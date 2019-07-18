@@ -27,7 +27,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static decimal GetFeesChargedToPayer(this Transaction transaction)
-        {           
+        {
             var total = 0M;
 
             if (transaction.ConvenienceFeePayerAccountId == transaction.PayerAccountId)
@@ -76,7 +76,7 @@ namespace AfterSchoolLibrary.Services
         public static List<ParticipationObject> GetParticipationObjects(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return ActivityPayment.LoadByTransactionId(transaction.ID.Value, msgs, dc)
-                .Select(payment => 
+                .Select(payment =>
                     new ParticipationObject(payment.ParticipationObjectId.Value, payment.ParticipationObjectTypeId, msgs, dc)
                 )
                 .ToList();
@@ -111,14 +111,14 @@ namespace AfterSchoolLibrary.Services
                 checkoutObject.ConvenienceFeeOverrideAmount ?? checkoutObject.GetTotalConvenienceFeesToday(msgs, dc),
                 checkoutObject.PaymentTypeFeeOverrideAmount ?? checkoutObject.GetTotalCreditCardFeesToday(msgs, dc),
                 checkoutObject.StripeChargeId,
-                loggedInUser, 
-                msgs, 
+                loggedInUser,
+                msgs,
                 dc);
         }
 
         public static Transaction CreateNew(Account payingAccount, Account billingAccount, Account ConvenienceFeePayer, Account PaymentTypeFeePayer, decimal? amount, string participationObjectName, int? purchaseId, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, decimal? platformFee, decimal? platformPercentFee, decimal convenienceFee, decimal paymentTypeFee, string stripeChargeOrRefundId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();            
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var transaction = new Transaction()
             {
@@ -188,7 +188,7 @@ namespace AfterSchoolLibrary.Services
                 PaymentSourceTypeId = paymentSourceType,
                 PlatformFlatFee = 0,
                 PlatformPercentFee = 0,
-                OriginalTransactionId = originalTransaction.ID.Value, 
+                OriginalTransactionId = originalTransaction.ID.Value,
             };
             msgs.AddRange(transaction.Save(dc));
 
@@ -209,7 +209,30 @@ namespace AfterSchoolLibrary.Services
 
         public static decimal GetRefundedAmount(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return - Transaction.GetTotalRefundByOriginalTransaction(transaction.ID.Value, msgs, dc);
+            return -Transaction.GetTotalRefundByOriginalTransaction(transaction.ID.Value, msgs, dc);
+        }
+
+        public static string GetStatus(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var currentPayout = transaction.PayoutId != null ? Payout.Load(transaction.PayoutId.Value, msgs, dc: dc) : null;
+
+            if (currentPayout != null)
+            {
+                switch (currentPayout.PayoutStatusId)
+                {
+                    case PayoutStatus.Completed:
+                        return "Paid";
+                    case PayoutStatus.Requested:
+                        return "Payout Requested";
+                    default:
+                        return currentPayout.PayoutStatusId.ToString();
+                }
+            }
+            else if (transaction.CreateDate.Value.AddDays(2) > transaction.CreateDate)
+            {
+                return "Incoming";
+            }
+            return string.Empty;
         }
     }
 }

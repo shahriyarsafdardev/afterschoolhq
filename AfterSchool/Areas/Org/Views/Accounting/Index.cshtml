@@ -150,6 +150,7 @@
                             <th class="text-center">Total Amt Paid</th>
                             <th class="text-center">Platform Fee</th>
                             <th class="text-center">Your Amount</th>
+                            <th class="text-center">Status</th>
                             @*<th>Refund</th>*@
                         </tr>
                     </thead>
@@ -161,11 +162,11 @@
                                 var purchase = transaction.GetPurchase();
                                 var registrant = Registrant.Load(purchase.RegistrantId.Value);
                                 var participationObjects = transaction.GetParticipationObjects();
-
+                                var currentStatus = transaction.GetStatus();
                                 <tr id="@transaction.Uid" data-refunded-amount="@transaction.GetRefundedAmount().ToCurrency()">
                                     <td>
                                         <span class="am-checkbox">
-                                            <input type="checkbox" id="selectTransaction-@transaction.ID" @(transaction.PayoutId != null ? "disabled" : "") class="chkTransaction" onchange="selectTransaction(@transaction.ID,this)" />
+                                            <input type="checkbox" id="selectTransaction-@transaction.ID" @((transaction.PayoutId != null || currentStatus == "Incoming") ? "disabled" : "") class="chkTransaction" onchange="selectTransaction(@transaction.ID,this)" />
                                             <label for="selectTransaction-@transaction.ID"></label>
                                         </span>
                                     </td>
@@ -200,7 +201,9 @@
                                     <td class="text-center">
                                         @transaction.GetBillerPayout().ToCurrency()
                                     </td>
-
+                                    <td class="text-center">
+                                        @currentStatus
+                                    </td>
                                         @*<td>
                                                 @if (transaction.IsCharge() && !transaction.IsTotallyRefunded())
                                                 {
