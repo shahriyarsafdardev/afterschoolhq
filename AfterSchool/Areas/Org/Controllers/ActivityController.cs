@@ -1937,12 +1937,40 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Messages(string id)
+        public ActionResult Messages(string id, string pn, string rpp)
         {
-            var activity = Activity.LoadByUid(id.ToGuid());
-            ViewBag.Messages = new SystemMessages();
+            var msgs = new SystemMessages();
+            var activity = Activity.LoadByUid(id.ToGuid(), msgs);
+
+            int pageNumber = 1;
+            int recordsPerPage = 10;
+
+            if (pn.IsNumber() && pn.ToInteger() > 0)
+                pageNumber = pn.ToInteger();
+
+            if (rpp.IsNumber() && rpp.ToInteger() > 0)
+                recordsPerPage = rpp.ToInteger();
+
+            var start = recordsPerPage * (pageNumber - 1);
+            var length = recordsPerPage;
+
+            var totalMessageCount = activity.GetMessagesCount(msgs);
+            var activityMessages = activity.GetMessages(start, length, msgs);
+            var totalPages = Math.Ceiling(totalMessageCount.ToDouble() / recordsPerPage).ToInteger();
+
+            ViewBag.Messages = msgs;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.ActivityMessages = activityMessages;
+
+            ViewBag.PagingModel = new PagingModel()
+            {
+                TotalCount = totalMessageCount,
+                PageNumber = pageNumber,
+                RecordsPerPage = recordsPerPage,
+                TotalPages = totalPages
+            };
+
             return View(activity);
         }
 
@@ -2007,6 +2035,9 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 return View("messagedetail", am);
             }
+
+            if (msgs.HasNoErrors())
+                return RedirectToAction("messagedetail", new { id = activity.Uid });
 
             ViewBag.Messages = msgs;
             ViewBag.Registrants = activity.GetRegistrants();

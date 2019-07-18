@@ -242,6 +242,17 @@ namespace AfterSchoolLibrary.Models
             return this.GetRegistrantCount(msgs, dc) - this.GetUnsentCount(msgs, dc);
         }
 
+        public static List<ActivityMessage> LoadByActivityId(int ActivityId, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["ActivityId"], ActivityId);
+            dq.SelectRange.Start = start;
+            dq.SelectRange.Length = length;
+            dq.OrderBys.Add(ObjectMap["CreateDate"], OrderByDirectionEnum.Descending);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
         private Activity _Activity = null;
         public Activity GetActivity(SystemMessages msgs = null, DatabaseConnection dc = null)
         {

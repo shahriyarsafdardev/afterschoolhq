@@ -305,16 +305,23 @@ namespace AfterSchoolLibrary.Services
                 msgs.Add($"No email address available for {registrant.Name}", MessageType.Notice);
 
             if (registrant.Email.IsNotEmpty())
+            {
+                var header = $"<h2>{subject} for {activityName}</h2>";
+                var sentBy = $"<p>Sent by <strong>{replyToName}</strong> at <strong>{DateTime.UtcNow.ToLongDateTimeString()}</strong></p>";
+
+                body = $"<p>{body}</p>";
+
                 msgs.AddRange(SendGridHelper.SendMail(
                     fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
                         Helpers.Email.AppNoReplyEmailAddress,
                         $"{fromName} via {Helpers.Utilities.AppName()}"),
                     toEmail: new SendGrid.Helpers.Mail.EmailAddress(registrant.Email, registrant.DisplayName),
                     subject: $"{replyToName} has sent {aOrAn} {subject} regarding {activityName}",
-                    body: $"{body}{(Helpers.Email.GetAppSignature(isAfterSchool: true, utm_campaign: utmCampaign))}",
+                    body: $"{header}{body}{sentBy}{Helpers.Email.GetAppSignature(isAfterSchool: true, utm_campaign: utmCampaign)}",
                     replyTo: new SendGrid.Helpers.Mail.EmailAddress(replyToEmail, replyToName),
                     emailTemplateId: SendGridHelper.GetGenericTemplateId()
                 ));
+            }
         }
 
         public static List<ParticipationObject> GetParticipationObjects(this Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)

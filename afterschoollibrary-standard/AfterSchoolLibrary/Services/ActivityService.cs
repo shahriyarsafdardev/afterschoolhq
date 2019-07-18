@@ -6,6 +6,7 @@ using BasicLibrary.DataAccess;
 using System.Text.RegularExpressions;
 using System.Linq;
 using AfterSchoolLibrary.Models;
+using System.Collections;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -2221,6 +2222,19 @@ namespace AfterSchoolLibrary.Services
         public static List<ActivityMessage> GetMessages(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return ActivityMessage.LoadByActivityId(activity.ID.Value, msgs, dc);
+        }
+
+        public static List<ActivityMessage> GetMessages(this Activity activity, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return ActivityMessage.LoadByActivityId(activity.ID.Value, start, length, msgs, dc);
+        }
+
+        public static int GetMessagesCount(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return ActivityMessage.GetCount(
+                criterias: new Hashtable() { { "ActivityId", activity.ID.Value } },
+                msgs: msgs,
+                dc: dc);
         }
 
         public static bool IsOpenUpcomingOrRecentlyClosed(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
