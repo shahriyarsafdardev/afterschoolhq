@@ -194,7 +194,7 @@ namespace AfterSchool.Models
                     SessionVariables.CurrentAccount = awus.First().ToAccount(true);
                     SessionVariables.AccountUserType = awus.First().UserTypeId;
                 }
-                else if (source == "parent-info")
+                else if (source == "parent-login")
                 {
                     var awu = awus.FirstOrDefault(item => item.AccountAccountTypeId == AccountType.Registrant);
 
