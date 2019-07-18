@@ -4,6 +4,7 @@ using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
 using System.Linq;
 using System.Collections.Generic;
+using System.Collections;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -232,7 +233,15 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        internal static void SendText(this Registrant registrant, Account sendingAccount, WebUser loggedInUser, int activityMessageId, string subject, string body, string senderName, SystemMessages msgs, DatabaseConnection dc = null)
+        public static bool HasReceivedTextMessages(this Registrant registrant, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return TwilioSMS.GetCount(
+                criterias: new Hashtable() { { "RegistrantId", registrant.ID.Value } }, 
+                msgs: msgs, 
+                dc: dc) > 0;
+        }
+
+        internal static void SendText(this Registrant registrant, Account sendingAccount, WebUser loggedInUser, ActivityMessage message, string activityName, string subject, string body, string senderName, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (!registrant.AllowTextMessages)
                 msgs.Add($"{registrant.DisplayName} does not allow text messaging", MessageType.Notice);
@@ -248,13 +257,21 @@ namespace AfterSchoolLibrary.Services
                 }
 
                 // ensure this message has not already been sent to this user
-                var twilioSms = TwilioSMS.LoadByRegistrantIdByActivityMessageId(registrant.ID.Value, activityMessageId, msgs, dc);
+                var twilioSms = TwilioSMS.LoadByRegistrantIdByActivityMessageId(registrant.ID.Value, message.ID.Value, msgs, dc);
 
                 if (twilioSms.IsEmpty())
                 {
+                    if (!registrant.HasReceivedTextMessages(msgs, dc))
+                        TwilioHelper.SendSMS(
+                            registrant.Phone,
+                            $"Welcome to {Helpers.Utilities.AppName()} Alerts! You are receiving this message because you enabled text notifications when you registered your child for activities. \nMsg&data rates may apply. \nReply HELP for help, STOP to cancel",
+                            msgs);
+
+                    var aOrAn = subject[0].In("aeiouAEIOU") ? "an" : "a";
+                    
                     var resource = TwilioHelper.SendSMS(
                         registrant.Phone,
-                        $"{subject}\n{body}\nSent by {senderName} with {Helpers.Utilities.AppName()}",
+                        $"{senderName} has sent {aOrAn} {subject} for {activityName}\nPlease review your message: {Helpers.Utilities.BaseUrl()}/msg/{message.Uid}",
                         msgs);
 
                     if (msgs.HasNoErrors() && resource.IsNotEmpty())
@@ -263,7 +280,7 @@ namespace AfterSchoolLibrary.Services
                         {
                             TwilioResourceId = resource.Sid,
                             TwilioStatus = resource.Status.ToString(),
-                            ActivityMessageId = activityMessageId,
+                            ActivityMessageId = message.ID,
                             RegistrantId = registrant.ID,
                             SenderId = loggedInUser.ID,
                             SendingAccountId = sendingAccount.ID,
@@ -278,8 +295,10 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
-        internal static void SendEmail(this Registrant registrant, bool isAfterSchool, string fromName, string replyToEmail, string replyToName, string subject, string body, string utmCampaign = "", SystemMessages msgs = null)
+        internal static void SendEmail(this Registrant registrant, string activityName, string fromName, string replyToEmail, string replyToName, string subject, string body, string utmCampaign = "", SystemMessages msgs = null)
         {
+            var aOrAn = subject[0].In("aeiouAEIOU") ? "an" : "a";
+
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             if (registrant.Email.IsEmpty())
@@ -291,10 +310,10 @@ namespace AfterSchoolLibrary.Services
                         Helpers.Email.AppNoReplyEmailAddress,
                         $"{fromName} via {Helpers.Utilities.AppName()}"),
                     toEmail: new SendGrid.Helpers.Mail.EmailAddress(registrant.Email, registrant.DisplayName),
-                    subject: subject,
-                    body: $"{body}{(Helpers.Email.GetAppSignature(isAfterSchool: isAfterSchool, utm_campaign: utmCampaign))}",
+                    subject: $"{replyToName} has sent {aOrAn} {subject} regarding {activityName}",
+                    body: $"{body}{(Helpers.Email.GetAppSignature(isAfterSchool: true, utm_campaign: utmCampaign))}",
                     replyTo: new SendGrid.Helpers.Mail.EmailAddress(replyToEmail, replyToName),
-                    emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)
+                    emailTemplateId: SendGridHelper.GetGenericTemplateId()
                 ));
         }
 

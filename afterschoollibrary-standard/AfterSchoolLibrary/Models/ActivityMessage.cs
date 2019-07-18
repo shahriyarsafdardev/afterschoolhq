@@ -27,6 +27,7 @@ namespace AfterSchoolLibrary.Models
 		public DateTime? DateSent { get { return (DateTime?)MDV["DateSent"].Value; } set { MDV["DateSent"].Value = value; } }
 		public string Subject { get { return (string)MDV["Subject"].Value; } set { MDV["Subject"].Value = value; } }
 		public string Body { get { return (string)MDV["Body"].Value; } set { MDV["Body"].Value = value; } }
+		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
 		public string ActivityName { get { return (string)MDV["ActivityName"].Value; } }
 		public string ActivityGroupName { get { return (string)MDV["ActivityGroupName"].Value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
@@ -36,6 +37,7 @@ namespace AfterSchoolLibrary.Models
         {
             this.Config(ObjectMap, DatabaseQuery, typeof(ActivityMessage).Name, "ID");
             this.LoadObjectValues(ObjectMap);
+			this.Uid = Guid.NewGuid();
 			
         }
 
@@ -52,6 +54,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "DateSent", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "Subject", System.Data.SqlDbType.NVarChar , "150");
 				_dp.Add(className, "Body", System.Data.SqlDbType.Text);
+				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
 				_dp.Add(className, "ActivityName", typeof(Activity).Name, "Name", System.Data.SqlDbType.NVarChar, "Activity");
 				_dp.Add(className, "ActivityGroupName", typeof(ActivityGroup).Name, "Name", System.Data.SqlDbType.NVarChar, "ActivityGroup");
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
@@ -157,6 +160,10 @@ namespace AfterSchoolLibrary.Models
 			dps.Add(ObjectMap["Body"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["Uid"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -181,6 +188,14 @@ namespace AfterSchoolLibrary.Models
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ActivityGroupId"], ActivityGroupId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static ActivityMessage LoadByUid(Guid Uid, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["Uid"], Uid);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
 		
@@ -230,23 +245,21 @@ namespace AfterSchoolLibrary.Models
         private Activity _Activity = null;
         public Activity GetActivity(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (_Activity.IsEmpty())
-            {
+            if (_Activity.IsEmpty() && this.ActivityId.HasValue)
                 _Activity = Activity.Load(this.ActivityId.Value, msgs, dc);
-            }
+
             return _Activity;
         }
 
         private ActivityGroup _ActivityGroup = null;
         public ActivityGroup GetActivityGroup(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (_ActivityGroup.IsEmpty())
-            {
+            if (_ActivityGroup.IsEmpty() && this.ActivityGroupId.HasValue)
                 _ActivityGroup = ActivityGroup.Load(this.ActivityGroupId.Value, msgs, dc);
-            }
+
             return _ActivityGroup;
         }
-        
+
         #endregion
     }
 }

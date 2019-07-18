@@ -1977,9 +1977,9 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
 
             if (subject.IsEmpty())
-                msgs.Add("Subject is required", MessageType.UserError);
+                msgs.Add("Message Reason is required", MessageType.UserError);
             if (body.IsEmpty())
-                msgs.Add("Body is required", MessageType.UserError);
+                msgs.Add("Message Body is required", MessageType.UserError);
 
             ActivityMessage am = null;
             var activity = Activity.LoadByUid(id.ToGuid());

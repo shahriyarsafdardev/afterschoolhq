@@ -1,7 +1,7 @@
-public enum ActivityMessagePurposeType
+public enum ActivityMessageReason
 {
 	NotSet = 0,
-	ActivityCancellation,
+	ActivityCancellationNotice,
 	AttendanceNotice,
 	BehaviorNotice,
 	GeneralUpdate,

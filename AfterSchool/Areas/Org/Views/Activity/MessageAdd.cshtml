@@ -13,7 +13,7 @@
 
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-    @{Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model);}
+    @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model); }
 
     <div class="panel panel-default">
         <div class="panel-heading">
@@ -36,19 +36,19 @@
                         <div class="col-sm-6">
                             <select name="subject" id="subject" class="form-control">
                                 <option value="">Select a Message Reason...</option>
-                                <option value="Activity Cancellation">Activity Cancellation</option>
-                                <option value="Attendance Notice">Attendance Notice</option>
-                                <option value="">Behavior Notice</option>
-                                <option value="">General Update</option>
-                                <option value="">Urgent Update</option>
+                                @foreach(var reason in Enum.GetValues(typeof(ActivityMessageReason)).Cast<ActivityMessageReason>().Except(ActivityMessageReason.NotSet.AsList()).OrderBy(x => x.ToString()))
+                                {
+                                    <option value="@reason.ToString().SplitByUpperCase()">@reason.ToString().SplitByUpperCase()</option>
+                                }
                             </select>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label class="col-sm-3 control-label">Body</label>
+                        <label class="col-sm-3 control-label">Message Body</label>
                         <div class="col-sm-6">
-                            <textarea name="body" id="body" required style="width: 100%"></textarea>
+                            <textarea name="body" id="body" required style="width: 100%" rows="5" class="form-control"></textarea>
+                            <p class="text-muted">Max of 1000 characters</p>
                         </div>
                     </div>
 
@@ -76,7 +76,16 @@
                     <div class="form-group">
                         <label class="col-sm-3 control-label"></label>
                         <div class="col-sm-6">
-                            <button id="send-btn" type="submit" class="btn btn-primary btn-lg btn-block pull-right"><i class="s7-diskette"></i> Send Message to Selected Registrants</button>
+                            <div class="pull-left">
+                                <a href="@Url.Action("messages", "activity", new { Model.Uid })" class="text-muted">
+                                    &laquo; Cancel
+                                </a>
+                            </div>
+                            <div class="pull-right">
+                                <button id="send-btn" type="submit" class="btn btn-primary btn-lg btn-block pull-right">
+                                    <i class="s7-mail"></i> Send Message to Selected Registrants &raquo;
+                                </button>
+                            </div>
                         </div>
                     </div>
                 }

@@ -23,7 +23,7 @@ namespace AfterSchoolLibrary.Services
             var account = activity.GetAccount(msgs, dc);
             var loggedInUser = WebUser.Load(loggedInUserId, msgs, dc);
 
-            am.SendActivityMessage(account, loggedInUser, activity.ContactName, activity.ContactEmail, activity.ContactName, msgs, dc);
+            am.SendActivityMessage(account, loggedInUser, activity.Name, activity.ContactName, activity.ContactEmail, activity.ContactName, msgs, dc);
 
             if (msgs.HasNoErrors())
                 msgs.AddRange(am.SendMessageToTeamMembers(activity, account, dc));
@@ -63,12 +63,13 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
-        private static void SendForGroup(ActivityMessage am, SystemMessages msgs, DatabaseConnection dc = null)
+        private static void SendForGroup(ActivityMessage am, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var group = am.GetActivityGroup(dc: dc);
-            var account = group.GetAccount(dc: dc);
+            var group = am.GetActivityGroup(msgs, dc);
+            var account = group.GetAccount(msgs, dc);
+            var loggedInUser = WebUser.Load(loggedInUserId, msgs, dc);
 
-            am.SendActivityMessage(account, account.Name, account.Email, account.Name, msgs, dc: dc);
+            am.SendActivityMessage(account, loggedInUser, group.Name, account.Name, account.Email, account.Name, msgs, dc);
 
             if (msgs.HasNoErrors())
             {
@@ -107,14 +108,16 @@ namespace AfterSchoolLibrary.Services
             return text;
         }
 
-        private static void SendActivityMessage(this ActivityMessage activityMessage, Account account, WebUser loggedInUser, string fromName, string replyToEmail, string replyToName, SystemMessages msgs, DatabaseConnection dc = null)
+        private static void SendActivityMessage(this ActivityMessage activityMessage, Account account, WebUser loggedInUser, string activityName, string fromName, string replyToEmail, string replyToName, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var amrs = activityMessage.GetActivityMessageRegistrants(msgs, dc);
 
             amrs.ForEach(activityMessageRegistrant => {
                 activityMessageRegistrant.SendMessage(
+                    activityMessage,
                     account, 
                     loggedInUser,
+                    activityName,
                     fromName, 
                     replyToEmail, 
                     replyToName, 
@@ -158,6 +161,25 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(amr.Save(dc));
 
             return amr;
+        }
+
+        public static WebUser GetCreatedBy(this ActivityMessage activityMessage, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (activityMessage.CreatedBy.HasValue)
+                return WebUser.Load(activityMessage.CreatedBy.Value, msgs, dc);
+
+            return null;
+        }
+
+        public static ParticipationObject GetParticipationObject(this ActivityMessage activityMessage, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (activityMessage.ActivityId.HasValue)
+                return new ParticipationObject(activityMessage.ActivityId.Value, ParticipationObjectType.Activity, msgs, dc);
+
+            if (activityMessage.ActivityGroupId.HasValue)
+                return new ParticipationObject(activityMessage.ActivityGroupId.Value, ParticipationObjectType.Activity, msgs, dc);
+
+            return null;
         }
     }
 }

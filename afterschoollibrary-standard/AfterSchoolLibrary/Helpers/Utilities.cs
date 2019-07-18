@@ -295,6 +295,7 @@ namespace AfterSchoolLibrary.Helpers
                     amsgs.AddRange(UpdateRegistrantAccess(adc));
                     amsgs.AddRange(UpdateRegistrantStatuses(adc));
                     amsgs.AddRange(UpdateRequiresParentalConsent(adc));
+                    amsgs.AddRange(UpdateActivityMessageUids(adc));
 
                     // amsgs.AddRange(MigrateToBCrypt(adc));
 
@@ -352,6 +353,23 @@ namespace AfterSchoolLibrary.Helpers
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs)
             );            
+
+            return msgs;
+        }
+
+        private static SystemMessages UpdateActivityMessageUids(DatabaseConnection dc)
+        {
+            var msgs = new SystemMessages();
+            var ams = ActivityMessage.Load(
+                criterias: new Hashtable() { { "Uid", DBNull.Value } },
+                msgs: msgs,
+                dc: dc);
+
+            ams.ForEach(am =>
+            {
+                am.Uid = Guid.NewGuid();
+                msgs.AddRange(am.Save(dc));
+            });
 
             return msgs;
         }

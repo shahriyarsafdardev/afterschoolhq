@@ -24,15 +24,15 @@ namespace AfterSchoolLibrary.Services
             return registrants;
         }        
 
-        internal static void SendMessage(this ActivityMessageRegistrant activityMessageRegistrant, Account account, WebUser loggedInUser, string fromName, string replyToEmail, string replyToName, string subject, string body, SystemMessages msgs, DatabaseConnection dc = null)
+        internal static void SendMessage(this ActivityMessageRegistrant activityMessageRegistrant, ActivityMessage message, Account account, WebUser loggedInUser, string activityName, string fromName, string replyToEmail, string replyToName, string subject, string body, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var allResults = new SystemMessages();
 
             activityMessageRegistrant.GetChildAndParentRegistrants(allResults, dc)
                 .ForEach(registrant =>
                 {
-                    registrant.SendEmail(account.IsAfterSchool, fromName, replyToEmail, replyToName, subject, body, "activity_message", msgs);
-                    registrant.SendText(account, loggedInUser, activityMessageRegistrant.ActivityMessageId.Value, subject, body, replyToName, msgs);
+                    registrant.SendEmail(activityName, fromName, replyToEmail, replyToName, subject, body, "activity_message", msgs);
+                    registrant.SendText(account, loggedInUser, message, activityName, subject, body, replyToName, msgs);
                 }
             );            
 

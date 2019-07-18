@@ -277,6 +277,7 @@ property: AccountId, int?, Int, required
 property: DateSent, DateTime?, DateTime
 property: Subject, string, NVarChar "150"
 property: Body, string, Text
+property: Uid, Guid, UniqueIdentifier
 join: Activity.ID, ActivityId, LeftOuterJoin
 join: ActivityGroup.ID, ActivityGroupId, LeftOuterJoin
 join: Account.ID, AccountId, InnerJoin
@@ -285,6 +286,7 @@ joinproperty: ActivityGroup.Name, string, NVarChar
 joinproperty: Account.Name, string, NVarChar
 loadmethod: ActivityId, List<>
 loadmethod: ActivityGroupId, List<>
+loadmethod: Uid
 [end]
 
 [begin]
@@ -1536,6 +1538,7 @@ property: TwilioResourceId, string, NVarChar "50"
 property: TwilioStatus, string, NVarChar "20"
 loadmethod: TwilioResourceId
 loadmethod: RegistrantId|ActivityMessageId
+loadmethod: RegistrantId, List<>
 [end]
 
 [begin]
@@ -1798,6 +1801,6 @@ values: NotSet, Started, OutOfDate, Completed
 
 [begin]
 type: Enum
-name: ActivityMessagePurposeType
-values: NotSet, ActivityCancellation, AttendanceNotice, BehaviorNotice, GeneralUpdate, LatePickUpAlert, UrgentUpdate
+name: ActivityMessageReason
+values: NotSet, ActivityCancellationNotice, AttendanceNotice, BehaviorNotice, GeneralUpdate, LatePickUpAlert, UrgentUpdate
 [end]
