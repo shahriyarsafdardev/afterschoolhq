@@ -298,7 +298,7 @@ namespace AfterSchoolLibrary.Services
                 msgs.Add($"No email address available for {registrant.Name}", MessageType.Notice);
 
             if (registrant.Email.IsNotEmpty())
-                ActivityMessageService.SendEmailMessage(activityName, fromName, registrant.Email, registrant.DisplayName, replyToName, replyToName, subject, body, utmCampaign, msgs);
+                ActivityMessageService.SendEmailMessage(activityName, fromName, registrant.Email, registrant.DisplayName, replyToEmail, replyToName, subject, body, utmCampaign, msgs);
         }
 
         public static List<ParticipationObject> GetParticipationObjects(this Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)

@@ -1977,7 +1977,7 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult MessageDetail(string id)
         {
-            var am = ActivityMessage.Load(id.ToInteger());
+            var am = ActivityMessage.LoadByUid(id.ToGuid());
             var activity = Activity.Load(am.ActivityId.Value);
             ViewBag.Messages = new SystemMessages();
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
@@ -2033,11 +2033,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 ViewBag.Messages = msgs;
                 ViewBag.IsActivityLeader = IsActivityLeader(activity);
 
-                return View("messagedetail", am);
+                return View("messagedetail", am.Reload());
             }
-
-            if (msgs.HasNoErrors())
-                return RedirectToAction("messagedetail", new { id = activity.Uid });
 
             ViewBag.Messages = msgs;
             ViewBag.Registrants = activity.GetRegistrants();

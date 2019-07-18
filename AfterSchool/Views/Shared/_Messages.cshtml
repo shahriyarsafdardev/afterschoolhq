@@ -31,7 +31,7 @@
                 foreach (var message in Model)
                 {
                     <tr>
-                        <td><a href="@Url.Action("messagedetail", viewController, new { id = message.ID })" class="btn btn-primary btn-sm">View</a></td>
+                        <td><a href="@Url.Action("messagedetail", viewController, new { id = message.Uid })" class="btn btn-primary btn-sm">View</a></td>
                         <td>@(message.DateSent.HasValue ? account.ConvertToAccountTimeZone(message.DateSent.Value).ToLongDateTimeString() : "N/A")</td>
                         <td>@message.Subject</td>
                         <td>@message.GetSentCount()</td>
