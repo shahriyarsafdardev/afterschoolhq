@@ -30,6 +30,9 @@ namespace AfterSchoolLibrary
             {
                 InitializeTwilioClientService();
 
+                if (!Helpers.Utilities.IsProduction)
+                    body = $"{Helpers.Utilities.Environment}: {body}";
+
                 resource = MessageResource.Create(
                     body: body,
                     from: new Twilio.Types.PhoneNumber(TwilioPhoneNumber),

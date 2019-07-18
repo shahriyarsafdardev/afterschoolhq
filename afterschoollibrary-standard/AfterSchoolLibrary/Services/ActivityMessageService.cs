@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Twilio.Rest.Api.V2010.Account;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -26,11 +27,11 @@ namespace AfterSchoolLibrary.Services
             am.SendActivityMessage(account, loggedInUser, activity.Name, activity.ContactName, activity.ContactEmail, activity.ContactName, msgs, dc);
 
             if (msgs.HasNoErrors())
-                msgs.AddRange(am.SendMessageToTeamMembers(activity, account, dc));
+                msgs.AddRange(am.SendMessageToTeamMembers(activity, account, loggedInUser, dc));
 
         }
 
-        private static SystemMessages SendMessageToTeamMembers(this ActivityMessage activityMessage, Activity activity, Account account, DatabaseConnection dc = null)
+        private static SystemMessages SendMessageToTeamMembers(this ActivityMessage activityMessage, Activity activity, Account account, WebUser loggedInUser, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
             var members = activity.GetTeamMembers(msgs, dc).DistinctBy(member => member.WebUserId).ToList();
@@ -42,25 +43,42 @@ namespace AfterSchoolLibrary.Services
                     member.WebUserLastName.IfBlank(""),
                     member.WebUserDisplayName.IfBlank(""));
 
-                msgs.AddRange(SendGridHelper.SendMail(
-                    fromEmail: Helpers.Email.SendGridNoReplyEmailAddress(account.IsAfterSchool),
-                    toEmail: new SendGrid.Helpers.Mail.EmailAddress(member.WebUserEmail),
-                    subject: activityMessage.Subject,
-                    body: $"{body}{(Helpers.Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "activity_message"))}",
-                    replyTo: new SendGrid.Helpers.Mail.EmailAddress(
-                        activity.ContactEmail,
-                        activity.ContactName),
-                    emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
-                ));
+                ActivityMessageService.SendEmailMessage(activity.Name, loggedInUser.DisplayName, member.WebUserEmail, member.WebUserDisplayName, activity.ContactName, activity.ContactEmail, activityMessage.Subject, body, "activity_message", msgs);
 
-                TwilioHelper.SendSMS(
-                    member.WebUserPhone,
-                    $"{activityMessage.Subject}\n{body}",
-                    msgs
-                );
+                ActivityMessageService.SendTextMessage(member.WebUserPhone, loggedInUser.DisplayName, activityMessage.Subject, activity.Name, activityMessage.Uid.ToString(), msgs);
             });
 
             return msgs;
+        }
+
+        internal static MessageResource SendTextMessage(string phone, string senderName, string subject, string activityName, string messageUid, SystemMessages msgs)
+        {
+            var aOrAn = subject[0].In("aeiouAEIOU") ? "an" : "a";
+
+            return TwilioHelper.SendSMS(
+                phone,
+                $"{senderName} has sent {aOrAn} {subject} for {activityName}\nPlease review your message: {Helpers.Utilities.BaseUrl()}/msg/{messageUid}",
+                msgs);
+        }
+
+        internal static void SendEmailMessage(string activityName, string fromName, string toEmail, string toName, string replyToEmail, string replyToName, string subject, string body, string utmCampaign, SystemMessages msgs)
+        {
+            var aOrAn = subject[0].In("aeiouAEIOU") ? "an" : "a";
+            var header = $"<h2 style=\"margin-left: 20px;\">{subject} for {activityName}</h2>";
+            var sentBy = $"<p>&nbsp;</p><p>Sent by <strong>{replyToName}</strong> at <strong>{DateTime.UtcNow.ToLongDateTimeString()}</strong></p>";
+
+            body = $"<p>{body.Replace("\n", "<br />")}</p>";
+
+            msgs.AddRange(SendGridHelper.SendMail(
+                fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
+                    Helpers.Email.AppNoReplyEmailAddress,
+                    $"{fromName} via {Helpers.Utilities.AppName()}"),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(toEmail, toName),
+                subject: $"{replyToName} has sent {aOrAn} {subject} regarding {activityName}",
+                body: $"{header}{body}{sentBy}{Helpers.Email.GetAppSignature(isAfterSchool: true, utm_campaign: utmCampaign)}",
+                replyTo: new SendGrid.Helpers.Mail.EmailAddress(replyToEmail, replyToName),
+                emailTemplateId: SendGridHelper.GetGenericTemplateId()
+            ));
         }
 
         private static void SendForGroup(ActivityMessage am, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)

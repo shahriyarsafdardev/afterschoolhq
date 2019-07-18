@@ -267,12 +267,7 @@ namespace AfterSchoolLibrary.Services
                             $"Welcome to {Helpers.Utilities.AppName()} Alerts! You are receiving this message because you enabled text notifications when you registered your child for activities. \nMsg&data rates may apply. \nReply HELP for help, STOP to cancel",
                             msgs);
 
-                    var aOrAn = subject[0].In("aeiouAEIOU") ? "an" : "a";
-                    
-                    var resource = TwilioHelper.SendSMS(
-                        registrant.Phone,
-                        $"{senderName} has sent {aOrAn} {subject} for {activityName}\nPlease review your message: {Helpers.Utilities.BaseUrl()}/msg/{message.Uid}",
-                        msgs);
+                    var resource = ActivityMessageService.SendTextMessage(registrant.Phone, senderName, subject, activityName, message.Uid.ToString(), msgs);
 
                     if (msgs.HasNoErrors() && resource.IsNotEmpty())
                     {
@@ -297,31 +292,13 @@ namespace AfterSchoolLibrary.Services
 
         internal static void SendEmail(this Registrant registrant, string activityName, string fromName, string replyToEmail, string replyToName, string subject, string body, string utmCampaign = "", SystemMessages msgs = null)
         {
-            var aOrAn = subject[0].In("aeiouAEIOU") ? "an" : "a";
-
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             if (registrant.Email.IsEmpty())
                 msgs.Add($"No email address available for {registrant.Name}", MessageType.Notice);
 
             if (registrant.Email.IsNotEmpty())
-            {
-                var header = $"<h2>{subject} for {activityName}</h2>";
-                var sentBy = $"<p>Sent by <strong>{replyToName}</strong> at <strong>{DateTime.UtcNow.ToLongDateTimeString()}</strong></p>";
-
-                body = $"<p>{body}</p>";
-
-                msgs.AddRange(SendGridHelper.SendMail(
-                    fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                        Helpers.Email.AppNoReplyEmailAddress,
-                        $"{fromName} via {Helpers.Utilities.AppName()}"),
-                    toEmail: new SendGrid.Helpers.Mail.EmailAddress(registrant.Email, registrant.DisplayName),
-                    subject: $"{replyToName} has sent {aOrAn} {subject} regarding {activityName}",
-                    body: $"{header}{body}{sentBy}{Helpers.Email.GetAppSignature(isAfterSchool: true, utm_campaign: utmCampaign)}",
-                    replyTo: new SendGrid.Helpers.Mail.EmailAddress(replyToEmail, replyToName),
-                    emailTemplateId: SendGridHelper.GetGenericTemplateId()
-                ));
-            }
+                ActivityMessageService.SendEmailMessage(activityName, fromName, registrant.Email, registrant.DisplayName, replyToName, replyToName, subject, body, utmCampaign, msgs);
         }
 
         public static List<ParticipationObject> GetParticipationObjects(this Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
