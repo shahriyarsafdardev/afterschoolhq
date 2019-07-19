@@ -734,8 +734,8 @@ namespace AfterSchool.Controllers
                         if (createuseraccount.IsNumber())
                         {
                             var firstName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).Value;
-                            var lastName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).Value;                            
-                            var phone = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone).Value;                            
+                            var lastName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).Value;
+                            var phone = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone).Value;
 
                             studentUser = SessionVariables.CurrentAccount.CreateAndInviteUser(
                                  firstName: firstName,
@@ -1092,14 +1092,14 @@ namespace AfterSchool.Controllers
 
             if (!parentOrGuardian.IsProfileCompleted && parentOrGuardian.GetOwner(msgs).ID == SessionVariables.CurrentUser.ID)
                 return RedirectToAction(
-                    "editpersonal", 
-                    "family", 
+                    "editpersonal",
+                    "family",
                     new { Area = "user", id = parentOrGuardian.Uid, reg = registration?.Uid, student = SessionVariables.CurrentRegistrant?.Uid });
 
             if (!SessionVariables.CurrentRegistrant.IsProfileCompleted)
                 return RedirectToAction(
-                    "editstudentpersonal", 
-                    "family", 
+                    "editstudentpersonal",
+                    "family",
                     new { Area = "user", id = SessionVariables.CurrentRegistrant.Uid, reg = registration?.Uid, student = SessionVariables.CurrentRegistrant?.Uid });
 
             // current registrant is already registered
@@ -1148,7 +1148,7 @@ namespace AfterSchool.Controllers
                     if (!populated)
                         msgs.Add($"{question.Text} is required", MessageType.UserError);
                 }
-                    
+
             });
 
             if (signature.IsEmpty())
@@ -1223,14 +1223,26 @@ namespace AfterSchool.Controllers
                         .ForEach(qvm =>
                         {
                             if (qvm.Question.QuestionTypeId == QuestionType.FileUpload)
-                                submittedRecord.AddAnswer(
-                                    file: Request.Files[qvm.Name].InputStream,
-                                    filename: Request.Files[qvm.Name].FileName,
-                                    question: qvm.Question,
-                                    registrationId: registration.ID,
-                                    loggedInUser: SessionVariables.CurrentUser,
-                                    msgs: amsgs,
-                                    dc: adc);
+                            {
+                                var currentFileSizeInBytes = Request.Files[qvm.Name].ContentLength;
+                                //5 MB = 5242880 Bytes
+                                //File uploaded here should be less than of 5MB
+                                if (currentFileSizeInBytes <= 5242880)
+                                {
+                                    submittedRecord.AddAnswer(
+                                        file: Request.Files[qvm.Name].InputStream,
+                                        filename: Request.Files[qvm.Name].FileName,
+                                        question: qvm.Question,
+                                        registrationId: registration.ID,
+                                        loggedInUser: SessionVariables.CurrentUser,
+                                        msgs: amsgs,
+                                        dc: adc);
+                                }
+                                else
+                                {
+                                    msgs.Add("Upload a file less than or equal to 5 megabytes", MessageType.UserError);
+                                }
+                            }
                             else
                                 submittedRecord.AddAnswer(
                                     answerText: qvm.Value,
@@ -1520,7 +1532,7 @@ namespace AfterSchool.Controllers
         #region ThankYou
 
         private void ThankYouViewBag(string registrationUid, SystemMessages msgs)
-        {            
+        {
             ResetRegistrationSession();
 
             var registration = Registration.LoadByUid(registrationUid.ToGuid(), msgs);
@@ -1640,7 +1652,7 @@ namespace AfterSchool.Controllers
                 var firstName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName);
                 var lastName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName);
                 var email = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail);
-                var phone = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone);                
+                var phone = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone);
 
                 WebUser user = null;
                 Account account = null;
