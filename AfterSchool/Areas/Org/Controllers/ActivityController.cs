@@ -2229,7 +2229,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         private bool MustRequestToPublish(Activity activity)
         {
-            return SessionVariables.CurrentUser.CanPublishActivity(SessionVariables.CurrentAccount, activity);
+            return !SessionVariables.CurrentUser.CanPublishActivity(SessionVariables.CurrentAccount, activity);
         }
 
         private bool IsExternallyProvided(Activity activity)
