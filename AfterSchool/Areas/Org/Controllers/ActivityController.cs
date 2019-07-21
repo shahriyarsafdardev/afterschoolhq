@@ -1699,6 +1699,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.MustRequestToPublish = MustRequestToPublish(activity);
             ViewBag.ShowCopyButton = ShowCopyButtonOnPublishDetail(activity);
+            ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.Messages = msgs;
             return View(activity);
         }
@@ -1717,6 +1718,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             ViewBag.MustRequestToPublish = MustRequestToPublish(activity);
             ViewBag.ShowCopyButton = ShowCopyButtonOnPublishDetail(activity);
+            ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.IsFullScreen = Request["isnew"] == "1";
             return View("publishdetail", activity);
         }
@@ -1760,6 +1762,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.IsFullScreen = Request["isnew"] == "1";
             ViewBag.MustRequestToPublish = mustRequestToPublish;
             ViewBag.ShowCopyButton = ShowCopyButtonOnPublishDetail(activity);
+            ViewBag.IsActivityLeader = IsActivityLeader(activity);
             return View("publishdetail", activity);
         }
 
@@ -1785,6 +1788,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             ViewBag.MustRequestToPublish = mustRequestToPublish;
             ViewBag.ShowCopyButton = ShowCopyButtonOnPublishDetail(activity);
+            ViewBag.IsActivityLeader = IsActivityLeader(activity);
             return View("publishdetail", activity);
         }
 
@@ -2211,18 +2215,21 @@ namespace AfterSchool.Areas.Org.Controllers
 
         private bool IsActivityLeader(Activity activity)
         {
-            return SessionVariables.AccountUserType == UserType.Administrator || SessionVariables.CurrentUser.IsActivityLeader(activity);
+            if (SessionVariables.CurrentAccount.ID == activity.AccountId)
+            {
+                if (SessionVariables.AccountUserType.In(AccountService.AdminUserTypes))
+                    return true;
+
+                return SessionVariables.CurrentUser.IsActivityLeader(activity);
+            }
+
+            return false;
+
         }
 
         private bool MustRequestToPublish(Activity activity)
         {
-            var location = activity.GetLocation();
-            var hostAccount = location?.GetHostAcount();
-
-            if (hostAccount.IsNotEmpty() && hostAccount.OwnerId.HasValue)
-                return hostAccount.ID != activity.AccountId && SessionVariables.CurrentAccount.ID != hostAccount.ID;
-
-            return false;
+            return !SessionVariables.CurrentUser.CanPublishActivity(SessionVariables.CurrentAccount, activity);
         }
 
         private bool IsExternallyProvided(Activity activity)

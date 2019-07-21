@@ -101,7 +101,7 @@
                                             <tr id="paymentplan-fee-row-@plan.ID" class="hide paymentplan-fee-row">
                                                 <td>Payment Plan</td>
                                                 <td class="text-right">
-                                                    @plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency() 
+                                                    @plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()*
                                                 </td>
                                                 <td>
                                                     per
@@ -122,7 +122,7 @@
                                                 <span id="subscription-total-value" class="hide">@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount)</span>
                                                 <span id="subscription-asf-value" class="hide">0</span>
                                                 <span id="subscription-ccf-value" class="hide">@plan.GetCreditCardFee(paymentAccount)</span>
-                                                @participationObject.SubscriptionPlans.First().GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()
+                                                @plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()*
                                             </td>
                                             <td>
                                                 per
@@ -267,12 +267,14 @@
 
                     <div class="row">
                         <div class="padding-v-30 text-center">
+                            
                             <a href="javascript:history.go(-1)" class="text-muted">&laquo; Back</a>
+
                             @if (participationObject.AllowToPayLater)
                             {
                                 @:&bull; 
                                 <a href="@Url.Action("finalizeregistration", new { id = registration.Uid })" class="text-muted">
-                                    Pay Later
+                                    Request to Pay Later
                                 </a>
                             }
 

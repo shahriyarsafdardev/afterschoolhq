@@ -46,14 +46,14 @@
                         <input type="number" class="form-control" id="cost" name="cost" onfocus="this.select()" value="@(Model.CostPerRegistrant.HasValue ? Model.CostPerRegistrant.Value.ToString("0.00") : "0.00")" required min="0.00" step=".01" @paymentdisabled />
                     </div>
                     <p class="text-muted">
-                        <em>The parent will be charged $<span id="finaltuitioncost">0.00</span> upon checkout</em>
+                        <em>The total cost will be $<span id="finaltuitioncost">0.00</span> at checkout</em>
                     </p>
                 </div>
             </div>
 
             <div class="form-group hide">
                 <label class="col-sm-3 control-label">
-                    Cost Description
+                    Fee Description
                 </label>
                 <div class="col-sm-9">
                     <textarea class="form-control" id="costdescription" name="costdescription" onfocus="this.select()" @paymentdisabled placeholder="(ex. The cost will cover uniforms and materials, etc)">@Model.CostDescription</textarea>
@@ -359,7 +359,14 @@
 
 @helper BillingPeriodOptions(SubscriptionPlan plan)
 {
-    foreach (var billingPeriodType in Enum.GetValues(typeof(BillingPeriodType)).Cast<BillingPeriodType>().Where(x => x.NotIn(new List<BillingPeriodType> { BillingPeriodType.NotSet, BillingPeriodType.Day, BillingPeriodType.Year })))
+    var exceptions = new List<BillingPeriodType> { BillingPeriodType.NotSet };
+
+    if (AfterSchoolLibrary.Helpers.Utilities.IsProduction)
+    {
+        exceptions = new List<BillingPeriodType> { BillingPeriodType.NotSet, BillingPeriodType.Day, BillingPeriodType.Year };
+    }
+
+    foreach (var billingPeriodType in Enum.GetValues(typeof(BillingPeriodType)).Cast<BillingPeriodType>().Where(x => x.NotIn(exceptions)))
     {
         var selected = "";
         if (plan.IsEmpty() && billingPeriodType == BillingPeriodType.Month)

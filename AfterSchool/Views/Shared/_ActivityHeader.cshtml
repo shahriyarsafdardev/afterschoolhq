@@ -1,7 +1,6 @@
 ﻿@model Activity
 
 @{
-    var m = Model;
     var isActivityLeader = true;
     if (ViewBag.IsActivityLeader != null)
     {
@@ -33,6 +32,7 @@
     <div class="btn-toolbar">
         <div class="btn-group hidden-xs">
             <a href="@Url.Action("summary", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "summary" ? "-active" : "")"><i class="s7-graph2"></i> Summary</a>
+
             @if (isActivityLeader)
             {
                 <a href="@Url.Action("editsetup", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "editsetup" ? "-active" : "")"><i class="s7-edit"></i> Setup</a>
@@ -41,6 +41,7 @@
                     <a href="@Url.Action("form", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "form" ? "-active" : "")"><i class="s7-note2"></i> Reg Form</a>
                 }
             }
+
             @if(Model.IsPublished || registrantCount > 0)
             {
                 <a href="@Url.Action("registrants", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "registrants" ? "-active" : "")"><i class="s7-user"></i> @UILabel.RegistrantLabel(true)</a>
@@ -53,6 +54,7 @@
                     <a href="@Url.Action("messages", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "messages" ? "-active" : "")"><i class="s7-mail"></i> Messaging</a>
                 }
             }
+
             @if (isActivityLeader)
             {
                 if (SessionVariables.AccountPackage.GetFeature(FeatureType.TeamAccounts).Max.Value > 1)
@@ -60,9 +62,14 @@
                     <a href="@Url.Action("team", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "team" ? "-active" : "")">
                         <i class="s7-users"></i> Staff
                     </a>
-                }
+                }                
+            }
+
+            @if (isActivityLeader || SessionVariables.CurrentUser.CanPublishActivity(SessionVariables.CurrentAccount, Model))
+            {
                 <a href="@Url.Action("publishdetail", "activity", new { id = Model.Uid })" class="btn @publishClass"><i class="s7-link"></i> Publish...</a>
             }
+
             @if (Model.ActivityGroupId.HasValue)
             {
                 <a href="@Url.Action("activities", "group", new {id = group.Uid})" class="btn btn-alt5">

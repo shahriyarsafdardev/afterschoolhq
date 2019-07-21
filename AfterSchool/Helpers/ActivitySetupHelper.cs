@@ -48,10 +48,7 @@ namespace AfterSchool.Helpers
             }
             else if (cmd == "publish")
             {
-                var location = activity.GetLocation();
-                var hostAccount = location?.GetHostAcount();
-
-                if (hostAccount.IsEmpty() || (hostAccount.ID == activity.AccountId && hostAccount.OwnerId.HasValue))
+                if (SessionVariables.CurrentUser.CanPublishActivity(SessionVariables.CurrentAccount, activity))
                     return "Publish &raquo;";
 
                 if (isTop)

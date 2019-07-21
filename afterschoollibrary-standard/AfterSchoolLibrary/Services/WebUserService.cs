@@ -142,6 +142,18 @@ namespace AfterSchoolLibrary.Services
             var awu = user.GetActivityWebUser(a, dc: dc);
             return awu.IsNotEmpty() && awu.IsLeader;
         }
+
+        public static bool CanPublishActivity(this WebUser user, Account currentAccount, Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var location = activity.GetLocation();
+            var hostAccount = location?.GetHostAcount();
+
+            if (hostAccount.IsEmpty() || (hostAccount.OwnerId.HasValue && hostAccount.ID == currentAccount.ID))
+                return true;
+
+            return false;
+        }
+
         public static ActivityWebUser GetActivityWebUser(this WebUser user, Activity a, DatabaseConnection dc = null)
         {
             return a.ID.HasValue ? ActivityWebUser.LoadByActivityIdByWebUserId(a.ID.Value, user.ID.Value, dc: dc) : null;
