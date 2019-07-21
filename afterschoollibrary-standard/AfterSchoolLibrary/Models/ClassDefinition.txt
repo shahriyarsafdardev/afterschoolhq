@@ -1352,6 +1352,11 @@ property: RegistrantId, int?, Int, required
 property: StartDate, DateTime?, DateTime, required
 property: StripeSubscriptionId, string, NVarChar "50"
 property: StripeCustomerId, string, NVarChar "50"
+property: Amount, decimal?, Money
+property: ConvenienceFee, decimal?, Money
+property: PaymentTypeFee, decimal?, Money
+property: PaymentTypeFeesPaidBy, FeesPaidByType, Int
+property: ConvenienceFeesPaidBy, FeesPaidByType, Int
 loadmethod: PurchaseId, List<>
 loadmethod: RegistrantId, List<>
 loadmethod: SubscriptionPlanId, List<>

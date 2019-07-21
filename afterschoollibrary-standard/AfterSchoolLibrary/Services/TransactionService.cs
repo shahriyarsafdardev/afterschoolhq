@@ -108,8 +108,8 @@ namespace AfterSchoolLibrary.Services
                 checkoutObject.PaymentSourceType,
                 useConnectedAccount ? checkoutObject.GetPlatformFlatFee(msgs, dc) : new decimal?(), // deprecated property
                 useConnectedAccount ? checkoutObject.GetPlatformPercentFee(msgs, dc) : new decimal?(), // deprecated property
-                checkoutObject.GetTotalConvenienceFeesToday(msgs, dc),
-                checkoutObject.GetTotalCreditCardFeesToday(msgs, dc),
+                checkoutObject.ConvenienceFeeOverrideAmount ?? checkoutObject.GetTotalConvenienceFeesToday(msgs, dc),
+                checkoutObject.PaymentTypeFeeOverrideAmount ?? checkoutObject.GetTotalCreditCardFeesToday(msgs, dc),
                 checkoutObject.StripeChargeId,
                 loggedInUser, 
                 msgs, 
