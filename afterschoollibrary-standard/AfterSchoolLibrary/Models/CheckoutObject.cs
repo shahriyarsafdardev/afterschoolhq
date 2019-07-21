@@ -27,6 +27,8 @@ namespace AfterSchoolLibrary.Models
         /// override will sometimes be the manual payment or the subscription payment
         /// </summary>
         public decimal? OverrideAmount { get; set; }
+        public decimal? ConvenienceFeeOverrideAmount { get; set; }
+        public decimal? PaymentTypeFeeOverrideAmount { get; set; }
         public string StripeChargeId { get; set; }
         public Purchase Purchase { get; set; }
         public PaymentSourceType PaymentSourceType { get; set; }

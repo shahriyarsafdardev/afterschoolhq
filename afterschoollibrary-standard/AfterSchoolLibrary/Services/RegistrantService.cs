@@ -217,9 +217,39 @@ namespace AfterSchoolLibrary.Services
                 startDateTime,
                 purchase,
                 subscription.Id,
+                GetFeeObject(checkoutObject, billingAccount, subscriptionPlanType, msgs, dc),
                 loggedInUser,
                 msgs,
                 dc);
+        }
+
+        private static FeeObject GetFeeObject(CheckoutObject checkoutObject, Account billingAccount, SubscriptionPlanType subscriptionPlanType, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            decimal? convenienceFee = 0;
+            decimal? paymentTypeFee = 0;
+            decimal? amount = 0;
+
+            if (subscriptionPlanType == SubscriptionPlanType.PaymentPlan)
+            {
+                convenienceFee = checkoutObject.GetPaymentPlanCostTodayConvenienceFee(msgs, dc);
+                paymentTypeFee = checkoutObject.GetPaymentPlanCostTodayCreditCardFee(msgs, dc);
+                amount = checkoutObject.PaymentPlan.CostPerPeriod;
+            }
+            else
+            {
+                convenienceFee = checkoutObject.GetSubscriptionCostTodayConvenienceFee(msgs, dc);
+                paymentTypeFee = checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc);
+                amount = checkoutObject.PaymentPlan.CostPerPeriod;
+            }
+
+            return new FeeObject()
+            {
+                ConvenienceFee = convenienceFee.Value,
+                ConvenienceFeesPaidBy = billingAccount.ConvenienceFeesPaidBy,
+                PaymentTypeFee = paymentTypeFee.Value,
+                PaymentTypeFeesPaidBy = billingAccount.CreditCardFeesPaidBy,
+                Amount = amount.Value
+            };
         }
      
         public static string GetParentOrGuardianEmail(this Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)

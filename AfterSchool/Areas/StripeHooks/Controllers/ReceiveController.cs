@@ -173,6 +173,8 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                 PayingAccount = purchasingAccount,
                 BillingAccount = billingAccount,
                 OverrideAmount = plan.CostPerPeriod, // should be able to pull from the plan, but there's a bug for right now, have to really fix later
+                ConvenienceFeeOverrideAmount = registrantSubscriptionPlan.ConvenienceFee,
+                PaymentTypeFeeOverrideAmount = registrantSubscriptionPlan.PaymentTypeFee,
                 ParticipationObject = participationObject,
                 PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
                 PaymentType = PaymentType.CreditCard,
