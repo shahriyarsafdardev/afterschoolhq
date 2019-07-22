@@ -11,7 +11,7 @@ using System.Collections;
 namespace AfterSchoolLibrary.Models
 {
 	/// <summary>
-    /// Store all information on a purchase
+    /// Store information about messages sent via text
     /// </summary>
 	
     public class TwilioSMS : BasicObjectWithModified

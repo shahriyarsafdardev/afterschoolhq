@@ -93,6 +93,7 @@ namespace AfterSchoolLibrary.Models
 			PurchaseableObjectCoupon.Create(dc);
 			Purchase.Create(dc);
 			TwilioSMS.Create(dc);
+			Migration.Create(dc);
 			
 
 			return msgs;
@@ -167,6 +168,7 @@ namespace AfterSchoolLibrary.Models
 			PurchaseableObjectCoupon.Alter(dc);
 			Purchase.Alter(dc);
 			TwilioSMS.Alter(dc);
+			Migration.Alter(dc);
 			
 
 			return msgs;
@@ -574,6 +576,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_TwilioSMS_TwilioResourceId ON [TwilioSMS] (TwilioResourceId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_TwilioSMS_ActivityMessageId_RegistrantId ON [TwilioSMS] (RegistrantId,ActivityMessageId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_TwilioSMS_RegistrantId ON [TwilioSMS] (RegistrantId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Migration_UniqueIdentifier ON [Migration] (UniqueIdentifier)"));
 			
 
 			return msgs;
@@ -667,9 +670,9 @@ namespace AfterSchoolLibrary.Models
             }            
         }
 
-		#endregion
+        #endregion
 
-		#region "UserDefined"
+        #region "UserDefined"
 
         #endregion
 	}
