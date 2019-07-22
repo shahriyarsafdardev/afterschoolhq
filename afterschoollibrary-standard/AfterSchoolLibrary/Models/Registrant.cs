@@ -523,6 +523,15 @@ namespace AfterSchoolLibrary.Models
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
+        public static List<Registrant> LoadMastersNotRecentlyUpdated(DateTime lastUpdatedDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["IsMaster"], true);
+            dq.Criterias.Add(ObjectMap["LastModifiedDate"], lastUpdatedDate, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
         internal void DeleteSessionActions(SystemMessages msgs, DatabaseConnection dc = null)
         {
             SessionAction.LoadByRegistrantId(this.ID.Value, msgs, dc).ForEach(sa => msgs.AddRange(sa.Delete(dc)));
