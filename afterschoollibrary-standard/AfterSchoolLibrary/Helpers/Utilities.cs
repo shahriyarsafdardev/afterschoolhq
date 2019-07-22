@@ -284,7 +284,7 @@ namespace AfterSchoolLibrary.Helpers
 
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
-                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs)
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs)               
             );
 
             Database.ExecuteTransaction
@@ -298,6 +298,7 @@ namespace AfterSchoolLibrary.Helpers
                     amsgs.AddRange(UpdateRequiresParentalConsent(adc));
                     amsgs.AddRange(UpdateActivityMessageUids(adc));
                     amsgs.AddRange(UpdateSendToStaff(adc));
+                    amsgs.AddRange(InvalidateRegistrantAccounts(adc));
 
                     // amsgs.AddRange(MigrateToBCrypt(adc));
 
@@ -357,6 +358,28 @@ namespace AfterSchoolLibrary.Helpers
             );            
 
             return msgs;
+        }
+
+        private static SystemMessages InvalidateRegistrantAccounts(DatabaseConnection dc)
+        {
+            return Migration.Run
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    var registrants = Registrant.LoadMastersNotRecentlyUpdated("7/1/2019".ToDateTime(), amsgs, adc);
+
+                    registrants.ForEach(registrant =>
+                    {
+                        registrant.UpdateProfileStatus(
+                            RegistrantProfileStatus.OutOfDate, 
+                            new WebUser() { ID = 0 }, 
+                            amsgs, 
+                            adc);
+                    });
+                },
+                uniqueIdenfier: "InvalidateRegistrantAccounts-20190721",
+                dc: dc
+            );
         }
 
         private static SystemMessages UpdateSendToStaff(DatabaseConnection dc)
