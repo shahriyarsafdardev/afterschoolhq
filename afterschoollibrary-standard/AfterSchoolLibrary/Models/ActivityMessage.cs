@@ -28,6 +28,7 @@ namespace AfterSchoolLibrary.Models
 		public string Subject { get { return (string)MDV["Subject"].Value; } set { MDV["Subject"].Value = value; } }
 		public string Body { get { return (string)MDV["Body"].Value; } set { MDV["Body"].Value = value; } }
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
+		public bool SendToStaff { get { return (bool)MDV["SendToStaff"].Value; } set { MDV["SendToStaff"].Value = value; } }
 		public string ActivityName { get { return (string)MDV["ActivityName"].Value; } }
 		public string ActivityGroupName { get { return (string)MDV["ActivityGroupName"].Value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
@@ -38,6 +39,7 @@ namespace AfterSchoolLibrary.Models
             this.Config(ObjectMap, DatabaseQuery, typeof(ActivityMessage).Name, "ID");
             this.LoadObjectValues(ObjectMap);
 			this.Uid = Guid.NewGuid();
+			this.SendToStaff = false;
 			
         }
 
@@ -55,6 +57,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "Subject", System.Data.SqlDbType.NVarChar , "150");
 				_dp.Add(className, "Body", System.Data.SqlDbType.Text);
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
+				_dp.Add(className, "SendToStaff", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "ActivityName", typeof(Activity).Name, "Name", System.Data.SqlDbType.NVarChar, "Activity");
 				_dp.Add(className, "ActivityGroupName", typeof(ActivityGroup).Name, "Name", System.Data.SqlDbType.NVarChar, "ActivityGroup");
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
@@ -162,6 +165,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["Uid"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["SendToStaff"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

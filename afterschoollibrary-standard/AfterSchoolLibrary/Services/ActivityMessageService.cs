@@ -26,7 +26,7 @@ namespace AfterSchoolLibrary.Services
 
             am.SendActivityMessage(account, loggedInUser, activity.Name, activity.ContactName, activity.ContactEmail, activity.ContactName, msgs, dc);
 
-            if (msgs.HasNoErrors())
+            if (msgs.HasNoErrors() && am.SendToStaff)
                 msgs.AddRange(am.SendMessageToTeamMembers(activity, account, loggedInUser, dc));
 
         }

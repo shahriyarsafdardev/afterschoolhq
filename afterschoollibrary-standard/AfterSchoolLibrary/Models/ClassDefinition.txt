@@ -278,6 +278,7 @@ property: DateSent, DateTime?, DateTime
 property: Subject, string, NVarChar "150"
 property: Body, string, Text
 property: Uid, Guid, UniqueIdentifier
+property: SendToStaff, bool, Bit
 join: Activity.ID, ActivityId, LeftOuterJoin
 join: ActivityGroup.ID, ActivityGroupId, LeftOuterJoin
 join: Account.ID, AccountId, InnerJoin

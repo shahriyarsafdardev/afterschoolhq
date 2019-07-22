@@ -46,6 +46,12 @@
                             @Html.Raw(Model.Body.Replace("\n", "<br />"))
                         </div>
                     </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Sent to Staff</label>
+                        <div class="col-sm-6 padding-10">
+                            @Model.SendToStaff.ToYesNo()
+                        </div>
+                    </div>
                     @if (Model.DateSent.HasValue)
                     {
                         <div class="form-group">
@@ -59,23 +65,30 @@
                     {
                         <div class="form-group">
                             <label class="col-sm-3 control-label">
-                                Recipients
+                                Student Recipients
                             </label>
-                            <div class="col-sm-6">
-                                @for (int i = 0; i < 3; i++)
+                            <div class="col-sm-6 padding-10">
+                                @if (amrs.Count > 0)
                                 {
-                                    <div class="col-md-4">
-                                        @foreach (var amr in amrs.Skip(i * registrantsPerColumn).ToList().Take(registrantsPerColumn))
-                                        {
-                                            <div class="padding-10">
-                                                @if (amr.DateSent.HasValue)
-                                                {
-                                                    <i class="s7-check-circle text-success text-bold"></i>
-                                                }
-                                                @amr.RegistrantDisplayName
-                                            </div>
-                                        }
-                                    </div>
+                                    for (int i = 0; i < 3; i++)
+                                    {
+                                        <div class="col-md-4">
+                                            @foreach (var amr in amrs.Skip(i * registrantsPerColumn).ToList().Take(registrantsPerColumn))
+                                            {
+                                                <div class="padding-10">
+                                                    @if (amr.DateSent.HasValue)
+                                                    {
+                                                        <i class="s7-check-circle text-success text-bold"></i>
+                                                    }
+                                                    @amr.RegistrantDisplayName
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <span>None</span>
                                 }
                             </div>
                         </div>
