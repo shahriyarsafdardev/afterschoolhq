@@ -292,10 +292,12 @@ namespace AfterSchoolLibrary.Helpers
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     amsgs.AddRange(AdditionalData(adc));
-                    amsgs.AddRange(UpdateRegistrantAccess(adc));
+
                     amsgs.AddRange(UpdateRegistrantStatuses(adc));
+                    amsgs.AddRange(UpdateRegistrantAccess(adc));
                     amsgs.AddRange(UpdateRequiresParentalConsent(adc));
                     amsgs.AddRange(UpdateActivityMessageUids(adc));
+                    amsgs.AddRange(UpdateSendToStaff(adc));
 
                     // amsgs.AddRange(MigrateToBCrypt(adc));
 
@@ -357,68 +359,111 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
+        private static SystemMessages UpdateSendToStaff(DatabaseConnection dc)
+        {
+            return Migration.Run
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    amsgs.AddRange(ActivityMessage.Update(
+                        updateValues: new Hashtable() { { "SendToStaff", true } },
+                        criterias: new Hashtable() { },
+                        ObjectMap: ActivityMessage.ObjectMap,
+                        dc: adc));
+                },
+                uniqueIdenfier: "UpdateSendToStaff-20190721",
+                dc: dc
+            );
+        }
+
         private static SystemMessages UpdateActivityMessageUids(DatabaseConnection dc)
         {
-            var msgs = new SystemMessages();
-            var ams = ActivityMessage.Load(
-                criterias: new Hashtable() { { "Uid", DBNull.Value } },
-                msgs: msgs,
-                dc: dc);
+            return Migration.Run
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    var ams = ActivityMessage.Load(
+                        criterias: new Hashtable() { { "Uid", DBNull.Value } },
+                        msgs: amsgs,
+                        dc: adc);
 
-            ams.ForEach(am =>
-            {
-                am.Uid = Guid.NewGuid();
-                msgs.AddRange(am.Save(dc));
-            });
-
-            return msgs;
+                    ams.ForEach(am =>
+                    {
+                        am.Uid = Guid.NewGuid();
+                        amsgs.AddRange(am.Save(adc));
+                    });
+                },
+                uniqueIdenfier: "UpdateActivityMessageUids-20190721",
+                dc: dc
+            );
         }
 
         private static SystemMessages UpdateRequiresParentalConsent(DatabaseConnection dc)
         {
-            return Activity.Update(
-                updateValues: new Hashtable() { { "RequiresParentalConsent", true } },
-                criterias: new Hashtable() { },
-                ObjectMap: Activity.ObjectMap,
-                dc: dc);
+            return Migration.Run
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    amsgs.AddRange(Activity.Update(
+                        updateValues: new Hashtable() { { "RequiresParentalConsent", true } },
+                        criterias: new Hashtable() { },
+                        ObjectMap: Activity.ObjectMap,
+                        dc: adc));
+                },
+                uniqueIdenfier: "UpdateRequiresParentalConsent-20190721",
+                dc: dc
+            );
         }
 
         private static SystemMessages UpdateRegistrantStatuses(DatabaseConnection dc)
         {
-            return Registrant.Update(
-                updateValues:  new Hashtable() { { "ProfileStatusId", (int)RegistrantProfileStatus.Completed } },
-                criterias: new Hashtable()
+            return Migration.Run
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    { "IsMaster", true },
-                    { "ProfileStatusId", 0 }
+                    amsgs.AddRange(Registrant.Update(
+                        updateValues: new Hashtable() { { "ProfileStatusId", (int)RegistrantProfileStatus.Completed } },
+                        criterias: new Hashtable()
+                        {
+                            { "IsMaster", true },
+                            { "ProfileStatusId", 0 }
+                        },
+                        ObjectMap: Registrant.ObjectMap,
+                        dc: adc));
                 },
-                ObjectMap: Registrant.ObjectMap,
-                dc: dc);
+                uniqueIdenfier: "UpdateRegistrantStatuses-20190721",
+                dc: dc
+            );
         }
 
         public static SystemMessages UpdateRegistrantAccess(DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
-            var registrants = Registrant.Load(
-                criterias: new Hashtable() { { "IsMaster", true } }, 
-                msgs: msgs, 
-                dc: dc);
+            return Migration.Run
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    var registrants = Registrant.Load(
+                        criterias: new Hashtable() { { "IsMaster", true } },
+                        msgs: amsgs,
+                        dc: adc);
 
-            registrants.ForEach(registrant => {
+                    registrants.ForEach(registrant =>
+                    {
+                        var user = new WebUser() { ID = registrant.WebUserId };
 
-                var user = new WebUser() { ID = registrant.WebUserId };
+                        if (!registrant.WebUserId.HasValue)
+                            user = registrant.GetAccount(amsgs, adc).GetAccountOwner(amsgs, adc);
 
-                if (!registrant.WebUserId.HasValue)
-                    user = registrant.GetAccount(msgs, dc).GetAccountOwner(msgs, dc);
-
-                registrant.AddUserWithAccess(
-                        user: user,
-                        loggedInUser: null,
-                        msgs: msgs,
-                        dc: dc);
-            });
-
-            return msgs;
+                        registrant.AddUserWithAccess(
+                                user: user,
+                                loggedInUser: null,
+                                msgs: amsgs,
+                                dc: adc);
+                    });
+                },
+                uniqueIdenfier: "UpdateRegistrantAccess-20190721",
+                dc: dc
+            );
         }
 
         public static SystemMessages MigrateToBCrypt(DatabaseConnection dc = null)
