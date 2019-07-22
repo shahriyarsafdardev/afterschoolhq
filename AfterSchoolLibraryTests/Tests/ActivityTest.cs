@@ -863,7 +863,7 @@ namespace AfterSchoolLibraryTests.Tests
 
             var registrantIds = new List<int>() { registrant.ID.Value };
 
-            Assert.NotNull(activity.AddMessage("subj", "Hello Class", registrantIds, accountOwner.ID.Value, msgs, dc));
+            Assert.NotNull(activity.AddMessage("subj", "Hello Class", registrantIds, false, accountOwner.ID.Value, msgs, dc));
         }
 
         //[Fact]

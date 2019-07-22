@@ -199,6 +199,7 @@ namespace AfterSchoolLibrary.Models
 			ActivitySchedule.Update(new Hashtable(){{"IsOngoing",false}}, new Hashtable(){{"IsOngoing", DBNull.Value}}, ActivitySchedule.ObjectMap, dc);
 			ActivityInstance.Update(new Hashtable(){{"Day",0}}, new Hashtable(){{"Day", DBNull.Value}}, ActivityInstance.ObjectMap, dc);
 			ActivityInstance.Update(new Hashtable(){{"InstanceTypeId",0}}, new Hashtable(){{"InstanceTypeId", DBNull.Value}}, ActivityInstance.ObjectMap, dc);
+			ActivityMessage.Update(new Hashtable(){{"SendToStaff",false}}, new Hashtable(){{"SendToStaff", DBNull.Value}}, ActivityMessage.ObjectMap, dc);
 			Account.Update(new Hashtable(){{"IsAdminAccount",false}}, new Hashtable(){{"IsAdminAccount", DBNull.Value}}, Account.ObjectMap, dc);
 			Account.Update(new Hashtable(){{"IsActive",false}}, new Hashtable(){{"IsActive", DBNull.Value}}, Account.ObjectMap, dc);
 			Account.Update(new Hashtable(){{"IsAfterSchool",false}}, new Hashtable(){{"IsAfterSchool", DBNull.Value}}, Account.ObjectMap, dc);
