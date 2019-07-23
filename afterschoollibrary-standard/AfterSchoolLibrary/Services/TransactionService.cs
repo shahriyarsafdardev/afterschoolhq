@@ -11,7 +11,7 @@ namespace AfterSchoolLibrary.Services
     {
 
         public static decimal GetFeesChargedToBiller(this Transaction transaction)
-        {
+        {            
             if (transaction.PlatformFlatFee.HasValue || transaction.PlatformPercentFee.HasValue)
                 return (transaction.Amount.Value * transaction.PlatformPercentFee.Value) + transaction.PlatformFlatFee.Value;
 

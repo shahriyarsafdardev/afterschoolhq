@@ -657,8 +657,6 @@ namespace AfterSchoolLibrary.Services
                 SeatsAvailable = activity.SeatsAvailable,
                 Uid = Guid.NewGuid(),
                 WaitingListSeats = activity.WaitingListSeats,
-                //AcceptPayPal = this.AcceptPayPal,
-                //AcceptCreditCard = this.AcceptCreditCard,
                 CostPerRegistrant = activity.CostPerRegistrant,
                 CostDescription = activity.CostDescription,
                 GenderRestriction = activity.GenderRestriction,
@@ -666,13 +664,12 @@ namespace AfterSchoolLibrary.Services
                 GradeLevelEnd = activity.GradeLevelEnd,
                 AgeStart = activity.AgeStart,
                 AgeEnd = activity.AgeEnd,
-                //AllowOrganizationRegistration = this.AllowOrganizationRegistration,
                 AllowToPayLater = activity.AllowToPayLater,
                 RegistrationModeId = activity.RegistrationModeId,
                 ActivityGroupId = activity.ActivityGroupId,
                 ActivityTypeId = activity.ActivityTypeId,
                 LocationId = activity.LocationId,
-
+                RequiresParentalConsent = activity.RequiresParentalConsent
             };
         }
 
@@ -1416,7 +1413,7 @@ namespace AfterSchoolLibrary.Services
                          accountOwner: null,
                          packageId: null,
                          packageBillingPeriod: null,
-                         timeZone: null,
+                         timeZone: activityAccount.TimeZone,
                          loggedInUser: loggedInUser,
                          isAfterSchool: true,
                          createWithStripe: false,
