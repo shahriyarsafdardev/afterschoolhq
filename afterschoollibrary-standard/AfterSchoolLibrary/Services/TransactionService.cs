@@ -167,7 +167,7 @@ namespace AfterSchoolLibrary.Services
                 dc);
         }
 
-        public static Transaction CreateNew(Account purchasingAccount, Account billingAccount, decimal amount, Purchase purchase, string participationObjectName, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, string stripeChargeOrRefundId, Transaction originalTransaction , WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Transaction CreateNew(Account purchasingAccount, Account billingAccount, decimal amount, Purchase purchase, string participationObjectName, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, string stripeChargeOrRefundId, Transaction originalTransaction, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -199,7 +199,7 @@ namespace AfterSchoolLibrary.Services
         {
             if (transaction.IsCharge())
             {
-                var totalRefund = - Transaction.GetTotalRefundByOriginalTransaction(transaction.ID.Value, msgs, dc);
+                var totalRefund = -Transaction.GetTotalRefundByOriginalTransaction(transaction.ID.Value, msgs, dc);
 
                 return totalRefund == transaction.Amount;
             }
@@ -212,9 +212,16 @@ namespace AfterSchoolLibrary.Services
             return -Transaction.GetTotalRefundByOriginalTransaction(transaction.ID.Value, msgs, dc);
         }
 
+        public static Payout GetPayout(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (transaction.PayoutId != null)
+                Payout.Load(transaction.PayoutId.Value, msgs, dc: dc);
+            return null;
+        }
+
         public static string GetStatus(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var currentPayout = transaction.PayoutId != null ? Payout.Load(transaction.PayoutId.Value, msgs, dc: dc) : null;
+            var currentPayout = GetPayout(transaction, msgs);
 
             if (currentPayout != null)
             {
@@ -232,7 +239,7 @@ namespace AfterSchoolLibrary.Services
             {
                 return "Incoming";
             }
-            return string.Empty;
+            return null;
         }
     }
 }
