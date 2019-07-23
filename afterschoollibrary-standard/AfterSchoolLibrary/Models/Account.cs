@@ -402,7 +402,7 @@ namespace AfterSchoolLibrary.Models
         {
             get
             {
-                return $"{Helpers.Utilities.BaseUrl(true)}/signup/invite/{this.InviteCodeToShare}";
+                return $"{Helpers.Utilities.BaseUrl(true)}/signup?invite={this.InviteCodeToShare}";
             }
         }
 

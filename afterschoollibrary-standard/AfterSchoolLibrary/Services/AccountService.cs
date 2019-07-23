@@ -1524,10 +1524,12 @@ namespace AfterSchoolLibrary.Services
             else
                 relationship = AccountRelationshipService.CreateNew(hostAccount, visitorAccount, ApprovalStatus.Approved, hostPermissionType, loggedInUser, msgs, dc);
 
-            if (msgs.HasNoErrors())
-                msgs.AddRange(Helpers.EmailHelper.SendApprovalNotificationToVisitor(visitorAccount, hostAccount));
-
             return relationship;
+        }
+
+        public static void SendApprovalNotificationToVisitor(this Account hostAccount, Account visitorAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            msgs.AddRange(Helpers.EmailHelper.SendApprovalNotificationToVisitor(visitorAccount, hostAccount));
         }
 
         /// <summary>
