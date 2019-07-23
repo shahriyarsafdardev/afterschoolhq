@@ -779,7 +779,7 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
-        public static SystemMessages SendApprovalNotificationToVisitor(Account visitorAccount, Account hostAccount)
+        public static SystemMessages SendApprovalNotificationToVisitor(Account visitorAccount, Account hostAccount, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
 

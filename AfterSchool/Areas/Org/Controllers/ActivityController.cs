@@ -1742,6 +1742,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 {
                     var visitingAccount = activity.GetAccount(msgs);
                     SessionVariables.CurrentAccount.ApproveAccessToAccount(visitingAccount, SessionVariables.CurrentUser, msgs);
+
+                    if (msgs.HasNoErrors())
+                        SessionVariables.CurrentAccount.SendApprovalNotificationToVisitor(visitingAccount, msgs);
                 }
 
                 activity.Publish(SessionVariables.CurrentUser, msgs);
