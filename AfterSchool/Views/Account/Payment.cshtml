@@ -189,14 +189,57 @@
 
                 <div id="payment-info-ach">
 
+                    @* PAY VIA Existing ACH Sources *@
+                    @if (sources.Any(source => source.AchDebit.IsNotEmpty()))
+                    {
+                        <div class="row">
+                            <div class="col-md-6 col-md-offset-3 col-sm-12 padding-30 margin-t-20">
+                                
+                                <p class="text-center text-large">Pay using an existing ACH  (No Transaction Fees)</p>
+
+                                <form class="form-horizontal" action="@Url.Action("payment", "account", new { id = registration.Uid })" method="post" id="existing-payment-form">
+
+                                    <input type="hidden" name="paymentoption" id="paymentoption-existing" class="payment-option" value="0" />
+                                    <input type="hidden" name="coupon" class="coupon" value="" />
+
+                                    <div class="form-group">
+                                        <label class="col-md-3 control-label">
+                                            Select Account
+                                        </label>
+                                        <div class="col-md-9">
+                                            <select name="source" id="source" class="form-control">
+                                                @foreach (var source in sources.Where(source => source.AchDebit.IsNotEmpty()))
+                                                {
+                                                    <option value="@source.Id">
+                                                        ******@source.AchDebit.Last4 - @source.AchDebit.Type
+                                                    </option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <p>&nbsp;</p>
+                                    </div>
+                                    <div class="form-group">
+                                        <button type="submit" class="btn btn-register btn-lg" id="btn-paywithexistingach">
+                                            Purchase via ACH -
+                                            <span class="total-due-today-ach"></span>
+                                            &raquo;
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    }
+
                     @* PAY VIA ACH *@
                     <div class="row">
                         <div class="col-md-6 col-md-offset-3 col-sm-12 padding-30 margin-t-20">
-                            <p class="text-center text-large margin-b-20">Pay via ACH (No Transaction Fees)</p>
+                            <p class="text-center text-large margin-b-20">Pay via new ACH (No Transaction Fees)</p>
 
-                            <button id="plaid-button" class="btn btn-register btn-lg">
+                            <button id="plaid-button" class="btn btn-register@(sources.Any(source => source.AchDebit.IsNotEmpty()) ? "-default" : "") btn-lg">
                                 Purchase via ACH -
-                                $<span id="total-due-today-ach"></span>
+                                $<span class="total-due-today-ach"></span>
                                 &raquo;
                             </button>
 
@@ -416,7 +459,7 @@
 
     function updateTotalsACH(regFee, regTotalToday) {
         let total = regFee + regTotalToday + getSubscriptionTotalValueACH();
-        $('#total-due-today-ach').html(total.toFixed(2));
+        $('.total-due-today-ach').html(total.toFixed(2));
     }
 
     function getSubscriptionTotalValue() {
@@ -551,10 +594,24 @@
 
         $('#existing-payment-form').submit(function () {
             $('#btn-paywithexistingcard').html('Processing Payment...');
-            $('#btn-paywithexistingcard').prop('disabled', true);
-            $('#btn-paywithnewcard').prop('disabled', true);
+
+            disableButtons();
         });
     });
+
+    function disableButtons() {
+        $('#btn-paywithexistingach').prop('disabled', true);
+        $('#btn-paywithexistingcard').prop('disabled', true);
+        $('#btn-paywithnewcard').prop('disabled', true);
+        $('#plaid-button').prop('disabled', true);
+    }
+
+    function enableButtons() {
+        $('#btn-paywithexistingach').prop('disabled', false);
+        $('#btn-paywithexistingcard').prop('disabled', false);
+        $('#btn-paywithnewcard').prop('disabled', false);
+        $('#plaid-button').prop('disabled', false);
+    }
 </script>
 
 <script>
@@ -563,8 +620,8 @@
         $('#btn-paywithnewcard').click(function () {
 
             $('#btn-paywithnewcard').html('Processing Payment...');
-            $('#btn-paywithnewcard').prop('disabled', true);
-            $('#btn-paywithexistingcard').prop('disabled', true);
+
+            disableButtons();
 
             stripe.createToken(card).then(function (result) {
 
@@ -573,7 +630,7 @@
                     var errorElement = document.getElementById('card-errors');
                     errorElement.textContent = result.error.message;
                     $('#btn-paywithnewcard').html('Review Purchase');
-                    $('#btn-paywithnewcard').prop('disabled', false);
+                    enableButtons();
 
                 } else {
 
@@ -632,9 +689,8 @@
         onSuccess: function (public_token, metadata) {
             // Send the public_token and account ID to your app server
             $('#plaid-button').html('Processing Payment...'); 
-            $('#plaid-button').prop('disabled', true);
-            $('#btn-paywithnewcard').prop('disabled', true);
-            $('#btn-paywithexistingcard').prop('disabled', true);
+
+            disableButtons();
 
             plaidTokenHandler(public_token, metadata.account_id)
         },
