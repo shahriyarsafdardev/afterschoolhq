@@ -211,7 +211,7 @@
                                                 @foreach (var source in sources.Where(source => source.AchDebit.IsNotEmpty()))
                                                 {
                                                     <option value="@source.Id">
-                                                        ******@source.AchDebit.Last4 - @source.AchDebit.Type
+                                                        * * * * * * @source.AchDebit.Last4 - @source.AchDebit.Type.ToProperCase() Acct
                                                     </option>
                                                 }
                                             </select>
