@@ -1945,9 +1945,24 @@ namespace AfterSchoolLibrary.Services
 
         internal static string GetStripeSourceFromToken(this Account fromAccount, string stripeToken, SystemMessages msgs = null)
         {
-            var source = StripeHelper.CreateSource(stripeToken, msgs);
+            var source = StripeHelper.CreateCreditCardSource(stripeToken, msgs);
             msgs.AddRange(StripeHelper.AddSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null));
             return source.Id;
+        }
+
+        internal static string GetStripeSourceFromPlaidToken(this Account fromAccount, PlaidPurchaseObject plaidPurchaseObject, SystemMessages msgs = null)
+        {
+            var plaidToken = Helpers.PlaidHelper.GetPlaidToken(plaidPurchaseObject.PublicToken, msgs);
+
+            if (msgs.HasNoErrors())
+            {
+                var bankAccount = Helpers.PlaidHelper.CreateStripeBankAccount(plaidToken.AccessToken, plaidPurchaseObject.AccountId, msgs);
+                var source = StripeHelper.CreateACHSource(bankAccount.StripeBankAccountToken, msgs);
+                msgs.AddRange(StripeHelper.AddSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null));
+                return source.Id;
+            }
+
+            return null;
         }
 
         internal static Stripe.Charge CreateStripeChargeDuringCheckout(CheckoutObject checkoutObject, SystemMessages msgs, DatabaseConnection dc = null)
@@ -2052,14 +2067,12 @@ namespace AfterSchoolLibrary.Services
 
             if (customer.DefaultSourceId.IsEmpty())
             {
-                var source = StripeHelper.CreateSource(stripeToken, msgs);
+                var source = StripeHelper.CreateCreditCardSource(stripeToken, msgs);
                 msgs.AddRange(StripeHelper.AddSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null));
                 sourceId = source.Id;
             }
             else
-            {
                 sourceId = customer.DefaultSourceId;
-            }
 
             return sourceId;
         }
@@ -2097,8 +2110,15 @@ namespace AfterSchoolLibrary.Services
         {
             // if user wants to save payment info, do it before you charge the card
             // can't use a token twice
-            if (msgs.HasNoErrors() && checkoutObject.SavePaymentInfo)
-                checkoutObject.SourceId = checkoutObject.PayingAccount.GetStripeSourceFromToken(checkoutObject.StripeToken, msgs);
+            if (msgs.HasNoErrors())
+            {
+                var payingAccount = checkoutObject.PayingAccount;
+
+                if (checkoutObject.PlaidPurchaseObject.IsNotEmpty())
+                    checkoutObject.SourceId = payingAccount.GetStripeSourceFromPlaidToken(checkoutObject.PlaidPurchaseObject, msgs);
+                else if (checkoutObject.SavePaymentInfo)
+                    checkoutObject.SourceId = payingAccount.GetStripeSourceFromToken(checkoutObject.StripeToken, msgs);
+            }
 
             // if everything goes right then bill the person, 
             // if any errors it'll just rollback the transaction anyway :)

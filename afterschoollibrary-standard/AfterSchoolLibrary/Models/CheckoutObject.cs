@@ -15,6 +15,7 @@ namespace AfterSchoolLibrary.Models
         public SubscriptionPlan SubscriptionPlan { get; set; }
         public SubscriptionPlan PaymentPlan { get; set; }
         public string StripeToken { get; set; }
+        public PlaidPurchaseObject PlaidPurchaseObject { get; set; }
         public string SourceId { get; set; }
         public ParticipationObject ParticipationObject { get; set; }
         public Account PayingAccount { get; set; }
@@ -39,6 +40,7 @@ namespace AfterSchoolLibrary.Models
         public CheckoutObject()
         {
             Products = new List<Product>();
+            PlaidPurchaseObject = new PlaidPurchaseObject();
         }
 
         public bool IsPaying

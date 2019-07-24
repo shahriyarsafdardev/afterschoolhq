@@ -1183,12 +1183,7 @@ namespace AfterSchoolLibrary.Billing
             return new Stripe.SourceService(StripeClient);
         }
 
-        public static Stripe.Source CreateSource(Stripe.Customer customer, string token, SystemMessages msgs)
-        {
-            return CreateSource(token, msgs);
-        }
-
-        public static Stripe.Source CreateSource(string token, SystemMessages msgs)
+        public static Stripe.Source CreateCreditCardSource(string token, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -1199,6 +1194,31 @@ namespace AfterSchoolLibrary.Billing
                 var options = new Stripe.SourceCreateOptions()
                 {
                     Type = "card",
+                    Token = token
+                };
+
+                source = GetSourceService().Create(options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Payment source was not created", MessageType.UserError);
+            }
+
+            return source;
+        }
+
+        public static Stripe.Source CreateACHSource(string token, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            Stripe.Source source = null;
+
+            try
+            {
+                var options = new Stripe.SourceCreateOptions()
+                {
+                    Type = "ach_debit",
                     Token = token
                 };
 

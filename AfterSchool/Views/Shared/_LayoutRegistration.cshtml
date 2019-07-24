@@ -17,6 +17,7 @@
 
     @Html.Raw(SessionVariables.CurrentAccount?.GetAccountProperty(AccountPropertyType.FacebookAdPixel)?.Value)
     @RenderSection("fbadevents", required: false)
+    @RenderSection("header", required: false)
 
     <style>
         .layout-footer a {

@@ -43,7 +43,7 @@
                             </p>
                             <div class="am-radio">
                                 <input type="radio" name="paymentoption" id="paymentoption-0" class="payment-option-radio" value="" checked="checked" />
-                                <label for="paymentoption-0">Pay <strong>@participationObject.GetCheckoutCostWithConvenienceFee().ToCurrency()</strong> today</label>                                
+                                <label for="paymentoption-0">Pay <strong>@participationObject.GetCheckoutCostWithConvenienceFee().ToCurrency()</strong> today</label>
                             </div>
 
                             @foreach (var plan in participationObject.PaymentPlans)
@@ -56,8 +56,8 @@
                                         {
                                             <span>
                                                 and
-                                                <strong>@(plan.TotalPeriods - 1)</strong> more payments of 
-                                                <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong> each 
+                                                <strong>@(plan.TotalPeriods - 1)</strong> more payments of
+                                                <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong> each
                                                 <strong>@plan.BillingPeriodTypeId.ToString().ToLower()</strong>
                                             </span>
                                         }
@@ -70,8 +70,9 @@
                         </div>
                     </div>
                 }
-                                
-                <div class="row padding-30">
+
+                @* Cost Table *@
+                <div class="row padding-30 hide">
                     <div class="col-md-6 col-md-offset-3">
                         <div class="table-responsive">
                             <table class="table">
@@ -95,9 +96,9 @@
                                     }
 
                                     @if (participationObject.PaymentPlans.Any())
-                                    { 
+                                    {
                                         foreach (var plan in participationObject.PaymentPlans)
-                                        {                                        
+                                        {
                                             <tr id="paymentplan-fee-row-@plan.ID" class="hide paymentplan-fee-row">
                                                 <td>Payment Plan</td>
                                                 <td class="text-right">
@@ -106,7 +107,7 @@
                                                 <td>
                                                     per
                                                     <strong>@plan.BillingPeriodTypeId.ToString().ToLower()</strong> for
-                                                    <strong>@plan.TotalPeriods</strong> 
+                                                    <strong>@plan.TotalPeriods</strong>
                                                     <strong>@plan.BillingPeriodTypeId.ToString().ToLower()s</strong>
                                                 </td>
                                             </tr>
@@ -136,7 +137,7 @@
                                         <span id="subscription-asf-value" class="hide">0</span>
                                         <span id="subscription-ccf-value" class="hide">0</span>
                                     }
-                                    
+
                                     <tr id="credit-card-transaction-fee-row" class="@(participationObject.UseStripeConnectedAccount ? "hide" : "")">
                                         <td>Credit Card Transaction Fee</td>
                                         <td class="text-right">
@@ -155,14 +156,14 @@
                                     </tr>
 
                                     @*<tr>
-                                        <td>
-                                            Coupon
-                                        </td>
-                                        <td>
-                                            <input type="text" id="coupon-code" class="form-control" value="" />
-                                            <button type="button" class="btn btn-sm btn-default" onclick="applyCoupon()">Apply</button>
-                                        </td>
-                                    </tr>*@
+                                            <td>
+                                                Coupon
+                                            </td>
+                                            <td>
+                                                <input type="text" id="coupon-code" class="form-control" value="" />
+                                                <button type="button" class="btn btn-sm btn-default" onclick="applyCoupon()">Apply</button>
+                                            </td>
+                                        </tr>*@
                                 </tbody>
                                 <tfoot>
                                     <tr>
@@ -173,26 +174,47 @@
                                         </td>
                                         <td>
                                             <p class="text-medium text-right">
-                                                <span id="dollar-prefix">$</span><span id="total-due-today"></span>
+                                                <span id="dollar-prefix">$</span><span class="total-due-today"></span>
                                             </p>
                                         </td>
                                         <td></td>
                                     </tr>
                                 </tfoot>
-                            </table>               
+                            </table>
                         </div>
 
                         <p class="text-center text-small text-muted">* Cost includes fees supporting afterschool programs for @SessionVariables.RegistrationStartPageAccount.Name</p>
                     </div>
                 </div>
 
-                <div id="payment-info" style="position:relative;">                    
+                <div id="payment-info-ach">
 
+                    @* PAY VIA ACH *@
+                    <div class="row">
+                        <div class="col-md-6 col-md-offset-3 col-sm-12 padding-30 margin-t-20">
+                            <p class="text-center text-large margin-b-20">Pay via ACH (No Transaction Fees)</p>
+
+                            <button id="plaid-button" class="btn btn-register btn-lg">
+                                Purchase via ACH -
+                                $<span id="total-due-today-ach"></span>
+                                &raquo;
+                            </button>
+
+                        </div>
+                    </div>
+
+                </div>
+
+                <hr />
+
+                <div id="payment-info" style="position:relative;">
+
+                    @* PAY VIA Existing Sources *@
                     @if (sources.Any(source => source.Card.IsNotEmpty()))
                     {
                         <div class="row">
                             <div class="col-md-6 col-md-offset-3 col-sm-12 padding-30 margin-t-20">
-                                <p class="text-center text-large">Pay using an existing card</p>
+                                <p class="text-center text-large">Pay using an existing credit card</p>
                                 <form class="form-horizontal" action="@Url.Action("payment", "account", new { id = registration.Uid })" method="post" id="existing-payment-form">
                                     <input type="hidden" name="paymentoption" id="paymentoption-existing" class="payment-option" value="0" />
                                     <input type="hidden" name="coupon" class="coupon" value="" />
@@ -217,19 +239,28 @@
                                         <p>&nbsp;</p>
                                     </div>
                                     <div class="form-group">
-                                        <button type="submit" class="btn btn-register btn-lg" id="btn-paywithexistingcard">Purchase &raquo;</button>
+                                        <button type="submit" class="btn btn-register-default btn-lg" id="btn-paywithexistingcard">
+                                            Purchase via Credit Card -
+                                            <span class="total-due-today"></span>
+                                            &raquo;
+                                        </button>
                                     </div>
                                 </form>
                             </div>
                         </div>
                     }
 
+                    @* PAY VIA NEW CC *@
                     <div class="row">
                         <div class="col-md-6 col-md-offset-3 col-sm-12 padding-30 margin-t-20">
-                            <p class="text-center text-large">Pay with a new card</p>
+                            
+                            <p class="text-center text-large">Pay with a new credit card</p>
+
                             <form action="@Url.Action("payment", "account", new { id = registration.Uid })" method="post" id="payment-form" class="form-horizontal">
+
                                 <input type="hidden" name="paymentoption" id="paymentoption-new" class="payment-option" value="0" />
                                 @*<input type="hidden" name="coupon" class="coupon" value="" />*@
+
                                 <div class="form-group">
                                     <label for="card-element">
                                         Credit or debit card
@@ -241,6 +272,7 @@
                                     <!-- Used to display Element errors. -->
                                     <div id="card-errors" role="alert"></div>
                                 </div>
+                                
                                 <div class="row">
                                     <div class="col-md-10 col-md-offset-1">
                                         <div class="am-checkbox text-center">
@@ -255,8 +287,13 @@
                                         </div>
                                     </div>
                                 </div>
+
                                 <div class="form-group padding-v-20">
-                                    <button type="button" id="btn-paywithnewcard" class="btn btn-register btn-lg">Purchase &raquo;</button>
+                                    <button type="button" id="btn-paywithnewcard" class="btn btn-register-default btn-lg">
+                                        Purchase via Credit Card -
+                                        <span class="total-due-today"></span>
+                                        &raquo;
+                                    </button>
                                 </div>
                             </form>
 
@@ -265,14 +302,20 @@
 
                     <div class="clearfix"></div>
 
+                </div>
+
+                <hr />
+
+                @* ALLOW TO PAY LATER *@
+                <div>
                     <div class="row">
                         <div class="padding-v-30 text-center">
-                            
+
                             <a href="javascript:history.go(-1)" class="text-muted">&laquo; Back</a>
 
                             @if (participationObject.AllowToPayLater)
                             {
-                                @:&bull; 
+                                @:&bull;
                                 <a href="@Url.Action("finalizeregistration", new { id = registration.Uid })" class="text-muted">
                                     Request to Pay Later
                                 </a>
@@ -280,47 +323,36 @@
 
                         </div>
                     </div>
-
-                    <div id="block-payment-info" style="position:absolute; top: 0px; left: 0px;" class="text-center padding-20 hide">
-                        <span style="vertical-align: middle; display: inline-block; line-height: 40px;" class="text-white text-medium">
-                            @paymentAccount.Name is not setup to accept online payments at this time. <br />
-                            Please pay in person via check or cash at your earliest convenience.<br /><br />
-                            <div class="am-checkbox text-medium-small">
-                                <input type="checkbox" id="payinperson" onclick="allowContinue()" />
-                                <label for="payinperson">I will pay in person</label>
-                            </div>
-                            <br />
-                            <button onclick="location.href='@Url.Action("finalizeregistration", "account", new { id = registration.Uid })'" 
-                                    class="btn btn-register btn-xl" 
-                                    id="btn-continue"
-                                    disabled="disabled">
-                                Continue Checkout &raquo;
-                            </button>
-                        </span>
-                    </div>
-
                 </div>
+
             </div>
         </div>
     </div>
 </div>
 
+
 <script src="https://js.stripe.com/v3/"></script>
+<script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
 
 <script>
     function applyCoupon() {
+
         var couponCode = $('#coupon-code').val();
         var paymentOption = $('input[name=paymentoption]:checked').val();
+
         $.get(
             '/services/validatecoupon?couponcode=' + encodeURIComponent(couponCode)+'&paymentoption='+ paymentOption,
             function (data) {
+
                 var amount = data.amount;
                 var spAmount = data.subscriptionPlanAmount;
                 var numberInMonths = data.numberInMonths;
 
                 if (data && data.status == 'ok') {
+
                     var coupon = data.coupon;
                     var totalDueToday = 0;
+
                     if (coupon.AmountTypeId === @((int)CouponAmountType.Percentage)) { // percentage coupon type
                         if (coupon.AppliesTo === @((int)CouponApplyType.SubscriptionPlan)) { // subscription plan
                             totalDueToday = amount + (spAmount * (1 - coupon.Amount));
@@ -337,8 +369,8 @@
                         }
                     }
 
-                    $("#total-due-today").text(totalDueToday.toFixed(2));
-                    $("#total-due-today").css("color", "red");
+                    $(".total-due-today").text(totalDueToday.toFixed(2));
+                    $(".total-due-today").css("color", "red");
                     $("#dollar-prefix").css("color", "red");
                     $(".coupon").val(couponCode);
                     Notifications.showBar({
@@ -348,8 +380,8 @@
                     });
                 } else {
                     $(".coupon").val('');
-                    $("#total-due-today").text((amount + spAmount).toFixed(2));
-                    $("#total-due-today").removeAttr("style");
+                    $(".total-due-today").text((amount + spAmount).toFixed(2));
+                    $(".total-due-today").removeAttr("style");
                     $("#dollar-prefix").removeAttr("style");
 
                     var items = "";
@@ -366,7 +398,9 @@
             }
         )
     }
+</script>
 
+<script>
     function allowContinue() {
         if ($('#payinperson').is(':checked')) {
             $('#btn-continue').prop('disabled', false);
@@ -377,7 +411,12 @@
 
     function updateTotals(regFee, regTotalToday) {
         let total = regFee + regTotalToday + getSubscriptionTotalValue();
-        $('#total-due-today').html(total.toFixed(2));
+        $('.total-due-today').html(total.toFixed(2));
+    }
+
+    function updateTotalsACH(regFee, regTotalToday) {
+        let total = regFee + regTotalToday + getSubscriptionTotalValueACH();
+        $('#total-due-today-ach').html(total.toFixed(2));
     }
 
     function getSubscriptionTotalValue() {
@@ -387,17 +426,27 @@
         return 0;
     }
 
+    function getSubscriptionTotalValueACH() {
+        if (!isNaN($('#subscription-total-value').html())) {
+            return parseFloat($('#subscription-total-value').html()) + parseFloat($('#subscription-asf-value').html());
+        }
+        return 0;
+    }
+
     function updatePaymentOptionCost(paymentPlanId) {
         let regTotalToday = parseFloat($('#payment-plan-cost-' + paymentPlanId).html()) + parseFloat($('#payment-plan-asf-' + paymentPlanId).html()) + parseFloat($('#payment-plan-ccf-' + paymentPlanId).html());
-        
+        let regTotalTodayACH = parseFloat($('#payment-plan-cost-' + paymentPlanId).html()) + parseFloat($('#payment-plan-asf-' + paymentPlanId).html());
+
         $('#registration-fee-row').addClass('hide');
         $('.paymentplan-fee-row').addClass('hide');
 
         if (paymentPlanId == 0) {
             updateTotals(getRegFee(), 0);
+            updateTotalsACH(getRegFeeACH(), 0);
             $('#registration-fee-row').removeClass('hide');
         } else {
             updateTotals(0, regTotalToday);
+            updateTotalsACH(0, regTotalTodayACH);
             $('#paymentplan-fee-row-' + paymentPlanId).removeClass('hide');
         }
     }
@@ -405,9 +454,17 @@
     function getRegFee() {
         if (!isNaN($('#fee-total-value').html())) {
             return parseFloat($('#fee-total-value').html()) + parseFloat($('#fee-ccf').html()) + parseFloat($('#fee-asf').html());
-        } else {
-            return 0;
         }
+
+        return 0;
+    }
+
+    function getRegFeeACH() {
+        if (!isNaN($('#fee-total-value').html())) {
+            return parseFloat($('#fee-total-value').html()) + parseFloat($('#fee-asf').html());
+        }
+
+        return 0;
     }
 
     function sizePaymentBlock() {
@@ -422,7 +479,7 @@
     }
 
     function unapplyCoupon() {
-        $("#total-due-today").removeAttr("style");
+        $(".total-due-today").removeAttr("style");
         $("#dollar-prefix").removeAttr("style");
         $("#coupon-code").val('');
         $(".coupon").val('');
@@ -443,6 +500,19 @@
         $('#fee-asf-text').html('$' + newasf.toFixed(2));
     }
 
+    function updatePaymentFeesACH(paymentPlanId) {
+        var newasf = parseFloat($('#payment-plan-asf-' + paymentPlanId).html());
+
+        if (!isNaN($('#subscription-total-value').html())) {
+            newasf += parseFloat($('#subscription-asf-value').html());
+        }
+
+        $('#fee-asf').html(newasf);
+        $('#fee-asf-text').html('$' + newasf.toFixed(2));
+    }
+</script>
+
+<script>
     PageEvent.add(PageEvent.AFTER_INIT, function () {
 
         $(window).on('resize', function () {
@@ -460,20 +530,23 @@
             let paymentPlanId = $(this).attr('id').split('-')[1];
 
             updatePaymentFees(paymentPlanId);
+            updatePaymentFeesACH(paymentPlanId);
             updatePaymentOptionCost(paymentPlanId);
             unapplyCoupon();
-            
+
         });
-        
+
         updatePaymentFees(0);
+        updatePaymentFeesACH(0);
 
         @if (participationObject.PaymentPlans.Any())
-        { 
+        {
             @: updatePaymentOptionCost(0);
         }
         else
         {
             @: updateTotals(getRegFee(), 0);
+            @: updateTotalsACH(getRegFeeACH(), 0);
         }
 
         $('#existing-payment-form').submit(function () {
@@ -481,6 +554,11 @@
             $('#btn-paywithexistingcard').prop('disabled', true);
             $('#btn-paywithnewcard').prop('disabled', true);
         });
+    });
+</script>
+
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
 
         $('#btn-paywithnewcard').click(function () {
 
@@ -488,12 +566,7 @@
             $('#btn-paywithnewcard').prop('disabled', true);
             $('#btn-paywithexistingcard').prop('disabled', true);
 
-          //  console.log('clicked pay');
-
             stripe.createToken(card).then(function (result) {
-
-            //    console.log('result: ');
-                console.log(result);
 
                 if (result.error) {
                     // Inform the customer that there was an error.
@@ -501,7 +574,9 @@
                     errorElement.textContent = result.error.message;
                     $('#btn-paywithnewcard').html('Review Purchase');
                     $('#btn-paywithnewcard').prop('disabled', false);
+
                 } else {
+
                     // Send the token to your server.
                     stripeTokenHandler(result.token);
                 }
@@ -545,4 +620,42 @@
             form.submit();
         }
     });
+</script>
+
+<script>
+    var linkHandler = Plaid.create({
+        env: 'sandbox',
+        clientName: 'AfterSchool HQ',
+        key: '@AfterSchoolLibrary.Helpers.PlaidHelper.PublicKey',
+        product: ['auth'],
+        selectAccount: true,
+        onSuccess: function (public_token, metadata) {
+            // Send the public_token and account ID to your app server
+            $('#plaid-button').html('Processing Payment...'); 
+            $('#plaid-button').prop('disabled', true);
+            $('#btn-paywithnewcard').prop('disabled', true);
+            $('#btn-paywithexistingcard').prop('disabled', true);
+
+            plaidTokenHandler(public_token, metadata.account_id)
+        },
+        onExit: function (err, metadata) {
+            // The user exited the Link flow.
+            if (err != null) {
+                // The user encountered a Plaid API error prior to exiting.
+            }
+        },
+    });
+
+    function plaidTokenHandler(token, accountId) {
+        // Insert the token ID into the form so it gets submitted to the server
+        var form = $('#payment-form');
+        form.append('<input type="hidden" name="plaidtoken" value="' + token + '" />')
+        form.append('<input type="hidden" name="plaidaccountid" value="' + accountId + '" />')
+        form.submit();
+    }
+
+    // Trigger the Link UI
+    document.getElementById('plaid-button').onclick = function () {
+        linkHandler.open();
+    };
 </script>
