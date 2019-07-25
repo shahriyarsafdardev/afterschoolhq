@@ -1036,7 +1036,6 @@ namespace AfterSchoolLibrary.Services
 
                         // setup schedule
                         if (amsgs.HasNoErrors() && (schedule.IsNotEmpty() || scheduledates.IsNotEmpty()))
-                        {
                             amsgs.AddRange(activity.SetupSchedule(
                                 account,
                                 schedule.IfEmpty(""),
@@ -1051,20 +1050,16 @@ namespace AfterSchoolLibrary.Services
                                 isongoing.IfEmpty(""),
                                 loggedInUserId,
                                 adc));
-                        }
 
                         //setup initial activityProperties
                         if (amsgs.HasNoErrors())
-                        {
                             amsgs.AddRange(activity.SetupActivityProperties(
                                 registrationthankyouemail.IfEmpty(null),
                                 applicationthankyouemail.IfEmpty(null),
                                 loggedInUserId,
                                 adc));
-                        }
 
                         if (amsgs.HasNoErrors() && instructor.IsNotEmpty())
-                        {
                             amsgs.AddRange(activity.SetupInstructor(
                                 account,
                                 instructor.IfEmpty(""),
@@ -1075,7 +1070,6 @@ namespace AfterSchoolLibrary.Services
                                 loggedInUserId,
                                 adc
                                 ));
-                        }
 
                         //setup location
                         if (amsgs.HasNoErrors() && (location.IsNotEmpty() || locationname.IsNotEmpty()))
@@ -1102,8 +1096,7 @@ namespace AfterSchoolLibrary.Services
                         }
                        
                         //setup provider
-                        if (amsgs.HasNoErrors() && (provider.IsNotEmpty() || providername.IsNotEmpty()))
-                        {
+                        if (amsgs.HasNoErrors() && activity.LeaderTypeId == ActivityLeaderType.ExternalProvider && (provider.IsNumber() || providername.IsNotEmpty()))
                             amsgs.AddRange(activity.SetupProvider(
                                 account,
                                 provider.IfEmpty(""),
@@ -1113,13 +1106,10 @@ namespace AfterSchoolLibrary.Services
                                 provideremail.IfEmpty(""),
                                 providerphone.IfEmpty(""),
                                 loggedInUserId,
-                                adc
-                                ));
-                        }
+                                adc));
 
                         //setup SubscriptionPlan
                         if (amsgs.HasNoErrors() && hassubscriptionplan != null && hassubscriptionplan.ToString().IsBoolean())
-                        {
                             amsgs.AddRange(activity.SetupSubscriptionPlan(
                                 account,
                                 hassubscriptionplan.IfEmpty(""),
@@ -1128,11 +1118,9 @@ namespace AfterSchoolLibrary.Services
                                 loggedInUserId,
                                 adc
                             ));
-                        }
 
                         //setup PaymentPlan
                         if (amsgs.HasNoErrors() && haspaymentplan != null && haspaymentplan.ToString().IsBoolean())
-                        {
                             amsgs.AddRange(activity.SetupPaymentPlan(
                                 account,
                                 haspaymentplan.IfEmpty(""),
@@ -1142,7 +1130,6 @@ namespace AfterSchoolLibrary.Services
                                 loggedInUserId,
                                 adc
                             ));
-                        }
                     },
                     onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
@@ -1387,20 +1374,27 @@ namespace AfterSchoolLibrary.Services
                 providerAccount = Account.Load(provider.ToInteger(), msgs, dc);
             else
             {
+                var providerMsgs = new SystemMessages();
+
                 if (providername.IsEmpty())
-                    msgs.Add("Provider Organization or Program is required", MessageType.UserError);
+                    providerMsgs.Add("Provider Organization or Program is required", MessageType.UserError);
 
                 if (providerfirstname.IsEmpty())
-                    msgs.Add("Provider First Name is required", MessageType.UserError);
+                    providerMsgs.Add("Provider First Name is required", MessageType.UserError);
 
                 if (providerlastname.IsEmpty())
-                    msgs.Add("Provider Last Name is required", MessageType.UserError);
+                    providerMsgs.Add("Provider Last Name is required", MessageType.UserError);
 
                 if (!provideremail.IsEmail())
-                    msgs.Add("Provider Email is required", MessageType.UserError);
+                    providerMsgs.Add("Provider Email is required", MessageType.UserError);
 
                 if (providerphone.IsNotEmpty() && !providerphone.IsPhone())
-                    msgs.Add("Please enter a valid phone number", MessageType.UserError);
+                    providerMsgs.Add("Please enter a valid phone number", MessageType.UserError);
+
+                if (providerMsgs.Count >= 4)
+                    msgs.Add("Provider Information is required", MessageType.UserError);
+                else
+                    msgs.AddRange(providerMsgs);
 
                 if (msgs.HasNoErrors())
                 {
@@ -1424,7 +1418,7 @@ namespace AfterSchoolLibrary.Services
                         firstName: providerfirstname,
                         lastName: providerlastname,
                         email: provideremail,
-                        phone: providerphone,
+                        phone: null,
                         userType: UserType.Owner,
                         loggedInUser: loggedInUser,
                         msgs: msgs,

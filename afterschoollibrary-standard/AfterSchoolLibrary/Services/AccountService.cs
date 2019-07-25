@@ -418,51 +418,68 @@ namespace AfterSchoolLibrary.Services
 
         public static WebUser AddUser(this Account account, string firstName, string lastName, string email, UserType userType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.AddUser(firstName, lastName, email, null, null, false, true, false, userType, false, loggedInUser, msgs, dc: dc);
+            return account.AddUser(firstName, lastName, email, null, null, false, true, false, userType, true, loggedInUser, msgs, dc: dc);
         }
 
         public static WebUser AddUser(this Account account, string firstName, string lastName, string email, string phone, UserType userType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.AddUser(firstName, lastName, email, phone, null, false, false, false, userType, false, loggedInUser, msgs, dc: dc);
+            return account.AddUser(firstName, lastName, email, phone, null, false, false, false, userType, true, loggedInUser, msgs, dc: dc);
         }
 
-        public static WebUser AddUser(this Account account, string firstName, string lastName, string email, string phone, UserType userType, bool forceNewUser, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static WebUser AddUser(this Account account, string firstName, string lastName, string email, string phone, UserType userType, bool canUseExistingUserAccount, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.AddUser(firstName, lastName, email, phone, null, false, false, false, userType, forceNewUser, loggedInUser, msgs, dc: dc);
+            return account.AddUser(firstName, lastName, email, phone, null, false, false, false, userType, canUseExistingUserAccount, loggedInUser, msgs, dc: dc);
         }
 
-        public static WebUser AddUser(this Account account, string firstName, string lastName, string email, string phone, string password, bool isActive, bool isRegistered, bool isVerified, UserType userType, bool forceNewUser, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static WebUser AddUser(this Account account, string firstName, string lastName, string email, string phone, string password, bool isActive, bool isRegistered, bool isVerified, UserType userType, bool canUseExistingUserAccount, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             WebUser user = null;
+            var userExists = false;
+
+            if (!canUseExistingUserAccount)
+            {
+                if (WebUser.ExistsByEmail(email.Trim(), msgs, dc))
+                {
+                    msgs.Add("Email is already in use", MessageType.UserError);
+                    userExists = true;
+                }
+                else if (phone.IsNotEmpty() && WebUser.ExistsByPhone(phone.Trim(), msgs, dc))
+                {
+                    msgs.Add("Phone is already in use", MessageType.UserError);
+                    userExists = true;
+                }
+            }
 
             Database.ExecuteTransaction(
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    if (!WebUser.ExistsByEmail(email.Trim(), amsgs, adc))
+                    if (!userExists)
                     {
-                        user = new WebUser();
-                        user.FirstName = firstName.Trim();
-                        user.LastName = lastName.Trim();
-                        user.Email = email.Trim();
-                        user.Phone = phone.IfBlank("").Trim();
-                        user.Username = WebUserService.GenerateUsername(firstName, lastName, amsgs, adc);
+                        user = new WebUser
+                        {
+                            FirstName = firstName.Trim(),
+                            LastName = lastName.Trim(),
+                            Email = email.Trim(),
+                            Phone = phone.IfBlank("").Trim(),
+                            CreateDate = DateTime.Now,
+                            LastModifiedDate = DateTime.Now,
+                            CreatedBy = loggedInUser?.ID.IfEmpty(0),
+                            LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
+                            IsActive = isActive,
+                            IsRegistered = isRegistered,
+                            VerifiedAccount = isVerified,
+                            Uid = Guid.NewGuid(),
+                            Username = WebUserService.GenerateUsername(firstName, lastName, amsgs, adc)
+                        };
 
                         if (!password.IsEmpty())
                             user.Password = WebUserService.EncryptPassword(password);
 
-                        user.CreateDate = user.LastModifiedDate = DateTime.Now;
-                        user.CreatedBy = user.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
-                        user.IsActive = isActive;
-                        user.IsRegistered = isRegistered;
-                        user.VerifiedAccount = isVerified;
-                        user.Uid = Guid.NewGuid();
                         amsgs.AddRange(user.Save(adc));
                     }
-                    else if (!forceNewUser)
+                    else if (canUseExistingUserAccount)
                         user = WebUser.LoadByEmail(email.Trim(), amsgs, adc);
-                    else
-                        msgs.Add("Email is already in use", MessageType.UserError);
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
@@ -481,7 +498,16 @@ namespace AfterSchoolLibrary.Services
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var user = account.AddUser(firstName, lastName, email, phone, userType, true, loggedInUser, msgs, dc);
+            var user = account.AddUser(
+                firstName: firstName, 
+                lastName: lastName, 
+                email: email, 
+                phone: phone, 
+                userType: userType, 
+                canUseExistingUserAccount: false, 
+                loggedInUser: loggedInUser, 
+                msgs: msgs, 
+                dc: dc);
 
             if (msgs.HasNoErrors())
                 msgs.AddRange(account.SendInvitedEmail(user, loggedInUser, message, dc));
