@@ -79,16 +79,14 @@ namespace AfterSchool.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        user = WebUserService.CreateNew(
+                        user = WebUserService.CreateNewWithNoPhone(
                             firstName: model.FirstName,
                             lastName: model.LastName,
                             email: model.Email,
-                            phone: null,
                             password: model.Password2,
                             isActive: true,
                             isRegistered: true,
                             isVerified: false,
-                            allowTextMessages: false,
                             loggedInUser: null,
                             msgs: amsgs,
                             dc: adc);
