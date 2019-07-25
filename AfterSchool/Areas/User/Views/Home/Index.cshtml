@@ -10,8 +10,14 @@
     var activitiesRequiringAttention = (List<RegistrantActivity>)ViewBag.ActivitiesRequiringAttention;
     var showToDos = activitiesRequiringAttention.Any() || Model.Any(registrant => registrant.ProfileStatusId != RegistrantProfileStatus.Completed);
     var showProviders = providers.Any();
-    var showLeftColumn = showToDos || showProviders;
+    var showRightColumn = showToDos || showProviders;
+    var showLeftColumn = activityInstances.Any();
     var upcomingDivClass = "col-md-12 col-lg-6";
+
+    if (!showRightColumn)
+    {
+        upcomingDivClass = "col-md-12 col-lg-8 col-lg-offset-2";
+    }
 
     if (!showLeftColumn)
     {
@@ -23,23 +29,26 @@
 
 <div class="main-content">
 
-    <div class="@upcomingDivClass">
-        @if (activityInstances.Count > 0)
-        {
-            foreach (var activityInstance in activityInstances)
-            {
-                Html.RenderPartial("Schedule/_BrowseActivityInstance", activityInstance);
-            }
-
-            <div class="text-medium-small text-center hide">
-                <a href="@Url.Action("index", "schedule")">View More &raquo;</a>
-            </div>
-        }
-    </div>
-
     @if (showLeftColumn)
     {
-        <div class="col-md-12 col-lg-6">
+        <div class="@upcomingDivClass">
+            @if (activityInstances.Any())
+            {
+                foreach (var activityInstance in activityInstances)
+                {
+                    Html.RenderPartial("Schedule/_BrowseActivityInstance", activityInstance);
+                }
+
+                <div class="text-medium-small text-center hide">
+                    <a href="@Url.Action("index", "schedule")">View More &raquo;</a>
+                </div>
+            }
+        </div>
+    }
+
+    @if (showRightColumn)
+    {
+        <div class="@upcomingDivClass">
 
             @if (showToDos)
             {
