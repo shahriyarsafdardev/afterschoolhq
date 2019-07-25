@@ -83,7 +83,7 @@ namespace AfterSchool.Controllers
                             firstName: model.FirstName,
                             lastName: model.LastName,
                             email: model.Email,
-                            phone: model.OrgPhone,
+                            phone: null,
                             password: model.Password2,
                             isActive: true,
                             isRegistered: true,

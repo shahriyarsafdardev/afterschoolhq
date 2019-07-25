@@ -8,11 +8,11 @@
     }
 }
 
-@helper RenderAccountType(AccountType accountType)
+@helper RenderAccountType(AccountType accountType, bool? selected)
 {
     var checkedString = "";
 
-    if (accountType == Model.OrgType)
+    if (accountType == Model.OrgType || (selected.HasValue && selected.Value))
     {
         checkedString = "checked=\"checked\"";
     }
@@ -41,14 +41,14 @@
         </div>
     </div>
     
-    <div class="form-group">
+    <div class="form-group @(Model.InviteCodeToShare.IsNotEmpty() ? "hide" : "")">
         <div class="text-center">
             <p class="text-medium-small">
                 Choose your organization type
             </p>
 
-            @RenderAccountType(AccountType.ActivityProvider)
-            @RenderAccountType(AccountType.School)
+            @RenderAccountType(AccountType.ActivityProvider, Model.InviteCodeToShare.IsNotEmpty() ? true : new bool?())
+            @RenderAccountType(AccountType.School, null)
 
         </div>
     </div>
