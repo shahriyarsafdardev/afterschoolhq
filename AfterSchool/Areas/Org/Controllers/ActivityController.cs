@@ -368,7 +368,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditContact(string id, string leadertype, string contactname, string contactphone, string contactemail, string instructor, string instructorfirstname, string instructorlastname, string instructoremail, string instructorphone, string cmd)
+        public ActionResult EditContact(string id, string leadertype, string contactname, string contactphone, string contactemail, string instructor, string instructorfirstname, string instructorlastname, string instructoremail, string instructorphone, string cmd, string provider, string providername, string providerfirstname, string providerlastname, string provideremail, string providerphone)
         {
             var msgs = new SystemMessages();
             Activity activity = null;
@@ -383,7 +383,13 @@ namespace AfterSchool.Areas.Org.Controllers
                 { "instructorfirstname", instructorfirstname },
                 { "instructorlastname", instructorlastname },
                 { "instructoremail", instructoremail },
-                { "instructorphone", instructorphone }
+                { "instructorphone", instructorphone },
+                { "provider", provider },
+                { "providername", providername },
+                { "providerfirstname", providerfirstname },
+                { "providerlastname", providerlastname },
+                { "provideremail", provideremail },
+                { "providerphone", providerphone }
             };
 
             activity = Activity.LoadByUid(id.ToGuid(), msgs);
@@ -743,7 +749,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditCost(string id, string cost, string costdescription, string acceptpaypal, string acceptcreditcard, string allowtopaylater, string cmd, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, string provider, string providername, string providerfirstname, string providerlastname, string provideremail, string providerphone)
+        public ActionResult EditCost(string id, string cost, string costdescription, string acceptpaypal, string acceptcreditcard, string allowtopaylater, string cmd, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber)
         {
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid());
@@ -763,13 +769,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "haspaymentplan", haspaymentplan.IfBlank("0") },
                     { "paymentplancost", paymentplancost },
                     { "paymentplanperiod", paymentplanperiod },
-                    { "paymentplanperiodnumber", paymentplanperiodnumber },
-                    { "provider", provider },
-                    { "providername", providername },
-                    { "providerfirstname", providerfirstname },
-                    { "providerlastname", providerlastname },
-                    { "provideremail", provideremail },
-                    { "providerphone", providerphone }
+                    { "paymentplanperiodnumber", paymentplanperiodnumber }
                 };
 
                 activity = ActivityService.EditExisting(

@@ -93,20 +93,6 @@
     </div>
 </div>
 
-<div id="provider-info" class="hide">
-    @if (Model.LeaderTypeId == ActivityLeaderType.ExternalProvider)
-    {
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                External Provider Information
-            </div>
-            <div class="panel-body">
-                @{ Html.RenderPartial("~/Views/Shared/Components/_ProviderAddOrEdit.cshtml", null, new ViewDataDictionary() { { "ProviderAccountId", Model.ProviderAccountId } }); }
-            </div>
-        </div>
-    }
-</div>
-
 <div id="advanced-settings-container" class="hide">
 
     <div class="col-md-offset-3 col-md-9 padding-v-30">
@@ -270,6 +256,7 @@
 
         $('#do-parents-pay-no').click(function () {
             showTuitionCosts();
+            $('#cost').val(0);
         })
 
         if ('@Model.IsFree' == '@false') {
