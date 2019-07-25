@@ -52,19 +52,19 @@
         </div>
         <div class="panel-body">
             @{ Html.RenderPartial(
-                       "~/Views/Shared/_Activities.cshtml",
-                       Model,
-                       new ViewDataDictionary() {
-                            { "Account", SessionVariables.CurrentAccount },
-                            { "AccountPackage", SessionVariables.AccountPackage },
-                            { "PagingModel", ViewBag.PagingModel },
-                            { "ShowRegistrationPeriodFilter", true },
-                            { "Groups", ViewBag.Groups },
-                            { "Group", ViewBag.Group },
-                            { "NeedToUpgrade", needToUpgrade },
-                            { "HasArchivedActivities", hasArchivedActivities }
-                           }
-                       ); }
+                "~/Views/Shared/_Activities.cshtml",
+                Model,
+                new ViewDataDictionary() {
+                    { "Account", SessionVariables.CurrentAccount },
+                    { "AccountPackage", SessionVariables.AccountPackage },
+                    { "PagingModel", ViewBag.PagingModel },
+                    { "ShowRegistrationPeriodFilter", true },
+                    { "Groups", ViewBag.Groups },
+                    { "Group", ViewBag.Group },
+                    { "NeedToUpgrade", needToUpgrade },
+                    { "HasArchivedActivities", hasArchivedActivities }
+                    }
+                ); }
         </div>
     </div>
 </div>

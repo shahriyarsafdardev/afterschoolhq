@@ -43,6 +43,7 @@ namespace AfterSchoolLibrary.Models
 		public bool AccountIsAdminAccount { get { return (bool)MDV["AccountIsAdminAccount"].Value; } }
 		public DateTime? AccountCreateDate { get { return (DateTime?)MDV["AccountCreateDate"].Value; } }
 		public bool AccountIsActive { get { return (bool)MDV["AccountIsActive"].Value; } }
+		public AccountType AccountAccountTypeId { get { return (AccountType)MDV["AccountAccountTypeId"].Value; } }
 		
 
         public AccountWebUser()
@@ -81,6 +82,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "AccountIsAdminAccount", typeof(Account).Name, "IsAdminAccount", System.Data.SqlDbType.Bit, "Account");
 				_dp.Add(className, "AccountCreateDate", typeof(Account).Name, "CreateDate", System.Data.SqlDbType.DateTime, "Account");
 				_dp.Add(className, "AccountIsActive", typeof(Account).Name, "IsActive", System.Data.SqlDbType.Bit, "Account");
+				_dp.Add(className, "AccountAccountTypeId", typeof(Account).Name, "AccountTypeId", System.Data.SqlDbType.Int, "Account");
 				
                 return _dp;
             }

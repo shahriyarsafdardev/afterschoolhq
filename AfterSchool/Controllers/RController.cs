@@ -60,19 +60,7 @@ namespace AfterSchool.Controllers
 
             if (account.IsNotEmpty())
             {
-                participationObjects.AddRange(account.GetPublishedActivities(msgs).Select(activity => activity.GetParticipationObject(msgs)));
-
-                var hostedLocationIds = account.GetHostedLocations(msgs).Select(location => location.ID.Value).ToList();
-                account.GetApprovedVisitorAccounts(msgs).ForEach(visitor =>
-                {
-                    participationObjects.AddRange(
-                        visitor.GetPublishedActivitiesInLocations(hostedLocationIds, msgs)
-                            .Select(activity =>  activity.GetParticipationObject(msgs))
-                            .DistinctBy(participationObject => new { participationObject.ObjectID, participationObject.ObjectType }));
-                });
-
-                participationObjects.AddRange(account.GetPublishedExternalLeagues(msgs).Select(x => x.GetParticipationObject(msgs)));
-                participationObjects.AddRange(account.GetPublishedSessions(msgs).Select(x => x.GetParticipationObject(msgs)));
+                participationObjects.AddRange(account.GetPublishedParticipationObjects(msgs));
                 locations.AddRange(account.GetAllAvailableLocations(msgs));
             }
             else
@@ -118,18 +106,27 @@ namespace AfterSchool.Controllers
             return (accountName, accountUniqueName);
         }
 
-        public ActionResult Activity(string accountname, string activitytype, string activityname)
+        public ActionResult Activity(string accountname, string activitytype, string activityname, string preview)
         {
             RestartRegistrationSession();
 
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
             ParticipationObject participationObject = null;
+            var canPublishActivity = false;
 
             if (account.IsNotEmpty())
             {
                 var activity = AfterSchoolLibrary.Models.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
                 participationObject = activity.GetParticipationObject(msgs);
+
+                if (!activity.IsPublished && activity.GetLocation().HostAccountId != activity.AccountId)
+                {
+                    var accountOwnerId = activity.GetLocation().GetHostAcount().OwnerId;
+
+                    if (SessionVariables.CurrentUser.ID == accountOwnerId)
+                        canPublishActivity = true;
+                }
             }
             else
             {
@@ -148,6 +145,7 @@ namespace AfterSchool.Controllers
 
             ViewBag.Messages = msgs;
             ViewBag.Account = account;
+            ViewBag.CanPublishActivity = canPublishActivity;
 
             return View(participationObject);
         }
@@ -229,7 +227,10 @@ namespace AfterSchool.Controllers
             if (SessionVariables.CurrentRegistrant.IsEmpty())
                 return RedirectToAction("getstarted", "account", new { area = "", regaccount = account.Uid });
 
-            return RedirectToAction("register", "account", new { area = "", regaccount = account.Uid });
+            if (SessionVariables.CurrentRegistrant.IsParentOrGuardian)
+                return RedirectToAction("register", "account", new { area = "", regaccount = account.Uid });
+
+            return RedirectToAction("registerstudent", "account", new { area = "", regaccount = account.Uid });
         }
     }
 }

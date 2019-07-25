@@ -82,6 +82,7 @@ property: ActivityTypeId, ActivityType, Int, required
 property: DateSubmittedToActivityGroup, DateTime?, DateTime, , Used to track when a team has been submitted to a league
 property: AccountActivityGroupId, int?, Int, , When a activity is part of a league that is from an external source (such as a team) then it should be linked to the account version of that league
 property: LeaderTypeId, ActivityLeaderType, Int, , Track what kind of leader it is - internal or external
+property: RequiresParentalConsent, bool, Bit, , let us know whether the parent needs to consent
 -property: AllowPreRegistration, bool, Bit
 -property: RegistrationTimeZone, string, NVarChar "30"
 -property: AcceptPayPal, bool, Bit
@@ -276,6 +277,8 @@ property: AccountId, int?, Int, required
 property: DateSent, DateTime?, DateTime
 property: Subject, string, NVarChar "150"
 property: Body, string, Text
+property: Uid, Guid, UniqueIdentifier
+property: SendToStaff, bool, Bit
 join: Activity.ID, ActivityId, LeftOuterJoin
 join: ActivityGroup.ID, ActivityGroupId, LeftOuterJoin
 join: Account.ID, AccountId, InnerJoin
@@ -284,6 +287,7 @@ joinproperty: ActivityGroup.Name, string, NVarChar
 joinproperty: Account.Name, string, NVarChar
 loadmethod: ActivityId, List<>
 loadmethod: ActivityGroupId, List<>
+loadmethod: Uid
 [end]
 
 [begin]
@@ -505,6 +509,7 @@ joinproperty: Account.OwnerId, int?, Int
 joinproperty: Account.IsAdminAccount, bool, Bit
 joinproperty: Account.CreateDate, DateTime?, DateTime
 joinproperty: Account.IsActive, bool, Bit
+joinproperty: Account.AccountTypeId, AccountType, Int
 loadmethod: AccountId, List<>
 loadmethod: WebUserId, List<>
 loadmethod: AccountId|WebUserId
@@ -653,6 +658,7 @@ property: FirstRegistrantId, int?, Int
 property: IsParentOrGuardian, bool, Bit
 property: AllowTextMessages, bool, Bit
 property: SchoolLocationId, int?, Int, , The location id of the school the registrant is attending
+property: ProfileStatusId, RegistrantProfileStatus, Int, , The status of the profile - completed, started, out of date
 loadmethod: AccountId, List<>
 loadmethod: ParentRegistrantId, List<>
 loadmethod: AccountId|RegistrantTypeId, List<>
@@ -662,6 +668,18 @@ loadmethod: WebUserId, List<>
 loadmethod: WebUserId|IsMaster, List<>
 loadmethod: FirstRegistrantId, List<>
 loadmethod: ParentRegistrantId|AccountId, List<>
+[end]
+
+[begin]
+type: Class
+name: RegistrantWebUser
+description: Maintains the relationship between a Registrant and Webuser. Meaning a Registrant can be accessed by multiple WebUsers
+inherits: BasicObject
+property: RegistrantId, int?, Int, required
+property: WebUserId, int?, Int, required
+loadmethod: RegistrantId, List<>
+loadmethod: WebUserId, List<>
+loadmethod: RegistrantId|WebUserId
 [end]
 
 [begin]
@@ -1335,6 +1353,11 @@ property: RegistrantId, int?, Int, required
 property: StartDate, DateTime?, DateTime, required
 property: StripeSubscriptionId, string, NVarChar "50"
 property: StripeCustomerId, string, NVarChar "50"
+property: Amount, decimal?, Money
+property: ConvenienceFee, decimal?, Money
+property: PaymentTypeFee, decimal?, Money
+property: PaymentTypeFeesPaidBy, FeesPaidByType, Int
+property: ConvenienceFeesPaidBy, FeesPaidByType, Int
 loadmethod: PurchaseId, List<>
 loadmethod: RegistrantId, List<>
 loadmethod: SubscriptionPlanId, List<>
@@ -1363,6 +1386,7 @@ property: TransactionTypeId, TransactionType, Int, required
 property: StripeChargeOrRefundId, string, NVarChar "50"
 property: PaymentSourceTypeId, PaymentSourceType, Int
 property: OriginalTransactionId, int?, Int
+property: PayoutId, int?, Int, , If associated to a payout then it cannot be requested for another payout
 property: PlatformPercentFee, decimal?, Decimal "10,2", , deprecated
 property: PlatformFlatFee, decimal?, Decimal "10,2", , deprecated
 loadmethod: BillerAccountId, List<>
@@ -1372,6 +1396,7 @@ loadmethod: BillerAccountId|TransactionTypeId, List<>
 loadmethod: PayerAccountId|TransactionTypeId, List<>
 loadmethod: StripeChargeOrRefundId
 loadmethod: OriginalTransactionId, List<>
+loadmethod: PayoutId, List<>
 [end]
 
 [begin]
@@ -1386,6 +1411,7 @@ property: PayoutStatusId, PayoutStatus, Int, required
 property: PaymentTypeId, PaymentType, Int, required
 property: DateRequested, DateTime?, DateTime, required
 property: RequestedBy, int?, Int, required
+property: ExternalPayoutId, string, NVarChar "100", , a place to store the check id or stripe payout id
 loadmethod: AccountId, List<>
 loadmethod: AccountId|PayoutStatusId, List<>
 loadmethod: PayoutStatusId, List<>
@@ -1506,6 +1532,31 @@ loadmethod: CouponId, List<>
 [end]
 
 [begin]
+type: Class
+name: TwilioSMS
+description: Store information about messages sent via text
+inherits: BasicObjectWithModified
+property: ActivityMessageId, int?, Int, , We can make sure we don't send the same message to the same person even if they have 2 kids in the same class
+property: RegistrantId, int?, Int, , The master registrant that receives the message
+property: SendingAccountId, int?, Int
+property: SenderId, int?, Int
+property: TwilioResourceId, string, NVarChar "50"
+property: TwilioStatus, string, NVarChar "20"
+loadmethod: TwilioResourceId
+loadmethod: RegistrantId|ActivityMessageId
+loadmethod: RegistrantId, List<>
+[end]
+
+[begin]
+type: Class
+name: Migration
+description: Store migration history
+inherits: BasicObject
+property: UniqueIdentifier, string, NVarChar "50", required
+loadmethod: UniqueIdentifier
+[end]
+
+[begin]
 type: Enum
 name: CouponAmountType
 values: NotSet, Percentage, FlatAmount
@@ -1598,7 +1649,7 @@ values: NotSet, Register, Apply
 [begin]
 type: Enum
 name: RegistrationAssignmentType
-values: NotSet, Reserved, WaitingList, Applied, Invited, Declined, ReservedPendingPayment
+values: NotSet, Reserved, WaitingList, Applied, Invited, Declined, ReservedPendingPayment, ReservedPendingParentalConsent
 [end]
 
 [begin]
@@ -1724,7 +1775,7 @@ values: NotSet, InSession, OutOfSession
 [begin]
 type: Enum
 name: RegistrationCompletionStatus
-values: NotSet, Started, Completed, RequiresParentSignature
+values: NotSet, Started, Completed, RequiresParentSignature, Signed
 [end]
 
 [begin]
@@ -1755,4 +1806,16 @@ values: NotSet, StaffMember, Student, ExternalProvider
 type: Enum
 name: BankAccountType
 values: NotSet, BusinessChecking, PersonalChecking, PersonalSavings
+[end]
+
+[begin]
+type: Enum
+name: RegistrantProfileStatus
+values: NotSet, Started, OutOfDate, Completed
+[end]
+
+[begin]
+type: Enum
+name: ActivityMessageReason
+values: NotSet, ActivityCancellationNotice, AttendanceNotice, BehaviorNotice, GeneralUpdate, LatePickUpAlert, UrgentUpdate
 [end]

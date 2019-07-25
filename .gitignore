@@ -9,9 +9,8 @@ Uploads
 *.orig
 # *.dll
 # *.dll.config
-AfterSchool/bin/BasicLibrary.*
-AfterSchool/bin/AfterSchoolLibrary.*
-AfterSchool/bin/AfterSchool.*
+AfterSchool/bin
+packages
 UpgradeLog.htm
 
 .vs

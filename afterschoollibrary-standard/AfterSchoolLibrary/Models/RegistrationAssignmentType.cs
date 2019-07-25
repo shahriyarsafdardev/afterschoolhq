@@ -6,5 +6,6 @@ public enum RegistrationAssignmentType
 	Applied,
 	Invited,
 	Declined,
-	ReservedPendingPayment
+	ReservedPendingPayment,
+	ReservedPendingParentalConsent
 }

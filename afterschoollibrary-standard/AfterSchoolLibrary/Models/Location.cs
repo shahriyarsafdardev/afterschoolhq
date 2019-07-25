@@ -191,19 +191,23 @@ namespace AfterSchoolLibrary.Models
 
 		#region "UserDefined"
 
-        public static List<Location> Search(string query, int? start, int? length, SystemMessages msgs, DatabaseConnection dc = null)
+        public static List<Location> Search(string query, LocationType? locationType, int? start, int? length, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
 
             var sql = $@"
-                    select * from Location
+                    select * 
+                    from Location
                     where 
                         (
                             Contains(name, '{"\""}{query.Split(' ').ToStringList("*\" AND \"")}{"*\""}') or
                             Contains(address1,'{"\""}{query.Split(' ').ToStringList("*\" AND \"")}{"*\""}')
                         ) and IsTest = 0
                 ";
+
+            if (locationType.HasValue && locationType.Value != LocationType.NotSet)
+                sql += $@" and LocationTypeId = {(int)locationType.Value}";
             
            return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }

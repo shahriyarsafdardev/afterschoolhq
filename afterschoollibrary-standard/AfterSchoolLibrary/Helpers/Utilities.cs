@@ -27,6 +27,17 @@ namespace AfterSchoolLibrary.Helpers
             return BaseUrl(isAfterSchool) + "/paypal/notification/";
         }
 
+        public static string Environment
+        {
+            get
+            {
+                if (!IsLocalHost)
+                    return ConfigurationManager.AppSettings["NET_ENV"];
+
+                return "Local";
+            }
+        }
+
         public static bool IsProduction
         {
             get
@@ -189,7 +200,7 @@ namespace AfterSchoolLibrary.Helpers
             }
         }
 
-        public static string BaseUrl(bool isAfterSchool)
+        public static string BaseUrl(bool isAfterSchool = true)
         {
             return $"http{(Utilities.UseSSL() ? "s" : "")}://{HostName}";
         }
@@ -273,7 +284,7 @@ namespace AfterSchoolLibrary.Helpers
 
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
-                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs)
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs)               
             );
 
             Database.ExecuteTransaction
@@ -281,6 +292,14 @@ namespace AfterSchoolLibrary.Helpers
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     amsgs.AddRange(AdditionalData(adc));
+
+                    amsgs.AddRange(UpdateRegistrantStatuses(adc));
+                    amsgs.AddRange(UpdateRegistrantAccess(adc));
+                    amsgs.AddRange(UpdateRequiresParentalConsent(adc));
+                    amsgs.AddRange(UpdateActivityMessageUids(adc));
+                    amsgs.AddRange(UpdateSendToStaff(adc));
+                    amsgs.AddRange(InvalidateRegistrantAccounts(adc));
+
                     // amsgs.AddRange(MigrateToBCrypt(adc));
 
                     // amsgs.AddRange(MigrateChargesAndPayoutsEnabled(adc));
@@ -339,6 +358,135 @@ namespace AfterSchoolLibrary.Helpers
             );            
 
             return msgs;
+        }
+
+        private static SystemMessages InvalidateRegistrantAccounts(DatabaseConnection dc)
+        {
+            return Migration.Run
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    var registrants = Registrant.LoadMastersNotRecentlyUpdated("7/1/2019".ToDateTime(), amsgs, adc);
+
+                    registrants.ForEach(registrant =>
+                    {
+                        registrant.UpdateProfileStatus(
+                            RegistrantProfileStatus.OutOfDate, 
+                            new WebUser() { ID = 0 }, 
+                            amsgs, 
+                            adc);
+                    });
+                },
+                uniqueIdenfier: "InvalidateRegistrantAccounts-20190721",
+                dc: dc
+            );
+        }
+
+        private static SystemMessages UpdateSendToStaff(DatabaseConnection dc)
+        {
+            return Migration.Run
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    amsgs.AddRange(ActivityMessage.Update(
+                        updateValues: new Hashtable() { { "SendToStaff", true } },
+                        criterias: new Hashtable() { },
+                        ObjectMap: ActivityMessage.ObjectMap,
+                        dc: adc));
+                },
+                uniqueIdenfier: "UpdateSendToStaff-20190721",
+                dc: dc
+            );
+        }
+
+        private static SystemMessages UpdateActivityMessageUids(DatabaseConnection dc)
+        {
+            return Migration.Run
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    var ams = ActivityMessage.Load(
+                        criterias: new Hashtable() { { "Uid", DBNull.Value } },
+                        msgs: amsgs,
+                        dc: adc);
+
+                    ams.ForEach(am =>
+                    {
+                        am.Uid = Guid.NewGuid();
+                        amsgs.AddRange(am.Save(adc));
+                    });
+                },
+                uniqueIdenfier: "UpdateActivityMessageUids-20190721",
+                dc: dc
+            );
+        }
+
+        private static SystemMessages UpdateRequiresParentalConsent(DatabaseConnection dc)
+        {
+            return Migration.Run
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    amsgs.AddRange(Activity.Update(
+                        updateValues: new Hashtable() { { "RequiresParentalConsent", true } },
+                        criterias: new Hashtable() { },
+                        ObjectMap: Activity.ObjectMap,
+                        dc: adc));
+                },
+                uniqueIdenfier: "UpdateRequiresParentalConsent-20190721",
+                dc: dc
+            );
+        }
+
+        private static SystemMessages UpdateRegistrantStatuses(DatabaseConnection dc)
+        {
+            return Migration.Run
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    amsgs.AddRange(Registrant.Update(
+                        updateValues: new Hashtable() { { "ProfileStatusId", (int)RegistrantProfileStatus.Completed } },
+                        criterias: new Hashtable()
+                        {
+                            { "IsMaster", true },
+                            { "ProfileStatusId", 0 }
+                        },
+                        ObjectMap: Registrant.ObjectMap,
+                        dc: adc));
+                },
+                uniqueIdenfier: "UpdateRegistrantStatuses-20190721",
+                dc: dc
+            );
+        }
+
+        public static SystemMessages UpdateRegistrantAccess(DatabaseConnection dc = null)
+        {
+            return Migration.Run
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    var registrants = Registrant.Load(
+                        criterias: new Hashtable() { { "IsMaster", true } },
+                        msgs: amsgs,
+                        dc: adc);
+
+                    registrants.ForEach(registrant =>
+                    {
+                        var user = new WebUser() { ID = registrant.WebUserId };
+
+                        if (!registrant.WebUserId.HasValue)
+                            user = registrant.GetAccount(amsgs, adc).GetAccountOwner(amsgs, adc);
+
+                        registrant.AddUserWithAccess(
+                                user: user,
+                                loggedInUser: null,
+                                msgs: amsgs,
+                                dc: adc);
+                    });
+                },
+                uniqueIdenfier: "UpdateRegistrantAccess-20190721",
+                dc: dc
+            );
         }
 
         public static SystemMessages MigrateToBCrypt(DatabaseConnection dc = null)
@@ -557,7 +705,7 @@ namespace AfterSchoolLibrary.Helpers
 
                         if (registrant.IsNotEmpty())
                         {
-                            var childRegistrants = registrant.GetChildren(msgs, dc);
+                            var childRegistrants = registrant.GetSubmittedRecords(msgs, dc);
 
                             childRegistrants.ForEach(child => {
                                 var activityIds = RegistrantActivity.LoadByRegistrantId(child.ID.Value, msgs, dc)
@@ -613,7 +761,7 @@ namespace AfterSchoolLibrary.Helpers
 
                     if (activityGroup.AccountId != registration.AccountId)
                     {
-                        var account = registration.GetAccount(dc);
+                        var account = registration.GetAccount(msgs, dc);
                         var aag = activityGroup.GetAccountActivityGroup(account, msgs, dc);
 
                         if (aag.IsNotEmpty())
@@ -1685,7 +1833,7 @@ namespace AfterSchoolLibrary.Helpers
             var registrant = Registrant.Load(5735, dc: dc);
             var questionIds = registrant.GetAnswers(dc: dc).Select(x => x.FormQuestionId.Value).ToList();
             var questions = FormQuestion.Load(questionIds, dc: dc);
-            registrant.CreateMasterCopy(questions, 0, msgs, dc: dc);
+            registrant.CreateMasterCopy(questions, new WebUser() { ID = 0 }, msgs, dc);
             return msgs;
         }
 
@@ -1763,7 +1911,7 @@ namespace AfterSchoolLibrary.Helpers
                     {
                         var answers = registrant.GetAnswers(dc: dc);
                         var questions = FormQuestion.Load(answers.Select(x => x.FormQuestionId.Value).ToList(), dc: dc);
-                        var master = registrant.CreateMasterCopy(questions, user.ID.Value, msgs, dc: dc);
+                        var master = registrant.CreateMasterCopy(questions, user, msgs, dc: dc);
                     }
                 }
             }
@@ -1836,6 +1984,15 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
+        public static AmazonHelper GetNewAmazonHelper()
+        {
+            return new AmazonHelper(
+                    Helpers.Utilities.AmazonBucketName,
+                    Helpers.Utilities.AmazonAccessKeyId,
+                    Helpers.Utilities.AmazonSecretAccessKeyId,
+                    Helpers.Utilities.AmazonRegionEndPoint);
+        }
+
         public static Amazon.RegionEndpoint AmazonRegionEndPoint { get; set; }
 
         public static string AmazonBucketName
@@ -1862,12 +2019,12 @@ namespace AfterSchoolLibrary.Helpers
             return Utilities.HostName;
         }
 
-        public static System.Net.Mail.MailAddress AppFromAddress(bool isAfterSchool)
+        public static System.Net.Mail.MailAddress AppFromAddress(bool isAfterSchool = true)
         {
             return new System.Net.Mail.MailAddress(AppNoReplyEmailAddress, AppEmailFromName(isAfterSchool));
         }
 
-        public static EmailAddress SendGridNoReplyEmailAddress(bool isAfterSchool)
+        public static EmailAddress SendGridNoReplyEmailAddress(bool isAfterSchool = true)
         {
             return new EmailAddress(Email.AppNoReplyEmailAddress, Utilities.AppName(isAfterSchool));
         }

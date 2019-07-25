@@ -1,0 +1,68 @@
+﻿using AfterSchool.Models;
+using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Services;
+using BasicLibrary;
+using System;
+using System.Collections.Generic;
+using System.Web.Mvc;
+using AfterSchool.Areas.User.Models;
+
+namespace AfterSchool.Areas.User.Controllers
+{
+    public class ActivityController : BaseLoggedInController
+    {
+        public ActivityController() : base(new List<AccountType>() { AccountType.Registrant })
+        {
+
+        }
+
+        // GET: User/Activity
+        public ActionResult Index()
+        {
+            var msgs = new SystemMessages();
+            var registrants = SessionVariables.CurrentUser.GetChildrenRegistrants(msgs);
+            var studentActivities = new List<RegistrantActivityViewModel>();
+
+            registrants.ForEach(registrant =>
+            {
+                var studentPOs = new List<ParticipationViewModel>();
+
+                registrant.GetSubmittedRecords(msgs).ForEach(submittedRecord =>
+                {
+                    var ras = submittedRecord.GetRegistrantActivities(msgs);
+
+                    ras.ForEach(ra => {
+                        var participationObject = ra.GetParticipationObject(msgs);
+                        
+                        if (participationObject.IsOutOfSession(msgs))
+                            studentPOs.Add(new ParticipationViewModel(participationObject, ra, submittedRecord, RegistrationStatus.Past));
+                        else if (participationObject.IsInSession(msgs))
+                            studentPOs.Add(new ParticipationViewModel(participationObject, ra, submittedRecord, RegistrationStatus.Current));
+                        else if (participationObject.WillBeInSession(msgs))
+                            studentPOs.Add(new ParticipationViewModel(participationObject, ra, submittedRecord, RegistrationStatus.Future));
+                    });
+                    
+                });
+
+                studentActivities.Add(new RegistrantActivityViewModel(registrant, studentPOs));
+            });
+
+            return View(studentActivities);
+        }
+
+        [HttpGet]
+        public ActionResult Withdraw(string id, string po, string type)
+        {
+            var msgs = new SystemMessages();
+            var registrant = Registrant.LoadByUid(id.ToGuid());
+
+            registrant.WithdrawRegistration(
+                participationObjectId: po.ToInteger(), 
+                participationObjectType: (ParticipationObjectType)type.ToInteger(), 
+                loggedInUser: SessionVariables.CurrentUser, 
+                msgs: msgs);
+
+            return RedirectToAction("Index");
+        }
+    }
+}

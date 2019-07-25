@@ -6,6 +6,7 @@ using Xunit.Abstractions;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using AfterSchoolLibrary.Services;
+using AfterSchoolLibraryTests.Factories;
 
 namespace AfterSchoolLibraryTests.Tests
 {
@@ -112,11 +113,61 @@ namespace AfterSchoolLibraryTests.Tests
         }
 
         [Fact]
+        public void LoadByBillerAccountIdTestWithParticipationObject()
+        {
+            var package = PackageFactory.Create(msgs, dc);
+            var accountPackage = AccountPackageFactory.Create(BillerAccount, package, msgs, dc);
+            var activity = ActivityFactory.Create(BillerAccount, msgs, dc);
+            var participationObject = activity.GetParticipationObject(msgs, dc);
+            var registrant = RegistrantFactory.Create(msgs, dc);
+            var transaction = TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, msgs, dc);
+            var activityPayment = ActivityPaymentFactory.Create(BillerAccount, activity, registrant, transaction, msgs, dc);
+            var participationObjects = participationObject.AsList().Select(po => (po.ObjectID.Value, po.ObjectType)).ToList();
+
+            var transactions = Transaction.LoadByBillerAccountId(
+                BillerAccount.ID.Value, 
+                null, 
+                null, 
+                participationObjects, 
+                null, 
+                null, 
+                msgs, 
+                dc);
+
+            Assert.Single(transactions);
+        }
+
+        [Fact]
         public void LoadByPayerAccountIdTest()
         {
             var transaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, msgs, dc);
 
             Assert.Single(Transaction.LoadByPayerAccountId(PayerAccount.ID.Value, msgs, dc));
+        }
+
+        [Fact]
+        public void LoadByPayerAccountIdTestWithParticipationObject()
+        {
+            var package = PackageFactory.Create(msgs, dc);
+            var accountPackage = AccountPackageFactory.Create(BillerAccount, package, msgs, dc);
+            var activity = ActivityFactory.Create(BillerAccount, msgs, dc);
+            var participationObject = activity.GetParticipationObject(msgs, dc);
+            var registrant = RegistrantFactory.Create(msgs, dc);
+            var transaction = TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, msgs, dc);
+            var activityPayment = ActivityPaymentFactory.Create(BillerAccount, activity, registrant, transaction, msgs, dc);
+            var participationObjects = participationObject.AsList().Select(po => (po.ObjectID.Value, po.ObjectType)).ToList();
+
+            var transactions = Transaction.LoadByPayerAccountId(
+                PayerAccount.ID.Value,
+                null,
+                null,
+                participationObjects,
+                null,
+                null,
+                msgs,
+                dc);
+
+            Assert.Single(transactions);
         }
 
         [Fact]

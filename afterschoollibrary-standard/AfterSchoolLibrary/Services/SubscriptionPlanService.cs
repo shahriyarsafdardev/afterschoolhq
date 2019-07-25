@@ -283,6 +283,18 @@ namespace AfterSchoolLibrary.Services
             return 0;
         }
 
+        public static decimal GetTotalCostWithConvenienceFee(this SubscriptionPlan subscriptionPlan, Account ownerAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (ownerAccount.IsEmpty())
+                ownerAccount = subscriptionPlan.GetAccount(msgs, dc);
+
+            if (subscriptionPlan.CostPerPeriod.HasValue)
+                return subscriptionPlan.CostPerPeriod.Value
+                    + subscriptionPlan.GetConvenienceFee(ownerAccount, msgs, dc);
+
+            return 0;
+        }
+
         public static decimal GetCreditCardFee(this SubscriptionPlan subscriptionPlan, Account ownerAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (ownerAccount.IsEmpty())
@@ -318,7 +330,7 @@ namespace AfterSchoolLibrary.Services
             return false;
         }
 
-        public static RegistrantSubscriptionPlan AddRegistrant(this SubscriptionPlan plan, Registrant registrant, DateTime? startDateTime, Purchase purchase, string stripeSubscriptionId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static RegistrantSubscriptionPlan AddRegistrant(this SubscriptionPlan plan, Registrant registrant, DateTime? startDateTime, Purchase purchase, string stripeSubscriptionId, FeeObject feeObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return RegistrantSubscriptionPlanService.CreateNew(
                 registrant,
@@ -326,6 +338,7 @@ namespace AfterSchoolLibrary.Services
                 startDateTime.IfEmpty(DateTime.UtcNow),
                 purchase.ID,
                 stripeSubscriptionId,
+                feeObject,
                 loggedInUser,
                 msgs,
                 dc);

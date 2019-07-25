@@ -9,7 +9,7 @@ namespace AfterSchoolLibrary.Services
 {
     public static class RegistrantSubscriptionPlanService
     {
-        public static RegistrantSubscriptionPlan CreateNew(Registrant registrant, SubscriptionPlan plan, DateTime startDate, int? purchaseId, string stripeSubscriptionId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static RegistrantSubscriptionPlan CreateNew(Registrant registrant, SubscriptionPlan plan, DateTime startDate, int? purchaseId, string stripeSubscriptionId, FeeObject feeObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -23,7 +23,12 @@ namespace AfterSchoolLibrary.Services
                 RegistrantId = registrant.ID,
                 StartDate = startDate,
                 PurchaseId = purchaseId,
-                StripeSubscriptionId = stripeSubscriptionId
+                StripeSubscriptionId = stripeSubscriptionId,
+                ConvenienceFee = feeObject.ConvenienceFee,
+                PaymentTypeFee = feeObject.PaymentTypeFee,
+                ConvenienceFeesPaidBy = feeObject.ConvenienceFeesPaidBy,
+                PaymentTypeFeesPaidBy = feeObject.PaymentTypeFeesPaidBy,
+                Amount = feeObject.Amount
             };
 
             msgs.AddRange(rpp.Save(dc));

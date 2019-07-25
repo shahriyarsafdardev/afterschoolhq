@@ -29,7 +29,7 @@
                     You must e-sign to finalize registration
                 </h3>
 
-                <form class="form-horizontal" id="register-form" method="post" action="@Url.Action("register", "account")">
+                <form class="form-horizontal" id="register-form" method="post" action="@Url.Action("register", "account")" enctype="multipart/form-data">
 
                     @foreach (var group in groups)
                     {

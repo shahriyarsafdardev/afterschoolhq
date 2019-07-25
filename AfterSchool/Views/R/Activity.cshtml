@@ -6,7 +6,18 @@
     var msgs = (SystemMessages)ViewBag.Messages;
 }
 
-@{ Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", account); }
+@{ 
+    Html.RenderPartial(
+        "~/Views/Shared/Registration/_AccountTopBar.cshtml",
+        account,
+        new ViewDataDictionary()
+        {
+            { "LoginReturnUrl", Model.GetHomePageUrl() },
+            { "CanPublishActivity", ViewBag.CanPublishActivity },
+            { "ParticipationObject", Model }
+        }
+    );
+}
 
 <div class="reg-header text-center">
     <h1 class="activity-title">
@@ -34,7 +45,13 @@
                         </h3>
                     </div>
                     <div class="col-lg-4 col-md-12">
-                        @{ Html.RenderPartial("~/Views/Shared/Registration/_RegisterButton.cshtml", Model, new ViewDataDictionary() { { "condensed", true } }); }
+                        @{ 
+                            Html.RenderPartial(
+                               "~/Views/Shared/Registration/_RegisterButton.cshtml", 
+                               Model, 
+                               new ViewDataDictionary() { { "condensed", true } }
+                            ); 
+                        }
                     </div>
                 </div>
             </div>
@@ -98,6 +115,12 @@
                         </p>
                     </div>
 
+                    @if (Model.RequiresParentalConsent)
+                    {
+                        <div class="activity-detail-block">
+                            <strong>Requires Parental Consent</strong>
+                        </div>
+                    }
                 </div>
 
                 <div class="margin-b-20">
@@ -129,7 +152,6 @@
                         <iframe width="100%" height="300" frameborder="0" style="border:0"
                                 src="https://www.google.com/maps/embed/v1/place?q=@Url.Encode($"{Model.Location.GetAddress()}")&key=AIzaSyAdjn8QBBStTz9TDAjZOyijAato7uzvjjk" allowfullscreen>
                         </iframe>
-                        @*<img src="https://maps.googleapis.com/maps/api/staticmap?markers=@Url.Encode(Model.Location.GetAddress())&size=1500x300&maptype=roadmap&key=AIzaSyAdjn8QBBStTz9TDAjZOyijAato7uzvjjk&zoom=13" style="width:100%"/>*@
                     </div>
                 </div>
 

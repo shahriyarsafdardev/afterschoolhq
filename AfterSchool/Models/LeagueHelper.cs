@@ -57,9 +57,9 @@ namespace AfterSchool.Models
                                 // manages seats and create registrantactivity record
                                 var participationObject = activity.GetParticipationObject(amsgs, adc);
 
-                                Registration.ProcessRegistrationAssignment(
-                                        registration: registration,
+                                registration.ProcessRegistrationAssignment(
                                         participationObject: participationObject,
+                                        masterRegistrant: null,
                                         registrant: registrant,
                                         seatsRequested: 1,
                                         activityGroupId: activity.ActivityGroupId,

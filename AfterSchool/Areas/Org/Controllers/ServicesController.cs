@@ -17,27 +17,27 @@ namespace AfterSchool.Areas.Org.Controllers
 
         }
 
-        [HttpPost]
-        public ActionResult RequestPayout(string payoutamount)
-        {
-            var msgs = new SystemMessages();
-            var maxAmountAvailable = SessionVariables.CurrentAccount.GetMaxAmountAvailableForPayout(msgs);
+        //[HttpPost]
+        //public ActionResult RequestPayout(string payoutamount)
+        //{
+        //    var msgs = new SystemMessages();
+        //    var maxAmountAvailable = SessionVariables.CurrentAccount.GetMaxAmountAvailableForPayout(msgs);
 
-            if (!payoutamount.IsNumber() || payoutamount.ToDecimal() < 25 || payoutamount.ToDecimal() > maxAmountAvailable)
-                msgs.Add($"Amount must be at least $25 and no greater than {maxAmountAvailable.ToCurrency()}", MessageType.UserError);
+        //    if (!payoutamount.IsNumber() || payoutamount.ToDecimal() < 25 || payoutamount.ToDecimal() > maxAmountAvailable)
+        //        msgs.Add($"Amount must be at least $25 and no greater than {maxAmountAvailable.ToCurrency()}", MessageType.UserError);
 
-            if (msgs.HasNoErrors())
-                SessionVariables.CurrentAccount.RequestNewPayout(payoutamount.ToDecimal(), SessionVariables.CurrentUser, msgs);
+        //    if (msgs.HasNoErrors())
+        //        SessionVariables.CurrentAccount.RequestNewPayout(payoutamount.ToDecimal(), SessionVariables.CurrentUser, msgs);
 
-            if (msgs.HasNoErrors())
-                return Json(new
-                {
-                    status = "ok",
-                    messages = msgs
-                }, JsonRequestBehavior.AllowGet);
+        //    if (msgs.HasNoErrors())
+        //        return Json(new
+        //        {
+        //            status = "ok",
+        //            messages = msgs
+        //        }, JsonRequestBehavior.AllowGet);
 
-            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
-        }
+        //    return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+        //}
 
         [HttpGet]
         public ActionResult CalculateFinalPrice(string cost)
@@ -52,7 +52,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 var finalPrice = cost.ToDecimal();
 
                 if (!SessionVariables.CurrentAccount.HasFeature(FeatureType.UseStripeConnectedAccount))
-                    finalPrice = AfterSchoolLibrary.Billing.Platform.GetFinalTotalCost(cost.ToDecimal(), SessionVariables.CurrentAccount);
+                    finalPrice = AfterSchoolLibrary.Billing.Platform.GetCostWithConvenienceFee(cost.ToDecimal(), SessionVariables.CurrentAccount);
 
                 return Json(new
                 {
@@ -512,35 +512,6 @@ namespace AfterSchool.Areas.Org.Controllers
             Response.Clear();
             WriteOutput(new { status = "ok", messages = msgs }, ResponseType.JSON);
             Response.End();
-
-            return View();
-        }
-
-        public ActionResult SearchLocations(string search)
-        {
-            var msgs = new SystemMessages();
-            var locations = Location.Search(search.Trim(), 0, 10, msgs);
-
-            Response.Clear();
-            WriteOutput(new
-            {
-                status = "ok",
-                locations = locations.Select(location => new
-                {
-                    location.ID,
-                    location.Name,
-                    location.Address1,
-                    location.Address2,
-                    location.City,
-                    location.State,
-                    location.PostalCode,
-                    FullAddress = location.FormatAddress(useLineBreaks: false),
-                    location.HostAccountId,
-                    LocationType = location.LocationTypeId.ToString()
-                })
-            }, 
-            ResponseType.JSON);
-            Response.End();           
 
             return View();
         }

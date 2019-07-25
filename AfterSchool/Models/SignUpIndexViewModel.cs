@@ -16,6 +16,7 @@ namespace AfterSchool.Models
         public string Password1 { get; set; }
         public string Password2 { get; set; }
         public string TimeZone { get; set; }
+        public string InviteCodeToShare { get; set; }
 
     }
 }

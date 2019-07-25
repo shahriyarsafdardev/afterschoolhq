@@ -20,6 +20,11 @@
 
         <div class="panel-heading">
             <i class="s7-note2"></i> Transactions
+            <div class="pull-right">
+                <button class="btn btn-primary md-trigger" id="request-payout" disabled="true" onclick="requestPayout()" data-modal="modal-payout-request">
+                    Request Payouts
+                </button>
+            </div>
             <div class="clearfix"></div>
         </div>
 
@@ -96,13 +101,34 @@
                     }
                 </div>
                 <div class="col-md-2">
+                    <div class="form-group">
+                        <select id="participationObjects" class="form-control">
+                            <option data-type="" value="">Activities</option>
+                            @foreach (var po in (List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)>)ViewBag.ParticipationObjects)
+                            {
+                                var selected = "";
+                                if (po.ID.ToString() == Request["poid"] && ((int)po.ParticipationObjectTypeId).ToString() == Request["poTypeId"])
+                                {
+                                    selected = "selected=\"selected\"";
+                                }
+                                <option value="@po.ID" data-type="@((int)po.ParticipationObjectTypeId)" @selected>@po.Name</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
                     <button type="button" class="btn btn-primary btn-lg" onclick="search()">Search</button>
+                    <button type="button" class="btn btn-primary btn-lg" onclick="DownloadToCSV()">Export To CSV</button>
                 </div>
 
                 <script>
                     function search() {
-                        window.location.href = `@Url.Action("index", "accounting")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}`;
+                        window.location.href = `@Url.Action("index", "accounting")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}&poId=${encodeURIComponent($('#participationObjects').val())}&poTypeId=${encodeURIComponent($('#participationObjects option:selected').data('type'))}`;
                     }
+                    function DownloadToCSV() {
+                         window.location.href = `@Url.Action("DownloadCSV", "accounting")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}&poId=${encodeURIComponent($('#participationObjects').val())}&poTypeId=${encodeURIComponent($('#participationObjects option:selected').data('type'))}`;
+                    }
+
                 </script>
             </div>
 
@@ -110,12 +136,18 @@
                 <table class="table table-hover table-condensed" id="transaction-table">
                     <thead>
                         <tr>
+                            <th>
+                                <span class="am-checkbox">
+                                    <input type="checkbox" id="selectAllTransaction" onchange="selectAllTransaction(this)" />
+                                    <label for="selectAllTransaction"></label>
+                                </span>
+                            </th>
                             <th>ID</th>
                             <th>Created On</th>
                             <th>Payer</th>
                             <th>For</th>
                             <th>Item Description</th>
-                            <th class="text-center">Total Amt Paid</th>                            
+                            <th class="text-center">Total Amt Paid</th>
                             <th class="text-center">Platform Fee</th>
                             <th class="text-center">Your Amount</th>
                             @*<th>Refund</th>*@
@@ -131,6 +163,12 @@
                                 var participationObjects = transaction.GetParticipationObjects();
 
                                 <tr id="@transaction.Uid" data-refunded-amount="@transaction.GetRefundedAmount().ToCurrency()">
+                                    <td>
+                                        <span class="am-checkbox">
+                                            <input type="checkbox" id="selectTransaction-@transaction.ID" @(transaction.PayoutId != null ? "disabled" : "") class="chkTransaction" onchange="selectTransaction(@transaction.ID,this)" />
+                                            <label for="selectTransaction-@transaction.ID"></label>
+                                        </span>
+                                    </td>
                                     <td>
                                         @transaction.GetTransactionNumber()
                                     </td>
@@ -163,16 +201,16 @@
                                         @transaction.GetBillerPayout().ToCurrency()
                                     </td>
 
-                                    @*<td>
-                                        @if (transaction.IsCharge() && !transaction.IsTotallyRefunded())
-                                        {
-                                            <button onclick="openDialog('@transaction.Uid')"
-                                                    class="md-trigger"
-                                                    data-modal="modal-refund">
-                                                Refund
-                                            </button>
-                                        }
-                                    </td>*@
+                                        @*<td>
+                                                @if (transaction.IsCharge() && !transaction.IsTotallyRefunded())
+                                                {
+                                                    <button onclick="openDialog('@transaction.Uid')"
+                                                            class="md-trigger"
+                                                            data-modal="modal-refund">
+                                                        Refund
+                                                    </button>
+                                                }
+                                            </td>*@
                                 </tr>
                             }
                         }
@@ -192,15 +230,15 @@
                     (PagingModel)ViewBag.PagingModel,
                     new ViewDataDictionary()
                     {
-                                    { "controller", "accounting" },
-                                    { "action", "index" },
-                                    { "querystring", $"sdate={Request["sdate"]}&edate={Request["edate"]}" }
-                    }
+                    { "controller", "accounting" },
+                    { "action", "index" },
+                    { "querystring", $"sdate={Request["sdate"]}&edate={Request["edate"]}&poId={Request["poId"]}&poTypeId={Request["poTypeId"]}" }
+            }
                 );
             }
         </div>
     </div>
- </div>
+</div>
 
 <div id="modal-refund" class="md-modal colored-header custom-width md-effect-9">
 
@@ -239,18 +277,57 @@
     </div>
 </div>
 
+<form action="@Url.Action("RequestPayout","Accounting")" id="requestPayoutForm" method="post">
+    @Html.Hidden("TransactionIds")
+</form>
 
 <script>
-    function validateForm() {
+     var selectedTransactions = [];
+     function validateForm() {
         var val = parseFloat($("#amount").val());
         var isValid = val >= 0.1;
 
         $("#confirm-refund-btn").attr('disabled', !isValid);
+     }
+
+    function requestPayout() {
+        $("#TransactionIds").val(this.selectedTransactions.join());
+        $("#requestPayoutForm").submit();
     }
 
     function openDialog(newUid) {
         $("#modal-refund").data("uid", newUid);
         $("#refunded-amount").text($("#" + newUid).data('refunded-amount'));
+    }
+
+      function selectTransaction(id, event) {
+        if (event.checked) {
+            this.selectedTransactions.push(id);
+        }
+        else {
+            var index = this.selectedTransactions.map(x => {
+                    return x;
+                }).indexOf(id);
+            this.selectedTransactions.splice(index, 1);
+        }
+        if (this.selectedTransactions.length > 0)
+            $("#request-payout").attr("disabled", false);
+        else
+            $("#request-payout").attr("disabled", true);
+    }
+
+    function selectAllTransaction(event) {
+        var allChkBoxes = $(".chkTransaction");
+        allChkBoxes.map(function (e) {
+            if (event.checked) {
+                if ($(this).prop("checked") == false)
+                    this.click();
+               }
+             else {
+                if ($(this).prop("checked") == true)
+                    this.click();
+              }
+           })
     }
 
     function confirmRefund() {

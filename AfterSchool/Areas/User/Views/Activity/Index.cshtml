@@ -1,0 +1,73 @@
+﻿@model List<RegistrantActivityViewModel>
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;    
+}
+
+@{ Html.RenderPartial("_UserAccountHeader"); }
+
+<div class="main-content">
+
+    @foreach (var item in Model)
+    {
+        <div class="row">
+            <h3 class="margin-h-30">@item.Registrant.Name</h3>
+
+            @foreach (var regStatus in Enum.GetValues(typeof(RegistrationStatus)).Cast<RegistrationStatus>().Except(RegistrationStatus.NotSet.AsList()))
+            {
+                <div class="row">
+                    @{
+                        Html.RenderPartial(
+                            "Activities/_BrowseGroupedActivities",
+                            item.Participations,
+                            new ViewDataDictionary()
+                            {
+                                { "Status", (int)regStatus }
+                            }
+                        );
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<div id="modal-withdraw" class="md-modal colored-header custom-width md-effect-9">
+    <form id="form-withdraw" action="" method="post">
+        <div class="md-content">
+            <div class="modal-header">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+                <h3 class="modal-title"><i class="s7-attention"></i> Withdrawal Confirmation</h3>
+            </div>
+            <div class="modal-body form">
+                <p class="text-medium-small">Are you sure you want to <strong>withdraw</strong> <strong><span id="withdraw-name"></span></strong> from <strong><span id="withdraw-activity"></span></strong>?</p>
+                <p>
+                    This action <em>cannot</em> be undone. In order to rejoin the @UILabel.ActivityLabel(ActivityType.Activity).ToLower(), you will need to register again.
+                </p>
+                <p>&nbsp;</p>
+                <p class="text-muted text-small" style="font-size: .8em;">
+                    Notes:<br />
+                    &bull; If you are withdrawing from a monthly subscription, your payments will be cancelled at the end of the current period.<br />
+                    &bull; This action will not trigger a refund. If you desire a refund, please select <em>Request a refund</em>.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+                <a href="" class="btn btn-danger padding-h-20" id="btn-confirm-withdraw">Withdraw &raquo;</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    function withdraw(registrant, po, type, registrantName, activityName) {
+        $('#withdraw-name').html(registrantName);
+        $('#withdraw-activity').html(activityName);
+
+        $('#btn-confirm-withdraw').attr('href', `@Url.Action("withdraw", "activity")/${registrant}?po=${po}&type=${type}`);
+    }
+</script>
+
+@section header
+{
+    <link href="~/Assets/css/style-registration.css" type="text/css" rel="stylesheet" />
+}

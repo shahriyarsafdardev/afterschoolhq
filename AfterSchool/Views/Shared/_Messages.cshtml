@@ -3,7 +3,11 @@
 @{
     var sendNewLink = (string)ViewData["SendNewMessageLink"];
     var viewController = (string)ViewData["ViewLinkController"];
+    var viewAction = (string)ViewData["ViewLinkAction"];
+    var viewId = (string)ViewData["ViewLinkId"];
     var account = (Account)ViewData["Account"];
+    var paging = (PagingModel)ViewData["PagingModel"];
+
 }
 <div class="row">
     <div class="col-md-12">
@@ -24,25 +28,15 @@
         <tbody>
             @if (Model.Count() > 0)
             {
-                for (var i = 0; i <= 1; i++)
+                foreach (var message in Model)
                 {
-                    var messages = Model.Where(x => x.DateSent.HasValue == i.ToBoolean());
-
-                    if (i.ToBoolean())
-                    {
-                        messages = messages.OrderBy(x => x.DateSent.Value);
-                    }
-
-                    foreach (var message in messages)
-                    {
-                        <tr>
-                            <td><a href="@Url.Action("messagedetail", viewController, new { id = message.ID })" class="btn btn-primary btn-sm">View</a></td>
-                            <td>@(message.DateSent.HasValue ? account.ConvertToAccountTimeZone(message.DateSent.Value).ToLongDateTimeString() : "N/A")</td>
-                            <td>@message.Subject</td>
-                            <td>@message.GetSentCount()</td>
-                            <td>@message.GetUnsentCount()</td>
-                        </tr>
-                    }
+                    <tr>
+                        <td><a href="@Url.Action("messagedetail", viewController, new { id = message.Uid })" class="btn btn-primary btn-sm">View</a></td>
+                        <td>@(message.DateSent.HasValue ? account.ConvertToAccountTimeZone(message.DateSent.Value).ToLongDateTimeString() : "N/A")</td>
+                        <td>@message.Subject</td>
+                        <td>@message.GetSentCount()</td>
+                        <td>@message.GetUnsentCount()</td>
+                    </tr>
                 }
             }
             else
@@ -54,3 +48,16 @@
         </tbody>
     </table>
 </div>
+
+@{ 
+    Html.RenderPartial(
+        "~/Views/Shared/_Paging.cshtml",
+        paging,
+        new ViewDataDictionary()
+        {
+            { "id", viewId },
+            { "action", viewAction },
+            { "controller", viewController }
+        }
+    );
+}

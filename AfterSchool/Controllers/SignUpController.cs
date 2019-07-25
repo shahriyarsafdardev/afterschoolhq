@@ -8,19 +8,21 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary.DataAccess;
 using Hangfire;
+using System.Collections.Generic;
 
 namespace AfterSchool.Controllers
 {
     public class SignUpController : BaseController
     {
         [HttpGet]
-        public ActionResult Index()
+        public ActionResult Index(string invite)
         {
             var signupIndexVM = new SignUpIndexViewModel()
             {
                 FirstName = CookieVariables.DemoFirstName,
                 Email = CookieVariables.DemoEmailAddress,
-                OrgName = CookieVariables.DemoOrgName
+                OrgName = CookieVariables.DemoOrgName,
+                InviteCodeToShare = invite
             };
 
             ViewBag.Messages = new SystemMessages();
@@ -31,6 +33,7 @@ namespace AfterSchool.Controllers
         public ActionResult Index(SignUpIndexViewModel model)
         {
             var msgs = new SystemMessages();
+            Account invitingAccount = null;
 
             if (model.OrgName.IsEmpty())
                 msgs.Add("Organization / Program Name is required", MessageType.UserError);
@@ -56,6 +59,16 @@ namespace AfterSchool.Controllers
                 msgs.Add("Passwords are required and must match", MessageType.UserError);
             else if (model.Password1.Length < 8)
                 msgs.Add("Password must be at least 8 characters", MessageType.UserError);
+
+            if (model.InviteCodeToShare.IsNotEmpty())
+            {
+                if (!model.InviteCodeToShare.IsGuid())
+                    msgs.Add("Invalid invitation code", MessageType.UserError);
+
+                invitingAccount = Account.LoadByInviteCodeToShare(model.InviteCodeToShare.ToGuid());
+                if (invitingAccount.IsEmpty())
+                    msgs.Add("Invalid invitation code", MessageType.UserError);
+            }
 
             if (msgs.HasNoErrors())
             {
@@ -92,11 +105,15 @@ namespace AfterSchool.Controllers
                                 loggedInUser: user,
                                 msgs: amsgs,
                                 dc: adc);
+
+                        if (invitingAccount.IsNotEmpty() && account.IsNotEmpty())
+                            invitingAccount.ApproveAccessToAccount(account, user, amsgs, adc);
+
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
                         msgs.AddRange(smsgs);
-                        msgs.AddRange(LoadSessionInfo(user, account));
+                        LoadSessionInfo(user, account, msgs: msgs);
 
                         var userId = user.ID.Value;
                         var accountId = account.ID.Value;
@@ -196,21 +213,19 @@ namespace AfterSchool.Controllers
             if (msgs.HasNoErrors() && !user.VerifiedAccount)
             {
                 var userId = user.ID.Value;
-                Hangfire.BackgroundJob.Enqueue(() => WebUserService.SendVerificationEmail(userId));
+                BackgroundJob.Enqueue(() => WebUserService.SendVerificationEmail(userId));
             }
 
             if (msgs.HasNoErrors())
-                msgs.AddRange(LoadSessionInfo(user));
+                LoadSessionInfo(user, msgs: msgs);
 
             if (msgs.HasNoErrors())
                 return LoginRedirect();
-            else
-            {
-                ViewBag.Messages = msgs;
-                ViewBag.AccountUid = a;
-                ViewBag.Uid = id;
-                return View(user);
-            }
+
+            ViewBag.Messages = msgs;
+            ViewBag.AccountUid = a;
+            ViewBag.Uid = id;
+            return View(user);
         }
 
         [HttpGet]
@@ -451,8 +466,10 @@ namespace AfterSchool.Controllers
             if (invitingAccount.IsEmpty())
                 msgs.Add("Invalid invite code", MessageType.UserError);
 
-            // auto accept invite
-            if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentAccount.IsNotEmpty() && SessionVariables.CurrentAccount.AccountTypeId != AccountType.AfterSchool && SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant && SessionVariables.CurrentAccount.ID != invitingAccount.ID)
+            var accountTypesToAccept = new List<AccountType>() { AccountType.ActivityProvider, AccountType.School };           
+
+            // auto accept invite of already logged in
+            if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentAccount.AccountTypeId.In(accountTypesToAccept) && SessionVariables.CurrentAccount.ID != invitingAccount.ID)
             {
                 invitingAccount.ApproveAccessToAccount(SessionVariables.CurrentAccount, SessionVariables.CurrentUser, msgs);
 
@@ -519,7 +536,7 @@ namespace AfterSchool.Controllers
             }
 
             if (msgs.HasNoErrors())
-                msgs.AddRange(LoadSessionInfo(user));
+                LoadSessionInfo(user, msgs: msgs);
 
             if (msgs.HasNoErrors())
                 return RedirectToAction("createaccount", new { invitecode = invitingAccount.InviteCodeToShare });

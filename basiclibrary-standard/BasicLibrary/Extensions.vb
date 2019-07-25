@@ -6,6 +6,7 @@ Imports System.Collections.Specialized
 Imports System.Xml
 Imports System.Xml.Serialization
 Imports System.Data
+Imports System.Globalization
 
 Public Module Extensions
 
@@ -70,6 +71,11 @@ Public Module Extensions
             Return True
         End If
         Return False
+    End Function
+
+    <Extension>
+    Public Function MonthAsString(ByVal aDate As Date) As String
+        Return CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(aDate.Month)
     End Function
 
     <Extension>

@@ -111,7 +111,7 @@
                                             <td><a href="mailto:@user.Email">@user.Email</a></td>
                                             <td>@user.Phone</td>
                                             <td>
-                                                <a href="@Url.Action("denyvisitor", "account")" class="btn btn-default">Deny</a>
+                                                <a href="@Url.Action("denyvisitor", "account", new { id = request.ID })" class="btn btn-default">Deny</a>
                                             </td>
                                         </tr>
                                     }

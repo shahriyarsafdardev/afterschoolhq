@@ -292,14 +292,13 @@ namespace AfterSchoolLibrary.Models
             this.LastModifiedBy = loggedInUserId;
             msgs.AddRange(this.Save(dc: dc));
 
-            msgs.AddRange(this.UpdateRegistrantInfo(registrant, dc: dc));
+            this.UpdateRegistrantInfo(registrant, msgs, dc);
 
             return msgs;
         }
 
-        public SystemMessages UpdateRegistrantInfo(Registrant registrant, DatabaseConnection dc = null)
+        public void UpdateRegistrantInfo(Registrant registrant, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
             if (this.QuestionDataTypeId != QuestionDataType.NotSet)
             {
                 switch (this.QuestionDataTypeId)
@@ -312,6 +311,9 @@ namespace AfterSchoolLibrary.Models
                         break;
                     case QuestionDataType.RegistrantEmail:
                         registrant.Email = this.Text;
+                        break;
+                    case QuestionDataType.RegistrantMobilePhone:
+                        registrant.Phone = this.Text;
                         break;
                     case QuestionDataType.OrganizationName:
                         registrant.Company = this.Text;
@@ -331,9 +333,8 @@ namespace AfterSchoolLibrary.Models
                  
                 }
 
-                msgs.AddRange(registrant.Save(dc: dc));
+                msgs.AddRange(registrant.Save(dc));
             }
-            return msgs;
         }
 
         public static List<FormQuestionAnswer> LoadByRegistrationIds(List<int> RegistrationIds, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -352,8 +353,21 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["RegistrantId"], registrantId);
             dq.Criterias.Add(ObjectMap["QuestionDataTypeId"], (int)qt);
             dq.Criterias.Add(ObjectMap["RegistrationId"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
-            dq.Criterias.Add(ObjectMap["FormQuestionId"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
+
+        public string GetFileDownloadLink()
+        {
+            if (this.FormQuestionQuestionTypeId == QuestionType.FileUpload)
+                return GetFileDownloadLink(this.Text);
+
+            return null;
+        }
+
+        public static string GetFileDownloadLink(string amazonFileLocation)
+        {
+            var ah = Helpers.Utilities.GetNewAmazonHelper();
+            return ah.GetFileLink(amazonFileLocation, true, DateTime.UtcNow.AddMinutes(30), false);
         }
 
         #endregion

@@ -15,10 +15,11 @@ namespace AfterSchoolLibrary
         public const string EnrollHQGenericTemplateId = "c672e668-1b54-4721-84be-50fe3cde7cb2";
         public const string AfterSchoolHQGenericTemplateId = "70362a81-6361-4140-9d5b-25b28e97ceca";
 
-        public static string GetGenericTemplateId(bool isAfterSchool)
+        public static string GetGenericTemplateId(bool isAfterSchool = true)
         {
             if (isAfterSchool)
                 return AfterSchoolHQGenericTemplateId;
+
             return EnrollHQGenericTemplateId;
         }
 
@@ -38,21 +39,19 @@ namespace AfterSchoolLibrary
             var sg = new SendGridClient(SendGridApiKey);
             // var content = new Content("text/html", body);
 
+            if (!Helpers.Utilities.IsProduction)
+                subject = $"{Helpers.Utilities.Environment} ENV: {subject}";
+
             var mail = MailHelper.CreateSingleEmail(fromEmail, toEmail, subject, null, body);
             mail.ReplyTo = replyTo;
             mail.TemplateId = emailTemplateId ?? EnrollHQGenericTemplateId;
             
-            var task = Task.Run(async () =>
-            {
-                return await sg.SendEmailAsync(mail);
-            });
+            var task = Task.Run(async () => { return await sg.SendEmailAsync(mail); });
             task.Wait();
 
             dynamic response = task.Result;
             if (response.StatusCode != System.Net.HttpStatusCode.Accepted)
-            {
                 msgs.Add(response.Body.ReadAsStringAsync().Result, MessageType.Error);
-            }
 
             return msgs;
         }

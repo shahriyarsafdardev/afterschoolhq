@@ -133,9 +133,29 @@ namespace AfterSchoolLibrary {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] Payout_Request {
+            get {
+                object obj = ResourceManager.GetObject("Payout_Request", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] ProviderAccount_Added {
             get {
                 object obj = ResourceManager.GetObject("ProviderAccount_Added", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] Publish_Request {
+            get {
+                object obj = ResourceManager.GetObject("Publish_Request", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -156,6 +176,16 @@ namespace AfterSchoolLibrary {
         internal static byte[] Registration_Confirmation_Rows {
             get {
                 object obj = ResourceManager.GetObject("Registration_Confirmation_Rows", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] Registration_Withdrawal {
+            get {
+                object obj = ResourceManager.GetObject("Registration_Withdrawal", resourceCulture);
                 return ((byte[])(obj));
             }
         }

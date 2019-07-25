@@ -31,10 +31,17 @@
                 }
                 else
                 {
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label">Subject</label>
+
+                    <div class="form-group" id="subject-group">
+                        <label class="col-sm-3 control-label">Message Reason</label>
                         <div class="col-sm-6">
-                            <input type="text" name="subject" id="subject" maxlength="150" class="form-control" required />
+                            <select name="subject" id="subject" class="form-control">
+                                <option value="">Select a Message Reason...</option>
+                                @foreach(var reason in Enum.GetValues(typeof(ActivityMessageReason)).Cast<ActivityMessageReason>().Except(ActivityMessageReason.NotSet.AsList()).OrderBy(x => x.ToString()))
+                                {
+                                    <option value="@((int)reason)">@reason.ToString().SplitByUpperCase()</option>
+                                }
+                            </select>
                         </div>
                     </div>
 

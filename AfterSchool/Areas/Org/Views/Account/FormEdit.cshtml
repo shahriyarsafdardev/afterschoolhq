@@ -8,7 +8,7 @@
     var qgId = new int?();
     var questions = new List<FormQuestion>();
     var typesWithOptions = new List<QuestionType>() { QuestionType.CheckboxList, QuestionType.DropDownList, QuestionType.RadioList, QuestionType.RadioMatrix };
-    var typesUserCannotAdd = new List<QuestionType>() { QuestionType.FileUpload, QuestionType.TextBlock, QuestionType.NotSet, QuestionType.RadioMatrix };
+    var typesUserCannotAdd = new List<QuestionType>() { QuestionType.TextBlock, QuestionType.NotSet, QuestionType.RadioMatrix };
 
     if (questionGroup.IsNotEmpty())
     {

@@ -357,13 +357,17 @@ namespace AfterSchoolLibrary.Models
             return dq.GetCount(msgs) > 0;
         }
 
-        public static bool ExistsByParticipationObjectByRegistrants(int participationObjectId, ParticipationObjectType participationObjectType, List<int> registrantIds, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool ExistsByParticipationObjectByRegistrants(int participationObjectId, ParticipationObjectType participationObjectType, List<int> registrantIds, List<RegistrationAssignmentType> assignmentTypes, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["participationObjectId"], participationObjectId);
             dq.Criterias.Add(ObjectMap["participationObjectTypeId"], (int)participationObjectType);
             dq.Criterias.Add(ObjectMap["RegistrantId"], registrantIds, DatabaseCriteriaOperatorEnum.In);
+
+            if (assignmentTypes.IsNotEmpty() && assignmentTypes.Count > 0)
+                dq.Criterias.Add(ObjectMap["AssignmentTypeId"], assignmentTypes.Select(x => (int)x).ToArray(), DatabaseCriteriaOperatorEnum.In);
+
             return dq.GetCount(msgs) > 0;
         }
 
@@ -448,7 +452,7 @@ namespace AfterSchoolLibrary.Models
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
-            dq.Criterias.Add(ObjectMap["RegistrationId"], RegistrationIds, DatabaseCriteriaOperatorEnum.In);
+            dq.Criterias.Add(ObjectMap["RegistrationId"], RegistrationIds.ToArray(), DatabaseCriteriaOperatorEnum.In);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
@@ -456,7 +460,7 @@ namespace AfterSchoolLibrary.Models
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
-            dq.Criterias.Add(ObjectMap["RegistrantId"], registrantIds, DatabaseCriteriaOperatorEnum.In);
+            dq.Criterias.Add(ObjectMap["RegistrantId"], registrantIds.ToArray(), DatabaseCriteriaOperatorEnum.In);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 

@@ -6,6 +6,7 @@
     var label = "Enter a location";
     var placeholderText = "Search Locations...";
     var locationIsRequired = false;
+    var locationType = LocationType.NotSet;
 
     if (ViewData["searchonly"].IsNotEmpty())
     {
@@ -27,9 +28,14 @@
         accountId = (int)ViewData["accountId"];
     }
 
-    if (ViewData["locationIsRequired"].IsNotEmpty() && ViewData["locationIsRequired"].IsNotEmpty().ToString().ToBoolean())
+    if (ViewData["locationIsRequired"].IsNotEmpty() && ViewData["locationIsRequired"].ToString().ToBoolean())
     {
-        locationIsRequired = ViewData["locationIsRequired"].IsNotEmpty().ToString().ToBoolean();
+        locationIsRequired = ViewData["locationIsRequired"].ToString().ToBoolean();
+    }
+
+    if (ViewData["locationType"].IsNotEmpty() && ViewData["locationType"].ToString().IsNumber())
+    {
+        locationType = (LocationType)ViewData["locationType"].ToString().ToInteger();
     }
 }
 
@@ -133,7 +139,7 @@
             isSearching = true;
                 
             $.get(
-                `@Url.Action("searchlocations", "services")?search=${locationSearch.val()}`,
+                `@Url.Action("searchlocations", "services", new { Area = "" })?search=${locationSearch.val()}&type=@((int)locationType)`,
                 function (data) {
 
                     isSearching = false;
@@ -208,7 +214,7 @@
                     <div class="${listItemClass}"
                         style="${listItemStyle}" 
                         id="location-0">
-                        <strong>Searching... Type of the location name or address</strong>
+                        <strong>Searching... Type the location name or address</strong>
                     </div>`);
             }
             else {

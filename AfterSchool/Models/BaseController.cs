@@ -146,7 +146,7 @@ namespace AfterSchool.Models
 
                     case AccountType.Registrant:
                         if (SessionVariables.Cart.IsNotEmpty())
-                            return RedirectToAction("select", "account");
+                            return RedirectToAction("select", "account", new { area = "" });
                         else if (registrationAccount.IsNotEmpty())
                             return Redirect(registrationAccount.HomePageUrl);
                         else
@@ -160,10 +160,23 @@ namespace AfterSchool.Models
             return RedirectToAction("index", "login", new { area = "" });
         }
 
-        protected SystemMessages LoadSessionInfo(WebUser user, Account account = null, bool doRememberMe = false)
+        protected void LoadSessionInfo(WebUser user, SystemMessages msgs = null)
         {
-            var msgs = new SystemMessages();
+            LoadSessionInfo(user, null, false, null, msgs);
+        }
 
+        protected void LoadSessionInfo(WebUser user, Account account, SystemMessages msgs = null)
+        {
+            LoadSessionInfo(user, account, false, null, msgs);
+        }
+
+        protected void LoadSessionInfo(WebUser user, Account account, bool doRememberMe, SystemMessages msgs = null)
+        {
+            LoadSessionInfo(user, account, doRememberMe, null, msgs);
+        }
+
+        protected void LoadSessionInfo(WebUser user, Account account, bool doRememberMe, string source, SystemMessages msgs = null)
+        {
             SessionVariables.CurrentAccount = null;
             SessionVariables.CurrentUser = user;
 
@@ -181,6 +194,16 @@ namespace AfterSchool.Models
                     SessionVariables.CurrentAccount = awus.First().ToAccount(true);
                     SessionVariables.AccountUserType = awus.First().UserTypeId;
                 }
+                else if (source == "parent-login")
+                {
+                    var awu = awus.FirstOrDefault(item => item.AccountAccountTypeId == AccountType.Registrant);
+
+                    if (awu.IsNotEmpty())
+                    {
+                        SessionVariables.CurrentAccount = awu.ToAccount(true);
+                        SessionVariables.AccountUserType = awu.UserTypeId;
+                    }
+                }
             }
 
             if (SessionVariables.CurrentAccount.IsNotEmpty())
@@ -189,21 +212,8 @@ namespace AfterSchool.Models
             //set login cookies
             if (doRememberMe)
             {
-                var cookieUser = new HttpCookie("sessionuser", Convert.ToBase64String(Encryption.Encrypt(
-                    SessionVariables.CurrentUser.Uid.ToString(), AfterSchoolLibrary.Helpers.Utilities.AppAESKey, AfterSchoolLibrary.Helpers.Utilities.AppIV)));
-                cookieUser.Expires = DateTime.Now.AddMonths(1);
-                Response.Cookies.Add(cookieUser);
-
-                if (!SessionVariables.CurrentAccount.IsEmpty())
-                {
-                    var cookieAccount = new HttpCookie("sessionAccount", Convert.ToBase64String(Encryption.Encrypt(
-                        SessionVariables.CurrentAccount.UniqueName, AfterSchoolLibrary.Helpers.Utilities.AppAESKey, AfterSchoolLibrary.Helpers.Utilities.AppIV)));
-                    cookieAccount.Expires = DateTime.Now.AddMonths(1);
-                    Response.Cookies.Add(cookieAccount);
-                }
+                // TO DO: RE-ADD Remember me code
             }
-
-            return msgs;
         }
 
         internal ActionResult Logout(string returnUrl = null, bool goToLoginScreenBeforeReturn = false)

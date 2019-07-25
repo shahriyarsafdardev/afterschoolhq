@@ -232,13 +232,13 @@ namespace AfterSchool.Areas.Admin.Controllers
             if (msgs.HasNoErrors())
             {
                 SessionVariables.OriginalLoggedInUser = SessionVariables.CurrentUser;
-                msgs.AddRange(LoadSessionInfo(user, null, false));
+                LoadSessionInfo(user, null, false, msgs);
             }
 
             if (msgs.HasNoErrors())
             {
                 if (SessionVariables.CurrentAccount.IsEmpty())
-                    return RedirectToAction("select", "login", new { area = "" });
+                    return RedirectToAction("select", "login", new { Area = "" });
 
                 return LoginRedirect();
             }

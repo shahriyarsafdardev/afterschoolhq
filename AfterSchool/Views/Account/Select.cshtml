@@ -31,9 +31,29 @@
 
     @foreach (var registrant in Model)
     {
-        var isRegistered = registrant.IsRegisteredFor(participationObject);
-        var btnText = isRegistered ? $"Already {registered}" : register;
-        var disabledText = isRegistered ? " disabled=\"disabled\" " : "";
+        var disabledText = "";
+        var btnText = "";
+
+        if (registrant.IsRegisteredFor(participationObject))
+        {
+            if (!registrant.IsRegisteredForAndHasConsent(participationObject))
+            {
+                btnText = "Give Consent";
+            }
+            else if (!registrant.IsRegisteredForHasConsentAndPaid(participationObject))
+            {
+                btnText = "Pay Now";
+            }
+            else
+            {
+                btnText = $"Already {registered}";
+                disabledText = " disabled=\"disabled\" ";
+            }
+        }
+        else
+        {
+            btnText = register;
+        }
 
         <div class="col-sm-12 col-md-6 col-lg-4">
             <div class="panel">
@@ -51,6 +71,7 @@
                            class="btn btn-register btn-lg"
                            @disabledText>
                             @btnText
+                            &raquo;
                         </a>
                     </p>
                 </div>

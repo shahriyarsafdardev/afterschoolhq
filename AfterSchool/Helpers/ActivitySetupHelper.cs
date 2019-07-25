@@ -5,6 +5,8 @@ using System.Web;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using System.Web.Mvc;
+using AfterSchool.Models;
+using AfterSchoolLibrary.Services;
 
 namespace AfterSchool.Helpers
 {
@@ -18,10 +20,10 @@ namespace AfterSchool.Helpers
 
         public static string NavButton(Activity activity, string action, string cmd, bool isTop, bool isPrimary, HttpRequestBase request)
         {
-            return $"<button type=\"submit\" class=\"{ButtonStyle(isTop, isPrimary)}\" onclick=\"ActivitySetup.navigateActivity('{GenerateUrl(activity, action, "activity", cmd, request)}')\">{ButtonText(cmd, isTop)}</button>";
+            return $"<button type=\"submit\" class=\"{ButtonStyle(isTop, isPrimary)}\" onclick=\"ActivitySetup.navigateActivity('{GenerateUrl(activity, action, "activity", cmd, request)}')\">{ButtonText(cmd, isTop, activity)}</button>";
         }
 
-        private static string ButtonText(string cmd, bool isTop)
+        private static string ButtonText(string cmd, bool isTop, Activity activity)
         {
             if (cmd == "prev")
             {
@@ -45,7 +47,15 @@ namespace AfterSchool.Helpers
                 return "Done &raquo;";
             }
             else if (cmd == "publish")
-                return "Publish &raquo;";
+            {
+                if (SessionVariables.CurrentUser.CanPublishActivity(SessionVariables.CurrentAccount, activity))
+                    return "Publish &raquo;";
+
+                if (isTop)
+                    return "Submit &raquo;";
+
+                return "Submit to Publish &raquo;";
+            }
 
             return "";
         }

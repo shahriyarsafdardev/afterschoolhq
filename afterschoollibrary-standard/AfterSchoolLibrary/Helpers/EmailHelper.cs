@@ -6,6 +6,7 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using System.Linq;
 using System.Collections.Generic;
+using BasicLibrary.DataAccess;
 
 namespace AfterSchoolLibrary.Helpers
 {
@@ -81,26 +82,57 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
-        public static SystemMessages SendRegistrationConfirmed(CheckoutObject checkoutObject, bool sendBcc)
+        public static void SendRegistrationWithdrawal(Registrant registrant, ParticipationObject participationObject, WebUser loggedInUser, SystemMessages msgs)
+        {
+            var model = new NameValueCollection()
+            {
+                { "ActivityContactName", participationObject.ContactName },
+                { "RegistrantName",  registrant.Name},
+                { "ActivityName", participationObject.Name },
+                { "CurrentUserName", loggedInUser.DisplayName },
+                { "SupportEmail", Email.AppSupportEmailAddress },
+                { "ProductName", Utilities.AppName() }
+            };
+
+            var subject = $"{registrant.Name}'s registration for {participationObject.Name} has been withdrawn";
+            var body = ProcessTemplate(
+                EmailTemplates.Registration_Withdrawal,
+                model,
+                "Registration_Withdrawal",
+                msgs);
+
+            // SEND EMAILS
+            var mailMsgs = new SystemMessages();
+
+            // Send email to activity contact
+            mailMsgs.AddRange(SendGridHelper.SendMail(
+                fromEmail: Email.SendGridNoReplyEmailAddress(),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(participationObject.ContactEmail),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId()));
+        }
+
+        public static SystemMessages SendRegistrationConfirmed(CheckoutObject checkoutObject, WebUser loggedInUser, bool isParentCopy, bool sendBcc, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
             var isAfterSchool = checkoutObject.PayingAccount.IsAfterSchool;
             var purchaserAccount = checkoutObject.PayingAccount;
-            var purchaser = checkoutObject.PayingAccount.GetAccountOwner(msgs);
+            var purchaser = checkoutObject.PayingAccount.GetAccountOwner(msgs, dc);
             var participationObject = checkoutObject.ParticipationObject;
             var billingAccount = checkoutObject.ParticipationObject.OwnerAccount;
-            var billingAccountOwner = billingAccount.GetAccountOwner(msgs);
+            var billingAccountOwner = billingAccount.GetAccountOwner(msgs, dc);
             var paymentPlan = checkoutObject.PaymentPlan;
             var subscription = checkoutObject.SubscriptionPlan;
-            var registrant = checkoutObject.MasterRegistrant;
-            var parentOrGuardian = registrant.GetParentOrGuardian(msgs);
-            var canAccountAcceptPayments = billingAccount.CanProcessPayments(msgs);
+            var masterRegistrant = checkoutObject.MasterRegistrant;
+            var parentOrGuardian = masterRegistrant.GetParentOrGuardian(msgs, dc);
+            var canAccountAcceptPayments = billingAccount.CanProcessPayments(msgs, dc);
 
             var receiptRows = "";
             var regStatus = "";
             var registeredOrApplied = "registered";
-            var registrantActivity = checkoutObject.Registration.GetRegistrantActivities().First();
-            var registrationThankYou = participationObject.GetRegistrationThankYou(registrantActivity, msgs);
+            var registrantActivity = checkoutObject.Registration.GetRegistrantActivities(msgs, dc).First();
+            var registrationThankYou = participationObject.GetRegistrationThankYou(registrantActivity, msgs, dc);
             var cost = "";
             var ccFee = "";
             var asFee = "";
@@ -110,6 +142,7 @@ namespace AfterSchoolLibrary.Helpers
             {
                 case RegistrationAssignmentType.Reserved:
                 case RegistrationAssignmentType.ReservedPendingPayment:
+                case RegistrationAssignmentType.ReservedPendingParentalConsent:
                     regStatus = "Reserved";
                     break;
                 case RegistrationAssignmentType.WaitingList:
@@ -128,6 +161,8 @@ namespace AfterSchoolLibrary.Helpers
             // so we should treat them as registered
             if (registrantActivity.AssignmentTypeId == RegistrationAssignmentType.Applied)
                 amountDueOrPaid = "Amount Due (If Confirmed)";
+            else if (registrantActivity.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingParentalConsent)
+                amountDueOrPaid = "Amount Due (If Parent Approved)";
             else if (!canAccountAcceptPayments || registrantActivity.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment)
                 amountDueOrPaid = "Amount Due";
             else
@@ -145,16 +180,16 @@ namespace AfterSchoolLibrary.Helpers
                 else if (checkoutObject.PaymentPlan.IsNotEmpty())
                 {
                     cost = checkoutObject.PaymentPlanCostTodayNoFees.ToCurrency();
-                    ccFee = checkoutObject.GetPaymentPlanCostTodayCreditCardFee(msgs).ToCurrency();
-                    asFee = checkoutObject.GetPaymentPlanCostTodayConvenienceFee(msgs).ToCurrency();
+                    ccFee = checkoutObject.GetPaymentPlanCostTodayCreditCardFee(msgs, dc).ToCurrency();
+                    asFee = checkoutObject.GetPaymentPlanCostTodayConvenienceFee(msgs, dc).ToCurrency();
 
                     additionalDetails = $"today plus {paymentPlan.CostPerPeriod.ToCurrency()} for {(paymentPlan.TotalPeriods.Value - 1)} {paymentPlan.BillingPeriodTypeId.ToString().ToLower()}(s)";
                 }
                 else
                 {
-                    cost = checkoutObject.TuitionCostNoFees.ToCurrency();
-                    ccFee = checkoutObject.GetTuitionCreditCardFee(msgs).ToCurrency();
-                    asFee = checkoutObject.GetTuitionConvenienceFee(msgs).ToCurrency();
+                    cost = (checkoutObject.TuitionCostNoFees + checkoutObject.GetTuitionConvenienceFee(msgs, dc)).ToCurrency();
+                    ccFee = checkoutObject.GetTuitionCreditCardFee(msgs, dc).ToCurrency();
+                    asFee = checkoutObject.GetTuitionConvenienceFee(msgs, dc).ToCurrency();
 
                     additionalDetails = "tuition fee";
                 }
@@ -179,10 +214,11 @@ namespace AfterSchoolLibrary.Helpers
             if (subscription.IsNotEmpty())
             {
                 description = $"Subscription for {participationObject.Name}";
-                cost = checkoutObject.SubscriptionCostTodayNoFees.ToCurrency();
                 additionalDetails = $"per {subscription.BillingPeriodTypeId.ToString().ToLower()}";
-                ccFee = checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs).ToCurrency();
-                asFee = checkoutObject.GetSubscriptionCostTodayConvenienceFee(msgs).ToCurrency();
+
+                cost = (checkoutObject.SubscriptionCostTodayNoFees + checkoutObject.GetSubscriptionCostTodayConvenienceFee(msgs, dc)).ToCurrency();
+                asFee = checkoutObject.GetSubscriptionCostTodayConvenienceFee(msgs, dc).ToCurrency();
+                ccFee = checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc).ToCurrency();
 
                 // add tuition fee row
                 var subscriptionFeeModel = new NameValueCollection()
@@ -200,45 +236,60 @@ namespace AfterSchoolLibrary.Helpers
                     msgs);
             };
 
+            var registrationDetails = "Login to your account to view more details about this registration.";
+            var loginLink = $"{Utilities.LoginUrl(isAfterSchool)}";
+
+            if (isParentCopy)
+            {
+                var parentUser = parentOrGuardian.GetOwner(msgs, dc);
+                if (parentUser.IsNotEmpty() && !parentUser.IsRegistered)
+                {
+                    registrationDetails = "Create your account to review this registration.";
+                    loginLink = parentUser.GetInviteUrl(purchaserAccount);
+                }
+            }
+
             var model = new NameValueCollection()
             {
-                { "FirstName", purchaser.FirstName },
+                { "FirstName", isParentCopy ? purchaser.FirstName : loggedInUser.FirstName },
                 { "ProductName", Utilities.AppName(isAfterSchool) },
-                { "LoginLink", $"{Utilities.LoginUrl(isAfterSchool)}" },
-                { "ActivityContactEmail",  participationObject.ContactEmail},
-                { "ActivityContactPhone",  participationObject.ContactPhone},
-                { "ActivityContactName",  participationObject.ContactName},
+                { "LoginLink", loginLink },
+                { "ActivityContactEmail", participationObject.ContactEmail},
+                { "ActivityContactPhone", participationObject.ContactPhone},
+                { "ActivityContactName", participationObject.ContactName},
                 { "BillerAccountName", billingAccount.Name },
                 { "BillerAccountLink", billingAccount.HomePageUrl },
                 { "AmountDueOrPaid", amountDueOrPaid },
-                { "TotalCost", checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs).ToCurrency() },
+                { "TotalCost", checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs, dc).ToCurrency() },
                 { "BodyRows", receiptRows },
-                { "CustomMessage", registrationThankYou },
+                { "CustomMessage", isParentCopy ? $"{masterRegistrant.FirstName} has registered for the following activity:" : registrationThankYou },
                 { "CreditCardFee", ccFee },
-                { "ConvenienceFee", asFee }
+                { "ConvenienceFee", asFee },
+                { "RegistrationDetails", registrationDetails}
             };
-
-            var subject = $"{registrant.FirstName} has {registeredOrApplied} for {participationObject.Name}!";
+            
+            var subject = $"{participationObject.Name} registration for {masterRegistrant.FirstName}";
             var body = ProcessTemplate(
                 EmailTemplates.Registration_Confirmation,
                 model,
                 "Registration_Confirmation",
                 msgs);
 
-            var mailMsgs = SendGridHelper.SendMail(
+            // SEND EMAILS
+            var mailMsgs = new SystemMessages();
+
+            // Send email to registerer
+            mailMsgs.AddRange(SendGridHelper.SendMail(
                 fromEmail: Email.SendGridNoReplyEmailAddress(isAfterSchool),
-                toEmail: new SendGrid.Helpers.Mail.EmailAddress(parentOrGuardian.Email),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(loggedInUser.Email),
                 subject: subject,
                 body: body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool));
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)));
 
-            // send bcc
+            // send bcc to activity contact
             if (sendBcc)
             {
                 var emails = new List<string>();
-
-                //if (billingAccountOwner.Email.IsEmail())
-                //    emails.Add(billingAccountOwner.Email.ToLower());
 
                 if (participationObject.ContactEmail.IsEmail() && participationObject.ContactEmail.ToLower().NotIn(emails))
                     emails.Add(participationObject.ContactEmail.ToLower());
@@ -728,7 +779,7 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
-        public static SystemMessages SendApprovalNotificationToVisitor(Account visitorAccount, Account hostAccount)
+        public static SystemMessages SendApprovalNotificationToVisitor(Account visitorAccount, Account hostAccount, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
 
@@ -870,8 +921,7 @@ namespace AfterSchoolLibrary.Helpers
                EmailTemplates.ProviderAccount_Added,
                model,
                "provideraccountadded",
-               msgs
-               );
+               msgs);
 
             var mailMsgs = SendGridHelper.SendMail(
                 fromEmail: Email.SendGridNoReplyEmailAddress(hostAccount.IsAfterSchool),
@@ -885,22 +935,85 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
-        private static string ProcessTemplate(byte[] emailTemplate, NameValueCollection model, string cacheId, SystemMessages msgs = null)
+        public static SystemMessages SendPayoutRequestNotification(Payout payout, Account toAccount)
+        {
+            var msgs = new SystemMessages();
+
+            var model = new NameValueCollection()
+            {
+                { "AccountName", toAccount.Name },
+                { "PayoutAmount", payout.Amount.ToCurrency() },
+                { "LoginLink", Utilities.LoginUrl(true, $"{Utilities.BaseUrl(true)}/admin/payout/") },
+            };
+
+            var subject = $"A new payout has been requested by {toAccount.Name}";
+            var body = ProcessTemplate(
+                EmailTemplates.Payout_Request,
+                model,
+                "Payout_Request-1.00",
+                msgs);
+
+            var mailMsgs = SendGridHelper.SendMail(
+                fromEmail: Email.SendGridNoReplyEmailAddress(),
+                toEmail: Email.SendGridSupportEmailAddress,
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId());
+
+            msgs.AddRange(mailMsgs);
+
+            return msgs;
+        }
+
+        public static SystemMessages SendPublishRequestNotification(Activity activity, Account locationOwner, WebUser accountOwner, WebUser loggedInUser)
+        {
+            var msgs = new SystemMessages();
+
+            var model = new NameValueCollection()
+            {
+                { "AccountOwnerName", accountOwner.FirstName },
+                { "CurrentUserName", loggedInUser.DisplayName },
+                { "ActivityName", activity.Name },
+                { "AccountName", locationOwner.Name },
+                { "LoginLink", Utilities.LoginUrl(true, activity.PreviewUrl) },
+                { "ProductName", Utilities.AppName() },
+            };
+
+            var subject = $"{loggedInUser.DisplayName} has requested to publish an activity";
+            var body = ProcessTemplate(
+                EmailTemplates.Publish_Request,
+                model,
+                "Publish_Request-1.00",
+                msgs);
+
+            var mailMsgs = SendGridHelper.SendMail(
+                fromEmail: Email.SendGridNoReplyEmailAddress(),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(accountOwner.Email),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId());
+
+            msgs.AddRange(mailMsgs);
+
+            return msgs;
+        }
+
+        internal static string ProcessTemplate(byte[] emailTemplate, NameValueCollection model, string cacheId, SystemMessages msgs = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             try
             {                   
                 using (Stream stream = new MemoryStream(emailTemplate))
-                using (StreamReader reader = new StreamReader(stream))
-                {
-                    string template = reader.ReadToEnd(); 
+                    using (StreamReader reader = new StreamReader(stream))
+                    {
+                        string template = reader.ReadToEnd(); 
                     
-                    foreach (string key in model.Keys)
-                        template = template.Replace($"@Model.{key}", model[key]);
+                        foreach (string key in model.Keys)
+                            template = template.Replace($"@Model.{key}", model[key]);
 
-                    return template;
-                }
+                        return template;
+                    }
             }
             catch(Exception ex)
             {

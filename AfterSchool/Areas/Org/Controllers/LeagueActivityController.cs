@@ -1846,7 +1846,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult MessageAdd(string id, string subject, string body)
+        public ActionResult MessageAdd(string id, string subject, string body, string sendtostaff)
         {
             var msgs = new SystemMessages();
 
@@ -1864,9 +1864,9 @@ namespace AfterSchool.Areas.Org.Controllers
                     .Where(x => Request[$"registrant-{x.ID.ToString()}"].IsNotBlank())
                     .Select(x => x.ID.Value)
                     .ToList();
-                am = activity.AddMessage(subject, body, registrantIds, SessionVariables.CurrentUser.ID.Value, msgs);
+                am = activity.AddMessage(subject, body, registrantIds, sendtostaff.IsBoolean(), SessionVariables.CurrentUser.ID.Value, msgs);
 
-                BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, null));
+                BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, SessionVariables.CurrentUser.ID.Value, null, null));
             }                
 
             ViewBag.Messages = msgs;

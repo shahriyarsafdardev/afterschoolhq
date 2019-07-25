@@ -282,7 +282,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditRestrictions(string id, string alloworganization, string agerestrictions, string agestart, string ageend, string graderestrictions, string mingrade, string maxgrade, string genderrestrictions, string cmd)
+        public ActionResult EditRestrictions(string id, string alloworganization, string agerestrictions, string agestart, string ageend, string graderestrictions, string mingrade, string maxgrade, string genderrestrictions, string requiresparentalconsent, string cmd)
         {
             var msgs = new SystemMessages();
             Activity activity = null;
@@ -309,7 +309,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "gradestart", graderestrictions.IsNumber() ? mingrade : "-1"},
                     { "gradeend", graderestrictions.IsNumber() ? maxgrade : "-1"},
                     { "genderrestrictions", genderrestrictions},
-                    { "gradeIds", gradeIds.ToArray().ToStringArray().ToStringList() }
+                    { "gradeIds", gradeIds.ToArray().ToStringArray().ToStringList() },
+                    { "requiresparentalconsent", requiresparentalconsent.IfBlank("0") }
                 };
 
                 activity = ActivityService.EditExisting(
@@ -367,14 +368,14 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditContact(string id, string leadertype, string contactname, string contactphone, string contactemail, string instructor, string instructorfirstname, string instructorlastname, string instructoremail, string instructorphone, string cmd)
+        public ActionResult EditContact(string id, string leadertype, string contactname, string contactphone, string contactemail, string instructor, string instructorfirstname, string instructorlastname, string instructoremail, string instructorphone, string cmd, string provider, string providername, string providerfirstname, string providerlastname, string provideremail, string providerphone)
         {
             var msgs = new SystemMessages();
             Activity activity = null;
 
             var values = new Dictionary<string, object>()
             {
-                { "leadertype", leadertype },
+                { "leadertype", leadertype.IfBlank("0") },
                 { "contactname", contactname},
                 { "contactphone", contactphone},
                 { "contactemail", contactemail},
@@ -382,7 +383,13 @@ namespace AfterSchool.Areas.Org.Controllers
                 { "instructorfirstname", instructorfirstname },
                 { "instructorlastname", instructorlastname },
                 { "instructoremail", instructoremail },
-                { "instructorphone", instructorphone }
+                { "instructorphone", instructorphone },
+                { "provider", provider },
+                { "providername", providername },
+                { "providerfirstname", providerfirstname },
+                { "providerlastname", providerlastname },
+                { "provideremail", provideremail },
+                { "providerphone", providerphone }
             };
 
             activity = Activity.LoadByUid(id.ToGuid(), msgs);
@@ -742,7 +749,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditCost(string id, string cost, string costdescription, string acceptpaypal, string acceptcreditcard, string allowtopaylater, string cmd, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, string provider, string providername, string providerfirstname, string providerlastname, string provideremail, string providerphone)
+        public ActionResult EditCost(string id, string cost, string costdescription, string acceptpaypal, string acceptcreditcard, string allowtopaylater, string cmd, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber)
         {
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid());
@@ -762,13 +769,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "haspaymentplan", haspaymentplan.IfBlank("0") },
                     { "paymentplancost", paymentplancost },
                     { "paymentplanperiod", paymentplanperiod },
-                    { "paymentplanperiodnumber", paymentplanperiodnumber },
-                    { "provider", provider },
-                    { "providername", providername },
-                    { "providerfirstname", providerfirstname },
-                    { "providerlastname", providerlastname },
-                    { "provideremail", provideremail },
-                    { "providerphone", providerphone }
+                    { "paymentplanperiodnumber", paymentplanperiodnumber }
                 };
 
                 activity = ActivityService.EditExisting(
@@ -871,7 +872,10 @@ namespace AfterSchool.Areas.Org.Controllers
                             return View("EditLocation", activity);
                         }
                     case "publish":
-                        return RedirectToAction("publish", new { id = activity.Uid, isnew = Request["isnew"] });
+                        if (!MustRequestToPublish(activity))
+                            return RedirectToAction("publish", new { id = activity.Uid, isnew = Request["isnew"] });
+
+                        return RedirectToAction("requesttopublish", new { id = activity.Uid, isnew = Request["isnew"] });
                 }
             }
 
@@ -1690,10 +1694,33 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult PublishDetail(string id)
         {
-            var activity = Activity.LoadByUid(id.ToGuid());
-            ViewBag.Messages = new SystemMessages();
+            var msgs = new SystemMessages();
+            var activity = Activity.LoadByUid(id.ToGuid(), msgs);
             ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.MustRequestToPublish = MustRequestToPublish(activity);
+            ViewBag.ShowCopyButton = ShowCopyButtonOnPublishDetail(activity);
+            ViewBag.IsActivityLeader = IsActivityLeader(activity);
+            ViewBag.Messages = msgs;
             return View(activity);
+        }
+
+        [HttpGet]
+        public ActionResult RequestToPublish(string id)
+        {
+            var msgs = new SystemMessages();
+            var activity = Activity.LoadByUid(id.ToGuid());
+
+            activity.RequestToPublish(SessionVariables.CurrentUser, msgs);
+
+            if (msgs.HasNoErrors())
+                msgs.Add("Your request to publish has been submitted", MessageType.Success);
+
+            ViewBag.Messages = msgs;
+            ViewBag.MustRequestToPublish = MustRequestToPublish(activity);
+            ViewBag.ShowCopyButton = ShowCopyButtonOnPublishDetail(activity);
+            ViewBag.IsActivityLeader = IsActivityLeader(activity);
+            ViewBag.IsFullScreen = Request["isnew"] == "1";
+            return View("publishdetail", activity);
         }
 
         [HttpGet]
@@ -1701,8 +1728,27 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid());
+            var mustRequestToPublish = MustRequestToPublish(activity);
 
-            activity.Publish(SessionVariables.CurrentUser, msgs);
+            if (mustRequestToPublish)
+                msgs.Add("You do not have permissions to publish", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                // check if provided by external provider
+                var location = activity.GetLocation(msgs);
+
+                if (location.IsNotEmpty() && location.HostAccountId != activity.AccountId)
+                {
+                    var visitingAccount = activity.GetAccount(msgs);
+                    SessionVariables.CurrentAccount.ApproveAccessToAccount(visitingAccount, SessionVariables.CurrentUser, msgs);
+
+                    if (msgs.HasNoErrors())
+                        SessionVariables.CurrentAccount.SendApprovalNotificationToVisitor(visitingAccount, msgs);
+                }
+
+                activity.Publish(SessionVariables.CurrentUser, msgs);
+            }
 
             if (msgs.HasNoErrors())
             {
@@ -1717,6 +1763,9 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Messages = msgs;
             ViewBag.IsFullScreen = Request["isnew"] == "1";
+            ViewBag.MustRequestToPublish = mustRequestToPublish;
+            ViewBag.ShowCopyButton = ShowCopyButtonOnPublishDetail(activity);
+            ViewBag.IsActivityLeader = IsActivityLeader(activity);
             return View("publishdetail", activity);
         }
 
@@ -1725,8 +1774,13 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid());
+            var mustRequestToPublish = MustRequestToPublish(activity);
 
-            activity.Unpublish(SessionVariables.CurrentUser, msgs);
+            if (mustRequestToPublish)
+                msgs.Add("You do not have permissions to unpublish", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+                activity.Unpublish(SessionVariables.CurrentUser, msgs);
 
             if (msgs.HasNoErrors())
             {
@@ -1735,6 +1789,9 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             ViewBag.Messages = msgs;
+            ViewBag.MustRequestToPublish = mustRequestToPublish;
+            ViewBag.ShowCopyButton = ShowCopyButtonOnPublishDetail(activity);
+            ViewBag.IsActivityLeader = IsActivityLeader(activity);
             return View("publishdetail", activity);
         }
 
@@ -1887,19 +1944,47 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Messages(string id)
+        public ActionResult Messages(string id, string pn, string rpp)
         {
-            var activity = Activity.LoadByUid(id.ToGuid());
-            ViewBag.Messages = new SystemMessages();
+            var msgs = new SystemMessages();
+            var activity = Activity.LoadByUid(id.ToGuid(), msgs);
+
+            int pageNumber = 1;
+            int recordsPerPage = 10;
+
+            if (pn.IsNumber() && pn.ToInteger() > 0)
+                pageNumber = pn.ToInteger();
+
+            if (rpp.IsNumber() && rpp.ToInteger() > 0)
+                recordsPerPage = rpp.ToInteger();
+
+            var start = recordsPerPage * (pageNumber - 1);
+            var length = recordsPerPage;
+
+            var totalMessageCount = activity.GetMessagesCount(msgs);
+            var activityMessages = activity.GetMessages(start, length, msgs);
+            var totalPages = Math.Ceiling(totalMessageCount.ToDouble() / recordsPerPage).ToInteger();
+
+            ViewBag.Messages = msgs;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.ActivityMessages = activityMessages;
+
+            ViewBag.PagingModel = new PagingModel()
+            {
+                TotalCount = totalMessageCount,
+                PageNumber = pageNumber,
+                RecordsPerPage = recordsPerPage,
+                TotalPages = totalPages
+            };
+
             return View(activity);
         }
 
         [HttpGet]
         public ActionResult MessageDetail(string id)
         {
-            var am = ActivityMessage.Load(id.ToInteger());
+            var am = ActivityMessage.LoadByUid(id.ToGuid());
             var activity = Activity.Load(am.ActivityId.Value);
             ViewBag.Messages = new SystemMessages();
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
@@ -1922,14 +2007,14 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult MessageAdd(string id,string deliveryMethod, string subject, string body)
+        public ActionResult MessageAdd(string id, string deliveryMethod, string subject, string body, string sendtostaff)
         {
             var msgs = new SystemMessages();
 
             if (subject.IsEmpty())
-                msgs.Add("Subject is required", MessageType.UserError);
+                msgs.Add("Message Reason is required", MessageType.UserError);
             if (body.IsEmpty())
-                msgs.Add("Body is required", MessageType.UserError);
+                msgs.Add("Message Body is required", MessageType.UserError);
 
             ActivityMessage am = null;
             var activity = Activity.LoadByUid(id.ToGuid());
@@ -1940,9 +2025,10 @@ namespace AfterSchool.Areas.Org.Controllers
                     .Where(x => Request[$"registrant-{x.ID.ToString()}"].IsNotBlank())
                     .Select(x => x.ID.Value)
                     .ToList();
-                am = activity.AddMessage(subject, body, registrantIds, SessionVariables.CurrentUser.ID.Value, msgs);
+
+                am = activity.AddMessage(subject, body, registrantIds, sendtostaff.IsBoolean(), SessionVariables.CurrentUser.ID.Value, msgs);
                 
-                BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, null));
+                BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, SessionVariables.CurrentUser.ID.Value, null, null));
             }
 
             ViewBag.Messages = msgs;
@@ -1955,7 +2041,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 ViewBag.Messages = msgs;
                 ViewBag.IsActivityLeader = IsActivityLeader(activity);
 
-                return View("messagedetail", am);
+                return View("messagedetail", am.Reload());
             }
 
             ViewBag.Messages = msgs;
@@ -2133,7 +2219,37 @@ namespace AfterSchool.Areas.Org.Controllers
 
         private bool IsActivityLeader(Activity activity)
         {
-            return SessionVariables.AccountUserType == UserType.Administrator || SessionVariables.CurrentUser.IsActivityLeader(activity);
+            if (SessionVariables.CurrentAccount.ID == activity.AccountId)
+            {
+                if (SessionVariables.AccountUserType.In(AccountService.AdminUserTypes))
+                    return true;
+
+                return SessionVariables.CurrentUser.IsActivityLeader(activity);
+            }
+
+            return false;
+
+        }
+
+        private bool MustRequestToPublish(Activity activity)
+        {
+            return !SessionVariables.CurrentUser.CanPublishActivity(SessionVariables.CurrentAccount, activity);
+        }
+
+        private bool IsExternallyProvided(Activity activity)
+        {
+            var location = activity.GetLocation();
+            var hostAccount = location?.GetHostAcount();
+
+            if (hostAccount.IsNotEmpty() && hostAccount.OwnerId.HasValue)
+                return hostAccount.ID != activity.AccountId;
+
+            return false;
+        }
+
+        private bool ShowCopyButtonOnPublishDetail(Activity activity)
+        {
+            return activity.AccountId == SessionVariables.CurrentAccount.ID || !IsExternallyProvided(activity);
         }
     }
 }

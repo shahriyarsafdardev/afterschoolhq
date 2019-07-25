@@ -101,13 +101,13 @@ namespace AfterSchool.Controllers
             return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult SearchLocations(string search)
+        public ActionResult SearchLocations(string search, string type)
         {
             if (!IsRequestFromApp())
                 return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
 
             var msgs = new SystemMessages();
-            var locations = Location.Search(search.Trim(), 0, 10, msgs);
+            var locations = Location.Search(search.Trim(), (LocationType)type.ToInteger(), 0, 10, msgs);
 
             return Json(new { 
                 status = "ok",

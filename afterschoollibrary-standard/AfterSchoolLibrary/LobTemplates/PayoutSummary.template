@@ -1,0 +1,100 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+    <title>@Model.ProductName</title>
+    <style>
+        *, *:before, *:after {
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 8.5in;
+            height: 11in;
+            margin: 0;
+            padding: 0;
+        }
+
+        .text {
+            position: relative;
+            left: 20px;
+            top: 20px;
+            width: 6in;
+            font-family: 'Open Sans';
+            font-size: 10px;
+        }
+
+        #ink-free-area {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 8.5in;
+            height: 3.625in;
+            /* background-color: rgba(255,0,0,0.5) */;
+        }
+
+        #page-content {
+            position: relative;
+            width: 8.125in;
+            height: 7.1875in;
+            left: 0.1875in;
+            top: 3.625in;
+            /* background-color: rgba(0,0,0,0.2) */;
+        }
+
+        table {
+            width: 7.75in;
+        }
+
+        text-center, td.text-center {
+            text-align: center;
+        }
+
+        text-right, td.text-right {
+            text-align: right;
+        }
+
+        table td, table th {
+            padding: 2px;
+        }
+
+        table > thead > th, table > tfoot > td, table > thead, table > tfoot {
+            background-color: #ddd;
+        }
+    </style>
+
+</head>
+<body>
+    <div id="ink-free-area">
+        <div class="text"></div>
+    </div>
+    <div id="page-content">
+		<div class="text">
+			<div>
+				<div>
+					<table>
+						<thead>
+							<tr>
+								<th>Activity</th>
+								<th class="text-center">Amount</th>
+							</tr>
+						</thead>
+						<tbody>
+							@Model.Body
+						</tbody>
+						<tfoot>
+							<tr>
+								<td class="text-right"><strong>Total: </strong></td>
+								<td class="text-right"><strong>@Model.TotalPayout</strong></td>
+							</tr>
+						</tfoot>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

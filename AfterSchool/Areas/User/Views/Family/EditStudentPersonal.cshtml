@@ -1,0 +1,85 @@
+﻿@model Registrant
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var qvms = (List<FormQuestionViewModel>)ViewBag.QuestionViewModels;
+    var school = (Location)ViewBag.School;
+    Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
+}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <div class="panel panel-default">
+
+        <div class="panel-heading">
+            <i class="s7-user"></i> @Model.Name - Personal Info
+
+            <div class="pull-right">
+                <a href="@Url.Action("index", (Request["reg"].IsGuid() ? "home" : "family"))" class="btn btn-default">
+                    Exit
+                </a>
+            </div>
+        </div>
+
+        <div class="panel-body">
+
+            @if (Request["reg"].IsGuid() || Request["student"].IsGuid())
+            {
+                <div role="alert" class="alert alert-danger alert-icon">
+                    <div class="icon">
+                        <span class="s7-info"></span>
+                    </div>
+                    <div class="message">
+                        <p class="text-center text-medium">
+                            You must update/complete your profile in order to continue registration
+                        </p>
+                    </div>
+                </div>
+            }
+
+            <form class="form-horizontal" 
+                  id="form-save-personal" 
+                  method="post" 
+                  action="@Url.Action("editstudentpersonal", "family", new { id = Model.Uid, reg = Request["reg"], student = Request["student"] })">
+
+                @foreach (var qvm in qvms)
+                {
+                    Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
+                }
+
+                @{
+                    Html.RenderPartial(
+                        "~/Views/Shared/_LocationEdit.cshtml",
+                        school ?? new Location(),
+                        new ViewDataDictionary()
+                        {
+                            { "label", "Enter your school" },
+                            { "searchOnly", true },
+                            { "placeholderText", "Enter your school name" },
+                            { "locationType", (int)LocationType.School }
+                        }
+                    );
+                }
+
+                <div class="margin-v-20">
+                    <div class="col-md-offset-3 col-md-6">
+                        <button type="submit" id="btn-save-personal" class="btn btn-primary btn-block btn-lg">Save and Continue &raquo;</button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+</div>
+
+
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('#form-save-personal').submit(function () {
+            $('#btn-save-personal').html('Saving...');
+            $('#btn-save-personal').prop('disabled', true);
+        });
+    });
+</script>

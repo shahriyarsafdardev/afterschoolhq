@@ -34,7 +34,7 @@
 
                     @if (!Model.IsPublished)
                     {
-                        @: @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editconfirmation", "publish", true, true, Request))
+                        @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editconfirmation", "publish", true, true, Request))
                     }
                     @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(true, false))
                     @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editconfirmation", "prev", true, false, Request))

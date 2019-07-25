@@ -55,6 +55,7 @@ namespace AfterSchoolLibrary.Models
 			ActivityGroup.Create(dc);
 			AccountActivityGroup.Create(dc);
 			Registrant.Create(dc);
+			RegistrantWebUser.Create(dc);
 			ContactList.Create(dc);
 			ContactListRegistrant.Create(dc);
 			ActivityPayment.Create(dc);
@@ -91,6 +92,8 @@ namespace AfterSchoolLibrary.Models
 			AttachedCoupon.Create(dc);
 			PurchaseableObjectCoupon.Create(dc);
 			Purchase.Create(dc);
+			TwilioSMS.Create(dc);
+			Migration.Create(dc);
 			
 
 			return msgs;
@@ -127,6 +130,7 @@ namespace AfterSchoolLibrary.Models
 			ActivityGroup.Alter(dc);
 			AccountActivityGroup.Alter(dc);
 			Registrant.Alter(dc);
+			RegistrantWebUser.Alter(dc);
 			ContactList.Alter(dc);
 			ContactListRegistrant.Alter(dc);
 			ActivityPayment.Alter(dc);
@@ -163,6 +167,8 @@ namespace AfterSchoolLibrary.Models
 			AttachedCoupon.Alter(dc);
 			PurchaseableObjectCoupon.Alter(dc);
 			Purchase.Alter(dc);
+			TwilioSMS.Alter(dc);
+			Migration.Alter(dc);
 			
 
 			return msgs;
@@ -185,6 +191,7 @@ namespace AfterSchoolLibrary.Models
 			Activity.Update(new Hashtable(){{"IsArchived",false}}, new Hashtable(){{"IsArchived", DBNull.Value}}, Activity.ObjectMap, dc);
 			Activity.Update(new Hashtable(){{"ActivityTypeId",0}}, new Hashtable(){{"ActivityTypeId", DBNull.Value}}, Activity.ObjectMap, dc);
 			Activity.Update(new Hashtable(){{"LeaderTypeId",0}}, new Hashtable(){{"LeaderTypeId", DBNull.Value}}, Activity.ObjectMap, dc);
+			Activity.Update(new Hashtable(){{"RequiresParentalConsent",false}}, new Hashtable(){{"RequiresParentalConsent", DBNull.Value}}, Activity.ObjectMap, dc);
 			Location.Update(new Hashtable(){{"IsDefault",false}}, new Hashtable(){{"IsDefault", DBNull.Value}}, Location.ObjectMap, dc);
 			Location.Update(new Hashtable(){{"LocationTypeId",0}}, new Hashtable(){{"LocationTypeId", DBNull.Value}}, Location.ObjectMap, dc);
 			Location.Update(new Hashtable(){{"IsTest",false}}, new Hashtable(){{"IsTest", DBNull.Value}}, Location.ObjectMap, dc);
@@ -194,6 +201,7 @@ namespace AfterSchoolLibrary.Models
 			ActivitySchedule.Update(new Hashtable(){{"IsOngoing",false}}, new Hashtable(){{"IsOngoing", DBNull.Value}}, ActivitySchedule.ObjectMap, dc);
 			ActivityInstance.Update(new Hashtable(){{"Day",0}}, new Hashtable(){{"Day", DBNull.Value}}, ActivityInstance.ObjectMap, dc);
 			ActivityInstance.Update(new Hashtable(){{"InstanceTypeId",0}}, new Hashtable(){{"InstanceTypeId", DBNull.Value}}, ActivityInstance.ObjectMap, dc);
+			ActivityMessage.Update(new Hashtable(){{"SendToStaff",false}}, new Hashtable(){{"SendToStaff", DBNull.Value}}, ActivityMessage.ObjectMap, dc);
 			Account.Update(new Hashtable(){{"IsAdminAccount",false}}, new Hashtable(){{"IsAdminAccount", DBNull.Value}}, Account.ObjectMap, dc);
 			Account.Update(new Hashtable(){{"IsActive",false}}, new Hashtable(){{"IsActive", DBNull.Value}}, Account.ObjectMap, dc);
 			Account.Update(new Hashtable(){{"IsAfterSchool",false}}, new Hashtable(){{"IsAfterSchool", DBNull.Value}}, Account.ObjectMap, dc);
@@ -239,6 +247,7 @@ namespace AfterSchoolLibrary.Models
 			Registrant.Update(new Hashtable(){{"IsContactOnly",false}}, new Hashtable(){{"IsContactOnly", DBNull.Value}}, Registrant.ObjectMap, dc);
 			Registrant.Update(new Hashtable(){{"IsParentOrGuardian",false}}, new Hashtable(){{"IsParentOrGuardian", DBNull.Value}}, Registrant.ObjectMap, dc);
 			Registrant.Update(new Hashtable(){{"AllowTextMessages",false}}, new Hashtable(){{"AllowTextMessages", DBNull.Value}}, Registrant.ObjectMap, dc);
+			Registrant.Update(new Hashtable(){{"ProfileStatusId",0}}, new Hashtable(){{"ProfileStatusId", DBNull.Value}}, Registrant.ObjectMap, dc);
 			ActivityPayment.Update(new Hashtable(){{"ParticipationObjectTypeId",0}}, new Hashtable(){{"ParticipationObjectTypeId", DBNull.Value}}, ActivityPayment.ObjectMap, dc);
 			RegistrantActivity.Update(new Hashtable(){{"ParticipationObjectTypeId",0}}, new Hashtable(){{"ParticipationObjectTypeId", DBNull.Value}}, RegistrantActivity.ObjectMap, dc);
 			RegistrantActivity.Update(new Hashtable(){{"AssignmentTypeId",0}}, new Hashtable(){{"AssignmentTypeId", DBNull.Value}}, RegistrantActivity.ObjectMap, dc);
@@ -277,6 +286,8 @@ namespace AfterSchoolLibrary.Models
 			SubscriptionPlan.Update(new Hashtable(){{"DoesAutoRenew",false}}, new Hashtable(){{"DoesAutoRenew", DBNull.Value}}, SubscriptionPlan.ObjectMap, dc);
 			SubscriptionPlan.Update(new Hashtable(){{"IsActive",false}}, new Hashtable(){{"IsActive", DBNull.Value}}, SubscriptionPlan.ObjectMap, dc);
 			SubscriptionPlan.Update(new Hashtable(){{"PlanTypeId",0}}, new Hashtable(){{"PlanTypeId", DBNull.Value}}, SubscriptionPlan.ObjectMap, dc);
+			RegistrantSubscriptionPlan.Update(new Hashtable(){{"PaymentTypeFeesPaidBy",0}}, new Hashtable(){{"PaymentTypeFeesPaidBy", DBNull.Value}}, RegistrantSubscriptionPlan.ObjectMap, dc);
+			RegistrantSubscriptionPlan.Update(new Hashtable(){{"ConvenienceFeesPaidBy",0}}, new Hashtable(){{"ConvenienceFeesPaidBy", DBNull.Value}}, RegistrantSubscriptionPlan.ObjectMap, dc);
 			Transaction.Update(new Hashtable(){{"PaymentTypeId",0}}, new Hashtable(){{"PaymentTypeId", DBNull.Value}}, Transaction.ObjectMap, dc);
 			Transaction.Update(new Hashtable(){{"TransactionTypeId",0}}, new Hashtable(){{"TransactionTypeId", DBNull.Value}}, Transaction.ObjectMap, dc);
 			Transaction.Update(new Hashtable(){{"PaymentSourceTypeId",0}}, new Hashtable(){{"PaymentSourceTypeId", DBNull.Value}}, Transaction.ObjectMap, dc);
@@ -343,6 +354,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityGradeLevel_GradeLevelId ON [ActivityGradeLevel] (GradeLevelId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityMessage_ActivityId ON [ActivityMessage] (ActivityId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityMessage_ActivityGroupId ON [ActivityMessage] (ActivityGroupId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityMessage_Uid ON [ActivityMessage] (Uid)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityMessageRegistrant_ActivityMessageId ON [ActivityMessageRegistrant] (ActivityMessageId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityMessageRegistrant_RegistrantId ON [ActivityMessageRegistrant] (RegistrantId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityMessageRegistrant_ActivityMessageId_RegistrantId ON [ActivityMessageRegistrant] (ActivityMessageId,RegistrantId)"));
@@ -417,6 +429,9 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registrant_IsMaster_WebUserId ON [Registrant] (WebUserId,IsMaster)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registrant_FirstRegistrantId ON [Registrant] (FirstRegistrantId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registrant_AccountId_ParentRegistrantId ON [Registrant] (ParentRegistrantId,AccountId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrantWebUser_RegistrantId ON [RegistrantWebUser] (RegistrantId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrantWebUser_WebUserId ON [RegistrantWebUser] (WebUserId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrantWebUser_RegistrantId_WebUserId ON [RegistrantWebUser] (RegistrantId,WebUserId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ContactList_AccountId ON [ContactList] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ContactListRegistrant_ContactListId_RegistrantId ON [ContactListRegistrant] (ContactListId,RegistrantId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ContactListRegistrant_ContactListId ON [ContactListRegistrant] (ContactListId)"));
@@ -532,6 +547,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Transaction_PayerAccountId_TransactionTypeId ON [Transaction] (PayerAccountId,TransactionTypeId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Transaction_StripeChargeOrRefundId ON [Transaction] (StripeChargeOrRefundId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Transaction_OriginalTransactionId ON [Transaction] (OriginalTransactionId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Transaction_PayoutId ON [Transaction] (PayoutId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Payout_AccountId ON [Payout] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Payout_AccountId_PayoutStatusId ON [Payout] (AccountId,PayoutStatusId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Payout_PayoutStatusId ON [Payout] (PayoutStatusId)"));
@@ -557,6 +573,10 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Purchase_RegistrationId ON [Purchase] (RegistrationId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Purchase_RegistrantId ON [Purchase] (RegistrantId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Purchase_CouponId ON [Purchase] (CouponId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_TwilioSMS_TwilioResourceId ON [TwilioSMS] (TwilioResourceId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_TwilioSMS_ActivityMessageId_RegistrantId ON [TwilioSMS] (RegistrantId,ActivityMessageId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_TwilioSMS_RegistrantId ON [TwilioSMS] (RegistrantId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Migration_UniqueIdentifier ON [Migration] (UniqueIdentifier)"));
 			
 
 			return msgs;
@@ -650,9 +670,9 @@ namespace AfterSchoolLibrary.Models
             }            
         }
 
-		#endregion
+        #endregion
 
-		#region "UserDefined"
+        #region "UserDefined"
 
         #endregion
 	}

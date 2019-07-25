@@ -1,12 +1,11 @@
-﻿
-@using System.Collections.Specialized;
+﻿@using System.Collections.Specialized;
 @model FormQuestionViewModel
 
 <div class="form-group">
     @if (Model.Question.QuestionTypeId == QuestionType.Checkbox)
     {
         <div class="col-md-6 col-md-offset-3">
-            @{ Html.RenderPartial("~/Views/Shared/Form/_Checkbox.cshtml", Model); }
+            @{ Html.RenderPartial("~/Views/Shared/Form/_Checkbox.cshtml", Model, new ViewDataDictionary() { { "AdditionalClass", ViewData["AdditionalClass"] } }); }
         </div>
     }
     else
@@ -14,7 +13,7 @@
        if(Model.Question.QuestionTypeId != QuestionType.TextBlock)
         {
             <div class="col-md-3 control-label">
-                @{ Html.RenderPartial("~/Views/Shared/Form/_Label.cshtml", Model); }
+                @{ Html.RenderPartial("~/Views/Shared/Form/_Label.cshtml", Model, new ViewDataDictionary() { { "AdditionalClass", ViewData["AdditionalClass"] } }); }
             </div>
         }
 
@@ -22,30 +21,33 @@
             @switch (Model.Question.QuestionTypeId)
             {
                 case QuestionType.TextBlock:
-                    Html.RenderPartial("~/Views/Shared/Form/_TextBlock.cshtml", Model);
+                    Html.RenderPartial("~/Views/Shared/Form/_TextBlock.cshtml", Model, new ViewDataDictionary() { { "AdditionalClass", ViewData["AdditionalClass"] } });
                     break;
                 case QuestionType.TextBox:
                 case QuestionType.Email:
                 case QuestionType.Number:
-                    Html.RenderPartial("~/Views/Shared/Form/_Textbox.cshtml", Model);
+                    Html.RenderPartial("~/Views/Shared/Form/_Textbox.cshtml", Model, new ViewDataDictionary() { { "AdditionalClass", ViewData["AdditionalClass"] } });
+                    break;
+                case QuestionType.FileUpload:
+                    Html.RenderPartial("~/Views/Shared/Form/_FileUpload.cshtml", Model, new ViewDataDictionary() { { "AdditionalClass", ViewData["AdditionalClass"] } });
                     break;
                 case QuestionType.Date:
-                    Html.RenderPartial("~/Views/Shared/Form/_Date.cshtml", Model);
+                    Html.RenderPartial("~/Views/Shared/Form/_Date.cshtml", Model, new ViewDataDictionary() { { "AdditionalClass", ViewData["Class"] } });
                     break;
                 case QuestionType.DropDownList:
-                    Html.RenderPartial("~/Views/Shared/Form/_DropDownList.cshtml", Model);
+                    Html.RenderPartial("~/Views/Shared/Form/_DropDownList.cshtml", Model, new ViewDataDictionary() { { "AdditionalClass", ViewData["AdditionalClass"] } });
                     break;
                 case QuestionType.RadioList:
-                    Html.RenderPartial("~/Views/Shared/Form/_RadioList.cshtml", Model);
+                    Html.RenderPartial("~/Views/Shared/Form/_RadioList.cshtml", Model, new ViewDataDictionary() { { "AdditionalClass", ViewData["AdditionalClass"] } });
                     break;
                 case QuestionType.TextArea:
-                    Html.RenderPartial("~/Views/Shared/Form/_TextArea.cshtml", Model);
+                    Html.RenderPartial("~/Views/Shared/Form/_TextArea.cshtml", Model, new ViewDataDictionary() { { "AdditionalClass", ViewData["AdditionalClass"] } });
                     break;
                 case QuestionType.RadioMatrix:
-                    Html.RenderPartial("~/Views/Shared/Form/_RadioMatrix.cshtml", Model);
+                    Html.RenderPartial("~/Views/Shared/Form/_RadioMatrix.cshtml", Model, new ViewDataDictionary() { { "AdditionalClass", ViewData["AdditionalClass"] } });
                     break;
                 case QuestionType.CheckboxList:
-                    Html.RenderPartial("~/Views/Shared/Form/_CheckboxList.cshtml", Model);
+                    Html.RenderPartial("~/Views/Shared/Form/_CheckboxList.cshtml", Model, new ViewDataDictionary() { { "AdditionalClass", ViewData["AdditionalClass"] } });
                     break;
                 default:
                     break;

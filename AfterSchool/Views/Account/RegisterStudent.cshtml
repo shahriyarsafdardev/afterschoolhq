@@ -1,0 +1,83 @@
+﻿@model ParticipationObject
+@{
+    ViewBag.Title = "RegisterStudent";
+    Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
+    var cart = (Cart)ViewBag.Cart;
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var alreadyRegistered = (bool)ViewBag.AlreadyRegistered;
+}
+
+@{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+@{ Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", SessionVariables.RegistrationStartPageAccount); }
+
+<div class="reg-header">
+    <div>        
+        <div>
+            <h1>You are registering for: @Model.Name</h1>
+        </div>
+    </div>
+</div>
+
+<div>
+    <div class="am-content">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="text-center">
+                    <h2>Registration Confirmation</h2><br />
+                </div>
+                <div class="panel-body">
+
+                    @if (alreadyRegistered)
+                    {
+                        <p class="text-medium-small text-center">
+                            You've already registered for @Model.Name
+                        </p>
+
+                          <div class="padding-v-20">
+                            <a href="@SessionVariables.RegistrationStartPageAccount.HomePageUrl" class="btn btn-register btn-lg">&laquo; View More Activities</a>
+                        </div>
+                    }
+                    else
+                    { 
+                        <form method="post" id="register-form" class="form-horizontal" action="@Url.Action("RegisterStudent", "account")">
+                            <div class="form-group">
+                                <label for="" class="control-label col-md-3">
+                                </label>
+                                <div class="col-md-9">
+                                    <div class="am-checkbox">
+                                        <input type="checkbox" required class="form-control" name="agree" id="agree" />
+                                        <label for="agree">
+                                            I confirm that I have entered both my information and my parent's information correctly and I intend to participate in <strong>@Model.Name</strong><br />
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="padding-v-20">
+                                <button type="submit" id="btn-create-account" class="btn btn-register btn-lg">Register &raquo;</button>
+                            </div>
+
+                            <div class="row">
+                                <div class="padding-v-20 text-center">
+                                    <a href="javascript:history.go(-1)" class="text-muted">&laquo; Back</a>
+                                </div>
+                            </div>
+
+                        </form>
+                    }
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('#register-form').submit(function () {
+            $('#btn-register-account').html('Registering...');
+            $('#btn-register-account').prop('disabled', true);
+        });
+    });
+</script>
+
