@@ -1528,14 +1528,12 @@ namespace AfterSchoolLibrary.Services
             return relationship;
         }
 
-        /// <summary>
-        /// Approves access to the host account 
-        /// </summary>
-        /// <param name="hostAccount"></param>
-        /// <param name="visitorAccount"></param>
-        /// <param name="loggedInUser"></param>
-        /// <param name="dc"></param>
-        /// <returns></returns>
+        public static bool IsApprovedAsVisitorTo(this Account visitorAccount, Account hostAccount, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var relationship = AccountRelationship.LoadByHostAccountIdByVisitorAccountId(hostAccount.ID.Value, visitorAccount.ID.Value, msgs, dc);
+            return relationship.ApprovalStatusId == ApprovalStatus.Approved;
+        }
+
         public static AccountRelationship ApproveAccessToAccount(this Account hostAccount, Account visitorAccount, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return ApproveAccessToAccount(hostAccount, visitorAccount, HostPermissionType.ApproveOnly, loggedInUser, msgs, dc);
@@ -1548,7 +1546,14 @@ namespace AfterSchoolLibrary.Services
             if (relationship.IsNotEmpty())
                 msgs.AddRange(AccountRelationshipService.UpdateApprovalStatus(hostAccount, visitorAccount, ApprovalStatus.Approved, loggedInUser, dc));
             else
-                relationship = AccountRelationshipService.CreateNew(hostAccount, visitorAccount, ApprovalStatus.Approved, hostPermissionType, loggedInUser, msgs, dc);
+                relationship = AccountRelationshipService.CreateNew(
+                    hostAccount, 
+                    visitorAccount, 
+                    ApprovalStatus.Approved, 
+                    hostPermissionType, 
+                    loggedInUser, 
+                    msgs, 
+                    dc);
 
             return relationship;
         }
