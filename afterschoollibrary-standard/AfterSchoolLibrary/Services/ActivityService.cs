@@ -1366,15 +1366,20 @@ namespace AfterSchoolLibrary.Services
         {
             var msgs = new SystemMessages();
             var loggedInUser = new WebUser { ID = loggedInUserId };
+            var newProvider = false;
 
             Account providerAccount = null;
 
             // provider already exists
             if (provider.IsNumber() && provider.ToInteger() > 0)
+            {                
                 providerAccount = Account.Load(provider.ToInteger(), msgs, dc);
+                newProvider = providerAccount.ID != activity.ProviderAccountId;
+            }
             else
             {
                 var providerMsgs = new SystemMessages();
+                newProvider = true;
 
                 if (providername.IsEmpty())
                     providerMsgs.Add("Provider Organization or Program is required", MessageType.UserError);
@@ -2145,18 +2150,14 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        public static void NotifyProviderOfNewActivity(int activityId, int loggedInUserId)
+        public static void NotifyProviderOfNewActivity(this Activity activity, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
-            var activity = Activity.Load(activityId, msgs);
-
             if (!activity.ProviderAccountId.HasValue)
                 return;
 
-            var provider = activity.GetProvider(msgs);
-            var loggedInUser = WebUser.Load(loggedInUserId, msgs);            
-            var hostAccount = activity.GetAccount(msgs);
-            var providerOwner = provider.GetAccountOwner(msgs);
+            var provider = activity.GetProvider(msgs, dc);
+            var hostAccount = activity.GetAccount(msgs, dc);
+            var providerOwner = provider.GetAccountOwner(msgs, dc);
 
             if (provider.IsNotEmpty())
                 msgs.AddRange(Helpers.EmailHelper.SendProviderNewActivityNotification(hostAccount, provider, providerOwner, activity, loggedInUser));
