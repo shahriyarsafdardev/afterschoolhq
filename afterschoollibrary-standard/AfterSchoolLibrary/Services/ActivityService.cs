@@ -1366,20 +1366,15 @@ namespace AfterSchoolLibrary.Services
         {
             var msgs = new SystemMessages();
             var loggedInUser = new WebUser { ID = loggedInUserId };
-            var newProvider = false;
 
             Account providerAccount = null;
 
             // provider already exists
             if (provider.IsNumber() && provider.ToInteger() > 0)
-            {                
                 providerAccount = Account.Load(provider.ToInteger(), msgs, dc);
-                newProvider = providerAccount.ID != activity.ProviderAccountId;
-            }
             else
             {
                 var providerMsgs = new SystemMessages();
-                newProvider = true;
 
                 if (providername.IsEmpty())
                     providerMsgs.Add("Provider Organization or Program is required", MessageType.UserError);
