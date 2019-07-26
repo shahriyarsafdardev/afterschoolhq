@@ -4,11 +4,13 @@
     var accountOrDashboard = "Account";
     var canPublishActivity = ViewData["CanPublishActivity"].IsNotEmpty() ? ViewData["CanPublishActivity"].ToString().ToBoolean() : false;
     var participationObject = (ParticipationObject)ViewData["ParticipationObject"];
+    var dashboardUrl = Url.Action("index", "home", new { area = "user" });
 
     if (Model.AccountTypeId != AccountType.Registrant)
     {
         accountOrDashboard = "Dashboard";
-    }    
+        dashboardUrl = Url.Action("index", "home", new { area = "org" });
+    }
 }
 
 @helper RenderReturnToHomeUrl()
@@ -47,7 +49,7 @@
                                     Approve &amp; Publish Activity &raquo;
                                 </a>
                             }
-                            <a href="@Url.Action("index", "home", new { area = "user" })" class="btn btn-link">View @accountOrDashboard</a>
+                            <a href="@dashboardUrl" class="btn btn-link">View @accountOrDashboard</a>
                             <a href="@Url.Action("index", "logout", new { returnurl = SessionVariables.RegistrationStartPageAccount.HomePageUrl })" class="btn btn-link">Logout</a>
                         }
                         else

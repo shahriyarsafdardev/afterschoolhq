@@ -2145,18 +2145,14 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        public static void NotifyProviderOfNewActivity(int activityId, int loggedInUserId)
+        public static void NotifyProviderOfNewActivity(this Activity activity, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
-            var activity = Activity.Load(activityId, msgs);
-
             if (!activity.ProviderAccountId.HasValue)
                 return;
 
-            var provider = activity.GetProvider(msgs);
-            var loggedInUser = WebUser.Load(loggedInUserId, msgs);            
-            var hostAccount = activity.GetAccount(msgs);
-            var providerOwner = provider.GetAccountOwner(msgs);
+            var provider = activity.GetProvider(msgs, dc);
+            var hostAccount = activity.GetAccount(msgs, dc);
+            var providerOwner = provider.GetAccountOwner(msgs, dc);
 
             if (provider.IsNotEmpty())
                 msgs.AddRange(Helpers.EmailHelper.SendProviderNewActivityNotification(hostAccount, provider, providerOwner, activity, loggedInUser));
