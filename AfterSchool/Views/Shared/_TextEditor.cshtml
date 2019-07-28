@@ -7,8 +7,9 @@
         required = " required=\"required\" ";
     }
 }
+
+<div id="touch-screen-msg" class="text-danger hide"><em>Please tap and hold to edit content</em></div>
 <div class="padding-10 border-light-gray rounded-corners">
-    <div id="touch-screen-msg" class="text-danger hide"><em>Please tap and hold to edit content</em></div>
     <div class="editable" id="@ViewData["id"]-div">@Html.Raw(Model)</div>
     <textarea name="@ViewData["name"]" id="@ViewData["id"]" class="hide" @required></textarea>
 </div>
@@ -32,6 +33,6 @@
 
     function setTextAreaValue@(ViewData["id"])() {
         $('#@ViewData["id"]').val($('#@ViewData["id"]-div:first-child').html());
-    } 
+    }
 
 </script>
