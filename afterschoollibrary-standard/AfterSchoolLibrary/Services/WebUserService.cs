@@ -148,7 +148,8 @@ namespace AfterSchoolLibrary.Services
             var location = activity.GetLocation();
             var hostAccount = location?.GetHostAcount();
 
-            if (hostAccount.IsEmpty() || hostAccount.ID == currentAccount.ID || !hostAccount.HasAccountOwner)
+            // if host account doesn't exist, is unclaimed, or is actually the same as the current account
+            if (hostAccount.IsEmpty() || !hostAccount.HasAccountOwner || hostAccount.ID == currentAccount.ID)
                 return true;
 
             return false;
