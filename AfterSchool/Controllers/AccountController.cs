@@ -177,15 +177,6 @@ namespace AfterSchool.Controllers
                                 loggedInUser: null,
                                 msgs: amsgs,
                                 dc: adc);
-
-                            // create account
-                            account = user.AddNewRegistrantAccount(
-                                userType: UserType.Owner,
-                                isActive: true,
-                                isAfterSchool: SessionVariables.IsAfterSchool.Value,
-                                loggedInUser: user,
-                                msgs: amsgs,
-                                dc: adc);
                         }
                         else
                         {
@@ -195,9 +186,16 @@ namespace AfterSchool.Controllers
                             user.LastModifiedBy = SessionVariables.CurrentUser.ID;
                             user.LastModifiedDate = System.DateTime.UtcNow;
                             amsgs.AddRange(user.Save(adc));
-
-                            account = SessionVariables.CurrentAccount;
                         }
+
+                        // create account
+                        account = user.AddNewRegistrantAccount(
+                            userType: UserType.Owner,
+                            isActive: true,
+                            isAfterSchool: SessionVariables.IsAfterSchool.Value,
+                            loggedInUser: user,
+                            msgs: amsgs,
+                            dc: adc);
 
                         // create parent registrant record
                         var registrant = account.CreateRegistrant(
@@ -228,9 +226,7 @@ namespace AfterSchool.Controllers
                     onSuccess: (SystemMessages smsgs) =>
                     {
                         msgs.AddRange(smsgs);
-                        SessionVariables.CurrentUser = user;
-                        SessionVariables.CurrentAccount = account;
-                        SessionVariables.AccountUserType = user.GetUserType(account);
+                        LoadSessionInfo(user, account);
                     },
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                     onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
