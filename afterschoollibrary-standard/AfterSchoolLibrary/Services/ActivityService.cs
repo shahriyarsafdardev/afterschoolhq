@@ -2243,8 +2243,12 @@ namespace AfterSchoolLibrary.Services
         {
             var location = activity.GetLocation(msgs, dc);
             var locationOwner = location.GetHostAcount(msgs, dc);
-            var accountOwner = locationOwner.GetAccountOwner(msgs, dc);
-            msgs.AddRange(Helpers.EmailHelper.SendPublishRequestNotification(activity, locationOwner, accountOwner, loggedInUser));
+
+            if (locationOwner.HasAccountOwner)
+            {
+                var accountOwner = locationOwner.GetAccountOwner(msgs, dc);
+                msgs.AddRange(Helpers.EmailHelper.SendPublishRequestNotification(activity, locationOwner, accountOwner, loggedInUser));
+            }
         }
     }
 }
