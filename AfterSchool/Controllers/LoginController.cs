@@ -77,7 +77,7 @@ namespace AfterSchool.Controllers
                     return RedirectToAction("select", "login", new { returnurl });
 
                 if (returnurl.IsNotEmpty())
-                    return Redirect(returnurl);
+                    return HandleRedirectAfterLogin(returnurl);
 
                 return LoginRedirect();
             }
