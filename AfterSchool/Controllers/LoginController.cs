@@ -21,7 +21,7 @@ namespace AfterSchool.Controllers
             if (loggedInWithAnAccount && (regaccount.IsEmpty() || SessionVariables.CurrentAccount.AccountTypeId == AccountType.Registrant))
             {
                 if (Request["returnurl"].IsNotEmpty())
-                    return Redirect(Request["returnurl"]);
+                    return HandleRedirectAfterLogin(Request["returnurl"]);
 
                 return LoginRedirect();
             }
@@ -77,7 +77,7 @@ namespace AfterSchool.Controllers
                     return RedirectToAction("select", "login", new { returnurl });
 
                 if (returnurl.IsNotEmpty())
-                    return Redirect(returnurl);
+                    return HandleRedirectAfterLogin(returnurl);
 
                 return LoginRedirect();
             }

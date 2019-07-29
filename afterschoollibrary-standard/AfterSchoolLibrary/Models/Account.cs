@@ -334,6 +334,14 @@ namespace AfterSchoolLibrary.Models
 
 		#region "UserDefined"
 
+        public bool HasAccountOwner
+        {
+            get
+            {
+                return OwnerId.HasValue;
+            }
+        }
+
         public bool HasStripeConnectedAccount
         {
             get
@@ -480,7 +488,7 @@ namespace AfterSchoolLibrary.Models
                         (
                             AccountTypeId = {(int)AccountType.ActivityProvider} and
                             Contains(name, '{"\""}{query.Split(' ').ToStringList("*\" AND \"")}{"*\""}')
-                        ) and IsTest = 0
+                        ) and IsTest = 0 and OwnerId != NULL
                 ";
 
             return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);

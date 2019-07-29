@@ -2154,8 +2154,13 @@ namespace AfterSchoolLibrary.Services
             var hostAccount = activity.GetAccount(msgs, dc);
             var providerOwner = provider.GetAccountOwner(msgs, dc);
 
-            if (provider.IsNotEmpty())
-                msgs.AddRange(Helpers.EmailHelper.SendProviderNewActivityNotification(hostAccount, provider, providerOwner, activity, loggedInUser));
+            if (provider.IsNotEmpty() && providerOwner.IsNotEmpty())
+                msgs.AddRange(Helpers.EmailHelper.SendProviderNewActivityNotification(
+                    hostAccount, 
+                    provider, 
+                    providerOwner, 
+                    activity, 
+                    loggedInUser));
         }
 
         public static void Publish(this Activity activity, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -2243,8 +2248,12 @@ namespace AfterSchoolLibrary.Services
         {
             var location = activity.GetLocation(msgs, dc);
             var locationOwner = location.GetHostAcount(msgs, dc);
-            var accountOwner = locationOwner.GetAccountOwner(msgs, dc);
-            msgs.AddRange(Helpers.EmailHelper.SendPublishRequestNotification(activity, locationOwner, accountOwner, loggedInUser));
+
+            if (locationOwner.HasAccountOwner)
+            {
+                var accountOwner = locationOwner.GetAccountOwner(msgs, dc);
+                msgs.AddRange(Helpers.EmailHelper.SendPublishRequestNotification(activity, locationOwner, accountOwner, loggedInUser));
+            }
         }
     }
 }

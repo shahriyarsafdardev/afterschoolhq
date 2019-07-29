@@ -84,7 +84,13 @@ namespace AfterSchool.Controllers
                 var masterRegistrant = SessionVariables.CurrentUser.GetMasterRegistrant();
 
                 if (masterRegistrant.IsNotEmpty())
+                {
+                    // need to load correct session info
+                    if (masterRegistrant.AccountId != SessionVariables.CurrentAccount.ID)
+                        LoadSessionInfo(SessionVariables.CurrentUser, masterRegistrant.GetAccount());
+
                     return RedirectToAction("select");
+                }
             }
 
             var msgs = new SystemMessages();
@@ -171,15 +177,6 @@ namespace AfterSchool.Controllers
                                 loggedInUser: null,
                                 msgs: amsgs,
                                 dc: adc);
-
-                            // create account
-                            account = user.AddNewRegistrantAccount(
-                                userType: UserType.Owner,
-                                isActive: true,
-                                isAfterSchool: SessionVariables.IsAfterSchool.Value,
-                                loggedInUser: user,
-                                msgs: amsgs,
-                                dc: adc);
                         }
                         else
                         {
@@ -189,9 +186,16 @@ namespace AfterSchool.Controllers
                             user.LastModifiedBy = SessionVariables.CurrentUser.ID;
                             user.LastModifiedDate = System.DateTime.UtcNow;
                             amsgs.AddRange(user.Save(adc));
-
-                            account = SessionVariables.CurrentAccount;
                         }
+
+                        // create account
+                        account = user.AddNewRegistrantAccount(
+                            userType: UserType.Owner,
+                            isActive: true,
+                            isAfterSchool: SessionVariables.IsAfterSchool.Value,
+                            loggedInUser: user,
+                            msgs: amsgs,
+                            dc: adc);
 
                         // create parent registrant record
                         var registrant = account.CreateRegistrant(
@@ -222,9 +226,7 @@ namespace AfterSchool.Controllers
                     onSuccess: (SystemMessages smsgs) =>
                     {
                         msgs.AddRange(smsgs);
-                        SessionVariables.CurrentUser = user;
-                        SessionVariables.CurrentAccount = account;
-                        SessionVariables.AccountUserType = user.GetUserType(account);
+                        LoadSessionInfo(user, account);
                     },
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                     onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
@@ -735,13 +737,13 @@ namespace AfterSchool.Controllers
                         {
                             var firstName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).Value;
                             var lastName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).Value;
-                            var phone = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone).Value;
+                            // var phone = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone).Value;
 
                             studentUser = SessionVariables.CurrentAccount.CreateAndInviteUser(
                                  firstName: firstName,
                                  lastName: lastName,
                                  email: email,
-                                 phone: phone,
+                                 phone: null,
                                  message: $"Your parent/guardian ({SessionVariables.CurrentUser.DisplayName}) has invited you to sign up for {AfterSchoolLibrary.Helpers.Utilities.AppName()} to register for activities",
                                  userType: UserType.Student,
                                  loggedInUser: SessionVariables.CurrentUser,

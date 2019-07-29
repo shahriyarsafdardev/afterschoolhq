@@ -246,5 +246,33 @@ namespace AfterSchool.Models
 
             return RedirectToAction("index", "Login", new { returnurl = returnUrl });
         }
+
+        internal ActionResult HandleRedirectAfterLogin(string returnUrl)
+        {
+            ActionResult actionResult = LoginRedirect();
+
+            switch(SessionVariables.CurrentAccount.AccountTypeId)
+            {
+                case AccountType.ActivityProvider:
+                case AccountType.School:
+                    if (returnUrl.ToLower().Contains("/org/"))
+                        actionResult = Redirect(returnUrl);
+                    break;
+                case AccountType.AfterSchool:
+                    if (returnUrl.ToLower().Contains("/admin/"))
+                        actionResult = Redirect(returnUrl);
+                    break;
+                case AccountType.Registrant:
+                    if (returnUrl.ToLower().Contains("/user/"))
+                        actionResult = Redirect(returnUrl);
+                    break;
+                case AccountType.SchoolDistrict:
+                    if (returnUrl.ToLower().Contains("/district/"))
+                        actionResult = Redirect(returnUrl);
+                    break;
+            }
+
+            return actionResult;
+        }
     }
 }
