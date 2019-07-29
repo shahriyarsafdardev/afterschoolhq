@@ -47,12 +47,20 @@
                         @foreach (var qvm in Model)
                         {
                             Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
+
                             if (qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail)
                             {
+                                var selected = "";
+
+                                if (Request["createUserAccount"].IsNumber())
+                                {
+                                    selected = "checked=\"checked\"";
+                                }
+
                                 <div class="row">
                                     <div class="col-md-6 col-md-offset-3">
                                         <div class="am-checkbox">
-                                            <input type="checkbox" id="createUserAccount" name="createUserAccount" value="1" />
+                                            <input type="checkbox" id="createUserAccount" name="createUserAccount" value="1" @selected/>
                                             <label for="createUserAccount">
                                                 Allow my child to login and register for activities (<em>cannot be the same as your email address</em>)
                                             </label>
