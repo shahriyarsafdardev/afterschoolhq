@@ -84,7 +84,13 @@ namespace AfterSchool.Controllers
                 var masterRegistrant = SessionVariables.CurrentUser.GetMasterRegistrant();
 
                 if (masterRegistrant.IsNotEmpty())
+                {
+                    // need to load correct session info
+                    if (masterRegistrant.AccountId != SessionVariables.CurrentAccount.ID)
+                        LoadSessionInfo(SessionVariables.CurrentUser, masterRegistrant.GetAccount());
+
                     return RedirectToAction("select");
+                }
             }
 
             var msgs = new SystemMessages();

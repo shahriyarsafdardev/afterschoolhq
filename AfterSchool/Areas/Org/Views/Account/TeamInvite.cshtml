@@ -57,8 +57,14 @@
                 <div class="form-group">
                     <label class="col-sm-3 control-label"></label>
                     <div class="col-sm-6">
-                        <button type="submit" class="btn btn-primary">Invite</button>
-                        <a href="@Url.Action("team", "account")" class="btn btn-default pull-right"><i class="icon icon-right s7-left-arrow"></i> Cancel</a>
+                        <div class="pull-right">
+                            <button type="submit" class="btn btn-primary btn-lg">Invite Team Members &raquo;</button>
+                        </div>
+                        <div class="pull-left">
+                            <a href="@Url.Action("team", "account")" class="text-muted">
+                                Cancel
+                            </a>
+                        </div>
                     </div>
                 </div>
             </form>
