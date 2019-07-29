@@ -735,13 +735,13 @@ namespace AfterSchool.Controllers
                         {
                             var firstName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).Value;
                             var lastName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).Value;
-                            var phone = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone).Value;
+                            // var phone = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone).Value;
 
                             studentUser = SessionVariables.CurrentAccount.CreateAndInviteUser(
                                  firstName: firstName,
                                  lastName: lastName,
                                  email: email,
-                                 phone: phone,
+                                 phone: null,
                                  message: $"Your parent/guardian ({SessionVariables.CurrentUser.DisplayName}) has invited you to sign up for {AfterSchoolLibrary.Helpers.Utilities.AppName()} to register for activities",
                                  userType: UserType.Student,
                                  loggedInUser: SessionVariables.CurrentUser,

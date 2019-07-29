@@ -334,6 +334,14 @@ namespace AfterSchoolLibrary.Models
 
 		#region "UserDefined"
 
+        public bool HasAccountOwner
+        {
+            get
+            {
+                return OwnerId.HasValue;
+            }
+        }
+
         public bool HasStripeConnectedAccount
         {
             get

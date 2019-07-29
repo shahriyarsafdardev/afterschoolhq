@@ -18,7 +18,10 @@ namespace AfterSchoolLibrary.Services
 
         public static WebUser GetAccountOwner(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return WebUser.Load(account.OwnerId.Value, msgs, dc);
+            if (account.HasAccountOwner)
+                return WebUser.Load(account.OwnerId.Value, msgs, dc);
+
+            return null;
         }
 
         public static List<WebUser> GetAccountOwnersAndAdmins(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
