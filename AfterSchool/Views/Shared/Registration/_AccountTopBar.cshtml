@@ -6,7 +6,7 @@
     var participationObject = (ParticipationObject)ViewData["ParticipationObject"];
     var dashboardUrl = Url.Action("index", "home", new { area = "user" });
 
-    if (Model.AccountTypeId != AccountType.Registrant)
+    if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant)
     {
         accountOrDashboard = "Dashboard";
         dashboardUrl = Url.Action("index", "home", new { area = "org" });
