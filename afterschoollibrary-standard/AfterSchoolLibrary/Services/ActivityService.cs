@@ -2154,8 +2154,13 @@ namespace AfterSchoolLibrary.Services
             var hostAccount = activity.GetAccount(msgs, dc);
             var providerOwner = provider.GetAccountOwner(msgs, dc);
 
-            if (provider.IsNotEmpty())
-                msgs.AddRange(Helpers.EmailHelper.SendProviderNewActivityNotification(hostAccount, provider, providerOwner, activity, loggedInUser));
+            if (provider.IsNotEmpty() && providerOwner.IsNotEmpty())
+                msgs.AddRange(Helpers.EmailHelper.SendProviderNewActivityNotification(
+                    hostAccount, 
+                    provider, 
+                    providerOwner, 
+                    activity, 
+                    loggedInUser));
         }
 
         public static void Publish(this Activity activity, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)

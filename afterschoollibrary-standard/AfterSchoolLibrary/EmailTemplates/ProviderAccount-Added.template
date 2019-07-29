@@ -11,7 +11,7 @@
       <li>Your activity being promoted to all parents and students at @Model.HostAccountName</li>
       <li>Money is collected and deposited into your account faster than ever and you don't need to lift a finger</li>
     </ul>
-    <strong>The amount you charge per registration for your activity (@Model.AmountCharged) will be deposited (or mailed) in full to you based on your preferences.</strong>
+    <strong>The amount you charge per registration for your activity will be deposited (or mailed) in full to you based on your preferences.</strong>
   </p>
 
   <p>
