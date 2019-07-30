@@ -50,16 +50,17 @@
     var isSearching = false;
     var listItemClass = "text-small padding-10";
     var listItemStyle = "background-color: #f0f0f0;";
+    var listItemStyleHover = "background-color: #fcfcfc;";
     var listItemOnMouseOver = "providerMouseOver";
     var listItemOnMouseOut = "providerMouseOut";
     var listItemOnClick = "providerMouseClick";
 
     function providerMouseOver(id) {
-        $(`#provider-${id}`).addClass('bg-warning');
+        $(`#provider-${id}`).attr('style', listItemStyleHover);
     }
 
     function providerMouseOut(id) {
-        $(`#provider-${id}`).removeClass('bg-warning');
+        $(`#provider-${id}`).attr('style', listItemStyle);
     }
 
     function providerMouseClick(id, fullLabel) {

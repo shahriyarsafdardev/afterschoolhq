@@ -491,6 +491,9 @@ namespace AfterSchoolLibrary.Models
                         ) and IsTest = 0 and OwnerId != NULL
                 ";
 
+            dq.SelectRange.Start = start;
+            dq.SelectRange.Length = length;
+
             return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
