@@ -250,24 +250,28 @@ namespace AfterSchool.Models
         internal ActionResult HandleRedirectAfterLogin(string returnUrl)
         {
             ActionResult actionResult = LoginRedirect();
+            const string adminPath = "/admin/";
+            const string registrantPath = "/user/";
+            const string districtPath = "/district/";
+            const string orgPath = "/org/";
 
-            switch(SessionVariables.CurrentAccount.AccountTypeId)
+            switch (SessionVariables.CurrentAccount.AccountTypeId)
             {
                 case AccountType.ActivityProvider:
                 case AccountType.School:
-                    if (returnUrl.ToLower().Contains("/org/"))
+                    if (!returnUrl.ToLower().Contains(new string[] { adminPath, registrantPath, districtPath }))
                         actionResult = Redirect(returnUrl);
                     break;
                 case AccountType.AfterSchool:
-                    if (returnUrl.ToLower().Contains("/admin/"))
+                    if (!returnUrl.ToLower().Contains(new string[] { orgPath, registrantPath, districtPath }))
                         actionResult = Redirect(returnUrl);
                     break;
                 case AccountType.Registrant:
-                    if (returnUrl.ToLower().Contains("/user/"))
+                    if (!returnUrl.ToLower().Contains(new string[] { orgPath, adminPath, districtPath }))
                         actionResult = Redirect(returnUrl);
                     break;
                 case AccountType.SchoolDistrict:
-                    if (returnUrl.ToLower().Contains("/district/"))
+                    if (!returnUrl.ToLower().Contains(new string[] { orgPath, adminPath, registrantPath }))
                         actionResult = Redirect(returnUrl);
                     break;
             }
