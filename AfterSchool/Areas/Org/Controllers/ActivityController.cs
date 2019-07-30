@@ -1361,9 +1361,8 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             // check if provided by external provider
             var location = activity.GetLocation(msgs);
-            var locationOwner = location?.GetHostAcount(msgs);
             var isLoggedInAccountOwnerAccount = SessionVariables.CurrentAccount.ID == location?.HostAccountId;
-            var activityIsHostedAtAnotherAccount = location.HostAccountId != activity.AccountId;
+            var activityIsHostedAtAnotherAccount = location?.HostAccountId != activity.AccountId;
 
             // activity is created in the activity provider's account
             if (isLoggedInAccountOwnerAccount && activityIsHostedAtAnotherAccount)
