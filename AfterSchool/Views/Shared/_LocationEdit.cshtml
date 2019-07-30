@@ -63,16 +63,17 @@
     var isSearching = false;
     var listItemClass = "text-small padding-10";
     var listItemStyle = "background-color: #f0f0f0;";
+    var listItemStyleHover = "background-color: #fcfcfc;";
     var listItemOnMouseOver = "locationMouseOver";
     var listItemOnMouseOut = "locationMouseOut";
     var listItemOnClick = "locationMouseClick";
 
     function locationMouseOver(id) {
-        $(`#location-${id}`).addClass('bg-warning');
+        $(`#location-${id}`).attr('style', listItemStyleHover);
     }
 
     function locationMouseOut(id) {
-        $(`#location-${id}`).removeClass('bg-warning');
+        $(`#location-${id}`).attr('style', listItemStyle);
     }
 
     function locationMouseClick(id, fullAddress, hostAccount, locationType) {

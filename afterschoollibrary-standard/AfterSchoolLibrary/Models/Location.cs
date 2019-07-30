@@ -208,6 +208,9 @@ namespace AfterSchoolLibrary.Models
 
             if (locationType.HasValue && locationType.Value != LocationType.NotSet)
                 sql += $@" and LocationTypeId = {(int)locationType.Value}";
+
+            dq.SelectRange.Start = start;
+            dq.SelectRange.Length = length;
             
            return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
