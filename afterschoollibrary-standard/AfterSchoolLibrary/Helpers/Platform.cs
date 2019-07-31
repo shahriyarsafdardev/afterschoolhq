@@ -16,14 +16,14 @@ namespace AfterSchoolLibrary.Billing
 
             // Because stripe will take their charge out of the total charge with the convenience fee
             var costWithConvenienceFee = cost + GetConvenienceFee(cost, billingAccount);
-            var stripeFee = Math.Ceiling(StripeHelper.GetStripeFee(costWithConvenienceFee, billingAccount.IsCreditCardFeeTakenOutOfCost));
+            var stripeFee = StripeHelper.GetStripeFee(costWithConvenienceFee, billingAccount.IsCreditCardFeeTakenOutOfCost);
 
             // always round up to nearest dollar or .5
             // result should always be 3.50 or 4.00 or 2.50 or 3.00, etc.
-            if (cost < 100)
-                return ((stripeFee * 2) / 2) - .01M;
+            if (cost <= 50)
+                return (Math.Ceiling(stripeFee * 2) / 2) - .01M;
 
-            return stripeFee - .01M;
+            return Math.Ceiling(stripeFee) - .01M;
         }
 
         public static decimal GetConvenienceFee(decimal cost, Account billingAccount)
@@ -33,10 +33,11 @@ namespace AfterSchoolLibrary.Billing
             if (cost <= 0)
                 return 0;
 
-            if (billingAccount.IsConvenienceFeeTakenOutOfCost)
-                fee = (cost * ConveniencePercentFee) + ConvenienceFlatFee;
-            else
-                fee = ((cost + ConvenienceFlatFee) / (1 - ConveniencePercentFee)) - cost;
+            fee = (cost * ConveniencePercentFee) + ConvenienceFlatFee;
+            //if (billingAccount.IsConvenienceFeeTakenOutOfCost)
+            //    fee = (cost * ConveniencePercentFee) + ConvenienceFlatFee;
+            //else
+            //    fee = ((cost + ConvenienceFlatFee) / (1 - ConveniencePercentFee)) - cost;
 
             // always round up to nearest dollar or .5
             // result should always be 3.50 or 4.00 or 2.50 or 3.00, etc. Max of $10
@@ -44,10 +45,10 @@ namespace AfterSchoolLibrary.Billing
 
             var finalFee = Math.Ceiling(fee * 2) / 2;
 
-            if (cost >= 50)
+            if (cost > 50)
                 finalFee = Math.Ceiling(fee);
 
-            return (finalFee - .01M).KeepInRange(0.99M, 20);
+            return (finalFee - .01M).KeepInRange(0.49M, 9.99M) + (Math.Ceiling(cost) - cost);
         }
 
         public static decimal GetTotalFees(decimal cost, Account billingAccount)
