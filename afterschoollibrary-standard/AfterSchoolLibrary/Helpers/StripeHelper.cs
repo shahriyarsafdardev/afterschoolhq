@@ -851,10 +851,8 @@ namespace AfterSchoolLibrary.Billing
             return customer;
         }
 
-        public static SystemMessages AddSourceToCustomer(string customerId, string sourceToken, string stripeAccountId)
+        public static Stripe.Customer AddSourceToCustomer(string customerId, string sourceToken, string stripeAccountId, SystemMessages msgs)
         {
-            var msgs = new SystemMessages();
-
             var options = new Stripe.CustomerUpdateOptions
             {
                 Source = sourceToken
@@ -864,9 +862,11 @@ namespace AfterSchoolLibrary.Billing
             if (stripeAccountId.IsNotEmpty())
                 requestOptions.StripeAccount = stripeAccountId;
 
+            Stripe.Customer customer = null;
+
             try
             {
-                GetCustomerService().Update(customerId, options, requestOptions);
+                customer = GetCustomerService().Update(customerId, options, requestOptions);
             }
             catch (StripeException ex)
             {
@@ -874,7 +874,7 @@ namespace AfterSchoolLibrary.Billing
                 msgs.Add($"Customer ({customerId}) was not updated", MessageType.UserError);
             }
 
-            return msgs;
+            return customer;
         }
 
         #endregion
@@ -1174,6 +1174,31 @@ namespace AfterSchoolLibrary.Billing
 
         #endregion
 
+        #region StripeBankAccount
+
+        private static Stripe.BankAccountService GetBankAccountService()
+        {
+            return new Stripe.BankAccountService(StripeClient);
+        }
+
+        public static List<Stripe.BankAccount> GetBankAccounts(string customerId, SystemMessages msgs)
+        {
+            var bankAccounts = new List<Stripe.BankAccount>();
+
+            try
+            {
+                bankAccounts = GetBankAccountService().List(customerId).ToList();
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add($"Cannot get list of bank accounts", MessageType.Error, ex);
+            }
+
+            return bankAccounts;
+        }
+
+        #endregion
+
         #region StripeSource
 
         public const string TestSourceToken = "tok_visa";
@@ -1194,31 +1219,6 @@ namespace AfterSchoolLibrary.Billing
                 var options = new Stripe.SourceCreateOptions()
                 {
                     Type = "card",
-                    Token = token
-                };
-
-                source = GetSourceService().Create(options);
-            }
-            catch (StripeException ex)
-            {
-                msgs.Add(ex.Message, MessageType.UserError, ex);
-                msgs.Add($"Payment source was not created", MessageType.UserError);
-            }
-
-            return source;
-        }
-
-        public static Stripe.Source CreateACHSource(string token, SystemMessages msgs)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-            Stripe.Source source = null;
-
-            try
-            {
-                var options = new Stripe.SourceCreateOptions()
-                {
-                    Type = "ach_debit",
                     Token = token
                 };
 
@@ -1265,11 +1265,11 @@ namespace AfterSchoolLibrary.Billing
 
         public static List<Stripe.Source> GetSources(string customerId, SystemMessages msgs)
         {
-            var cards = new List<Stripe.Source>();
+            var sources = new List<Stripe.Source>();
 
             try
             {
-                cards.AddRange(GetSourceService().List(customerId).ToList());
+                sources = GetSourceService().List(customerId).ToList();
             }
             catch (StripeException ex)
             {
@@ -1277,7 +1277,7 @@ namespace AfterSchoolLibrary.Billing
                 msgs.Add($"Cannot get list of payment sources", MessageType.UserError);
             }
 
-            return cards;
+            return sources;
         }
 
         public static Stripe.Source GetSource(string sourceId, SystemMessages msgs)

@@ -5,6 +5,7 @@
     var msgs = (SystemMessages)ViewBag.Messages;
     var cart = (Cart)ViewBag.Cart;
     var sources = (List<Stripe.Source>)ViewBag.Sources;
+    var bankAccounts = (List<Stripe.BankAccount>)ViewBag.BankAccounts;
     var participationObject = (ParticipationObject)ViewBag.ParticipationObject;
     var registration = (Registration)ViewBag.Registration;
     var checkoutObject = (CheckoutObject)ViewBag.CheckoutObject;
@@ -190,7 +191,7 @@
                 <div id="payment-info-ach">
 
                     @* PAY VIA Existing ACH Sources *@
-                    @if (sources.Any(source => source.AchDebit.IsNotEmpty()))
+                    @if (bankAccounts.Any())
                     {
                         <div class="row">
                             <div class="col-md-6 col-md-offset-3 col-sm-12 padding-30 margin-t-20">
@@ -207,11 +208,11 @@
                                             Select Account
                                         </label>
                                         <div class="col-md-9">
-                                            <select name="source" id="source" class="form-control">
-                                                @foreach (var source in sources.Where(source => source.AchDebit.IsNotEmpty()))
+                                            <select name="banksource" id="banksource" class="form-control">
+                                                @foreach (var bankAccount in bankAccounts)
                                                 {
-                                                    <option value="@source.Id">
-                                                        * * * * * * @source.AchDebit.Last4 - @source.AchDebit.Type.ToProperCase() Acct
+                                                    <option value="@bankAccount.Id">
+                                                        * * * * * * @bankAccount.Last4 - @bankAccount.BankName
                                                     </option>
                                                 }
                                             </select>
@@ -223,7 +224,7 @@
                                     <div class="form-group">
                                         <button type="submit" class="btn btn-register btn-lg" id="btn-paywithexistingach">
                                             Purchase via ACH -
-                                            <span class="total-due-today-ach"></span>
+                                            <span class="total-due-today-ach"></span>*
                                             &raquo;
                                         </button>
                                     </div>
@@ -237,9 +238,9 @@
                         <div class="col-md-6 col-md-offset-3 col-sm-12 padding-30 margin-t-20">
                             <p class="text-center text-large margin-b-20">Pay via new ACH (No Transaction Fees)</p>
 
-                            <button id="plaid-button" class="btn btn-register@(sources.Any(source => source.AchDebit.IsNotEmpty()) ? "-default" : "") btn-lg">
+                            <button id="plaid-button" class="btn btn-register@(bankAccounts.Any() ? "-default" : "") btn-lg">
                                 Purchase via ACH -
-                                $<span class="total-due-today-ach"></span>
+                                $<span class="total-due-today-ach"></span>*
                                 &raquo;
                             </button>
 
@@ -266,7 +267,7 @@
                                             Select Card
                                         </label>
                                         <div class="col-md-9">
-                                            <select name="source" id="source" class="form-control">
+                                            <select name="ccsource" id="ccsource" class="form-control">
                                                 @foreach (var source in sources.Where(source => source.Card.IsNotEmpty()))
                                                 {
                                                     <option value="@source.Id">
@@ -284,7 +285,7 @@
                                     <div class="form-group">
                                         <button type="submit" class="btn btn-register-default btn-lg" id="btn-paywithexistingcard">
                                             Purchase via Credit Card -
-                                            <span class="total-due-today"></span>
+                                            <span class="total-due-today"></span>*
                                             &raquo;
                                         </button>
                                     </div>
@@ -334,7 +335,7 @@
                                 <div class="form-group padding-v-20">
                                     <button type="button" id="btn-paywithnewcard" class="btn btn-register-default btn-lg">
                                         Purchase via Credit Card -
-                                        <span class="total-due-today"></span>
+                                        <span class="total-due-today"></span>*
                                         &raquo;
                                     </button>
                                 </div>
@@ -348,6 +349,10 @@
                 </div>
 
                 <hr />
+
+                <p class="text-center text-small text-muted">
+                    * Cost includes fees supporting afterschool programs for @SessionVariables.RegistrationStartPageAccount.Name
+                </p>
 
                 @* ALLOW TO PAY LATER *@
                 <div>

@@ -714,15 +714,24 @@ namespace AfterSchoolLibrary.Services
 
         public static List<Stripe.Source> GetStripeSources(this Account account, SystemMessages msgs = null)
         {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-            var sources = new List<Stripe.Source>();
+            if (msgs.IsEmpty()) msgs = new SystemMessages();            
             var customer = account.GetStripeCustomer(msgs);
 
             if (customer.IsNotEmpty())
-                sources.AddRange(Billing.StripeHelper.GetSources(customer.Id, msgs));
+                return StripeHelper.GetSources(customer.Id, msgs);
 
-            return sources;
+            return new List<Stripe.Source>();
+        }
+
+        public static List<Stripe.BankAccount> GetStripeBankAccounts(this Account account, SystemMessages msgs = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            var customer = account.GetStripeCustomer(msgs);
+
+            if (customer.IsNotEmpty())
+                return StripeHelper.GetBankAccounts(customer.Id, msgs);
+
+            return new List<Stripe.BankAccount>();
         }
 
         public static List<Stripe.Charge> GetStripeBillingHistory(this Account account, SystemMessages msgs = null)
@@ -1946,20 +1955,19 @@ namespace AfterSchoolLibrary.Services
         internal static string GetStripeSourceFromToken(this Account fromAccount, string stripeToken, SystemMessages msgs = null)
         {
             var source = StripeHelper.CreateCreditCardSource(stripeToken, msgs);
-            msgs.AddRange(StripeHelper.AddSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null));
+            StripeHelper.AddSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null, msgs);
             return source.Id;
         }
 
-        internal static string GetStripeSourceFromPlaidToken(this Account fromAccount, PlaidPurchaseObject plaidPurchaseObject, SystemMessages msgs = null)
+        internal static string GetStripeSourceFromPlaidToken(this Account fromAccount, BankAccountPurchaseObject bankAccountPurchaseObject, SystemMessages msgs = null)
         {
-            var plaidToken = Helpers.PlaidHelper.GetPlaidToken(plaidPurchaseObject.PublicToken, msgs);
+            var plaidToken = Helpers.PlaidHelper.GetPlaidToken(bankAccountPurchaseObject.PlaidPublicToken, msgs);
 
             if (msgs.HasNoErrors())
             {
-                var bankAccount = Helpers.PlaidHelper.CreateStripeBankAccount(plaidToken.AccessToken, plaidPurchaseObject.AccountId, msgs);
-                var source = StripeHelper.CreateACHSource(bankAccount.StripeBankAccountToken, msgs);
-                msgs.AddRange(StripeHelper.AddSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null));
-                return source.Id;
+                var bankAccount = Helpers.PlaidHelper.CreateStripeBankAccount(plaidToken.AccessToken, bankAccountPurchaseObject.PlaidAccountId, msgs);
+                var customer = StripeHelper.AddSourceToCustomer(fromAccount.StripeCustomerId, bankAccount.StripeBankAccountToken, null, msgs);
+                return customer.DefaultSourceId;
             }
 
             return null;
@@ -1970,7 +1978,7 @@ namespace AfterSchoolLibrary.Services
             // if stripe token then don't send customer id
             string customerId = null;
 
-            if (checkoutObject.SavePaymentInfo || checkoutObject.SourceId.IsNotEmpty())
+            if (checkoutObject.SavePaymentInfo || checkoutObject.HasStripeSourceId)
                 customerId = checkoutObject.PayingAccount.StripeCustomerId;
 
             // if can charge fees we bill it directly from our AHQ account
@@ -1982,7 +1990,7 @@ namespace AfterSchoolLibrary.Services
                 fromCustomerId: customerId,
                 destinationAccountId: useStripeConnectedAccount ? checkoutObject.BillingAccount.StripeUserId : null,
                 platformFee: useStripeConnectedAccount ? platformFeeAmount : new decimal?(),
-                tokenOrSourceId: checkoutObject.SourceId.IfEmpty(checkoutObject.StripeToken),
+                tokenOrSourceId: checkoutObject.StripeSourceId.IfEmpty(checkoutObject.CreditCardPurchaseObject?.StripeToken),
                 totalAmount: checkoutObject.GetTuitionCostWithFees(msgs, dc),
                 description: $"{checkoutObject.ParticipationObject.Name} Registration",
                 statementDescriptor: $"AHQ/{checkoutObject.BillingAccount.Name}",
@@ -2068,7 +2076,7 @@ namespace AfterSchoolLibrary.Services
             if (customer.DefaultSourceId.IsEmpty())
             {
                 var source = StripeHelper.CreateCreditCardSource(stripeToken, msgs);
-                msgs.AddRange(StripeHelper.AddSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null));
+                StripeHelper.AddSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null, msgs);
                 sourceId = source.Id;
             }
             else
@@ -2114,10 +2122,10 @@ namespace AfterSchoolLibrary.Services
             {
                 var payingAccount = checkoutObject.PayingAccount;
 
-                if (checkoutObject.PlaidPurchaseObject.IsNotEmpty())
-                    checkoutObject.SourceId = payingAccount.GetStripeSourceFromPlaidToken(checkoutObject.PlaidPurchaseObject, msgs);
+                if (checkoutObject.BankAccountPurchaseObject?.PlaidPublicToken != null)
+                    checkoutObject.BankAccountPurchaseObject.StripeSourceId = payingAccount.GetStripeSourceFromPlaidToken(checkoutObject.BankAccountPurchaseObject, msgs);
                 else if (checkoutObject.SavePaymentInfo)
-                    checkoutObject.SourceId = payingAccount.GetStripeSourceFromToken(checkoutObject.StripeToken, msgs);
+                    checkoutObject.CreditCardPurchaseObject.StripeSourceId = payingAccount.GetStripeSourceFromToken(checkoutObject.CreditCardPurchaseObject.StripeToken, msgs);
             }
 
             // if everything goes right then bill the person, 
