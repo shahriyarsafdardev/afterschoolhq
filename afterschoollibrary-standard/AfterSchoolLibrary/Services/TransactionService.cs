@@ -215,7 +215,8 @@ namespace AfterSchoolLibrary.Services
         public static Payout GetPayout(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (transaction.PayoutId != null)
-                Payout.Load(transaction.PayoutId.Value, msgs, dc: dc);
+                Payout.Load(transaction.PayoutId.Value, msgs, dc);
+
             return null;
         }
 
@@ -224,7 +225,6 @@ namespace AfterSchoolLibrary.Services
             var currentPayout = GetPayout(transaction, msgs);
 
             if (currentPayout != null)
-            {
                 switch (currentPayout.PayoutStatusId)
                 {
                     case PayoutStatus.Completed:
@@ -234,11 +234,10 @@ namespace AfterSchoolLibrary.Services
                     default:
                         return currentPayout.PayoutStatusId.ToString();
                 }
-            }
-            else if (transaction.CreateDate.Value.AddDays(2) > transaction.CreateDate)
-            {
+
+            if (DateTime.UtcNow.IsBefore(transaction.CreateDate.Value.AddHours(48)))
                 return "Incoming";
-            }
+
             return null;
         }
     }
