@@ -27,10 +27,10 @@ namespace AfterSchoolLibrary.Helpers
                 if (Utilities.IsLocalHost)
                     return SandboxSecretKey;
 
-                if (!Utilities.IsProduction)
-                    return DevelopmentSecretKey;
+                if (Utilities.IsProduction)
+                    return ProductionSecretKey;
 
-                return ProductionSecretKey;
+                return DevelopmentSecretKey;
             }
         }
 
@@ -41,10 +41,10 @@ namespace AfterSchoolLibrary.Helpers
                 if (Utilities.IsLocalHost)
                     return "sandbox";
 
-                if (!Utilities.IsProduction)
-                    return "development";
+                if (Utilities.IsProduction)
+                    return "production";
 
-                return "production";
+                return "development";
             }
         }
 
@@ -127,10 +127,10 @@ namespace Plaid
                     if (AfterSchoolLibrary.Helpers.Utilities.IsLocalHost)
                         return SandboxBaseUrl;
 
-                    if (!AfterSchoolLibrary.Helpers.Utilities.IsProduction)
-                        return DevelopmentBaseUrl;
+                    if (AfterSchoolLibrary.Helpers.Utilities.IsProduction)
+                        return ProductionBaseUrl;
 
-                    return SandboxBaseUrl;
+                    return DevelopmentBaseUrl;
                 }
             }
 
