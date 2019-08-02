@@ -1622,6 +1622,34 @@ ul li.phone-li:after {
 }
 
 
+/* FAQ */
+
+.provider-faq {
+    margin: 50px;
+}
+
+.card {
+    margin: 25px 50px;
+}
+
+.card-header {
+    background: whitesmoke;
+    padding: 10px;
+}
+
+.btn-link, .btn-link:hover {
+    color: #4a4a4a;
+}
+
+.card-body {
+    font-weight: 300;
+    margin: 15px 30px;
+}
+
+h2.mb-0 {
+    margin: 0px!important;
+}
+
 /*Footer Section*/
 
 .footer-section {
