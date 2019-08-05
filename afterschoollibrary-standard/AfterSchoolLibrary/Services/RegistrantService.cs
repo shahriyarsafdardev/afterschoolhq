@@ -144,7 +144,7 @@ namespace AfterSchoolLibrary.Services
             else
             {
                 // if running the billing through stripe connected account
-                sourceId = purchasingAccount.CopyStripeSourceToAccount(checkoutObject.BillingAccount, checkoutObject.StripeToken, msgs);
+                sourceId = purchasingAccount.CopyStripeSourceToAccount(checkoutObject, msgs);
 
                 // create the customer on the connected account
                 customer = Billing.StripeHelper.CreateCustomer(

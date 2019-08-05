@@ -188,7 +188,7 @@
 
                 <div id="payment-info" style="position:relative;">                    
 
-                    @if (sources.Any())
+                    @if (sources.Any(source => source.Card.IsNotEmpty()))
                     {
                         <div class="row">
                             <div class="col-md-6 col-md-offset-3 col-sm-12 padding-30 margin-t-20">
@@ -202,7 +202,7 @@
                                         </label>
                                         <div class="col-md-9">
                                             <select name="source" id="source" class="form-control">
-                                                @foreach (var source in sources)
+                                                @foreach (var source in sources.Where(source => source.Card.IsNotEmpty()))
                                                 {
                                                     <option value="@source.Id">
                                                         **** **** **** @source.Card.Last4

@@ -2072,15 +2072,23 @@ namespace AfterSchoolLibrary.Services
         /// <param name="stripeToken"></param>
         /// <param name="msgs"></param>
         /// <returns></returns>
-        internal static string CopyStripeSourceToAccount(this Account fromAccount, Account toAccount, string stripeToken, SystemMessages msgs)
+        internal static string CopyStripeSourceToAccount(this Account fromAccount, CheckoutObject checkoutObject, SystemMessages msgs)
         {
             // what happens if the same registrant gets another payment plan?
             // Create a new customer? For now YES, it doesn't really matter I don't think
 
             // get shared source
-            var customer = Billing.StripeHelper.GetCustomer(fromAccount.StripeCustomerId, null, msgs);
-            var sourceId = fromAccount.CreateStripeSourceFromToken(stripeToken, customer, msgs);
-            var copiedSource = Billing.StripeHelper.CreateSourceFromOriginal(customer.Id, sourceId, toAccount.StripeUserId, msgs);
+            var customer = StripeHelper.GetCustomer(fromAccount.StripeCustomerId, null, msgs);
+            string sourceId = checkoutObject.SourceId;
+
+            if (checkoutObject.StripeToken.IsNotEmpty())
+                sourceId = fromAccount.CreateStripeSourceFromToken(checkoutObject.StripeToken, customer, msgs);
+
+            var copiedSource = StripeHelper.CreateSourceFromOriginal(
+                customer.Id, 
+                sourceId, 
+                checkoutObject.BillingAccount.StripeUserId, 
+                msgs);
 
             return copiedSource.Id;
         }
