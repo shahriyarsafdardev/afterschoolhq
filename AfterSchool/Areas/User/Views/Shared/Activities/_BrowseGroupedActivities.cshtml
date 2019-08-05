@@ -1,7 +1,7 @@
 ﻿@model List<ParticipationViewModel>
 
 @{ 
-    var status = Enum.GetValues(typeof(RegistrationStatus)).Cast<RegistrationStatus>().ToList();
+    var status = Enum.GetValues(typeof(RegistrationStatus)).Cast<RegistrationStatus>().OrderBy(x => x.ToString()).ToList();
 
     if (ViewData["Status"].IsNotEmpty() && ViewData["Status"].IsNumber())
     {
