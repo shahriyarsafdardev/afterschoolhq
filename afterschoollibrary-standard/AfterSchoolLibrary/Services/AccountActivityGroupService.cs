@@ -127,8 +127,15 @@ namespace AfterSchoolLibrary.Services
             var account = accountActivityGroup.GetAccount(msgs, dc);
             var activityGroup = accountActivityGroup.GetActivityGroup(msgs, dc);
             var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
-            var instances = activityGroup.GetSchedule(msgs, dc).GetInstances(msgs: msgs, dc: dc);
-            return now > instances.Last().StartDateTime;
+            var schedule = activityGroup.GetSchedule(msgs, dc);
+            var instances = schedule?.GetInstances(msgs: msgs, dc: dc);
+            if (instances.Count > 0)
+                return now > instances.Last().StartDateTime;
+            
+            if (schedule.IsNotEmpty())
+                return !schedule.IsOngoing;
+
+            return true;
         }
     }
 }
