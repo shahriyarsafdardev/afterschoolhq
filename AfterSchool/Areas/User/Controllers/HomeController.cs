@@ -42,8 +42,8 @@ namespace AfterSchool.Areas.User.Controllers
 
                 if (registrant.SchoolLocationId.HasValue)
                 {
-                    var account = registrant.GetSchoolLocation(msgs).GetHostAcount(msgs);
-                    if(!providers.Any(provider => provider.ID == account.ID))
+                    var account = registrant.GetSchoolLocation(msgs)?.GetHostAcount(msgs);                   
+                    if(account.IsNotEmpty() && !providers.Any(provider => provider.ID == account.ID))
                         providers.Add(account);
                 }
 
@@ -53,8 +53,13 @@ namespace AfterSchool.Areas.User.Controllers
                     var account = submittedRecord.GetAccount(msgs);
 
                     ras.ForEach(ra => {
-                        var instances = ra.GetSchedule(msgs).GetInstances(msgs: msgs);
-                        activityInstances.AddRange(instances.Select(instance => (instance, registrant, ra.ParticipationObjectId, ra.ParticipationObjectTypeId)));
+                        var instances = ra.GetSchedule(msgs)?.GetInstances(msgs: msgs);
+                        if (instances.IsNotEmpty())
+                            activityInstances.AddRange(instances.Select(instance => (
+                                instance, 
+                                registrant, 
+                                ra.ParticipationObjectId, 
+                                ra.ParticipationObjectTypeId)));
                     });
 
                     if (masterRegistrant.IsParentOrGuardian)
