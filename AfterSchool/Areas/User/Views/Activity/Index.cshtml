@@ -12,7 +12,7 @@
         <div class="row">
             <h3 class="margin-h-30">@item.Registrant.Name</h3>
 
-            @foreach (var regStatus in Enum.GetValues(typeof(RegistrationStatus)).Cast<RegistrationStatus>().Except(RegistrationStatus.NotSet.AsList()))
+            @foreach (var regStatus in Enum.GetValues(typeof(RegistrationStatus)).Cast<RegistrationStatus>().Except(RegistrationStatus.NotSet.AsList()).OrderBy(x => x.ToString()))
             {
                 <div class="row">
                     @{
