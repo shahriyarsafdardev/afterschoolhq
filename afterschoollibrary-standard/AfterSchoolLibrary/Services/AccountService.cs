@@ -2071,7 +2071,7 @@ namespace AfterSchoolLibrary.Services
             var sourceId = "";
 
             if (customer.IsEmpty())
-                customer = Billing.StripeHelper.GetCustomer(fromAccount.StripeCustomerId, null, msgs);
+                customer = StripeHelper.GetCustomer(fromAccount.StripeCustomerId, null, msgs);
 
             if (customer.DefaultSourceId.IsEmpty())
             {
@@ -2099,14 +2099,47 @@ namespace AfterSchoolLibrary.Services
             // Create a new customer? For now YES, it doesn't really matter I don't think
 
             // get shared source
-            var customer = StripeHelper.GetCustomer(fromAccount.StripeCustomerId, null, msgs);
-            string sourceId = checkoutObject.SourceId;
+            var platformCustomer = StripeHelper.GetCustomer(fromAccount.StripeCustomerId, null, msgs);
+
+            if (checkoutObject.StripeSourceId.IsNotEmpty() && checkoutObject.BillingAccount.HasFeature(FeatureType.UseStripeConnectedAccount))
+            {
+                var stripeUserId = checkoutObject.BillingAccount.StripeUserId;
+                var customer = StripeHelper.GetCustomer(fromAccount.StripeCustomerId, stripeUserId, msgs);
+
+                if (customer.IsEmpty())
+                    customer = StripeHelper.CreateCustomer(
+                        platformCustomer.Description,
+                        platformCustomer.Email,
+                        stripeUserId,
+                        msgs);
+
+                var tokenFromConnectedAccount = StripeHelper.CreateCustomerToken(
+                    platformCustomer.Id,
+                    stripeUserId,
+                    checkoutObject.StripeSourceId,
+                    msgs);
+                
+                var source = StripeHelper.CreateCreditCardSource(
+                    tokenFromConnectedAccount.Id,
+                    stripeUserId, 
+                    msgs);
+
+                StripeHelper.AddSourceToCustomer(
+                    customer.Id, 
+                    source.Id,
+                    stripeUserId, 
+                    msgs);
+
+                return source.Id;
+            }
+
+            string sourceId = checkoutObject.StripeSourceId;
 
             if (checkoutObject.StripeToken.IsNotEmpty())
-                sourceId = fromAccount.CreateStripeSourceFromToken(checkoutObject.StripeToken, customer, msgs);
+                sourceId = fromAccount.CreateStripeSourceFromToken(checkoutObject.StripeToken, platformCustomer, msgs);
 
             var copiedSource = StripeHelper.CreateSourceFromOriginal(
-                customer.Id, 
+                platformCustomer.Id, 
                 sourceId, 
                 checkoutObject.BillingAccount.StripeUserId, 
                 msgs);

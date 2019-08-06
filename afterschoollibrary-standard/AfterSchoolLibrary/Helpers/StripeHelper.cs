@@ -859,6 +859,7 @@ namespace AfterSchoolLibrary.Billing
             };
 
             var requestOptions = new Stripe.RequestOptions();
+
             if (stripeAccountId.IsNotEmpty())
                 requestOptions.StripeAccount = stripeAccountId;
 
@@ -1210,19 +1211,29 @@ namespace AfterSchoolLibrary.Billing
 
         public static Stripe.Source CreateCreditCardSource(string token, SystemMessages msgs)
         {
+            return CreateCreditCardSource(token, null, msgs);
+        }
+
+        public static Stripe.Source CreateCreditCardSource(string token, string stripeAccountId, SystemMessages msgs)
+        {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var options = new Stripe.SourceCreateOptions()
+            {
+                Type = "card",
+                Token = token,
+            };
+
+            var requestOptions = new Stripe.RequestOptions();
+
+            if (stripeAccountId.IsNotEmpty())
+                requestOptions.StripeAccount = stripeAccountId;
 
             Stripe.Source source = null;
 
             try
             {
-                var options = new Stripe.SourceCreateOptions()
-                {
-                    Type = "card",
-                    Token = token
-                };
-
-                source = GetSourceService().Create(options);
+                source = GetSourceService().Create(options, requestOptions);
             }
             catch (StripeException ex)
             {
@@ -1382,18 +1393,19 @@ namespace AfterSchoolLibrary.Billing
             return new Stripe.TokenService(StripeClient);
         }
 
-        public static Stripe.Token CreateCustomerToken(string customerId, string stripeAccountId, SystemMessages msgs)
+        public static Stripe.Token CreateCustomerToken(string customerId, string stripeAccountId, string sourceId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var options = new Stripe.TokenCreateOptions()
             {
-                CustomerId = customerId               
+                CustomerId = customerId,
+                Card = new AnyOf<string, CreditCardOptions>(sourceId)
             };
 
             var requestOptions = new Stripe.RequestOptions();
             if (stripeAccountId.IsNotEmpty())
-                requestOptions.StripeConnectAccountId = stripeAccountId;
+                requestOptions.StripeAccount = stripeAccountId;
 
             Stripe.Token token = null;
 
