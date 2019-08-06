@@ -2756,7 +2756,8 @@ namespace AfterSchoolLibrary.Services
         {
             return AccountActivityGroup.GetCount(
                 new Hashtable() {
-                    { "AccountId", account.ID.Value }
+                    { "AccountId", account.ID.Value },
+                    { "ActivityGroupIsArchived", false }
                 },
                 msgs,
                 dc);
