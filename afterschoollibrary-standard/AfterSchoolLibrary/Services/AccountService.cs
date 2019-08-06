@@ -2710,7 +2710,7 @@ namespace AfterSchoolLibrary.Services
 
         public static List<ActivityGroup> GetLeagues(this Account account, bool IsArchived, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityGroup.LoadByAccountId(account.ID.Value, ActivityGroupType.League, start, length, msgs, dc);
+            return ActivityGroup.LoadByAccountId(account.ID.Value, ActivityGroupType.League, IsArchived, start, length, msgs, dc);
         }
 
         public static int GetLeagueCount(this Account account, bool IsArchived, SystemMessages msgs = null, DatabaseConnection dc = null)

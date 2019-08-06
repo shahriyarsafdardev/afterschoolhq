@@ -65,6 +65,48 @@ namespace AfterSchool.Areas.District.Controllers
 
             return View(groups);
         }
+
+
+        [HttpGet]
+        public ActionResult Archive(string id)
+        {
+            var msgs = new SystemMessages();
+            var group = ActivityGroup.LoadByUid(id.ToGuid());
+
+            if (group.IsNotEmpty())
+                msgs.AddRange(group.MoveToArchive(SessionVariables.CurrentUser.ID.Value));
+
+            ViewBag.Messages = msgs;
+
+            if (msgs.HasNoErrors())
+                msgs.Add($"{group.Name} has been archived", MessageType.Success);
+
+            if (Request.UrlReferrer.IsNotEmpty())
+                return Redirect(Request.UrlReferrer.ToString());
+
+            return RedirectToAction("index", "league");
+        }
+
+        [HttpGet]
+        public ActionResult Restore(string id)
+        {
+            var msgs = new SystemMessages();
+            var group = ActivityGroup.LoadByUid(id.ToGuid());
+
+            if (group.IsNotEmpty())
+                msgs.AddRange(group.MoveFromArchive(SessionVariables.CurrentUser.ID.Value));
+
+            ViewBag.Messages = msgs;
+
+            if (msgs.HasNoErrors())
+                msgs.Add($"{group.Name} has been restored", MessageType.Success);
+
+            if (Request.UrlReferrer.IsNotEmpty())
+                return Redirect(Request.UrlReferrer.ToString());
+
+            return RedirectToAction("index", "league");
+        }
+
         [ValidateInput(false)]
         [HttpGet]
         public ActionResult Summary(string id)
