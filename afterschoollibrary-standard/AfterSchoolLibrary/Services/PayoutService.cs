@@ -137,7 +137,7 @@ namespace AfterSchoolLibrary.Services
                 // send money via ACH
                 if (payoutAccount.CanReceiveACHDeposits(msgs, dc))
                 {
-                    if (payoutAccount.HasStripeConnectedAccount)
+                    if (payoutAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc) && payoutAccount.HasStripeConnectedAccount)
                     {
                         payoutAccount.SendStripePayout(
                             payout: payout,
