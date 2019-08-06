@@ -50,8 +50,15 @@ namespace AfterSchool.Areas.Org.Controllers
             groups = SessionVariables.CurrentAccount.GetLeagues(isArchived, start, length).OrderByDescending(x => x.CreateDate).ToList();
             extAccountActivityGroups = AccountActivityGroup.LoadByAccountId(SessionVariables.CurrentAccount.ID.Value);
 
-            acceptedInvites = extAccountActivityGroups.Where(aag => aag.InviteStatusId == InviteStatus.Accepted).Select(aag => aag.GetActivityGroup()).ToList();
-            pendingInvites = extAccountActivityGroups.Where(aag => aag.InviteStatusId == InviteStatus.Invited).Select(aag => aag.GetActivityGroup()).ToList();
+            acceptedInvites = extAccountActivityGroups
+                .Where(aag => aag.InviteStatusId == InviteStatus.Accepted && !aag.ActivityGroupIsArchived)
+                .Select(aag => aag.GetActivityGroup())
+                .ToList();
+
+            pendingInvites = extAccountActivityGroups
+                .Where(aag => aag.InviteStatusId == InviteStatus.Invited && !aag.ActivityGroupIsArchived)
+                .Select(aag => aag.GetActivityGroup())
+                .ToList();
 
             hasArchivedGroups = SessionVariables.CurrentAccount.GetLeagueCount(true) > 0;
 
