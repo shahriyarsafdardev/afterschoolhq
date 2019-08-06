@@ -373,7 +373,7 @@ namespace AfterSchoolLibrary.Billing
 
             var requestOptions = new RequestOptions()
             {
-                StripeConnectAccountId = connectedAccountId
+                StripeAccount = connectedAccountId
             };
 
             Payout stripePayout = null;
@@ -450,8 +450,9 @@ namespace AfterSchoolLibrary.Billing
             };
 
             var requestOptions = new Stripe.RequestOptions();
+
             if (stripeAccountId.IsNotEmpty())
-                requestOptions.StripeConnectAccountId = stripeAccountId;
+                requestOptions.StripeAccount = stripeAccountId;
 
             if (metaData.IsNotEmpty())
                 options.Metadata = metaData;
@@ -482,8 +483,9 @@ namespace AfterSchoolLibrary.Billing
             };
 
             var requestOptions = new Stripe.RequestOptions();
+
             if (stripeAccountId.IsNotEmpty())
-                requestOptions.StripeConnectAccountId = stripeAccountId;
+                requestOptions.StripeAccount = stripeAccountId;
 
             Stripe.Product product = null;
 
@@ -505,8 +507,9 @@ namespace AfterSchoolLibrary.Billing
             var msgs = new SystemMessages();
 
             var requestOptions = new RequestOptions();
+
             if (stripeAccountId.IsNotEmpty())
-                requestOptions.StripeConnectAccountId = stripeAccountId;
+                requestOptions.StripeAccount = stripeAccountId;
 
             try
             {
@@ -583,8 +586,9 @@ namespace AfterSchoolLibrary.Billing
             };
 
             var requestOptions = new Stripe.RequestOptions();
+
             if (stripeAccountId.IsNotEmpty())
-                requestOptions.StripeConnectAccountId = stripeAccountId;
+                requestOptions.StripeAccount = stripeAccountId;
 
             if (metaData.IsNotEmpty())
                 options.Metadata = metaData;
@@ -617,8 +621,9 @@ namespace AfterSchoolLibrary.Billing
             };
 
             var requestOptions = new Stripe.RequestOptions();
+
             if (stripeAccountId.IsNotEmpty())
-                requestOptions.StripeConnectAccountId = stripeAccountId;
+                requestOptions.StripeAccount = stripeAccountId;
 
             Stripe.Plan plan = null;
 
@@ -641,7 +646,7 @@ namespace AfterSchoolLibrary.Billing
             var requestOptions = new Stripe.RequestOptions();
 
             if (stripeAccountId.IsNotEmpty())
-                requestOptions.StripeConnectAccountId = stripeAccountId;
+                requestOptions.StripeAccount = stripeAccountId;
 
             try
             {
@@ -707,8 +712,9 @@ namespace AfterSchoolLibrary.Billing
             };
 
             var requestOptions = new Stripe.RequestOptions();
+
             if (stripeAccountId.IsNotEmpty())
-                requestOptions.StripeConnectAccountId = stripeAccountId;
+                requestOptions.StripeAccount = stripeAccountId;
 
             try
             {
@@ -761,7 +767,7 @@ namespace AfterSchoolLibrary.Billing
 
             var requestOptions = new Stripe.RequestOptions();
             if (stripeAccountId.IsNotEmpty())
-                requestOptions.StripeConnectAccountId = stripeAccountId;
+                requestOptions.StripeAccount = stripeAccountId;
 
             try
             {
@@ -787,8 +793,9 @@ namespace AfterSchoolLibrary.Billing
             };
 
             var requestOptions = new Stripe.RequestOptions();
+
             if (stripeAccountId.IsNotEmpty())
-                requestOptions.StripeConnectAccountId = stripeAccountId;
+                requestOptions.StripeAccount = stripeAccountId;
 
             Stripe.Customer customer = null;
 
@@ -811,7 +818,7 @@ namespace AfterSchoolLibrary.Billing
 
             var requestOptions = new Stripe.RequestOptions();
             if (stripeAccountId.IsNotEmpty())
-                requestOptions.StripeConnectAccountId = stripeAccountId;
+                requestOptions.StripeAccount = stripeAccountId;
 
             try
             {
@@ -908,7 +915,7 @@ namespace AfterSchoolLibrary.Billing
             var requestOptions = new Stripe.RequestOptions();
             if (stripeAccountId.IsNotEmpty())
             {
-                requestOptions.StripeConnectAccountId = stripeAccountId;
+                requestOptions.StripeAccount = stripeAccountId;
                 options.ApplicationFeePercent = platformFeePercent * 100;
             }
 
@@ -969,7 +976,7 @@ namespace AfterSchoolLibrary.Billing
 
             var requestOptions = new Stripe.RequestOptions();
             if (stripeAccountId.IsNotEmpty())
-                requestOptions.StripeConnectAccountId = stripeAccountId;
+                requestOptions.StripeAccount = stripeAccountId;
 
             Stripe.Subscription subscription = null;
 
@@ -997,7 +1004,7 @@ namespace AfterSchoolLibrary.Billing
 
             var requestOptions = new Stripe.RequestOptions();
             if (stripeAccountId.IsNotEmpty())
-                requestOptions.StripeConnectAccountId = stripeAccountId;
+                requestOptions.StripeAccount = stripeAccountId;
 
             try
             {
@@ -1256,8 +1263,9 @@ namespace AfterSchoolLibrary.Billing
             };
 
             var requestOptions = new Stripe.RequestOptions();
+
             if (stripeAccountId.IsNotEmpty())
-                requestOptions.StripeConnectAccountId = stripeAccountId;
+                requestOptions.StripeAccount = stripeAccountId;
 
             Stripe.Source source = null;
 
@@ -1519,8 +1527,9 @@ namespace AfterSchoolLibrary.Billing
                 options.PercentOff = value;
 
             var requestOptions = new Stripe.RequestOptions();
+
             if (stripeAccountId.IsNotEmpty())
-                requestOptions.StripeConnectAccountId = stripeAccountId;
+                requestOptions.StripeAccount = stripeAccountId;
 
             Stripe.Coupon coupon = null;
 
