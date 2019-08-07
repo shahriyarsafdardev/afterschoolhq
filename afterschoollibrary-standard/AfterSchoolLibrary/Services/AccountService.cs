@@ -1955,7 +1955,7 @@ namespace AfterSchoolLibrary.Services
         internal static string GetStripeSourceFromToken(this Account fromAccount, string stripeToken, SystemMessages msgs = null)
         {
             var source = StripeHelper.CreateCreditCardSource(stripeToken, msgs);
-            StripeHelper.AddSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null, msgs);
+            StripeHelper.AddNewCardToCustomer(fromAccount.StripeCustomerId, source, null, msgs);
             return source.Id;
         }
 
@@ -1966,7 +1966,7 @@ namespace AfterSchoolLibrary.Services
             if (msgs.HasNoErrors())
             {
                 var bankAccount = Helpers.PlaidHelper.CreateStripeBankAccount(plaidToken.AccessToken, bankAccountPurchaseObject.PlaidAccountId, msgs);
-                var customer = StripeHelper.AddSourceToCustomer(fromAccount.StripeCustomerId, bankAccount.StripeBankAccountToken, null, msgs);
+                var customer = StripeHelper.AddDefaultSourceToCustomer(fromAccount.StripeCustomerId, bankAccount.StripeBankAccountToken, null, msgs);
                 return customer.DefaultSourceId;
             }
 
@@ -2073,10 +2073,10 @@ namespace AfterSchoolLibrary.Services
             if (customer.IsEmpty())
                 customer = StripeHelper.GetCustomer(fromAccount.StripeCustomerId, null, msgs);
 
-            if (customer.DefaultSourceId.IsEmpty())
+            if (stripeToken.IsNotEmpty())
             {
                 var source = StripeHelper.CreateCreditCardSource(stripeToken, msgs);
-                StripeHelper.AddSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null, msgs);
+                StripeHelper.AddDefaultSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null, msgs);
                 sourceId = source.Id;
             }
             else
@@ -2124,7 +2124,7 @@ namespace AfterSchoolLibrary.Services
                     stripeUserId, 
                     msgs);
 
-                StripeHelper.AddSourceToCustomer(
+                StripeHelper.AddDefaultSourceToCustomer(
                     customer.Id, 
                     source.Id,
                     stripeUserId, 

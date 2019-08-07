@@ -858,7 +858,7 @@ namespace AfterSchoolLibrary.Billing
             return customer;
         }
 
-        public static Stripe.Customer AddSourceToCustomer(string customerId, string sourceToken, string stripeAccountId, SystemMessages msgs)
+        public static Stripe.Customer AddDefaultSourceToCustomer(string customerId, string sourceToken, string stripeAccountId, SystemMessages msgs)
         {
             var options = new Stripe.CustomerUpdateOptions
             {
@@ -883,6 +883,60 @@ namespace AfterSchoolLibrary.Billing
             }
 
             return customer;
+        }
+
+        public static Stripe.Card AddNewCardToCustomer(string customerId, Stripe.Source source, string stripeAccountId, SystemMessages msgs)
+        {
+            var options = new Stripe.CardCreateOptions()
+            {
+                 Source = source.Id
+            };
+
+            var requestOptions = new Stripe.RequestOptions();
+
+            if (stripeAccountId.IsNotEmpty())
+                requestOptions.StripeAccount = stripeAccountId;
+
+            Stripe.Card card = null;
+
+            try
+            {
+                card = GetCardService().Create(customerId, options, requestOptions);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Customer ({customerId}) was not updated", MessageType.UserError);
+            }
+
+            return card;
+        }
+
+        public static Stripe.BankAccount AddNewBankAccountToCustomer(string customerId, Stripe.Source source, string stripeAccountId, SystemMessages msgs)
+        {
+            var options = new Stripe.BankAccountCreateOptions()
+            {
+                Source = source.Id
+            };
+
+            var requestOptions = new Stripe.RequestOptions();
+
+            if (stripeAccountId.IsNotEmpty())
+                requestOptions.StripeAccount = stripeAccountId;
+
+            Stripe.BankAccount bankAccount = null;
+
+            try
+            {
+                bankAccount = GetBankAccountService().Create(customerId, options, requestOptions);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Customer ({customerId}) was not updated", MessageType.UserError);
+            }
+
+            return bankAccount;
         }
 
         #endregion
@@ -1222,6 +1276,36 @@ namespace AfterSchoolLibrary.Billing
         }
 
         public static Stripe.Source CreateCreditCardSource(string token, string stripeAccountId, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var options = new Stripe.SourceCreateOptions()
+            {
+                Type = "card",
+                Token = token,
+            };
+
+            var requestOptions = new Stripe.RequestOptions();
+
+            if (stripeAccountId.IsNotEmpty())
+                requestOptions.StripeAccount = stripeAccountId;
+
+            Stripe.Source source = null;
+
+            try
+            {
+                source = GetSourceService().Create(options, requestOptions);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Payment source was not created", MessageType.UserError);
+            }
+
+            return source;
+        }
+
+        public static Stripe.Source CreateBankAccountSource(string token, string stripeAccountId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
