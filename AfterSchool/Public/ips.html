@@ -845,9 +845,9 @@
                 $(document).ready(function () {
                     $('#search').keyup(function () {
                         $('.school-info-holder').removeClass('hide');
-                        let searchVal = $('#search').val();
+                        let searchVal = $('#search').val().toLowerCase();
                         $('.school-info-holder').each(function () {
-                            if ($(this).attr('school-name') && $(this).attr('school-name').indexOf(searchVal) == -1) {
+                            if ($(this).attr('school-name') && $(this).attr('school-name').toLowerCase().indexOf(searchVal) == -1) {
                                 $(this).addClass('hide');
                             }
                         });
