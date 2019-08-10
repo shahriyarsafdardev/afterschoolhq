@@ -280,26 +280,29 @@ namespace AfterSchoolLibrary.Services
 
                         // keep activities up to date with groups
                         group.GetActivities(null, false, false, null, null, false, amsgs, adc)
-                        .ForEach(activity => {
+                            .ForEach(activity => {
 
-                            activity.RegistrationModeId = group.RegistrationModeId;
-                            
-                            if (group.GenderRestriction == GenderRestrictionType.None)
-                                activity.GenderRestriction = group.GenderRestriction;
+                                activity.RegistrationModeId = group.RegistrationModeId;
 
-                            if (activity.GradeLevelStart < group.MinGradeLevelId)
-                                activity.GradeLevelStart = group.MinGradeLevelId;
+                                if (group.MinGradeLevelId.HasValue)
+                                {
+                                    if (group.GenderRestriction == GenderRestrictionType.None)
+                                        activity.GenderRestriction = group.GenderRestriction;
 
-                            if (activity.GradeLevelEnd > group.MaxGradeLevelId)
-                                activity.GradeLevelEnd = group.MaxGradeLevelId;
+                                    if (group.MinGradeLevelId.HasValue && activity.GradeLevelStart < group.MinGradeLevelId)
+                                        activity.GradeLevelStart = group.MinGradeLevelId;
 
-                            amsgs.AddRange(activity.Save(adc));
+                                    if (group.MaxGradeLevelId.HasValue && activity.GradeLevelEnd > group.MaxGradeLevelId)
+                                        activity.GradeLevelEnd = group.MaxGradeLevelId;
+                                }
 
-                            // update form
-                            var activityForm = activity.GetActiveActivityForm(amsgs, adc);
-                            activityForm.FormId = group.FormId;
-                            amsgs.AddRange(activityForm.Save(adc));
-                        });
+                                amsgs.AddRange(activity.Save(adc));
+
+                                // update form
+                                var activityForm = activity.GetActiveActivityForm(amsgs, adc);
+                                activityForm.FormId = group.FormId;
+                                amsgs.AddRange(activityForm.Save(adc));
+                            });
 
                         if (isNew)
                         {
@@ -327,16 +330,9 @@ namespace AfterSchoolLibrary.Services
                                 loggedInUser.ID.Value,
                                 adc));
                         }
-
                     },
-                    onSuccess: (SystemMessages smsgs) =>
-                    {
-                        msgs.AddRange(smsgs);
-                    },
-                    onFailure: (SystemMessages fmsgs) =>
-                    {
-                        msgs.AddRange(fmsgs);
-                    },
+                    onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                     dc: dc
                 );
             }
@@ -381,7 +377,8 @@ namespace AfterSchoolLibrary.Services
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             ActivityGroup group = null;
 
-            Database.ExecuteTransaction(
+            Database.ExecuteTransaction
+            (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     // copy group

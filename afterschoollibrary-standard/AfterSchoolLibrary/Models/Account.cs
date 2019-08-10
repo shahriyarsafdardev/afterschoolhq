@@ -477,7 +477,7 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static List<Account> FullTextSearch(string query, int? start, int? length, SystemMessages msgs, DatabaseConnection dc = null)
+        public static List<Account> FullTextSearch(string query, AccountType accountType, int? start, int? length, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -485,10 +485,8 @@ namespace AfterSchoolLibrary.Models
             var sql = $@"
                     select * from Account
                     where 
-                        (
-                            AccountTypeId = {(int)AccountType.ActivityProvider} and
-                            Contains(name, '{"\""}{query.Split(' ').ToStringList("*\" AND \"")}{"*\""}')
-                        ) and IsTest = 0 and OwnerId != NULL
+                        Contains(name, '{"\""}{query.Split(' ').ToStringList("*\" AND \"")}{"*\""}') and
+                        IsTest = 0 and OwnerId is not NULL and AccountTypeId = {(int)accountType}
                 ";
 
             dq.SelectRange.Start = start;
