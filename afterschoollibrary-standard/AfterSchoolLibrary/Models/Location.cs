@@ -193,7 +193,9 @@ namespace AfterSchoolLibrary.Models
 
         public static List<Location> Search(string query, LocationType? locationType, int? start, int? length, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var searchTerms = query.Split(' ').Where(term => term.NotIn(Helpers.Utilities.FullTextSearchWordsToIgnore) && term.Trim().Length > 0);
+            var searchTerms = query.Split(' ').Where(term =>  
+                term.IsNotBlank() &&
+                term.ToLower().NotIn(Helpers.Utilities.FullTextSearchWordsToIgnore));
 
             if (searchTerms.Any())
             {

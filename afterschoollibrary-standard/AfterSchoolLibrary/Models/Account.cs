@@ -479,7 +479,9 @@ namespace AfterSchoolLibrary.Models
 
         public static List<Account> FullTextSearch(string query, AccountType accountType, int? start, int? length, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var searchTerms = query.Split(' ').Where(term => term.NotIn(Helpers.Utilities.FullTextSearchWordsToIgnore) && term.Trim().Length > 0);
+            var searchTerms = query.Split(' ').Where(term =>
+                term.IsNotBlank() &&
+                term.ToLower().NotIn(Helpers.Utilities.FullTextSearchWordsToIgnore));
 
             if (searchTerms.Any())
             {
