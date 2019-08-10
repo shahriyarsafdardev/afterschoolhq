@@ -185,34 +185,41 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		
+
 
         #endregion
 
-		#region "UserDefined"
+        #region "UserDefined"
 
         public static List<Location> Search(string query, LocationType? locationType, int? start, int? length, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var dq = DatabaseQuery;
-            dq.Connection = dc;
+            var searchTerms = query.Split(' ').Where(term => term.NotIn(Helpers.Utilities.FullTextSearchWordsToIgnore) && term.Trim().Length > 0);
 
-            var sql = $@"
+            if (searchTerms.Any())
+            {
+                var dq = DatabaseQuery;
+                dq.Connection = dc;
+
+                var sql = $@"
                     select * 
                     from Location
                     where 
                         (
-                            Contains(name, '{"\""}{query.Split(' ').ToStringList("*\" AND \"")}{"*\""}') or
-                            Contains(address1,'{"\""}{query.Split(' ').ToStringList("*\" AND \"")}{"*\""}')
+                            Contains(name, '{"\""}{searchTerms.ToStringList("*\" AND \"")}{"*\""}') or
+                            Contains(address1,'{"\""}{searchTerms.ToStringList("*\" AND \"")}{"*\""}')
                         ) and IsTest = 0
                 ";
 
-            if (locationType.HasValue && locationType.Value != LocationType.NotSet)
-                sql += $@" and LocationTypeId = {(int)locationType.Value}";
+                if (locationType.HasValue && locationType.Value != LocationType.NotSet)
+                    sql += $@" and LocationTypeId = {(int)locationType.Value}";
 
-            dq.SelectRange.Start = start;
-            dq.SelectRange.Length = length;
-            
-           return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+                dq.SelectRange.Start = start;
+                dq.SelectRange.Length = length;
+
+                return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+            }
+
+            return new List<Location>();
         }
 
         public static List<Location> LoadByLocationTypeIdByCityByState(LocationType LocationTypeId, string city, string state, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
