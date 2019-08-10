@@ -2,8 +2,8 @@
 @{
     var accountPackage = (AccountPackage)ViewBag.AccountPackage;
     var forms = (List<Form>)ViewBag.Forms;
-    var grades = (List<GradeLevel>)ViewBag.Grades;
-    var schedule = (ActivitySchedule)ViewBag.Schedule;
+    // var grades = (List<GradeLevel>)ViewBag.Grades;
+    // var schedule = (ActivitySchedule)ViewBag.Schedule;
 }
 
 <div class="form-group">
@@ -13,25 +13,31 @@
     </div>
 </div>
 
-<div class="form-group">
-    <label class="col-sm-3 control-label">
-        Total Available Seats <span class="text-danger">*</span>
-        <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Must be a number between 1 and @accountPackage.GetFeature(FeatureType.Participants).Max.Value" data-placement="top"></i>
-    </label>
-    <div class="col-sm-6">
-        <input type="number" class="form-control" id="seatsavailable" name="seatsavailable" value="@Model.SeatsAvailable" onfocus="this.select()" required step="1" min="1" max="@accountPackage.GetFeature(FeatureType.Participants).Max.Value" />
-    </div>
-</div>
+@*
+<div class="hide">
 
-<div class="form-group">
-    <label class="col-sm-3 control-label">
-        Waiting List Seats <span class="text-danger">*</span>
-        <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Can be any positive number" data-placement="top"></i>
-    </label>
-    <div class="col-sm-6">
-        <input type="number" class="form-control" id="waitinglistseats" name="waitinglistseats" value="@Model.WaitingListSeats" onfocus="this.select()" required step="1" min="0" />
+    <div class="form-group">
+        <label class="col-sm-3 control-label">
+            Total Available Seats <span class="text-danger">*</span>
+            <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Must be a number between 1 and @accountPackage.GetFeature(FeatureType.Participants).Max.Value" data-placement="top"></i>
+        </label>
+        <div class="col-sm-6">
+            <input type="number" class="form-control" id="seatsavailable" name="seatsavailable" value="@Model.SeatsAvailable" onfocus="this.select()" required step="1" min="1" max="@accountPackage.GetFeature(FeatureType.Participants).Max.Value" />
+        </div>
     </div>
+
+    <div class="form-group">
+        <label class="col-sm-3 control-label">
+            Waiting List Seats <span class="text-danger">*</span>
+            <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Can be any positive number" data-placement="top"></i>
+        </label>
+        <div class="col-sm-6">
+            <input type="number" class="form-control" id="waitinglistseats" name="waitinglistseats" value="@Model.WaitingListSeats" onfocus="this.select()" required step="1" min="0" />
+        </div>
+    </div>
+
 </div>
+*@
 
 <div class="form-group">
     <label class="col-md-3 control-label">
@@ -39,14 +45,14 @@
     </label>
     <div class="col-md-9">
         @{ Html.RenderPartial(
-           "~/Views/Shared/_TextEditor.cshtml",
-           Model.Description,
-           new ViewDataDictionary() {
+            "~/Views/Shared/_TextEditor.cshtml",
+            Model.Description,
+            new ViewDataDictionary() {
                 { "required", true },
                 { "name", "description" },
                 { "id", "description" }
-           }
-           ); }
+            }
+            ); }
         <p class="text-muted">
             <em>
                 Describe your @UILabel.ActivityGroupLabel(Model.ActivityGroupTypeId)
@@ -79,7 +85,7 @@
     </div>
 </div>
 
-<div class="form-group hide">
+<div class="form-group">
     <label class="col-sm-3 control-label">Invite Only</label>
     <div class="col-sm-9">
         @{
@@ -111,77 +117,92 @@
     </div>
 </div>
 
-<div class="form-group">
-    <label class="col-md-3 control-label">
-        Gender Restrictions
-    </label>
-    <div class="col-md-9">
-        <div class="am-radio inline">
-            @foreach (GenderRestrictionType item in System.Enum.GetValues(typeof(GenderRestrictionType)))
-            {
-                <input type="radio" name="genderrestrictions" id="genderrestrictions-@((int)item)" @(Model.GenderRestriction == item ? " checked=\"checked\" " : "") value="@((int)item)" />
-                <label for="genderrestrictions-@((int)item)" class="margin-h-10">
-                    @item.ToString().SplitByUpperCase()
-                </label>
-            }
+
+
+
+
+@*
+
+<div class="hide">
+
+    <div class="form-group">
+        <label class="col-md-3 control-label">
+            Gender Restrictions
+        </label>
+        <div class="col-md-9">
+            <div class="am-radio inline">
+                @foreach (GenderRestrictionType item in System.Enum.GetValues(typeof(GenderRestrictionType)))
+                {
+                    <input type="radio" name="genderrestrictions" id="genderrestrictions-@((int)item)" @(Model.GenderRestriction == item ? " checked=\"checked\" " : "") value="@((int)item)" />
+                    <label for="genderrestrictions-@((int)item)" class="margin-h-10">
+                        @item.ToString().SplitByUpperCase()
+                    </label>
+                }
+            </div>
         </div>
     </div>
-</div>
 
-<div class="form-group">
-    <label class="col-md-3 control-label">
-        Grade Restrictions
-    </label>
-    <div class="col-md-1">
-        @{Html.RenderPartial
-            (
-                "~/Views/Shared/_SwitchButton.cshtml",
-                Model.MinGradeLevelId.HasValue,
-                new ViewDataDictionary()
+    <div class="form-group">
+        <label class="col-md-3 control-label">
+            Grade Restrictions
+        </label>
+        <div class="col-md-1">
+            @{Html.RenderPartial
+                    (
+                        "~/Views/Shared/_SwitchButton.cshtml",
+                        Model.MinGradeLevelId.HasValue,
+                        new ViewDataDictionary()
+                        {
+                        { "checkboxname", "graderestrictions" },
+                        { "checkboxid", "graderestrictions" },
+                        { "disabled", false }
+                        }
+                    );
+            }
+        </div>
+        <div class="col-md-5 hide" id="grade">
+            <select id="mingrade" name="mingrade" class="form-control">
+                @foreach (var grade in grades)
                 {
-                { "checkboxname", "graderestrictions" },
-                { "checkboxid", "graderestrictions" },
-                { "disabled", false }
+                    <option value="@grade.ID" @(Model.MinGradeLevelId == grade.ID ? " selected=\"selected\" " : "")>@grade.Name</option>
                 }
-            );
-        }
+            </select>
+            <p class="margin-v-10">
+                To
+            </p>
+            <select id="maxgrade" name="maxgrade" class="form-control">
+                @foreach (var grade in grades)
+                {
+                    <option value="@grade.ID" @(Model.MaxGradeLevelId == grade.ID ? " selected=\"selected\" " : "")>@grade.Name</option>
+                }
+            </select>
+        </div>
     </div>
-    <div class="col-md-5 hide" id="grade">
-        <select id="mingrade" name="mingrade" class="form-control">
-            @foreach (var grade in grades)
-            {
-                <option value="@grade.ID" @(Model.MinGradeLevelId == grade.ID ? " selected=\"selected\" " : "")>@grade.Name</option>
-            }
-        </select>
-        <p class="margin-v-10">
-            To
-        </p>
-        <select id="maxgrade" name="maxgrade" class="form-control">
-            @foreach (var grade in grades)
-            {
-                <option value="@grade.ID" @(Model.MaxGradeLevelId == grade.ID ? " selected=\"selected\" " : "")>@grade.Name</option>
-            }
-        </select>
-    </div>
+
 </div>
 
-<div class="form-group">
-    <label class="col-sm-3 control-label">Contact Name<span class="text-danger">*</span></label>
-    <div class="col-sm-6">
-        <input type="text" class="form-control" id="contactname" name="contactname" value="@Model.ContactName" onfocus="this.select()" required />
+<div class="hide">
+    <div class="form-group">
+        <label class="col-sm-3 control-label">Contact Name<span class="text-danger">*</span></label>
+        <div class="col-sm-6">
+            <input type="text" class="form-control" id="contactname" name="contactname" value="@Model.ContactName" onfocus="this.select()" required />
+        </div>
     </div>
-</div>
-<div class="form-group">
-    <label class="col-sm-3 control-label">Contact Phone<span class="text-danger">*</span></label>
-    <div class="col-sm-6">
-        <input type="text" class="form-control" id="contactphone" name="contactphone" value="@Model.ContactPhone" onfocus="this.select()" required />
+
+    <div class="form-group">
+        <label class="col-sm-3 control-label">Contact Phone<span class="text-danger">*</span></label>
+        <div class="col-sm-6">
+            <input type="text" class="form-control" id="contactphone" name="contactphone" value="@Model.ContactPhone" onfocus="this.select()" required />
+        </div>
     </div>
-</div>
-<div class="form-group">
-    <label class="col-sm-3 control-label">Contact Email<span class="text-danger">*</span></label>
-    <div class="col-sm-6">
-        <input type="email" class="form-control" id="contactemail" name="contactemail" value="@Model.ContactEmail" onfocus="this.select()" required />
+
+    <div class="form-group">
+        <label class="col-sm-3 control-label">Contact Email<span class="text-danger">*</span></label>
+        <div class="col-sm-6">
+            <input type="email" class="form-control" id="contactemail" name="contactemail" value="@Model.ContactEmail" onfocus="this.select()" required />
+        </div>
     </div>
+
 </div>
 
 @{
@@ -197,29 +218,30 @@
     );
 }
 
-<script>
-    PageEvent.add(
-        PageEvent.AFTER_INIT,
-        function () {
-            $('#graderestrictions').click(function () {
+    <script>
+        PageEvent.add(
+            PageEvent.AFTER_INIT,
+            function () {
+                $('#graderestrictions').click(function () {
+                    gradeCheck();
+                });
+
+                $('#mingrade').change(function () {
+                    if (parseInt($(this).val()) > parseInt($('#maxgrade').val())) {
+                        $('#maxgrade').val($(this).val());
+                    }
+                });
+
                 gradeCheck();
-            });
+            }
+        );
 
-            $('#mingrade').change(function () {
-                if (parseInt($(this).val()) > parseInt($('#maxgrade').val())) {
-                    $('#maxgrade').val($(this).val());
-                }
-            });
-
-            gradeCheck();
+        function gradeCheck() {
+            if ($('#graderestrictions').is(':checked')) {
+                $('#grade').removeClass('hide');
+            } else {
+                $('#grade').addClass('hide');
+            }
         }
-    );
-
-    function gradeCheck() {
-        if ($('#graderestrictions').is(':checked')) {
-            $('#grade').removeClass('hide');
-        } else {
-            $('#grade').addClass('hide');
-        }
-    }
-</script>
+    </script>
+*@

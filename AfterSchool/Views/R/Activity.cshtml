@@ -99,12 +99,15 @@
 
                     </div>
 
-                    <div class="activity-detail-block">
-                        <h3>Schedule</h3>
-                        <p>
-                            @{ Html.RenderPartial("_ActivityScheduleHtml", Model.Schedule); }
-                        </p>
-                    </div>
+                    @if (Model.Schedule.IsNotEmpty())
+                    {
+                        <div class="activity-detail-block">
+                            <h3>Schedule</h3>
+                            <p>
+                                @{ Html.RenderPartial("_ActivityScheduleHtml", Model.Schedule); }
+                            </p>
+                        </div>
+                    }
 
                     <div class="activity-detail-block">
                         <h3>Contact</h3>
