@@ -479,20 +479,29 @@ namespace AfterSchoolLibrary.Models
 
         public static List<Account> FullTextSearch(string query, AccountType accountType, int? start, int? length, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var dq = DatabaseQuery;
-            dq.Connection = dc;
+            var searchTerms = query.Split(' ').Where(term =>
+                term.IsNotBlank() &&
+                term.ToLower().NotIn(Helpers.Utilities.FullTextSearchWordsToIgnore));
 
-            var sql = $@"
+            if (searchTerms.Any())
+            {
+                var dq = DatabaseQuery;
+                dq.Connection = dc;
+
+                var sql = $@"
                     select * from Account
                     where 
-                        Contains(name, '{"\""}{query.Split(' ').ToStringList("*\" AND \"")}{"*\""}') and
+                        Contains(name, '{"\""}{searchTerms.ToStringList("*\" AND \"")}{"*\""}') and
                         IsTest = 0 and OwnerId is not NULL and AccountTypeId = {(int)accountType}
                 ";
 
-            dq.SelectRange.Start = start;
-            dq.SelectRange.Length = length;
+                dq.SelectRange.Start = start;
+                dq.SelectRange.Length = length;
 
-            return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+                return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+            }
+
+            return new List<Account>();
         }
 
         #endregion
