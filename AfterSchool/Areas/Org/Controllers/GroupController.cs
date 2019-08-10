@@ -101,8 +101,8 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = new SystemMessages();
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Forms = SessionVariables.CurrentAccount.GetForms();
-            ViewBag.Grades = GradeLevel.Load();
-            LoadEditScheduleViewBag(group, group.ActivityScheduleId.ToString());
+            // ViewBag.Grades = GradeLevel.Load();
+            // LoadEditScheduleViewBag(group, group.ActivityScheduleId.ToString());
             return View(group);
         }
 
@@ -111,8 +111,8 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Edit(string id, string name, string description, string regmode, string form, string isinviteonly, string genderrestrictions, string mingrade, string maxgrade, string schedule, string scheduledetails, string requiresalldays, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime, string isongoing, string contactname, string contactemail, string contactphone, string seatsavailable, string waitinglistseats)
         {
             var msgs = new SystemMessages();
-            var inSessionDates = new List<DateRange>();
-            var outOfSessionDates = new List<DateTime>();
+            // var inSessionDates = new List<DateRange>();
+            // var outOfSessionDates = new List<DateTime>();
 
             var values = new Dictionary<string, object>()
             {
@@ -121,32 +121,32 @@ namespace AfterSchool.Areas.Org.Controllers
                 { "regmode", regmode },
                 { "form", form },
                 { "isinviteonly", 0.ToString() },
-                { "genderrestrictions", genderrestrictions },
-                { "mingrade", mingrade },
-                { "maxgrade", maxgrade },
-                { "contactname", contactname },
-                { "contactemail", contactemail },
-                { "contactphone", contactphone },
-                { "seatsavailable", seatsavailable },
-                { "waitinglistseats", waitinglistseats }
+                // { "genderrestrictions", genderrestrictions },
+                // { "mingrade", mingrade },
+                // { "maxgrade", maxgrade },
+                // { "contactname", contactname },
+                // { "contactemail", contactemail },
+                // { "contactphone", contactphone },
+                // { "seatsavailable", seatsavailable },
+                // { "waitinglistseats", waitinglistseats }
             };
 
-            var filteredParams = Request.Params.Filter("schedulerepeat-");
-            var days = Models.ActivityScheduleUI.PrepDaysOfWeek(filteredParams);
-            inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
-            outOfSessionDates = ActivityScheduleUI.PrepScheduleDatesClosed(Request.Params.Filter("meeting-closed-"));
+            //var filteredParams = Request.Params.Filter("schedulerepeat-");
+            //var days = Models.ActivityScheduleUI.PrepDaysOfWeek(filteredParams);
+            //inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
+            //outOfSessionDates = ActivityScheduleUI.PrepScheduleDatesClosed(Request.Params.Filter("meeting-closed-"));
 
-            values.Add("scheduledetails", scheduledetails);
-            values.Add("days", days.Select(x => (int)x).ToArray().ToStringArray().ToStringList());
-            values.Add("repeatsweekly", repeatsweekly.IfBlank("0"));
-            values.Add("startdate", startdate);
-            values.Add("enddate", enddate);
-            values.Add("dailystarttime", dailystarttime);
-            values.Add("dailyendtime", dailyendtime);
-            values.Add("scheduledates", inSessionDates);
-            values.Add("scheduledatesclosed", outOfSessionDates);
-            values.Add("schedule", schedule);
-            values.Add("isongoing", isongoing);
+            //values.Add("scheduledetails", scheduledetails);
+            //values.Add("days", days.Select(x => (int)x).ToArray().ToStringArray().ToStringList());
+            //values.Add("repeatsweekly", repeatsweekly.IfBlank("0"));
+            //values.Add("startdate", startdate);
+            //values.Add("enddate", enddate);
+            //values.Add("dailystarttime", dailystarttime);
+            //values.Add("dailyendtime", dailyendtime);
+            //values.Add("scheduledates", inSessionDates);
+            //values.Add("scheduledatesclosed", outOfSessionDates);
+            //values.Add("schedule", schedule);
+            //values.Add("isongoing", isongoing);
 
             var group = ActivityGroupService.SaveSession(SessionVariables.CurrentUser, SessionVariables.CurrentAccount, id, values, msgs);
 
@@ -155,14 +155,17 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add($"{UILabel.ActivityGroupLabel(group.ActivityGroupTypeId)} Saved", MessageType.Success);
 
                 if (id.IsEmpty())
-                    UpdateSession(sat: SessionActionType.ActivityGroupCreate, accountId: SessionVariables.CurrentAccount.ID, activityGroupId: group.ID);
+                    UpdateSession(
+                        sat: SessionActionType.ActivityGroupCreate, 
+                        accountId: SessionVariables.CurrentAccount.ID, 
+                        activityGroupId: group.ID);
             }
 
             ViewBag.Messages = msgs;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Forms = SessionVariables.CurrentAccount.GetForms();
-            ViewBag.Grades = GradeLevel.Load();
-            LoadEditScheduleViewBag(group, group.ActivityScheduleId.ToString());
+            // ViewBag.Grades = GradeLevel.Load();
+            // LoadEditScheduleViewBag(group, group.ActivityScheduleId.ToString());
             return View(group);
         }
 

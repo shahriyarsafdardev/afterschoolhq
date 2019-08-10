@@ -133,7 +133,7 @@ namespace AfterSchool.Controllers
                 return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
 
             var msgs = new SystemMessages();
-            var accounts = Account.FullTextSearch(search.Trim(), 0, 10, msgs);
+            var accounts = Account.FullTextSearch(search.Trim(), AccountType.ActivityProvider, 0, 10, msgs);
 
             return Json(new
             {
