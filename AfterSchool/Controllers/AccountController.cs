@@ -1335,7 +1335,7 @@ namespace AfterSchool.Controllers
                 return RedirectToAction("register");
 
             // current registrant is already registered, then select a different student
-            if (SessionVariables.CurrentRegistrant.IsRegisteredFor(participationObject, msgs))
+            if (SessionVariables.CurrentRegistrant.IsRegisteredForAndHasConsent(participationObject, msgs))
                 return RedirectToAction("select");
 
             var registration = Registration.LoadByUid(registrationUid.ToGuid(), msgs);
