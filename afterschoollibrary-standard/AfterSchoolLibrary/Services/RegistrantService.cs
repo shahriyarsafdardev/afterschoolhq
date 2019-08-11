@@ -376,7 +376,7 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(registrant.Save(dc));
         }
 
-        public static bool IsRegisteredFor(this Registrant masterRegistrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool IsReservedFor(this Registrant masterRegistrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var submittedRecords = masterRegistrant.GetSubmittedRecords(participationObject.OwnerAccount.ID.Value, msgs, dc);
 
@@ -384,12 +384,17 @@ namespace AfterSchoolLibrary.Services
                 participationObjectId: participationObject.ObjectID.Value,
                 participationObjectType: participationObject.ObjectType,
                 registrantIds: submittedRecords.Select(item => item.ID.Value).ToList(),
-                assignmentTypes: null,
+                assignmentTypes: new List<RegistrationAssignmentType>()
+                {
+                    RegistrationAssignmentType.Reserved,
+                    RegistrationAssignmentType.ReservedPendingPayment,
+                    RegistrationAssignmentType.ReservedPendingParentalConsent
+                },
                 msgs: msgs,
                 dc: dc);
         }
 
-        public static bool IsRegisteredForAndHasConsent(this Registrant masterRegistrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool IsReservedWithConsentFor(this Registrant masterRegistrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var submittedRecords = masterRegistrant.GetSubmittedRecords(participationObject.OwnerAccount.ID.Value, msgs, dc);
 
@@ -397,12 +402,16 @@ namespace AfterSchoolLibrary.Services
                 participationObjectId: participationObject.ObjectID.Value,
                 participationObjectType: participationObject.ObjectType,
                 registrantIds: submittedRecords.Select(item => item.ID.Value).ToList(),
-                assignmentTypes: new List<RegistrationAssignmentType>() { RegistrationAssignmentType.Reserved, RegistrationAssignmentType.ReservedPendingPayment },
+                assignmentTypes: new List<RegistrationAssignmentType>()
+                {
+                    RegistrationAssignmentType.Reserved,
+                    RegistrationAssignmentType.ReservedPendingPayment
+                },
                 msgs: msgs,
                 dc: dc);
         }
 
-        public static bool IsRegisteredForHasConsentAndPaid(this Registrant masterRegistrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool IsReservedWithConsentAndPaidFor(this Registrant masterRegistrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var submittedRecords = masterRegistrant.GetSubmittedRecords(participationObject.OwnerAccount.ID.Value, msgs, dc);
 
@@ -410,7 +419,27 @@ namespace AfterSchoolLibrary.Services
                 participationObjectId: participationObject.ObjectID.Value,
                 participationObjectType: participationObject.ObjectType,
                 registrantIds: submittedRecords.Select(item => item.ID.Value).ToList(),
-                assignmentTypes: new List<RegistrationAssignmentType>() { RegistrationAssignmentType.Reserved },
+                assignmentTypes: RegistrationAssignmentType.Reserved.AsList(),
+                msgs: msgs,
+                dc: dc);
+        }
+
+        public static bool HasSubmittedFor(this Registrant masterRegistrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var submittedRecords = masterRegistrant.GetSubmittedRecords(participationObject.OwnerAccount.ID.Value, msgs, dc);
+
+            return submittedRecords.Any() && RegistrantActivity.ExistsByParticipationObjectByRegistrants(
+                participationObjectId: participationObject.ObjectID.Value,
+                participationObjectType: participationObject.ObjectType,
+                registrantIds: submittedRecords.Select(item => item.ID.Value).ToList(),
+                assignmentTypes: new List<RegistrationAssignmentType>()
+                {
+                    RegistrationAssignmentType.Reserved,
+                    RegistrationAssignmentType.ReservedPendingPayment,
+                    RegistrationAssignmentType.Applied,
+                    RegistrationAssignmentType.WaitingList,
+                    RegistrationAssignmentType.ReservedPendingParentalConsent
+                },
                 msgs: msgs,
                 dc: dc);
         }

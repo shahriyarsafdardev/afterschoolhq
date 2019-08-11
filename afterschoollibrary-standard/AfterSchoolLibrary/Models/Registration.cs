@@ -976,20 +976,7 @@ namespace AfterSchoolLibrary.Models
                 return Purchase.Load(this.PurchaseId.Value, msgs, dc);
 
             return null;
-        }        
-
-        public bool IsRegisteredFor(int participationObjectId, ParticipationObjectType participationObjectType, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return this.GetRegistrantActivities(msgs, dc)
-                .Where(x => 
-                    x.ParticipationObjectId.Value == participationObjectId && 
-                    x.ParticipationObjectTypeId == participationObjectType)
-                .Count() > 0;
-        }
-        public bool IsRegisteredFor(ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return IsRegisteredFor(participationObject.ObjectID.Value, participationObject.ObjectType, msgs, dc);
-        }
+        }   
 
         public static int TotalCurrentRegistrationsCount(int accountId, DatabaseConnection dc = null)
         {

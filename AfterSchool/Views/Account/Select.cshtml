@@ -34,13 +34,13 @@
         var disabledText = "";
         var btnText = "";
 
-        if (registrant.IsRegisteredFor(participationObject))
+        if (registrant.HasSubmittedFor(participationObject))
         {
-            if (!registrant.IsRegisteredForAndHasConsent(participationObject))
+            if (!registrant.IsReservedWithConsentFor(participationObject))
             {
                 btnText = "Give Consent";
             }
-            else if (!registrant.IsRegisteredForHasConsentAndPaid(participationObject))
+            else if (!participationObject.IsFree && !registrant.IsReservedWithConsentAndPaidFor(participationObject))
             {
                 btnText = "Pay Now";
             }
