@@ -96,9 +96,10 @@ namespace AfterSchoolLibrary.Services
             // if there is room
             if (!seatsAvailable.HasValue || seatsAvailable >= numberOfSeatsRequested)
             {
-                var isStudentRegistering = masterRegistrant.WebUserId.HasValue && loggedInUser.ID == masterRegistrant.WebUserId;
+                var isStudentOrTeacherRegistering = masterRegistrant.IsEmpty() || (masterRegistrant.WebUserId.HasValue && loggedInUser.ID == masterRegistrant.WebUserId);
+
                 // if the person registering is the student
-                if (participationObject.RequiresParentalConsent && isStudentRegistering)
+                if (participationObject.RequiresParentalConsent && isStudentOrTeacherRegistering)
                     return RegistrationAssignmentType.ReservedPendingParentalConsent;
 
                 // if the person didn't pay yet
