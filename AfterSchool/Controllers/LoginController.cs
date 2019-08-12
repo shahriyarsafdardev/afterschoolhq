@@ -127,7 +127,7 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
-                user = WebUser.LoadByEmail(email);
+                user = WebUser.LoadByEmail(email, msgs);
 
                 if (user.IsNotEmpty())
                     msgs.AddRange(user.SendPasswordResetToken(SessionVariables.IsAfterSchool.Value));

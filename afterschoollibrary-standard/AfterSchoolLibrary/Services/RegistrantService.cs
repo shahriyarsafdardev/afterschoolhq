@@ -20,9 +20,9 @@ namespace AfterSchoolLibrary.Services
 
             var creatingNewAccount = password.IsNotEmpty();
 
-            if (WebUser.ExistsByEmail(email, dc: dc))
+            if (WebUser.ExistsByEmail(email, msgs, dc))
             {
-                var user = WebUser.LoadByEmail(email, dc: dc);
+                var user = WebUser.LoadByEmail(email, msgs, dc);
                 if (!creatingNewAccount)
                 {
                     // not creating an account, current account has no password
@@ -376,7 +376,21 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(registrant.Save(dc));
         }
 
-        public static bool IsRegisteredFor(this Registrant masterRegistrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool IsAppliedFor(this Registrant masterRegistrant, ParticipationObject participationObject, bool? hasParentalConsent, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var submittedRecords = masterRegistrant.GetSubmittedRecords(participationObject.OwnerAccount.ID.Value, msgs, dc);
+
+            return submittedRecords.Any() && RegistrantActivity.ExistsByParticipationObjectByRegistrants(
+                participationObjectId: participationObject.ObjectID.Value,
+                participationObjectType: participationObject.ObjectType,
+                registrantIds: submittedRecords.Select(item => item.ID.Value).ToList(),
+                assignmentTypes: RegistrationAssignmentType.Applied.AsList(),
+                hasParentalConsent: hasParentalConsent,
+                msgs: msgs,
+                dc: dc);
+        }
+        
+        public static bool HasConsentFor(this Registrant masterRegistrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var submittedRecords = masterRegistrant.GetSubmittedRecords(participationObject.OwnerAccount.ID.Value, msgs, dc);
 
@@ -385,11 +399,12 @@ namespace AfterSchoolLibrary.Services
                 participationObjectType: participationObject.ObjectType,
                 registrantIds: submittedRecords.Select(item => item.ID.Value).ToList(),
                 assignmentTypes: null,
+                hasParentalConsent: true,
                 msgs: msgs,
                 dc: dc);
         }
 
-        public static bool IsRegisteredForAndHasConsent(this Registrant masterRegistrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool IsReservedFor(this Registrant masterRegistrant, ParticipationObject participationObject, bool? hasParentalConsent, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var submittedRecords = masterRegistrant.GetSubmittedRecords(participationObject.OwnerAccount.ID.Value, msgs, dc);
 
@@ -397,12 +412,18 @@ namespace AfterSchoolLibrary.Services
                 participationObjectId: participationObject.ObjectID.Value,
                 participationObjectType: participationObject.ObjectType,
                 registrantIds: submittedRecords.Select(item => item.ID.Value).ToList(),
-                assignmentTypes: new List<RegistrationAssignmentType>() { RegistrationAssignmentType.Reserved, RegistrationAssignmentType.ReservedPendingPayment },
+                assignmentTypes: new List<RegistrationAssignmentType>()
+                {
+                    RegistrationAssignmentType.Reserved,
+                    RegistrationAssignmentType.ReservedPendingPayment,
+                    RegistrationAssignmentType.ReservedPendingParentalConsent,
+                },
+                hasParentalConsent: hasParentalConsent,
                 msgs: msgs,
                 dc: dc);
         }
 
-        public static bool IsRegisteredForHasConsentAndPaid(this Registrant masterRegistrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool IsReservedAndPaidFor(this Registrant masterRegistrant, ParticipationObject participationObject, bool? hasParentalConsent, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var submittedRecords = masterRegistrant.GetSubmittedRecords(participationObject.OwnerAccount.ID.Value, msgs, dc);
 
@@ -410,7 +431,29 @@ namespace AfterSchoolLibrary.Services
                 participationObjectId: participationObject.ObjectID.Value,
                 participationObjectType: participationObject.ObjectType,
                 registrantIds: submittedRecords.Select(item => item.ID.Value).ToList(),
-                assignmentTypes: new List<RegistrationAssignmentType>() { RegistrationAssignmentType.Reserved },
+                assignmentTypes: RegistrationAssignmentType.Reserved.AsList(),
+                hasParentalConsent: hasParentalConsent,
+                msgs: msgs,
+                dc: dc);
+        }
+
+        public static bool HasSubmittedFor(this Registrant masterRegistrant, ParticipationObject participationObject, bool? hasParentalConsent, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var submittedRecords = masterRegistrant.GetSubmittedRecords(participationObject.OwnerAccount.ID.Value, msgs, dc);
+
+            return submittedRecords.Any() && RegistrantActivity.ExistsByParticipationObjectByRegistrants(
+                participationObjectId: participationObject.ObjectID.Value,
+                participationObjectType: participationObject.ObjectType,
+                registrantIds: submittedRecords.Select(item => item.ID.Value).ToList(),
+                assignmentTypes: new List<RegistrationAssignmentType>()
+                {
+                    RegistrationAssignmentType.Reserved,
+                    RegistrationAssignmentType.ReservedPendingPayment,
+                    RegistrationAssignmentType.Applied,
+                    RegistrationAssignmentType.WaitingList,
+                    RegistrationAssignmentType.ReservedPendingParentalConsent
+                },
+                hasParentalConsent: hasParentalConsent,
                 msgs: msgs,
                 dc: dc);
         }

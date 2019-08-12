@@ -208,21 +208,76 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		
+
 
         #endregion
 
-		#region "UserDefined"
+        #region "UserDefined"
 
-        public static WebUser LoadByEmail(string email, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static WebUser LoadByEmail(string email, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return LoadByEmail(email, null, msgs, dc);
+        }
+
+        public static WebUser LoadByEmail(string email, bool? hasPassword, SystemMessages msgs, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["email"], email);
+
+            if (hasPassword.HasValue)
+            {
+                var op = hasPassword.Value ? DatabaseCriteriaOperatorEnum.IsNot : DatabaseCriteriaOperatorEnum.Is;
+                dq.UseParameterizedQuery = false;
+                dq.Criterias.Add(ObjectMap["password"], DBNull.Value, op);
+            }
+
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public bool CanEmailBeUsed(string email, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static WebUser LoadByPhone(string phone, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return LoadByPhone(phone, null, msgs, dc);
+        }
+
+        public static WebUser LoadByPhone(string phone, bool? hasPassword, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["phone"], phone);
+
+            if (hasPassword.HasValue)
+            {
+                var op = hasPassword.Value ? DatabaseCriteriaOperatorEnum.IsNot : DatabaseCriteriaOperatorEnum.Is;
+                dq.UseParameterizedQuery = false;
+                dq.Criterias.Add(ObjectMap["password"], DBNull.Value, op);
+            }
+
+            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
+
+        public static WebUser LoadByUsername(string username, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return LoadByUsername(username, null, msgs, dc);
+        }
+
+        public static WebUser LoadByUsername(string username, bool? hasPassword, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["username"], username);
+
+            if (hasPassword.HasValue)
+            {
+                var op = hasPassword.Value ? DatabaseCriteriaOperatorEnum.IsNot : DatabaseCriteriaOperatorEnum.Is;
+                dq.UseParameterizedQuery = false;
+                dq.Criterias.Add(ObjectMap["password"], DBNull.Value, op);
+            }
+
+            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
+
+        public bool CanEmailBeUsed(string email, SystemMessages msgs, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -231,7 +286,16 @@ namespace AfterSchoolLibrary.Models
             return dq.GetCount() == 0;
         }
 
-        public static bool ExistsByEmail(string email, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public bool CanPhoneBeUsed(string phone, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["phone"], phone);
+            dq.Criterias.Add(ObjectMap["ID"], this.ID.Value, DatabaseCriteriaOperatorEnum.NotEqualTo);
+            return dq.GetCount() == 0;
+        }
+
+        public static bool ExistsByEmail(string email, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return GetCount(
                 criterias: new Hashtable(){
@@ -241,24 +305,7 @@ namespace AfterSchoolLibrary.Models
                 ) > 0;
         }
 
-        public static WebUser LoadByPhone(string phone, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
-            dq.Connection = dc;
-            dq.Criterias.Add(ObjectMap["phone"], phone);
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
-        }
-
-        public bool CanPhoneBeUsed(string phone, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
-            dq.Connection = dc;
-            dq.Criterias.Add(ObjectMap["phone"], phone);
-            dq.Criterias.Add(ObjectMap["ID"], this.ID.Value, DatabaseCriteriaOperatorEnum.NotEqualTo);
-            return dq.GetCount() == 0;
-        }
-
-        public static bool ExistsByPhone(string phone, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool ExistsByPhone(string phone, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return GetCount(
                 criterias: new Hashtable(){
@@ -268,7 +315,7 @@ namespace AfterSchoolLibrary.Models
                 ) > 0;
         }
 
-        public static bool ExistsByUid(Guid uid, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool ExistsByUid(Guid uid, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return GetCount(
                 criterias: new Hashtable(){
@@ -276,14 +323,6 @@ namespace AfterSchoolLibrary.Models
                 },
                 dc: dc
                 ) > 0;
-        }
-
-        public static WebUser LoadByUsername(string username, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
-            dq.Connection = dc;
-            dq.Criterias.Add(ObjectMap["username"], username);
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
         #endregion
