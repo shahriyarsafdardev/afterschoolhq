@@ -197,7 +197,7 @@ namespace AfterSchool.Controllers
                 msgs.Add("Email is required", MessageType.UserError);
             else if(!email.IsMatch(BasicLibrary.Utilities.EmailRegEx))
                 msgs.Add("Please enter a valid email address", MessageType.UserError);
-            else if(!user.CanEmailBeUsed(email))
+            else if(!user.CanEmailBeUsed(email, msgs))
                 msgs.Add("This email has already been registered", MessageType.UserError);
 
             if (password1.IsEmpty() || password2.IsEmpty() || (password1 != password2))
@@ -235,7 +235,7 @@ namespace AfterSchool.Controllers
             {
                 msgs.Add("Invalid verification code", MessageType.UserError);
             }
-            else if (!WebUser.ExistsByUid(id.ToGuid()))
+            else if (!WebUser.ExistsByUid(id.ToGuid(), msgs))
             { 
                 msgs.Add("Invalid verification code", MessageType.UserError);
             }
@@ -509,14 +509,14 @@ namespace AfterSchool.Controllers
                 msgs.Add("Email is required", MessageType.UserError);
             else if (!email.IsMatch(BasicLibrary.Utilities.EmailRegEx))
                 msgs.Add("Please enter a valid email address", MessageType.UserError);
-            else if (WebUser.ExistsByEmail(email))
+            else if (WebUser.ExistsByEmail(email, msgs))
                 msgs.Add("This email has already been registered. Login if you already have an account.", MessageType.UserError);
 
             if (phone.IsEmpty())
                 msgs.Add("Phone is required", MessageType.UserError);
             else if (!phone.IsMatch(BasicLibrary.Utilities.PhoneRegEx))
                 msgs.Add("Please enter a valid phone number", MessageType.UserError);
-            else if (WebUser.ExistsByPhone(phone))
+            else if (WebUser.ExistsByPhone(phone, msgs))
                 msgs.Add("This phone has already been registered. Login if you already have an account.", MessageType.UserError);
 
             if (password1.IsEmpty() || password2.IsEmpty() || (password1 != password2))

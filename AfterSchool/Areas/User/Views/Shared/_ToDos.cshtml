@@ -67,18 +67,25 @@
                             <td>@participationObject.Name</td>
                             <td class="text-center">@ra.RegistrantFirstName</td>
                             <td class="text-center">@registration.LastModifiedDate.ToShortDateString()</td>
-                            <td class="text-right">
-                                <a href="@registration.GetParentalConsentUrl" class="btn btn-primary">
-                                    @if (ra.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingParentalConsent)
-                                    {
-                                        <span>Give Consent @(participationObject.IsNotFreeAndCanAcceptPayments ? "& Pay" : "")</span>
-                                    }
-                                    else if (ra.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment && participationObject.IsNotFreeAndCanAcceptPayments)
-                                    {
-                                        <span>Pay Online</span>
-                                    }
-                                    &raquo;
-                                </a>
+                            <td class="text-right">                                
+                                @if (registration.ESignature.IsBlank())
+                                {
+                                    <a href="@registration.GetParentalConsentUrl" class="btn btn-primary">
+                                        <span>
+                                            Give Consent 
+                                            @if (ra.AssignmentTypeId != RegistrationAssignmentType.Applied)
+                                            {
+                                                @(participationObject.IsNotFreeAndCanAcceptPayments ? "& Pay" : "")
+                                            }
+                                        </span> &raquo;
+                                    </a>
+                                }
+                                else if (ra.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment && participationObject.IsNotFreeAndCanAcceptPayments)
+                                {
+                                    <a href="@registration.GetPaymentUrl" class="btn btn-primary">
+                                        <span>Pay Online</span> &raquo;
+                                    </a>
+                                }
                             </td>
                         </tr>
                     }
