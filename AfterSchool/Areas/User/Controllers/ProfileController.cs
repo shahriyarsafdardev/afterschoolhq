@@ -42,7 +42,7 @@ namespace AfterSchool.Areas.User.Controllers
             {
                 msgs.Add("Email must be valid", MessageType.UserError);
             }
-            else if (!SessionVariables.CurrentUser.CanEmailBeUsed(email))
+            else if (!SessionVariables.CurrentUser.CanEmailBeUsed(email, msgs))
             {
                 msgs.Add("Email is already in use by another user", MessageType.UserError);
             }

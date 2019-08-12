@@ -83,7 +83,7 @@ namespace AfterSchoolLibraryTests.Tests
         public void LoadByEmailTest()
         {
             var user = Factories.WebUserFactory.CreateWithEmail("test@test.com", msgs, dc: dc);
-            var user2 = WebUser.LoadByEmail(user.Email, dc: dc);
+            var user2 = WebUser.LoadByEmail(user.Email, msgs, dc);
 
             Assert.NotNull(user2);
         }
@@ -96,7 +96,7 @@ namespace AfterSchoolLibraryTests.Tests
             var user = Factories.WebUserFactory.CreateWithEmail(email1, msgs, dc: dc);
             var user2 = Factories.WebUserFactory.CreateWithEmail(email2, msgs, dc: dc);
 
-            Assert.True(user.CanEmailBeUsed(testEmail, dc: dc) == result);
+            Assert.True(user.CanEmailBeUsed(testEmail, msgs, dc) == result);
         }
 
         [Theory(DisplayName = "Check if email already exists at all in system")]
@@ -114,13 +114,13 @@ namespace AfterSchoolLibraryTests.Tests
         {
             var user = Factories.WebUserFactory.Create(msgs, dc: dc);
 
-            Assert.True(WebUser.ExistsByUid(user.Uid, dc: dc));
+            Assert.True(WebUser.ExistsByUid(user.Uid, msgs, dc));
         }
 
         [Fact(DisplayName = "Check if UID exists in webuser table - failing")]
         public void ExistsByUidFailingTest()
         {
-            Assert.False(WebUser.ExistsByUid(Guid.NewGuid(), dc: dc));
+            Assert.False(WebUser.ExistsByUid(Guid.NewGuid(), msgs, dc));
         }
 
         [Fact(DisplayName = "Load by username")]
@@ -128,7 +128,7 @@ namespace AfterSchoolLibraryTests.Tests
         {
             var user = Factories.WebUserFactory.CreateWithUsername("username1", msgs, dc: dc);
 
-            Assert.NotNull(WebUser.LoadByUsername(user.Username, dc: dc));
+            Assert.NotNull(WebUser.LoadByUsername(user.Username, msgs, dc));
         }
 
         [Theory(DisplayName = "Login with username and password")]

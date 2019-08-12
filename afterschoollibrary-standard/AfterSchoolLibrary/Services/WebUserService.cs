@@ -31,17 +31,17 @@ namespace AfterSchoolLibrary.Services
 
         public static WebUser LoginByUsername(string username, string password, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return WebUser.LoadByUsername(username, msgs, dc).ReturnUserIfValidPassword(password);
+            return WebUser.LoadByUsername(username, true, msgs, dc).ReturnUserIfValidPassword(password);
         }
 
         public static WebUser LoginByPhone(string phone, string password, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return WebUser.LoadByPhone(phone, msgs, dc).ReturnUserIfValidPassword(password);
+            return WebUser.LoadByPhone(phone, true, msgs, dc).ReturnUserIfValidPassword(password);
         }
 
         public static WebUser LoginByEmail(string email, string password, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return WebUser.LoadByEmail(email, msgs, dc).ReturnUserIfValidPassword(password);
+            return WebUser.LoadByEmail(email, true, msgs, dc).ReturnUserIfValidPassword(password);
         }
 
         public static WebUser ReturnUserIfValidPassword(this WebUser user, string plainPassword)
@@ -298,7 +298,7 @@ namespace AfterSchoolLibrary.Services
                 msgs.Add("Email is required", MessageType.UserError);
             else if (!email.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
                 msgs.Add("Email must valid", MessageType.UserError);
-            else if (WebUser.ExistsByEmail(email))
+            else if (WebUser.ExistsByEmail(email, msgs, dc))
                 msgs.Add("Email is already in use, do you already have an account?", MessageType.UserError);
 
             if (password.IsNotEmpty() && password.Length < 8)
@@ -344,14 +344,14 @@ namespace AfterSchoolLibrary.Services
                 msgs.Add("Email is required", MessageType.UserError);
             else if (!email.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
                 msgs.Add("Email must valid", MessageType.UserError);
-            else if (WebUser.ExistsByEmail(email))
+            else if (WebUser.ExistsByEmail(email, msgs, dc))
                 msgs.Add("Email is already in use, do you already have an account?", MessageType.UserError);
 
             if (phone.IsNotEmpty())
             { 
                 if (!phone.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
                     msgs.Add("Phone must be valid", MessageType.UserError);
-                else if (WebUser.ExistsByPhone(phone))
+                else if (WebUser.ExistsByPhone(phone, msgs, dc))
                     msgs.Add("Phone is already in use, do you already have an account?", MessageType.UserError);
             }
 
@@ -399,14 +399,14 @@ namespace AfterSchoolLibrary.Services
                 msgs.Add("Email is required", MessageType.UserError);
             else if (!email.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
                 msgs.Add("Email must valid", MessageType.UserError);
-            else if (WebUser.ExistsByEmail(email))
+            else if (WebUser.ExistsByEmail(email, msgs, dc))
                 msgs.Add("Email is already in use, do you already have an account?", MessageType.UserError);
 
             if (phone.IsEmpty())
                 msgs.Add("Phone is required", MessageType.UserError);
             else if (!phone.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
                 msgs.Add("Phone must be valid", MessageType.UserError);
-            else if (WebUser.ExistsByPhone(phone))
+            else if (WebUser.ExistsByPhone(phone, msgs, dc))
                 msgs.Add("Phone is already in use, do you already have an account?", MessageType.UserError);
 
             if (password.IsNotEmpty() && password.Length < 8)

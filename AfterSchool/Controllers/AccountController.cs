@@ -1105,7 +1105,7 @@ namespace AfterSchool.Controllers
                     new { Area = "user", id = SessionVariables.CurrentRegistrant.Uid, reg = registration?.Uid, student = SessionVariables.CurrentRegistrant?.Uid });
 
             // current registrant is already registered
-            if (SessionVariables.CurrentRegistrant.HasSubmittedFor(participationObject, msgs))
+            if (SessionVariables.CurrentRegistrant.HasSubmittedFor(participationObject, true, msgs))
                 return RedirectToAction("select");
 
             // need to see if there are any questions required by the form on the activity/activity group that haven't been collected on the main form
@@ -1334,11 +1334,11 @@ namespace AfterSchool.Controllers
             if (!registrationUid.IsGuid())
                 return RedirectToAction("register");
 
-            // current registrant has already submitted, then select a different student
-            if (SessionVariables.CurrentRegistrant.HasSubmittedFor(participationObject, msgs))
-                return RedirectToAction("select");
-
             var registration = Registration.LoadByUid(registrationUid.ToGuid(), msgs);
+
+            // current registrant has already submitted, then select a different student
+            if (registration.CompletionStatusId == RegistrationCompletionStatus.Completed)
+                return RedirectToAction("select");
 
             if (msgs.HasNoErrors())
                 AccountService.ProcessRegistrationWithoutPayment(
@@ -1410,7 +1410,7 @@ namespace AfterSchool.Controllers
             PaymentViewBag(id, participationObject, msgs);
 
             // current registrant is already registered
-            if (SessionVariables.CurrentRegistrant.IsReservedWithConsentAndPaidFor(participationObject, msgs))
+            if (SessionVariables.CurrentRegistrant.IsReservedAndPaidFor(participationObject, true, msgs))
                 return RedirectToAction("select");
 
             return View();
@@ -1883,7 +1883,7 @@ namespace AfterSchool.Controllers
                 return RedirectToAction("InviteParent");
 
             var participationObject = SessionVariables.Cart.GetCartItems().FirstOrDefault()?.GetParticipationObject();
-            ViewBag.AlreadyRegistered = SessionVariables.CurrentRegistrant.HasSubmittedFor(participationObject, msgs);
+            ViewBag.AlreadyRegistered = SessionVariables.CurrentRegistrant.HasSubmittedFor(participationObject, null, msgs);
             ViewBag.Messages = msgs;
             return View(participationObject);
         }

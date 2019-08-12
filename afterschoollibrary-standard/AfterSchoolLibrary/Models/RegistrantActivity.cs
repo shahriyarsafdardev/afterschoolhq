@@ -357,16 +357,25 @@ namespace AfterSchoolLibrary.Models
             return dq.GetCount(msgs) > 0;
         }
 
-        public static bool ExistsByParticipationObjectByRegistrants(int participationObjectId, ParticipationObjectType participationObjectType, List<int> registrantIds, List<RegistrationAssignmentType> assignmentTypes, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool ExistsByParticipationObjectByRegistrants(int participationObjectId, ParticipationObjectType participationObjectType, List<int> registrantIds, List<RegistrationAssignmentType> assignmentTypes, bool? hasParentalConsent, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
+            dq.UseParameterizedQuery = false;
             dq.Criterias.Add(ObjectMap["participationObjectId"], participationObjectId);
             dq.Criterias.Add(ObjectMap["participationObjectTypeId"], (int)participationObjectType);
             dq.Criterias.Add(ObjectMap["RegistrantId"], registrantIds, DatabaseCriteriaOperatorEnum.In);
 
             if (assignmentTypes.IsNotEmpty() && assignmentTypes.Count > 0)
                 dq.Criterias.Add(ObjectMap["AssignmentTypeId"], assignmentTypes.Select(x => (int)x).ToArray(), DatabaseCriteriaOperatorEnum.In);
+
+            if (hasParentalConsent.HasValue)
+            {
+                var criteriaOperator = hasParentalConsent.Value ? DatabaseCriteriaOperatorEnum.IsNot : DatabaseCriteriaOperatorEnum.Is;
+
+                dq.Joins.Add(Registration.ObjectMap["ID"], ObjectMap["RegistrationId"], DatabaseJoinTypeEnum.InnerJoin);
+                dq.Criterias.Add(Registration.ObjectMap["ESignature"], DBNull.Value, criteriaOperator);
+            }
 
             return dq.GetCount(msgs) > 0;
         }

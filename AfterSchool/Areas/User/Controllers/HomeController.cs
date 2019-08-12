@@ -75,7 +75,10 @@ namespace AfterSchool.Areas.User.Controllers
                 .OrderBy(item => item.ActivityInstance.StartDateTime.Value)
                 .Take(4)
                 .ToList();
-            ViewBag.ActivitiesRequiringAttention = registrantActivities.Where(registrantActivity => registrantActivity.AssignmentTypeId.In(assignmentTypesNeedingAttention)).ToList();
+            ViewBag.ActivitiesRequiringAttention = registrantActivities.Where(registrantActivity => 
+                    registrantActivity.AssignmentTypeId.In(assignmentTypesNeedingAttention) ||
+                    (registrantActivity.AssignmentTypeId == RegistrationAssignmentType.Applied && registrantActivity.GetRegistration().ESignature.IsEmpty())
+                ).ToList();
             ViewBag.Providers = providers;
             ViewBag.Messages = msgs;
 
