@@ -885,7 +885,7 @@ namespace AfterSchoolLibrary.Billing
             return customer;
         }
 
-        public static Stripe.Source AttachPlaidSourceToCustomer(string customerId, string sourceToken, string stripeAccountId, SystemMessages msgs)
+        public static Stripe.Source AttachSourceToCustomer(string customerId, string sourceToken, string stripeAccountId, SystemMessages msgs)
         {
             var options = new Stripe.SourceAttachOptions
             {
