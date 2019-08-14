@@ -2231,14 +2231,14 @@ namespace AfterSchoolLibrary.Services
                 return false;
 
             var account = activity.GetAccount(msgs, dc);
-            var now = DateTime.UtcNow;
+            var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
 
             // currently open or upcoming
-            if (regPeriod.EndDateTime.Value >= account.ConvertFromAccountTimeZone(now))
+            if (regPeriod.EndDateTime.Value >= now)
                 return true;
 
             // recently closed
-            if (regPeriod.EndDateTime.Value.AddWeeks(2) >= account.ConvertFromAccountTimeZone(now))
+            if (regPeriod.EndDateTime.Value.AddWeeks(2) >= now)
                 return true;
 
             return false;
