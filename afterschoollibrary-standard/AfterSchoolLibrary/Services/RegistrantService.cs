@@ -320,7 +320,7 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
-        internal static void SendEmail(this Registrant registrant, string activityName, string fromName, string replyToEmail, string replyToName, string subject, string body, string utmCampaign = "", SystemMessages msgs = null)
+        internal static void SendEmail(this Registrant registrant, Account account, string activityName, string fromName, string replyToEmail, string replyToName, string subject, string body, string utmCampaign = "", SystemMessages msgs = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -328,7 +328,18 @@ namespace AfterSchoolLibrary.Services
                 msgs.Add($"No email address available for {registrant.Name}", MessageType.Notice);
 
             if (registrant.Email.IsNotEmpty())
-                ActivityMessageService.SendEmailMessage(activityName, fromName, registrant.Email, registrant.DisplayName, replyToEmail, replyToName, subject, body, utmCampaign, msgs);
+                ActivityMessageService.SendEmailMessage(
+                    account, 
+                    activityName, 
+                    fromName, 
+                    registrant.Email, 
+                    registrant.DisplayName, 
+                    replyToEmail, 
+                    replyToName, 
+                    subject, 
+                    body, 
+                    utmCampaign, 
+                    msgs);
         }
 
         public static List<ParticipationObject> GetParticipationObjects(this Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)

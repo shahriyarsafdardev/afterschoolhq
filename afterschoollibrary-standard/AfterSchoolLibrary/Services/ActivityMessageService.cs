@@ -43,7 +43,7 @@ namespace AfterSchoolLibrary.Services
                     member.WebUserLastName.IfBlank(""),
                     member.WebUserDisplayName.IfBlank(""));
 
-                ActivityMessageService.SendEmailMessage(activity.Name, loggedInUser.DisplayName, member.WebUserEmail, member.WebUserDisplayName, activity.ContactEmail, activity.ContactName, activityMessage.Subject, body, "activity_message", msgs);
+                ActivityMessageService.SendEmailMessage(account, activity.Name, loggedInUser.DisplayName, member.WebUserEmail, member.WebUserDisplayName, activity.ContactEmail, activity.ContactName, activityMessage.Subject, body, "activity_message", msgs);
 
                 ActivityMessageService.SendTextMessage(member.WebUserPhone, loggedInUser.DisplayName, activityMessage.Subject, activity.Name, activityMessage.Uid.ToString(), msgs);
             });
