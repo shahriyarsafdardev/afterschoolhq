@@ -2077,7 +2077,7 @@ namespace AfterSchoolLibrary.Services
             if (stripeToken.IsNotEmpty())
             {
                 var source = StripeHelper.CreateCreditCardSource(stripeToken, msgs);
-                StripeHelper.AddDefaultSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null, msgs);
+                StripeHelper.AttachSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null, msgs);
                 sourceId = source.Id;
             }
             else
