@@ -48,9 +48,15 @@ namespace AfterSchoolLibrary.Services
         {
             var participationObjects = new List<ParticipationObject>();
 
-            participationObjects.AddRange(account.GetPublishedActivities(msgs, dc).Select(activity => activity.GetParticipationObject(msgs, dc)));
+            participationObjects.AddRange(
+                account.GetPublishedActivities(msgs, dc)
+                .Select(activity => activity.GetParticipationObject(msgs, dc))
+            );
 
-            var hostedLocationIds = account.GetHostedLocations(msgs, dc).Select(location => location.ID.Value).ToList();
+            var hostedLocationIds = account.GetHostedLocations(msgs, dc)
+                                            .Select(location => location.ID.Value)
+                                            .ToList();
+
             account.GetApprovedVisitorAccounts(msgs, dc).ForEach(visitor =>
             {
                 participationObjects.AddRange(
@@ -59,8 +65,14 @@ namespace AfterSchoolLibrary.Services
                         .DistinctBy(participationObject => new { participationObject.ObjectID, participationObject.ObjectType }));
             });
 
-            participationObjects.AddRange(account.GetPublishedExternalLeagues(msgs, dc).Select(x => x.GetParticipationObject(msgs, dc)));
-            participationObjects.AddRange(account.GetPublishedSessions(msgs, dc).Select(x => x.GetParticipationObject(msgs, dc)));
+            participationObjects.AddRange(
+                account.GetPublishedExternalLeagues(msgs, dc)
+                    .Select(x => x.GetParticipationObject(msgs, dc))
+            );
+
+            participationObjects.AddRange(account.GetPublishedSessions(msgs, dc)
+                .Select(x => x.GetParticipationObject(msgs, dc))
+            );
 
             return participationObjects;
         }
@@ -72,7 +84,10 @@ namespace AfterSchoolLibrary.Services
 
             periods.ForEach(period => activities.AddRange(period.GetActivities(msgs, dc).Where(x => x.IsPubliclyViewable)));
 
-            activities.AddRange(Activity.LoadByProviderAccountId(account.ID.Value, msgs, dc).Where(activity => activity.IsOpenUpcomingOrRecentlyClosed(msgs, dc)));
+            activities.AddRange(
+                Activity.LoadByProviderAccountId(account.ID.Value, msgs, dc)
+                    .Where(activity => activity.IsOpenUpcomingOrRecentlyClosed(msgs, dc))
+            );
 
             return activities;
         }
