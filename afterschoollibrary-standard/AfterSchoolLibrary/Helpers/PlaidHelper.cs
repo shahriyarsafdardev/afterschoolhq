@@ -14,7 +14,7 @@ namespace AfterSchoolLibrary.Helpers
     public class PlaidHelper
     {
         private static string SandboxSecretKey { get { return ConfigurationManager.AppSettings["Plaid.SandboxSecretKey"]; } }
-        private static string DevelopmentSecretKey { get { return ConfigurationManager.AppSettings["Plaid.DevelopmentSecretKey"]; } }
+        private static string DevelopmentSecretKey { get { return ConfigurationManager.AppSettings["Plaid.SandboxSecretKey"]; } }
         private static string ProductionSecretKey { get { return ConfigurationManager.AppSettings["Plaid.ProductionSecretKey"]; } }
 
         public static string ClientId { get { return ConfigurationManager.AppSettings["Plaid.ClientId"]; } }
@@ -30,7 +30,7 @@ namespace AfterSchoolLibrary.Helpers
                 if (Utilities.IsProduction)
                     return ProductionSecretKey;
 
-                return DevelopmentSecretKey;
+                return SandboxSecretKey;
             }
         }
 
@@ -44,7 +44,7 @@ namespace AfterSchoolLibrary.Helpers
                 if (Utilities.IsProduction)
                     return "production";
 
-                return "development";
+                return "sandbox";
             }
         }
 
