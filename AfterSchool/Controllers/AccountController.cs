@@ -1963,26 +1963,32 @@ namespace AfterSchool.Controllers
         #region Helpers
 
         private ActionResult CheckRedirect(bool checkForEmptyCart = false)
-        {
-            if (SessionVariables.RegistrationStartPageAccount.IsEmpty())
+        {            
+            if (SessionVariables.RegistrationStartPageAccount.IsNotEmpty())
             {
-                if (SessionVariables.CurrentUser.IsEmpty())
-                    return Redirect(AfterSchoolLibrary.Helpers.Utilities.LoginUrl(true));
+                var redirectUrl = SessionVariables.RegistrationStartPageAccount.HomePageUrl;
 
-                if (SessionVariables.CurrentAccount.IsEmpty())
-                    return RedirectToAction("select", "login");
+                if (SessionVariables.CurrentUser.IsEmpty() || SessionVariables.CurrentAccount.IsEmpty())
+                    return Redirect(redirectUrl);
 
-                return HandleRedirectAfterLogin(null);
+                if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant)
+                    return Redirect(redirectUrl);
+
+                if (checkForEmptyCart && SessionVariables.Cart.IsEmpty())
+                    return Redirect(redirectUrl);
             }
 
-            if (SessionVariables.CurrentUser.IsEmpty() || SessionVariables.CurrentAccount.IsEmpty())
-                return Redirect(SessionVariables.RegistrationStartPageAccount.HomePageUrl);
+            if (SessionVariables.CurrentUser.IsEmpty())
+                return Redirect(AfterSchoolLibrary.Helpers.Utilities.LoginUrl(true));
+
+            if (SessionVariables.CurrentAccount.IsEmpty())
+                return RedirectToAction("select", "login");
 
             if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant)
-                return Redirect(SessionVariables.RegistrationStartPageAccount.HomePageUrl);
+                return HandleRedirectAfterLogin(null);
 
             if (checkForEmptyCart && SessionVariables.Cart.IsEmpty())
-                return Redirect(SessionVariables.RegistrationStartPageAccount.HomePageUrl);
+                return HandleRedirectAfterLogin(null);
 
             return null;
         }
