@@ -1822,7 +1822,7 @@ namespace AfterSchool.Controllers
                             phone: phone.Value.Trim(),
                             message: $"{SessionVariables.CurrentUser.FirstName} has signed up for an account on {AfterSchoolLibrary.Helpers.Utilities.AppName()}{locationString}. Please create your parent {AfterSchoolLibrary.Helpers.Utilities.AppName()} account to know and approve of activities your child requests to participate in.",
                             userType: UserType.Owner,
-                            canUseExistingUserAccount: false,
+                            canUseExistingUserAccount: true,
                             loggedInUser: SessionVariables.CurrentUser,
                             msgs: msgs);
 
