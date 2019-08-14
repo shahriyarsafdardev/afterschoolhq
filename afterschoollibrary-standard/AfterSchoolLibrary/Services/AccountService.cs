@@ -48,19 +48,19 @@ namespace AfterSchoolLibrary.Services
         {
             var participationObjects = new List<ParticipationObject>();
 
-            participationObjects.AddRange(account.GetPublishedActivities(msgs).Select(activity => activity.GetParticipationObject(msgs)));
+            participationObjects.AddRange(account.GetPublishedActivities(msgs, dc).Select(activity => activity.GetParticipationObject(msgs, dc)));
 
-            var hostedLocationIds = account.GetHostedLocations(msgs).Select(location => location.ID.Value).ToList();
-            account.GetApprovedVisitorAccounts(msgs).ForEach(visitor =>
+            var hostedLocationIds = account.GetHostedLocations(msgs, dc).Select(location => location.ID.Value).ToList();
+            account.GetApprovedVisitorAccounts(msgs, dc).ForEach(visitor =>
             {
                 participationObjects.AddRange(
-                    visitor.GetPublishedActivitiesInLocations(hostedLocationIds, msgs)
+                    visitor.GetPublishedActivitiesInLocations(hostedLocationIds, msgs, dc)
                         .Select(activity => activity.GetParticipationObject(msgs))
                         .DistinctBy(participationObject => new { participationObject.ObjectID, participationObject.ObjectType }));
             });
 
-            participationObjects.AddRange(account.GetPublishedExternalLeagues(msgs).Select(x => x.GetParticipationObject(msgs)));
-            participationObjects.AddRange(account.GetPublishedSessions(msgs).Select(x => x.GetParticipationObject(msgs)));
+            participationObjects.AddRange(account.GetPublishedExternalLeagues(msgs, dc).Select(x => x.GetParticipationObject(msgs, dc)));
+            participationObjects.AddRange(account.GetPublishedSessions(msgs, dc).Select(x => x.GetParticipationObject(msgs, dc)));
 
             return participationObjects;
         }
