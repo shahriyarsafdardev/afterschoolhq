@@ -523,9 +523,14 @@ namespace AfterSchoolLibrary.Services
 
         public static WebUser InviteUser(this Account account, string firstName, string lastName, string email, string phone, string message, UserType userType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            return InviteUser(account, firstName, lastName, email, phone, message, userType, true, loggedInUser, msgs, dc);
+        }
+
+        public static WebUser InviteUser(this Account account, string firstName, string lastName, string email, string phone, string message, UserType userType, bool canUseExistingUserAccount, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var user = account.AddUser(firstName, lastName, email, phone, userType, loggedInUser, msgs, dc);
+            var user = account.AddUser(firstName, lastName, email, phone, userType, canUseExistingUserAccount, loggedInUser, msgs, dc);
 
             if (msgs.HasNoErrors())
                 msgs.AddRange(account.SendInvitedEmail(user, loggedInUser, message, dc));
