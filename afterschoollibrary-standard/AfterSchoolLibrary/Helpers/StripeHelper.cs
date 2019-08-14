@@ -1332,36 +1332,6 @@ namespace AfterSchoolLibrary.Billing
             return source;
         }
 
-        public static Stripe.Source CreateBankAccountSource(string token, string stripeAccountId, SystemMessages msgs)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-            var options = new Stripe.SourceCreateOptions()
-            {
-                Type = "card",
-                Token = token,
-            };
-
-            var requestOptions = new Stripe.RequestOptions();
-
-            if (stripeAccountId.IsNotEmpty())
-                requestOptions.StripeAccount = stripeAccountId;
-
-            Stripe.Source source = null;
-
-            try
-            {
-                source = GetSourceService().Create(options, requestOptions);
-            }
-            catch (StripeException ex)
-            {
-                msgs.Add(ex.Message, MessageType.UserError, ex);
-                msgs.Add($"Payment source was not created", MessageType.UserError);
-            }
-
-            return source;
-        }
-
         public static Stripe.Source CreateSourceFromOriginal(string customerId, string originalSourceId, string stripeAccountId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
