@@ -31,7 +31,7 @@ namespace AfterSchoolLibrary.Services
             activityMessageRegistrant.GetChildAndParentRegistrants(allResults, dc)
                 .ForEach(registrant =>
                 {
-                    registrant.SendEmail(activityName, fromName, replyToEmail, replyToName, subject, body, "activity_message", msgs);
+                    registrant.SendEmail(account, activityName, fromName, replyToEmail, replyToName, subject, body, "activity_message", msgs);
                     registrant.SendText(account, loggedInUser, message, activityName, subject, body, replyToName, msgs);
                 }
             );            

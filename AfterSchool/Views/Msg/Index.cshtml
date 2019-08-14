@@ -11,7 +11,7 @@
     <div class="col-md-6 col-md-offset-3 text-center">
         <div class="panel">
             <div class="panel-footer">
-                <p>Sent by <strong>@(createdBy.DisplayName)</strong> at <strong>@Model.CreateDate.ToLongDateTimeString()</strong></p>
+                <p>Sent by <strong>@(createdBy.DisplayName)</strong> at <strong>@participationObject.OwnerAccount.ConvertToAccountTimeZone(Model.CreateDate.Value).ToLongDateTimeString()</strong></p>
             </div>
             <div class="panel-heading text-left">
                 <h1><strong>@Model.Subject for @(participationObject.Name)</strong></h1>

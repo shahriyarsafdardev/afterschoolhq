@@ -61,11 +61,11 @@ namespace AfterSchoolLibrary.Services
                 msgs);
         }
 
-        internal static void SendEmailMessage(string activityName, string fromName, string toEmail, string toName, string replyToEmail, string replyToName, string subject, string body, string utmCampaign, SystemMessages msgs)
+        internal static void SendEmailMessage(Account account, string activityName, string fromName, string toEmail, string toName, string replyToEmail, string replyToName, string subject, string body, string utmCampaign, SystemMessages msgs)
         {
             var aOrAn = subject[0].In("aeiouAEIOU") ? "an" : "a";
             var header = $"<h2 style=\"margin-left: 10px;\">{subject} for {activityName}</h2>";
-            var sentBy = $"<p>&nbsp;</p><p>Sent by <strong>{replyToName}</strong> at <strong>{DateTime.UtcNow.ToLongDateTimeString()}</strong></p>";
+            var sentBy = $"<p>&nbsp;</p><p>Sent by <strong>{replyToName}</strong> at <strong>{account.ConvertToAccountTimeZone(DateTime.UtcNow).ToLongDateTimeString()}</strong></p>";
 
             body = $"<p>{body.Replace("\n", "<br />")}</p>";
 
