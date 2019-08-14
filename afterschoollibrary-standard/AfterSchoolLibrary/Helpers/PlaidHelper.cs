@@ -117,7 +117,7 @@ namespace Plaid
             protected const string ClientVersion = ".1";
 
             protected static string SandboxBaseUrl { get { return ConfigurationManager.AppSettings["Plaid.SandboxBaseUrl"]; } }
-            protected static string DevelopmentBaseUrl { get { return ConfigurationManager.AppSettings["Plaid.SandboxBaseUrl"]; } }
+            protected static string DevelopmentBaseUrl { get { return ConfigurationManager.AppSettings["Plaid.DevelopmentBaseUrl"]; } }
             protected static string ProductionBaseUrl { get { return ConfigurationManager.AppSettings["Plaid.ProductionBaseUrl"]; } }
 
             protected static string BaseUrl
@@ -130,7 +130,7 @@ namespace Plaid
                     if (AfterSchoolLibrary.Helpers.Utilities.IsProduction)
                         return ProductionBaseUrl;
 
-                    return DevelopmentBaseUrl;
+                    return SandboxBaseUrl;
                 }
             }
 
