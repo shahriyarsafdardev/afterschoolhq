@@ -1453,8 +1453,7 @@ namespace AfterSchool.Controllers
                         PlaidAccountId = plaidaccountid,
                         StripeSourceId = bankSourceId                       
                     };
-
-                if (ccSourceId.IsNotEmpty() || stripetoken.IsNotEmpty())
+                else if (ccSourceId.IsNotEmpty() || stripetoken.IsNotEmpty())
                     creditCardPurchaseObject = new CreditCardPurchaseObject()
                     {
                         StripeToken = stripetoken,
