@@ -72,11 +72,19 @@
                     {
                         Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", item);
 
-                        if (item.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone)
+                        if (item.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail)
                         {
                             <div class="row">
                                 <div class="col-md-6 col-md-offset-3">
-                                    <div class="am-checkbox text-center">
+                                    <div> Please use your student email</div>
+                                </div>
+                            </div>
+                        }
+                        else if (item.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone)
+                        {
+                            <div class="row">
+                                <div class="col-md-6 col-md-offset-3">
+                                    <div class="am-checkbox">
                                         <input type="checkbox" id="textnotifications" name="textnotifications" value="1" @(Request["textnotifications"] == "1" ? " checked=\"checked\" " : "") />
                                         <label for="textnotifications">
                                             I would like to receive text messages about my student&#39;s activities&#46;

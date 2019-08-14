@@ -1230,7 +1230,6 @@ namespace AfterSchool.Controllers
                                 //5 MB = 5242880 Bytes
                                 //File uploaded here should be less than of 5MB
                                 if (currentFileSizeInBytes <= 5242880)
-                                {
                                     submittedRecord.AddAnswer(
                                         file: Request.Files[qvm.Name].InputStream,
                                         filename: Request.Files[qvm.Name].FileName,
@@ -1239,11 +1238,8 @@ namespace AfterSchool.Controllers
                                         loggedInUser: SessionVariables.CurrentUser,
                                         msgs: amsgs,
                                         dc: adc);
-                                }
                                 else
-                                {
                                     msgs.Add("Upload a file less than or equal to 5 megabytes", MessageType.UserError);
-                                }
                             }
                             else
                                 submittedRecord.AddAnswer(
@@ -1802,70 +1798,77 @@ namespace AfterSchool.Controllers
             var email = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail);
             var phone = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone);
 
-            Database.ExecuteTransaction
-            (
-                action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                {
-                    var location = participationObject?.Location;
-                    var hostAccount = location?.GetHostAcount(amsgs, adc);
-                    var locationString = "";
+            if (email.Value.IsSameAs(SessionVariables.CurrentUser.Email))
+                msgs.Add("Parent email cannot be the same as your student email address when creating a login account", MessageType.UserError);
 
-                    if (hostAccount.IsNotEmpty() && hostAccount.AccountTypeId != AccountType.School)
-                        locationString = $" at {hostAccount.Name}";
+            if (!msgs.HasErrors())
+            {
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        var location = participationObject?.Location;
+                        var hostAccount = location?.GetHostAcount(amsgs, adc);
+                        var locationString = "";
+
+                        if (hostAccount.IsNotEmpty() && hostAccount.AccountTypeId != AccountType.School)
+                            locationString = $" at {hostAccount.Name}";
 
                     // invite parent: 
                     var parentUser = SessionVariables.CurrentAccount.InviteUser(
-                        firstName.Value,
-                        lastName.Value,
-                        email.Value.Trim(),
-                        phone.Value.Trim(),
-                        message: $"{SessionVariables.CurrentUser.FirstName} has signed up for an account on {AfterSchoolLibrary.Helpers.Utilities.AppName()}{locationString}. Please create your parent {AfterSchoolLibrary.Helpers.Utilities.AppName()} account to know and approve of activities your child requests to participate in.",
-                        UserType.Owner,
-                        SessionVariables.CurrentUser,
-                        msgs);
+                            firstName: firstName.Value,
+                            lastName: lastName.Value,
+                            email: email.Value.Trim(),
+                            phone: phone.Value.Trim(),
+                            message: $"{SessionVariables.CurrentUser.FirstName} has signed up for an account on {AfterSchoolLibrary.Helpers.Utilities.AppName()}{locationString}. Please create your parent {AfterSchoolLibrary.Helpers.Utilities.AppName()} account to know and approve of activities your child requests to participate in.",
+                            userType: UserType.Owner,
+                            canUseExistingUserAccount: false,
+                            loggedInUser: SessionVariables.CurrentUser,
+                            msgs: msgs);
 
                     // Create parent registrant
-                    var parent = SessionVariables.CurrentAccount.CreateRegistrant(
-                        registrantOwner: parentUser,
-                        canBeAccessedBy: parentUser.AsList(),
-                        registrantType: RegistrantType.Individual,
-                        isMaster: true,
-                        isParentOrGuardian: true,
-                        allowTextMessages: textnotifications.IfBlank("").ToBoolean(),
-                        schoolLocationId: null,
-                        profileStatus: RegistrantProfileStatus.Started,
-                        loggedInUser: SessionVariables.CurrentUser,
-                        msgs: msgs,
-                        dc: adc);
+                    var parentRegistrant = SessionVariables.CurrentAccount.CreateRegistrant(
+                            registrantOwner: parentUser,
+                            canBeAccessedBy: parentUser.AsList(),
+                            registrantType: RegistrantType.Individual,
+                            isMaster: true,
+                            isParentOrGuardian: true,
+                            allowTextMessages: textnotifications.IfBlank("").ToBoolean(),
+                            schoolLocationId: null,
+                            profileStatus: RegistrantProfileStatus.Started,
+                            loggedInUser: SessionVariables.CurrentUser,
+                            msgs: msgs,
+                            dc: adc);
 
-                    SessionVariables.CurrentRegistrant.AddUserWithAccess(
-                        user: parentUser,
-                        loggedInUser: SessionVariables.CurrentUser,
-                        msgs: msgs,
-                        dc: adc);
+                        SessionVariables.CurrentRegistrant.AddUserWithAccess(
+                            user: parentUser,
+                            loggedInUser: SessionVariables.CurrentUser,
+                            msgs: msgs,
+                            dc: adc);
 
                     // add answers to student registrant record
                     qvms.ForEach(qvm =>
-                    {
-                        parent.AddAnswer(
-                            answerText: qvm.Value.IfEmpty("").Trim(),
-                            question: qvm.Question,
-                            loggedInUser: SessionVariables.CurrentUser,
-                            msgs: amsgs,
-                            dc: adc);
-                    });
-                },
-                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
-                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
-            );
+                        {
+                            parentRegistrant.AddAnswer(
+                                answerText: qvm.Value.IfEmpty("").Trim(),
+                                question: qvm.Question,
+                                loggedInUser: SessionVariables.CurrentUser,
+                                msgs: amsgs,
+                                dc: adc);
+                        });
+                    },
+                    onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                    onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                );
+            }
 
             if (msgs.HasNoErrors())
                 return RedirectToAction("RegisterStudent");
 
             ViewBag.Messages = msgs;
 
-            return View();
+            return View(qvms);
         }
 
         #endregion
