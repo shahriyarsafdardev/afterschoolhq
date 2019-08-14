@@ -1964,14 +1964,25 @@ namespace AfterSchool.Controllers
 
         private ActionResult CheckRedirect(bool checkForEmptyCart = false)
         {
+            if (SessionVariables.RegistrationStartPageAccount.IsEmpty())
+            {
+                if (SessionVariables.CurrentUser.IsEmpty())
+                    return Redirect(AfterSchoolLibrary.Helpers.Utilities.LoginUrl(true));
+
+                if (SessionVariables.CurrentAccount.IsEmpty())
+                    return RedirectToAction("select", "login");
+
+                return HandleRedirectAfterLogin(null);
+            }
+
             if (SessionVariables.CurrentUser.IsEmpty() || SessionVariables.CurrentAccount.IsEmpty())
-                return RedirectToAction(SessionVariables.RegistrationStartPageAccount.HomePageUrl);
+                return Redirect(SessionVariables.RegistrationStartPageAccount.HomePageUrl);
 
             if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant)
                 return Redirect(SessionVariables.RegistrationStartPageAccount.HomePageUrl);
 
             if (checkForEmptyCart && SessionVariables.Cart.IsEmpty())
-                return RedirectToAction(SessionVariables.RegistrationStartPageAccount.HomePageUrl);
+                return Redirect(SessionVariables.RegistrationStartPageAccount.HomePageUrl);
 
             return null;
         }
