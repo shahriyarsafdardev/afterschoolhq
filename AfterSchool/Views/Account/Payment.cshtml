@@ -11,6 +11,8 @@
     var checkoutObject = (CheckoutObject)ViewBag.CheckoutObject;
     var accountCanAcceptPayments = (bool)ViewBag.AccountCanAcceptPayments;
     var paymentAccount = participationObject.PaymentAccount;
+
+    bankAccounts = bankAccounts.Where(bankAccount => bankAccount.Object == "bank_account").ToList();
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }

@@ -1966,8 +1966,9 @@ namespace AfterSchoolLibrary.Services
             if (msgs.HasNoErrors())
             {
                 var bankAccount = Helpers.PlaidHelper.CreateStripeBankAccount(plaidToken.AccessToken, bankAccountPurchaseObject.PlaidAccountId, msgs);
-                var customer = StripeHelper.AddDefaultSourceToCustomer(fromAccount.StripeCustomerId, bankAccount.StripeBankAccountToken, null, msgs);
-                return customer.DefaultSourceId;
+                var source = StripeHelper.AttachPlaidSourceToCustomer(fromAccount.StripeCustomerId, bankAccount.StripeBankAccountToken, null, msgs);
+                //return customer.DefaultSourceId;
+                return source.Id;
             }
 
             return null;

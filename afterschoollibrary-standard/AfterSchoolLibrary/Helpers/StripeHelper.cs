@@ -885,6 +885,33 @@ namespace AfterSchoolLibrary.Billing
             return customer;
         }
 
+        public static Stripe.Source AttachPlaidSourceToCustomer(string customerId, string sourceToken, string stripeAccountId, SystemMessages msgs)
+        {
+            var options = new Stripe.SourceAttachOptions
+            {
+                Source = sourceToken
+            };
+
+            var requestOptions = new Stripe.RequestOptions();
+
+            if (stripeAccountId.IsNotEmpty())
+                requestOptions.StripeAccount = stripeAccountId;
+
+            Stripe.Source source = null;
+
+            try
+            {
+                source = GetSourceService().Attach(customerId, options, requestOptions);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Source was not attached", MessageType.UserError);
+            }
+
+            return source;
+        }
+
         public static Stripe.Card AddNewCardToCustomer(string customerId, Stripe.Source source, string stripeAccountId, SystemMessages msgs)
         {
             var options = new Stripe.CardCreateOptions()
