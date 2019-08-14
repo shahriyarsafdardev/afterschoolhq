@@ -1801,7 +1801,7 @@ namespace AfterSchool.Controllers
             if (email.Value.IsSameAs(SessionVariables.CurrentUser.Email))
                 msgs.Add("Parent email cannot be the same as your student email address when creating a login account", MessageType.UserError);
 
-            if (!msgs.HasErrors())
+            if (msgs.HasNoErrors())
             {
                 Database.ExecuteTransaction
                 (
