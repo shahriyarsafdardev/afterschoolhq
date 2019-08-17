@@ -20,18 +20,9 @@
         </span>
     }    
 
-    @if (Model.SubscriptionPlans.Any())
-    {
-        <span>
-            @if (!Model.IsTuitionFree)
-            {
-                <span>plus</span>
-            }            
-            <strong>
-                @ParticipationObjectUI.PrintPlanFee(Model.SubscriptionPlans.First(), Model.OwnerAccount, displayCheckoutPrice)
-            </strong> 
-            each 
-            @Model.SubscriptionPlans.First().BillingPeriodTypeId.ToString().ToLower()
-        </span>
+    @{ Html.RenderPartial(
+        "~/Views/Shared/ParticipationObject/_SubscriptionPlan.cshtml",
+        Model,
+        new ViewDataDictionary() { { "DisplayCheckoutPrice", displayCheckoutPrice } }); 
     }
 </p>

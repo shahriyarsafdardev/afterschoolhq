@@ -102,7 +102,7 @@
                     {
                         <div class="row">
                             <div class="col-md-6 col-md-offset-3 col-sm-12 text-center text-medium-small">
-                                @if (participationObject.Cost.Value > 0)
+                                @if (!participationObject.IsTuitionFree)
                                 {
                                     <p>
                                         Pay <strong>@participationObject.GetCheckoutCostWithConvenienceFee().ToCurrency()</strong> today @PrintSubscriptionCost(subscriptionPlan, participationObject)
