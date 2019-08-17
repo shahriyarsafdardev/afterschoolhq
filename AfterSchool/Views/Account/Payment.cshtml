@@ -243,14 +243,14 @@
                         <div id="payment-info-ach">
 
                             <div>
-                                <p class="text-center text-large">Pay using Bank/ACH  (No Transaction Fees)</p>
+                                <p class="text-center text-large">Pay using a Bank Account  (No Transaction Fees)</p>
                             </div>
 
                             @* PAY VIA Existing ACH Sources *@
                             @if (bankAccounts.Any())
                             {
                                 <div class="row">
-                                    <div class="col-md-6 col-md-offset-3 col-sm-12 padding-30 margin-t-20">
+                                    <div class="col-md-6 col-md-offset-3 col-sm-12 padding-30">
 
                                         <form class="form-horizontal" action="@Url.Action("payment", "account", new { id = registration.Uid })" method="post" id="existing-payment-form">
 
@@ -289,7 +289,11 @@
 
                             @* PAY VIA ACH *@
                             <div class="row">
-                                <div class="col-md-6 col-md-offset-3 col-sm-12 padding-30 margin-t-20">
+                                <div class="col-md-6 col-md-offset-3 col-sm-12 padding-30">
+
+                                    <p class="text-medium text-center">
+                                        Pay using a new Bank Account
+                                    </p>
 
                                     <button id="plaid-button" class="btn btn-register@(bankAccounts.Any() ? "-default" : "") btn-lg">
                                         Pay via ACH -
