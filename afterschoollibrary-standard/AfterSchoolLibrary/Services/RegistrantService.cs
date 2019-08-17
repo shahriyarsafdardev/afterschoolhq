@@ -411,6 +411,23 @@ namespace AfterSchoolLibrary.Services
                 dc: dc);
         }
 
+        public static bool HasPlan(this Registrant masterRegistrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var submittedRecords = masterRegistrant.GetSubmittedRecords(participationObject.OwnerAccount.ID.Value, msgs, dc);
+
+            return submittedRecords.Any() && RegistrantSubscriptionPlan.ExistsByParticipationObjectByRegistrants(
+                participationObjectId: participationObject.ObjectID.Value,
+                participationObjectType: participationObject.ObjectType,
+                registrantIds: submittedRecords.Select(item => item.ID.Value).ToList(),
+                msgs: msgs,
+                dc: dc);
+        }
+
+        public static List<RegistrantSubscriptionPlan> GetRegistrantSubscriptionPlans(this Registrant registrant, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return RegistrantSubscriptionPlan.LoadByRegistrantId(registrant.ID.Value, msgs, dc);
+        }
+
         public static bool IsAppliedFor(this Registrant masterRegistrant, ParticipationObject participationObject, bool? hasParentalConsent, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return HasParticipationAssignment(masterRegistrant, participationObject, RegistrationAssignmentType.Applied.AsList(), hasParentalConsent, msgs, dc);
