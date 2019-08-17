@@ -984,14 +984,16 @@ namespace AfterSchoolLibrary.Billing
             var options = new Stripe.SubscriptionCreateOptions
             {
                 CustomerId = customerId,
-                Billing = Stripe.Billing.ChargeAutomatically,
-                TrialEnd = startDate.Value.AddDays(-1),
+                CollectionMethod = "charge_automatically",
                 DefaultSource = sourceId,
                 CouponId = stripeCouponId,
                 Items = new List<SubscriptionItemOption>() { new SubscriptionItemOption() { PlanId = planId, Quantity = 1 } },
                 Metadata = metaData,
                 Prorate = false,
             };
+
+            if (startDate.Value.AddDays(-1).IsAfter(DateTime.UtcNow))
+                options.TrialEnd = startDate.Value.AddDays(-1);
 
             var requestOptions = new Stripe.RequestOptions();
             if (stripeAccountId.IsNotEmpty())

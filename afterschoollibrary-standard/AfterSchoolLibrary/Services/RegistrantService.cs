@@ -139,7 +139,7 @@ namespace AfterSchoolLibrary.Services
             if (!useStripeConnectedAccount)
             {
                 customer = purchasingAccount.GetStripeCustomer(msgs);
-                sourceId = purchasingAccount.CreateStripeSourceFromToken(checkoutObject.StripeToken, customer, msgs);
+                sourceId = checkoutObject.StripeSourceId ?? purchasingAccount.CreateStripeSourceFromToken(checkoutObject.StripeToken, customer, msgs);
             }
             else
             {
@@ -158,7 +158,17 @@ namespace AfterSchoolLibrary.Services
             return (customer, sourceId);
         }
 
-        public static void StartSubscriptionPlan(this Registrant registrant, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void StartPaymentPlan(this Registrant registrant, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            registrant.StartPlan(checkoutObject, SubscriptionPlanType.PaymentPlan, loggedInUser, msgs, dc);
+        }
+
+        public static void StartSubscriptionPlan(this Registrant registrant, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            registrant.StartPlan(checkoutObject, SubscriptionPlanType.Subscription, loggedInUser, msgs, dc);
+        }
+
+        public static void StartPlan(this Registrant registrant, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -387,7 +397,7 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(registrant.Save(dc));
         }
 
-        public static bool IsAppliedFor(this Registrant masterRegistrant, ParticipationObject participationObject, bool? hasParentalConsent, SystemMessages msgs = null, DatabaseConnection dc = null)
+        private static bool HasParticipationAssignment(this Registrant masterRegistrant, ParticipationObject participationObject, List<RegistrationAssignmentType> assignmentTypes, bool? hasParentalConsent, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var submittedRecords = masterRegistrant.GetSubmittedRecords(participationObject.OwnerAccount.ID.Value, msgs, dc);
 
@@ -395,78 +405,57 @@ namespace AfterSchoolLibrary.Services
                 participationObjectId: participationObject.ObjectID.Value,
                 participationObjectType: participationObject.ObjectType,
                 registrantIds: submittedRecords.Select(item => item.ID.Value).ToList(),
-                assignmentTypes: RegistrationAssignmentType.Applied.AsList(),
+                assignmentTypes: assignmentTypes,
                 hasParentalConsent: hasParentalConsent,
                 msgs: msgs,
                 dc: dc);
+        }
+
+        public static bool IsAppliedFor(this Registrant masterRegistrant, ParticipationObject participationObject, bool? hasParentalConsent, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return HasParticipationAssignment(masterRegistrant, participationObject, RegistrationAssignmentType.Applied.AsList(), hasParentalConsent, msgs, dc);
         }
         
         public static bool HasConsentFor(this Registrant masterRegistrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var submittedRecords = masterRegistrant.GetSubmittedRecords(participationObject.OwnerAccount.ID.Value, msgs, dc);
-
-            return submittedRecords.Any() && RegistrantActivity.ExistsByParticipationObjectByRegistrants(
-                participationObjectId: participationObject.ObjectID.Value,
-                participationObjectType: participationObject.ObjectType,
-                registrantIds: submittedRecords.Select(item => item.ID.Value).ToList(),
-                assignmentTypes: null,
-                hasParentalConsent: true,
-                msgs: msgs,
-                dc: dc);
+            return HasParticipationAssignment(masterRegistrant, participationObject, null, true, msgs, dc);
         }
 
         public static bool IsReservedFor(this Registrant masterRegistrant, ParticipationObject participationObject, bool? hasParentalConsent, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var submittedRecords = masterRegistrant.GetSubmittedRecords(participationObject.OwnerAccount.ID.Value, msgs, dc);
-
-            return submittedRecords.Any() && RegistrantActivity.ExistsByParticipationObjectByRegistrants(
-                participationObjectId: participationObject.ObjectID.Value,
-                participationObjectType: participationObject.ObjectType,
-                registrantIds: submittedRecords.Select(item => item.ID.Value).ToList(),
-                assignmentTypes: new List<RegistrationAssignmentType>()
+            var assignmentTypes = new List<RegistrationAssignmentType>()
                 {
                     RegistrationAssignmentType.Reserved,
                     RegistrationAssignmentType.ReservedPendingPayment,
                     RegistrationAssignmentType.ReservedPendingParentalConsent,
-                },
-                hasParentalConsent: hasParentalConsent,
-                msgs: msgs,
-                dc: dc);
+                };
+
+            return HasParticipationAssignment(masterRegistrant, participationObject, assignmentTypes, hasParentalConsent, msgs, dc);
         }
 
         public static bool IsReservedAndPaidFor(this Registrant masterRegistrant, ParticipationObject participationObject, bool? hasParentalConsent, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var submittedRecords = masterRegistrant.GetSubmittedRecords(participationObject.OwnerAccount.ID.Value, msgs, dc);
+            return HasParticipationAssignment(masterRegistrant, participationObject, RegistrationAssignmentType.Reserved.AsList(), hasParentalConsent, msgs, dc);
+        }
 
-            return submittedRecords.Any() && RegistrantActivity.ExistsByParticipationObjectByRegistrants(
-                participationObjectId: participationObject.ObjectID.Value,
-                participationObjectType: participationObject.ObjectType,
-                registrantIds: submittedRecords.Select(item => item.ID.Value).ToList(),
-                assignmentTypes: RegistrationAssignmentType.Reserved.AsList(),
-                hasParentalConsent: hasParentalConsent,
-                msgs: msgs,
-                dc: dc);
+        public static bool HasWithdrawn(this Registrant masterRegistrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return HasParticipationAssignment(masterRegistrant, participationObject, RegistrationAssignmentType.Withdrawn.AsList(), null, msgs, dc);
         }
 
         public static bool HasSubmittedFor(this Registrant masterRegistrant, ParticipationObject participationObject, bool? hasParentalConsent, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var submittedRecords = masterRegistrant.GetSubmittedRecords(participationObject.OwnerAccount.ID.Value, msgs, dc);
-
-            return submittedRecords.Any() && RegistrantActivity.ExistsByParticipationObjectByRegistrants(
-                participationObjectId: participationObject.ObjectID.Value,
-                participationObjectType: participationObject.ObjectType,
-                registrantIds: submittedRecords.Select(item => item.ID.Value).ToList(),
-                assignmentTypes: new List<RegistrationAssignmentType>()
+            var assignmentTypes= new List<RegistrationAssignmentType>()
                 {
                     RegistrationAssignmentType.Reserved,
                     RegistrationAssignmentType.ReservedPendingPayment,
                     RegistrationAssignmentType.Applied,
                     RegistrationAssignmentType.WaitingList,
-                    RegistrationAssignmentType.ReservedPendingParentalConsent
-                },
-                hasParentalConsent: hasParentalConsent,
-                msgs: msgs,
-                dc: dc);
+                    RegistrationAssignmentType.ReservedPendingParentalConsent,
+                    RegistrationAssignmentType.Withdrawn,
+                };
+
+            return HasParticipationAssignment(masterRegistrant, participationObject, assignmentTypes, hasParentalConsent, msgs, dc);
         }
 
         public static Account GetAccount(this Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -820,7 +809,7 @@ namespace AfterSchoolLibrary.Services
                 return;
             }
 
-            registrantActivity.ChangeSeatAssignment(RegistrationAssignmentType.Declined, loggedInUser, msgs, dc);
+            registrantActivity.ChangeSeatAssignment(RegistrationAssignmentType.Withdrawn, loggedInUser, msgs, dc);
 
             // Notify Provider
             if (msgs.HasNoErrors())

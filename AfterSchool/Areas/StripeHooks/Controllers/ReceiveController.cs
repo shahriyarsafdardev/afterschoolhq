@@ -124,7 +124,7 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
             var customerId = stripeInvoice.CustomerId;
             var account = AfterSchoolLibrary.Models.Account.LoadByStripeCustomerId(customerId, msgs);
 
-            if (account.IsNotEmpty())
+            if (account.IsEmpty())
             {
                 msgs.Add($"Ignoring - Account is a customer of AHQ - Stripe Sub ID {customerId}", MessageType.Notice);
                 return ReturnOK(msgs);

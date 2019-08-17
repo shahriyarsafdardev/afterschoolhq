@@ -2395,7 +2395,6 @@ namespace AfterSchoolLibrary.Services
                     if (checkoutObject.SubscriptionPlan.IsNotEmpty())
                         accountRegistrant.StartSubscriptionPlan(
                             checkoutObject: checkoutObject,
-                            subscriptionPlanType: SubscriptionPlanType.Subscription,
                             loggedInUser: loggedInUser,
                             msgs: amsgs,
                             dc: adc);
@@ -2421,9 +2420,8 @@ namespace AfterSchoolLibrary.Services
                             );
                         }
 
-                        accountRegistrant.StartSubscriptionPlan(
+                        accountRegistrant.StartPaymentPlan(
                             checkoutObject: checkoutObject,
-                            subscriptionPlanType: SubscriptionPlanType.PaymentPlan,
                             loggedInUser: loggedInUser,
                             msgs: amsgs,
                             dc: adc
