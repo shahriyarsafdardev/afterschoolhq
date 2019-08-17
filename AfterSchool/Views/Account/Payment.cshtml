@@ -190,68 +190,71 @@
                     </div>
                 </div>
 
-                <div id="payment-info-ach">
+                @if (participationObject.OwnerAccount.HasFeature(FeatureType.AcceptACH))
+                { 
+                    <div id="payment-info-ach">
 
-                    @* PAY VIA Existing ACH Sources *@
-                    @if (bankAccounts.Any())
-                    {
+                        @* PAY VIA Existing ACH Sources *@
+                        @if (bankAccounts.Any())
+                        {
+                            <div class="row">
+                                <div class="col-md-6 col-md-offset-3 col-sm-12 padding-30 margin-t-20">
+                                
+                                    <p class="text-center text-large">Pay using an existing ACH  (No Transaction Fees)</p>
+
+                                    <form class="form-horizontal" action="@Url.Action("payment", "account", new { id = registration.Uid })" method="post" id="existing-payment-form">
+
+                                        <input type="hidden" name="paymentoption" id="paymentoption-existing" class="payment-option" value="0" />
+                                        <input type="hidden" name="coupon" class="coupon" value="" />
+
+                                        <div class="form-group">
+                                            <label class="col-md-3 control-label">
+                                                Select Account
+                                            </label>
+                                            <div class="col-md-9">
+                                                <select name="banksource" id="banksource" class="form-control">
+                                                    @foreach (var bankAccount in bankAccounts)
+                                                    {
+                                                        <option value="@bankAccount.Id">
+                                                            * * * * * * @bankAccount.Last4 - @bankAccount.BankName
+                                                        </option>
+                                                    }
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <p>&nbsp;</p>
+                                        </div>
+                                        <div class="form-group">
+                                            <button type="submit" class="btn btn-register btn-lg" id="btn-paywithexistingach">
+                                                Purchase via ACH -
+                                                <span class="total-due-today-ach"></span>*
+                                                &raquo;
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        }
+
+                        @* PAY VIA ACH *@
                         <div class="row">
                             <div class="col-md-6 col-md-offset-3 col-sm-12 padding-30 margin-t-20">
-                                
-                                <p class="text-center text-large">Pay using an existing ACH  (No Transaction Fees)</p>
+                                <p class="text-center text-large margin-b-20">Pay via new ACH (No Transaction Fees)</p>
 
-                                <form class="form-horizontal" action="@Url.Action("payment", "account", new { id = registration.Uid })" method="post" id="existing-payment-form">
+                                <button id="plaid-button" class="btn btn-register@(bankAccounts.Any() ? "-default" : "") btn-lg">
+                                    Purchase via ACH -
+                                    $<span class="total-due-today-ach"></span>*
+                                    &raquo;
+                                </button>
 
-                                    <input type="hidden" name="paymentoption" id="paymentoption-existing" class="payment-option" value="0" />
-                                    <input type="hidden" name="coupon" class="coupon" value="" />
-
-                                    <div class="form-group">
-                                        <label class="col-md-3 control-label">
-                                            Select Account
-                                        </label>
-                                        <div class="col-md-9">
-                                            <select name="banksource" id="banksource" class="form-control">
-                                                @foreach (var bankAccount in bankAccounts)
-                                                {
-                                                    <option value="@bankAccount.Id">
-                                                        * * * * * * @bankAccount.Last4 - @bankAccount.BankName
-                                                    </option>
-                                                }
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <p>&nbsp;</p>
-                                    </div>
-                                    <div class="form-group">
-                                        <button type="submit" class="btn btn-register btn-lg" id="btn-paywithexistingach">
-                                            Purchase via ACH -
-                                            <span class="total-due-today-ach"></span>*
-                                            &raquo;
-                                        </button>
-                                    </div>
-                                </form>
                             </div>
                         </div>
-                    }
 
-                    @* PAY VIA ACH *@
-                    <div class="row">
-                        <div class="col-md-6 col-md-offset-3 col-sm-12 padding-30 margin-t-20">
-                            <p class="text-center text-large margin-b-20">Pay via new ACH (No Transaction Fees)</p>
-
-                            <button id="plaid-button" class="btn btn-register@(bankAccounts.Any() ? "-default" : "") btn-lg">
-                                Purchase via ACH -
-                                $<span class="total-due-today-ach"></span>*
-                                &raquo;
-                            </button>
-
-                        </div>
                     </div>
 
-                </div>
-
-                <hr />
+                    <hr />
+                }
 
                 <div id="payment-info" style="position:relative;">
 
