@@ -249,7 +249,7 @@ namespace AfterSchoolLibrary.Services
             {
                 convenienceFee = checkoutObject.GetSubscriptionCostTodayConvenienceFee(msgs, dc);
                 paymentTypeFee = checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc);
-                amount = checkoutObject.PaymentPlan.CostPerPeriod;
+                amount = checkoutObject.SubscriptionPlan.CostPerPeriod;
             }
 
             return new FeeObject()
