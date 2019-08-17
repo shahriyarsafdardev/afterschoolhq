@@ -36,13 +36,16 @@
 
         if (registrant.HasSubmittedFor(participationObject, null))
         {
-            var hasConsent = registrant.HasConsentFor(participationObject);
-
-            if (!hasConsent)
+            if (registrant.HasWithdrawn(participationObject))
+            {
+                btnText = $"Withdrawn";
+                disabledText = " disabled=\"disabled\" ";
+            }
+            else if (!registrant.HasConsentFor(participationObject))
             {
                 btnText = "Give Consent";
             }
-            else if (!participationObject.IsFree && !registrant.IsReservedAndPaidFor(participationObject, null) && !registrant.IsAppliedFor(participationObject, null))
+            else if (!registrant.IsReservedAndPaidFor(participationObject, null) && !registrant.IsAppliedFor(participationObject, null) && !registrant.HasPlan(participationObject))
             {
                 btnText = "Pay Now";
             }

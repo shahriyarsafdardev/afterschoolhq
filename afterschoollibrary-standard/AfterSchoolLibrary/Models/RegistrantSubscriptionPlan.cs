@@ -262,6 +262,20 @@ namespace AfterSchoolLibrary.Models
             return Registrant.Load(this.RegistrantId.Value, msgs, dc);
         }
 
+        public static bool ExistsByParticipationObjectByRegistrants(int participationObjectId, ParticipationObjectType participationObjectType, List<int> registrantIds, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseParameterizedQuery = false;
+            dq.Criterias.Add(ObjectMap["RegistrantId"], registrantIds, DatabaseCriteriaOperatorEnum.In);
+
+            dq.Joins.Add(SubscriptionPlan.ObjectMap["ID"], ObjectMap["SubscriptionPlanId"], DatabaseJoinTypeEnum.InnerJoin);
+            dq.Criterias.Add(SubscriptionPlan.ObjectMap["participationObjectId"], participationObjectId);
+            dq.Criterias.Add(SubscriptionPlan.ObjectMap["participationObjectTypeId"], (int)participationObjectType);
+
+            return dq.GetCount(msgs) > 0;
+        }
+
         #endregion
     }
 }

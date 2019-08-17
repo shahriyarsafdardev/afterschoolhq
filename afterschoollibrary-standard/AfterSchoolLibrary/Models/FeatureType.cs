@@ -20,5 +20,6 @@ public enum FeatureType
 	PaymentsPercentageFee,
 	PaymentsPercentageFlatFee,
 	ManageLeagues,
-	UseStripeConnectedAccount
+	UseStripeConnectedAccount,
+	AcceptACH
 }

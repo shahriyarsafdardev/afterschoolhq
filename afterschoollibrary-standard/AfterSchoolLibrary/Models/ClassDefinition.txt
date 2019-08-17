@@ -1619,7 +1619,7 @@ values: NotSet, Individual, Organization
 [begin]
 type: Enum
 name: FeatureType
-values: NotSet, Attendance, AcceptPayments, Messaging, CustomUrl, TeamAccounts, WaitingList, ManageForms, ManageLocations, ManageActivityGroups, Activities, Participants, AllowApplications, Lottery, TrialDays, ManageContacts, ViewInsights, PaymentsPercentageFee, PaymentsPercentageFlatFee, ManageLeagues, UseStripeConnectedAccount
+values: NotSet, Attendance, AcceptPayments, Messaging, CustomUrl, TeamAccounts, WaitingList, ManageForms, ManageLocations, ManageActivityGroups, Activities, Participants, AllowApplications, Lottery, TrialDays, ManageContacts, ViewInsights, PaymentsPercentageFee, PaymentsPercentageFlatFee, ManageLeagues, UseStripeConnectedAccount, AcceptACH
 [end]
 
 [begin]
@@ -1649,7 +1649,7 @@ values: NotSet, Register, Apply
 [begin]
 type: Enum
 name: RegistrationAssignmentType
-values: NotSet, Reserved, WaitingList, Applied, Invited, Declined, ReservedPendingPayment, ReservedPendingParentalConsent
+values: NotSet, Reserved, WaitingList, Applied, Invited, Declined, ReservedPendingPayment, ReservedPendingParentalConsent, Withdrawn
 [end]
 
 [begin]

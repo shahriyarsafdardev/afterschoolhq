@@ -12,18 +12,29 @@
 <p>
     Tuition Fee payment options:
     <ul>
-        <li>
-            1 payment of
-            @ParticipationObjectUI.PrintTuitionFee(Model, displayCheckoutPrice)@(Model.PaymentPlans.Any() ? ", or " : "")
-        </li>
+        @if (!Model.IsTuitionFree)
+        {
+            <li>
+                1 payment of
+                @ParticipationObjectUI.PrintTuitionFee(Model, displayCheckoutPrice)@(Model.PaymentPlans.Any() ? ", or " : "")
+            </li>
+        }
         @foreach (var plan in Model.PaymentPlans)
         {
             <li>
                 @plan.TotalPeriods payments of
-                @ParticipationObjectUI.PrintPlanFee(plan, Model.OwnerAccount, displayCheckoutPrice) 
+                @ParticipationObjectUI.PrintPlanFee(plan, Model.OwnerAccount, displayCheckoutPrice)
                 each
                 @plan.BillingPeriodTypeId.ToString().ToLower()@(plan.ID != Model.PaymentPlans.Last().ID ? ", or " : "")
             </li>
         }
     </ul>
+</p>
+
+<p>
+    @{ Html.RenderPartial(
+          "~/Views/Shared/ParticipationObject/_SubscriptionPlan.cshtml",
+          Model,
+          new ViewDataDictionary() { { "DisplayCheckoutPrice", displayCheckoutPrice } });
+    }
 </p>
