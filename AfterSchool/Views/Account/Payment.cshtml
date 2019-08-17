@@ -11,6 +11,7 @@
     var checkoutObject = (CheckoutObject)ViewBag.CheckoutObject;
     var accountCanAcceptPayments = (bool)ViewBag.AccountCanAcceptPayments;
     var paymentAccount = participationObject.PaymentAccount;
+    var acceptACH = participationObject.OwnerAccount.HasFeature(FeatureType.AcceptACH);
 
     bankAccounts = bankAccounts.Where(bankAccount => bankAccount.Object == "bank_account").ToList();
 }
@@ -190,8 +191,8 @@
                     </div>
                 </div>
 
-                @if (participationObject.OwnerAccount.HasFeature(FeatureType.AcceptACH))
-                { 
+                @if (acceptACH)
+                {
                     <div id="payment-info-ach">
 
                         @* PAY VIA Existing ACH Sources *@
@@ -199,7 +200,7 @@
                         {
                             <div class="row">
                                 <div class="col-md-6 col-md-offset-3 col-sm-12 padding-30 margin-t-20">
-                                
+
                                     <p class="text-center text-large">Pay using an existing ACH  (No Transaction Fees)</p>
 
                                     <form class="form-horizontal" action="@Url.Action("payment", "account", new { id = registration.Uid })" method="post" id="existing-payment-form">
@@ -302,7 +303,7 @@
                     @* PAY VIA NEW CC *@
                     <div class="row">
                         <div class="col-md-6 col-md-offset-3 col-sm-12 padding-30 margin-t-20">
-                            
+
                             <p class="text-center text-large">Pay with a new credit card</p>
 
                             <form action="@Url.Action("payment", "account", new { id = registration.Uid })" method="post" id="payment-form" class="form-horizontal">
@@ -321,7 +322,7 @@
                                     <!-- Used to display Element errors. -->
                                     <div id="card-errors" role="alert"></div>
                                 </div>
-                                
+
                                 <div class="row">
                                     <div class="col-md-10 col-md-offset-1">
                                         <div class="am-checkbox text-center">
@@ -385,7 +386,6 @@
 
 
 <script src="https://js.stripe.com/v3/"></script>
-<script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
 
 <script>
     function applyCoupon() {
@@ -689,39 +689,45 @@
     });
 </script>
 
-<script>
-    var linkHandler = Plaid.create({
-        env: '@AfterSchoolLibrary.Helpers.PlaidHelper.PlaidEnvironment',
-        clientName: 'AfterSchool HQ',
-        key: '@AfterSchoolLibrary.Helpers.PlaidHelper.PublicKey',
-        product: ['auth'],
-        selectAccount: true,
-        onSuccess: function (public_token, metadata) {
-            // Send the public_token and account ID to your app server
-            $('#plaid-button').html('Processing Payment...'); 
 
-            disableButtons();
+@if (acceptACH)
+{
+    <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
 
-            plaidTokenHandler(public_token, metadata.account_id)
-        },
-        onExit: function (err, metadata) {
-            // The user exited the Link flow.
-            if (err != null) {
-                // The user encountered a Plaid API error prior to exiting.
-            }
-        },
-    });
+    <script>
+        var linkHandler = Plaid.create({
+            env: '@AfterSchoolLibrary.Helpers.PlaidHelper.PlaidEnvironment',
+            clientName: 'AfterSchool HQ',
+            key: '@AfterSchoolLibrary.Helpers.PlaidHelper.PublicKey',
+            product: ['auth'],
+            selectAccount: true,
+            onSuccess: function (public_token, metadata) {
+                // Send the public_token and account ID to your app server
+                $('#plaid-button').html('Processing Payment...');
 
-    function plaidTokenHandler(token, accountId) {
-        // Insert the token ID into the form so it gets submitted to the server
-        var form = $('#payment-form');
-        form.append('<input type="hidden" name="plaidtoken" value="' + token + '" />')
-        form.append('<input type="hidden" name="plaidaccountid" value="' + accountId + '" />')
-        form.submit();
-    }
+                disableButtons();
 
-    // Trigger the Link UI
-    document.getElementById('plaid-button').onclick = function () {
-        linkHandler.open();
-    };
-</script>
+                plaidTokenHandler(public_token, metadata.account_id)
+            },
+            onExit: function (err, metadata) {
+                // The user exited the Link flow.
+                if (err != null) {
+                    // The user encountered a Plaid API error prior to exiting.
+                }
+            },
+        });
+
+        function plaidTokenHandler(token, accountId) {
+            // Insert the token ID into the form so it gets submitted to the server
+            var form = $('#payment-form');
+            form.append('<input type="hidden" name="plaidtoken" value="' + token + '" />')
+            form.append('<input type="hidden" name="plaidaccountid" value="' + accountId + '" />')
+            form.submit();
+        }
+
+        // Trigger the Link UI
+        document.getElementById('plaid-button').onclick = function () {
+            linkHandler.open();
+        };
+    </script>
+}
