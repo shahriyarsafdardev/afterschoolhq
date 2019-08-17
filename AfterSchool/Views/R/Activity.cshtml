@@ -68,35 +68,7 @@
                 <div class="col-md-4">
 
                     <div class="activity-detail-block">
-                        <h3>
-                            @{ Html.RenderPartial("~/Views/Shared/ParticipationObject/_FreeTuition.cshtml", Model); }
-                        </h3>
-
-                        @if (!Model.IsFree)
-                        {
-                            if (!Model.PaymentPlans.Any())
-                            {
-                                Html.RenderPartial(
-                                    "~/Views/Shared/ParticipationObject/_TuitionAndNoPaymentPlans.cshtml", 
-                                    Model, 
-                                    new ViewDataDictionary() { { "DisplayCheckoutPrice", true } });
-                            }
-                            else
-                            {
-                                Html.RenderPartial(
-                                    "~/Views/Shared/ParticipationObject/_TuitionAndPaymentPlans.cshtml", 
-                                    Model,
-                                    new ViewDataDictionary() { { "DisplayCheckoutPrice", true } });
-                            }
-
-                            if (Model.CostDescription.IsNotEmpty())
-                            {
-                                <p class="padding-v-10">
-                                    @Model.CostDescription
-                                </p>
-                            }
-                        }
-
+                        @{ Html.RenderPartial("~/Views/Shared/ParticipationObject/_PaymentInfo.cshtml", Model); }
                     </div>
 
                     @if (Model.Schedule.IsNotEmpty())
