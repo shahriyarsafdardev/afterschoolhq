@@ -2,23 +2,13 @@
 @{
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
     ViewBag.Title = "Invite Parent";
-    var cart = (Cart)ViewBag.Cart;
+    var participationObject = (ParticipationObject)ViewBag.ParticipationObject;
     var msgs = (SystemMessages)ViewBag.Messages;
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 @{ Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", SessionVariables.RegistrationStartPageAccount); }
-
-<div class="reg-header">
-    <div>
-        @foreach (var item in cart.GetCartItems())
-        {
-            <div>
-                <h1>You are registering for: @item.GetParticipationObject().Name</h1>
-            </div>
-        }
-    </div>
-</div>
+@{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", participationObject); }
 
 <div>
     <div class="col-md-12">
@@ -28,7 +18,7 @@
                 <div class="text-center reg-instructions">
                     <p><strong>Step 2 of 2: Invite your parent</strong></p>
                 </div>
-                
+
                 <div class="text-center reg-login">
                     <p>
                         Please enter your parents information below in order to continue

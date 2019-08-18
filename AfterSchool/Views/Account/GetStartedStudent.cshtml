@@ -3,40 +3,13 @@
 @{
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
     ViewBag.Title = "Create Account";
-    var cart = (Cart)ViewBag.Cart;
+    var participationObject = (ParticipationObject)ViewBag.ParticipationObject;
     var msgs = (SystemMessages)ViewBag.Messages;
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 @{ Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", SessionVariables.RegistrationStartPageAccount); }
-
-<div class="reg-header">
-
-    <div class="row">
-        <div class="col-md-8 col-sm-12">
-            <div>
-                @foreach (var item in cart.GetCartItems())
-                {
-                    <div>
-                        <h1>You are registering for&#58; @item.GetParticipationObject().Name</h1>
-                    </div>
-                }
-            </div>
-            <div>
-                Enter your information below to begin your simplest registration yet.
-            </div>
-        </div>
-
-        <div class="col-md-4 col-sm-12 hide">
-            <div class="pull-right">
-                <a href="@SessionVariables.RegistrationStartPageAccount.HomePageUrl" class="btn btn-alt8">
-                    &laquo; @SessionVariables.RegistrationStartPageAccount.Name Home
-                </a>
-            </div>
-        </div>
-    </div>
-
-</div>
+@{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", participationObject); }
 
 <div>
     <div class="col-md-12">

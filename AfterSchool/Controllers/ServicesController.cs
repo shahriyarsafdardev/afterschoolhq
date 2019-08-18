@@ -30,6 +30,42 @@ namespace AfterSchool.Controllers
             return false;
         }
 
+        [HttpPost]
+        public ActionResult AddToCart(string uid)
+        {
+            if (!IsRequestFromApp())
+                return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
+
+            var msgs = new SystemMessages();
+
+            if (SessionVariables.Cart.IsEmpty())
+                SessionVariables.Cart = Cart.GetNewCart(loggedInUser: SessionVariables.CurrentUser, msgs: msgs);
+
+            SessionVariables.Cart.AddCartItem(Activity.LoadByUid(uid.ToGuid(), msgs), msgs);
+
+            if (msgs.HasNoErrors())
+                return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
+
+            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public ActionResult RemoveFromCart(string uid)
+        {
+            if (!IsRequestFromApp())
+                return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
+
+            var msgs = new SystemMessages();
+
+            if (SessionVariables.Cart.IsNotEmpty())
+                SessionVariables.Cart.RemoveCartItem(Activity.LoadByUid(uid.ToGuid(), msgs), msgs);
+
+            if (msgs.HasNoErrors())
+                return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
+
+            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+        }
+
         public ActionResult SetDemoOrgName(string orgname, string firstname, string email)
         {
             var msgs = new SystemMessages();

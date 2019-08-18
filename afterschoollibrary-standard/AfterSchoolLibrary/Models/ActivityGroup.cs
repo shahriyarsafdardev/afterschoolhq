@@ -381,7 +381,7 @@ namespace AfterSchoolLibrary.Models
 
         public string GetHomePageUrl(bool isAfterSchool = true, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return $"{Helpers.Utilities.BaseUrl(isAfterSchool)}/{this.GetAccount(msgs, dc).UniqueName.ToLower()}/{this.ActivityGroupTypeId.ToString().ToLower()}/{this.UniqueName}";
+            return $"{Helpers.Utilities.BaseUrl(isAfterSchool)}/{this.GetAccount(msgs, dc).UniqueName.ToLower()}/{this.ActivityGroupTypeId.ToString().ToLower()}/{this.UniqueName.ToLower()}";
         }
 
         public string HomePageUrl
@@ -389,6 +389,14 @@ namespace AfterSchoolLibrary.Models
             get
             {
                 return this.GetHomePageUrl(true);
+            }
+        }
+
+        public string BrowseUrl
+        {
+            get
+            {
+                return $"{HomePageUrl}/browse";
             }
         }
 

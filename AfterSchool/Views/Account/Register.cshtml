@@ -10,6 +10,7 @@
         .OrderBy(group => group.DisplayOrder)
         .DistinctBy(group => group.ID)
         .ToList();
+    var sessionActivities = (List<ParticipationObject>)ViewBag.SessionActivities;
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -39,13 +40,11 @@
                             new ViewDataDictionary() { { "QuestionViewModels", qvms.Where(qvm => qvm.Question.FormQuestionGroupId == group.ID).ToList() } });
                     }
 
-                    @if (Model.IsActivityGroup() && Model.GetActivityGroup().RegistrationModeId == RegistrationMode.Apply)
+                    @if (sessionActivities.IsNotEmpty() && sessionActivities.Any())
                     {
-                        var group = Model.GetActivityGroup();
-
                         Html.RenderPartial(
                             "~/Views/Shared/Activity/_ActivityPreferences.cshtml",
-                            group.GetActivities(null, false, false, null, null, false));
+                            sessionActivities);
                     }
 
                     <div class="form-group">

@@ -817,7 +817,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var questions = GetAddRegistrationQuestions(form, msgs).OrderBy(question => question.DisplayOrder).ToList();
 
             ViewBag.QuestionViewModels = questions.Select(question => new FormQuestionViewModel(question)).ToList();
-            ViewBag.Activities = session.GetActivities(ActivityType.Activity, false, false, null, null, false, msgs);
+            ViewBag.Activities = session.GetActivities(ActivityType.Activity, false, false, null, null, false, msgs).Select(x => x.GetParticipationObject(msgs)).ToList();
             ViewBag.Messages = msgs;
 
             return View(session);
