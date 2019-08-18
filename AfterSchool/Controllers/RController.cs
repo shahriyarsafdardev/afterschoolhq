@@ -75,14 +75,21 @@ namespace AfterSchool.Controllers
                 participationObjects = participationObjects.Take(11).ToList();
             }
 
+            participationObjects = participationObjects
+                                    .Where(po => !po.IsActivity() || !po.GetActivity().ActivityGroupId.HasValue)
+                                    .OrderBy(po => po.RegistrationPeriod.IsClosed(account))
+                                    .ThenBy(po => po.RegistrationPeriod.WillOpen(account))
+                                    .ThenBy(po => po.RegistrationPeriod.IsOpen(account))
+                                    .ToList();
+
             ViewBag.Grades = grades;
             ViewBag.Messages = msgs;
             ViewBag.Cart = SessionVariables.Cart;
             ViewBag.Locations = locations;
-            ViewBag.ParticipationObjects = participationObjects.OrderBy(po => po.RegistrationPeriod.IsClosed(account))
-                                            .ThenBy(po => po.RegistrationPeriod.WillOpen(account))
-                                            .ThenBy(po => po.RegistrationPeriod.IsOpen(account))
-                                            .ToList();
+            ViewBag.ParticipationObjects = participationObjects;
+            ViewBag.RegistrationOpened = participationObjects.Where(po => po.RegistrationPeriod.IsOpen()).ToList();
+            ViewBag.RegistrationClosed = participationObjects.Where(po => po.RegistrationPeriod.IsClosed()).ToList();
+            ViewBag.RegistrationWillOpen = participationObjects.Where(po => po.RegistrationPeriod.WillOpen()).ToList();
 
             return View(account);
         }
@@ -204,6 +211,26 @@ namespace AfterSchool.Controllers
             return RedirectToRegistration(account, participationObject, msgs);
         }
 
+        public ActionResult BrowseSession(string accountname, string sessionname)
+        {
+            var msgs = new SystemMessages();
+            var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
+            var session = ActivityGroup.LoadByAccountIdByUniqueName(account.ID.Value, sessionname, msgs);
+            var participationObjects = session.GetActivities(msgs).Select(activity => activity.GetParticipationObject(msgs)).ToList();
+
+            ViewBag.Session = session.GetParticipationObject(msgs);
+            ViewBag.Grades = GradeLevel.Load(msgs: msgs);
+            ViewBag.Messages = msgs;
+            ViewBag.Cart = SessionVariables.Cart;
+            ViewBag.Locations = account.GetAllAvailableLocations(msgs);
+            ViewBag.ParticipationObjects = participationObjects;
+            ViewBag.RegistrationOpened = participationObjects.Where(po => po.RegistrationPeriod.IsOpen()).ToList();
+            ViewBag.RegistrationClosed = participationObjects.Where(po => po.RegistrationPeriod.IsClosed()).ToList();
+            ViewBag.RegistrationWillOpen = participationObjects.Where(po => po.RegistrationPeriod.WillOpen()).ToList();
+
+            return View("browse", account);
+        }
+
         public ActionResult RegisterLeague(string accountname, string activitygrouptype, string externalaccountname, string group)
         {
             var msgs = new SystemMessages();
@@ -221,7 +248,9 @@ namespace AfterSchool.Controllers
         {
             SetRegistrationStartPage(account);
 
-            SessionVariables.Cart = Cart.GetNewCart(loggedInUser: SessionVariables.CurrentUser, msgs: msgs);
+            if (!participationObject.IsActivityGroup() || participationObject.GetActivityGroup().ActivityGroupTypeId != ActivityGroupType.Session)
+                SessionVariables.Cart = Cart.GetNewCart(loggedInUser: SessionVariables.CurrentUser, msgs: msgs);
+
             SessionVariables.Cart.AddCartItem(participationObject, msgs);
 
             if (SessionVariables.CurrentRegistrant.IsEmpty())

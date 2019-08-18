@@ -2011,10 +2011,18 @@ namespace AfterSchoolLibrary.Services
         {
             if (activity.ID.HasValue)
             {
-                var item = ActivityRegistrationPeriod.LoadByActivityIdByIsActive(activity.ID.Value, true, msgs, dc);
-                if (item.IsNotEmpty())
-                    return item.ToRegistrationPeriod(true, msgs, dc);
+                if (activity.ActivityGroupId.HasValue)
+                {
+                    return activity.GetActivityGroup(msgs, dc).GetCurrentOrNextRegistrationPeriod(msgs, dc);
+                }
+                else
+                {
+                    var item = ActivityRegistrationPeriod.LoadByActivityIdByIsActive(activity.ID.Value, true, msgs, dc);
+                    if (item.IsNotEmpty())
+                        return item.ToRegistrationPeriod(true, msgs, dc);
+                }
             }
+
             return null;
         }
 

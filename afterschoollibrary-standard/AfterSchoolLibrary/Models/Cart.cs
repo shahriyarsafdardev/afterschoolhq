@@ -236,6 +236,34 @@ namespace AfterSchoolLibrary.Models
 
         }
 
+        public void MoveItemTo(int index, CartItem item)
+        {
+            this.GetCartItems().Remove(item);
+            this.GetCartItems().Insert(index, item);
+        }
+
+        public void RemoveCartItem(Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            RemoveCartItem(activity.ID.Value, ParticipationObjectType.Activity, msgs, dc);
+        }
+
+        public void RemoveCartItem(ParticipationObject po, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            RemoveCartItem(po.ObjectID.Value, po.ObjectType, msgs, dc);
+        }
+
+        public void RemoveCartItem(int participationObjectId, ParticipationObjectType participationObjectType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var cartItem = GetCartItems(msgs, dc)
+                            .Where(item => item.ParticipationObjectId == participationObjectId && item.ParticipationObjectTypeId == participationObjectType)
+                            .FirstOrDefault();
+
+            if (cartItem.IsNotEmpty())
+                msgs.AddRange(cartItem.Delete(dc));
+
+            ResetCartItems();
+        }
+
         private List<CartItem> _CartItems = null;
         public List<CartItem> GetCartItems(SystemMessages msgs = null, DatabaseConnection dc = null)
         {

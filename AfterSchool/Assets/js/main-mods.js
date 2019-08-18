@@ -283,6 +283,18 @@ var Notifications = {
             class_name: "color " + alertClass,
             text: options.message
         });
+    },
+    showErrors: function (messages) {
+        var items = "";
+        for (var message of messages) {
+            items += message.Text + "<br />";
+        }
+
+        Notifications.showBar({
+            title: 'Error',
+            message: items,
+            success: false
+        });
     }
 }
 

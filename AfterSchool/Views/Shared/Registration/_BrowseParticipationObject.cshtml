@@ -10,6 +10,8 @@
      id="@Model.Uid"
      mingrade="@Model.MinGradeId"
      maxgrade="@Model.MaxGradeId"
+     mingradetext="@(Model.GetMinGradeLevel()?.Name)"
+     maxgradetext="@(Model.GetMaxGradeLevel()?.Name)"
      hasseatsremaining="@Model.HasSeatsAvailable().ToString().ToLower()"
      haswaitinglistremaining="@Model.HasWaitingListSeatsAvailable().ToString().ToLower()"
      days="@ParticipationObjectUI.PrintDaysOfWeek(Model)"
@@ -62,9 +64,18 @@
             </p>
 
             <div class="margin-t-20">
-                <a href="@Model.GetHomePageUrl(SessionVariables.IsAfterSchool.Value)" class="btn btn-primary btn-register btn-block">
-                    Learn More &raquo;
-                </a>
+                @if (Model.IsActivity() && Model.GetActivity().ActivityGroupId.HasValue)
+                {
+                    <button class="btn btn-primary btn-register btn-block btn-cart" in-cart="0" uid="@Model.Uid">
+                        <i class="s7-cart"></i> <span>Add to Cart</span>
+                    </button>
+                }
+                else
+                {
+                    <a href="@Model.GetHomePageUrl(true)" class="btn btn-primary btn-register btn-block">
+                        Learn More &raquo;
+                    </a>
+                }
             </div>
 
             <div class="seats-remaining text-center">

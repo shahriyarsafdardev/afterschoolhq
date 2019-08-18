@@ -3,7 +3,7 @@
     ViewBag.Title = Model.Name;
     var msgs = (SystemMessages)ViewBag.Messages;
     var qvms = (List<FormQuestionViewModel>)ViewBag.QuestionViewModels;
-    var activities = (List<Activity>)ViewBag.Activities;
+    var activities = (List<ParticipationObject>)ViewBag.Activities;
 }
 
 @{Html.RenderPartial("OrgAccountHeader", Model.ID.ToString());}

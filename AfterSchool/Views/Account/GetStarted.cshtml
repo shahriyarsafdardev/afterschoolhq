@@ -3,41 +3,13 @@
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
     ViewBag.Title = "Get Started";
     var msgs = (SystemMessages)ViewBag.Messages;
-    var cart = (Cart)ViewBag.Cart;
+    var participationObject = (ParticipationObject)ViewBag.ParticipationObject;
     var registrationAccount = (Account)ViewBag.RegistrationAccount;
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
-
 @{ Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", SessionVariables.RegistrationStartPageAccount ?? registrationAccount); }
-
-<div class="reg-header">
-
-    <div class="row">
-        <div class="col-md-8 col-sm-12">
-            <div>
-                @foreach (var item in cart.GetCartItems())
-                {
-                    <div>
-                        <h1>You are registering for&#58; @item.GetParticipationObject().Name</h1>
-                    </div>
-                }
-            </div>
-            <div>
-                Enter your information below to begin your simplest registration yet.
-            </div>
-        </div>
-
-        <div class="col-md-4 col-sm-12 hide">
-            <div class="pull-right">
-                <a href="@SessionVariables.RegistrationStartPageAccount.HomePageUrl" class="btn btn-alt8">
-                    &laquo; @SessionVariables.RegistrationStartPageAccount.Name Home
-                </a>
-            </div>
-        </div>
-    </div>
-
-</div>
+@{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", participationObject); }
 
 <div>
     <div class="col-md-12">
@@ -56,13 +28,13 @@
                         </p>
                         <br />
                         <p>
-                            Already have an account? 
+                            Already have an account?
                             <a href="#" class="md-trigger" data-modal="modal-login">
                                 Login
                             </a>
                         </p>
                         <p>
-                            Are you a student? 
+                            Are you a student?
                             <a href="@Url.Action("getstartedstudent", "account", new { regaccount = Request["regaccount"] })">
                                 Register Here
                             </a>
@@ -73,9 +45,9 @@
                 <div>
                     <form class="form-horizontal" id="signup-form" method="post" action="@Url.Action("getstarted", "account")">
                         @foreach (var qvm in Model.Where(qvm => !qvm.Hide))
-                        {                            
+                        {
                             Html.RenderPartial(
-                                "~/Views/Shared/Form/_Question.cshtml", 
+                                "~/Views/Shared/Form/_Question.cshtml",
                                 qvm);
 
                             if (qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone)

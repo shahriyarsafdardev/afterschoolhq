@@ -2,10 +2,14 @@
 @{
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
     ViewBag.Title = Model.Name;
-    var objects = (List<ParticipationObject>)ViewBag.ParticipationObjects;
+    var participationObjects = (List<ParticipationObject>)ViewBag.ParticipationObjects;
     var grades = (List<GradeLevel>)ViewBag.Grades;
     var cart = (Cart)ViewBag.Cart;
     var locations = (List<Location>)ViewBag.Locations;
+    var registrationOpen = (List<ParticipationObject>)ViewBag.RegistrationOpened;
+    var registrationClosed = (List<ParticipationObject>)ViewBag.RegistrationClosed;
+    var registrationWillOpen = (List<ParticipationObject>)ViewBag.RegistrationWillOpen;
+    var session = (ParticipationObject)ViewBag.Session;
 }
 
 @{ Html.RenderPartial(
@@ -21,15 +25,238 @@
 
 <div class="margin-10">
 
-    @{ 
+    @{
         // Html.RenderPartial("~/Views/Shared/Registration/_AddActivity.cshtml", Model);
     }
 
-    @foreach (var item in objects)
+    @if (registrationOpen.Any())
     {
-        Html.RenderPartial("~/Views/Shared/Registration/_BrowseParticipationObject.cshtml", item);
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <h3>Open for Registration</h3>
+            </div>
+
+            @foreach (var item in registrationOpen)
+            {
+                Html.RenderPartial("~/Views/Shared/Registration/_BrowseParticipationObject.cshtml", item);
+            }
+        </div>
+        <hr />
     }
+
+    @if (registrationWillOpen.Any())
+    {
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <h3>Registration Opening Soon</h3>
+            </div>
+
+            @foreach (var item in registrationWillOpen)
+            {
+                Html.RenderPartial("~/Views/Shared/Registration/_BrowseParticipationObject.cshtml", item);
+            }
+        </div>
+        <hr />
+    }
+
+    @if (registrationClosed.Any())
+    {
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <h3>Registration Closed</h3>
+            </div>
+
+            @foreach (var item in registrationClosed)
+            {
+                Html.RenderPartial("~/Views/Shared/Registration/_BrowseParticipationObject.cshtml", item);
+            }
+        </div>
+        <hr />
+    }
+
 </div>
+
+@if (session.IsNotEmpty())
+{
+    <div class="cart-tab bg-danger padding-10 pointer text-white text-center" style="position:fixed; right: -10px; top: 50px; border-radius: 10px; padding-right: 20px;">
+        <div class="cart-count text-medium-small">0</div>
+        <i class="s7-cart icon-large"></i>
+        <div>Checkout &raquo;</div>
+    </div>
+
+    <div class="cart-bar col-xs-12 col-sm-6 col-md-4 col-lg-3 text-white hide" style="position:fixed; top:0px; right: 0px; height: 100%; background-color: #2f3c40;">
+        <div>
+            <div class="text-right"><i class="s7-close icon-xlarge pointer cart-bar-close"></i></div>
+        </div>
+        <div>
+            <h3>@UILabel.ActivityLabel(ActivityType.Activity, true)</h3>
+            <div class="cart-activities">
+
+            </div>
+            <div class="cart-activities-none"><p>You have no @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower() in your cart</p></div>
+        </div>
+        <div>
+            <button onclick="location.href='@session.GetRegistrationPageUrl()'" 
+                    class="btn btn-primary btn-register btn-block btn-checkout" 
+                    style="position: absolute; bottom: 80px; width: 90%;" 
+                    disabled="disabled">
+                Register 1 Student &raquo;
+            </button>
+        </div>
+    </div>
+
+    <script>
+
+        PageEvent.add(PageEvent.AFTER_INIT, function () {
+
+            $('.btn-cart').click(function () {
+
+                const btnCart = $(this);
+                const uid = btnCart.attr('uid');
+
+                if (btnCart.attr('in-cart') == '0') {
+                    addToCartUI(btnCart, uid);                     
+                } else {
+                    removeFromCartUI(btnCart, uid);
+                }
+            });
+
+            $('.cart-tab').click(function () {
+                toggleCartBar();
+            });
+
+            $('.cart-bar-close').click(function () {
+                toggleCartBar();
+            })
+
+            @if (SessionVariables.Cart.IsNotEmpty())
+            {
+                foreach (var item in SessionVariables.Cart.GetCartItems())
+                {
+                    @:markItemAsInCart($('.btn-cart[uid="@item.GetParticipationObject().Uid"]'))
+                }
+            }
+        });
+
+        function addToCart(uid, callback) {
+            $.post(
+                '/services/addtocart/',
+                'uid=' + uid,
+                function (data) {
+                    if (data && data.status == 'ok') {
+                        callback();
+                    } else {
+                        Notifications.showErrors(data.messages);
+                        onFailure();
+                    }
+                }
+            );
+        }
+
+        function removeFromCart(uid, onSuccess, onFailure) {
+            $.post(
+                '/services/removefromcart/',
+                'uid=' + uid,
+                function (data) {
+                    if (data && data.status == 'ok') {
+                        onSuccess();
+                    } else {
+                        Notifications.showErrors(data.messages);
+                        onFailure();
+                    }
+                }
+            );
+        }
+
+        function addToCartUI(btnCart, uid) {
+            btnCart.children('span').html('Adding...');
+
+            addToCart(
+                uid,
+                function () {
+                    markItemAsInCart(btnCart);
+                },
+                function () {
+                    markItemAsNotInCart(btnCart);
+                },
+            );
+        }
+
+        function removeFromCartUI(btnCart, uid) {
+            btnCart.children('span').html('Removing...');
+
+            removeFromCart(
+                uid,
+                function () {
+                    markItemAsNotInCart(btnCart);
+                },
+                function () {
+                    markItemAsInCart(btnCart);
+                },
+            );
+        }
+
+        function removeFromCartByUid(uid) {
+            removeFromCartUI($('.btn-cart[uid="' + uid + '"]').first(), uid)
+        }
+
+        function incrementCartCount() {
+            let val = $('.cart-count').first().html();
+            val = parseInt(val) + 1;
+            $('.cart-count').html(val);
+        }
+
+        function decrementCartCount() {
+            let val = $('.cart-count').first().html();
+            val = parseInt(val) - 1;
+            $('.cart-count').html(val);
+        }
+
+        function getActivityHtml(btnCart) {
+            var parent = btnCart.parents('.participation-object').first();
+            var uid = btnCart.attr('uid');
+
+            return '<div uid="' + uid + '" style="float:left; margin-right: 20px; margin-top: 5px; border: solid 1px #00c5a3; width: 200px; position: relative;" class="cart-bar-item padding-10"><div id="' + btnCart.attr('uid') + '" class="text-medium-small">' + parent.attr('name') + '</div><div class="text-small">Days: ' + parent.attr('days') + '</div><div class="text-small">Grades: ' + parent.attr('mingradetext') + ' - ' + parent.attr('maxgradetext') + '</div><div class="pointer"><a href="javascript:removeFromCartByUid(\'' + uid + '\')">Remove</a></div></div>';
+        }
+
+        function markItemAsInCart(btnCart) {
+            incrementCartCount();
+            btnCart.children('span').html('Remove from Cart');
+            btnCart.attr('in-cart', '1');
+            btnCart.removeClass('btn-register');
+            btnCart.addClass('btn-register-default');
+            $('.cart-activities').append(getActivityHtml(btnCart));
+            $('.cart-activities-none').addClass('hide');
+            $('.btn-checkout').prop('disabled', false);
+            $('.cart-tab').removeClass('bg-danger');
+            $('.cart-tab').addClass('bg-primary');
+        }
+
+        function markItemAsNotInCart(btnCart) {
+            decrementCartCount();
+            btnCart.children('span').html('Add to Cart');
+            btnCart.attr('in-cart', '0');
+            btnCart.removeClass('btn-register-default');
+            btnCart.addClass('btn-register');
+            $('.cart-bar-item[uid="' + btnCart.attr('uid') + '"]').remove();
+            if ($('.cart-activities').children().length == 0) {
+                $('.cart-activities-none').removeClass('hide');
+                $('.btn-checkout').prop('disabled', true);
+                $('.cart-tab').removeClass('bg-primary');
+                $('.cart-tab').addClass('bg-danger');
+            }
+        }
+
+        function toggleCartBar() {
+            if ($('.cart-bar').hasClass('hide')) {
+                $('.cart-bar').removeClass('hide');
+            } else {
+                $('.cart-bar').addClass('hide');
+            }
+        }
+    </script>
+
+}
 
 @{Html.RenderPartial("~/Views/Shared/Modals/_LeadForm.cshtml", Model);}
 

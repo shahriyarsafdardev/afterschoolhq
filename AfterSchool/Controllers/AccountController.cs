@@ -53,7 +53,7 @@ namespace AfterSchool.Controllers
                 }
             });
 
-            ViewBag.Cart = SessionVariables.Cart;
+            ViewBag.ParticipationObject = GetParticipationObjectFromCart();
 
             var qvms = questions.Select(question => new FormQuestionViewModel(question, Request.Params)).ToList();
 
@@ -265,7 +265,7 @@ namespace AfterSchool.Controllers
                 }
             });
 
-            ViewBag.Cart = SessionVariables.Cart;
+            ViewBag.ParticipationObject = GetParticipationObjectFromCart();
 
             return questions;
         }
@@ -365,7 +365,7 @@ namespace AfterSchool.Controllers
                 }
             });
 
-            ViewBag.Cart = SessionVariables.Cart;
+            ViewBag.ParticipationObject = GetParticipationObjectFromCart();
 
             return questions;
         }
@@ -516,7 +516,7 @@ namespace AfterSchool.Controllers
                 .ToList()
                 .ForEach(question => { question.IsRequired = true; });
 
-            ViewBag.Cart = SessionVariables.Cart;
+            ViewBag.ParticipationObject = GetParticipationObjectFromCart();
 
             return questions;
         }
@@ -646,7 +646,7 @@ namespace AfterSchool.Controllers
                 schoolLocation = SessionVariables.RegistrationStartPageAccount.GetDefaultLocation(msgs);
 
             ViewBag.School = schoolLocation;
-            ViewBag.Cart = SessionVariables.Cart;
+            ViewBag.ParticipationObject = GetParticipationObjectFromCart();
             ViewBag.ShowStepNumber = SessionVariables.CurrentAccount.GetChildrenRegistrants(msgs).Count == 0;
 
             return questions;
@@ -911,7 +911,7 @@ namespace AfterSchool.Controllers
                 }
             });
 
-            ViewBag.Cart = SessionVariables.Cart;
+            ViewBag.ParticipationObject = GetParticipationObjectFromCart();
             ViewBag.ShowStepNumber = SessionVariables.CurrentAccount.GetChildrenRegistrants(msgs).Count < 2;
 
             return questions;
@@ -1026,7 +1026,7 @@ namespace AfterSchool.Controllers
             var students = SessionVariables.CurrentUser.GetChildrenRegistrants(msgs);
 
             ViewBag.Messages = msgs;
-            ViewBag.ParticipationObject = SessionVariables.Cart.GetCartItems().FirstOrDefault()?.GetParticipationObject();
+            ViewBag.ParticipationObject = GetParticipationObjectFromCart();
 
             return View(students);
         }
@@ -1075,8 +1075,7 @@ namespace AfterSchool.Controllers
                         .Where(question => question.QuestionDataTypeId == QuestionDataType.NotSet)
                         .Where(question => answers.Find(answer => answer.FormQuestionId == question.ID).IsEmpty())
                 );
-
-            ViewBag.Cart = SessionVariables.Cart;
+            
             ViewBag.Registrant = SessionVariables.CurrentRegistrant;
 
             return questions;
@@ -1088,7 +1087,7 @@ namespace AfterSchool.Controllers
             if (results.IsNotEmpty()) return results;
 
             var msgs = new SystemMessages();
-            var participationObject = SessionVariables.Cart.GetCartItems().FirstOrDefault()?.GetParticipationObject();
+            var participationObject = GetParticipationObjectFromCart();
             var parentOrGuardian = SessionVariables.CurrentRegistrant.GetParentOrGuardian(msgs);
             var (submittedRecord, registration) = SessionVariables.CurrentRegistrant.GetSubmittedRecord(participationObject, msgs);
 
@@ -1118,6 +1117,16 @@ namespace AfterSchool.Controllers
             ViewBag.QuestionViewModels = questions.Select(question => question.ToFormQuestionViewModel()).ToList();
             ViewBag.Messages = msgs;
 
+            if (participationObject.IsActivityGroup() && participationObject.GetActivityGroup().ActivityGroupTypeId == ActivityGroupType.Session && participationObject.GetActivityGroup().RegistrationModeId == RegistrationMode.Apply)
+            {
+                ViewBag.SessionActivities = SessionVariables.Cart.GetCartItems()
+                                        .Where(x => x.ParticipationObjectTypeId == ParticipationObjectType.Activity)
+                                        .Select(x => x.GetParticipationObject(msgs))
+                                        .Where(x => x.GetActivity().ActivityGroupId.HasValue)
+                                        .OrderBy(x => x.Name)
+                                        .ToList();
+            }
+
             return View(participationObject);
         }
 
@@ -1130,7 +1139,7 @@ namespace AfterSchool.Controllers
         private ActionResult RegisterActionPost(string signature)
         {
             var msgs = new SystemMessages();
-            var participationObject = SessionVariables.Cart.GetCartItems().FirstOrDefault()?.GetParticipationObject();
+            var participationObject = GetParticipationObjectFromCart();
 
             // need to see if there are any questions required by the form on the activity/activity group that haven't been collected on the main form
             var questions = RegisterViewBag(participationObject, msgs);
@@ -1263,7 +1272,7 @@ namespace AfterSchool.Controllers
                                 var postedValue = Request[$"activity-preference-{i}"];
                                 if (postedValue.IsGuid())
                                 {
-                                    var activity = Activity.LoadByUid(postedValue.ToGuid(), msgs);
+                                    var activity = activities.First(x => x.Uid == postedValue.ToGuid());
 
                                     registration.ProcessRegistrationAssignment(
                                         participationObject: activity.GetParticipationObject(amsgs, adc),
@@ -1314,7 +1323,7 @@ namespace AfterSchool.Controllers
             if (results.IsNotEmpty()) return results;
 
             var msgs = new SystemMessages();
-            var participationObject = SessionVariables.Cart.GetCartItems(msgs).FirstOrDefault()?.GetParticipationObject(msgs);
+            var participationObject = GetParticipationObjectFromCart();
             var canAcceptPayments = participationObject.OwnerAccount.CanProcessPayments(msgs);
 
             // if you can't pay later
@@ -1402,7 +1411,7 @@ namespace AfterSchool.Controllers
             if (results.IsNotEmpty()) return results;
 
             var msgs = new SystemMessages();
-            var participationObject = SessionVariables.Cart.GetCartItems(msgs).FirstOrDefault()?.GetParticipationObject(msgs);
+            var participationObject = GetParticipationObjectFromCart();
 
             PaymentViewBag(id, participationObject, msgs);
 
@@ -1422,7 +1431,7 @@ namespace AfterSchool.Controllers
         private ActionResult PaymentActionPost(string id, string stripetoken, string plaidtoken, string plaidaccountid, string ccSourceId, string bankSourceId, string savepaymentinfo, string paymentoption, string couponCode)
         {
             var msgs = new SystemMessages();
-            var participationObject = SessionVariables.Cart.GetCartItems(msgs).FirstOrDefault()?.GetParticipationObject(msgs);
+            var participationObject = GetParticipationObjectFromCart();
             var coupon = new Coupon();
 
             if (couponCode.IsNotEmpty())
@@ -1611,7 +1620,7 @@ namespace AfterSchool.Controllers
                 }
             });
 
-            ViewBag.Cart = SessionVariables.Cart;
+            ViewBag.ParticipationObject = GetParticipationObjectFromCart();
 
             return questions;
         }
@@ -1784,7 +1793,7 @@ namespace AfterSchool.Controllers
                 }
             });
 
-            ViewBag.Cart = SessionVariables.Cart;
+            ViewBag.ParticipationObject = GetParticipationObjectFromCart();
 
             return questions;
         }
@@ -1809,7 +1818,7 @@ namespace AfterSchool.Controllers
             // Get parent info from page
             var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
 
-            var participationObject = SessionVariables.Cart.GetCartItems(msgs).FirstOrDefault()?.GetParticipationObject(msgs);
+            var participationObject = GetParticipationObjectFromCart();
             var firstName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName);
             var lastName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName);
             var email = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail);
@@ -1902,7 +1911,7 @@ namespace AfterSchool.Controllers
             if (SessionVariables.CurrentRegistrant.GetParentOrGuardian(msgs).IsEmpty())
                 return RedirectToAction("InviteParent");
 
-            var participationObject = SessionVariables.Cart.GetCartItems().FirstOrDefault()?.GetParticipationObject();
+            var participationObject = GetParticipationObjectFromCart();
             ViewBag.AlreadyRegistered = SessionVariables.CurrentRegistrant.HasSubmittedFor(participationObject, null, msgs);
             ViewBag.Messages = msgs;
             return View(participationObject);
@@ -1970,7 +1979,6 @@ namespace AfterSchool.Controllers
                 return RedirectToAction("ThankYou", new { id = registration.Uid });
 
             ViewBag.Messages = msgs;
-            ViewBag.Cart = SessionVariables.Cart;
 
             return View(participationObject);
         }
@@ -2008,6 +2016,19 @@ namespace AfterSchool.Controllers
                 return HandleRedirectAfterLogin(null);
 
             return null;
+        }
+
+        private ParticipationObject GetParticipationObjectFromCart()
+        {
+            var participationObjects = SessionVariables.Cart.GetCartItems().Select(cart => cart.GetParticipationObject()).ToList();
+            ParticipationObject participationObject = null;
+           
+            participationObjects.ForEach(item => {
+                if (item.IsActivityGroup())
+                    participationObject = item;
+            });
+
+            return participationObject ?? participationObjects.First();
         }
 
         private void ResetRegistrationSession()
