@@ -128,5 +128,15 @@ namespace AfterSchoolLibrary.Services
 
             return null;
         }
+
+        public static bool HasPlan(this RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RegistrantSubscriptionPlan.ExistsByParticipationObjectByRegistrants(
+                participationObjectId: registrantActivity.ParticipationObjectId.Value,
+                participationObjectType: registrantActivity.ParticipationObjectTypeId,
+                registrantIds: registrantActivity.RegistrantId.Value.AsList(),
+                msgs: msgs,
+                dc: dc);
+        }
     }
 }
