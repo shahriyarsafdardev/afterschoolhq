@@ -240,33 +240,37 @@ namespace AfterSchoolLibrary.Services
 
         public static List<RegistrationPeriod> GetUpcomingRegistrationPeriods(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
             return account.GetRegistrationPeriods(msgs, dc)
-                .Where(x => x.StartDateTime.Value > account.ConvertToAccountTimeZone(DateTime.UtcNow))
+                .Where(x => x.StartDateTime.Value.IsAfter(now))
                 .OrderBy(x => x.StartDateTime.Value)
                 .ToList();
         }
 
         public static List<RegistrationPeriod> GetOpenRegistrationPeriods(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.GetRegistrationPeriods()
+            var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
+            return account.GetRegistrationPeriods(msgs, dc)
                 .Where(x =>
-                    x.StartDateTime.Value <= account.ConvertToAccountTimeZone(DateTime.UtcNow) &&
-                    x.EndDateTime.Value >= account.ConvertToAccountTimeZone(DateTime.UtcNow)
+                    x.StartDateTime.Value.IsOnOrBefore(now) &&
+                    x.EndDateTime.Value.IsOnOrAfter(now)
                  )
                 .ToList();
         }
 
         public static List<RegistrationPeriod> GetClosedRegistrationPeriods(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.GetRegistrationPeriods()
-                .Where(x => x.EndDateTime.Value < account.ConvertToAccountTimeZone(DateTime.UtcNow))
+            var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
+            return account.GetRegistrationPeriods(msgs, dc)
+                .Where(x => x.EndDateTime.Value.IsBefore(now))
                 .ToList();
         }
 
         public static List<RegistrationPeriod> GetRecentlyClosedRegistrationPeriods(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.GetRegistrationPeriods()
-                .Where(x => x.EndDateTime.Value.AddWeeks(2) < account.ConvertToAccountTimeZone(DateTime.UtcNow))
+            var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
+            return account.GetRegistrationPeriods(msgs, dc)
+                .Where(period => period.EndDateTime.Value.AddWeeks(8).IsOnOrAfter(now))
                 .ToList();
         }
 
@@ -714,15 +718,24 @@ namespace AfterSchoolLibrary.Services
 
         public static List<Stripe.Source> GetStripeSources(this Account account, SystemMessages msgs = null)
         {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-            var sources = new List<Stripe.Source>();
+            if (msgs.IsEmpty()) msgs = new SystemMessages();            
             var customer = account.GetStripeCustomer(msgs);
 
             if (customer.IsNotEmpty())
-                sources.AddRange(Billing.StripeHelper.GetSources(customer.Id, msgs));
+                return StripeHelper.GetSources(customer.Id, msgs);
 
-            return sources;
+            return new List<Stripe.Source>();
+        }
+
+        public static List<Stripe.BankAccount> GetStripeBankAccounts(this Account account, SystemMessages msgs = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            var customer = account.GetStripeCustomer(msgs);
+
+            if (customer.IsNotEmpty())
+                return StripeHelper.GetBankAccounts(customer.Id, msgs);
+
+            return new List<Stripe.BankAccount>();
         }
 
         public static List<Stripe.Charge> GetStripeBillingHistory(this Account account, SystemMessages msgs = null)
@@ -1945,9 +1958,24 @@ namespace AfterSchoolLibrary.Services
 
         internal static string GetStripeSourceFromToken(this Account fromAccount, string stripeToken, SystemMessages msgs = null)
         {
-            var source = StripeHelper.CreateSource(stripeToken, msgs);
-            msgs.AddRange(StripeHelper.AddSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null));
+            var source = StripeHelper.CreateCreditCardSource(stripeToken, msgs);
+            StripeHelper.AddNewCardToCustomer(fromAccount.StripeCustomerId, source, null, msgs);
             return source.Id;
+        }
+
+        internal static string GetStripeSourceFromPlaidToken(this Account fromAccount, BankAccountPurchaseObject bankAccountPurchaseObject, SystemMessages msgs = null)
+        {
+            var plaidToken = Helpers.PlaidHelper.GetPlaidToken(bankAccountPurchaseObject.PlaidPublicToken, msgs);
+
+            if (msgs.HasNoErrors())
+            {
+                var bankAccount = Helpers.PlaidHelper.CreateStripeBankAccount(plaidToken.AccessToken, bankAccountPurchaseObject.PlaidAccountId, msgs);
+                var source = StripeHelper.AttachSourceToCustomer(fromAccount.StripeCustomerId, bankAccount.StripeBankAccountToken, null, msgs);
+                //return customer.DefaultSourceId;
+                return source.Id;
+            }
+
+            return null;
         }
 
         internal static Stripe.Charge CreateStripeChargeDuringCheckout(CheckoutObject checkoutObject, SystemMessages msgs, DatabaseConnection dc = null)
@@ -1955,7 +1983,7 @@ namespace AfterSchoolLibrary.Services
             // if stripe token then don't send customer id
             string customerId = null;
 
-            if (checkoutObject.SavePaymentInfo || checkoutObject.SourceId.IsNotEmpty())
+            if (checkoutObject.SavePaymentInfo || checkoutObject.HasStripeSourceId)
                 customerId = checkoutObject.PayingAccount.StripeCustomerId;
 
             // if can charge fees we bill it directly from our AHQ account
@@ -1967,7 +1995,7 @@ namespace AfterSchoolLibrary.Services
                 fromCustomerId: customerId,
                 destinationAccountId: useStripeConnectedAccount ? checkoutObject.BillingAccount.StripeUserId : null,
                 platformFee: useStripeConnectedAccount ? platformFeeAmount : new decimal?(),
-                tokenOrSourceId: checkoutObject.SourceId.IfEmpty(checkoutObject.StripeToken),
+                tokenOrSourceId: checkoutObject.StripeSourceId.IfEmpty(checkoutObject.CreditCardPurchaseObject?.StripeToken),
                 totalAmount: checkoutObject.GetTuitionCostWithFees(msgs, dc),
                 description: $"{checkoutObject.ParticipationObject.Name} Registration",
                 statementDescriptor: $"AHQ/{checkoutObject.BillingAccount.Name}",
@@ -2048,18 +2076,16 @@ namespace AfterSchoolLibrary.Services
             var sourceId = "";
 
             if (customer.IsEmpty())
-                customer = Billing.StripeHelper.GetCustomer(fromAccount.StripeCustomerId, null, msgs);
+                customer = StripeHelper.GetCustomer(fromAccount.StripeCustomerId, null, msgs);
 
-            if (customer.DefaultSourceId.IsEmpty())
+            if (stripeToken.IsNotEmpty())
             {
-                var source = StripeHelper.CreateSource(stripeToken, msgs);
-                msgs.AddRange(StripeHelper.AddSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null));
+                var source = StripeHelper.CreateCreditCardSource(stripeToken, msgs);
+                StripeHelper.AttachSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null, msgs);
                 sourceId = source.Id;
             }
             else
-            {
                 sourceId = customer.DefaultSourceId;
-            }
 
             return sourceId;
         }
@@ -2072,15 +2098,56 @@ namespace AfterSchoolLibrary.Services
         /// <param name="stripeToken"></param>
         /// <param name="msgs"></param>
         /// <returns></returns>
-        internal static string CopyStripeSourceToAccount(this Account fromAccount, Account toAccount, string stripeToken, SystemMessages msgs)
+        internal static string CopyStripeSourceToAccount(this Account fromAccount, CheckoutObject checkoutObject, SystemMessages msgs)
         {
             // what happens if the same registrant gets another payment plan?
             // Create a new customer? For now YES, it doesn't really matter I don't think
 
             // get shared source
-            var customer = Billing.StripeHelper.GetCustomer(fromAccount.StripeCustomerId, null, msgs);
-            var sourceId = fromAccount.CreateStripeSourceFromToken(stripeToken, customer, msgs);
-            var copiedSource = Billing.StripeHelper.CreateSourceFromOriginal(customer.Id, sourceId, toAccount.StripeUserId, msgs);
+            var platformCustomer = StripeHelper.GetCustomer(fromAccount.StripeCustomerId, null, msgs);
+
+            if (checkoutObject.StripeSourceId.IsNotEmpty() && checkoutObject.BillingAccount.HasFeature(FeatureType.UseStripeConnectedAccount))
+            {
+                var stripeUserId = checkoutObject.BillingAccount.StripeUserId;
+                var customer = StripeHelper.GetCustomer(fromAccount.StripeCustomerId, stripeUserId, msgs);
+
+                if (customer.IsEmpty())
+                    customer = StripeHelper.CreateCustomer(
+                        platformCustomer.Description,
+                        platformCustomer.Email,
+                        stripeUserId,
+                        msgs);
+
+                var tokenFromConnectedAccount = StripeHelper.CreateCustomerToken(
+                    platformCustomer.Id,
+                    stripeUserId,
+                    checkoutObject.StripeSourceId,
+                    msgs);
+                
+                var source = StripeHelper.CreateCreditCardSource(
+                    tokenFromConnectedAccount.Id,
+                    stripeUserId, 
+                    msgs);
+
+                StripeHelper.AddDefaultSourceToCustomer(
+                    customer.Id, 
+                    source.Id,
+                    stripeUserId, 
+                    msgs);
+
+                return source.Id;
+            }
+
+            string sourceId = checkoutObject.StripeSourceId;
+
+            if (checkoutObject.StripeToken.IsNotEmpty())
+                sourceId = fromAccount.CreateStripeSourceFromToken(checkoutObject.StripeToken, platformCustomer, msgs);
+
+            var copiedSource = StripeHelper.CreateSourceFromOriginal(
+                platformCustomer.Id, 
+                sourceId, 
+                checkoutObject.BillingAccount.StripeUserId, 
+                msgs);
 
             return copiedSource.Id;
         }
@@ -2089,8 +2156,15 @@ namespace AfterSchoolLibrary.Services
         {
             // if user wants to save payment info, do it before you charge the card
             // can't use a token twice
-            if (msgs.HasNoErrors() && checkoutObject.SavePaymentInfo)
-                checkoutObject.SourceId = checkoutObject.PayingAccount.GetStripeSourceFromToken(checkoutObject.StripeToken, msgs);
+            if (msgs.HasNoErrors())
+            {
+                var payingAccount = checkoutObject.PayingAccount;
+
+                if (checkoutObject.BankAccountPurchaseObject?.PlaidPublicToken != null)
+                    checkoutObject.BankAccountPurchaseObject.StripeSourceId = payingAccount.GetStripeSourceFromPlaidToken(checkoutObject.BankAccountPurchaseObject, msgs);
+                else if (checkoutObject.SavePaymentInfo)
+                    checkoutObject.CreditCardPurchaseObject.StripeSourceId = payingAccount.GetStripeSourceFromToken(checkoutObject.CreditCardPurchaseObject.StripeToken, msgs);
+            }
 
             // if everything goes right then bill the person, 
             // if any errors it'll just rollback the transaction anyway :)
@@ -2325,7 +2399,6 @@ namespace AfterSchoolLibrary.Services
                     if (checkoutObject.SubscriptionPlan.IsNotEmpty())
                         accountRegistrant.StartSubscriptionPlan(
                             checkoutObject: checkoutObject,
-                            subscriptionPlanType: SubscriptionPlanType.Subscription,
                             loggedInUser: loggedInUser,
                             msgs: amsgs,
                             dc: adc);
@@ -2351,9 +2424,8 @@ namespace AfterSchoolLibrary.Services
                             );
                         }
 
-                        accountRegistrant.StartSubscriptionPlan(
+                        accountRegistrant.StartPaymentPlan(
                             checkoutObject: checkoutObject,
-                            subscriptionPlanType: SubscriptionPlanType.PaymentPlan,
                             loggedInUser: loggedInUser,
                             msgs: amsgs,
                             dc: adc

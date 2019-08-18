@@ -137,7 +137,7 @@ body.registration {
     margin-top: 10px;
 }
 
-.btn-register {
+.btn-register, .btn-register-default {
     background: #00ae85;
     color: #fff;
     padding: 11px 0px;
@@ -151,14 +151,18 @@ body.registration {
     transition: all 0.3s;
 }
 
-.btn-register[disabled]{
+.btn-register[disabled], .btn-register-default[disabled] {
     background: #9a9a9a;
 }
 
-.btn-register[disabled]:hover {
+.btn-register[disabled]:hover, .btn-register-default[disabled]:hover {
     background: #9a9a9a;
     color: #fff;
     transition: all 0.3s;
+}
+
+.btn-register-default {
+    background: #333;
 }
 
 .btn-waitlist {

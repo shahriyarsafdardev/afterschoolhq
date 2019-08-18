@@ -185,11 +185,11 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-
+		
 
         #endregion
 
-        #region "UserDefined"
+		#region "UserDefined"
 
         public static List<Location> Search(string query, LocationType? locationType, int? start, int? length, SystemMessages msgs, DatabaseConnection dc = null)
         {

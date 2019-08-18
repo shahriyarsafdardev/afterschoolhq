@@ -121,14 +121,14 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
         private IHttpActionResult InvoicePaymentSucceeded(Stripe.Event stripeEvent, SystemMessages msgs)
         {
             var stripeInvoice = (Stripe.Invoice)stripeEvent.Data.Object;
-            var customerId = stripeInvoice.CustomerId;
-            var account = AfterSchoolLibrary.Models.Account.LoadByStripeCustomerId(customerId, msgs);
+            // var customerId = stripeInvoice.CustomerId;
+            //var account = AfterSchoolLibrary.Models.Account.LoadByStripeCustomerId(customerId, msgs);
 
-            if (account.IsNotEmpty())
-            {
-                msgs.Add($"Ignoring - Account is a customer of AHQ - Stripe Sub ID {customerId}", MessageType.Notice);
-                return ReturnOK(msgs);
-            }
+            //if (account.IsEmpty())
+            //{
+            //    msgs.Add($"Ignoring - Account is a customer of AHQ - Stripe Sub ID {customerId}", MessageType.Notice);
+            //    return ReturnOK(msgs);
+            //}
 
             var stripeSubscriptionId = stripeInvoice.SubscriptionId;
             var chargeId = stripeInvoice.ChargeId;

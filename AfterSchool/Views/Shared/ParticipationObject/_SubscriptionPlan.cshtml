@@ -1,0 +1,25 @@
+﻿@model ParticipationObject
+
+@{
+    var displayCheckoutPrice = false;
+
+    if (ViewData["DisplayCheckoutPrice"] != null && ViewData["DisplayCheckoutPrice"].ToString().IsBoolean())
+    {
+        displayCheckoutPrice = ViewData["DisplayCheckoutPrice"].ToString().ToBoolean();
+    }
+}
+
+@if (Model.SubscriptionPlans.Any())
+{
+    <span>
+        @if (!Model.IsTuitionFree)
+        {
+            <span>plus</span>
+        }
+        <strong>
+            @ParticipationObjectUI.PrintPlanFee(Model.SubscriptionPlans.First(), Model.OwnerAccount, displayCheckoutPrice)
+        </strong>
+        subscription each
+        @Model.SubscriptionPlans.First().BillingPeriodTypeId.ToString().ToLower()
+    </span>
+}

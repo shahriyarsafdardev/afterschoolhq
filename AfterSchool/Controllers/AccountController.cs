@@ -1387,6 +1387,7 @@ namespace AfterSchool.Controllers
 
             ViewBag.Registration = registration;
             ViewBag.Sources = SessionVariables.CurrentAccount.GetStripeSources(msgs);
+            ViewBag.BankAccounts = SessionVariables.CurrentAccount.GetStripeBankAccounts(msgs);
             ViewBag.Cart = SessionVariables.Cart;
             ViewBag.ParticipationObject = participationObject;
             ViewBag.Messages = msgs;
@@ -1418,7 +1419,7 @@ namespace AfterSchool.Controllers
             return HandleIsLoggedIn() ?? PaymentActionGet(id);
         }
 
-        private ActionResult PaymentActionPost(string id, string stripetoken, string sourceId, string savepaymentinfo, string paymentoption, string couponCode)
+        private ActionResult PaymentActionPost(string id, string stripetoken, string plaidtoken, string plaidaccountid, string ccSourceId, string bankSourceId, string savepaymentinfo, string paymentoption, string couponCode)
         {
             var msgs = new SystemMessages();
             var participationObject = SessionVariables.Cart.GetCartItems(msgs).FirstOrDefault()?.GetParticipationObject(msgs);
@@ -1427,7 +1428,7 @@ namespace AfterSchool.Controllers
             if (couponCode.IsNotEmpty())
                 coupon = SessionVariables.CurrentAccount.ValidateCoupon(participationObject, couponCode, msgs);
 
-            if (sourceId.IsEmpty() && stripetoken.IsEmpty())
+            if (ccSourceId.IsEmpty() && stripetoken.IsEmpty() && plaidtoken.IsEmpty() && bankSourceId.IsEmpty())
                 msgs.Add("Please enter your payment information", MessageType.UserError);
 
             var registration = PaymentViewBag(id, participationObject, msgs);
@@ -1442,6 +1443,22 @@ namespace AfterSchool.Controllers
                 var payingAccount = SessionVariables.CurrentAccount;
                 var convenienceFeePayer = billingAccount.IsConvenienceFeeTakenOutOfCost ? billingAccount : payingAccount;
                 var creditCardFeePayer = billingAccount.IsCreditCardFeeTakenOutOfCost ? billingAccount : payingAccount;
+                BankAccountPurchaseObject bankAccountPurchaseObject = null;
+                CreditCardPurchaseObject creditCardPurchaseObject = null;
+
+                if (plaidtoken.IsNotEmpty() || bankSourceId.IsNotEmpty())
+                    bankAccountPurchaseObject = new BankAccountPurchaseObject()
+                    {
+                        PlaidPublicToken = plaidtoken,
+                        PlaidAccountId = plaidaccountid,
+                        StripeSourceId = bankSourceId                       
+                    };
+                else if (ccSourceId.IsNotEmpty() || stripetoken.IsNotEmpty())
+                    creditCardPurchaseObject = new CreditCardPurchaseObject()
+                    {
+                        StripeToken = stripetoken,
+                        StripeSourceId = ccSourceId
+                    };
 
                 if (participationObject.UseStripeConnectedAccount)
                 {
@@ -1464,11 +1481,11 @@ namespace AfterSchool.Controllers
                         PayingAccount = payingAccount,
                         BillingAccount = billingAccount,
                         Registration = registration,
-                        StripeToken = stripetoken,
-                        SourceId = sourceId,
+                        CreditCardPurchaseObject = creditCardPurchaseObject,
+                        BankAccountPurchaseObject = bankAccountPurchaseObject,
                         SavePaymentInfo = savepaymentinfo.IfEmpty("0").ToBoolean(),
                         MasterRegistrant = SessionVariables.CurrentRegistrant,
-                        PaymentType = PaymentType.CreditCard,
+                        PaymentType = bankAccountPurchaseObject.IsNotEmpty() ? PaymentType.ACH : PaymentType.CreditCard,
                         PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
                         ConvenienceFeePayer = convenienceFeePayer,
                         CreditCardFeePayer = creditCardFeePayer
@@ -1484,9 +1501,9 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public ActionResult Payment(string id, string source, string stripetoken, string savepaymentinfo, string paymentoption, string coupon)
+        public ActionResult Payment(string id, string ccsource, string banksource, string stripetoken, string plaidtoken, string plaidaccountid, string savepaymentinfo, string paymentoption, string coupon)
         {
-            return HandleIsLoggedIn() ?? PaymentActionPost(id, stripetoken, source, savepaymentinfo, paymentoption, coupon);
+            return HandleIsLoggedIn() ?? PaymentActionPost(id, stripetoken, plaidtoken, plaidaccountid, ccsource, banksource, savepaymentinfo, paymentoption, coupon);
         }
 
         private ActionResult MakePaymentActionGet(string id)

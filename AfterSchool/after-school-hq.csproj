@@ -1601,6 +1601,8 @@
     <Content Include="Views\Account\RegisterStudentThanks.cshtml" />
     <Content Include="Views\Shared\Form\_FileUpload.cshtml" />
     <Content Include="Views\Msg\Index.cshtml" />
+    <Content Include="Views\Shared\ParticipationObject\_PaymentInfo.cshtml" />
+    <Content Include="Views\Shared\ParticipationObject\_SubscriptionPlan.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

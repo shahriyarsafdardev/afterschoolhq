@@ -14,8 +14,8 @@ namespace AfterSchoolLibrary.Models
         public Coupon Coupon { get; set; }
         public SubscriptionPlan SubscriptionPlan { get; set; }
         public SubscriptionPlan PaymentPlan { get; set; }
-        public string StripeToken { get; set; }
-        public string SourceId { get; set; }
+        public BankAccountPurchaseObject BankAccountPurchaseObject { get; set; }
+        public CreditCardPurchaseObject CreditCardPurchaseObject { get; set; }
         public ParticipationObject ParticipationObject { get; set; }
         public Account PayingAccount { get; set; }
         public Account BillingAccount { get; set; }
@@ -41,11 +41,35 @@ namespace AfterSchoolLibrary.Models
             Products = new List<Product>();
         }
 
+        public bool HasStripeSourceId
+        {
+            get
+            {
+                return BankAccountPurchaseObject?.StripeSourceId != null || CreditCardPurchaseObject?.StripeSourceId != null;
+            }
+        }
+
+        public string StripeSourceId
+        {
+            get
+            {
+                return BankAccountPurchaseObject?.StripeSourceId ?? CreditCardPurchaseObject?.StripeSourceId;
+            }
+        }
+
+        public string StripeToken
+        {
+            get
+            {
+                return BankAccountPurchaseObject?.PlaidPublicToken ?? CreditCardPurchaseObject?.StripeToken;
+            }
+        }
+
         public bool IsPaying
         {
             get
             {
-                return StripeToken.IsNotEmpty() || SourceId.IsNotEmpty();
+                return CreditCardPurchaseObject.IsNotEmpty() || BankAccountPurchaseObject.IsNotEmpty();
             }
         }
 
@@ -154,7 +178,7 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetTuitionCreditCardFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (!IsTuitionFree && !GetUseStripeConnectedAccount(msgs, dc))
+            if (!IsTuitionFree && !GetUseStripeConnectedAccount(msgs, dc) && CreditCardPurchaseObject.IsNotEmpty())
                 return Billing.Platform.GetCreditCardFee(TuitionCostNoFees, BillingAccount);
 
             return 0;
@@ -190,7 +214,7 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetSubscriptionCostTodayCreditCardFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (!GetUseStripeConnectedAccount(msgs, dc))
+            if (!GetUseStripeConnectedAccount(msgs, dc) && CreditCardPurchaseObject.IsNotEmpty())
                 return Billing.Platform.GetCreditCardFee(SubscriptionCostTodayNoFees, BillingAccount);
 
             return 0;
@@ -226,7 +250,7 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetPaymentPlanCostTodayCreditCardFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (!GetUseStripeConnectedAccount(msgs, dc))
+            if (!GetUseStripeConnectedAccount(msgs, dc) && CreditCardPurchaseObject.IsNotEmpty())
                 return Billing.Platform.GetCreditCardFee(PaymentPlanCostTodayNoFees, BillingAccount);
 
             return 0;

@@ -34,8 +34,8 @@ namespace AfterSchoolLibrary.Services
                 PurchaserAccountId = checkoutObject.PayingAccount?.ID,
                 RegistrantId = checkoutObject.MasterRegistrant?.ID,
                 RegistrationId = checkoutObject.Registration.ID,
-                StripeToken = checkoutObject.StripeToken,
-                StripeSourceId = checkoutObject.SourceId
+                StripeToken = checkoutObject.CreditCardPurchaseObject?.StripeToken,
+                StripeSourceId = checkoutObject.StripeSourceId
             };
             msgs.AddRange(purchase.Save(dc));
 
