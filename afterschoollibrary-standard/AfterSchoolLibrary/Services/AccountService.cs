@@ -240,33 +240,37 @@ namespace AfterSchoolLibrary.Services
 
         public static List<RegistrationPeriod> GetUpcomingRegistrationPeriods(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
             return account.GetRegistrationPeriods(msgs, dc)
-                .Where(x => x.StartDateTime.Value > account.ConvertToAccountTimeZone(DateTime.UtcNow))
+                .Where(x => x.StartDateTime.Value.IsAfter(now))
                 .OrderBy(x => x.StartDateTime.Value)
                 .ToList();
         }
 
         public static List<RegistrationPeriod> GetOpenRegistrationPeriods(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.GetRegistrationPeriods()
+            var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
+            return account.GetRegistrationPeriods(msgs, dc)
                 .Where(x =>
-                    x.StartDateTime.Value <= account.ConvertToAccountTimeZone(DateTime.UtcNow) &&
-                    x.EndDateTime.Value >= account.ConvertToAccountTimeZone(DateTime.UtcNow)
+                    x.StartDateTime.Value.IsOnOrBefore(now) &&
+                    x.EndDateTime.Value.IsOnOrAfter(now)
                  )
                 .ToList();
         }
 
         public static List<RegistrationPeriod> GetClosedRegistrationPeriods(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.GetRegistrationPeriods()
-                .Where(x => x.EndDateTime.Value < account.ConvertToAccountTimeZone(DateTime.UtcNow))
+            var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
+            return account.GetRegistrationPeriods(msgs, dc)
+                .Where(x => x.EndDateTime.Value.IsBefore(now))
                 .ToList();
         }
 
         public static List<RegistrationPeriod> GetRecentlyClosedRegistrationPeriods(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.GetRegistrationPeriods()
-                .Where(x => x.EndDateTime.Value.AddWeeks(2) < account.ConvertToAccountTimeZone(DateTime.UtcNow))
+            var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
+            return account.GetRegistrationPeriods(msgs, dc)
+                .Where(period => period.EndDateTime.Value.AddWeeks(8).IsOnOrAfter(now))
                 .ToList();
         }
 
