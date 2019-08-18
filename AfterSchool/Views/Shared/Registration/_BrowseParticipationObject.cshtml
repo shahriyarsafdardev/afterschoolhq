@@ -79,7 +79,7 @@
             </div>
 
             <div class="seats-remaining text-center">
-                @if (Model.SeatsRemaining.HasValue)
+                @if (Model.SeatsRemaining.HasValue && Model.IsActivity())
                 {
                     <strong>
                         <em>

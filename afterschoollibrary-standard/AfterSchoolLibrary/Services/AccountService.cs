@@ -89,7 +89,7 @@ namespace AfterSchoolLibrary.Services
                     .Where(activity => activity.IsOpenUpcomingOrRecentlyClosed(msgs, dc))
             );
 
-            return activities;
+            return activities.DistinctBy(activity => activity.ID).ToList();
         }
 
         public static List<Activity> GetPublishedActivitiesInLocations(this Account account, List<int> locationIds, SystemMessages msgs = null, DatabaseConnection dc = null)

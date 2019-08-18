@@ -40,7 +40,7 @@
                             new ViewDataDictionary() { { "QuestionViewModels", qvms.Where(qvm => qvm.Question.FormQuestionGroupId == group.ID).ToList() } });
                     }
 
-                    @if (sessionActivities.Any())
+                    @if (sessionActivities.IsNotEmpty() && sessionActivities.Any())
                     {
                         Html.RenderPartial(
                             "~/Views/Shared/Activity/_ActivityPreferences.cshtml",
