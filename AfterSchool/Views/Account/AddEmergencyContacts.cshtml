@@ -3,23 +3,12 @@
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
     ViewBag.Title = "Add Emergency Contacts";
     var msgs = (SystemMessages)ViewBag.Messages;
-    var cart = (Cart)ViewBag.Cart;
+    var participationObject = (ParticipationObject)ViewBag.ParticipationObject;
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
-
 @{ Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", SessionVariables.RegistrationStartPageAccount); }
-
-<div class="reg-header">
-    <div>
-        @foreach (var item in cart.GetCartItems())
-        {
-            <div>
-                <h1>You are registering for: @item.GetParticipationObject().Name</h1>
-            </div>
-        }
-    </div>
-</div>
+@{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", participationObject); }
 
 <div>
     <div class="col-md-12">

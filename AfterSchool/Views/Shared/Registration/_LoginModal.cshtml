@@ -64,16 +64,7 @@
                         location.href = '@ViewData["ReturnUrl"]';
                     }
                 } else {
-                    var items = "";
-                    for (var message of data.messages) {
-                        items += message.Text + "<br />";
-                    }
-
-                    Notifications.showBar({
-                        title: 'Error',
-                        message: items,
-                        success: false
-                    });
+                    Notifications.showErrors(data.messages);
 
                     $('#btn-login').html(loginText);
                     $('#btn-login').prop('disabled', false);

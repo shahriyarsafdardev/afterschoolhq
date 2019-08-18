@@ -8,19 +8,8 @@
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
-
 @{ Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", SessionVariables.RegistrationStartPageAccount); }
-
-<div class="reg-header">
-    <div>
-        @foreach (var item in cart.GetCartItems())
-        {
-            <div>
-                <h1>You are registering for: @item.GetParticipationObject().Name</h1>
-            </div>
-        }
-    </div>
-</div>
+@{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", participationObject); }
 
 <div>
     <div class="col-md-12">
@@ -28,7 +17,7 @@
             <div class="panel-body">
 
                 <div>
-                    
+
                     <div class="text-center reg-instructions">
                         <p><strong>Step 3 of 6: Additional Parent / Guardian</strong></p>
                     </div>
