@@ -14,6 +14,7 @@ namespace AfterSchool.Controllers
 {
     public class DbController : BaseController
     {
+        [HttpGet]
         public ActionResult Update(string id)
         {
             if (Request.UserHostAddress == "::1" || id == "eibfeiwalncdsja32rq9yfwbfg32yewody7832re7ywofaudisfh7238qoweiafb7328qwoadg78027rweubfad")
@@ -37,7 +38,8 @@ namespace AfterSchool.Controllers
                 Response.Write(Request.UserHostAddress);
                 Response.End();
             }
-            return View();
+
+            return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
         }
     }
 }
