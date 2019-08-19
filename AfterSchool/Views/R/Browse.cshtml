@@ -84,24 +84,27 @@
         <div>Checkout &raquo;</div>
     </div>
 
-    <div class="cart-bar col-xs-12 col-sm-8 col-md-6 col-lg-4 col-xl-3 text-white hide" style="position:fixed; top:0px; right: 0px; height: 100%; background-color: #2f3c40;">
-        <div>
+    <div class="cart-bar col-xs-12 col-sm-8 col-md-6 col-lg-4 col-xl-3 text-white hide" style="position:fixed; top:0px; right: 0px; height: 100%; background-color: #2f3c40; overflow-y: auto;">
+        <div class="pull-right">
             <div class="text-right"><i class="s7-close icon-xlarge pointer cart-bar-close"></i></div>
         </div>
+        
         <div>
+            <button onclick="location.href='@session.GetRegistrationPageUrl()'" 
+                    class="btn btn-primary btn-register btn-block btn-checkout" 
+                    style="margin-top: 20px;" 
+                    disabled="disabled">
+                Register 1 Student &raquo;
+            </button>
+        </div>
+
+        <div style="margin-bottom: 80px;">
             <h3>@UILabel.ActivityLabel(ActivityType.Activity, true)</h3>
             <div class="cart-activities">
 
             </div>
             <div class="cart-activities-none"><p>You have no @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower() in your cart</p></div>
-        </div>
-        <div>
-            <button onclick="location.href='@session.GetRegistrationPageUrl()'" 
-                    class="btn btn-primary btn-register btn-block btn-checkout" 
-                    style="position: absolute; bottom: 80px; width: 90%;" 
-                    disabled="disabled">
-                Register 1 Student &raquo;
-            </button>
+            <div class="clearfix"></div>
         </div>
     </div>
 
@@ -216,7 +219,7 @@
             var parent = btnCart.parents('.participation-object').first();
             var uid = btnCart.attr('uid');
 
-            return '<div uid="' + uid + '" style="float:left; margin-right: 20px; margin-top: 5px; border: solid 1px #00c5a3; width: 200px; position: relative;" class="cart-bar-item padding-10"><div id="' + btnCart.attr('uid') + '" class="text-medium-small">' + parent.attr('name') + '</div><div class="text-small">Days: ' + parent.attr('days') + '</div><div class="text-small">Grades: ' + parent.attr('mingradetext') + ' - ' + parent.attr('maxgradetext') + '</div><div class="pointer"><a href="javascript:removeFromCartByUid(\'' + uid + '\')">Remove</a></div></div>';
+            return '<div uid="' + uid + '" style="float:left; margin-right: 20px; margin-top: 5px; border: solid 1px #00c5a3; width: 200px; position: relative;" class="cart-bar-item padding-10"><div id="' + btnCart.attr('uid') + '" class="text-medium-small">' + parent.attr('name') + '</div><div class="text-small">' + parent.attr('days') + ' &bull; ' + parent.attr('mingradetext') + ' - ' + parent.attr('maxgradetext') + '</div><div class="pointer"><a href="javascript:removeFromCartByUid(\'' + uid + '\')">Remove</a></div></div>';
         }
 
         function markItemAsInCart(btnCart) {
