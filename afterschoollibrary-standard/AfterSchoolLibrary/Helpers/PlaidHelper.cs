@@ -28,7 +28,7 @@ namespace AfterSchoolLibrary.Helpers
                     return SandboxSecretKey;
 
                 if (Utilities.IsProduction)
-                    return DevelopmentSecretKey;
+                    return ProductionSecretKey;
 
                 return SandboxSecretKey;
             }
@@ -42,7 +42,7 @@ namespace AfterSchoolLibrary.Helpers
                     return "sandbox";
 
                 if (Utilities.IsProduction)
-                    return "development";
+                    return "production";
 
                 return "sandbox";
             }
@@ -128,7 +128,7 @@ namespace Plaid
                         return SandboxBaseUrl;
 
                     if (AfterSchoolLibrary.Helpers.Utilities.IsProduction)
-                        return DevelopmentBaseUrl;
+                        return ProductionBaseUrl;
 
                     return SandboxBaseUrl;
                 }
