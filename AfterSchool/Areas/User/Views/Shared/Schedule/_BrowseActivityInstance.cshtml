@@ -32,16 +32,19 @@
                 </p>
             </div>
 
-            <div>
-                <p class="reg-info">
-                    @participationObject.Location.GetAddress()
-                </p>
-            </div>
+            @if (participationObject.Location.IsNotEmpty())
+            {
+                <div>
+                    <p class="reg-info">
+                        @participationObject.Location.GetAddress()
+                    </p>
+                </div>
 
-            <div style="position: relative; margin-left: -20px; margin-right: -20px">
-                <iframe width="100%" height="200" frameborder="0" style="border:0"
-                        src="https://www.google.com/maps/embed/v1/place?q=@Url.Encode($"{participationObject.Location.GetAddress()}")&key=AIzaSyAdjn8QBBStTz9TDAjZOyijAato7uzvjjk" allowfullscreen></iframe>
-            </div>
+                <div style="position: relative; margin-left: -20px; margin-right: -20px">
+                    <iframe width="100%" height="200" frameborder="0" style="border:0"
+                            src="https://www.google.com/maps/embed/v1/place?q=@Url.Encode($"{participationObject.Location.GetAddress()}")&key=AIzaSyAdjn8QBBStTz9TDAjZOyijAato7uzvjjk" allowfullscreen></iframe>
+                </div>
+            }
 
         </div>
         <div class="panel-footer">
