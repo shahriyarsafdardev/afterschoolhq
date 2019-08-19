@@ -1415,7 +1415,8 @@ namespace AfterSchoolLibrary.Services
                 //    account.CreateStripeCustomAccount(msgs, dc);
 
                 //create default form for account to use for registration
-                account.CreateDefaultForm(loggedInUser, msgs, dc);
+                if (accountType != AccountType.Registrant)
+                    account.CreateDefaultForm(loggedInUser, msgs, dc);
             }
 
             return account;
