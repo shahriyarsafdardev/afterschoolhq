@@ -28,17 +28,9 @@ namespace AfterSchool.Controllers
                     false, 
                     "AfterSchool HQ"));
 
-                Response.Clear();
-                Response.Write(msgs.RenderMessageList(MessageOutputType.Text));
-                Response.End();
+                return Json(new { status = "ok", messages = msgs }, JsonRequestBehavior.AllowGet);
             }
-            else
-            {
-                Response.Clear();
-                Response.Write(Request.UserHostAddress);
-                Response.End();
-            }
-
+            
             return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
         }
     }
