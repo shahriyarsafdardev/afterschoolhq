@@ -80,13 +80,16 @@
                             </p>
                         </div>
                     }
-
+                    
                     <div class="activity-detail-block">
                         <h3>Contact</h3>
                         <p>
-                            @Model.ContactName<br />
-                            @Model.ContactPhone<br />
-                            <a href="mailto:@Model.ContactEmail">Send Email</a><br />
+                            @Model.ContactName.IfEmpty(Model.OwnerAccount.Name)<br />
+                            @if (Model.ContactPhone.IfEmpty(Model.OwnerAccount.Phone).IsNotBlank())
+                            {
+                                <span>@Model.ContactPhone.IfEmpty(Model.OwnerAccount.Phone)</span><br />
+                            }
+                            <a href="mailto:@Model.ContactEmail.IfEmpty(Model.OwnerAccount.Email)">Send Email</a><br />
                         </p>
                     </div>
 
