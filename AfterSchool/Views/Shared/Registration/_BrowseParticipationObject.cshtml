@@ -64,7 +64,7 @@
             </p>
 
             <div class="margin-t-20">
-                @if (Model.IsActivity() && Model.GetActivity().ActivityGroupId.HasValue)
+                @if (Model.IsActivity() && Model.GetActivity().IsNotEmpty() && Model.GetActivity().ActivityGroupId.HasValue)
                 {
                     <button class="btn btn-primary btn-register btn-block btn-cart" in-cart="0" uid="@Model.Uid">
                         <i class="s7-cart"></i> <span>Add to Cart</span>

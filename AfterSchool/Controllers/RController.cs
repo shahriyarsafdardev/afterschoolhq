@@ -69,6 +69,10 @@ namespace AfterSchool.Controllers
                                         .ThenBy(po => po.RegistrationPeriod.WillOpen(account))
                                         .ThenBy(po => po.RegistrationPeriod.IsOpen(account))
                                         .ToList();
+
+                ViewBag.RegistrationOpened = participationObjects.Where(po => po.RegistrationPeriod.IsOpen()).ToList();
+                ViewBag.RegistrationClosed = participationObjects.Where(po => po.RegistrationPeriod.IsClosed()).ToList();
+                ViewBag.RegistrationWillOpen = participationObjects.Where(po => po.RegistrationPeriod.WillOpen()).ToList();
             }
             else
             {
@@ -80,6 +84,10 @@ namespace AfterSchool.Controllers
 
                 ParticipationObject.GenerateDemoObjects(ref account, participationObjects, locations, accountname, accountUniqueName, grades);
                 participationObjects = participationObjects.Take(11).ToList();
+
+                ViewBag.RegistrationOpened = participationObjects;
+                ViewBag.RegistrationClosed = new List<ParticipationObject>();
+                ViewBag.RegistrationWillOpen = new List<ParticipationObject>();
             }
 
             ViewBag.Grades = grades;
@@ -87,9 +95,6 @@ namespace AfterSchool.Controllers
             ViewBag.Cart = SessionVariables.Cart;
             ViewBag.Locations = locations;
             ViewBag.ParticipationObjects = participationObjects;
-            ViewBag.RegistrationOpened = participationObjects.Where(po => po.RegistrationPeriod.IsOpen()).ToList();
-            ViewBag.RegistrationClosed = participationObjects.Where(po => po.RegistrationPeriod.IsClosed()).ToList();
-            ViewBag.RegistrationWillOpen = participationObjects.Where(po => po.RegistrationPeriod.WillOpen()).ToList();
 
             return View(account);
         }
