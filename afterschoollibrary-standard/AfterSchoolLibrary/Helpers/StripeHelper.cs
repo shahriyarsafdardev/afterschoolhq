@@ -1285,7 +1285,7 @@ namespace AfterSchoolLibrary.Billing
                 msgs.Add($"Cannot get list of bank accounts", MessageType.Error, ex);
             }
 
-            return bankAccounts;
+            return bankAccounts.Where(bankAccount => bankAccount.Object == "bank_account").ToList();
         }
 
         #endregion

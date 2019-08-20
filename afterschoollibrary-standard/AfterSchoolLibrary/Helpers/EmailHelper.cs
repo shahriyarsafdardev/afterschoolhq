@@ -226,7 +226,7 @@ namespace AfterSchoolLibrary.Helpers
                     { "Description", description },
                     { "Quantity",  "1"},
                     { "Cost", cost },
-                    { "CostDescription", additionalDetails }
+                    { "AdditionalDetails", additionalDetails }
                 };
 
                 receiptRows += ProcessTemplate(
