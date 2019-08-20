@@ -101,10 +101,9 @@ namespace AfterSchool.Controllers
             if (regaccount.IsGuid())
             {
                 var registrationAccount = Account.LoadByUid(regaccount.ToGuid(), msgs);
-                var participationObject = GetParticipationObjectFromCart();
 
                 // redirect to home page because there is nothing in the cart
-                if (participationObject.IsEmpty())
+                if (!SessionVariables.Cart.GetCartItems().Any())
                     return Redirect(SessionVariables.RegistrationStartPageAccount?.HomePageUrl ?? registrationAccount.HomePageUrl);
 
                 ViewBag.RegistrationAccount = registrationAccount;
