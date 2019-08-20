@@ -286,8 +286,8 @@ var Notifications = {
     },
     showErrors: function (messages) {
         var items = "";
-        for (var message of messages) {
-            items += message.Text + "<br />";
+        for (var i = 0; i < messages.length; i++) {
+            items += messages[i].Text + "<br />";
         }
 
         Notifications.showBar({
