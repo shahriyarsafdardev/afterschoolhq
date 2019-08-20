@@ -13,8 +13,6 @@
     var paymentAccount = participationObject.PaymentAccount;
     var acceptACH = participationObject.OwnerAccount.HasFeature(FeatureType.AcceptACH);
     var subscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault();
-
-    bankAccounts = bankAccounts.Where(bankAccount => bankAccount.Object == "bank_account").ToList();
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
