@@ -1459,6 +1459,13 @@ namespace AfterSchool.Controllers
                 var payingAccount = SessionVariables.CurrentAccount;
                 var convenienceFeePayer = billingAccount.IsConvenienceFeeTakenOutOfCost ? billingAccount : payingAccount;
                 var creditCardFeePayer = billingAccount.IsCreditCardFeeTakenOutOfCost ? billingAccount : payingAccount;
+
+                // get original cost
+                var registrant = registration.GetRegistrant(msgs);
+                var registrantActivity = registrant.GetRegistrantActivity(participationObject, msgs);
+                if (registrantActivity.IsNotEmpty() && registrantActivity.AmountCharged.HasValue && participationObject.Cost > registrantActivity.AmountCharged)
+                    participationObject.Cost = registrantActivity.AmountCharged;
+
                 BankAccountPurchaseObject bankAccountPurchaseObject = null;
                 CreditCardPurchaseObject creditCardPurchaseObject = null;
 
