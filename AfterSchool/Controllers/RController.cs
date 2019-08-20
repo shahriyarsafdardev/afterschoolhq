@@ -62,6 +62,13 @@ namespace AfterSchool.Controllers
             {
                 participationObjects.AddRange(account.GetPublishedParticipationObjects(msgs));
                 locations.AddRange(account.GetAllAvailableLocations(msgs));
+
+                participationObjects = participationObjects
+                                        .Where(po => !po.IsActivity() || !po.GetActivity().ActivityGroupId.HasValue)
+                                        .OrderBy(po => po.RegistrationPeriod.IsClosed(account))
+                                        .ThenBy(po => po.RegistrationPeriod.WillOpen(account))
+                                        .ThenBy(po => po.RegistrationPeriod.IsOpen(account))
+                                        .ToList();
             }
             else
             {
@@ -74,13 +81,6 @@ namespace AfterSchool.Controllers
                 ParticipationObject.GenerateDemoObjects(ref account, participationObjects, locations, accountname, accountUniqueName, grades);
                 participationObjects = participationObjects.Take(11).ToList();
             }
-
-            participationObjects = participationObjects
-                                    .Where(po => !po.IsActivity() || !po.GetActivity().ActivityGroupId.HasValue)
-                                    .OrderBy(po => po.RegistrationPeriod.IsClosed(account))
-                                    .ThenBy(po => po.RegistrationPeriod.WillOpen(account))
-                                    .ThenBy(po => po.RegistrationPeriod.IsOpen(account))
-                                    .ToList();
 
             ViewBag.Grades = grades;
             ViewBag.Messages = msgs;
