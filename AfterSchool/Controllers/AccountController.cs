@@ -99,7 +99,15 @@ namespace AfterSchool.Controllers
             ViewBag.Messages = msgs;
 
             if (regaccount.IsGuid())
-                ViewBag.RegistrationAccount = Account.LoadByUid(regaccount.ToGuid(), msgs);
+            {
+                var registrationAccount = Account.LoadByUid(regaccount.ToGuid(), msgs);
+
+                // redirect to home page because there is nothing in the cart
+                if (!SessionVariables.Cart.GetCartItems().Any())
+                    return Redirect(SessionVariables.RegistrationStartPageAccount?.HomePageUrl ?? registrationAccount.HomePageUrl);
+
+                ViewBag.RegistrationAccount = registrationAccount;
+            }
 
             // pre-load phone number
             if (SessionVariables.CurrentUser.IsNotEmpty())
@@ -2042,7 +2050,7 @@ namespace AfterSchool.Controllers
                     participationObject = item;
             });
 
-            return participationObject ?? participationObjects.First();
+            return participationObject ?? participationObjects.FirstOrDefault();
         }
 
         private void ResetRegistrationSession()
