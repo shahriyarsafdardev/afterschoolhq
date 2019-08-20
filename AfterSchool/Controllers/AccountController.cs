@@ -1393,6 +1393,11 @@ namespace AfterSchool.Controllers
         private Registration PaymentViewBag(string id, ParticipationObject participationObject, SystemMessages msgs)
         {
             var registration = Registration.LoadByUid(id.ToGuid(), msgs);
+            var registrant = registration.GetRegistrant(msgs);
+            var registrantActivity = registrant.GetRegistrantActivity(participationObject, msgs);
+
+            if (registrantActivity.IsNotEmpty() && registrantActivity.AmountCharged.HasValue && participationObject.Cost > registrantActivity.AmountCharged)
+                participationObject.Cost = registrantActivity.AmountCharged;
 
             ViewBag.Registration = registration;
             ViewBag.Sources = SessionVariables.CurrentAccount.GetStripeSources(msgs);
@@ -1408,15 +1413,17 @@ namespace AfterSchool.Controllers
         private ActionResult PaymentActionGet(string id)
         {
             var results = CheckRedirect(checkForEmptyCart: true);
-            if (results.IsNotEmpty()) return results;
+            if (results.IsNotEmpty())
+                return results;
 
             var msgs = new SystemMessages();
             var participationObject = GetParticipationObjectFromCart();
+            var currentRegistrant = SessionVariables.CurrentRegistrant;
 
             PaymentViewBag(id, participationObject, msgs);
 
-            // current registrant is already registered
-            if (SessionVariables.CurrentRegistrant.IsReservedAndPaidFor(participationObject, true, msgs))
+            // current registrant is already registered or already using a payment plan
+            if (currentRegistrant.IsReservedAndPaidFor(participationObject, true, msgs) || currentRegistrant.MasterRegistrantHasPlan(participationObject, msgs))
                 return RedirectToAction("select");
 
             return View();
@@ -1452,6 +1459,13 @@ namespace AfterSchool.Controllers
                 var payingAccount = SessionVariables.CurrentAccount;
                 var convenienceFeePayer = billingAccount.IsConvenienceFeeTakenOutOfCost ? billingAccount : payingAccount;
                 var creditCardFeePayer = billingAccount.IsCreditCardFeeTakenOutOfCost ? billingAccount : payingAccount;
+
+                // get original cost
+                var registrant = registration.GetRegistrant(msgs);
+                var registrantActivity = registrant.GetRegistrantActivity(participationObject, msgs);
+                if (registrantActivity.IsNotEmpty() && registrantActivity.AmountCharged.HasValue && participationObject.Cost > registrantActivity.AmountCharged)
+                    participationObject.Cost = registrantActivity.AmountCharged;
+
                 BankAccountPurchaseObject bankAccountPurchaseObject = null;
                 CreditCardPurchaseObject creditCardPurchaseObject = null;
 

@@ -45,7 +45,7 @@
             {
                 btnText = "Give Consent";
             }
-            else if (!registrant.IsReservedAndPaidFor(participationObject, null) && !registrant.IsAppliedFor(participationObject, null) && !registrant.HasPlan(participationObject))
+            else if (!registrant.IsReservedAndPaidFor(participationObject, null) && !registrant.IsAppliedFor(participationObject, null) && !registrant.MasterRegistrantHasPlan(participationObject))
             {
                 btnText = "Pay Now";
             }

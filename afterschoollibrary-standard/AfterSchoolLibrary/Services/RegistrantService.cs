@@ -411,7 +411,7 @@ namespace AfterSchoolLibrary.Services
                 dc: dc);
         }
 
-        public static bool HasPlan(this Registrant masterRegistrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool MasterRegistrantHasPlan(this Registrant masterRegistrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var submittedRecords = masterRegistrant.GetSubmittedRecords(participationObject.OwnerAccount.ID.Value, msgs, dc);
 
@@ -421,6 +421,16 @@ namespace AfterSchoolLibrary.Services
                 registrantIds: submittedRecords.Select(item => item.ID.Value).ToList(),
                 msgs: msgs,
                 dc: dc);
+        }
+
+        public static bool HasPlan(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RegistrantSubscriptionPlan.ExistsByParticipationObjectByRegistrants(
+                    participationObjectId: participationObject.ObjectID.Value,
+                    participationObjectType: participationObject.ObjectType,
+                    registrantIds: registrant.ID.Value.AsList(),
+                    msgs: msgs,
+                    dc: dc);
         }
 
         public static List<RegistrantSubscriptionPlan> GetRegistrantSubscriptionPlans(this Registrant registrant, SystemMessages msgs, DatabaseConnection dc = null)
@@ -971,6 +981,16 @@ namespace AfterSchoolLibrary.Services
         public static decimal GetAmountPaid(this Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return ActivityPayment.LoadByRegistrantId(registrant.ID.Value, msgs, dc).Sum(payment => payment.Amount.Value);
+        }
+
+        public static RegistrantActivity GetRegistrantActivity(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return RegistrantActivity.LoadByParticipationObjectByRegistrant(
+                participationObject.ObjectID.Value, 
+                participationObject.ObjectType, 
+                registrant.ID.Value, 
+                msgs, 
+                dc);
         }
     }
 }

@@ -580,41 +580,6 @@ namespace AfterSchoolLibrary.Models
                 .ForEach(ra => ra.AdjustPreferenceNumber(-1, msgs, dc));
         }
 
-        public SystemMessages SendNewRegistrationNotice(ParticipationObject participationObject, DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
-            var account = participationObject.OwnerAccount;
-
-            if (account.Email.IsEmpty())
-                return msgs;
-
-            if (participationObject.ContactEmail.IsNotBlank() && account.Email.IsSameAs(participationObject.ContactEmail))
-                return msgs;
-
-            var details = $"" +
-                $"<p><strong>{this.RegistrantName}</strong> has registered for <strong>{participationObject.Name}</strong> at <strong>{account.Name}</strong>.</p> " +
-                $"<p>You currently have a total of: " +
-                $"<ul>" +
-                $"<li><strong>{participationObject.GetRegistrantCountByAssignmentTypes(Registration.ReservedStatuses, dc: dc)}</strong> reserved</li>" +
-                $"<li><strong>{participationObject.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.WaitingList, dc: dc)}</strong> on the waiting list</li>" +
-                $"<li><strong>{participationObject.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.Applied, dc: dc)}</strong> applications</li>" +
-                $"</ul>" +
-                $"</p>";
-
-            var message = $"<p>Hello {participationObject.ContactName},</p>{details}<p>{(Helpers.Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "registration_notification"))}</p>";
-
-            return SendGridHelper.SendMail(
-                    fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                                    Helpers.Email.AppNoReplyEmailAddress,
-                                    Helpers.Utilities.AppName(account.IsAfterSchool)
-                               ),
-                    toEmail: new SendGrid.Helpers.Mail.EmailAddress(account.Email),
-                    subject: $"You have a new registration for {participationObject.Name}",
-                    body: message,
-                    emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
-                );
-        }
-
         public decimal GetAmountPaid(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return ActivityPayment.GetTotalPaidByParticipationObjectByRegistrant(
