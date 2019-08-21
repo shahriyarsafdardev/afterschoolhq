@@ -1360,6 +1360,7 @@ property: PaymentTypeFee, decimal?, Money
 property: PaymentTypeFeesPaidBy, FeesPaidByType, Int
 property: ConvenienceFeesPaidBy, FeesPaidByType, Int
 property: PaymentTypeId, PaymentType, Int, required
+property: BillingPeriodTypeId, BillingPeriodType, Int
 loadmethod: PurchaseId, List<>
 loadmethod: RegistrantId, List<>
 loadmethod: SubscriptionPlanId, List<>

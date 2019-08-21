@@ -12,5 +12,6 @@ namespace AfterSchoolLibrary.Models
         public decimal Amount { get; set; }
         public int? TotalPeriods { get; set; }
         public PaymentType PaymentType { get; set; }
+        public BillingPeriodType BillingPeriodType { get; set; }
     }
 }

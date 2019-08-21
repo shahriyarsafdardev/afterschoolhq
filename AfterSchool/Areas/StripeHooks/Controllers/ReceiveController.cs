@@ -156,7 +156,20 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
             }
 
             // send payment succeeded email
-            purchasingAccount.SendSubscriptionPaymentSucceeded(plan);                       
+            purchasingAccount.SendSubscriptionPaymentSucceeded(rsp, plan);
+
+            AfterSchoolLibrary.Models.Account convenienceFeePayer;
+            AfterSchoolLibrary.Models.Account transactionFeePayer;
+
+            if (rsp.ConvenienceFeesPaidBy == FeesPaidByType.Parent)
+                convenienceFeePayer = purchasingAccount;
+            else
+                convenienceFeePayer = billingAccount;
+
+            if (rsp.PaymentTypeFeesPaidBy == FeesPaidByType.Parent)
+                transactionFeePayer = purchasingAccount;
+            else
+                transactionFeePayer = billingAccount;
 
             // save transaction info and track payment to the activity as well.
             var checkoutObject = new CheckoutObject()
@@ -175,7 +188,9 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                 MasterRegistrant = masterRegistrant,
                 NumberOfSeats = 1,
                 Registration = registration,
-                RegistrantSubscriptionPlan = rsp
+                RegistrantSubscriptionPlan = rsp,
+                ConvenienceFeePayer = convenienceFeePayer,
+                CreditCardFeePayer = transactionFeePayer,
             };
 
             billingAccount.ProcessSubscriptionPlanPayment(checkoutObject, plan, rsp, msgs);

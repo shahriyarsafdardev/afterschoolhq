@@ -30,7 +30,8 @@ namespace AfterSchoolLibrary.Services
                 PaymentTypeFeesPaidBy = feeObject.PaymentTypeFeesPaidBy,
                 Amount = feeObject.Amount,
                 TotalPeriods = feeObject.TotalPeriods,
-                PaymentTypeId = feeObject.PaymentType
+                PaymentTypeId = feeObject.PaymentType,
+                BillingPeriodTypeId = feeObject.BillingPeriodType
             };
 
             msgs.AddRange(rpp.Save(dc));

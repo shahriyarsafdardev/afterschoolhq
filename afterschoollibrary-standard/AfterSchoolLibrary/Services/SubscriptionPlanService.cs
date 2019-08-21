@@ -249,23 +249,27 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static bool CheckAndCancelPaymentPlan(this SubscriptionPlan plan, RegistrantSubscriptionPlan rsp, Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            var totalPayments = rsp.GetPaymentCount(msgs, dc);
-            var totalPeriods = rsp.TotalPeriods.HasValue ? rsp.TotalPeriods.Value : plan.TotalPeriods.Value;
-            string stripeUserId = null;
-
-            if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
-                stripeUserId = billingAccount.StripeUserId;
-
-            if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan && totalPayments >= totalPeriods)
+        {            
+            if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan)
             {
-                msgs.AddRange(Billing.StripeHelper.CancelSubscription(
-                    rsp.StripeSubscriptionId,
-                    stripeUserId
-                ));
+                var totalPayments = rsp.GetPaymentCount(msgs, dc);
+                var totalPeriods = rsp.TotalPeriods.HasValue ? rsp.TotalPeriods.Value : plan.TotalPeriods.Value;
 
-                if (msgs.HasNoErrors())
-                    return true;
+                if (totalPayments >= totalPeriods)
+                {
+                    string stripeUserId = null;
+
+                    if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
+                        stripeUserId = billingAccount.StripeUserId;
+
+                    msgs.AddRange(Billing.StripeHelper.CancelSubscription(
+                        rsp.StripeSubscriptionId,
+                        stripeUserId
+                    ));
+
+                    if (msgs.HasNoErrors())
+                        return true;
+                }
             }
 
             return false;

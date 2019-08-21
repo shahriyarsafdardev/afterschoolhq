@@ -46,6 +46,7 @@ namespace AfterSchoolLibrary.Models
 		/// Required.
 		/// </summary>
 		public PaymentType PaymentTypeId { get { return (PaymentType)MDV["PaymentTypeId"].Value; } set { MDV["PaymentTypeId"].Value = value; } }
+		public BillingPeriodType BillingPeriodTypeId { get { return (BillingPeriodType)MDV["BillingPeriodTypeId"].Value; } set { MDV["BillingPeriodTypeId"].Value = value; } }
 		
 
         public RegistrantSubscriptionPlan()
@@ -55,6 +56,7 @@ namespace AfterSchoolLibrary.Models
 			this.PaymentTypeFeesPaidBy = FeesPaidByType.NotSet;
 			this.ConvenienceFeesPaidBy = FeesPaidByType.NotSet;
 			this.PaymentTypeId = PaymentType.NotSet;
+			this.BillingPeriodTypeId = BillingPeriodType.NotSet;
 			
         }
 
@@ -78,6 +80,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "PaymentTypeFeesPaidBy", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ConvenienceFeesPaidBy", System.Data.SqlDbType.Int);
 				_dp.Add(className, "PaymentTypeId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "BillingPeriodTypeId", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
@@ -211,6 +214,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["PaymentTypeId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["BillingPeriodTypeId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

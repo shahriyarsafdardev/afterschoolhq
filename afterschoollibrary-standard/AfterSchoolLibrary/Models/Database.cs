@@ -289,6 +289,7 @@ namespace AfterSchoolLibrary.Models
 			RegistrantSubscriptionPlan.Update(new Hashtable(){{"PaymentTypeFeesPaidBy",0}}, new Hashtable(){{"PaymentTypeFeesPaidBy", DBNull.Value}}, RegistrantSubscriptionPlan.ObjectMap, dc);
 			RegistrantSubscriptionPlan.Update(new Hashtable(){{"ConvenienceFeesPaidBy",0}}, new Hashtable(){{"ConvenienceFeesPaidBy", DBNull.Value}}, RegistrantSubscriptionPlan.ObjectMap, dc);
 			RegistrantSubscriptionPlan.Update(new Hashtable(){{"PaymentTypeId",0}}, new Hashtable(){{"PaymentTypeId", DBNull.Value}}, RegistrantSubscriptionPlan.ObjectMap, dc);
+			RegistrantSubscriptionPlan.Update(new Hashtable(){{"BillingPeriodTypeId",0}}, new Hashtable(){{"BillingPeriodTypeId", DBNull.Value}}, RegistrantSubscriptionPlan.ObjectMap, dc);
 			Transaction.Update(new Hashtable(){{"PaymentTypeId",0}}, new Hashtable(){{"PaymentTypeId", DBNull.Value}}, Transaction.ObjectMap, dc);
 			Transaction.Update(new Hashtable(){{"TransactionTypeId",0}}, new Hashtable(){{"TransactionTypeId", DBNull.Value}}, Transaction.ObjectMap, dc);
 			Transaction.Update(new Hashtable(){{"PaymentSourceTypeId",0}}, new Hashtable(){{"PaymentSourceTypeId", DBNull.Value}}, Transaction.ObjectMap, dc);
