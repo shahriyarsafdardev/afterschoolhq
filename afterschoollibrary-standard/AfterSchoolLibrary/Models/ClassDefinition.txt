@@ -1354,6 +1354,7 @@ property: StartDate, DateTime?, DateTime, required
 property: StripeSubscriptionId, string, NVarChar "50"
 property: StripeCustomerId, string, NVarChar "50"
 property: Amount, decimal?, Money
+property: TotalPeriods, int?, Int
 property: ConvenienceFee, decimal?, Money
 property: PaymentTypeFee, decimal?, Money
 property: PaymentTypeFeesPaidBy, FeesPaidByType, Int

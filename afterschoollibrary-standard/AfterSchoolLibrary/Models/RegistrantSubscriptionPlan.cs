@@ -37,6 +37,7 @@ namespace AfterSchoolLibrary.Models
 		public string StripeSubscriptionId { get { return (string)MDV["StripeSubscriptionId"].Value; } set { MDV["StripeSubscriptionId"].Value = value; } }
 		public string StripeCustomerId { get { return (string)MDV["StripeCustomerId"].Value; } set { MDV["StripeCustomerId"].Value = value; } }
 		public decimal? Amount { get { return (decimal?)MDV["Amount"].Value; } set { MDV["Amount"].Value = value; } }
+		public int? TotalPeriods { get { return (int?)MDV["TotalPeriods"].Value; } set { MDV["TotalPeriods"].Value = value; } }
 		public decimal? ConvenienceFee { get { return (decimal?)MDV["ConvenienceFee"].Value; } set { MDV["ConvenienceFee"].Value = value; } }
 		public decimal? PaymentTypeFee { get { return (decimal?)MDV["PaymentTypeFee"].Value; } set { MDV["PaymentTypeFee"].Value = value; } }
 		public FeesPaidByType PaymentTypeFeesPaidBy { get { return (FeesPaidByType)MDV["PaymentTypeFeesPaidBy"].Value; } set { MDV["PaymentTypeFeesPaidBy"].Value = value; } }
@@ -66,6 +67,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "StripeSubscriptionId", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "StripeCustomerId", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "Amount", System.Data.SqlDbType.Money);
+				_dp.Add(className, "TotalPeriods", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ConvenienceFee", System.Data.SqlDbType.Money);
 				_dp.Add(className, "PaymentTypeFee", System.Data.SqlDbType.Money);
 				_dp.Add(className, "PaymentTypeFeesPaidBy", System.Data.SqlDbType.Int);
@@ -177,6 +179,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["Amount"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["TotalPeriods"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
