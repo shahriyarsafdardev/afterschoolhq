@@ -261,7 +261,8 @@ namespace AfterSchoolLibrary.Services
                 PaymentTypeFee = paymentTypeFee.Value,
                 PaymentTypeFeesPaidBy = billingAccount.CreditCardFeesPaidBy,
                 Amount = amount.Value,
-                TotalPeriods = totalPeriods
+                TotalPeriods = totalPeriods,
+                PaymentType = checkoutObject.PaymentType
             };
         }
      

@@ -11,5 +11,6 @@ namespace AfterSchoolLibrary.Models
         public decimal PaymentTypeFee { get; set; }
         public decimal Amount { get; set; }
         public int? TotalPeriods { get; set; }
+        public PaymentType PaymentType { get; set; }
     }
 }
