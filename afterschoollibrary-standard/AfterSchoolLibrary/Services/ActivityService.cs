@@ -1231,7 +1231,7 @@ namespace AfterSchoolLibrary.Services
         private static SystemMessages SetupSubscriptionPlan(this Activity activity, Account account, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            var hasChanges = false;
+            var hasChanges = true;
 
             // first: desactivate the current plan if there are any changes
             if (activity.HasSubscriptionPlan(msgs, dc))
@@ -1241,7 +1241,7 @@ namespace AfterSchoolLibrary.Services
                 hasChanges = plan.CostPerPeriod.Value != subscriptionplancost.ToDecimal() || 
                             plan.BillingPeriodTypeId != (BillingPeriodType)subscriptionplanperiod.ToInteger();
 
-                if (hasChanges)
+                if (hasChanges || !hassubscriptionplan.ToBoolean())
                     msgs.AddRange(plan.Deactivate(loggedInUserId, dc));
             }
 
@@ -1265,18 +1265,18 @@ namespace AfterSchoolLibrary.Services
         private static SystemMessages SetupPaymentPlan(this Activity activity, Account account, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            var hasChanges = false;
+            var hasChanges = true;
 
             // first: desactivate the current plan if there are any changes
             if (activity.HasPaymentPlan(msgs, dc))
             {
-                var plan = activity.GetSubscriptionPlan(msgs, dc);
+                var plan = activity.GetPaymentPlan(msgs, dc);
 
                 hasChanges = plan.CostPerPeriod.Value != paymentplancost.ToDecimal() || 
                             plan.BillingPeriodTypeId != (BillingPeriodType)paymentplanperiod.ToInteger() || 
                             plan.TotalPeriods.Value != paymentplanperiodnumber.ToInteger();
 
-                if (hasChanges)
+                if (hasChanges || !haspaymentplan.ToBoolean())
                     msgs.AddRange(plan.Deactivate(loggedInUserId, dc));
             }
 
