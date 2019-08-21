@@ -42,6 +42,10 @@ namespace AfterSchoolLibrary.Models
 		public decimal? PaymentTypeFee { get { return (decimal?)MDV["PaymentTypeFee"].Value; } set { MDV["PaymentTypeFee"].Value = value; } }
 		public FeesPaidByType PaymentTypeFeesPaidBy { get { return (FeesPaidByType)MDV["PaymentTypeFeesPaidBy"].Value; } set { MDV["PaymentTypeFeesPaidBy"].Value = value; } }
 		public FeesPaidByType ConvenienceFeesPaidBy { get { return (FeesPaidByType)MDV["ConvenienceFeesPaidBy"].Value; } set { MDV["ConvenienceFeesPaidBy"].Value = value; } }
+		/// <summary>
+		/// Required.
+		/// </summary>
+		public PaymentType PaymentTypeId { get { return (PaymentType)MDV["PaymentTypeId"].Value; } set { MDV["PaymentTypeId"].Value = value; } }
 		
 
         public RegistrantSubscriptionPlan()
@@ -50,6 +54,7 @@ namespace AfterSchoolLibrary.Models
             this.LoadObjectValues(ObjectMap);
 			this.PaymentTypeFeesPaidBy = FeesPaidByType.NotSet;
 			this.ConvenienceFeesPaidBy = FeesPaidByType.NotSet;
+			this.PaymentTypeId = PaymentType.NotSet;
 			
         }
 
@@ -72,6 +77,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "PaymentTypeFee", System.Data.SqlDbType.Money);
 				_dp.Add(className, "PaymentTypeFeesPaidBy", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ConvenienceFeesPaidBy", System.Data.SqlDbType.Int);
+				_dp.Add(className, "PaymentTypeId", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
@@ -131,6 +137,8 @@ namespace AfterSchoolLibrary.Models
 				msgs.Add("RegistrantId is required on RegistrantSubscriptionPlan object", MessageType.Error);
 			if (this.StartDate.IsEmpty())
 				msgs.Add("StartDate is required on RegistrantSubscriptionPlan object", MessageType.Error);
+			if (this.PaymentTypeId.IsEmpty())
+				msgs.Add("PaymentTypeId is required on RegistrantSubscriptionPlan object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(RegistrantSubscriptionPlan).Name));
@@ -201,6 +209,10 @@ namespace AfterSchoolLibrary.Models
 			dps.Add(ObjectMap["ConvenienceFeesPaidBy"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["PaymentTypeId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -257,6 +269,16 @@ namespace AfterSchoolLibrary.Models
         #endregion
 
 		#region "UserDefined"
+
+        public decimal TotalPaidWithFees
+        {
+            get
+            {
+                return Amount.Value + 
+                    (ConvenienceFeesPaidBy == FeesPaidByType.Parent ? ConvenienceFee.Value : 0) + 
+                    (PaymentTypeFeesPaidBy == FeesPaidByType.Parent ? PaymentTypeFee.Value : 0);
+            }
+        }
 
         public SubscriptionPlan GetSubscriptionPlan(SystemMessages msgs = null, DatabaseConnection dc = null)
         {

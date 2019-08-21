@@ -248,18 +248,19 @@ namespace AfterSchoolLibrary.Services
             };
         }
 
-        public static bool CheckAndCancelPaymentPlan(this SubscriptionPlan plan, RegistrantSubscriptionPlan registrantSubscriptionPlan, Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool CheckAndCancelPaymentPlan(this SubscriptionPlan plan, RegistrantSubscriptionPlan rsp, Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var totalPayments = registrantSubscriptionPlan.GetPaymentCount(msgs, dc);
+            var totalPayments = rsp.GetPaymentCount(msgs, dc);
+            var totalPeriods = rsp.TotalPeriods.HasValue ? rsp.TotalPeriods.Value : plan.TotalPeriods.Value;
             string stripeUserId = null;
 
             if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
                 stripeUserId = billingAccount.StripeUserId;
 
-            if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan && totalPayments >= plan.TotalPeriods.Value)
+            if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan && totalPayments >= totalPeriods)
             {
                 msgs.AddRange(Billing.StripeHelper.CancelSubscription(
-                    registrantSubscriptionPlan.StripeSubscriptionId,
+                    rsp.StripeSubscriptionId,
                     stripeUserId
                 ));
 
