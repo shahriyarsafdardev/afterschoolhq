@@ -227,23 +227,25 @@ namespace AfterSchoolLibrary.Services
                 startDateTime,
                 purchase,
                 subscription.Id,
-                GetFeeObject(checkoutObject, billingAccount, subscriptionPlanType, msgs, dc),
+                GetFeeObject(checkoutObject, billingAccount, plan, msgs, dc),
                 loggedInUser,
                 msgs,
                 dc);
         }
 
-        private static FeeObject GetFeeObject(CheckoutObject checkoutObject, Account billingAccount, SubscriptionPlanType subscriptionPlanType, SystemMessages msgs, DatabaseConnection dc = null)
+        private static PlanFeeObject GetFeeObject(CheckoutObject checkoutObject, Account billingAccount, SubscriptionPlan plan, SystemMessages msgs, DatabaseConnection dc = null)
         {
             decimal? convenienceFee = 0;
             decimal? paymentTypeFee = 0;
             decimal? amount = 0;
+            int? totalPeriods = null;
 
-            if (subscriptionPlanType == SubscriptionPlanType.PaymentPlan)
+            if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan)
             {
                 convenienceFee = checkoutObject.GetPaymentPlanCostTodayConvenienceFee(msgs, dc);
                 paymentTypeFee = checkoutObject.GetPaymentPlanCostTodayCreditCardFee(msgs, dc);
                 amount = checkoutObject.PaymentPlan.CostPerPeriod;
+                totalPeriods = checkoutObject.PaymentPlan.TotalPeriods;
             }
             else
             {
@@ -252,13 +254,16 @@ namespace AfterSchoolLibrary.Services
                 amount = checkoutObject.SubscriptionPlan.CostPerPeriod;
             }
 
-            return new FeeObject()
+            return new PlanFeeObject()
             {
                 ConvenienceFee = convenienceFee.Value,
                 ConvenienceFeesPaidBy = billingAccount.ConvenienceFeesPaidBy,
                 PaymentTypeFee = paymentTypeFee.Value,
                 PaymentTypeFeesPaidBy = billingAccount.CreditCardFeesPaidBy,
-                Amount = amount.Value
+                Amount = amount.Value,
+                TotalPeriods = totalPeriods,
+                PaymentType = checkoutObject.PaymentType,
+                BillingPeriodType = plan.BillingPeriodTypeId
             };
         }
      

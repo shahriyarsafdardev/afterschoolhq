@@ -465,17 +465,21 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
-        public static SystemMessages SendSubscriptionPaymentSucceeded(WebUser payingAccountUser, SubscriptionPlan plan)
+        public static SystemMessages SendSubscriptionPaymentSucceeded(WebUser payingAccountUser, RegistrantSubscriptionPlan rsp, SubscriptionPlan plan)
         {
             var msgs = new SystemMessages();
             var participationObject = plan.GetParticipationObject(msgs);
+            var billingPeriodTypeId = rsp.BillingPeriodTypeId;
 
+            if (billingPeriodTypeId == BillingPeriodType.NotSet)
+                billingPeriodTypeId = rsp.BillingPeriodTypeId;
+            
             var model = new NameValueCollection()
             {
                 { "FirstName", payingAccountUser.FirstName },
                 { "AccountName", participationObject.OwnerAccount.Name },
-                { "Period", $"{plan.BillingPeriodTypeId.ToString().ToLower()}ly" },
-                { "PaymentAmount", plan.CostPerPeriod.ToCurrency() },
+                { "Period", $"{billingPeriodTypeId.ToString().ToLower()}ly" },
+                { "PaymentAmount", rsp.TotalPaidWithFees.ToCurrency() },
                 { "ActivityName", participationObject.Name },
                 { "LoginLink", Utilities.LoginUrl(true) }
             };
