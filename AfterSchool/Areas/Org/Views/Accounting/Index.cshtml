@@ -151,6 +151,7 @@
                             <th class="text-center">Platform Fee</th>
                             <th class="text-center">Your Amount</th>
                             <th class="text-center">Status</th>
+                            <th class="text-center">Type</th>
                             @*<th>Refund</th>*@
                         </tr>
                     </thead>
@@ -164,6 +165,7 @@
                                 var participationObjects = transaction.GetParticipationObjects();
                                 var currentStatus = transaction.GetStatus();
                                 var disableChk = (transaction.PayoutId != null || currentStatus == "Incoming") ? "disabled" : "";
+
                                 <tr id="@transaction.Uid" data-refunded-amount="@transaction.GetRefundedAmount().ToCurrency()">
                                     <td>
                                         <span class="am-checkbox">
@@ -204,6 +206,9 @@
                                     </td>
                                     <td class="text-center">
                                         @currentStatus
+                                    </td>
+                                    <td class="text-center">
+                                        @transaction.PaymentTypeId.ToString()
                                     </td>
                                         @*<td>
                                                 @if (transaction.IsCharge() && !transaction.IsTotallyRefunded())

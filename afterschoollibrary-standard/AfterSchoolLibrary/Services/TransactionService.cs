@@ -100,7 +100,7 @@ namespace AfterSchoolLibrary.Services
                 checkoutObject.BillingAccount,
                 checkoutObject.ConvenienceFeePayer,
                 checkoutObject.CreditCardFeePayer,
-                checkoutObject.OverrideAmount ?? checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs, dc),
+                checkoutObject.OverrideAmount ?? checkoutObject.GetTuitionCostWithFees(msgs, dc),
                 checkoutObject.ParticipationObject.Name,
                 checkoutObject.Purchase?.ID,
                 transactionType,
@@ -108,8 +108,8 @@ namespace AfterSchoolLibrary.Services
                 checkoutObject.PaymentSourceType,
                 useConnectedAccount ? checkoutObject.GetPlatformFlatFee(msgs, dc) : new decimal?(), // deprecated property
                 useConnectedAccount ? checkoutObject.GetPlatformPercentFee(msgs, dc) : new decimal?(), // deprecated property
-                checkoutObject.ConvenienceFeeOverrideAmount ?? checkoutObject.GetTotalConvenienceFeesToday(msgs, dc),
-                checkoutObject.PaymentTypeFeeOverrideAmount ?? checkoutObject.GetTotalCreditCardFeesToday(msgs, dc),
+                checkoutObject.ConvenienceFeeOverrideAmount ?? checkoutObject.GetTuitionConvenienceFee(msgs, dc),
+                checkoutObject.PaymentTypeFeeOverrideAmount ?? checkoutObject.GetTuitionCreditCardFee(msgs, dc),
                 checkoutObject.StripeChargeId,
                 loggedInUser,
                 msgs,
@@ -235,7 +235,12 @@ namespace AfterSchoolLibrary.Services
                         return currentPayout.PayoutStatusId.ToString();
                 }
 
-            if (DateTime.UtcNow.IsBefore(transaction.CreateDate.Value.AddHours(48)))
+            var waitPeriodInDays = 2;
+
+            if (transaction.PaymentTypeId == PaymentType.ACH)
+                waitPeriodInDays = 5;
+
+            if (DateTime.UtcNow.IsBefore(transaction.CreateDate.Value.AddDays(waitPeriodInDays)))
                 return "Incoming";
 
             return null;

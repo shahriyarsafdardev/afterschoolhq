@@ -295,6 +295,7 @@ namespace AfterSchoolLibrary.Helpers
                 {
                     amsgs.AddRange(AdditionalData(adc));
 
+                    amsgs.AddRange(UpdateRegistrantSubscriptionPlans(adc));
                     amsgs.AddRange(UpdateRegistrantStatuses(adc));
                     amsgs.AddRange(UpdateRegistrantAccess(adc));
                     amsgs.AddRange(UpdateRequiresParentalConsent(adc));
@@ -360,6 +361,28 @@ namespace AfterSchoolLibrary.Helpers
             );            
 
             return msgs;
+        }
+
+        private static SystemMessages UpdateRegistrantSubscriptionPlans(DatabaseConnection dc)
+        {
+            return Migration.Run
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    var rsps = RegistrantSubscriptionPlan.Load(
+                                criterias: new Hashtable() { { "PaymentTypeId", 0  } },
+                                msgs: amsgs, 
+                                dc: adc);
+
+                    rsps.ForEach(rsp =>
+                    {
+                        rsp.PaymentTypeId = PaymentType.CreditCard;
+                        amsgs.AddRange(rsp.Save(adc));
+                    });
+                },
+                uniqueIdenfier: "UpdateRegistrantSubscriptionPlans-20190821",
+                dc: dc
+            );
         }
 
         private static SystemMessages InvalidateRegistrantAccounts(DatabaseConnection dc)

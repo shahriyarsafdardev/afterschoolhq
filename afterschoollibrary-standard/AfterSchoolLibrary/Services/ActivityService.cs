@@ -1231,66 +1231,33 @@ namespace AfterSchoolLibrary.Services
         private static SystemMessages SetupSubscriptionPlan(this Activity activity, Account account, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
+            var hasChanges = true;
+
+            // first: desactivate the current plan if there are any changes
+            if (activity.HasSubscriptionPlan(msgs, dc))
+            {
+                var plan = activity.GetSubscriptionPlan(msgs, dc);
+
+                hasChanges = plan.CostPerPeriod.Value != subscriptionplancost.ToDecimal() || 
+                            plan.BillingPeriodTypeId != (BillingPeriodType)subscriptionplanperiod.ToInteger();
+
+                if (hasChanges || !hassubscriptionplan.ToBoolean())
+                    msgs.AddRange(plan.Deactivate(loggedInUserId, dc));
+            }
 
             // if the subscription plan option(UI) is activated
-            if (hassubscriptionplan.ToBoolean())
-            {
-                // if there is no subscription plan active in the DB
-                // let's create a new one
-                if (!activity.HasSubscriptionPlan(msgs, dc))
-                {
-                    var subscriptionPlan = Services.SubscriptionPlanService.CreateNewSubscriptionPlan(
-                            account,
-                            ParticipationObjectType.Activity,
-                            activity.ID.Value,
-                            subscriptionplancost.ToDecimal(),
-                            (BillingPeriodType)subscriptionplanperiod.ToInteger(),
-                            true,
-                            loggedInUserId,
-                            msgs,
-                            dc
-                        );
-                }
-                else
-                {
-                    var subscriptionPlan = activity.GetSubscriptionPlan(msgs, dc);
-
-                    // if the plan is purchased and begin edited
-                    if (subscriptionPlan.IsPurchased(msgs, dc) && (subscriptionPlan.CostPerPeriod != subscriptionplancost.ToDecimal()))
-                    {
-                        // first: desactivate the current plan
-                        msgs.AddRange(subscriptionPlan.Deactivate(loggedInUserId, dc));
-
-                        // second: create a new plan
-                        var newSubscriptionPlan = Services.SubscriptionPlanService.CreateNewSubscriptionPlan(
-                                account,
-                                ParticipationObjectType.Activity,
-                                activity.ID.Value,
-                                subscriptionplancost.ToDecimal(),
-                                (BillingPeriodType)subscriptionplanperiod.ToInteger(),
-                                true,
-                                loggedInUserId,
-                                msgs,
-                                dc
-                            );
-                    }
-                    else
-                    {
-                        // update the current plan
-                        subscriptionPlan.LastModifiedBy = loggedInUserId;
-                        subscriptionPlan.LastModifiedDate = DateTime.UtcNow;
-                        subscriptionPlan.CostPerPeriod = Convert.ToDecimal(subscriptionplancost);
-                        subscriptionPlan.BillingPeriodTypeId = (BillingPeriodType)Convert.ToInt32(subscriptionplanperiod);
-                        msgs.AddRange(subscriptionPlan.SaveWithStripe(dc));
-                    }
-                }
-
-            }
-            else if (activity.HasSubscriptionPlan())
-            {
-                var subscriptionPlan = activity.GetSubscriptionPlan(msgs, dc);
-                msgs.AddRange(subscriptionPlan.Deactivate(loggedInUserId, dc));
-            }
+            if (hassubscriptionplan.ToBoolean() && hasChanges)
+                SubscriptionPlanService.CreateNewSubscriptionPlan(
+                    account,
+                    ParticipationObjectType.Activity,
+                    activity.ID.Value,
+                    subscriptionplancost.ToDecimal(),
+                    (BillingPeriodType)subscriptionplanperiod.ToInteger(),
+                    true,
+                    loggedInUserId,
+                    msgs,
+                    dc
+                );
 
             return msgs;
         }
@@ -1298,66 +1265,33 @@ namespace AfterSchoolLibrary.Services
         private static SystemMessages SetupPaymentPlan(this Activity activity, Account account, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
+            var hasChanges = true;
 
-            // if the payment plan option(UI) is activated
-            if (haspaymentplan.ToBoolean())
+            // first: desactivate the current plan if there are any changes
+            if (activity.HasPaymentPlan(msgs, dc))
             {
-                // if there is no payment plan active in the DB
-                // let's create a new one
-                if (!activity.HasPaymentPlan(msgs, dc))
-                {
-                    var paymentPlan = SubscriptionPlanService.CreateNewPaymentPlan(
-                        account,
-                        ParticipationObjectType.Activity,
-                        activity.ID.Value,
-                        paymentplancost.ToDecimal(),
-                        (BillingPeriodType)paymentplanperiod.ToInteger(),
-                        paymentplanperiodnumber.ToInteger(),
-                        loggedInUserId,
-                        msgs,
-                        dc);
-                }
-                else
-                {
-                    var paymentPlan = activity.GetPaymentPlan(msgs, dc);
+                var plan = activity.GetPaymentPlan(msgs, dc);
 
-                    // if the plan is purchased and begin edited
-                    if (paymentPlan.IsPurchased(msgs, dc) && (paymentPlan.CostPerPeriod != paymentplancost.ToDecimal()))
-                    {
-                        // first: desactivate the current plan
-                        msgs.AddRange(paymentPlan.Deactivate(loggedInUserId, dc));
+                hasChanges = plan.CostPerPeriod.Value != paymentplancost.ToDecimal() || 
+                            plan.BillingPeriodTypeId != (BillingPeriodType)paymentplanperiod.ToInteger() || 
+                            plan.TotalPeriods.Value != paymentplanperiodnumber.ToInteger();
 
-                        // second: create a new plan
-                        var newPaymentPlan = Services.SubscriptionPlanService.CreateNewPaymentPlan(
-                                account,
-                                ParticipationObjectType.Activity,
-                                activity.ID.Value,
-                                paymentplancost.ToDecimal(),
-                                (BillingPeriodType)paymentplanperiod.ToInteger(),
-                                paymentplanperiodnumber.ToInteger(),
-                                loggedInUserId,
-                                msgs,
-                                dc
-                            );
-                    }
-                    else
-                    {
-                        // update the current plan
-                        paymentPlan.LastModifiedBy = loggedInUserId;
-                        paymentPlan.LastModifiedDate = DateTime.UtcNow;
-                        paymentPlan.CostPerPeriod = paymentplancost.ToDecimal();
-                        paymentPlan.BillingPeriodTypeId = (BillingPeriodType)paymentplanperiod.ToInteger();
-                        paymentPlan.TotalPeriods = paymentplanperiodnumber.ToInteger();
-                        msgs.AddRange(paymentPlan.SaveWithStripe(dc));
-                    }
-                }
-
+                if (hasChanges || !haspaymentplan.ToBoolean())
+                    msgs.AddRange(plan.Deactivate(loggedInUserId, dc));
             }
-            else if (activity.HasPaymentPlan(msgs, dc))
-            {
-                var paymentPlan = activity.GetPaymentPlan(msgs, dc);
-                msgs.AddRange(paymentPlan.Deactivate(loggedInUserId, dc));
-            }
+
+            // if the subscription plan option(UI) is activated
+            if (haspaymentplan.ToBoolean() && hasChanges)
+                SubscriptionPlanService.CreateNewPaymentPlan(
+                    account,
+                    ParticipationObjectType.Activity,
+                    activity.ID.Value,
+                    paymentplancost.ToDecimal(),
+                    (BillingPeriodType)paymentplanperiod.ToInteger(),
+                    paymentplanperiodnumber.ToInteger(),
+                    loggedInUserId,
+                    msgs,
+                    dc);
 
             return msgs;
         }

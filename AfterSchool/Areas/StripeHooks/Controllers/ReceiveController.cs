@@ -121,27 +121,18 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
         private IHttpActionResult InvoicePaymentSucceeded(Stripe.Event stripeEvent, SystemMessages msgs)
         {
             var stripeInvoice = (Stripe.Invoice)stripeEvent.Data.Object;
-            // var customerId = stripeInvoice.CustomerId;
-            //var account = AfterSchoolLibrary.Models.Account.LoadByStripeCustomerId(customerId, msgs);
-
-            //if (account.IsEmpty())
-            //{
-            //    msgs.Add($"Ignoring - Account is a customer of AHQ - Stripe Sub ID {customerId}", MessageType.Notice);
-            //    return ReturnOK(msgs);
-            //}
-
             var stripeSubscriptionId = stripeInvoice.SubscriptionId;
             var chargeId = stripeInvoice.ChargeId;
-            var registrantSubscriptionPlan = RegistrantSubscriptionPlan.LoadByStripeSubscriptionId(stripeSubscriptionId, msgs);
+            var rsp = RegistrantSubscriptionPlan.LoadByStripeSubscriptionId(stripeSubscriptionId, msgs);
 
-            if (registrantSubscriptionPlan.IsEmpty())
+            if (rsp.IsEmpty())
             {
                 msgs.Add($"Ignoring - Registrant Subscription Plan not found - Stripe Sub ID {stripeSubscriptionId}", MessageType.Notice);
                 return ReturnOK(msgs);
             }
 
-            var plan = registrantSubscriptionPlan.GetSubscriptionPlan(msgs);
-            var registrant = registrantSubscriptionPlan.GetRegistrant(msgs);
+            var plan = rsp.GetSubscriptionPlan(msgs);
+            var registrant = rsp.GetRegistrant(msgs);
             var masterRegistrant = registrant.GetMasterRegistrant(msgs);
             var purchasingAccount = masterRegistrant.GetAccount(msgs);
             var billingAccount = plan.GetAccount(msgs);
@@ -165,29 +156,44 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
             }
 
             // send payment succeeded email
-            purchasingAccount.SendSubscriptionPaymentSucceeded(plan);
-                    
+            purchasingAccount.SendSubscriptionPaymentSucceeded(rsp, plan);
+
+            AfterSchoolLibrary.Models.Account convenienceFeePayer;
+            AfterSchoolLibrary.Models.Account transactionFeePayer;
+
+            if (rsp.ConvenienceFeesPaidBy == FeesPaidByType.Parent)
+                convenienceFeePayer = purchasingAccount;
+            else
+                convenienceFeePayer = billingAccount;
+
+            if (rsp.PaymentTypeFeesPaidBy == FeesPaidByType.Parent)
+                transactionFeePayer = purchasingAccount;
+            else
+                transactionFeePayer = billingAccount;
+
             // save transaction info and track payment to the activity as well.
             var checkoutObject = new CheckoutObject()
             {
                 PayingAccount = purchasingAccount,
                 BillingAccount = billingAccount,
-                OverrideAmount = registrantSubscriptionPlan.Amount,
-                ConvenienceFeeOverrideAmount =  registrantSubscriptionPlan.ConvenienceFee,
-                PaymentTypeFeeOverrideAmount = registrantSubscriptionPlan.PaymentTypeFee,
+                OverrideAmount = rsp.TotalPaidWithFees,
+                ConvenienceFeeOverrideAmount =  rsp.ConvenienceFee,
+                PaymentTypeFeeOverrideAmount = rsp.PaymentTypeFee,
                 ParticipationObject = participationObject,
                 PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
-                PaymentType = PaymentType.CreditCard,
+                PaymentType = rsp.PaymentTypeId,
                 StripeChargeId = chargeId,
                 SubscriptionPlan = plan.PlanTypeId == SubscriptionPlanType.Subscription ? plan : null,
                 PaymentPlan = plan.PlanTypeId == SubscriptionPlanType.PaymentPlan ? plan : null,
                 MasterRegistrant = masterRegistrant,
                 NumberOfSeats = 1,
                 Registration = registration,
-                RegistrantSubscriptionPlan = registrantSubscriptionPlan
+                RegistrantSubscriptionPlan = rsp,
+                ConvenienceFeePayer = convenienceFeePayer,
+                CreditCardFeePayer = transactionFeePayer,
             };
 
-            billingAccount.ProcessSubscriptionPlanPayment(checkoutObject, plan, registrantSubscriptionPlan, msgs);
+            billingAccount.ProcessSubscriptionPlanPayment(checkoutObject, plan, rsp, msgs);
 
             if (msgs.HasErrors())
                 return Return500(msgs);

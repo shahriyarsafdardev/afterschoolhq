@@ -579,11 +579,11 @@ namespace AfterSchoolLibrary.Services
             return Helpers.EmailHelper.SendWelcomeTrial(account.GetAccountOwner(dc: dc), account);
         }
 
-        public static SystemMessages SendSubscriptionPaymentSucceeded(this Account account, SubscriptionPlan plan, DatabaseConnection dc = null)
+        public static SystemMessages SendSubscriptionPaymentSucceeded(this Account account, RegistrantSubscriptionPlan rsp, SubscriptionPlan plan, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
             var accountOwner = account.GetAccountOwner(msgs, dc);
-            msgs.AddRange(Helpers.EmailHelper.SendSubscriptionPaymentSucceeded(accountOwner, plan));
+            msgs.AddRange(Helpers.EmailHelper.SendSubscriptionPaymentSucceeded(accountOwner, rsp, plan));
             return msgs;
         }
 

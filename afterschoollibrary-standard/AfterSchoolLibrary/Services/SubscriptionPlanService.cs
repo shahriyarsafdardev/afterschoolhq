@@ -248,23 +248,28 @@ namespace AfterSchoolLibrary.Services
             };
         }
 
-        public static bool CheckAndCancelPaymentPlan(this SubscriptionPlan plan, RegistrantSubscriptionPlan registrantSubscriptionPlan, Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            var totalPayments = registrantSubscriptionPlan.GetPaymentCount(msgs, dc);
-            string stripeUserId = null;
-
-            if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
-                stripeUserId = billingAccount.StripeUserId;
-
-            if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan && totalPayments >= plan.TotalPeriods.Value)
+        public static bool CheckAndCancelPaymentPlan(this SubscriptionPlan plan, RegistrantSubscriptionPlan rsp, Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {            
+            if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan)
             {
-                msgs.AddRange(Billing.StripeHelper.CancelSubscription(
-                    registrantSubscriptionPlan.StripeSubscriptionId,
-                    stripeUserId
-                ));
+                var totalPayments = rsp.GetPaymentCount(msgs, dc);
+                var totalPeriods = rsp.TotalPeriods.HasValue ? rsp.TotalPeriods.Value : plan.TotalPeriods.Value;
 
-                if (msgs.HasNoErrors())
-                    return true;
+                if (totalPayments >= totalPeriods)
+                {
+                    string stripeUserId = null;
+
+                    if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
+                        stripeUserId = billingAccount.StripeUserId;
+
+                    msgs.AddRange(Billing.StripeHelper.CancelSubscription(
+                        rsp.StripeSubscriptionId,
+                        stripeUserId
+                    ));
+
+                    if (msgs.HasNoErrors())
+                        return true;
+                }
             }
 
             return false;
@@ -330,7 +335,7 @@ namespace AfterSchoolLibrary.Services
             return false;
         }
 
-        public static RegistrantSubscriptionPlan AddRegistrant(this SubscriptionPlan plan, Registrant registrant, DateTime? startDateTime, Purchase purchase, string stripeSubscriptionId, FeeObject feeObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static RegistrantSubscriptionPlan AddRegistrant(this SubscriptionPlan plan, Registrant registrant, DateTime? startDateTime, Purchase purchase, string stripeSubscriptionId, PlanFeeObject feeObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return RegistrantSubscriptionPlanService.CreateNew(
                 registrant,
