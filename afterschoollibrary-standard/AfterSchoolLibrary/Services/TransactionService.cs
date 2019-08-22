@@ -235,7 +235,12 @@ namespace AfterSchoolLibrary.Services
                         return currentPayout.PayoutStatusId.ToString();
                 }
 
-            if (DateTime.UtcNow.IsBefore(transaction.CreateDate.Value.AddHours(48)))
+            var waitPeriodInDays = 2;
+
+            if (transaction.PaymentTypeId == PaymentType.ACH)
+                waitPeriodInDays = 5;
+
+            if (DateTime.UtcNow.IsBefore(transaction.CreateDate.Value.AddDays(waitPeriodInDays)))
                 return "Incoming";
 
             return null;
