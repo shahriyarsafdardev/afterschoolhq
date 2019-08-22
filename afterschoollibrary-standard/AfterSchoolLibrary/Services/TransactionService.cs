@@ -100,7 +100,7 @@ namespace AfterSchoolLibrary.Services
                 checkoutObject.BillingAccount,
                 checkoutObject.ConvenienceFeePayer,
                 checkoutObject.CreditCardFeePayer,
-                checkoutObject.OverrideAmount ?? checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs, dc),
+                checkoutObject.OverrideAmount ?? checkoutObject.GetTuitionCostWithFees(msgs, dc),
                 checkoutObject.ParticipationObject.Name,
                 checkoutObject.Purchase?.ID,
                 transactionType,
