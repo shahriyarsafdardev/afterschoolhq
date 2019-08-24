@@ -656,6 +656,62 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
+        public static SystemMessages SendSessionInviteEmail(Registrant contact, Account invitingAccount, ActivityGroup session, RegistrantActivityGroup rag, RegistrationPeriod period, WebUser loggedInUser, string customMessage = null)
+        {
+            var msgs = new SystemMessages();
+
+            if (customMessage.IsNotEmpty())
+                customMessage = $"<p>{customMessage.Replace("\n", "<br />")}</p><hr />";
+
+            var sessionUrl = session.HomePageUrl;
+            var acceptUrl = rag.GetInviteUrl();
+            var declineUrl = rag.GetDeclineUrl();
+            var regOpenText = "";
+
+            if (period.IsNotEmpty())
+            {
+                if (period.IsOpen())
+                    regOpenText = "Registration is open now.";
+                else if (period.WillOpen())
+                    regOpenText = $" Registration will open {period.StartDateTime.ToShortDateString()}.";
+            }
+
+            var model = new NameValueCollection()
+            {
+                { "FirstName", contact.FirstName },
+                { "ProductName", Utilities.AppName(invitingAccount.IsAfterSchool) },
+                { "SupportEmail", Email.AppSupportEmailAddress },
+                { "AcceptLink", acceptUrl },
+                { "DeclineLink", declineUrl },
+                { "CustomMessage", customMessage },
+                { "SenderDisplayName", loggedInUser.DisplayName },
+                { "AccountName", invitingAccount.Name },
+                { "SessionName", session.Name },
+                { "RegistrationOpenText", regOpenText }
+            };
+
+            var body = ProcessTemplate(
+                EmailTemplates.Session_Invite,
+                model,
+                "session_invite_1",
+                msgs
+                );
+
+            var subject = $"You have been invited to register for {session.Name}!";
+
+            var mailMsgs = SendGridHelper.SendMail(
+                fromEmail: Email.SendGridNoReplyEmailAddress(true),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(contact.Email),
+                subject: subject,
+                body: body,
+                replyTo: new SendGrid.Helpers.Mail.EmailAddress(invitingAccount.Email, invitingAccount.Name),
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(true));
+
+            msgs.AddRange(mailMsgs);
+
+            return msgs;
+        }
+
         public static SystemMessages SendLeagueAccountInvitedEmail(Account invitedAccount, ActivityGroup activityGroup, WebUser sendingUser, string customMessage = null)
         {
             var msgs = new SystemMessages();

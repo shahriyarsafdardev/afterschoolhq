@@ -61,6 +61,15 @@ namespace AfterSchool.Models
             return null;
         }
 
+        public static string GetSessionInvite(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var uid = (string)HttpContext.Current.Session["SessionInvite"];
+            if (uid.IsNotEmpty())
+                return uid;
+
+            return null;
+        }
+
         public static Session GetVisitorSession(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var id = (string)HttpContext.Current.Session["VisitorSession"];

@@ -673,10 +673,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         msgs.Add("Your invites will be sent shortly", MessageType.Success);
                     },
-                    onFailure: (SystemMessages fmsgs) =>
-                    {
-                        msgs.AddRange(fmsgs);
-                    }
+                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                    onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
                 );
             }
             return msgs;

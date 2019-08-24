@@ -3,80 +3,89 @@
 @{
     var condensed = false;
     var accountOwner = Model.OwnerAccount.ID.HasValue ? Model.OwnerAccount.GetAccountOwner() : null;
-    var isInviteOnly = Model.IsActivityGroup() ? Model.GetActivityGroup().IsInviteOnly : false;
+    var canRegiserFor = true;
 
     if (ViewData["condensed"].IsNotEmpty() && ViewData["condensed"].ToString().ToBoolean())
     {
         condensed = true;
     }
+
+    if (ViewData["canRegisterFor"].IsNotEmpty())
+    {
+        canRegiserFor = ViewData["canRegisterFor"].ToString().ToBoolean();
+    }
 }
 
-@if (!isInviteOnly)
+@if (!Model.OwnerAccount.ID.HasValue)
 {
-    if (!Model.OwnerAccount.ID.HasValue)
+    <a href="@Url.Action("index", "signup")" class="btn btn-register">
+        @if (condensed)
+        {
+            @: Customize &raquo;
+        }
+        else
+        {
+            <div class="hidden-xs">
+                Customize this page &raquo;
+            </div>
+            <div class="hidden-sm hidden-md hidden-lg">
+                Customize &raquo;
+            </div>
+        }
+    </a>
+}
+else if (accountOwner.IsNotEmpty() && !accountOwner.VerifiedAccount)
+{
+    if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentUser.HasAccessTo(Model.OwnerAccount))
     {
-        <a href="@Url.Action("index", "signup")" class="btn btn-register">
+        <button class="btn btn-register" onclick="AccountSetup.sendVerificationEmail()">
             @if (condensed)
             {
-                @: Customize &raquo;
+                @: Verify Email
             }
             else
             {
                 <div class="hidden-xs">
-                    Customize this page &raquo;
+                    Registration Not Enabled &raquo; Verify your email
                 </div>
                 <div class="hidden-sm hidden-md hidden-lg">
-                    Customize &raquo;
+                    Verify Email &raquo;
                 </div>
             }
-        </a>
-    }
-    else if (accountOwner.IsNotEmpty() && !accountOwner.VerifiedAccount)
-    {
-        if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentUser.HasAccessTo(Model.OwnerAccount))
-        {
-            <button class="btn btn-register" onclick="AccountSetup.sendVerificationEmail()">
-                @if (condensed)
-                {
-                    @: Verify Email
-                }
-                else
-                {
-                    <div class="hidden-xs">
-                        Registration Not Enabled &raquo; Verify your email
-                    </div>
-                    <div class="hidden-sm hidden-md hidden-lg">
-                        Verify Email &raquo;
-                    </div>
-                }
-            </button>
-        }
-        else
-        {
-            <button class="btn btn-register" disabled title="The account owner has not verified their account">
-                @if (condensed)
-                {
-                    @: Registration Disabled
-                }
-                else
-                {
-                    <div class="hidden-xs">
-                        Registration Not Enabled &raquo;
-                    </div>
-                    <div class="hidden-sm hidden-md hidden-lg">
-                        Registration Disabled &raquo;
-                    </div>
-                }
-            </button>
-        }
+        </button>
     }
     else
     {
-        if (Model.RegistrationPeriod.IsOpen(Model.OwnerAccount))
-        {
-            if (Model.IsActivityGroup() && Model.GetActivityGroup().ActivityGroupTypeId == ActivityGroupType.Session)
+        <button class="btn btn-register" disabled title="The account owner has not verified their account">
+            @if (condensed)
             {
-                <a href="@Model.GetActivityGroup().BrowseUrl" class="btn btn-register">
+                @: Registration Disabled
+            }
+            else
+            {
+                <div class="hidden-xs">
+                    Registration Not Enabled &raquo;
+                </div>
+                <div class="hidden-sm hidden-md hidden-lg">
+                    Registration Disabled &raquo;
+                </div>
+            }
+        </button>
+    }
+}
+else
+{
+    if (Model.RegistrationPeriod.IsOpen(Model.OwnerAccount))
+    {
+        var isSession = Model.IsActivityGroup() && Model.GetActivityGroup().ActivityGroupTypeId == ActivityGroupType.Session;
+
+        if (isSession)
+        {
+            var group = Model.GetActivityGroup();
+
+            if (canRegiserFor)
+            {
+                <a href="@group.BrowseUrl@(group.IsInviteOnly ? $"?invite={Request["invite"]}" : "")" class="btn btn-register">
                     @if (condensed)
                     {
                         @:Browse &raquo;
@@ -87,50 +96,50 @@
                     }
                 </a>
             }
+        }
+        else
+        {
+            <a href="@Model.GetRegistrationPageUrl()" class="btn btn-register">
+                @Model.RegistrationMode.ToString() &raquo;
+            </a>
+        }
+    }
+    else if (Model.RegistrationPeriod.WillOpen(Model.OwnerAccount))
+    {
+        <button type="button" class="btn btn-register">
+            @if (condensed)
+            {
+                @:Will open soon
+            }
             else
             {
-                <a href="@Model.GetRegistrationPageUrl()" class="btn btn-register">
-                    @Model.RegistrationMode.ToString() &raquo;
-                </a>
+                var ts = Model.RegistrationPeriod.WillOpenIn(Model.OwnerAccount);
+
+                @:Registration will open in
+
+                if (ts.Days > 0)
+                {
+                    @: @ts.Days days @ts.Hours hrs
+                }
+                else
+                {
+                    @: @ts.Hours hrs @ts.Minutes mins
+                }
             }
-        }
-        else if (Model.RegistrationPeriod.WillOpen(Model.OwnerAccount))
-        {
-            <button type="button" class="btn btn-register">
-                @if (condensed)
-                {
-                    @:Will open soon
-                }
-                else
-                {
-                    var ts = Model.RegistrationPeriod.WillOpenIn(Model.OwnerAccount);
+        </button>
+    }
+    else if (Model.RegistrationPeriod.IsClosed(Model.OwnerAccount))
+    {
+        <button type="button" class="btn btn-register">
+            @if (condensed)
+            {
+                @:Registration Closed
+            }
+            else
+            {
+                @:Registration is now closed
+            }
 
-                    @:Registration will open in
-
-                    if (ts.Days > 0)
-                    {
-                        @: @ts.Days days @ts.Hours hrs
-                    }
-                    else
-                    {
-                        @: @ts.Hours hrs @ts.Minutes mins
-                    }
-                }
-            </button>
-        }
-        else if (Model.RegistrationPeriod.IsClosed(Model.OwnerAccount))
-        {
-            <button type="button" class="btn btn-register">
-                @if (condensed)
-                {
-                    @:Registration Closed
-                }
-                else
-                {
-                    @:Registration is now closed
-                }
-
-            </button>
-        }
+        </button>
     }
 }

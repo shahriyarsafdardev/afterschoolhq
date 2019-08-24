@@ -118,6 +118,7 @@ namespace AfterSchool.Controllers
             return (accountName, accountUniqueName);
         }
 
+        [HttpGet]
         public ActionResult Activity(string accountname, string activitytype, string activityname, string preview)
         {
             RestartRegistrationSession();
@@ -158,17 +159,28 @@ namespace AfterSchool.Controllers
             ViewBag.Messages = msgs;
             ViewBag.Account = account;
             ViewBag.CanPublishActivity = canPublishActivity;
+            ViewBag.CanRegisterFor = true;
 
             return View(participationObject);
         }
 
-        public ActionResult ActivitySession(string accountname, string sessionname)
+        [HttpGet]
+        public ActionResult ActivitySession(string accountname, string sessionname, string invite, string decline)
         {
             RestartRegistrationSession();
 
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
             var session = ActivityGroup.LoadByAccountIdByUniqueName(account.ID.Value, sessionname, msgs);
+
+            if (invite.IsGuid())
+            {
+                SessionVariables.SessionInvite = invite;
+                ViewBag.CanRegisterFor = !session.IsInviteOnly || session.IsInvited(SessionVariables.SessionInvite.ToGuid(), msgs);
+
+                if (decline.IsBoolean() && decline.ToBoolean())
+                    session.DeclineInvite(SessionVariables.SessionInvite.ToGuid(), msgs);
+            }            
 
             SetRegistrationStartPage(account);
 
@@ -178,6 +190,7 @@ namespace AfterSchool.Controllers
             return View("activity", session.GetParticipationObject());
         }
 
+        [HttpGet]
         public ActionResult League(string accountname, string districtname, string leaguename)
         {
             RestartRegistrationSession();
@@ -196,6 +209,7 @@ namespace AfterSchool.Controllers
             return View("activity", aag.GetParticipationObject(msgs));
         }
 
+        [HttpGet]
         public ActionResult Register(string accountname, string activitytype, string activityname)
         {
             var msgs = new SystemMessages();
@@ -206,6 +220,7 @@ namespace AfterSchool.Controllers
             return RedirectToRegistration(account, participationObject, msgs);
         }
 
+        [HttpGet]
         public ActionResult RegisterSession(string accountname, string sessionname)
         {
             var msgs = new SystemMessages();
@@ -216,12 +231,25 @@ namespace AfterSchool.Controllers
             return RedirectToRegistration(account, participationObject, msgs);
         }
 
+        [HttpGet]
         public ActionResult BrowseSession(string accountname, string sessionname)
         {
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
             var session = ActivityGroup.LoadByAccountIdByUniqueName(account.ID.Value, sessionname, msgs);
-            var participationObjects = session.GetActivities(msgs).Select(activity => activity.GetParticipationObject(msgs)).ToList();
+            var canRegisterFor = !session.IsInviteOnly || (SessionVariables.SessionInvite.IsGuid() && session.IsInvited(SessionVariables.SessionInvite.ToGuid(), msgs));
+
+            if (!canRegisterFor)
+                return Redirect(session.HomePageUrl);
+
+            List<Activity> activities = null;
+
+            if (session.IsInviteOnly)
+                activities = session.GetInvitedToActivities(SessionVariables.SessionInvite.ToGuid(), msgs);
+            else
+                activities = session.GetActivities(msgs);
+
+            var participationObjects = activities.Select(activity => activity.GetParticipationObject(msgs)).ToList();
 
             ViewBag.Session = session.GetParticipationObject(msgs);
             ViewBag.Grades = GradeLevel.Load(msgs: msgs);
@@ -236,6 +264,7 @@ namespace AfterSchool.Controllers
             return View("browse", account);
         }
 
+        [HttpGet]
         public ActionResult RegisterLeague(string accountname, string activitygrouptype, string externalaccountname, string group)
         {
             var msgs = new SystemMessages();
