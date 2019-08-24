@@ -112,6 +112,10 @@ namespace AfterSchoolLibrary.Services
             // if there aren't any more seats available, but there's a waiting list
             else if (!waitingListSeatsAvailable.HasValue || waitingListSeatsAvailable >= numberOfSeatsRequested)
                 return RegistrationAssignmentType.WaitingList;
+            // this is probably temporary and will break if something else changes
+            // assuming that for sessions there are no reserved seats
+            else if (participationObject.IsActivityGroup() && participationObject.GetActivityGroup().ActivityGroupTypeId == ActivityGroupType.Session)
+                return RegistrationAssignmentType.Reserved;
 
             return RegistrationAssignmentType.NotSet;
         }

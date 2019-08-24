@@ -662,8 +662,7 @@ namespace AfterSchoolLibrary.Helpers
 
             if (customMessage.IsNotEmpty())
                 customMessage = $"<p>{customMessage.Replace("\n", "<br />")}</p><hr />";
-
-            var sessionUrl = session.HomePageUrl;
+            
             var acceptUrl = rag.GetInviteUrl();
             var declineUrl = rag.GetDeclineUrl();
             var regOpenText = "";

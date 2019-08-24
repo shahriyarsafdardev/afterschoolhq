@@ -321,6 +321,8 @@ namespace AfterSchoolLibrary.Models
                         emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
                     );
 
+                    msgs.Add("Your invitation has been declined", MessageType.Notice);
+
                     msgs.AddRange(smsgs);
                 },
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),

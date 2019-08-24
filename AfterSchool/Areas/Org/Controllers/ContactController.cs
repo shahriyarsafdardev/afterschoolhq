@@ -657,7 +657,6 @@ namespace AfterSchool.Areas.Org.Controllers
                     onSuccess: (SystemMessages smsgs) =>
                     {
                         // get session information because it isn't available in a background task
-                        var account = SessionVariables.CurrentAccount;
                         var loggedInUser = SessionVariables.CurrentUser;
 
                         BackgroundJob.Enqueue(() =>

@@ -19,6 +19,8 @@
     );
 }
 
+@{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
 <div class="reg-header text-center">
     <h1 class="activity-title">
         @Model.Name

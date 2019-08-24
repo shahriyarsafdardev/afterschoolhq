@@ -1270,31 +1270,50 @@ namespace AfterSchool.Controllers
 
                         // if there is a Session, then a person may set their preferences for activities in that session, 
                         // also only if the session is set to Apply
-                        if (participationObject.IsActivityGroup() && participationObject.GetActivityGroup().RegistrationModeId == RegistrationMode.Apply)
+                        if (participationObject.IsActivityGroup())
                         {
                             var activities = participationObject.GetActivityGroup()
                                 .GetActivities(null, false, false, null, null, false, amsgs, adc);
 
-                            for (int i = 1; i <= activities.Count; i++)
+                            if (participationObject.GetActivityGroup().RegistrationModeId == RegistrationMode.Apply)
                             {
-                                var postedValue = Request[$"activity-preference-{i}"];
-                                if (postedValue.IsGuid())
+                                for (int i = 1; i <= activities.Count; i++)
                                 {
-                                    var activity = activities.First(x => x.Uid == postedValue.ToGuid());
+                                    var postedValue = Request[$"activity-preference-{i}"];
+                                    if (postedValue.IsGuid())
+                                    {
+                                        var activity = activities.First(x => x.Uid == postedValue.ToGuid());
 
-                                    registration.ProcessRegistrationAssignment(
-                                        participationObject: activity.GetParticipationObject(amsgs, adc),
-                                        masterRegistrant: SessionVariables.CurrentRegistrant,
-                                        registrant: submittedRecord,
-                                        seatsRequested: 1,
-                                        preferenceNumber: i,
-                                        activityGroupId: participationObject.GetActivityGroupId(),
-                                        amountCharged: participationObject.Cost,
-                                        periodId: period?.ID,
-                                        loggedInUser: SessionVariables.CurrentUser,
-                                        msgs: amsgs,
-                                        dc: adc);
+                                        registration.ProcessRegistrationAssignment(
+                                            participationObject: activity.GetParticipationObject(amsgs, adc),
+                                            masterRegistrant: SessionVariables.CurrentRegistrant,
+                                            registrant: submittedRecord,
+                                            seatsRequested: 1,
+                                            preferenceNumber: i,
+                                            activityGroupId: participationObject.GetActivityGroupId(),
+                                            amountCharged: participationObject.Cost,
+                                            periodId: period?.ID,
+                                            loggedInUser: SessionVariables.CurrentUser,
+                                            msgs: amsgs,
+                                            dc: adc);
+                                    }
                                 }
+                            }
+                            else
+                            {
+                                activities.ForEach(activity => {
+                                    registration.ProcessRegistrationAssignment(
+                                            participationObject: activity.GetParticipationObject(amsgs, adc),
+                                            masterRegistrant: SessionVariables.CurrentRegistrant,
+                                            registrant: submittedRecord,
+                                            seatsRequested: 1,
+                                            activityGroupId: participationObject.GetActivityGroupId(),
+                                            amountCharged: participationObject.Cost,
+                                            periodId: period?.ID,
+                                            loggedInUser: SessionVariables.CurrentUser,
+                                            msgs: amsgs,
+                                            dc: adc);
+                                });
                             }
                         }
 

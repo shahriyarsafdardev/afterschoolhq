@@ -85,7 +85,7 @@ else
 
             if (canRegiserFor)
             {
-                <a href="@group.BrowseUrl@(group.IsInviteOnly ? $"?invite={Request["invite"]}" : "")" class="btn btn-register">
+                <a href="@group.BrowseUrl" class="btn btn-register">
                     @if (condensed)
                     {
                         @:Browse &raquo;

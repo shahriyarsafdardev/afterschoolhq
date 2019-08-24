@@ -558,6 +558,9 @@ namespace AfterSchoolLibrary.Models
                     finalList.Add(activity);
             });
 
+            if (!finalList.Any())
+                return activities;
+
             return finalList;
         }
 

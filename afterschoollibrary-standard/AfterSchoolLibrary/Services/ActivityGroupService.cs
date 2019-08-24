@@ -461,6 +461,11 @@ namespace AfterSchoolLibrary.Services
             return SaveActivityGroup(loggedInUser, account, ActivityGroupType.League, activityGroupUid, values, msgs, dc);
         }
 
+        public static bool IsInvited(this ActivityGroup group, string invite, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return invite.IsGuid() && group.IsInvited(invite.ToGuid(), msgs, dc);
+        }
+
         public static bool IsInvited(this ActivityGroup group, Guid invite, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return RegistrantActivityGroup.ExistsByUid(invite, msgs, dc);
