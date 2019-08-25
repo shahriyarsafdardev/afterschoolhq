@@ -551,8 +551,8 @@ namespace AfterSchoolLibrary.Models
                     registrantIds: registrantId.Value.AsList(),
                     assignmentTypes: RegistrationAssignmentType.Invited.AsList(),
                     hasParentalConsent: null,
-                    msgs,
-                    dc);
+                    msgs: msgs,
+                    dc: dc);
 
                 if (exists)
                     finalList.Add(activity);
