@@ -130,12 +130,10 @@ namespace AfterSchoolLibrary.Helpers
 
             var receiptRows = "";
             var regStatus = "";
-            var registeredOrApplied = "registered";
             var registrantActivity = checkoutObject.Registration.GetRegistrantActivities(msgs, dc).First();
             var registrationThankYou = participationObject.GetRegistrationThankYou(registrantActivity, msgs, dc);
             var cost = "";
             var ccFee = "";
-            var asFee = "";
             var additionalDetails = "";
 
             switch (registrantActivity.AssignmentTypeId)
@@ -150,16 +148,16 @@ namespace AfterSchoolLibrary.Helpers
                     break;
                 case RegistrationAssignmentType.Applied:
                     regStatus = "Applied";
-                    registeredOrApplied = "applied";
                     break;
             }
 
             var description = $"{participationObject.Name} - {regStatus}";
             var amountDueOrPaid = "";
+            var appliedOrWaitingList = new RegistrationAssignmentType[] { RegistrationAssignmentType.Applied, RegistrationAssignmentType.WaitingList };
 
             // if it's in apply mode, but the student could have been moved to registered even during apply mode registration
             // so we should treat them as registered
-            if (registrantActivity.AssignmentTypeId == RegistrationAssignmentType.Applied)
+            if (registrantActivity.AssignmentTypeId.In(appliedOrWaitingList))
                 amountDueOrPaid = "Amount Due (If Confirmed)";
             else if (registrantActivity.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingParentalConsent)
                 amountDueOrPaid = "Amount Due (If Parent Approved)";
@@ -175,21 +173,18 @@ namespace AfterSchoolLibrary.Helpers
                 {
                     cost = "FREE";
                     ccFee = "$0";
-                    asFee = "$0";
                 }
                 else if (checkoutObject.PaymentPlan.IsNotEmpty())
                 {
-                    cost = checkoutObject.PaymentPlanCostTodayNoFees.ToCurrency();
+                    cost = checkoutObject.GetPaymentPlanCostTodayConvenienceFee(msgs, dc).ToCurrency();
                     ccFee = checkoutObject.GetPaymentPlanCostTodayCreditCardFee(msgs, dc).ToCurrency();
-                    asFee = checkoutObject.GetPaymentPlanCostTodayConvenienceFee(msgs, dc).ToCurrency();
 
-                    additionalDetails = $"today plus {paymentPlan.CostPerPeriod.ToCurrency()} for {(paymentPlan.TotalPeriods.Value - 1)} {paymentPlan.BillingPeriodTypeId.ToString().ToLower()}(s)";
+                    additionalDetails = $"today plus {paymentPlan.GetTotalCostWithConvenienceFee(billingAccount, msgs, dc).ToCurrency()} for {(paymentPlan.TotalPeriods.Value - 1)} {paymentPlan.BillingPeriodTypeId.ToString().ToLower()}(s)";
                 }
                 else
                 {
                     cost = (checkoutObject.TuitionCostNoFees + checkoutObject.GetTuitionConvenienceFee(msgs, dc)).ToCurrency();
                     ccFee = checkoutObject.GetTuitionCreditCardFee(msgs, dc).ToCurrency();
-                    asFee = checkoutObject.GetTuitionConvenienceFee(msgs, dc).ToCurrency();
 
                     additionalDetails = "tuition fee";
                 }
@@ -217,7 +212,6 @@ namespace AfterSchoolLibrary.Helpers
                 additionalDetails = $"per {subscription.BillingPeriodTypeId.ToString().ToLower()}";
 
                 cost = (checkoutObject.SubscriptionCostTodayNoFees + checkoutObject.GetSubscriptionCostTodayConvenienceFee(msgs, dc)).ToCurrency();
-                asFee = checkoutObject.GetSubscriptionCostTodayConvenienceFee(msgs, dc).ToCurrency();
                 ccFee = checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc).ToCurrency();
 
                 // add tuition fee row
@@ -264,7 +258,6 @@ namespace AfterSchoolLibrary.Helpers
                 { "BodyRows", receiptRows },
                 { "CustomMessage", isParentCopy ? $"{masterRegistrant.FirstName} has registered for the following activity:" : registrationThankYou },
                 { "CreditCardFee", ccFee },
-                { "ConvenienceFee", asFee },
                 { "RegistrationDetails", registrationDetails}
             };
             
