@@ -59,7 +59,7 @@
 
                     <div class="padding-v-20">
                         <button type="submit" id="btn-register" class="btn btn-register btn-lg">
-                            @if (Model.IsFree || Model.RegistrationMode == RegistrationMode.Apply)
+                            @if (!Model.ShouldParentPay())
                             {
                                 @: Complete Registration &raquo;
                             }

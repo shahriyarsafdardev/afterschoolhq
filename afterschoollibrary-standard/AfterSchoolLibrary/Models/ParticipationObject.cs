@@ -530,6 +530,14 @@ namespace AfterSchoolLibrary.Models
 
         #region Financial
 
+        public bool ShouldParentPay()
+        {
+            // OwnerAccount.CanProcessPayments(msgs, dc) &&
+            return !this.IsFree && 
+                this.RegistrationMode == RegistrationMode.Register && 
+                this.SeatsRemaining > 0;
+        }
+
         public decimal GetAmountPaidByRegistrant(int registrantId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return ActivityPayment.GetTotalPaidByParticipationObjectByRegistrant(
