@@ -8,7 +8,7 @@
     var registrant = (Registrant)ViewBag.Registrant;
     var isSelfRegistered = (bool)ViewBag.IsSelfRegistered;
     var assignmentType = registration.GetRegistrantActivities().First().AssignmentTypeId;
-    var participationObject = registration.GetParticipationObject();
+    var participationObject = (ParticipationObject)ViewBag.ParticipationObject;
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -24,18 +24,26 @@
 
                 <div class="reg-ul">
                     <p>
-                        @(isSelfRegistered ? "You have" : $"{registrant.FirstName} has") 
-                        @if(assignmentType == RegistrationAssignmentType.Applied)
+                        @if (isSelfRegistered)
                         {
-                            <span>applied</span>
-                        }
-                        else if (assignmentType == RegistrationAssignmentType.WaitingList)
-                        {
-                            <span>been placed on the waiting list</span>
+                            <span>You have</span>
                         }
                         else
                         {
-                            <span>been registered</span>
+                            <span><strong>@registrant.FirstName</strong> has</span>
+                        }
+
+                        @if(assignmentType == RegistrationAssignmentType.Applied)
+                        {
+                            <span><strong>applied</strong></span>
+                        }
+                        else if (assignmentType == RegistrationAssignmentType.WaitingList)
+                        {
+                            <span>been placed on the <strong>waiting list</strong></span>
+                        }
+                        else
+                        {
+                            <span>been <strong>registered</strong></span>
                         }
                         for <strong>@participationObject.Name</strong>
                     </p>
