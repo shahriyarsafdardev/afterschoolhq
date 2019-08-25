@@ -1603,6 +1603,7 @@ namespace AfterSchool.Controllers
             ViewBag.IsSelfRegistered = masterRegistrant.WebUserId == SessionVariables.CurrentUser.ID;
             ViewBag.Registrant = masterRegistrant;
             ViewBag.Messages = msgs;
+            ViewBag.ParticipationObject = GetParticipationObjectFromRegistration(registration, msgs);
         }
 
         private ActionResult ThankYouActionGet(string registrationUid)
@@ -2051,6 +2052,18 @@ namespace AfterSchool.Controllers
                 return HandleRedirectAfterLogin(null);
 
             return null;
+        }
+
+        private ParticipationObject GetParticipationObjectFromRegistration(Registration registration, SystemMessages msgs)
+        {
+            var registrantActivities = registration.GetRegistrantActivities(msgs);
+
+            if (registrantActivities.Count == 1)
+                return registrantActivities.First().GetParticipationObject(msgs);
+
+            return registrantActivities
+                .First(x => x.ParticipationObjectTypeId == ParticipationObjectType.ActivityGroup)
+                .GetParticipationObject(msgs);
         }
 
         private ParticipationObject GetParticipationObjectFromCart()

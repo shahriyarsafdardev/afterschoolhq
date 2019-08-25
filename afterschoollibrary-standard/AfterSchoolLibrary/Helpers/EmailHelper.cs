@@ -127,16 +127,19 @@ namespace AfterSchoolLibrary.Helpers
             var masterRegistrant = checkoutObject.MasterRegistrant;
             var parentOrGuardian = masterRegistrant.GetParentOrGuardian(msgs, dc);
             var canAccountAcceptPayments = billingAccount.CanProcessPayments(msgs, dc);
+            var registration = checkoutObject.Registration;
 
             var receiptRows = "";
             var regStatus = "";
-            var registrantActivity = checkoutObject.Registration.GetRegistrantActivities(msgs, dc).First();
-            var registrationThankYou = participationObject.GetRegistrationThankYou(registrantActivity, msgs, dc);
+            var registrantActivities = registration.GetRegistrantActivities(msgs, dc);
+            var mainRA = registrantActivities.First(ra => ra.ParticipationObjectId == participationObject.ObjectID && ra.ParticipationObjectTypeId == participationObject.ObjectType);
+            var otherRAs = registrantActivities.Except(mainRA.AsList()).ToList();
+            var registrationThankYou = participationObject.GetRegistrationThankYou(mainRA, msgs, dc);
             var cost = "";
             var ccFee = "";
             var additionalDetails = "";
 
-            switch (registrantActivity.AssignmentTypeId)
+            switch (mainRA.AssignmentTypeId)
             {
                 case RegistrationAssignmentType.Reserved:
                 case RegistrationAssignmentType.ReservedPendingPayment:
@@ -151,20 +154,25 @@ namespace AfterSchoolLibrary.Helpers
                     break;
             }
 
-            var description = $"{participationObject.Name} - {regStatus}";
             var amountDueOrPaid = "";
             var appliedOrWaitingList = new RegistrationAssignmentType[] { RegistrationAssignmentType.Applied, RegistrationAssignmentType.WaitingList };
 
             // if it's in apply mode, but the student could have been moved to registered even during apply mode registration
             // so we should treat them as registered
-            if (registrantActivity.AssignmentTypeId.In(appliedOrWaitingList))
+            if (mainRA.AssignmentTypeId.In(appliedOrWaitingList))
                 amountDueOrPaid = "Amount Due (If Confirmed)";
-            else if (registrantActivity.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingParentalConsent)
+            else if (mainRA.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingParentalConsent)
                 amountDueOrPaid = "Amount Due (If Parent Approved)";
-            else if (!canAccountAcceptPayments || registrantActivity.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment)
+            else if (!canAccountAcceptPayments || mainRA.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment)
                 amountDueOrPaid = "Amount Due";
             else
                 amountDueOrPaid = "Amount Paid";
+
+            var description = $"{participationObject.Name} - {regStatus}";
+
+            otherRAs.ForEach(ra => {
+                description += $"<br />&nbsp;&bull;&nbsp;{ra.GetParticipationObject(msgs, dc).Name}";
+            });
 
             // show this if no subscription plan, if there's a reg fee or there's a payment plan
             if (checkoutObject.IsFree || participationObject.Cost > 0.ToDecimal() || paymentPlan.IsNotEmpty())
@@ -248,9 +256,9 @@ namespace AfterSchoolLibrary.Helpers
                 { "FirstName", isParentCopy ? purchaser.FirstName : loggedInUser.FirstName },
                 { "ProductName", Utilities.AppName(isAfterSchool) },
                 { "LoginLink", loginLink },
-                { "ActivityContactEmail", participationObject.ContactEmail},
-                { "ActivityContactPhone", participationObject.ContactPhone},
-                { "ActivityContactName", participationObject.ContactName},
+                { "ActivityContactEmail", participationObject.ContactEmail.IfBlank(billingAccount.Email)},
+                { "ActivityContactPhone", participationObject.ContactPhone.IfBlank(billingAccount.Phone)},
+                { "ActivityContactName", participationObject.ContactName.IfBlank(billingAccount.Name)},
                 { "BillerAccountName", billingAccount.Name },
                 { "BillerAccountLink", billingAccount.HomePageUrl },
                 { "AmountDueOrPaid", amountDueOrPaid },
