@@ -461,6 +461,21 @@ namespace AfterSchoolLibrary.Services
             return SaveActivityGroup(loggedInUser, account, ActivityGroupType.League, activityGroupUid, values, msgs, dc);
         }
 
+        public static bool IsInvited(this ActivityGroup group, string invite, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return invite.IsGuid() && group.IsInvited(invite.ToGuid(), msgs, dc);
+        }
+
+        public static bool IsInvited(this ActivityGroup group, Guid invite, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return RegistrantActivityGroup.ExistsByUid(invite, msgs, dc);
+        }
+
+        public static void DeclineInvite(this ActivityGroup group, Guid invite, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            RegistrantActivityGroup.LoadByUid(invite, msgs, dc)?.DeclineInvite(0, msgs, dc);
+        }
+
         public static SystemMessages EmailInvitedContacts(int id, int periodId, List<int> contactIds, string emailmessage, string inviteUrl, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
@@ -471,61 +486,19 @@ namespace AfterSchoolLibrary.Services
             var contacts = Registrant.LoadList(contactIds, dc: dc);
 
             if (contacts.IsNotEmpty() && contacts.Any())
-            {
-                var subject = "";
-                var body = "";
-
-                subject = string.Format("You have been invited to register for {0}", group.Name);
-
-                var regOpenText = "";
-                if (period.IsNotEmpty())
-                {
-                    if (period.IsOpen(dc: dc))
-                        regOpenText = "Registration is open now.";
-                    else if (group.WillOpen(dc: dc))
-                        regOpenText = "Registration will open " + period.StartDateTime.ToShortDateString() + ".";
-                }
-
-                var acceptInviteText = "To accept this invite and register, please click the following link: <a href=\"{0}\">{0}</a>";
-                var declineInviteText = "<p>To decline this invite, please click the following link: <a href=\"{0}\">{0}</a></p>";
-                var userSignature = string.Format("<p>Regards,<br />{0}</p>", loggedInUser.DisplayName);
-                var declineUrl = "";
-
-                body = "{0}{1}<p>{2} {3}</p>{4}{5}{6}";
-
+            {                
                 contacts.ForEach(contact => {
-                    var finalInviteUrl = inviteUrl;
-                    var rag = RegistrantActivityGroup.LoadByActivityGroupIdByRegistrantId(group.ID.Value, contact.ID.Value, dc: dc);
 
-                    var salutation = "<p>Hello,</p>";
-                    if (contact.FirstName.IsNotBlank())
-                        salutation = string.Format("<p>Hello {0},</p>", contact.FirstName);
+                    var rag = RegistrantActivityGroup.LoadByActivityGroupIdByRegistrantId(group.ID.Value, contact.ID.Value, msgs, dc);
 
-                    finalInviteUrl += (finalInviteUrl.Contains("?") ? "&" : "?") + "invite=" + rag.Uid.ToString();
-                    declineUrl = finalInviteUrl + "&declined=1";
-
-                    var acceptInviteTextWithLink = string.Format(acceptInviteText, finalInviteUrl);
-                    var declineInviteTextWithLink = string.Format(declineInviteText, declineUrl);
-
-                    SendGridHelper.SendMail(
-                        fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                            Helpers.Email.AppNoReplyEmailAddress,
-                            string.Format("{0} via {1}", account.Name,
-                            Helpers.Utilities.AppName(account.IsAfterSchool))),
-                        toEmail: new SendGrid.Helpers.Mail.EmailAddress(contact.Email, contact.Name),
-                        subject: subject,
-                        body: string.Format(
-                            body,
-                            salutation,
-                            emailmessage,
-                            regOpenText,
-                            acceptInviteTextWithLink,
-                            declineInviteTextWithLink,
-                            userSignature,
-                            Helpers.Email.GetAppSignature(account.IsAfterSchool, "invite_contacts")),
-                        replyTo: new SendGrid.Helpers.Mail.EmailAddress(account.Email, account.Name),
-                        emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
-                    );
+                    msgs.AddRange(Helpers.EmailHelper.SendSessionInviteEmail(
+                        contact,
+                        account,
+                        group,
+                        rag,
+                        period,
+                        loggedInUser,
+                        emailmessage));
                 });
             }
 

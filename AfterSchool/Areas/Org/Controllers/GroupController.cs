@@ -120,7 +120,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 { "description", description },
                 { "regmode", regmode },
                 { "form", form },
-                { "isinviteonly", 0.ToString() },
+                { "isinviteonly", isinviteonly.IsBoolean() },
                 // { "genderrestrictions", genderrestrictions },
                 // { "mingrade", mingrade },
                 // { "maxgrade", maxgrade },
