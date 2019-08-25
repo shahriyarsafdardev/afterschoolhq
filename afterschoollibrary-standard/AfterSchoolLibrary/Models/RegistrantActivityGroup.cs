@@ -258,12 +258,11 @@ namespace AfterSchoolLibrary.Models
         }
 
         private ActivityGroup _Group = null;
-        public ActivityGroup GetGroup(DatabaseConnection dc = null)
+        public ActivityGroup GetGroup(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (_Group.IsEmpty())
-            {
-                _Group = ActivityGroup.Load(this.ActivityGroupId.Value, dc: dc);
-            }
+                _Group = ActivityGroup.Load(this.ActivityGroupId.Value, msgs, dc);
+
             return _Group;
         }
         public string RegistrantName
@@ -284,9 +283,8 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        public SystemMessages DeclineInvite(Account account, int loggedInUserId, DatabaseConnection dc = null)
+        public void DeclineInvite(int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
             var groupName = this.ActivityGroupName;
             var registrantName = this.RegistrantName;
 
@@ -311,33 +309,26 @@ namespace AfterSchoolLibrary.Models
                         });
                 },
                 onSuccess: (SystemMessages smsgs) =>
-                {
-                    if (smsgs.HasNoErrors())
-                    {
-                        var body = "<p>Hello,</p><p>{0} has opted to decline the invitation to register for {1}</p>{2}";
+                {                    
+                    var body = "<p>Hello,</p><p>{0} has opted to decline the invitation to register for {1}</p>{2}";
+                    var account = this.GetGroup(msgs, dc).GetAccount(msgs, dc);
 
-                        SendGridHelper.SendMail(
-                            fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                                Helpers.Email.AppNoReplyEmailAddress, 
-                                string.Format("{0} via {1}", account.Name, Helpers.Utilities.AppName(account.IsAfterSchool))
-                            ),
-                            toEmail: new SendGrid.Helpers.Mail.EmailAddress(account.Email, account.Name),
-                            subject: string.Format("An invitation was declined for {0}", groupName),
-                            body: string.Format(body, registrantName, groupName, Helpers.Email.GetAppSignature(account.IsAfterSchool, "declined_invite_notice")),        
-                            emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
-                        );
-                    }
+                    SendGridHelper.SendMail(
+                        fromEmail: Helpers.Email.SendGridNoReplyEmailAddress(),
+                        toEmail: new SendGrid.Helpers.Mail.EmailAddress(account.Email, account.Name),
+                        subject: string.Format("An invitation was declined for {0}", groupName),
+                        body: string.Format(body, registrantName, groupName, Helpers.Email.GetAppSignature(account.IsAfterSchool, "declined_invite_notice")),        
+                        emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
+                    );
+
+                    msgs.Add("Your invitation has been declined", MessageType.Notice);
 
                     msgs.AddRange(smsgs);
                 },
-                onFailure: (SystemMessages fmsgs) =>
-                {
-                    msgs.AddRange(fmsgs);
-                },
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
-
-            return msgs;
         }
 
         public static List<RegistrantActivityGroup> LoadByActivityGroupId(int ActivityGroupId, int? start, int? length, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -349,6 +340,14 @@ namespace AfterSchoolLibrary.Models
             dq.SelectRange.Length = length;
             dq.OrderBys.Add(ObjectMap["RegistrantFirstName"], OrderByDirectionEnum.Ascending);
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static bool ExistsByUid(Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["Uid"], Uid);
+            return dq.GetCount(msgs) > 0;
         }
 
         #endregion

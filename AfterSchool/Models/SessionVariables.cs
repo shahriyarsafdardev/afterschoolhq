@@ -100,7 +100,7 @@ namespace AfterSchool.Models
                 HttpContext.Current.Session["AccountUserType"] = value;
             }
         }
-        
+
         public static AccountPackage AccountPackage
         {
             get
@@ -115,7 +115,22 @@ namespace AfterSchool.Models
                     SessionHelper.RemoveFromSession("AccountPackage");
             }
         }
-        
+
+        public static string SessionInvite
+        {
+            get
+            {
+                return SessionHelper.GetSessionInvite();
+            }
+            set
+            {
+                if (value.IsNotEmpty())
+                    SessionHelper.AddToSession("SessionInvite", value.ToString());
+                else
+                    SessionHelper.RemoveFromSession("SessionInvite");
+            }
+        }
+
         public static Session VisitorSession
         {
             get

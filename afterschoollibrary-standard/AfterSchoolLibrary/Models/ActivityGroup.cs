@@ -524,12 +524,44 @@ namespace AfterSchoolLibrary.Models
         {
             return GetActivities(null, false, false, null, null, false, msgs, dc);
         }
+
         public List<Activity> GetActivities(ActivityType? activityType, bool? isArchived, bool? isDeleted, int? start, int? length, bool forceReload = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (_Activities.IsEmpty() || forceReload)
                 _Activities = Activity.LoadByAccountId(this.AccountId.Value, this.ID.Value, null, activityType, isArchived, isDeleted, start, length, msgs, dc);
 
             return _Activities;
+        }
+
+        public List<Activity> GetInvitedToActivities(Guid inviteUid, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var activities = GetActivities(msgs, dc);
+            var finalList = new List<Activity>();
+            var rag = RegistrantActivityGroup.LoadByUid(inviteUid, msgs, dc);
+
+            if (rag.IsEmpty())
+                return new List<Activity>();
+
+            var registrantId = rag.RegistrantId;
+
+            activities.ForEach(activity => {
+                var exists = RegistrantActivity.ExistsByParticipationObjectByRegistrants(
+                    participationObjectId: activity.ID.Value,
+                    participationObjectType: ParticipationObjectType.Activity,
+                    registrantIds: registrantId.Value.AsList(),
+                    assignmentTypes: RegistrationAssignmentType.Invited.AsList(),
+                    hasParentalConsent: null,
+                    msgs,
+                    dc);
+
+                if (exists)
+                    finalList.Add(activity);
+            });
+
+            if (!finalList.Any())
+                return activities;
+
+            return finalList;
         }
 
         private Form _Form = null;

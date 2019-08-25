@@ -113,7 +113,14 @@ namespace AfterSchoolLibrary.Services
             else if (!waitingListSeatsAvailable.HasValue || waitingListSeatsAvailable >= numberOfSeatsRequested)
                 return RegistrationAssignmentType.WaitingList;
 
-            return RegistrationAssignmentType.NotSet;
+            // this is probably temporary and will break if something else changes
+            // assuming that for sessions there are no reserved seat setting saved
+            else if (participationObject.IsActivityGroup() && participationObject.GetActivityGroup().ActivityGroupTypeId == ActivityGroupType.Session)
+                return RegistrationAssignmentType.Reserved;
+
+            // forget the limit on waiting list seats, just dump people there for now
+            // TODO: figure out what to do if paying and only waiting list seats left
+            return RegistrationAssignmentType.WaitingList;
         }
 
         public static void ProcessRegistrationAssignment(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
