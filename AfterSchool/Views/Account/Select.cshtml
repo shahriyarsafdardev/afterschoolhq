@@ -45,6 +45,11 @@
             {
                 btnText = "Give Consent";
             }
+            else if (registrant.OnWaitingListFor(participationObject))
+            {
+                btnText = $"On Waiting List";
+                disabledText = " disabled=\"disabled\" ";
+            }
             else if (!registrant.IsReservedAndPaidFor(participationObject, null) && !registrant.IsAppliedFor(participationObject, null) && !registrant.MasterRegistrantHasPlan(participationObject))
             {
                 btnText = "Pay Now";
