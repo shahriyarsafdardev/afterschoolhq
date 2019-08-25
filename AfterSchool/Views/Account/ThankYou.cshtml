@@ -24,7 +24,15 @@
 
                 <div class="reg-ul">
                     <p>
-                        @(isSelfRegistered ? "You have" : $"{registrant.FirstName} has") 
+                        @if (isSelfRegistered)
+                        {
+                            <span>You have</span>
+                        }
+                        else
+                        {
+                            <span><strong>@registrant.FirstName</strong> has</span>
+                        }
+
                         @if(assignmentType == RegistrationAssignmentType.Applied)
                         {
                             <span><strong>applied</strong></span>
