@@ -447,10 +447,21 @@ namespace AfterSchoolLibrary.Services
         {
             return HasParticipationAssignment(masterRegistrant, participationObject, RegistrationAssignmentType.Applied.AsList(), hasParentalConsent, msgs, dc);
         }
-        
+
         public static bool HasConsentFor(this Registrant masterRegistrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return HasParticipationAssignment(masterRegistrant, participationObject, null, true, msgs, dc);
+        }
+
+        public static bool OnWaitingListFor(this Registrant masterRegistrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return HasParticipationAssignment(
+                masterRegistrant, 
+                participationObject, 
+                RegistrationAssignmentType.WaitingList.AsList(), 
+                true, 
+                msgs, 
+                dc);
         }
 
         public static bool IsReservedFor(this Registrant masterRegistrant, ParticipationObject participationObject, bool? hasParentalConsent, SystemMessages msgs = null, DatabaseConnection dc = null)
