@@ -1326,7 +1326,7 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
-                if (participationObject.IsFree || participationObject.RegistrationMode == RegistrationMode.Apply)
+                if (participationObject.IsFree || participationObject.RegistrationMode == RegistrationMode.Apply || participationObject.SeatsRemaining == 0)
                     return RedirectToAction("finalizeregistration", new { id = registration.Uid });
 
                 return RedirectToAction("payment", new { id = registration.Uid });
@@ -1358,7 +1358,7 @@ namespace AfterSchool.Controllers
             {
                 // if it's not free and registration mode is not set to apply mode
                 // if it costs something and you're forced to register then you need to pay
-                if (!participationObject.IsFree && participationObject.RegistrationMode == RegistrationMode.Register)
+                if (!participationObject.IsFree && participationObject.RegistrationMode == RegistrationMode.Register && participationObject.SeatsRemaining > 0)
                     return RedirectToAction("payment", new { id = registrationUid });
             }
 
