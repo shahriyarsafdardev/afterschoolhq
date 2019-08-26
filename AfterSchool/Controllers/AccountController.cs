@@ -1597,13 +1597,15 @@ namespace AfterSchool.Controllers
             var registration = Registration.LoadByUid(registrationUid.ToGuid(), msgs);
             var registrant = registration.GetRegistrant(msgs);
             var masterRegistrant = registrant.GetMasterRegistrant(msgs);
+            var (participationObject, assignmentType) = GetParticipationObjectFromRegistration(registration, msgs);
 
             ViewBag.Registration = registration;
             ViewBag.Account = SessionVariables.RegistrationStartPageAccount;
             ViewBag.IsSelfRegistered = masterRegistrant.WebUserId == SessionVariables.CurrentUser.ID;
             ViewBag.Registrant = masterRegistrant;
             ViewBag.Messages = msgs;
-            ViewBag.ParticipationObject = GetParticipationObjectFromRegistration(registration, msgs);
+            ViewBag.ParticipationObject = participationObject;
+            ViewBag.AssignmentType = assignmentType;
         }
 
         private ActionResult ThankYouActionGet(string registrationUid)
@@ -2054,16 +2056,21 @@ namespace AfterSchool.Controllers
             return null;
         }
 
-        private ParticipationObject GetParticipationObjectFromRegistration(Registration registration, SystemMessages msgs)
+        private (ParticipationObject, RegistrationAssignmentType) GetParticipationObjectFromRegistration(Registration registration, SystemMessages msgs)
         {
             var registrantActivities = registration.GetRegistrantActivities(msgs);
+            var assignmentType = RegistrationAssignmentType.NotSet;
+            RegistrantActivity registrantActivity = null;
 
             if (registrantActivities.Count == 1)
-                return registrantActivities.First().GetParticipationObject(msgs);
+                registrantActivity = registrantActivities.First();
+            else
+                registrantActivity = registrantActivities
+                                    .First(x => x.ParticipationObjectTypeId == ParticipationObjectType.ActivityGroup);
 
-            return registrantActivities
-                .First(x => x.ParticipationObjectTypeId == ParticipationObjectType.ActivityGroup)
-                .GetParticipationObject(msgs);
+            assignmentType = registrantActivity.AssignmentTypeId;
+
+            return (registrantActivity.GetParticipationObject(msgs), assignmentType);
         }
 
         private ParticipationObject GetParticipationObjectFromCart()

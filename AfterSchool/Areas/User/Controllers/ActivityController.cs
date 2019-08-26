@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Web.Mvc;
 using AfterSchool.Areas.User.Models;
+using System.Linq;
 
 namespace AfterSchool.Areas.User.Controllers
 {
@@ -29,7 +30,9 @@ namespace AfterSchool.Areas.User.Controllers
 
                 registrant.GetSubmittedRecords(msgs).ForEach(submittedRecord =>
                 {
-                    var ras = submittedRecord.GetRegistrantActivities(msgs);
+                    var ras = submittedRecord.GetRegistrantActivities(msgs)
+                                .Where(ra => ra.ParticipationObjectTypeId != ParticipationObjectType.ActivityGroup)
+                                .ToList();                    
 
                     ras.ForEach(ra => {
                         var participationObject = ra.GetParticipationObject(msgs);
