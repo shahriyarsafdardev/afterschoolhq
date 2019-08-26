@@ -769,8 +769,10 @@
     <Content Include="Public\js\bootstrap.min.js" />
     <Content Include="Public\js\custom.js" />
     <Content Include="Public\js\npm.js" />
+    <Content Include="Public\parent-faq.html" />
     <Content Include="Public\parents.html" />
     <Content Include="Public\privacy.html" />
+    <Content Include="Public\provider-faq.html" />
     <Content Include="Public\providers.html" />
     <Content Include="Public\schools.html" />
     <Content Include="Public\sign-up.html" />

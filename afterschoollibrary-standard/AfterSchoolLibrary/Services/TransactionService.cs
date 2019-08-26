@@ -261,7 +261,7 @@ namespace AfterSchoolLibrary.Services
         {
             return transaction.PayoutId == null &&
                 DateTime.UtcNow.IsOnOrAfter(transaction.CreateDate.Value.AddDays(transaction.GetWaitPeriodInDays())) &&
-                transaction.PlatformPercentFee == 0 &&
+                !transaction.PlatformPercentFee.HasValue &&
                 transaction.PaymentSourceTypeId == PaymentSourceType.AfterSchoolPlatform;
         }
     }
