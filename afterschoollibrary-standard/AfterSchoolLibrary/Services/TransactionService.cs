@@ -259,7 +259,7 @@ namespace AfterSchoolLibrary.Services
             return transaction.PayoutId == null &&
                 DateTime.UtcNow.IsOnOrAfter(transaction.CreateDate.Value.AddDays(transaction.GetWaitPeriodInDays())) &&
                 transaction.PlatformPercentFee == 0 &&
-                transaction.PaymentSourceTypeId != PaymentSourceType.Manual;
+                transaction.PaymentSourceTypeId == PaymentSourceType.AfterSchoolPlatform;
         }
     }
 }
