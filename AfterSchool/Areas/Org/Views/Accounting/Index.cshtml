@@ -164,7 +164,7 @@
                                 var registrant = Registrant.Load(purchase.RegistrantId.Value);
                                 var participationObjects = transaction.GetParticipationObjects();
                                 var currentStatus = transaction.GetStatus();
-                                var disableChk = transaction.CanRequestPayout() ? "disabled" : "";
+                                var disableChk = !transaction.CanRequestPayout() ? "disabled" : "";
 
                                 <tr id="@transaction.Uid" data-refunded-amount="@transaction.GetRefundedAmount().ToCurrency()">
                                     <td>
