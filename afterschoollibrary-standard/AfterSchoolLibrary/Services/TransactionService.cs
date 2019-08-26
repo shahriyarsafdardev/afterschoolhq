@@ -235,6 +235,9 @@ namespace AfterSchoolLibrary.Services
 
         public static string GetStatus(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            if (transaction.PaymentSourceTypeId != PaymentSourceType.AfterSchoolPlatform)
+                return "";
+
             var currentPayout = GetPayout(transaction, msgs);
 
             if (currentPayout != null)
