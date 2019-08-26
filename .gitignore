@@ -14,8 +14,7 @@ packages
 UpgradeLog.htm
 
 .vs
-.vscode
-.vscode/*
+AfterSchool/.vscode
 
 # Packages #
 ############
