@@ -220,6 +220,14 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
+        public static int GetWaitPeriodInDays(this Transaction transaction)
+        {
+            if (transaction.PaymentTypeId == PaymentType.ACH)
+                return 5;
+
+            return 2;
+        }
+
         public static string GetStatus(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var currentPayout = GetPayout(transaction, msgs);
@@ -234,16 +242,19 @@ namespace AfterSchoolLibrary.Services
                     default:
                         return currentPayout.PayoutStatusId.ToString();
                 }
-
-            var waitPeriodInDays = 2;
-
-            if (transaction.PaymentTypeId == PaymentType.ACH)
-                waitPeriodInDays = 5;
-
-            if (DateTime.UtcNow.IsBefore(transaction.CreateDate.Value.AddDays(waitPeriodInDays)))
+            
+            if (DateTime.UtcNow.IsBefore(transaction.CreateDate.Value.AddDays(transaction.GetWaitPeriodInDays())))
                 return "Incoming";
 
             return null;
+        }
+
+        public static bool CanRequestPayout(this Transaction transaction)
+        {
+            return transaction.PayoutId == null &&
+                DateTime.UtcNow.IsOnOrAfter(transaction.CreateDate.Value.AddDays(transaction.GetWaitPeriodInDays())) &&
+                transaction.PlatformPercentFee == 0 &&
+                transaction.PaymentSourceTypeId != PaymentSourceType.Manual;
         }
     }
 }
