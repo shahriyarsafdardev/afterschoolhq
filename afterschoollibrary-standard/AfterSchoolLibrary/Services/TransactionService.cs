@@ -222,7 +222,12 @@ namespace AfterSchoolLibrary.Services
 
         public static int GetWaitPeriodInDays(this Transaction transaction)
         {
-            if (transaction.PaymentTypeId == PaymentType.ACH)
+            return GetWaitPeriodInDays(transaction.PaymentTypeId);
+        }
+
+        public static int GetWaitPeriodInDays(PaymentType paymentType)
+        {
+            if (paymentType == PaymentType.ACH)
                 return 5;
 
             return 2;
