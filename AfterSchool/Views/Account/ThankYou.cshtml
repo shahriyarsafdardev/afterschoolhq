@@ -7,7 +7,7 @@
     var registration = (Registration)ViewBag.Registration;
     var registrant = (Registrant)ViewBag.Registrant;
     var isSelfRegistered = (bool)ViewBag.IsSelfRegistered;
-    var assignmentType = registration.GetRegistrantActivities().First().AssignmentTypeId;
+    var assignmentType = (RegistrationAssignmentType)ViewBag.AssignmentType;
     var participationObject = (ParticipationObject)ViewBag.ParticipationObject;
 }
 
