@@ -777,6 +777,7 @@
     <Content Include="Public\schools.html" />
     <Content Include="Public\sign-up.html" />
     <Content Include="Public\tos.html" />
+    <Content Include="robots.txt" />
     <Content Include="Scripts\app\app.init.js" />
     <Content Include="Scripts\app\modules\bootstrap-start.js" />
     <Content Include="Scripts\app\modules\clear-storage.js" />
