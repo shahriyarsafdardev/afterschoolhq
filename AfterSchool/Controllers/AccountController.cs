@@ -15,7 +15,7 @@ namespace AfterSchool.Controllers
 
         #region GetStartedParent
 
-        private List<FormQuestionViewModel> GetStartedParentViewBag(SystemMessages msgs)
+        private List<FormQuestionViewModel> GetStartedParentViewBag(ParticipationObject participationObject, SystemMessages msgs)
         {
             var form = GetAdministratorAccountForm(msgs);
             var personalContactGroup = form.GetQuestionGroups(msgs)
@@ -53,7 +53,7 @@ namespace AfterSchool.Controllers
                 }
             });
 
-            ViewBag.ParticipationObject = GetParticipationObjectFromCart();
+            ViewBag.ParticipationObject = participationObject;
 
             var qvms = questions.Select(question => new FormQuestionViewModel(question, Request.Params)).ToList();
 
@@ -94,7 +94,12 @@ namespace AfterSchool.Controllers
             }
 
             var msgs = new SystemMessages();
-            var qvms = GetStartedParentViewBag(msgs);
+            var participationObject = GetParticipationObjectFromCart();
+
+            if (participationObject.IsEmpty())
+                return HttpNotFound();
+
+            var qvms = GetStartedParentViewBag(participationObject, msgs);
 
             ViewBag.Messages = msgs;
 
@@ -2078,10 +2083,10 @@ namespace AfterSchool.Controllers
 
         private ParticipationObject GetParticipationObjectFromCart()
         {
-            var participationObjects = SessionVariables.Cart.GetCartItems().Select(cart => cart.GetParticipationObject()).ToList();
+            var participationObjects = SessionVariables.Cart?.GetCartItems().Select(cart => cart.GetParticipationObject()).ToList();
             ParticipationObject participationObject = null;
-           
-            participationObjects.ForEach(item => {
+
+            participationObjects?.ForEach(item => {
                 if (item.IsActivityGroup())
                     participationObject = item;
             });
