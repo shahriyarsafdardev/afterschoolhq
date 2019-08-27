@@ -1270,28 +1270,31 @@ namespace AfterSchool.Controllers
 
                         // if there is a Session, then a person may set their preferences for activities in that session, 
                         // also only if the session is set to Apply
-                        if (participationObject.IsActivityGroup())
+                        if (participationObject.IsActivityGroup() && participationObject.GetActivityGroup().ActivityGroupTypeId == ActivityGroupType.Session)
                         {
-                            var activities = participationObject.GetActivityGroup()
-                                .GetActivities(null, false, false, null, null, false, amsgs, adc);
+                            // only get activities that are in the cart
+                            var participationObjects = SessionVariables.Cart.GetCartItems(amsgs, adc)
+                                                        .Where(item => item.ParticipationObjectTypeId == ParticipationObjectType.Activity)
+                                                        .Select(item => item.GetParticipationObject(amsgs, adc))
+                                                        .ToList();
 
                             if (participationObject.GetActivityGroup().RegistrationModeId == RegistrationMode.Apply)
                             {
-                                for (int i = 1; i <= activities.Count; i++)
+                                for (int i = 1; i <= participationObjects.Count; i++)
                                 {
                                     var postedValue = Request[$"activity-preference-{i}"];
                                     if (postedValue.IsGuid())
                                     {
-                                        var activity = activities.First(x => x.Uid == postedValue.ToGuid());
+                                        var po = participationObjects.First(x => x.Uid == postedValue.ToGuid());
 
                                         registration.ProcessRegistrationAssignment(
-                                            participationObject: activity.GetParticipationObject(amsgs, adc),
+                                            participationObject: po,
                                             masterRegistrant: SessionVariables.CurrentRegistrant,
                                             registrant: submittedRecord,
                                             seatsRequested: 1,
                                             preferenceNumber: i,
                                             activityGroupId: participationObject.GetActivityGroupId(),
-                                            amountCharged: participationObject.Cost,
+                                            amountCharged: po.Cost,
                                             periodId: period?.ID,
                                             loggedInUser: SessionVariables.CurrentUser,
                                             msgs: amsgs,
@@ -1301,14 +1304,14 @@ namespace AfterSchool.Controllers
                             }
                             else
                             {
-                                activities.ForEach(activity => {
+                                participationObjects.ForEach(po => {
                                     registration.ProcessRegistrationAssignment(
-                                            participationObject: activity.GetParticipationObject(amsgs, adc),
+                                            participationObject: po,
                                             masterRegistrant: SessionVariables.CurrentRegistrant,
                                             registrant: submittedRecord,
                                             seatsRequested: 1,
                                             activityGroupId: participationObject.GetActivityGroupId(),
-                                            amountCharged: participationObject.Cost,
+                                            amountCharged: po.Cost,
                                             periodId: period?.ID,
                                             loggedInUser: SessionVariables.CurrentUser,
                                             msgs: amsgs,
