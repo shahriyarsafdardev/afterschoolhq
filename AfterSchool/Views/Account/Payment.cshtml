@@ -11,7 +11,7 @@
     var checkoutObject = (CheckoutObject)ViewBag.CheckoutObject;
     var accountCanAcceptPayments = (bool)ViewBag.AccountCanAcceptPayments;
     var paymentAccount = participationObject.PaymentAccount;
-    var acceptACH = participationObject.OwnerAccount.HasFeature(FeatureType.AcceptACH);
+    var acceptACH = true;
     var subscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault();
 }
 
