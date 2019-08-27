@@ -85,15 +85,15 @@ namespace AfterSchoolLibrary.Services
 
             foreach (var key in groupedTransactions.Keys)
             {
-                var activityName = participationObjects.First(po => po.Uid.ToString() == key);
+                var name = participationObjects.First(po => po.Uid.ToString() == key).Name;
                 var totalAmount = groupedTransactions[key];
 
                 body += $@"<tr>
                             <td>
-                                {activityName}
+                                {name}
                             </td>
                             <td class=""text-right"">
-                                {totalAmount}
+                                {totalAmount.ToCurrency()}
                             </td>
                         </tr>";
             }
