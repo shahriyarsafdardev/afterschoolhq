@@ -73,7 +73,7 @@ namespace AfterSchool.Areas.User.Controllers
             ViewBag.ActivityInstances = activityInstances
                 .Where(item => item.ActivityInstance.StartDateTime.Value.Date >= DateTime.UtcNow.Date)
                 .OrderBy(item => item.ActivityInstance.StartDateTime.Value)
-                .Take(4)
+                .Take(10)
                 .ToList();
 
             ViewBag.ActivitiesRequiringAttention = registrantActivities.Where(ra =>
