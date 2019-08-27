@@ -95,28 +95,29 @@ namespace AfterSchool.Controllers
 
             var msgs = new SystemMessages();
             var participationObject = GetParticipationObjectFromCart();
-
-            if (participationObject.IsEmpty())
-                return HttpNotFound();
-
             var qvms = GetStartedParentViewBag(participationObject, msgs);
-
-            ViewBag.Messages = msgs;
+            Account registrationAccount = null;
 
             if (regaccount.IsGuid())
             {
-                var registrationAccount = Account.LoadByUid(regaccount.ToGuid(), msgs);
+                registrationAccount = Account.LoadByUid(regaccount.ToGuid(), msgs);
+            }
 
-                // redirect to home page because there is nothing in the cart
-                if (!SessionVariables.Cart.GetCartItems().Any())
-                    return Redirect(SessionVariables.RegistrationStartPageAccount?.HomePageUrl ?? registrationAccount.HomePageUrl);
+            // no activity is selected
+            if (participationObject.IsEmpty())
+            {
+                if (SessionVariables.RegistrationStartPageAccount.IsNotEmpty() || registrationAccount.IsNotEmpty())
+                    return Redirect(SessionVariables.RegistrationStartPageAccount?.HomePageUrl ?? registrationAccount?.HomePageUrl);
 
-                ViewBag.RegistrationAccount = registrationAccount;
+                return HttpNotFound();
             }
 
             // pre-load phone number
             if (SessionVariables.CurrentUser.IsNotEmpty())
                 qvms.Find(item => item.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone).Value = SessionVariables.CurrentUser.Phone;
+
+            ViewBag.RegistrationAccount = registrationAccount;
+            ViewBag.Messages = msgs;
 
             return View(qvms);
         }
@@ -125,8 +126,8 @@ namespace AfterSchool.Controllers
         public ActionResult GetStarted(string regaccount, string password1, string password2, string agree, string textnotifications)
         {
             var msgs = new SystemMessages();
-
-            var qvms = GetStartedParentViewBag(msgs);
+            var participationObject = GetParticipationObjectFromCart();
+            var qvms = GetStartedParentViewBag(participationObject, msgs);
 
             qvms.ForEach(qvm =>
             {
