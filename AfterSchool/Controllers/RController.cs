@@ -40,6 +40,7 @@ namespace AfterSchool.Controllers
         public ActionResult Account(string accountname)
         {
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname);
+
             RestartRegistrationSession();
             SetRegistrationStartPage(account, true);
             return Redirect($"/{accountname}/browse");            
@@ -123,14 +124,18 @@ namespace AfterSchool.Controllers
         {
             RestartRegistrationSession();
 
-            var msgs = new SystemMessages();
-            var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
             ParticipationObject participationObject = null;
+            var msgs = new SystemMessages();
+            var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);  
             var canPublishActivity = false;
 
             if (account.IsNotEmpty())
             {
                 var activity = AfterSchoolLibrary.Models.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
+
+                if (activity.IsEmpty())
+                    return HttpNotFound();
+
                 participationObject = activity.GetParticipationObject(msgs);
 
                 if (!activity.IsPublished && activity.GetLocation().HostAccountId != activity.AccountId)
@@ -152,6 +157,9 @@ namespace AfterSchool.Controllers
                 ParticipationObject.GenerateDemoObjects(ref account, participationObjects, locations, accountname, accountUniqueName, grades);
 
                 participationObject = participationObjects.Find(x => x.UniqueName.ToLower() == activityname);
+
+                if (participationObject.IsEmpty())
+                    return HttpNotFound();
             }
 
             SetRegistrationStartPage(account);
@@ -171,7 +179,14 @@ namespace AfterSchool.Controllers
 
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
+
+            if (account.IsEmpty())
+                return HttpNotFound();
+
             var session = ActivityGroup.LoadByAccountIdByUniqueName(account.ID.Value, sessionname, msgs);
+
+            if (session.IsEmpty())
+                return HttpNotFound();
 
             if (invite.IsGuid())
             {
@@ -197,8 +212,20 @@ namespace AfterSchool.Controllers
 
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
+
+            if (account.IsEmpty())
+                return HttpNotFound();
+
             var districtAccount = AfterSchoolLibrary.Models.Account.LoadByUniqueName(districtname, msgs);
-            var league = AfterSchoolLibrary.Models.ActivityGroup.LoadByAccountIdByUniqueName(districtAccount.ID.Value, leaguename, msgs);
+
+            if (districtAccount.IsEmpty())
+                return HttpNotFound();
+
+            var league = ActivityGroup.LoadByAccountIdByUniqueName(districtAccount.ID.Value, leaguename, msgs);
+
+            if (league.IsEmpty())
+                return HttpNotFound();
+
             var aag = league.GetAccountActivityGroup(account, msgs);
 
             SetRegistrationStartPage(account);
@@ -214,7 +241,15 @@ namespace AfterSchool.Controllers
         {
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
+
+            if (account.IsEmpty())
+                return HttpNotFound();
+
             var activity = AfterSchoolLibrary.Models.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
+
+            if (activity.IsEmpty())
+                return HttpNotFound();
+
             var participationObject = activity.GetParticipationObject(msgs);
 
             return RedirectToRegistration(account, participationObject, msgs);
@@ -225,7 +260,15 @@ namespace AfterSchool.Controllers
         {
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
+
+            if (account.IsEmpty())
+                return HttpNotFound();
+
             var session = ActivityGroup.LoadByAccountIdByUniqueName(account.ID.Value, sessionname, msgs);
+
+            if (session.IsEmpty())
+                return HttpNotFound();
+
             var participationObject = session.GetParticipationObject(msgs);
 
             return RedirectToRegistration(account, participationObject, msgs);
@@ -236,7 +279,15 @@ namespace AfterSchool.Controllers
         {
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
+
+            if (account.IsEmpty())
+                return HttpNotFound();
+
             var session = ActivityGroup.LoadByAccountIdByUniqueName(account.ID.Value, sessionname, msgs);
+
+            if (session.IsEmpty())
+                return HttpNotFound();
+
             var canRegisterFor = !session.IsInviteOnly || (SessionVariables.SessionInvite.IsGuid() && session.IsInvited(SessionVariables.SessionInvite.ToGuid(), msgs));
 
             if (!canRegisterFor)
@@ -269,9 +320,20 @@ namespace AfterSchool.Controllers
         {
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
-            var activityGroupType = activitygrouptype.ParseEnum<ActivityGroupType>();
+
+            if (account.IsEmpty())
+                return HttpNotFound();
+
             var externalAccount = AfterSchoolLibrary.Models.Account.LoadByUniqueName(externalaccountname, msgs);
+
+            if (externalAccount.IsEmpty())
+                return HttpNotFound();
+
             var activityGroup = ActivityGroup.LoadByAccountIdByUniqueName(externalAccount.ID.Value, group, msgs);
+
+            if (activityGroup.IsEmpty())
+                return HttpNotFound();
+
             var aag = activityGroup.GetAccountActivityGroup(account, msgs);
             var participationObject = aag.GetParticipationObject(msgs);
 
