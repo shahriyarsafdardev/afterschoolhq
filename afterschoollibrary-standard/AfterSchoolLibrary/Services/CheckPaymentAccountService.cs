@@ -65,31 +65,38 @@ namespace AfterSchoolLibrary.Services
         private static string GetCheckBottomBody(Payout payout, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var transactions = payout.GetTransactions(msgs, dc);
-            var groupedTransactions = new List<(ParticipationObject ParticipationObject, decimal? BillerPayout)>();
+            var groupedTransactions = new Dictionary<string, decimal>();
+            var participationObjects = new List<ParticipationObject>();
             var body = "";
 
             transactions.ForEach(transaction => {
 
                 var participationObject = transaction.GetParticipationObjects(msgs, dc).First();
-                var groupedTransaction = groupedTransactions.Find(item => item.ParticipationObject.ObjectID == participationObject.ObjectID);
 
-                if (groupedTransaction.IsNotEmpty() && groupedTransaction.ParticipationObject.IsNotEmpty())
-                    groupedTransaction.BillerPayout += transaction.GetBillerPayout();
+                if (groupedTransactions.ContainsKey(participationObject.Uid.ToString()))
+                    groupedTransactions[participationObject.Uid.ToString()] += transaction.GetBillerPayout();
                 else
-                    groupedTransactions.Add((participationObject, transaction.GetBillerPayout()));
+                {
+                    groupedTransactions.Add(participationObject.Uid.ToString(), transaction.GetBillerPayout());
+                    participationObjects.Add(participationObject);
+                }
 
             });
 
-            groupedTransactions.ForEach(groupedTransaction => {
+            foreach (var key in groupedTransactions.Keys)
+            {
+                var name = participationObjects.First(po => po.Uid.ToString() == key).Name;
+                var totalAmount = groupedTransactions[key];
+
                 body += $@"<tr>
                             <td>
-                                {groupedTransaction.ParticipationObject.Name}
+                                {name}
                             </td>
                             <td class=""text-right"">
-                                {groupedTransaction.BillerPayout.ToCurrency()}
+                                {totalAmount.ToCurrency()}
                             </td>
                         </tr>";
-            });
+            }
 
             return body;
         }
