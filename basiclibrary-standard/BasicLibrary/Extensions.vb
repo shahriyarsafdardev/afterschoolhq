@@ -945,6 +945,11 @@ Public Module Extensions
 
     <Extension()>
     Public Function IsBoolean(ByVal aString As String) As Boolean
+
+        If aString.IsBlank() Then
+            Return False
+        End If
+
         Try
             Dim b As Boolean = aString.ToBoolean()
         Catch ex As Exception
