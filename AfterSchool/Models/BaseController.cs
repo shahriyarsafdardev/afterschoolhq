@@ -278,12 +278,5 @@ namespace AfterSchool.Models
 
             return actionResult;
         }
-
-        internal ActionResult NotFound404()
-        {
-            Response.StatusCode = 404;
-
-            return Redirect("/404.html");
-        }
     }
 }
