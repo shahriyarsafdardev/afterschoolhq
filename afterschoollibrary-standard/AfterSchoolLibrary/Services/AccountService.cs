@@ -1510,9 +1510,17 @@ namespace AfterSchoolLibrary.Services
 
         public static List<Location> GetVisitorLocations(this Account visitorAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountRelationshipLocation.LoadByVisitorAccountId(visitorAccount.ID.Value, msgs, dc)
-                .Select(x => x.GetLocation(msgs, dc))
-                .ToList();
+            var arls = AccountRelationshipLocation.LoadByVisitorAccountId(visitorAccount.ID.Value, msgs, dc);
+            var locations = new List<Location>();
+
+            arls.ForEach(arl => {
+                var location = arl.GetLocation(msgs, dc);
+
+                if (location.IsNotEmpty())
+                    locations.Add(location);
+            });
+
+            return locations;
         }
 
         public static List<Location> GetHostedLocations(this Account hostAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -1523,7 +1531,11 @@ namespace AfterSchoolLibrary.Services
         public static List<Location> GetAllAvailableLocations(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var locations = account.GetHostedLocations(msgs, dc);
-            locations.AddRange(account.GetVisitorLocations(msgs, dc));
+            var visitorLocations = account.GetVisitorLocations(msgs, dc);
+
+            if (visitorLocations.Any())
+                locations.AddRange(visitorLocations);
+
             return locations;
         }
 
