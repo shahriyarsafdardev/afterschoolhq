@@ -59,11 +59,7 @@ namespace AfterSchool.Models
                 SessionVariables.CurrentUser.UpdateLastActivity();
 
                 if (SessionVariables.CurrentAccount.IsEmpty())
-                {
                     BaseLoggedInController.CheckAccount(requestContext.HttpContext.Request);
-                }
-                
-                // BaseLoggedInController.CheckAccount(requestContext.HttpContext.Request);
             }
         }
 
@@ -80,7 +76,7 @@ namespace AfterSchool.Models
             return true;
         }
 
-        protected override void OnActionExecuting(System.Web.Mvc.ActionExecutingContext filterContext)
+        protected override void OnActionExecuting(ActionExecutingContext filterContext)
         {
             if (!HasAccess())
             {

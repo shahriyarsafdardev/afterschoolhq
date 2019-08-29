@@ -10,12 +10,15 @@
     var registrationClosed = (List<ParticipationObject>)ViewBag.RegistrationClosed;
     var registrationWillOpen = (List<ParticipationObject>)ViewBag.RegistrationWillOpen;
     var session = (ParticipationObject)ViewBag.Session;
+    var msgs = (SystemMessages)ViewBag.Messages;
 }
 
 @{ Html.RenderPartial(
         "~/Views/Shared/Registration/_AccountTopBar.cshtml",
         Model,
         new ViewDataDictionary() { { "LoginReturnUrl", Model.HomePageUrl } }); }
+
+@{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
 @{ Html.RenderPartial("~/Views/Shared/Registration/_BrowseRegistrationHeader.cshtml", Model); }
 

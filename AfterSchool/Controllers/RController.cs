@@ -188,21 +188,17 @@ namespace AfterSchool.Controllers
             if (session.IsEmpty())
                 return HttpNotFound();
 
-            if (invite.IsGuid())
-            {
-                SessionVariables.SessionInvite = invite;
-
-                if (decline.IsBoolean() && decline.ToBoolean())
-                    session.DeclineInvite(SessionVariables.SessionInvite.ToGuid(), msgs);
-            }                       
+            LoadSessionInvite(session, invite, decline, msgs);
 
             SetRegistrationStartPage(account);
 
-            ViewBag.Messages = msgs;
-            ViewBag.Account = account;
-            ViewBag.CanRegisterFor = !session.IsInviteOnly || session.IsInvited(SessionVariables.SessionInvite, msgs);
+            return Redirect(session.BrowseUrl);
 
-            return View("activity", session.GetParticipationObject());
+            //ViewBag.Messages = msgs;
+            //ViewBag.Account = account;
+            //ViewBag.CanRegisterFor = !session.IsInviteOnly || session.IsInvited(SessionVariables.SessionInvite, msgs);
+
+            //return View("activity", session.GetParticipationObject());
         }
 
         [HttpGet]
@@ -275,7 +271,7 @@ namespace AfterSchool.Controllers
         }
 
         [HttpGet]
-        public ActionResult BrowseSession(string accountname, string sessionname)
+        public ActionResult BrowseSession(string accountname, string sessionname, string invite, string decline)
         {
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
@@ -287,6 +283,8 @@ namespace AfterSchool.Controllers
 
             if (session.IsEmpty())
                 return HttpNotFound();
+
+            LoadSessionInvite(session, invite, decline, msgs);
 
             var canRegisterFor = !session.IsInviteOnly || (SessionVariables.SessionInvite.IsGuid() && session.IsInvited(SessionVariables.SessionInvite.ToGuid(), msgs));
 
@@ -356,6 +354,17 @@ namespace AfterSchool.Controllers
                 return RedirectToAction("register", "account", new { area = "", regaccount = account.Uid });
 
             return RedirectToAction("registerstudent", "account", new { area = "", regaccount = account.Uid });
+        }
+
+        private void LoadSessionInvite(ActivityGroup session, string invite, string decline, SystemMessages msgs)
+        {
+            if (invite.IsGuid())
+            {
+                SessionVariables.SessionInvite = invite;
+
+                if (decline.IsBoolean() && decline.ToBoolean())
+                    session.DeclineInvite(SessionVariables.SessionInvite.ToGuid(), msgs);
+            }
         }
     }
 }
