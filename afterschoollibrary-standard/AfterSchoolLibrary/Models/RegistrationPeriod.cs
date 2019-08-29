@@ -298,12 +298,15 @@ namespace AfterSchoolLibrary.Models
                     .Select(x => x.ActivityId.Value)
                     .ToList();
 
-            return Activity.LoadList(
-                    activityIds, 
-                    msgs, 
-                    dc)
-                .Where(x => !x.IsDeleted)
-                .ToList();
+            if (activityIds.Any())
+                return Activity.LoadList(
+                        activityIds, 
+                        msgs, 
+                        dc)
+                    .Where(x => !x.IsDeleted)
+                    .ToList();
+
+            return new List<Activity>();
         }
 
         public int GetActivityCount(DatabaseConnection dc = null)

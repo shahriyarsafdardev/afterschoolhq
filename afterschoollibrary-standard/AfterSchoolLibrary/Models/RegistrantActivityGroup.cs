@@ -245,16 +245,16 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        public string GetInviteUrl(DatabaseConnection dc = null)
+        public string GetInviteUrl(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var url = this.GetGroup(dc: dc).HomePageUrl;
+            var url = this.GetGroup(msgs, dc).BrowseUrl;
             url += (url.Contains("?") ? "&" : "?") + $"invite={this.Uid.ToString()}";
             return url;
         }
 
-        public string GetDeclineUrl(DatabaseConnection dc= null)
+        public string GetDeclineUrl(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return GetInviteUrl(dc: dc) + "&decline=1";
+            return GetInviteUrl(msgs, dc) + "&decline=1";
         }
 
         private ActivityGroup _Group = null;
@@ -265,6 +265,7 @@ namespace AfterSchoolLibrary.Models
 
             return _Group;
         }
+
         public string RegistrantName
         {
             get
@@ -321,7 +322,7 @@ namespace AfterSchoolLibrary.Models
                         emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
                     );
 
-                    msgs.Add("Your invitation has been declined", MessageType.Notice);
+                    msgs.Add("Your invitation has been declined", MessageType.Success);
 
                     msgs.AddRange(smsgs);
                 },
