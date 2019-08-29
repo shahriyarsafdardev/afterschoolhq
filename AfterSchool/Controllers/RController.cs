@@ -192,11 +192,13 @@ namespace AfterSchool.Controllers
 
             SetRegistrationStartPage(account);
 
-            ViewBag.Messages = msgs;
-            ViewBag.Account = account;
-            ViewBag.CanRegisterFor = !session.IsInviteOnly || session.IsInvited(SessionVariables.SessionInvite, msgs);
+            return Redirect(session.BrowseUrl);
 
-            return View("activity", session.GetParticipationObject());
+            //ViewBag.Messages = msgs;
+            //ViewBag.Account = account;
+            //ViewBag.CanRegisterFor = !session.IsInviteOnly || session.IsInvited(SessionVariables.SessionInvite, msgs);
+
+            //return View("activity", session.GetParticipationObject());
         }
 
         [HttpGet]
