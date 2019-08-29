@@ -516,7 +516,7 @@ namespace AfterSchoolLibrary.Models
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
-            dq.Criterias.Add(ObjectMap["ID"], ids, BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.In);
+            dq.Criterias.Add(ObjectMap["ID"], ids.ToArray(), BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.In);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 

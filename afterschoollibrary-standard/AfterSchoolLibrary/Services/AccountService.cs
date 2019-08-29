@@ -2846,15 +2846,23 @@ namespace AfterSchoolLibrary.Services
         public static List<AccountActivityGroup> GetPublishedExternalLeagues(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var aags = AccountActivityGroup.LoadByAccountIdByIsPublished(account.ID.Value, true, msgs, dc);
-            var periods = RegistrationPeriod.LoadByAccountActivityGroupIds(
-                    aags.Select(x => x.ID.Value).ToList(),
-                    msgs,
-                    dc
-                )
-                .Where(period => period.IsOpen() || period.WillOpen() || period.WillCloseIn().Days > -14)
-                .ToList();
 
-            return aags.Where(aag => periods.Select(period => period.AccountActivityGroupId.Value).Contains(aag.ID.Value)).ToList();
+            if (aags.Any())
+            {
+                var aagIds = aags.Select(x => x.ID.Value).ToList();
+                var periodAagIds = RegistrationPeriod.LoadByAccountActivityGroupIds(aagIds, msgs, dc)
+                    .Where(period => 
+                            period.IsOpen(msgs: msgs, dc: dc) || 
+                            period.WillOpen(msgs: msgs, dc: dc) || 
+                            period.WillCloseIn(msgs: msgs, dc: dc).Days > -14)
+                    .Select(period => period.AccountActivityGroupId.Value)
+                    .ToList();
+
+                if (periodAagIds.Any())
+                    return aags.Where(aag => periodAagIds.Contains(aag.ID.Value)).ToList();
+            }
+
+            return new List<AccountActivityGroup>();
         }
 
         public static int GetExternalLeagueCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
