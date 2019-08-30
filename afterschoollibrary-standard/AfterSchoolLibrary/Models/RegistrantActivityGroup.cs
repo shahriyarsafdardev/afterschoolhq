@@ -286,9 +286,6 @@ namespace AfterSchoolLibrary.Models
 
         public void DeclineInvite(int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var groupName = this.ActivityGroupName;
-            var registrantName = this.RegistrantName;
-
             Database.ExecuteTransaction
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
@@ -311,14 +308,14 @@ namespace AfterSchoolLibrary.Models
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {                    
-                    var body = "<p>Hello,</p><p>{0} has opted to decline the invitation to register for {1}</p>{2}";
+                    var body = $"<p>Hello,</p><p>{this.RegistrantName.IfEmpty(this.RegistrantEmail)} has opted to decline the invitation to register for {this.ActivityGroupName}</p>{Helpers.Email.GetAppSignature(true, "declined_invite_notice")}";
                     var account = this.GetGroup(msgs, dc).GetAccount(msgs, dc);
 
                     SendGridHelper.SendMail(
                         fromEmail: Helpers.Email.SendGridNoReplyEmailAddress(),
                         toEmail: new SendGrid.Helpers.Mail.EmailAddress(account.Email, account.Name),
-                        subject: string.Format("An invitation was declined for {0}", groupName),
-                        body: string.Format(body, registrantName, groupName, Helpers.Email.GetAppSignature(account.IsAfterSchool, "declined_invite_notice")),        
+                        subject: string.Format("An invitation was declined for {0}", this.ActivityGroupName),
+                        body: body,        
                         emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
                     );
 

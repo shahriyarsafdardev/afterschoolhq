@@ -76,6 +76,14 @@
                     <div class="activity-detail-block">
                         @{ Html.RenderPartial("~/Views/Shared/ParticipationObject/_PaymentInfo.cshtml", Model); }
                     </div>
+                    
+
+                    @if (Model.IsActivityGroup() && Model.GetActivityGroup().IsInviteOnly)
+                    {
+                        <div class="activity-detail-block">
+                            <strong>Registration unavailable: Requires Invite to Register</strong>
+                        </div>
+                    }
 
                     @if (Model.Schedule.IsNotEmpty())
                     {
