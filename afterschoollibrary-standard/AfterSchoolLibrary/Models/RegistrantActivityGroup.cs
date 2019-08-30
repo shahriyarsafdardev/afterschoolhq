@@ -308,7 +308,7 @@ namespace AfterSchoolLibrary.Models
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {                    
-                    var body = $"<p>Hello,</p><p>{this.RegistrantName} has opted to decline the invitation to register for {this.ActivityGroupName}</p>{Helpers.Email.GetAppSignature(true, "declined_invite_notice")}";
+                    var body = $"<p>Hello,</p><p>{this.RegistrantName.IfEmpty(this.RegistrantEmail)} has opted to decline the invitation to register for {this.ActivityGroupName}</p>{Helpers.Email.GetAppSignature(true, "declined_invite_notice")}";
                     var account = this.GetGroup(msgs, dc).GetAccount(msgs, dc);
 
                     SendGridHelper.SendMail(
