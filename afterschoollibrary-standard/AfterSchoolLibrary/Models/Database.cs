@@ -93,6 +93,7 @@ namespace AfterSchoolLibrary.Models
 			PurchaseableObjectCoupon.Create(dc);
 			Purchase.Create(dc);
 			TwilioSMS.Create(dc);
+			TwilioBlockedPhone.Create(dc);
 			Migration.Create(dc);
 			
 
@@ -168,6 +169,7 @@ namespace AfterSchoolLibrary.Models
 			PurchaseableObjectCoupon.Alter(dc);
 			Purchase.Alter(dc);
 			TwilioSMS.Alter(dc);
+			TwilioBlockedPhone.Alter(dc);
 			Migration.Alter(dc);
 			
 
@@ -578,6 +580,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_TwilioSMS_TwilioResourceId ON [TwilioSMS] (TwilioResourceId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_TwilioSMS_ActivityMessageId_RegistrantId ON [TwilioSMS] (RegistrantId,ActivityMessageId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_TwilioSMS_RegistrantId ON [TwilioSMS] (RegistrantId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_TwilioBlockedPhone_Phone ON [TwilioBlockedPhone] (Phone)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Migration_UniqueIdentifier ON [Migration] (UniqueIdentifier)"));
 			
 

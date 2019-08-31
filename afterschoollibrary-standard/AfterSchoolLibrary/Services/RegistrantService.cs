@@ -5,6 +5,7 @@ using AfterSchoolLibrary.Models;
 using System.Linq;
 using System.Collections.Generic;
 using System.Collections;
+using Twilio.Rest.Api.V2010.Account;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -300,38 +301,81 @@ namespace AfterSchoolLibrary.Services
                     msgs.Add("Account is not active and cannot send text messages", MessageType.UserError);
                     return;
                 }
+                
+                // if phone number is on the block list
+                if (TwilioBlockedPhone.ExistsByPhone(registrant.Phone, msgs, dc))
+                    return;
 
-                // ensure this message has not already been sent to this user
-                var twilioSms = TwilioSMS.LoadByRegistrantIdByActivityMessageId(registrant.ID.Value, message.ID.Value, msgs, dc);
+                // if person has already received this text message
+                if (TwilioSMS.ExistsByRegistrantIdByActivityMessageId(registrant.ID.Value, message.ID.Value, msgs, dc))
+                    return;
 
-                if (twilioSms.IsEmpty())
-                {
-                    if (!registrant.HasReceivedTextMessages(msgs, dc))
-                        TwilioHelper.SendSMS(
-                            registrant.Phone,
-                            $"Welcome to {Helpers.Utilities.AppName()} Alerts! You are receiving this message because you enabled text notifications when you registered your child for activities. \nMsg&data rates may apply. \nReply HELP for help, STOP to cancel",
-                            msgs);
+                // if user hasn't received a text from us yet, need to send standard text info
+                if (!registrant.HasReceivedTextMessages(msgs, dc))
+                    TwilioHelper.SendSMS(
+                        registrant.Phone,
+                        $"Welcome to {Helpers.Utilities.AppName()} Alerts! You are receiving this message because you enabled text notifications when you registered your child for activities. \nMsg&data rates may apply. \nReply HELP for help, STOP to cancel",
+                        msgs);
 
-                    var resource = ActivityMessageService.SendTextMessage(registrant.Phone, senderName, subject, activityName, message.Uid.ToString(), msgs);
+                var resource = ActivityMessageService.SendTextMessage(
+                                    registrant.Phone, 
+                                    senderName, 
+                                    subject, 
+                                    activityName, 
+                                    message.Uid.ToString(), 
+                                    msgs);
 
-                    if (msgs.HasNoErrors() && resource.IsNotEmpty())
+                if (resource.IsEmpty())
+                    return;
+
+                if (resource.ErrorCode.HasValue)
+                    registrant.AddPhoneToTwilioBlockedList(resource, loggedInUser, msgs, dc);
+                else if (msgs.HasNoErrors())
+                    registrant.SaveTwilioSms(resource, message, sendingAccount, loggedInUser, msgs, dc);
+            }
+        }
+
+        private static void SaveTwilioSms(this Registrant registrant, MessageResource resource, ActivityMessage message, Account sendingAccount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var twilioSms = new TwilioSMS()
+            {
+                TwilioResourceId = resource.Sid,
+                TwilioStatus = resource.Status.ToString(),
+                ActivityMessageId = message.ID,
+                RegistrantId = registrant.ID,
+                SenderId = loggedInUser.ID,
+                SendingAccountId = sendingAccount.ID,
+                CreateDate = DateTime.UtcNow,
+                CreatedBy = loggedInUser.ID,
+                LastModifiedDate = DateTime.UtcNow,
+                LastModifiedBy = loggedInUser.ID,
+            };
+            msgs.AddRange(twilioSms.Save(dc));
+        }
+
+        private static void AddPhoneToTwilioBlockedList(this Registrant registrant, MessageResource resource, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            // add to block list
+            switch (resource.ErrorCode.Value)
+            {
+                case 30004:
+                case 30005:
+                case 30006:
+
+                    registrant.AllowTextMessages = false;
+                    msgs.AddRange(registrant.Save(dc));
+
+                    var tbp = new TwilioBlockedPhone()
                     {
-                        twilioSms = new TwilioSMS()
-                        {
-                            TwilioResourceId = resource.Sid,
-                            TwilioStatus = resource.Status.ToString(),
-                            ActivityMessageId = message.ID,
-                            RegistrantId = registrant.ID,
-                            SenderId = loggedInUser.ID,
-                            SendingAccountId = sendingAccount.ID,
-                            CreateDate = DateTime.UtcNow,
-                            CreatedBy = loggedInUser.ID,
-                            LastModifiedDate = DateTime.UtcNow,
-                            LastModifiedBy = loggedInUser.ID,
-                        };
-                        msgs.AddRange(twilioSms.Save(dc));
-                    }
-                }
+                        Phone = registrant.Phone,
+                        ErrorCode = resource.ErrorCode,
+                        ErrorMessage = resource.ErrorMessage.MaxChars(100),
+                        CreateDate = DateTime.UtcNow,
+                        CreatedBy = loggedInUser?.ID.IfEmpty(0)
+                    };
+                    msgs.AddRange(tbp.Save(dc));
+
+                    break;
             }
         }
 
