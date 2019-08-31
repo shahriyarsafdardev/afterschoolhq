@@ -16,8 +16,8 @@ namespace AfterSchool.Areas.WebHooks
         {
             context.MapRoute(
                 "WebHooks_default",
-                "WebHooks/{controller}/{action}/{id}",
-                new { action = "Index", id = UrlParameter.Optional }
+                "WebHooks/{controller}/{action}/{id}/{id2}",
+                new { action = "Index", id = UrlParameter.Optional, id2 = UrlParameter.Optional }
             );
         }
     }
