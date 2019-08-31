@@ -45,19 +45,21 @@ namespace AfterSchoolLibrary.Services
 
                 ActivityMessageService.SendEmailMessage(account, activity.Name, loggedInUser.DisplayName, member.WebUserEmail, member.WebUserDisplayName, activity.ContactEmail, activity.ContactName, activityMessage.Subject, body, "activity_message", msgs);
 
-                ActivityMessageService.SendTextMessage(member.WebUserPhone, loggedInUser.DisplayName, activityMessage.Subject, activity.Name, activityMessage.Uid.ToString(), msgs);
+                ActivityMessageService.SendTextMessage(member.WebUserPhone, loggedInUser.DisplayName, activityMessage.Subject, activity.Name, activityMessage.Uid.ToString(), null, msgs);
             });
 
             return msgs;
         }
 
-        internal static MessageResource SendTextMessage(string phone, string senderName, string subject, string activityName, string messageUid, SystemMessages msgs)
+        internal static MessageResource SendTextMessage(string phone, string senderName, string subject, string activityName, string messageUid, string registrantUid, SystemMessages msgs)
         {
             var aOrAn = subject[0].In("aeiouAEIOU") ? "an" : "a";
 
             return TwilioHelper.SendSMS(
                 phone,
                 $"{senderName} has sent {aOrAn} {subject} for {activityName}\nPlease review your message: {Helpers.Utilities.BaseUrl()}/msg/{messageUid}",
+                messageUid,
+                registrantUid,
                 msgs);
         }
 

@@ -315,6 +315,8 @@ namespace AfterSchoolLibrary.Services
                     TwilioHelper.SendSMS(
                         registrant.Phone,
                         $"Welcome to {Helpers.Utilities.AppName()} Alerts! You are receiving this message because you enabled text notifications when you registered your child for activities. \nMsg&data rates may apply. \nReply HELP for help, STOP to cancel",
+                        null,
+                        null,
                         msgs);
 
                 var resource = ActivityMessageService.SendTextMessage(
@@ -323,6 +325,7 @@ namespace AfterSchoolLibrary.Services
                                     subject, 
                                     activityName, 
                                     message.Uid.ToString(), 
+                                    registrant.Uid.ToString(),
                                     msgs);
 
                 if (resource.IsEmpty())
@@ -353,7 +356,7 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(twilioSms.Save(dc));
         }
 
-        private static void AddPhoneToTwilioBlockedList(this Registrant registrant, MessageResource resource, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void AddPhoneToTwilioBlockedList(this Registrant registrant, MessageResource resource, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             // add to block list
             switch (resource.ErrorCode.Value)
