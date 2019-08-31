@@ -498,9 +498,10 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult MessageDetail(string id)
         {
-            var am = ActivityMessage.Load(id.ToInteger());
-            ViewBag.Messages = new SystemMessages();
-            ViewBag.Registrants = am.GetActivityMessageRegistrants();
+            var msgs = new SystemMessages();
+            var am = ActivityMessage.LoadByUid(id.ToGuid(), msgs);
+            ViewBag.Messages = msgs;
+            ViewBag.Registrants = am.GetActivityMessageRegistrants(msgs);
             return View(am);
         }
 
@@ -520,7 +521,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult MessageAdd(string id, string subject, string body)
+        public ActionResult MessageAdd(string id, string deliveryMethod, string subject, string body, string sendtostaff)
         {
             var msgs = new SystemMessages();
 
@@ -535,10 +536,17 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 var registrantIds = group.GetRegistrants()
-                    .Where(x => Request[$"registrant-{x.ID.ToString()}"].IsNotBlank())
-                    .Select(x => x.ID.Value)
-                    .ToList();
-                am = group.AddMessage(subject, body, registrantIds, SessionVariables.CurrentUser.ID.Value, msgs);
+                                        .Where(x => Request[$"registrant-{x.ID.ToString()}"].IsNotBlank())
+                                        .Select(x => x.ID.Value)
+                                        .ToList();
+
+                am = group.AddMessage(
+                        subject, 
+                        body, 
+                        registrantIds,
+                        sendtostaff.IsBoolean(),
+                        SessionVariables.CurrentUser.ID.Value, 
+                        msgs);
 
                 BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, SessionVariables.CurrentUser.ID.Value, null, null));
             }
@@ -562,8 +570,8 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult MessagesResend(string id)
         {
             var msgs = new SystemMessages();
-            var am = ActivityMessage.Load(id.ToInteger());
-            var group = am.GetActivityGroup();
+            var am = ActivityMessage.LoadByUid(id.ToGuid(), msgs);
+            var group = am.GetActivityGroup(msgs);
 
             BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, SessionVariables.CurrentUser.ID.Value, null, null));
 
@@ -634,21 +642,15 @@ namespace AfterSchool.Areas.Org.Controllers
             var group = ActivityGroup.LoadByUid(id.ToGuid());
 
             if (group.IsNotEmpty())
-            {
                 msgs.AddRange(group.MoveToArchive(SessionVariables.CurrentUser.ID.Value));
-            }
 
             ViewBag.Messages = msgs;
 
             if (msgs.HasNoErrors())
-            {
-                msgs.Add(string.Format("{0} has been archived", group.Name), MessageType.Success);
-            }
+                msgs.Add($"{group.Name} has been archived", MessageType.Success);
 
             if (Request.UrlReferrer.IsNotEmpty())
-            {
-                Response.Redirect(Request.UrlReferrer.ToString(), true);
-            }
+                return Redirect(Request.UrlReferrer.ToString());
 
             return RedirectToAction("index", "group");
         }
@@ -660,21 +662,15 @@ namespace AfterSchool.Areas.Org.Controllers
             var group = ActivityGroup.LoadByUid(id.ToGuid());
 
             if (group.IsNotEmpty())
-            {
-                msgs.AddRange(group.MoveFromArchive(SessionVariables.CurrentUser.ID.Value));
-            }
+                group.MoveFromArchive(SessionVariables.CurrentUser.ID.Value, msgs);
 
             ViewBag.Messages = msgs;
 
             if (msgs.HasNoErrors())
-            {
-                msgs.Add(string.Format("{0} has been restored", group.Name), MessageType.Success);
-            }
+                msgs.Add($"{group.Name} has been restored", MessageType.Success);
 
             if (Request.UrlReferrer.IsNotEmpty())
-            {
-                Response.Redirect(Request.UrlReferrer.ToString(), true);
-            }
+                return Redirect(Request.UrlReferrer.ToString());
 
             return RedirectToAction("index", "group");
         }
@@ -682,7 +678,6 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Schedules(string id)
         {
-
             var msgs = new SystemMessages();
             var group = ActivityGroup.LoadByUid(id.ToGuid());
 

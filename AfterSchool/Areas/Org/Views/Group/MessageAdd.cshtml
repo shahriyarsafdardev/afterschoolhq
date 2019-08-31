@@ -31,7 +31,7 @@
                 }
                 else
                 {
-                    
+
                     <div class="form-group" id="subject-group">
                         <label class="col-sm-3 control-label">Message Reason</label>
                         <div class="col-sm-6">
@@ -39,27 +39,33 @@
                                 <option value="">Select a Message Reason...</option>
                                 @foreach(var reason in Enum.GetValues(typeof(ActivityMessageReason)).Cast<ActivityMessageReason>().Except(ActivityMessageReason.NotSet.AsList()).OrderBy(x => x.ToString()))
                                 {
-                                    <option value="@((int)reason)">@reason.ToString().SplitByUpperCase()</option>
+                                    <option value="@reason.ToString().SplitByUpperCase()">@reason.ToString().SplitByUpperCase()</option>
                                 }
                             </select>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label class="col-sm-3 control-label">Body</label>
+                        <label class="col-sm-3 control-label">Message Body</label>
                         <div class="col-sm-6">
-                            <div class="text-editor" id="body-div">
+                            <textarea name="body" id="body" required style="width: 100%" rows="5" class="form-control"></textarea>
+                            <p class="text-muted">Max of 1000 characters</p>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"></label>
+                        <div class="col-sm-6">
+                            <div class="am-checkbox">
+                                <input type="checkbox" id="sendtostaff" name="sendtostaff" value="1" checked="checked" />
+                                <label for="sendtostaff">Send Message To Staff</label>
                             </div>
-                            <textarea name="body" id="body" class="hide" required></textarea>
-                            <!--
-                            <textarea name="body" id="body" class="form-control" rows="10" required></textarea>
-                            -->
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label class="col-sm-3 control-label">
-                            Select @UILabel.RegistrantLabel(true)<br/>
+                            Select @UILabel.RegistrantLabel(true)<br />
                             <a href="javascript:selectAll()">Select All</a> | <a href="javascript:clearAll()">Clear All</a>
                         </label>
                         <div class="col-sm-6">
@@ -68,9 +74,20 @@
                                 <div class="col-md-4">
                                     @foreach (var registrant in registrants.Skip(i * registrantsPerColumn).ToList().Take(registrantsPerColumn))
                                     {
-                                        <div class="am-checkbox">
-                                            <input type="checkbox" id="registrant-@registrant.ID" name="registrant-@registrant.ID" value="1" checked="checked" />
-                                            <label for="registrant-@registrant.ID">@registrant.DisplayName</label>
+                                        <div class="am-checkbox registrant" 
+                                             data-has-email="@registrant.Email.IsNotEmpty().ToInteger()" 
+                                             data-has-phone-number="@registrant.Phone.IsNotEmpty().ToInteger()">
+
+                                            <input type="checkbox" 
+                                                   class="chk-registrant" 
+                                                   id="registrant-@registrant.ID" 
+                                                   name="registrant-@registrant.ID" 
+                                                   value="1" 
+                                                   checked="checked" />
+
+                                            <label for="registrant-@registrant.ID">
+                                                @registrant.DisplayName.MaxChars(20, "...")
+                                            </label>
                                         </div>
                                     }
                                 </div>
@@ -81,7 +98,16 @@
                     <div class="form-group">
                         <label class="col-sm-3 control-label"></label>
                         <div class="col-sm-6">
-                            <button type="submit" class="btn btn-primary btn-lg btn-block pull-right"><i class="s7-diskette"></i> Send Message to Selected @UILabel.RegistrantLabel(true)</button>
+                            <div class="pull-left">
+                                <a href="@Url.Action("messages", "group", new { id = Model.Uid })" class="text-muted">
+                                    &laquo; Cancel
+                                </a>
+                            </div>
+                            <div class="pull-right">
+                                <button id="send-btn" type="submit" class="btn btn-primary btn-lg btn-block pull-right">
+                                    <i class="s7-mail"></i> Send Message to Selected Registrants &raquo;
+                                </button>
+                            </div>
                         </div>
                     </div>
                 }
@@ -93,29 +119,13 @@
 
 <script>
     function selectAll() {
-        $('input[type="checkbox"]').each(function () {
+        $('input[type="checkbox"].chk-registrant').each(function () {
             $(this).prop('checked', true);
         });
     }
     function clearAll() {
-        $('input[type="checkbox"]').each(function () {
+        $('input[type="checkbox"].chk-registrant').each(function () {
             $(this).prop('checked', false);
         });
     }
-</script>
-
-
-<script>
-    PageEvent.add(PageEvent.AFTER_INIT, function () {
-        $('.text-editor').wysihtml5({
-            toolbar: {
-                'image': false,
-                'color': false,
-            }
-        });
-
-        $('.text-editor').on('blur', function () {
-            $('#body').val($('#body-div').html());
-        });
-    });
 </script>

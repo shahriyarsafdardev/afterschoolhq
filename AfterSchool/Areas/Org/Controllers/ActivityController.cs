@@ -1646,12 +1646,18 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                var registrantIds = activity.GetRegistrants()
-                    .Where(x => Request[$"registrant-{x.ID.ToString()}"].IsNotBlank())
-                    .Select(x => x.ID.Value)
-                    .ToList();
+                var registrantIds = activity.GetRegistrants(msgs)
+                                        .Where(x => Request[$"registrant-{x.ID.ToString()}"].IsNotBlank())
+                                        .Select(x => x.ID.Value)
+                                        .ToList();
 
-                am = activity.AddMessage(subject, body, registrantIds, sendtostaff.IsBoolean(), SessionVariables.CurrentUser.ID.Value, msgs);
+                am = activity.AddMessage(
+                        subject, 
+                        body, 
+                        registrantIds, 
+                        sendtostaff.IsBoolean(), 
+                        SessionVariables.CurrentUser.ID.Value, 
+                        msgs);
                 
                 BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, SessionVariables.CurrentUser.ID.Value, null, null));
             }
