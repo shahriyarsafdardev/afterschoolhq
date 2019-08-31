@@ -14,15 +14,15 @@ namespace AfterSchool.Areas.WebHooks.Controllers
     public class TwilioController : ApiController
     {
         [HttpPost]
-        public IHttpActionResult UpdateStatus(string id, string r, SmsRequest request)
+        public IHttpActionResult UpdateStatus(string am, string r, SmsRequest request)
         {
             var msgs = new SystemMessages();
 
-            if (request.MessageStatus.In(new string[] { "failed", "undelivered" }) && id.IsGuid() && r.IsGuid())
+            if (request.MessageStatus.In(new string[] { "failed", "undelivered" }) && am.IsGuid() && r.IsGuid())
             {
                 try
                 {
-                    var activityMessage = ActivityMessage.LoadByUid(id.ToGuid(), msgs);
+                    var activityMessage = ActivityMessage.LoadByUid(am.ToGuid(), msgs);
                     var registrant = Registrant.LoadByUid(r.ToGuid(), msgs);
 
                     if (activityMessage.IsNotEmpty() && registrant.IsNotEmpty())

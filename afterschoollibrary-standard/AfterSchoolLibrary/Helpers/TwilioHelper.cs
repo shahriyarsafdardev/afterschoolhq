@@ -36,8 +36,8 @@ namespace AfterSchoolLibrary
 
                 Uri statusCallback = null;
 
-                if (messageUid.IsNotBlank() && registrantUid.IsNotBlank())
-                    statusCallback = new Uri($"{Helpers.Utilities.BaseUrl(true)}{UpdateStatusCallbackUrl}/{messageUid}?r={registrantUid}");
+                if (!Helpers.Utilities.IsLocalHost && messageUid.IsNotBlank() && registrantUid.IsNotBlank())
+                    statusCallback = new Uri($"{Helpers.Utilities.BaseUrl(true)}{UpdateStatusCallbackUrl}/?am={messageUid}&r={registrantUid}");
 
                 resource = MessageResource.Create(
                     body: body,
