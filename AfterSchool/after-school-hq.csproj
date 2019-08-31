@@ -393,6 +393,12 @@
     <Reference Include="Twilio, Version=5.31.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Twilio.5.31.1\lib\net451\Twilio.dll</HintPath>
     </Reference>
+    <Reference Include="Twilio.AspNet.Common, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Twilio.AspNet.Common.5.20.1\lib\net45\Twilio.AspNet.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Twilio.AspNet.Mvc, Version=5.20.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Twilio.AspNet.Mvc.5.20.1\lib\net451\Twilio.AspNet.Mvc.dll</HintPath>
+    </Reference>
     <Reference Include="WebGrease, Version=1.6.5135.21930, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\WebGrease.1.6.0\lib\WebGrease.dll</HintPath>
@@ -488,6 +494,9 @@
     <Compile Include="Areas\User\Models\ParticipationViewModel.cs" />
     <Compile Include="Areas\User\Models\RegistrantActivityViewModel.cs" />
     <Compile Include="Areas\User\UserAreaRegistration.cs" />
+    <Compile Include="Areas\WebHooks\Controllers\StripeController.cs" />
+    <Compile Include="Areas\WebHooks\Controllers\TwilioController.cs" />
+    <Compile Include="Areas\WebHooks\WebHooksAreaRegistration.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\AfterSchoolController.cs" />
     <Compile Include="Controllers\DbController.cs" />
@@ -1144,6 +1153,7 @@
     <Content Include="Areas\User\Views\Shared\Providers\_ProviderContactInfo.cshtml" />
     <Content Include="Areas\User\Views\Shared\_ToDos.cshtml" />
     <Content Include="Areas\Org\Views\Registration\Update.cshtml" />
+    <Content Include="Areas\WebHooks\Views\web.config" />
     <None Include="Scripts\jquery-3.0.0-vsdoc.js" />
     <Content Include="Scripts\jquery-3.0.0.js" />
     <Content Include="Scripts\jquery-3.0.0.min.js" />
@@ -1608,6 +1618,7 @@
     <Content Include="Views\Shared\ParticipationObject\_PaymentInfo.cshtml" />
     <Content Include="Views\Shared\ParticipationObject\_SubscriptionPlan.cshtml" />
     <Content Include="Views\Shared\Registration\_RegistrationHeader.cshtml" />
+    <Content Include="Views\Msg\Invalid.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -1618,6 +1629,10 @@
     <Folder Include="Areas\StripeHooks\Models\" />
     <Folder Include="Areas\StripeHooks\Views\Shared\" />
     <Folder Include="Areas\StripeHooks\Views\Test\" />
+    <Folder Include="Areas\WebHooks\Models\" />
+    <Folder Include="Areas\WebHooks\Views\Shared\" />
+    <Folder Include="Areas\WebHooks\Views\Stripe\" />
+    <Folder Include="Areas\WebHooks\Views\Twilio\" />
     <Folder Include="Views\User\" />
   </ItemGroup>
   <ItemGroup>

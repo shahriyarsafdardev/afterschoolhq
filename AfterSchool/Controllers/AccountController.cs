@@ -2095,7 +2095,7 @@ namespace AfterSchool.Controllers
                     participationObject = item;
             });
 
-            return participationObject ?? participationObjects.FirstOrDefault();
+            return participationObject ?? participationObjects?.FirstOrDefault();
         }
 
         private void ResetRegistrationSession()

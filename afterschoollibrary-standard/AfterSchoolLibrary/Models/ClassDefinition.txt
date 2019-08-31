@@ -1550,6 +1550,18 @@ loadmethod: RegistrantId|ActivityMessageId
 loadmethod: RegistrantId, List<>
 [end]
 
+
+[begin]
+type: Class
+name: TwilioBlockedPhone
+description: Store phones that are blocked
+inherits: BasicObject
+property: Phone, string, NVarChar "50"
+property: ErrorCode, int?, Int
+property: ErrorMessage, string, NVarChar "100"
+loadmethod: Phone
+[end]
+
 [begin]
 type: Class
 name: Migration

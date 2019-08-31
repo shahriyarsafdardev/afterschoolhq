@@ -12,14 +12,20 @@ namespace AfterSchool
             config.MapHttpAttributeRoutes();
 
             config.Routes.MapHttpRoute(
-                name: "DefaultApi",
-                routeTemplate: "api/{controller}/{id}",
+                name: "StripeHooks",
+                routeTemplate: "stripehooks/{controller}/{id}",
                 defaults: new { id = RouteParameter.Optional }
             );
 
             config.Routes.MapHttpRoute(
-                name: "StripeHooks",
-                routeTemplate: "stripehooks/{controller}/{id}",
+                name: "WebHooks",
+                routeTemplate: "webhooks/{controller}/{action}/{id}/{id2}",
+                defaults: new { id = RouteParameter.Optional, id2 = RouteParameter.Optional }
+            );
+
+            config.Routes.MapHttpRoute(
+                name: "DefaultApi",
+                routeTemplate: "api/{controller}/{id}",
                 defaults: new { id = RouteParameter.Optional }
             );
         }
