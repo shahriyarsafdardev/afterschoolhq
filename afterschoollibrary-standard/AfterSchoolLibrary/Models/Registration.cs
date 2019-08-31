@@ -529,14 +529,14 @@ namespace AfterSchoolLibrary.Models
             return registrations.Where(x => x.ID != this.ID).ToList();
         }
 
-        public RegistrationPeriod GetRegistrationPeriod(DatabaseConnection dc = null)
+        public RegistrationPeriod GetRegistrationPeriod(SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return RegistrationPeriod.Load(this.RegistrationPeriodId.Value, dc: dc);
+            return RegistrationPeriod.Load(this.RegistrationPeriodId.Value, msgs, dc);
         }
 
-        public List<FormQuestionAnswer> GetAnswers(DatabaseConnection dc = null)
+        public List<FormQuestionAnswer> GetAnswers(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return FormQuestionAnswer.LoadByRegistrationId(this.ID.Value, dc: dc);
+            return FormQuestionAnswer.LoadByRegistrationId(this.ID.Value, msgs, dc);
         }
 
         public FormQuestionAnswer AddAnswer(string answerText, FormQuestion question, Registrant registrant, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
@@ -1088,20 +1088,11 @@ namespace AfterSchoolLibrary.Models
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     // delete all answers associated to this registration
-                    var answers = this.GetAnswers(adc);
-                    foreach (var answer in answers)
-                    {
-                        amsgs.AddRange(answer.Delete(adc));
-                    }
+                    this.GetAnswers(amsgs, adc).ForEach(answer => amsgs.AddRange(answer.Delete(adc)));
                 },
-                onSuccess: (SystemMessages smsgs) =>
-                {
-                    msgs.AddRange(smsgs);
-                },
-                onFailure: (SystemMessages fmsgs) =>
-                {
-                    msgs.AddRange(fmsgs);
-                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
 

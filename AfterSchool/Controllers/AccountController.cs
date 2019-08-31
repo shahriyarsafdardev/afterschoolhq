@@ -1249,20 +1249,23 @@ namespace AfterSchool.Controllers
                         {
                             if (qvm.Question.QuestionTypeId == QuestionType.FileUpload)
                             {
-                                var currentFileSizeInBytes = Request.Files[qvm.Name].ContentLength;
-                                //5 MB = 5242880 Bytes
-                                //File uploaded here should be less than of 5MB
-                                if (currentFileSizeInBytes <= 5242880)
-                                    submittedRecord.AddAnswer(
-                                        file: Request.Files[qvm.Name].InputStream,
-                                        filename: Request.Files[qvm.Name].FileName,
-                                        question: qvm.Question,
-                                        registrationId: registration.ID,
-                                        loggedInUser: SessionVariables.CurrentUser,
-                                        msgs: amsgs,
-                                        dc: adc);
-                                else
-                                    msgs.Add("Upload a file less than or equal to 5 megabytes", MessageType.UserError);
+                                if (Request.Files[qvm.Name].IsNotEmpty() && Request.Files[qvm.Name].ContentLength > 0)
+                                {
+                                    var currentFileSizeInBytes = Request.Files[qvm.Name].ContentLength;
+                                    //5 MB = 5242880 Bytes
+                                    //File uploaded here should be less than of 5MB
+                                    if (currentFileSizeInBytes <= 5242880)
+                                        submittedRecord.AddAnswer(
+                                            file: Request.Files[qvm.Name].InputStream,
+                                            filename: Request.Files[qvm.Name].FileName,
+                                            question: qvm.Question,
+                                            registrationId: registration.ID,
+                                            loggedInUser: SessionVariables.CurrentUser,
+                                            msgs: amsgs,
+                                            dc: adc);
+                                    else
+                                        msgs.Add("Upload a file less than or equal to 5 megabytes", MessageType.UserError);
+                                }
                             }
                             else
                                 submittedRecord.AddAnswer(
