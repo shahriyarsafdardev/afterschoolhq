@@ -713,7 +713,7 @@ namespace AfterSchoolLibrary.Services
                     msgs: msgs,
                     dc: dc);
             else
-                answer = FormQuestionAnswer.LoadByRegistrantIdByQuestionTypeId(registrant.ID.Value, questionDataType, msgs, dc);
+                answer = FormQuestionAnswer.LoadByRegistrantIdByQuestionDataTypeId(registrant.ID.Value, questionDataType, msgs, dc);
 
             if (answer.IsEmpty())
                 answer = new FormQuestionAnswer

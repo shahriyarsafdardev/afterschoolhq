@@ -345,14 +345,14 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static FormQuestionAnswer LoadByRegistrantIdByQuestionTypeId(int registrantId, QuestionDataType qt, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static FormQuestionAnswer LoadByRegistrantIdByQuestionDataTypeId(int registrantId, QuestionDataType qt, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
             dq.Criterias.Add(ObjectMap["RegistrantId"], registrantId);
             dq.Criterias.Add(ObjectMap["QuestionDataTypeId"], (int)qt);
-            dq.Criterias.Add(ObjectMap["RegistrationId"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
+            // dq.Criterias.Add(ObjectMap["RegistrationId"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 

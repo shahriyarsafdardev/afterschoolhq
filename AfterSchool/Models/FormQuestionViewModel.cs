@@ -20,6 +20,18 @@ namespace AfterSchool.Models
             Values = new NameValueCollection();
         }
 
+        public FormQuestionViewModel(FormQuestion question, string answer)
+        {
+            Question = question;
+            Values = new NameValueCollection() { { Id, answer } };
+        }
+
+        public FormQuestionViewModel(FormQuestion question, FormQuestionAnswer answer)
+        {
+            Question = question;
+            Values = new NameValueCollection() { { Id, answer.Text } };
+        }
+
         public bool Hide { get; set; }  
 
         public string RequiredProperty

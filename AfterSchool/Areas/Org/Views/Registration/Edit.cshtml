@@ -91,7 +91,7 @@
                                                                     <span>@item.Split('=')[0]: @item.Split('=')[1]</span><br />
                                                                 }
                                                             }
-                                                            else if (answer.FormQuestionQuestionTypeId == QuestionType.FileUpload)
+                                                            else if (answer.FormQuestionQuestionTypeId == QuestionType.FileUpload && answer.Text.IsNotBlank())
                                                             {
                                                                 <span>
                                                                     <a href="@Url.Action("downloadfile", "registration", new { id = Model.Uid, r = selectedRegistration.Uid, file = answer.ID, returnUrl = Request["returnurl"] })"
