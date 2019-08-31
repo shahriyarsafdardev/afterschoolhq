@@ -389,12 +389,12 @@ namespace AfterSchoolLibrary.Models
             return _Registration;
         }
 
-        public List<FormQuestionAnswer> GetAnswers(DatabaseConnection dc = null)
+        public List<FormQuestionAnswer> GetAnswers(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return this.GetRegistration(dc: dc).GetAnswers(dc: dc);
+            return this.GetRegistration(msgs, dc).GetAnswers(msgs, dc);
         }
 
-        public static List<RegistrantActivity> LoadByAccountId(int AccountId, int? start = null, int? length = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<RegistrantActivity> LoadByAccountId(int AccountId, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;

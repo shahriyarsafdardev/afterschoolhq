@@ -7,6 +7,8 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using AfterSchool.Models;
 using Hangfire;
+using System.Collections.Specialized;
+using BasicLibrary.DataAccess;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -191,6 +193,142 @@ namespace AfterSchool.Areas.Org.Controllers
 
             return View(registration);
         }
+
+        private List<FormQuestionViewModel> UpdateLoadQuestions(Registration registration, NameValueCollection formAnswers, SystemMessages msgs)
+        {
+            var answers = registration.GetAnswers(msgs);
+            var questionIds = answers.Select(answer => answer.FormQuestionId.Value).ToList();
+            var questions = FormQuestion.LoadList(questionIds, msgs);
+
+            questions.ForEach(question => {
+                switch (question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.RegistrantGrade:
+                    case QuestionDataType.RegistrantGender:
+                    case QuestionDataType.RegistrantFirstName:
+                    case QuestionDataType.RegistrantLastName:
+                        question.IsRequired = true;
+                        break;
+                    default:
+                        question.IsRequired = false;
+                        break;
+                }
+            });
+
+            List<FormQuestionViewModel> qvms = null;
+            questions = questions.OrderBy(question => question.DisplayOrder).ToList();
+
+            if (formAnswers.IsNotEmpty())
+                qvms = questions.Select(question => new FormQuestionViewModel(question, formAnswers)).ToList();
+            else
+                qvms = questions.Select(question => new FormQuestionViewModel(
+                             question,
+                             answers.Find(x => x.FormQuestionId == question.ID)))
+                        .ToList();
+
+
+            ViewBag.QuestionViewModels = qvms;
+
+            return qvms;
+        }
+
+        [HttpGet]
+        public ActionResult Update(string id)
+        {
+            var msgs = new SystemMessages();
+            var registration = Registration.LoadByUid(id.ToGuid(), msgs);
+
+            UpdateLoadQuestions(registration, null, msgs);
+
+            ViewBag.Messages = msgs;
+
+            return View(registration);
+        }
+
+        [HttpPost]
+        public ActionResult Update(string id, string nothing)
+        {
+            var msgs = new SystemMessages();
+            var registration = Registration.LoadByUid(id.ToGuid(), msgs);
+            var submittedRecord = registration.GetRegistrant(msgs);
+            var qvms = UpdateLoadQuestions(registration, Request.Params, msgs);
+
+            // validation
+            qvms.ForEach(qvm =>
+            {
+                if (qvm.Question.IsRequired && qvm.Value.IsEmpty())
+                    msgs.Add($"{qvm.Question.Text} is required", MessageType.UserError);
+
+                switch (qvm.Question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.RegistrantMobilePhone:
+                    case QuestionDataType.RegistrantHomePhone:
+                    case QuestionDataType.RegistrantWorkPhone:
+                        if (qvm.Value.IsNotEmpty() && !qvm.Value.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                            msgs.Add($"{qvm.Question.Text} must be a valid phone number", MessageType.UserError);
+                        break;
+                    case QuestionDataType.RegistrantEmail:
+                    case QuestionDataType.Parent1Email:
+                    case QuestionDataType.Parent2Email:
+                        if (qvm.Value.IsNotEmpty() && !qvm.Value.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
+                            msgs.Add($"{qvm.Question.Text} must be a valid email", MessageType.UserError);
+                        break;
+                }
+            });
+
+            // save answers
+            if (msgs.HasNoErrors())
+            {
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        qvms.ForEach(qvm =>
+                        {
+                            if (qvm.Question.QuestionTypeId == QuestionType.FileUpload)
+                            {
+                                if (Request.Files[qvm.Name].IsNotEmpty() && Request.Files[qvm.Name].ContentLength > 0)
+                                {
+                                    var currentFileSizeInBytes = Request.Files[qvm.Name].ContentLength;
+                                    //5 MB = 5242880 Bytes
+                                    //File uploaded here should be less than of 5MB
+                                    if (currentFileSizeInBytes <= 5242880)
+                                        submittedRecord.AddAnswer(
+                                            file: Request.Files[qvm.Name].InputStream,
+                                            filename: Request.Files[qvm.Name].FileName,
+                                            question: qvm.Question,
+                                            registrationId: registration.ID,
+                                            loggedInUser: SessionVariables.CurrentUser,
+                                            msgs: amsgs,
+                                            dc: adc);
+                                    else
+                                        msgs.Add("Upload a file less than or equal to 5 megabytes", MessageType.UserError);
+                                }
+                            }
+                            else
+                                submittedRecord.AddAnswer(
+                                    answerText: qvm.Value.IfEmpty("").Trim(),
+                                    question: qvm.Question,
+                                    registrationId: registration.ID,
+                                    loggedInUser: SessionVariables.CurrentUser,
+                                    msgs: amsgs,
+                                    dc: adc);
+                        });
+                    },
+                    onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                    onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                );
+            }
+
+            if (msgs.HasNoErrors())
+                return RedirectToAction("edit", new { id = registration.Uid });
+
+            ViewBag.Messages = msgs;
+
+            return View(registration);
+        }
+
 
         [HttpGet]
         public ActionResult DownloadFile(string id, string r, string file, string returnUrl)

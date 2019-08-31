@@ -114,11 +114,19 @@ else
             <tbody>
                 @if (Model.Count > 0)
                 {
+                    var assignmentTypes = new List<RegistrationAssignmentType>()
+                                            {
+                                                RegistrationAssignmentType.Applied,
+                                                RegistrationAssignmentType.Reserved,
+                                                RegistrationAssignmentType.ReservedPendingParentalConsent,
+                                                RegistrationAssignmentType.ReservedPendingPayment
+                                            };
+
                     foreach (Activity activity in Model)
                     {
                         var reservedTextClass = activity.IsFull() ? "text-danger text-bold" : "";
                         var waitingTextClass = activity.IsWaitingListFull() ? "text-danger text-bold" : "";
-                        
+
                         <tr>
                             <td>
                                 <a href="@Url.Action("summary", "activity", new { id = @activity.Uid})" class="btn btn-primary btn-sm">Manage</a>
@@ -169,7 +177,7 @@ else
                                 }                                
                             </td>
                             <td class="text-center @reservedTextClass">
-                                <a href="@Url.Action("registrants", "activity", new { id = activity.Uid })">@activity.GetRegistrantCount()</a>
+                                <a href="@Url.Action("registrants", "activity", new { id = activity.Uid })">@activity.GetRegistrantCountByAssignmentTypes(assignmentTypes)</a>
                             </td>
 
                             <td>
