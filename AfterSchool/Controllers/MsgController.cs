@@ -14,7 +14,15 @@ namespace AfterSchool.Controllers
         // GET: Msg
         public ActionResult Index(string id)
         {
-            return View(ActivityMessage.LoadByUid(id.ToGuid()));
+            if (id.IsGuid())
+            {
+                var am = ActivityMessage.LoadByUid(id.ToGuid());
+                
+                if (am.IsNotEmpty())
+                    return View(am);
+            }
+
+            return View("Invalid");
         }
     }
 }
