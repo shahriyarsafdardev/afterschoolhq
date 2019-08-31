@@ -498,9 +498,10 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult MessageDetail(string id)
         {
-            var am = ActivityMessage.Load(id.ToInteger());
-            ViewBag.Messages = new SystemMessages();
-            ViewBag.Registrants = am.GetActivityMessageRegistrants();
+            var msgs = new SystemMessages();
+            var am = ActivityMessage.LoadByUid(id.ToGuid(), msgs);
+            ViewBag.Messages = msgs;
+            ViewBag.Registrants = am.GetActivityMessageRegistrants(msgs);
             return View(am);
         }
 
@@ -569,8 +570,8 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult MessagesResend(string id)
         {
             var msgs = new SystemMessages();
-            var am = ActivityMessage.Load(id.ToInteger());
-            var group = am.GetActivityGroup();
+            var am = ActivityMessage.LoadByUid(id.ToGuid(), msgs);
+            var group = am.GetActivityGroup(msgs);
 
             BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, SessionVariables.CurrentUser.ID.Value, null, null));
 

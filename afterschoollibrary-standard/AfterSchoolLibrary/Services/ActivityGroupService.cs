@@ -671,6 +671,7 @@ namespace AfterSchoolLibrary.Services
                         AccountId = group.AccountId,
                         Subject = subject.MaxChars(150),
                         Body = body,
+                        SendToStaff = sendToStaff,
                         CreateDate = DateTime.UtcNow,
                         CreatedBy = loggedInUserId
                     };
