@@ -18,7 +18,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
         {
             var msgs = new SystemMessages();
 
-            if (request.MessageStatus.In(new string[] { "failed", "undelivered" }) && id.IsGuid() && id2.IsGuid())
+            if (request.IsNotEmpty() && request.MessageStatus.In(new string[] { "failed", "undelivered" }) && id.IsGuid() && id2.IsGuid())
             {
                 try
                 {
