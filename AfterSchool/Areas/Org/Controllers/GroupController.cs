@@ -641,21 +641,15 @@ namespace AfterSchool.Areas.Org.Controllers
             var group = ActivityGroup.LoadByUid(id.ToGuid());
 
             if (group.IsNotEmpty())
-            {
                 msgs.AddRange(group.MoveToArchive(SessionVariables.CurrentUser.ID.Value));
-            }
 
             ViewBag.Messages = msgs;
 
             if (msgs.HasNoErrors())
-            {
-                msgs.Add(string.Format("{0} has been archived", group.Name), MessageType.Success);
-            }
+                msgs.Add($"{group.Name} has been archived", MessageType.Success);
 
             if (Request.UrlReferrer.IsNotEmpty())
-            {
-                Response.Redirect(Request.UrlReferrer.ToString(), true);
-            }
+                return Redirect(Request.UrlReferrer.ToString());
 
             return RedirectToAction("index", "group");
         }
@@ -683,7 +677,6 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Schedules(string id)
         {
-
             var msgs = new SystemMessages();
             var group = ActivityGroup.LoadByUid(id.ToGuid());
 

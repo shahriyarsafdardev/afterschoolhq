@@ -37,9 +37,9 @@
                         <div class="col-sm-6">
                             <select name="subject" id="subject" class="form-control">
                                 <option value="">Select a Message Reason...</option>
-                                @foreach (var reason in Enum.GetValues(typeof(ActivityMessageReason)).Cast<ActivityMessageReason>().Except(ActivityMessageReason.NotSet.AsList()).OrderBy(x => x.ToString()))
+                                @foreach(var reason in Enum.GetValues(typeof(ActivityMessageReason)).Cast<ActivityMessageReason>().Except(ActivityMessageReason.NotSet.AsList()).OrderBy(x => x.ToString()))
                                 {
-                                    <option value="@((int)reason)">@reason.ToString().SplitByUpperCase()</option>
+                                    <option value="@reason.ToString().SplitByUpperCase()">@reason.ToString().SplitByUpperCase()</option>
                                 }
                             </select>
                         </div>
