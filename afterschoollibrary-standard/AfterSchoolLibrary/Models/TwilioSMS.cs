@@ -184,11 +184,20 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		
+
 
         #endregion
 
-		#region "UserDefined"
+        #region "UserDefined"
+
+        public static bool ExistsByRegistrantIdByActivityMessageId(int RegistrantId, int ActivityMessageId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
+            dq.Criterias.Add(ObjectMap["ActivityMessageId"], ActivityMessageId);
+            return dq.GetCount(msgs) > 0;
+        }
 
         #endregion
     }
