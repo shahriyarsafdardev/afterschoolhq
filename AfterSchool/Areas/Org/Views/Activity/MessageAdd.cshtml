@@ -73,9 +73,20 @@
                                 <div class="col-md-4">
                                     @foreach (var registrant in registrants.Skip(i * registrantsPerColumn).ToList().Take(registrantsPerColumn))
                                     {
-                                        <div class="am-checkbox registrant" data-has-email="@registrant.Email.IsNotEmpty().ToInteger()" data-has-phone-number="@registrant.Phone.IsNotEmpty().ToInteger()">
-                                            <input type="checkbox" class="chk-registrant" id="registrant-@registrant.ID" name="registrant-@registrant.ID" value="1" checked="checked" />
-                                            <label for="registrant-@registrant.ID">@registrant.DisplayName.MaxChars(20, "...")</label>
+                                        <div class="am-checkbox registrant" 
+                                             data-has-email="@registrant.Email.IsNotEmpty().ToInteger()" 
+                                             data-has-phone-number="@registrant.Phone.IsNotEmpty().ToInteger()">
+
+                                            <input type="checkbox" 
+                                                   class="chk-registrant" 
+                                                   id="registrant-@registrant.ID" 
+                                                   name="registrant-@registrant.ID" 
+                                                   value="1" 
+                                                   checked="checked" />
+
+                                            <label for="registrant-@registrant.ID">
+                                                @registrant.DisplayName.MaxChars(20, "...")
+                                            </label>
                                         </div>
                                     }
                                 </div>
