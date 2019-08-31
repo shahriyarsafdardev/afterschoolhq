@@ -655,5 +655,68 @@ namespace AfterSchoolLibrary.Services
             var instances = activityGroup.GetSchedule(msgs, dc).GetInstances(msgs: msgs, dc: dc);
             return now > instances.Last().StartDateTime;
         }
+
+        public static ActivityMessage AddMessage(this ActivityGroup group, string subject, string body, List<int> registrantIds, bool sendToStaff, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            ActivityMessage am = null;
+
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    am = new ActivityMessage
+                    {
+                        ActivityGroupId = group.ID,
+                        AccountId = group.AccountId,
+                        Subject = subject.MaxChars(150),
+                        Body = body,
+                        SendToStaff = sendToStaff,
+                        CreateDate = DateTime.UtcNow,
+                        CreatedBy = loggedInUserId
+                    };
+                    amsgs.AddRange(am.Save(dc));
+
+                    if (amsgs.HasNoErrors())
+                        registrantIds.ForEach(registrantId => am.AddRegistrant(registrantId, loggedInUserId, amsgs, adc));
+                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
+                dc: dc
+            );
+
+            return am;
+        }
+
+        public static SystemMessages MoveToArchive(this ActivityGroup group, int loggedInUserId, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            group.IsArchived = true;
+            group.LastModifiedDate = DateTime.UtcNow;
+            group.LastModifiedBy = loggedInUserId;
+            msgs.AddRange(group.Save(dc));
+
+            return msgs;
+        }
+
+        public static List<ActivitySchedule> GetSchedules(this ActivityGroup group, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return ActivitySchedule.LoadByActivityGroupId(group.ID.Value, msgs, dc);
+        }
+
+        public static void MoveFromArchive(this ActivityGroup group, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            group.IsArchived = false;
+            group.LastModifiedDate = DateTime.UtcNow;
+            group.LastModifiedBy = loggedInUserId;
+            msgs.AddRange(group.Save(dc));
+        }
+
+        public static List<RegistrantActivityGroup> GetInvitedContacts(this ActivityGroup group, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RegistrantActivityGroup.LoadByActivityGroupId(group.ID.Value, start, length, msgs, dc);
+        }
     }
 }

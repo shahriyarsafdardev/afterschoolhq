@@ -27,28 +27,79 @@ namespace AfterSchoolLibrary.Services
             am.SendActivityMessage(account, loggedInUser, activity.Name, activity.ContactName, activity.ContactEmail, activity.ContactName, msgs, dc);
 
             if (msgs.HasNoErrors() && am.SendToStaff)
-                msgs.AddRange(am.SendMessageToTeamMembers(activity, account, loggedInUser, dc));
+                am.SendMessageToTeamMembers(activity, account, loggedInUser, msgs, dc);
 
         }
 
-        private static SystemMessages SendMessageToTeamMembers(this ActivityMessage activityMessage, Activity activity, Account account, WebUser loggedInUser, DatabaseConnection dc = null)
+        private static void SendMessageToTeamMembers(this ActivityMessage activityMessage, Activity activity, Account account, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
             var members = activity.GetTeamMembers(msgs, dc).DistinctBy(member => member.WebUserId).ToList();
 
+            activityMessage.SendMessageToTeamMembers(
+                members,
+                activity.Name,
+                activity.ContactEmail.IfBlank(account.Email),
+                activity.ContactName.IfBlank(account.Name),
+                account,
+                loggedInUser,
+                msgs,
+                dc);
+        }
+
+        private static void SendMessageToTeamMembers(this ActivityMessage activityMessage, ActivityGroup group, Account account, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var members = new List<ActivityWebUser>();
+            var activities = group.GetActivities(msgs, dc);
+
+            activities.ForEach(activity => {
+                members.AddRange(activity.GetTeamMembers(msgs, dc).DistinctBy(member => member.WebUserId));
+            });
+
+            members = members.DistinctBy(member => member.WebUserId).ToList();
+
+            activityMessage.SendMessageToTeamMembers(
+                members,
+                group.Name,
+                group.ContactEmail.IfBlank(account.Email),
+                group.ContactName.IfBlank(account.Name),
+                account,
+                loggedInUser,
+                msgs,
+                dc);
+        }
+
+        internal static void SendMessageToTeamMembers(this ActivityMessage activityMessage, List<ActivityWebUser> members, string activityName, string contactEmail, string contactName, Account account, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
             members.ForEach(member => {
+
                 var body = SearchAndReplaceNameInText(
                     activityMessage.Body,
                     member.WebUserFirstName.IfBlank(""),
                     member.WebUserLastName.IfBlank(""),
                     member.WebUserDisplayName.IfBlank(""));
 
-                ActivityMessageService.SendEmailMessage(account, activity.Name, loggedInUser.DisplayName, member.WebUserEmail, member.WebUserDisplayName, activity.ContactEmail, activity.ContactName, activityMessage.Subject, body, "activity_message", msgs);
+                ActivityMessageService.SendEmailMessage(
+                    account,
+                    activityName,
+                    loggedInUser.DisplayName,
+                    member.WebUserEmail,
+                    member.WebUserDisplayName,
+                    contactEmail,
+                    contactName,
+                    activityMessage.Subject,
+                    body,
+                    "activity_message",
+                    msgs);
 
-                ActivityMessageService.SendTextMessage(member.WebUserPhone, loggedInUser.DisplayName, activityMessage.Subject, activity.Name, activityMessage.Uid.ToString(), null, msgs);
+                ActivityMessageService.SendTextMessage(
+                    member.WebUserPhone,
+                    loggedInUser.DisplayName,
+                    activityMessage.Subject,
+                    activityName,
+                    activityMessage.Uid.ToString(),
+                    null,
+                    msgs);
             });
-
-            return msgs;
         }
 
         internal static MessageResource SendTextMessage(string phone, string senderName, string subject, string activityName, string messageUid, string registrantUid, SystemMessages msgs)
@@ -91,19 +142,8 @@ namespace AfterSchoolLibrary.Services
 
             am.SendActivityMessage(account, loggedInUser, group.Name, account.Name, account.Email, account.Name, msgs, dc);
 
-            if (msgs.HasNoErrors())
-            {
-                // send to account admin
-                SendGridHelper.SendMail(
-                    fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                        Helpers.Email.AppNoReplyEmailAddress,
-                        $"CC: {account.Name} via {Helpers.Utilities.AppName(account.IsAfterSchool)}"),
-                    toEmail: new SendGrid.Helpers.Mail.EmailAddress(account.Email),
-                    subject: am.Subject,
-                    body: $"{am.Body}{(Helpers.Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "activitygroup_message"))}",
-                    emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
-                );
-            }
+            if (msgs.HasNoErrors() && am.SendToStaff)
+                am.SendMessageToTeamMembers(group, account, loggedInUser, msgs, dc);
         }
 
         private static string SearchAndReplaceNameInBodyText(this ActivityMessage activityMessage, ActivityMessageRegistrant amr)

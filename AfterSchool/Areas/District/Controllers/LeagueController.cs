@@ -94,7 +94,7 @@ namespace AfterSchool.Areas.District.Controllers
             var group = ActivityGroup.LoadByUid(id.ToGuid());
 
             if (group.IsNotEmpty())
-                msgs.AddRange(group.MoveFromArchive(SessionVariables.CurrentUser.ID.Value));
+                group.MoveFromArchive(SessionVariables.CurrentUser.ID.Value, msgs);
 
             ViewBag.Messages = msgs;
 
