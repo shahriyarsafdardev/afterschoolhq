@@ -1,7 +1,7 @@
 ﻿@model ParticipationObject
 
 
-@if (Model.IsNotEmpty())
+@if (Model.IsNotEmpty() && Model.RegistrationPeriod.IsOpen())
 {
     <div class="cart-tab bg-danger padding-10 pointer text-white text-center" style="position:fixed; right: -10px; top: 50px; border-radius: 10px; padding-right: 20px;">
         <div class="cart-count text-medium-small">0</div>
