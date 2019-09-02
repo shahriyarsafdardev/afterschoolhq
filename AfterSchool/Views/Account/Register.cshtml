@@ -15,10 +15,19 @@
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-@{ Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", SessionVariables.RegistrationStartPageAccount); }
+@{ 
+    Html.RenderPartial(
+        "~/Views/Shared/Registration/_AccountTopBar.cshtml",
+        SessionVariables.RegistrationStartPageAccount,
+        new ViewDataDictionary()
+        {
+            { "ParticipationObject", Model }
+        }
+    );
+}
 
 <div class="reg-header">
-    <h1>Registering <u>@SessionVariables.CurrentRegistrant.FirstName</u> for <u>@Model.Name</u></h1>
+    <h1 class="text-center">Registering <u>@SessionVariables.CurrentRegistrant.FirstName</u> for <u>@Model.Name</u></h1>
 </div>
 
 <div>
@@ -89,3 +98,15 @@
         });
     });
 </script>
+
+@if (Model.IsActivityGroup() && Model.GetActivityGroup().ActivityGroupTypeId == ActivityGroupType.Session)
+{
+    Html.RenderPartial(
+        "~/Views/Shared/Registration/_BrowseCart.cshtml",
+        Model,
+        new ViewDataDictionary()
+        {
+            { "IsDuringCheckout", true }
+        }
+    );
+}

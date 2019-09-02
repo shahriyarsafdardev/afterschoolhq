@@ -362,7 +362,9 @@ namespace AfterSchool.Controllers
             if (SessionVariables.CurrentRegistrant.IsEmpty())
                 return RedirectToAction("getstarted", "account", new { area = "", regaccount = account.Uid });
 
-            if (SessionVariables.CurrentRegistrant.IsParentOrGuardian)
+            var masterRegistrant = SessionVariables.CurrentUser.GetMasterRegistrant();
+
+            if (masterRegistrant.IsParentOrGuardian)
                 return RedirectToAction("register", "account", new { area = "", regaccount = account.Uid });
 
             return RedirectToAction("registerstudent", "account", new { area = "", regaccount = account.Uid });

@@ -1,12 +1,35 @@
 ﻿@model ParticipationObject
 
+@{ 
+    var duringCheckout = false;
+    var allowModifyCart = true;
+
+    if (ViewData["IsDuringCheckout"].IsNotEmpty() && ViewData["IsDuringCheckout"].ToString().IsBoolean())
+    {
+        duringCheckout = ViewData["IsDuringCheckout"].ToString().ToBoolean();
+    }
+
+    if (ViewData["AllowToModifyCart"].IsNotEmpty() && ViewData["AllowToModifyCart"].ToString().IsBoolean())
+    {
+        allowModifyCart = ViewData["AllowToModifyCart"].ToString().ToBoolean();
+    }
+}
 
 @if (Model.IsNotEmpty() && Model.RegistrationPeriod.IsOpen())
 {
     <div class="cart-tab bg-danger padding-10 pointer text-white text-center" style="position:fixed; right: -10px; top: 50px; border-radius: 10px; padding-right: 20px;">
         <div class="cart-count text-medium-small">0</div>
         <i class="s7-cart icon-large"></i>
-        <div>Checkout &raquo;</div>
+        <div>
+            @if (duringCheckout)
+            {
+                <span>View Cart &raquo;</span>
+            }
+            else
+            {
+                <span>Checkout &raquo;</span>
+            }            
+        </div>
     </div>
 
     <div class="cart-bar col-xs-12 col-sm-8 col-md-6 col-lg-4 col-xl-3 text-white hide" style="position:fixed; top:0px; right: 0px; height: 100%; background-color: #2f3c40; overflow-y: auto;">
@@ -15,12 +38,26 @@
         </div>
 
         <div>
-            <button onclick="location.href='@Model.GetRegistrationPageUrl()'"
-                    class="btn btn-primary btn-register btn-block btn-checkout"
-                    style="margin-top: 20px;"
-                    disabled="disabled">
-                Register 1 Student &raquo;
-            </button>
+            @if (duringCheckout)
+            {
+                if (allowModifyCart)
+                {
+                    <button onclick="location.href='@Model.GetBrowseUrl()'" 
+                            class="btn btn-primary btn-register btn-block btn-checkout"
+                            style="margin-top: 20px;">
+                        Modify Cart
+                    </button>
+                }
+            }
+            else
+            {
+                <button onclick="location.href='@Model.GetRegistrationPageUrl()'"
+                        class="btn btn-primary btn-register btn-block btn-checkout"
+                        style="margin-top: 20px;"
+                        disabled="disabled">
+                    Register 1 Student &raquo;
+                </button>
+            }
         </div>
 
         <div style="margin-bottom: 80px;">
@@ -61,9 +98,13 @@
             {
                 foreach (var item in SessionVariables.Cart.GetCartItems())
                 {
-                    @:getCartItem('@item.GetParticipationObject().Uid', function (cartObj) {
-                    @:  markItemAsInCart($('.btn-cart[uid="@item.GetParticipationObject().Uid"]'), cartObj);
-                    @:});
+                    var participationObject = item.GetParticipationObject();
+                    if (participationObject.IsActivity())
+                    { 
+                        @:getCartItem('@participationObject.Uid', function (cartObj) {
+                        @:  markItemAsInCart($('.btn-cart[uid="@participationObject.Uid"]'), cartObj);
+                        @:});
+                    }
                     
                 }
             }
@@ -164,13 +205,22 @@
         }
 
         function getActivityHtml(cartObj) {
-            return '<div uid="' + cartObj.uid + '" style="float:left; margin-right: 20px; margin-top: 5px; border: solid 1px #00c5a3; width: 200px; position: relative;" class="cart-bar-item padding-10"><div id="' + cartObj.uid + '" class="text-medium-small">' + cartObj.name + '</div><div class="text-small">' + cartObj.days + ' &bull; ' + cartObj.minGradeText + ' - ' + cartObj.maxGradeText + '</div><div class="pointer"><a href="javascript:removeFromCartByUid(\'' + cartObj.uid + '\')">Remove</a></div></div>';
+            let html = '<div uid="' + cartObj.uid + '" style="float:left; margin-right: 20px; margin-top: 5px; border: solid 1px #00c5a3; width: 200px; position: relative;" class="cart-bar-item padding-10"><div id="' + cartObj.uid + '" class="text-medium-small">' + cartObj.name + '</div><div class="text-small">' + cartObj.days + ' &bull; ' + cartObj.minGradeText + ' - ' + cartObj.maxGradeText + '</div>';
+
+            @if (!duringCheckout)
+            { 
+                @: html += '<div class="pointer"><a href="javascript:removeFromCartByUid(\'' + cartObj.uid + '\')">Remove</a></div>';
+            }
+
+            html += '</div>';
+
+            return html;
         }
 
         function markItemAsInCart(btnCart, cartObj) {
             console.log('markItemAsInCart');
             incrementCartCount();
-            btnCart.children('span').html('<i class="s7-close icon-medium"></i><i class="s7-cart icon-medium"></i>');
+            btnCart.children('span').html('<i class="s7-close-circle icon-medium"></i><i class="s7-cart icon-medium"></i>');
             btnCart.attr('in-cart', '1');
             btnCart.removeClass('btn-register');
             btnCart.addClass('btn-register-default');

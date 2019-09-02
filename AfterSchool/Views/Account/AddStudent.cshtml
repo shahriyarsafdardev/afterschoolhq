@@ -9,7 +9,19 @@
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
-@{ Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", SessionVariables.RegistrationStartPageAccount); }
+
+@{
+    Html.RenderPartial(
+        "~/Views/Shared/Registration/_AccountTopBar.cshtml",
+        SessionVariables.RegistrationStartPageAccount,
+        new ViewDataDictionary()
+        {
+            { "ParticipationObject", participationObject },
+            { "IsDuringProfileSetup", true }
+        }
+    );
+}
+
 @{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", participationObject); }
 
 <div>
@@ -65,10 +77,10 @@
                                 school ?? new Location(),
                                 new ViewDataDictionary()
                                 {
-                                                                    { "label", "Enter your school" },
-                                                                    { "searchOnly", true },
-                                                                    { "placeholderText", "Enter your school name" },
-                                                                    { "locationType", (int)LocationType.School }
+                                                    { "label", "Enter your school" },
+                                                    { "searchOnly", true },
+                                                    { "placeholderText", "Enter your school name" },
+                                                    { "locationType", (int)LocationType.School }
                                 }
                             );
                         }
@@ -98,3 +110,16 @@
         });
     });
 </script>
+
+@if (participationObject.IsActivityGroup() && participationObject.GetActivityGroup().ActivityGroupTypeId == ActivityGroupType.Session)
+{
+    Html.RenderPartial(
+        "~/Views/Shared/Registration/_BrowseCart.cshtml",
+        participationObject,
+        new ViewDataDictionary()
+        {
+            { "IsDuringCheckout", true },
+            { "AllowToModifyCart", false }
+        }
+    );
+}
