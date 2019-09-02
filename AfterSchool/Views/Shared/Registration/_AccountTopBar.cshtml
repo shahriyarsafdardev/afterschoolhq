@@ -5,6 +5,7 @@
     var canPublishActivity = ViewData["CanPublishActivity"].IsNotEmpty() ? ViewData["CanPublishActivity"].ToString().ToBoolean() : false;
     var participationObject = (ParticipationObject)ViewData["ParticipationObject"];
     var dashboardUrl = Url.Action("index", "home", new { area = "user" });
+    var session = (ParticipationObject)ViewData["session"];
 
     if (SessionVariables.CurrentAccount.IsNotEmpty() && SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant)
     {
@@ -13,9 +14,15 @@
     }
 }
 
-@helper RenderReturnToHomeUrl()
+@helper RenderReturnToHomeUrl(ParticipationObject session)
 {
-    if (Model.IsNotEmpty() && !($"{Model.HomePageUrl}/browse".ToLower().Contains(Request.Url.AbsolutePath.ToLower())))
+    if (session.IsNotEmpty())
+    {
+        <a href="@session.GetBrowseUrl()" class="btn btn-link">
+            &laquo; Return to @session.Name Home
+        </a>
+    }
+    else if (Model.IsNotEmpty() && !($"{Model.HomePageUrl}/browse".ToLower().Contains(Request.Url.AbsolutePath.ToLower())))
     {
         <a href="@Model.HomePageUrl" class="btn btn-link">
             &laquo; Return to @Model.Name Home
@@ -39,7 +46,7 @@
                 <div class="btn-group pull-right">
                     <div>
                         
-                        @RenderReturnToHomeUrl()
+                        @RenderReturnToHomeUrl(session)
 
                         @if (SessionVariables.CurrentUser.IsNotEmpty())
                         {
@@ -65,7 +72,7 @@
     {
         <div class="row">
             <div class="pull-right">
-                @RenderReturnToHomeUrl()
+                @RenderReturnToHomeUrl(session)
             </div>
         </div>
         <div>
