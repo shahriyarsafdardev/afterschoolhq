@@ -1971,7 +1971,7 @@ namespace AfterSchool.Controllers
         public ActionResult RegisterStudent(string agree)
         {
             var msgs = new SystemMessages();
-            var participationObject = SessionVariables.Cart.GetCartItems().FirstOrDefault()?.GetParticipationObject();
+            var participationObject = GetParticipationObjectFromCart();
             // need to see if there are any questions required by the form on the activity/activity group that haven't been collected on the main form
 
             if (agree.IsEmpty())
