@@ -5,17 +5,35 @@
     var canPublishActivity = ViewData["CanPublishActivity"].IsNotEmpty() ? ViewData["CanPublishActivity"].ToString().ToBoolean() : false;
     var participationObject = (ParticipationObject)ViewData["ParticipationObject"];
     var dashboardUrl = Url.Action("index", "home", new { area = "user" });
+    var session = (ParticipationObject)ViewData["session"];
+    var isDuringProfileSetup = false;
 
     if (SessionVariables.CurrentAccount.IsNotEmpty() && SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant)
     {
         accountOrDashboard = "Dashboard";
         dashboardUrl = Url.Action("index", "home", new { area = "org" });
     }
+
+    if (session.IsEmpty() && participationObject.IsNotEmpty() && participationObject.IsActivityGroup() && participationObject.GetActivityGroup().ActivityGroupTypeId == ActivityGroupType.Session)
+    {
+        session = participationObject;
+    }
+
+    if (ViewData["IsDuringProfileSetup"].IsNotEmpty() && ViewData["IsDuringProfileSetup"].ToString().IsBoolean())
+    {
+        isDuringProfileSetup = ViewData["IsDuringProfileSetup"].ToString().ToBoolean();
+    }
 }
 
-@helper RenderReturnToHomeUrl()
+@helper RenderReturnToHomeUrl(ParticipationObject session)
 {
-    if (Model.IsNotEmpty() && !($"{Model.HomePageUrl}/browse".ToLower().Contains(Request.Url.AbsolutePath.ToLower())))
+    if (session.IsNotEmpty())
+    {
+        <a href="@session.GetBrowseUrl()" class="btn btn-link">
+            &laquo; Return to @session.Name Home
+        </a>
+    }
+    else if (Model.IsNotEmpty() && !($"{Model.HomePageUrl}/browse".ToLower().Contains(Request.Url.AbsolutePath.ToLower())))
     {
         <a href="@Model.HomePageUrl" class="btn btn-link">
             &laquo; Return to @Model.Name Home
@@ -23,7 +41,7 @@
     }
 }
 
-<div class="reg-login-bar">
+<div class="reg-login-bar">    
     @if (Model.ID.HasValue)
     {
         <div class="row">
@@ -35,37 +53,41 @@
                 }
 
             </div>
-            <div class="col-md-6 col-sm-6 col-xs-12">                
-                <div class="btn-group pull-right">
-                    <div>
-                        
-                        @RenderReturnToHomeUrl()
 
-                        @if (SessionVariables.CurrentUser.IsNotEmpty())
-                        {
-                            if (canPublishActivity)
-                            { 
-                                <a href="@Url.Action("publishdetail", "activity", new { Area = "org", id = participationObject.Uid })" class="btn btn-primary btn-sm">
-                                    Approve &amp; Publish Activity &raquo;
-                                </a>
+            @if (!isDuringProfileSetup)
+            {
+                <div class="col-md-6 col-sm-6 col-xs-12">                
+                    <div class="btn-group pull-right">
+                        <div>
+                        
+                            @RenderReturnToHomeUrl(session)
+
+                            @if (SessionVariables.CurrentUser.IsNotEmpty())
+                            {
+                                if (canPublishActivity)
+                                {
+                                    <a href="@Url.Action("publishdetail", "activity", new { Area = "org", id = participationObject.Uid })" class="btn btn-primary btn-sm">
+                                        Approve &amp; Publish Activity &raquo;
+                                    </a>
+                                }
+                                <a href="@dashboardUrl" class="btn btn-link">View @accountOrDashboard</a>
+                                <a href="@Url.Action("index", "logout", new { returnurl = SessionVariables.RegistrationStartPageAccount.HomePageUrl })" class="btn btn-link">Logout</a>
                             }
-                            <a href="@dashboardUrl" class="btn btn-link">View @accountOrDashboard</a>
-                            <a href="@Url.Action("index", "logout", new { returnurl = SessionVariables.RegistrationStartPageAccount.HomePageUrl })" class="btn btn-link">Logout</a>
-                        }
-                        else
-                        {
-                            <button type="button" class="btn btn-link md-trigger" data-modal="modal-login">Login to Account</button>
-                        }
+                            else
+                            {
+                                <button type="button" class="btn btn-link md-trigger" data-modal="modal-login">Login to Account</button>
+                            }
+                        </div>
                     </div>
                 </div>
-            </div>
+            }
         </div>        
     }
     else
     {
         <div class="row">
             <div class="pull-right">
-                @RenderReturnToHomeUrl()
+                @RenderReturnToHomeUrl(session)
             </div>
         </div>
         <div>

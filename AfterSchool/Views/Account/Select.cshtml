@@ -18,10 +18,20 @@
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-@{ Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", SessionVariables.RegistrationStartPageAccount); }
+@{ 
+    Html.RenderPartial(
+        "~/Views/Shared/Registration/_AccountTopBar.cshtml",
+        SessionVariables.RegistrationStartPageAccount,
+        new ViewDataDictionary()
+        {
+            { "ParticipationObject", participationObject }
+        }
+    );
+}
+
 
 <div class="reg-header">
-    <div>
+    <div class="text-center">
         <h1>Complete registration for <u>@participationObject.Name</u></h1>
         <p>Please select which student you&#39;d like to register below.</p>
     </div>
@@ -106,3 +116,15 @@
     </div>
 
 </div>
+
+@if (participationObject.IsActivityGroup() && participationObject.GetActivityGroup().ActivityGroupTypeId == ActivityGroupType.Session)
+{
+    Html.RenderPartial(
+        "~/Views/Shared/Registration/_BrowseCart.cshtml",
+        participationObject,
+        new ViewDataDictionary()
+        {
+            { "IsDuringCheckout", true }
+        }
+    );
+}

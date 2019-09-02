@@ -257,6 +257,22 @@ namespace AfterSchoolLibrary.Models
                 case ParticipationObjectType.AccountActivityGroup:
                     return ((AccountActivityGroup)this.Object).GetHomePageUrl(isAfterSchool);
             }
+
+            return "";
+        }
+
+        public string GetBrowseUrl(bool isAfterSchool = true)
+        {
+            switch (this.ObjectType)
+            {
+                case ParticipationObjectType.Activity:
+                    return GetHomePageUrl(isAfterSchool);
+                case ParticipationObjectType.ActivityGroup:
+                    return ((ActivityGroup)this.Object).BrowseUrl;
+                case ParticipationObjectType.AccountActivityGroup:
+                    return GetHomePageUrl(isAfterSchool);
+            }
+
             return "";
         }
 

@@ -30,6 +30,42 @@ namespace AfterSchool.Controllers
             return false;
         }
 
+        [HttpGet]
+        public ActionResult GetCartItem(string uid)
+        {
+            if (!IsRequestFromApp())
+                return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
+
+            var msgs = new SystemMessages();
+
+            if (SessionVariables.Cart.IsNotEmpty())
+            {
+                var activity = Activity.LoadByUid(uid.ToGuid(), msgs);
+
+                if (msgs.HasNoErrors())
+                    return Json(new
+                    {
+                        status = "ok",
+                        cart = GetCartItemObject(activity.GetParticipationObject(msgs))
+                    }, JsonRequestBehavior.AllowGet);
+            }
+
+
+            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+        }
+
+        public dynamic GetCartItemObject(ParticipationObject participationObject)
+        {
+            return new
+            {
+                uid = participationObject.Uid,
+                name = participationObject.Name,
+                days = ParticipationObjectUI.PrintDaysOfWeek(participationObject),
+                minGradeText = participationObject.GetMinGradeLevel()?.Name,
+                maxGradeText = participationObject.GetMaxGradeLevel()?.Name
+            };
+        }
+
         [HttpPost]
         public ActionResult AddToCart(string uid)
         {
@@ -41,10 +77,15 @@ namespace AfterSchool.Controllers
             if (SessionVariables.Cart.IsEmpty())
                 SessionVariables.Cart = Cart.GetNewCart(loggedInUser: SessionVariables.CurrentUser, msgs: msgs);
 
-            SessionVariables.Cart.AddCartItem(Activity.LoadByUid(uid.ToGuid(), msgs), msgs);
+            var participationObject = Activity.LoadByUid(uid.ToGuid(), msgs).GetParticipationObject(msgs);
+
+            SessionVariables.Cart.AddCartItem(participationObject, msgs);
 
             if (msgs.HasNoErrors())
-                return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
+                return Json(new {
+                    status = "ok",
+                    cart = GetCartItemObject(participationObject)
+                }, JsonRequestBehavior.AllowGet);
 
             return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
         }

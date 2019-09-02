@@ -7,7 +7,19 @@
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
-@{ Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", SessionVariables.RegistrationStartPageAccount); }
+
+@{ 
+    Html.RenderPartial(
+        "~/Views/Shared/Registration/_AccountTopBar.cshtml",
+        SessionVariables.RegistrationStartPageAccount,
+        new ViewDataDictionary()
+        {
+            { "ParticipationObject", participationObject },
+            { "IsDuringProfileSetup", true }
+        }
+    );
+}
+
 @{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", participationObject); }
 
 <div>
@@ -59,7 +71,6 @@
     </div>
 </div>
 
-
 <script>
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         $('#emergency-contact-form').submit(function () {
@@ -68,3 +79,16 @@
         });
     });
 </script>
+
+@if (participationObject.IsActivityGroup() && participationObject.GetActivityGroup().ActivityGroupTypeId == ActivityGroupType.Session)
+{
+    Html.RenderPartial(
+        "~/Views/Shared/Registration/_BrowseCart.cshtml",
+        participationObject,
+        new ViewDataDictionary()
+        {
+            { "IsDuringCheckout", true },
+            { "AllowToModifyCart", false }
+        }
+    );
+}

@@ -30,10 +30,12 @@ namespace AfterSchool.Controllers
                 SessionVariables.RegistrationStartPageAccount = account;
         }
 
-        private void RestartRegistrationSession()
+        private void RestartRegistrationSession(bool clearCart = true)
         {
             SessionVariables.CurrentRegistrant = null;
-            SessionVariables.Cart = null;
+
+            if (clearCart)
+                SessionVariables.Cart = null;
         }
 
         [HttpGet]
@@ -122,12 +124,11 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult Activity(string accountname, string activitytype, string activityname, string preview)
         {
-            RestartRegistrationSession();
-
             ParticipationObject participationObject = null;
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);  
             var canPublishActivity = false;
+            ParticipationObject session = null;
 
             if (account.IsNotEmpty())
             {
@@ -137,6 +138,9 @@ namespace AfterSchool.Controllers
                     return HttpNotFound();
 
                 participationObject = activity.GetParticipationObject(msgs);
+
+                if (activity.ActivityGroupId.HasValue)
+                    session = activity.GetActivityGroup(msgs)?.GetParticipationObject(msgs);
 
                 if (!activity.IsPublished && activity.GetLocation().HostAccountId != activity.AccountId)
                 {
@@ -162,12 +166,14 @@ namespace AfterSchool.Controllers
                     return HttpNotFound();
             }
 
+            RestartRegistrationSession(clearCart: session.IsEmpty());
             SetRegistrationStartPage(account);
 
             ViewBag.Messages = msgs;
             ViewBag.Account = account;
             ViewBag.CanPublishActivity = canPublishActivity;
             ViewBag.CanRegisterFor = true;
+            ViewBag.Session = session;
 
             return View(participationObject);
         }
@@ -302,6 +308,9 @@ namespace AfterSchool.Controllers
                 activities = session.GetActivities(msgs);
 
             var participationObjects = activities.Select(activity => activity.GetParticipationObject(msgs)).ToList();
+            var opened = participationObjects.Where(po => po.RegistrationPeriod.IsOpen()).ToList();
+            var willOpen = participationObjects.Where(po => po.RegistrationPeriod.WillOpen()).ToList();
+            var closed = participationObjects.Where(po => po.RegistrationPeriod.IsClosed() && po.NotIn(willOpen)).ToList();
 
             ViewBag.Session = session.GetParticipationObject(msgs);
             ViewBag.Grades = GradeLevel.Load(msgs: msgs);
@@ -309,9 +318,9 @@ namespace AfterSchool.Controllers
             ViewBag.Cart = SessionVariables.Cart;
             ViewBag.Locations = account.GetAllAvailableLocations(msgs);
             ViewBag.ParticipationObjects = participationObjects;
-            ViewBag.RegistrationOpened = participationObjects.Where(po => po.RegistrationPeriod.IsOpen()).ToList();
-            ViewBag.RegistrationClosed = participationObjects.Where(po => po.RegistrationPeriod.IsClosed()).ToList();
-            ViewBag.RegistrationWillOpen = participationObjects.Where(po => po.RegistrationPeriod.WillOpen()).ToList();
+            ViewBag.RegistrationOpened = opened;
+            ViewBag.RegistrationClosed = closed;
+            ViewBag.RegistrationWillOpen = willOpen;
 
             return View("browse", account);
         }
@@ -353,7 +362,9 @@ namespace AfterSchool.Controllers
             if (SessionVariables.CurrentRegistrant.IsEmpty())
                 return RedirectToAction("getstarted", "account", new { area = "", regaccount = account.Uid });
 
-            if (SessionVariables.CurrentRegistrant.IsParentOrGuardian)
+            var masterRegistrant = SessionVariables.CurrentUser.GetMasterRegistrant();
+
+            if (masterRegistrant.IsParentOrGuardian)
                 return RedirectToAction("register", "account", new { area = "", regaccount = account.Uid });
 
             return RedirectToAction("registerstudent", "account", new { area = "", regaccount = account.Uid });

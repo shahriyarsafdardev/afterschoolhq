@@ -4,6 +4,7 @@
     var condensed = false;
     var accountOwner = Model.OwnerAccount.ID.HasValue ? Model.OwnerAccount.GetAccountOwner() : null;
     var canRegiserFor = true;
+    var session = (ParticipationObject)ViewData["session"];
 
     if (ViewData["condensed"].IsNotEmpty() && ViewData["condensed"].ToString().ToBoolean())
     {
@@ -96,6 +97,12 @@ else
                     }
                 </a>
             }
+        }
+        else if (session.IsNotEmpty())
+        {
+            <button href="@Model.GetRegistrationPageUrl()" class="btn btn-register btn-cart" in-cart="0" uid="@Model.Uid">
+                <span><i class="s7-plus icon-medium"></i><i class="s7-cart icon-medium"></i></span>
+            </button>
         }
         else
         {

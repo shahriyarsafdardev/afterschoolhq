@@ -1,14 +1,12 @@
 ﻿@model Account
 <div class="reg-header">
     <div class="reg-header-overlay">
-        <h1 class="activity-title">
-            <strong>
-                @Model.Name
-                @if (ViewBag.Session != null)
-                {
-                    @: - @(((ParticipationObject)ViewBag.Session).Name)
-                }
-            </strong>
+        <h1 class="activity-title text-center">
+            <span>@Model.Name</span>
+            @if (ViewBag.Session != null)
+            {
+                @: - @(((ParticipationObject)ViewBag.Session).Name)
+            }
             @if (!Model.ID.HasValue)
             {
                 <span class="badge badge-danger">DEMO</span>

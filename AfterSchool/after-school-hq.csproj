@@ -1619,6 +1619,7 @@
     <Content Include="Views\Shared\ParticipationObject\_SubscriptionPlan.cshtml" />
     <Content Include="Views\Shared\Registration\_RegistrationHeader.cshtml" />
     <Content Include="Views\Msg\Invalid.cshtml" />
+    <Content Include="Views\Shared\Registration\_BrowseCart.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

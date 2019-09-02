@@ -1,19 +1,30 @@
 ﻿@model ParticipationObject
 @{
-    ViewBag.Title = "RegisterStudent";
+    ViewBag.Title = "Complete Registration";
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
     var cart = (Cart)ViewBag.Cart;
     var msgs = (SystemMessages)ViewBag.Messages;
     var alreadyRegistered = (bool)ViewBag.AlreadyRegistered;
+    var sessionActivities = (List<ParticipationObject>)ViewBag.SessionActivities;
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
-@{ Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", SessionVariables.RegistrationStartPageAccount); }
+
+@{ 
+    Html.RenderPartial(
+        "~/Views/Shared/Registration/_AccountTopBar.cshtml",
+        SessionVariables.RegistrationStartPageAccount,
+        new ViewDataDictionary()
+        {
+            { "ParticipationObject", Model }
+        }
+    );
+}
 
 <div class="reg-header">
     <div>        
         <div>
-            <h1>You are registering for: @Model.Name</h1>
+            <h1 class="text-center">You are registering for: @Model.Name</h1>
         </div>
     </div>
 </div>
@@ -40,6 +51,14 @@
                     else
                     { 
                         <form method="post" id="register-form" class="form-horizontal" action="@Url.Action("RegisterStudent", "account")">
+                            
+                            @if (sessionActivities.IsNotEmpty() && sessionActivities.Any())
+                            {
+                                Html.RenderPartial(
+                                    "~/Views/Shared/Activity/_ActivityPreferences.cshtml",
+                                    sessionActivities);
+                            }
+
                             <div class="form-group">
                                 <label for="" class="control-label col-md-3">
                                 </label>
@@ -71,6 +90,7 @@
         </div>
     </div>
 </div>
+
 <script>
 
     PageEvent.add(PageEvent.AFTER_INIT, function () {
@@ -81,3 +101,14 @@
     });
 </script>
 
+@if (Model.IsActivityGroup() && Model.GetActivityGroup().ActivityGroupTypeId == ActivityGroupType.Session)
+{
+    Html.RenderPartial(
+        "~/Views/Shared/Registration/_BrowseCart.cshtml",
+        Model,
+        new ViewDataDictionary()
+        {
+            { "IsDuringCheckout", true }
+        }
+    );
+}
