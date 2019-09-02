@@ -76,7 +76,7 @@ else if (accountOwner.IsNotEmpty() && !accountOwner.VerifiedAccount)
 }
 else
 {
-    if (Model.RegistrationPeriod.IsOpen(Model.OwnerAccount) || true)
+    if (Model.RegistrationPeriod.IsOpen(Model.OwnerAccount))
     {
         var isSession = Model.IsActivityGroup() && Model.GetActivityGroup().ActivityGroupTypeId == ActivityGroupType.Session;
 
