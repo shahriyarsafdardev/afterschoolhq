@@ -1,0 +1,262 @@
+﻿@model ParticipationObject
+
+@{ 
+    var duringCheckout = false;
+    var allowModifyCart = true;
+
+    if (ViewData["IsDuringCheckout"].IsNotEmpty() && ViewData["IsDuringCheckout"].ToString().IsBoolean())
+    {
+        duringCheckout = ViewData["IsDuringCheckout"].ToString().ToBoolean();
+    }
+
+    if (ViewData["AllowToModifyCart"].IsNotEmpty() && ViewData["AllowToModifyCart"].ToString().IsBoolean())
+    {
+        allowModifyCart = ViewData["AllowToModifyCart"].ToString().ToBoolean();
+    }
+}
+
+@if (Model.IsNotEmpty() && Model.RegistrationPeriod.IsOpen())
+{
+    <div class="cart-tab bg-danger padding-10 pointer text-white text-center" style="position:fixed; right: -10px; top: 50px; border-radius: 10px; padding-right: 20px;">
+        <div class="cart-count text-medium-small">0</div>
+        <i class="s7-cart icon-large"></i>
+        <div>
+            @if (duringCheckout)
+            {
+                <span>View Cart &raquo;</span>
+            }
+            else
+            {
+                <span>Checkout &raquo;</span>
+            }            
+        </div>
+    </div>
+
+    <div class="cart-bar col-xs-12 col-sm-8 col-md-6 col-lg-4 col-xl-3 text-white hide" style="position:fixed; top:0px; right: 0px; height: 100%; background-color: #2f3c40; overflow-y: auto;">
+        <div class="pull-right">
+            <div class="text-right"><i class="s7-close icon-xlarge pointer cart-bar-close"></i></div>
+        </div>
+
+        <div>
+            @if (duringCheckout)
+            {
+                if (allowModifyCart)
+                {
+                    <button onclick="location.href='@Model.GetBrowseUrl()'" 
+                            class="btn btn-primary btn-register btn-block btn-checkout"
+                            style="margin-top: 20px;">
+                        Modify Cart
+                    </button>
+                }
+            }
+            else
+            {
+                <button onclick="location.href='@Model.GetRegistrationPageUrl()'"
+                        class="btn btn-primary btn-register btn-block btn-checkout"
+                        style="margin-top: 20px;"
+                        disabled="disabled">
+                    Register 1 Student &raquo;
+                </button>
+            }
+        </div>
+
+        <div style="margin-bottom: 80px;">
+            <h3>@UILabel.ActivityLabel(ActivityType.Activity, true)</h3>
+            <div class="cart-activities">
+
+            </div>
+            <div class="cart-activities-none"><p>You have no @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower() in your cart</p></div>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+
+    <script>
+
+        PageEvent.add(PageEvent.AFTER_INIT, function () {
+
+            $('.btn-cart').click(function () {
+
+                const btnCart = $(this);
+                const uid = btnCart.attr('uid');
+
+                if (btnCart.attr('in-cart') == '0') {
+                    addToCartUI(btnCart, uid);
+                } else {
+                    removeFromCartUI(btnCart, uid);
+                }
+            });
+
+            $('.cart-tab').click(function () {
+                toggleCartBar();
+            });
+
+            $('.cart-bar-close').click(function () {
+                toggleCartBar();
+            })
+
+            @if (SessionVariables.Cart.IsNotEmpty())
+            {
+                foreach (var item in SessionVariables.Cart.GetCartItems())
+                {
+                    var participationObject = item.GetParticipationObject();
+                    if (participationObject.IsActivity())
+                    { 
+                        @:getCartItem('@participationObject.Uid', function (cartObj) {
+                        @:  markItemAsInCart($('.btn-cart[uid="@participationObject.Uid"]'), cartObj);
+                        @:});
+                    }
+                    
+                }
+            }
+        });
+
+        function getCartItem(uid, callback) {
+            $.get(
+                '/services/getcartitem/?uid=' + uid,
+                function (data) {
+                    if (data && data.status == 'ok') {
+                        callback(data.cart);
+                    } else {
+                        Notifications.showErrors(data.messages);
+                    }
+                }
+            )
+        }
+
+        function addToCart(uid, onSuccess, onFailure) {
+            $.post(
+                '/services/addtocart/',
+                'uid=' + uid,
+                function (data) {
+                    if (data && data.status == 'ok') {
+                        onSuccess(data.cart);
+                    } else {
+                        Notifications.showErrors(data.messages);
+                        onFailure();
+                    }
+                }
+            );
+        }
+
+        function removeFromCart(uid, onSuccess, onFailure) {
+            console.log('removeFromCart');
+            $.post(
+                '/services/removefromcart/',
+                'uid=' + uid,
+                function (data) {
+                    if (data && data.status == 'ok') {
+                        onSuccess();
+                    } else {
+                        Notifications.showErrors(data.messages);
+                        onFailure();
+                    }
+                }
+            );
+        }
+
+        function addToCartUI(btnCart, uid) {
+            btnCart.children('span').html('...');
+
+            addToCart(
+                uid,
+                function (cartObj) {
+                    markItemAsInCart(btnCart, cartObj);
+                },
+                function () {
+                    markItemAsNotInCart(btnCart, uid);
+                },
+            );
+        }
+
+        function removeFromCartUI(btnCart, uid) {
+
+            console.log('removeFromCartUI');
+
+            if (btnCart) {
+                btnCart.children('span').html('...');
+            }
+
+            removeFromCart(
+                uid,
+                function () {
+                    markItemAsNotInCart(btnCart, uid);
+                },
+                function (cartObj) {
+                    markItemAsInCart(btnCart, cartObj);
+                },
+            );
+        }
+
+        function removeFromCartByUid(uid) {
+            console.log('removeFromCartByUid');
+            removeFromCartUI($('.btn-cart[uid="' + uid + '"]').first(), uid)
+        }
+
+        function incrementCartCount() {
+            let val = $('.cart-count').first().html();
+            val = parseInt(val) + 1;
+            $('.cart-count').html(val);
+        }
+
+        function decrementCartCount() {
+            let val = $('.cart-count').first().html();
+            val = parseInt(val) - 1;
+            $('.cart-count').html(val);
+        }
+
+        function getActivityHtml(cartObj) {
+            let html = '<div uid="' + cartObj.uid + '" style="float:left; margin-right: 20px; margin-top: 5px; border: solid 1px #00c5a3; width: 200px; position: relative;" class="cart-bar-item padding-10"><div id="' + cartObj.uid + '" class="text-medium-small">' + cartObj.name + '</div><div class="text-small">' + cartObj.days + ' &bull; ' + cartObj.minGradeText + ' - ' + cartObj.maxGradeText + '</div>';
+
+            @if (!duringCheckout)
+            { 
+                @: html += '<div class="pointer"><a href="javascript:removeFromCartByUid(\'' + cartObj.uid + '\')">Remove</a></div>';
+            }
+
+            html += '</div>';
+
+            return html;
+        }
+
+        function markItemAsInCart(btnCart, cartObj) {
+            console.log('markItemAsInCart');
+            incrementCartCount();
+            btnCart.children('span').html('<i class="s7-close-circle icon-medium"></i><i class="s7-cart icon-medium"></i>');
+            btnCart.attr('in-cart', '1');
+            btnCart.removeClass('btn-register');
+            btnCart.addClass('btn-register-default');
+            $('.cart-activities').append(getActivityHtml(cartObj));
+            $('.cart-activities-none').addClass('hide');
+            $('.btn-checkout').prop('disabled', false);
+            $('.cart-tab').removeClass('bg-danger');
+            $('.cart-tab').addClass('bg-primary');
+        }
+
+        function markItemAsNotInCart(btnCart, uid) {
+            console.log('markItemAsNotInCart');
+            decrementCartCount();
+            $('.cart-bar-item[uid="' + uid + '"]').remove();
+            if ($('.cart-activities').children().length == 0) {
+                $('.cart-activities-none').removeClass('hide');
+                $('.btn-checkout').prop('disabled', true);
+                $('.cart-tab').removeClass('bg-primary');
+                $('.cart-tab').addClass('bg-danger');
+            }
+
+            if (btnCart) {
+                btnCart.children('span').html('<i class="s7-plus icon-medium"></i><i class="s7-cart icon-medium"></i>');
+                btnCart.attr('in-cart', '0');
+                btnCart.removeClass('btn-register-default');
+                btnCart.addClass('btn-register');
+            }
+        }
+
+        function toggleCartBar() {
+            if ($('.cart-bar').hasClass('hide')) {
+                $('.cart-bar').removeClass('hide');
+            } else {
+                $('.cart-bar').addClass('hide');
+            }
+        }
+    </script>
+
+}

@@ -66,9 +66,25 @@
             <div class="margin-t-20">
                 @if (Model.IsActivity() && Model.GetActivity().IsNotEmpty() && Model.GetActivity().ActivityGroupId.HasValue)
                 {
-                    <button class="btn btn-primary btn-register btn-block btn-cart" in-cart="0" uid="@Model.Uid">
-                        <i class="s7-cart"></i> <span>Add to Cart</span>
-                    </button>
+                    var isOpen = Model.RegistrationPeriod.IsOpen();
+                    var learnMoreColSize = isOpen ? "col-md-9" : "col-md-12";
+                    var learnMoreStyle = isOpen ? "btn-register-default" : "btn-register";
+
+                    <div class="row">
+                        <div class="@learnMoreColSize">
+                            <a href="@Model.GetHomePageUrl(true)" class="btn @learnMoreStyle">
+                                Learn More &raquo;
+                            </a>
+                        </div>
+                        @if (isOpen)
+                        {
+                            <div class="col-md-3">
+                                <button class="btn btn-register btn-cart" in-cart="0" uid="@Model.Uid">
+                                    <span><i class="s7-plus icon-medium"></i><i class="s7-cart icon-medium"></i></span>
+                                </button>
+                            </div>
+                        }
+                    </div>
                 }
                 else
                 {

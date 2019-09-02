@@ -12,21 +12,32 @@ namespace AfterSchoolLibrary.Services
     {
         public static bool IsOpen(this RegistrationPeriod period, Account ownerAccount = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var now = (ownerAccount ?? period.GetAccount(msgs, dc)).ConvertToAccountTimeZone(DateTime.UtcNow);
-            return period.StartDateTime.Value <= now && period.EndDateTime.Value >= now;
+            if (period.IsNotEmpty())
+            {
+                var now = (ownerAccount ?? period.GetAccount(msgs, dc)).ConvertToAccountTimeZone(DateTime.UtcNow);
+                return period.StartDateTime.Value <= now && period.EndDateTime.Value >= now;
+            }
+
+            return false;
         }
 
         public static bool IsClosed(this RegistrationPeriod period, Account ownerAccount = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return !period.IsOpen(ownerAccount, msgs, dc);
-            //var now = this.GetAccount(msgs, dc).ConvertToAccountTimeZone(DateTime.UtcNow);
-            //return this.EndDateTime.Value < now;
+            if (period.IsNotEmpty())
+                return !period.IsOpen(ownerAccount, msgs, dc);
+
+            return true;
         }
 
         public static bool WillOpen(this RegistrationPeriod period, Account ownerAccount = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var now = (ownerAccount ?? period.GetAccount(msgs, dc)).ConvertToAccountTimeZone(DateTime.UtcNow);
-            return period.StartDateTime.Value > now;
+            if (period.IsNotEmpty())
+            {
+                var now = (ownerAccount ?? period.GetAccount(msgs, dc)).ConvertToAccountTimeZone(DateTime.UtcNow);
+                return period.StartDateTime.Value > now;
+            }
+
+            return false;
         }
 
         public static TimeSpan WillOpenIn(this RegistrationPeriod period, Account ownerAccount = null, SystemMessages msgs = null, DatabaseConnection dc = null)
