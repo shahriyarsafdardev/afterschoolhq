@@ -1,0 +1,52 @@
+﻿@model Registration
+
+@{
+    var listUrl = ViewBag.ListUrl;
+    var activities = (List<Activity>)ViewBag.AvailableActivities;
+    var selectedRegistration = (Registration)ViewBag.SelectedRegistration;
+
+    var invalidAssignmentTypes = new RegistrationAssignmentType[] { RegistrationAssignmentType.NotSet, RegistrationAssignmentType.Invited, RegistrationAssignmentType.Withdrawn, RegistrationAssignmentType.Declined };
+    var validAssignmentTypes = Enum.GetValues(typeof(RegistrationAssignmentType)).Cast<RegistrationAssignmentType>().Where(x => x.NotIn(invalidAssignmentTypes));
+}
+
+<div id="modal-activity-add" class="md-modal colored-header custom-width md-effect-9">
+    <form id="form-activity-add" action="@Url.Action("addactivity", "registration", new { id = Model.Uid, r = selectedRegistration.Uid, returnUrl = Request["returnurl"] })" method="post">
+        <div class="md-content">
+            <div class="modal-header">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+                <h3 class="modal-title"><i class="s7-gleam"></i> Add @UILabel.ActivityLabel(ActivityType.Activity)</h3>
+            </div>
+            <div class="modal-body form">
+
+                <div class="form-group">
+                    <label>@UILabel.ActivityLabel(ActivityType.Activity)</label>
+                    <select name="activity" id="activity" class="form-control" required>
+                        <option value="">Select Activity...</option>
+                        @foreach (var activity in activities)
+                        {
+                            <option value="@activity.Uid">@activity.ToFullDescription()</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Assignment</label>
+                    <div>
+                        <select name="activityassignment" class="form-control" required>
+                            <option value="">Select...</option>
+                            @foreach (var x in validAssignmentTypes)
+                            {                                
+                                <option value="@((int)x)">@x.ToString().SplitByUpperCase()</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="btnconfirm">Add New Activity &raquo;</button>
+            </div>
+        </div>
+    </form>
+</div>

@@ -652,11 +652,11 @@ namespace AfterSchoolLibrary.Services
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
-                participationObjectId,
-                participationObjectType,
-                registrant.ID.Value,
-                msgs,
-                dc);
+                        participationObjectId,
+                        participationObjectType,
+                        registrant.ID.Value,
+                        msgs,
+                        dc);
 
             if (ra.IsEmpty())
                 ra = new RegistrantActivity
@@ -1021,12 +1021,20 @@ namespace AfterSchoolLibrary.Services
             );
         }
 
-        public static Registrant GetParentOrGuardian(this Registrant masterRegistrant, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Registrant GetParentOrGuardian(this Registrant registrant, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return Registrant.LoadByAccountId(masterRegistrant.AccountId.Value, msgs, dc)
-                .Where(item => item.IsParentOrGuardian)
-                .OrderBy(item => item.ID)
-                .FirstOrDefault();
+            var masterRegistrant = registrant;
+
+            if (!registrant.IsMaster)
+                masterRegistrant = registrant.GetMasterRegistrant(msgs, dc);
+
+            if (!masterRegistrant.IsEmpty())
+                return Registrant.LoadByAccountId(masterRegistrant.AccountId.Value, msgs, dc)
+                    .Where(item => item.IsParentOrGuardian)
+                    .OrderBy(item => item.ID)
+                    .FirstOrDefault();
+
+            return null;
         }
 
         public static void DeleteRegistrantActivity(this Registrant registrant, int activityId, SystemMessages msgs, DatabaseConnection dc = null)

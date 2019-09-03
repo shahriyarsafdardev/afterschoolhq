@@ -14,7 +14,10 @@ namespace AfterSchoolLibrary.Services
         {
             msgs.AddRange(Helpers.EmailHelper.SendRegistrationConfirmed(checkoutObject, loggedInUser, false, sendBcc, dc));
 
-            if (!loggedInUser.GetMasterRegistrant(msgs, dc).IsParentOrGuardian)
+            // if the person registering is the student
+            var masterRegistrant = loggedInUser.GetMasterRegistrant(msgs, dc);
+
+            if (masterRegistrant.IsNotEmpty() && !masterRegistrant.IsParentOrGuardian)
                 msgs.AddRange(Helpers.EmailHelper.SendRegistrationConfirmed(checkoutObject, loggedInUser, true, false, dc));
         }
 
