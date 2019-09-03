@@ -1,6 +1,6 @@
 ﻿<div>
-  <p>Hello @Model.FirstName,</p>
-
+  <p>Hello @Model.FirstName,</p>  
+  
   <p>@Model.CustomMessage</p>
 
   <div style="margin: 20px">

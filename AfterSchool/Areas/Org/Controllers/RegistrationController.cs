@@ -441,15 +441,14 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult AddActivity(string id, string activity, string activityassignment, string preferencenumber, string r)
+        public ActionResult AddActivity(string id, string activity, string activityassignment, string r)
         {
-            var registration = Registration.LoadByUid(id.ToGuid());
-            var selectedRegistration = Registration.LoadByUid(r.ToGuid());
-            var ras = selectedRegistration.GetRegistrantActivities();
-            var act = Activity.Load(activity.ToInteger());
-            var registrant = selectedRegistration.GetRegistrant();
-            var regperiod = act.GetActiveRegistrationPeriod();            
             var msgs = new SystemMessages();
+            var registration = Registration.LoadByUid(id.ToGuid(), msgs);
+            var selectedRegistration = Registration.LoadByUid(r.ToGuid(), msgs);
+            var act = Activity.LoadByUid(activity.ToGuid(), msgs);
+            var registrant = selectedRegistration.GetRegistrant(msgs);
+            var regperiod = act.GetActiveRegistrationPeriod(msgs);  
             var assignmentType = (RegistrationAssignmentType)activityassignment.ToInteger();
             
             var choiceNumber = 1;
@@ -458,8 +457,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 registrationPeriodId = regperiod.ID;
 
             registrant.AddOrUpdateParticipationObject(
-                selectedRegistration.ID.Value, 
-                activity.ToInteger(), 
+                selectedRegistration.ID.Value,
+                act.ID.Value,
                 ParticipationObjectType.Activity, 
                 assignmentType, 
                 choiceNumber, 
@@ -472,9 +471,27 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 msgs.AddRange(selectedRegistration.WasUpdated());
 
-                UpdateSession(SessionActionType.RegistrationAddActivity, SessionVariables.CurrentAccount.ID, act.ID, null, selectedRegistration.RegistrantId, selectedRegistration.ID, selectedRegistration.RegistrationPeriodId);
+                // notify parent
+                var masterRegistrant = registrant.GetMasterRegistrant(msgs);
 
-                msgs.Add("Added New Activity: " + act.Name, MessageType.Success);
+                if (masterRegistrant.IsNotEmpty())
+                    selectedRegistration.SendConfirmation(
+                        new CheckoutObject()
+                        {
+                            BillingAccount = SessionVariables.CurrentAccount,
+                            PayingAccount = masterRegistrant.GetAccount(msgs),
+                            MasterRegistrant = masterRegistrant,
+                            NumberOfSeats = 1,
+                            ParticipationObject = act.GetParticipationObject(msgs),
+                            Registration = selectedRegistration,
+                        },
+                        SessionVariables.CurrentUser,
+                        true,
+                        msgs);
+
+                // UpdateSession(SessionActionType.RegistrationAddActivity, SessionVariables.CurrentAccount.ID, act.ID, null, selectedRegistration.RegistrantId, selectedRegistration.ID, selectedRegistration.RegistrationPeriodId);
+
+                msgs.Add($"{act.Name} has been added for {registrant.Name}", MessageType.Success);
             }
 
             LoadRegistrationViewBag(registration, r);
@@ -553,35 +570,47 @@ namespace AfterSchool.Areas.Org.Controllers
             allRegistrations = allRegistrations.OrderByDescending(x => x.ID).ToList();
 
             if(selectedRegistration.IsGuid())
-                registration = allRegistrations.Where(x => x.Uid == selectedRegistration.ToGuid()).First();
+                registration = allRegistrations.First(x => x.Uid == selectedRegistration.ToGuid());
             else
                 registration = allRegistrations.First();
 
-            var registrantActivities = registration.GetRegistrantActivities();
+            var ras = registration.GetRegistrantActivities();
+            var rasActivityTypes = ras.Where(y => y.ParticipationObjectTypeId == ParticipationObjectType.Activity);
             ViewBag.Messages = new SystemMessages();
             ViewBag.Registrant = registrant;
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.Answers = registration.GetAnswers();
-            ViewBag.RegistrantActivities = registrantActivities;
+            ViewBag.RegistrantActivities = ras;
             ViewBag.Registrations = allRegistrations;
             ViewBag.SelectedRegistration = registration;
 
             if (registration.IsNotEmpty())
                 ViewBag.CanMergeWith = allRegistrations.Where(x => x.RegistrationPeriodId == registration.RegistrationPeriodId && x.ID != registration.ID).ToList();
 
-            var activities = new List<Activity>();
+            List<Activity> activities = null;
 
             if (registration.ActivityGroupId.HasValue)
-                activities = registration.GetActivityGroup().GetActivities(null, false, false, null, null, false);
+                activities = registration.GetActivityGroup().GetActivities(
+                    activityType: null, 
+                    isArchived: false, 
+                    isDeleted: false, 
+                    start: null, 
+                    length: null, 
+                    forceReload: false);
             else
-                activities = SessionVariables.CurrentAccount.GetActivities(UserType.Administrator, SessionVariables.CurrentUser, null, false, false, null, null);
+                activities = SessionVariables.CurrentAccount.GetActivities(
+                    userType: UserType.Administrator, 
+                    user: SessionVariables.CurrentUser, 
+                    activityType: null, 
+                    isArchived: false, 
+                    isDeleted: false, 
+                    start: null, 
+                    length: null);
 
-            ViewBag.Activities = activities.Where(x =>
-                    x.ID.Value.NotIn(registrantActivities.Where(y => y.ParticipationObjectTypeId == ParticipationObjectType.Activity)
-                    .Select(y => y.ParticipationObjectId.Value))
-                )
-                .OrderBy(x => x.Name)
-                .ToList();
+            ViewBag.AvailableActivities = activities
+                                            .Where(x => x.ID.Value.NotIn(rasActivityTypes.Select(y => y.ParticipationObjectId.Value)))
+                                            .OrderBy(x => x.Name)
+                                            .ToList();
 
             if (Request["returnurl"].IsNotEmpty())
                 ViewBag.ListUrl = Request["returnurl"];

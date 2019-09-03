@@ -10,7 +10,8 @@
 {
     <div class="btn-toolbar">
         <div class="btn-group hidden-xs">
-            <button type="button" class="btn btn-alt6 md-trigger hide" data-modal="modal-activity-add" id="activityadd">
+            <button type="button" class="btn btn-alt6 md-trigger" data-modal="modal-activity-add" id="activityadd">
+                <i class="s7-gleam"></i>
                 Add @UILabel.ActivityLabel(ActivityType.Activity)
             </button>
             <a href="@Url.Action("update", "registration", new { id = Model.Uid.ToString() })" class="btn btn-alt6">
@@ -116,59 +117,7 @@
         </form>
     </div>
 
-    <div id="modal-activity-add" class="md-modal colored-header custom-width md-effect-9">
-        <form id="form-activity-add" action="@Url.Action("addactivity", "registration", new { id = Model.Uid, r = selectedRegistration.Uid, returnUrl = Request["returnurl"] })" method="post">
-            <div class="md-content">
-                <div class="modal-header">
-                    <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
-                    <h3 class="modal-title"><i class="s7-gleam"></i> Add @UILabel.ActivityLabel(ActivityType.Activity)</h3>
-                </div>
-                <div class="modal-body form">
-
-                    <div class="form-group">
-                        <label>@UILabel.ActivityLabel(ActivityType.Activity)</label>
-                        <select name="activity" id="activity" class="form-control" required>
-                            <option value="">Select Activity...</option>
-                            @foreach (var activity in activities)
-                            {
-                                <option value="@activity.ID">@activity.ToFullDescription()</option>
-                            }
-                        </select>
-                    </div>
-
-                    <div class="form-group hide" id="activity-days-container">
-                        <label>Days</label>
-                        <div id="activity-days">
-
-                        </div>
-                    </div>
-
-                    <div class="form-group hide" id="choice-number-container">
-                        <label>Choice Number</label>
-                        <select id="choicenumber" name="choicenumber"></select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Assignment</label>
-                        <div>
-                            <div class="am-radio inline">
-                                @foreach (var x in Enum.GetValues(typeof(RegistrationAssignmentType)).Cast<RegistrationAssignmentType>().Where(x => x != RegistrationAssignmentType.NotSet && x != RegistrationAssignmentType.Declined && x != RegistrationAssignmentType.Invited))
-                                {
-                                    <input type="radio" name="activityassignment" id="activity-assignment-type-@((int)x)" value="@((int)x)" required />
-                                    <label for="activity-assignment-type-@((int)x)">@x.ToString().SplitByUpperCase()</label>
-                                }
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-                <div class="modal-footer">
-                    <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="btnconfirm">Add New Activity</button>
-                </div>
-            </div>
-        </form>
-    </div>
+    Html.RenderPartial("_ModalRegistrationAddActivity");
 
     <script>
         function handleNav(value) {

@@ -133,7 +133,12 @@ namespace AfterSchoolLibrary.Helpers
             var regStatus = "";
             var registrantActivities = registration.GetRegistrantActivities(msgs, dc);
             var mainRA = registrantActivities.First(ra => ra.ParticipationObjectId == participationObject.ObjectID && ra.ParticipationObjectTypeId == participationObject.ObjectType);
-            var otherRAs = registrantActivities.Except(mainRA.AsList()).ToList();
+
+            var otherRAs = new List<RegistrantActivity>();
+
+            if (mainRA.ParticipationObjectTypeId == ParticipationObjectType.ActivityGroup)
+                otherRAs = registrantActivities.Except(mainRA.AsList()).ToList();
+
             var registrationThankYou = participationObject.GetRegistrationThankYou(mainRA, msgs, dc);
             var cost = "";
             var ccFee = "";
@@ -251,6 +256,13 @@ namespace AfterSchoolLibrary.Helpers
                 }
             }
 
+            var customMessage = registrationThankYou;
+
+            if (isParentCopy)
+                customMessage = $"{masterRegistrant.FirstName} has registered for the following activity:";
+            else if (loggedInUser.HasAccessTo(billingAccount))
+                customMessage = $"{masterRegistrant.FirstName} has been registered by {loggedInUser.DisplayName} at {billingAccount.Name} for the following activity:";
+
             var model = new NameValueCollection()
             {
                 { "FirstName", isParentCopy ? purchaser.FirstName : loggedInUser.FirstName },
@@ -264,7 +276,7 @@ namespace AfterSchoolLibrary.Helpers
                 { "AmountDueOrPaid", amountDueOrPaid },
                 { "TotalCost", checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs, dc).ToCurrency() },
                 { "BodyRows", receiptRows },
-                { "CustomMessage", isParentCopy ? $"{masterRegistrant.FirstName} has registered for the following activity:" : registrationThankYou },
+                { "CustomMessage", customMessage },
                 { "CreditCardFee", ccFee },
                 { "RegistrationDetails", registrationDetails}
             };
