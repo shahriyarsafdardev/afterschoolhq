@@ -36,8 +36,7 @@
                 <th></th>
                 <th class="text-nowrap">Name</th>
                 <th class="text-nowrap">Email</th>
-                <th class="text-nowrap">First Enrolled</th>
-                <th class="text-nowrap">Latest Registration</th>          
+                <th class="text-nowrap">First Enrolled</th>      
             </tr>
         </thead>
         <tbody>
@@ -46,10 +45,6 @@
                 foreach (var registration in Model)
                 {
                     var editLink = Url.Action(editAction, editController, new { id = registration.Uid.ToString(), returnUrl });
-                    var allRegistrations = registration.GetRelatedRegistrations();
-                    allRegistrations.Add(registration);
-                    var firstRegistration = allRegistrations.OrderBy(x => x.ID).FirstOrDefault();
-                    var lastRegistration = allRegistrations.OrderBy(x => x.ID).LastOrDefault();
 
                     <tr>
                         <td>
@@ -61,8 +56,7 @@
                         <td class="text-nowrap">
                             <a href="mailto:@registration.RegistrantEmail">@registration.RegistrantEmail</a>
                         </td>
-                        <td class="text-nowrap">@account.ConvertToAccountTimeZone(firstRegistration.CreateDate.Value).ToShortDateTimeString()</td>
-                        <td class="text-nowrap">@account.ConvertToAccountTimeZone(lastRegistration.LastUpdated.Value).ToShortDateTimeString()</td>
+                        <td class="text-nowrap">@account.ConvertToAccountTimeZone(registration.CreateDate.Value).ToShortDateTimeString()</td>
                     </tr>
                 }
             }

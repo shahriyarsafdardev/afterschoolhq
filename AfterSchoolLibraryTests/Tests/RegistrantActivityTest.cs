@@ -170,8 +170,8 @@ namespace AfterSchoolLibraryTests.Tests
             registrantActivities.Add(registrantActivity2);
 
             Assert.Equal(
-                registrantActivities.Select(ra => ra.ID.Value).ToArray().ToStringArray().ToString(),
-                RegistrantActivity.LoadByRegistrantId(registrant.ID.Value, dc: dc).Select(ra => ra.ID.Value).ToArray().ToStringArray().ToString()
+                registrantActivities.Select(ra => ra.ID.Value).ToStrings().ToString(),
+                RegistrantActivity.LoadByRegistrantId(registrant.ID.Value, dc: dc).Select(ra => ra.ID.Value).ToStrings().ToString()
             );
         }
 

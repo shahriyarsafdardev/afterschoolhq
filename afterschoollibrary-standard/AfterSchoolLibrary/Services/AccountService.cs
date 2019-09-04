@@ -910,7 +910,7 @@ namespace AfterSchoolLibrary.Services
         public static List<Registration> GetRegistrations(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Registration.LoadByAccountId(account.ID.Value, msgs, dc)
-                .Where(registration => Registration.ValidCompletionStatus.Contains((int)registration.CompletionStatusId))
+                .Where(registration => Registration.ValidCompletionStatus.Contains(registration.CompletionStatusId))
                 .ToList();
         }
 

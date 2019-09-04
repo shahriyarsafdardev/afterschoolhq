@@ -388,7 +388,7 @@ namespace AfterSchool.Areas.District.Controllers
             outOfSessionDates = ActivityScheduleUI.PrepScheduleDatesClosed(Request.Params.Filter("meeting-closed-"));
 
             values.Add("scheduledetails", scheduledetails);
-            values.Add("days", days.Select(x => (int)x).ToArray().ToStringArray().ToStringList());
+            values.Add("days", days.Select(x => (int)x).ToStrings().ToStringList());
             values.Add("repeatsweekly", repeatsweekly.IfBlank("0"));
             values.Add("startdate", startdate);
             values.Add("enddate", enddate);

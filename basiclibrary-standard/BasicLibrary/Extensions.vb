@@ -508,7 +508,12 @@ Public Module Extensions
 
     <Extension()>
     Public Function ToStringArray(ByVal aArray() As Integer) As String()
-        Return Array.ConvertAll(Of Integer, String)(aArray, AddressOf ArrayConvertAllIntegerToString)
+        Return aArray.ToStrings().ToArray()
+    End Function
+
+    <Extension()>
+    Public Function ToStrings(ByVal aList As IEnumerable(Of Integer)) As IEnumerable(Of String)
+        Return aList.Select(Function(item) item.ToString())
     End Function
 
     <Extension()>
