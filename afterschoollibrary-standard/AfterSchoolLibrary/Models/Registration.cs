@@ -721,7 +721,7 @@ namespace AfterSchoolLibrary.Models
                 itemList.ForEach(item =>
                 {
                     if (searchTextWhere.IsNotBlank())
-                        searchText += " or ";
+                        searchTextWhere += " or ";
 
                     searchTextWhere += $"[Text] like '%{item.Replace("\'", "\\\'")}%'";
                 });
