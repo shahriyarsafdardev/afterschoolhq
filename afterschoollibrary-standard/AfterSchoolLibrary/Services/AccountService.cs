@@ -66,12 +66,11 @@ namespace AfterSchoolLibrary.Services
             });
 
             participationObjects.AddRange(
-                account.GetPublishedExternalLeagues(msgs, dc)
-                    .Select(x => x.GetParticipationObject(msgs, dc))
+                account.GetPublishedExternalLeagues(msgs, dc).Select(x => x.GetParticipationObject(msgs, dc))
             );
 
-            participationObjects.AddRange(account.GetPublishedSessions(msgs, dc)
-                .Select(x => x.GetParticipationObject(msgs, dc))
+            participationObjects.AddRange(
+                account.GetPublishedSessions(msgs, dc).Select(x => x.GetParticipationObject(msgs, dc))
             );
 
             return participationObjects;
@@ -191,12 +190,16 @@ namespace AfterSchoolLibrary.Services
         public static List<ActivityGroup> GetPublishedSessions(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var groups = ActivityGroup.LoadByAccountIdByIsPublishedByIsArchived(account.ID.Value, true, false, msgs, dc);
+
+            if (!groups.Any())
+                return new List<ActivityGroup>();
+
             var periods = RegistrationPeriod.LoadByActivityGroupIds(
                     groups.Select(x => x.ID.Value).ToList(),
                     msgs,
                     dc
                 )
-                .Where(period => period.IsOpen() || period.WillOpen() || period.WillCloseIn().Days > -14)
+                .Where(period => period.IsOpen(msgs: msgs, dc: dc) || period.WillOpen(msgs: msgs, dc: dc) || period.WillCloseIn(msgs: msgs, dc: dc).Days > -14)
                 .ToList();
 
             return groups.Where(group => periods.Select(period => period.ActivityGroupId.Value).Contains(group.ID.Value)).ToList();
