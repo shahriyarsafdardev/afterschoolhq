@@ -198,6 +198,9 @@ namespace AfterSchoolLibrary.Models
 
         public static List<RegistrationPeriod> LoadByActivityGroupIds(List<int> ActivityGroupIds, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
+            if (ActivityGroupIds.IsEmpty() || !ActivityGroupIds.Any())
+                return new List<RegistrationPeriod>();
+
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ActivityGroupId"], ActivityGroupIds, DatabaseCriteriaOperatorEnum.In);
