@@ -382,11 +382,15 @@ namespace AfterSchoolLibrary.Models
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        internal static List<int> ValidCompletionStatus
+        internal static List<RegistrationCompletionStatus> ValidCompletionStatus
         {
             get
             {
-                return new List<int>() { (int)RegistrationCompletionStatus.Completed, (int)RegistrationCompletionStatus.RequiresParentSignature };
+                return (new List<RegistrationCompletionStatus>()
+                    {
+                        RegistrationCompletionStatus.Completed,
+                        RegistrationCompletionStatus.RequiresParentSignature
+                    });
             }
         } 
 
@@ -522,7 +526,7 @@ namespace AfterSchoolLibrary.Models
 		                        r.ID = {this.FirstRegistrationId.IfEmpty(0)} or
 		                        r.FirstRegistrationId = {this.ID} or
 		                        r.ID = {this.ID}
-	                        ) and r.CompletionStatusId in ({ValidCompletionStatus.ToArray().ToStringArray().ToStringList()})";
+	                        ) and r.CompletionStatusId in ({ValidCompletionStatus.Select(x => (int)x).ToStrings().ToStringList()})";
 
             var registrations = dq.ExecuteSelect(sql).AsEnumerable().ToList().ConvertAll(LoadObject);
 
@@ -694,231 +698,149 @@ namespace AfterSchoolLibrary.Models
             msgs.AddRange(this.Save(dc: dc));
 
             return msgs;
-        }  
+        }
 
-        private static DatabaseQuery GetSearchQuery(string searchText, int accountId, int? questionId, RegistrationStatus regStatus, List<int> participationObjectIds = null, ParticipationObjectType participationObjectType = ParticipationObjectType.NotSet, List<RegistrationAssignmentType> rats = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        private static string GetSearchSQL(string searchText, int accountId, int? questionId, RegistrationStatus regStatus, List<int> participationObjectIds = null, ParticipationObjectType participationObjectType = ParticipationObjectType.NotSet, List<RegistrationAssignmentType> rats = null, bool getCount = false)
         {
-            var dq = DatabaseQuery;
-            dq.Connection = dc;
-            dq.UseParameterizedQuery = false;
-            dq.Criterias.Add(ObjectMap["AccountId"], accountId);
-            dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus, DatabaseCriteriaOperatorEnum.In);
-            // dq.Criterias.Add(ObjectMap["FirstRegistrationId"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
-
-            // aggregate related registrations
-            var regQuery = Registration.DatabaseQuery;
-            regQuery.UseParameterizedQuery = false;
-            regQuery.Joins[0].Alias = "Registrant1";
-            regQuery.SelectParameters.Clear();
-            regQuery.SelectParameters.Add(
-                Registration.ObjectMap["Id"], 
-                "regid", 
-                $"ISNULL({DatabaseQuery.FunctionReplaceValue}, {ObjectMap["ID"].ParameterFullName})"
-                );
-
-            regQuery.Criterias.Add(ObjectMap["AccountId"], accountId);
-
-            // getting only registered seats
-            if ((rats.IsNotEmpty() && rats.Count > 0) || (participationObjectIds.IsNotEmpty() && participationObjectIds.Any()))
-            {
-                var raQuery = BaseObject.get_DatabaseQuery(ObjectMap, typeof(RegistrantActivity).Name);
-                raQuery.UseParameterizedQuery = false;
-                raQuery.SelectParameters.Clear();
-                raQuery.SelectParameters.Add(RegistrantActivity.ObjectMap["RegistrationId"]);
-                raQuery.Joins.Add(ObjectMap["ID"], RegistrantActivity.ObjectMap["RegistrationId"], DatabaseJoinTypeEnum.InnerJoin);
-
-                if (participationObjectIds.IsNotEmpty() && participationObjectIds.Any())
-                {
-                    raQuery.Criterias.Add(RegistrantActivity.ObjectMap["ParticipationObjectId"], participationObjectIds, DatabaseCriteriaOperatorEnum.In);
-                    raQuery.Criterias.Add(RegistrantActivity.ObjectMap["ParticipationObjectTypeId"], (int)participationObjectType);
-                }
-
-                if (rats.IsNotEmpty() && rats.Count > 0)
-                    raQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], rats.Select(x =>(int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
-
-                regQuery.Criterias.Add(ObjectMap["Id"], raQuery, DatabaseCriteriaOperatorEnum.In);
-            }
-
-            if (regStatus != RegistrationStatus.NotSet)
-            {
-                if (regStatus == RegistrationStatus.Current)
-                {
-                    var aQuery = BaseObject.get_DatabaseQuery(ObjectMap, typeof(RegistrantActivity).Name);
-                    aQuery.UseParameterizedQuery = false;
-                    aQuery.SelectParameters.Clear();
-                    aQuery.SelectParameters.Add(RegistrantActivity.ObjectMap["RegistrationId"]);
-                    aQuery.Joins.Add(ObjectMap["ID"], RegistrantActivity.ObjectMap["RegistrationId"], DatabaseJoinTypeEnum.InnerJoin);
-                    aQuery.Joins.Add(Activity.ObjectMap["ID"], RegistrantActivity.ObjectMap["ActivityId"], DatabaseJoinTypeEnum.InnerJoin);
-                    aQuery.Joins.Add(ActivityInstance.ObjectMap["ActivityScheduleId"], Activity.ObjectMap["ActivityScheduleId"], DatabaseJoinTypeEnum.InnerJoin);
-
-                    aQuery.Criterias.Add(ObjectMap["AccountId"], accountId);
-                    // has start dates that are less than or equal to now
-                    aQuery.Criterias.Add(ActivityInstance.ObjectMap["StartDateTime"], DateTime.UtcNow.LastDateOfWeek(), DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
-
-                    if (rats.IsNotEmpty() && rats.Count > 0)
-                        aQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], rats.Select(x => (int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
-
-                    regQuery.Criterias.Add(ObjectMap["Id"], aQuery, DatabaseCriteriaOperatorEnum.In);
-
-                    var bQuery = BaseObject.get_DatabaseQuery(ObjectMap, typeof(RegistrantActivity).Name);
-                    bQuery.UseParameterizedQuery = false;
-                    bQuery.SelectParameters.Clear();
-                    bQuery.SelectParameters.Add(RegistrantActivity.ObjectMap["RegistrationId"]);
-                    bQuery.Joins.Add(ObjectMap["ID"], RegistrantActivity.ObjectMap["RegistrationId"], DatabaseJoinTypeEnum.InnerJoin);
-                    bQuery.Joins.Add(Activity.ObjectMap["ID"], RegistrantActivity.ObjectMap["ActivityId"], DatabaseJoinTypeEnum.InnerJoin);
-                    bQuery.Joins.Add(ActivityInstance.ObjectMap["ActivityScheduleId"], Activity.ObjectMap["ActivityScheduleId"], DatabaseJoinTypeEnum.InnerJoin);
-
-                    bQuery.Criterias.Add(ObjectMap["AccountId"], accountId);
-                    // has end dates that are greater than or equal to now
-                    bQuery.Criterias.Add(ActivityInstance.ObjectMap["EndDateTime"], DateTime.UtcNow.FirstDateOfWeek(), DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
-
-                    if (rats.IsNotEmpty() && rats.Count > 0)
-                        bQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], rats.Select(x => (int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
-
-                    regQuery.Criterias.Add(ObjectMap["Id"], bQuery, DatabaseCriteriaOperatorEnum.In);
-                }
-                else if (regStatus == RegistrationStatus.Future)
-                {
-                    // has no end dates in the past
-                    var aQuery = BaseObject.get_DatabaseQuery(ObjectMap, typeof(RegistrantActivity).Name);
-                    aQuery.UseParameterizedQuery = false;
-                    aQuery.SelectParameters.Clear();
-                    aQuery.SelectParameters.Add(RegistrantActivity.ObjectMap["RegistrationId"]);
-                    aQuery.Joins.Add(ObjectMap["ID"], RegistrantActivity.ObjectMap["RegistrationId"], DatabaseJoinTypeEnum.InnerJoin);
-                    aQuery.Joins.Add(Activity.ObjectMap["ID"], RegistrantActivity.ObjectMap["ActivityId"], DatabaseJoinTypeEnum.InnerJoin);
-                    aQuery.Joins.Add(ActivityInstance.ObjectMap["ActivityScheduleId"], Activity.ObjectMap["ActivityScheduleId"], DatabaseJoinTypeEnum.InnerJoin);
-
-                    aQuery.Criterias.Add(ObjectMap["AccountId"], accountId);
-                    aQuery.Criterias.Add(ActivityInstance.ObjectMap["EndDateTime"], DateTime.UtcNow.LastDateOfWeek(), DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
-
-                    if (rats.IsNotEmpty() && rats.Count > 0)
-                        aQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], rats.Select(x => (int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
-
-                    var parameter = Registrant.ObjectMap["id"];
-                    parameter.TableAlias = "Registrant1";
-                    aQuery.Criterias.Add(RegistrantActivity.ObjectMap["RegistrantId"], parameter);
-
-                    regQuery.Criterias.Add(ObjectMap["Id"], aQuery, DatabaseCriteriaOperatorEnum.NotIn);
-
-                    // has some records in the activity instance table though
-                    var bQuery = BaseObject.get_DatabaseQuery(ObjectMap, typeof(RegistrantActivity).Name);
-                    bQuery.UseParameterizedQuery = false;
-                    bQuery.SelectParameters.Clear();
-                    bQuery.SelectParameters.Add(RegistrantActivity.ObjectMap["RegistrationId"]);
-                    bQuery.Joins.Add(ObjectMap["ID"], RegistrantActivity.ObjectMap["RegistrationId"], DatabaseJoinTypeEnum.InnerJoin);
-                    bQuery.Joins.Add(Activity.ObjectMap["ID"], RegistrantActivity.ObjectMap["ActivityId"], DatabaseJoinTypeEnum.InnerJoin);
-                    bQuery.Joins.Add(ActivityInstance.ObjectMap["ActivityScheduleId"], Activity.ObjectMap["ActivityScheduleId"], DatabaseJoinTypeEnum.InnerJoin);
-                    bQuery.Criterias.Add(ObjectMap["AccountId"], accountId);
-
-                    if (rats.IsNotEmpty() && rats.Count > 0)
-                        bQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], rats.Select(x => (int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
-
-                    bQuery.Criterias.Add(RegistrantActivity.ObjectMap["RegistrantId"], parameter);
-
-                    regQuery.Criterias.Add(ObjectMap["Id"], bQuery, DatabaseCriteriaOperatorEnum.In);
-                }
-                else if (regStatus == RegistrationStatus.Past)
-                {
-                    // has no start dates in the future
-                    var aQuery = BaseObject.get_DatabaseQuery(ObjectMap, typeof(RegistrantActivity).Name);
-                    aQuery.UseParameterizedQuery = false;
-                    aQuery.SelectParameters.Clear();
-                    aQuery.SelectParameters.Add(RegistrantActivity.ObjectMap["RegistrationId"]);
-                    aQuery.Joins.Add(ObjectMap["ID"], RegistrantActivity.ObjectMap["RegistrationId"], DatabaseJoinTypeEnum.InnerJoin);
-                    aQuery.Joins.Add(Activity.ObjectMap["ID"], RegistrantActivity.ObjectMap["ActivityId"], DatabaseJoinTypeEnum.InnerJoin);
-                    aQuery.Joins.Add(ActivityInstance.ObjectMap["ActivityScheduleId"], Activity.ObjectMap["ActivityScheduleId"], DatabaseJoinTypeEnum.InnerJoin);
-
-                    aQuery.Criterias.Add(ObjectMap["AccountId"], accountId);
-                    aQuery.Criterias.Add(ActivityInstance.ObjectMap["StartDateTime"], DateTime.UtcNow.FirstDateOfWeek(), DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
-
-                    if (rats.IsNotEmpty() && rats.Count > 0)
-                        aQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], rats.Select(x => (int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
-
-                    var parameter = Registrant.ObjectMap["id"];
-                    parameter.TableAlias = "Registrant1";
-                    aQuery.Criterias.Add(RegistrantActivity.ObjectMap["RegistrantId"], parameter);
-
-                    regQuery.Criterias.Add(ObjectMap["Id"], aQuery, DatabaseCriteriaOperatorEnum.NotIn);
-                   
-                }
-            }
+            var searchTextJoin = "";
+            var whereClause = "";
+            var searchTextWhere = "";
 
             if (searchText.IsNotBlank())
             {
+                searchTextJoin = "inner join FormQuestionAnswer fqa on r2.ID = fqa.RegistrationId";
+
+
                 var itemList = new List<string>();
 
                 if (questionId.HasValue)
-                {
                     itemList.Add(searchText);
-                }
                 else
-                {
                     itemList.AddRange(searchText.Split(' ').Select(x => x.Trim()));
-                }
 
-                foreach (var item in itemList)
+                itemList.ForEach(item =>
                 {
-                    if (item.IsNotBlank())
-                    {
-                        var answerQuery = BaseObject.get_DatabaseQuery(ObjectMap, typeof(FormQuestionAnswer).Name);
-                        answerQuery.UseParameterizedQuery = false;
-                        answerQuery.SelectParameters.Clear();
-                        answerQuery.SelectParameters.Add(FormQuestionAnswer.ObjectMap["RegistrationId"]);
-                        answerQuery.Joins.Add(ObjectMap["ID"], FormQuestionAnswer.ObjectMap["RegistrationId"], DatabaseJoinTypeEnum.InnerJoin);
-                        answerQuery.Criterias.Add(FormQuestionAnswer.ObjectMap["RegistrationAccountId"], accountId);
+                    if (searchTextWhere.IsBlank())
+                        searchText += " or ";
 
-                        if (questionId.HasValue)
-                        {
-                            answerQuery.Joins.Add(FormQuestion.ObjectMap["ID"], FormQuestionAnswer.ObjectMap["FormQuestionId"], DatabaseJoinTypeEnum.InnerJoin);
+                    searchTextWhere += $"[Text] like '%{item.Replace("\'", "\\\'")}%'";
+                });
 
-                            answerQuery.Criterias.Add(FormQuestionAnswer.ObjectMap["FormQuestionId"], questionId.Value);
+                searchTextWhere = $"({searchTextWhere})";
 
-                            var criteriaGroup1 = new DatabaseCriterias(LogicalOperatorType.Or);
-
-                            var criteriaGroup2 = new DatabaseCriterias(LogicalOperatorType.And);
-                            criteriaGroup2.Add(FormQuestionAnswer.ObjectMap["Text"], item);
-                            criteriaGroup2.Add(FormQuestion.ObjectMap["Options"], DBNull.Value, DatabaseCriteriaOperatorEnum.IsNot);
-                            criteriaGroup1.Add(criteriaGroup2);
-
-                            var criteriaGroup3 = new DatabaseCriterias(LogicalOperatorType.And);
-                            criteriaGroup3.Add(FormQuestionAnswer.ObjectMap["Text"], item, DatabaseCriteriaOperatorEnum.Like);
-                            criteriaGroup3.Add(FormQuestion.ObjectMap["Options"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
-                            criteriaGroup1.Add(criteriaGroup3);
-
-                            answerQuery.Criterias.Add(criteriaGroup1);
-                        }
-                        else
-                        {
-                            answerQuery.Criterias.Add(FormQuestionAnswer.ObjectMap["Text"], item, DatabaseCriteriaOperatorEnum.Like);
-                        }
-
-                        regQuery.Criterias.Add(ObjectMap["Id"], answerQuery, DatabaseCriteriaOperatorEnum.In);
-                    }
-                }
+                //if (questionId.HasValue)
+                //{
+                //    searchTextWhere = " and QuestionDataTypeId ";
+                //}
             }
 
-            dq.Criterias.Add(ObjectMap["ID"], regQuery, DatabaseCriteriaOperatorEnum.In);
+            var hasAssignmentTypes = rats.IsNotEmpty() && rats.Any();
+            var hasActivityIds = participationObjectIds.IsNotEmpty() && participationObjectIds.Any();
+            var hasRegStatus = regStatus != RegistrationStatus.NotSet;
+            var activityJoin = "";
+            var assignmentTypeWhere = "";
+            var activityIdWhere = "";
 
-            dq.OrderBys.Add(ObjectMap["RegistrantFirstName"], OrderByDirectionEnum.Ascending);
-            dq.OrderBys.Add(ObjectMap["RegistrantLastName"], OrderByDirectionEnum.Ascending);
+            if (hasAssignmentTypes || hasActivityIds || hasRegStatus)
+            {
+                activityJoin = "inner join RegistrantActivity ra on r2.ID = ra.RegistrationId";
 
-            return dq;
+                if (hasAssignmentTypes)
+                    assignmentTypeWhere = $"ra.AssignmentTypeId in ({rats.Select(x => (int)x).ToStrings().ToStringList()})";
+
+                if (hasActivityIds)
+                    activityIdWhere = $"ra.ParticipationObjectId in ({participationObjectIds.ToStrings().ToStringList()}) and ra.ParticipationObjectTypeId = {(int)participationObjectType}";
+            }
+
+            var regStatusJoin = "";
+            var regStatusWhere = "";
+
+            if (hasRegStatus)
+            {
+                regStatusJoin = $"inner join Activity a on ra.ParticipationObjectId = a.ID and ra.ParticipationObjectTypeId = {(int)participationObjectType} inner join ActivityInstance ai on a.ActivityScheduleId = ai.ActivityScheduleId";
+
+                switch (regStatus)
+                {
+                    case RegistrationStatus.Past:
+                        regStatusWhere = $"ai.EndDateTime < '{DateTime.UtcNow.LastDateOfWeek()}'";
+                        break;
+                    case RegistrationStatus.Current:
+                        regStatusWhere = $"ai.StartDateTime <= '{DateTime.UtcNow.FirstDateOfWeek()}' and ai.EndDateTime >= '{DateTime.UtcNow.LastDateOfWeek()}'";
+                        break;
+                    case RegistrationStatus.Future:
+                        regStatusWhere = $"ai.StartDateTime > '{DateTime.UtcNow.FirstDateOfWeek()}'";
+                        break;
+                }
+
+            }
+
+            whereClause += searchTextWhere;
+            whereClause += assignmentTypeWhere.IsNotEmpty() ? (whereClause.IsNotEmpty() ? " and " : "") + assignmentTypeWhere : "";
+            whereClause += activityIdWhere.IsNotEmpty() ? (whereClause.IsNotEmpty() ? " and " : "") + activityIdWhere : "";
+            whereClause += regStatusWhere.IsNotEmpty() ? (whereClause.IsNotEmpty() ? " and " : "") + regStatusWhere : "";
+            whereClause = $@"where 
+                                r2.AccountId = {accountId} and 
+                                r2.CompletionStatusId in ({ValidCompletionStatus.Select(x => (int)x).ToStrings().ToStringList()})" +
+                                (whereClause.IsNotEmpty() ? $" and {whereClause}" : "");
+
+            var select = @"r.*,
+                            reg.FirstName as RegistrantFirstName,
+                            reg.LastName as RegistrantLastName,
+                            reg.Email as RegistrantEmail,
+                            reg.RegistrantTypeId as RegistrantRegistrantTypeId,
+                            reg.Uid as RegistrantUid,
+                            reg.Phone as RegistrantPhone,
+                            reg.Company as RegistrantCompany";
+
+            var orderBy = @"order by
+                                reg.FirstName,
+                                reg.LastName";
+
+            if (getCount)
+            {
+                select = "COUNT(r.id)";
+                orderBy = "";
+            }
+
+            var sql = $@"select {select}
+                        from 
+	                        Registration r inner join
+                            Registrant reg on r.RegistrantId = reg.ID
+                        where
+	                        r.FirstRegistrationId is null and
+                            r.AccountId = {accountId} and
+	                        r.ID in 
+	                        (
+		                        select 
+			                        isnull(r2.FirstRegistrationId, r2.ID)
+		                        from
+			                        Registration r2
+                                    {searchTextJoin}
+			                        {activityJoin}
+			                        {regStatusJoin}
+		                        {whereClause}
+	                        )
+                        {orderBy}";
+
+            return sql;
         }
 
         public static List<Registration> Search(string searchText, int accountId, int? questionId, List<int> participationObjectIds, ParticipationObjectType participationObjectType, RegistrationStatus regStatus, List<RegistrationAssignmentType> rats, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var dq = GetSearchQuery(searchText, accountId, questionId, regStatus, participationObjectIds, participationObjectType, rats, msgs, dc);
-            dq.UseParameterizedQuery = false;
+            // var dq = GetSearchQuery(searchText, accountId, questionId, regStatus, participationObjectIds, participationObjectType, rats, msgs, dc);
+            var dq = DatabaseQuery;
+            var sql = GetSearchSQL(searchText, accountId, questionId, regStatus, participationObjectIds, participationObjectType, rats);
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
 
-            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+            return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
         public static int SearchCount(string searchText, int accountId, int? questionId, List<int> participationObjectIds, ParticipationObjectType participationObjectType, RegistrationStatus regStatus, List<RegistrationAssignmentType> rats, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var dq = GetSearchQuery(searchText, accountId, questionId, regStatus, participationObjectIds, participationObjectType, rats, msgs, dc);
-            return dq.GetCount(msgs);
+            var dq = DatabaseQuery;
+            var sql = GetSearchSQL(searchText, accountId, questionId, regStatus, participationObjectIds, participationObjectType, rats, true);
+            return dq.ExecuteSelect(sql).Rows[0][0].ToString().ToInteger();
         }
 
         public static List<Registration> LoadByRegistrationPeriodId(int RegistrationPeriodId, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -984,7 +906,7 @@ namespace AfterSchoolLibrary.Models
                         from Registration r
                         where 
                         accountId = {accountId} and
-                        completionStatusId in ({ValidCompletionStatus.ToArray().ToStringArray().ToStringList()}) and
+                        completionStatusId in ({ValidCompletionStatus.Select(x => (int)x).ToStrings().ToStringList()}) and
                         (
                             select count(ra.id) 
                             from RegistrantActivity ra

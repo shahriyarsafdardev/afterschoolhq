@@ -340,7 +340,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "gradestart", graderestrictions.IsNumber() ? gradestart : "-1"},
                     { "gradeend", graderestrictions.IsNumber() ? gradeend : "-1"},
                     { "genderrestrictions", genderrestrictions},
-                    { "gradeIds", gradeIds.ToArray().ToStringArray().ToStringList() }
+                    { "gradeIds", gradeIds.ToStrings().ToStringList() }
                 };
 
                 activity = ActivityService.EditExisting(
@@ -672,7 +672,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 values = new Dictionary<string, object>()
                 {
                     { "scheduledetails", scheduledetails},
-                    { "days", days.Select(x => (int)x).ToArray().ToStringArray().ToStringList() },
+                    { "days", days.Select(x => (int)x).ToStrings().ToStringList() },
                     { "repeatsweekly", repeatsweekly.IfBlank("0") },
                     { "startdate", startdate },
                     { "enddate", enddate },
