@@ -44,6 +44,7 @@ namespace AfterSchoolLibrary.Models
         public string LocationDetails { get; set; }
         public bool UseStripeConnectedAccount { get; set; }
         public bool RequiresParentalConsent { get; set; }
+        public bool IsInviteOnly { get; set; }
 
         private ActivityType? ActivityType { get; set; }
         private ActivityGroupType? ActivityGroupType { get; set; }
@@ -51,12 +52,14 @@ namespace AfterSchoolLibrary.Models
         public ParticipationObject(int participationObjectId, ParticipationObjectType participationObjectType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             RequiresParentalConsent = true;
+            IsInviteOnly = false;
             InitObject(participationObjectId, participationObjectType, true, msgs, dc);
         }
 
         public ParticipationObject(int participationObjectId, ParticipationObjectType participationObjectType, bool loadAllDetails, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             RequiresParentalConsent = true;
+            IsInviteOnly = false;
             InitObject(participationObjectId, participationObjectType, loadAllDetails, msgs, dc);
         }
 
@@ -150,6 +153,7 @@ namespace AfterSchoolLibrary.Models
             ContactName = activityGroup.ContactName;
             ContactPhone = activityGroup.ContactPhone;
             IsTuitionFree = (!activityGroup.Cost.HasValue || activityGroup.Cost.Value == 0.ToDecimal());
+            IsInviteOnly = activityGroup.IsInviteOnly;
             // Description = activityGroup.Description;
             // TODO: PayLater = activityGroup.AllowToPayLater;
 

@@ -61,21 +61,25 @@ namespace AfterSchool.Controllers
             var locations = new List<Location>();
             var grades = GradeLevel.Load(msgs: msgs);
 
+            List<ParticipationObject> regOpened = null;
+            List<ParticipationObject> regWillOpen = null;
+            List<ParticipationObject> regClosed = null;
+
             if (account.IsNotEmpty())
             {
                 participationObjects.AddRange(account.GetPublishedParticipationObjects(msgs));
                 locations.AddRange(account.GetAllAvailableLocations(msgs));
 
                 participationObjects = participationObjects
-                                        .Where(po => !po.IsActivity() || !po.GetActivity().ActivityGroupId.HasValue)
+                                        .Where(po => (!po.IsActivity() || !po.GetActivity().ActivityGroupId.HasValue) && !po.IsInviteOnly)
                                         .OrderBy(po => po.RegistrationPeriod.IsClosed(account))
                                         .ThenBy(po => po.RegistrationPeriod.WillOpen(account))
                                         .ThenBy(po => po.RegistrationPeriod.IsOpen(account))
                                         .ToList();
 
-                ViewBag.RegistrationOpened = participationObjects.Where(po => po.RegistrationPeriod.IsOpen()).ToList();
-                ViewBag.RegistrationClosed = participationObjects.Where(po => po.RegistrationPeriod.IsClosed()).ToList();
-                ViewBag.RegistrationWillOpen = participationObjects.Where(po => po.RegistrationPeriod.WillOpen()).ToList();
+                regOpened = participationObjects.Where(po => po.RegistrationPeriod.IsOpen()).ToList();
+                regWillOpen = participationObjects.Where(po => po.RegistrationPeriod.WillOpen()).ToList();
+                regClosed = participationObjects.Where(po => po.NotIn(regWillOpen) && po.RegistrationPeriod.IsClosed()).ToList();
             }
             else
             {
@@ -88,10 +92,14 @@ namespace AfterSchool.Controllers
                 ParticipationObject.GenerateDemoObjects(ref account, participationObjects, locations, accountname, accountUniqueName, grades);
                 participationObjects = participationObjects.Take(11).ToList();
 
-                ViewBag.RegistrationOpened = participationObjects;
-                ViewBag.RegistrationClosed = new List<ParticipationObject>();
-                ViewBag.RegistrationWillOpen = new List<ParticipationObject>();
+                regOpened = participationObjects;
+                regClosed = new List<ParticipationObject>();
+                regOpened = new List<ParticipationObject>();
             }
+
+            ViewBag.RegistrationOpened = regOpened;
+            ViewBag.RegistrationWillOpen = regWillOpen;
+            ViewBag.RegistrationClosed = regClosed;
 
             ViewBag.Grades = grades;
             ViewBag.Messages = msgs;
