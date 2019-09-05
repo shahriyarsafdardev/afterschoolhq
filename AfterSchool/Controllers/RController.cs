@@ -99,8 +99,8 @@ namespace AfterSchool.Controllers
                 participationObjects = participationObjects.Take(11).ToList();
 
                 regOpened = participationObjects;
+                regWillOpen = new List<ParticipationObject>();
                 regClosed = new List<ParticipationObject>();
-                regOpened = new List<ParticipationObject>();
             }
 
             ViewBag.RegistrationOpened = regOpened;
