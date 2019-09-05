@@ -489,6 +489,11 @@ namespace AfterSchoolLibrary.Models
             return ObjectType == ParticipationObjectType.ActivityGroup;
         }
 
+        public bool IsSession()
+        {
+            return IsActivityGroup() && GetActivityGroup().ActivityGroupTypeId == global::ActivityGroupType.Session;
+        }
+
         public ActivityGroup GetActivityGroup()
         {
             return (ActivityGroup)this.Object;

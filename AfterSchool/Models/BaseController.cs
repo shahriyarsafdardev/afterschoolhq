@@ -278,5 +278,20 @@ namespace AfterSchool.Models
 
             return actionResult;
         }
+
+        internal bool isUnsupportedBrowser()
+        {
+            if (Request.Browser.Browser == "IE" || Request.Browser.Browser == "InternetExplorer")
+                return true;
+
+            return false;
+        }
+
+        private const string UnsupportedBrowserPage = "/unsupportedbrowser.html";
+
+        internal ActionResult RedirectUnsupportedBrowser()
+        {
+            return Redirect(UnsupportedBrowserPage);
+        }
     }
 }

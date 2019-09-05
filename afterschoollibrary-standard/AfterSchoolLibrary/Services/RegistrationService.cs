@@ -162,7 +162,11 @@ namespace AfterSchoolLibrary.Services
         {
             // NOTE: getting only one activity per registration at the moment, 
             // but could be problem in the future
-            var ra = registration.GetRegistrantActivities(msgs, dc).FirstOrDefault();
+            var ra = registration.GetRegistrantActivities(msgs, dc)
+                        .Where(x => x.ParticipationObjectId == participationObject.ObjectID && 
+                                    x.ParticipationObjectTypeId == participationObject.ObjectType)
+                        .FirstOrDefault();
+
             var assignmentType = GetRegistrationAssignmentType(
                 participationObject,
                 masterRegistrant,

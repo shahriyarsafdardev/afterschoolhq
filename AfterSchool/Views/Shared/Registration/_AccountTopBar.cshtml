@@ -14,7 +14,7 @@
         dashboardUrl = Url.Action("index", "home", new { area = "org" });
     }
 
-    if (session.IsEmpty() && participationObject.IsNotEmpty() && participationObject.IsActivityGroup() && participationObject.GetActivityGroup().ActivityGroupTypeId == ActivityGroupType.Session)
+    if (session.IsEmpty() && participationObject.IsNotEmpty() && participationObject.IsSession())
     {
         session = participationObject;
     }
@@ -27,7 +27,7 @@
 
 @helper RenderReturnToHomeUrl(ParticipationObject session)
 {
-    if (session.IsNotEmpty())
+    if (session.IsNotEmpty() && !Request.Url.ToString().ToLower().Contains(session.GetHomePageUrl().ToLower()))
     {
         <a href="@session.GetBrowseUrl()" class="btn btn-link">
             &laquo; Return to @session.Name Home
@@ -64,7 +64,7 @@
 
                             @if (SessionVariables.CurrentUser.IsNotEmpty())
                             {
-                                if (canPublishActivity)
+                                if (canPublishActivity && participationObject.IsNotEmpty())
                                 {
                                     <a href="@Url.Action("publishdetail", "activity", new { Area = "org", id = participationObject.Uid })" class="btn btn-primary btn-sm">
                                         Approve &amp; Publish Activity &raquo;
