@@ -64,7 +64,7 @@
 
                             @if (SessionVariables.CurrentUser.IsNotEmpty())
                             {
-                                if (canPublishActivity)
+                                if (canPublishActivity && participationObject.IsNotEmpty())
                                 {
                                     <a href="@Url.Action("publishdetail", "activity", new { Area = "org", id = participationObject.Uid })" class="btn btn-primary btn-sm">
                                         Approve &amp; Publish Activity &raquo;
