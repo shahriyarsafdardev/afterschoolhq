@@ -1578,7 +1578,7 @@ namespace AfterSchool.Controllers
             var (participationObject, assignmentType) = GetParticipationObjectFromRegistration(registration, msgs);
 
             ViewBag.Registration = registration;
-            ViewBag.Account = SessionVariables.RegistrationStartPageAccount;
+            ViewBag.Account = SessionVariables.RegistrationStartPageAccount ?? participationObject.OwnerAccount;
             ViewBag.IsSelfRegistered = masterRegistrant.WebUserId == SessionVariables.CurrentUser.ID;
             ViewBag.Registrant = masterRegistrant;
             ViewBag.Messages = msgs;
