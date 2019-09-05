@@ -64,6 +64,10 @@
             {
                 btnText = "Pay Now";
             }
+            else if (participationObject.IsSession())
+            {
+                btnText = $"Add To Existing Registration";
+            }
             else
             {
                 btnText = $"Already {registered}";

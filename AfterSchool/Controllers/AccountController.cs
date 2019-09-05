@@ -1052,6 +1052,7 @@ namespace AfterSchool.Controllers
                 SessionVariables.CurrentRegistrant = Registrant.LoadByUid(id.ToGuid());
                 return RedirectToAction("register", "account");
             }
+
             return RedirectToAction("select", "account");
         }
 
@@ -1117,8 +1118,11 @@ namespace AfterSchool.Controllers
                     "family",
                     new { Area = "user", id = SessionVariables.CurrentRegistrant.Uid, reg = registration?.Uid, student = SessionVariables.CurrentRegistrant?.Uid });
 
+            var isSession = participationObject.IsSession();
+            var hasSubmittedFor = submittedRecord.IsNotEmpty();
+
             // current registrant is already registered
-            if (SessionVariables.CurrentRegistrant.HasSubmittedFor(participationObject, true, msgs))
+            if (hasSubmittedFor && !isSession)
                 return RedirectToAction("select");
 
             // need to see if there are any questions required by the form on the activity/activity group that haven't been collected on the main form
@@ -1131,7 +1135,7 @@ namespace AfterSchool.Controllers
             ViewBag.QuestionViewModels = questions.Select(question => question.ToFormQuestionViewModel()).ToList();
             ViewBag.Messages = msgs;
 
-            LoadSessionActivitiesViewBag(participationObject, msgs);
+            LoadSessionActivitiesViewBag(participationObject, registration, msgs);
 
             return View(participationObject);
         }
@@ -1175,6 +1179,8 @@ namespace AfterSchool.Controllers
             RegistrationPeriod period = null;
             Registrant submittedRecord = null;
 
+            (submittedRecord, registration) = SessionVariables.CurrentRegistrant.GetSubmittedRecord(participationObject, msgs);
+
             if (msgs.HasNoErrors())
             {
                 Database.ExecuteTransaction
@@ -1197,8 +1203,6 @@ namespace AfterSchool.Controllers
 
                         // account gets copy / snapshot of master registrant record
                         // required in order to make sure registration data doesn't change as registrant changes information in master record.
-                        (submittedRecord, registration) = SessionVariables.CurrentRegistrant.GetSubmittedRecord(participationObject, amsgs, adc);
-
                         if (submittedRecord.IsEmpty())
                         {
                             submittedRecord = SessionVariables.CurrentRegistrant.SubmitRecordToAccount(
@@ -1271,7 +1275,7 @@ namespace AfterSchool.Controllers
 
 
                         if (amsgs.HasNoErrors())
-                            AddSessionActivities(
+                            AddSessionActivitiesToRegistration(
                                 participationObject,
                                 registration,
                                 submittedRecord,
@@ -1297,7 +1301,7 @@ namespace AfterSchool.Controllers
             ViewBag.QuestionViewModels = qvms;
             ViewBag.Messages = msgs;
 
-            LoadSessionActivitiesViewBag(participationObject, msgs);
+            LoadSessionActivitiesViewBag(participationObject, registration, msgs);
 
             return View(participationObject);
         }
@@ -1914,11 +1918,12 @@ namespace AfterSchool.Controllers
                 return RedirectToAction("InviteParent");
 
             var participationObject = GetParticipationObjectFromCart();
+            var (submittedRecord, registration) = SessionVariables.CurrentRegistrant.GetSubmittedRecord(participationObject, msgs);
 
-            ViewBag.AlreadyRegistered = SessionVariables.CurrentRegistrant.HasSubmittedFor(participationObject, null, msgs);
+            ViewBag.AlreadyRegistered = submittedRecord.IsNotEmpty();
             ViewBag.Messages = msgs;
 
-            LoadSessionActivitiesViewBag(participationObject, msgs);
+            LoadSessionActivitiesViewBag(participationObject, registration, msgs);
 
             return View(participationObject);
         }
@@ -1951,17 +1956,17 @@ namespace AfterSchool.Controllers
 
                         // Create Registration
                         registration = submittedRecord.AddRegistration(
-                            ownerAccountId: participationObject.OwnerAccount.ID.Value,
-                            activityGroupId: participationObject.GetAnyRelatedActivityGroupId(),
-                            accountActivityGroupId: participationObject.GetAccountActivityGroupId(),
-                            periodId: participationObject.GetCurrentRegistrationPeriod(amsgs, adc)?.ID,
-                            completionStatus: RegistrationCompletionStatus.RequiresParentSignature,
-                            loggedInUserId: SessionVariables.CurrentUser.ID.Value,
-                            msgs: amsgs,
-                            dc: adc);
+                                        ownerAccountId: participationObject.OwnerAccount.ID.Value,
+                                        activityGroupId: participationObject.GetAnyRelatedActivityGroupId(),
+                                        accountActivityGroupId: participationObject.GetAccountActivityGroupId(),
+                                        periodId: participationObject.GetCurrentRegistrationPeriod(amsgs, adc)?.ID,
+                                        completionStatus: RegistrationCompletionStatus.RequiresParentSignature,
+                                        loggedInUserId: SessionVariables.CurrentUser.ID.Value,
+                                        msgs: amsgs,
+                                        dc: adc);
 
                         if (amsgs.HasNoErrors())
-                            AddSessionActivities(
+                            AddSessionActivitiesToRegistration(
                                 participationObject,
                                 registration,
                                 submittedRecord,
@@ -1995,7 +2000,7 @@ namespace AfterSchool.Controllers
 
             ViewBag.Messages = msgs;
 
-            LoadSessionActivitiesViewBag(participationObject, msgs);
+            LoadSessionActivitiesViewBag(participationObject, registration, msgs);
 
             return View(participationObject);
         }
@@ -2088,19 +2093,16 @@ namespace AfterSchool.Controllers
             return administratorAccount.GetDefaultForm(msgs);
         }
 
-        private void AddSessionActivities(ParticipationObject participationObject, Registration registration, Registrant submittedRecord, RegistrationPeriod period, SystemMessages msgs, DatabaseConnection dc = null)
+        private void AddSessionActivitiesToRegistration(ParticipationObject participationObject, Registration registration, Registrant submittedRecord, RegistrationPeriod period, SystemMessages msgs, DatabaseConnection dc = null)
         {
             // if there is a Session, then a person may set their preferences for activities in that session, 
             // also only if the session is set to Apply
-            if (participationObject.IsActivityGroup() && participationObject.GetActivityGroup().ActivityGroupTypeId == ActivityGroupType.Session)
+            if (participationObject.IsSession())
             {
                 // only get activities that are in the cart
-                var participationObjects = SessionVariables.Cart.GetCartItems(msgs, dc)
-                                            .Where(item => item.ParticipationObjectTypeId == ParticipationObjectType.Activity)
-                                            .Select(item => item.GetParticipationObject(msgs, dc))
-                                            .ToList();
+                var participationObjects = GetAllParticipationObjectsForCheckout(registration, msgs);
 
-                if (participationObject.GetActivityGroup().RegistrationModeId == RegistrationMode.Apply)
+                if (participationObject.RegistrationMode == RegistrationMode.Apply)
                 {
                     for (int i = 1; i <= participationObjects.Count; i++)
                     {
@@ -2143,17 +2145,38 @@ namespace AfterSchool.Controllers
             }
         }
 
-        private void LoadSessionActivitiesViewBag(ParticipationObject participationObject, SystemMessages msgs)
+        private List<ParticipationObject> GetAllParticipationObjectsForCheckout(Registration registration, SystemMessages msgs)
         {
-            if (participationObject.IsActivityGroup() && participationObject.GetActivityGroup().ActivityGroupTypeId == ActivityGroupType.Session && participationObject.GetActivityGroup().RegistrationModeId == RegistrationMode.Apply)
+            var activities = new List<ParticipationObject>();
+
+            activities.AddRange(SessionVariables.Cart.GetCartItems()
+                                    .Where(x => x.ParticipationObjectTypeId == ParticipationObjectType.Activity)
+                                    .Select(x => x.GetParticipationObject(msgs))
+                                    .Where(x => x.GetActivity().ActivityGroupId.HasValue));
+
+            if (registration.IsNotEmpty())
             {
-                ViewBag.SessionActivities = SessionVariables.Cart.GetCartItems()
-                                        .Where(x => x.ParticipationObjectTypeId == ParticipationObjectType.Activity)
-                                        .Select(x => x.GetParticipationObject(msgs))
-                                        .Where(x => x.GetActivity().ActivityGroupId.HasValue)
-                                        .OrderBy(x => x.Name)
-                                        .ToList();
+                var ignoredTypes = new List<RegistrationAssignmentType>()
+                    {
+                        RegistrationAssignmentType.Declined,
+                        RegistrationAssignmentType.Withdrawn,
+                        RegistrationAssignmentType.Invited,
+                        RegistrationAssignmentType.NotSet
+                    };
+
+                activities.AddRange(registration.GetRegistrantActivities(msgs)
+                                                .Where(x => x.AssignmentTypeId.NotIn(ignoredTypes))
+                                                .Where(x => x.ParticipationObjectTypeId == ParticipationObjectType.Activity)
+                                                .Select(x => x.GetParticipationObject(msgs)));
             }
+
+            return activities.DistinctBy(x => x.ObjectID).OrderBy(x => x.Name).ToList();
+        }
+
+        private void LoadSessionActivitiesViewBag(ParticipationObject participationObject, Registration registration, SystemMessages msgs)
+        {
+            if (participationObject.IsSession() && participationObject.RegistrationMode == RegistrationMode.Apply)
+                ViewBag.SessionActivities = GetAllParticipationObjectsForCheckout(registration, msgs);
         }
 
         #endregion
