@@ -99,8 +99,8 @@ namespace AfterSchool.Controllers
                 participationObjects = participationObjects.Take(11).ToList();
 
                 regOpened = participationObjects;
+                regWillOpen = new List<ParticipationObject>();
                 regClosed = new List<ParticipationObject>();
-                regOpened = new List<ParticipationObject>();
             }
 
             ViewBag.RegistrationOpened = regOpened;
@@ -370,7 +370,10 @@ namespace AfterSchool.Controllers
         {
             SetRegistrationStartPage(account);
 
-            if (!participationObject.IsActivityGroup() || participationObject.GetActivityGroup().ActivityGroupTypeId != ActivityGroupType.Session)
+            if (participationObject.IsEmpty())
+                return HttpNotFound();
+
+            if (!participationObject.IsSession())
                 SessionVariables.Cart = Cart.GetNewCart(loggedInUser: SessionVariables.CurrentUser, msgs: msgs);
 
             SessionVariables.Cart.AddCartItem(participationObject, msgs);

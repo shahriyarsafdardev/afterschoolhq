@@ -176,7 +176,6 @@ namespace AfterSchool.Controllers
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
                         if (SessionVariables.CurrentUser.IsEmpty())
-                        {
                             // create user
                             user = WebUserService.CreateNew(
                                 firstName: firstName.Value,
@@ -191,7 +190,6 @@ namespace AfterSchool.Controllers
                                 loggedInUser: null,
                                 msgs: amsgs,
                                 dc: adc);
-                        }
                         else
                         {
                             user = SessionVariables.CurrentUser;
@@ -202,40 +200,45 @@ namespace AfterSchool.Controllers
                             amsgs.AddRange(user.Save(adc));
                         }
 
-                        // create account
-                        account = user.AddNewRegistrantAccount(
-                            userType: UserType.Owner,
-                            isActive: true,
-                            isAfterSchool: SessionVariables.IsAfterSchool.Value,
-                            loggedInUser: user,
-                            msgs: amsgs,
-                            dc: adc);
-
-                        // create parent registrant record
-                        var registrant = account.CreateRegistrant(
-                            registrantOwner: user,
-                            canBeAccessedBy: user.AsList(),
-                            registrantType: RegistrantType.Individual,
-                            isMaster: true,
-                            isParentOrGuardian: true,
-                            allowTextMessages: textnotifications.IfBlank("0").ToBoolean(),
-                            schoolLocationId: null,
-                            profileStatus: RegistrantProfileStatus.Started,
-                            loggedInUser: user,
-                            msgs: amsgs,
-                            dc: adc);
-
-                        // add answers to parent registrant record
-                        // will be used later to copy information over to student records
-                        qvms.ForEach(qvm =>
-                        {
-                            registrant.AddAnswer(
-                                answerText: qvm.Value.IfEmpty("").Trim(),
-                                question: qvm.Question,
+                        if (amsgs.HasNoErrors())
+                            // create account
+                            account = user.AddNewRegistrantAccount(
+                                userType: UserType.Owner,
+                                isActive: true,
+                                isAfterSchool: SessionVariables.IsAfterSchool.Value,
                                 loggedInUser: user,
                                 msgs: amsgs,
                                 dc: adc);
-                        });
+
+                        if (amsgs.HasNoErrors())
+                        {
+                            // create parent registrant record
+                            var registrant = account.CreateRegistrant(
+                                registrantOwner: user,
+                                canBeAccessedBy: user.AsList(),
+                                registrantType: RegistrantType.Individual,
+                                isMaster: true,
+                                isParentOrGuardian: true,
+                                allowTextMessages: textnotifications.IfBlank("0").ToBoolean(),
+                                schoolLocationId: null,
+                                profileStatus: RegistrantProfileStatus.Started,
+                                loggedInUser: user,
+                                msgs: amsgs,
+                                dc: adc);
+
+                            if (amsgs.HasNoErrors())
+                                // add answers to parent registrant record
+                                // will be used later to copy information over to student records
+                                qvms.ForEach(qvm =>
+                                {
+                                    registrant.AddAnswer(
+                                        answerText: qvm.Value.IfEmpty("").Trim(),
+                                        question: qvm.Question,
+                                        loggedInUser: user,
+                                        msgs: amsgs,
+                                        dc: adc);
+                                });
+                        }
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
@@ -1575,7 +1578,7 @@ namespace AfterSchool.Controllers
             var (participationObject, assignmentType) = GetParticipationObjectFromRegistration(registration, msgs);
 
             ViewBag.Registration = registration;
-            ViewBag.Account = SessionVariables.RegistrationStartPageAccount;
+            ViewBag.Account = SessionVariables.RegistrationStartPageAccount ?? participationObject.OwnerAccount;
             ViewBag.IsSelfRegistered = masterRegistrant.WebUserId == SessionVariables.CurrentUser.ID;
             ViewBag.Registrant = masterRegistrant;
             ViewBag.Messages = msgs;
@@ -1714,43 +1717,49 @@ namespace AfterSchool.Controllers
                             msgs: amsgs,
                             dc: adc);
 
-                        // create account
-                        account = user.AddNewRegistrantAccount(
-                            userType: UserType.Student,
-                            isActive: true,
-                            isAfterSchool: SessionVariables.IsAfterSchool.Value,
-                            loggedInUser: user,
-                            msgs: amsgs,
-                            dc: adc);
-
-                        var location = participationObject?.Location;
-                        if (location.IsNotEmpty() && location.GetHostAcount(amsgs, adc).AccountTypeId != AccountType.School)
-                            location = null;
-
-                        // create student registrant record
-                        registrant = account.CreateRegistrant(
-                            registrantOwner: user,
-                            canBeAccessedBy: user.AsList(),
-                            registrantType: RegistrantType.Individual,
-                            isMaster: true,
-                            isParentOrGuardian: false,
-                            allowTextMessages: false,
-                            schoolLocationId: location?.ID, // probably should have a school location id
-                            profileStatus: RegistrantProfileStatus.Started,
-                            loggedInUser: user,
-                            msgs: amsgs,
-                            dc: adc);
-
-                        // add answers to student registrant record
-                        qvms.ForEach(qvm =>
-                        {
-                            registrant.AddAnswer(
-                                answerText: qvm.Value.IfEmpty("").Trim(),
-                                question: qvm.Question,
+                        if (amsgs.HasNoErrors())
+                            // create account
+                            account = user.AddNewRegistrantAccount(
+                                userType: UserType.Student,
+                                isActive: true,
+                                isAfterSchool: SessionVariables.IsAfterSchool.Value,
                                 loggedInUser: user,
                                 msgs: amsgs,
                                 dc: adc);
-                        });
+
+
+                        if (amsgs.HasNoErrors())
+                        {
+                            var location = participationObject?.Location;
+                            if (location.IsNotEmpty() && location.GetHostAcount(amsgs, adc).AccountTypeId != AccountType.School)
+                                location = null;
+
+                            // create student registrant record
+                            registrant = account.CreateRegistrant(
+                                registrantOwner: user,
+                                canBeAccessedBy: user.AsList(),
+                                registrantType: RegistrantType.Individual,
+                                isMaster: true,
+                                isParentOrGuardian: false,
+                                allowTextMessages: false,
+                                schoolLocationId: location?.ID, // probably should have a school location id
+                                profileStatus: RegistrantProfileStatus.Started,
+                                loggedInUser: user,
+                                msgs: amsgs,
+                                dc: adc);
+
+                            if (amsgs.HasNoErrors())
+                                // add answers to student registrant record
+                                qvms.ForEach(qvm =>
+                                {
+                                    registrant.AddAnswer(
+                                        answerText: qvm.Value.IfEmpty("").Trim(),
+                                        question: qvm.Question,
+                                        loggedInUser: user,
+                                        msgs: amsgs,
+                                        dc: adc);
+                                });
+                        }
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
