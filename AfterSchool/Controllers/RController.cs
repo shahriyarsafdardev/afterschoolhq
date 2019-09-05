@@ -370,7 +370,10 @@ namespace AfterSchool.Controllers
         {
             SetRegistrationStartPage(account);
 
-            if (!participationObject.IsActivityGroup() || participationObject.GetActivityGroup().ActivityGroupTypeId != ActivityGroupType.Session)
+            if (participationObject.IsEmpty())
+                return HttpNotFound();
+
+            if (!participationObject.IsSession())
                 SessionVariables.Cart = Cart.GetNewCart(loggedInUser: SessionVariables.CurrentUser, msgs: msgs);
 
             SessionVariables.Cart.AddCartItem(participationObject, msgs);
