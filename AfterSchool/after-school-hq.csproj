@@ -560,6 +560,7 @@
     <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="UnsupportedBrowser.html" />
     <Content Include="404.html" />
     <Content Include="Assets\bootstrap3-wysiwyg\bootstrap3-wysihtml5.all.min.js" />
     <Content Include="Assets\bootstrap3-wysiwyg\bootstrap3-wysihtml5.min.css" />

@@ -16,7 +16,7 @@
 @{ Html.RenderPartial(
          "~/Views/Shared/Registration/_AccountTopBar.cshtml",
          Model,
-         new ViewDataDictionary() { { "LoginReturnUrl", Model.HomePageUrl } }); }
+         new ViewDataDictionary() { { "LoginReturnUrl", Model.HomePageUrl }, { "session", session } }); }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 

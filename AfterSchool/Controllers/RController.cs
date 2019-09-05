@@ -41,6 +41,9 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult Account(string accountname)
         {
+            if (isUnsupportedBrowser())
+                return RedirectUnsupportedBrowser();
+
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname);
 
             RestartRegistrationSession();
@@ -51,6 +54,9 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult Browse(string accountname)
         {
+            if (isUnsupportedBrowser())
+                return RedirectUnsupportedBrowser();
+
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname);
 
@@ -110,28 +116,12 @@ namespace AfterSchool.Controllers
             return View(account);
         }
 
-        private (string AccountName, string AccountUniqueName) GetDemoAccountDetails(string accountName)
-        {
-            var accountUniqueName = "";
-
-            if (CookieVariables.DemoOrgName.IsNotEmpty())
-            {
-                accountName = CookieVariables.DemoOrgName;
-                accountUniqueName = CookieVariables.DemoUniqueOrgName;
-            }
-            else
-            {
-                var reg = new Regex(BasicLibrary.Utilities.UrlFriendlyRegEx, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-                accountName = accountName.SplitByUpperCase();
-                accountUniqueName = reg.Replace(accountName.GetMaxWords(25), "");
-            }
-
-            return (accountName, accountUniqueName);
-        }
-
         [HttpGet]
         public ActionResult Activity(string accountname, string activitytype, string activityname, string preview)
         {
+            if (isUnsupportedBrowser())
+                return RedirectUnsupportedBrowser();
+
             ParticipationObject participationObject = null;
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);  
@@ -189,6 +179,9 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult ActivitySession(string accountname, string sessionname, string invite, string decline)
         {
+            if (isUnsupportedBrowser())
+                return RedirectUnsupportedBrowser();
+
             RestartRegistrationSession();
 
             var msgs = new SystemMessages();
@@ -221,6 +214,9 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult League(string accountname, string districtname, string leaguename)
         {
+            if (isUnsupportedBrowser())
+                return RedirectUnsupportedBrowser();
+
             RestartRegistrationSession();
 
             var msgs = new SystemMessages();
@@ -252,6 +248,9 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult Register(string accountname, string activitytype, string activityname)
         {
+            if (isUnsupportedBrowser())
+                return RedirectUnsupportedBrowser();
+
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
 
@@ -271,6 +270,9 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult RegisterSession(string accountname, string sessionname)
         {
+            if (isUnsupportedBrowser())
+                return RedirectUnsupportedBrowser();
+
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
 
@@ -290,6 +292,9 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult BrowseSession(string accountname, string sessionname, string invite, string decline)
         {
+            if (isUnsupportedBrowser())
+                return RedirectUnsupportedBrowser();
+
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
 
@@ -336,6 +341,9 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult RegisterLeague(string accountname, string activitygrouptype, string externalaccountname, string group)
         {
+            if (isUnsupportedBrowser())
+                return RedirectUnsupportedBrowser();
+
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
 
@@ -387,6 +395,25 @@ namespace AfterSchool.Controllers
                 if (decline.IsBoolean() && decline.ToBoolean())
                     session.DeclineInvite(SessionVariables.SessionInvite.ToGuid(), msgs);
             }
+        }
+
+        private (string AccountName, string AccountUniqueName) GetDemoAccountDetails(string accountName)
+        {
+            var accountUniqueName = "";
+
+            if (CookieVariables.DemoOrgName.IsNotEmpty())
+            {
+                accountName = CookieVariables.DemoOrgName;
+                accountUniqueName = CookieVariables.DemoUniqueOrgName;
+            }
+            else
+            {
+                var reg = new Regex(BasicLibrary.Utilities.UrlFriendlyRegEx, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+                accountName = accountName.SplitByUpperCase();
+                accountUniqueName = reg.Replace(accountName.GetMaxWords(25), "");
+            }
+
+            return (accountName, accountUniqueName);
         }
     }
 }
