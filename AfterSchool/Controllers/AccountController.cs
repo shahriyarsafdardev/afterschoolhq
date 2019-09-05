@@ -1117,20 +1117,27 @@ namespace AfterSchool.Controllers
                     "editstudentpersonal",
                     "family",
                     new { Area = "user", id = SessionVariables.CurrentRegistrant.Uid, reg = registration?.Uid, student = SessionVariables.CurrentRegistrant?.Uid });
-
-            var isSession = participationObject.IsSession();
+            
             var hasSubmittedFor = submittedRecord.IsNotEmpty();
 
             // current registrant is already registered
-            if (hasSubmittedFor && !isSession)
+            if (hasSubmittedFor && !participationObject.IsSession())
                 return RedirectToAction("select");
 
             // need to see if there are any questions required by the form on the activity/activity group that haven't been collected on the main form
             var questions = RegisterViewBag(participationObject, msgs);
 
-            // if there are no additional questions to answer, if it doesn't require parental consent, and the registration has already been started (by the child)
-            if (questions.Count == 0 && !participationObject.RequiresParentalConsent && registration.IsNotEmpty())
-                return RedirectToAction("payment", new { id = registration.Uid });
+            // if there are no additional questions to answer, 
+            // if it doesn't require parental consent, 
+            // the registration has already been started (by the child)
+            // and it's not a session (parents can edit registrations for sessions)
+            if (!questions.Any() && !participationObject.RequiresParentalConsent && registration.IsNotEmpty() && !participationObject.IsSession())
+            {
+                if (participationObject.ShouldParentPay())
+                    return RedirectToAction("payment", new { id = registration.Uid });
+                
+                return RedirectToAction("finalizeregistration", new { id = registration.Uid });
+            }
 
             ViewBag.QuestionViewModels = questions.Select(question => question.ToFormQuestionViewModel()).ToList();
             ViewBag.Messages = msgs;
