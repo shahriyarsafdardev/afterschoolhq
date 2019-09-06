@@ -688,7 +688,11 @@ namespace AfterSchool.Areas.User.Controllers
 
                             UpdateChildrenRegistrants(
                                 registrant, 
-                                new List<QuestionGroupDataType>() { QuestionGroupDataType.EmergencyContact1, QuestionGroupDataType.EmergencyContact1 }, 
+                                new List<QuestionGroupDataType>()
+                                {
+                                    QuestionGroupDataType.EmergencyContact1,
+                                    QuestionGroupDataType.EmergencyContact1
+                                }, 
                                 amsgs, 
                                 adc);
                         },
@@ -753,7 +757,7 @@ namespace AfterSchool.Areas.User.Controllers
         private void UpdateChildrenRegistrants(Registrant registrant, List<QuestionGroupDataType> questionGroupDataTypes, SystemMessages msgs, DatabaseConnection dc)
         {
             // if this is the parent and owner of this account
-            if (registrant.IsParentOrGuardian && registrant.GetOwner(msgs, dc).ID == SessionVariables.CurrentAccount.GetAccountOwner(msgs, dc).ID)
+            if (registrant.IsParentOrGuardian && registrant.GetOwner(msgs, dc)?.ID == SessionVariables.CurrentAccount.GetAccountOwner(msgs, dc).ID)
             {
                 var students = SessionVariables.CurrentAccount.GetChildrenRegistrants(msgs, dc);
 
