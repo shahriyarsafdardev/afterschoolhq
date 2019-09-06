@@ -376,6 +376,9 @@ namespace AfterSchool.Controllers
             if (!participationObject.IsSession())
                 SessionVariables.Cart = Cart.GetNewCart(loggedInUser: SessionVariables.CurrentUser, msgs: msgs);
 
+            if (SessionVariables.Cart.IsEmpty())
+                return Redirect(participationObject.GetHomePageUrl());
+
             SessionVariables.Cart.AddCartItem(participationObject, msgs);
 
             if (SessionVariables.CurrentRegistrant.IsEmpty())
