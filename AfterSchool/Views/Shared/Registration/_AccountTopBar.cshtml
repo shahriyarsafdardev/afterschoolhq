@@ -7,6 +7,7 @@
     var dashboardUrl = Url.Action("index", "home", new { area = "user" });
     var session = (ParticipationObject)ViewData["session"];
     var isDuringProfileSetup = false;
+    var returnUrl = SessionVariables.RegistrationStartPageAccount?.HomePageUrl;
 
     if (SessionVariables.CurrentAccount.IsNotEmpty() && SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant)
     {
@@ -71,7 +72,7 @@
                                     </a>
                                 }
                                 <a href="@dashboardUrl" class="btn btn-link">View @accountOrDashboard</a>
-                                <a href="@Url.Action("index", "logout", new { returnurl = SessionVariables.RegistrationStartPageAccount.HomePageUrl })" class="btn btn-link">Logout</a>
+                                <a href="@Url.Action("index", "logout", new { returnurl = returnUrl })" class="btn btn-link">Logout</a>
                             }
                             else
                             {
