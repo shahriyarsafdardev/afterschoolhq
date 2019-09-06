@@ -225,18 +225,7 @@ namespace AfterSchool.Controllers
                 if (user.IsEmpty())
                     msgs.Add("Invalid username and/or password", MessageType.UserError);
                 else
-                {
-                    var doRememberMe = !Request.Params["remember"].IsEmpty();
-
-                    LoadSessionInfo(user, null, doRememberMe, source, msgs);
-
-                    // if validated user and doesn't have a Parent account, create one automatically and continue
-                    if (source == "parent-login" && SessionVariables.CurrentAccount?.AccountTypeId != AccountType.Registrant)
-                    {
-                        var registrantAccount = user.AddNewRegistrantAccount(UserType.Owner, true, true, user, msgs);
-                        LoadSessionInfo(user, registrantAccount, doRememberMe, msgs);
-                    }
-                }
+                    LoadSessionInfo(user, null, Request.Params["remember"].IsNotEmpty(), source, msgs);
             }
 
             if (msgs.HasNoErrors())
