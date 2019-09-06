@@ -16,7 +16,7 @@
         new ViewDataDictionary()
         {
             { "ParticipationObject", participationObject },
-            { "isDuringProfileSetup", SessionVariables.CurrentAccount.IsNotEmpty() }
+            { "isDuringProfileSetup", SessionVariables.CurrentUser.IsNotEmpty() }
         }
     );
 }
