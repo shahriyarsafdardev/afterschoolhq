@@ -78,30 +78,40 @@ namespace AfterSchool.Controllers
 
         private ActionResult HandleGetStartedAccountRedirect(SystemMessages msgs)
         {
-            if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant)
+            if (SessionVariables.CurrentUser.IsNotEmpty())
             {
-                //check if the user has a parent account
-                var registrantAccount = SessionVariables.CurrentUser
-                                        .GetAccounts(msgs)
-                                        .FirstOrDefault(x => x.AccountTypeId == AccountType.Registrant);
+                var registrantAccount = SessionVariables.CurrentAccount;
 
-                // if no parent account, then create one real quick
-                if (registrantAccount.IsEmpty())
+                if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant)
                 {
-                    var user = SessionVariables.CurrentUser;
-                    registrantAccount = user.AddNewRegistrantAccount(UserType.Owner, true, true, user, msgs);
-                    LoadSessionInfo(user, registrantAccount, false, msgs);
-                }
-                // otherwise load up the right account
-                else
-                {
-                    LoadSessionInfo(SessionVariables.CurrentUser, registrantAccount, false, msgs);
+                    //check if the user has a parent account
+                    registrantAccount = SessionVariables.CurrentUser
+                                            .GetAccounts(msgs)
+                                            .FirstOrDefault(x => x.AccountTypeId == AccountType.Registrant);
 
-                    // if you have a completed parent profile
-                    var masterRegistrant = SessionVariables.CurrentUser.GetMasterRegistrant();
-                    if (masterRegistrant.IsNotEmpty() && masterRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed)
-                        return RedirectToAction("select");
+                    // if no parent account, then create one real quick
+                    if (registrantAccount.IsEmpty())
+                    {
+                        var user = SessionVariables.CurrentUser;
+                        registrantAccount = user.AddNewRegistrantAccount(UserType.Owner, true, true, user, msgs);
+                    }
                 }
+
+                var masterRegistrant = SessionVariables.CurrentUser.GetMasterRegistrant(msgs);
+
+                if (masterRegistrant.IsNotEmpty())
+                    registrantAccount = masterRegistrant.GetAccount(msgs);
+
+                if (registrantAccount.ID != SessionVariables.CurrentAccount.ID)
+                    LoadSessionInfo(
+                        SessionVariables.CurrentUser,
+                        registrantAccount,
+                        false,
+                        msgs);
+
+                // if you have a completed parent profile
+                if (masterRegistrant.IsNotEmpty() && masterRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed)
+                    return RedirectToAction("select");
             }
 
             return null;
