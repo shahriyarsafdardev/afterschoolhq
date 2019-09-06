@@ -76,32 +76,63 @@ namespace AfterSchool.Controllers
             return qvms;
         }
 
-        [HttpGet]
-        public ActionResult GetStarted(string regaccount)
+        private ActionResult HandleGetStartedAccountRedirect(SystemMessages msgs)
         {
             if (SessionVariables.CurrentUser.IsNotEmpty())
             {
-                var masterRegistrant = SessionVariables.CurrentUser.GetMasterRegistrant();
+                var registrantAccount = SessionVariables.CurrentAccount;
+
+                if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant)
+                {
+                    //check if the user has a parent account
+                    registrantAccount = SessionVariables.CurrentUser
+                                            .GetAccounts(msgs)
+                                            .FirstOrDefault(x => x.AccountTypeId == AccountType.Registrant);
+
+                    // if no parent account, then create one real quick
+                    if (registrantAccount.IsEmpty())
+                    {
+                        var user = SessionVariables.CurrentUser;
+                        registrantAccount = user.AddNewRegistrantAccount(UserType.Owner, true, true, user, msgs);
+                    }
+                }
+
+                var masterRegistrant = SessionVariables.CurrentUser.GetMasterRegistrant(msgs);
 
                 if (masterRegistrant.IsNotEmpty())
-                {
-                    // need to load correct session info
-                    if (masterRegistrant.AccountId != SessionVariables.CurrentAccount.ID)
-                        LoadSessionInfo(SessionVariables.CurrentUser, masterRegistrant.GetAccount());
+                    registrantAccount = masterRegistrant.GetAccount(msgs);
 
+                if (registrantAccount.ID != SessionVariables.CurrentAccount.ID)
+                    LoadSessionInfo(
+                        SessionVariables.CurrentUser,
+                        registrantAccount,
+                        false,
+                        msgs);
+
+                // if you have a completed parent profile
+                if (masterRegistrant.IsNotEmpty() && masterRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed)
                     return RedirectToAction("select");
-                }
             }
 
+            return null;
+        }
+
+        [HttpGet]
+        public ActionResult GetStarted(string regaccount)
+        {
             var msgs = new SystemMessages();
+
+            // handles admin accounts that have or need parent accounts
+            var redirectResult = HandleGetStartedAccountRedirect(msgs);
+            if (redirectResult.IsNotEmpty())
+                return redirectResult;
+
             var participationObject = GetParticipationObjectFromCart();
             var qvms = GetStartedParentViewBag(participationObject, msgs);
             Account registrationAccount = null;
 
             if (regaccount.IsGuid())
-            {
                 registrationAccount = Account.LoadByUid(regaccount.ToGuid(), msgs);
-            }
 
             // no activity is selected
             if (participationObject.IsEmpty())
@@ -1034,6 +1065,13 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
 
             var masterRegistrant = SessionVariables.CurrentUser.GetMasterRegistrant();
+
+            if (masterRegistrant.IsEmpty())
+                return RedirectToAction("getstarted");
+
+            if (masterRegistrant.ProfileStatusId == RegistrantProfileStatus.Started)
+                return RedirectToAction("getstarted");
+
             if (!masterRegistrant.IsParentOrGuardian)
             {
                 SessionVariables.CurrentRegistrant = masterRegistrant;

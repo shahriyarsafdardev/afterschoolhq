@@ -15,7 +15,8 @@
         SessionVariables.RegistrationStartPageAccount ?? registrationAccount,
         new ViewDataDictionary()
         {
-            { "ParticipationObject", participationObject }
+            { "ParticipationObject", participationObject },
+            { "isDuringProfileSetup", SessionVariables.CurrentUser.IsNotEmpty() }
         }
     );
 }

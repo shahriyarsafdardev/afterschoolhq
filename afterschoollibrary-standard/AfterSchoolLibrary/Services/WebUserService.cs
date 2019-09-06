@@ -87,10 +87,10 @@ namespace AfterSchoolLibrary.Services
                 );
         }
 
-        public static List<Account> GetAccounts(this WebUser user, DatabaseConnection dc = null)
+        public static List<Account> GetAccounts(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountWebUser.LoadByWebUserIdByIsActive(user.ID.Value, true, dc: dc)
-                .Select(x => x.ToAccount(loadFromDb: true, dc: dc))
+            return AccountWebUser.LoadByWebUserIdByIsActive(user.ID.Value, true, msgs, dc)
+                .Select(x => x.ToAccount(true, msgs, dc))
                 .ToList();
         }
 
