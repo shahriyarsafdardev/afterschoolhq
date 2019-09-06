@@ -35,7 +35,7 @@ namespace AfterSchool.Areas.User.Controllers
                 };
             var providers = new List<Account>();
 
-            if (!registrants.Any(registrant => registrant.ID == masterRegistrant.ID))
+            if (!registrants.Any(registrant => registrant.ID == masterRegistrant.ID) && masterRegistrant.IsNotEmpty())
                 registrants.Add(masterRegistrant);
 
             registrants.ForEach(registrant => {
