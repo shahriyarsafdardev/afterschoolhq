@@ -2173,14 +2173,11 @@ namespace AfterSchoolLibrary.Services
                 return false;
 
             var account = activity.GetAccount(msgs, dc);
-            var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
-
-            // currently open or upcoming
-            if (regPeriod.EndDateTime.Value >= now)
+            
+            if (regPeriod.IsOpen(account, msgs, dc) || regPeriod.WillOpen(account, msgs, dc))
                 return true;
-
-            // recently closed
-            if (regPeriod.EndDateTime.Value.AddWeeks(2) >= now)
+            
+            if (regPeriod.IsRecentlyClosed(account, msgs, dc))
                 return true;
 
             return false;
