@@ -24,13 +24,29 @@
 
 
 <script type="text/javascript">
-        $(document).ready(function () {
-            //initialize the javascript
-            App.init();
-            App.formElements();
-            App.wizard();
-            $('.md-trigger').modalEffects();
-        });
+    $(document).ready(function () {
+        //initialize the javascript
+        App.init();
+        App.formElements();
+        App.wizard();
+        $('.md-trigger').modalEffects();
+    });
 </script>
 
 <script src="/assets/js/main-mods.js?v=1.0.8" type="text/javascript"></script>
+
+@if (AfterSchoolLibrary.Helpers.Utilities.IsProduction && SessionVariables.OriginalLoggedInUser.IsEmpty() && (SessionVariables.CurrentAccount.IsEmpty() || SessionVariables.CurrentAccount.AccountTypeId != AccountType.AfterSchool))
+{
+    <script>
+        @if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentAccount.IsNotEmpty())
+        {
+            @:smartlook('identify', '@SessionVariables.CurrentUser.Uid', {
+            @:    "name": "@SessionVariables.CurrentUser.DisplayName",
+            @:    "email": "@SessionVariables.CurrentUser.Email",
+            @:    "userType": "@SessionVariables.AccountUserType.ToString()",
+            @:    "accountType": "@SessionVariables.CurrentAccount.AccountTypeId.ToString()",
+            @:    "account": "@SessionVariables.CurrentAccount.Name"
+            @:    });
+        }
+    </script>
+}
