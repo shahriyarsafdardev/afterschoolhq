@@ -15,7 +15,7 @@ namespace AfterSchoolLibrary.Services
             if (period.IsNotEmpty())
             {
                 var now = (ownerAccount ?? period.GetAccount(msgs, dc)).ConvertToAccountTimeZone(DateTime.UtcNow);
-                return period.StartDateTime.Value <= now && period.EndDateTime.Value >= now;
+                return now.IsOnOrAfter(period.StartDateTime.Value) && now.IsOnOrBefore(period.EndDateTime.Value);
             }
 
             return false;
@@ -34,7 +34,7 @@ namespace AfterSchoolLibrary.Services
             if (period.IsNotEmpty())
             {
                 var now = (ownerAccount ?? period.GetAccount(msgs, dc)).ConvertToAccountTimeZone(DateTime.UtcNow);
-                return period.StartDateTime.Value > now;
+                return now.IsBefore(period.StartDateTime.Value);
             }
 
             return false;

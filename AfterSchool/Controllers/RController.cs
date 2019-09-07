@@ -321,9 +321,16 @@ namespace AfterSchool.Controllers
                 activities = session.GetActivities(msgs);
 
             var participationObjects = activities.Select(activity => activity.GetParticipationObject(msgs)).ToList();
-            var opened = participationObjects.Where(po => po.RegistrationPeriod.IsOpen()).ToList();
-            var willOpen = participationObjects.Where(po => po.RegistrationPeriod.WillOpen()).ToList();
-            var closed = participationObjects.Where(po => po.RegistrationPeriod.IsClosed() && po.NotIn(willOpen)).ToList();
+            var opened = new List<ParticipationObject>();
+            var willOpen = new List<ParticipationObject>();
+            var closed = new List<ParticipationObject>();
+
+            if (session.IsOpenNow(msgs))
+                opened = participationObjects;
+            else if (session.WillOpen(msgs))
+                willOpen = participationObjects;
+            else
+                closed = participationObjects;
 
             ViewBag.Session = session.GetParticipationObject(msgs);
             ViewBag.Grades = GradeLevel.Load(msgs: msgs);

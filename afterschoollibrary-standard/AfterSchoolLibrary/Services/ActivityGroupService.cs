@@ -718,5 +718,87 @@ namespace AfterSchoolLibrary.Services
         {
             return RegistrantActivityGroup.LoadByActivityGroupId(group.ID.Value, start, length, msgs, dc);
         }
+
+        public static RegistrationPeriod GetLatestRegistrationPeriod(this ActivityGroup group, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var period = group.GetCurrentOrNextRegistrationPeriod(msgs, dc);
+
+            if (period.IsEmpty())
+                period = group.GetRegistrationPeriods(msgs, dc)
+                            .OrderByDescending(p => p.EndDateTime)
+                            .FirstOrDefault();
+
+            return period;
+        }
+
+        public static RegistrationPeriod GetCurrentOrNextRegistrationPeriod(this ActivityGroup group, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var period = group.GetCurrentRegistrationPeriod(msgs, dc);
+
+            if (period.IsEmpty())
+                period = group.GetNextRegistrationPeriod(msgs, dc);
+
+            return period;
+        }
+
+        public static RegistrationPeriod GetNextRegistrationPeriod(this ActivityGroup group, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return group.GetRegistrationPeriods(msgs, dc)
+                    .Where(period => period.WillOpen(group.GetAccount(msgs, dc), msgs, dc))
+                    .OrderBy(period => period.StartDateTime.Value)
+                    .FirstOrDefault();
+        }
+
+        public static RegistrationPeriod GetCurrentRegistrationPeriod(this ActivityGroup group, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return group.GetRegistrationPeriods(msgs, dc)
+                    .Where(period => period.IsOpen(group.GetAccount(msgs, dc), msgs, dc))
+                    .FirstOrDefault();
+        }
+
+        public static bool IsOpenNow(this ActivityGroup group, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return group.GetRegistrationPeriods(msgs, dc)
+                    .Where(period => period.IsOpen(group.GetAccount(msgs, dc), msgs, dc))
+                    .Any();
+        }
+
+        public static bool IsClosedNow(this ActivityGroup group, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return !group.IsOpenNow(msgs, dc);
+        }
+
+        public static bool WillOpen(this ActivityGroup group, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return group.GetRegistrationPeriods(msgs, dc)
+                    .Where(period => period.WillOpen(group.GetAccount(msgs, dc), msgs, dc))
+                    .Any();
+        }
+
+        public static TimeSpan WillOpenIn(this ActivityGroup group, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (group.WillOpen(msgs, dc))
+            {
+                var period = group.GetNextRegistrationPeriod(msgs, dc);
+
+                if (period.IsNotEmpty())
+                    return period.WillOpenIn(group.GetAccount(msgs, dc), msgs, dc);
+            }
+
+            return new TimeSpan();
+        }
+
+        public static TimeSpan WillCloseIn(this ActivityGroup group, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (group.IsOpenNow(msgs, dc))
+            {
+                var period = group.GetCurrentRegistrationPeriod(msgs, dc);
+
+                if (period.IsNotEmpty())
+                    return period.WillCloseIn(group.GetAccount(msgs, dc), msgs, dc);
+            }
+
+            return new TimeSpan();
+        }
     }
 }
