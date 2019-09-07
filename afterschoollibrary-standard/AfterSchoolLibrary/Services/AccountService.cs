@@ -197,10 +197,13 @@ namespace AfterSchoolLibrary.Services
             var periods = RegistrationPeriod.LoadByActivityGroupIds(
                     groups.Select(x => x.ID.Value).ToList(),
                     msgs,
-                    dc
-                )
-                .Where(period => period.IsOpen(msgs: msgs, dc: dc) || period.WillOpen(msgs: msgs, dc: dc) || period.WillCloseIn(msgs: msgs, dc: dc).Days > -14)
-                .ToList();
+                    dc);
+
+            periods.Where(period => 
+                        period.IsOpen(account, msgs, dc) || 
+                        period.WillOpen(account, msgs, dc) || 
+                        period.IsRecentlyClosed(account, msgs, dc))
+                    .ToList();
 
             return groups.Where(group => periods.Select(period => period.ActivityGroupId.Value).Contains(group.ID.Value)).ToList();
         }
@@ -2855,9 +2858,9 @@ namespace AfterSchoolLibrary.Services
                 var aagIds = aags.Select(x => x.ID.Value).ToList();
                 var periodAagIds = RegistrationPeriod.LoadByAccountActivityGroupIds(aagIds, msgs, dc)
                     .Where(period => 
-                            period.IsOpen(msgs: msgs, dc: dc) || 
-                            period.WillOpen(msgs: msgs, dc: dc) || 
-                            period.WillCloseIn(msgs: msgs, dc: dc).Days > -14)
+                            period.IsOpen(account, msgs, dc) || 
+                            period.WillOpen(account, msgs, dc) || 
+                            period.IsRecentlyClosed(account, msgs, dc))
                     .Select(period => period.AccountActivityGroupId.Value)
                     .ToList();
 
