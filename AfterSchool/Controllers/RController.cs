@@ -78,14 +78,14 @@ namespace AfterSchool.Controllers
 
                 participationObjects = participationObjects
                                         .Where(po => (!po.IsActivity() || !po.GetActivity().ActivityGroupId.HasValue) && !po.IsInviteOnly)
-                                        .OrderBy(po => po.RegistrationPeriod.IsClosed(account))
-                                        .ThenBy(po => po.RegistrationPeriod.WillOpen(account))
-                                        .ThenBy(po => po.RegistrationPeriod.IsOpen(account))
+                                        .OrderBy(po => po.RegistrationPeriod.IsClosed(account, msgs))
+                                        .ThenBy(po => po.RegistrationPeriod.WillOpen(account, msgs))
+                                        .ThenBy(po => po.RegistrationPeriod.IsOpen(account, msgs))
                                         .ToList();
 
-                regOpened = participationObjects.Where(po => po.RegistrationPeriod.IsOpen()).ToList();
-                regWillOpen = participationObjects.Where(po => po.RegistrationPeriod.WillOpen()).ToList();
-                regClosed = participationObjects.Where(po => po.NotIn(regWillOpen) && po.RegistrationPeriod.IsClosed()).ToList();
+                regOpened = participationObjects.Where(po => po.RegistrationPeriod.IsOpen(account, msgs)).ToList();
+                regWillOpen = participationObjects.Where(po => po.RegistrationPeriod.WillOpen(account, msgs)).ToList();
+                regClosed = participationObjects.Where(po => po.NotIn(regWillOpen) && po.RegistrationPeriod.IsClosed(account, msgs)).ToList();
             }
             else
             {

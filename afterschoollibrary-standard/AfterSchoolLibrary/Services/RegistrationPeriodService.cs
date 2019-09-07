@@ -29,6 +29,17 @@ namespace AfterSchoolLibrary.Services
             return true;
         }
 
+        public static bool IsRecentlyClosed(this RegistrationPeriod period, Account ownerAccount = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (period.IsNotEmpty())
+            {
+                var now = (ownerAccount ?? period.GetAccount(msgs, dc)).ConvertToAccountTimeZone(DateTime.UtcNow);
+                return now.IsOnOrBefore(period.EndDateTime.Value.AddWeeks(8));
+            }
+
+            return true;
+        }
+
         public static bool WillOpen(this RegistrationPeriod period, Account ownerAccount = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (period.IsNotEmpty())
