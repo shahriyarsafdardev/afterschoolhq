@@ -1,4 +1,4 @@
-﻿@if (AfterSchoolLibrary.Helpers.Utilities.IsLocalHost && SessionVariables.OriginalLoggedInUser.IsEmpty() && (SessionVariables.CurrentAccount.IsEmpty() || SessionVariables.CurrentAccount.AccountTypeId != AccountType.AfterSchool))
+﻿@if (AfterSchoolLibrary.Helpers.Utilities.IsProduction && SessionVariables.OriginalLoggedInUser.IsEmpty() && (SessionVariables.CurrentAccount.IsEmpty() || SessionVariables.CurrentAccount.AccountTypeId != AccountType.AfterSchool))
 {
     @*
     <script>
