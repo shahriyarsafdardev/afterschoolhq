@@ -138,7 +138,10 @@ namespace AfterSchool.Controllers
                 participationObject = activity.GetParticipationObject(msgs);
 
                 if (activity.ActivityGroupId.HasValue)
+                {
                     session = activity.GetActivityGroup(msgs)?.GetParticipationObject(msgs);
+                    AddNoCacheHeaders();
+                }
 
                 if (!activity.IsPublished && activity.GetLocation().HostAccountId != activity.AccountId)
                 {
@@ -313,6 +316,8 @@ namespace AfterSchool.Controllers
             if (!canRegisterFor)
                 return Redirect(session.HomePageUrl);
 
+            AddNoCacheHeaders();
+
             List<Activity> activities = null;
 
             if (session.IsInviteOnly)
@@ -427,6 +432,13 @@ namespace AfterSchool.Controllers
             }
 
             return (accountName, accountUniqueName);
+        }
+
+        private void AddNoCacheHeaders()
+        {
+            Response.AppendHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1.
+            Response.AppendHeader("Pragma", "no-cache"); // HTTP 1.0.
+            Response.AppendHeader("Expires", "0"); // Proxies.
         }
     }
 }
