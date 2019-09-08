@@ -142,12 +142,7 @@ namespace AfterSchoolLibrary.Services
                 customer = payingAccount.GetStripeCustomer(msgs);
                     
                 if (checkoutObject.StripeSourceId.IsEmpty())
-                {
-                    if (checkoutObject.BankAccountPurchaseObject?.PlaidPublicToken != null)
-                        checkoutObject.BankAccountPurchaseObject.StripeSourceId = payingAccount.GetStripeSourceFromPlaidToken(checkoutObject.BankAccountPurchaseObject, msgs);
-                    else if (checkoutObject.SavePaymentInfo)
-                        checkoutObject.CreditCardPurchaseObject.StripeSourceId = payingAccount.GetStripeSourceFromToken(checkoutObject.CreditCardPurchaseObject.StripeToken, msgs);
-                }
+                    checkoutObject.LoadStripeSource(msgs);
 
                 sourceId = checkoutObject.StripeSourceId;
             }

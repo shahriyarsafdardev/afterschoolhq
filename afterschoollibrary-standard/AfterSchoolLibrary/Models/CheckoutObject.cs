@@ -322,5 +322,16 @@ namespace AfterSchoolLibrary.Models
             return _UseStripeConnectedAccount.Value;
         }
 
+        public void LoadStripeSource(SystemMessages msgs)
+        {
+            if (StripeSourceId.IsNotEmpty())
+                return;
+
+            if (BankAccountPurchaseObject?.PlaidPublicToken != null)
+                BankAccountPurchaseObject.StripeSourceId = PayingAccount.GetStripeSourceFromPlaidToken(BankAccountPurchaseObject, msgs);
+            else if (SavePaymentInfo || SubscriptionPlan.IsNotEmpty())
+                CreditCardPurchaseObject.StripeSourceId = PayingAccount.GetStripeSourceFromToken(CreditCardPurchaseObject.StripeToken, msgs);
+        }
+
     }
 }
