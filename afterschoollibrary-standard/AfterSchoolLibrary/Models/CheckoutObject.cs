@@ -324,10 +324,13 @@ namespace AfterSchoolLibrary.Models
 
         public void LoadStripeSource(SystemMessages msgs)
         {
-            if (this.BankAccountPurchaseObject?.PlaidPublicToken != null)
-                this.BankAccountPurchaseObject.StripeSourceId = this.PayingAccount.GetStripeSourceFromPlaidToken(this.BankAccountPurchaseObject, msgs);
-            else if (this.SavePaymentInfo || this.SubscriptionPlan.IsNotEmpty())
-                this.CreditCardPurchaseObject.StripeSourceId = this.PayingAccount.GetStripeSourceFromToken(this.CreditCardPurchaseObject.StripeToken, msgs);
+            if (StripeSourceId.IsNotEmpty())
+                return;
+
+            if (BankAccountPurchaseObject?.PlaidPublicToken != null)
+                BankAccountPurchaseObject.StripeSourceId = PayingAccount.GetStripeSourceFromPlaidToken(BankAccountPurchaseObject, msgs);
+            else if (SavePaymentInfo || SubscriptionPlan.IsNotEmpty())
+                CreditCardPurchaseObject.StripeSourceId = PayingAccount.GetStripeSourceFromToken(CreditCardPurchaseObject.StripeToken, msgs);
         }
 
     }
