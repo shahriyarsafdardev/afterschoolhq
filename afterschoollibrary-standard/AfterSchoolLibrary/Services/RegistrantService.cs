@@ -133,24 +133,33 @@ namespace AfterSchoolLibrary.Services
             // unless you're not using connected accounts for subscriptions
             var msgs = new SystemMessages();
             var billingAccount = checkoutObject.BillingAccount;
-            var purchasingAccount = checkoutObject.PayingAccount;
+            var payingAccount = checkoutObject.PayingAccount;
             string sourceId = null;
             Stripe.Customer customer = null;
 
             if (!useStripeConnectedAccount)
             {
-                customer = purchasingAccount.GetStripeCustomer(msgs);
-                sourceId = checkoutObject.StripeSourceId ?? purchasingAccount.CreateStripeSourceFromToken(checkoutObject.StripeToken, customer, msgs);
+                customer = payingAccount.GetStripeCustomer(msgs);
+                    
+                if (checkoutObject.StripeSourceId.IsEmpty())
+                {
+                    if (checkoutObject.BankAccountPurchaseObject?.PlaidPublicToken != null)
+                        checkoutObject.BankAccountPurchaseObject.StripeSourceId = payingAccount.GetStripeSourceFromPlaidToken(checkoutObject.BankAccountPurchaseObject, msgs);
+                    else if (checkoutObject.SavePaymentInfo)
+                        checkoutObject.CreditCardPurchaseObject.StripeSourceId = payingAccount.GetStripeSourceFromToken(checkoutObject.CreditCardPurchaseObject.StripeToken, msgs);
+                }
+
+                sourceId = checkoutObject.StripeSourceId;
             }
             else
             {
                 // if running the billing through stripe connected account
-                sourceId = purchasingAccount.CopyStripeSourceToAccount(checkoutObject, msgs);
+                sourceId = payingAccount.CopyStripeSourceToAccount(checkoutObject, msgs);
 
                 // create the customer on the connected account
                 customer = Billing.StripeHelper.CreateCustomer(
-                    description: purchasingAccount.Name,
-                    email: purchasingAccount.Email,
+                    description: payingAccount.Name,
+                    email: payingAccount.Email,
                     sourceId: sourceId,
                     stripeAccountId: billingAccount.StripeUserId,
                     msgs: msgs);
