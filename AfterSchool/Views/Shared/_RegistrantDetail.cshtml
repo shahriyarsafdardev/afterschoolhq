@@ -74,7 +74,7 @@
                     Payment Information
                 </div>
                 <div class="panel-body">
-                    <form action="@Url.Action("AddPayment", "activity", new { id = Model.ID })" method="post">
+                    <form id="form-add-payment" action="@Url.Action("AddPayment", "activity", new { id = Model.ID })" method="post">
                         <div class="table-responsive">
                             <table class="table table-striped">
                                 <tr>
@@ -137,7 +137,7 @@
                                 <tr>
                                     <td></td>
                                     <td>
-                                        <button type="submit" class="btn btn-primary btn-lg">Add Payment</button>
+                                        <button id="btn-submit-payment" type="submit" class="btn btn-primary btn-lg">Add Payment</button>
                                     </td>
                                 </tr>
 
@@ -148,111 +148,111 @@
             </div>
 
             @*<div class="panel panel-default">
-                <div class="panel-heading">
-                    Coupons
-                </div>
-                <div class="panel-body">
-                    <form action="@Url.Action("attachcoupon", "activity", new { id = Model.ID })" method="post">
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                @foreach (var attachedCoupon in attachedCoupons)
-                                {
-                                    var coupon = attachedCoupon.GetCoupon();
+                    <div class="panel-heading">
+                        Coupons
+                    </div>
+                    <div class="panel-body">
+                        <form action="@Url.Action("attachcoupon", "activity", new { id = Model.ID })" method="post">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    @foreach (var attachedCoupon in attachedCoupons)
+                                    {
+                                        var coupon = attachedCoupon.GetCoupon();
 
+                                        <tr>
+                                            <td width="33%" class="text-right">@coupon.CouponCode</td>
+                                            <td>@coupon.GetAmountAsString()  off</td>
+                                        </tr>
+                                    }
                                     <tr>
-                                        <td width="33%" class="text-right">@coupon.CouponCode</td>
-                                        <td>@coupon.GetAmountAsString()  off</td>
-                                    </tr>
-                                }
-                                <tr>
-                                    <td class="text-right">Discount Type</td>
-                                    <td>
-                                        @foreach (var amountType in Enum.GetValues(typeof(CouponAmountType)).Cast<CouponAmountType>().Where(type => type != CouponAmountType.NotSet))
-                                        {
-                                            var checkedstr = amountType == CouponAmountType.Percentage ? "checked=\"checked\"" : "";
-
-                                            <div class="am-radio">
-                                                <input type="radio" name="discounttype" id="discounttype-@((int)amountType)" value="@((int)amountType)" onclick="toggleDiscountType(@((int)amountType))" @checkedstr />
-                                                <label for="discounttype-@((int)amountType)">@amountType.ToString().SplitByUpperCase()</label>
-                                            </div>
-                                        }
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="text-right">Discount Amount</td>
-                                    <td>
-                                        <div class="col-md-6">
-                                            <div class="input-group input-group-lg xs-mb-15">
-                                                <span id="amounttype-flat" class="input-group-addon hide">$</span>
-                                                <input type="number" class="form-control" id="couponamount" name="couponamount" onfocus="this.select()" value="0" min="0.00" step=".01" />
-                                                <span id="amounttype-percentage" class="input-group-addon">%</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="text-right">Expiration Date</td>
-                                    <td>
-                                        <div class="col-md-6">
-                                            @{
-                                                Html.RenderPartial(
-                                                    "~/Views/Shared/Components/_Date.cshtml",
-                                                    new FormInputViewModel()
-                                                    {
-                                                        Id = "expirationdate",
-                                                        Name = "expirationdate",
-                                                        Placeholder = "Expiration Date",
-                                                        Value = ""
-                                                    }
-                                                    );
-                                            }
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="text-right">Applies To</td>
-                                    <td>
-                                        @foreach (var applyType in Enum.GetValues(typeof(CouponApplyType))
-                                             .Cast<CouponApplyType>()
-                                             .Where(type => type == CouponApplyType.SubscriptionPlan || type == CouponApplyType.TuitionFee)
-                                         )
-                                        {
-                                            if (CouponApplyType.SubscriptionPlan != applyType || activity.HasSubscriptionPlan())
+                                        <td class="text-right">Discount Type</td>
+                                        <td>
+                                            @foreach (var amountType in Enum.GetValues(typeof(CouponAmountType)).Cast<CouponAmountType>().Where(type => type != CouponAmountType.NotSet))
                                             {
+                                                var checkedstr = amountType == CouponAmountType.Percentage ? "checked=\"checked\"" : "";
+
                                                 <div class="am-radio">
-                                                    <input data-flag="@applyType" type="radio" checked="@applyType == CouponApplyType.TuitionFee" name="couponApplyType" id="couponApplyType-@((int)applyType)" value="@((int)applyType)" />
-                                                    <label for="couponApplyType-@((int)applyType)">@applyType.ToString().SplitByUpperCase()</label>
+                                                    <input type="radio" name="discounttype" id="discounttype-@((int)amountType)" value="@((int)amountType)" onclick="toggleDiscountType(@((int)amountType))" @checkedstr />
+                                                    <label for="discounttype-@((int)amountType)">@amountType.ToString().SplitByUpperCase()</label>
                                                 </div>
                                             }
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-right">Discount Amount</td>
+                                        <td>
+                                            <div class="col-md-6">
+                                                <div class="input-group input-group-lg xs-mb-15">
+                                                    <span id="amounttype-flat" class="input-group-addon hide">$</span>
+                                                    <input type="number" class="form-control" id="couponamount" name="couponamount" onfocus="this.select()" value="0" min="0.00" step=".01" />
+                                                    <span id="amounttype-percentage" class="input-group-addon">%</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-right">Expiration Date</td>
+                                        <td>
+                                            <div class="col-md-6">
+                                                @{
+                                                    Html.RenderPartial(
+                                                        "~/Views/Shared/Components/_Date.cshtml",
+                                                        new FormInputViewModel()
+                                                        {
+                                                            Id = "expirationdate",
+                                                            Name = "expirationdate",
+                                                            Placeholder = "Expiration Date",
+                                                            Value = ""
+                                                        }
+                                                        );
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-right">Applies To</td>
+                                        <td>
+                                            @foreach (var applyType in Enum.GetValues(typeof(CouponApplyType))
+                                                 .Cast<CouponApplyType>()
+                                                 .Where(type => type == CouponApplyType.SubscriptionPlan || type == CouponApplyType.TuitionFee)
+                                             )
+                                            {
+                                                if (CouponApplyType.SubscriptionPlan != applyType || activity.HasSubscriptionPlan())
+                                                {
+                                                    <div class="am-radio">
+                                                        <input data-flag="@applyType" type="radio" checked="@applyType == CouponApplyType.TuitionFee" name="couponApplyType" id="couponApplyType-@((int)applyType)" value="@((int)applyType)" />
+                                                        <label for="couponApplyType-@((int)applyType)">@applyType.ToString().SplitByUpperCase()</label>
+                                                    </div>
+                                                }
 
-                                        }
-                                    </td>
-                                </tr>
-                                <tr id="duration-section" class="hide">
-                                    <td class="text-right">Duration</td>
-                                    <td>
-                                        <div class="am-radio">
-                                            <input type="radio" name="duration" id="forever-option" value="0" checked />
-                                            <label for="forever-option">Forever</label>
-                                        </div>
-                                        <div class="am-radio">
-                                            <input type="radio" name="duration" id="duration-in-month-option" value="2" />
-                                            <label for="duration-in-month-option"># of Times</label>
-                                            <input type="number" style="display: inline; width: 100px;margin-left: 10px" class="form-control" id="duration-in-month-input" name="durationInMonths" onfocus="this.select()" value="1" min="1" step="1" />
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td></td>
-                                    <td>
-                                        <button type="submit" class="btn btn-primary btn-lg">Add &amp; Send Coupon to Parent</button>
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
-                    </form>
-                </div>
-            </div>*@
+                                            }
+                                        </td>
+                                    </tr>
+                                    <tr id="duration-section" class="hide">
+                                        <td class="text-right">Duration</td>
+                                        <td>
+                                            <div class="am-radio">
+                                                <input type="radio" name="duration" id="forever-option" value="0" checked />
+                                                <label for="forever-option">Forever</label>
+                                            </div>
+                                            <div class="am-radio">
+                                                <input type="radio" name="duration" id="duration-in-month-option" value="2" />
+                                                <label for="duration-in-month-option"># of Times</label>
+                                                <input type="number" style="display: inline; width: 100px;margin-left: 10px" class="form-control" id="duration-in-month-input" name="durationInMonths" onfocus="this.select()" value="1" min="1" step="1" />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td>
+                                            <button type="submit" class="btn btn-primary btn-lg">Add &amp; Send Coupon to Parent</button>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </form>
+                    </div>
+                </div>*@
         }
     </div>
 </div>
@@ -267,6 +267,11 @@
                 $('#duration-section').addClass('hide');
             }
         });
+
+        $('#form-add-payment').submit(function () {
+            $('#btn-submit-payment').html('Adding Payment...');
+            $('#btn-submit-payment').prop('disabled', true);
+        });
     });
 
     function toggleDiscountType(type) {
@@ -278,4 +283,5 @@
             $('#amounttype-flat').addClass('hide');
         }
     }
+    
 </script>

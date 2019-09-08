@@ -2176,14 +2176,7 @@ namespace AfterSchoolLibrary.Services
             // if user wants to save payment info, do it before you charge the card
             // can't use a token twice
             if (msgs.HasNoErrors())
-            {
-                var payingAccount = checkoutObject.PayingAccount;
-
-                if (checkoutObject.BankAccountPurchaseObject?.PlaidPublicToken != null)
-                    checkoutObject.BankAccountPurchaseObject.StripeSourceId = payingAccount.GetStripeSourceFromPlaidToken(checkoutObject.BankAccountPurchaseObject, msgs);
-                else if (checkoutObject.SavePaymentInfo)
-                    checkoutObject.CreditCardPurchaseObject.StripeSourceId = payingAccount.GetStripeSourceFromToken(checkoutObject.CreditCardPurchaseObject.StripeToken, msgs);
-            }
+                checkoutObject.LoadStripeSource(msgs);
 
             // if everything goes right then bill the person, 
             // if any errors it'll just rollback the transaction anyway :)
