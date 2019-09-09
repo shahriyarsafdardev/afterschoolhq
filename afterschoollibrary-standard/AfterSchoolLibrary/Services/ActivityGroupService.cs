@@ -808,6 +808,7 @@ namespace AfterSchoolLibrary.Services
             var group = ActivityGroup.Load(groupId, msgs, dc);
             var registrations = group.GetRegistrations(msgs: msgs, dc: dc);
             var loggedInUser = WebUser.Load(loggedInUserId, msgs, dc);
+            var sendBcc = true;
 
             registrations.ForEach(registration => {
                 var masterRegistrant = registration.GetMasterRegistrant(msgs, dc);
@@ -820,9 +821,11 @@ namespace AfterSchoolLibrary.Services
                         billingAccount: group.GetAccount(msgs, dc),
                         group: group,
                         loggedInUser: loggedInUser,
-                        sendBcc: true,
+                        sendBcc: sendBcc,
                         msgs: msgs,
                         dc: dc);
+
+                sendBcc = false;
             });
         }
     }

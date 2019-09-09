@@ -126,7 +126,7 @@ namespace AfterSchoolLibrary.Helpers
                 var rowModel = new NameValueCollection()
                     {
                         { "ActivityName", po.Name },
-                        { "ActivityDays",  po.Schedule.GetDaysOfTheWeek(msgs, dc).Select(x => x.ToString().MaxChars(2)).ToStringList(", ")},
+                        { "ActivityDays",  po.Schedule.GetDaysOfTheWeek(msgs, dc).Select(x => x.ToString().MaxChars(3)).ToStringList(", ")},
                     };
 
                 rows += ProcessTemplate(
