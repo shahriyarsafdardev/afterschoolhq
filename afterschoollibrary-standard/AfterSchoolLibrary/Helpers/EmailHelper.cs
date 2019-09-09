@@ -164,8 +164,8 @@ namespace AfterSchoolLibrary.Helpers
                 {
                     { "FirstName", parent?.FirstName ?? registrant.GetAnswer(QuestionDataType.Parent1FirstName, msgs, dc).Text },
                     { "ReservedTable", AddLotteryTable(reservedRas, registrant, "has been placed in", msgs, dc) },
-                    { "WaitingListTable", AddLotteryTable(waitingListRas, registrant, "has been placed on the waiting list for", msgs, dc) },
-                    { "AppliedTable", AddLotteryTable(appliedRas, registrant, "has not been placed in", msgs, dc) },
+                    { "WaitingListTable", AddLotteryTable(waitingListRas, registrant, "has been placed on the <em>waiting list</em> for", msgs, dc) },
+                    { "AppliedTable", AddLotteryTable(appliedRas, registrant, "has <em>not</em> been placed in", msgs, dc) },
                     { "ProductName", Utilities.AppName() },
                     { "LoginLink", Utilities.LoginUrl(true) },
                     { "ActivityContactEmail", session.ContactEmail.IfBlank(billingAccount.Email)},
