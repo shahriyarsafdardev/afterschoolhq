@@ -808,7 +808,7 @@ namespace AfterSchoolLibrary.Services
             var group = ActivityGroup.Load(groupId, msgs, dc);
             var registrations = group.GetRegistrations(msgs: msgs, dc: dc);
             var loggedInUser = WebUser.Load(loggedInUserId, msgs, dc);
-            var sendBcc = true;
+            var sendBcc = false;
 
             registrations.ForEach(registration => {
                 var masterRegistrant = registration.GetMasterRegistrant(msgs, dc);
