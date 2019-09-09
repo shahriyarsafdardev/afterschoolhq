@@ -519,7 +519,12 @@ namespace AfterSchoolLibrary.Services
         {
             var registrantActivities = registration.GetRegistrantActivities(msgs, dc);
             if (registrantActivities.Any())
+            {
+                if (registrantActivities.Any(ra => ra.ParticipationObjectTypeId == ParticipationObjectType.ActivityGroup))
+                    return registrantActivities.First(ra => ra.ParticipationObjectTypeId == ParticipationObjectType.ActivityGroup).GetParticipationObject(msgs, dc);
+
                 return registrantActivities.First().GetParticipationObject(msgs, dc);
+            }
 
             return null;
         }
