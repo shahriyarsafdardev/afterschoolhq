@@ -250,10 +250,9 @@ namespace AfterSchoolLibrary.Models
                 {
                     var related = registration.GetCurrentRelatedRegistrations(msgs, dc);
                     var existingRas = new List<RegistrantActivity>();
-                    foreach(var rel in related)
-                    {
-                        existingRas.AddRange(rel.GetRegistrantActivities(msgs, dc));
-                    }
+                    related.ForEach(rel => 
+                        existingRas.AddRange(rel.GetRegistrantActivities(msgs, dc).Where(ra => ra.ParticipationObjectTypeId == ParticipationObjectType.Activity))
+                    );
 
                     // only add date ranges of activities that are reserved
                     foreach(var ra in existingRas.Where(x => x.AssignmentTypeId.In(Registration.ReservedStatuses)))

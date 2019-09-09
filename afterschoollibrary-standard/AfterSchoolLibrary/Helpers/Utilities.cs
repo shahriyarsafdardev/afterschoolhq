@@ -1111,7 +1111,7 @@ namespace AfterSchoolLibrary.Helpers
 
                 foreach (var match in matches)
                 {
-                    msgs.AddRange(registration.AddRelatedRegistration(match, 0, dc: dc));
+                    registration.AddRelatedRegistration(match, 0, msgs, dc: dc);
                     registrations.Remove(match);
                 }
 

@@ -264,31 +264,6 @@ namespace AfterSchool.Areas.Org.Controllers
             return View("periods", group);
         }
 
-        [ValidateInput(false)]
-        [HttpPost]
-        public ActionResult PeriodNotify(string id, string period, string emailmessage)
-        {
-            var msgs = new SystemMessages();
-            var account = SessionVariables.CurrentAccount;
-            var group = ActivityGroup.LoadByUid(id.ToGuid());
-            var regperiod = RegistrationPeriod.Load(period.ToInteger());
-            var registrations = group.GetRegistrations(null, null, null);
-
-            BackgroundJob.Enqueue(() =>
-                RegistrationPeriodService.NotifyRegistrants(
-                    regperiod.ID.Value, 
-                    emailmessage, 
-                    registrations.Select(x => x.ID.Value).ToList(), 
-                    null)
-            );
-
-            msgs.Add("Your emails will be sent shortly", MessageType.Success);
-
-            PeriodViewBag(group, msgs);
-
-            return View("periods", group);
-        }
-
         [HttpGet]
         public ActionResult Activities(string id, string pn, string rpp, string archive)
         {
@@ -398,7 +373,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var group = ActivityGroup.LoadByUid(id.ToGuid());
 
             // TODO: Need to add functionality back
-            // BackgroundJob.Enqueue(() => ActivityGroup.SendRegistrationConfirmations(group.ID.Value, null, null));
+            // BackgroundJob.Enqueue(() => ActivityGroupService.SendRegistrationConfirmations(group.ID.Value, null, null));
 
             var msgs = new SystemMessages();
             msgs.Add("Not Implemented", MessageType.UserError);
@@ -897,7 +872,7 @@ namespace AfterSchool.Areas.Org.Controllers
             switch (nextStep)
             {
                 case 1:
-                    var periods = group.GetRegistrationPeriods().Where(x => x.GetSeatCountByAssignmentType(RegistrationAssignmentType.Applied) > 0).ToList();
+                    var periods = group.GetRegistrationPeriods(msgs).Where(x => x.GetSeatCountByAssignmentType(RegistrationAssignmentType.Applied) > 0).ToList();
                     ViewBag.Periods = periods;
                     break;
                 case 2:
