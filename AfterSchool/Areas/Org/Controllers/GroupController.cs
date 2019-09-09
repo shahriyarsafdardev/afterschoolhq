@@ -371,12 +371,9 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult NotifyAll(string id)
         {
             var group = ActivityGroup.LoadByUid(id.ToGuid());
-
-            // TODO: Need to add functionality back
-            // BackgroundJob.Enqueue(() => ActivityGroupService.SendRegistrationConfirmations(group.ID.Value, null, null));
-
-            var msgs = new SystemMessages();
-            msgs.Add("Not Implemented", MessageType.UserError);
+            var loggedInUserId = SessionVariables.LoggedInUser.ID.Value;
+            
+            BackgroundJob.Enqueue(() => ActivityGroupService.SendLotteryResults(group.ID.Value, loggedInUserId, null, null));
 
             return RedirectToAction("registrations", new { id = group.Uid, emailed = 1 });
         }

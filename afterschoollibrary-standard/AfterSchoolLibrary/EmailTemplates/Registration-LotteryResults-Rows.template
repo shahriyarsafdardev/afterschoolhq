@@ -1,0 +1,4 @@
+﻿<tr>
+  <td style="padding: 10px;">@Model.ActivityName</td>
+  <td style="padding: 10px;">@Model.ActivityDays</td>
+</tr>

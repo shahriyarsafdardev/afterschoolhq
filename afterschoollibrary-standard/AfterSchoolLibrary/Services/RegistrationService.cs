@@ -10,15 +10,21 @@ namespace AfterSchoolLibrary.Services
 {
     public static class RegistrationService
     {
-        public static void SendConfirmation(this Registration registration, CheckoutObject checkoutObject, WebUser loggedInUser, bool sendBcc, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void SendLotteryConfirmation(this Registration registration, Account billingAccount, ActivityGroup group, WebUser loggedInUser, bool sendBcc, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            msgs.AddRange(Helpers.EmailHelper.SendRegistrationConfirmed(checkoutObject, loggedInUser, false, sendBcc, dc));
+            Helpers.EmailHelper.SendLotteryResults(registration, billingAccount, group.GetParticipationObject(msgs, dc), loggedInUser, sendBcc, msgs, dc);
+        }
+
+        public static void SendConfirmation(this Registration registration, CheckoutObject checkoutObject, string customMessage, WebUser loggedInUser, bool sendBcc, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            msgs.AddRange(Helpers.EmailHelper.SendRegistrationConfirmed(checkoutObject, customMessage, loggedInUser, false, sendBcc, dc));
 
             // if the person registering is the student
+            // TODO: Handle better if provider on the backend is registering the student
             var masterRegistrant = loggedInUser.GetMasterRegistrant(msgs, dc);
 
             if (masterRegistrant.IsNotEmpty() && !masterRegistrant.IsParentOrGuardian)
-                msgs.AddRange(Helpers.EmailHelper.SendRegistrationConfirmed(checkoutObject, loggedInUser, true, false, dc));
+                msgs.AddRange(Helpers.EmailHelper.SendRegistrationConfirmed(checkoutObject, customMessage, loggedInUser, true, false, dc));
         }
 
         public static void DeleteWithRelatedRecords(this Registration registration, SystemMessages msgs = null, DatabaseConnection dc = null)

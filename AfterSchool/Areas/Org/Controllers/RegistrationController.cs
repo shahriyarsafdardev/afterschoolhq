@@ -485,6 +485,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             ParticipationObject = act.GetParticipationObject(msgs),
                             Registration = selectedRegistration,
                         },
+                        null,
                         SessionVariables.CurrentUser,
                         true,
                         msgs);

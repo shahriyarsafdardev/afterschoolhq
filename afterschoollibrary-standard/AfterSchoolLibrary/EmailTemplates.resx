@@ -154,6 +154,15 @@
   <data name="Registration_Confirmation_Rows" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>emailtemplates\registration-confirmation-rows.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="Registration_LotteryResults" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>emailtemplates\registration-lotteryresults.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Registration_LotteryResults_Rows" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>emailtemplates\registration-lotteryresults-rows.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Registration_LotteryResults_Table" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>emailtemplates\registration-lotteryresults-table.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="Registration_Withdrawal" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>emailtemplates\registration-withdrawal.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
