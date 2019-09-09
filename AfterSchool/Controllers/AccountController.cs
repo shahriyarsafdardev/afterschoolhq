@@ -1415,9 +1415,9 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             var registration = Registration.LoadByUid(id.ToGuid(), msgs);
 
-            SessionVariables.CurrentRegistrant = registration.GetRegistrant(msgs).GetMasterRegistrant(msgs);
+            SessionVariables.CurrentRegistrant = registration.GetMasterRegistrant(msgs);
             SessionVariables.Cart = Cart.GetNewCart(loggedInUser: SessionVariables.CurrentUser, msgs: msgs);
-            SessionVariables.Cart.AddCartItem(registration.GetParticipationObject(msgs), msgs);
+            SessionVariables.Cart.AddCartItem(registration.GetFirstParticipationObject(msgs), msgs);
             SessionVariables.RegistrationStartPageAccount = registration.GetAccount(msgs);
 
             return RedirectToAction("Register");
@@ -1577,7 +1577,7 @@ namespace AfterSchool.Controllers
             // check if still owes money, load up variables
             if (!registration.IsPaid(msgs))
             {
-                var participationObject = registration.GetParticipationObject(msgs);
+                var participationObject = registration.GetFirstParticipationObject(msgs);
                 var currentRegistrant = registration.GetRegistrant(msgs).GetMasterRegistrant(msgs);
                 var parentRegistrant = currentRegistrant.GetParentOrGuardian(msgs);
                 var parentAccount = parentRegistrant.GetAccount(msgs);

@@ -179,32 +179,7 @@ namespace AfterSchool.Areas.District.Controllers
             PeriodViewBag(group, msgs);
 
             return View("periods", group);
-        }
-
-        [ValidateInput(false)]
-        [HttpPost]
-        public ActionResult PeriodNotify(string id, string period, string emailmessage)
-        {
-            var msgs = new SystemMessages();
-            var account = SessionVariables.CurrentAccount;
-            var group = ActivityGroup.LoadByUid(id.ToGuid());
-            var regperiod = RegistrationPeriod.Load(period.ToInteger());
-            var registrations = group.GetRegistrations(null, null, null);
-
-            BackgroundJob.Enqueue(() =>
-                RegistrationPeriodService.NotifyRegistrants(
-                    regperiod.ID.Value,
-                    emailmessage,
-                    registrations.Select(x => x.ID.Value).ToList(),
-                    null)
-            );
-
-            msgs.Add("Your emails will be sent shortly", MessageType.Success);
-
-            PeriodViewBag(group, msgs);
-
-            return View("periods", group);
-        }
+        }        
 
         private ActivityGroup LoadSchoolsViewBag(string id, string pn, string rpp)
         {

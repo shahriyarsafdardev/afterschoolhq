@@ -2340,7 +2340,7 @@ namespace AfterSchoolLibrary.Services
                     msgs.AddRange(smsgs);
 
                     if (sendConfirmationEmail)
-                        checkoutObject.Registration.SendConfirmation(checkoutObject, loggedInUser, true, msgs, dc);
+                        checkoutObject.Registration.SendConfirmation(checkoutObject, null, loggedInUser, true, msgs, dc);
 
                 },
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
@@ -2374,7 +2374,7 @@ namespace AfterSchoolLibrary.Services
                     msgs.AddRange(smsgs);
 
                     if (sendConfirmationEmail)
-                        checkoutObject.Registration.SendConfirmation(checkoutObject, loggedInUser, true, msgs, dc);
+                        checkoutObject.Registration.SendConfirmation(checkoutObject, null, loggedInUser, true, msgs, dc);
 
                 },
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
@@ -2452,7 +2452,7 @@ namespace AfterSchoolLibrary.Services
                     if (checkoutObject.Coupon.IsNotEmpty() && checkoutObject.Coupon.ID.IsNotEmpty())
                         checkoutObject.PayingAccount.MarkCouponAsUsed(checkoutObject.Coupon);
 
-                    checkoutObject.Registration.SendConfirmation(checkoutObject, loggedInUser, true, msgs, dc);
+                    checkoutObject.Registration.SendConfirmation(checkoutObject, null, loggedInUser, true, msgs, dc);
                 },
                 onFailure: (SystemMessages amsgs) => msgs.AddRange(amsgs),
                 onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),

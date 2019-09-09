@@ -768,6 +768,11 @@ Public MustInherit Class BasicLookUpObject
             Return _databaseParameters
         End Get
     End Property
+
+    Public Overrides Function ToString() As String
+        Return Name
+    End Function
+
 End Class
 <Serializable()> _
 Public MustInherit Class BaseAddress
@@ -926,6 +931,9 @@ Public MustInherit Class BaseAddress
 
     End Function
 
+    Public Overrides Function ToString() As String
+        Return FormatAddress(False)
+    End Function
 
 End Class
 <Serializable()> _
@@ -983,6 +991,10 @@ Public MustInherit Class BaseLocation
 
     Public Function FormatAddressWithoutName(Optional ByVal useLineBreaks As Boolean = True) As String
         Return MyBase.FormatAddress(useLineBreaks)
+    End Function
+
+    Public Overrides Function ToString() As String
+        Return FormatAddress(False)
     End Function
 
 End Class
@@ -1068,6 +1080,10 @@ Public MustInherit Class BaseCompany
 
     Public Function FormatAddressWithoutName(Optional ByVal useLineBreaks As Boolean = True) As String
         Return MyBase.FormatAddress(useLineBreaks)
+    End Function
+
+    Public Overrides Function ToString() As String
+        Return Name
     End Function
 
 End Class
@@ -1573,6 +1589,10 @@ Public MustInherit Class BaseFile
 
         Return fullFilePath
 
+    End Function
+
+    Public Overrides Function ToString() As String
+        Return Filename
     End Function
 
 End Class

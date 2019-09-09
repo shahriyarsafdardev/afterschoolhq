@@ -934,7 +934,7 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(reg.Save(dc));
 
             if (registrant.FirstName.IsNotEmpty() && registrant.LastName.IsNotEmpty() && registrant.Email.IsNotEmpty())
-                msgs.AddRange(reg.FindAndSetFirstRegistration(registrant.FirstName, registrant.LastName, registrant.Email, dc));
+                reg.FindAndSetFirstRegistration(registrant.FirstName, registrant.LastName, registrant.Email, msgs, dc);
 
             return reg.Reload(msgs, dc);
         }

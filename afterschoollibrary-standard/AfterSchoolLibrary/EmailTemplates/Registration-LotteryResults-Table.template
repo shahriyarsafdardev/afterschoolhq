@@ -1,0 +1,8 @@
+﻿<div>
+  <h3>@Model.StudentName @Model.Action the following activities:</h3>
+  <table style="border: 2px solid #f7f7f7; width: 600px;" border="0">
+    <tbody>
+      @Model.ActivityRows
+    </tbody>
+  </table>
+</div>

@@ -138,5 +138,10 @@ namespace AfterSchoolLibrary.Services
                 msgs: msgs,
                 dc: dc);
         }
+
+        public static List<FormQuestionAnswer> GetAnswers(this RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return registrantActivity.GetRegistration(msgs, dc).GetAnswers(msgs, dc);
+        }
     }
 }

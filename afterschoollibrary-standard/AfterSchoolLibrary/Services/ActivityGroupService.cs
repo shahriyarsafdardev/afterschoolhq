@@ -800,5 +800,33 @@ namespace AfterSchoolLibrary.Services
 
             return new TimeSpan();
         }
+
+        public static void SendLotteryResults(int groupId, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var group = ActivityGroup.Load(groupId, msgs, dc);
+            var registrations = group.GetRegistrations(msgs: msgs, dc: dc);
+            var loggedInUser = WebUser.Load(loggedInUserId, msgs, dc);
+            var sendBcc = false;
+
+            registrations.ForEach(registration => {
+                var masterRegistrant = registration.GetMasterRegistrant(msgs, dc);
+                var registrantActivities = registration.GetRegistrantActivities(msgs, dc);
+                var hasActivities = registrantActivities.Any(ra => ra.ParticipationObjectTypeId == ParticipationObjectType.Activity);
+                var hasThisGroup = registrantActivities.Any(ra => ra.ParticipationObjectTypeId == ParticipationObjectType.ActivityGroup && ra.ParticipationObjectId == group.ID);
+
+                if (hasActivities && hasThisGroup)
+                    registration.SendLotteryConfirmation(
+                        billingAccount: group.GetAccount(msgs, dc),
+                        group: group,
+                        loggedInUser: loggedInUser,
+                        sendBcc: sendBcc,
+                        msgs: msgs,
+                        dc: dc);
+
+                sendBcc = false;
+            });
+        }
     }
 }

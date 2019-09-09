@@ -48,7 +48,7 @@ namespace AfterSchool.Models
                             activities.ForEach(otherTeam =>
                             {
                                 if (RegistrantActivity.LoadByParticipationObjectByRegistrant(otherTeam.ID.Value, ParticipationObjectType.Activity, registrant.ID.Value, amsgs, adc).IsNotEmpty())
-                                    amsgs.AddRange(registration.RemoveParticipation(otherTeam.ID.Value, ParticipationObjectType.Activity, adc));
+                                    registration.RemoveParticipation(otherTeam.ID.Value, ParticipationObjectType.Activity, amsgs, adc);
                             });
 
                             //check if the student is not already registered for this team
@@ -72,7 +72,7 @@ namespace AfterSchool.Models
                         }
                         else if (!Request[$"registrant-{registrant.ID}"].IsBoolean() && ra.IsNotEmpty())
                         {
-                            amsgs.AddRange(ra.GetRegistration(amsgs, adc).RemoveParticipation(activity.ID.Value, ParticipationObjectType.Activity, adc));
+                            ra.GetRegistration(amsgs, adc).RemoveParticipation(activity.ID.Value, ParticipationObjectType.Activity, amsgs, adc);
                         }
                     });
 
