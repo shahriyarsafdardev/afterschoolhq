@@ -496,10 +496,12 @@ namespace AfterSchoolLibrary.Models
             return registrations.Where(x => x.ID != this.ID).ToList();
         }
 
-        public List<Registration> GetCurrentRelatedRegistrations(DatabaseConnection dc = null)
+        public List<Registration> GetCurrentRelatedRegistrations(SystemMessages msgs, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.UseParameterizedQuery = false;
+
+            // TODO: needs to consider timezone of the user for the ai2.StartDateTime
 
             var sql = $@"
                         select
@@ -528,7 +530,7 @@ namespace AfterSchoolLibrary.Models
 		                        r.ID = {this.ID}
 	                        ) and r.CompletionStatusId in ({ValidCompletionStatus.Select(x => (int)x).ToStrings().ToStringList()})";
 
-            var registrations = dq.ExecuteSelect(sql).AsEnumerable().ToList().ConvertAll(LoadObject);
+            var registrations = dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 
             return registrations.Where(x => x.ID != this.ID).ToList();
         }

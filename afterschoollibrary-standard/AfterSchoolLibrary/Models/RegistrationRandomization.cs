@@ -142,11 +142,15 @@ namespace AfterSchoolLibrary.Models
                 }
 
                //get all registrant activities for this registrant
-                var registrantActivities = this.RegistrantActivities.Where(x => x.RegistrantId == registrant.ID).ToList();
+                var registrantActivities = this.RegistrantActivities.Where(ra => ra.RegistrantId == registrant.ID).ToList();
 
                 //get all registrant activities for this registrant that aren't registered yet
-                var registrantActivitiesNotRegisteredYet = registrantActivities.Where(x => !registrantAssignment.Assignments.Contains(x.ID.Value)).ToList();
-                var registrantActivitiesAlreadyRegistered = registrantActivities.Where(x => registrantAssignment.Assignments.Contains(x.ID.Value)).ToList();
+                var registrantActivitiesNotRegisteredYet = registrantActivities
+                                                            .Where(ra => ra.ID.Value.NotIn(registrantAssignment.Assignments))
+                                                            .ToList();
+                var registrantActivitiesAlreadyRegistered = registrantActivities
+                                                            .Where(ra => ra.ID.Value.In(registrantAssignment.Assignments))
+                                                            .ToList();
 
                 //set the highest preference order at the top
                 registrantActivitiesNotRegisteredYet = registrantActivitiesNotRegisteredYet.OrderBy(x => x.PreferenceNumber.Value).ToList();
@@ -154,8 +158,10 @@ namespace AfterSchoolLibrary.Models
                 foreach(var ra in registrantActivitiesNotRegisteredYet)
                 {
                     // make sure activity is not full
-                    var activity = this.Activities.Find(x => x.ID == ra.ParticipationObjectId && ra.ParticipationObjectTypeId == ParticipationObjectType.Activity);
-                    var activityAssignment = ActivityAssignments.Find(x => x.ActivityId == ra.ParticipationObjectId.Value && ra.ParticipationObjectTypeId == ParticipationObjectType.Activity);
+                    var activity = this.Activities.Find(x => x.ID == ra.ParticipationObjectId && 
+                                                            ra.ParticipationObjectTypeId == ParticipationObjectType.Activity);
+                    var activityAssignment = ActivityAssignments.Find(x => x.ActivityId == ra.ParticipationObjectId.Value && 
+                                                                    ra.ParticipationObjectTypeId == ParticipationObjectType.Activity);
 
                     if (activityAssignment.IsEmpty())
                     {
@@ -167,13 +173,13 @@ namespace AfterSchoolLibrary.Models
                     var wlSeatsTaken = activityAssignment.WaitingListAssignments.Count() + ActivityAndSeatCounts.Find(x => x.ActivityId == activity.ID).WaitingListSeatsTaken;
                     var isFull = seatsTaken >= activity.SeatsAvailable.Value;
                     var isWLFull = wlSeatsTaken >= activity.WaitingListSeats.Value;
-                    var activityDays = activity.GetSchedule(dc: dc).GetInstances(dc: dc);
+                    var activityDates = activity.GetSchedule(msgs, dc).GetInstances(msgs: msgs, dc: dc);
                     var hasActivityDuringScheduleAlready = false;
 
                     // check to see if the person is already registered for any days/times that would overlap, 
                     // if so, you can't register
                     hasActivityDuringScheduleAlready = DateRange.HasOverlappingDates(
-                                                            activityDays.Select(x => new DateRange(x.StartDateTime.Value, x.EndDateTime.Value)), 
+                                                            activityDates.Select(x => new DateRange(x.StartDateTime.Value, x.EndDateTime.Value)), 
                                                             registrantAssignment.AssignmentDateRanges
                                                         );
 
@@ -182,7 +188,7 @@ namespace AfterSchoolLibrary.Models
                     // if not full and doesn't have conflicting dates
                     if (!isFull && !hasActivityDuringScheduleAlready)
                     {
-                        msgs.AddRange(AddAssignment(ra, AssignmentType.Seat, dc: dc));
+                        AddAssignment(ra, AssignmentType.Seat, msgs, dc);
                         allFull = false;
                         break;
                     }
@@ -190,26 +196,21 @@ namespace AfterSchoolLibrary.Models
                     // unless they were placed in another activity for that same day with a higher preference number
                     else if (!isWLFull && !hasActivityDuringScheduleAlready)
                     {
-                        msgs.AddRange(AddAssignment(ra, AssignmentType.WaitingList, dc: dc));
+                        AddAssignment(ra, AssignmentType.WaitingList, msgs, dc);
                     }
                     // puts it in the not assigned list
                     else
                     {
-                        msgs.AddRange(AddAssignment(ra, AssignmentType.NotSet, dc: dc));
+                        AddAssignment(ra, AssignmentType.NotSet, msgs, dc);
                     }
                 }
 
                 // check to see if all activities have been completed for this registrant
-                if (!registrantActivities.Where(x => !registrantAssignment.Assignments.Contains(x.ID.Value)).Any())
-                {
+                if (!registrantActivities.Where(x => x.ID.Value.NotIn(registrantAssignment.Assignments)).Any())
                     registrantsToRemove.Add(registrant);
-                }
             }
 
-            foreach(var registrant in registrantsToRemove)
-            {
-                this.Registrants.Remove(registrant);
-            }            
+            registrantsToRemove.ForEach(registrant => this.Registrants.Remove(registrant));
 
             return allFull;
         }
@@ -218,7 +219,7 @@ namespace AfterSchoolLibrary.Models
         {
             if (this.ActivityGroup.IsNotEmpty())
             {
-                this.Registrations = this.ActivityGroup.GetRegistrations(dc: dc);
+                this.Registrations = this.ActivityGroup.GetRegistrations(msgs: msgs, dc: dc);
                 this.RegistrantActivities = this.ActivityGroup.GetRegistrantActivities(this.Registrations, msgs, dc: dc);
                 this.Activities = this.ActivityGroup.GetActivities(null, false, false, null, null, false, msgs, dc);
             }
@@ -229,8 +230,8 @@ namespace AfterSchoolLibrary.Models
                     new ActivityAndSeatCount()
                     {
                         ActivityId = activity.ID.Value,
-                        ReservedSeatsTaken = activity.GetSeatsTaken(dc: dc),
-                        WaitingListSeatsTaken = activity.GetWaitingListSeatsTaken(dc: dc)
+                        ReservedSeatsTaken = activity.GetSeatsTaken(msgs, dc),
+                        WaitingListSeatsTaken = activity.GetWaitingListSeatsTaken(msgs, dc)
                     }
                 );
             }
@@ -243,16 +244,15 @@ namespace AfterSchoolLibrary.Models
             {
                 var assignment = new RegistrantAssignment();
                 assignment.RegistrantId = registrant.ID.Value;
-                this.RegistrantAssignments.Add(assignment);
 
-                var registrations = registrant.GetRegistrations(dc: dc);
+                var registrations = registrant.GetRegistrations(msgs, dc);
                 foreach(var registration in registrations)
                 {
-                    var related = registration.GetCurrentRelatedRegistrations(dc: dc);
+                    var related = registration.GetCurrentRelatedRegistrations(msgs, dc);
                     var existingRas = new List<RegistrantActivity>();
                     foreach(var rel in related)
                     {
-                        existingRas.AddRange(rel.GetRegistrantActivities(dc: dc));
+                        existingRas.AddRange(rel.GetRegistrantActivities(msgs, dc));
                     }
 
                     // only add date ranges of activities that are reserved
@@ -266,10 +266,12 @@ namespace AfterSchoolLibrary.Models
                         );
                     }
                 }
+
+                this.RegistrantAssignments.Add(assignment);
             }
         }
 
-        private SystemMessages DoAssignments(SystemMessages msgs, DatabaseConnection dc)
+        private void DoAssignments(SystemMessages msgs, DatabaseConnection dc)
         {            
             foreach (var registrantAssignment in this.RegistrantAssignments)
             {
@@ -284,7 +286,6 @@ namespace AfterSchoolLibrary.Models
                     ra.ChangeSeatAssignment(RegistrationAssignmentType.WaitingList, this.LoggedInUser, msgs, dc);
                 }
             }
-            return msgs;
         }
 
         public SystemMessages ApplyLottery(List<RegistrantAssignment> registrantAssignments, SystemMessages msgs, DatabaseConnection dc = null)
@@ -297,7 +298,7 @@ namespace AfterSchoolLibrary.Models
                 {
                     _RegistrantAssignments = registrantAssignments;
                     LoadData(amsgs, adc);
-                    amsgs.AddRange(DoAssignments(amsgs, adc));
+                    DoAssignments(amsgs, adc);
 
                     if(amsgs.HasNoErrors() && this.ActivityGroup.IsNotEmpty())
                     {
@@ -305,18 +306,9 @@ namespace AfterSchoolLibrary.Models
                         amsgs.AddRange(this.ActivityGroup.Save(adc));
                     }
                 },
-                onSuccess: (SystemMessages smsgs) =>
-                {
-                    msgs.AddRange(smsgs);
-                },
-                onFailure: (SystemMessages fmsgs) =>
-                {
-                    msgs.AddRange(fmsgs);
-                },
-                onException: (SystemMessages emsgs) =>
-                {
-                    Helpers.Utilities.SystemErrorLog(emsgs);
-                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );            
 
@@ -333,9 +325,9 @@ namespace AfterSchoolLibrary.Models
             return this.RegistrantAssignments;
         }
 
-        private SystemMessages AddAssignment(RegistrantActivity ra, AssignmentType type, DatabaseConnection dc = null)
+        private void AddAssignment(RegistrantActivity ra, AssignmentType type, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             // registrant view
             var assignment = RegistrantAssignments.Find(x => x.RegistrantId == ra.RegistrantId.Value);
@@ -366,7 +358,7 @@ namespace AfterSchoolLibrary.Models
 
             // store all dates/times this registrant is enrolled for
             var activity = this.Activities.Find(x => x.ID == ra.ParticipationObjectId && ra.ParticipationObjectTypeId == ParticipationObjectType.Activity);
-            var dateRanges = activity.GetSchedule(dc: dc).GetInstances(dc: dc).Select(x => new DateRange(x.StartDateTime.Value, x.EndDateTime.Value));
+            var dateRanges = activity.GetSchedule(msgs, dc).GetInstances(msgs: msgs, dc: dc).Select(x => new DateRange(x.StartDateTime.Value, x.EndDateTime.Value));
             switch (type)
             {
                 case AssignmentType.Seat:
@@ -402,8 +394,6 @@ namespace AfterSchoolLibrary.Models
                         break;
                 }
             }
-
-            return msgs;
         }
 
 
