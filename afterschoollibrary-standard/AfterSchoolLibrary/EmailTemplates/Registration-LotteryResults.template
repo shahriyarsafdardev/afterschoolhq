@@ -1,0 +1,32 @@
+﻿<div>
+  <p>Hello @Model.FirstName,</p>
+
+  <p>Here are your lottery results below:</p>
+
+  <div style="margin: 20px">
+
+    @Model.ReservedTable
+
+    @Model.WaitingListTable
+
+    @Model.AppliedTable
+
+  </div>
+
+  <p>
+    <a href="@Model.LoginLink">Login to your account to view more details about this registration.</a>
+  </p>
+
+  <p>
+    If you have any questions or concerns about the status of this registration please contact @Model.ActivityContactName either by phone (@Model.ActivityContactPhone) or email (<a href="mailto:@Model.ActivityContactEmail">@Model.ActivityContactEmail</a>).
+  </p>
+
+  <p>
+    This activity is provided by <a href="@Model.BillerAccountLink">@Model.BillerAccountName</a>.
+  </p>
+
+  <p>
+    Thanks!<br />
+    @Model.ProductName
+  </p>
+</div>

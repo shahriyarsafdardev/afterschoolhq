@@ -113,7 +113,109 @@ namespace AfterSchoolLibrary.Helpers
                 emailTemplateId: SendGridHelper.GetGenericTemplateId()));
         }
 
-        public static SystemMessages SendRegistrationConfirmed(CheckoutObject checkoutObject, WebUser loggedInUser, bool isParentCopy, bool sendBcc, DatabaseConnection dc = null)
+        private static string AddLotteryTable(List<RegistrantActivity> ras, Registrant registrant, string action, SystemMessages msgs, DatabaseConnection dc)
+        {
+            if (!ras.Any())
+                return "";
+
+            var rows = "";
+
+            ras.ForEach(ra => {
+
+                var po = ra.GetParticipationObject(msgs, dc);
+                var rowModel = new NameValueCollection()
+                    {
+                        { "ActivityName", po.Name },
+                        { "ActivityDays",  po.Schedule.GetDaysOfTheWeek(msgs, dc).Select(x => x.ToString().MaxChars(3)).ToStringList(", ")},
+                    };
+
+                rows += ProcessTemplate(
+                    EmailTemplates.Registration_LotteryResults_Rows,
+                    rowModel,
+                    "Registration_LotteryResults_Rows-1.0",
+                    msgs);
+
+            });
+
+            var tableModel = new NameValueCollection()
+                {
+                    { "StudentName", registrant.FirstName },
+                    { "Action",  action },
+                    { "ActivityRows", rows }
+                };
+
+            return ProcessTemplate(
+                EmailTemplates.Registration_LotteryResults_Table,
+                tableModel,
+                "Registration_LotteryResults_Table-1.0",
+                msgs);
+        }
+
+        public static void SendLotteryResults(Registration registration, Account billingAccount, ParticipationObject session, WebUser loggedInUser, bool sendBcc, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var registrant = registration.GetRegistrant(msgs, dc);
+            var parent = registrant.GetMasterRegistrant(msgs, dc)?.GetParentOrGuardian(msgs, dc);
+            var registrantActivities = registration.GetRegistrantActivities(msgs, dc).Where(ra => ra.ParticipationObjectTypeId == ParticipationObjectType.Activity);
+            var reservedRas = registrantActivities.Where(ra => ra.AssignmentTypeId.In(Registration.ReservedStatuses)).ToList();
+            var waitingListRas = registrantActivities.Where(ra => ra.AssignmentTypeId == RegistrationAssignmentType.WaitingList).ToList();
+            var appliedRas = registrantActivities.Where(ra => ra.AssignmentTypeId == RegistrationAssignmentType.Applied).ToList();
+
+            var resultsModel = new NameValueCollection()
+                {
+                    { "FirstName", parent?.FirstName ?? registrant.GetAnswer(QuestionDataType.Parent1FirstName, msgs, dc).Text },
+                    { "ReservedTable", AddLotteryTable(reservedRas, registrant, "has been placed in", msgs, dc) },
+                    { "WaitingListTable", AddLotteryTable(waitingListRas, registrant, "has been placed on the <em>waiting list</em> for", msgs, dc) },
+                    { "AppliedTable", AddLotteryTable(appliedRas, registrant, "has <em>not</em> been placed in", msgs, dc) },
+                    { "ProductName", Utilities.AppName() },
+                    { "LoginLink", Utilities.LoginUrl(true) },
+                    { "ActivityContactEmail", session.ContactEmail.IfBlank(billingAccount.Email)},
+                    { "ActivityContactPhone", session.ContactPhone.IfBlank(billingAccount.Phone)},
+                    { "ActivityContactName", session.ContactName.IfBlank(billingAccount.Name)},
+                    { "BillerAccountName", billingAccount.Name },
+                    { "BillerAccountLink", billingAccount.HomePageUrl },
+                };
+
+            var subject = $"{session.Name} Lottery results for {registrant.Name}";
+            var body =  ProcessTemplate(
+                EmailTemplates.Registration_LotteryResults,
+                resultsModel,
+                "Registration_LotteryResults-1.0",
+                msgs);
+
+            // SEND EMAILS
+            var mailMsgs = new SystemMessages();
+            var toEmail = parent?.Email ?? registrant.GetAnswer(QuestionDataType.Parent1Email, msgs, dc).Text ?? registrant.Email;
+            
+            mailMsgs.AddRange(SendGridHelper.SendMail(
+                fromEmail: Email.SendGridNoReplyEmailAddress(),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(toEmail),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId()));
+            
+            if (sendBcc)
+            {
+                var emails = new List<string>();
+
+                if (session.ContactEmail.IsEmail() && session.ContactEmail.ToLower().NotIn(emails))
+                    emails.Add(session.ContactEmail.ToLower());
+
+                if (!emails.Any())
+                    emails.Add(billingAccount.Email.ToLower());
+
+                emails.ForEach(email =>
+                    SendGridHelper.SendMail(
+                        fromEmail: Email.SendGridNoReplyEmailAddress(true),
+                        toEmail: new SendGrid.Helpers.Mail.EmailAddress(email),
+                        subject: $"Lottery CC: {subject}",
+                        body: body,
+                        emailTemplateId: SendGridHelper.GetGenericTemplateId(true)));
+            }
+
+            msgs.AddRange(mailMsgs);
+        }
+
+        public static SystemMessages SendRegistrationConfirmed(CheckoutObject checkoutObject, string customMessage, WebUser loggedInUser, bool isParentCopy, bool sendBcc, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
             var isAfterSchool = checkoutObject.PayingAccount.IsAfterSchool;
@@ -175,8 +277,8 @@ namespace AfterSchoolLibrary.Helpers
 
             var description = $"{participationObject.Name} - {regStatus}";
 
-            otherRAs.ForEach(ra => {
-                description += $"<br />&nbsp;&bull;&nbsp;{ra.GetParticipationObject(msgs, dc).Name}";
+            otherRAs.OrderBy(ra => ra.AssignmentTypeId).ToList().ForEach(ra => {
+                description += $"<br />&nbsp;&bull;&nbsp;{ra.GetParticipationObject(msgs, dc).Name} - {ra.AssignmentTypeId.ToString().SplitByUpperCase()}";
             });
 
             // show this if no subscription plan, if there's a reg fee or there's a payment plan
@@ -244,7 +346,7 @@ namespace AfterSchoolLibrary.Helpers
             };
 
             var registrationDetails = "Login to your account to view more details about this registration.";
-            var loginLink = $"{Utilities.LoginUrl(isAfterSchool)}";
+            var loginLink = Utilities.LoginUrl(isAfterSchool);
 
             if (isParentCopy)
             {
@@ -256,12 +358,15 @@ namespace AfterSchoolLibrary.Helpers
                 }
             }
 
-            var customMessage = registrationThankYou;
+            if (customMessage.IsEmpty())
+            {
+                customMessage = registrationThankYou;
 
-            if (isParentCopy)
-                customMessage = $"{masterRegistrant.FirstName} has registered for the following activity:";
-            else if (loggedInUser.HasAccessTo(billingAccount))
-                customMessage = $"{masterRegistrant.FirstName} has been registered by {loggedInUser.DisplayName} at {billingAccount.Name} for the following activity:";
+                if (isParentCopy)
+                    customMessage = $"{masterRegistrant.FirstName} has registered for the following activity:";
+                else if (loggedInUser.HasAccessTo(billingAccount))
+                    customMessage = $"{masterRegistrant.FirstName} has been registered by {loggedInUser.DisplayName} at {billingAccount.Name} for the following activity:";
+            }
 
             var model = new NameValueCollection()
             {
@@ -311,7 +416,7 @@ namespace AfterSchoolLibrary.Helpers
                     SendGridHelper.SendMail(
                         fromEmail: Email.SendGridNoReplyEmailAddress(isAfterSchool),
                         toEmail: new SendGrid.Helpers.Mail.EmailAddress(email),
-                        subject: $"New Registration CC: {subject}",
+                        subject: $"Registration CC: {subject}",
                         body: body,
                         emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)));
             }

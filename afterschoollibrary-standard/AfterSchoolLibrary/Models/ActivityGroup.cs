@@ -577,7 +577,7 @@ namespace AfterSchoolLibrary.Models
         public List<RegistrantActivity> GetRegistrantActivities(List<Registration> registrations = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (registrations.IsEmpty())
-                registrations = Registration.LoadByActivityGroupId(this.ID.Value, dc: dc);
+                registrations = Registration.LoadByActivityGroupId(this.ID.Value, msgs, dc);
 
             if (_RegistrantActivities.IsEmpty())
             {
@@ -587,15 +587,14 @@ namespace AfterSchoolLibrary.Models
                     _RegistrantActivities = RegistrantActivity.LoadByRegistrationIds(registrationIds, msgs, dc);
 
                     var activityIds = _RegistrantActivities.Where(x => x.ParticipationObjectTypeId == ParticipationObjectType.Activity)
-                        .Select(x => x.ParticipationObjectId.Value)
-                        .ToList();
+                                                            .Select(x => x.ParticipationObjectId.Value)
+                                                            .ToList();
 
                     var deletedActivityIds = Activity.LoadList(activityIds, true, msgs, dc).Select(activity => activity.ID.Value);
                     _RegistrantActivities = _RegistrantActivities.Where(x =>
-                        x.ParticipationObjectTypeId == ParticipationObjectType.Activity && 
-                        x.ParticipationObjectId.Value.NotIn(deletedActivityIds)
-                        )
-                        .ToList();
+                                                                    x.ParticipationObjectTypeId == ParticipationObjectType.Activity && 
+                                                                    x.ParticipationObjectId.Value.NotIn(deletedActivityIds)
+                                                                ).ToList();
                 }
                 else
                     _RegistrantActivities = new List<RegistrantActivity>();

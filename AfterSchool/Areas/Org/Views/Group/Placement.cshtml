@@ -69,6 +69,7 @@
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             <div class="btn-group pull-right">
+                                <a href="@Url.Action("placement", "group", new { id = Model.Uid })" class="btn btn-default md-trigger" data-modal="modal-loading">Start Over</a>
                                 <button type="button" onclick="startLottery()"  class="btn btn-default md-trigger" data-modal="modal-loading">Re-run Lottery...</button>
                                 <button type="button" onclick="applyLottery()" class="btn btn-primary md-trigger" data-modal="modal-loading">Apply Lottery</button>
                             </div>
@@ -136,7 +137,7 @@
                                             var waitingListCount = waitingListActivities.Where(x => x.ParticipationObjectId == activity.ID && x.ParticipationObjectTypeId == ParticipationObjectType.Activity).Count(x => x.AssignmentTypeId == RegistrationAssignmentType.WaitingList);
 
                                             totalSeats += activity.SeatsAvailable.Value;
-                                            totalLeft += (activity.SeatsAvailable.Value - assignedCount);
+                                            totalLeft += (activity.GetSeatsRemaining() - assignedCount);
                                             totalWL += waitingListCount;
 
                                             <tr>
@@ -158,8 +159,8 @@
                                                     }
 
                                                 </td>
-                                                <td class="text-center">@activity.SeatsAvailable</td>
-                                                <td class="text-center">@(activity.SeatsAvailable - assignedCount)</td>
+                                                <td class="text-center">@activity.SeatsAvailable.Value</td>
+                                                <td class="text-center">@(activity.GetSeatsRemaining() - assignedCount)</td>
                                                 <td class="text-center">@waitingListCount</td>
                                             </tr>
                                         }
@@ -215,28 +216,68 @@
             {
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <button type="button" onclick="notifyAll()" class="btn btn-primary btn-space md-trigger pull-right" data-modal="modal-confirmation">Notify All @UILabel.RegistrantLabel(true)</button>
+                        <div class="btn-group pull-right">
+                            <a href="@Url.Action("placement", "group", new { id = Model.Uid })" class="btn btn-default md-trigger" data-modal="modal-loading">Start Over</a>
+                            <button type="button" onclick="notifyAll()" class="btn btn-primary btn-space md-trigger" data-modal="modal-confirmation">Notify All @UILabel.RegistrantLabel(true)</button>
+                        </div>
+                        
                         Step 3 - Results
                     </div>
                     <div class="panel-body">
                         @if (msgs.HasNoErrors())
                         {
-                            var assignments = (List<RegistrantAssignment>)ViewBag.RegistrantAssignments;
+                            // var assignments = (List<RegistrantAssignment>)ViewBag.RegistrantAssignments;
                             var activities = (List<Activity>)ViewBag.Activities;
                             var registrantActivities = (List<RegistrantActivity>)ViewBag.RegistrantActivities;
                             var assignedRegistrantActivities = (List<RegistrantActivity>)ViewBag.AssignedRegistrantActivities;
                             var waitingListActivities = (List<RegistrantActivity>)ViewBag.WaitingListActivities;
 
                             var registrants = registrantActivities.Select(x => x.ToRegistrant()).DistinctBy(x => x.ID).OrderBy(x => x.Name).ToList();
-                            var reservedRegistrants = assignments.Where(x => x.Assignments.Count > 0).Count();
-                            var waitingListRegistrants = assignments.Where(x => x.WaitingListAssignments.Count > 0).Count();
-                            var onlyWaitingListRegistrants = assignments.Where(x => x.WaitingListAssignments.Count > 0 && x.Assignments.Count == 0).Count();
-                            var noSeatRegistrants = assignments.Where(x => x.Assignments.Count == 0 && x.WaitingListAssignments.Count == 0).Count();
+                            //var reservedRegistrants = assignments.Where(x => x.Assignments.Count > 0).Count();
+                            //var waitingListRegistrants = assignments.Where(x => x.WaitingListAssignments.Count > 0).Count();
+                            //var onlyWaitingListRegistrants = assignments.Where(x => x.WaitingListAssignments.Count > 0 && x.Assignments.Count == 0).Count();
+                            //var noSeatRegistrants = assignments.Where(x => x.Assignments.Count == 0 && x.WaitingListAssignments.Count == 0).Count();
 
-                            var totalSeats = 0;
-                            var totalLeft = 0;
-                            var totalWL = 0;
+                            <h1>Activity Results</h1>
 
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>@UILabel.ActivityLabel(ActivityType.Activity, true)</th>
+                                            <th>Total Seats</th>
+                                            <th>Reserved Seats</th>
+                                            <th>Waiting List</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var activity in activities)
+                                        {
+                                            var assignedRas = assignedRegistrantActivities.Where(x => x.ParticipationObjectId == activity.ID && x.ParticipationObjectTypeId == ParticipationObjectType.Activity);
+                                            var waitingListRas = waitingListActivities.Where(x => x.ParticipationObjectId == activity.ID && x.ParticipationObjectTypeId == ParticipationObjectType.Activity);
+
+                                            <tr>
+                                                <td class="text-nowrap">
+                                                    @activity.Name - @activity.GetDaysOfTheWeek().Select(day => day.ToString().MaxChars(2)).ToStringList(", ")
+                                                </td>
+                                                <td>
+                                                    @activity.SeatsAvailable
+                                                </td>
+                                                <td>
+                                                    @assignedRas.Count()
+                                                </td>
+                                                <td>
+                                                    @waitingListRas.Count()
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <hr />
+
+                            <h1>Student Results</h1>
 
                             <div class="table-responsive">
                                 <table class="table table-striped">
@@ -253,13 +294,16 @@
                                             var assignedRas = assignedRegistrantActivities.Where(x => x.RegistrantId == registrant.ID);
                                             var waitingListRas = waitingListActivities.Where(x => x.RegistrantId == registrant.ID);
 
+                                            var regAssignedActivities = assignedRas.Select(ra => activities.Find(activity => activity.ID == ra.ParticipationObjectId && ra.ParticipationObjectTypeId == ParticipationObjectType.Activity));
+                                            var regWaitingListActivities = waitingListRas.Select(ra => activities.Find(activity => activity.ID == ra.ParticipationObjectId && ra.ParticipationObjectTypeId == ParticipationObjectType.Activity));
+
                                             <tr>
                                                 <td class="text-nowrap">@registrant.Name</td>
                                                 <td>
-                                                    @Html.Raw(assignedRas.Select(x => x.GetActivity().Name).ToStringList(", "))
+                                                    @regAssignedActivities.Select(x => $"{x.Name} - ({x.GetDaysOfTheWeek().Select(day => day.ToString().MaxChars(2)).ToStringList(", ")})").ToStringList(", ")
                                                 </td>
                                                 <td>
-                                                    @Html.Raw(waitingListRas.Select(x => x.GetActivity().Name).ToStringList(", "))
+                                                    @regWaitingListActivities.Select(x => $"{x.Name} - ({x.GetDaysOfTheWeek().Select(day => day.ToString().MaxChars(2)).ToStringList(", ")})").ToStringList(", ")
                                                 </td>
                                             </tr>
                                         }

@@ -320,28 +320,6 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        public string AddToRegistrationUrl
-        {
-            get
-            {
-                return $"{Helpers.Utilities.BaseUrl(this.GetAccount().IsAfterSchool)}/reg/add/{this.Uid.ToString()}";
-            }
-        }
-
-        public Registrant ToRegistrant()
-        {
-            return new Registrant()
-            {
-                FirstName = RegistrantFirstName,
-                LastName = RegistrantLastName,
-                Uid = RegistrantUid,
-                Email = RegistrantEmail,
-                Company = RegistrantCompany,
-                RegistrantTypeId = RegistrantRegistrantTypeId,
-                Phone = RegistrantPhone
-            };
-        }
-
         public static List<Registration> LoadByAccountId(int AccountId, int? start, int? length, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
@@ -424,9 +402,8 @@ namespace AfterSchoolLibrary.Models
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public SystemMessages FindAndSetFirstRegistration(string firstName, string lastName, string email, DatabaseConnection dc = null)
+        public void FindAndSetFirstRegistration(string firstName, string lastName, string email, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
@@ -447,11 +424,9 @@ namespace AfterSchoolLibrary.Models
                 this.LastModifiedDate = DateTime.UtcNow;
                 msgs.AddRange(this.Save(dc: dc));
             }
-
-            return msgs;
         }
 
-        public static List<Registration> FindRelatedRegistrations(int AccountId, string firstName, string lastName, string email, DatabaseConnection dc = null)
+        public static List<Registration> FindRelatedRegistrations(int AccountId, string firstName, string lastName, string email, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -460,244 +435,7 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["RegistrantFirstName"], firstName.Trim());
             dq.Criterias.Add(ObjectMap["RegistrantLastName"], lastName.Trim());
             dq.Criterias.Add(ObjectMap["RegistrantEmail"], email.Trim());
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
-        }
-
-        public List<Registration> FindRelatedRegistrations(string firstName = null, string lastName = null, string email = null, DatabaseConnection dc = null)
-        {            
-            return FindRelatedRegistrations(
-                this.AccountId.Value, 
-                firstName ?? this.RegistrantFirstName, 
-                lastName ?? this.RegistrantLastName, 
-                email ?? this.RegistrantEmail, 
-                dc);
-        }
-
-        public SystemMessages AddRelatedRegistration(Registration registration, int loggedInUserId, DatabaseConnection dc = null)
-        {
-            registration.FirstRegistrationId = this.ID.Value;
-            registration.LastModifiedBy = loggedInUserId;
-            registration.LastModifiedDate = DateTime.UtcNow;
-            return registration.Save(dc: dc);
-        }
-
-        public List<Registration> GetRelatedRegistrations(DatabaseConnection dc = null)
-        {
-            var registrations = new List<Registration>();
-            if (this.FirstRegistrationId.HasValue)
-            {
-                registrations.Add(Registration.Load(this.FirstRegistrationId.Value, dc: dc));
-                registrations.AddRange(Registration.LoadByFirstRegistrationId(this.FirstRegistrationId.Value, dc: dc));
-            }
-            else
-            {
-                registrations.AddRange(Registration.LoadByFirstRegistrationId(this.ID.Value, dc: dc));
-            }
-            return registrations.Where(x => x.ID != this.ID).ToList();
-        }
-
-        public List<Registration> GetCurrentRelatedRegistrations(DatabaseConnection dc = null)
-        {
-            var dq = DatabaseQuery;
-            dq.UseParameterizedQuery = false;
-
-            var sql = $@"
-                        select
-	                        *
-                        from
-	                        Registration r inner join
-	                        Registrant re on r.registrantid = re.id
-                        where
-	                        r.id in
-	                        (
-		                        select
-			                        r2.id	
-		                        from 
-			                        registration r2 inner join 
-			                        registrationactivity ra2 on r2.id = ra2.RegistrationId inner join
-			                        activity a2 on ra2.activityid = a2.id inner join
-			                        activityinstance ai2 on a2.activityscheduleid = ai2.activityscheduleid
-		                        where
-			                        ai2.StartDateTime >= getdate() and
-                                    r2.AccountId = {this.AccountId}
-	                        ) and
-	                        (
-		                        r.FirstRegistrationId = {this.FirstRegistrationId.IfEmpty(0)} or
-		                        r.ID = {this.FirstRegistrationId.IfEmpty(0)} or
-		                        r.FirstRegistrationId = {this.ID} or
-		                        r.ID = {this.ID}
-	                        ) and r.CompletionStatusId in ({ValidCompletionStatus.Select(x => (int)x).ToStrings().ToStringList()})";
-
-            var registrations = dq.ExecuteSelect(sql).AsEnumerable().ToList().ConvertAll(LoadObject);
-
-            return registrations.Where(x => x.ID != this.ID).ToList();
-        }
-
-        public RegistrationPeriod GetRegistrationPeriod(SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            return RegistrationPeriod.Load(this.RegistrationPeriodId.Value, msgs, dc);
-        }
-
-        public List<FormQuestionAnswer> GetAnswers(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return FormQuestionAnswer.LoadByRegistrationId(this.ID.Value, msgs, dc);
-        }
-
-        public FormQuestionAnswer AddAnswer(string answerText, FormQuestion question, Registrant registrant, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();                        
-
-            var answer = new FormQuestionAnswer();
-            answer.RegistrantId = registrant.ID;
-            answer.RegistrationId = this.ID;
-            answer.Text = answerText;
-            answer.FormQuestionId = question.ID; // question id not as important as the question data type id because 1 answer may apply to multiple question ids but one type of question data
-            answer.QuestionDataTypeId = question.QuestionDataTypeId;
-            answer.CreateDate = answer.LastModifiedDate = DateTime.UtcNow;
-            answer.CreatedBy = answer.LastModifiedBy = loggedInUserId;
-            msgs.AddRange(answer.Save(dc: dc));
-            
-            answer.UpdateRegistrantInfo(registrant, msgs, dc);
-
-            return answer;
-        }
-
-        public void MoveActivity(RegistrantActivity ra, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            // delete previous relationships to old registration
-            //msgs.AddRange(ra.DeleteRegistrationActivity(dc: dc));
-
-            // move to new registrant and registration
-            ra.RegistrantId = this.RegistrantId;
-            ra.RegistrationId = this.ID;
-            ra.LastModifiedBy = loggedInUserId;
-            ra.LastModifiedDate = DateTime.UtcNow;
-            msgs.AddRange(ra.Save(dc));
-
-            // add to this registration record 
-            // TODO: hopefully will remove this in the future, the whole registration activity object :(
-            //this.AddActivity(ra.ActivityId.Value, loggedInUserId, msgs, dc);
-        }
-
-        public Account GetAccount(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return Account.Load(this.AccountId.Value, msgs, dc);
-        }
-
-        private ActivityGroup _ActivityGroup = null;
-        public ActivityGroup GetActivityGroup(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (this.ActivityGroupId.HasValue && _ActivityGroup.IsEmpty())
-            {
-                _ActivityGroup = ActivityGroup.Load(this.ActivityGroupId.Value, msgs, dc);
-            }
-            return _ActivityGroup;
-        }
-
-        public Registrant GetRegistrant(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return Registrant.Load(this.RegistrantId.Value, msgs, dc);
-        }
-
-        //public List<RegistrationActivity> GetRegistrationActivities(DatabaseConnection dc = null)
-        //{
-        //    return RegistrationActivity.LoadByRegistrationId(this.ID.Value, dc: dc);
-        //}
-
-        public List<RegistrantActivity> GetRegistrantActivities(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            var registrantActivities = RegistrantActivity.LoadByRegistrationId(this.ID.Value, msgs, dc);
-            var participationObjectTypes = registrantActivities.Select(registrantActivity => registrantActivity.ParticipationObjectTypeId)
-                .DistinctBy(registrantActivity => registrantActivity)
-                .ToList();
-            var rasToReturn = new List<RegistrantActivity>();
-
-            participationObjectTypes.ForEach(participationObjectType => {
-
-                switch (participationObjectType)
-                {
-                    case ParticipationObjectType.Activity:
-                        var activityIds = registrantActivities.Where(x => x.ParticipationObjectTypeId == participationObjectType)
-                            .Select(x => x.ParticipationObjectId.Value)
-                            .ToList();
-                        var activities = Activity.LoadList(activityIds, msgs, dc);
-                        var validActivityIds = activities.Where(x =>
-                            !x.IsDeleted &&
-                            !x.IsArchived &&
-                            (!x.ActivityGroupId.HasValue || !x.ActivityGroupIsArchived.Value))
-                            .Select(activity => activity.ID.Value);
-
-                        rasToReturn.AddRange(registrantActivities.Where(
-                            registrantActivity => 
-                                registrantActivity.ParticipationObjectTypeId == participationObjectType && 
-                                registrantActivity.ParticipationObjectId.Value.In(validActivityIds)
-                            ));
-
-                        break;
-
-                    case ParticipationObjectType.ActivityGroup:
-                        var activityGroupIds = registrantActivities.Where(x => x.ParticipationObjectTypeId == participationObjectType)
-                            .Select(x => x.ParticipationObjectId.Value)
-                            .ToList();
-                        var activityGroups = ActivityGroup.LoadList(activityGroupIds, msgs, dc);
-                        var validActivityGroupIds = activityGroups.Where(x => !x.IsArchived)
-                            .Select(activity => activity.ID.Value);
-
-                        rasToReturn.AddRange(registrantActivities.Where(
-                            registrantActivity => 
-                                registrantActivity.ParticipationObjectTypeId == participationObjectType && 
-                                registrantActivity.ParticipationObjectId.Value.In(validActivityGroupIds)
-                            ));
-
-                        break;
-
-                    case ParticipationObjectType.AccountActivityGroup:
-                        var accountActivityGroupIds = registrantActivities.Where(x => x.ParticipationObjectTypeId == participationObjectType)
-                            .Select(x => x.ParticipationObjectId.Value)
-                            .ToList();
-                        var accountActivityGroups = AccountActivityGroup.LoadList(accountActivityGroupIds, msgs, dc);
-                        var validAccountActivityGroupIds = accountActivityGroups.Where(x => !x.ActivityGroupIsArchived)
-                            .Select(activity => activity.ID.Value);
-
-                        rasToReturn.AddRange(registrantActivities.Where(
-                            registrantActivity => 
-                                registrantActivity.ParticipationObjectTypeId == participationObjectType && 
-                                registrantActivity.ParticipationObjectId.Value.In(validAccountActivityGroupIds)
-                            ));
-
-                        break;
-                }
-
-            });
-
-            return rasToReturn;
-        }
-
-        public SystemMessages RemoveParticipation(int participationObjectId, ParticipationObjectType participationObjectType, DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
-
-            var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
-                participationObjectId, 
-                participationObjectType, 
-                this.RegistrantId.Value,
-                msgs,
-                dc);
-
-            if (ra.IsNotEmpty())
-                ra.CancelRegistration(msgs, dc);
-
-            return msgs;
-        }
-
-        public SystemMessages WasUpdated(DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
-
-            this.LastUpdated = DateTime.UtcNow;
-            msgs.AddRange(this.Save(dc: dc));
-
-            return msgs;
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
         private static string GetSearchSQL(string searchText, int accountId, int? questionId, RegistrationStatus regStatus, List<int> participationObjectIds = null, ParticipationObjectType participationObjectType = ParticipationObjectType.NotSet, List<RegistrationAssignmentType> rats = null, bool getCount = false)
@@ -883,25 +621,7 @@ namespace AfterSchoolLibrary.Models
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-        }
-
-        public decimal GetAmountPaid(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            var registrantActivities = this.GetRegistrantActivities(msgs, dc);
-
-            if (registrantActivities.Any())
-                return registrantActivities.First().GetAmountPaid(msgs, dc);
-
-            return 0;
-        }
-
-        public Purchase GetPurchase(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (this.PurchaseId.HasValue)
-                return Purchase.Load(this.PurchaseId.Value, msgs, dc);
-
-            return null;
-        }   
+        } 
 
         public static int TotalCurrentRegistrationsCount(int accountId, DatabaseConnection dc = null)
         {
@@ -973,116 +693,6 @@ namespace AfterSchoolLibrary.Models
 	                    r.AccountId = {AccountId}";
 
             return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-        }
-
-        internal SystemMessages DeleteSessionActions(DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
-
-            Database.ExecuteTransaction
-            (
-                action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                {
-                    // delete all related session actions
-                    var actions = SessionAction.LoadByRegistrationId(this.ID.Value, dc: adc);
-                    foreach (var action in actions)
-                    {
-                        amsgs.AddRange(action.Delete(adc));
-                    }
-                },
-                onSuccess: (SystemMessages smsgs) =>
-                {
-                    msgs.AddRange(smsgs);
-                },
-                onFailure: (SystemMessages fmsgs) =>
-                {
-                    msgs.AddRange(fmsgs);
-                },
-                dc: dc
-            );
-
-            return msgs;
-        }
-
-        internal SystemMessages DeleteAnswers(DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
-
-            Database.ExecuteTransaction
-            (
-                action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                {
-                    // delete all answers associated to this registration
-                    this.GetAnswers(amsgs, adc).ForEach(answer => amsgs.AddRange(answer.Delete(adc)));
-                },
-                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
-                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
-                dc: dc
-            );
-
-            return msgs;
-        }
-
-        internal SystemMessages UpdateRelatedRegistrationsAfterDelete(DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
-
-            // this may be the first registration of other registrations :(
-            // and we're about to delete this registration, so we have to
-            // switch the first registration id to a new one, 
-            // which kind of sucks because we need to know when their real first reg was
-            // TODO: Figure out way to keep the date of their first registration (MAYBE)
-            // it's the first registration if FirstRegistrationId is null
-            if (!this.FirstRegistrationId.HasValue)
-            {
-                // get reg's where the first reg id is equal to the mergedfrom
-                var laterRegs = Registration.LoadByFirstRegistrationId(this.ID.Value, dc: dc);
-
-                // reset each one
-                foreach (var laterReg in laterRegs)
-                {
-                    // reset the first registration id
-                    laterReg.FirstRegistrationId = null;
-                    laterReg.Save(dc: dc);
-
-                    msgs.AddRange(laterReg.FindAndSetFirstRegistration(laterReg.RegistrantFirstName, laterReg.RegistrantLastName, laterReg.RegistrantEmail, dc: dc));
-                }
-            }
-
-            return msgs;
-        }
-
-        public void SetRegistrationStatus(RegistrationCompletionStatus completionStatus, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            this.CompletionStatusId = completionStatus;
-            this.LastModifiedDate = DateTime.UtcNow;
-            this.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
-            msgs.AddRange(this.Save(dc));
-
-            msgs.AddRange(this.FindAndSetFirstRegistration(this.RegistrantFirstName, this.RegistrantLastName, this.RegistrantEmail, dc));
-        }
-
-        public bool IsPaid(SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            var registrantActivities = this.GetRegistrantActivities(msgs, dc);
-
-            if (registrantActivities.Any())
-            {
-                // this only works now because we're doing on registration at a time
-                var registrantActivity = registrantActivities.First();
-
-                return ActivityPayment.GetTotalPaidByParticipationObjectByRegistrant(
-                    registrantActivity.ParticipationObjectId.Value,
-                    registrantActivity.ParticipationObjectTypeId,
-                    this.RegistrantId.Value,
-                    msgs,
-                    dc) > 0;
-            }
-
-            msgs.Add("Incomplete registration", MessageType.UserError);
-
-            return false;
         }
 
         public string GetParentalConsentUrl

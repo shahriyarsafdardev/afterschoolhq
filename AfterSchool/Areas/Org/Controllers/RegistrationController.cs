@@ -406,7 +406,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
 
 
-                msgs.AddRange(selectedRegistration.WasUpdated());
+                selectedRegistration.WasUpdated(msgs);
 
                 UpdateSession(sat, SessionVariables.CurrentAccount.ID, registrantActivity.GetActivityId(), null, selectedRegistration.RegistrantId, selectedRegistration.ID, selectedRegistration.RegistrationPeriodId, registrantActivity.GetActivityGroupId());
 
@@ -429,7 +429,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var registrantActivity = RegistrantActivity.Load(ra.ToInteger(), msgs);
             var activity = registrantActivity.GetActivity(msgs);
 
-            msgs.AddRange(selectedRegistration.RemoveParticipation(registrantActivity.ParticipationObjectId.Value, registrantActivity.ParticipationObjectTypeId));
+            selectedRegistration.RemoveParticipation(registrantActivity.ParticipationObjectId.Value, registrantActivity.ParticipationObjectTypeId, msgs);
 
             if (msgs.HasNoErrors())
                 msgs.Add($"Removed {UILabel.ActivityLabel(activity.ActivityTypeId)}: {activity.Name}", MessageType.Success);
@@ -469,7 +469,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                msgs.AddRange(selectedRegistration.WasUpdated());
+                selectedRegistration.WasUpdated(msgs);
 
                 // notify parent
                 var masterRegistrant = registrant.GetMasterRegistrant(msgs);
@@ -485,6 +485,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             ParticipationObject = act.GetParticipationObject(msgs),
                             Registration = selectedRegistration,
                         },
+                        null,
                         SessionVariables.CurrentUser,
                         true,
                         msgs);
