@@ -40,11 +40,17 @@
             }
         </div>
     }
+    else
+    {
+        <div class="@upcomingDivClass">
+            @{ Html.RenderPartial("Activities/_NoActivities"); }
+        </div>
+    }
 
     @if (showRightColumn)
     {
-        <div class="@upcomingDivClass pull-right">
-            
+        <div class="@upcomingDivClass">
+
             @if (showToDos)
             {
                 Html.RenderPartial("_ToDos", Model);
