@@ -57,10 +57,6 @@
                                             <td class="text-right" width="33%">Registration Date/Time</td>
                                             <td>@account.ConvertToAccountTimeZone(selectedRegistration.CreateDate.Value).ToLongDateTimeString()</td>
                                         </tr>
-                                        <tr class="hide">
-                                            <td class="text-right">@UILabel.RegistrantLabel() Link to Add Activities</td>
-                                            <td><a href="@selectedRegistration.AddToRegistrationUrl" target="_blank">@selectedRegistration.AddToRegistrationUrl</a></td>
-                                        </tr>
                                     </table>
                                 </div>
 

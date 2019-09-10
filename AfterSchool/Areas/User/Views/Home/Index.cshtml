@@ -14,12 +14,7 @@
     var showLeftColumn = activityInstances.Any();
     var upcomingDivClass = "col-md-12 col-lg-6";
 
-    if (!showRightColumn)
-    {
-        upcomingDivClass = "col-md-12 col-lg-8 col-lg-offset-2";
-    }
-
-    if (!showLeftColumn)
+    if (!showRightColumn || !showLeftColumn)
     {
         upcomingDivClass = "col-md-12 col-lg-8 col-lg-offset-2";
     }
@@ -48,8 +43,8 @@
 
     @if (showRightColumn)
     {
-        <div class="@upcomingDivClass">
-
+        <div class="@upcomingDivClass pull-right">
+            
             @if (showToDos)
             {
                 Html.RenderPartial("_ToDos", Model);
@@ -65,7 +60,6 @@
 
         </div>
     }
-
 
 
     @*
