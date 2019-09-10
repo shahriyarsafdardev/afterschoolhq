@@ -352,6 +352,11 @@ namespace AfterSchoolLibrary.Models
             return RegistrantActivity.LoadByRegistrantId(this.ID.Value, msgs, dc).ToList();
         }
 
+        public List<RegistrantActivity> GetRegistrantActivities(List<RegistrationAssignmentType> assignmentTypes, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RegistrantActivity.LoadByRegistrantId(this.ID.Value, assignmentTypes, msgs, dc).ToList();
+        }
+
         private static DatabaseQuery SearchRegistrantsQuery(string searchText, int? contactListId, int accountId, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;

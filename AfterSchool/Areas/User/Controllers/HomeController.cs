@@ -49,7 +49,7 @@ namespace AfterSchool.Areas.User.Controllers
 
                 registrant.GetSubmittedRecords(msgs).ForEach(submittedRecord => {
 
-                    var ras = submittedRecord.GetRegistrantActivities(msgs);
+                    var ras = submittedRecord.GetRegistrantActivities(Registration.ReservedStatuses, msgs);
                     var account = submittedRecord.GetAccount(msgs);
 
                     ras.ForEach(ra => {
