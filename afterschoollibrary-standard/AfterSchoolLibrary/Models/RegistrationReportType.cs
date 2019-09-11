@@ -4,5 +4,5 @@ public enum RegistrationReportType
 	Basic,
 	Detailed,
 	SingleActivity,
-    Dismissal
+	Dismissal
 }
