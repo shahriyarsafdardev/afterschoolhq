@@ -314,6 +314,7 @@ namespace AfterSchoolLibrary.Services
         {
             var registrantActivities = new List<RegistrantActivity>();
             var registrantIds = registrations.Select(x => x.RegistrantId.Value).ToList();
+            var registrationIds = registrations.Select(x => x.ID.Value).ToList();
 
             registrantActivities = RegistrantActivity.LoadByRegistrantIds(registrantIds, msgs, dc);
 
@@ -334,7 +335,7 @@ namespace AfterSchoolLibrary.Services
                     break;
             }
 
-            var answers = FormQuestionAnswer.LoadByRegistrationIds(registrations.Select(x => x.ID.Value).ToList(), msgs, dc)
+            var answers = FormQuestionAnswer.LoadByRegistrationIds(registrationIds, msgs, dc)
                .Where(x => x.Text.IsNotBlank())
                .ToList();
 
@@ -389,7 +390,15 @@ namespace AfterSchoolLibrary.Services
             row.Add("First Name");
             row.Add("Last Name");
             row.Add("Email");
-            row.Add("Activities");
+
+            if (reportType == RegistrationReportType.Dismissal)
+            {
+                Enum.GetValues(typeof(DayOfWeekASL)).Cast<DayOfWeekASL>().Except(DayOfWeekASL.NotSet.AsList()).ToList().ForEach(dayOfWeek => {
+                    row.Add(dayOfWeek.ToString());
+                });
+            }
+            else
+                row.Add("Activities");
 
             if (reportType != RegistrationReportType.Basic)
             {
@@ -410,7 +419,7 @@ namespace AfterSchoolLibrary.Services
             row.Add(registration.RegistrantLastName);
             row.Add(registration.RegistrantEmail);
 
-            AddActivitiesToCSVReport(row, registration, registrantActivities);
+            AddActivitiesToCSVReport(row, registration, registrantActivities, reportType);
 
             if (reportType != RegistrationReportType.Basic)
             {
@@ -421,43 +430,61 @@ namespace AfterSchoolLibrary.Services
             return row;
         }
 
-        private static void AddActivitiesToCSVReport(List<string> row, Registration registration, List<RegistrantActivity> registrantActivities, SystemMessages msgs = null, DatabaseConnection dc = null)
+        private static void AddActivitiesToCSVReport(List<string> row, Registration registration, List<RegistrantActivity> registrantActivities, RegistrationReportType reportType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var regIds = registration.ID.Value.AsList();
             var ras = registrantActivities.Where(registrantActivity => registrantActivity.RegistrationId.Value.In(regIds))
                 .ToList();
-            var participationObjects = ras.Select(registrantActivity =>
-                new
-                {
-                    registrantActivity.ParticipationObjectId,
-                    registrantActivity.ParticipationObjectTypeId,
-                    registrantActivity.AssignmentTypeId
-                })
-                .ToList();
 
-            var activitiesList = new List<string>();
-            participationObjects.ForEach(participationObject => 
+            if (reportType == RegistrationReportType.Dismissal)
             {
-                var name = "";
-
-                switch (participationObject.ParticipationObjectTypeId)
+                Enum.GetValues(typeof(DayOfWeekASL)).Cast<DayOfWeekASL>().Except(DayOfWeekASL.NotSet.AsList()).ToList().ForEach(dayOfWeek =>
                 {
-                    case ParticipationObjectType.AccountActivityGroup:
-                        var aag = AccountActivityGroup.Load(participationObject.ParticipationObjectId.Value, msgs, dc);
-                        name = ActivityGroup.Load(aag.ActivityGroupId.Value, msgs, dc).Name;
-                        break;
-                    case ParticipationObjectType.Activity:
-                        name = Activity.Load(participationObject.ParticipationObjectId.Value, msgs, dc).Name;
-                        break;
-                    case ParticipationObjectType.ActivityGroup:
-                        name = ActivityGroup.Load(participationObject.ParticipationObjectId.Value, msgs, dc).Name;
-                        break;
-                }
+                    var dayActivities = new List<RegistrantActivity>();
 
-                activitiesList.Add($"{name} - {participationObject.AssignmentTypeId.ToString().SplitByUpperCase()}");
-            });            
+                    ras.Where(ra => ra.AssignmentTypeId.In(Registration.ReservedStatuses)).ToList().ForEach(ra => {
+                        var daysInSchedule = ra.GetSchedule(msgs, dc)?.GetDaysOfTheWeek(msgs, dc);
+                        if (daysInSchedule.IsNotEmpty() && dayOfWeek.In(daysInSchedule))
+                            dayActivities.Add(ra);
+                    });
+                                        
+                    AddActivitiesToRow(row, dayActivities, reportType, msgs, dc);
+                });
+            }
+            else
+                AddActivitiesToRow(row, ras, reportType, msgs, dc);
+        }
+
+        private static void AddActivitiesToRow(List<string> row, List<RegistrantActivity> ras, RegistrationReportType reportType, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var activitiesList = new List<string>();
+            ras.ForEach(ra =>
+            {
+                var name = GetActivityNameForReport(ra, msgs, dc);
+
+                if (reportType != RegistrationReportType.Dismissal)
+                    name += $" - {ra.AssignmentTypeId.ToString().SplitByUpperCase()}";
+
+                activitiesList.Add(name);
+            });
 
             row.Add(activitiesList.ToStringList("; "));
+        }
+
+        private static string GetActivityNameForReport(RegistrantActivity registrantActivity, SystemMessages msgs, DatabaseConnection dc)
+        {          
+            switch (registrantActivity.ParticipationObjectTypeId)
+            {
+                case ParticipationObjectType.AccountActivityGroup:
+                    var aag = AccountActivityGroup.Load(registrantActivity.ParticipationObjectId.Value, msgs, dc);
+                    return ActivityGroup.Load(aag.ActivityGroupId.Value, msgs, dc).Name;
+                case ParticipationObjectType.Activity:
+                    return Activity.Load(registrantActivity.ParticipationObjectId.Value, msgs, dc).Name;
+                case ParticipationObjectType.ActivityGroup:
+                    return ActivityGroup.Load(registrantActivity.ParticipationObjectId.Value, msgs, dc).Name;
+            }
+
+            return "";
         }
 
         private static void AddQuestionsToCSVReport(List<string> row, List<FormQuestion> standardQuestions, List<FormQuestion> customQuestions, List<FormQuestionAnswer> answers, Registration registration)

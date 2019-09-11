@@ -1670,7 +1670,7 @@ values: NotSet, Reserved, WaitingList, Applied, Invited, Declined, ReservedPendi
 [begin]
 type: Enum
 name: RegistrationReportType
-values: NotSet, Basic, Detailed, SingleActivity
+values: NotSet, Basic, Detailed, SingleActivity, Dismissal
 [end]
 
 [begin]
