@@ -89,12 +89,16 @@
                         <button onclick="location.href='@Url.Action("addregistration", "group" , new { id = Model.Uid })'" class="btn btn-primary btn-space">
                             Add Student
                         </button>
-                        <button class="btn btn-default md-trigger btn-space" data-modal="modal-emails">Send Registration Report</button>
+
+                        <button class="btn btn-default md-trigger btn-space" data-modal="modal-emails">
+                            Send Registration Report
+                        </button>
+
+                        <button type="button" onclick="notifyAll()" class="btn btn-default btn-space md-trigger" data-modal="modal-confirmation" @btnNotifyDisabled>
+                            Email Registration Details to @UILabel.RegistrantLabel(true)
+                        </button>
+
                     </div>
-                    
-                    <button type="button" onclick="notifyAll()" class="btn btn-default btn-lg btn-space md-trigger hide" data-modal="modal-confirmation" @btnNotifyDisabled>
-                        Email Registration Details to @UILabel.RegistrantLabel(true)
-                    </button>
                 </div>
             </div>
 
@@ -158,7 +162,7 @@
 <script>
     function notifyAll() {
         $('#confirmation-action').html('<strong>notify all @UILabel.RegistrantLabel(true).ToLower()</strong>');
-        $('#confirmation-additional-text').html('All @UILabel.RegistrantLabel(true).ToLower() will receive an email of their current registrations. You will also receive one BCC email as confirmation.');
+        $('#confirmation-additional-text').html('All @UILabel.RegistrantLabel(true).ToLower() will receive an email of their current registrations.');
         $('#btnconfirm').attr('href', '@Url.Action("notifyall", "group", new { id = Model.Uid })');
     }
 </script>
