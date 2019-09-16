@@ -448,7 +448,6 @@ namespace AfterSchoolLibrary.Models
             {
                 searchTextJoin = "inner join FormQuestionAnswer fqa on r2.ID = fqa.RegistrationId";
 
-
                 var itemList = new List<string>();
 
                 if (questionId.HasValue)
