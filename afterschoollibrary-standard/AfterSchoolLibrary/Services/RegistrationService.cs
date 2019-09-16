@@ -237,6 +237,8 @@ namespace AfterSchoolLibrary.Services
                 account,
                 reportType,
                 registrationStatus,
+                participationObjectIds,
+                participationObjectType,
                 rats);
 
             var fileLink = RegistrationService.UploadCSV(account, filename, csv, msgs);
@@ -310,13 +312,27 @@ namespace AfterSchoolLibrary.Services
             return ah.GetFileLink(amazonLocation, false, null, true);
         }
 
-        public static string ExportCSV(List<Registration> registrations, Account account, RegistrationReportType reportType, RegistrationStatus registrationStatus, List<RegistrationAssignmentType> assignmentTypes, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static string ExportCSV(List<Registration> registrations, Account account, RegistrationReportType reportType, RegistrationStatus registrationStatus, List<int> participationObjectIds, ParticipationObjectType participationObjectType, List<RegistrationAssignmentType> assignmentTypes, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var registrantActivities = new List<RegistrantActivity>();
-            var registrantIds = registrations.Select(x => x.RegistrantId.Value).ToList();
-            var registrationIds = registrations.Select(x => x.ID.Value).ToList();
+            var allregistrations = new List<Registration>();
+
+            allregistrations.AddRange(registrations);
+
+            registrations.ForEach(registration => 
+                allregistrations.AddRange(registration.GetRelatedRegistrations(msgs, dc))
+            );
+
+            var registrantIds = allregistrations.Select(x => x.RegistrantId.Value).ToList();
+            var registrationIds = allregistrations.Select(x => x.ID.Value).ToList();
 
             registrantActivities = RegistrantActivity.LoadByRegistrantIds(registrantIds, msgs, dc);
+
+            if (participationObjectIds.Any())
+                registrantActivities = registrantActivities.Where(ra => 
+                                            ra.ParticipationObjectId.Value.In(participationObjectIds) && 
+                                            ra.ParticipationObjectTypeId == participationObjectType)
+                                        .ToList();
 
             if (assignmentTypes.IsNotEmpty() && assignmentTypes.Count > 0)
                 registrantActivities = registrantActivities.Where(x => x.AssignmentTypeId.In(assignmentTypes))
@@ -334,6 +350,18 @@ namespace AfterSchoolLibrary.Services
                     registrantActivities = registrantActivities.Where(x => x.WillBeInSession(msgs, dc)).ToList();
                     break;
             }
+
+            var activitySchedules = new List<ActivitySchedules>();
+
+            if (reportType == RegistrationReportType.Dismissal)
+                registrantActivities.DistinctBy(ra => new { ra.ParticipationObjectId, ra.ParticipationObjectTypeId }).ToList().ForEach(ra => {
+                    activitySchedules.Add(new ActivitySchedules()
+                    {
+                        DaysOfTheWeek = ra.GetSchedule(msgs, dc).GetDaysOfTheWeek(msgs, dc),
+                        ParticipationObjectId = ra.ParticipationObjectId.Value,
+                        ParticipationObjectTypeId = ra.ParticipationObjectTypeId
+                    });
+                });
 
             var answers = FormQuestionAnswer.LoadByRegistrationIds(registrationIds, msgs, dc)
                .Where(x => x.Text.IsNotBlank())
@@ -365,18 +393,19 @@ namespace AfterSchoolLibrary.Services
                 ));
 
             // print data for each registration
-            registrations.ForEach(registration =>
+            registrations.ForEach(firstRegistration => {
+
+                var reportRegistration = new ReportRegistration(firstRegistration, allregistrations, answers, registrantActivities, activitySchedules);
+
                 table.Add(AddEachRegistrationToCSVReport(
-                    registration,
+                    reportRegistration,
                     account,
                     reportType,
-                    registrantActivities,
                     standardQuestions,
                     customQuestions,
-                    answers,
                     msgs,
-                    dc))
-            );
+                    dc));
+            });
 
             return CsvFile.Create(table);
         }
@@ -409,44 +438,138 @@ namespace AfterSchoolLibrary.Services
             return row;
         }
 
-        private static List<string> AddEachRegistrationToCSVReport(Registration registration, Account account, RegistrationReportType reportType, List<RegistrantActivity> registrantActivities, List<FormQuestion> standardQuestions, List<FormQuestion> customQuestions, List<FormQuestionAnswer> answers, SystemMessages msgs, DatabaseConnection dc = null)
+        private class ActivitySchedules
+        {
+            public int ParticipationObjectId { get; set; }
+            public ParticipationObjectType ParticipationObjectTypeId { get; set; }
+            public List<DayOfWeekASL> DaysOfTheWeek { get; set; }
+
+            public bool IsMatch(RegistrantActivity ra)
+            {
+                return ra.ParticipationObjectId == ParticipationObjectId && ra.ParticipationObjectTypeId == ParticipationObjectTypeId;
+            }
+
+            public bool HasMatch(List<RegistrantActivity> registrantActivities)
+            {
+                return registrantActivities.Any(ra => IsMatch(ra));
+            }
+
+            public List<RegistrantActivity> GetMatches(List<RegistrantActivity> registrantActivities)
+            {
+                return registrantActivities.Where(ra => IsMatch(ra)).ToList();
+            }
+        }
+
+        private class ReportRegistration
+        {
+            public Registration FirstRegistration { get; set; }
+            public List<Registration> RelatedRegistrations { get; set; }
+            public List<RegistrantActivity> RegistrantActivities { get; set; }
+            public List<FormQuestionAnswer> Answers { get; set; }
+            public List<ActivitySchedules> ActivitySchedules { get; set; }
+            public List<int> RegistrantIds
+            {
+                get
+                {
+                    return AllRegistrations.Select(registration => registration.RegistrantId.Value).ToList();
+                }
+            }
+            public List<Registration> AllRegistrations
+            {
+                get
+                {
+                    var registrations = FirstRegistration.AsList();
+                    registrations.AddRange(RelatedRegistrations);
+                    return registrations;
+                }
+            }
+            public List<int> AllRegistrationIds
+            {
+                get
+                {
+                    return AllRegistrations.Select(registration => registration.ID.Value).ToList();
+                }
+            }
+
+            public decimal GetAmountPaid(SystemMessages msgs, DatabaseConnection dc = null)
+            {
+                return AllRegistrations.Sum(registration => registration.GetAmountPaid(msgs, dc));
+            }
+
+            public FormQuestionAnswer GetAnswer(FormQuestion question)
+            {
+                if (question.QuestionDataTypeId != QuestionDataType.NotSet)
+                    return Answers
+                            .Where(item =>
+                                item.RegistrationId.Value.In(AllRegistrationIds) &&
+                                item.FormQuestionQuestionDataTypeId == question.QuestionDataTypeId)
+                            .OrderBy(x => x.RegistrationId)
+                            .LastOrDefault();
+
+                return Answers
+                    .Where(item =>
+                        item.RegistrationId.Value.In(AllRegistrationIds) &&
+                        item.FormQuestionText.IsSameAs(question.Text))
+                    .OrderBy(x => x.RegistrationId)
+                    .LastOrDefault();
+            }
+
+            public List<RegistrantActivity> GetReservedActivitiesByDayOfTheWeek(DayOfWeekASL day)
+            {
+                var schedules = ActivitySchedules.Where(schedule => schedule.DaysOfTheWeek.Contains(day)).ToList();
+                var ras = new List<RegistrantActivity>();
+                var reservedRas = GetReservedActivities();
+
+                schedules.ForEach(schedule => ras.AddRange(schedule.GetMatches(reservedRas)));
+
+                return ras;
+            }
+
+            public List<RegistrantActivity> GetReservedActivities()
+            {
+                return RegistrantActivities.Where(ra => ra.AssignmentTypeId.In(Registration.ReservedStatuses)).ToList();
+            }
+
+            public ReportRegistration(Registration firstRegistration, List<Registration> allRegistrations, List<FormQuestionAnswer> answers, List<RegistrantActivity> registrantActivities, List<ActivitySchedules> activitySchedules)
+            {
+                FirstRegistration = firstRegistration;
+                RelatedRegistrations = allRegistrations.Where(reg => reg.FirstRegistrationId == FirstRegistration.ID).ToList();
+                Answers = answers.Where(answer => answer.RegistrantId.Value.In(RegistrantIds)).ToList();
+                RegistrantActivities = registrantActivities.Where(ra => ra.RegistrantId.Value.In(RegistrantIds)).ToList();
+                ActivitySchedules = activitySchedules.Where(schedules => schedules.HasMatch(RegistrantActivities)).ToList();
+            }
+        }
+
+        private static List<string> AddEachRegistrationToCSVReport(ReportRegistration registration, Account account, RegistrationReportType reportType, List<FormQuestion> standardQuestions, List<FormQuestion> customQuestions, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var row = new List<string>();
 
-            row.Add(account.ConvertToAccountTimeZone(registration.CreateDate.Value).ToShortDateTimeString());
+            row.Add(account.ConvertToAccountTimeZone(registration.FirstRegistration.CreateDate.Value).ToShortDateTimeString());
 
-            row.Add(registration.RegistrantFirstName);
-            row.Add(registration.RegistrantLastName);
-            row.Add(registration.RegistrantEmail);
+            row.Add(registration.FirstRegistration.RegistrantFirstName);
+            row.Add(registration.FirstRegistration.RegistrantLastName);
+            row.Add(registration.FirstRegistration.RegistrantEmail);
 
-            AddActivitiesToCSVReport(row, registration, registrantActivities, reportType);
+            AddActivitiesToCSVReport(row, registration, reportType);
 
             if (reportType != RegistrationReportType.Basic)
             {
                 row.Add(registration.GetAmountPaid(msgs, dc).ToCurrency());
-                AddQuestionsToCSVReport(row, standardQuestions, customQuestions, answers, registration);
+                AddQuestionsToCSVReport(row, standardQuestions, customQuestions, registration);
             }
 
             return row;
         }
 
-        private static void AddActivitiesToCSVReport(List<string> row, Registration registration, List<RegistrantActivity> registrantActivities, RegistrationReportType reportType, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            var regIds = registration.ID.Value.AsList();
-            var ras = registrantActivities.Where(registrantActivity => registrantActivity.RegistrationId.Value.In(regIds))
-                .ToList();
+        private static void AddActivitiesToCSVReport(List<string> row, ReportRegistration registration, RegistrationReportType reportType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {            
+            var ras = registration.RegistrantActivities;
 
             if (reportType == RegistrationReportType.Dismissal)
             {
                 Enum.GetValues(typeof(DayOfWeekASL)).Cast<DayOfWeekASL>().Except(DayOfWeekASL.NotSet.AsList()).ToList().ForEach(dayOfWeek =>
                 {
-                    var dayActivities = new List<RegistrantActivity>();
-
-                    ras.Where(ra => ra.AssignmentTypeId.In(Registration.ReservedStatuses)).ToList().ForEach(ra => {
-                        var daysInSchedule = ra.GetSchedule(msgs, dc)?.GetDaysOfTheWeek(msgs, dc);
-                        if (daysInSchedule.IsNotEmpty() && dayOfWeek.In(daysInSchedule))
-                            dayActivities.Add(ra);
-                    });
+                    var dayActivities = registration.GetReservedActivitiesByDayOfTheWeek(dayOfWeek);
                                         
                     AddActivitiesToRow(row, dayActivities, reportType, msgs, dc);
                 });
@@ -487,7 +610,7 @@ namespace AfterSchoolLibrary.Services
             return "";
         }
 
-        private static void AddQuestionsToCSVReport(List<string> row, List<FormQuestion> standardQuestions, List<FormQuestion> customQuestions, List<FormQuestionAnswer> answers, Registration registration)
+        private static void AddQuestionsToCSVReport(List<string> row, List<FormQuestion> standardQuestions, List<FormQuestion> customQuestions, ReportRegistration registration)
         {
             foreach (var question in standardQuestions)
             {
@@ -498,12 +621,7 @@ namespace AfterSchoolLibrary.Services
                     case QuestionDataType.RegistrantEmail:
                         break;
                     default:
-                        var answer = answers
-                            .Where(item =>
-                                registration.ID == item.RegistrationId &&
-                                item.FormQuestionQuestionDataTypeId == question.QuestionDataTypeId)
-                            .OrderBy(x => x.RegistrationId)
-                            .LastOrDefault();
+                        var answer = registration.GetAnswer(question);
 
                         if (answer.IsNotEmpty())
                             row.Add(answer.Text);
@@ -515,12 +633,7 @@ namespace AfterSchoolLibrary.Services
 
             foreach (var question in customQuestions)
             {
-                var answer = answers
-                    .Where(item =>
-                        registration.ID == item.RegistrationId &&
-                        item.FormQuestionText == question.Text)
-                    .OrderBy(x => x.RegistrationId)
-                    .LastOrDefault();
+                var answer = registration.GetAnswer(question);
 
                 if (answer.IsNotEmpty())
                     row.Add(answer.Text);
