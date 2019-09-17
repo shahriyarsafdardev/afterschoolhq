@@ -601,6 +601,23 @@ namespace AfterSchoolLibrary.Services
             return copy;
         }
 
+        public static bool IsRegistrationDone(this Registrant submittedRecord, Registration registration, ParticipationObject participationObject, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (submittedRecord.IsEmpty())
+                return false;
+
+            if (registration.IsEmpty())
+                return false;
+
+            if (participationObject.RequiresParentalConsent && registration.ESignature.IsEmpty())
+                return false;
+
+            if (participationObject.ShouldParentPay() && !submittedRecord.IsReservedAndPaidFor(participationObject, null, msgs, dc))
+                return false;
+
+            return true;
+        }
+
         public static List<Registrant> GetSubmittedRecords(this Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Registrant.LoadByParentRegistrantId(registrant.ID.Value, msgs, dc);
