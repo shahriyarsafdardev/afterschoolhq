@@ -1158,11 +1158,12 @@ namespace AfterSchool.Controllers
                     "editstudentpersonal",
                     "family",
                     new { Area = "user", id = SessionVariables.CurrentRegistrant.Uid, reg = registration?.Uid, student = SessionVariables.CurrentRegistrant?.Uid });
-            
-            var hasSubmittedFor = submittedRecord.IsNotEmpty();
+
+
+            var isRegistrationDone = submittedRecord.IsRegistrationDone(registration, participationObject, msgs);
 
             // current registrant is already registered
-            if (hasSubmittedFor && !participationObject.IsSession())
+            if (isRegistrationDone && !participationObject.IsSession())
                 return RedirectToAction("select");
 
             // need to see if there are any questions required by the form on the activity/activity group that haven't been collected on the main form
@@ -1172,7 +1173,9 @@ namespace AfterSchool.Controllers
             // if it doesn't require parental consent, 
             // the registration has already been started (by the child)
             // and it's not a session (parents can edit registrations for sessions)
-            if (!questions.Any() && !participationObject.RequiresParentalConsent && registration.IsNotEmpty() && !participationObject.IsSession())
+            var gotoPayment = !questions.Any() && !participationObject.RequiresParentalConsent && registration.IsNotEmpty() && !participationObject.IsSession();
+
+            if (gotoPayment)
             {
                 if (participationObject.ShouldParentPay())
                     return RedirectToAction("payment", new { id = registration.Uid });
