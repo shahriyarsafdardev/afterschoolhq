@@ -887,14 +887,11 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var activityToCopy = Activity.LoadByUid(id.ToGuid());
 
-            Activity activity = null;
-
-            if (copywithregistrants.IsBoolean())
-                activity = activityToCopy
-                    .CopyWithRegistrants(activitynamecopy, true, SessionVariables.CurrentUser.ID.Value, msgs);
-            else
-                activity = activityToCopy
-                    .Copy(activitynamecopy, true, SessionVariables.CurrentUser.ID.Value, msgs);
+            var activity = activityToCopy.Copy(
+                            activitynamecopy,
+                            true,
+                            SessionVariables.CurrentUser.ID.Value,
+                            msgs);
 
             ViewBag.Messages = msgs;
 

@@ -1,11 +1,11 @@
 ﻿@model ActivityType
 @{ 
-    var showCopyWithStudents = true;
+    var showCopyWithStudents = false;
 
-    if (ViewData["ShowCopyWithStudents"].IsNotEmpty())
-    {
-        showCopyWithStudents = ViewData["ShowCopyWithStudents"].ToString().ToBoolean();
-    }
+    //if (ViewData["ShowCopyWithStudents"].IsNotEmpty())
+    //{
+    //    showCopyWithStudents = ViewData["ShowCopyWithStudents"].ToString().ToBoolean();
+    //}
 }
 <div id="modal-copy-activity" class="md-modal colored-header custom-width md-effect-9">
     <form id="form-copy" action="" method="post">
@@ -20,7 +20,7 @@
 
                 <div class="form-group">
                     <label>@UILabel.ActivityLabel(Model) Name</label>
-                    <input type="text" placeholder="Your @UILabel.ActivityLabel(Model) Name" class="form-control" id="activitynamecopy" name="activitynamecopy" onfocus="this.select()">
+                    <input type="text" placeholder="Your @UILabel.ActivityLabel(Model) Name" class="form-control" id="activitynamecopy" name="activitynamecopy" onfocus="this.select()" maxlength="50">
                 </div>
 
                 @if (showCopyWithStudents)
