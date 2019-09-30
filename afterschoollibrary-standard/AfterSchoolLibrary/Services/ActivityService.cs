@@ -549,7 +549,7 @@ namespace AfterSchoolLibrary.Services
                         //copy registration period if doesn't have activity groups
                         if (!account.HasFeature(FeatureType.ManageActivityGroups, amsgs, adc))
                         {
-                            var periodName = RegistrationPeriod.GenerateUniqueName(account.ID.Value, $"{copy.Name} - Reg Window", amsgs, adc);
+                            var periodName = RegistrationPeriod.GenerateUniqueName(account.ID.Value, $"{copy.Name} - Reg Window".MaxChars(50), amsgs, adc);
                             var newPeriod = activePeriod.Copy(periodName, loggedInUserId, amsgs, dc: adc);
                             amsgs.AddRange(newPeriod.AddActivity(copy, true, loggedInUserId, adc));
                         }
