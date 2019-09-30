@@ -13,12 +13,12 @@ namespace AfterSchoolLibrary.Services
         {
             var registrants = new List<Registrant>();
             var childRegistrant = activityMessageRegistrant.GetRegistrant(msgs, dc);
-            var parentOrGuardian = childRegistrant.GetMasterRegistrant(msgs, dc)?.GetParentOrGuardian(msgs, dc);
+            var parentOrGuardian = childRegistrant.GetParentOrGuardian(msgs, dc);
 
             if (parentOrGuardian.IsNotEmpty())
                 registrants.Add(parentOrGuardian);
 
-            if (childRegistrant.Email.IsNotEmpty() && !childRegistrant.Email.IsSameAs(parentOrGuardian.Email))
+            if (childRegistrant.Email.IsNotEmpty() && (parentOrGuardian.IsEmpty() || !childRegistrant.Email.IsSameAs(parentOrGuardian.Email)))
                 registrants.Add(childRegistrant);
 
             return registrants;
