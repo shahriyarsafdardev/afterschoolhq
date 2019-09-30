@@ -337,7 +337,7 @@ namespace AfterSchoolLibrary.Models
                 Description = this.Description,
                 EndDateTime = this.EndDateTime,
                 Location = this.Location,
-                Name = newName.IfEmpty(this.Name + " Copy"),
+                Name = newName.IfEmpty(this.Name + " Copy").MaxChars(50),
                 StartDateTime = this.StartDateTime
             };
             msgs.AddRange(period.Save(dc: dc));
