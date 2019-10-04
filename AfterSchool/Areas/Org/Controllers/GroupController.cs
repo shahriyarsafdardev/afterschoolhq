@@ -743,14 +743,11 @@ namespace AfterSchool.Areas.Org.Controllers
             var group = ActivityGroup.LoadByUid(id.ToGuid()).Copy(groupnamecopy, true, SessionVariables.CurrentUser.ID.Value, msgs);
 
             ViewBag.Messages = msgs;
+
             if (msgs.HasNoErrors())
-            {
                 return RedirectToAction("edit", new { id = group.Uid });
-            }
-            else
-            {
-                return RedirectToAction("index", "group");
-            }
+
+            return RedirectToAction("index", "group");
         }
 
         private List<FormQuestion> GetAddRegistrationQuestions(Form form, SystemMessages msgs)

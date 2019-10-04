@@ -486,15 +486,20 @@ namespace AfterSchoolLibrary.Services
 
         public static Activity CopyWithRegistrants(this Activity activity, string newName, bool useSameForm, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return activity.Copy(newName, useSameForm, true, loggedInUserId, msgs, dc);
+            return activity.Copy(newName, useSameForm, true, true, true, loggedInUserId, msgs, dc);
         }
 
         public static Activity Copy(this Activity activity, string newName, bool useSameForm, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return activity.Copy(newName, useSameForm, false, loggedInUserId, msgs, dc);
+            return activity.Copy(newName, useSameForm, false, true, true, loggedInUserId, msgs, dc);
         }
 
-        internal static Activity Copy(this Activity activity, string newName, bool useSameForm, bool includeRegistrants, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Activity Copy(this Activity activity, string newName, bool useSameForm, bool includeSignUpPeriods, bool includeSchedule, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return activity.Copy(newName, useSameForm, false, includeSignUpPeriods, includeSchedule, loggedInUserId, msgs, dc);
+        }
+
+        internal static Activity Copy(this Activity activity, string newName, bool useSameForm, bool includeRegistrants, bool includeSignUpPeriods, bool includeSchedule, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -543,18 +548,21 @@ namespace AfterSchoolLibrary.Services
                     // copy team and permissions
                     activity.GetTeamMembers(amsgs, adc).ForEach(member => member.Copy(copy.ID.Value, loggedInUserId, amsgs, adc));
 
-                    var activePeriod = activity.GetActiveRegistrationPeriod(amsgs, adc);
-                    if (activePeriod.IsNotEmpty())
+                    if (includeSignUpPeriods)
                     {
-                        //copy registration period if doesn't have activity groups
-                        if (!account.HasFeature(FeatureType.ManageActivityGroups, amsgs, adc))
+                        var activePeriod = activity.GetActiveRegistrationPeriod(amsgs, adc);
+                        if (activePeriod.IsNotEmpty())
                         {
-                            var periodName = RegistrationPeriod.GenerateUniqueName(account.ID.Value, $"{copy.Name} - Reg Window".MaxChars(50), amsgs, adc);
-                            var newPeriod = activePeriod.Copy(periodName, loggedInUserId, amsgs, dc: adc);
-                            amsgs.AddRange(newPeriod.AddActivity(copy, true, loggedInUserId, adc));
+                            //copy registration period if doesn't have activity groups
+                            if (!account.HasFeature(FeatureType.ManageActivityGroups, amsgs, adc))
+                            {
+                                var periodName = RegistrationPeriod.GenerateUniqueName(account.ID.Value, $"{copy.Name} - Reg Window".MaxChars(50), amsgs, adc);
+                                var newPeriod = activePeriod.Copy(periodName, loggedInUserId, amsgs, dc: adc);
+                                amsgs.AddRange(newPeriod.AddActivity(copy, true, loggedInUserId, adc));
+                            }
+                            else
+                                amsgs.AddRange(activePeriod.AddActivity(copy, true, loggedInUserId, adc));
                         }
-                        else
-                            amsgs.AddRange(activePeriod.AddActivity(copy, true, loggedInUserId, adc));
                     }
 
                     // copy Activity Properties
@@ -573,7 +581,7 @@ namespace AfterSchoolLibrary.Services
                     });
 
                     // NOTE: copy schedule?
-                    if (activity.ActivityScheduleId.HasValue)
+                    if (includeSchedule && activity.ActivityScheduleId.HasValue)
                     {
                         copy.ActivityScheduleId = activity.GetSchedule(amsgs, adc)
                             .CopyAndSave(loggedInUserId, amsgs, adc)
