@@ -410,41 +410,44 @@ namespace AfterSchoolLibrary.Services
                         Cost = activityGroup.Cost,
                         CostUnitTypeId = activityGroup.CostUnitTypeId,
                     };
-                    msgs.AddRange(group.Save(adc));
+                    amsgs.AddRange(group.Save(adc));
 
                     // copy AccountProperties / Content
-                    activityGroup.GetGroupProperties(msgs, adc).ForEach(item => {
-                        var newprop = new AccountProperty();
-                        newprop.AccountPropertyTypeId = item.AccountPropertyTypeId;
-                        newprop.ActivityGroupId = group.ID;
-                        newprop.CreateDate = newprop.LastModifiedDate = DateTime.UtcNow;
-                        newprop.CreatedBy = newprop.LastModifiedBy = loggedInUserId;
-                        newprop.Value = item.Value;
-                        msgs.AddRange(newprop.Save(adc));
+                    activityGroup.GetGroupProperties(amsgs, adc).ForEach(item => {
+                        var newprop = new AccountProperty
+                        {
+                            AccountPropertyTypeId = item.AccountPropertyTypeId,
+                            ActivityGroupId = group.ID,
+                            CreateDate = DateTime.UtcNow,
+                            LastModifiedDate = DateTime.UtcNow,
+                            CreatedBy = loggedInUserId,
+                            LastModifiedBy = loggedInUserId,
+                            Value = item.Value,
+                        };
+                        amsgs.AddRange(newprop.Save(adc));
                     });
 
                     // activities
                     activityGroup.GetActivities(amsgs, adc).ForEach(activity => {
-                        var newact = activity.Copy(activity.Name, true, loggedInUserId, amsgs, dc: adc);
+                        var newact = activity.Copy(
+                                        newName: activity.Name, 
+                                        useSameForm: true,
+                                        includeSignUpPeriods: false,
+                                        includeSchedule: false,
+                                        loggedInUserId: loggedInUserId, 
+                                        msgs: amsgs, 
+                                        dc: adc);
+
                         newact.ActivityGroupId = group.ID;
                         newact.ActivityScheduleId = null;
                         newact.IsPublished = true;
-                        msgs.AddRange(newact.Save(adc));
+                        amsgs.AddRange(newact.Save(adc));
                     });
                     
                 },
-                onSuccess: (SystemMessages smsgs) =>
-                {
-                    msgs.AddRange(smsgs);
-                },
-                onFailure: (SystemMessages fmsgs) =>
-                {
-                    msgs.AddRange(fmsgs);
-                },
-                onException: (SystemMessages emsgs) =>
-                {
-                    Helpers.Utilities.SystemErrorLog(emsgs);
-                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
 
