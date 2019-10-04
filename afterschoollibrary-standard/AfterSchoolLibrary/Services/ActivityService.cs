@@ -496,7 +496,7 @@ namespace AfterSchoolLibrary.Services
 
         public static Activity Copy(this Activity activity, string newName, bool useSameForm, bool includeSignUpPeriods, bool includeSchedule, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return activity.Copy(newName, useSameForm, false, true, true, loggedInUserId, msgs, dc);
+            return activity.Copy(newName, useSameForm, false, includeSignUpPeriods, includeSchedule, loggedInUserId, msgs, dc);
         }
 
         internal static Activity Copy(this Activity activity, string newName, bool useSameForm, bool includeRegistrants, bool includeSignUpPeriods, bool includeSchedule, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
