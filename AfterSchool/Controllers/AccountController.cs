@@ -1120,8 +1120,9 @@ namespace AfterSchool.Controllers
 
             var answers = SessionVariables.CurrentRegistrant.GetAnswers(msgs);
 
-            var questions = requiredQuestions.Where(question =>
-                    answers.Find(answer => answer.QuestionDataTypeId == question.QuestionDataTypeId).IsEmpty()
+            var questions = requiredQuestions.Where(question => 
+                    answers.FirstOrDefault(answer => answer.QuestionDataTypeId == question.QuestionDataTypeId).IsEmpty() ||
+                    answers.FirstOrDefault(answer => answer.QuestionDataTypeId == question.QuestionDataTypeId).Text.IsBlank()
                 )
                 .Distinct()
                 .ToList();
