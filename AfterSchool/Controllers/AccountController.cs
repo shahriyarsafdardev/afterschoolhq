@@ -1230,6 +1230,8 @@ namespace AfterSchool.Controllers
             Registration registration = null;
             RegistrationPeriod period = null;
             Registrant submittedRecord = null;
+            var currentRegistrant = SessionVariables.CurrentRegistrant;
+            var currentUser = SessionVariables.CurrentUser;
 
             (submittedRecord, registration) = SessionVariables.CurrentRegistrant.GetSubmittedRecord(participationObject, msgs);
 
@@ -1245,10 +1247,10 @@ namespace AfterSchool.Controllers
                         .ToList()
                         .ForEach(qvm =>
                         {
-                            SessionVariables.CurrentRegistrant.AddAnswer(
+                            currentRegistrant.AddAnswer(
                                 answerText: qvm.Value,
                                 question: qvm.Question,
-                                loggedInUser: SessionVariables.CurrentUser,
+                                loggedInUser: currentUser,
                                 msgs: amsgs,
                                 dc: adc);
                         });
@@ -1257,9 +1259,9 @@ namespace AfterSchool.Controllers
                         // required in order to make sure registration data doesn't change as registrant changes information in master record.
                         if (submittedRecord.IsEmpty())
                         {
-                            submittedRecord = SessionVariables.CurrentRegistrant.SubmitRecordToAccount(
+                            submittedRecord = currentRegistrant.SubmitRecordToAccount(
                                 ownerAccount: participationObject.OwnerAccount,
-                                loggedInUser: SessionVariables.CurrentUser,
+                                loggedInUser: currentUser,
                                 msgs: amsgs,
                                 dc: adc
                                 );
@@ -1271,22 +1273,22 @@ namespace AfterSchool.Controllers
                                 accountActivityGroupId: participationObject.GetAccountActivityGroupId(),
                                 periodId: period?.ID,
                                 esignature: signature,
-                                loggedInUserId: SessionVariables.CurrentUser.ID.Value,
+                                loggedInUserId: currentUser.ID.Value,
                                 msgs: amsgs,
                                 dc: adc);
                         }
                         else
                             registration.AddESignature(
                                 esignature: signature,
-                                loggedInUser: SessionVariables.CurrentUser,
+                                loggedInUser: currentUser,
                                 msgs: amsgs,
                                 dc: adc);
 
                         //copy all answers from the main account to the registrant & registration :)
-                        SessionVariables.CurrentRegistrant.CopyAnswers(
+                        currentRegistrant.CopyAnswers(
                             copyingRegistrant: submittedRecord,
                             registration: registration,
-                            loggedInUser: SessionVariables.CurrentUser,
+                            loggedInUser: currentUser,
                             msgs: amsgs,
                             dc: adc);
 
@@ -1308,7 +1310,7 @@ namespace AfterSchool.Controllers
                                             filename: Request.Files[qvm.Name].FileName,
                                             question: qvm.Question,
                                             registrationId: registration.ID,
-                                            loggedInUser: SessionVariables.CurrentUser,
+                                            loggedInUser: currentUser,
                                             msgs: amsgs,
                                             dc: adc);
                                     else
@@ -1320,11 +1322,10 @@ namespace AfterSchool.Controllers
                                     answerText: qvm.Value,
                                     question: qvm.Question,
                                     registrationId: registration.ID,
-                                    loggedInUser: SessionVariables.CurrentUser,
+                                    loggedInUser: currentUser,
                                     msgs: amsgs,
                                     dc: adc);
                         });
-
 
                         if (amsgs.HasNoErrors())
                             AddSessionActivitiesToRegistration(
