@@ -339,6 +339,7 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
             dq.Criterias.Add(ObjectMap["CreateDate"], startDate, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
             dq.Criterias.Add(ObjectMap["CreateDate"], endDate, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+            dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus.Select(x => (int)x).ToArray(), DatabaseCriteriaOperatorEnum.In);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
@@ -349,6 +350,7 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
             dq.Criterias.Add(ObjectMap["CreateDate"], startDate, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
             dq.Criterias.Add(ObjectMap["CreateDate"], endDate, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+            dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus.Select(x => (int)x).ToArray(), DatabaseCriteriaOperatorEnum.In);
             return dq.GetCount(msgs);
         }
 
@@ -393,7 +395,7 @@ namespace AfterSchoolLibrary.Models
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
             dq.Criterias.Add(ObjectMap["AccountId"], accountId);
-            dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus, DatabaseCriteriaOperatorEnum.In);
+            dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus.Select(x => (int)x).ToArray(), DatabaseCriteriaOperatorEnum.In);
             dq.Criterias.Add(ObjectMap["FirstRegistrationId"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
             dq.OrderBys.Add(ObjectMap["RegistrantFirstName"], OrderByDirectionEnum.Ascending);
             dq.OrderBys.Add(ObjectMap["RegistrantLastName"], OrderByDirectionEnum.Ascending);
@@ -588,7 +590,7 @@ namespace AfterSchoolLibrary.Models
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["RegistrationPeriodId"], RegistrationPeriodId);
-            dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus, DatabaseCriteriaOperatorEnum.In);
+            dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus.Select(x => (int)x).ToArray(), DatabaseCriteriaOperatorEnum.In);
             dq.OrderBys.Add(ObjectMap["RegistrantFirstName"], OrderByDirectionEnum.Ascending);
             dq.OrderBys.Add(ObjectMap["RegistrantLastName"], OrderByDirectionEnum.Ascending);
             dq.SelectRange.Start = start;
@@ -601,7 +603,7 @@ namespace AfterSchoolLibrary.Models
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ActivityGroupId"], ActivityGroupId);
-            dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus, DatabaseCriteriaOperatorEnum.In);
+            dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus.Select(x => (int)x).ToArray(), DatabaseCriteriaOperatorEnum.In);
             dq.OrderBys.Add(ObjectMap["RegistrantFirstName"], OrderByDirectionEnum.Ascending);
             dq.OrderBys.Add(ObjectMap["RegistrantLastName"], OrderByDirectionEnum.Ascending);
             dq.SelectRange.Start = start;
@@ -614,7 +616,7 @@ namespace AfterSchoolLibrary.Models
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["AccountActivityGroupId"], AccountActivityGroupId);
-            dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus, DatabaseCriteriaOperatorEnum.In);
+            dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus.Select(x => (int)x).ToArray(), DatabaseCriteriaOperatorEnum.In);
             dq.OrderBys.Add(ObjectMap["RegistrantFirstName"], OrderByDirectionEnum.Ascending);
             dq.OrderBys.Add(ObjectMap["RegistrantLastName"], OrderByDirectionEnum.Ascending);
             dq.SelectRange.Start = start;
