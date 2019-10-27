@@ -49,11 +49,12 @@ namespace AfterSchoolLibrary.Models
         }
     }
 
-    public class ActivityAndSeatCount
+    public class ActivityDetail
     {
         public int ActivityId { get; set; }
         public int ReservedSeatsTaken { get; set; }
         public int WaitingListSeatsTaken { get; set; }
+        public List<DateRange> Dates { get; set; }
     }
 
     [Serializable]
@@ -72,7 +73,7 @@ namespace AfterSchoolLibrary.Models
         private List<Registration> Registrations { get; set; }
         private List<RegistrantActivity> RegistrantActivities { get; set; }
         private List<Activity> Activities { get; set; }
-        private List<ActivityAndSeatCount> ActivityAndSeatCounts { get; set; }
+        private List<ActivityDetail> ActivityDetails { get; set; }
         private List<Registrant> Registrants { get; set; }
         private int RoundNumber { get; set; }
 
@@ -105,14 +106,14 @@ namespace AfterSchoolLibrary.Models
         public RegistrationRandomization()
         {
             RoundNumber = 0;
-            ActivityAndSeatCounts = new List<ActivityAndSeatCount>();
+            ActivityDetails = new List<ActivityDetail>();
         }
 
         public RegistrationRandomization(ActivityGroup group)
         {
             ActivityGroup = group;
             RoundNumber = 0;
-            ActivityAndSeatCounts = new List<ActivityAndSeatCount>();
+            ActivityDetails = new List<ActivityDetail>();
         }
 
         /// <summary>
@@ -122,11 +123,10 @@ namespace AfterSchoolLibrary.Models
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns>bool</returns>
-        private bool RunLottery(SystemMessages msgs = null, DatabaseConnection dc = null)
+        private bool RunLottery()
         {
             this.RoundNumber++;
 
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
             var registrants = this.Registrants.Shuffle().ToList();
             var registrantsToRemove = new List<Registrant>();
             var allFull = true;
@@ -169,17 +169,17 @@ namespace AfterSchoolLibrary.Models
                         this.ActivityAssignments.Add(activityAssignment);
                     }
 
-                    var seatsTaken = activityAssignment.Assignments.Count() + ActivityAndSeatCounts.Find(x => x.ActivityId == activity.ID).ReservedSeatsTaken;
-                    var wlSeatsTaken = activityAssignment.WaitingListAssignments.Count() + ActivityAndSeatCounts.Find(x => x.ActivityId == activity.ID).WaitingListSeatsTaken;
+                    var seatsTaken = activityAssignment.Assignments.Count() + ActivityDetails.Find(x => x.ActivityId == activity.ID).ReservedSeatsTaken;
+                    var wlSeatsTaken = activityAssignment.WaitingListAssignments.Count() + ActivityDetails.Find(x => x.ActivityId == activity.ID).WaitingListSeatsTaken;
                     var isFull = seatsTaken >= activity.SeatsAvailable.Value;
                     var isWLFull = wlSeatsTaken >= activity.WaitingListSeats.Value;
-                    var activityDates = activity.GetSchedule(msgs, dc).GetInstances(msgs: msgs, dc: dc);
+                    var activityDates = this.ActivityDetails.Find(x => x.ActivityId == activity.ID).Dates;
                     var hasActivityDuringScheduleAlready = false;
 
                     // check to see if the person is already registered for any days/times that would overlap, 
                     // if so, you can't register
                     hasActivityDuringScheduleAlready = DateRange.HasOverlappingDates(
-                                                            activityDates.Select(x => new DateRange(x.StartDateTime.Value, x.EndDateTime.Value)), 
+                                                            activityDates, 
                                                             registrantAssignment.AssignmentDateRanges
                                                         );
 
@@ -188,7 +188,7 @@ namespace AfterSchoolLibrary.Models
                     // if not full and doesn't have conflicting dates
                     if (!isFull && !hasActivityDuringScheduleAlready)
                     {
-                        AddAssignment(ra, AssignmentType.Seat, msgs, dc);
+                        AddAssignment(ra, AssignmentType.Seat);
                         allFull = false;
                         break;
                     }
@@ -196,12 +196,12 @@ namespace AfterSchoolLibrary.Models
                     // unless they were placed in another activity for that same day with a higher preference number
                     else if (!isWLFull && !hasActivityDuringScheduleAlready)
                     {
-                        AddAssignment(ra, AssignmentType.WaitingList, msgs, dc);
+                        AddAssignment(ra, AssignmentType.WaitingList);
                     }
                     // puts it in the not assigned list
                     else
                     {
-                        AddAssignment(ra, AssignmentType.NotSet, msgs, dc);
+                        AddAssignment(ra, AssignmentType.NotSet);
                     }
                 }
 
@@ -226,13 +226,14 @@ namespace AfterSchoolLibrary.Models
             
             foreach(var activity in this.Activities)
             {
-                this.ActivityAndSeatCounts.Add(
-                    new ActivityAndSeatCount()
+                this.ActivityDetails.Add(
+                    new ActivityDetail()
                     {
                         ActivityId = activity.ID.Value,
                         ReservedSeatsTaken = activity.GetSeatsTaken(msgs, dc),
-                        WaitingListSeatsTaken = activity.GetWaitingListSeatsTaken(msgs, dc)
-                    }
+                        WaitingListSeatsTaken = activity.GetWaitingListSeatsTaken(msgs, dc),
+                        Dates = activity.GetSchedule(msgs, dc).GetInstances(msgs: msgs, dc: dc).Select(x => new DateRange(x.StartDateTime.Value, x.EndDateTime.Value)).ToList()
+            }
                 );
             }
 
@@ -319,15 +320,13 @@ namespace AfterSchoolLibrary.Models
             if(msgs.IsEmpty()) msgs = new SystemMessages();
 
             LoadData(msgs, dc);
-            while (!RunLottery(msgs));
+            while (!RunLottery());
 
             return this.RegistrantAssignments;
         }
 
-        private void AddAssignment(RegistrantActivity ra, AssignmentType type, SystemMessages msgs = null, DatabaseConnection dc = null)
+        private void AddAssignment(RegistrantActivity ra, AssignmentType type)
         {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
             // registrant view
             var assignment = RegistrantAssignments.Find(x => x.RegistrantId == ra.RegistrantId.Value);
             if (assignment.IsEmpty())
@@ -357,7 +356,7 @@ namespace AfterSchoolLibrary.Models
 
             // store all dates/times this registrant is enrolled for
             var activity = this.Activities.Find(x => x.ID == ra.ParticipationObjectId && ra.ParticipationObjectTypeId == ParticipationObjectType.Activity);
-            var dateRanges = activity.GetSchedule(msgs, dc).GetInstances(msgs: msgs, dc: dc).Select(x => new DateRange(x.StartDateTime.Value, x.EndDateTime.Value));
+            var dateRanges = this.ActivityDetails.Find(x => x.ActivityId == activity.ID).Dates;
             switch (type)
             {
                 case AssignmentType.Seat:
