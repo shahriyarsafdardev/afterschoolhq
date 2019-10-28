@@ -297,6 +297,7 @@ namespace AfterSchool.Areas.District.Controllers
 
             ViewBag.Members = members;
             ViewBag.Team = team;
+            ViewBag.Messages = msgs;
             return View(group);
         }
 
