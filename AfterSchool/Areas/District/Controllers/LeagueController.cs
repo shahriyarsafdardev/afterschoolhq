@@ -285,7 +285,20 @@ namespace AfterSchool.Areas.District.Controllers
             ViewBag.Teams = teams.Where(t => t.DateSubmittedToActivityGroup.IsNotEmpty() && !t.IsDeleted).ToList();
             ViewBag.Activities = group.GetActivities();
             return View(group);
-        }                        
+        }
+
+        [HttpGet]
+        public ActionResult TeamDetails(string id, string teamid)
+        {
+            var msgs = new SystemMessages();
+            var group = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
+            var team = Activity.LoadByUid(teamid.ToGuid(), msgs);
+            var members = team.GetRegistrantActivities(msgs);
+
+            ViewBag.Members = members;
+            ViewBag.Team = team;
+            return View(group);
+        }
 
         [ValidateInput(false)]
         [HttpGet]
