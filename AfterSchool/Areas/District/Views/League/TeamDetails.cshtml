@@ -1,0 +1,54 @@
+@model ActivityGroup
+@{
+    ViewBag.Title = "Team";
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var team = (Activity)ViewBag.Team;
+    var members = (List<RegistrantActivity>)ViewBag.Members;
+}
+
+@{Html.RenderPartial("DistrictHeader");}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+    @{Html.RenderPartial("_LeagueHeader");}
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+
+            <div class="pull-right">
+
+                <a href="@Url.Action("teams", "league", new { id = Model.Uid })" class="btn btn-primary btn-space margin-r-10">
+                    <i class="icon icon-left s7-plus"></i>
+                    Back to Teams
+                </a>
+            </div>
+
+            @{Html.RenderPartial("_ActivityGroupTitle", $"{Model.Name} - {team.Name}"); }
+            <div class="clearfix"></div>
+        </div>
+        <div class="panel-body">
+
+           <div class="table-responsive">
+               <table class="table">
+                   <thead>
+                       <tr>
+                           <th>Name</th>
+                           <th>First Enrolled</th>
+                       </tr>
+                   </thead>
+                   <tbody>
+                       @foreach(var item in members)
+                       {
+                           <tr>
+                               <td>@item.RegistrantName</td>
+                               <td>@item.CreateDate.Value.Date.ToShortDateString()</td>
+                           </tr>
+                       }
+                   </tbody>
+               </table>
+           </div>
+
+        </div>
+    </div>
+</div>

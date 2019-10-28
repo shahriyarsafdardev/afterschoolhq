@@ -122,7 +122,7 @@ else
                         <tr>
                              @if (disableViewTeams)
                              {
-                                 <td></td>
+                                 <td><a href="@Url.Action("teamdetails", "league", new { id = group.Uid, teamid = activity.Uid })" class="btn btn-default btn-sm">View</a></td>
                                  <td> @activity.Name @(activity.ActivityGroupId.HasValue ? "- " + activity.ActivityGroupName : "")</td>
                              }
                              else
