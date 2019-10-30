@@ -2159,7 +2159,7 @@ namespace AfterSchool.Controllers
             if (participationObject.IsSession())
             {
                 // only get activities that are in the cart
-                var participationObjects = GetAllParticipationObjectsForCheckout(registration, msgs);
+                var participationObjects = GetAllParticipationObjectsForCheckout(registration, msgs, dc);                    
 
                 if (participationObject.RegistrationMode == RegistrationMode.Apply)
                 {
@@ -2184,9 +2184,14 @@ namespace AfterSchool.Controllers
                                 dc: dc);
                         }
                     }
+
+                    // make sure the number of final registered programs is equal to the number of programs that is in the cart + what already exists
+                    var registeredPOs = GetCurrentlyRegisteredForParticipationObjects(registration, msgs, dc);
+
+                    if (registeredPOs.Count != participationObjects.Count)
+                        msgs.Add($"Please enter all of your {UILabel.ActivityLabel(ActivityType.Activity).ToLower()} preferences", MessageType.UserError);
                 }
                 else
-                {
                     participationObjects.ForEach(po => {
                         registration.ProcessRegistrationAssignment(
                                 participationObject: po,
@@ -2198,38 +2203,40 @@ namespace AfterSchool.Controllers
                                 periodId: period?.ID,
                                 loggedInUser: SessionVariables.CurrentUser,
                                 msgs: msgs,
-                                dc: dc);
-                    });
-                }
+                                dc: dc);});
             }
         }
 
-        private List<ParticipationObject> GetAllParticipationObjectsForCheckout(Registration registration, SystemMessages msgs)
+        private List<ParticipationObject> GetAllParticipationObjectsForCheckout(Registration registration, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var activities = new List<ParticipationObject>();
+            var participationObjects = new List<ParticipationObject>();
 
-            activities.AddRange(SessionVariables.Cart.GetCartItems()
+            participationObjects.AddRange(SessionVariables.Cart.GetCartItems(msgs, dc)
                                     .Where(x => x.ParticipationObjectTypeId == ParticipationObjectType.Activity)
-                                    .Select(x => x.GetParticipationObject(msgs))
+                                    .Select(x => x.GetParticipationObject(msgs, dc))
                                     .Where(x => x.GetActivity().ActivityGroupId.HasValue));
 
             if (registration.IsNotEmpty())
+                participationObjects.AddRange(GetCurrentlyRegisteredForParticipationObjects(registration, msgs, dc));
+
+            return participationObjects.DistinctBy(x => x.ObjectID).OrderBy(x => x.Name).ToList();
+        }
+
+        private List<ParticipationObject> GetCurrentlyRegisteredForParticipationObjects(Registration registration, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var ignoredTypes = new List<RegistrationAssignmentType>()
             {
-                var ignoredTypes = new List<RegistrationAssignmentType>()
-                    {
-                        RegistrationAssignmentType.Declined,
-                        RegistrationAssignmentType.Withdrawn,
-                        RegistrationAssignmentType.Invited,
-                        RegistrationAssignmentType.NotSet
-                    };
+                RegistrationAssignmentType.Declined,
+                RegistrationAssignmentType.Withdrawn,
+                RegistrationAssignmentType.Invited,
+                RegistrationAssignmentType.NotSet
+            };
 
-                activities.AddRange(registration.GetRegistrantActivities(msgs)
-                                                .Where(x => x.AssignmentTypeId.NotIn(ignoredTypes))
-                                                .Where(x => x.ParticipationObjectTypeId == ParticipationObjectType.Activity)
-                                                .Select(x => x.GetParticipationObject(msgs)));
-            }
-
-            return activities.DistinctBy(x => x.ObjectID).OrderBy(x => x.Name).ToList();
+            return registration.GetRegistrantActivities(msgs, dc)
+                        .Where(x => x.AssignmentTypeId.NotIn(ignoredTypes))
+                        .Where(x => x.ParticipationObjectTypeId == ParticipationObjectType.Activity)
+                        .Select(x => x.GetParticipationObject(msgs, dc))
+                        .ToList();
         }
 
         private void LoadSessionActivitiesViewBag(ParticipationObject participationObject, Registration registration, SystemMessages msgs)
