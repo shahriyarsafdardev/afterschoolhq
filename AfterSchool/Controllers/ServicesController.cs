@@ -308,7 +308,7 @@ namespace AfterSchool.Controllers
             if (district.IsEmpty())
                 return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
 
-            var schools = district.GetVisitorAccounts(AccountType.School, msgs).OrderBy(x => x.Name);
+            var schools = district.GetVisitorAccounts(AccountType.School, msgs).Where(school => !school.IsTest && school.IsActive).OrderBy(x => x.Name);
             var status = msgs.HasNoErrors() ? "ok" : "error";
             var schoolList = schools.Select(school => 
                                     new 
