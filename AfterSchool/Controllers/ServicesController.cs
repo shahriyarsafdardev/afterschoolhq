@@ -272,8 +272,6 @@ namespace AfterSchool.Controllers
 
             var msgs = new SystemMessages();
 
-            var status = "";
-
             if (!email.IsMatch(BasicLibrary.Utilities.EmailRegEx))
                 msgs.Add("Please enter an email", MessageType.UserError);
 
@@ -293,9 +291,40 @@ namespace AfterSchool.Controllers
                     isAfterSchool: true
                     ));
 
-            status = msgs.HasNoErrors() ? "ok" : "error";
+            var status = msgs.HasNoErrors() ? "ok" : "error";
 
             return Json(new { status, messages = msgs }, JsonRequestBehavior.AllowGet);
-        }    
+        }
+
+        [HttpGet]
+        public ActionResult GetIPSSchools()
+        {
+            if (!IsRequestFromApp())
+                return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
+
+            var msgs = new SystemMessages();
+            var district = Account.LoadByAccountTypeId(AccountType.SchoolDistrict, msgs).FirstOrDefault();
+
+            if (district.IsEmpty())
+                return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
+
+            var schools = district.GetVisitorAccounts(AccountType.School, msgs).OrderBy(x => x.Name);
+            var status = msgs.HasNoErrors() ? "ok" : "error";
+            var schoolList = schools.Select(school => 
+                                    new 
+                                    { 
+                                        school.Name, 
+                                        Link = school.HomePageUrl, 
+                                        Address = school.GetHostedLocations(msgs).Any() ? school.GetHostedLocations(msgs).First().FormatAddressWithoutName(false) : ""
+                                    }
+                                );
+
+            return Json(new 
+            { 
+                status, 
+                messages = msgs, 
+                schools = schoolList
+            }, JsonRequestBehavior.AllowGet);
+        }
     }
 }

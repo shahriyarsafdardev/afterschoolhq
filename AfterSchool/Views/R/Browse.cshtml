@@ -32,6 +32,16 @@
         // Html.RenderPartial("~/Views/Shared/Registration/_AddActivity.cshtml", Model);
     }
 
+    @if (!registrationOpen.Any() && !registrationWillOpen.Any() && !registrationClosed.Any())
+    {
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <h3>No activities currently open for registration</h3>
+                <p>Have questions? Please contact @Model.Name @@ @Html.Raw(Model.Phone.IsNotBlank() ? Model.Phone : $"<a href=\"mailto:{Model.Email}\">{Model.Email}</a>")</p>
+            </div>
+        </div>
+    }
+
     @if (registrationOpen.Any())
     {
         <div class="row">
