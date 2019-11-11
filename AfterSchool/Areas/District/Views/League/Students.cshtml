@@ -1,0 +1,62 @@
+@model ActivityGroup
+@{
+    ViewBag.Title = "Team";
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var teams = (List<Activity>)ViewBag.Teams;
+    var members = (List<RegistrantActivity>)ViewBag.Members;
+}
+
+@{Html.RenderPartial("DistrictHeader");}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+    @{Html.RenderPartial("_LeagueHeader");}
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+
+            <div class="pull-right">
+            </div>
+
+            @{Html.RenderPartial("_ActivityGroupTitle", $"{Model.Name} - {members.Count} Students"); }
+            <div class="clearfix"></div>
+        </div>
+        <div class="panel-body">
+
+           <div class="table-responsive">
+               <table class="table">
+                   <thead>
+                       <tr>
+                           <th>Name</th>
+                           <th>Date of Birth</th>
+                           <th>Grade</th>
+                           <th>Gender</th>
+                           <th>School</th>
+                           <th>Team</th>
+                           <th>First Enrolled</th>
+                       </tr>
+                   </thead>
+                   <tbody>
+                       @foreach(var item in members)
+                       {
+                           var registrant = item.ToRegistrant();
+                           var team = teams.First(t => t.ID == item.ParticipationObjectId);
+
+                           <tr>
+                               <td>@item.RegistrantName</td>
+                               <td>@(registrant.GetAnswer(QuestionDataType.RegistrantDateOfBirth)?.Text.IfEmpty("-"))</td>
+                               <td>@(registrant.GetAnswer(QuestionDataType.RegistrantGrade)?.Text.IfEmpty("-"))</td>
+                               <td>@(registrant.GetAnswer(QuestionDataType.RegistrantGender)?.Text.IfEmpty("-"))</td>
+                               <td>@team.AccountName</td>
+                               <td>@team.Name</td>
+                               <td>@item.CreateDate.Value.ToShortDateString()</td>
+                           </tr>
+                       }
+                   </tbody>
+               </table>
+           </div>
+
+        </div>
+    </div>
+</div>

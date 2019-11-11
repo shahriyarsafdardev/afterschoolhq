@@ -116,12 +116,11 @@ namespace AfterSchoolLibrary.Services
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             var vistorAccounts = currentAccount.GetVisitorAccounts(accountType);
-            List<AccountActivityGroup> accountActivityGroups = new List<AccountActivityGroup>();
-            
-            foreach(var visitorAccount in vistorAccounts)
-            {
-                accountActivityGroups.Add(AccountActivityGroup.LoadByAccountIdByActivityGroupId(visitorAccount.ID.Value, activityGroup.ID.Value));
-            }
+            var accountActivityGroups = new List<AccountActivityGroup>();
+
+            vistorAccounts.ForEach(visitorAccount =>
+                accountActivityGroups.Add(AccountActivityGroup.LoadByAccountIdByActivityGroupId(visitorAccount.ID.Value, activityGroup.ID.Value))
+            );
 
             return accountActivityGroups;
         }
