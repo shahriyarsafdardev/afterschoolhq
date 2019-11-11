@@ -291,14 +291,34 @@ namespace AfterSchool.Areas.District.Controllers
         public ActionResult TeamDetails(string id, string teamid)
         {
             var msgs = new SystemMessages();
-            var group = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
+            var league = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
             var team = Activity.LoadByUid(teamid.ToGuid(), msgs);
             var members = team.GetRegistrantActivities(msgs);
 
             ViewBag.Members = members;
             ViewBag.Team = team;
             ViewBag.Messages = msgs;
-            return View(group);
+            return View(league);
+        }
+
+        [HttpGet]
+        public ActionResult Students(string id)
+        {
+            var msgs = new SystemMessages();
+            var league = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
+            var teams = league.GetLeagueTeams(SessionVariables.CurrentAccount, AccountType.School)
+                            .Where(t => t.DateSubmittedToActivityGroup.IsNotEmpty() && !t.IsDeleted)
+                            .ToList();
+            var members = new List<RegistrantActivity>();
+            
+            teams.ForEach(team =>
+                members.AddRange(team.GetRegistrantActivities(msgs))
+            );
+
+            ViewBag.Teams = teams;
+            ViewBag.Members = members.OrderBy(member => member.RegistrantLastName).ThenBy(member => member.RegistrantFirstName).ToList();
+            ViewBag.Messages = msgs;
+            return View(league);
         }
 
         [ValidateInput(false)]
