@@ -2,7 +2,6 @@
 @{
     string accountId = "";
     string returnUrl = "";
-    bool allowImpersonation = false;
     var accountPackage = (AccountPackage)ViewData["AccountPackage"];
     var paging = (PagingModel)ViewData["PagingModel"];
     var isAfterSchoolAdmin = SessionVariables.CurrentAccount.AccountTypeId == AccountType.AfterSchool;
