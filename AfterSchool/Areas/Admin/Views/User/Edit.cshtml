@@ -30,15 +30,15 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-3 control-label">Cellphone</label>
-                    <div class="col-sm-6">
-                        <input type="text" class="form-control" id="phone" name="phone" value="@Model.Phone" onfocus="this.select()" required />
-                    </div>
-                </div>
-                <div class="form-group">
                     <label class="col-sm-3 control-label">Email</label>
                     <div class="col-sm-6">
                         <input type="email" class="form-control" id="email" name="email" value="@Model.Email" onfocus="this.select()" required />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Phone</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" id="phone" name="phone" value="@Model.Phone" onfocus="this.select()" />
                     </div>
                 </div>
                 <div class="form-group">
@@ -57,9 +57,9 @@
                     <label class="col-sm-3 control-label">Is Active</label>
                     <div class="col-sm-6">
                         @{ Html.RenderPartial(
-                     "~/Views/Shared/_SwitchButton.cshtml",
-                     Model.IsActive,
-                     new ViewDataDictionary() { { "checkboxname", "isactive" }, { "checkboxid", "isactive" } });
+                      "~/Views/Shared/_SwitchButton.cshtml",
+                      Model.IsActive,
+                      new ViewDataDictionary() { { "checkboxname", "isactive" }, { "checkboxid", "isactive" } });
                         }
                     </div>
                 </div>
@@ -69,9 +69,9 @@
                         <label class="col-sm-3 control-label">Create System Admin Account</label>
                         <div class="col-sm-6">
                             @{ Html.RenderPartial(
-                             "~/Views/Shared/_SwitchButton.cshtml",
-                             false,
-                             new ViewDataDictionary() { { "checkboxname", "sysadmin" }, { "checkboxid", "sysadmin" } });
+                              "~/Views/Shared/_SwitchButton.cshtml",
+                              false,
+                              new ViewDataDictionary() { { "checkboxname", "sysadmin" }, { "checkboxid", "sysadmin" } });
                             }
                         </div>
                     </div>
