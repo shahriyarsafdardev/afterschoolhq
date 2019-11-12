@@ -2193,7 +2193,7 @@ namespace AfterSchoolLibrary.Services
         public static void RequestToPublish(this Activity activity, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var location = activity.GetLocation(msgs, dc);
-            var locationOwner = location.GetHostAcount(msgs, dc);
+            var locationOwner = location.GetHostAccount(msgs, dc);
 
             if (locationOwner.HasAccountOwner)
             {

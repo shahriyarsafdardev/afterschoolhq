@@ -51,9 +51,12 @@ namespace AfterSchoolLibrary.Services
                 .ToList();
         }
         
-        public static Account GetHostAcount(this Location location, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Account GetHostAccount(this Location location, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Account.Load(location.HostAccountId.Value, msgs, dc);
+            if (location.HostAccountId.HasValue)
+                return Account.Load(location.HostAccountId.Value, msgs, dc);
+
+            return null;
         }
 
         public static Location CreateNewWithValidation(string locationName, string address1, string address2, string city, string state, string postalCode, string country, LocationType locationType, int? hostAccountId, Account visitorAccount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)

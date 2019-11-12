@@ -21,8 +21,9 @@ namespace AfterSchool.Areas.Admin.Controllers
 
         // GET: User
         [HttpGet]
-        public ActionResult Index(string pn, string rpp)
+        public ActionResult Index(string pn, string rpp, string search)
         {
+            var msgs = new SystemMessages();
             int pageNumber = 1;
             int recordsPerPage = 10;
 
@@ -35,11 +36,11 @@ namespace AfterSchool.Areas.Admin.Controllers
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
 
-            int userCount = WebUser.GetCount();
-            var users = WebUser.Load(start: start, length: length);
+            int userCount = WebUser.GetSearchCount(search, msgs);
+            var users = WebUser.Search(search, start, length);
             var totalPages = Math.Ceiling(userCount.ToDouble() / recordsPerPage).ToInteger();
 
-            ViewBag.Messages = new SystemMessages();
+            ViewBag.Messages = msgs;
             ViewBag.PagingModel = new PagingModel()
             {
                 TotalCount = userCount,

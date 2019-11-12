@@ -131,8 +131,7 @@ namespace AfterSchool.Models
         {
             if (SessionVariables.CurrentAccount.IsEmpty())
             {
-                // take to account creation screen
-                return RedirectToAction("createaccount", "signup");
+                return RedirectToAction("select", "login");
             }
             else if (SessionVariables.CurrentUser.HasAccessTo(SessionVariables.CurrentAccount))
             {
