@@ -13,13 +13,10 @@
     {
         accountId = ViewData["AccountId"].ToString();
     }
+
     if (!ViewData["ReturnUrl"].IsEmpty())
     {
         returnUrl = ViewData["ReturnUrl"].ToString();
-    }
-    if (!ViewData["AllowImpersonation"].IsEmpty())
-    {
-        allowImpersonation = ViewData["AllowImpersonation"].ToString().ToBoolean();
     }
 
     if (accountId.Length > 0)
