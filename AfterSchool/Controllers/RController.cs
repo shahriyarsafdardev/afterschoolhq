@@ -145,7 +145,7 @@ namespace AfterSchool.Controllers
 
                 if (!activity.IsPublished && activity.GetLocation().HostAccountId != activity.AccountId)
                 {
-                    var accountOwnerId = activity.GetLocation().GetHostAcount().OwnerId;
+                    var accountOwnerId = activity.GetLocation().GetHostAccount().OwnerId;
 
                     if (SessionVariables.CurrentUser.ID == accountOwnerId)
                         canPublishActivity = true;

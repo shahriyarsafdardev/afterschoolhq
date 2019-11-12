@@ -42,7 +42,7 @@ namespace AfterSchool.Areas.User.Controllers
 
                 if (registrant.SchoolLocationId.HasValue)
                 {
-                    var account = registrant.GetSchoolLocation(msgs)?.GetHostAcount(msgs);                   
+                    var account = registrant.GetSchoolLocation(msgs)?.GetHostAccount(msgs);                   
                     if(account.IsNotEmpty() && !providers.Any(provider => provider.ID == account.ID))
                         providers.Add(account);
                 }

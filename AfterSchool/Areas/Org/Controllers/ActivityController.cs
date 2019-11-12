@@ -1867,7 +1867,7 @@ namespace AfterSchool.Areas.Org.Controllers
         private bool IsExternallyProvided(Activity activity)
         {
             var location = activity.GetLocation();
-            var hostAccount = location?.GetHostAcount();
+            var hostAccount = location?.GetHostAccount();
 
             if (hostAccount.IsNotEmpty() && hostAccount.OwnerId.HasValue)
                 return hostAccount.ID != activity.AccountId;
