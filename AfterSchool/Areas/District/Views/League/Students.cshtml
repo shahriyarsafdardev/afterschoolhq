@@ -28,7 +28,8 @@
                <table class="table">
                    <thead>
                        <tr>
-                           <th>Name</th>
+                           <th>First Name</th>
+                           <th>Last Name</th>
                            <th>Date of Birth</th>
                            <th>Grade</th>
                            <th>Gender</th>
@@ -44,7 +45,8 @@
                            var team = teams.First(t => t.ID == item.ParticipationObjectId);
 
                            <tr>
-                               <td>@item.RegistrantName</td>
+                               <td>@item.RegistrantFirstName</td>
+                               <td>@item.RegistrantLastName</td>
                                <td>@(registrant.GetAnswer(QuestionDataType.RegistrantDateOfBirth)?.Text.IfEmpty("-"))</td>
                                <td>@(registrant.GetAnswer(QuestionDataType.RegistrantGrade)?.Text.IfEmpty("-"))</td>
                                <td>@(registrant.GetAnswer(QuestionDataType.RegistrantGender)?.Text.IfEmpty("-"))</td>
