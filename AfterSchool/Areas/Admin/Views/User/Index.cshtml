@@ -16,17 +16,44 @@
         </div>
         <div class="panel-body">
 
+            <div class="row padding-v-10">
+                <div class="col-md-4">
+                    <input type="text" id="search" name="search" value="@Request["search"]" class="form-control" placeholder="Enter Search Term..." />
+                </div>
+                <div class="col-md-4">
+                </div>
+                <div class="col-md-4">
+
+                </div>
+            </div>
+
             @{ Html.RenderPartial(
-             "~/Views/Shared/_Users.cshtml",
-             Model,
-             new ViewDataDictionary() {
+              "~/Views/Shared/_Users.cshtml",
+              Model,
+              new ViewDataDictionary()
+              {
+                    { "AllowImpersonation", "true" },
                     { "AccountId", ViewBag.AccountId },
                     { "ReturnUrl", ViewBag.ReturnUrl } ,
                     { "PagingModel", ViewBag.PagingModel }
-             });
+            });
             }
         </div>
     </div>
 </div>
 
+
+<script>
+    function doSearch() {
+        location.href = `@Url.Action("index", "user")?search=${$('#search').val()}`;
+    }
+
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('#search').keypress(function (e) {
+            if (e.keyCode == 13 || e.keyCode == 10) {
+                doSearch();
+            }
+        });
+    });
+</script>
 

@@ -2,8 +2,12 @@
 @{
     string accountId = "";
     string returnUrl = "";
+    bool allowImpersonation = false;
     var accountPackage = (AccountPackage)ViewData["AccountPackage"];
     var paging = (PagingModel)ViewData["PagingModel"];
+    var isAfterSchoolAdmin = SessionVariables.CurrentAccount.AccountTypeId == AccountType.AfterSchool;
+    var canDelete = SessionVariables.OriginalLoggedInUser.IsNotEmpty();
+    string inviteUrl = Url.Action("invite", "user");
 
     if (!ViewData["AccountId"].IsEmpty())
     {
@@ -13,8 +17,10 @@
     {
         returnUrl = ViewData["ReturnUrl"].ToString();
     }
-
-    string inviteUrl = Url.Action("invite", "user");
+    if (!ViewData["AllowImpersonation"].IsEmpty())
+    {
+        allowImpersonation = ViewData["AllowImpersonation"].ToString().ToBoolean();
+    }
 
     if (accountId.Length > 0)
     {
@@ -30,7 +36,7 @@
 @if (accountPackage.IsNotEmpty())
 {
     <p class="pull-right text-bold">
-        @Model.Count of @accountPackage.GetFeature(FeatureType.TeamAccounts).Max.Value User Accounts
+        @Model.Count of @((int)accountPackage.GetFeature(FeatureType.TeamAccounts).Max.Value) User Accounts
     </p>
     <div class="clearfix"></div>
 }
@@ -38,7 +44,7 @@
     <table class="table table-hover">
         <thead>
             <tr>
-                @if (SessionVariables.CurrentAccount.IsAdminAccount)
+                @if (isAfterSchoolAdmin)
                 {
                     <th></th>
                 }
@@ -46,7 +52,7 @@
                 <th>Email</th>
                 <th>Registered?</th>
                 <th>Is Active?</th>
-                @if (!SessionVariables.CurrentAccount.IsAdminAccount)
+                @if (!isAfterSchoolAdmin)
                 {
                     <th>Type</th>
                 }
@@ -60,32 +66,35 @@
                 foreach (WebUser user in Model)
                 {
                     <tr>
-                        @if (SessionVariables.CurrentAccount.IsAdminAccount)
+                        @if (isAfterSchoolAdmin)
                         {
                             <td>
-                                <a href="@Url.Action("edit", "user", new { id = @user.Uid, returnUrl = returnUrl })" class="btn btn-default btn-xs"><i class="icon icon-left s7-edit"></i> Edit</a>
+                                <a href="@Url.Action("edit", "user", new { id = user.Uid, returnUrl = returnUrl })" class="btn btn-default btn-xs"><i class="icon icon-left s7-edit"></i> Edit</a>
                             </td>
                         }
                         <td>@user.DisplayName</td>
                         <td><a href="mailto:@user.Email">@user.Email</a></td>
                         <td>@user.IsRegistered.ToYesNo()</td>
                         <td>@user.IsActive.ToYesNo()</td>
-                        @if (!SessionVariables.CurrentAccount.IsAdminAccount)
+                        @if (!isAfterSchoolAdmin)
                         {
                             <td>@user.GetUserType(SessionVariables.CurrentAccount).ToString().SplitByUpperCase()</td>
                         }
                         <td>@user.CreateDate.Value.ToLongDateString()</td>
                         <td>
                             <div class="btn-group">
-                                @if (SessionVariables.CurrentAccount.IsAdminAccount)
+                                @if (isAfterSchoolAdmin)
                                 {
                                     <a href="@Url.Action("impersonate", "user", new { id = accountId, uid = @user.Uid })" class="btn btn-default btn-sm">
-                                        <i class="icon icon-left s7-power"></i> Impersonate
+                                        <i class="icon icon-left s7-user"></i> Impersonate
                                     </a>
                                 }
                                 else if (!user.IsRegistered)
                                 {
-                                    <button type="button" class="btn btn-default btn-sm md-trigger" data-modal="modal-invite" onclick="showInviteLink('@user.GetInviteUrl(SessionVariables.CurrentAccount)')">
+                                    <button type="button" 
+                                            class="btn btn-default btn-sm md-trigger" 
+                                            data-modal="modal-invite" 
+                                            onclick="showInviteLink('@user.GetInviteUrl(SessionVariables.CurrentAccount)')">
                                         Get Invite Link
                                     </button>
                                 }
@@ -111,7 +120,8 @@
         {
         { "id", "" },
         { "action", "index" },
-        { "controller", "user" }
+        { "controller", "user" },
+        { "querystring", $"search={Request["search"]}" }
         }
     );
 }
