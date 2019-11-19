@@ -1609,23 +1609,40 @@ namespace AfterSchoolLibrary.Services
         {
             var account = activity.GetAccount(msgs, dc);
             var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
-            var instances = activity.GetSchedule(msgs, dc).GetInstances(msgs: msgs, dc: dc);
-            return instances.First().StartDateTime <= now && now <= instances.Last().EndDateTime;
+            var instances = activity.GetSchedule(msgs, dc)?.GetInstances(msgs: msgs, dc: dc);
+
+            if (instances.IsNotEmpty() && instances.Any())
+                return instances.First().StartDateTime <= now && now <= instances.Last().EndDateTime;
+
+            return false;
         }
 
         public static bool WillBeInSession(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var account = activity.GetAccount(msgs, dc);
             var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
-            var instances = activity.GetSchedule(msgs, dc).GetInstances(msgs: msgs, dc: dc);
-            return now < instances.First().StartDateTime;
+            var instances = activity.GetSchedule(msgs, dc)?.GetInstances(msgs: msgs, dc: dc);
+
+            if (instances.IsNotEmpty() && instances.Any())
+                return now < instances.First().StartDateTime;
+
+            return false;
         }
 
         public static bool IsOutOfSession(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var now = activity.GetAccount(msgs, dc).ConvertToAccountTimeZone(DateTime.UtcNow);
-            var instances = activity.GetSchedule(msgs, dc).GetInstances(msgs: msgs, dc: dc);
-            return now > instances.Last().StartDateTime;
+            var account = activity.GetAccount(msgs, dc);
+            var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
+            var schedule = activity.GetSchedule(msgs, dc);
+            var instances = schedule?.GetInstances(msgs: msgs, dc: dc);
+
+            if (instances.IsNotEmpty() && instances.Any())
+                return now > instances.Last().StartDateTime;
+
+            if (schedule.IsNotEmpty())
+                return !schedule.IsOngoing;
+
+            return true;
         }
 
         public static bool CanAcceptPayments(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
