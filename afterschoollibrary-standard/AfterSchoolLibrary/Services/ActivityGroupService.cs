@@ -639,23 +639,40 @@ namespace AfterSchoolLibrary.Services
         {
             var account = activityGroup.GetAccount(msgs, dc);
             var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
-            var instances = activityGroup.GetSchedule(msgs, dc).GetInstances(msgs: msgs, dc: dc);
-            return instances.First().StartDateTime <= now && now <= instances.Last().EndDateTime;
+            var instances = activityGroup.GetSchedule(msgs, dc)?.GetInstances(msgs: msgs, dc: dc);
+
+            if (instances.IsNotEmpty() && instances.Any())
+                return instances.First().StartDateTime <= now && now <= instances.Last().EndDateTime;
+
+            return false;
         }
 
         public static bool WillBeInSession(this ActivityGroup activityGroup, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var account = activityGroup.GetAccount(msgs, dc);
             var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
-            var instances = activityGroup.GetSchedule(msgs, dc).GetInstances(msgs: msgs, dc: dc);
-            return now < instances.First().StartDateTime;
+            var instances = activityGroup.GetSchedule(msgs, dc)?.GetInstances(msgs: msgs, dc: dc);
+
+            if (instances.IsNotEmpty() && instances.Any())
+                return now < instances.First().StartDateTime;
+
+            return false;
         }
 
         public static bool IsOutOfSession(this ActivityGroup activityGroup, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var now = activityGroup.GetAccount(msgs, dc).ConvertToAccountTimeZone(DateTime.UtcNow);
-            var instances = activityGroup.GetSchedule(msgs, dc).GetInstances(msgs: msgs, dc: dc);
-            return now > instances.Last().StartDateTime;
+            var account = activityGroup.GetAccount(msgs, dc);
+            var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
+            var schedule = activityGroup.GetSchedule(msgs, dc);
+            var instances = schedule?.GetInstances(msgs: msgs, dc: dc);
+
+            if (instances.IsNotEmpty() && instances.Any())
+                return now > instances.Last().StartDateTime;
+
+            if (schedule.IsNotEmpty())
+                return !schedule.IsOngoing;
+
+            return true;
         }
 
         public static ActivityMessage AddMessage(this ActivityGroup group, string subject, string body, List<int> registrantIds, bool sendToStaff, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)

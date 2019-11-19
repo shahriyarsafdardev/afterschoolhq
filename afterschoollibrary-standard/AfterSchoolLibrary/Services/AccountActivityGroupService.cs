@@ -110,7 +110,11 @@ namespace AfterSchoolLibrary.Services
             var activityGroup = accountActivityGroup.GetActivityGroup(msgs, dc);
             var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
             var instances = activityGroup.GetSchedule(msgs, dc).GetInstances(msgs: msgs, dc: dc);
-            return instances.First().StartDateTime <= now && now <= instances.Last().EndDateTime;
+
+            if (instances.IsNotEmpty() && instances.Any())
+                return instances.First().StartDateTime <= now && now <= instances.Last().EndDateTime;
+
+            return false;
         }
 
         public static bool WillBeInSession(this AccountActivityGroup accountActivityGroup, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -119,7 +123,11 @@ namespace AfterSchoolLibrary.Services
             var activityGroup = accountActivityGroup.GetActivityGroup(msgs, dc);
             var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
             var instances = activityGroup.GetSchedule(msgs, dc).GetInstances(msgs: msgs, dc: dc);
-            return now < instances.First().StartDateTime;
+
+            if (instances.IsNotEmpty() && instances.Any())
+                return now < instances.First().StartDateTime;
+
+            return false;
         }
 
         public static bool IsOutOfSession(this AccountActivityGroup accountActivityGroup, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -129,7 +137,8 @@ namespace AfterSchoolLibrary.Services
             var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
             var schedule = activityGroup.GetSchedule(msgs, dc);
             var instances = schedule?.GetInstances(msgs: msgs, dc: dc);
-            if (instances.Count > 0)
+
+            if (instances.IsNotEmpty() && instances.Any())
                 return now > instances.Last().StartDateTime;
             
             if (schedule.IsNotEmpty())
