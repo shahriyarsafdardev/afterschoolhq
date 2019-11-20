@@ -639,10 +639,14 @@ namespace AfterSchoolLibrary.Services
         {
             var account = activityGroup.GetAccount(msgs, dc);
             var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
-            var instances = activityGroup.GetSchedule(msgs, dc)?.GetInstances(msgs: msgs, dc: dc);
+            var schedule = activityGroup.GetSchedule(msgs, dc);
+            var instances = schedule?.GetInstances(msgs: msgs, dc: dc);
 
             if (instances.IsNotEmpty() && instances.Any())
                 return instances.First().StartDateTime <= now && now <= instances.Last().EndDateTime;
+
+            if (schedule.IsNotEmpty())
+                return schedule.IsOngoing;
 
             return false;
         }
