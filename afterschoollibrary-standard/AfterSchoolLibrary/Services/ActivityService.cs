@@ -1609,10 +1609,14 @@ namespace AfterSchoolLibrary.Services
         {
             var account = activity.GetAccount(msgs, dc);
             var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
-            var instances = activity.GetSchedule(msgs, dc)?.GetInstances(msgs: msgs, dc: dc);
+            var schedule = activity.GetSchedule(msgs, dc);
+            var instances = schedule?.GetInstances(msgs: msgs, dc: dc);
 
             if (instances.IsNotEmpty() && instances.Any())
                 return instances.First().StartDateTime <= now && now <= instances.Last().EndDateTime;
+
+            if (schedule.IsNotEmpty())
+                return schedule.IsOngoing;
 
             return false;
         }
