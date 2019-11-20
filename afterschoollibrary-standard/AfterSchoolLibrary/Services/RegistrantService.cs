@@ -469,11 +469,21 @@ namespace AfterSchoolLibrary.Services
 
         public static bool MasterRegistrantHasPlan(this Registrant masterRegistrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var submittedRecords = masterRegistrant.GetSubmittedRecords(participationObject.OwnerAccount.ID.Value, msgs, dc);
+            return masterRegistrant.MasterRegistrantHasPlan(
+                participationObject.OwnerAccount.ID.Value, 
+                participationObject.ObjectID.Value, 
+                participationObject.ObjectType, 
+                msgs, 
+                dc);
+        }
+
+        public static bool MasterRegistrantHasPlan(this Registrant masterRegistrant, int billingAccountId, int participationObjectId, ParticipationObjectType participationObjectType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var submittedRecords = masterRegistrant.GetSubmittedRecords(billingAccountId, msgs, dc);
 
             return submittedRecords.Any() && RegistrantSubscriptionPlan.ExistsByParticipationObjectByRegistrants(
-                participationObjectId: participationObject.ObjectID.Value,
-                participationObjectType: participationObject.ObjectType,
+                participationObjectId: participationObjectId,
+                participationObjectType: participationObjectType,
                 registrantIds: submittedRecords.Select(item => item.ID.Value).ToList(),
                 msgs: msgs,
                 dc: dc);
@@ -481,9 +491,17 @@ namespace AfterSchoolLibrary.Services
 
         public static bool HasPlan(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            return registrant.HasPlan(participationObject.ObjectID.Value, participationObject.ObjectType, msgs, dc);
+        }
+
+        public static bool HasPlan(this Registrant registrant, int participationObjectId, ParticipationObjectType participationObjectType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (registrant.IsMaster)
+                return registrant.MasterRegistrantHasPlan(new ParticipationObject(participationObjectId, participationObjectType, msgs, dc), msgs, dc);
+
             return RegistrantSubscriptionPlan.ExistsByParticipationObjectByRegistrants(
-                    participationObjectId: participationObject.ObjectID.Value,
-                    participationObjectType: participationObject.ObjectType,
+                    participationObjectId: participationObjectId,
+                    participationObjectType: participationObjectType,
                     registrantIds: registrant.ID.Value.AsList(),
                     msgs: msgs,
                     dc: dc);
@@ -492,6 +510,25 @@ namespace AfterSchoolLibrary.Services
         public static List<RegistrantSubscriptionPlan> GetRegistrantSubscriptionPlans(this Registrant registrant, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return RegistrantSubscriptionPlan.LoadByRegistrantId(registrant.ID.Value, msgs, dc);
+        }
+
+        public static bool CancelSubcriptionIfExists(this Registrant registrant, int participationObjectId, ParticipationObjectType participationObjectType, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            // TODO: Has to be a better way
+            if (!registrant.HasPlan(participationObjectId, participationObjectType, msgs, dc))
+                return false;
+
+            var rsps = registrant.GetRegistrantSubscriptionPlans(msgs, dc);
+            foreach (var rsp in rsps)
+            {
+                var plan = rsp.GetSubscriptionPlan(msgs, dc);
+                var isSubscription = plan.PlanTypeId == SubscriptionPlanType.Subscription;
+
+                if (plan.ParticipationObjectId == participationObjectId && plan.ParticipationObjectTypeId == participationObjectType && isSubscription)
+                    return plan.CancelSubscription(rsp, plan.GetAccount(msgs, dc));
+            };
+
+            return false;
         }
 
         public static bool IsAppliedFor(this Registrant masterRegistrant, ParticipationObject participationObject, bool? hasParentalConsent, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -912,22 +949,36 @@ namespace AfterSchoolLibrary.Services
             }
 
             var ras = registrant.GetRegistrantActivities(msgs, dc);
-            var registrantActivity = ras.Find(ra => ra.ParticipationObjectId == participationObjectId && ra.ParticipationObjectTypeId == participationObjectType);
+            var ra = ras.Find(ra => ra.ParticipationObjectId == participationObjectId && ra.ParticipationObjectTypeId == participationObjectType);
 
-            if (registrantActivity.IsEmpty())
+            if (ra.IsEmpty())
             {
                 msgs.Add("Registration not found", MessageType.Notice);
                 return;
             }
 
-            registrantActivity.ChangeSeatAssignment(RegistrationAssignmentType.Withdrawn, loggedInUser, msgs, dc);
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    ra.ChangeSeatAssignment(RegistrationAssignmentType.Withdrawn, loggedInUser, amsgs, adc);
 
-            // Notify Provider
-            if (msgs.HasNoErrors())
-            {
-                var participationObject = registrantActivity.GetParticipationObject(msgs, dc);
-                Helpers.EmailHelper.SendRegistrationWithdrawal(registrant, participationObject, loggedInUser, msgs);
-            }
+                    // cancel subscription if it has one
+                    if (msgs.HasNoErrors())
+                        registrant.CancelSubcriptionIfExists(participationObjectId, participationObjectType, amsgs, adc);
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
+
+                    // Notify Provider
+                    var participationObject = ra.GetParticipationObject(msgs, dc);
+                    Helpers.EmailHelper.SendRegistrationWithdrawal(registrant, participationObject, loggedInUser, msgs);
+                },
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
+                dc: dc
+            );
         }
 
         public static Registration AddRegistration(this Registrant registrant, int ownerAccountId, int? activityGroupId, int? accountActivityGroupId, int? periodId, RegistrationCompletionStatus completionStatus, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)

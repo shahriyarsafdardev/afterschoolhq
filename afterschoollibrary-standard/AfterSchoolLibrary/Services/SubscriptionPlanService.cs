@@ -248,6 +248,27 @@ namespace AfterSchoolLibrary.Services
             };
         }
 
+        public static bool CancelSubscription(this SubscriptionPlan plan, RegistrantSubscriptionPlan rsp, Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (plan.PlanTypeId == SubscriptionPlanType.Subscription)
+            {                
+                string stripeUserId = null;
+
+                if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
+                    stripeUserId = billingAccount.StripeUserId;
+
+                msgs.AddRange(Billing.StripeHelper.CancelSubscription(
+                    rsp.StripeSubscriptionId,
+                    stripeUserId
+                ));
+
+                if (msgs.HasNoErrors())
+                    return true;
+            }
+
+            return false;
+        }
+
         public static bool CheckAndCancelPaymentPlan(this SubscriptionPlan plan, RegistrantSubscriptionPlan rsp, Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {            
             if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan)
