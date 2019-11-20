@@ -36,8 +36,9 @@ namespace AfterSchool.Areas.User.Controllers
 
                     ras.ForEach(ra => {
                         var participationObject = ra.GetParticipationObject(msgs);
-                        
-                        if (participationObject.IsOutOfSession(msgs))
+                        var isPast = participationObject.IsOutOfSession(msgs) || ra.AssignmentTypeId == RegistrationAssignmentType.Withdrawn;
+
+                        if (isPast)
                             studentPOs.Add(new ParticipationViewModel(participationObject, ra, submittedRecord, RegistrationStatus.Past));
                         else if (participationObject.IsInSession(msgs))
                             studentPOs.Add(new ParticipationViewModel(participationObject, ra, submittedRecord, RegistrationStatus.Current));
