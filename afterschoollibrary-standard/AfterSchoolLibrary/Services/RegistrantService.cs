@@ -526,7 +526,7 @@ namespace AfterSchoolLibrary.Services
 
                 if (plan.ParticipationObjectId == participationObjectId && plan.ParticipationObjectTypeId == participationObjectType && isSubscription)
                     return plan.CancelSubscription(rsp, plan.GetAccount(msgs, dc));
-            };
+            }
 
             return false;
         }
