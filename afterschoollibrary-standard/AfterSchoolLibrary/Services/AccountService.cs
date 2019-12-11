@@ -464,19 +464,21 @@ namespace AfterSchoolLibrary.Services
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             WebUser user = null;
             var userExists = false;
+            var emailExists = false;
+            var phoneExists = false;
+
+            if (WebUser.ExistsByEmail(email.Trim(), msgs, dc))
+                userExists = emailExists = true;
+            else if (phone.IsNotEmpty() && WebUser.ExistsByPhone(phone.Trim(), msgs, dc))
+                userExists = phoneExists = true;
 
             if (!canUseExistingUserAccount)
             {
-                if (WebUser.ExistsByEmail(email.Trim(), msgs, dc))
-                {
+                if (emailExists)
                     msgs.Add("Email is already in use", MessageType.UserError);
-                    userExists = true;
-                }
-                else if (phone.IsNotEmpty() && WebUser.ExistsByPhone(phone.Trim(), msgs, dc))
-                {
+                
+                if (phoneExists)
                     msgs.Add("Phone is already in use", MessageType.UserError);
-                    userExists = true;
-                }
             }
 
             Database.ExecuteTransaction(

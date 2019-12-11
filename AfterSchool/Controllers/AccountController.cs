@@ -1889,7 +1889,9 @@ namespace AfterSchool.Controllers
             var email = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail);
             var phone = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone);
 
-            if (email.Value.IsSameAs(SessionVariables.CurrentUser.Email))
+            if (email.Value.IsEmpty())
+                msgs.Add("Parent email is required", MessageType.UserError);
+            else if (email.Value.Trim().IsSameAs(SessionVariables.CurrentUser.Email.Trim()))
                 msgs.Add("Parent email cannot be the same as your student email address when creating a login account", MessageType.UserError);
 
             if (msgs.HasNoErrors())
@@ -1905,8 +1907,8 @@ namespace AfterSchool.Controllers
                         if (hostAccount.IsNotEmpty() && hostAccount.AccountTypeId != AccountType.School)
                             locationString = $" at {hostAccount.Name}";
 
-                    // invite parent: 
-                    var parentUser = SessionVariables.CurrentAccount.InviteUser(
+                        // invite parent: 
+                        var parentUser = SessionVariables.CurrentAccount.InviteUser(
                             firstName: firstName.Value,
                             lastName: lastName.Value,
                             email: email.Value.Trim(),
@@ -1917,8 +1919,8 @@ namespace AfterSchool.Controllers
                             loggedInUser: SessionVariables.CurrentUser,
                             msgs: msgs);
 
-                    // Create parent registrant
-                    var parentRegistrant = SessionVariables.CurrentAccount.CreateRegistrant(
+                        // Create parent registrant
+                        var parentRegistrant = SessionVariables.CurrentAccount.CreateRegistrant(
                             registrantOwner: parentUser,
                             canBeAccessedBy: parentUser.AsList(),
                             registrantType: RegistrantType.Individual,
