@@ -481,41 +481,44 @@ namespace AfterSchoolLibrary.Services
                     msgs.Add("Phone is already in use", MessageType.UserError);
             }
 
-            Database.ExecuteTransaction(
-                action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                {
-                    if (!userExists)
+            if (msgs.HasNoErrors())
+                Database.ExecuteTransaction(
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        user = new WebUser
+                        if (!userExists)
                         {
-                            FirstName = firstName.Trim(),
-                            LastName = lastName.Trim(),
-                            Email = email.Trim(),
-                            Phone = phone.IfBlank("").Trim(),
-                            CreateDate = DateTime.Now,
-                            LastModifiedDate = DateTime.Now,
-                            CreatedBy = loggedInUser?.ID.IfEmpty(0),
-                            LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
-                            IsActive = isActive,
-                            IsRegistered = isRegistered,
-                            VerifiedAccount = isVerified,
-                            Uid = Guid.NewGuid(),
-                            Username = WebUserService.GenerateUsername(firstName, lastName, amsgs, adc)
-                        };
+                            user = new WebUser
+                            {
+                                FirstName = firstName.Trim(),
+                                LastName = lastName.Trim(),
+                                Email = email.Trim(),
+                                Phone = phone.IfBlank("").Trim(),
+                                CreateDate = DateTime.Now,
+                                LastModifiedDate = DateTime.Now,
+                                CreatedBy = loggedInUser?.ID.IfEmpty(0),
+                                LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
+                                IsActive = isActive,
+                                IsRegistered = isRegistered,
+                                VerifiedAccount = isVerified,
+                                Uid = Guid.NewGuid(),
+                                Username = WebUserService.GenerateUsername(firstName, lastName, amsgs, adc)
+                            };
 
-                        if (!password.IsEmpty())
-                            user.Password = WebUserService.EncryptPassword(password);
+                            if (!password.IsEmpty())
+                                user.Password = WebUserService.EncryptPassword(password);
 
-                        amsgs.AddRange(user.Save(adc));
-                    }
-                    else if (canUseExistingUserAccount)
-                        user = WebUser.LoadByEmail(email.Trim(), amsgs, adc);
-                },
-                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
-                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
-                dc: dc
-            );
+                            amsgs.AddRange(user.Save(adc));
+                        }
+                        else if (canUseExistingUserAccount)
+                        {
+                            user = WebUser.LoadByEmail(email.Trim(), amsgs, adc);
+                        }
+                    },
+                    onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                    onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
+                    dc: dc
+                );
 
             if (msgs.HasNoErrors())
                 AddUser(account, user, userType, loggedInUser, msgs, dc);
