@@ -2946,8 +2946,7 @@ namespace AfterSchoolLibrary.Services
 
         public static bool IsNewProviderForOtherAccounts(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.IsProviderForOtherAccounts(msgs, dc) &&
-                account.StripeUserId.IsEmpty();
+            return account.IsProviderForOtherAccounts(msgs, dc) && !account.CanReceivePaymentDeposits(msgs, dc);
         }
 
         #endregion
