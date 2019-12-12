@@ -212,7 +212,7 @@
                                         @currentStatus
                                     </td>
                                     <td class="text-center">
-                                        @transaction.PaymentTypeId.ToString()
+                                        @transaction.PaymentTypeId.ToString().SplitByUpperCase()
                                     </td>
                                         @*<td>
                                                 @if (transaction.IsCharge() && !transaction.IsTotallyRefunded())
