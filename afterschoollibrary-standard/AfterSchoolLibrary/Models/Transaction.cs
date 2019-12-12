@@ -382,8 +382,8 @@ namespace AfterSchoolLibrary.Models
                     0,
                     DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
 
-            dq.OrderBys.Add(ObjectMap["Description"], OrderByDirectionEnum.Ascending);
             dq.OrderBys.Add(ObjectMap["CreateDate"], OrderByDirectionEnum.Descending);
+            dq.OrderBys.Add(ObjectMap["Description"], OrderByDirectionEnum.Ascending);
 
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
