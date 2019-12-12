@@ -69,7 +69,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var allParticipationObjects = allPos.DistinctBy(po => (po.ID, po.ParticipationObjectTypeId, po.Name));
 
             // sort transactions
-            allTransactions = allTransactions.OrderByDescending(x => x.ID).ToList();
+            // allTransactions = allTransactions.OrderByDescending(x => x.ID).ToList();
 
             ViewBag.TotalAmountPaid = SessionVariables.CurrentAccount.GetTotalAmountBilledOut(startDate, endDate, msgs);
             ViewBag.TotalAmountRefunded = SessionVariables.CurrentAccount.GetTotalAmountRefundedTo(startDate, endDate, msgs);
