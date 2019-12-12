@@ -169,7 +169,11 @@
                                 <tr id="@transaction.Uid" data-refunded-amount="@transaction.GetRefundedAmount().ToCurrency()">
                                     <td>
                                         <span class="am-checkbox">
-                                            <input type="checkbox" id="selectTransaction-@transaction.ID" @disableChk class="chkTransaction" onchange="selectTransaction(@transaction.ID,this)" />
+                                            <input type="checkbox" 
+                                                   id="selectTransaction-@transaction.ID" 
+                                                   @disableChk 
+                                                   class="chkTransaction" 
+                                                   onchange="selectTransaction(@transaction.ID,this)" />
                                             <label for="selectTransaction-@transaction.ID"></label>
                                         </span>
                                     </td>

@@ -236,11 +236,11 @@ namespace AfterSchoolLibrary.Services
         public static string GetStatus(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (transaction.PaymentSourceTypeId != PaymentSourceType.AfterSchoolPlatform)
-                return "";
+                return "N/A";
 
             var currentPayout = GetPayout(transaction, msgs);
 
-            if (currentPayout != null)
+            if (currentPayout.IsNotEmpty())
                 switch (currentPayout.PayoutStatusId)
                 {
                     case PayoutStatus.Completed:
@@ -254,7 +254,7 @@ namespace AfterSchoolLibrary.Services
             if (DateTime.UtcNow.IsBefore(transaction.CreateDate.Value.AddDays(transaction.GetWaitPeriodInDays())))
                 return "Incoming";
 
-            return null;
+            return "Ready For Payout";
         }
 
         public static bool CanRequestPayout(this Transaction transaction)
