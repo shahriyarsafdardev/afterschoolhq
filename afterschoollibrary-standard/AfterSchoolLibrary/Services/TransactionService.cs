@@ -214,8 +214,8 @@ namespace AfterSchoolLibrary.Services
 
         public static Payout GetPayout(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (transaction.PayoutId != null)
-                Payout.Load(transaction.PayoutId.Value, msgs, dc);
+            if (transaction.PayoutId.HasValue)
+                return Payout.Load(transaction.PayoutId.Value, msgs, dc);
 
             return null;
         }
