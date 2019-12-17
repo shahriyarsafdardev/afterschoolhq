@@ -24,7 +24,7 @@ namespace AfterSchoolLibrary.Helpers
 
         public static string PayPalPaymentNotificationUrl(bool isAfterSchool)
         {
-            return BaseUrl(isAfterSchool) + "/paypal/notification/";
+            return BaseUrl() + "/paypal/notification/";
         }
 
         public static string Environment
@@ -190,7 +190,6 @@ namespace AfterSchoolLibrary.Helpers
             }
         }
 
-
         public static string HostName
         {
             get
@@ -202,14 +201,30 @@ namespace AfterSchoolLibrary.Helpers
             }
         }
 
-        public static string BaseUrl(bool isAfterSchool = true)
+        public static string ShortHostName
+        {
+            get
+            {
+                if (Utilities.IsProduction)
+                    return ConfigurationManager.AppSettings["ShortHostName"];
+
+                return HostName;
+            }
+        }
+
+        public static string ShortBaseUrl()
+        {
+            return $"http{(Utilities.UseSSL() ? "s" : "")}://{ShortHostName}";
+        }
+
+        public static string BaseUrl()
         {
             return $"http{(Utilities.UseSSL() ? "s" : "")}://{HostName}";
         }
 
-        public static string LoginUrl(bool isAfterSchool, string redirectUrl = null)
+        public static string LoginUrl(string redirectUrl = null)
         {            
-            return $"{BaseUrl(isAfterSchool)}/login{(redirectUrl.IsNotEmpty() ? $"?returnurl={HttpUtility.UrlEncode(redirectUrl)}" : "")}";
+            return $"{BaseUrl()}/login{(redirectUrl.IsNotEmpty() ? $"?returnurl={HttpUtility.UrlEncode(redirectUrl)}" : "")}";
         }
 
         public static bool UseSSL()
@@ -2034,9 +2049,9 @@ namespace AfterSchoolLibrary.Helpers
 
     public class Email
     {
-        public static string BaseUrl(bool isAfterSchool)
+        public static string BaseUrl()
         {
-            return $"{Utilities.BaseUrl(isAfterSchool)}/";
+            return $"{Utilities.BaseUrl()}/";
         }
 
         public static string HostName()
@@ -2084,11 +2099,11 @@ namespace AfterSchoolLibrary.Helpers
 
         public static string AppSignature(bool isAfterSchool)
         {
-           return string.Format("<p>{0}<br /><a href=\"{1}\">{1}</a></p>", AppEmailFromName(isAfterSchool), BaseUrl(isAfterSchool));
+           return string.Format("<p>{0}<br /><a href=\"{1}\">{1}</a></p>", AppEmailFromName(isAfterSchool), BaseUrl());
         }
         public static string GetAppSignature(bool isAfterSchool, string utm_campaign, string utm_source = "afterschoolhq", string utm_medium = "email")
         {
-            return $"<p>Powered by <a href=\"{BaseUrl(isAfterSchool)}?utm_source={utm_source}&utm_medium={utm_medium}&utm_campaign={utm_campaign}\">{AppEmailFromName(isAfterSchool)}</a></p>";
+            return $"<p>Powered by <a href=\"{BaseUrl()}?utm_source={utm_source}&utm_medium={utm_medium}&utm_campaign={utm_campaign}\">{AppEmailFromName(isAfterSchool)}</a></p>";
         }
         public static string AppReplyAboveLineText
         {

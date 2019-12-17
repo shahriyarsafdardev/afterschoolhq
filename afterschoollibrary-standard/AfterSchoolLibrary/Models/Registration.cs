@@ -700,7 +700,7 @@ namespace AfterSchoolLibrary.Models
         {
             get
             {
-                return $"{Helpers.Utilities.BaseUrl(true)}/account/parentalconsent/{this.Uid}";
+                return $"{Helpers.Utilities.BaseUrl()}/account/parentalconsent/{this.Uid}";
             }
         }
 
@@ -708,7 +708,7 @@ namespace AfterSchoolLibrary.Models
         {
             get
             {
-                return $"{Helpers.Utilities.BaseUrl(true)}/account/makepayment/{this.Uid}";
+                return $"{Helpers.Utilities.BaseUrl()}/account/makepayment/{this.Uid}";
             }
         }
 

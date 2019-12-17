@@ -401,7 +401,16 @@ namespace AfterSchoolLibrary.Models
         {
             get
             {
-                return $"{Helpers.Utilities.BaseUrl(true)}/{this.UniqueName}";
+                return $"{Helpers.Utilities.BaseUrl()}/{this.UniqueName}";
+            }
+
+        }
+
+        public string ShortHomePageUrl
+        {
+            get
+            {
+                return $"{Helpers.Utilities.ShortBaseUrl()}/{this.UniqueName}";
             }
 
         }
@@ -410,7 +419,15 @@ namespace AfterSchoolLibrary.Models
         {
             get
             {
-                return $"{Helpers.Utilities.BaseUrl(true)}/signup?invite={this.InviteCodeToShare}";
+                return $"{Helpers.Utilities.BaseUrl()}/signup?invite={this.InviteCodeToShare}";
+            }
+        }
+
+        public string HostAccountShortInviteUrl
+        {
+            get
+            {
+                return $"{Helpers.Utilities.ShortBaseUrl()}/signup?invite={this.InviteCodeToShare}";
             }
         }
 

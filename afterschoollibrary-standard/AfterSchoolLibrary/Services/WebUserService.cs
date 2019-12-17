@@ -67,7 +67,7 @@ namespace AfterSchoolLibrary.Services
             if (!user.IsActive)
                 body += $"<p>Click on the following link to create your account and start using {Helpers.Utilities.AppName(account.IsAfterSchool)}: <a href=\"{user.GetInviteUrl(account)}\">{user.GetInviteUrl(account)}</a></p>";
             else
-                body += $"<p>Click the following login link to access \"{account.Name}\": <a href=\"{Helpers.Utilities.BaseUrl(account.IsAfterSchool)}login?group={account.ID.Value.ToString()}\">{Helpers.Utilities.HostName}/login</a></p>";
+                body += $"<p>Click the following login link to access \"{account.Name}\": <a href=\"{Helpers.Utilities.BaseUrl()}login?group={account.ID.Value.ToString()}\">{Helpers.Utilities.HostName}/login</a></p>";
 
             body += "<p>Thank you!!</p>";
             body += Helpers.Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "invite_team_member");
@@ -248,7 +248,7 @@ namespace AfterSchoolLibrary.Services
 
         public static string GetInviteUrl(this WebUser user, Account account)
         {
-            return $"{Helpers.Email.BaseUrl(account.IsAfterSchool)}signup/new/{user.Uid.ToString()}?a={account.Uid}";
+            return $"{Helpers.Email.BaseUrl()}signup/new/{user.Uid.ToString()}?a={account.Uid}";
         }
 
         public static WebUser InviteNew(string firstName, string lastName, string email, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
