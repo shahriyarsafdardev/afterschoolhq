@@ -157,8 +157,13 @@
                                     <tr>
                                         <td>Organization Home Page</td>
                                         <td>
-                                            <a href="@SessionVariables.CurrentAccount.HomePageUrl" target="_blank">@SessionVariables.CurrentAccount.HomePageUrl</a>
-                                            <a href="@SessionVariables.CurrentAccount.HomePageUrl" target="_blank"><i class="s7-link"></i></a>
+                                            <input type="text" value="@SessionVariables.CurrentAccount.HomePageUrl" id="account-reg-url" onclick="this.select()" class="form-control inline" />
+                                        </td>
+                                        <td>
+                                            <span onclick="WebPage.copySelection('account-reg-url', 'URL has been copied')" title="Copy Url">
+                                                <i class="s7-copy-file icon-large text-success pointer"></i>
+                                            </span>
+                                            <a href="@SessionVariables.CurrentAccount.HomePageUrl" target="_blank" title="View Page"><i class="s7-link icon-large"></i></a>
                                         </td>
                                     </tr>
                                     @if (Model.IsPublished)
@@ -168,8 +173,13 @@
                                             <tr>
                                                 <td>@UILabel.ActivityGroupLabel(group.ActivityGroupTypeId) URL</td>
                                                 <td>
-                                                    <a href="@group.HomePageUrl" target="_blank">@group.HomePageUrl</a>
-                                                    <a href="@group.HomePageUrl" target="_blank"><i class="s7-link"></i></a>
+                                                    <input type="text" value="@group.HomePageUrl" id="group-reg-url" onclick="this.select()" class="form-control" />
+                                                </td>
+                                                <td>
+                                                    <span onclick="WebPage.copySelection('group-reg-url', 'URL has been copied')" title="Copy Url" class="pointer">
+                                                        <i class="s7-copy-file icon-large text-success pointer"></i>
+                                                    </span>
+                                                    <a href="@group.HomePageUrl" target="_blank" title="View Page"><i class="s7-link icon-large"></i></a>
                                                 </td>
                                             </tr>
                                         }
@@ -178,8 +188,13 @@
                                             <tr>
                                                 <td>@UILabel.ActivityLabel(Model.ActivityTypeId) URL</td>
                                                 <td>
-                                                    <a href="@Model.HomePageUrl" target="_blank">@Model.HomePageUrl</a>
-                                                    <a href="@Model.HomePageUrl" target="_blank"><i class="s7-link"></i></a>
+                                                    <input type="text" value="@Model.HomePageUrl" id="activity-reg-url" onclick="this.select()" class="form-control" />
+                                                </td>
+                                                <td>
+                                                    <span onclick="WebPage.copySelection('activity-reg-url', 'URL has been copied')" title="Copy Url">
+                                                        <i class="s7-copy-file icon-large text-success pointer"></i>
+                                                    </span>
+                                                    <a href="@Model.HomePageUrl" target="_blank" title="View Page"><i class="s7-link icon-large"></i></a>
                                                 </td>
                                             </tr>
                                         }
