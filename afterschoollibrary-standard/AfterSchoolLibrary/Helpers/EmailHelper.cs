@@ -167,7 +167,7 @@ namespace AfterSchoolLibrary.Helpers
                     { "WaitingListTable", AddLotteryTable(waitingListRas, registrant, "has been placed on the <em>waiting list</em> for", msgs, dc) },
                     { "AppliedTable", AddLotteryTable(appliedRas, registrant, "has <em>not</em> been placed in", msgs, dc) },
                     { "ProductName", Utilities.AppName() },
-                    { "LoginLink", Utilities.LoginUrl(true) },
+                    { "LoginLink", Utilities.LoginUrl() },
                     { "ActivityContactEmail", session.ContactEmail.IfBlank(billingAccount.Email)},
                     { "ActivityContactPhone", session.ContactPhone.IfBlank(billingAccount.Phone)},
                     { "ActivityContactName", session.ContactName.IfBlank(billingAccount.Name)},
@@ -346,7 +346,7 @@ namespace AfterSchoolLibrary.Helpers
             };
 
             var registrationDetails = "Login to your account to view more details about this registration.";
-            var loginLink = Utilities.LoginUrl(isAfterSchool);
+            var loginLink = Utilities.LoginUrl();
 
             if (isParentCopy)
             {
@@ -434,7 +434,7 @@ namespace AfterSchoolLibrary.Helpers
             {
                 { "FirstName", user.FirstName },
                 { "ProductName", Utilities.AppName(isAfterSchool) },
-                { "ResetPasswordLink", $"{Email.BaseUrl(isAfterSchool)}login/changepassword/?token={token.Uid.ToString()}" },
+                { "ResetPasswordLink", $"{Email.BaseUrl()}login/changepassword/?token={token.Uid.ToString()}" },
                 { "ExpiresInDays", (token.ExpireDate.Value.Date - DateTime.UtcNow.Date).Days.ToString() },
                 { "SupportEmail", Email.AppSupportEmailAddress },
             };
@@ -517,7 +517,7 @@ namespace AfterSchoolLibrary.Helpers
                 { "FirstName", user.FirstName },
                 { "AccountName", account.Name },
                 { "ProductName", Utilities.AppName(isAfterSchool) },
-                { "LoginLink", $"{Email.BaseUrl(isAfterSchool)}login" }
+                { "LoginLink", $"{Email.BaseUrl()}login" }
             };
 
             var body = ProcessTemplate(
@@ -559,7 +559,7 @@ namespace AfterSchoolLibrary.Helpers
                 { "Period", $"{plan.BillingPeriodTypeId.ToString().ToLower()}ly" },
                 { "PaymentAmount", plan.CostPerPeriod.ToCurrency() },
                 { "ActivityName", activityName },
-                { "LoginLink", $"{Email.BaseUrl(isAfterSchool)}login" }
+                { "LoginLink", $"{Email.BaseUrl()}login" }
             };
 
             var body = ProcessTemplate(
@@ -599,7 +599,7 @@ namespace AfterSchoolLibrary.Helpers
                 { "Period", $"{billingPeriodTypeId.ToString().ToLower()}ly" },
                 { "PaymentAmount", rsp.TotalPaidWithFees.ToCurrency() },
                 { "ActivityName", participationObject.Name },
-                { "LoginLink", Utilities.LoginUrl(true) }
+                { "LoginLink", Utilities.LoginUrl() }
             };
 
             var subject = $"Your payment succeeded for {participationObject.Name}";
@@ -631,7 +631,7 @@ namespace AfterSchoolLibrary.Helpers
             {
                 { "FirstName", user.FirstName },
                 { "ProductName", Utilities.AppName(isAfterSchool) },
-                { "VerificationLink", $"{Email.BaseUrl(isAfterSchool)}signup/verify/{user.Uid.ToString()}" },
+                { "VerificationLink", $"{Email.BaseUrl()}signup/verify/{user.Uid.ToString()}" },
                 { "SupportEmail", Email.AppSupportEmailAddress },
             };
 
@@ -843,7 +843,7 @@ namespace AfterSchoolLibrary.Helpers
                 { "FirstName", invitedUser.FirstName },
                 { "ProductName", Utilities.AppName(invitedAccount.IsAfterSchool) },
                 { "SenderDisplayName", sendingUser.DisplayName },
-                { "LoginLink", $"{Email.BaseUrl(invitedAccount.IsAfterSchool)}login" },
+                { "LoginLink", $"{Email.BaseUrl()}login" },
                 { "CustomMessage", customMessage },
                 { "RegistrationStartDate", activityGroup.GetCurrentOrNextRegistrationPeriod(msgs).StartDateTime.ToLongDateTimeString() },
                 { "RegistrationEndDate", activityGroup.GetCurrentOrNextRegistrationPeriod(msgs).EndDateTime.ToLongDateTimeString() },
@@ -924,7 +924,7 @@ namespace AfterSchoolLibrary.Helpers
                 { "VisitorAccountName", visitorAccount.Name },
                 { "VisitorUserDisplayName", visitorAccountOwner.DisplayName },
                 { "ProductName", Utilities.AppName(hostAccount.IsAfterSchool) },
-                { "LoginLink", $"{Email.BaseUrl(hostAccount.IsAfterSchool)}login" }
+                { "LoginLink", $"{Email.BaseUrl()}login" }
             };
 
             var subject = $"{visitorAccount.Name} is requesting permission to list after school activities at your location";
@@ -966,7 +966,7 @@ namespace AfterSchoolLibrary.Helpers
                 { "HostAccountName", hostAccount.Name},
                 { "VisitorAccountName", visitorAccount.Name },
                 { "ProductName", Utilities.AppName(hostAccount.IsAfterSchool) },
-                { "LoginLink", $"{Email.BaseUrl(hostAccount.IsAfterSchool)}login" }
+                { "LoginLink", $"{Email.BaseUrl()}login" }
             };            
 
             var subject = $"You have been approved to list activities at {hostAccount.Name}";
@@ -999,7 +999,7 @@ namespace AfterSchoolLibrary.Helpers
                 { "HostAccountName", hostAccount.Name},
                 { "VisitorAccountName", visitorAccount.Name },
                 { "ProductName", Utilities.AppName(hostAccount.IsAfterSchool) },
-                { "LoginLink", $"{Email.BaseUrl(hostAccount.IsAfterSchool)}login" }
+                { "LoginLink", $"{Email.BaseUrl()}login" }
             };
 
             var subject = $"You have been denied to list activities at {hostAccount.Name}";
@@ -1069,7 +1069,7 @@ namespace AfterSchoolLibrary.Helpers
         public static SystemMessages SendProviderNewActivityNotification(Account hostAccount, Account visitorAccount, WebUser visitorAccountOwner, Activity activity, WebUser loggedInUser)
         {
             var msgs = new SystemMessages();
-            var getStartedLink = $"{Email.BaseUrl(hostAccount.IsAfterSchool)}login";
+            var getStartedLink = $"{Email.BaseUrl()}login";
             var getStartedText = "Login to view your account";
 
             if (!visitorAccount.IsActive)
@@ -1120,7 +1120,7 @@ namespace AfterSchoolLibrary.Helpers
             {
                 { "AccountName", toAccount.Name },
                 { "PayoutAmount", payout.Amount.ToCurrency() },
-                { "LoginLink", Utilities.LoginUrl(true, $"{Utilities.BaseUrl(true)}/admin/payout/") },
+                { "LoginLink", Utilities.LoginUrl($"{Utilities.BaseUrl()}/admin/payout/") },
             };
 
             var subject = $"A new payout has been requested by {toAccount.Name}";
@@ -1152,7 +1152,7 @@ namespace AfterSchoolLibrary.Helpers
                 { "CurrentUserName", loggedInUser.DisplayName },
                 { "ActivityName", activity.Name },
                 { "AccountName", locationOwner.Name },
-                { "LoginLink", Utilities.LoginUrl(true, activity.PreviewUrl) },
+                { "LoginLink", Utilities.LoginUrl(activity.PreviewUrl) },
                 { "ProductName", Utilities.AppName() },
             };
 

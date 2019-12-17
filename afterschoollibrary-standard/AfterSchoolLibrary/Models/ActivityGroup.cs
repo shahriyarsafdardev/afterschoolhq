@@ -373,15 +373,20 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		
+
 
         #endregion
 
-		#region "UserDefined"
+        #region "UserDefined"
 
         public string GetHomePageUrl(bool isAfterSchool = true, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return $"{Helpers.Utilities.BaseUrl(isAfterSchool)}/{this.GetAccount(msgs, dc).UniqueName.ToLower()}/{this.ActivityGroupTypeId.ToString().ToLower()}/{this.UniqueName.ToLower()}";
+            return $"{Helpers.Utilities.BaseUrl()}/{this.GetAccount(msgs, dc).UniqueName.ToLower()}/{this.ActivityGroupTypeId.ToString().ToLower()}/{this.UniqueName.ToLower()}";
+        }
+
+        public string GetShortHomePageUrl(bool isAfterSchool = true, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return $"{Helpers.Utilities.ShortBaseUrl()}/{this.GetAccount(msgs, dc).UniqueName.ToLower()}/{this.ActivityGroupTypeId.ToString().ToLower()}/{this.UniqueName.ToLower()}";
         }
 
         public string HomePageUrl
@@ -392,11 +397,27 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
+        public string ShortHomePageUrl
+        {
+            get
+            {
+                return this.GetShortHomePageUrl(true);
+            }
+        }
+
         public string BrowseUrl
         {
             get
             {
                 return $"{HomePageUrl}/browse";
+            }
+        }
+
+        public string ShortBrowseUrl
+        {
+            get
+            {
+                return $"{ShortHomePageUrl}/browse";
             }
         }
 

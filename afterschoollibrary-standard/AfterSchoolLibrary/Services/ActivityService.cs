@@ -83,15 +83,23 @@ namespace AfterSchoolLibrary.Services
             return ((totalFields - totalErrors) / totalFields) * 100;
 
         }
-
         public static string GetHomePageUrl(this Activity activity, bool isAfterSchool = true, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return BuildHomePageUrl(activity.GetAccount(msgs, dc).UniqueName, activity.ActivityTypeId, activity.UniqueName);
         }
+        public static string GetShortHomePageUrl(this Activity activity, bool isAfterSchool = true, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return BuildShortHomePageUrl(activity.GetAccount(msgs, dc).UniqueName, activity.ActivityTypeId, activity.UniqueName);
+        }
 
         public static string BuildHomePageUrl(string accountUniqueName, ActivityType activityType, string activityUniqueName)
         {
-            return $"{Helpers.Utilities.BaseUrl(true)}/{accountUniqueName}/{activityType.ToString().ToLower()}/{activityUniqueName.ToLower()}";
+            return $"{Helpers.Utilities.BaseUrl()}/{accountUniqueName}/{activityType.ToString().ToLower()}/{activityUniqueName.ToLower()}";
+        }
+
+        public static string BuildShortHomePageUrl(string accountUniqueName, ActivityType activityType, string activityUniqueName)
+        {
+            return $"{Helpers.Utilities.ShortBaseUrl()}/{accountUniqueName}/{activityType.ToString().ToLower()}/{activityUniqueName.ToLower()}";
         }
 
         public static bool IsFull(this Activity activity, DatabaseConnection dc = null)

@@ -258,6 +258,14 @@ var WebPage = {
     getUrlPath: function () {
         var url = window.location.href.split('?');
         return url[0];
+    },
+    copySelection: function (id, successText) {
+        var copyText = document.getElementById(id);
+        copyText.select();
+        copyText.setSelectionRange(0, 99999);
+        document.execCommand("copy");
+
+        Notifications.showMessage("Copied", successText, true);
     }
 }
 
@@ -282,6 +290,13 @@ var Notifications = {
             title: '<i class="' + alertIcon + '"></i> ' + alertTitle,
             class_name: "color " + alertClass,
             text: options.message
+        });
+    },
+    showMessage: function (title, message, isSuccess) {
+        Notifications.showBar({
+            title: title,
+            message: message,
+            success: isSuccess
         });
     },
     showErrors: function (messages) {
