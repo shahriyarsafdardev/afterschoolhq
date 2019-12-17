@@ -89,7 +89,7 @@ namespace AfterSchoolLibrary.Services
         }
         public static string GetShortHomePageUrl(this Activity activity, bool isAfterSchool = true, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return BuildHomePageUrl(activity.GetAccount(msgs, dc).UniqueName, activity.ActivityTypeId, activity.UniqueName);
+            return BuildShortHomePageUrl(activity.GetAccount(msgs, dc).UniqueName, activity.ActivityTypeId, activity.UniqueName);
         }
 
         public static string BuildHomePageUrl(string accountUniqueName, ActivityType activityType, string activityUniqueName)
