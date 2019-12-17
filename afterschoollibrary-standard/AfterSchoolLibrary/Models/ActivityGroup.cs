@@ -417,7 +417,7 @@ namespace AfterSchoolLibrary.Models
         {
             get
             {
-                return $"{HomePageUrl}/browse";
+                return $"{ShortHomePageUrl}/browse";
             }
         }
 
