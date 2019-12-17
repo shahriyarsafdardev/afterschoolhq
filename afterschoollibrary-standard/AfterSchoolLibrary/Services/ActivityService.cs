@@ -91,7 +91,7 @@ namespace AfterSchoolLibrary.Services
 
         public static string BuildHomePageUrl(string accountUniqueName, ActivityType activityType, string activityUniqueName)
         {
-            return $"{Helpers.Utilities.BaseUrl(true)}/{accountUniqueName}/{activityType.ToString().ToLower()}/{activityUniqueName.ToLower()}";
+            return $"{Helpers.Utilities.BaseUrl()}/{accountUniqueName}/{activityType.ToString().ToLower()}/{activityUniqueName.ToLower()}";
         }
 
         public static bool IsFull(this Activity activity, DatabaseConnection dc = null)
