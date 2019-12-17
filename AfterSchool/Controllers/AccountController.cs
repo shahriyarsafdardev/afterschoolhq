@@ -2087,7 +2087,7 @@ namespace AfterSchool.Controllers
             }
 
             if (SessionVariables.CurrentUser.IsEmpty())
-                return Redirect(AfterSchoolLibrary.Helpers.Utilities.LoginUrl(true));
+                return Redirect(AfterSchoolLibrary.Helpers.Utilities.LoginUrl());
 
             if (SessionVariables.CurrentAccount.IsEmpty())
                 return RedirectToAction("select", "login");

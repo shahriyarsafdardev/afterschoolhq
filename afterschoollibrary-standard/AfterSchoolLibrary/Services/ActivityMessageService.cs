@@ -108,7 +108,7 @@ namespace AfterSchoolLibrary.Services
 
             return TwilioHelper.SendSMS(
                 phone,
-                $"{senderName} has sent {aOrAn} {subject} for {activityName}\nPlease review your message: {Helpers.Utilities.BaseUrl()}/msg/{messageUid}",
+                $"{senderName} has sent {aOrAn} {subject} for {activityName}\nPlease review your message: {Helpers.Utilities.ShortBaseUrl()}/msg/{messageUid}",
                 messageUid,
                 registrantUid,
                 msgs);

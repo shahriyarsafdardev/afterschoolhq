@@ -504,6 +504,14 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
+        public string ShortHomePageUrl
+        {
+            get
+            {
+                return Services.ActivityService.GetShortHomePageUrl(this, true);
+            }
+        }
+
         public string PreviewUrl
         {
             get
