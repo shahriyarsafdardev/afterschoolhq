@@ -238,6 +238,9 @@ namespace AfterSchoolLibrary.Services
             if (transaction.PaymentSourceTypeId != PaymentSourceType.AfterSchoolPlatform)
                 return "N/A";
 
+            if (transaction.PlatformPercentFee.HasValue)
+                return "Paid";
+
             var currentPayout = GetPayout(transaction, msgs);
 
             if (currentPayout.IsNotEmpty())
@@ -263,6 +266,21 @@ namespace AfterSchoolLibrary.Services
                 DateTime.UtcNow.IsOnOrAfter(transaction.CreateDate.Value.AddDays(transaction.GetWaitPeriodInDays())) &&
                 !transaction.PlatformPercentFee.HasValue &&
                 transaction.PaymentSourceTypeId == PaymentSourceType.AfterSchoolPlatform;
+        }
+
+        public static Payout CreatePayout(this Transaction transaction, PayoutStatus payoutStatus, PaymentType paymentType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (!transaction.PayoutId.HasValue)
+                return PayoutService.CreateNew(
+                    account: transaction.GetBillerAccount(msgs, dc),
+                    transactions: transaction.AsList(),
+                    payoutStatus: payoutStatus,
+                    paymentType: paymentType,
+                    loggedInUser: loggedInUser,
+                    msgs: msgs,
+                    dc: dc);
+
+            return null;
         }
     }
 }
