@@ -734,6 +734,16 @@ namespace AfterSchoolLibrary.Models
             return 0;
         }
 
+        public static List<Transaction> GetUnmarkedConnectedAccountTransactions(SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+
+            var sql = "select * from [Transaction] where ConvenienceFeePayerAccountId = BillerAccountId and PlatformFlatFee is null and PayoutId is null";
+
+            return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
         #endregion
     }
 }
