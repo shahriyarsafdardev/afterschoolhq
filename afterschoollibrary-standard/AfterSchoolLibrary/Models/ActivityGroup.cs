@@ -612,15 +612,6 @@ namespace AfterSchoolLibrary.Models
             return finalList;
         }
 
-        private Form _Form = null;
-        public Form GetForm(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (_Form.IsEmpty() && this.FormId.HasValue)
-                _Form = Form.Load(this.FormId.Value, msgs, dc);
-
-            return _Form;
-        }
-
         public List<RegistrantActivity> _RegistrantActivities = null;
         public List<RegistrantActivity> GetRegistrantActivities(List<Registration> registrations = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {

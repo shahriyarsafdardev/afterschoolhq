@@ -21,7 +21,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
         }
 
-        // GET: Admin/Activity
         public ActionResult Summary(string id)
         {
             var msgs = new SystemMessages();

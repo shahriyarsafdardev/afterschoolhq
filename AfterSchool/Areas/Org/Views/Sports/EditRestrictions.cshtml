@@ -35,7 +35,7 @@
                     @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editrestrictions", "next", true, true, Request))
                     @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(true, false))
 
-                    @{Html.RenderPartial("_SportsRestrictions.cshtml", Model);}
+                    @{Html.RenderPartial("_SportsRestrictions", Model);}
 
                     <div class="form-group">
                         <div class="col-sm-6 col-sm-offset-3">

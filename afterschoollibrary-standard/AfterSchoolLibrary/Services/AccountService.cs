@@ -1358,7 +1358,7 @@ namespace AfterSchoolLibrary.Services
 
         public static Activity GetDefaultNewActivity(this Account account)
         {
-            var activity = new Activity
+            return new Activity
             {
                 WaitingListSeats = 0,
                 SeatsAvailable = Math.Min(20, account.GetActiveAccountPackage().GetFeature(FeatureType.Participants).Max.Value.ToInteger()),
@@ -1367,7 +1367,22 @@ namespace AfterSchoolLibrary.Services
                 RegistrationModeId = RegistrationMode.Register,
                 AllowToPayLater = true,
             };
-            return activity;
+        }
+
+        public static ActivityGroup GetDefaultNewLeague(this Account account)
+        {
+            return new ActivityGroup
+            {
+                WaitingListSeats = 0,
+                SeatsAvailable = Math.Min(20, account.GetActiveAccountPackage().GetFeature(FeatureType.Participants).Max.Value.ToInteger()),
+                Cost = 0,
+                AccountId = account.ID,
+                RegistrationModeId = RegistrationMode.Register,
+                AllowToPayLater = true,
+                ActivityGroupTypeId = ActivityGroupType.League,
+                RequiresParentalConsent = true,
+                CostUnitTypeId = CostUnitType.PerRegistrant,
+            };
         }
 
         public static RegistrationPeriod GetDefaultNewRegistrationPeriod(this Account account)
