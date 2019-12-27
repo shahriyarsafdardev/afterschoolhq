@@ -1,0 +1,61 @@
+﻿@model ActivityGroup
+@{
+    var grades = GradeLevel.Load();
+}
+<div class="panel panel-default panel-small-padding">
+    <div class="panel-heading">
+        Restrictions
+    </div>
+    <div class="panel-body">
+
+        <div class="form-group">
+            <label class="col-md-3 control-label">
+                Requires Parental Consent
+            </label>
+            <div class="col-md-9">
+                @{Html.RenderPartial
+                  (
+                      "~/Views/Shared/_SwitchButton.cshtml",
+                      Model.RequiresParentalConsent,
+                      new ViewDataDictionary()
+                      {
+                        { "checkboxname", "requiresparentalconsent" },
+                        { "checkboxid", "requiresparentalconsent" },
+                        { "disabled", false }
+                      }
+                  );
+                }
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-md-3 control-label">
+                Gender Restrictions
+            </label>
+            <div class="col-md-9">
+                <div class="am-radio inline">
+                    @foreach (GenderRestrictionType item in System.Enum.GetValues(typeof(GenderRestrictionType)))
+                    {
+                        <input type="radio" 
+                               name="genderrestrictions" 
+                               id="genderrestrictions-@((int)item)" 
+                               @(Model.GenderRestriction == item ? " checked=\"checked\" " : "") 
+                               value="@((int)item)" />
+                        <label for="genderrestrictions-@((int)item)" class="margin-h-10">
+                            @item.ToString().SplitByUpperCase()
+                        </label>
+                    }
+                </div>
+            </div>
+        </div>
+
+        @{
+        Html.RenderPartial(
+            "~/Views/Shared/_GradeRestrictions.cshtml",
+            null,
+            new ViewDataDictionary() { { "minGradeLevelId", Model.MinGradeLevelId }, { "MaxGradeLevelId", Model.MaxGradeLevelId }, { "grades", grades } }
+            );
+        }
+
+    </div>
+</div>

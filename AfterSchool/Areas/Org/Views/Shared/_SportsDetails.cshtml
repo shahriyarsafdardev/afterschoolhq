@@ -1,0 +1,43 @@
+﻿@model ActivityGroup
+@{ 
+    var accountPackage = (AccountPackage)ViewData["AccountPackage"];
+}
+
+<div class="panel panel-default panel-small-padding">
+    <div class="panel-heading">
+        About Your @UILabel.ActivityLabel(Model.ActivityGroupTypeId)
+    </div>
+    <div class="panel-body">
+
+        <div class="form-group hide">
+            <label class="col-sm-3 control-label">Headline / Brief Description</label>
+            <div class="col-sm-9">
+                <textarea class="form-control" id="description" name="description"onfocus="this.select()">@Model.Description</textarea>
+            </div>
+        </div>
+
+        <div class="form-group">
+
+            <label class="col-md-3 control-label">
+                Enter details about your @UILabel.ActivityLabel(Model.ActivityGroupTypeId).ToLower() <span class="text-danger">*</span>                                
+            </label>
+            <div class="col-md-9">
+                @{ Html.RenderPartial(
+               "~/Views/Shared/_TextEditor.cshtml",
+               Model.Details,
+               new ViewDataDictionary() {
+                    { "required", false },
+                    { "name", "details" },
+                    { "id", "details" }
+               }
+               ); }
+
+                <p class="text-muted">
+                    <em>Tell us why we should sign up for your @UILabel.ActivityLabel(Model.ActivityGroupTypeId).ToLower(). What will we get out of it?. What should we expect?</em>
+                </p>
+            </div>
+        </div>
+
+    </div>
+</div>
+

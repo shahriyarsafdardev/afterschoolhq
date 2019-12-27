@@ -1,0 +1,64 @@
+﻿@model ActivityGroup
+@{
+    ViewBag.Title = ((Account)ViewBag.Account).Name;
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var accountPackage = (AccountPackage)ViewBag.AccountPackage;
+    var saveBtnWidth = 7;
+    var title = Model.Name.IfBlank("New " + UILabel.ActivityLabel(Model.ActivityGroupTypeId));
+    var isFullScreen = (bool)ViewBag.IsFullScreen;
+
+    if (isFullScreen)
+    {
+        Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
+    }
+}
+
+@{ Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
+
+    <div class="main-content">
+
+        @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+        @{ Html.RenderPartial("_ActivityGroupHeader"); }
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", title); }
+
+                @if (isFullScreen)
+                {
+                    Html.RenderPartial("_ExitFullScreen", "");
+                }
+            </div>
+            <div class="panel-body">
+
+                <div class="col-md-8 col-lg-9">
+                    <form id="form1" method="post" action="@Url.Action("editsetup", "sports", new { id = Model.Uid, isnew = Request["isnew"] })" class="form-horizontal">
+
+                        @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editsetup", "next", true, true, Request))
+                        @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(true, false))
+
+                        @{Html.RenderPartial("_SportsSetup", Model);}
+
+                        <div class="form-group">
+
+                            <div class="col-sm-@saveBtnWidth col-sm-offset-3">
+                                @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(false, false))
+                            </div>
+
+                            <div class="col-sm-2">
+                                @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editsetup", "next", false, true, Request))
+                            </div>
+
+                        </div>
+
+                    </form>
+                </div>
+
+                <div class="col-md-4 col-lg-3">
+                    @{Html.RenderPartial("_SportsEditNav", Model); }
+                </div>
+
+            </div>
+        </div>
+    </div>

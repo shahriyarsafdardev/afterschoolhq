@@ -318,6 +318,7 @@ namespace AfterSchoolLibrary.Helpers
                     amsgs.AddRange(Migrations.UpdateSendToStaff_20190721.Do(adc));
                     amsgs.AddRange(Migrations.InvalidateRegistrantAccounts_20190721.Do(adc));
                     amsgs.AddRange(Migrations.CreatePayoutsForConnectedAccounts_20191226.Do(adc));
+                    amsgs.AddRange(Migrations.UpdateRequiresParentalConsentForActivityGroup_20191226.Do(adc));
 
 
                     // amsgs.AddRange(MigrateToBCrypt(adc));
@@ -514,7 +515,7 @@ namespace AfterSchoolLibrary.Helpers
             var aps = AccountPackage.Load(msgs: msgs, dc: dc);
 
             aps.ForEach(ap => {
-                var apf = ap.GetFeature(FeatureType.ManageLeagues, msgs, dc);
+                var apf = ap.GetFeature(FeatureType.ManageExternalLeagues, msgs, dc);
                 if (apf.IsEmpty())
                 {
                     msgs.AddRange(new AccountPackageFeature()
@@ -522,7 +523,7 @@ namespace AfterSchoolLibrary.Helpers
                         AccountPackageId = ap.ID,
                         CreateDate = DateTime.UtcNow,
                         CreatedBy = 0,
-                        FeatureTypeId = FeatureType.ManageLeagues,
+                        FeatureTypeId = FeatureType.ManageExternalLeagues,
                         LastModifiedBy = 0,
                         LastModifiedDate = DateTime.UtcNow,
                         Max = 0
