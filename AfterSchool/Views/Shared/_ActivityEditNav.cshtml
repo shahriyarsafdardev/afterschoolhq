@@ -20,7 +20,7 @@
                 <a href="@Url.Action("editsetup", "activity", new { id = Model.ID.HasValue && Model.ID > 0 ? Model.Uid.ToString() : "", isnew = Request["isnew"] })">Settings</a>
             </div>
         </li>
-        @if (Model.ActivityTypeId == ActivityType.Activity)
+        @if (Model.ActivityTypeId != ActivityType.Team)
         {
             <li data-id="4" class="dd-item">
                 <div class="dd-handle @editrestrictionsactive">
@@ -49,7 +49,7 @@
                 }
             </div>
         </li>
-        @if (Model.ActivityTypeId == ActivityType.Activity)
+        @if (Model.ActivityTypeId != ActivityType.Team)
         {
             <li data-id="2" class="dd-item">
                 <div class="dd-handle @editdetailsactive">
@@ -79,7 +79,7 @@
             </div>
         </li>
 
-        @if (Model.ActivityTypeId == ActivityType.Activity)
+        @if (Model.ActivityTypeId != ActivityType.Team)
         {
             <li data-id="4" class="dd-item">
                 <div class="dd-handle @editlocationactive">
