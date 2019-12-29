@@ -18,7 +18,7 @@ namespace AfterSchoolLibrary.Migrations
                     amsgs.AddRange(ActivityGroup.Update(
                        updateValues: new Hashtable() { { "RequiresParentalConsent", true } },
                        criterias: new Hashtable() { },
-                       ObjectMap: Activity.ObjectMap,
+                       ObjectMap: ActivityGroup.ObjectMap,
                        dc: adc));
                 },
                 uniqueIdenfier: "UpdateRequiresParentalConsentForActivityGroup_20191226",
