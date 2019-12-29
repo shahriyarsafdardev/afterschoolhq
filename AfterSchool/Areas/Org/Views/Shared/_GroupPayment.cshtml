@@ -1,0 +1,272 @@
+﻿@model ActivityGroup
+
+@{
+    var subscriptionPlan = (SubscriptionPlan)ViewBag.SubscriptionPlan;
+    var paymentPlan = (SubscriptionPlan)ViewBag.PaymentPlan;
+    var canProcessPayments = (bool)ViewBag.CanProcessPayments;
+    var accountPackage = (AccountPackage)ViewData["AccountPackage"];
+    var paymentdisabled = "";
+
+    if (!accountPackage.HasFeature(FeatureType.AcceptPayments))
+    {
+        paymentdisabled = " disabled=\"disabled\" ";
+    }
+}
+
+<div class="panel panel-default panel-small-padding">
+    <div class="panel-heading">
+        Fees
+    </div>
+
+    <div class="panel-body">
+
+        <div class="form-group">
+            <label class="col-sm-3 control-label" for="do-parents-pay">
+                Do parents pay for this @UILabel.ActivityGroupLabel(ActivityGroupType.League).ToLower()? <span class="text-danger">*</span>
+            </label>
+            <div class="col-sm-9">
+                <div class="am-radio inline">
+                    <input type="radio" class="form-control" name="doparentspay" id="do-parents-pay-yes" required />
+                    <label for="do-parents-pay-yes">Yes</label>
+                </div>
+                <div class="am-radio inline">
+                    <input type="radio" class="form-control" name="doparentspay" id="do-parents-pay-no" required  />
+                    <label for="do-parents-pay-no">No</label>
+                </div>
+            </div>
+        </div>
+
+        <div id="tuition-costs" class="hide">
+
+            <div class="form-group">
+                <label class="col-sm-3 control-label">Registration Fee</label>
+                <div class="col-sm-9">
+                    <div class="input-group input-group-lg xs-mb-15">
+                        <span class="input-group-addon">$</span>
+                        <input type="number" class="form-control" id="cost" name="cost" onfocus="this.select()" value="@(Model.Cost.HasValue ? Model.Cost.Value.ToString("0.00") : "0.00")" required min="0.00" step=".01" @paymentdisabled />
+                    </div>
+                    <p class="text-muted">
+                        <em>The total cost will be $<span id="finaltuitioncost">0.00</span> at checkout</em>
+                    </p>
+                </div>
+            </div>
+
+            <div class="form-group @(!canProcessPayments ? "hide": "")">
+                <label class="col-sm-3 control-label">Allow to Pay Later</label>
+                <div class="col-sm-9">
+                    @{Html.RenderPartial
+                    (
+                        "~/Views/Shared/_SwitchButton.cshtml",
+                        Model.AllowToPayLater,
+                        new ViewDataDictionary()
+                        {
+                        { "checkboxname", "allowtopaylater" },
+                        { "checkboxid", "allowtopaylater" }
+                        }
+                    );
+                    }
+                    <p class="text-muted">
+                        <em>
+                            Allowing a @UILabel.RegistrantLabel().ToLower() to pay later means a @UILabel.RegistrantLabel().ToLower() can register and occupy a seat for your @Model.ActivityGroupTypeId.ToString().ToLower() without paying. <br />
+                            <strong>NOTE: This could cause an unpaid @UILabel.RegistrantLabel().ToLower() to take a reserved seat another @UILabel.RegistrantLabel().ToLower() may have paid for, and therefore is discouraged.</strong>
+                        </em>
+                    </p>
+                </div>
+            </div>
+                        
+        </div>
+    </div>
+</div>
+
+<div id="advanced-settings-container" class="hide">
+
+    <div class="col-md-offset-3 col-md-9 padding-v-30">
+        <span><a onclick="ActivitySetup.showAdvancedSettings()" id="btn-advanced-settings" class="pointer">Show Advanced Settings</a></span>
+    </div>
+
+    <div class="panel panel-default hide advanced-settings">
+
+        <div class="panel-heading">
+            Payment Options
+        </div>
+
+        <div class="panel-body">
+
+            <div class="form-group">
+                <div class="row">
+                    <label class="col-sm-3 control-label">Registration Payment Plan</label>
+                    <div class="col-sm-1">
+                        @{Html.RenderPartial
+                        (
+                            "~/Views/Shared/_SwitchButton.cshtml",
+                            Model.HasPaymentPlan(),
+                            new ViewDataDictionary()
+                            {
+                                { "checkboxname", "haspaymentplan" },
+                                { "checkboxid", "haspaymentplan" }
+                            }
+                        );
+                        }
+                    </div>
+                </div>
+                <div id="paymentplansection" class="row">
+                    <div class="col-md-3"></div>
+                    <div class="col-sm-6 col-md-9">
+                        <div class="input-group input-group-lg xs-mb-15">
+                            <span class="input-group-addon">Payment Amt $</span>
+                            <input type="number" class="form-control" id="paymentplancost"
+                                   name="paymentplancost" onfocus="this.select()"
+                                   value="@(paymentPlan.IsNotEmpty() && paymentPlan.CostPerPeriod.HasValue ? paymentPlan.CostPerPeriod.Value.ToString("0.00") : "0.00")"
+                                   required min="0.00" step=".01" @paymentdisabled />
+                        </div>
+                        <p class="text-muted">
+                            <em>The parent will be charged $<span id="finalpaymentplancost">0.00</span> upon checkout</em>
+                        </p>
+                    </div>
+                    <div class="col-md-3"></div>
+                    <div class="col-sm-6 col-md-9">
+                        <div class="input-group input-group-lg xs-mb-15">
+                            <span class="input-group-addon">Every</span>
+                            <select name="paymentplanperiod" id="paymentplanperiod" class="form-control" required>
+                                @BillingPeriodOptions(paymentPlan)
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3"></div>
+                    <div class="col-sm-6 col-md-9">
+                        <div class="input-group input-group-lg xs-mb-15">
+                            <span class="input-group-addon"># of Payments</span>
+                            <input type="number" class="form-control" id="paymentplanperiodnumber"
+                                   name="paymentplanperiodnumber" onfocus="this.select()"
+                                   value="@(paymentPlan.IsNotEmpty() ? paymentPlan.TotalPeriods.ToString() : "0")"
+                                   required min="0" step="1" @paymentdisabled />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+
+                    <div class="col-sm-3"></div>
+                    <div class="col-sm-9">
+                        <p class="text-muted padding-v-10">Payment plans are used to break up the registration fee into monthly payments.</p>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    var costTimeOut = null;
+    var paymentplanTimeOut = null;
+
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        setPaymentPlanSection();
+
+        $('#haspaymentplan').change(function (cb) {
+            setPaymentPlanSection();
+        });
+
+        $('#do-parents-pay-yes').click(function () {
+            showTuitionCosts();
+        })
+
+        $('#do-parents-pay-no').click(function () {
+            showTuitionCosts();
+            $('#cost').val(0);
+        })
+
+        if ('@Model.IsFree' == '@false') {
+            $('#do-parents-pay-yes').prop('checked', true);
+            $('#do-parents-pay-yes').trigger('click');
+
+            if ('@Model.HasPaymentPlan()' == '@true') {
+                ActivitySetup.showAdvancedSettings();
+            }
+        }
+       
+        $('#cost').keyup(function () {
+            costTimeOut = null;
+            costTimeOut = setTimeout(function () {
+                calculateFinalPrice($('#cost').val(), $('#finaltuitioncost'));
+            }, 200);
+        });
+
+        $('#paymentplancost').keyup(function () {
+            paymentplanTimeOut = null;
+            paymentplanTimeOut = setTimeout(function () {
+                calculateFinalPrice($('#paymentplancost').val(), $('#finalpaymentplancost'));
+            }, 200);
+        });
+
+        calculateFinalPrice($('#cost').val(), $('#finaltuitioncost'));
+        calculateFinalPrice($('#paymentplancost').val(), $('#finalpaymentplancost'));
+    });
+
+    function calculateFinalPrice(cost, span) {
+
+        if (isNaN(cost))
+            return;
+
+        $.get(
+            '@Url.Action("calculatefinalprice", "services")?cost=' + cost,
+            function (data) {
+                if (data && data.status == 'ok' && !isNaN(data.price)) {
+                    span.html(parseFloat(data.price).toFixed(2));
+                } else {
+                    span.html('0.00');
+                }
+            }
+        );
+    }
+
+    function showTuitionCosts() {
+        if ($('#do-parents-pay-yes').is(':checked')) {
+            $('#tuition-costs').removeClass('hide');
+            $('#provider-info').removeClass('hide');
+            $('#advanced-settings-container').removeClass('hide');
+        } else {
+            $('#tuition-costs').addClass('hide');
+            $('#provider-info').addClass('hide');
+            $('#advanced-settings-container').addClass('hide');
+        }
+    }
+
+    function setPaymentPlanSection() {
+        if ($('#haspaymentplan').is(':checked')) {
+            $('#paymentplansection').show();
+            $('#paymentplanperiod').prop('required', true);
+        } else {
+            $('#paymentplansection').hide();
+            $('#paymentplanperiod').prop('required', false);
+        }
+    }
+</script>
+
+@helper BillingPeriodOptions(SubscriptionPlan plan)
+{
+    var exceptions = new List<BillingPeriodType> { BillingPeriodType.NotSet };
+
+    if (AfterSchoolLibrary.Helpers.Utilities.IsProduction)
+    {
+        exceptions = new List<BillingPeriodType> { BillingPeriodType.NotSet, BillingPeriodType.Day, BillingPeriodType.Year };
+    }
+
+    foreach (var billingPeriodType in Enum.GetValues(typeof(BillingPeriodType)).Cast<BillingPeriodType>().Where(x => x.NotIn(exceptions)))
+    {
+        var selected = "";
+        if (plan.IsEmpty() && billingPeriodType == BillingPeriodType.Month)
+        {
+            selected = " selected=\"selected\" ";
+        }
+        else if (plan.IsNotEmpty() && billingPeriodType == plan.BillingPeriodTypeId)
+        {
+            selected = " selected=\"selected\" ";
+        }
+
+        <option value="@((int)billingPeriodType)" @selected>@billingPeriodType.ToString()</option>
+    }
+}

@@ -8,6 +8,7 @@
     var returnUrl = ViewBag.ReturnUrl;
     var activities = (List<Activity>)ViewBag.Activities;
     var itemsPerColumn = Math.Ceiling(activities.Count / 3.0).ToInteger();
+    var group = (ActivityGroup)ViewBag.Group;
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -54,7 +55,7 @@
                                         </optgroup>
                                     </select>
                                 </div>
-                                @if (activities.Count > 0 && activities.Where(x => x.ActivityGroupId.HasValue).Any())
+                                @if (activities.Where(x => x.ActivityGroupId.HasValue).Any() && group.ActivityGroupTypeId != ActivityGroupType.League)
                                 {
                                     <div class="form-group">
                                         <label for="list" class="col-md-12">

@@ -24,6 +24,11 @@
         id = group.Uid.ToString();
         currentListUrl = Url.Action("activities", "group", new { archive = 0 });
         archivedListUrl = Url.Action("activities", "group", new { archive = 1 });
+
+        if (group.ActivityGroupTypeId == ActivityGroupType.League)
+        {
+            activityType = ActivityType.Team;
+        }
     }
 
     var currentClass = "";

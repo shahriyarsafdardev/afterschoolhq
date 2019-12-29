@@ -30,5 +30,3 @@ if "%DEPLOYMENT_GROUP_NAME%"=="" (
 
 	%systemroot%\System32\xcopy %path% !target! /e /i /y /s
 )
-
-%SYSTEMROOT%\System32\WindowsPowerShell\v1.0\powershell.exe -noprofile -command "Invoke-WebRequest -Uri http://localhost/db/update/eibfeiwalncdsja32rq9yfwbfg32yewody7832re7ywofaudisfh7238qoweiafb7328qwoadg78027rweubfad -UseBasicParsing"

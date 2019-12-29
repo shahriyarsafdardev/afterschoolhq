@@ -46,6 +46,11 @@ namespace AfterSchoolLibrary.Models
 		public string ContactEmail { get { return (string)MDV["ContactEmail"].Value; } set { MDV["ContactEmail"].Value = value; } }
 		public int? SeatsAvailable { get { return (int?)MDV["SeatsAvailable"].Value; } set { MDV["SeatsAvailable"].Value = value; } }
 		public int? WaitingListSeats { get { return (int?)MDV["WaitingListSeats"].Value; } set { MDV["WaitingListSeats"].Value = value; } }
+		public bool RequiresParentalConsent { get { return (bool)MDV["RequiresParentalConsent"].Value; } set { MDV["RequiresParentalConsent"].Value = value; } }
+		public bool AllowToPayLater { get { return (bool)MDV["AllowToPayLater"].Value; } set { MDV["AllowToPayLater"].Value = value; } }
+		public string Details { get { return (string)MDV["Details"].Value; } set { MDV["Details"].Value = value; } }
+		public DateTime? StartDate { get { return (DateTime?)MDV["StartDate"].Value; } set { MDV["StartDate"].Value = value; } }
+		public DateTime? EndDate { get { return (DateTime?)MDV["EndDate"].Value; } set { MDV["EndDate"].Value = value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
 		
 
@@ -62,6 +67,8 @@ namespace AfterSchoolLibrary.Models
 			this.ActivityGroupTypeId = ActivityGroupType.NotSet;
 			this.GenderRestriction = GenderRestrictionType.None;
 			this.CostUnitTypeId = CostUnitType.NotSet;
+			this.RequiresParentalConsent = false;
+			this.AllowToPayLater = false;
 			
         }
 
@@ -94,6 +101,11 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "ContactEmail", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "SeatsAvailable", System.Data.SqlDbType.Int);
 				_dp.Add(className, "WaitingListSeats", System.Data.SqlDbType.Int);
+				_dp.Add(className, "RequiresParentalConsent", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "AllowToPayLater", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "Details", System.Data.SqlDbType.NVarChar , "4000");
+				_dp.Add(className, "StartDate", System.Data.SqlDbType.DateTime);
+				_dp.Add(className, "EndDate", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
 				
                 return _dp;
@@ -263,6 +275,26 @@ namespace AfterSchoolLibrary.Models
 			dps.Add(ObjectMap["WaitingListSeats"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["RequiresParentalConsent"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["AllowToPayLater"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["Details"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["StartDate"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["EndDate"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -373,12 +405,19 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-
+		
 
         #endregion
 
-        #region "UserDefined"
+		#region "UserDefined"
 
+        public bool IsFree
+        {
+            get
+            {
+                return !this.Cost.HasValue || this.Cost.Value <= 0;
+            }
+        }
         public string GetHomePageUrl(bool isAfterSchool = true, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return $"{Helpers.Utilities.BaseUrl()}/{this.GetAccount(msgs, dc).UniqueName.ToLower()}/{this.ActivityGroupTypeId.ToString().ToLower()}/{this.UniqueName.ToLower()}";
@@ -426,7 +465,7 @@ namespace AfterSchoolLibrary.Models
             get
             {
                 return !IsArchived &&
-                    !this.GetActivities().Where(x => !x.ActivityScheduleId.HasValue).Any() &&
+                    (this.ActivityGroupTypeId == ActivityGroupType.League || !this.GetActivities().Where(x => !x.ActivityScheduleId.HasValue).Any()) &&
                     this.GetRegistrationPeriods().Any();
             }
         }
@@ -437,18 +476,6 @@ namespace AfterSchoolLibrary.Models
             {
                 return IsPublished && !IsArchived;
             }
-        }
-
-        public SystemMessages SetIsPublished(bool isPublished, int loggedInUserId, DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
-
-            this.IsPublished = isPublished;
-            this.LastModifiedBy = loggedInUserId;
-            this.LastModifiedDate = DateTime.UtcNow;
-            msgs.AddRange(this.Save(dc: dc));
-
-            return msgs;
         }
 
         public static List<ActivityGroup> LoadList(List<int> ids, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -549,7 +576,7 @@ namespace AfterSchoolLibrary.Models
         public List<Activity> GetActivities(ActivityType? activityType, bool? isArchived, bool? isDeleted, int? start, int? length, bool forceReload = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (_Activities.IsEmpty() || forceReload)
-                _Activities = Activity.LoadByAccountId(this.AccountId.Value, this.ID.Value, null, activityType, isArchived, isDeleted, start, length, msgs, dc);
+                _Activities = Activity.LoadByAccountId(this.AccountId.Value, this.ID.Value, null, activityType, isArchived, isDeleted, null, start, length, msgs, dc);
 
             return _Activities;
         }
@@ -583,15 +610,6 @@ namespace AfterSchoolLibrary.Models
                 return activities;
 
             return finalList;
-        }
-
-        private Form _Form = null;
-        public Form GetForm(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (_Form.IsEmpty() && this.FormId.HasValue)
-                _Form = Form.Load(this.FormId.Value, msgs, dc);
-
-            return _Form;
         }
 
         public List<RegistrantActivity> _RegistrantActivities = null;
@@ -655,7 +673,7 @@ namespace AfterSchoolLibrary.Models
         public int GetActivityCountByAccountId(int accountId, ActivityType? activityType, bool? isArchived, bool? isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (this.ID.HasValue)
-                return Activity.GetCountByAccountId(accountId, this.ID, activityType, isArchived, isDeleted, msgs, dc);
+                return Activity.GetCountByAccountId(accountId, this.ID, activityType, isArchived, isDeleted, null, msgs, dc);
 
             return 0;
         }
@@ -741,6 +759,19 @@ namespace AfterSchoolLibrary.Models
         public ParticipationObject GetParticipationObject(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return new ParticipationObject(this, msgs, dc);
+        }
+
+        public bool HasPaymentPlan(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return SubscriptionPlan.GetCount(
+               new Hashtable() {
+                    { "ParticipationObjectId", this.ID.Value },
+                    { "ParticipationObjectTypeId", (int)ParticipationObjectType.ActivityGroup },
+                    { "PlanTypeId", (int)SubscriptionPlanType.PaymentPlan },
+                    { "IsActive", true }
+               },
+               msgs,
+               dc) > 0;
         }
 
         #endregion

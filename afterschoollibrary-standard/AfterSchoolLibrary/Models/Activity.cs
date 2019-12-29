@@ -546,7 +546,7 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        private static DatabaseQuery LoadByAccountIdQuery(int? accountId, int? activityGroupId, int? accountActivityGroupId, ActivityType? activityType, bool? isArchived, bool? isDeleted, bool? isSubmitted, DatabaseConnection dc = null)
+        private static DatabaseQuery LoadByAccountIdQuery(int? accountId, int? activityGroupId, int? accountActivityGroupId, ActivityType? activityType, bool? isArchived, bool? isDeleted, bool? isSubmitted, bool? ungroupedOnly, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.UseParameterizedQuery = false;
@@ -570,8 +570,10 @@ namespace AfterSchoolLibrary.Models
 
             if (activityGroupId.HasValue)
                 dq.Criterias.Add(ObjectMap["activityGroupId"], activityGroupId.Value);
+			else if (ungroupedOnly.HasValue && ungroupedOnly.Value)
+				dq.Criterias.Add(ObjectMap["activityGroupId"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
 
-            if (accountActivityGroupId.HasValue)
+			if (accountActivityGroupId.HasValue)
                 dq.Criterias.Add(ObjectMap["accountActivityGroupId"], accountActivityGroupId.Value);
 
             if (activityType.HasValue)
@@ -614,27 +616,27 @@ namespace AfterSchoolLibrary.Models
             return dq;
         }
 
-        public static int GetCountByAccountId(int AccountId, int? activityGroupId, ActivityType? activityType, bool? isArchived, bool? isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetCountByAccountId(int AccountId, int? activityGroupId, ActivityType? activityType, bool? isArchived, bool? isDeleted, bool? ungroupedOnly, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var dq = LoadByAccountIdQuery(AccountId, activityGroupId, null, activityType, isArchived, isDeleted, null, dc);
+            var dq = LoadByAccountIdQuery(AccountId, activityGroupId, null, activityType, isArchived, isDeleted, null, ungroupedOnly, dc);
             return dq.GetCount(msgs);
         }
 
         public static int GetCountByActivityGroupId(int? activityGroupId, ActivityType? activityType, bool? isArchived, bool? isDeleted, bool? isSubmitted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var dq = LoadByAccountIdQuery(null, activityGroupId, null, activityType, isArchived, isDeleted, isSubmitted, dc);
+            var dq = LoadByAccountIdQuery(null, activityGroupId, null, activityType, isArchived, isDeleted, isSubmitted, false, dc);
             return dq.GetCount(msgs);
         }
 
         public static int GetCountByAccountActivityGroupId(int? accountActivityGroupId, ActivityType? activityType, bool? isArchived, bool? isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var dq = LoadByAccountIdQuery(null, null, accountActivityGroupId, activityType, isArchived, isDeleted, null, dc);
+            var dq = LoadByAccountIdQuery(null, null, accountActivityGroupId, activityType, isArchived, isDeleted, null, false, dc);
             return dq.GetCount(msgs);
         }
 
-        public static List<Activity> LoadByAccountId(int AccountId, int? activityGroupId, int? accountActivityGroupId, ActivityType? activityType, bool? isArchived, bool? isDeleted, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Activity> LoadByAccountId(int AccountId, int? activityGroupId, int? accountActivityGroupId, ActivityType? activityType, bool? isArchived, bool? isDeleted, bool? ungroupedOnly, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var dq = LoadByAccountIdQuery(AccountId, activityGroupId, accountActivityGroupId, activityType, isArchived, isDeleted, null, dc: dc);
+            var dq = LoadByAccountIdQuery(AccountId, activityGroupId, accountActivityGroupId, activityType, isArchived, isDeleted, null, ungroupedOnly, dc);
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
             dq.OrderBys.Add("Name", OrderByDirectionEnum.Ascending);

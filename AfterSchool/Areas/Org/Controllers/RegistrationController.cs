@@ -91,7 +91,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 SessionVariables.CurrentUser,
                 null,
                 false, 
-                false)
+                false,
+                null)
                 .OrderBy(x => x.Name)
                 .ToList();
 
@@ -605,6 +606,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     activityType: null, 
                     isArchived: false, 
                     isDeleted: false, 
+                    ungroupedOnly: null,
                     start: null, 
                     length: null);
 

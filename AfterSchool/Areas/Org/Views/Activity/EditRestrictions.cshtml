@@ -34,18 +34,14 @@
 
                     @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editrestrictions", "next", true, true, Request))
                     @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(true, false))
-                    @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editrestrictions", "prev", true, false, Request))
 
                     @{Html.RenderPartial("~/Views/Shared/_ActivityFormRestrictions.cshtml", Model);}
 
                     <div class="form-group">
-                        <div class="col-sm-2 col-sm-offset-3">
-                            @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editrestrictions", "prev", false, false, Request))
-                        </div>
-                        <div class="col-sm-5">
+                        <div class="col-sm-6 col-sm-offset-3">
                             @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(false, false))
                         </div>
-                        <div class="col-sm-2">
+                        <div class="col-sm-3">
                             @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editrestrictions", "next", false, true, Request))
                         </div>
                     </div>

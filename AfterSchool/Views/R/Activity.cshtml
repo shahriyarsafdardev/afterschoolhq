@@ -45,7 +45,7 @@
          maxgradetext="@(Model.GetMaxGradeLevel()?.Name)"
          hasseatsremaining="@Model.HasSeatsAvailable().ToString().ToLower()"
          haswaitinglistremaining="@Model.HasWaitingListSeatsAvailable().ToString().ToLower()"
-         days="@ParticipationObjectUI.PrintDaysOfWeek(Model)"
+         days="@ParticipationObjectUI.PrintDaysOfWeekList(Model)"
          location="@(Model.Location?.FormatAddress(false))"
          gender="@((int)Model.GenderRestriction)"
          name="@Model.Name">
@@ -55,7 +55,7 @@
                 <div class="row">
                     <div class="col-lg-8 col-md-12">
                         <h3 class="text-white text-center">
-                            @ParticipationObjectUI.PrintDaysOfWeek(Model) &bull;
+                            @ParticipationObjectUI.PrintDaysOfWeekOrStartDate(Model) &bull;
                             @ParticipationObjectUI.PrintGradeLevels(Model) &bull;
                             @ParticipationObjectUI.PrintGenderRestrictions(Model)
                         </h3>
@@ -92,7 +92,6 @@
                         @{ Html.RenderPartial("~/Views/Shared/ParticipationObject/_PaymentInfo.cshtml", Model); }
                     </div>
 
-
                     @if (Model.IsActivityGroup() && Model.GetActivityGroup().IsInviteOnly)
                     {
                         <div class="activity-detail-block">
@@ -100,13 +99,30 @@
                         </div>
                     }
 
-                    @if (Model.Schedule.IsNotEmpty())
+                    @if (Model.Schedule.IsNotEmpty() || Model.StartDate.HasValue)
                     {
                         <div class="activity-detail-block">
                             <h3>Schedule</h3>
-                            <p>
-                                @{ Html.RenderPartial("_ActivityScheduleHtml", Model.Schedule); }
-                            </p>
+
+                            @if (Model.StartDate.HasValue)
+                            {
+                                <p>
+                                    Starts: <strong>@Model.StartDate.Value.ToLongDateString()</strong><br />
+                                    @if (Model.EndDate.HasValue)
+                                    {
+                                        <span>
+                                            Ends: <strong>@Model.EndDate.Value.ToLongDateString()</strong>
+                                        </span>
+                                    }
+                                </p>
+                            }
+
+                            @if (Model.Schedule.IsNotEmpty())
+                            {
+                                <p>
+                                    @{ Html.RenderPartial("_ActivityScheduleHtml", Model.Schedule); }
+                                </p>
+                            }
                         </div>
                     }
 

@@ -45,6 +45,8 @@ namespace AfterSchoolLibrary.Models
         public bool UseStripeConnectedAccount { get; set; }
         public bool RequiresParentalConsent { get; set; }
         public bool IsInviteOnly { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
 
         private ActivityType? ActivityType { get; set; }
         private ActivityGroupType? ActivityGroupType { get; set; }
@@ -130,6 +132,8 @@ namespace AfterSchoolLibrary.Models
                 PaymentPlans = activity.GetActivePaymentPlans(msgs, dc);
                 SubscriptionPlans = activity.GetActiveSubscriptionPlans(msgs, dc);
                 IsFree = IsTuitionFree && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0;
+                StartDate = activity.GetFirstDate(msgs, dc);
+                EndDate = activity.GetLastDate(msgs, dc);
             }
         }
 
@@ -140,7 +144,7 @@ namespace AfterSchoolLibrary.Models
             ObjectType = ParticipationObjectType.ActivityGroup;
             Uid = activityGroup.Uid;
             Name = activityGroup.Name;
-            Details = activityGroup.Description;
+            Details = activityGroup.Details.IfBlank(activityGroup.Description);
             GenderRestriction = activityGroup.GenderRestriction;
             MinGradeId = activityGroup.MinGradeLevelId;
             MaxGradeId = activityGroup.MaxGradeLevelId;
@@ -154,8 +158,10 @@ namespace AfterSchoolLibrary.Models
             ContactPhone = activityGroup.ContactPhone;
             IsTuitionFree = (!activityGroup.Cost.HasValue || activityGroup.Cost.Value == 0.ToDecimal());
             IsInviteOnly = activityGroup.IsInviteOnly;
-            // Description = activityGroup.Description;
-            // TODO: PayLater = activityGroup.AllowToPayLater;
+            AllowToPayLater = activityGroup.AllowToPayLater;
+            RequiresParentalConsent = activityGroup.RequiresParentalConsent;
+            StartDate = activityGroup.StartDate;
+            EndDate = activityGroup.EndDate;
 
             if (loadAllDetails)
             {
@@ -170,6 +176,8 @@ namespace AfterSchoolLibrary.Models
                 PaymentPlans = activityGroup.GetPaymentPlans(msgs, dc);
                 SubscriptionPlans = activityGroup.GetSubscriptionPlans(msgs, dc);
                 IsFree = IsTuitionFree && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0;
+                StartDate = activityGroup.GetFirstDate(msgs, dc);
+                EndDate = activityGroup.GetLastDate(msgs, dc);
             }
         }
 

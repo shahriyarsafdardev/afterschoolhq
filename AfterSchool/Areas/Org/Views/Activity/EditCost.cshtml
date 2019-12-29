@@ -3,6 +3,7 @@
     ViewBag.Title = ((Account)ViewBag.Account).Name;
     SystemMessages msgs = (SystemMessages)ViewBag.Messages;
     var accountPackage = (AccountPackage)ViewBag.AccountPackage;
+    var activityTitle = $"{(Model.ActivityGroupName.IsNotEmpty() ? $"{Model.ActivityGroupName} - " : "")}{Model.Name}";
 
     var isFullScreen = (bool)ViewBag.IsFullScreen;
     if (isFullScreen)
@@ -21,7 +22,7 @@
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Name); }
+            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", activityTitle); }
 
             @if (isFullScreen)
             {
@@ -44,7 +45,6 @@
                             @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editcost", "publish", true, true, Request))
                         }
                         @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(true, false))
-                        @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editcost", "prev", true, false, Request))
                     }
 
                     @{Html.RenderPartial("~/Views/Shared/_ActivityFormPayment.cshtml", Model);}
@@ -52,13 +52,10 @@
                     @if (Model.CanAcceptPayments())
                     {
                         <div class="form-group">
-                            <div class="col-sm-2 col-sm-offset-3">
-                                @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editcost", "prev", false, false, Request))
-                            </div>
-                            <div class="col-sm-5">
+                            <div class="col-sm-6 col-sm-offset-3">
                                 @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(false, false))
                             </div>
-                            <div class="col-sm-2">
+                            <div class="col-sm-3">
                                 @if (!Model.ActivityGroupId.HasValue)
                                 {
                                     @:@Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editcost", "next", false, true, Request))

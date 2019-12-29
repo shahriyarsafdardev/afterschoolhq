@@ -36,18 +36,14 @@
 
                     @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editlocation", "next", true, true, Request))
                     @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(true, false))
-                    @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editlocation", "prev", true, false, Request))
 
                     @{Html.RenderPartial("~/Views/Shared/_ActivityFormLocation.cshtml", Model);}
 
                     <div class="form-group">
-                        <div class="col-sm-2 col-sm-offset-3">
-                            @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editlocation", "prev", false, false, Request))
-                        </div>
-                        <div class="col-sm-5">
+                        <div class="col-sm-6 col-sm-offset-3">
                             @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(false, false))
                         </div>
-                        <div class="col-sm-2">
+                        <div class="col-sm-3">
                             @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editlocation", "next", false, true, Request))
                         </div>
                     </div>

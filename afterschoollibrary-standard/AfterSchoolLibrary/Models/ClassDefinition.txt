@@ -595,6 +595,11 @@ property: ContactPhone, string, NVarChar "50"
 property: ContactEmail, string, NVarChar "100"
 property: SeatsAvailable, int?, Int
 property: WaitingListSeats, int?, Int
+property: RequiresParentalConsent, bool, Bit
+property: AllowToPayLater, bool, Bit
+property: Details, string, NVarChar "4000"
+property: StartDate, DateTime?, DateTime
+property: EndDate, DateTime?, DateTime
 baseproperty: Name, required
 loadmethod: AccountId, List<>
 loadmethod: AccountId|ActivityGroupTypeId, List<>
@@ -1567,7 +1572,7 @@ type: Class
 name: Migration
 description: Store migration history
 inherits: BasicObject
-property: UniqueIdentifier, string, NVarChar "50", required
+property: UniqueIdentifier, string, NVarChar "100", required
 loadmethod: UniqueIdentifier
 [end]
 
@@ -1634,7 +1639,7 @@ values: NotSet, Individual, Organization
 [begin]
 type: Enum
 name: FeatureType
-values: NotSet, Attendance, AcceptPayments, Messaging, CustomUrl, TeamAccounts, WaitingList, ManageForms, ManageLocations, ManageActivityGroups, Activities, Participants, AllowApplications, Lottery, TrialDays, ManageContacts, ViewInsights, PaymentsPercentageFee, PaymentsPercentageFlatFee, ManageLeagues, UseStripeConnectedAccount, AcceptACH
+values: NotSet, Attendance, AcceptPayments, Messaging, CustomUrl, TeamAccounts, WaitingList, ManageForms, ManageLocations, ManageActivityGroups, Activities, Participants, AllowApplications, Lottery, TrialDays, ManageContacts, ViewInsights, PaymentsPercentageFee, PaymentsPercentageFlatFee, ManageExternalLeagues, UseStripeConnectedAccount, AcceptACH, ManageLeagues
 [end]
 
 [begin]

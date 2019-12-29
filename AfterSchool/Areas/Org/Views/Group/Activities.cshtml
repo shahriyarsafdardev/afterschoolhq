@@ -18,37 +18,61 @@
         <div class="panel-heading">
             <div class="pull-right">
 
-                @if (!needToUpgrade)
-                {
-                    <a href="@Url.Action("editsetup", "activity", new { group = Model.Uid, isnew = 1 })" class="btn btn-primary btn-space margin-r-10">
-                        <i class="icon icon-left s7-plus"></i>
-                        Add @UILabel.ActivityLabel(Model.ActivityGroupTypeId)
-                    </a>
-                }
-                else
+                @if (Model.ActivityGroupTypeId == ActivityGroupType.Session)
                 {
                     <button class="btn btn-primary md-trigger" data-modal="modal-offering">
                         <i class="icon icon-left s7-plus"></i>
                         Add @UILabel.ActivityLabel(Model.ActivityGroupTypeId)
                     </button>
-                    <div id="modal-offering" class="md-modal colored-header custom-width md-effect-9">
-                        <form id="form-upgrade" action="" method="post">
+                }
+                else
+                {
+                    <button class="btn btn-primary btn-space md-trigger" data-modal="modal-quick-add">
+                        Team Quick Add &raquo;
+                    </button>
+                    <div id="modal-quick-add" class="md-modal colored-header custom-width md-effect-9">
+                        <form id="form-upgrade" action="@Url.Action("teamquickadd", "group", new { id = Model.Uid })" method="post">
                             <div class="md-content">
+
                                 <div class="modal-header">
                                     <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
-                                    <h3 class="modal-title">Upgrade Your Account</h3>
+                                    <h3 class="modal-title">Create a Team</h3>
                                 </div>
                                 <div class="modal-body form">
-                                    <p>You have reached your limit of @UILabel.ActivityLabel(Model.ActivityGroupTypeId, true). Time to upgrade :).</p>
+                                    <div class="form-group">
+                                        <label class="control-label">Enter your team name</label>
+                                        <input type="text" required id="teamname" name="teamname" class="form-control" placeholder="ex: Tigers" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label">Enter the maximum number of players</label>
+                                        <input type="number" required id="seatsavailable" name="seatsavailable" step="1" min="1" max="100" class="form-control" placeholder="ex: 15" />
+                                    </div>
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-                                    <a href="@Url.Action("packages", "account")" class="btn btn-primary">Upgrade &raquo;</a>
+                                    <button type="submit" class="btn btn-primary">Create Team &raquo;</button>
                                 </div>
                             </div>
                         </form>
                     </div>
                 }
+                <div id="modal-offering" class="md-modal colored-header custom-width md-effect-9">
+                    <form id="form-upgrade" action="" method="post">
+                        <div class="md-content">
+                            <div class="modal-header">
+                                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+                                <h3 class="modal-title">Upgrade Your Account</h3>
+                            </div>
+                            <div class="modal-body form">
+                                <p>You have reached your limit of @UILabel.ActivityLabel(Model.ActivityGroupTypeId, true). Time to upgrade :).</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+                                <a href="@Url.Action("packages", "account")" class="btn btn-primary">Upgrade &raquo;</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
 
             </div>
 

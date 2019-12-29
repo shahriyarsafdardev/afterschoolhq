@@ -19,7 +19,8 @@ public enum FeatureType
 	ViewInsights,
 	PaymentsPercentageFee,
 	PaymentsPercentageFlatFee,
-	ManageLeagues,
+	ManageExternalLeagues,
 	UseStripeConnectedAccount,
-	AcceptACH
+	AcceptACH,
+	ManageLeagues
 }

@@ -4,8 +4,20 @@
     var paging = (PagingModel)ViewBag.PagingModel;
     var hasArchivedGroups = (bool)ViewBag.HasArchivedGroups;
     var controller = ViewBag.GroupController;
+    var action = ViewBag.GroupAction;
     var isExternalGroupsView = ViewBag.isExternalGroupsView ?? false;
     var pendingInvites = (List<ActivityGroup>)ViewBag.pendingInvites;
+    var addAction = "edit";
+
+    if (activityGroupType == ActivityGroupType.League)
+    {
+        addAction = "editsetup";
+    }
+
+    if (action == null)
+    {
+        action = "index";
+    }
 
     var previousLink = "#";
     var nextLink = "#";
@@ -13,11 +25,11 @@
     {
         if (paging.PageNumber > 1)
         {
-            previousLink = Url.Action("index", controller, new { pn = paging.PageNumber - 1, rpp = Request["rpp"], archive = Request["archive"] });
+            previousLink = Url.Action(action, controller, new { pn = paging.PageNumber - 1, rpp = Request["rpp"], archive = Request["archive"] });
         }
         if (paging.PageNumber < paging.TotalPages)
         {
-            nextLink = Url.Action("index", controller, new { pn = paging.PageNumber + 1, rpp = Request["rpp"], archive = Request["archive"] });
+            nextLink = Url.Action(action, controller, new { pn = paging.PageNumber + 1, rpp = Request["rpp"], archive = Request["archive"] });
         }
     }
 
@@ -60,11 +72,11 @@ else if (isExternalGroupsView && Model.Count == 0)
             }
             else
             {
-                <p>You haven't created any @UILabel.ActivityGroupLabel(activityGroupType, true).ToLower() yet. In order to get started, <a href="@Url.Action("edit", controller)">create your first @UILabel.ActivityGroupLabel(activityGroupType).ToLower()</a>.</p>
+                <p>You haven't created any @UILabel.ActivityGroupLabel(activityGroupType, true).ToLower() yet. In order to get started, <a href="@Url.Action(addAction, controller, new { isnew = 1 })">create your first @UILabel.ActivityGroupLabel(activityGroupType).ToLower()</a>.</p>
 
                 <p>&nbsp;</p>
                 <p>
-                    <a href="@Url.Action("edit", controller)" class="btn btn-primary btn-lg">Create Your First @UILabel.ActivityGroupLabel(activityGroupType) &raquo;</a>
+                    <a href="@Url.Action(addAction, controller, new { isnew = 1 }))" class="btn btn-primary btn-lg">Create Your First @UILabel.ActivityGroupLabel(activityGroupType) &raquo;</a>
                 </p>
             }
 
@@ -80,8 +92,8 @@ else
         <div class="row">
             <div class="col-md-12">
                 <div class="pull-right">
-                    <a href="@Url.Action("index", controller, new { archive = 0 })" class="@currentClass">Current</a> |
-                    <a href="@Url.Action("index", controller, new { archive = 1 })" class="@archiveClass">Archived</a>
+                    <a href="@Url.Action(action, controller, new { archive = 0 })" class="@currentClass">Current</a> |
+                    <a href="@Url.Action(action, controller, new { archive = 1 })" class="@archiveClass">Archived</a>
                 </div>
             </div>
         </div>
@@ -192,8 +204,8 @@ else
                 else
                 {
                     <tr>
-                        <td colspan="4">
-                            There are no @UILabel.ActivityGroupLabel(activityGroupType, true).ToLower(). Please <a href="@Url.Action("edit", controller)">add a new @UILabel.ActivityGroupLabel(activityGroupType).ToLower()</a>
+                        <td colspan="6">
+                            There are no @UILabel.ActivityGroupLabel(activityGroupType, true).ToLower(). Please <a href="@Url.Action($"edit{(activityGroupType == ActivityGroupType.League ? "setup" : "")}", controller, new { isnew = 1 })">add a new @UILabel.ActivityGroupLabel(activityGroupType).ToLower()</a>
                         </td>
                     </tr>
                 }
@@ -206,10 +218,10 @@ else
         paging,
         new ViewDataDictionary()
         {
-{ "id", "" },
-{ "querystring", string.Format("archive={0}", Request["archive"]) },
-{ "action", "index" },
-{ "controller", controller }
+            { "id", "" },
+            { "querystring", string.Format("archive={0}", Request["archive"]) },
+            { "action", action },
+            { "controller", controller }
         }
     );
 

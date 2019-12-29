@@ -659,82 +659,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Activities = group.GetActivities();
 
             return View(group);
-        }
-
-        [ValidateInput(false)]
-        [HttpPost]
-        public ActionResult EditDetails(string id, string details, string scheduledetails, string cmd)
-        {
-            var msgs = new SystemMessages();
-            Activity activity = null;
-
-            if (id.IsNumber() && id.ToInteger() > 0)
-            {
-                var values = new Dictionary<string, object>()
-                {
-                    { "details", details},
-                    { "scheduledetails", scheduledetails}
-                };
-
-                activity = ActivityService.EditExisting(
-                    loggedInUserId: SessionVariables.CurrentUser.ID.Value,
-                    account: SessionVariables.CurrentAccount,
-                    activityId: id,
-                    values: values,
-                    msgs: msgs
-                );
-            }
-
-            if (msgs.HasNoErrors())
-            {
-                msgs.Add(string.Format("{0} Saved", UILabel.ActivityLabel(activity.ActivityTypeId)), MessageType.Success);
-            }
-
-            ViewBag.Messages = msgs;
-            ViewBag.Account = SessionVariables.CurrentAccount;
-            ViewBag.AccountPackage = SessionVariables.AccountPackage;
-
-            if (msgs.HasNoErrors())
-            {
-                switch (cmd)
-                {
-                    case "prev":
-                        ViewBag.ActiveMenu = "EditSchedule";
-                        return View("EditSchedule", activity);
-                    case "next":
-                        ViewBag.ActiveMenu = "EditContact";
-                        return View("EditContact", activity);
-                }
-            }
-
-            ViewBag.ActiveMenu = "EditDetails";
-            return View(activity);
-        }
-
-        private void LoadEditScheduleViewBag(ActivityGroup activityGroup, string scheduleId)
-        {
-            ViewBag.Schedules = SessionVariables.CurrentAccount.GetActivitySchedules();
-
-            ActivitySchedule schedule = null;
-
-            // changing schedule
-            if (scheduleId.IsNumber())
-            {
-                schedule = ActivitySchedule.Load(scheduleId.ToInteger());
-                if (schedule.AccountId != SessionVariables.CurrentAccount.ID)
-                    schedule = null;
-            }
-
-            if (schedule.IsEmpty())
-                schedule = activityGroup.GetSchedule();
-
-            if (schedule.IsEmpty())
-                schedule = ActivitySchedule.GetNewDefaultSchedule();
-
-            ViewBag.Schedule = schedule;
-            ViewBag.ActivityInstances = schedule.GetInstances();
-            ViewBag.ShowScheduleList = SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups);
-        }
+        }        
 
         [HttpPost]
         public ActionResult Copy(string id, string groupnamecopy, string usesameformcopy)
@@ -952,6 +877,458 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Step = nextStep;
             ViewBag.Messages = msgs;
             return View(group);
+        }
+
+        /* Sports */
+        // GET: Org/Sports
+        public ActionResult IndexLeague(string pn, string rpp, string archive)
+        {
+            int pageNumber = 1;
+            int recordsPerPage = 10;
+            bool isArchived = false;
+
+            if (pn.IsNumber() && pn.ToInteger() > 0)
+                pageNumber = pn.ToInteger();
+
+            if (rpp.IsNumber() && rpp.ToInteger() > 0)
+                recordsPerPage = rpp.ToInteger();
+
+            if (archive.IsBoolean())
+                isArchived = archive.ToInteger().ToBoolean();
+
+            var start = recordsPerPage * (pageNumber - 1);
+            var length = recordsPerPage;
+            var totalCount = 0;
+            var hasArchivedGroups = false;
+
+            totalCount = SessionVariables.CurrentAccount.GetLeagueCount(isArchived);
+            var leagues = SessionVariables.CurrentAccount.GetLeagues(isArchived, start, length).OrderByDescending(x => x.CreateDate).ToList();
+
+            hasArchivedGroups = SessionVariables.CurrentAccount.GetLeagueCount(true) > 0;
+
+            var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
+
+            ViewBag.GroupController = "group";
+            ViewBag.GroupAction = "indexleague";
+            ViewBag.Messages = new SystemMessages();
+            ViewBag.HasArchivedGroups = hasArchivedGroups;
+            ViewBag.ActivityGroupType = ActivityGroupType.League;
+            ViewBag.PagingModel = new PagingModel()
+            {
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                RecordsPerPage = recordsPerPage,
+                TotalPages = totalPages
+            };
+
+            return View(leagues);
+        }
+
+        [HttpGet]
+        public ActionResult EditSetup(string id)
+        {
+            var msgs = new SystemMessages();
+            ActivityGroup league = null;
+
+            if (id.IsGuid())
+            {
+                league = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
+            }
+            else
+            {
+                league = SessionVariables.CurrentAccount.GetDefaultNewLeague();
+                league.RegistrationModeId = RegistrationMode.Register;
+                league.StartDate = DateTime.UtcNow.AddWeeks(4).FirstDateOfWeek();
+                league.EndDate = league.StartDate.Value.AddWeeks(8).LastDateOfWeek();
+            }
+
+            LoadEditSetupViewBag(league, msgs);
+            ViewBag.ActiveMenu = "EditSetup";
+
+            return View(league);
+        }
+
+        [HttpPost]
+        public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string isinviteonly, string startdate, string enddate, string cmd)
+        {
+            var msgs = new SystemMessages();
+            var values = new Dictionary<string, object>()
+            {
+                { "name", name },
+                { "seatsavailable", seatsavailable },
+                { "waitinglistseats", waitinglistseats },
+                { "timezone", timezone },
+                { "form", form },
+                { "regmode", regmode },
+                { "isinviteonly", isinviteonly },
+                { "startdate", startdate },
+                { "enddate", enddate },
+            };
+            var league = SaveLeague(id, values, msgs);
+
+            if (msgs.HasNoErrors())
+            {
+                switch (cmd)
+                {
+                    case "next":
+                        return RedirectToAction("editrestrictions", new { id = league.Uid, isnew = Request["isnew"], saved = 1 });
+                }
+            }
+
+            LoadEditSetupViewBag(league, msgs);
+            ViewBag.ActiveMenu = "EditSetup";
+            return View(league);
+        }
+
+        private void LoadEditSetupViewBag(ActivityGroup league, SystemMessages msgs)
+        {
+            var activeForm = league?.GetForm(msgs) ?? SessionVariables.CurrentAccount.GetDefaultForm(msgs);
+
+            ViewBag.Messages = msgs;
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.Forms = SessionVariables.CurrentAccount.GetForms(msgs).OrderBy(x => x.Name).ToList();
+            ViewBag.ActiveForm = activeForm;
+            ViewBag.IsFullScreen = GetIsFullScreen(league);
+        }
+
+        private bool GetIsFullScreen(ActivityGroup group)
+        {
+            ViewBag.FullScreenExitUrl = Url.Action($"index{(group.ActivityGroupTypeId == ActivityGroupType.League ? "league" : "")}", "group");
+
+            return Request["isnew"] == "1" && !group.IsPublished;
+        }
+
+        [HttpGet]
+        public ActionResult EditRestrictions(string id)
+        {
+            var league = ActivityGroup.LoadByUid(id.ToGuid());
+
+            ViewBag.Messages = new SystemMessages();
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.ActiveMenu = "EditRestrictions";
+            ViewBag.IsFullScreen = GetIsFullScreen(league);
+            return View(league);
+        }
+
+        [HttpPost]
+        public ActionResult EditRestrictions(string id, string alloworganization, string agerestrictions, string agestart, string ageend, string graderestrictions, string mingrade, string maxgrade, string genderrestrictions, string requiresparentalconsent, string cmd)
+        {
+            var msgs = new SystemMessages();
+            var gradeIds = new List<int>();
+            var grades = GradeLevel.Load();
+
+            grades.ForEach(grade => {
+                if (Request["grade-" + grade.ID.ToString()].IsNotEmpty())
+                    gradeIds.Add(grade.ID.Value);
+            });
+
+            var values = new Dictionary<string, object>()
+            {
+                { "alloworganization", alloworganization.IfBlank("0")},
+                { "agestart", agerestrictions.IsNumber() ? agestart : "-1"},
+                { "ageend", agerestrictions.IsNumber() ? ageend : "-1"},
+                { "mingrade", graderestrictions.IsNumber() ? mingrade : ""},
+                { "maxgrade", graderestrictions.IsNumber() ? maxgrade : ""},
+                { "genderrestrictions", genderrestrictions},
+                { "gradeIds", gradeIds.ToStrings().ToStringList() },
+                { "requiresparentalconsent", requiresparentalconsent.IfBlank("0") }
+            };
+
+            var league = SaveLeague(id, values, msgs);
+
+            ViewBag.Messages = msgs;
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.AccountPackage = SessionVariables.AccountPackage;
+
+            if (msgs.HasNoErrors())
+            {
+                switch (cmd)
+                {
+                    case "prev":
+                        return RedirectToAction("editsetup", new { id = league.Uid, isnew = Request["isnew"], saved = 1 });
+                    case "next":
+                        return RedirectToAction("editdetails", new { id = league.Uid, isnew = Request["isnew"], saved = 1 });
+                }
+            }
+
+            ViewBag.IsFullScreen = GetIsFullScreen(league);
+            ViewBag.ActiveMenu = "EditRestrictions";
+            return View(league);
+        }
+
+        [HttpGet]
+        public ActionResult EditContact(string id)
+        {
+            var msgs = new SystemMessages();
+            var league = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
+
+            ViewBag.Messages = msgs;
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.Instructors = SessionVariables.CurrentAccount.GetUsers(msgs: msgs);
+            ViewBag.ActiveMenu = "EditContact";
+            ViewBag.IsFullScreen = GetIsFullScreen(league);
+            return View(league);
+        }
+
+        [HttpPost]
+        public ActionResult EditContact(string id, string contactname, string contactphone, string contactemail, string cmd)
+        {
+            var msgs = new SystemMessages();
+            var values = new Dictionary<string, object>()
+            {
+                { "contactname", contactname},
+                { "contactphone", contactphone},
+                { "contactemail", contactemail},
+            };
+            var league = SaveLeague(id, values, msgs);
+
+            ViewBag.Messages = msgs;
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.IsFullScreen = GetIsFullScreen(league);
+
+            if (msgs.HasNoErrors())
+            {
+                switch (cmd)
+                {
+                    case "prev":
+                        return RedirectToAction("editdetails", new { id = league.Uid, isnew = Request["isnew"], saved = 1 });
+                    case "next":
+                        return RedirectToAction("editcost", new { id = league.Uid, isnew = Request["isnew"], saved = 1 });
+                }
+            }
+
+            ViewBag.ActiveMenu = "EditCost";
+            return View(league);
+        }
+
+        [HttpGet]
+        public ActionResult EditDetails(string id)
+        {
+            var league = ActivityGroup.LoadByUid(id.ToGuid());
+
+            ViewBag.Messages = new SystemMessages();
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.ActiveMenu = "EditDetails";
+            ViewBag.IsFullScreen = GetIsFullScreen(league);
+            return View(league);
+        }
+
+        [ValidateInput(false)]
+        [HttpPost]
+        public ActionResult EditDetails(string id, string description, string details, string cmd)
+        {
+            var msgs = new SystemMessages();
+
+            if (details.IsEmpty())
+                msgs.Add($"{UILabel.ActivityGroupLabel(ActivityGroupType.League)} Details is required", MessageType.UserError);
+
+
+            var values = new Dictionary<string, object>()
+            {
+                { "details", details},
+                { "description", description}
+            };
+
+            var league = SaveLeague(id, values, msgs);
+
+            ViewBag.Messages = msgs;
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.IsFullScreen = GetIsFullScreen(league);
+
+            if (msgs.HasNoErrors())
+            {
+                switch (cmd)
+                {
+                    case "prev":
+                        return RedirectToAction("editrestrictions", new { id = league.Uid, isnew = Request["isnew"], saved = 1 });
+                    case "next":
+                        return RedirectToAction("editcontact", new { id = league.Uid, isnew = Request["isnew"], saved = 1 });
+                }
+            }
+
+            ViewBag.ActiveMenu = "EditDetails";
+            return View(league);
+        }
+
+        private void LoadEditCostViewBag(ActivityGroup league, SystemMessages msgs)
+        {
+            var canProcessPayments = SessionVariables.CurrentAccount.CanProcessPayments(msgs);
+
+            if (!canProcessPayments)
+                league.AllowToPayLater = true;
+
+            ViewBag.Messages = msgs;
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.CanProcessPayments = canProcessPayments;
+            ViewBag.PaymentPlan = league.GetPaymentPlan();
+            ViewBag.ActiveMenu = "EditCost";
+            ViewBag.IsFullScreen = GetIsFullScreen(league);
+        }
+
+        [HttpGet]
+        public ActionResult EditCost(string id)
+        {
+            var msgs = new SystemMessages();
+            var league = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
+            LoadEditCostViewBag(league, msgs);
+            return View(league);
+        }
+
+        [HttpPost]
+        public ActionResult EditCost(string id, string cost, string costdescription, string allowtopaylater, string cmd, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber)
+        {
+            var msgs = new SystemMessages();
+            var values = new Dictionary<string, object>()
+            {
+                { "cost", cost},
+                { "costdescription", costdescription},
+                { "allowtopaylater", allowtopaylater.IfBlank("0")},
+                { "haspaymentplan", haspaymentplan.IfBlank("0") },
+                { "paymentplancost", paymentplancost },
+                { "paymentplanperiod", paymentplanperiod },
+                { "paymentplanperiodnumber", paymentplanperiodnumber }
+            };
+            var league = SaveLeague(id, values, msgs);
+
+            ViewBag.Messages = msgs;
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.IsFullScreen = GetIsFullScreen(league);
+
+            if (msgs.HasNoErrors())
+            {
+                switch (cmd)
+                {
+                    case "prev":
+                        return RedirectToAction("editcontact", new { id = league.Uid, isnew = Request["isnew"], saved = 1 });
+                    case "next":
+                        return RedirectToAction("editconfirmation", new { id = league.Uid, isnew = Request["isnew"], saved = 1 });
+                    case "publish":
+                        return RedirectToAction("publish", new { id = league.Uid, isnew = Request["isnew"], saved = 1 });
+                }
+            }
+
+            LoadEditCostViewBag(league, msgs);
+
+            return View(league);
+        }
+
+        [HttpGet]
+        public ActionResult EditConfirmation(string id)
+        {
+            var league = ActivityGroup.LoadByUid(id.ToGuid());
+
+            ViewBag.Messages = new SystemMessages();
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.ActiveMenu = "EditConfirmation";
+            ViewBag.IsFullScreen = GetIsFullScreen(league);
+            return View(league);
+        }
+
+        private ActivityGroup SaveLeague(string id, Dictionary<string, object> values, SystemMessages msgs)
+        {
+            var league = ActivityGroupService.SaveLeague(
+                loggedInUser: SessionVariables.CurrentUser,
+                account: SessionVariables.CurrentAccount,
+                activityGroupUid: id,
+                values: values,
+                msgs: msgs
+            );
+
+            if (msgs.HasNoErrors())
+                msgs.Add($"{UILabel.ActivityGroupLabel(league.ActivityGroupTypeId)} Saved", MessageType.Success);
+
+            return league;
+        }
+
+        [ValidateInput(false)]
+        [HttpPost]
+        public ActionResult EditConfirmation(string id, string registrationthankyouemail, string applicationthankyouemail, string cmd)
+        {
+            var msgs = new SystemMessages();
+            var values = new Dictionary<string, object>()
+            {
+                { "registrationthankyouemail", registrationthankyouemail },
+                { "applicationthankyouemail", applicationthankyouemail }
+            };
+            var league = SaveLeague(id, values, msgs);
+
+            ViewBag.Messages = msgs;
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.IsFullScreen = GetIsFullScreen(league);
+
+            if (msgs.HasNoErrors())
+            {
+                switch (cmd)
+                {
+                    case "prev":
+                        if (SessionVariables.CurrentAccount.CanProcessPayments())
+                            return RedirectToAction("editcost", new { id = league.Uid, isnew = Request["isnew"], saved = 1 });
+                        else
+                            return RedirectToAction("editcontact", new { id = league.Uid, isnew = Request["isnew"], saved = 1 });
+                    case "publish":
+                        return RedirectToAction("publish", new { id = league.Uid, isnew = Request["isnew"], saved = 1 });
+                    case "signupperiods":
+                        return RedirectToAction("periods", new { id = league.Uid, saved = 1 });
+                }
+            }
+
+            ViewBag.ActiveMenu = "EditConfirmation";
+            return View(league);
+        }
+
+        [HttpPost]
+        public ActionResult TeamQuickAdd(string id, string teamname, string seatsavailable)
+        {
+            var msgs = new SystemMessages();
+            var league = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
+            Activity activity = null;
+            var otherActivities = Activity.LoadByActivityGroupId(league.ID.Value);
+
+            otherActivities.ForEach((oa) =>
+            {
+                if (oa.Name.IsSameAs(teamname))
+                    msgs.Add("Team name already exists in this League, please use a different name", MessageType.UserError);
+            });
+
+            if (msgs.HasNoErrors())
+            {
+                activity = new Activity()
+                {
+                    Name = teamname.MaxChars(50),
+                    SeatsAvailable = seatsavailable.ToInteger(),
+                    CreateDate = DateTime.UtcNow,
+                    CreatedBy = SessionVariables.CurrentUser.ID,
+                    LastModifiedDate = DateTime.UtcNow,
+                    LastModifiedBy = SessionVariables.CurrentUser.ID,
+                    ActivityGroupId = league.ID,
+                    AccountId = SessionVariables.CurrentAccount.ID,
+                    ActivityTypeId = ActivityType.Team,
+                    ContactEmail = league.ContactEmail,
+                    ContactName = league.ContactName,
+                    ContactPhone = league.ContactPhone,
+                    GradeLevelEnd = league.MaxGradeLevelId,
+                    GradeLevelStart = league.MinGradeLevelId,
+                    RequiresParentalConsent = league.RequiresParentalConsent,
+                    GenderRestriction = league.GenderRestriction,
+                    IsPublished = true,
+                };
+                msgs.AddRange(activity.Save());
+            }
+
+            if (msgs.HasNoErrors())
+                msgs.AddRange(activity.SetupTeam(SessionVariables.CurrentAccount, SessionVariables.CurrentUser.ID.Value));
+
+            return RedirectToAction("activities", new { id = league.Uid, saved = 1 });
         }
 
     }
