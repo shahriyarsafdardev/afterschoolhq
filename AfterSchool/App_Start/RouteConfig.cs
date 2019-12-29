@@ -94,7 +94,32 @@ namespace AfterSchool
                 new string[] { "AfterSchool.Controllers" });
 
             routes.MapRoute(
-                "LeagueHome",
+                "LeagueHome1",
+                "{accountname}/league/{leaguename}",
+                new
+                {
+                    controller = "r",
+                    action = "league",
+                    accountname = UrlParameter.Optional,
+                    districtname = UrlParameter.Optional,
+                    leaguename = UrlParameter.Optional,
+                });
+
+            routes.MapRoute(
+                "LeagueRegister1",
+                "{accountname}/league/{group}/register",
+                new
+                {
+                    controller = "r",
+                    action = "registerleague",
+                    accountname = UrlParameter.Optional,
+                    activitygrouptype = "league",
+                    externalaccount = UrlParameter.Optional,
+                    group = UrlParameter.Optional
+                });
+
+            routes.MapRoute(
+                "LeagueHome2",
                 "{accountname}/league/{districtname}/{leaguename}",
                 new
                 {
@@ -140,7 +165,7 @@ namespace AfterSchool
 
             routes.MapRoute(
                 "ActivityRegister",
-                "{accountname}/{activitytype}/{activityname}/register",
+                "{accountname}/activity/{activityname}/register",
                 new
                 {
                     controller = "r",
@@ -151,7 +176,7 @@ namespace AfterSchool
                 });
 
             routes.MapRoute(
-                "LeagueRegister",
+                "LeagueRegister2",
                 "{accountname}/{activitygrouptype}/{externalaccountname}/{group}/register",
                 new
                 {

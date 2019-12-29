@@ -11,27 +11,42 @@
     }
     var actionName = ViewContext.RouteData.Values["action"].ToString().ToLower();
     var activityCount = Model.GetActivityCount(ActivityType.Activity, null, false, null);
+    var isFullScreen = false;
+
+    if (ViewBag.IsFullScreen != null)
+    {
+        isFullScreen = (bool)ViewBag.IsFullScreen;
+    }
 }
-@if (Model.IsNotEmpty() && Model.ID.HasValue && Model.ID.Value > 0)
+@if (Model.IsNotEmpty() && Model.ID.HasValue && Model.ID.Value > 0 && !isFullScreen)
 {
     <div class="btn-toolbar">
         <div class="btn-group hidden-xs">
             <a href="@Url.Action("summary", "group", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "summary" ? "-active" : "")">
                 <i class="s7-graph2"></i>  Summary
             </a>
-            <a href="@Url.Action("edit", "group", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "edit" ? "-active" : "")">
-                <i class="s7-edit"></i> Setup
-            </a>
-            <a href="@Url.Action("emailcontent", "group", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "emailcontent" ? "-active" : "")">
-                <i class="s7-note2"></i> Content
-            </a>
+            @if (Model.ActivityGroupTypeId == ActivityGroupType.Session)
+            {
+                <a href="@Url.Action("edit", "group", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "edit" ? "-active" : "")">
+                    <i class="s7-edit"></i> Setup
+                </a>
+                <a href="@Url.Action("emailcontent", "group", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "emailcontent" ? "-active" : "")">
+                    <i class="s7-note2"></i> Content
+                </a>
+            }
+            else
+            {
+                <a href="@Url.Action("editsetup", "group", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "editsetup" ? "-active" : "")">
+                    <i class="s7-edit"></i> Setup
+                </a>
+            }
             <a href="@Url.Action("periods", "group", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "periods" ? "-active" : "")">
                 <i class="s7-date"></i> @UILabel.RegistrationPeriodAbbrLabel(true)
             </a>
             <a href="@Url.Action("activities", "group", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "activities" ? "-active" : "")">
                 <i class="s7-gleam"></i> @UILabel.ActivityLabel(Model.ActivityGroupTypeId, true)
             </a>
-            
+
             @if (activityCount > 0 || Model.IsPublished)
             {
                 <a href="@Url.Action("registrations", "group", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "registrations" ? "-active" : "")">
@@ -50,27 +65,27 @@
                         @if (SessionVariables.CurrentAccount.HasAccountPackageFeature(FeatureType.ManageContacts))
                         {
                             <li>
-                                <a href="@Url.Action("invited", "group", new {id = Model.Uid})"> <!-- class="btn btn-alt6@(actionName == "invited" ? "-active" : "")"-->
+                                <a href="@Url.Action("invited", "group", new {id = Model.Uid})">
                                     <i class="s7-user"></i> Invitations
                                 </a>
                             </li>
                         }
                         <li>
-                            <a href="@Url.Action("messages", "group", new {id = Model.Uid})"> <!-- class="btn btn-alt6@(actionName == "messages" ? "-active" : "")"-->
+                            <a href="@Url.Action("messages", "group", new {id = Model.Uid})">
                                 <i class="s7-mail"></i> Messaging
                             </a>
                         </li>
-                        @if (Model.RegistrationModeId == RegistrationMode.Apply && SessionVariables.AccountPackage.HasFeature(FeatureType.Lottery))
+                        @if ((Model.ActivityGroupTypeId == ActivityGroupType.League || Model.RegistrationModeId == RegistrationMode.Apply) && SessionVariables.AccountPackage.HasFeature(FeatureType.Lottery))
                         {
                             <li>
-                                <a href="@Url.Action("placement", "group", new { id = Model.Uid })"> <!-- class="btn btn-alt6@(actionName == "placement" ? "-active" : "")"-->
+                                <a href="@Url.Action("placement", "group", new { id = Model.Uid })">
                                     Lottery
                                 </a>
                             </li>
                         }
                     </ul>
                 </div>
-            }   
+            }
             <a href="@Url.Action("publishdetail", "group", new { id = Model.Uid })" class="btn @publishClass"><i class="s7-link"></i> Publish</a>
         </div>
         <div class="hidden-lg hidden-sm hidden-md">

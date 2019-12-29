@@ -21,7 +21,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
         }
 
-        // GET: Admin/Activity
         public ActionResult Summary(string id)
         {
             var msgs = new SystemMessages();
@@ -87,9 +86,9 @@ namespace AfterSchool.Areas.Org.Controllers
             }
             else
             {
-                totalActivityCount = SessionVariables.CurrentAccount.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.CurrentUser, ActivityType.Activity, isArchived, false, msgs);
-                activities = SessionVariables.CurrentAccount.GetActivities(SessionVariables.AccountUserType, SessionVariables.CurrentUser, ActivityType.Activity, isArchived, false, start, length, msgs);
-                hasArchivedActivities = SessionVariables.CurrentAccount.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.CurrentUser, ActivityType.Activity, true, false, msgs) > 0;
+                totalActivityCount = SessionVariables.CurrentAccount.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.CurrentUser, ActivityType.Activity, isArchived, false, true, msgs);
+                activities = SessionVariables.CurrentAccount.GetActivities(SessionVariables.AccountUserType, SessionVariables.CurrentUser, ActivityType.Activity, isArchived, false, true, start, length, msgs);
+                hasArchivedActivities = SessionVariables.CurrentAccount.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.CurrentUser, ActivityType.Activity, true, false, true, msgs) > 0;
             }
 
             var totalPages = Math.Ceiling(totalActivityCount.ToDouble() / recordsPerPage).ToInteger();
@@ -227,8 +226,17 @@ namespace AfterSchool.Areas.Org.Controllers
                 switch (cmd)
                 {
                     case "next":
-                        ViewBag.ActiveMenu = "EditRestrictions";
-                        return View("EditRestrictions", activity);
+                        if (activity.ActivityTypeId == ActivityType.Activity)
+                        {
+                            ViewBag.ActiveMenu = "EditRestrictions";
+                            return View("EditRestrictions", activity);
+                        }
+                        else
+                        {
+                            LoadEditScheduleViewBag(activity, activity.ActivityScheduleId?.ToString());
+                            ViewBag.ActiveMenu = "EditSchedule";
+                            return View("editschedule", activity);
+                        }
                 }
             }
 
@@ -323,9 +331,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             if (msgs.HasNoErrors())
-            {
                 msgs.Add(string.Format("{0} Saved", UILabel.ActivityLabel(activity.ActivityTypeId)), MessageType.Success);
-            }
 
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
@@ -629,8 +635,17 @@ namespace AfterSchool.Areas.Org.Controllers
                         ViewBag.ActiveMenu = "EditRestrictions";
                         return View("EditRestrictions", activity);
                     case "next":
-                        ViewBag.ActiveMenu = "EditDetails";
-                        return View("EditDetails", activity);
+                        if (activity.ActivityTypeId == ActivityType.Activity)
+                        {
+                            ViewBag.ActiveMenu = "EditDetails";
+                            return View("EditDetails", activity);
+                        }
+                        else
+                        {
+                            ViewBag.ActiveMenu = "EditContact";
+                            ViewBag.Instructors = SessionVariables.CurrentAccount.GetUsers(msgs: msgs);
+                            return View("editcontact", activity);
+                        }
                 }
             }
             

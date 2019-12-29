@@ -1659,9 +1659,7 @@ namespace AfterSchoolLibrary.Services
 
         public static bool CanAcceptPayments(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return activity.GetAccount(msgs, dc)
-                .GetActiveAccountPackage(msgs, dc)
-                .HasFeature(FeatureType.AcceptPayments, msgs, dc);
+            return activity.GetAccount(msgs, dc).CanProcessPayments(msgs, dc);
         }
 
         public static PurchaseableObject GetPurchaseableObject(this Activity activity)

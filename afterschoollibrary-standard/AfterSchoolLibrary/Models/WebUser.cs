@@ -105,38 +105,7 @@ namespace AfterSchoolLibrary.Models
             return WebUser.BaseGetCount(criterias, ObjectMap, dq, msgs);
         }
 
-        public static int GetSearchCount(string search, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
-            dq.Connection = dc;
-            dq.Criterias.LogicalOperator = LogicalOperatorType.Or;
-            if (search.IsNotEmpty())
-            {
-                dq.Criterias.Add(ObjectMap["FirstName"], search, DatabaseCriteriaOperatorEnum.Like);
-                dq.Criterias.Add(ObjectMap["LastName"], search, DatabaseCriteriaOperatorEnum.Like);
-                dq.Criterias.Add(ObjectMap["Email"], search, DatabaseCriteriaOperatorEnum.Like);
-            }
-            return dq.GetCount(msgs);
-        }
-
-        public static List<WebUser> Search(string search, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            var dq = DatabaseQuery;
-            dq.Connection = dc;
-
-            dq.Criterias.LogicalOperator = LogicalOperatorType.Or;
-            if (search.IsNotBlank())
-            {
-                dq.Criterias.Add(ObjectMap["FirstName"], search, DatabaseCriteriaOperatorEnum.Like);
-                dq.Criterias.Add(ObjectMap["LastName"], search, DatabaseCriteriaOperatorEnum.Like);
-                dq.Criterias.Add(ObjectMap["Email"], search, DatabaseCriteriaOperatorEnum.Like);
-            }
-            dq.SelectRange.Start = start;
-            dq.SelectRange.Length = length;
-            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-        }
-
-        public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
 			var msgs = new SystemMessages();
 
@@ -354,6 +323,37 @@ namespace AfterSchoolLibrary.Models
                 },
                 dc: dc
                 ) > 0;
+        }
+
+        public static int GetSearchCount(string search, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.LogicalOperator = LogicalOperatorType.Or;
+            if (search.IsNotEmpty())
+            {
+                dq.Criterias.Add(ObjectMap["FirstName"], search, DatabaseCriteriaOperatorEnum.Like);
+                dq.Criterias.Add(ObjectMap["LastName"], search, DatabaseCriteriaOperatorEnum.Like);
+                dq.Criterias.Add(ObjectMap["Email"], search, DatabaseCriteriaOperatorEnum.Like);
+            }
+            return dq.GetCount(msgs);
+        }
+
+        public static List<WebUser> Search(string search, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+
+            dq.Criterias.LogicalOperator = LogicalOperatorType.Or;
+            if (search.IsNotBlank())
+            {
+                dq.Criterias.Add(ObjectMap["FirstName"], search, DatabaseCriteriaOperatorEnum.Like);
+                dq.Criterias.Add(ObjectMap["LastName"], search, DatabaseCriteriaOperatorEnum.Like);
+                dq.Criterias.Add(ObjectMap["Email"], search, DatabaseCriteriaOperatorEnum.Like);
+            }
+            dq.SelectRange.Start = start;
+            dq.SelectRange.Length = length;
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
         #endregion

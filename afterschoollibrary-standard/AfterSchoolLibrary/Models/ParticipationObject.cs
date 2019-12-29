@@ -140,7 +140,7 @@ namespace AfterSchoolLibrary.Models
             ObjectType = ParticipationObjectType.ActivityGroup;
             Uid = activityGroup.Uid;
             Name = activityGroup.Name;
-            Details = activityGroup.Description;
+            Details = activityGroup.Details.IfBlank(activityGroup.Description);
             GenderRestriction = activityGroup.GenderRestriction;
             MinGradeId = activityGroup.MinGradeLevelId;
             MaxGradeId = activityGroup.MaxGradeLevelId;
@@ -154,6 +154,8 @@ namespace AfterSchoolLibrary.Models
             ContactPhone = activityGroup.ContactPhone;
             IsTuitionFree = (!activityGroup.Cost.HasValue || activityGroup.Cost.Value == 0.ToDecimal());
             IsInviteOnly = activityGroup.IsInviteOnly;
+            AllowToPayLater = activityGroup.AllowToPayLater;
+            RequiresParentalConsent = activityGroup.RequiresParentalConsent;
             // Description = activityGroup.Description;
             // TODO: PayLater = activityGroup.AllowToPayLater;
 

@@ -10,7 +10,7 @@ using AfterSchoolLibrary.Services;
 
 namespace AfterSchool.Helpers
 {
-    public class ActivitySetupHelper
+    public static class ActivitySetupHelper
     {
 
         public static string SaveButton(bool isTop, bool isPrimary)
@@ -20,10 +20,16 @@ namespace AfterSchool.Helpers
 
         public static string NavButton(Activity activity, string action, string cmd, bool isTop, bool isPrimary, HttpRequestBase request)
         {
-            return $"<button type=\"submit\" class=\"{ButtonStyle(isTop, isPrimary)}\" onclick=\"ActivitySetup.navigateActivity('{GenerateUrl(activity, action, "activity", cmd, request)}')\">{ButtonText(cmd, isTop, activity)}</button>";
+            var canPublishActivity = SessionVariables.CurrentUser.CanPublishActivity(SessionVariables.CurrentAccount, activity);
+
+            return $"<button type=\"submit\" class=\"{ButtonStyle(isTop, isPrimary)}\" onclick=\"ActivitySetup.navigateActivity('{GenerateUrl(activity, action, "activity", cmd, request)}')\">{ButtonText(cmd, isTop, canPublishActivity)}</button>";
+        }
+        public static string NavButton(ActivityGroup group, string action, string cmd, bool isTop, bool isPrimary, HttpRequestBase request)
+        {
+            return $"<button type=\"submit\" class=\"{ButtonStyle(isTop, isPrimary)}\" onclick=\"ActivitySetup.navigateActivity('{GenerateUrl(group, action, "group", cmd, request)}')\">{ButtonText(cmd, isTop, true)}</button>";
         }
 
-        private static string ButtonText(string cmd, bool isTop, Activity activity)
+        private static string ButtonText(string cmd, bool isTop, bool canPublishActivity)
         {
             if (cmd == "prev")
             {
@@ -37,7 +43,7 @@ namespace AfterSchool.Helpers
                 if (isTop)
                     return "&raquo;";
 
-                return "Next &raquo;";
+                return "Save &amp; Next &raquo;";
             }
             else if (cmd == "done")
             {
@@ -48,19 +54,31 @@ namespace AfterSchool.Helpers
             }
             else if (cmd == "publish")
             {
-                if (SessionVariables.CurrentUser.CanPublishActivity(SessionVariables.CurrentAccount, activity))
-                    return "Publish &raquo;";
+                if (canPublishActivity)
+                    return "Save &amp; Publish &raquo;";
 
                 if (isTop)
                     return "Submit &raquo;";
 
                 return "Submit to Publish &raquo;";
             }
+            else if (cmd == "signupperiods")
+            {
+                if (isTop)
+                    return "&raquo;";
+
+                return "Save &amp; Continue &raquo;";
+            }
 
             return "";
         }
 
         private static string GenerateUrl(Activity activity, string action, string model, string cmd, HttpRequestBase request)
+        {
+            var x = new UrlHelper(request.RequestContext);
+            return x.Action(action, model, new { id = activity.Uid, cmd = cmd, isnew = request["isnew"] });
+        }
+        private static string GenerateUrl(ActivityGroup activity, string action, string model, string cmd, HttpRequestBase request)
         {
             var x = new UrlHelper(request.RequestContext);
             return x.Action(action, model, new { id = activity.Uid, cmd = cmd, isnew = request["isnew"] });

@@ -160,6 +160,7 @@ namespace AfterSchoolLibrary.Services
             var regmode = values.GetValueOrDefault("regmode");
             var form = values.GetValueOrDefault("form");
             var description = values.GetValueOrDefault("description");
+            var details = values.GetValueOrDefault("details");
             var isinviteonly = values.GetValueOrDefault("isinviteonly");
             var maxgradeid = values.GetValueOrDefault("maxgrade");
             var mingradeid = values.GetValueOrDefault("mingrade");
@@ -180,20 +181,31 @@ namespace AfterSchoolLibrary.Services
             var contactphone = values.GetValueOrDefault("contactphone");
             var numberofseats = values.GetValueOrDefault("seatsavailable");
             var numberofwaitinglistseats = values.GetValueOrDefault("waitinglistseats");
-
-            if (name.IsEmpty())
-                msgs.Add("Label is required", MessageType.UserError);
-            else if (ActivityGroup.ExistsByAccountIdByName(account.ID.Value, name.ToString(), activityGroupUid.ToGuid()))
-                msgs.Add("Label is already in use", MessageType.UserError);
-
-            if (regmode.IsEmpty())
-                msgs.Add("Registration Mode is required", MessageType.UserError);
-
-            if (activityGroupType == ActivityGroupType.Session && form.IsEmpty())
-                msgs.Add("Form is required", MessageType.UserError);
+            var haspaymentplan = values.GetValueOrDefault("haspaymentplan");
+            var paymentplancost = values.GetValueOrDefault("paymentplancost");
+            var paymentplanperiod = values.GetValueOrDefault("paymentplanperiod");
+            var paymentplanperiodnumber = values.GetValueOrDefault("paymentplanperiodnumber");
+            var cost = values.GetValueOrDefault("cost");
+            var allowtopaylater = values.GetValueOrDefault("allowtopaylater");
+            var requiresparentalconsent = values.GetValueOrDefault("requiresparentalconsent");
 
             var group = ActivityGroup.LoadByUid(activityGroupUid.ToGuid(), msgs, dc);
             var isNew = false;
+
+            if (group.IsEmpty())
+            {
+                if (name.IsEmpty())
+                    msgs.Add("Name is required", MessageType.UserError);
+                else if (ActivityGroup.ExistsByAccountIdByName(account.ID.Value, name.ToString(), activityGroupUid.ToGuid()))
+                    msgs.Add("Name is already in use", MessageType.UserError);
+
+                if (regmode.IsEmpty())
+                    msgs.Add("Registration Mode is required", MessageType.UserError);
+
+                if (activityGroupType == ActivityGroupType.Session && form.IsEmpty())
+                    msgs.Add("Form is required", MessageType.UserError);
+            }
+
             if (group.IsEmpty())
             {
                 group = new ActivityGroup();
@@ -201,6 +213,7 @@ namespace AfterSchoolLibrary.Services
                 group.CreatedBy = loggedInUser.ID;
                 group.Uid = activityGroupUid.ToGuid();
                 group.ActivityGroupTypeId = activityGroupType;
+                group.RequiresParentalConsent = true;
                 isNew = true;
             }
 
@@ -209,6 +222,9 @@ namespace AfterSchoolLibrary.Services
 
             if (description.IsNotEmpty())
                 group.Description = description.ToString().MaxChars(400);
+
+            if (details.IsNotEmpty())
+                group.Details = details.ToString().MaxChars(4000);
 
             if (regmode.IsNumber())
                 group.RegistrationModeId = (RegistrationMode)regmode.ToString().ToInteger();
@@ -244,6 +260,19 @@ namespace AfterSchoolLibrary.Services
             if (numberofwaitinglistseats.IsNumber())
                 group.WaitingListSeats = numberofwaitinglistseats.ToString().ToInteger();
 
+            if (cost.IsNumber())
+                group.Cost = cost.ToString().ToDecimal();
+
+            if (requiresparentalconsent.IsNotEmpty() && requiresparentalconsent.ToString().IsBoolean())
+                group.RequiresParentalConsent = requiresparentalconsent.ToString().ToBoolean();
+
+            if (allowtopaylater.IsNotEmpty() && allowtopaylater.ToString().IsBoolean())
+            {
+                if (account.CanProcessPayments(msgs, dc))
+                    group.AllowToPayLater = allowtopaylater.ToString().ToBoolean();
+                else
+                    group.AllowToPayLater = true;
+            }
 
             if (msgs.HasNoErrors())
             {
@@ -329,6 +358,18 @@ namespace AfterSchoolLibrary.Services
                                 loggedInUser.ID.Value,
                                 adc));
                         }
+
+                        //setup PaymentPlan
+                        if (amsgs.HasNoErrors() && haspaymentplan != null && haspaymentplan.ToString().IsBoolean())
+                            amsgs.AddRange(group.SetupPaymentPlan(
+                                account,
+                                haspaymentplan.IfEmpty(""),
+                                paymentplancost.IfEmpty(""),
+                                paymentplanperiod.IfEmpty(""),
+                                paymentplanperiodnumber.IfEmpty(""),
+                                loggedInUser.ID.Value,
+                                adc
+                            ));
                     },
                     onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
@@ -337,6 +378,39 @@ namespace AfterSchoolLibrary.Services
             }
 
             return group;
+        }
+        private static SystemMessages SetupPaymentPlan(this ActivityGroup group, Account account, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, int loggedInUserId, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var hasChanges = true;
+
+            // first: desactivate the current plan if there are any changes
+            if (group.HasPaymentPlan(msgs, dc))
+            {
+                var plan = group.GetPaymentPlan(msgs, dc);
+
+                hasChanges = plan.CostPerPeriod.Value != paymentplancost.ToDecimal() ||
+                            plan.BillingPeriodTypeId != (BillingPeriodType)paymentplanperiod.ToInteger() ||
+                            plan.TotalPeriods.Value != paymentplanperiodnumber.ToInteger();
+
+                if (hasChanges || !haspaymentplan.ToBoolean())
+                    msgs.AddRange(plan.Deactivate(loggedInUserId, dc));
+            }
+
+            // if the subscription plan option(UI) is activated
+            if (haspaymentplan.ToBoolean() && hasChanges)
+                SubscriptionPlanService.CreateNewPaymentPlan(
+                    account,
+                    ParticipationObjectType.ActivityGroup,
+                    group.ID.Value,
+                    paymentplancost.ToDecimal(),
+                    (BillingPeriodType)paymentplanperiod.ToInteger(),
+                    paymentplanperiodnumber.ToInteger(),
+                    loggedInUserId,
+                    msgs,
+                    dc);
+
+            return msgs;
         }
 
         private static SystemMessages SetupSchedule(this ActivityGroup activityGroup, Account account, string schedule, List<DateRange> scheduledates, List<DateTime> scheduledatesclosed, string scheduledetails, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime, string isongoing, int loggedInUserId, DatabaseConnection dc = null)
@@ -367,6 +441,18 @@ namespace AfterSchoolLibrary.Services
             activityGroup.ActivityScheduleId = newSchedule.ID;
 
             msgs.AddRange(activityGroup.Save(dc));
+
+            return msgs;
+        }
+
+        public static SystemMessages SetIsPublished(this ActivityGroup group, bool isPublished, int loggedInUserId, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            group.IsPublished = isPublished;
+            group.LastModifiedBy = loggedInUserId;
+            group.LastModifiedDate = DateTime.UtcNow;
+            msgs.AddRange(group.Save(dc: dc));
 
             return msgs;
         }
@@ -408,6 +494,9 @@ namespace AfterSchoolLibrary.Services
                         WaitingListSeats = activityGroup.WaitingListSeats,
                         Cost = activityGroup.Cost,
                         CostUnitTypeId = activityGroup.CostUnitTypeId,
+                        AllowToPayLater = activityGroup.AllowToPayLater,
+                        Details = activityGroup.Details,
+                        RequiresParentalConsent = activityGroup.RequiresParentalConsent,
                     };
                     amsgs.AddRange(group.Save(adc));
 
@@ -461,6 +550,31 @@ namespace AfterSchoolLibrary.Services
         public static ActivityGroup SaveLeague(WebUser loggedInUser, Account account, string activityGroupUid, Dictionary<string, object> values, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return SaveActivityGroup(loggedInUser, account, ActivityGroupType.League, activityGroupUid, values, msgs, dc);
+        }
+
+        public static SubscriptionPlan GetPaymentPlan(this ActivityGroup group, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return SubscriptionPlan.LoadActiveByParticipationObject(group.ID.Value, ParticipationObjectType.ActivityGroup, msgs, dc)
+                .Where(plan => plan.PlanTypeId == SubscriptionPlanType.PaymentPlan && plan.IsActive)
+                .FirstOrDefault();
+        }
+
+        public static RegistrationPeriod AddNewRegistrationPeriod(this ActivityGroup group, DateTime startDateTime, DateTime endDateTime, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var regperiod = new RegistrationPeriod
+            {
+                CreatedBy = loggedInUser.ID,
+                CreateDate = DateTime.UtcNow,
+                ActivityGroupId = group.ID,
+                AccountId = group.AccountId,
+                StartDateTime = startDateTime,
+                EndDateTime = endDateTime,
+                LastModifiedBy = loggedInUser.ID,
+                LastModifiedDate = DateTime.UtcNow
+            };
+            msgs.AddRange(regperiod.Save());
+
+            return regperiod;
         }
 
         public static bool IsInvited(this ActivityGroup group, string invite, SystemMessages msgs, DatabaseConnection dc = null)
@@ -568,22 +682,13 @@ namespace AfterSchoolLibrary.Services
             Database.ExecuteTransaction(
                 action: (SystemMessages amsgs, BasicLibrary.DataAccess.DatabaseConnection adc) =>
                 {
-                    group.GetRegistrantActivities(dc: adc).ForEach(
+                    group.GetRegistrantActivities(msgs: amsgs, dc: adc).ForEach(
                         ra => ra.ChangeSeatAssignment(RegistrationAssignmentType.Applied, loggedInUser, amsgs, adc)
                     );
                 },
-                onSuccess: (SystemMessages smsgs) =>
-                {
-                    msgs.AddRange(smsgs);
-                },
-                onFailure: (SystemMessages fmsgs) =>
-                {
-                    msgs.AddRange(fmsgs);
-                },
-                onException: (SystemMessages emsgs) =>
-                {
-                    Helpers.Utilities.SystemErrorLog(emsgs);  
-                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
 
@@ -592,12 +697,25 @@ namespace AfterSchoolLibrary.Services
 
         public static ActivityForm GetDefaultActivityForm(this ActivityGroup group, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return new ActivityForm()
-            {
-                FormId = group.GetForm(msgs, dc).ID,
-                IsActive = true,
-                AccountId = group.AccountId
-            };
+            var form = group.GetForm(msgs, dc);
+
+            if (form.IsNotEmpty())
+                return new ActivityForm()
+                {
+                    FormId = form.ID,
+                    IsActive = true,
+                    AccountId = group.AccountId
+                };
+
+            return null;
+        }
+
+        public static Form GetForm(this ActivityGroup group, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (group.FormId.HasValue)
+                return Form.Load(group.FormId.Value, msgs, dc);
+
+            return null;
         }
 
         public static SystemMessages InviteContacts(this ActivityGroup group, List<Registrant> contacts, RegistrationPeriod period, List<int> activityIds, int loggedInUserId, DatabaseConnection dc = null)

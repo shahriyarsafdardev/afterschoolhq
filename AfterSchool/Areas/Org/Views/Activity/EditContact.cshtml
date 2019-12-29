@@ -3,6 +3,7 @@
     ViewBag.Title = ((Account)ViewBag.Account).Name;
     SystemMessages msgs = (SystemMessages)ViewBag.Messages;
     var accountPackage = (AccountPackage)ViewBag.AccountPackage;
+    var activityTitle = $"{(Model.ActivityGroupName.IsNotEmpty() ? $"{Model.ActivityGroupName} - " : "")}{Model.Name}";
     var isFullScreen = (bool)ViewBag.IsFullScreen;
     if (isFullScreen)
     {
@@ -20,7 +21,7 @@
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Name); }
+            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", activityTitle); }
 
             @if (isFullScreen)
             {
@@ -31,22 +32,24 @@
 
             <div class="col-md-8 col-lg-9">
                 <form id="form1" method="post" action="@Url.Action("editcontact", "activity", new { id = Model.Uid, isnew = Request["isnew"] })" class="form-horizontal">
-
-                    @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editcontact", "next", true, true, Request))
+                    
+                    @if (Model.ActivityTypeId == ActivityType.Activity)
+                    {
+                        @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editcontact", "next", true, true, Request))
+                    }
                     @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(true, false))
-                    @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editcontact", "prev", true, false, Request))
 
                     @{Html.RenderPartial("~/Views/Shared/_ActivityFormContactInfo.cshtml", Model);}
 
                     <div class="form-group">
-                        <div class="col-sm-2 col-sm-offset-3">
-                            @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editcontact", "prev", false, false, Request))
-                        </div>
-                        <div class="col-sm-5">
+                        <div class="col-sm-6 col-sm-offset-3">
                             @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(false, false))
                         </div>
-                        <div class="col-sm-2">
-                            @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editcontact", "next", false, true, Request))
+                        <div class="col-sm-3">
+                            @if (Model.ActivityTypeId == ActivityType.Activity)
+                            {
+                                @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editcontact", "next", false, true, Request))
+                            }
                         </div>
                     </div>
 

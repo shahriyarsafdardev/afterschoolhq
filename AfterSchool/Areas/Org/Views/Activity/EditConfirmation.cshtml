@@ -37,26 +37,22 @@
                         @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editconfirmation", "publish", true, true, Request))
                     }
                     @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(true, false))
-                    @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editconfirmation", "prev", true, false, Request))
 
                     @{Html.RenderPartial("~/Views/Shared/_ActivityFormConfirmation.cshtml", Model);}
 
                     <div class="form-group">
-                        <div class="col-sm-2 col-sm-offset-3">
-                            @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editconfirmation", "prev", false, false, Request))
-                        </div>
                         @if (!Model.IsPublished)
                         {
-                            <div class="col-sm-5">
+                            <div class="col-sm-6 col-sm-offset-3">
                                 @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(false, false))
                             </div>
-                            <div class="col-sm-2">
+                            <div class="col-sm-3">
                                 @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editconfirmation", "publish", false, true, Request))
                             </div>
                         }
                         else
                         {
-                            <div class="col-sm-7">
+                            <div class="col-sm-9">
                                 @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(false, false))
                             </div>
                         }

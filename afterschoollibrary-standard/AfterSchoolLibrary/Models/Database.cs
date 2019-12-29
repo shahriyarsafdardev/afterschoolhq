@@ -15,8 +15,8 @@ namespace AfterSchoolLibrary.Models
     {
 		#region "ClassGenerator"
 		public static DatabaseCredentials ProductionCredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }
-        public static DatabaseCredentials LocalCredentials { get { return new DatabaseCredentials("localhost", "AfterSchool", "AfterSchoolUser", "Nj8Ed$wpLfJ"); } }
-        public static DatabaseCredentials CICredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }
+		public static DatabaseCredentials LocalCredentials { get { return new DatabaseCredentials("localhost", "AfterSchool", "AfterSchoolUser", "Nj8Ed$wpLfJ"); } }
+		public static DatabaseCredentials CICredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }
 		public static DatabaseCredentials QACredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }
 		public static DatabaseCredentials TestCredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }
 		public static DatabaseCredentials StagingCredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }
@@ -241,6 +241,8 @@ namespace AfterSchoolLibrary.Models
 			ActivityGroup.Update(new Hashtable(){{"ActivityGroupTypeId",0}}, new Hashtable(){{"ActivityGroupTypeId", DBNull.Value}}, ActivityGroup.ObjectMap, dc);
 			ActivityGroup.Update(new Hashtable(){{"GenderRestriction",0}}, new Hashtable(){{"GenderRestriction", DBNull.Value}}, ActivityGroup.ObjectMap, dc);
 			ActivityGroup.Update(new Hashtable(){{"CostUnitTypeId",0}}, new Hashtable(){{"CostUnitTypeId", DBNull.Value}}, ActivityGroup.ObjectMap, dc);
+			ActivityGroup.Update(new Hashtable(){{"RequiresParentalConsent",false}}, new Hashtable(){{"RequiresParentalConsent", DBNull.Value}}, ActivityGroup.ObjectMap, dc);
+			ActivityGroup.Update(new Hashtable(){{"AllowToPayLater",false}}, new Hashtable(){{"AllowToPayLater", DBNull.Value}}, ActivityGroup.ObjectMap, dc);
 			AccountActivityGroup.Update(new Hashtable(){{"InviteStatusId",0}}, new Hashtable(){{"InviteStatusId", DBNull.Value}}, AccountActivityGroup.ObjectMap, dc);
 			AccountActivityGroup.Update(new Hashtable(){{"IsPublished",false}}, new Hashtable(){{"IsPublished", DBNull.Value}}, AccountActivityGroup.ObjectMap, dc);
 			AccountActivityGroup.Update(new Hashtable(){{"CostUnitTypeId",0}}, new Hashtable(){{"CostUnitTypeId", DBNull.Value}}, AccountActivityGroup.ObjectMap, dc);
