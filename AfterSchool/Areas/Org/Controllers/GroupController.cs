@@ -938,6 +938,8 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 league = SessionVariables.CurrentAccount.GetDefaultNewLeague();
                 league.RegistrationModeId = RegistrationMode.Register;
+                league.StartDate = DateTime.UtcNow.AddWeeks(4).FirstDateOfWeek();
+                league.EndDate = league.StartDate.Value.AddWeeks(8).LastDateOfWeek();
             }
 
             LoadEditSetupViewBag(league, msgs);

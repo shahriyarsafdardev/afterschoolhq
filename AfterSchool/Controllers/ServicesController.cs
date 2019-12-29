@@ -60,7 +60,7 @@ namespace AfterSchool.Controllers
             {
                 uid = participationObject.Uid,
                 name = participationObject.Name,
-                days = ParticipationObjectUI.PrintDaysOfWeek(participationObject),
+                days = ParticipationObjectUI.PrintDaysOfWeekList(participationObject),
                 minGradeText = participationObject.GetMinGradeLevel()?.Name,
                 maxGradeText = participationObject.GetMaxGradeLevel()?.Name
             };

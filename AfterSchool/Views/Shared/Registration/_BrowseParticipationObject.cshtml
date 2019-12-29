@@ -14,7 +14,7 @@
      maxgradetext="@(Model.GetMaxGradeLevel()?.Name)"
      hasseatsremaining="@Model.HasSeatsAvailable().ToString().ToLower()"
      haswaitinglistremaining="@Model.HasWaitingListSeatsAvailable().ToString().ToLower()"
-     days="@ParticipationObjectUI.PrintDaysOfWeek(Model)"
+     days="@ParticipationObjectUI.PrintDaysOfWeekList(Model)"
      location="@(Model.Location?.FormatAddress(false))"
      gender="@((int)Model.GenderRestriction)"
      name="@Model.Name">
@@ -47,7 +47,7 @@
 
             <div>
                 <span class="reg-info">
-                    @ParticipationObjectUI.PrintDaysOfWeek(Model)
+                    @ParticipationObjectUI.PrintDaysOfWeekOrStartDate(Model)
                 </span>
                 &bull;
                 <span class="reg-info">
@@ -95,7 +95,7 @@
             </div>
 
             <div class="seats-remaining text-center">
-                @if (Model.SeatsRemaining.HasValue && Model.IsActivity())
+                @if (Model.SeatsRemaining.HasValue && (Model.IsActivity() || (Model.IsActivityGroup() && Model.GetActivityGroup().ActivityGroupTypeId == ActivityGroupType.League)))
                 {
                     <strong>
                         <em>

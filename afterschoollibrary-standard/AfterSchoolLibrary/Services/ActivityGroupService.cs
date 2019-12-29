@@ -226,10 +226,10 @@ namespace AfterSchoolLibrary.Services
             if (details.IsNotEmpty())
                 group.Details = details.ToString().MaxChars(4000);
 
-            if (startdate.ToString().IsDate())
+            if (startdate.IsNotEmpty() && startdate.ToString().IsDate())
                 group.StartDate = startdate.ToString().ToDateTime();
 
-            if (enddate.ToString().IsDate())
+            if (enddate.IsNotEmpty() && enddate.ToString().IsDate())
                 group.EndDate = enddate.ToString().ToDateTime();
 
             if (regmode.IsNumber())

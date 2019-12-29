@@ -45,7 +45,7 @@
          maxgradetext="@(Model.GetMaxGradeLevel()?.Name)"
          hasseatsremaining="@Model.HasSeatsAvailable().ToString().ToLower()"
          haswaitinglistremaining="@Model.HasWaitingListSeatsAvailable().ToString().ToLower()"
-         days="@ParticipationObjectUI.PrintDaysOfWeek(Model)"
+         days="@ParticipationObjectUI.PrintDaysOfWeekList(Model)"
          location="@(Model.Location?.FormatAddress(false))"
          gender="@((int)Model.GenderRestriction)"
          name="@Model.Name">
@@ -55,7 +55,7 @@
                 <div class="row">
                     <div class="col-lg-8 col-md-12">
                         <h3 class="text-white text-center">
-                            @ParticipationObjectUI.PrintDaysOfWeek(Model) &bull;
+                            @ParticipationObjectUI.PrintDaysOfWeekOrStartDate(Model) &bull;
                             @ParticipationObjectUI.PrintGradeLevels(Model) &bull;
                             @ParticipationObjectUI.PrintGenderRestrictions(Model)
                         </h3>
@@ -107,12 +107,11 @@
                             @if (Model.StartDate.HasValue)
                             {
                                 <p>
-                                    @Model.StartDate.Value.ToLongDateString() 
+                                    Starts: <strong>@Model.StartDate.Value.ToLongDateString()</strong><br />
                                     @if (Model.EndDate.HasValue)
                                     {
                                         <span>
-                                            -
-                                            @Model.EndDate.Value.ToLongDateString()
+                                            Ends: <strong>@Model.EndDate.Value.ToLongDateString()</strong>
                                         </span>
                                     }
                                 </p>
