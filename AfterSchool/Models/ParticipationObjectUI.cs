@@ -64,12 +64,23 @@ namespace AfterSchool.Models
             return new List<string>();
         }
 
-        public static string PrintDaysOfWeek(ParticipationObject participationObject)
+        public static string PrintDaysOfWeekOrStartDate(ParticipationObject participationObject)
         {
             if (participationObject.Schedule.IsNotEmpty())
                 return participationObject.Schedule.GetDaysOfTheWeek().OrderBy(x => (int)x).Select(x => x.ToString().MaxChars(2)).ToStringList(",");
 
-            return "No Schedule Available";
+            if (participationObject.StartDate.HasValue)
+                return $"Starts: {participationObject.StartDate.Value.ToString("M/d")}";
+
+            return "No Schedule";
+        }
+
+        public static string PrintDaysOfWeekList(ParticipationObject participationObject)
+        {
+            if (participationObject.Schedule.IsNotEmpty())
+                return participationObject.Schedule.GetDaysOfTheWeek().OrderBy(x => (int)x).Select(x => x.ToString().MaxChars(2)).ToStringList(",");
+
+            return "";
         }
 
         public static string PrintGenderRestrictions(ParticipationObject participationObject)

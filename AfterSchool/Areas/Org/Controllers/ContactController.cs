@@ -540,6 +540,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var returnUrl = "";
             var activities = new List<Activity>();
+            ActivityGroup group = null;
 
             switch (type)
             {
@@ -548,6 +549,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                     if (period.ActivityGroupId.HasValue)
                     {
+                        group = period.GetGroup(msgs);
                         returnUrl = Url.Action("periods", "group", new { id = period.GetGroup().Uid });
                         activities.AddRange(period.GetGroup(msgs).GetActivities(null, false, false, null, null));
                     }
@@ -560,13 +562,14 @@ namespace AfterSchool.Areas.Org.Controllers
 
                     break;
                 case "groupfromlists":
-                    var group = ActivityGroup.LoadByUid(id.ToGuid());
+                    group = ActivityGroup.LoadByUid(id.ToGuid());
                     returnUrl = Url.Action("lists", "contact");
                     activities.AddRange(group.GetActivities(null, false, false, null, null));
 
                     break;
             }
 
+            ViewBag.Group = group;
             ViewBag.ReturnUrl = returnUrl;
             ViewBag.SelectedList = list.IsNumber() ? list.ToInteger() : new int?();
             ViewBag.Id = id;
