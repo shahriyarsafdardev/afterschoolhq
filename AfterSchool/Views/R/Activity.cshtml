@@ -92,7 +92,6 @@
                         @{ Html.RenderPartial("~/Views/Shared/ParticipationObject/_PaymentInfo.cshtml", Model); }
                     </div>
 
-
                     @if (Model.IsActivityGroup() && Model.GetActivityGroup().IsInviteOnly)
                     {
                         <div class="activity-detail-block">
@@ -100,13 +99,31 @@
                         </div>
                     }
 
-                    @if (Model.Schedule.IsNotEmpty())
+                    @if (Model.Schedule.IsNotEmpty() || Model.StartDate.HasValue)
                     {
                         <div class="activity-detail-block">
                             <h3>Schedule</h3>
-                            <p>
-                                @{ Html.RenderPartial("_ActivityScheduleHtml", Model.Schedule); }
-                            </p>
+
+                            @if (Model.StartDate.HasValue)
+                            {
+                                <p>
+                                    @Model.StartDate.Value.ToLongDateString() 
+                                    @if (Model.EndDate.HasValue)
+                                    {
+                                        <span>
+                                            -
+                                            @Model.EndDate.Value.ToLongDateString()
+                                        </span>
+                                    }
+                                </p>
+                            }
+
+                            @if (Model.Schedule.IsNotEmpty())
+                            {
+                                <p>
+                                    @{ Html.RenderPartial("_ActivityScheduleHtml", Model.Schedule); }
+                                </p>
+                            }
                         </div>
                     }
 

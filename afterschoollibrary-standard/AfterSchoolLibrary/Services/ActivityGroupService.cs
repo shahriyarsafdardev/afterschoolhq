@@ -226,6 +226,12 @@ namespace AfterSchoolLibrary.Services
             if (details.IsNotEmpty())
                 group.Details = details.ToString().MaxChars(4000);
 
+            if (startdate.ToString().IsDate())
+                group.StartDate = startdate.ToString().ToDateTime();
+
+            if (enddate.ToString().IsDate())
+                group.EndDate = enddate.ToString().ToDateTime();
+
             if (regmode.IsNumber())
                 group.RegistrationModeId = (RegistrationMode)regmode.ToString().ToInteger();
 
@@ -968,6 +974,33 @@ namespace AfterSchoolLibrary.Services
 
                 sendBcc = false;
             });
+        }
+
+
+        /// <summary>
+        /// gets the first scheduled date for the activity, also gets the start time
+        /// </summary>
+        /// <param name="dc"></param>
+        /// <returns></returns>
+        public static DateTime? GetFirstDate(this ActivityGroup group, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (group.StartDate.HasValue)
+                return group.StartDate;
+
+            return group.GetSchedule(msgs, dc)?.GetInstances(msgs: msgs, dc: dc).FirstOrDefault()?.StartDateTime;
+        }
+
+        /// <summary>
+        /// gets the last scheduled date for the activity, also gets the start time
+        /// </summary>
+        /// <param name="dc"></param>
+        /// <returns></returns>
+        public static DateTime? GetLastDate(this ActivityGroup group, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (group.EndDate.HasValue)
+                return group.EndDate;
+
+            return group.GetSchedule(msgs, dc)?.GetInstances(msgs: msgs, dc: dc).LastOrDefault()?.StartDateTime;
         }
     }
 }
