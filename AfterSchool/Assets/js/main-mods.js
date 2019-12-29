@@ -359,3 +359,9 @@ var AccountSetup = {
         );
     }
 }
+
+PageEvent.add(PageEvent.AFTER_INIT, function () {
+    if (WebPage.getUrlParamValue('saved') == '1') {
+        Notifications.showMessage('Success', 'Saved', true);
+    }
+})

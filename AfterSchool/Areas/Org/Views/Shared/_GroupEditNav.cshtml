@@ -15,7 +15,7 @@
     <ol class="dd-list">
         <li data-id="1" class="dd-item">
             <div class="dd-handle @editsetupactive">
-                <a href="@Url.Action("editsetup", "sports", new { id = Model.ID.HasValue && Model.ID > 0 ? Model.Uid.ToString() : "", isnew = Request["isnew"] })">Settings</a>
+                <a href="@Url.Action("editsetup", "group", new { id = Model.ID.HasValue && Model.ID > 0 ? Model.Uid.ToString() : "", isnew = Request["isnew"] })">Settings</a>
             </div>
         </li>
         <li data-id="4" class="dd-item">
@@ -23,7 +23,7 @@
                 @{Html.RenderPartial(
                         "~/Views/Shared/_ActiveLink.cshtml",
                         new ViewDataDictionary {
-                            { "Url", Url.Action("editrestrictions", "sports", new { id = Model.Uid.ToString(), isnew = Request["isnew"] }) },
+                            { "Url", Url.Action("editrestrictions", "group", new { id = Model.Uid.ToString(), isnew = Request["isnew"] }) },
                             { "Text", "Restrictions" },
                             { "IsActive", isScheduleActive },
                         }
@@ -36,7 +36,7 @@
                 @{Html.RenderPartial(
                         "~/Views/Shared/_ActiveLink.cshtml",
                         new ViewDataDictionary {
-                            { "Url", Url.Action("editdetails", "sports", new { id = Model.Uid.ToString(), isnew = Request["isnew"] }) },
+                            { "Url", Url.Action("editdetails", "group", new { id = Model.Uid.ToString(), isnew = Request["isnew"] }) },
                             { "Text", "About Your " + UILabel.ActivityGroupLabel(Model.ActivityGroupTypeId) },
                             { "IsActive", isActive },
                         }
@@ -49,7 +49,7 @@
                 @{Html.RenderPartial(
                         "~/Views/Shared/_ActiveLink.cshtml",
                         new ViewDataDictionary {
-                            { "Url", Url.Action("editcontact", "sports", new { id = Model.Uid.ToString(), isnew = Request["isnew"] }) },
+                            { "Url", Url.Action("editcontact", "group", new { id = Model.Uid.ToString(), isnew = Request["isnew"] }) },
                             { "Text", "Contact" },
                             { "IsActive", isActive },
                         }
@@ -62,7 +62,7 @@
                 @{Html.RenderPartial(
                         "~/Views/Shared/_ActiveLink.cshtml",
                         new ViewDataDictionary {
-                            { "Url", Url.Action("editcost", "sports", new { id = Model.Uid.ToString(), isnew = Request["isnew"] }) },
+                            { "Url", Url.Action("editcost", "group", new { id = Model.Uid.ToString(), isnew = Request["isnew"] }) },
                             { "Text", "Pricing & Payment" },
                             { "IsActive", isActive && Model.GetAccount().CanProcessPayments() },
                         }
@@ -76,7 +76,7 @@
                 @{Html.RenderPartial(
                         "~/Views/Shared/_ActiveLink.cshtml",
                         new ViewDataDictionary {
-                            { "Url", Url.Action("editconfirmation", "sports", new { id = Model.Uid.ToString(), isnew = Request["isnew"] }) },
+                            { "Url", Url.Action("editconfirmation", "group", new { id = Model.Uid.ToString(), isnew = Request["isnew"] }) },
                             { "Text", "Email Content" },
                             { "IsActive", isActive },
                         }

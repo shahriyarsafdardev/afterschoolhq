@@ -453,7 +453,7 @@ namespace AfterSchoolLibrary.Models
             get
             {
                 return !IsArchived &&
-                    !this.GetActivities().Where(x => !x.ActivityScheduleId.HasValue).Any() &&
+                    (this.ActivityGroupTypeId == ActivityGroupType.League || !this.GetActivities().Where(x => !x.ActivityScheduleId.HasValue).Any()) &&
                     this.GetRegistrationPeriods().Any();
             }
         }
@@ -464,18 +464,6 @@ namespace AfterSchoolLibrary.Models
             {
                 return IsPublished && !IsArchived;
             }
-        }
-
-        public SystemMessages SetIsPublished(bool isPublished, int loggedInUserId, DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
-
-            this.IsPublished = isPublished;
-            this.LastModifiedBy = loggedInUserId;
-            this.LastModifiedDate = DateTime.UtcNow;
-            msgs.AddRange(this.Save(dc: dc));
-
-            return msgs;
         }
 
         public static List<ActivityGroup> LoadList(List<int> ids, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)

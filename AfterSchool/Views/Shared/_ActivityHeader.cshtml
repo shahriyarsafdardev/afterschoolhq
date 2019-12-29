@@ -65,7 +65,7 @@
                 }                
             }
 
-            @if (isActivityLeader || SessionVariables.CurrentUser.CanPublishActivity(SessionVariables.CurrentAccount, Model))
+            @if (Model.ActivityTypeId == ActivityType.Activity && (isActivityLeader || SessionVariables.CurrentUser.CanPublishActivity(SessionVariables.CurrentAccount, Model)))
             {
                 <a href="@Url.Action("publishdetail", "activity", new { id = Model.Uid })" class="btn @publishClass"><i class="s7-link"></i> Publish...</a>
             }

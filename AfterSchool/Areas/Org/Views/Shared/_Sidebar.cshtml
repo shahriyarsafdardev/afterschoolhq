@@ -92,7 +92,7 @@
 
             @if (CanView(FeatureType.ManageLeagues, SessionVariables.AccountUserType, PermissionType.LeaguesView))
             {
-                <li class="@leagueactive"><a href="@Url.Action("index", "sports")"><i class="icon s7-ball"></i> @UILabel.ActivityGroupLabel(ActivityGroupType.League, true)</a></li>
+                <li class="@leagueactive"><a href="@Url.Action("indexleague", "group")"><i class="icon s7-ball"></i> @UILabel.ActivityGroupLabel(ActivityGroupType.League, true)</a></li>
             }
 
             @if (CanView(FeatureType.ManageExternalLeagues, SessionVariables.AccountUserType, PermissionType.LeaguesView))

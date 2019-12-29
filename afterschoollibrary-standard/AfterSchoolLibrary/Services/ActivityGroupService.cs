@@ -160,6 +160,7 @@ namespace AfterSchoolLibrary.Services
             var regmode = values.GetValueOrDefault("regmode");
             var form = values.GetValueOrDefault("form");
             var description = values.GetValueOrDefault("description");
+            var details = values.GetValueOrDefault("details");
             var isinviteonly = values.GetValueOrDefault("isinviteonly");
             var maxgradeid = values.GetValueOrDefault("maxgrade");
             var mingradeid = values.GetValueOrDefault("mingrade");
@@ -186,20 +187,25 @@ namespace AfterSchoolLibrary.Services
             var paymentplanperiodnumber = values.GetValueOrDefault("paymentplanperiodnumber");
             var cost = values.GetValueOrDefault("cost");
             var allowtopaylater = values.GetValueOrDefault("allowtopaylater");
-
-            if (name.IsEmpty())
-                msgs.Add("Name is required", MessageType.UserError);
-            else if (ActivityGroup.ExistsByAccountIdByName(account.ID.Value, name.ToString(), activityGroupUid.ToGuid()))
-                msgs.Add("Name is already in use", MessageType.UserError);
-
-            if (regmode.IsEmpty())
-                msgs.Add("Registration Mode is required", MessageType.UserError);
-
-            if (activityGroupType == ActivityGroupType.Session && form.IsEmpty())
-                msgs.Add("Form is required", MessageType.UserError);
+            var requiresparentalconsent = values.GetValueOrDefault("requiresparentalconsent");
 
             var group = ActivityGroup.LoadByUid(activityGroupUid.ToGuid(), msgs, dc);
             var isNew = false;
+
+            if (group.IsEmpty())
+            {
+                if (name.IsEmpty())
+                    msgs.Add("Name is required", MessageType.UserError);
+                else if (ActivityGroup.ExistsByAccountIdByName(account.ID.Value, name.ToString(), activityGroupUid.ToGuid()))
+                    msgs.Add("Name is already in use", MessageType.UserError);
+
+                if (regmode.IsEmpty())
+                    msgs.Add("Registration Mode is required", MessageType.UserError);
+
+                if (activityGroupType == ActivityGroupType.Session && form.IsEmpty())
+                    msgs.Add("Form is required", MessageType.UserError);
+            }
+
             if (group.IsEmpty())
             {
                 group = new ActivityGroup();
@@ -207,6 +213,7 @@ namespace AfterSchoolLibrary.Services
                 group.CreatedBy = loggedInUser.ID;
                 group.Uid = activityGroupUid.ToGuid();
                 group.ActivityGroupTypeId = activityGroupType;
+                group.RequiresParentalConsent = true;
                 isNew = true;
             }
 
@@ -215,6 +222,9 @@ namespace AfterSchoolLibrary.Services
 
             if (description.IsNotEmpty())
                 group.Description = description.ToString().MaxChars(400);
+
+            if (details.IsNotEmpty())
+                group.Details = details.ToString().MaxChars(4000);
 
             if (regmode.IsNumber())
                 group.RegistrationModeId = (RegistrationMode)regmode.ToString().ToInteger();
@@ -253,6 +263,9 @@ namespace AfterSchoolLibrary.Services
             if (cost.IsNumber())
                 group.Cost = cost.ToString().ToDecimal();
 
+            if (requiresparentalconsent.IsNotEmpty() && requiresparentalconsent.ToString().IsBoolean())
+                group.RequiresParentalConsent = requiresparentalconsent.ToString().ToBoolean();
+
             if (allowtopaylater.IsNotEmpty() && allowtopaylater.ToString().IsBoolean())
             {
                 if (account.CanProcessPayments(msgs, dc))
@@ -260,7 +273,6 @@ namespace AfterSchoolLibrary.Services
                 else
                     group.AllowToPayLater = true;
             }
-
 
             if (msgs.HasNoErrors())
             {
@@ -433,6 +445,18 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
+        public static SystemMessages SetIsPublished(this ActivityGroup group, bool isPublished, int loggedInUserId, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            group.IsPublished = isPublished;
+            group.LastModifiedBy = loggedInUserId;
+            group.LastModifiedDate = DateTime.UtcNow;
+            msgs.AddRange(group.Save(dc: dc));
+
+            return msgs;
+        }
+
         public static ActivityGroup Copy(this ActivityGroup activityGroup, string newName, bool useSameForm, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -470,6 +494,9 @@ namespace AfterSchoolLibrary.Services
                         WaitingListSeats = activityGroup.WaitingListSeats,
                         Cost = activityGroup.Cost,
                         CostUnitTypeId = activityGroup.CostUnitTypeId,
+                        AllowToPayLater = activityGroup.AllowToPayLater,
+                        Details = activityGroup.Details,
+                        RequiresParentalConsent = activityGroup.RequiresParentalConsent,
                     };
                     amsgs.AddRange(group.Save(adc));
 

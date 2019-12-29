@@ -26,7 +26,7 @@ namespace AfterSchool.Helpers
         }
         public static string NavButton(ActivityGroup group, string action, string cmd, bool isTop, bool isPrimary, HttpRequestBase request)
         {
-            return $"<button type=\"submit\" class=\"{ButtonStyle(isTop, isPrimary)}\" onclick=\"ActivitySetup.navigateActivity('{GenerateUrl(group, action, "sports", cmd, request)}')\">{ButtonText(cmd, isTop, true)}</button>";
+            return $"<button type=\"submit\" class=\"{ButtonStyle(isTop, isPrimary)}\" onclick=\"ActivitySetup.navigateActivity('{GenerateUrl(group, action, "group", cmd, request)}')\">{ButtonText(cmd, isTop, true)}</button>";
         }
 
         private static string ButtonText(string cmd, bool isTop, bool canPublishActivity)
@@ -61,6 +61,13 @@ namespace AfterSchool.Helpers
                     return "Submit &raquo;";
 
                 return "Submit to Publish &raquo;";
+            }
+            else if (cmd == "signupperiods")
+            {
+                if (isTop)
+                    return "&raquo;";
+
+                return "Save &amp; Continue &raquo;";
             }
 
             return "";

@@ -41,13 +41,10 @@
                     @{Html.RenderPartial("~/Views/Shared/_ActivityFormSchedule.cshtml", (ActivitySchedule)ViewBag.Schedule);}
 
                     <div class="form-group">
-                        <div class="col-sm-2 col-sm-offset-3">
-                            @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editschedule", "prev", false, false, Request))
-                        </div>
-                        <div class="col-sm-5">
+                        <div class="col-sm-6 col-sm-offset-3">
                             @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(false, false))
                         </div>
-                        <div class="col-sm-2">
+                        <div class="col-sm-3">
                             @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editschedule", "next", false, true, Request))
                         </div>
                     </div>
