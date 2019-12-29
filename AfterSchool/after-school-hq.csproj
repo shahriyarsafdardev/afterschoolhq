@@ -483,7 +483,6 @@
     <Compile Include="Areas\Org\Controllers\RegistrationController.cs" />
     <Compile Include="Areas\Org\Controllers\ScheduleController.cs" />
     <Compile Include="Areas\Org\Controllers\ServicesController.cs" />
-    <Compile Include="Areas\Org\Controllers\SportsController.cs" />
     <Compile Include="Areas\Org\Controllers\UserController.cs" />
     <Compile Include="Areas\StripeHooks\Controllers\ReceiveController.cs" />
     <Compile Include="Areas\StripeHooks\StripeHooksAreaRegistration.cs" />
@@ -1160,13 +1159,6 @@
     <Content Include="Areas\User\Views\Shared\Activities\_NoActivities.cshtml" />
     <Content Include="Areas\District\Views\League\TeamDetails.cshtml" />
     <Content Include="Areas\District\Views\League\Students.cshtml" />
-    <Content Include="Areas\Org\Views\Sports\IndexLeague.cshtml" />
-    <Content Include="Areas\Org\Views\Sports\EditSetup.cshtml" />
-    <Content Include="Areas\Org\Views\Sports\EditRestrictions.cshtml" />
-    <Content Include="Areas\Org\Views\Sports\EditDetails.cshtml" />
-    <Content Include="Areas\Org\Views\Sports\EditCost.cshtml" />
-    <Content Include="Areas\Org\Views\Sports\EditContact.cshtml" />
-    <Content Include="Areas\Org\Views\Sports\EditConfirmation.cshtml" />
     <Content Include="Areas\Org\Views\Shared\_GroupEditNav.cshtml" />
     <Content Include="Areas\Org\Views\Shared\_GroupConfirmation.cshtml" />
     <Content Include="Areas\Org\Views\Shared\_GroupContactInfo.cshtml" />
