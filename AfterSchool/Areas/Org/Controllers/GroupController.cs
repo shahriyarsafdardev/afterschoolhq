@@ -938,6 +938,8 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 league = SessionVariables.CurrentAccount.GetDefaultNewLeague();
                 league.RegistrationModeId = RegistrationMode.Register;
+                league.StartDate = DateTime.UtcNow.AddWeeks(4).FirstDateOfWeek();
+                league.EndDate = league.StartDate.Value.AddWeeks(8).LastDateOfWeek();
             }
 
             LoadEditSetupViewBag(league, msgs);
@@ -947,7 +949,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string isinviteonly, string cmd)
+        public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string isinviteonly, string startdate, string enddate, string cmd)
         {
             var msgs = new SystemMessages();
             var values = new Dictionary<string, object>()
@@ -958,7 +960,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 { "timezone", timezone },
                 { "form", form },
                 { "regmode", regmode },
-                { "isinviteonly", isinviteonly }
+                { "isinviteonly", isinviteonly },
+                { "startdate", startdate },
+                { "enddate", enddate },
             };
             var league = SaveLeague(id, values, msgs);
 

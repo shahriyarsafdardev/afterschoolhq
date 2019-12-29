@@ -45,6 +45,8 @@ namespace AfterSchoolLibrary.Models
         public bool UseStripeConnectedAccount { get; set; }
         public bool RequiresParentalConsent { get; set; }
         public bool IsInviteOnly { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
 
         private ActivityType? ActivityType { get; set; }
         private ActivityGroupType? ActivityGroupType { get; set; }
@@ -130,6 +132,8 @@ namespace AfterSchoolLibrary.Models
                 PaymentPlans = activity.GetActivePaymentPlans(msgs, dc);
                 SubscriptionPlans = activity.GetActiveSubscriptionPlans(msgs, dc);
                 IsFree = IsTuitionFree && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0;
+                StartDate = activity.GetFirstDate(msgs, dc);
+                EndDate = activity.GetLastDate(msgs, dc);
             }
         }
 
@@ -156,8 +160,8 @@ namespace AfterSchoolLibrary.Models
             IsInviteOnly = activityGroup.IsInviteOnly;
             AllowToPayLater = activityGroup.AllowToPayLater;
             RequiresParentalConsent = activityGroup.RequiresParentalConsent;
-            // Description = activityGroup.Description;
-            // TODO: PayLater = activityGroup.AllowToPayLater;
+            StartDate = activityGroup.StartDate;
+            EndDate = activityGroup.EndDate;
 
             if (loadAllDetails)
             {
@@ -172,6 +176,8 @@ namespace AfterSchoolLibrary.Models
                 PaymentPlans = activityGroup.GetPaymentPlans(msgs, dc);
                 SubscriptionPlans = activityGroup.GetSubscriptionPlans(msgs, dc);
                 IsFree = IsTuitionFree && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0;
+                StartDate = activityGroup.GetFirstDate(msgs, dc);
+                EndDate = activityGroup.GetLastDate(msgs, dc);
             }
         }
 
