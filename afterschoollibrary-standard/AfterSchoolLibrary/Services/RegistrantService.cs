@@ -491,6 +491,9 @@ namespace AfterSchoolLibrary.Services
 
         public static bool HasPlan(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            if (registrant.IsMaster)
+                return registrant.MasterRegistrantHasPlan(participationObject, msgs, dc);
+
             return registrant.HasPlan(participationObject.ObjectID.Value, participationObject.ObjectType, msgs, dc);
         }
 
