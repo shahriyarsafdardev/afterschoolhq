@@ -819,6 +819,7 @@ namespace AfterSchoolLibrary.Services
             var paymentplancost = values.GetValueOrDefault("paymentplancost");
             var paymentplanperiod = values.GetValueOrDefault("paymentplanperiod");
             var paymentplanperiodnumber = values.GetValueOrDefault("paymentplanperiodnumber");
+            var paymentplanpaymentstarttype = values.GetValueOrDefault("paymentplanpaymentstarttype");
             var accountactivitygroup = values.GetValueOrDefault("accountactivitygroup");
             var provider = values.GetValueOrDefault("provider");
             var providername = values.GetValueOrDefault("providername");
@@ -1142,6 +1143,7 @@ namespace AfterSchoolLibrary.Services
                                 paymentplancost.IfEmpty(""),
                                 paymentplanperiod.IfEmpty(""),
                                 paymentplanperiodnumber.IfEmpty(""),
+                                paymentplanpaymentstarttype.IfEmpty(""),
                                 loggedInUserId,
                                 adc
                             ));
@@ -1277,10 +1279,11 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
-        private static SystemMessages SetupPaymentPlan(this Activity activity, Account account, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, int loggedInUserId, DatabaseConnection dc = null)
+        private static SystemMessages SetupPaymentPlan(this Activity activity, Account account, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, string paymentplanpaymentstarttype, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
             var hasChanges = true;
+            var planStartType = paymentplanpaymentstarttype.ToInteger().ToEnum<PlanPaymentStartType>();
 
             // first: desactivate the current plan if there are any changes
             if (activity.HasPaymentPlan(msgs, dc))
@@ -1289,7 +1292,8 @@ namespace AfterSchoolLibrary.Services
 
                 hasChanges = plan.CostPerPeriod.Value != paymentplancost.ToDecimal() || 
                             plan.BillingPeriodTypeId != (BillingPeriodType)paymentplanperiod.ToInteger() || 
-                            plan.TotalPeriods.Value != paymentplanperiodnumber.ToInteger();
+                            plan.TotalPeriods.Value != paymentplanperiodnumber.ToInteger() ||
+                            plan.PaymentStartTypeId != planStartType;
 
                 if (hasChanges || !haspaymentplan.ToBoolean())
                     msgs.AddRange(plan.Deactivate(loggedInUserId, dc));
@@ -1304,6 +1308,7 @@ namespace AfterSchoolLibrary.Services
                     paymentplancost.ToDecimal(),
                     (BillingPeriodType)paymentplanperiod.ToInteger(),
                     paymentplanperiodnumber.ToInteger(),
+                    planStartType,
                     loggedInUserId,
                     msgs,
                     dc);

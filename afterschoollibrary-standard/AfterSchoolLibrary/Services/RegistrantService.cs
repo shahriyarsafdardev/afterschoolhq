@@ -187,9 +187,9 @@ namespace AfterSchoolLibrary.Services
             var platformFeePercent = new decimal?();
             string stripeAccountId = null;
 
-            if (checkoutObject.ParticipationObject.IsActivity())
+            if (plan.PlanTypeId == SubscriptionPlanType.Subscription || plan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts)
             {
-                var firstActivityDate = checkoutObject.ParticipationObject.GetActivity().GetFirstDate(msgs, dc);
+                var firstActivityDate = checkoutObject.ParticipationObject.StartDate;
 
                 // can't start in the past
                 if (firstActivityDate.HasValue && firstActivityDate.Value.IsAfter(startDateTime.Value))

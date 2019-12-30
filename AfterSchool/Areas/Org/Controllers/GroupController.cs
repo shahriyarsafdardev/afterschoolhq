@@ -1182,7 +1182,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditCost(string id, string cost, string costdescription, string allowtopaylater, string cmd, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber)
+        public ActionResult EditCost(string id, string cost, string costdescription, string allowtopaylater, string cmd, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, string paymentplanpaymentstarttype)
         {
             var msgs = new SystemMessages();
             var values = new Dictionary<string, object>()
@@ -1193,7 +1193,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 { "haspaymentplan", haspaymentplan.IfBlank("0") },
                 { "paymentplancost", paymentplancost },
                 { "paymentplanperiod", paymentplanperiod },
-                { "paymentplanperiodnumber", paymentplanperiodnumber }
+                { "paymentplanperiodnumber", paymentplanperiodnumber },
+                { "paymentplanpaymentstarttype", paymentplanpaymentstarttype }
             };
             var league = SaveLeague(id, values, msgs);
 

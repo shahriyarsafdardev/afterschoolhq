@@ -319,7 +319,7 @@ namespace AfterSchoolLibrary.Helpers
                     amsgs.AddRange(Migrations.InvalidateRegistrantAccounts_20190721.Do(adc));
                     amsgs.AddRange(Migrations.CreatePayoutsForConnectedAccounts_20191226.Do(adc));
                     amsgs.AddRange(Migrations.UpdateRequiresParentalConsentForActivityGroup_20191226.Do(adc));
-
+                    amsgs.AddRange(Migrations.UpdatePlanPaymentStartType_20191230.Do(adc));
 
                     // amsgs.AddRange(MigrateToBCrypt(adc));
 

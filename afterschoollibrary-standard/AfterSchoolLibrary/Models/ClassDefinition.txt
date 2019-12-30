@@ -1326,6 +1326,7 @@ property: TotalPeriods, int?, Int
 property: StripePlanId, string, NVarChar "50"
 property: PlanTypeId, SubscriptionPlanType, Int
 property: StartDayOfMonth, int?, Int
+property: PaymentStartTypeId, PlanPaymentStartType, Int
 loadmethod: ParticipationObjectId|ParticipationObjectTypeId|PlanTypeId, List<>, LoadByParticipationObject
 loadmethod: PlanOwnerAccountId, List<>
 [end]
@@ -1838,4 +1839,10 @@ values: NotSet, Started, OutOfDate, Completed
 type: Enum
 name: ActivityMessageReason
 values: NotSet, ActivityCancellationNotice, AttendanceNotice, BehaviorNotice, GeneralUpdate, LatePickUpAlert, UrgentUpdate
+[end]
+
+[begin]
+type: Enum
+name: PlanPaymentStartType
+values: NotSet, WhenActivityStarts, OnCheckout
 [end]
