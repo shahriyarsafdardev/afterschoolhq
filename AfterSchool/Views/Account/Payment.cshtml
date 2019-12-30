@@ -73,14 +73,29 @@
                                     <div class="am-radio">
                                         <input type="radio" name="paymentoption" id="paymentoption-@plan.ID" class="payment-option-radio" value="@plan.ID" />
                                         <label for="paymentoption-@plan.ID">
-                                            Pay <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong> today
+                                            Pay <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong> 
+
+                                            @Html.Raw(plan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout ? "<strong>today</strong>" : $"on <strong>{participationObject.StartDate.Value.ToLongDateString()}</strong>")
+
                                             @if (plan.TotalPeriods > 1)
                                             {
                                                 <span>
                                                     and
-                                                    <strong>@(plan.TotalPeriods - 1)</strong> more payments of
-                                                    <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong> each
-                                                    <strong>@plan.BillingPeriodTypeId.ToString().ToLower()</strong>
+                                                    <strong>@(plan.TotalPeriods - 1)</strong> more payment@(plan.TotalPeriods > 2 ? "s" : "") of
+                                                    <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong> 
+                                                    @if (plan.TotalPeriods > 2)
+                                                    {
+                                                        <span>
+                                                            each following
+                                                            <strong>@plan.BillingPeriodTypeId.ToString().ToLower()</strong>
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>
+                                                            one month from today
+                                                        </span>
+                                                    }
                                                 </span>
                                             }
                                             
@@ -131,7 +146,7 @@
                                     @if (!participationObject.IsTuitionFree)
                                     {
                                         <tr id="registration-fee-row">
-                                            <td>Tuition Fee</td>
+                                            <td>Registration Fee</td>
                                             <td class="text-right">
                                                 <span id="fee-total-value" class="hide">@participationObject.GetCheckoutCostWithConvenienceFee()</span>
                                                 @participationObject.GetCheckoutCostWithConvenienceFee().ToCurrency()*

@@ -45,15 +45,15 @@ namespace AfterSchoolLibrary.Services
 
         public static SubscriptionPlan CreateNewPaymentPlan(Account planOwner, Activity activity, decimal costPerPeriod, BillingPeriodType billingPeriodType, int totalPeriods, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return CreateNewPaymentPlan(planOwner, ParticipationObjectType.Activity, activity.ID.Value, costPerPeriod, billingPeriodType, totalPeriods, loggedInUser?.ID.IfEmpty(0), msgs, dc);
+            return CreateNewPaymentPlan(planOwner, ParticipationObjectType.Activity, activity.ID.Value, costPerPeriod, billingPeriodType, totalPeriods, PlanPaymentStartType.WhenActivityStarts, loggedInUser?.ID.IfEmpty(0), msgs, dc);
         }
 
         public static SubscriptionPlan CreateNewPaymentPlan(Account planOwner, ActivityGroup activityGroup, decimal costPerPeriod, BillingPeriodType billingPeriodType, int totalPeriods, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return CreateNewPaymentPlan(planOwner, ParticipationObjectType.ActivityGroup, activityGroup.ID.Value, costPerPeriod, billingPeriodType, totalPeriods, loggedInUser?.ID.IfEmpty(0), msgs, dc);
+            return CreateNewPaymentPlan(planOwner, ParticipationObjectType.ActivityGroup, activityGroup.ID.Value, costPerPeriod, billingPeriodType, totalPeriods, PlanPaymentStartType.WhenActivityStarts, loggedInUser?.ID.IfEmpty(0), msgs, dc);
         }
 
-        public static SubscriptionPlan CreateNewPaymentPlan(Account planOwner, ParticipationObjectType participationObjectType, int participationObjectId, decimal costPerPeriod, BillingPeriodType billingPeriodType, int totalPeriods, int? loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public static SubscriptionPlan CreateNewPaymentPlan(Account planOwner, ParticipationObjectType participationObjectType, int participationObjectId, decimal costPerPeriod, BillingPeriodType billingPeriodType, int totalPeriods, PlanPaymentStartType paymentStartType, int? loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -70,7 +70,8 @@ namespace AfterSchoolLibrary.Services
                 ParticipationObjectId = participationObjectId,
                 ParticipationObjectTypeId = participationObjectType,
                 TotalPeriods = totalPeriods,
-                PlanTypeId = SubscriptionPlanType.PaymentPlan
+                PlanTypeId = SubscriptionPlanType.PaymentPlan,
+                PaymentStartTypeId = paymentStartType
             };
 
             msgs.AddRange(plan.SaveWithStripe(dc));

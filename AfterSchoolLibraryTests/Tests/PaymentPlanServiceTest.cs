@@ -33,6 +33,7 @@ namespace AfterSchoolLibraryTests.Tests
                 35.ToDecimal(),
                 BillingPeriodType.Month,
                 12,
+                PlanPaymentStartType.WhenActivityStarts,
                 LoggedInUser.ID.Value,
                 msgs,
                 dc);
@@ -52,6 +53,7 @@ namespace AfterSchoolLibraryTests.Tests
                 35.ToDecimal(),
                 BillingPeriodType.Month,
                 12,
+                PlanPaymentStartType.WhenActivityStarts,
                 LoggedInUser.ID.Value,
                 msgs,
                 dc);
