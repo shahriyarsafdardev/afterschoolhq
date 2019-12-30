@@ -245,7 +245,8 @@ namespace AfterSchoolLibrary.Services
                 DoesAutoRenew = subscriptionPlan.DoesAutoRenew,
                 IsActive = subscriptionPlan.IsActive,
                 PlanTypeId = subscriptionPlan.PlanTypeId,
-                TotalPeriods = subscriptionPlan.TotalPeriods
+                TotalPeriods = subscriptionPlan.TotalPeriods,
+                PaymentStartTypeId = subscriptionPlan.PaymentStartTypeId
             };
         }
 
