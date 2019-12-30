@@ -528,7 +528,7 @@ namespace AfterSchoolLibrary.Services
                 var isSubscription = plan.PlanTypeId == SubscriptionPlanType.Subscription;
 
                 if (plan.ParticipationObjectId == participationObjectId && plan.ParticipationObjectTypeId == participationObjectType && isSubscription)
-                    return plan.CancelSubscription(rsp, plan.GetAccount(msgs, dc));
+                    return plan.CancelSubscription(rsp, plan.GetAccount(msgs, dc), msgs, dc);
             }
 
             return false;
@@ -952,7 +952,7 @@ namespace AfterSchoolLibrary.Services
             }
 
             var ras = registrant.GetRegistrantActivities(msgs, dc);
-            var ra = ras.Find(ra => ra.ParticipationObjectId == participationObjectId && ra.ParticipationObjectTypeId == participationObjectType);
+            var ra = ras.Find(item => item.ParticipationObjectId == participationObjectId && item.ParticipationObjectTypeId == participationObjectType);
 
             if (ra.IsEmpty())
             {
