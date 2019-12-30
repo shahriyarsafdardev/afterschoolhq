@@ -41,6 +41,7 @@ namespace AfterSchoolLibrary.Models
 		public string StripePlanId { get { return (string)MDV["StripePlanId"].Value; } set { MDV["StripePlanId"].Value = value; } }
 		public SubscriptionPlanType PlanTypeId { get { return (SubscriptionPlanType)MDV["PlanTypeId"].Value; } set { MDV["PlanTypeId"].Value = value; } }
 		public int? StartDayOfMonth { get { return (int?)MDV["StartDayOfMonth"].Value; } set { MDV["StartDayOfMonth"].Value = value; } }
+		public PlanPaymentStartType PaymentStartTypeId { get { return (PlanPaymentStartType)MDV["PaymentStartTypeId"].Value; } set { MDV["PaymentStartTypeId"].Value = value; } }
 		
 
         public SubscriptionPlan()
@@ -52,6 +53,7 @@ namespace AfterSchoolLibrary.Models
 			this.DoesAutoRenew = false;
 			this.IsActive = false;
 			this.PlanTypeId = SubscriptionPlanType.NotSet;
+			this.PaymentStartTypeId = PlanPaymentStartType.NotSet;
 			
         }
 
@@ -73,6 +75,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "StripePlanId", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "PlanTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "StartDayOfMonth", System.Data.SqlDbType.Int);
+				_dp.Add(className, "PaymentStartTypeId", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
@@ -196,6 +199,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["StartDayOfMonth"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["PaymentStartTypeId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

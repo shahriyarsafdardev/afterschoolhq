@@ -294,7 +294,12 @@ namespace AfterSchoolLibrary.Helpers
                     cost = checkoutObject.GetPaymentPlanCostTodayConvenienceFee(msgs, dc).ToCurrency();
                     ccFee = checkoutObject.GetPaymentPlanCostTodayCreditCardFee(msgs, dc).ToCurrency();
 
-                    additionalDetails = $"today plus {paymentPlan.GetTotalCostWithConvenienceFee(billingAccount, msgs, dc).ToCurrency()} for {(paymentPlan.TotalPeriods.Value - 1)} {paymentPlan.BillingPeriodTypeId.ToString().ToLower()}(s)";
+                    var todayOrLater = "today";
+
+                    if (checkoutObject.PaymentPlan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts)
+                        todayOrLater = participationObject.StartDate.ToShortDateString();
+
+                    additionalDetails = $"{todayOrLater} plus {paymentPlan.GetTotalCostWithConvenienceFee(billingAccount, msgs, dc).ToCurrency()} for {(paymentPlan.TotalPeriods.Value - 1)} {paymentPlan.BillingPeriodTypeId.ToString().ToLower()}(s)";
                 }
                 else
                 {

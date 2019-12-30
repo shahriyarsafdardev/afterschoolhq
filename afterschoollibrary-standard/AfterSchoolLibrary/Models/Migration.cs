@@ -38,7 +38,7 @@ namespace AfterSchoolLibrary.Models
                 BasicLibrary.DataAccess.DatabaseParameters _dp = new BasicLibrary.DataAccess.DatabaseParameters();
                 string className = typeof(Migration).Name;
                 _dp = BasicObject.get_BaseObjectMap(className);
-				_dp.Add(className, "UniqueIdentifier", System.Data.SqlDbType.NVarChar , "50");
+				_dp.Add(className, "UniqueIdentifier", System.Data.SqlDbType.NVarChar , "100");
 				
                 return _dp;
             }

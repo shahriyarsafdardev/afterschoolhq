@@ -762,7 +762,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditCost(string id, string cost, string costdescription, string acceptpaypal, string acceptcreditcard, string allowtopaylater, string cmd, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber)
+        public ActionResult EditCost(string id, string cost, string costdescription, string acceptpaypal, string acceptcreditcard, string allowtopaylater, string cmd, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, string paymentplanpaymentstarttype)
         {
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid());
@@ -782,7 +782,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "haspaymentplan", haspaymentplan.IfBlank("0") },
                     { "paymentplancost", paymentplancost },
                     { "paymentplanperiod", paymentplanperiod },
-                    { "paymentplanperiodnumber", paymentplanperiodnumber }
+                    { "paymentplanperiodnumber", paymentplanperiodnumber },
+                    { "paymentplanpaymentstarttype", paymentplanpaymentstarttype }
                 };
 
                 activity = ActivityService.EditExisting(
