@@ -480,14 +480,14 @@ namespace AfterSchoolLibrary.Services
         public static ActivityGroup Copy(this ActivityGroup activityGroup, string newName, bool useSameForm, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
-            ActivityGroup group = null;
+            ActivityGroup copy = null;
 
             Database.ExecuteTransaction
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     // copy group
-                    group = new ActivityGroup
+                    copy = new ActivityGroup
                     {
                         AccountId = activityGroup.AccountId,
                         CreateDate = DateTime.UtcNow,
@@ -518,14 +518,14 @@ namespace AfterSchoolLibrary.Services
                         Details = activityGroup.Details,
                         RequiresParentalConsent = activityGroup.RequiresParentalConsent,
                     };
-                    amsgs.AddRange(group.Save(adc));
+                    amsgs.AddRange(copy.Save(adc));
 
                     // copy AccountProperties / Content
                     activityGroup.GetGroupProperties(amsgs, adc).ForEach(item => {
                         var newprop = new AccountProperty
                         {
                             AccountPropertyTypeId = item.AccountPropertyTypeId,
-                            ActivityGroupId = group.ID,
+                            ActivityGroupId = copy.ID,
                             CreateDate = DateTime.UtcNow,
                             LastModifiedDate = DateTime.UtcNow,
                             CreatedBy = loggedInUserId,
@@ -546,12 +546,16 @@ namespace AfterSchoolLibrary.Services
                                         msgs: amsgs, 
                                         dc: adc);
 
-                        newact.ActivityGroupId = group.ID;
+                        newact.ActivityGroupId = copy.ID;
                         newact.ActivityScheduleId = null;
                         newact.IsPublished = true;
                         amsgs.AddRange(newact.Save(adc));
                     });
-                    
+
+                    var oldPaymentPlan = activityGroup.GetPaymentPlan(amsgs, adc);
+                    if (oldPaymentPlan.IsNotEmpty())
+                        oldPaymentPlan.Copy(copy.ID.Value, loggedInUserId, amsgs, adc);
+
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
@@ -559,7 +563,7 @@ namespace AfterSchoolLibrary.Services
                 dc: dc
             );
 
-            return group;
+            return copy;
         }
 
         public static ActivityGroup SaveSession(WebUser loggedInUser, Account account, string activityGroupUid, Dictionary<string, object> values, SystemMessages msgs, DatabaseConnection dc = null)
