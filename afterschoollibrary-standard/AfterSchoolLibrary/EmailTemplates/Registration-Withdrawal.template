@@ -2,7 +2,7 @@
   <p>Hey @Model.ActivityContactName,</p>
 
   <p>
-    @Model.RegistrantName has been withdrawn from @Model.ActivityName by @Model.CurrentUserName. The registration status for @Model.RegistrantName has been changed to Declined.
+    @Model.RegistrantName has been withdrawn from @Model.ActivityName by @Model.CurrentUserName. The registration status for @Model.RegistrantName has been changed to Withdrawn.
   </p>
 
   <p>
