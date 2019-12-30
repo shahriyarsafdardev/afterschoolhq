@@ -2073,7 +2073,7 @@ namespace AfterSchoolLibrary.Services
         /// <returns></returns>
         public static DateTime? GetFirstDate(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return activity.GetSchedule(msgs, dc).GetInstances(msgs: msgs, dc: dc).FirstOrDefault()?.StartDateTime;
+            return activity.GetSchedule(msgs, dc)?.GetInstances(msgs: msgs, dc: dc).FirstOrDefault()?.StartDateTime;
         }
 
         /// <summary>
@@ -2083,7 +2083,7 @@ namespace AfterSchoolLibrary.Services
         /// <returns></returns>
         public static DateTime? GetLastDate(this Activity activity, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return activity.GetSchedule(msgs, dc).GetInstances(msgs: msgs, dc: dc).LastOrDefault()?.StartDateTime;
+            return activity.GetSchedule(msgs, dc)?.GetInstances(msgs: msgs, dc: dc).LastOrDefault()?.StartDateTime;
         }
 
         public static SystemMessages SendRegistrationSummaryReport(int activityId, string uiActivityLabel, DatabaseConnection dc = null)
