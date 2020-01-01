@@ -348,6 +348,26 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
+        public static List<Transaction> LoadByDate(DateTime? startDate, DateTime? endDate, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseParameterizedQuery = false;
+
+            if (startDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+
+            if (endDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+
+            dq.OrderBys.Add(ObjectMap["CreateDate"], OrderByDirectionEnum.Descending);
+            dq.OrderBys.Add(ObjectMap["Description"], OrderByDirectionEnum.Ascending);
+
+            dq.SelectRange.Start = start;
+            dq.SelectRange.Length = length;
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
         public static List<Transaction> LoadByBillerAccountId(int BillerAccountId, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             return LoadByBillerOrPayerAccountId(BillerAccountId, null, startDate, endDate, participationObjects, start, length, msgs, dc);
@@ -416,6 +436,19 @@ namespace AfterSchoolLibrary.Models
             return activityPaymentQuery;
         }
 
+        public static int GetCount(DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+
+            if (startDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+            if (endDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+
+            return dq.GetCount(msgs);
+        }
+
         public static int GetCountByBillerAccountId(int BillerAccountId, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return GetCountByBillerOrPayerAccountId(BillerAccountId, null, startDate, endDate, participationObjects, msgs, dc);
@@ -449,7 +482,7 @@ namespace AfterSchoolLibrary.Models
                     0,
                     DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
 
-            return dq.GetCount();
+            return dq.GetCount(msgs);
         }
 
         public static List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)> GetParticipationObjectsByBillerAccountId(int BillerAccountId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -514,6 +547,30 @@ namespace AfterSchoolLibrary.Models
             return dq.GetCount(msgs);
         }
 
+        public static decimal GetTotalFeesPaid(DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseParameterizedQuery = false;
+            dq.SelectParameters.Clear();
+
+            var sp = new SelectParameter(ObjectMap["Amount"]);
+            sp.Function = $"ISNULL(SUM({ObjectMap["PlatformFlatFee"].ParameterFullName} + ({ObjectMap["PlatformPercentFee"].ParameterFullName} * {ObjectMap["Amount"].ParameterFullName})), 0) + ISNULL(SUM({ObjectMap["PaymentTypeFeeCharged"].ParameterFullName} + {ObjectMap["ConvenienceFeeCharged"].ParameterFullName}), 0)";
+            dq.SelectParameters.Add(sp);
+
+            if (startDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+
+            if (endDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+
+            var results = dq.Select(msgs);
+            if (results.Rows.Any())
+                return results.Rows[0][0].ToString().ToDecimal();
+
+            return 0;
+        }
+
         public static decimal GetTotalFeesPaidByBillerAccount(int BillerAccountId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             DatabaseQuery dq = DatabaseQuery;
@@ -538,6 +595,30 @@ namespace AfterSchoolLibrary.Models
                 return results.Rows[0][0].ToString().ToDecimal() + 
                     GetTotalConvenienceFeesPaidByBillerAccount(BillerAccountId, startDate, endDate, msgs, dc) +
                     GetTotalPaymentTypeFeesPaidByBillerAccount(BillerAccountId, startDate, endDate, msgs, dc);
+
+            return 0;
+        }
+
+        public static decimal GetTotalAmountBilledOut(DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseParameterizedQuery = false;
+            dq.SelectParameters.Clear();
+
+            var sp = new SelectParameter(ObjectMap["Amount"]);
+            sp.Function = $"ISNULL(SUM({ObjectMap["Amount"].ParameterFullName}), 0)";
+            dq.SelectParameters.Add(sp);
+
+            if (startDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+
+            if (endDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+
+            var results = dq.Select(msgs);
+            if (results.Rows.Any())
+                return results.Rows[0][0].ToString().ToDecimal();
 
             return 0;
         }
