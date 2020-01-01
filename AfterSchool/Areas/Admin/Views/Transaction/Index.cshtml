@@ -105,15 +105,15 @@
                 </div>
                 <div class="col-md-4">
                     <button type="button" class="btn btn-primary btn-lg" onclick="search()">Search</button>
-                    <button type="button" class="btn btn-primary btn-lg" onclick="DownloadToCSV()">Export To CSV</button>
+                    <button type="button" class="btn btn-primary btn-lg hide" onclick="DownloadToCSV()">Export To CSV</button>
                 </div>
 
                 <script>
                     function search() {
-                        window.location.href = `@Url.Action("index", "accounting")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}`;
+                        window.location.href = `@Url.Action("index", "transaction")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}`;
                     }
                     function DownloadToCSV() {
-                         window.location.href = `@Url.Action("DownloadCSV", "accounting")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}`;
+                         window.location.href = `@Url.Action("DownloadCSV", "transaction")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}`;
                     }
 
                 </script>
@@ -207,7 +207,7 @@
                     (PagingModel)ViewBag.PagingModel,
                     new ViewDataDictionary()
                     {
-                    { "controller", "accounting" },
+                    { "controller", "transaction" },
                     { "action", "index" },
                     { "querystring", $"sdate={Request["sdate"]}&edate={Request["edate"]}&poId={Request["poId"]}&poTypeId={Request["poTypeId"]}" }
 }
