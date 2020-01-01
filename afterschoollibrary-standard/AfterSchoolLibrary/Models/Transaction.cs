@@ -571,6 +571,32 @@ namespace AfterSchoolLibrary.Models
             return 0;
         }
 
+        public static decimal GetTotalAHQProfit(DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseParameterizedQuery = false;
+            dq.SelectParameters.Clear();
+
+            var sp = new SelectParameter(ObjectMap["Amount"]);
+            sp.Function = $@"
+                            ISNULL(SUM({ObjectMap["PlatformFlatFee"].ParameterFullName} + ({ObjectMap["PlatformPercentFee"].ParameterFullName} * {ObjectMap["Amount"].ParameterFullName} - ({Billing.StripeHelper.StripePercentFee} * {ObjectMap["Amount"].ParameterFullName}) - {Billing.StripeHelper.StripeFlatFee})), 0) + 
+                            ISNULL(SUM({ObjectMap["PaymentTypeFeeCharged"].ParameterFullName} + {ObjectMap["ConvenienceFeeCharged"].ParameterFullName} - ({Billing.StripeHelper.StripePercentFee} * {ObjectMap["Amount"].ParameterFullName}) - {Billing.StripeHelper.StripeFlatFee}), 0)";
+            dq.SelectParameters.Add(sp);
+
+            if (startDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+
+            if (endDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+
+            var results = dq.Select(msgs);
+            if (results.Rows.Any())
+                return results.Rows[0][0].ToString().ToDecimal();
+
+            return 0;
+        }
+
         public static decimal GetTotalFeesPaidByBillerAccount(int BillerAccountId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             DatabaseQuery dq = DatabaseQuery;
