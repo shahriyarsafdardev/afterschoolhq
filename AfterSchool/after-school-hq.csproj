@@ -460,6 +460,7 @@
     <Compile Include="Areas\Admin\Controllers\PackageController.cs" />
     <Compile Include="Areas\Admin\Controllers\PayoutController.cs" />
     <Compile Include="Areas\Admin\Controllers\StripeHooksController.cs" />
+    <Compile Include="Areas\Admin\Controllers\TransactionController.cs" />
     <Compile Include="Areas\Admin\Controllers\UploadController.cs" />
     <Compile Include="Areas\District\Controllers\AccountController.cs" />
     <Compile Include="Areas\District\Controllers\HomeController.cs" />
@@ -1173,6 +1174,7 @@
     <Content Include="Areas\Org\Views\Group\EditDetails.cshtml" />
     <Content Include="Areas\Org\Views\Group\EditRestrictions.cshtml" />
     <Content Include="Areas\Org\Views\Group\EditSetup.cshtml" />
+    <Content Include="Areas\Admin\Views\Transaction\Index.cshtml" />
     <None Include="Scripts\jquery-3.0.0-vsdoc.js" />
     <Content Include="Scripts\jquery-3.0.0.js" />
     <Content Include="Scripts\jquery-3.0.0.min.js" />
