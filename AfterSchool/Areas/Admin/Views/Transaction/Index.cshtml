@@ -6,6 +6,7 @@
     var avgTransactionAmount = transactionCount == 0 ? 0 : totalTransactionAmount / transactionCount;
     var totalFees = (decimal)ViewBag.TotalFeesPaid;
     var totalPayout = totalTransactionAmount - totalFees;
+    var totalProfit = (decimal)ViewBag.TotalProfit;
 }
 
 @{ Html.RenderPartial("AdminHeader"); }
@@ -23,6 +24,17 @@
 
         <div class="panel-body">
             <div class="row">
+
+                <div class="col-md-2">
+                    <div class="widget widget-tile widget-bordered">
+                        <div class="data-info">
+                            <div data-toggle="counter" data-end="@totalTransactionAmount" id="totalTransactionAmount" data-decimals="2" data-suffix="" class="value">@totalTransactionAmount.ToCurrency()</div>
+                            <div class="desc">Total Amt Paid</div>
+                        </div>
+                        <div class="icon"><span class=""></span></div>
+                    </div>
+                </div>
+
                 <div class="col-md-2">
                     <div class="widget widget-tile widget-bordered">
                         <div class="data-info">
@@ -46,8 +58,8 @@
                 <div class="col-md-2">
                     <div class="widget widget-tile widget-bordered">
                         <div class="data-info">
-                            <div data-toggle="counter" data-end="@totalTransactionAmount" id="totalTransactionAmount" data-decimals="2" data-suffix="" class="value">@totalTransactionAmount.ToCurrency()</div>
-                            <div class="desc">Total Amt Paid</div>
+                            <div data-toggle="counter" data-end="@totalFees" id="totalPayout" data-decimals="2" data-suffix="" class="value">@totalFees.ToCurrency()</div>
+                            <div class="desc">Total Fees</div>
                         </div>
                         <div class="icon"><span class=""></span></div>
                     </div>
@@ -56,8 +68,8 @@
                 <div class="col-md-2">
                     <div class="widget widget-tile widget-bordered">
                         <div class="data-info">
-                            <div data-toggle="counter" data-end="@totalFees" id="totalPayout" data-decimals="2" data-suffix="" class="value">@totalFees.ToCurrency()</div>
-                            <div class="desc">Total Fees</div>
+                            <div data-toggle="counter" data-end="@totalProfit" id="totalProfit" data-decimals="2" data-suffix="" class="value">@totalProfit.ToCurrency()</div>
+                            <div class="desc">Total Profit</div>
                         </div>
                         <div class="icon"><span class=""></span></div>
                     </div>

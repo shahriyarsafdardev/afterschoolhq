@@ -54,6 +54,7 @@ namespace AfterSchool.Areas.Admin.Controllers
 
             ViewBag.TotalAmountPaid = Transaction.GetTotalAmountBilledOut(startDate, endDate, msgs);
             ViewBag.TotalFeesPaid = Transaction.GetTotalFeesPaid(startDate, endDate, msgs);
+            ViewBag.TotalProfit = Transaction.GetTotalAHQProfit(startDate, endDate, msgs);
             ViewBag.Messages = msgs;
             ViewBag.PagingModel = new PagingModel()
             {
