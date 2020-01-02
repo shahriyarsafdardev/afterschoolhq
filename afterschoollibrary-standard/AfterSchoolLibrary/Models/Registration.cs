@@ -306,18 +306,41 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		
+
 
         #endregion
 
-		#region "UserDefined"
+        #region "UserDefined"
 
+        [Obsolete]
         public string Name
+        {
+            get
+            {
+                return RegistrantName;
+            }
+        }
+        public string RegistrantName
         {
             get
             {
                 return WebUser.BuildDisplayName(RegistrantFirstName, RegistrantLastName);
             }
+        }
+
+        public Registrant ToRegistrant()
+        {
+            return new Registrant()
+            {
+                ID = this.RegistrantId,
+                FirstName = this.RegistrantFirstName,
+                LastName = this.RegistrantLastName,
+                Email = this.RegistrantEmail,
+                Uid = this.RegistrantUid,
+                Phone = this.RegistrantPhone,
+                Company = this.RegistrantCompany,
+                RegistrantTypeId = this.RegistrantRegistrantTypeId,
+            };
         }
 
         public static List<Registration> LoadByAccountId(int AccountId, int? start, int? length, DatabaseConnection dc = null)

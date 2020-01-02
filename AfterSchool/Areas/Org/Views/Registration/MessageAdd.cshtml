@@ -125,7 +125,7 @@
                         <div class="panel panel-default panel-borders">
                             <div class="panel-body">
                                 <div style="height: 200px; overflow: auto;">
-                                    @Html.Raw(registrations.Select(registration => $"{registration.RegistrantFirstName} {registration.RegistrantLastName}").JoinWith("<br />"))
+                                    @Html.Raw(registrations.Select(registration => $"{registration.RegistrantName}").JoinWith("<br />"))
                                 </div>
                             </div>
                         </div>

@@ -642,9 +642,14 @@ namespace AfterSchoolLibrary.Models
             return _RegistrantActivities;
         }
 
-        public List<Registrant> GetRegistrants(List<Registration> registrations = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public List<Registrant> GetRegistrants(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return GetRegistrantActivities(registrations, msgs, dc: dc).Select(x => x.ToRegistrant()).DistinctBy(x => x.ID.Value).ToList();
+            return GetRegistrations(null, null, msgs, dc).Select(x => x.ToRegistrant()).DistinctBy(x => x.ID.Value).ToList();
+        }
+
+        public List<Registrant> GetRegistrants(List<Registration> registrations, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return registrations.Select(x => x.ToRegistrant()).DistinctBy(x => x.ID.Value).ToList();
         }
 
         public int GetTotalSeatsLeft(SystemMessages msgs = null, DatabaseConnection dc = null)

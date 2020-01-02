@@ -488,6 +488,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 .OrderBy(x => x.FirstName)
                 .ThenBy(x => x.LastName)
                 .ToList();
+
             return View(group);
         }
 
