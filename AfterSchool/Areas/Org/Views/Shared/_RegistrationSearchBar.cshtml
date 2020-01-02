@@ -3,7 +3,12 @@
     var groups = (List<ActivityGroup>)ViewBag.Groups;
     var questions = (List<FormQuestion>)ViewBag.Questions;
     var questionGroups = (List<FormQuestionGroup>)ViewBag.QuestionGroups;
-    var isReadyOnly = (bool)ViewBag.SearchBarReadOnly;
+    var isReadyOnly = false;
+
+    if (ViewBag.SearchBarReadOnly != null)
+    {
+        isReadyOnly = (bool)ViewBag.SearchBarReadOnly;
+    }
 }
 
 <div class="row">
@@ -25,9 +30,10 @@
             </select>
         </div>
     }
+    
     <div class="col-md-3">
         <div class="form-group">
-            <input type="text" name="opensearch" id="opensearch" placeholder="Enter your search term..." class="form-control" value="@Request["q"]" @(isReadyOnly ? "readonly=\"readonly\"": "") />
+            <input type="text" name="opensearch" id="opensearch" placeholder="Search for first or last name or email" class="form-control" value="@Request["q"]" @(isReadyOnly ? "readonly=\"readonly\"": "") />
         </div>
     </div>
 

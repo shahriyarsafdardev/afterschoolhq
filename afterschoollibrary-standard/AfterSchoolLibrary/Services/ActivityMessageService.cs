@@ -36,7 +36,7 @@ namespace AfterSchoolLibrary.Services
             var members = activity.GetTeamMembers(msgs, dc).DistinctBy(member => member.WebUserId).ToList();
 
             activityMessage.SendMessageToTeamMembers(
-                members,
+                members.Select(member => member.ToWebUser()).ToList(),
                 activity.Name,
                 activity.ContactEmail.IfBlank(account.Email),
                 activity.ContactName.IfBlank(account.Name),
@@ -58,7 +58,7 @@ namespace AfterSchoolLibrary.Services
             members = members.DistinctBy(member => member.WebUserId).ToList();
 
             activityMessage.SendMessageToTeamMembers(
-                members,
+                members.Select(member => member.ToWebUser()).ToList(),
                 group.Name,
                 group.ContactEmail.IfBlank(account.Email),
                 group.ContactName.IfBlank(account.Name),
@@ -68,22 +68,37 @@ namespace AfterSchoolLibrary.Services
                 dc);
         }
 
-        internal static void SendMessageToTeamMembers(this ActivityMessage activityMessage, List<ActivityWebUser> members, string activityName, string contactEmail, string contactName, Account account, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        private static void SendMessageToTeamMembers(this ActivityMessage activityMessage, Account account, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var members = account.GetActiveMembers(msgs, dc).DistinctBy(member => member.WebUserId).ToList();
+
+            activityMessage.SendMessageToTeamMembers(
+                members.Select(member => member.ToWebUser()).ToList(),
+                account.Name,
+                loggedInUser.Email,
+                loggedInUser.DisplayName,
+                account,
+                loggedInUser,
+                msgs,
+                dc);
+        }
+
+        internal static void SendMessageToTeamMembers(this ActivityMessage activityMessage, List<WebUser> members, string activityName, string contactEmail, string contactName, Account account, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             members.ForEach(member => {
 
                 var body = SearchAndReplaceNameInText(
                     activityMessage.Body,
-                    member.WebUserFirstName.IfBlank(""),
-                    member.WebUserLastName.IfBlank(""),
-                    member.WebUserDisplayName.IfBlank(""));
+                    member.FirstName.IfBlank(""),
+                    member.LastName.IfBlank(""),
+                    member.DisplayName.IfBlank(""));
 
                 ActivityMessageService.SendEmailMessage(
                     account,
                     activityName,
                     loggedInUser.DisplayName,
-                    member.WebUserEmail,
-                    member.WebUserDisplayName,
+                    member.Email,
+                    member.DisplayName,
                     contactEmail,
                     contactName,
                     activityMessage.Subject,
@@ -92,7 +107,7 @@ namespace AfterSchoolLibrary.Services
                     msgs);
 
                 ActivityMessageService.SendTextMessage(
-                    member.WebUserPhone,
+                    member.Phone,
                     loggedInUser.DisplayName,
                     activityMessage.Subject,
                     activityName,
@@ -146,6 +161,17 @@ namespace AfterSchoolLibrary.Services
                 am.SendMessageToTeamMembers(group, account, loggedInUser, msgs, dc);
         }
 
+        private static void SendForAccount(ActivityMessage am, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var account = am.GetAccount(msgs, dc);
+            var loggedInUser = WebUser.Load(loggedInUserId, msgs, dc);
+
+            am.SendActivityMessage(account, loggedInUser, account.Name, account.Name, account.Email, account.Name, msgs, dc);
+
+            if (msgs.HasNoErrors() && am.SendToStaff)
+                am.SendMessageToTeamMembers(account, loggedInUser, msgs, dc);
+        }
+
         private static string SearchAndReplaceNameInBodyText(this ActivityMessage activityMessage, ActivityMessageRegistrant amr)
         {
             var body = activityMessage.Body;
@@ -195,13 +221,15 @@ namespace AfterSchoolLibrary.Services
 
         public static void Send(int id, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
+           if (msgs.IsEmpty()) msgs = new SystemMessages();
             var am = ActivityMessage.Load(id, msgs, dc);
 
             if (am.ActivityId.HasValue)
                 ActivityMessageService.SendForActivity(am, loggedInUserId, msgs, dc);
             else if (am.ActivityGroupId.HasValue)
                 ActivityMessageService.SendForGroup(am, loggedInUserId, msgs, dc);
+            else if (am.AccountId.HasValue)
+                ActivityMessageService.SendForAccount(am, loggedInUserId, msgs, dc);
             else
                 msgs.Add("Error sending Messages", MessageType.Error);
         }
@@ -240,6 +268,21 @@ namespace AfterSchoolLibrary.Services
                 return new ParticipationObject(activityMessage.ActivityGroupId.Value, ParticipationObjectType.Activity, msgs, dc);
 
             return null;
+        }
+
+        public static Activity GetActivity(this ActivityMessage am, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Activity.Load(am.ActivityId.Value, msgs, dc);
+        }
+
+        public static ActivityGroup GetActivityGroup(this ActivityMessage am, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return ActivityGroup.Load(am.ActivityGroupId.Value, msgs, dc);
+        }
+
+        public static Account GetAccount(this ActivityMessage am, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Account.Load(am.AccountId.Value, msgs, dc);
         }
     }
 }

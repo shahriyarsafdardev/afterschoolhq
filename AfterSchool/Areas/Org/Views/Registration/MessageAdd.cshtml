@@ -3,6 +3,15 @@
     ViewBag.Title = SessionVariables.CurrentAccount.Name;
     var msgs = (SystemMessages)ViewBag.Messages;
     var totalCount = (int)ViewBag.TotalCount;
+
+    var activities = (List<Activity>)ViewBag.Activities;
+    var groups = (List<ActivityGroup>)ViewBag.Groups;
+    var questions = (List<FormQuestion>)ViewBag.Questions;
+    var questionGroups = (List<FormQuestionGroup>)ViewBag.QuestionGroups;
+    var isReadyOnly = (bool)ViewBag.SearchBarReadOnly;
+    var selectedActivities = (List<Activity>)ViewBag.SelectedActivities;
+    var selectedGroups = (List<ActivityGroup>)ViewBag.SelectedGroups;
+    var registrations = (List<Registration>)ViewBag.Registrations;
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -21,7 +30,57 @@
 
             <form method="post" action="@Url.Action("messageadd", "registration")" class="form-horizontal">
 
-                @{ Html.RenderPartial("_RegistrationSearchBar"); }
+                @if (Request["q"].IsNotEmpty())
+                {
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Search Term</label>
+                        <div class="col-sm-6">
+                            <input type="text" readonly="readonly" class="form-control" value="@Request["q"]" />
+                        </div>
+                    </div>
+                }
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">@UILabel.ActivityLabel(plural: true)</label>
+                    <div class="col-sm-6">
+                        @if (selectedActivities.Any() || selectedGroups.Any())
+                        {
+                            <input type="text" readonly="readonly" class="form-control" value="@selectedGroups.Select(group => group.Name).Union(selectedActivities.Select(activity => activity.Name)).JoinWith(",")" />
+                        }
+                        else
+                        {
+                            <input type="text" readonly="readonly" class="form-control" value="All @UILabel.ActivityLabel(plural: true)" />
+                        }
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Seat Assignments</label>
+                    <div class="col-sm-6">
+                        @if (Request["at"].IsNotEmpty() && Request["at"].IsNumber())
+                        {
+                            <input type="text" readonly="readonly" class="form-control" value="@(Request["at"].ToInteger().ToEnum<RegistrationAssignmentType>().ToString().SplitByUpperCase())" />
+                        }
+                        else
+                        {
+                            <input type="text" readonly="readonly" class="form-control" value="All Seat Assignments" />
+                        }
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Registration Status</label>
+                    <div class="col-sm-6">
+                        @if (Request["regstatus"].IsNotEmpty() && Request["regstatus"].IsNumber())
+                        {
+                            <input type="text" readonly="readonly" class="form-control" value="@(Request["regstatus"].ToInteger().ToEnum<RegistrationAssignmentType>().ToString().SplitByUpperCase())" />
+                        }
+                        else
+                        {
+                            <input type="text" readonly="readonly" class="form-control" value="All Students" />
+                        }
+                    </div>
+                </div>
 
                 <div class="form-group" id="subject-group">
                     <label class="col-sm-3 control-label">Message Reason</label>
@@ -35,6 +94,12 @@
                         </select>
                     </div>
                 </div>
+
+                <input type="hidden" name="q" value="@Request["q"]" />
+                <input type="hidden" name="activity" value="@Request["activity"]" />
+                <input type="hidden" name="group" value="@Request["group"]" />
+                <input type="hidden" name="at" value="@Request["at"]" />
+                <input type="hidden" name="regstatus" value="@Request["regstatus"]" />
 
                 <div class="form-group">
                     <label class="col-sm-3 control-label">Message Body</label>
@@ -50,6 +115,19 @@
                         <div class="am-checkbox">
                             <input type="checkbox" id="sendtostaff" name="sendtostaff" value="1" checked="checked" />
                             <label for="sendtostaff">Send Message To Staff</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Selected Students</label>
+                    <div class="col-sm-6">
+                        <div class="panel panel-default panel-borders">
+                            <div class="panel-body">
+                                <div style="height: 200px; overflow: auto;">
+                                    @Html.Raw(registrations.Select(registration => $"{registration.RegistrantFirstName} {registration.RegistrantLastName}").JoinWith("<br />"))
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -49,6 +49,16 @@ namespace AfterSchoolLibrary.Services
             return ActivityMessage.LoadByAccountId(account.ID.Value, msgs, dc);
         }
 
+        public static List<ActivityMessage> GetActivityMessages(this Account account, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return ActivityMessage.LoadByAccountId(account.ID.Value, start, length, msgs, dc);
+        }
+
+        public static int GetActivityMessageCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return ActivityMessage.GetCountByAccountId(account.ID.Value, msgs, dc);
+        }
+
         public static ActivityMessage AddMessage(this Account account, string subject, string body, List<int> registrantIds, bool sendToStaff, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -436,14 +446,14 @@ namespace AfterSchoolLibrary.Services
                 .ToList();
         }
 
-        public static List<AccountWebUser> GetMembers(this Account account, DatabaseConnection dc = null)
+        public static List<AccountWebUser> GetMembers(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountWebUser.LoadByAccountId(account.ID.Value, dc: dc);
+            return AccountWebUser.LoadByAccountId(account.ID.Value, msgs, dc);
         }
 
-        public static List<AccountWebUser> GetActiveMembers(this Account account, DatabaseConnection dc = null)
+        public static List<AccountWebUser> GetActiveMembers(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountWebUser.LoadByAccountIdByIsActive(account.ID.Value, true, dc: dc);
+            return AccountWebUser.LoadByAccountIdByIsActive(account.ID.Value, true, msgs, dc);
         }
 
         public static AccountWebUser AddUser(this Account account, WebUser user, UserType ut, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)

@@ -544,6 +544,8 @@ namespace AfterSchool.Areas.Org.Controllers
             List<Registration> registrations;
             var activities = new List<Activity>();
             var groups = new List<ActivityGroup>();
+            var selectedGroups = new List<ActivityGroup>();
+            var selectedActivities = new List<Activity>();
 
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
@@ -555,12 +557,16 @@ namespace AfterSchool.Areas.Org.Controllers
             var registrationStatus = RegistrationStatus.NotSet;
 
             if (activity.IsNotEmpty())
+            {
                 activityIds = activity.Split(',').Select(x => x.ToInteger()).ToList();
+                selectedActivities = Activity.LoadList(activityIds);
+            }
 
             if (group.IsNotEmpty())
             {
                 groupIds = group.Split(',').Select(x => x.ToInteger()).ToList();
-                ActivityGroup.LoadList(groupIds, msgs).ForEach(x => {
+                selectedGroups = ActivityGroup.LoadList(groupIds, msgs);
+                selectedGroups.ForEach(x => {
                     activityIds.AddRange(x.GetActivities(null, false, false, null, null).Select(y => y.ID.Value));
                 });
             }
@@ -624,17 +630,42 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Activities = activities;
             ViewBag.Groups = groups;
+            ViewBag.SelectedActivities = selectedActivities;
+            ViewBag.SelectedGroups = selectedGroups;
             ViewBag.SearchBarReadOnly = isReadOnly;
 
             return (registrations, totalCount);
         }
 
         [HttpGet]
-        public ActionResult Messages()
+        public ActionResult Messages(string pn, string rpp)
         {
             var msgs = new SystemMessages();
-            var activityMessages = SessionVariables.CurrentAccount.GetActivityMessages(msgs);
+            int pageNumber = 1;
+            int recordsPerPage = 10;
+
+            if (pn.IsNumber() && pn.ToInteger() > 0)
+                pageNumber = pn.ToInteger();
+
+            if (rpp.IsNumber() && rpp.ToInteger() > 0)
+                recordsPerPage = rpp.ToInteger();
+
+            var start = recordsPerPage * (pageNumber - 1);
+            var length = recordsPerPage;
+
+            var activityMessages = SessionVariables.CurrentAccount.GetActivityMessages(start, length, msgs);
+            var totalCount = SessionVariables.CurrentAccount.GetActivityMessageCount(msgs);
+            var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
+            var (registrations, totalRegistrationCount) = LoadSearch("", "", null, null, "", "", "", "", "", false);
+
             ViewBag.Messages = msgs;
+            ViewBag.PagingModel = new PagingModel()
+            {
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                RecordsPerPage = recordsPerPage,
+                TotalPages = totalPages
+            };
             return View(activityMessages);
         }
 
