@@ -9,6 +9,7 @@
     var contactName = createdBy.DisplayName;
     var contactEmail = createdBy.Email;
     var contactPhone = account.Phone;
+    var sentAt = account.ConvertToAccountTimeZone(Model.CreateDate.Value).ToLongDateTimeString();
 
     if (Model.ActivityId.HasValue || Model.ActivityGroupId.HasValue)
     {
@@ -17,6 +18,7 @@
         contactName = participationObject.ContactName;
         contactEmail = participationObject.ContactEmail;
         contactPhone = participationObject.ContactPhone;
+        sentAt = participationObject.OwnerAccount.ConvertToAccountTimeZone(Model.CreateDate.Value).ToLongDateTimeString();
     }
 
 }
@@ -25,7 +27,7 @@
     <div class="col-md-6 col-md-offset-3 text-center">
         <div class="panel">
             <div class="panel-footer">
-                <p>Sent by <strong>@(createdBy.DisplayName)</strong> at <strong>@account.ConvertToAccountTimeZone(Model.CreateDate.Value).ToLongDateTimeString()</strong></p>
+                <p>Sent by <strong>@(createdBy.DisplayName)</strong> at <strong>@sentAt</strong></p>
             </div>
             <div class="panel-heading text-left">
                 <h1><strong>@Model.Subject for @(activityName)</strong></h1>
