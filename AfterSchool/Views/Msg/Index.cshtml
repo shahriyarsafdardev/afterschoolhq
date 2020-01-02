@@ -3,25 +3,41 @@
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
     ViewBag.Title = Model.Subject;
     var createdBy = Model.GetCreatedBy();
-    var participationObject = Model.GetParticipationObject();
-    
+    var account = Model.GetAccount();
+
+    var activityName = account.Name;
+    var contactName = createdBy.DisplayName;
+    var contactEmail = createdBy.Email;
+    var contactPhone = account.Phone;
+    var sentAt = account.ConvertToAccountTimeZone(Model.CreateDate.Value).ToLongDateTimeString();
+
+    if (Model.ActivityId.HasValue || Model.ActivityGroupId.HasValue)
+    {
+        var participationObject = Model.GetParticipationObject();
+        activityName = participationObject.Name;
+        contactName = participationObject.ContactName;
+        contactEmail = participationObject.ContactEmail;
+        contactPhone = participationObject.ContactPhone;
+        sentAt = participationObject.OwnerAccount.ConvertToAccountTimeZone(Model.CreateDate.Value).ToLongDateTimeString();
+    }
+
 }
 
 <div>
     <div class="col-md-6 col-md-offset-3 text-center">
         <div class="panel">
             <div class="panel-footer">
-                <p>Sent by <strong>@(createdBy.DisplayName)</strong> at <strong>@participationObject.OwnerAccount.ConvertToAccountTimeZone(Model.CreateDate.Value).ToLongDateTimeString()</strong></p>
+                <p>Sent by <strong>@(createdBy.DisplayName)</strong> at <strong>@sentAt</strong></p>
             </div>
             <div class="panel-heading text-left">
-                <h1><strong>@Model.Subject for @(participationObject.Name)</strong></h1>
+                <h1><strong>@Model.Subject for @(activityName)</strong></h1>
             </div>
             <div class="panel-body">
                 <p class="text-left">@Html.Raw(Model.Body.Replace("\n", "<br />"))</p>
             </div>
             <div class="panel-footer">
                 <p>
-                    For more information, feel free to reach @participationObject.ContactName via <a href="mailto:@participationObject.ContactEmail">email</a> or <a href="tel:@participationObject.ContactPhone">@participationObject.ContactPhone</a>
+                    For more information, feel free to reach @contactName via <a href="mailto:@contactEmail">email</a> or <a href="tel:@contactPhone">@contactPhone</a>
                 </p>
             </div>
         </div>

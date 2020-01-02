@@ -23,9 +23,6 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Index(string activity, string group, string pn, string rpp, string q, string emailed, string question, string regstatus, string at)
         {
             var msgs = new SystemMessages();
-            var registrations = new List<Registration>();
-            var activities = new List<Activity>();
-            var groups = new List<ActivityGroup>();
             int pageNumber = 1;
             int recordsPerPage = 10;
 
@@ -35,92 +32,13 @@ namespace AfterSchool.Areas.Org.Controllers
             if (rpp.IsNumber() && rpp.ToInteger() > 0)
                 recordsPerPage = rpp.ToInteger();
 
-            var start = recordsPerPage * (pageNumber - 1);
-            var length = recordsPerPage;
-            var totalCount = 0;
-            var activityIds = new List<int>();
-            var groupIds = new List<int>();
-            var questionId = new int?();
-            var rats = new List<RegistrationAssignmentType>();
-            var registrationStatus = RegistrationStatus.NotSet;
-
-            if (activity.IsNotEmpty())
-                activityIds = activity.Split(',').Select(x => x.ToInteger()).ToList();
-
-            if (group.IsNotEmpty())
-            {
-                groupIds = group.Split(',').Select(x => x.ToInteger()).ToList();
-                var groupList = ActivityGroup.LoadList(groupIds, msgs);
-                groupList.ForEach(x => {
-                    activityIds.AddRange(x.GetActivities(null, false, false, null, null).Select(y => y.ID.Value));
-                });
-            }
-
-            if (at.IsNumber())
-                rats.Add((RegistrationAssignmentType)at.ToInteger());
-
-            if (regstatus.IsNumber())
-                registrationStatus = (RegistrationStatus)regstatus.ToInteger();
-
-            if (question.IsNumber())
-                questionId = question.ToInteger();
-
-            registrations = SessionVariables.CurrentAccount.SearchRegistrations(
-                q, 
-                questionId, 
-                activityIds,
-                ParticipationObjectType.Activity,
-                registrationStatus,
-                rats, 
-                start, 
-                length,
-                msgs);
-
-            totalCount = SessionVariables.CurrentAccount.SearchRegistrationCount(
-                q, 
-                questionId,
-                activityIds,
-                ParticipationObjectType.Activity,
-                registrationStatus,
-                rats,
-                msgs);                 
-
+            var (registrations, totalCount) = LoadSearch(activity, group, pageNumber, recordsPerPage, q, emailed, question, regstatus, at, false);
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
-            activities = SessionVariables.CurrentAccount.GetActivities(
-                UserType.Administrator, 
-                SessionVariables.CurrentUser,
-                null,
-                false, 
-                false,
-                null)
-                .OrderBy(x => x.Name)
-                .ToList();
-
-            groups = SessionVariables.CurrentAccount.GetSessions();
 
             if (emailed.IsBoolean() && emailed.ToBoolean())
                 msgs.Add("An email will be sent shortly", MessageType.Success);
-
-            //get all questions
-            var activityForms = SessionVariables.CurrentAccount.GetActivityForms().Where(x => x.IsActive).ToList();
-            var questions = FormQuestion.LoadByFormIdsByIsActive(activityForms.Select(x => x.FormId.Value).ToList(), true);
-            var finalQuestions = new List<FormQuestion>();
-            var finalQuestionGroups = new List<FormQuestionGroup>();
-
-            finalQuestions.AddRange(questions.Where(x => x.QuestionDataTypeId != QuestionDataType.NotSet).DistinctBy(x => x.QuestionDataTypeId));
-            finalQuestions.AddRange(questions.Where(x => x.QuestionDataTypeId == QuestionDataType.NotSet).DistinctBy(x => new { x.Text, x.FormQuestionGroupName }));
-
-            var questionGroups = questions.Select(x => x.ToFormQuestionGroup()).ToList();
-            finalQuestionGroups.AddRange(questionGroups.Where(x => x.QuestionGroupDataTypeId != QuestionGroupDataType.NotSet).DistinctBy(x => x.QuestionGroupDataTypeId));
-            finalQuestionGroups.AddRange(questionGroups.Where(x => x.QuestionGroupDataTypeId == QuestionGroupDataType.NotSet).DistinctBy(x => x.Name));
-
-            ViewBag.Questions = finalQuestions;
-            ViewBag.QuestionGroups = finalQuestionGroups;      
+            
             ViewBag.Messages = msgs;
-            ViewBag.Activities = activities;
-            ViewBag.Groups = groups;
-            ViewBag.Account = SessionVariables.CurrentAccount;
-            ViewBag.ActivityGroupType = ActivityGroupType.Session;
             ViewBag.PagingModel = new PagingModel()
             {
                 TotalCount = totalCount,
@@ -329,7 +247,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
             return View(registration);
         }
-
 
         [HttpGet]
         public ActionResult DownloadFile(string id, string r, string file, string returnUrl)
@@ -619,6 +536,223 @@ namespace AfterSchool.Areas.Org.Controllers
                 ViewBag.ListUrl = Request["returnurl"];
             else
                 ViewBag.ListUrl = Url.Action("index", "registration");
+        }
+
+        private (List<Registration>, int) LoadSearch(string activity, string group, int? pageNumber, int? recordsPerPage, string q, string emailed, string question, string regstatus, string at, bool isReadOnly)
+        {
+            var msgs = new SystemMessages();
+            List<Registration> registrations;
+            var activities = new List<Activity>();
+            var groups = new List<ActivityGroup>();
+            var selectedGroups = new List<ActivityGroup>();
+            var selectedActivities = new List<Activity>();
+
+            var start = recordsPerPage * (pageNumber - 1);
+            var length = recordsPerPage;
+            var totalCount = 0;
+            var activityIds = new List<int>();
+            List<int> groupIds;
+            var questionId = new int?();
+            var rats = new List<RegistrationAssignmentType>();
+            var registrationStatus = RegistrationStatus.NotSet;
+
+            if (activity.IsNotEmpty())
+            {
+                activityIds = activity.Split(',').Select(x => x.ToInteger()).ToList();
+                selectedActivities = Activity.LoadList(activityIds);
+            }
+
+            if (group.IsNotEmpty())
+            {
+                groupIds = group.Split(',').Select(x => x.ToInteger()).ToList();
+                selectedGroups = ActivityGroup.LoadList(groupIds, msgs);
+                selectedGroups.ForEach(x => {
+                    activityIds.AddRange(x.GetActivities(null, false, false, null, null).Select(y => y.ID.Value));
+                });
+            }
+
+            if (at.IsNumber())
+                rats.Add((RegistrationAssignmentType)at.ToInteger());
+
+            if (regstatus.IsNumber())
+                registrationStatus = (RegistrationStatus)regstatus.ToInteger();
+
+            //if (question.IsNumber())
+            //    questionId = question.ToInteger();
+
+            registrations = SessionVariables.CurrentAccount.SearchRegistrations(
+                q,
+                questionId,
+                activityIds,
+                ParticipationObjectType.Activity,
+                registrationStatus,
+                rats,
+                start,
+                length,
+                msgs);
+
+            totalCount = SessionVariables.CurrentAccount.SearchRegistrationCount(
+                q,
+                questionId,
+                activityIds,
+                ParticipationObjectType.Activity,
+                registrationStatus,
+                rats,
+                msgs);
+
+            activities = SessionVariables.CurrentAccount.GetActivities(
+                UserType.Administrator,
+                SessionVariables.CurrentUser,
+                null,
+                false,
+                false,
+                null)
+                .OrderBy(x => x.Name)
+                .ToList();
+
+            groups = SessionVariables.CurrentAccount.GetActivityGroups(msgs);
+
+            //get all questions
+            //var activityForms = SessionVariables.CurrentAccount.GetActivityForms().Where(x => x.IsActive).ToList();
+            //var questions = FormQuestion.LoadByFormIdsByIsActive(activityForms.Select(x => x.FormId.Value).ToList(), true);
+            //var finalQuestions = new List<FormQuestion>();
+            //var finalQuestionGroups = new List<FormQuestionGroup>();
+
+            //finalQuestions.AddRange(questions.Where(x => x.QuestionDataTypeId != QuestionDataType.NotSet).DistinctBy(x => x.QuestionDataTypeId));
+            //finalQuestions.AddRange(questions.Where(x => x.QuestionDataTypeId == QuestionDataType.NotSet).DistinctBy(x => new { x.Text, x.FormQuestionGroupName }));
+
+            //var questionGroups = questions.Select(x => x.ToFormQuestionGroup()).ToList();
+            //finalQuestionGroups.AddRange(questionGroups.Where(x => x.QuestionGroupDataTypeId != QuestionGroupDataType.NotSet).DistinctBy(x => x.QuestionGroupDataTypeId));
+            //finalQuestionGroups.AddRange(questionGroups.Where(x => x.QuestionGroupDataTypeId == QuestionGroupDataType.NotSet).DistinctBy(x => x.Name));
+
+            //ViewBag.Questions = finalQuestions;
+            //ViewBag.QuestionGroups = finalQuestionGroups;
+
+            ViewBag.Activities = activities;
+            ViewBag.Groups = groups;
+            ViewBag.SelectedActivities = selectedActivities;
+            ViewBag.SelectedGroups = selectedGroups;
+            ViewBag.SearchBarReadOnly = isReadOnly;
+
+            return (registrations, totalCount);
+        }
+
+        [HttpGet]
+        public ActionResult Messages(string pn, string rpp)
+        {
+            var msgs = new SystemMessages();
+            int pageNumber = 1;
+            int recordsPerPage = 10;
+
+            if (pn.IsNumber() && pn.ToInteger() > 0)
+                pageNumber = pn.ToInteger();
+
+            if (rpp.IsNumber() && rpp.ToInteger() > 0)
+                recordsPerPage = rpp.ToInteger();
+
+            var start = recordsPerPage * (pageNumber - 1);
+            var length = recordsPerPage;
+
+            var activityMessages = SessionVariables.CurrentAccount.GetActivityMessages(start, length, msgs);
+            var totalCount = SessionVariables.CurrentAccount.GetActivityMessageCount(msgs);
+            var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
+            var (registrations, totalRegistrationCount) = LoadSearch("", "", null, null, "", "", "", "", "", false);
+
+            ViewBag.Messages = msgs;
+            ViewBag.PagingModel = new PagingModel()
+            {
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                RecordsPerPage = recordsPerPage,
+                TotalPages = totalPages
+            };
+            return View(activityMessages);
+        }
+
+        [HttpGet]
+        public ActionResult MessageDetail(string id)
+        {
+            var am = ActivityMessage.LoadByUid(id.ToGuid());
+            ViewBag.Messages = new SystemMessages();
+            ViewBag.Registrants = am.GetActivityMessageRegistrants();
+            return View(am);
+        }
+
+        [HttpGet]
+        public ActionResult MessageAdd(string activity, string group, string pn, string rpp, string q, string emailed, string question, string regstatus, string at)
+        {
+            var msgs = new SystemMessages();
+            var (registrations, totalCount) = LoadSearch(activity, group, null, null, q, emailed, question, regstatus, at, true);
+
+            ViewBag.Registrations = registrations;
+            ViewBag.TotalCount = totalCount;
+            ViewBag.Messages = msgs;
+
+            return View();
+        }
+
+        [ValidateInput(false)]
+        [HttpPost]
+        public ActionResult MessageAdd(string id, string subject, string body, string sendtostaff, string activity, string group, string pn, string rpp, string q, string emailed, string question, string regstatus, string at)
+        {
+            var msgs = new SystemMessages();
+
+            if (subject.IsEmpty())
+                msgs.Add("Message Reason is required", MessageType.UserError);
+            if (body.IsEmpty())
+                msgs.Add("Message Body is required", MessageType.UserError);
+
+            ActivityMessage am = null;
+            var (registrations, totalCount) = LoadSearch(activity, group, null, null, q, emailed, question, regstatus, at, true);
+
+            if (msgs.HasNoErrors())
+            {
+                var registrantIds = registrations.Select(registration => registration.RegistrantId.Value).ToList();
+
+                am = SessionVariables.CurrentAccount.AddMessage(
+                        subject,
+                        body,
+                        registrantIds,
+                        sendtostaff.IsBoolean(),
+                        SessionVariables.CurrentUser.ID.Value,
+                        msgs);
+
+                BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, SessionVariables.CurrentUser.ID.Value, null, null));
+            }
+
+            ViewBag.Registrations = registrations;
+            ViewBag.TotalCount = totalCount;
+            ViewBag.Messages = msgs;
+
+            if (msgs.HasNoErrors())
+            {
+                msgs.Add("Your message will been sent to the selected registrants", MessageType.Success);
+                ViewBag.Registrants = am.GetActivityMessageRegistrants();
+
+                return View("messagedetail", am.Reload());
+            }
+
+            return View(activity);
+        }
+
+        [HttpGet]
+        public ActionResult MessagesResend(string id)
+        {
+            var msgs = new SystemMessages();
+            var am = ActivityMessage.LoadByUid(id.ToGuid(), msgs);
+
+            BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, SessionVariables.CurrentUser.ID.Value, null, null));
+
+            ViewBag.Messages = msgs;
+            ViewBag.Registrants = am.GetActivityMessageRegistrants();
+
+            if (msgs.HasNoErrors())
+            {
+                msgs.Add("Your message will been sent to the selected registrants", MessageType.Success);
+                return View("messagedetail", am);
+            }
+
+            return View("messagedetail", am);
         }
     }
 }

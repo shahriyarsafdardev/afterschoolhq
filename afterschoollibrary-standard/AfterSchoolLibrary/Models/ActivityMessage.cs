@@ -205,6 +205,14 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
+		public static List<ActivityMessage> LoadByAccountId(int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
 		
 
         #endregion
@@ -260,22 +268,23 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        private Activity _Activity = null;
-        public Activity GetActivity(SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<ActivityMessage> LoadByAccountId(int AccountId, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
-            if (_Activity.IsEmpty() && this.ActivityId.HasValue)
-                _Activity = Activity.Load(this.ActivityId.Value, msgs, dc);
-
-            return _Activity;
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+            dq.SelectRange.Start = start;
+            dq.SelectRange.Length = length;
+            dq.OrderBys.Add(ObjectMap["CreateDate"], OrderByDirectionEnum.Descending);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        private ActivityGroup _ActivityGroup = null;
-        public ActivityGroup GetActivityGroup(SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetCountByAccountId(int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
-            if (_ActivityGroup.IsEmpty() && this.ActivityGroupId.HasValue)
-                _ActivityGroup = ActivityGroup.Load(this.ActivityGroupId.Value, msgs, dc);
-
-            return _ActivityGroup;
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+            return dq.GetCount(msgs);
         }
 
         #endregion

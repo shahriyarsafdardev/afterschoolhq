@@ -1,0 +1,221 @@
+﻿@{
+    var activities = (List<Activity>)ViewBag.Activities;
+    var groups = (List<ActivityGroup>)ViewBag.Groups;
+    var questions = (List<FormQuestion>)ViewBag.Questions;
+    var questionGroups = (List<FormQuestionGroup>)ViewBag.QuestionGroups;
+    var isReadyOnly = false;
+
+    if (ViewBag.SearchBarReadOnly != null)
+    {
+        isReadyOnly = (bool)ViewBag.SearchBarReadOnly;
+    }
+}
+
+<div class="row">
+
+    @if (questionGroups.IsNotEmpty())
+    {
+        <div class="col-md-2 hide">
+            <select id="filter-question" name="filter-question" class="form-control" @(isReadyOnly ? "readonly=\"readonly\"" : "")>
+                <option value="">All Fields</option>
+                @foreach (var group in questionGroups)
+                {
+                    <optgroup label="@group.Name">
+                        @foreach (var question in questions.Where(x => x.FormQuestionGroupId == group.ID))
+                        {
+                            <option value="@question.ID" @(question.ID.ToString() == Request["question"] ? "selected=\"selected\"" : "")>@question.Text</option>
+                        }
+                    </optgroup>
+                }
+            </select>
+        </div>
+    }
+    
+    <div class="col-md-3">
+        <div class="form-group">
+            <input type="text" name="opensearch" id="opensearch" placeholder="Search for first or last name or email" class="form-control" value="@Request["q"]" @(isReadyOnly ? "readonly=\"readonly\"": "") />
+        </div>
+    </div>
+
+    <div class="col-md-5">
+        <div class="form-group">
+            <select id="activities" class="form-control select2 hide" multiple placeholder="Select student activities" @(isReadyOnly ? "readonly=\"readonly\"": "")>
+                <option value="0" @(Request["activity"].IsBlank() && Request["group"].IsBlank() ? "selected=\"selected\"" : "")>
+                    All Student Activities
+                </option>
+                @foreach (var groupType in Enum.GetValues(typeof(ActivityGroupType)).Cast<ActivityGroupType>().Where(item => item != ActivityGroupType.NotSet))
+                {
+                    foreach (var group in groups.Where(x => x.ActivityGroupTypeId == groupType))
+                    {
+                        var selectedGroup = "";
+                        if (Request["group"].IsNotBlank() && Request["group"].Split(',').Contains(group.ID.ToString()))
+                        {
+                            selectedGroup = " selected=\"selected\" ";
+                        }
+
+                        <optgroup label="@group.Name">
+                            <option value="group-@group.ID" @selectedGroup>
+                                @group.Name - All @UILabel.ActivityLabel(group.ActivityGroupTypeId, true)
+                            </option>
+
+                            @foreach (var activity in activities.Where(x => x.ActivityGroupId == group.ID))
+                            {
+                                var selectedActivity = "";
+                                if (Request["activity"].IsNotBlank() && Request["activity"].Split(',').Contains(activity.ID.ToString()))
+                                {
+                                    selectedActivity = " selected=\"selected\" ";
+                                }
+                                <option value="activity-@activity.ID" @selectedActivity>
+                                    @activity.ToFullDescription()
+                                </option>
+                            }
+                        </optgroup>
+                    }
+                }
+                @if (activities.Where(x => !x.ActivityGroupId.HasValue).Any())
+                {
+                    <optgroup label="All @UILabel.ActivityLabel(ActivityType.Activity, true)">
+                        @foreach (var activity in activities.Where(x => !x.ActivityGroupId.HasValue))
+                        {
+                            var selectedActivity = "";
+                            if (Request["activity"].IsNotBlank() && Request["activity"].Split(',').Contains(activity.ID.ToString()))
+                            {
+                                selectedActivity = " selected=\"selected\" ";
+                            }
+                            <option value="activity-@activity.ID" @selectedActivity>
+                                @activity.ToFullDescription()
+                            </option>
+                        }
+                    </optgroup>
+                }
+            </select>
+        </div>
+    </div>
+
+    <div class="col-md-2">
+        <div class="form-group">
+            <select id="assignmenttype" class="form-control" @(isReadyOnly ? "readonly=\"readonly\"": "")>
+                <option value="">All Seat Assignments</option>
+                @foreach (RegistrationAssignmentType item in Enum.GetValues(typeof(RegistrationAssignmentType)))
+                {
+                    if (item == RegistrationAssignmentType.NotSet)
+                    {
+                        continue;
+                    }
+                    <option value="@((int)item)"
+                            @(Request["at"] == ((int)item).ToString() ? " selected=\"selected\" " : "")>
+                        @item.ToString().SplitByUpperCase()
+                    </option>
+                }
+            </select>
+        </div>
+    </div>
+
+    <div class="col-md-2">
+        <div class="form-group">
+            <select id="regstatus" class="form-control" @(isReadyOnly ? "readonly=\"readonly\"": "")>
+                <option value="">All @UILabel.RegistrantLabel(true)</option>
+                @foreach (var item in Enum.GetValues(typeof(RegistrationStatus)).Cast<RegistrationStatus>().Where(x => x != RegistrationStatus.NotSet))
+                {
+                    <option value="@((int)item)"
+                            @(Request["regstatus"] == ((int)item).ToString() ? " selected=\"selected\" " : "")>
+                        @item.ToString().SplitByUpperCase() Only
+                    </option>
+                }
+            </select>
+        </div>
+    </div>
+</div>
+
+<script>
+    function getQuery() {
+        var q = $('#opensearch').val();
+        //if ($('#filter-question').val().length > 0 && $('#filter-answer').val() && $('#filter-answer').val().length > 0) {
+        //    q = $('#filter-answer').val();
+        //}
+        return `q=${q}`;
+    }
+
+    function getFilterQuestionQS() {
+        var f = '';
+        //if ($('#filter-question').val().length > 0) {
+        //    f = '&question=' + $('#filter-question').val();
+        //}
+        return f;
+    }
+
+    function getRegStatus() {
+        return `regstatus=${$('#regstatus').val()}`;
+    }
+
+    function getActivityOrGroup() {
+
+        var arr = $('#activities').val();
+        var activity = '';
+        var group = '';
+
+        if (!arr) return '';
+
+        for (var item of arr) {
+
+            var id = item.split('-')[1];
+
+            if (item.indexOf('group-') > -1) {
+                if (group.length > 0) group += ',';
+                group += id;
+            } else if (item.indexOf('activity-') > -1) {
+                if (activity.length > 0) activity += ',';
+                activity += id;
+            }
+        }
+
+        return `activity=${activity}&group=${group}`;
+    }
+
+    function getAssignmentType(){
+        return `at=${$('#assignmenttype').val()}`;
+    }
+        
+    function checkFilters() {
+        if ($('#filter-question').val().length > 0) {
+            $.get(
+                '/org/services/getansweroptions/' + $('#filter-question').val(),
+                function (data) {
+                    if (data && data.status == 'ok') {
+                        if (data.answers.length > 0) {
+
+                            $('#filter-answer').html('');
+                            for (var i = 0; i < data.answers.length; i++) {
+                                var selected = "";
+
+                                if (data.answers[i] == '@Request["q"]') {
+                                    selected = ' selected="selected" ';
+                                }
+
+                                $('#filter-answer').append('<option value="' + data.answers[i] + '" ' + selected + '>' + data.answers[i] + '</option>');
+                            }
+                            hideOpenSearch();
+                        } else {
+                            showOpenSearch();
+                        }
+                    } else {
+                        alert('Error loading filter');
+                    }
+                }
+            );
+        } else {
+            showOpenSearch();
+        }
+    }
+
+    function hideOpenSearch() {
+        $('#filter-answer').removeClass('hide');
+        $('#opensearch').addClass('hide');
+    }
+
+    function showOpenSearch() {
+        $('#filter-answer').html('');
+        $('#filter-answer').addClass('hide');
+        $('#opensearch').removeClass('hide');
+    }
+</script>
