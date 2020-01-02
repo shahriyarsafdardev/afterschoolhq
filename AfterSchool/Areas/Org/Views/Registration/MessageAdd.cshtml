@@ -1,0 +1,76 @@
+﻿
+@{
+    ViewBag.Title = SessionVariables.CurrentAccount.Name;
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var totalCount = (int)ViewBag.TotalCount;
+}
+
+@{Html.RenderPartial("OrgAccountHeader");}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    @{Html.RenderPartial("_RegistrationHeader");}
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            Send Message
+        </div>
+        <div class="panel-body">
+
+            <form method="post" action="@Url.Action("messageadd", "registration")" class="form-horizontal">
+
+                @{ Html.RenderPartial("_RegistrationSearchBar"); }
+
+                <div class="form-group" id="subject-group">
+                    <label class="col-sm-3 control-label">Message Reason</label>
+                    <div class="col-sm-6">
+                        <select name="subject" id="subject" class="form-control">
+                            <option value="">Select a Message Reason...</option>
+                            @foreach (var reason in Enum.GetValues(typeof(ActivityMessageReason)).Cast<ActivityMessageReason>().Except(ActivityMessageReason.NotSet.AsList()).OrderBy(x => x.ToString()))
+                            {
+                                <option value="@reason.ToString().SplitByUpperCase()">@reason.ToString().SplitByUpperCase()</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Message Body</label>
+                    <div class="col-sm-6">
+                        <textarea name="body" id="body" required style="width: 100%" rows="5" class="form-control"></textarea>
+                        <p class="text-muted">Max of 1000 characters</p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label"></label>
+                    <div class="col-sm-6">
+                        <div class="am-checkbox">
+                            <input type="checkbox" id="sendtostaff" name="sendtostaff" value="1" checked="checked" />
+                            <label for="sendtostaff">Send Message To Staff</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label"></label>
+                    <div class="col-sm-6">
+                        <div class="pull-left">
+                            <a href="@Url.Action("messages", "registration")" class="text-muted">
+                                &laquo; Cancel
+                            </a>
+                        </div>
+                        <div class="pull-right">
+                            <button id="send-btn" type="submit" class="btn btn-primary btn-lg btn-block pull-right">
+                                <i class="s7-mail"></i> Send Message to @totalCount Students &raquo;
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>

@@ -42,6 +42,45 @@ namespace AfterSchoolLibrary.Services
             return ActivitySchedule.LoadByAccountId(account.ID.Value, msgs, dc);
         }
 
+        #region ActivityMessages
+
+        public static List<ActivityMessage> GetActivityMessages(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return ActivityMessage.LoadByAccountId(account.ID.Value, msgs, dc);
+        }
+
+        public static ActivityMessage AddMessage(this Account account, string subject, string body, List<int> registrantIds, bool sendToStaff, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            ActivityMessage am = null;
+
+            Database.ExecuteTransaction(
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    am = new ActivityMessage
+                    {
+                        AccountId = account.ID,
+                        Subject = subject.MaxChars(150),
+                        Body = body,
+                        SendToStaff = sendToStaff,
+                        CreateDate = DateTime.UtcNow,
+                        CreatedBy = loggedInUserId
+                    };
+                    amsgs.AddRange(am.Save(adc));
+
+                    registrantIds.ForEach(registrantId => am.AddRegistrant(registrantId, loggedInUserId, amsgs, adc));
+                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
+                dc: dc
+            );
+
+            return am;
+        }
+
+        #endregion
+
         #region Activities
 
         public static List<ParticipationObject> GetPublishedParticipationObjects(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -181,6 +220,11 @@ namespace AfterSchoolLibrary.Services
         #endregion
 
         #region Sessions
+
+        public static List<ActivityGroup> GetActivityGroups(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return ActivityGroup.LoadByAccountId(account.ID.Value, msgs, dc);
+        }
 
         public static List<ActivityGroup> GetSessions(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {

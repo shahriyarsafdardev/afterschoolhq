@@ -1,0 +1,33 @@
+﻿@model List<ActivityMessage>
+@{
+    ViewBag.Title = $"Messages - {SessionVariables.CurrentAccount.Name}";
+    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+}
+
+@{Html.RenderPartial("OrgAccountHeader");}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    @{Html.RenderPartial("_RegistrationHeader");}
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            Messages
+        </div>
+        <div class="panel-body">
+            @{Html.RenderPartial(
+                "~/Views/Shared/_Messages.cshtml",
+                Model,
+                new ViewDataDictionary()
+                {
+                    { "SendNewMessageLink", Url.Action("messageadd", "registration") },
+                    { "Account", SessionVariables.CurrentAccount },
+                    { "ViewLinkController", "registration" },
+                    { "ShowAddMessage", false}
+                }
+                );}
+        </div>
+    </div>
+</div>

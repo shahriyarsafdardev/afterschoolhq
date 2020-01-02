@@ -7,18 +7,29 @@
     var viewId = (string)ViewData["ViewLinkId"];
     var account = (Account)ViewData["Account"];
     var paging = (PagingModel)ViewData["PagingModel"];
+    var showAddMessage = true;
+
+    if (ViewData["ShowAddMessage"] != null && ViewData["ShowAddMessage"].ToString().IsBoolean())
+    {
+        showAddMessage = ViewData["ShowAddMessage"].ToString().ToBoolean();
+    }
 
 }
-<div class="row">
-    <div class="col-md-12">
-        <a href="@sendNewLink" class="btn btn-primary btn-space"><i class="icon icon-left s7-paper-plane"></i> Send New Message</a>
+
+@if (showAddMessage)
+{
+    <div class="row">
+        <div class="col-md-12">
+            <a href="@sendNewLink" class="btn btn-primary btn-space"><i class="icon icon-left s7-paper-plane"></i> Send New Message</a>
+        </div>
     </div>
-</div>
+}
 <div class="table-responsive">
     <table class="table table-hover">
         <thead>
             <tr>
                 <th></th>
+                <th>Sent By</th>
                 <th>Date Sent</th>
                 <th>Subject</th>
                 <th># Sent</th>
@@ -32,6 +43,7 @@
                 {
                     <tr>
                         <td><a href="@Url.Action("messagedetail", viewController, new { id = message.Uid })" class="btn btn-primary btn-sm">View</a></td>
+                        <td>@message.GetCreatedBy().DisplayName</td>
                         <td>@(message.DateSent.HasValue ? account.ConvertToAccountTimeZone(message.DateSent.Value).ToLongDateTimeString() : "N/A")</td>
                         <td>@message.Subject</td>
                         <td>@message.GetSentCount()</td>

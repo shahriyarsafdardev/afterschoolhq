@@ -288,6 +288,7 @@ joinproperty: Account.Name, string, NVarChar
 loadmethod: ActivityId, List<>
 loadmethod: ActivityGroupId, List<>
 loadmethod: Uid
+loadmethod: AccountId, List<>
 [end]
 
 [begin]
