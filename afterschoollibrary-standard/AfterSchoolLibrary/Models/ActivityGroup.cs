@@ -644,12 +644,13 @@ namespace AfterSchoolLibrary.Models
 
         public List<Registrant> GetRegistrants(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return GetRegistrations(null, null, msgs, dc).Select(x => x.ToRegistrant()).DistinctBy(x => x.ID.Value).ToList();
-        }
+            var registrations = GetRegistrations(null, null, msgs, dc);
 
-        public List<Registrant> GetRegistrants(List<Registration> registrations, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return registrations.Select(x => x.ToRegistrant()).DistinctBy(x => x.ID.Value).ToList();
+            if (registrations.Any())
+                return registrations.Select(x => x.ToRegistrant()).DistinctBy(x => x.ID.Value).ToList();
+
+            // backwards compatibility for group registrations that aren't directly related to the group
+            return GetRegistrantActivities(null, msgs, dc).Select(x => x.ToRegistrant()).DistinctBy(x => x.ID.Value).ToList();
         }
 
         public int GetTotalSeatsLeft(SystemMessages msgs = null, DatabaseConnection dc = null)
