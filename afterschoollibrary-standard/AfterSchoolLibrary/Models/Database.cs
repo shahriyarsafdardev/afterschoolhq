@@ -362,6 +362,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityMessage_ActivityId ON [ActivityMessage] (ActivityId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityMessage_ActivityGroupId ON [ActivityMessage] (ActivityGroupId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityMessage_Uid ON [ActivityMessage] (Uid)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityMessage_AccountId ON [ActivityMessage] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityMessageRegistrant_ActivityMessageId ON [ActivityMessageRegistrant] (ActivityMessageId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityMessageRegistrant_RegistrantId ON [ActivityMessageRegistrant] (RegistrantId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityMessageRegistrant_ActivityMessageId_RegistrantId ON [ActivityMessageRegistrant] (ActivityMessageId,RegistrantId)"));

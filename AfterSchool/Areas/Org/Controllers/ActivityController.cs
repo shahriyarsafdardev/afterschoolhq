@@ -1717,7 +1717,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                     activity = Activity.LoadByUid(id.ToGuid(), amsgs, adc);
                     account = activity.GetAccount(amsgs, adc);
-                    users = account.GetMembers(adc).Select(x => x.ToWebUser()).ToList();
+                    users = account.GetMembers(amsgs, adc).Select(x => x.ToWebUser()).ToList();
 
                     foreach (var user in users)
                     {

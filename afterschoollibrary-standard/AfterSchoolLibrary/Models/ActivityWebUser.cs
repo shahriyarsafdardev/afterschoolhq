@@ -239,6 +239,18 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
+		public WebUser ToWebUser()
+		{
+			return new WebUser()
+			{
+				ID = WebUserId,
+				FirstName = WebUserFirstName,
+				LastName = WebUserLastName,
+				Email = WebUserEmail,
+				Phone = WebUserPhone
+			};
+		}
+
         #endregion
     }
 }

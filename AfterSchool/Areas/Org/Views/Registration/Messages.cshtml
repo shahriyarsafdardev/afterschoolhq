@@ -1,0 +1,71 @@
+﻿@model List<ActivityMessage>
+@{
+    ViewBag.Title = $"Messages - {SessionVariables.CurrentAccount.Name}";
+    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+}
+
+@{Html.RenderPartial("OrgAccountHeader");}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    @{Html.RenderPartial("_RegistrationHeader");}
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            Messages
+        </div>
+        <div class="panel-body">
+            
+            <button class="btn btn-link" onclick="toggleFilter()">Send New Message</button>
+
+            <div class="panel panel-default panel-borders hide" id="student-filter">
+
+                <div class="panel-body">
+
+                    <h3>Filter Students</h3>
+
+                    @{ Html.RenderPartial("_RegistrationSearchBar"); }
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <button class="btn btn-primary btn-lg" onclick="sendMessages()">Send Messages &raquo;</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @{Html.RenderPartial(
+                  "~/Views/Shared/_Messages.cshtml",
+                  Model,
+                  new ViewDataDictionary()
+                  {
+                    { "SendNewMessageLink", Url.Action("messageadd", "registration") },
+                    { "Account", SessionVariables.CurrentAccount },
+                    { "ViewLinkController", "registration" },
+                    { "ShowAddMessage", false },
+                    { "PagingModel", ViewBag.PagingModel }
+                  }
+                  );}
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script>        
+        function sendMessages() {
+            location.href = `@Url.Action("messageadd", "registration")?${getQuery()}&${getActivityOrGroup()}${getFilterQuestionQS()}&${getRegStatus()}&${getAssignmentType()}`;
+        }
+
+        function toggleFilter() {
+
+            if ($('#student-filter').hasClass('hide')) {
+                $('#student-filter').removeClass('hide');
+            } else {
+                $('#student-filter').addClass('hide');
+            }
+        }
+    </script>
+}
