@@ -12,6 +12,7 @@
     var selectedActivities = (List<Activity>)ViewBag.SelectedActivities;
     var selectedGroups = (List<ActivityGroup>)ViewBag.SelectedGroups;
     var registrations = (List<Registration>)ViewBag.Registrations;
+    var sendButtonText = $"Send Message to {UILabel.RegistrantLabel(true)}";
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -85,7 +86,7 @@
                 <div class="form-group" id="subject-group">
                     <label class="col-sm-3 control-label">Message Reason</label>
                     <div class="col-sm-6">
-                        <select name="subject" id="subject" class="form-control">
+                        <select name="subject" id="subject" class="form-control" required>
                             <option value="">Select a Message Reason...</option>
                             @foreach (var reason in Enum.GetValues(typeof(ActivityMessageReason)).Cast<ActivityMessageReason>().Except(ActivityMessageReason.NotSet.AsList()).OrderBy(x => x.ToString()))
                             {
@@ -135,14 +136,30 @@
                 <div class="form-group">
                     <label class="col-sm-3 control-label"></label>
                     <div class="col-sm-6">
+                        <div class="panel panel-default panel-borders">
+                            <div class="panel-body">
+                                <div class="am-checkbox">
+                                    <input type="checkbox" id="confirmed" name="confirmed" value="1" required onclick="checkForm()" />
+                                    <label for="confirmed" id="lblconfirmed">
+                                        I acknowledge that clicking <strong>'@sendButtonText'</strong> will send the message above to <strong>@totalCount @UILabel.RegistrantLabel(true).ToLower()</strong>. <strong>Once the message is sent it is non-reversible and it cannot be undone</strong>. Please carefully review your message and the list of @UILabel.RegistrantLabel(true).ToLower() before you click '@sendButtonText' below.
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label"></label>
+                    <div class="col-sm-6">
                         <div class="pull-left">
                             <a href="@Url.Action("messages", "registration")" class="text-muted">
                                 &laquo; Cancel
                             </a>
                         </div>
                         <div class="pull-right">
-                            <button id="send-btn" type="submit" class="btn btn-primary btn-lg btn-block pull-right">
-                                <i class="s7-mail"></i> Send Message to @totalCount Students &raquo;
+                            <button id="send-btn" type="submit" onclick="checkForm()" class="btn btn-primary btn-lg btn-block pull-right">
+                                <i class="s7-mail"></i> @sendButtonText &raquo;
                             </button>
                         </div>
                     </div>
@@ -152,3 +169,13 @@
     </div>
 
 </div>
+
+<script>
+    function checkForm() {
+        if (!$('#confirmed').is(':checked')) {
+            $('#lblconfirmed').addClass('text-danger');
+        } else {
+            $('#lblconfirmed').removeClass('text-danger');
+        }
+    }
+</script>
