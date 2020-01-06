@@ -70,14 +70,9 @@
 
                                 @foreach (var plan in participationObject.PaymentPlans)
                                 {
-                                    var planStartDate = participationObject.StartDate.Value;
                                     var now = participationObject.OwnerAccount.ConvertToAccountTimeZone(DateTime.UtcNow);
+                                    var planStartDate = participationObject.StartDate.Value.IsBefore(now) ? now : participationObject.StartDate.Value;
                                     var startToday = plan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout || planStartDate.IsBefore(now);
-
-                                    if (planStartDate.IsBefore(DateTime.UtcNow))
-                                    {
-                                        planStartDate = DateTime.UtcNow;
-                                    }
 
                                     <div class="am-radio">
                                         <input type="radio" name="paymentoption" id="paymentoption-@plan.ID" class="payment-option-radio" value="@plan.ID" />
