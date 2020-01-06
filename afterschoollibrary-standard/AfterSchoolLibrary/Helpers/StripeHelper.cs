@@ -1617,7 +1617,7 @@ namespace AfterSchoolLibrary.Billing
                 options.PercentOff = value;
 
             if (couponName.IsNotEmpty())
-                options.Name = couponName;
+                options.Name = couponName.MaxChars(40);
 
             var requestOptions = new Stripe.RequestOptions();
 
