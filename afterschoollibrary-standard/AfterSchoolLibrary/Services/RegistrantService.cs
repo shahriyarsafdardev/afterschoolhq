@@ -251,7 +251,7 @@ namespace AfterSchoolLibrary.Services
 
                 //need to add a coupon to subtract the credit card amount that is stored in the payment plan
                 var coupon = Billing.StripeHelper.CreateCoupon(
-                    couponName: $"ACH Discount - {ccFee} off of {totalCost}, PlanId: {plan.StripePlanId}",
+                    couponName: $"{plan.StripePlanId}/{totalCost.ToCurrency()}-{ccFee.ToCurrency()}/ACH".MaxChars(40),
                     discountValue: plan.GetCreditCardFee(billingAccount, msgs, dc),
                     couponDuration: Billing.StripeCouponDuration.Forever,
                     durationInMonths: null,
