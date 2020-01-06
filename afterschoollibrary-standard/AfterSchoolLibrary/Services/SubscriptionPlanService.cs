@@ -145,7 +145,7 @@ namespace AfterSchoolLibrary.Services
             return plan;
         }
 
-        private static Stripe.Product GetStripeProduct(this SubscriptionPlan subscriptionPlan, Account account, Guid uid, string name, string uniqueName, string stripeUserId, SystemMessages msgs)
+        private static Stripe.Product GetOrCreateStripeProduct(this SubscriptionPlan subscriptionPlan, Account account, Guid uid, string name, string uniqueName, string stripeUserId, SystemMessages msgs)
         {
             var product = Billing.StripeHelper.GetProduct(uid.ToString(), stripeUserId, msgs);
 
@@ -188,7 +188,7 @@ namespace AfterSchoolLibrary.Services
             string stripeUserId = account.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc) ? account.StripeUserId : null;
 
             // do stripe
-            var product = subscriptionPlan.GetStripeProduct(account, uid, name, uniqueName, stripeUserId, msgs);
+            var product = subscriptionPlan.GetOrCreateStripeProduct(account, uid, name, uniqueName, stripeUserId, msgs);
 
             if (msgs.HasErrors())
                 return msgs;

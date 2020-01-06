@@ -989,7 +989,7 @@ namespace AfterSchoolLibrary.Billing
                 CouponId = stripeCouponId,
                 Items = new List<SubscriptionItemOption>() { new SubscriptionItemOption() { PlanId = planId, Quantity = 1 } },
                 Metadata = metaData,
-                Prorate = false,
+                Prorate = false,               
             };
 
             if (startDate.Value.AddDays(-1).IsAfter(DateTime.UtcNow))
@@ -1587,6 +1587,11 @@ namespace AfterSchoolLibrary.Billing
 
         public static Stripe.Coupon CreateCoupon(decimal discountValue, StripeCouponDuration couponDuration, int? durationInMonths, CouponAmountType couponAmountType, string stripeAccountId, SystemMessages msgs)
         {
+            return CreateCoupon(null, discountValue, couponDuration, durationInMonths, couponAmountType, stripeAccountId, msgs);
+        }
+
+        public static Stripe.Coupon CreateCoupon(string couponName, decimal discountValue, StripeCouponDuration couponDuration, int? durationInMonths, CouponAmountType couponAmountType, string stripeAccountId, SystemMessages msgs)
+        {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var options = new Stripe.CouponCreateOptions();
@@ -1596,6 +1601,8 @@ namespace AfterSchoolLibrary.Billing
                 options.DurationInMonths = durationInMonths;
                 options.Duration = StripeCouponDuration.Repeating.ToString().ToLower();
             }
+            else if (couponDuration == StripeCouponDuration.Once)
+                options.Duration = StripeCouponDuration.Once.ToString().ToLower();
             else
                 options.Duration = StripeCouponDuration.Forever.ToString().ToLower();
 
@@ -1608,6 +1615,9 @@ namespace AfterSchoolLibrary.Billing
             }
             else
                 options.PercentOff = value;
+
+            if (couponName.IsNotEmpty())
+                options.Name = couponName.MaxChars(40);
 
             var requestOptions = new Stripe.RequestOptions();
 

@@ -70,12 +70,16 @@
 
                                 @foreach (var plan in participationObject.PaymentPlans)
                                 {
+                                    var now = participationObject.OwnerAccount.ConvertToAccountTimeZone(DateTime.UtcNow);
+                                    var planStartDate = participationObject.StartDate.Value.IsBefore(now) ? now : participationObject.StartDate.Value;
+                                    var startToday = plan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout || planStartDate.IsBefore(now);
+
                                     <div class="am-radio">
                                         <input type="radio" name="paymentoption" id="paymentoption-@plan.ID" class="payment-option-radio" value="@plan.ID" />
                                         <label for="paymentoption-@plan.ID">
                                             Pay <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong> 
 
-                                            @Html.Raw(plan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout ? "<strong>today</strong>" : $"on <strong>{participationObject.StartDate.Value.ToLongDateString()}</strong>")
+                                            @Html.Raw(startToday ? "<strong>today</strong>" : $"on <strong>{planStartDate.ToLongDateString()}</strong>")
 
                                             @if (plan.TotalPeriods > 1)
                                             {
