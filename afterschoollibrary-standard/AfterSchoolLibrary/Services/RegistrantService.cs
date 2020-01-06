@@ -171,7 +171,7 @@ namespace AfterSchoolLibrary.Services
         public static void StartSubscriptionPlan(this Registrant registrant, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             registrant.StartPlan(checkoutObject, SubscriptionPlanType.Subscription, loggedInUser, msgs, dc);
-        }
+        }        
 
         public static void StartPlan(this Registrant registrant, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -183,24 +183,17 @@ namespace AfterSchoolLibrary.Services
             var (customer, sourceId) = GetCustomerAndSourceForSubscription(checkoutObject, useStripeConnectedAccount);
             var plan = subscriptionPlanType == SubscriptionPlanType.PaymentPlan ? checkoutObject.PaymentPlan : checkoutObject.SubscriptionPlan;
             var stripeCouponId = plan.DoesCouponApply(checkoutObject.Coupon) ? checkoutObject.Coupon.StripeCouponId : null;
-            DateTime? startDateTime = DateTime.UtcNow;
+            DateTime? startDateTime = GetPlanStartDate(plan, checkoutObject, DateTime.UtcNow);
             var platformFeePercent = new decimal?();
             string stripeAccountId = null;
-
-            if (plan.PlanTypeId == SubscriptionPlanType.Subscription || plan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts)
-            {
-                var firstActivityDate = checkoutObject.ParticipationObject.StartDate;
-
-                // can't start in the past
-                if (firstActivityDate.HasValue && firstActivityDate.Value.IsAfter(startDateTime.Value))
-                    startDateTime = firstActivityDate;
-            }
 
             if (useStripeConnectedAccount)
             {
                 platformFeePercent = billingAccount.GetSubscriptionPlatformFeePercent(plan, msgs, dc);
                 stripeAccountId = billingAccount.StripeUserId;
             }
+
+            stripeCouponId = GetACHCoupon(checkoutObject, billingAccount, plan, stripeAccountId, msgs, dc);
 
             // create the subscription on the stripe account (could be added to main account or connected account)
             var subscription = Billing.StripeHelper.CreateSubscription(
@@ -236,6 +229,43 @@ namespace AfterSchoolLibrary.Services
                 loggedInUser,
                 msgs,
                 dc);
+        }
+
+        private static string GetACHCoupon(CheckoutObject checkoutObject, Account billingAccount, SubscriptionPlan plan, string stripeAccountId, SystemMessages msgs, DatabaseConnection dc)
+        {
+            if (checkoutObject.PaymentType == PaymentType.ACH)
+            {
+                var ccFee = plan.GetCreditCardFee(billingAccount, msgs, dc);
+                var totalCost = plan.GetTotalCostWithFees(billingAccount, msgs, dc);
+
+                //need to add a coupon to subtract the credit card amount that is stored in the payment plan
+                var coupon = Billing.StripeHelper.CreateCoupon(
+                    couponName: $"ACH Discount - {ccFee} off of {totalCost}, PlanId: {plan.StripePlanId}",
+                    discountValue: plan.GetCreditCardFee(billingAccount, msgs, dc),
+                    couponDuration: Billing.StripeCouponDuration.Forever,
+                    durationInMonths: null,
+                    couponAmountType: CouponAmountType.FlatAmount,
+                    stripeAccountId: stripeAccountId,
+                    msgs: msgs);
+
+                return coupon.Id;
+            }
+
+            return null;
+        }
+
+        private static DateTime GetPlanStartDate(SubscriptionPlan plan, CheckoutObject checkoutObject, DateTime initialDate)
+        {
+            if (plan.PlanTypeId == SubscriptionPlanType.Subscription || plan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts)
+            {
+                var firstActivityDate = checkoutObject.ParticipationObject.StartDate;
+
+                // can't start in the past
+                if (firstActivityDate.HasValue && firstActivityDate.Value.IsAfter(initialDate))
+                    return firstActivityDate.Value;
+            }
+
+            return initialDate;
         }
 
         private static PlanFeeObject GetFeeObject(CheckoutObject checkoutObject, Account billingAccount, SubscriptionPlan plan, SystemMessages msgs, DatabaseConnection dc = null)
