@@ -231,6 +231,17 @@ namespace AfterSchoolLibrary.Services
                 dc);
         }
 
+        /// <summary>
+        /// Give the purchaser a discount off of the subscription if they are purchasing with ACH, since the subscription is stored with the CC fee
+        /// And ACH checkouts shouldn't charge the extra CC fee
+        /// </summary>
+        /// <param name="checkoutObject"></param>
+        /// <param name="billingAccount"></param>
+        /// <param name="plan"></param>
+        /// <param name="stripeAccountId"></param>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
+        /// <returns></returns>
         private static string GetACHCoupon(CheckoutObject checkoutObject, Account billingAccount, SubscriptionPlan plan, string stripeAccountId, SystemMessages msgs, DatabaseConnection dc)
         {
             if (checkoutObject.PaymentType == PaymentType.ACH)
