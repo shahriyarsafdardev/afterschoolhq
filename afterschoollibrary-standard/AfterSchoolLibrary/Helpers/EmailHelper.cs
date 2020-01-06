@@ -290,14 +290,15 @@ namespace AfterSchoolLibrary.Helpers
                     ccFee = "$0";
                 }
                 else if (checkoutObject.PaymentPlan.IsNotEmpty())
-                {
-                    cost = checkoutObject.GetPaymentPlanCostTodayConvenienceFee(msgs, dc).ToCurrency();
+                {                    
+                    cost = checkoutObject.GetPaymentPlanCostTodayWithConvenienceFee(msgs, dc).ToCurrency();
                     ccFee = checkoutObject.GetPaymentPlanCostTodayCreditCardFee(msgs, dc).ToCurrency();
 
                     var todayOrLater = "today";
+                    var today = participationObject.OwnerAccount.ConvertToAccountTimeZone(DateTime.UtcNow);
 
-                    if (checkoutObject.PaymentPlan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts)
-                        todayOrLater = participationObject.StartDate.ToShortDateString();
+                    if (checkoutObject.PaymentPlan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts && participationObject.StartDate.Value.IsOnOrAfter(today))
+                        todayOrLater = $"on {participationObject.StartDate.ToShortDateString()}";
 
                     additionalDetails = $"{todayOrLater} plus {paymentPlan.GetTotalCostWithConvenienceFee(billingAccount, msgs, dc).ToCurrency()} for {(paymentPlan.TotalPeriods.Value - 1)} {paymentPlan.BillingPeriodTypeId.ToString().ToLower()}(s)";
                 }
@@ -331,7 +332,7 @@ namespace AfterSchoolLibrary.Helpers
                 description = $"Subscription for {participationObject.Name}";
                 additionalDetails = $"per {subscription.BillingPeriodTypeId.ToString().ToLower()}";
 
-                cost = (checkoutObject.SubscriptionCostTodayNoFees + checkoutObject.GetSubscriptionCostTodayConvenienceFee(msgs, dc)).ToCurrency();
+                cost = checkoutObject.GetSubscriptionCostTodayWithConvenienceFee(msgs, dc).ToCurrency();
                 ccFee = checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc).ToCurrency();
 
                 // add tuition fee row

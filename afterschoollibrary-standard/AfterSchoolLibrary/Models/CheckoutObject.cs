@@ -212,6 +212,12 @@ namespace AfterSchoolLibrary.Models
                     GetSubscriptionCostTodayConvenienceFee(msgs, dc);
         }
 
+        public decimal GetSubscriptionCostTodayWithConvenienceFee(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return SubscriptionCostTodayNoFees +
+                    GetSubscriptionCostTodayConvenienceFee(msgs, dc);
+        }
+
         public decimal GetSubscriptionCostTodayCreditCardFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (!GetUseStripeConnectedAccount(msgs, dc) && CreditCardPurchaseObject.IsNotEmpty())
@@ -245,6 +251,12 @@ namespace AfterSchoolLibrary.Models
         {
             return PaymentPlanCostTodayNoFees +
                     GetPaymentPlanCostTodayCreditCardFee(msgs, dc) +
+                    GetPaymentPlanCostTodayConvenienceFee(msgs, dc);
+        }
+
+        public decimal GetPaymentPlanCostTodayWithConvenienceFee(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return PaymentPlanCostTodayNoFees +
                     GetPaymentPlanCostTodayConvenienceFee(msgs, dc);
         }
 
