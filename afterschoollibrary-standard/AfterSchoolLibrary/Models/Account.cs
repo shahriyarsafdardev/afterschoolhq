@@ -521,6 +521,160 @@ namespace AfterSchoolLibrary.Models
             return new List<Account>();
         }
 
+        public static int GetTotalMinutesEnrolled(int? accountId, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+
+            var sql = @"With A as
+                (
+	                select 
+		                acc.Name as AccountName, a.Name as ActivityName, ai.StartDateTime, ai.EndDateTime, 
+		                DATEDIFF(MINUTE, ai.StartDateTime, ai.EndDateTime) as TotalMinutes,
+		                (select count(*) from RegistrantActivity ra where ra.ParticipationObjectId = a.ID and ra.ParticipationObjectTypeId = 1 and  and ra.AssignmentTypeId in (1,6,7)) as StudentsInClass
+	                from 
+		                ActivityInstance ai inner join
+		                Activity a on ai.ActivityScheduleId = a.ActivityScheduleId inner join
+		                Account acc on a.AccountId = acc.ID
+                    where";
+
+            if (accountId.HasValue)
+                sql += $"(acc.ID = {accountId} or a.LocationId in (select id from Location where Location.HostAccountId = {accountId}))";
+            else
+                sql += "acc.IsTest = 0";
+
+            if (startDateTime.HasValue)
+                sql += $" and ai.StartDateTime >= {startDateTime.Value.ToString()}";
+
+            if (endDateTime.HasValue)
+                sql += $" and ai.EndDateTime <= {endDateTime.Value.ToString()}";
+
+            sql += @"),
+                B as
+                (
+	                select AccountName, ActivityName, StartDateTime, EndDateTime, TotalMinutes, StudentsInClass, TotalMinutes * StudentsInClass as TotalMinutesPerClass from A
+                )
+                select sum(TotalMinutesPerClass) as Minutes from B";
+
+            var dt = dq.ExecuteSelect(sql, msgs);
+
+            if (dt.Rows.Any())
+                return dt.Rows[0][0].ToString().ToInteger();
+
+            return 0;
+        }
+
+        public static int GetTotalSeatsOffered(int? accountId, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+
+            var sql = @"With A as
+                (
+	                select 
+		                a.SeatsAvailable
+	                from 
+		                ActivityInstance ai inner join
+		                Activity a on ai.ActivityScheduleId = a.ActivityScheduleId inner join
+		                Account acc on a.AccountId = acc.ID
+                    where";
+
+            if (accountId.HasValue)
+                sql += $"(acc.ID = {accountId} or a.LocationId in (select id from Location where Location.HostAccountId = {accountId}))";
+            else
+                sql += "acc.IsTest = 0";
+
+            if (startDateTime.HasValue)
+                sql += $" and ai.StartDateTime >= {startDateTime.Value.ToString()}";
+
+            if (endDateTime.HasValue)
+                sql += $" and ai.EndDateTime <= {endDateTime.Value.ToString()}";
+
+            sql += @")
+                select sum(SeatsAvailable) from A";
+
+            var dt = dq.ExecuteSelect(sql, msgs);
+
+            if (dt.Rows.Any())
+                return dt.Rows[0][0].ToString().ToInteger();
+
+            return 0;
+        }
+
+        public static int GetTotalMinutesOffered(int? accountId, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+
+            var sql = @"With A as
+                (
+	                select 
+		                a.SeatsAvailable,
+		                DATEDIFF(MINUTE, ai.StartDateTime, ai.EndDateTime) as TotalMinutes,
+		                a.SeatsAvailable * DATEDIFF(MINUTE, ai.StartDateTime, ai.EndDateTime) as MaximumMinutesOffered
+	                from 
+		                ActivityInstance ai inner join
+		                Activity a on ai.ActivityScheduleId = a.ActivityScheduleId inner join
+		                Account acc on a.AccountId = acc.ID
+                    where";
+
+            if (accountId.HasValue)
+                sql += $"(acc.ID = {accountId} or a.LocationId in (select id from Location where Location.HostAccountId = {accountId}))";
+            else
+                sql += "acc.IsTest = 0";
+
+            if (startDateTime.HasValue)
+                sql += $" and ai.StartDateTime >= {startDateTime.Value.ToString()}";
+
+            if (endDateTime.HasValue)
+                sql += $" and ai.EndDateTime <= {endDateTime.Value.ToString()}";
+
+            sql += @")
+                select sum(MaximumMinutesOffered) from A";
+
+            var dt = dq.ExecuteSelect(sql, msgs);
+
+            if (dt.Rows.Any())
+                return dt.Rows[0][0].ToString().ToInteger();
+
+            return 0;
+        }
+
+        public static int GetTotalStudentsServed(int? accountId, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+
+            var sql = @"
+	                select 
+		                count(*)
+	                from 
+		                Registration r inner join 
+		                Account acc on r.accountid = acc.id inner join
+		                Activity a on acc.id = a.ID
+                    where
+                        r.FirstRegistrationId is not null and
+		                r.CompletionStatusId = 2";
+
+            if (accountId.HasValue)
+                sql += $" and (acc.ID = {accountId} or a.LocationId in (select id from Location where Location.HostAccountId = {accountId}))";
+            else
+                sql += " and acc.IsTest = 0";
+
+            if (startDateTime.HasValue)
+                sql += $" and r.CreateDate >= {startDateTime.Value.ToString()}";
+
+            if (endDateTime.HasValue)
+                sql += $" and r.CreateDate <= {endDateTime.Value.ToString()}";
+
+            var dt = dq.ExecuteSelect(sql, msgs);
+
+            if (dt.Rows.Any())
+                return dt.Rows[0][0].ToString().ToInteger();
+
+            return 0;
+        }
+
         #endregion
     }
 }

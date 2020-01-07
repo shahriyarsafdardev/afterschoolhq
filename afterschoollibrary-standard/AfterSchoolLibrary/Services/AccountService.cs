@@ -3034,5 +3034,29 @@ namespace AfterSchoolLibrary.Services
         }
 
         #endregion
+
+        #region Stats
+
+        public static decimal GetTotalHoursEnrolled(this Account account, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return Account.GetTotalMinutesEnrolled(account.ID.Value, startDateTime, endDateTime, msgs, dc) / 60;
+        }
+
+        public static int GetTotalSeatsOffered(this Account account, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return Account.GetTotalSeatsOffered(account.ID.Value, startDateTime, endDateTime, msgs, dc) / 60;
+        }
+
+        public static decimal GetTotalHoursOffered(this Account account, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return Account.GetTotalMinutesOffered(account.ID.Value, startDateTime, endDateTime, msgs, dc) / 60;
+        }
+
+        public static int GetTotalStudentsServed(this Account account, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return Account.GetTotalStudentsServed(account.ID.Value, startDateTime, endDateTime, msgs, dc) / 60;
+        }
+
+        #endregion
     }
 }
