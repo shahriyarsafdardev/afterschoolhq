@@ -544,10 +544,10 @@ namespace AfterSchoolLibrary.Models
                 sql += "acc.IsTest = 0";
 
             if (startDateTime.HasValue)
-                sql += $" and ai.StartDateTime >= {startDateTime.Value.ToString()}";
+                sql += $" and ai.StartDateTime >= '{startDateTime.Value.ToString()}'";
 
             if (endDateTime.HasValue)
-                sql += $" and ai.EndDateTime <= {endDateTime.Value.ToString()}";
+                sql += $" and ai.EndDateTime <= '{endDateTime.Value.ToString()}'";
 
             sql += @"),
                 B as
@@ -585,10 +585,10 @@ namespace AfterSchoolLibrary.Models
                 sql += "acc.IsTest = 0";
 
             if (startDateTime.HasValue)
-                sql += $" and ai.StartDateTime >= {startDateTime.Value.ToString()}";
+                sql += $" and ai.StartDateTime >= '{startDateTime.Value.ToString()}'";
 
             if (endDateTime.HasValue)
-                sql += $" and ai.EndDateTime <= {endDateTime.Value.ToString()}";
+                sql += $" and ai.EndDateTime <= '{endDateTime.Value.ToString()}'";
 
             sql += @")
                 select sum(SeatsAvailable) from A";
@@ -624,10 +624,10 @@ namespace AfterSchoolLibrary.Models
                 sql += "acc.IsTest = 0";
 
             if (startDateTime.HasValue)
-                sql += $" and ai.StartDateTime >= {startDateTime.Value.ToString()}";
+                sql += $" and ai.StartDateTime >= '{startDateTime.Value.ToString()}'";
 
             if (endDateTime.HasValue)
-                sql += $" and ai.EndDateTime <= {endDateTime.Value.ToString()}";
+                sql += $" and ai.EndDateTime <= '{endDateTime.Value.ToString()}'";
 
             sql += @")
                 select sum(MaximumMinutesOffered) from A";
@@ -653,7 +653,7 @@ namespace AfterSchoolLibrary.Models
 		                Account acc on r.accountid = acc.id inner join
 		                Activity a on acc.id = a.ID
                     where
-                        r.FirstRegistrationId is not null and
+                        r.FirstRegistrationId is null and
 		                r.CompletionStatusId = 2";
 
             if (accountId.HasValue)
@@ -662,10 +662,10 @@ namespace AfterSchoolLibrary.Models
                 sql += " and acc.IsTest = 0";
 
             if (startDateTime.HasValue)
-                sql += $" and r.CreateDate >= {startDateTime.Value.ToString()}";
+                sql += $" and r.CreateDate >= '{startDateTime.Value.ToString()}'";
 
             if (endDateTime.HasValue)
-                sql += $" and r.CreateDate <= {endDateTime.Value.ToString()}";
+                sql += $" and r.CreateDate <= '{endDateTime.Value.ToString()}'";
 
             var dt = dq.ExecuteSelect(sql, msgs);
 
@@ -673,6 +673,100 @@ namespace AfterSchoolLibrary.Models
                 return dt.Rows[0][0].ToString().ToInteger();
 
             return 0;
+        }
+
+        public static List<(string ActivityName, int RegistrationCount)> GetRegistrationCountByActivity(int? accountId, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+
+            var sql = @"
+	                select 
+                        distinct 
+                            act.Name, count(ra.id) as RegistrationCount
+                        from 
+                            RegistrantActivity ra inner join
+                            Registrant r on ra.registrantid = r.id inner join
+                            Account a on r.AccountId = a.ID inner join
+                            Activity act on ra.ParticipationObjectId = act.ID and ra.ParticipationObjectTypeId = 1
+                        where 
+                            r.ParentRegistrantId is not null";
+
+            if (accountId.HasValue)
+                sql += $" and (acc.ID = {accountId} or a.LocationId in (select id from Location where Location.HostAccountId = {accountId}))";
+            else
+                sql += " and acc.IsTest = 0";
+
+            if (startDateTime.HasValue)
+                sql += $" and ra.CreateDate >= '{startDateTime.Value.ToString()}'";
+
+            if (endDateTime.HasValue)
+                sql += $" and ra.CreateDate <= '{endDateTime.Value.ToString()}'";
+
+            sql += @"
+                        group by act.name
+                        order by act.Name";
+
+            return dq.ExecuteSelect(sql, msgs)
+                        .AsEnumerable()
+                        .ToList()
+                        .ConvertAll(row => { 
+                            return (
+                                ActivityName: row["Name"].ToString(),
+                                RegistrationCount: row["RegistrationCount"].ToString().ToInteger()
+                            ); 
+                        });            
+        }
+
+        public static List<(string Grade, int RegistrationCount)> GetRegistrationCountByGrade(int? accountId, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+
+            var sql = @"
+	                select
+	                    Name,
+	                    Abbreviation,
+	                    (
+		                    select count(r.id) 
+		                    from 
+			                    Registration r inner join
+			                    FormQuestionAnswer fqa on r.ID = fqa.RegistrationId inner join
+			                    RegistrantActivity ra on r.ID = ra.RegistrationId inner join
+			                    Activity a on ra.ParticipationObjectId = a.ID and ra.ParticipationObjectTypeId = 1 inner join 
+			                    Account acc on a.AccountId = acc.ID
+		                    where 
+			                    fqa.QuestionDataTypeId = 44 and
+			                    (fqa.Text = gl.Abbreviation or fqa.Text = gl.Name)";
+
+            if (accountId.HasValue)
+                sql += $" and (acc.AccountId = {accountId} or a.LocationId in (select id from Location where Location.HostAccountId = {accountId}))";
+            else
+                sql += " and acc.IsTest = 0";
+
+            if (startDateTime.HasValue)
+                sql += $" and ra.CreateDate >= '{startDateTime.Value.ToString()}'";
+
+            if (endDateTime.HasValue)
+                sql += $" and ra.CreateDate <= '{endDateTime.Value.ToString()}'";
+
+            sql += @"
+                        ) as RegistrationCount
+                    from 
+	                    GradeLevel gl
+                    Group By
+	                    Name,
+	                    Abbreviation";
+
+            return dq.ExecuteSelect(sql, msgs)
+                        .AsEnumerable()
+                        .ToList()
+                        .ConvertAll(row => {
+                            return (
+                                Grade: row["Name"].ToString(),
+                                NumberOfRegistrations: row["RegistrationCount"].ToString().ToInteger()
+                            );
+                        });
         }
 
         #endregion

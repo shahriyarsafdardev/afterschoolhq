@@ -3057,6 +3057,16 @@ namespace AfterSchoolLibrary.Services
             return Account.GetTotalStudentsServed(account.ID.Value, startDateTime, endDateTime, msgs, dc) / 60;
         }
 
+        public static List<(string ActivityName, int RegistrationCount)> GetRegistrationCountByActivity(this Account account, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return Account.GetRegistrationCountByActivity(account.ID.Value, startDateTime, endDateTime, msgs, dc);
+        }
+
+        public static List<(string Grade, int RegistrationCount)> GetRegistrationCountByGrade(this Account account, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return Account.GetRegistrationCountByGrade(account.ID.Value, startDateTime, endDateTime, msgs, dc);
+        }
+
         #endregion
     }
 }
