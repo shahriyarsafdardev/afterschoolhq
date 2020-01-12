@@ -152,8 +152,8 @@
                                         <tr id="registration-fee-row">
                                             <td>Registration Fee</td>
                                             <td class="text-right">
-                                                <span id="fee-total-value" class="hide">@participationObject.GetCheckoutCostWithConvenienceFee()</span>
-                                                @participationObject.GetCheckoutCostWithConvenienceFee().ToCurrency()*
+                                                <span id="fee-total-value" class="hide">@participationObject.GetCheckoutCostWithConvenienceFee().ToString("0.00")</span>
+                                                <span>@participationObject.GetCheckoutCostWithConvenienceFee().ToCurrency()*</span>
                                             </td>
                                             <td></td>
                                         </tr>
