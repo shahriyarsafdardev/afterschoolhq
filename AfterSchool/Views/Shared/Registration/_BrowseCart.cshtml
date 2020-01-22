@@ -139,7 +139,6 @@
         }
 
         function removeFromCart(uid, onSuccess, onFailure) {
-            console.log('removeFromCart');
             $.post(
                 '/services/removefromcart/',
                 'uid=' + uid,
@@ -170,8 +169,6 @@
 
         function removeFromCartUI(btnCart, uid) {
 
-            console.log('removeFromCartUI');
-
             if (btnCart) {
                 btnCart.children('span').html('...');
             }
@@ -188,7 +185,6 @@
         }
 
         function removeFromCartByUid(uid) {
-            console.log('removeFromCartByUid');
             removeFromCartUI($('.btn-cart[uid="' + uid + '"]').first(), uid)
         }
 
@@ -218,7 +214,6 @@
         }
 
         function markItemAsInCart(btnCart, cartObj) {
-            console.log('markItemAsInCart');
             incrementCartCount();
             btnCart.children('span').html('<i class="s7-close-circle icon-medium"></i><i class="s7-cart icon-medium"></i>');
             btnCart.attr('in-cart', '1');
@@ -232,7 +227,6 @@
         }
 
         function markItemAsNotInCart(btnCart, uid) {
-            console.log('markItemAsNotInCart');
             decrementCartCount();
             $('.cart-bar-item[uid="' + uid + '"]').remove();
             if ($('.cart-activities').children().length == 0) {

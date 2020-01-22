@@ -1,0 +1,86 @@
+﻿@model ParticipationObject
+
+<div id="modal-grade-ineligibility" class="md-modal colored-header modal-colored-header modal-colored-header-dark custom-width md-effect-9">
+
+    <div class="md-content">
+        <div class="modal-header">
+            <h3 class="modal-title"><i class="s7-attention"></i> Ineligible Activities</h3>
+        </div>
+        <div class="modal-body form">
+
+            <p>
+                <strong><span id="ineligible-student"></span></strong> is ineligible for the following @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower() due to being too young or too old. Please remove ineligible @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower() to continue:
+            </p>
+
+            <div id="ineligibile-activities">
+
+            </div>
+
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn md-close" onclick="closeEligibilityModal(false)">Select Different Child</button>
+            <button type="button" data-dismiss="modal" class="btn btn-primary md-close" onclick="closeEligibilityModal(true)">Change Activity Selection(s)</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function closeEligibilityModal(modifyCart) {
+        $('#modal-grade-ineligibility').removeClass('md-show');
+
+        if (modifyCart) {
+            location.href = '@Model.GetBrowseUrl()';
+        } else {
+            location.href = '@Url.Action("select", "account")';
+        }
+    }
+
+    function checkEligibility(registrantUid, continueUrl, statusUpdateId, ) {
+
+        var origStatusText = "";
+
+        if (statusUpdateId != null) {
+            origStatusText = $('#' + statusUpdateId).html();
+            $('#' + statusUpdateId).html('Checking Eligibility...');
+        }
+
+        $.get(
+            '@Url.Action("checkeligibility", "services")?uid=' + registrantUid,
+            function (data) {
+                
+                $('#ineligibile-activities').html('');
+
+                if (data && data.status == 'ok') {
+                    if (data.activities.length > 0) {
+
+                        $('#ineligible-student').html(data.studentName);
+
+                        for (const activity of data.activities) {
+                            $('#ineligibile-activities').append(activity + '<br />');
+                        }
+
+                        $('#modal-grade-ineligibility').addClass('md-show');
+
+                        if (statusUpdateId != null) {
+                            $('#' + statusUpdateId).html(origStatusText);
+                        }
+
+                    } else {
+                        
+                        if (statusUpdateId != null) {
+                            $('#' + statusUpdateId).html('Registering...');
+                        }
+
+                        if (continueUrl != null) {
+                            location.href = continueUrl;
+                        }
+                    }
+                } else {
+                    Notifications.showErrors(data.messages);
+                }
+
+            }
+        )
+    }
+</script>

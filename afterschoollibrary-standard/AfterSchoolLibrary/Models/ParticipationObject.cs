@@ -478,6 +478,27 @@ namespace AfterSchoolLibrary.Models
             return false;
         }
 
+        public bool IsStudentGradeInRange(Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (!MinGradeId.HasValue && !MaxGradeId.HasValue)
+                return true;
+
+            var gradeLevels = GradeLevel.Load(msgs: msgs, dc: dc).OrderBy(gradeLevel => gradeLevel.ID).ToList();
+            var registrantGradeLevelAnswer = registrant.GetAnswer(QuestionDataType.RegistrantGrade, msgs, dc);
+            var registrantGradeLevel = gradeLevels.FirstOrDefault(gradeLevel => gradeLevel.Abbreviation.IsSameAs(registrantGradeLevelAnswer.Text));
+
+            if (!MinGradeId.HasValue)
+                MinGradeId = gradeLevels.First().ID;
+
+            if (!MaxGradeId.HasValue)
+                MaxGradeId = gradeLevels.Last().ID;
+
+            if (registrantGradeLevel.ID.Value.IsInRange(MinGradeId.Value, MaxGradeId.Value))
+                return true;
+
+            return false;
+        }
+
         #endregion
 
         #region GetObjects
