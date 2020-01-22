@@ -3067,6 +3067,11 @@ namespace AfterSchoolLibrary.Services
             return Account.GetRegistrationCountByGrade(account.ID.Value, startDateTime, endDateTime, msgs, dc);
         }
 
+        public static (decimal totalProcessed, decimal totalProfit) GetTotalProcessedAndProfit(this Account account, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return Account.GetTotalProcessedAndProfit(account.ID.Value, startDateTime, endDateTime, msgs, dc);
+        }
+
         #endregion
     }
 }

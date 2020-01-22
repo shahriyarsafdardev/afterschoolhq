@@ -769,6 +769,80 @@ namespace AfterSchoolLibrary.Models
                         });
         }
 
+        public static (decimal totalProcessed, decimal totalProfit) GetTotalProcessedAndProfit(int? accountId, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+
+            var sql = $@"
+                        With A as
+                        (
+	                        select
+		                        ID,
+		                        BillerAccountId,
+		                        Amount,
+		                        ConvenienceFeeCharged,
+		                        PaymentTypeFeeCharged,
+		                        PaymentTypeId,
+		                        (Case PaymentTypeId
+			                        When {(int)PaymentType.CreditCard} Then
+				                        (Amount * {Billing.StripeHelper.StripePercentFee}) + {Billing.StripeHelper.StripeFlatFee}
+			                        When {(int)PaymentType.ACH} Then
+				                        (Amount * {Billing.StripeHelper.StripeBankPercentFee})
+		                        End) as StripeFee
+	                        From 
+		                        [Transaction]
+	                        Where
+		                        PaymentSourceTypeId = {(int)PaymentSourceType.AfterSchoolPlatform} and
+		                        ConvenienceFeeCharged is not null and 
+		                        ConvenienceFeeCharged > 0 and
+		                        ID in 
+		                        (
+			                        select 
+				                        ap.TransactionId
+			                        from 
+				                        ActivityPayment ap inner join
+				                        Activity a on ap.ParticipationObjectId = a.ID and ap.ParticipationObjectTypeId = {(int)ParticipationObjectType.Activity}
+			                        where";
+
+            if (accountId.HasValue)
+                sql += $" a.AccountId = {accountId.Value} or a.LocationId in (select id from location where HostAccountId = {accountId.Value})";
+            else
+                sql += " and acc.IsTest = 0";
+
+            sql += ")";
+
+            if (startDateTime.HasValue)
+                sql += $" and CreateDate >= '{startDateTime.Value.ToString()}'";
+
+            if (endDateTime.HasValue)
+                sql += $" and CreateDate <= '{endDateTime.Value.ToString()}'";
+
+            sql += @"
+                        ),
+                        B As
+                        (
+	                        Select 
+		                        ID,
+		                        Amount,
+		                        ConvenienceFeeCharged,
+		                        PaymentTypeFeeCharged,
+		                        PaymentTypeId,
+		                        StripeFee,
+		                        (ConvenienceFeeCharged + PaymentTypeFeeCharged - StripeFee) as Profit
+	                        from A
+                        )
+                        Select ISNULL(Sum(Amount), 0) as Amount, ISNULL(Sum(Profit), 0) as Profit from B
+                        ";
+
+            var dt = dq.ExecuteSelect(sql, msgs);
+
+            if (dt.Rows.Any())
+                return (dt.Rows[0][0].ToString().ToDecimal(), dt.Rows[0][1].ToString().ToDecimal());
+
+            return (0, 0);
+        }
+
         #endregion
     }
 }
