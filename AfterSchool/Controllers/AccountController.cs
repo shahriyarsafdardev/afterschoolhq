@@ -282,7 +282,7 @@ namespace AfterSchool.Controllers
             }
 
             if (msgs.HasNoErrors())
-                return RedirectToAction("addhomeaddress");
+                return RedirectToAction("addparent");
 
             ViewBag.Messages = msgs;
 
@@ -678,9 +678,9 @@ namespace AfterSchool.Controllers
                         case QuestionDataType.RegistrantGrade:
                         case QuestionDataType.RegistrantDateOfBirth:
                         case QuestionDataType.RegistrantGender:
-                        case QuestionDataType.RegistrantTShirtSize:
                             question.IsRequired = true;
                             break;
+                        case QuestionDataType.RegistrantTShirtSize:
                         case QuestionDataType.RegistrantHomePhone:
                         case QuestionDataType.RegistrantEmail:
                             question.IsRequired = false;

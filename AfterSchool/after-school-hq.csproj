@@ -1646,6 +1646,9 @@
     <Content Include="Views\Shared\Registration\_RegistrationHeader.cshtml" />
     <Content Include="Views\Msg\Invalid.cshtml" />
     <Content Include="Views\Shared\Registration\_BrowseCart.cshtml" />
+    <Content Include="Views\Shared\Registration\_SelectStudentCard.cshtml" />
+    <Content Include="Views\Shared\Registration\_NewStudentCard.cshtml" />
+    <Content Include="Views\Shared\Registration\_GradeIneligibility.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

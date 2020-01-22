@@ -8,6 +8,7 @@ using AfterSchool.Models;
 using AfterSchool.Helpers;
 using AfterSchoolLibrary.Services;
 using AfterSchoolLibrary;
+using System.Collections.Generic;
 
 namespace AfterSchool.Controllers
 {
@@ -28,6 +29,40 @@ namespace AfterSchool.Controllers
             }
 
             return false;
+        }
+
+        #region Checkout
+
+        [HttpGet]
+        public ActionResult CheckEligibility(string uid)
+        {
+            if (!IsRequestFromApp())
+                return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
+
+            var msgs = new SystemMessages();
+            var registrant = Registrant.LoadByUid(uid.ToGuid(), msgs);
+
+            if (SessionVariables.Cart.IsNotEmpty())
+            {
+                var cartItems = SessionVariables.Cart.GetCartItems(msgs);
+                var participationObjects = cartItems.Select(item => item.GetParticipationObject(msgs)).ToList();
+                var activities = new List<string>();
+
+                participationObjects.ForEach(participationObject => {
+                    if (!participationObject.IsStudentGradeInRange(registrant, msgs))
+                        activities.Add($"{participationObject.Name}: {participationObject.GetMinGradeLevel(msgs).Abbreviation} - {participationObject.GetMaxGradeLevel(msgs).Abbreviation}");
+                });
+
+                if (msgs.HasNoErrors())
+                    return Json(new
+                    {
+                        status = "ok",
+                        studentName = registrant.DisplayName,
+                        activities
+                    }, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
         }
 
         [HttpGet]
@@ -107,6 +142,10 @@ namespace AfterSchool.Controllers
             return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
         }
 
+        #endregion 
+
+        #region DemoOrgName
+
         public ActionResult SetDemoOrgName(string orgname, string firstname, string email)
         {
             var msgs = new SystemMessages();
@@ -144,6 +183,8 @@ namespace AfterSchool.Controllers
         {
             return Json(new { status = "ok", hasDemoOrgName = CookieVariables.DemoOrgName.IsNotBlank() }, JsonRequestBehavior.AllowGet);
         }
+
+        #endregion
 
         public ActionResult LeadForm(string org, string name, string email, string phone, string comments)
         {

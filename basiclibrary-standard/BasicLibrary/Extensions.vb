@@ -16,6 +16,11 @@ Public Module Extensions
     End Function
 
     <Extension>
+    Public Function IsInRange(ByVal aInteger As Integer, ByVal min As Integer, ByVal max As Integer) As Boolean
+        Return aInteger >= min And aInteger <= max
+    End Function
+
+    <Extension>
     Public Function IsTrue(ByVal aBool As Boolean?) As Boolean
         Return aBool.HasValue AndAlso aBool.Value
     End Function
@@ -125,6 +130,11 @@ Public Module Extensions
     <Extension>
     Public Function IsOnOrBefore(ByVal aDate As DateTime, ByVal bDate As DateTime) As Boolean
         Return aDate <= bDate
+    End Function
+
+    <Extension>
+    Public Function IsInRange(ByVal aDate As DateTime, ByVal min As DateTime, ByVal max As DateTime) As Boolean
+        Return aDate >= min And aDate <= max
     End Function
 
     <Extension>
