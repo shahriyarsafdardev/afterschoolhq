@@ -282,7 +282,7 @@ namespace AfterSchool.Controllers
             }
 
             if (msgs.HasNoErrors())
-                return RedirectToAction("addparent");
+                return RedirectToAction("addhomeaddress");
 
             ViewBag.Messages = msgs;
 
