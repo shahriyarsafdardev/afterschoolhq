@@ -18,14 +18,14 @@
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-@{ 
+@{
     Html.RenderPartial(
         "~/Views/Shared/Registration/_AccountTopBar.cshtml",
         SessionVariables.RegistrationStartPageAccount,
         new ViewDataDictionary()
         {
             { "ParticipationObject", participationObject }
-        }
+                }
     );
 }
 
@@ -41,85 +41,14 @@
 
     @foreach (var registrant in Model)
     {
-        var disabledText = "";
-        var btnText = "";
-
-        if (registrant.HasSubmittedFor(participationObject, null))
-        {
-            if (registrant.HasWithdrawn(participationObject))
-            {
-                btnText = $"Withdrawn";
-                disabledText = " disabled=\"disabled\" ";
-            }
-            else if (!registrant.HasConsentFor(participationObject))
-            {
-                btnText = "Give Consent";
-            }
-            else if (registrant.OnWaitingListFor(participationObject))
-            {
-                btnText = $"On Waiting List";
-                disabledText = " disabled=\"disabled\" ";
-            }
-            else if (!registrant.IsReservedAndPaidFor(participationObject, null) && !registrant.IsAppliedFor(participationObject, null) && !registrant.MasterRegistrantHasPlan(participationObject))
-            {
-                btnText = "Pay Now";
-            }
-            else if (participationObject.IsSession())
-            {
-                btnText = $"Add To Existing Registration";
-            }
-            else
-            {
-                btnText = $"Already {registered}";
-                disabledText = " disabled=\"disabled\" ";
-            }
-        }
-        else
-        {
-            btnText = register;
-        }
-
-        <div class="col-sm-12 col-md-6 col-lg-4">
-            <div class="panel">
-                <div class="heading panel-h3 text-center">
-                    <div class="padding-30">
-                        @registrant.DisplayName
-                        <p class="text-center text-small padding-v-10 text-muted">
-                            @registrant.GetAnswer(QuestionDataType.RegistrantGrade).Text Grade
-                        </p>
-                    </div>
-                </div>
-                <div class="panel-body">                    
-                    <p>
-                        <a href="@Url.Action("setstudent", "account", new { id = registrant.Uid })"
-                           class="btn btn-register btn-lg"
-                           @disabledText>
-                            @btnText
-                            &raquo;
-                        </a>
-                    </p>
-                </div>
-            </div>
-        </div>
+        Html.RenderPartial("~/Views/Shared/Registration/_SelectStudentCard.cshtml", registrant);
     }
 
-    <div class="col-sm-12 col-md-6 col-lg-4">
-        <div class="panel panel-full-dark">
-            <div class="heading panel-h3 text-center">
-                <div class="padding-30">
-                    New Child
-                    <p class="text-center text-small padding-v-10 text-muted">
-                        &nbsp;
-                    </p>
-                </div>
-            </div>
-            <div class="panel-body">
-                <p><a href="@Url.Action("addstudent", "account")" class="btn btn-register btn-lg">Add Child</a></p>
-            </div>
-        </div>
-    </div>
+    @{ Html.RenderPartial("~/Views/Shared/Registration/_NewStudentCard.cshtml"); }
 
 </div>
+
+@{ Html.RenderPartial("~/Views/Shared/Registration/_GradeIneligibility.cshtml", participationObject); }
 
 @if (participationObject.IsActivityGroup() && participationObject.GetActivityGroup().ActivityGroupTypeId == ActivityGroupType.Session)
 {
@@ -129,6 +58,6 @@
         new ViewDataDictionary()
         {
             { "IsDuringCheckout", true }
-        }
+                    }
     );
 }

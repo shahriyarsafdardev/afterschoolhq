@@ -15,14 +15,14 @@
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-@{ 
+@{
     Html.RenderPartial(
         "~/Views/Shared/Registration/_AccountTopBar.cshtml",
         SessionVariables.RegistrationStartPageAccount,
         new ViewDataDictionary()
         {
             { "ParticipationObject", Model }
-        }
+                }
     );
 }
 
@@ -90,12 +90,16 @@
     </div>
 </div>
 
+@{ Html.RenderPartial("~/Views/Shared/Registration/_GradeIneligibility.cshtml", Model); }
+
 <script>
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         $('#register-form').submit(function () {
             $('#btn-register').html('Saving...');
             $('#btn-register').prop('disabled', true);
         });
+
+        checkEligibility('@SessionVariables.CurrentRegistrant.Uid', null, null);
     });
 </script>
 
@@ -107,6 +111,6 @@
         new ViewDataDictionary()
         {
             { "IsDuringCheckout", true }
-        }
+                    }
     );
 }

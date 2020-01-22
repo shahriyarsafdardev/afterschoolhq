@@ -1,0 +1,83 @@
+﻿@model Registrant
+
+@{ 
+    var participationObject = (ParticipationObject)ViewBag.ParticipationObject;
+
+    var registered = "Registered";
+    var register = "Register";
+
+    if (participationObject.RegistrationMode == RegistrationMode.Apply)
+    {
+        register = "Apply";
+        registered = "Applied";
+    }
+
+    var disabledText = "";
+    var btnText = "";
+
+    if (Model.HasSubmittedFor(participationObject, null))
+    {
+        if (Model.HasWithdrawn(participationObject))
+        {
+            btnText = $"Withdrawn";
+            disabledText = " disabled=\"disabled\" ";
+        }
+        else if (!Model.HasConsentFor(participationObject))
+        {
+            btnText = "Give Consent";
+        }
+        else if (Model.OnWaitingListFor(participationObject))
+        {
+            btnText = $"On Waiting List";
+            disabledText = " disabled=\"disabled\" ";
+        }
+        else if (!Model.IsReservedAndPaidFor(participationObject, null) && !Model.IsAppliedFor(participationObject, null) && !Model.MasterRegistrantHasPlan(participationObject))
+        {
+            btnText = "Pay Now";
+        }
+        else if (participationObject.IsSession())
+        {
+            btnText = $"Add To Existing Registration";
+        }
+        else
+        {
+            btnText = $"Already {registered}";
+            disabledText = " disabled=\"disabled\" ";
+        }
+    }
+    else
+    {
+        if (!participationObject.IsStudentGradeInRange(Model))
+        {            
+            btnText = "Ineligible - Grade";
+            disabledText = " disabled=\"disabled\" ";
+        }
+        else
+        {
+            btnText = register;
+        }
+    }
+}
+    <div class="col-sm-12 col-md-6 col-lg-4">
+        <div class="panel">
+            <div class="heading panel-h3 text-center">
+                <div class="padding-30">
+                    @Model.DisplayName
+                    <p class="text-center text-small padding-v-10 text-muted">
+                        @Model.GetAnswer(QuestionDataType.RegistrantGrade).Text Grade
+                    </p>
+                </div>
+            </div>
+            <div class="panel-body">
+                <p>
+                    <a href="javascript:checkEligibility('@Model.Uid', '@Url.Action("setstudent", "account", new { id = Model.Uid })', 'btn-register-@Model.Uid')"
+                       id="btn-register-@Model.Uid"
+                       class="btn btn-register btn-lg"
+                       @disabledText>
+                        @btnText
+                        &raquo;
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
