@@ -115,7 +115,10 @@ else
                     <th>@UILabel.ActivityLabel(activityType)</th>
                     <th class="text-center">Starts</th>
                     <th class="text-center">Days</th>
-                    <th class="text-center">Grades</th>
+                    @if (activityType != ActivityType.FieldTrip)
+                    {
+                        <th class="text-center">Grades</th>
+                    }
                     <!--<th class="text-center">Ages</th>-->
                     <th class="text-center">Seats Taken</th>
                     <th></th>
@@ -173,18 +176,21 @@ else
                                     <a href="@Url.Action("editschedule", "activity", new { id = activity.Uid })">-</a>
                                 }
                             </td>
-                            <td class="text-center">
-                                @if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
-                                {
-                                    <a href="@Url.Action("editrestrictions", "activity", new { id = activity.Uid })">
-                                        @activity.GetStartingGradeLevel().Name - @activity.GetEndingGradeLevel().Name
-                                    </a>
-                                }
-                                else
-                                {
-                                    <a href="@Url.Action("editrestrictions", "activity", new { id = activity.Uid })">-</a>
-                                }                                
-                            </td>
+                            @if (activityType != ActivityType.FieldTrip)
+                            {
+                                <td class="text-center">
+                                    @if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
+                                    {
+                                        <a href="@Url.Action("editrestrictions", "activity", new { id = activity.Uid })">
+                                            @activity.GetStartingGradeLevel().Name - @activity.GetEndingGradeLevel().Name
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <a href="@Url.Action("editrestrictions", "activity", new { id = activity.Uid })">-</a>
+                                    }                                
+                                </td>
+                            }
                             <td class="text-center @reservedTextClass">
                                 <a href="@Url.Action("registrants", "activity", new { id = activity.Uid })">@activity.GetRegistrantCountByAssignmentTypes(assignmentTypes)</a>
                             </td>
