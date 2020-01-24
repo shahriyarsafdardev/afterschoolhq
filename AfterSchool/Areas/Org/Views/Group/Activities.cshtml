@@ -20,10 +20,10 @@
 
                 @if (Model.ActivityGroupTypeId == ActivityGroupType.Session)
                 {
-                    <button class="btn btn-primary md-trigger" data-modal="modal-offering">
+                    <a class="btn btn-primary" href="@Url.Action("editsetup", "activity", new { group = Model.Uid })">
                         <i class="icon icon-left s7-plus"></i>
                         Add @UILabel.ActivityLabel(Model.ActivityGroupTypeId)
-                    </button>
+                    </a>
                 }
                 else
                 {
@@ -56,23 +56,6 @@
                         </form>
                     </div>
                 }
-                <div id="modal-offering" class="md-modal colored-header custom-width md-effect-9">
-                    <form id="form-upgrade" action="" method="post">
-                        <div class="md-content">
-                            <div class="modal-header">
-                                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
-                                <h3 class="modal-title">Upgrade Your Account</h3>
-                            </div>
-                            <div class="modal-body form">
-                                <p>You have reached your limit of @UILabel.ActivityLabel(Model.ActivityGroupTypeId, true). Time to upgrade :).</p>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-                                <a href="@Url.Action("packages", "account")" class="btn btn-primary">Upgrade &raquo;</a>
-                            </div>
-                        </div>
-                    </form>
-                </div>
 
             </div>
 

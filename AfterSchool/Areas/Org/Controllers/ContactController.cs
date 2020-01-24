@@ -585,8 +585,8 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult InviteTo(string id, string type, string list, string invitemessage)
         {
             var msgs = new SystemMessages();
-            ActivityGroup group = null;
-            RegistrationPeriod period = null;
+            ActivityGroup group;
+            RegistrationPeriod period;
 
             switch (type)
             {
@@ -597,7 +597,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     if (period.ActivityGroupId.HasValue)
                     {
                         group = period.GetGroup();
-                        msgs.AddRange(InviteContactList(list, invitemessage, period, group));
+                        InviteContactList(list, invitemessage, period, group, msgs);
                         ViewBag.ReturnUrl = Url.Action("periods", "group", new { id = group.Uid });
                     }
                     else
@@ -607,15 +607,14 @@ namespace AfterSchool.Areas.Org.Controllers
                         ViewBag.ReturnUrl = Url.Action("registrants", "activity", new { id = activity.ID });
                     }
 
-
                     break;
 
                 case "groupfromlists":
                     
-                    group = ActivityGroup.LoadByUid(id.ToGuid());
-                    period = group.GetCurrentRegistrationPeriod();
+                    group = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
+                    period = group.GetCurrentOrNextRegistrationPeriod(msgs);
 
-                    msgs.AddRange(InviteContactList(list, invitemessage, period, group));
+                    InviteContactList(list, invitemessage, period, group, msgs);
 
                     ViewBag.ReturnUrl = Url.Action("lists", "contact");
                     break;
@@ -633,9 +632,8 @@ namespace AfterSchool.Areas.Org.Controllers
             }
         }
 
-        private SystemMessages InviteContactList(string list, string invitemessage, RegistrationPeriod period, ActivityGroup group)
+        private void InviteContactList(string list, string invitemessage, RegistrationPeriod period, ActivityGroup group, SystemMessages msgs)
         {
-            var msgs = new SystemMessages();
             var contactList = ContactList.Load(list.ToInteger());
             List<Registrant> contacts = null;
 
@@ -649,27 +647,31 @@ namespace AfterSchool.Areas.Org.Controllers
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
                         var activityIds = group.GetActivities(null, false, false, null, null, false, amsgs, adc)
-                            .Where(x => Request["activity-" + x.ID.Value.ToString()].IsNotBlank())
+                            .Where(x => Request[$"activity-{x.ID.Value.ToString()}"].IsNotBlank())
                             .Select(x => x.ID.Value)
                             .ToList();
 
-                        contacts = contactList.GetContacts(adc);
+                        contacts = contactList.GetContacts(amsgs, adc);
 
-                        amsgs.AddRange(group.InviteContacts(contacts, period, activityIds, SessionVariables.CurrentUser.ID.Value, adc));
+                        group.InviteContacts(contacts, period, activityIds, SessionVariables.CurrentUser.ID.Value, amsgs, adc);
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
+                        msgs.AddRange(smsgs);
+
                         // get session information because it isn't available in a background task
                         var loggedInUser = SessionVariables.CurrentUser;
+                        var periodId = period.ID.HasValue ? period.ID.Value : 0;
 
                         BackgroundJob.Enqueue(() =>
                             ActivityGroupService.EmailInvitedContacts(
                                 group.ID.Value,
-                                period.ID.Value,
+                                periodId,
                                 contacts.Select(x => x.ID.Value).ToList(),
                                 invitemessage,
                                 group.HomePageUrl,
                                 loggedInUser.ID.Value,
+                                null,
                                 null)
                         );
 
@@ -679,7 +681,6 @@ namespace AfterSchool.Areas.Org.Controllers
                     onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
                 );
             }
-            return msgs;
         }
         private SystemMessages InviteContactList(string list, string invitemessage, RegistrationPeriod period, Activity activity)
         {
@@ -696,14 +697,13 @@ namespace AfterSchool.Areas.Org.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        contacts = contactList.GetContacts(adc);
+                        contacts = contactList.GetContacts(amsgs, adc);
 
                         amsgs.AddRange(activity.InviteContacts(contacts, period, SessionVariables.CurrentUser.ID.Value, adc));
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
                         // get session information because it isn't available in a background task
-                        var account = SessionVariables.CurrentAccount;
                         var loggedInUser = SessionVariables.CurrentUser;
 
                         BackgroundJob.Enqueue(() =>
