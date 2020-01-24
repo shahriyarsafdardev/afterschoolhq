@@ -780,9 +780,9 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
-        public static SystemMessages SendSessionInviteEmail(Registrant contact, Account invitingAccount, ActivityGroup session, RegistrantActivityGroup rag, RegistrationPeriod period, WebUser loggedInUser, string customMessage = null)
+        public static void SendSessionInviteEmail(Registrant contact, Account invitingAccount, ActivityGroup session, RegistrantActivityGroup rag, RegistrationPeriod period, WebUser loggedInUser, string customMessage = null, SystemMessages msgs = null)
         {
-            var msgs = new SystemMessages();
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             if (customMessage.IsNotEmpty())
                 customMessage = $"<p>{customMessage.Replace("\n", "<br />")}</p><hr />";
@@ -831,8 +831,6 @@ namespace AfterSchoolLibrary.Helpers
                 emailTemplateId: SendGridHelper.GetGenericTemplateId(true));
 
             msgs.AddRange(mailMsgs);
-
-            return msgs;
         }
 
         public static SystemMessages SendLeagueAccountInvitedEmail(Account invitedAccount, ActivityGroup activityGroup, WebUser sendingUser, string customMessage = null)

@@ -20,7 +20,7 @@
 
                 @if (Model.ActivityGroupTypeId == ActivityGroupType.Session)
                 {
-                    <a class="btn btn-primary" href="@Url.Action("editsetup", "activity", new { group = group.Uid });">
+                    <a class="btn btn-primary" href="@Url.Action("editsetup", "activity", new { group = Model.Uid })">
                         <i class="icon icon-left s7-plus"></i>
                         Add @UILabel.ActivityLabel(Model.ActivityGroupTypeId)
                     </a>

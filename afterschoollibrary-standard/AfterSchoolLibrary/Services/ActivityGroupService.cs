@@ -616,33 +616,30 @@ namespace AfterSchoolLibrary.Services
             RegistrantActivityGroup.LoadByUid(invite, msgs, dc)?.DeclineInvite(0, msgs, dc);
         }
 
-        public static SystemMessages EmailInvitedContacts(int id, int periodId, List<int> contactIds, string emailmessage, string inviteUrl, int loggedInUserId, DatabaseConnection dc = null)
+        public static void EmailInvitedContacts(int id, int periodId, List<int> contactIds, string emailmessage, string inviteUrl, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
-            var group = ActivityGroup.Load(id, dc: dc);
-            var account = group.GetAccount(dc: dc);
-            var period = RegistrationPeriod.Load(periodId, dc: dc);
-            var loggedInUser = WebUser.Load(loggedInUserId, dc: dc);
-            var contacts = Registrant.LoadList(contactIds, dc: dc);
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            var group = ActivityGroup.Load(id, msgs, dc);
+            var account = group.GetAccount(msgs, dc);
+            var loggedInUser = WebUser.Load(loggedInUserId, msgs, dc);
+            var contacts = Registrant.LoadList(contactIds, msgs, dc);
+            var period = RegistrationPeriod.Load(periodId, msgs, dc);
 
             if (contacts.IsNotEmpty() && contacts.Any())
-            {                
                 contacts.ForEach(contact => {
 
                     var rag = RegistrantActivityGroup.LoadByActivityGroupIdByRegistrantId(group.ID.Value, contact.ID.Value, msgs, dc);
 
-                    msgs.AddRange(Helpers.EmailHelper.SendSessionInviteEmail(
+                    Helpers.EmailHelper.SendSessionInviteEmail(
                         contact,
                         account,
                         group,
                         rag,
                         period,
                         loggedInUser,
-                        emailmessage));
+                        emailmessage,
+                        msgs);
                 });
-            }
-
-            return msgs;
         }
 
         public static int GetSeatsRemaining(this ActivityGroup group, SystemMessages msgs = null, DatabaseConnection dc = null)
