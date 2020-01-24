@@ -12,7 +12,7 @@
         {
             showSeatsRemaining = false;
         }
-        else if (Model.IsActivity() && Model.GetActivity().ActivityTypeId == ActivityType.FieldTrip)
+        else if (Model.IsActivity() && Model.GetActivity().ActivityTypeId.In(new ActivityType[] { ActivityType.FieldTrip, ActivityType.PermissionSlip}))
         {
             showSeatsRemaining = false;
         }

@@ -23,5 +23,6 @@ public enum FeatureType
 	UseStripeConnectedAccount,
 	AcceptACH,
 	ManageLeagues,
-	ManageFieldTrips
+	ManageFieldTrips,
+	ManagePermissionSlips
 }

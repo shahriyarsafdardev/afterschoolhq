@@ -18,12 +18,17 @@ namespace AfterSchool.Models
         }
         public static string ActivityLabel(ActivityType activityType = ActivityType.Activity, bool plural = false)
         {
-            if (activityType == ActivityType.Team)
-                return GetLabelConfigParam("Team", plural);
-            else if (activityType == ActivityType.FieldTrip)
-                return GetLabelConfigParam("FieldTrip", plural);
-
-            return GetLabelConfigParam("Activity", plural);
+            switch (activityType)
+            {
+                case ActivityType.Team:
+                    return GetLabelConfigParam("Team", plural);
+                case ActivityType.FieldTrip:
+                    return GetLabelConfigParam("FieldTrip", plural);
+                case ActivityType.PermissionSlip:
+                    return GetLabelConfigParam("PermissionSlip", plural);
+                default:
+                    return GetLabelConfigParam("Activity", plural);
+            }
         }
         public static string RegistrantLabel(bool plural = false)
         {

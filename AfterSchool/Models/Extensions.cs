@@ -116,44 +116,41 @@ namespace AfterSchool.Models
             var archiveMsgs = new SystemMessages();
 
             if (activity.Name.IsEmpty())
-            {
                 setupMsgs.Add("Activity Name", MessageType.UserError);
-            }
-            if (activity.SeatsAvailable.HasValue == false)
-            {
+
+            if (!activity.SeatsAvailable.HasValue)
                 setupMsgs.Add("Seats Available", MessageType.UserError);
-            }
+
             if (!activity.ActivityGroupId.HasValue)
             {
                 if (activity.GetActiveRegistrationPeriod().IsEmpty())
-                {
                     setupMsgs.Add(UILabel.RegistrationPeriodLabel(), MessageType.UserError);
-                }
+
                 if (activity.GetActiveActivityForm().IsEmpty())
-                {
                     setupMsgs.Add("Registration Form", MessageType.UserError);
-                }
             }
+
             if (setupMsgs.HasErrors())
             {
                 setupMsgs.Insert(0, new SystemMessage($"<a href=\"/org/activity/editsetup/{activity.Uid}\" class=\"publish-error-title\">Settings</a>", MessageType.UserError));
                 msgs.AddRange(setupMsgs);
             }
 
-            if (!activity.HasSchedule)
+            if (activity.ActivityTypeId != ActivityType.PermissionSlip)
             {
-                scheduleMessages.Add("Schedule Meeting Dates/Times", MessageType.UserError);
-            }
-            if (scheduleMessages.HasErrors())
-            {
-                scheduleMessages.Insert(0, new SystemMessage($"<a href=\"/org/activity/editschedule/{activity.Uid}\" class=\"publish-error-title\">Schedule</a>", MessageType.UserError));
-                msgs.AddRange(scheduleMessages);
+                if (!activity.HasSchedule)
+                    scheduleMessages.Add("Schedule Meeting Dates/Times", MessageType.UserError);
+
+                if (scheduleMessages.HasErrors())
+                {
+                    scheduleMessages.Insert(0, new SystemMessage($"<a href=\"/org/activity/editschedule/{activity.Uid}\" class=\"publish-error-title\">Schedule</a>", MessageType.UserError));
+                    msgs.AddRange(scheduleMessages);
+                }
             }
 
             if (BasicLibrary.Utilities.RemoveHTMLAndEntities(activity.Details).IsBlank())
-            {
                 detailMsgs.Add("Description", MessageType.UserError);
-            }
+
             if (detailMsgs.HasErrors())
             {
                 detailMsgs.Insert(0, new SystemMessage($"<a href=\"/org/activity/editdetails/{activity.Uid}\" class=\"publish-error-title\">About Your Activity</a>", MessageType.UserError));
@@ -161,37 +158,32 @@ namespace AfterSchool.Models
             }
 
             if (activity.ContactName.IsBlank())
-            {
                 contactMsgs.Add("Contact Name", MessageType.UserError);
-            }
+
             if (activity.ContactPhone.IsBlank())
-            {
                 contactMsgs.Add("Contact Phone", MessageType.UserError);
-            }
+
             if (activity.ContactEmail.IsBlank())
-            {
                 contactMsgs.Add("Contact Email", MessageType.UserError);
-            }
+
             if (contactMsgs.HasErrors())
             {
                 contactMsgs.Insert(0, new SystemMessage($"<a href=\"/org/activity/editcontact/{activity.Uid}\" class=\"publish-error-title\">Contact Information</a>", MessageType.UserError));
                 msgs.AddRange(contactMsgs);
             }
 
-            if (!activity.LocationId.HasValue)
+            if (!activity.ActivityTypeId.NotIn(new List<ActivityType>() { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
             {
-                locationMsgs.Add("Activity Location", MessageType.UserError);
-            }            
-            if (locationMsgs.HasErrors())
-            {
-                locationMsgs.Insert(0, new SystemMessage($"<a href=\"/org/activity/editlocation/{activity.Uid}\" class=\"publish-error-title\">Location</a>", MessageType.UserError));
-                msgs.AddRange(locationMsgs);
+                if (!activity.LocationId.HasValue)
+                    locationMsgs.Add("Activity Location", MessageType.UserError);
+
+                if (locationMsgs.HasErrors())
+                {
+                    locationMsgs.Insert(0, new SystemMessage($"<a href=\"/org/activity/editlocation/{activity.Uid}\" class=\"publish-error-title\">Location</a>", MessageType.UserError));
+                    msgs.AddRange(locationMsgs);
+                }
             }
 
-            //if (activity.CostPerRegistrant.HasValue && activity.CostPerRegistrant.Value > 0 && !activity.AllowToPayLater && !activity.AcceptCreditCard)
-            //{
-            //    paymentMsgs.Add("Payment Information: Either accept credit cards or allow to pay later", MessageType.UserError);
-            //}
             if (paymentMsgs.HasErrors())
             {
                 paymentMsgs.Insert(0, new SystemMessage($"<a href=\"/org/activity/editcost/{activity.Uid}\" class=\"publish-error-title\">Payment</a>", MessageType.UserError));
@@ -220,13 +212,10 @@ namespace AfterSchool.Models
             }
 
             if (activity.IsArchived)
-            {
                 archiveMsgs.Add($"<a href=\"/org/activity/restore/{activity.Uid}\">Restore {activity.Name}</a>. It is currently archived", MessageType.Error);
-            }
+
             if (activity.IsGroupArchived)
-            {
                 archiveMsgs.Add($"<a href=\"/org/group/restore/{activity.GetActivityGroup().Uid}\">Restore {activity.GetActivityGroup().Name}</a>. It is currently archived", MessageType.Error);
-            }
 
             if (archiveMsgs.HasErrors())
             {

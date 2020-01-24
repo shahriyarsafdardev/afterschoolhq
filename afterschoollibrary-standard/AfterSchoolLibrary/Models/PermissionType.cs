@@ -30,5 +30,8 @@ public enum PermissionType
 	LeaguesManage,
 	FieldTripsView,
 	FieldTripsEdit,
-	FieldTripsManage
+	FieldTripsManage,
+	PermissionSlipsView,
+	PermissionSlipsEdit,
+	PermissionSlipsManage
 }

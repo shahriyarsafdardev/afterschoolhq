@@ -16,6 +16,7 @@
     }
 
     var showRegistrationPeriodList = SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups);
+    var showSeats = Model.ActivityTypeId != ActivityType.FieldTrip && Model.ActivityTypeId != ActivityType.PermissionSlip;
 }
 
 <div class="panel panel-default panel-small-padding">
@@ -31,7 +32,7 @@
             </div>
         </div>
 
-        @if (Model.ActivityTypeId != ActivityType.FieldTrip)
+        @if (showSeats)
         {
             <div class="form-group">
                 <label class="col-sm-3 control-label">
@@ -139,7 +140,7 @@
 
             <div class="advanced-settings hide">
 
-                @if (Model.ActivityTypeId != ActivityType.FieldTrip)
+                @if (showSeats)
                 {
                     <div class="form-group">
                         <label class="col-sm-3 control-label">

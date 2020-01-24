@@ -188,6 +188,18 @@ namespace AfterSchool
                 });
 
             routes.MapRoute(
+                "PermissionSlipRegister",
+                "{accountname}/permissionslip/{activityname}/register",
+                new
+                {
+                    controller = "r",
+                    action = "register",
+                    accountname = UrlParameter.Optional,
+                    activitytype = UrlParameter.Optional,
+                    activityname = UrlParameter.Optional
+                });
+
+            routes.MapRoute(
                 "LeagueRegister2",
                 "{accountname}/{activitygrouptype}/{externalaccountname}/{group}/register",
                 new

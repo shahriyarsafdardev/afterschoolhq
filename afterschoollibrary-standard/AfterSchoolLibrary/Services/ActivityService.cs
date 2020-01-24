@@ -53,13 +53,19 @@ namespace AfterSchoolLibrary.Services
             if (Utilities.RemoveHTMLAndEntities(activity.Details).IsBlank())
                 totalErrors++;
 
-            totalFields++;
-            if (!activity.HasSchedule)
-                totalErrors++;
+            if (activity.ActivityTypeId != ActivityType.PermissionSlip)
+            {
+                totalFields++;
+                if (!activity.HasSchedule || activity.ActivityTypeId == ActivityType.PermissionSlip)
+                    totalErrors++;
+            }
 
-            totalFields++;
-            if (!activity.LocationId.HasValue)
-                totalErrors++;
+            if (!activity.ActivityTypeId.NotIn(new List<ActivityType>() { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
+            {
+                totalFields++;
+                if (!activity.LocationId.HasValue)
+                    totalErrors++;
+            }
 
             //totalFields++;
             //if (CostPerRegistrant.HasValue && CostPerRegistrant.Value > 0 && !AllowToPayLater && !AcceptCreditCard)
@@ -839,7 +845,7 @@ namespace AfterSchoolLibrary.Services
                 if (name.IsEmpty())
                     msgs.Add("Activity Name is required", MessageType.UserError);
 
-                if (activityType != ActivityType.FieldTrip)
+                if (activityType.NotIn(new List<ActivityType>() { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
                 {
                     if (!seatsavailable.IsNumber())
                     {

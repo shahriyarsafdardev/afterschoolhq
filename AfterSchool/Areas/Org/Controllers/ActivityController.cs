@@ -245,6 +245,10 @@ namespace AfterSchool.Areas.Org.Controllers
                                 LoadEditScheduleViewBag(activity, activity.ActivityScheduleId?.ToString());
                                 ViewBag.ActiveMenu = "EditSchedule";
                                 return View("editschedule", activity);
+                            case ActivityType.PermissionSlip:
+                                ViewBag.ActiveMenu = "EditDetails";
+                                return View("EditDetails", activity);
+
                         }
                         break;
                 }
