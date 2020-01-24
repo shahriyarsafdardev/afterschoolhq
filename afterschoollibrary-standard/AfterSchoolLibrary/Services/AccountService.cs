@@ -1182,6 +1182,7 @@ namespace AfterSchoolLibrary.Services
         public static AccountPackage SetDefaultAccountPackage(this Account account, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var package = Package.Load(start: 0, length: 1, msgs: msgs, dc: dc).First();
+
             return account.AddPackage(package.ID.Value, BillingPeriodType.Month, loggedInUser, msgs, dc);
         }
 
@@ -1371,7 +1372,11 @@ namespace AfterSchoolLibrary.Services
                         }
 
                         if (amsgs.HasNoErrors() && newap.ID.HasValue)
-                            amsgs.AddRange(package.CopyFeaturesToAccountPackage(newap, loggedInUserId, adc));
+                            package.CopyFeaturesToAccountPackage(newap, loggedInUserId, amsgs, adc);
+
+                        // ensure package features are added
+                        account.EnsureDefaultPackageFeatures(newap, loggedInUser, msgs, dc);
+                        
 
                         // make sure the account package is set to the real trial days passed in
                         if (amsgs.HasNoErrors())
@@ -1398,15 +1403,26 @@ namespace AfterSchoolLibrary.Services
             return newap;
         }
 
+        private static void EnsureDefaultPackageFeatures(this Account account, AccountPackage newap, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (account.AccountTypeId == AccountType.School)
+            {
+                newap.AddPackageFeature(FeatureType.ManagePermissionSlips, 1, loggedInUser, msgs, dc);
+                newap.AddPackageFeature(FeatureType.ManageFieldTrips, 1, loggedInUser, msgs, dc);
+                newap.AddPackageFeature(FeatureType.ManageActivityGroups, 1, loggedInUser, msgs, dc);
+            }
+
+            newap.AddPackageFeature(FeatureType.AcceptACH, 1, loggedInUser, msgs, dc);
+        }
+
         public static int GetTrialDaysRemaining(this Account account, AccountPackage currentPackage, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var daysRemaining = 0;
             var firstAccountPackage = account.GetAccountPackages(msgs, dc).OrderBy(x => x.StartDate.Value).First();
             var daysSinceSignUp = (DateTime.UtcNow - firstAccountPackage.StartDate.Value).Days;
             if (daysSinceSignUp < currentPackage.GetFeature(FeatureType.TrialDays, msgs, dc).GetMaxValue() + 1) // they get the full last day
-            {
                 daysRemaining = (currentPackage.GetFeature(FeatureType.TrialDays, msgs, dc).GetMaxValue() - daysSinceSignUp).ToInteger();
-            }
+
             return daysRemaining;
         }
 

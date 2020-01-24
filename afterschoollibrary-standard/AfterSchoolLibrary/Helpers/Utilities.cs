@@ -878,10 +878,10 @@ namespace AfterSchoolLibrary.Helpers
         {
             var msgs = new SystemMessages();
 
-            var aps = AccountPackage.Load(dc: dc);
+            var aps = AccountPackage.Load(msgs: msgs, dc: dc);
             foreach (var ap in aps)
             {
-                msgs.AddRange(ap.ToPackage().CopyFeaturesToAccountPackage(ap, 0, dc: dc));
+                ap.ToPackage().CopyFeaturesToAccountPackage(ap, 0, msgs, dc: dc);
             }
 
             return msgs;
