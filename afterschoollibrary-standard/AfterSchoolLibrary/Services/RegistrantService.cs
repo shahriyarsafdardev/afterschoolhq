@@ -918,13 +918,11 @@ namespace AfterSchoolLibrary.Services
             return ra;
         }
 
-        public static SystemMessages AddInviteToActivities(this Registrant registrant, List<int> activityIds, int loggedInUserId, int? activityGroupId, int? registrationPeriodId, DatabaseConnection dc = null)
+        public static void AddInviteToActivities(this Registrant registrant, List<int> activityIds, int loggedInUserId, int? activityGroupId, int? registrationPeriodId, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
             activityIds.ForEach(activityId =>
                 registrant.AddInviteToActivity(activityId, loggedInUserId, activityGroupId, registrationPeriodId, msgs, dc)
             );
-            return msgs;
         }
 
         public static Registrant CreateMasterCopy(this Registrant registrant, List<FormQuestion> questions, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
