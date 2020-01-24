@@ -33,7 +33,7 @@
             <div class="col-md-8 col-lg-9">
                 <form id="form1" method="post" action="@Url.Action("editcontact", "activity", new { id = Model.Uid, isnew = Request["isnew"] })" class="form-horizontal">
                     
-                    @if (Model.ActivityTypeId == ActivityType.Activity)
+                    @if (Model.ActivityTypeId != ActivityType.Team)
                     {
                         @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editcontact", "next", true, true, Request))
                     }
@@ -46,7 +46,7 @@
                             @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(false, false))
                         </div>
                         <div class="col-sm-3">
-                            @if (Model.ActivityTypeId == ActivityType.Activity)
+                            @if (Model.ActivityTypeId != ActivityType.Team)
                             {
                                 @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editcontact", "next", false, true, Request))
                             }

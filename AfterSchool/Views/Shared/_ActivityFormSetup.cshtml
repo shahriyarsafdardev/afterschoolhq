@@ -31,18 +31,27 @@
             </div>
         </div>
 
-        <div class="form-group">
-            <label class="col-sm-3 control-label">
-                Total Available Seats <span class="text-danger">*</span>
-                <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Must be a number between 1 and @accountPackage.GetFeature(FeatureType.Participants).Max.Value" data-placement="top"></i>
-            </label>
-            <div class="col-sm-9">
-                <input type="number" class="form-control" id="seatsavailable" name="seatsavailable" value="@Model.SeatsAvailable" onfocus="this.select()" required step="1" min="1" max="@accountPackage.GetFeature(FeatureType.Participants).Max.Value" />
+        @if (Model.ActivityTypeId != ActivityType.FieldTrip)
+        {
+            <div class="form-group">
+                <label class="col-sm-3 control-label">
+                    Total Available Seats <span class="text-danger">*</span>
+                    <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Must be a number between 1 and @accountPackage.GetFeature(FeatureType.Participants).Max.Value" data-placement="top"></i>
+                </label>
+                <div class="col-sm-9">
+                    <input type="number" class="form-control" id="seatsavailable" name="seatsavailable" value="@Model.SeatsAvailable" onfocus="this.select()" required step="1" min="1" max="@accountPackage.GetFeature(FeatureType.Participants).Max.Value" />
+                </div>
             </div>
-        </div>
+        }
+        else
+        {
+            <input type="hidden" name="seatsavailable" value="1000" />
+        }
 
-        @if(group.IsEmpty())
-        { 
+        <input type="hidden" name="type" value="@((int)Model.ActivityTypeId)" />
+
+        @if (group.IsEmpty())
+        {
             if (showRegistrationPeriodList)
             {
                 <div class="form-group">
@@ -85,15 +94,15 @@
                 <div class="col-sm-4">
 
                     @{Html.RenderPartial(
-                            "~/Views/Shared/_TimeSelect.cshtml",
-                            activePeriod.StartDateTime.Value,
-                            new ViewDataDictionary()
-                            {
+                              "~/Views/Shared/_TimeSelect.cshtml",
+                              activePeriod.StartDateTime.Value,
+                              new ViewDataDictionary()
+                              {
                                 { "name", "registrationopentime" },
                                 { "id", "registrationopentime" },
                                 { "required", true }
-                            }
-                        );
+                      }
+                          );
                     }
 
                 </div>
@@ -110,35 +119,38 @@
                 <div class="col-sm-4">
 
                     @{Html.RenderPartial(
-                            "~/Views/Shared/_TimeSelect.cshtml",
-                            activePeriod.EndDateTime.Value,
-                            new ViewDataDictionary()
-                            {
+                                "~/Views/Shared/_TimeSelect.cshtml",
+                                activePeriod.EndDateTime.Value,
+                                new ViewDataDictionary()
+                                {
                                 { "name", "registrationclosetime" },
                                 { "id", "registrationclosetime" },
                                 { "required", true }
-                            }
-                        ); 
+                        }
+                            );
                     }
-                
+
                 </div>
-            </div>            
+            </div>
 
             <div class="col-md-offset-3 col-md-9 padding-v-20">
                 <span><a onclick="ActivitySetup.showAdvancedSettings()" id="btn-advanced-settings" class="pointer">Show Advanced Settings</a></span>
             </div>
 
             <div class="advanced-settings hide">
-        
-                <div class="form-group">
-                    <label class="col-sm-3 control-label">
-                        Waiting List Seats <span class="text-danger">*</span>
-                        <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Can be any positive number" data-placement="top"></i>
-                    </label>
-                    <div class="col-sm-9">
-                        <input type="number" class="form-control" id="waitinglistseats" name="waitinglistseats" value="@Model.WaitingListSeats" onfocus="this.select()" required step="1" min="0" @waitinglistdisabled />
+
+                @if (Model.ActivityTypeId != ActivityType.FieldTrip)
+                {
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">
+                            Waiting List Seats <span class="text-danger">*</span>
+                            <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Can be any positive number" data-placement="top"></i>
+                        </label>
+                        <div class="col-sm-9">
+                            <input type="number" class="form-control" id="waitinglistseats" name="waitinglistseats" value="@Model.WaitingListSeats" onfocus="this.select()" required step="1" min="0" @waitinglistdisabled />
+                        </div>
                     </div>
-                </div>
+                }
 
                 @if (accountPackage.HasFeature(FeatureType.ManageForms))
                 {
@@ -155,14 +167,14 @@
                                     <option value="@form.ID" @(activeForm?.FormId == form.ID ? " selected=\"selected\" " : "")>@form.Name</option>
                                 }
                             </select>
-                        </div>                
+                        </div>
                         <div class="col-md-3">
                             <a class="btn btn-block btn-link" href="@Url.Action("edit","form", new { id = activeForm?.ID })" id="editForm" target="_blank">Edit Form</a>
                         </div>
                     </div>
                 }
-                        
-                @if (SessionVariables.AccountPackage.HasFeature(FeatureType.AllowApplications))
+
+                @if (SessionVariables.AccountPackage.HasFeature(FeatureType.AllowApplications) && Model.ActivityTypeId != ActivityType.FieldTrip)
                 {
                     <div class="form-group">
                         <label class="col-sm-3 control-label">
@@ -191,9 +203,9 @@
                 }
             </div>
         }
-        else 
+        else
         {
-            <input type="hidden" name="group" value="@group.Uid" /> 
+            <input type="hidden" name="group" value="@group.Uid" />
             <input type="hidden" name="regmode" value="@((int)Model.RegistrationModeId)" />
             <input type="hidden" name="form" value="@activeForm.FormId" />
         }

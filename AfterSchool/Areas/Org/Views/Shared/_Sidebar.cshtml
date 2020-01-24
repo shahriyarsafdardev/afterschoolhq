@@ -80,7 +80,16 @@
 
             @if (CanView(FeatureType.Activities, SessionVariables.AccountUserType, PermissionType.ActivitiesView))
             {
-                <li class="@activityactive"><a href="@Url.Action("index", "activity")"><i class="icon s7-gleam"></i> @UILabel.ActivityLabel(ActivityType.Activity, true)</a></li>
+                <li class="@activityactive">
+                    <a href="@Url.Action("index", "activity")"><i class="icon s7-gleam"></i> @UILabel.ActivityLabel(ActivityType.Activity, true)</a>
+                </li>
+            }
+
+            @if (CanView(FeatureType.ManageFieldTrips, SessionVariables.AccountUserType, PermissionType.FieldTripsView))
+            {
+                <li class="@activityactive">
+                    <a href="@Url.Action("index", "activity", new { type = (int)ActivityType.FieldTrip })"><i class="icon s7-compass"></i> @UILabel.ActivityLabel(ActivityType.FieldTrip, true)</a>
+                </li>
             }
 
             @if (CanView(FeatureType.ManageActivityGroups, SessionVariables.AccountUserType, PermissionType.SessionsView))

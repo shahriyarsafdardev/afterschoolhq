@@ -27,5 +27,8 @@ public enum PermissionType
 	SessionsManage,
 	LeaguesView,
 	LeaguesEdit,
-	LeaguesManage
+	LeaguesManage,
+	FieldTripsView,
+	FieldTripsEdit,
+	FieldTripsManage
 }

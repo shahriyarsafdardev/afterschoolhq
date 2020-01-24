@@ -22,5 +22,6 @@ public enum FeatureType
 	ManageExternalLeagues,
 	UseStripeConnectedAccount,
 	AcceptACH,
-	ManageLeagues
+	ManageLeagues,
+	ManageFieldTrips
 }

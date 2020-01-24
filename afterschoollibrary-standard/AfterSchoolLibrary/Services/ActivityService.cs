@@ -827,24 +827,34 @@ namespace AfterSchoolLibrary.Services
             var providerlastname = values.GetValueOrDefault("providerlastname");
             var provideremail = values.GetValueOrDefault("provideremail");
             var providerphone = values.GetValueOrDefault("providerphone");
+            var type = values.GetValueOrDefault("type");
+
+            var activityType = ActivityType.NotSet;
+
+            if (type.IsNotEmpty() && type.IsNumber())
+                activityType = type.ToString().ToInteger().ToEnum<ActivityType>();
 
             if (!activityId.IsNumber() || activityId.ToInteger() == 0)
             {
                 if (name.IsEmpty())
                     msgs.Add("Activity Name is required", MessageType.UserError);
 
-                if (!seatsavailable.IsNumber())
+                if (activityType != ActivityType.FieldTrip)
                 {
-                    msgs.Add("Total Available Seats is required and must be greater than 0", MessageType.UserError);
-                }
-                else
-                {
-                    var ap = account.GetActiveAccountPackage(msgs, dc);
-                    var maxParticipants = ap.GetFeature(FeatureType.Participants, msgs, dc).Max.Value;
-                    if (maxParticipants < seatsavailable.ToString().ToInteger())
-                        msgs.Add(string.Format("Total Available Seats is required and must be less than or equal to {0}", maxParticipants), MessageType.UserError);
+                    if (!seatsavailable.IsNumber())
+                    {
+                        msgs.Add("Total Available Seats is required and must be greater than 0", MessageType.UserError);
+                    }
+                    else
+                    {
+                        var ap = account.GetActiveAccountPackage(msgs, dc);
+                        var maxParticipants = ap.GetFeature(FeatureType.Participants, msgs, dc).Max.Value;
+                        if (maxParticipants < seatsavailable.ToString().ToInteger())
+                            msgs.Add(string.Format("Total Available Seats is required and must be less than or equal to {0}", maxParticipants), MessageType.UserError);
 
+                    }
                 }
+
                 if (group.IsEmpty() && registrationperiod.ToString().ToInteger() > 0)
                 {
                     if (!$"{registrationopendate} {registrationopentime}".IsDateTime())
@@ -885,7 +895,7 @@ namespace AfterSchoolLibrary.Services
             {
                 activity = new Activity
                 {
-                    ActivityTypeId = ActivityType.Activity,
+                    ActivityTypeId = activityType,
                     CreateDate = DateTime.UtcNow,
                     CreatedBy = loggedInUserId,
                     SeatsAvailable = seatsavailable.ToString().ToInteger(),

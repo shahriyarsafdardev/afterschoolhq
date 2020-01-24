@@ -4,6 +4,23 @@
     var grades = (List<GradeLevel>)ViewBag.Grades;
     var cart = (Cart)ViewBag.Cart;
     var locations = (List<Location>)ViewBag.Locations;
+    var showSeatsRemaining = true;
+
+    if (Model.SeatsRemaining.HasValue)
+    {
+        if (Model.IsActivityGroup() && Model.GetActivityGroup().ActivityGroupTypeId != ActivityGroupType.League)
+        {
+            showSeatsRemaining = false;
+        }
+        else if (Model.IsActivity() && Model.GetActivity().ActivityTypeId == ActivityType.FieldTrip)
+        {
+            showSeatsRemaining = false;
+        }
+    }
+    else
+    {
+        showSeatsRemaining = false;
+    }
 }
 
 <div class="col-sm-12 col-md-6 col-lg-4 participation-object searchable-object"
@@ -95,7 +112,7 @@
             </div>
 
             <div class="seats-remaining text-center">
-                @if (Model.SeatsRemaining.HasValue && (Model.IsActivity() || (Model.IsActivityGroup() && Model.GetActivityGroup().ActivityGroupTypeId == ActivityGroupType.League)))
+                @if (showSeatsRemaining)
                 {
                     <strong>
                         <em>

@@ -20,6 +20,8 @@ namespace AfterSchool.Models
         {
             if (activityType == ActivityType.Team)
                 return GetLabelConfigParam("Team", plural);
+            else if (activityType == ActivityType.FieldTrip)
+                return GetLabelConfigParam("FieldTrip", plural);
 
             return GetLabelConfigParam("Activity", plural);
         }

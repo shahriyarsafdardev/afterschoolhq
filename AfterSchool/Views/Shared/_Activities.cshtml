@@ -6,19 +6,24 @@
     var group = (ActivityGroup)ViewData["Group"];
     var groups = (List<ActivityGroup>)ViewData["Groups"];
     var needToUpgrade = (bool)ViewData["NeedToUpgrade"];
+    var activityType = ActivityType.Activity;
 
-    var addUrl = Url.Action("editsetup", "activity", new { isnew = 1 });
+    if (ViewData["ActivityType"] != null)
+    {
+        activityType = ViewData["ActivityType"].ToString().ToInteger().ToEnum<ActivityType>();
+    }
+
+    var addUrl = Url.Action("editsetup", "activity", new { isnew = 1, type = (int)activityType });
     var pagingController = "activity";
     var pagingAction = "index";
     var id = "";
     var currentListUrl = Url.Action("index", "activity", new { archive = 0 });
     var archivedListUrl = Url.Action("index", "activity", new { archive = 1 });
     var hasArchivedActivities = (bool)ViewData["HasArchivedActivities"];
-    var activityType = ActivityType.Activity;
 
     if (group.IsNotEmpty())
     {
-        addUrl = Url.Action("editsetup", "activity", new { group = group.Uid });
+        addUrl = Url.Action("editsetup", "activity", new { group = group.Uid, type = (int)activityType });
         pagingController = "group";
         pagingAction = "activities";
         id = group.Uid.ToString();
@@ -245,7 +250,7 @@ else
         new ViewDataDictionary()
         {
             { "id", id },
-            { "querystring", string.Format("archive={0}", Request["archive"]) },
+            { "querystring", $"archive={Request["archive"]}&type={(int)activityType}" },
             { "action", pagingAction },
             { "controller", pagingController }
         }
