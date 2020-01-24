@@ -653,9 +653,9 @@ namespace AfterSchool.Areas.Org.Controllers
                             .Select(x => x.ID.Value)
                             .ToList();
 
-                        contacts = contactList.GetContacts(adc);
+                        contacts = contactList.GetContacts(amsgs, adc);
 
-                        amsgs.AddRange(group.InviteContacts(contacts, period, activityIds, SessionVariables.CurrentUser.ID.Value, adc));
+                        group.InviteContacts(contacts, period, activityIds, SessionVariables.CurrentUser.ID.Value, amsgs, adc);
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
@@ -696,14 +696,13 @@ namespace AfterSchool.Areas.Org.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        contacts = contactList.GetContacts(adc);
+                        contacts = contactList.GetContacts(amsgs, adc);
 
                         amsgs.AddRange(activity.InviteContacts(contacts, period, SessionVariables.CurrentUser.ID.Value, adc));
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
                         // get session information because it isn't available in a background task
-                        var account = SessionVariables.CurrentAccount;
                         var loggedInUser = SessionVariables.CurrentUser;
 
                         BackgroundJob.Enqueue(() =>

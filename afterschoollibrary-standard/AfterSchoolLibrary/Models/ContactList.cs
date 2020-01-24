@@ -199,9 +199,9 @@ namespace AfterSchoolLibrary.Models
             return ContactListRegistrant.GetCount(criterias: new Hashtable() { { "ContactListId", this.ID.Value } }, dc: dc);
         }
 
-        public List<Registrant> GetContacts(DatabaseConnection dc = null)
+        public List<Registrant> GetContacts(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ContactListRegistrant.LoadByContactListId(this.ID.Value, dc: dc).Select(x => x.ToRegistrant()).ToList();
+            return ContactListRegistrant.LoadByContactListId(this.ID.Value, msgs, dc).Select(x => x.ToRegistrant()).ToList();
         }
 
         public bool HasContact(Registrant contact, DatabaseConnection dc = null)
