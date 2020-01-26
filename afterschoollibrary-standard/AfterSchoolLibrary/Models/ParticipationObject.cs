@@ -48,8 +48,8 @@ namespace AfterSchoolLibrary.Models
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
 
-        private ActivityType? ActivityType { get; set; }
-        private ActivityGroupType? ActivityGroupType { get; set; }
+        public ActivityType? ActivityType { get; set; }
+        public ActivityGroupType? ActivityGroupType { get; set; }
 
         public ParticipationObject(int participationObjectId, ParticipationObjectType participationObjectType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {

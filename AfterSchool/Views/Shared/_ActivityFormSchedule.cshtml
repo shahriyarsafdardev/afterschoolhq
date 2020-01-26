@@ -192,7 +192,7 @@
 
             <div class="form-group">
                 <label class="col-md-3 control-label">
-                    Day of the week <span class="text-danger">*</span>
+                    Day(s) of the week <span class="text-danger">*</span>
                 </label>
                 <div class="col-md-7">
                     <div class="am-checkbox inline">
@@ -419,11 +419,7 @@
         // checkScheduleVal();
         showClosedDates();
         checkIsOnGoing();
-
-        @if (forceNonRepeating)
-        {
-            @:checkRepeatsWeekly();
-        }
+        checkRepeatsWeekly();
 
         $('#schedule').change(function(){
             if($(this).val() == '0') {

@@ -60,7 +60,7 @@ namespace AfterSchoolLibrary.Services
                     totalErrors++;
             }
 
-            if (!activity.ActivityTypeId.NotIn(new List<ActivityType>() { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
+            if (activity.ActivityTypeId.NotIn(new List<ActivityType>() { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
             {
                 totalFields++;
                 if (!activity.LocationId.HasValue)

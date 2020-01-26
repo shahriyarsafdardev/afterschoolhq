@@ -172,7 +172,7 @@ namespace AfterSchool.Models
                 msgs.AddRange(contactMsgs);
             }
 
-            if (!activity.ActivityTypeId.NotIn(new List<ActivityType>() { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
+            if (activity.ActivityTypeId.NotIn(new List<ActivityType>() { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
             {
                 if (!activity.LocationId.HasValue)
                     locationMsgs.Add("Activity Location", MessageType.UserError);

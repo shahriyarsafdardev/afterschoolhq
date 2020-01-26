@@ -8,11 +8,11 @@
 
     if (Model.SeatsRemaining.HasValue)
     {
-        if (Model.IsActivityGroup() && Model.GetActivityGroup().ActivityGroupTypeId != ActivityGroupType.League)
+        if (Model.IsActivityGroup() && Model.ActivityGroupType.Value != ActivityGroupType.League)
         {
             showSeatsRemaining = false;
         }
-        else if (Model.IsActivity() && Model.GetActivity().ActivityTypeId.In(new ActivityType[] { ActivityType.FieldTrip, ActivityType.PermissionSlip}))
+        else if (Model.IsActivity() && Model.ActivityType.Value.In(new ActivityType[] { ActivityType.FieldTrip, ActivityType.PermissionSlip}))
         {
             showSeatsRemaining = false;
         }
