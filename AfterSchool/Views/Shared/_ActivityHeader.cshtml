@@ -120,6 +120,10 @@
                 {
                     <option value="@Url.Action("summary", "group", new { id = group.Uid })">@UILabel.ActivityGroupLabel(group.ActivityGroupTypeId) &raquo;</option>
                 }
+                else
+                {
+                    <option value="@Url.Action("index", "activity", new { type = (int)Model.ActivityTypeId })">Back to List</option>
+                }
             </select>
         </div>
     </div>
