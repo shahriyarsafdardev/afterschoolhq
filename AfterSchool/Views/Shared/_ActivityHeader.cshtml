@@ -74,9 +74,13 @@
 
             @if (Model.ActivityGroupId.HasValue)
             {
-                <a href="@Url.Action("activities", "group", new {id = group.Uid})" class="btn btn-alt5">
+                <a href="@Url.Action("activities", "group", new { id = group.Uid })" class="btn btn-alt5">
                     <i class="s7-date"></i> @UILabel.ActivityGroupLabel(group.ActivityGroupTypeId) &raquo;
                 </a>
+            }
+            else
+            {
+                <a href="@Url.Action("index", "activity", new { type = (int)Model.ActivityTypeId })" class="btn btn-alt5">Back to List &raquo;</a>
             }
         </div>
         <div class="hidden-lg hidden-sm hidden-md">

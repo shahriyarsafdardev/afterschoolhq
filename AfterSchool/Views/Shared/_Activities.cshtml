@@ -113,14 +113,17 @@ else
                 <tr>
                     <th></th>
                     <th>@UILabel.ActivityLabel(activityType)</th>
-                    <th class="text-center">Starts</th>
-                    <th class="text-center">Days</th>
-                    @if (activityType != ActivityType.FieldTrip)
+                    @if (activityType != ActivityType.PermissionSlip)
+                    {
+                        <th class="text-center">Starts</th>
+                        <th class="text-center">Days</th>
+                    }
+                    @if (activityType.NotIn(new ActivityType[] { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
                     {
                         <th class="text-center">Grades</th>
                     }
                     <!--<th class="text-center">Ages</th>-->
-                    <th class="text-center">Seats Taken</th>
+                    <th class="text-center"># Reserved</th>
                     <th></th>
                 </tr>
             </thead>
@@ -128,11 +131,11 @@ else
                 @if (Model.Count > 0)
                 {
                     var assignmentTypes = new List<RegistrationAssignmentType>()
-                                            {
-                                                RegistrationAssignmentType.Reserved,
-                                                RegistrationAssignmentType.ReservedPendingParentalConsent,
-                                                RegistrationAssignmentType.ReservedPendingPayment
-                                            };
+                    {
+                        RegistrationAssignmentType.Reserved,
+                        RegistrationAssignmentType.ReservedPendingParentalConsent,
+                        RegistrationAssignmentType.ReservedPendingPayment
+                    };
 
                     foreach (Activity activity in Model)
                     {
@@ -152,31 +155,34 @@ else
                                     </span>
                                 }
                             </td>
-                            <td class="text-center">
-                                @if (activity.HasSchedule)
-                                {
-                                    <a href="@Url.Action("editschedule", "activity", new { id = activity.Uid })">
-                                        @activity.GetFirstDate().ToShortDateString().Replace("/", "-")
-                                    </a>
-                                }
-                                else
-                                {
-                                    <a href="@Url.Action("editschedule", "activity", new { id = activity.Uid })">-</a>
-                                }
-                            </td>
-                            <td class="text-center">
-                                @if (activity.GetDaysOfTheWeek().Any())
-                                {
-                                    <a href="@Url.Action("editschedule", "activity", new { id = activity.Uid })">
-                                        @activity.GetDaysOfTheWeek().OrderBy(x => (int)x).Select(x => x.ToString().MaxChars(2)).ToStringList(", ")
-                                    </a>
-                                }
-                                else
-                                {
-                                    <a href="@Url.Action("editschedule", "activity", new { id = activity.Uid })">-</a>
-                                }
-                            </td>
-                            @if (activityType != ActivityType.FieldTrip)
+                            @if (activityType != ActivityType.PermissionSlip)
+                            {
+                                <td class="text-center">
+                                    @if (activity.HasSchedule)
+                                    {
+                                        <a href="@Url.Action("editschedule", "activity", new { id = activity.Uid })">
+                                            @activity.GetFirstDate().ToShortDateString().Replace("/", "-")
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <a href="@Url.Action("editschedule", "activity", new { id = activity.Uid })">-</a>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @if (activity.GetDaysOfTheWeek().Any())
+                                    {
+                                        <a href="@Url.Action("editschedule", "activity", new { id = activity.Uid })">
+                                            @activity.GetDaysOfTheWeek().OrderBy(x => (int)x).Select(x => x.ToString().MaxChars(2)).ToStringList(", ")
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <a href="@Url.Action("editschedule", "activity", new { id = activity.Uid })">-</a>
+                                    }
+                                </td>
+                            }
+                            @if (activityType.NotIn(new ActivityType[] { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
                             {
                                 <td class="text-center">
                                     @if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
