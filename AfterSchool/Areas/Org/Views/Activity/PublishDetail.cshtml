@@ -56,7 +56,10 @@
                 <div class="panel-heading">
                     <div class="btn-group pull-right">
 
-                        <a href="@Url.Action("inviteto", "contact", new { id = Model.Uid, type = "activity" })" class="btn btn-default">Invite Parents &raquo;</a>
+                        @if (!Model.ActivityGroupId.HasValue)
+                        {
+                            <a href="@Url.Action("inviteto", "contact", new { id = Model.Uid, type = "activity" })" class="btn btn-default">Invite Parents &raquo;</a>
+                        }
 
                         @if (Model.IsPublishable && !mustRequestToPublish)
                         {                            
