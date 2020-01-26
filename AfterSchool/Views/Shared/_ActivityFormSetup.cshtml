@@ -16,7 +16,7 @@
     }
 
     var showRegistrationPeriodList = SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups);
-    var showSeats = Model.ActivityTypeId != ActivityType.FieldTrip && Model.ActivityTypeId != ActivityType.PermissionSlip;
+    var showSeats = Model.ActivityTypeId.NotIn(new ActivityType[] { ActivityType.FieldTrip, ActivityType.PermissionSlip });
 }
 
 <div class="panel panel-default panel-small-padding">
@@ -175,7 +175,7 @@
                     </div>
                 }
 
-                @if (SessionVariables.AccountPackage.HasFeature(FeatureType.AllowApplications) && Model.ActivityTypeId != ActivityType.FieldTrip)
+                @if (SessionVariables.AccountPackage.HasFeature(FeatureType.AllowApplications) && Model.ActivityTypeId == ActivityType.Activity)
                 {
                     <div class="form-group">
                         <label class="col-sm-3 control-label">
