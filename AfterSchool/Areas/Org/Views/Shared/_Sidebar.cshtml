@@ -13,7 +13,17 @@
         accountactive = "",
         profileactive = "",
         accountingactive = "",
-        leagueexternalactive = "";
+        leagueexternalactive = "",
+        activitycenteractive = "";
+
+    switch (controller)
+    {
+        case "activity":
+        case "group":
+        case "league":
+            activitycenteractive = "active";
+            break;
+    }
 
     switch(controller)
     {
@@ -78,24 +88,53 @@
 
             <li class="@homeactive"><a href="@Url.Action("index", "home")"><i class="icon s7-home"></i><span>Home</span></a></li>
 
-            @if (CanView(FeatureType.Activities, SessionVariables.AccountUserType, PermissionType.ActivitiesView))
+            @if (SessionVariables.CurrentAccount.AccountTypeId == AccountType.ActivityProvider)
             {
-                <li class="@activityactive"><a href="@Url.Action("index", "activity")"><i class="icon s7-gleam"></i> @UILabel.ActivityLabel(ActivityType.Activity, true)</a></li>
+                if (CanView(FeatureType.Activities, SessionVariables.AccountUserType, PermissionType.ActivitiesView))
+                {
+                    <li>
+                        <a href="@Url.Action("index", "activity")"><i class="icon s7-gleam"></i> @UILabel.ActivityLabel(ActivityType.Activity, true)</a>
+                    </li>
+                }
             }
-
-            @if (CanView(FeatureType.ManageActivityGroups, SessionVariables.AccountUserType, PermissionType.SessionsView))
+            else
             {
-                <li class="@sessionactive"><a href="@Url.Action("index", "group")"><i class="icon s7-date"></i> @UILabel.ActivityGroupLabel(ActivityGroupType.Session, true)</a></li>
-            }
+                <li class="parent @activitycenteractive">
+                    <a href="#"><i class="icon s7-gleam"></i> <span>Activity Center</span></a>
+                    <ul class="sub-menu">
+                        @if (CanView(FeatureType.Activities, SessionVariables.AccountUserType, PermissionType.ActivitiesView))
+                        {
+                            <li>
+                                <a href="@Url.Action("index", "activity")"><i class="icon s7-gleam"></i> Extracurricular @UILabel.ActivityLabel(ActivityType.Activity, true)</a>
+                            </li>
+                        }
+                        @if (CanView(FeatureType.ManageFieldTrips, SessionVariables.AccountUserType, PermissionType.FieldTripsView))
+                        {
+                            <li>
+                                <a href="@Url.Action("index", "activity", new { type = (int)ActivityType.FieldTrip })"><i class="icon s7-compass"></i> @UILabel.ActivityLabel(ActivityType.FieldTrip, true)</a>
+                            </li>
+                        }
+                        @if (CanView(FeatureType.ManagePermissionSlips, SessionVariables.AccountUserType, PermissionType.PermissionSlipsView))
+                        {
+                            <li>
+                                <a href="@Url.Action("index", "activity", new { type = (int)ActivityType.PermissionSlip })"><i class="icon s7-file"></i> @UILabel.ActivityLabel(ActivityType.PermissionSlip, true)</a>
+                            </li>
+                        }
+                        @if (CanView(FeatureType.ManageActivityGroups, SessionVariables.AccountUserType, PermissionType.SessionsView))
+                        {
+                            <li class=""><a href="@Url.Action("index", "group")"><i class="icon s7-date"></i> @UILabel.ActivityGroupLabel(ActivityGroupType.Session, true)</a></li>
+                        }
+                        @if (CanView(FeatureType.ManageLeagues, SessionVariables.AccountUserType, PermissionType.LeaguesView))
+                        {
+                            <li class=""><a href="@Url.Action("indexleague", "group")"><i class="icon s7-ball"></i> @UILabel.ActivityGroupLabel(ActivityGroupType.League, true)</a></li>
+                        }
 
-            @if (CanView(FeatureType.ManageLeagues, SessionVariables.AccountUserType, PermissionType.LeaguesView))
-            {
-                <li class="@leagueactive"><a href="@Url.Action("indexleague", "group")"><i class="icon s7-ball"></i> @UILabel.ActivityGroupLabel(ActivityGroupType.League, true)</a></li>
-            }
-
-            @if (CanView(FeatureType.ManageExternalLeagues, SessionVariables.AccountUserType, PermissionType.LeaguesView))
-            {
-                <li class="@leagueexternalactive"><a href="@Url.Action("indexexternal", "league")"><i class="icon s7-ball"></i> @UILabel.ActivityGroupLabel(ActivityGroupType.League, true)</a></li>
+                        @if (CanView(FeatureType.ManageExternalLeagues, SessionVariables.AccountUserType, PermissionType.LeaguesView))
+                        {
+                            <li class=""><a href="@Url.Action("indexexternal", "league")"><i class="icon s7-ball"></i> @UILabel.ActivityGroupLabel(ActivityGroupType.League, true)</a></li>
+                        }
+                    </ul>
+                </li>
             }
 
             @if (CanView(FeatureType.Participants, SessionVariables.AccountUserType, PermissionType.StudentsView))

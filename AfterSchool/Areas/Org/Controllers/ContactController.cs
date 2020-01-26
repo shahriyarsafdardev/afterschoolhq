@@ -529,22 +529,38 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult InviteTo(string id, string type, string list)
+        public ActionResult InviteTo(string id, string type, string list, string ret)
         {
             var msgs = new SystemMessages();
-            InviteToViewBag(id, type, list, msgs);
+            var lists = InviteToViewBag(id, type, list, msgs);
+
+            if (!lists.Any())
+            {
+                if (ret == "1" && type == "activity")
+                    return Redirect(Url.Action("publishdetail", "activity", new { id }));
+
+                return Redirect(Url.Action("add", "contact", new { returnUrl = Url.Action("inviteto", "contact", new { id, type }) }));
+            }
+
             return View();
         }
 
-        private void InviteToViewBag(string id, string type, string list, SystemMessages msgs)
+        private List<ContactList> InviteToViewBag(string id, string type, string list, SystemMessages msgs)
         {
             var returnUrl = "";
             var activities = new List<Activity>();
             ActivityGroup group = null;
+            Activity activity = null;
 
             switch (type)
             {
+                case "activity":
+                    activity = Activity.LoadByUid(id.ToGuid(), msgs);
+                    returnUrl = Url.Action("publishdetail", "activity", new { id });
+
+                    break;
                 case "period":
+
                     var period = RegistrationPeriod.LoadByUid(id.ToGuid());
 
                     if (period.ActivityGroupId.HasValue)
@@ -555,7 +571,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     }
                     else
                     {
-                        var activity = period.GetActivities(msgs).FirstOrDefault();
+                        activity = period.GetActivities(msgs).FirstOrDefault();
                         returnUrl = Url.Action("registrants", "activity", new { id = activity.ID });
                         activities.Add(activity);
                     }
@@ -570,26 +586,41 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             ViewBag.Group = group;
+            ViewBag.Activity = activity;
             ViewBag.ReturnUrl = returnUrl;
             ViewBag.SelectedList = list.IsNumber() ? list.ToInteger() : new int?();
             ViewBag.Id = id;
             ViewBag.Type = type;
             ViewBag.Activities = activities;
             ViewBag.Messages = msgs;
-            ViewBag.Lists = SessionVariables.CurrentAccount.GetContactLists();
             ViewBag.Done = false;
+
+            var lists = SessionVariables.CurrentAccount.GetContactLists();
+            ViewBag.Lists = lists;
+
+            return lists;
         }
 
         [HttpPost]
         [ValidateInput(false)]
-        public ActionResult InviteTo(string id, string type, string list, string invitemessage)
+        public ActionResult InviteTo(string id, string type, string list, string invitemessage, string ret)
         {
             var msgs = new SystemMessages();
             ActivityGroup group;
             RegistrationPeriod period;
+            Activity activity;
 
             switch (type)
             {
+                case "activity":
+                    activity = Activity.LoadByUid(id.ToGuid(), msgs);
+                    period = activity.GetCurrentOrNextRegistrationPeriod(msgs);
+
+                    InviteContactList(list, invitemessage, period, activity, msgs);
+
+                    ViewBag.ReturnUrl = Url.Action("publishdetail", "activity", new { id });
+
+                    break;
                 case "period":
 
                     period = RegistrationPeriod.LoadByUid(id.ToGuid());
@@ -602,7 +633,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     }
                     else
                     {
-                        var activity = period.GetActivities().FirstOrDefault();
+                        activity = period.GetActivities().FirstOrDefault();
                         msgs.AddRange(InviteContactList(list, invitemessage, period, activity));
                         ViewBag.ReturnUrl = Url.Action("registrants", "activity", new { id = activity.ID });
                     }
@@ -630,6 +661,35 @@ namespace AfterSchool.Areas.Org.Controllers
                 InviteToViewBag(id, type, list, msgs);
                 return View();
             }
+        }
+
+        private void InviteContactList(string list, string invitemessage, RegistrationPeriod period, Activity activity, SystemMessages msgs)
+        {
+            var contactList = ContactList.Load(list.ToInteger());
+            List<Registrant> contacts = null;
+
+            if (contactList.AccountId != SessionVariables.CurrentAccount.ID)
+                msgs.Add("Invalid contact list", MessageType.UserError);
+
+            contacts = contactList.GetContacts(msgs);
+
+            // get session information because it isn't available in a background task
+            var loggedInUser = SessionVariables.CurrentUser;
+            var periodId = period.ID.HasValue ? period.ID.Value : 0;
+
+            BackgroundJob.Enqueue(() =>
+                ActivityService.EmailInvitedContacts(
+                    activity.ID.Value,
+                    periodId,
+                    contacts.Select(x => x.ID.Value).ToList(),
+                    invitemessage,
+                    activity.HomePageUrl,
+                    loggedInUser.ID.Value,
+                    null,
+                    null)
+            );
+
+            msgs.Add("Your invites will be sent shortly", MessageType.Success);
         }
 
         private void InviteContactList(string list, string invitemessage, RegistrationPeriod period, ActivityGroup group, SystemMessages msgs)

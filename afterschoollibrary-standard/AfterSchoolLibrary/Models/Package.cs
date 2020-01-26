@@ -349,15 +349,12 @@ namespace AfterSchoolLibrary.Models
             return this.PricePerYear.Value == (0).ToDecimal();
         }
 
-        public SystemMessages CopyFeaturesToAccountPackage(AccountPackage ap, int loggedInUserId, DatabaseConnection dc = null)
+        public void CopyFeaturesToAccountPackage(AccountPackage ap, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
-            var apfs = ap.GetFeatures(dc: dc);
+            var apfs = ap.GetFeatures(msgs, dc);
             
-            this.GetFeatures(dc: dc).ForEach(pf => msgs.AddRange(ap.AddPackageFeature(pf, loggedInUserId, dc: dc)));
+            this.GetFeatures(dc: dc).ForEach(pf => ap.AddPackageFeature(pf, new WebUser() { ID = loggedInUserId }, msgs, dc));
             ap.ResetFeatureList();
-
-            return msgs;
         }
 
         #endregion

@@ -9,9 +9,9 @@ namespace AfterSchoolLibrary.Migrations
 {
     public class UpdatePlanPaymentStartType_20191230
     {
-        public static SystemMessages Do(DatabaseConnection dc)
+        public static void Do(SystemMessages msgs, DatabaseConnection dc)
         {
-            return Migration.Run
+            Migration.Run
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
@@ -22,6 +22,7 @@ namespace AfterSchoolLibrary.Migrations
                        dc: adc));
                 },
                 uniqueIdenfier: "UpdatePlanPaymentStartType_20191230",
+                msgs: msgs,
                 dc: dc
             );
         }

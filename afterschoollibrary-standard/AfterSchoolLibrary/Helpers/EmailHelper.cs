@@ -307,10 +307,10 @@ namespace AfterSchoolLibrary.Helpers
                     cost = (checkoutObject.TuitionCostNoFees + checkoutObject.GetTuitionConvenienceFee(msgs, dc)).ToCurrency();
                     ccFee = checkoutObject.GetTuitionCreditCardFee(msgs, dc).ToCurrency();
 
-                    additionalDetails = "tuition fee";
+                    additionalDetails = "registration fee";
                 }
 
-                // add tuition fee row
+                // add registration fee row
                 var tuitionFeeModel = new NameValueCollection()
                 {
                     { "Description", description },
@@ -335,7 +335,7 @@ namespace AfterSchoolLibrary.Helpers
                 cost = checkoutObject.GetSubscriptionCostTodayWithConvenienceFee(msgs, dc).ToCurrency();
                 ccFee = checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc).ToCurrency();
 
-                // add tuition fee row
+                // add registration fee row
                 var subscriptionFeeModel = new NameValueCollection()
                 {
                     { "Description", description },
@@ -821,6 +821,56 @@ namespace AfterSchoolLibrary.Helpers
                 );
 
             var subject = $"You have been invited to register for {session.Name}!";
+
+            var mailMsgs = SendGridHelper.SendMail(
+                fromEmail: Email.SendGridNoReplyEmailAddress(true),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(contact.Email),
+                subject: subject,
+                body: body,
+                replyTo: new SendGrid.Helpers.Mail.EmailAddress(invitingAccount.Email, invitingAccount.Name),
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(true));
+
+            msgs.AddRange(mailMsgs);
+        }
+
+        public static void SendActivityInviteEmail(Registrant contact, Account invitingAccount, Activity activity, RegistrationPeriod period, WebUser loggedInUser, string customMessage = null, SystemMessages msgs = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            if (customMessage.IsNotEmpty())
+                customMessage = $"<p>{customMessage.Replace("\n", "<br />")}</p><hr />";
+
+            var regOpenText = "";
+            var greetingName = contact.FirstName.IsNotEmpty() ? $" {contact.FirstName}" : "";
+
+            if (period.IsNotEmpty())
+            {
+                if (period.IsOpen())
+                    regOpenText = "Registration is open now.";
+                else if (period.WillOpen())
+                    regOpenText = $" Registration will open {period.StartDateTime.ToShortDateString()}.";
+            }
+
+            var model = new NameValueCollection()
+            {
+                { "Greeting", $"Hello{greetingName}" },
+                { "ProductName", Utilities.AppName(invitingAccount.IsAfterSchool) },
+                { "SupportEmail", Email.AppSupportEmailAddress },
+                { "ViewLink", activity.ShortHomePageUrl },
+                { "CustomMessage", customMessage },
+                { "SenderDisplayName", loggedInUser.DisplayName },
+                { "AccountName", invitingAccount.Name },
+                { "ActivityName", activity.Name },
+                { "RegistrationOpenText", regOpenText }
+            };
+
+            var body = ProcessTemplate(
+                EmailTemplates.Activity_Invite,
+                model,
+                "activity_invite_1",
+                msgs);
+
+            var subject = $"You have been invited to register for {activity.Name}!";
 
             var mailMsgs = SendGridHelper.SendMail(
                 fromEmail: Email.SendGridNoReplyEmailAddress(true),

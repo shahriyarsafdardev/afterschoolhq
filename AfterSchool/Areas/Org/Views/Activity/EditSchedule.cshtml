@@ -36,9 +36,13 @@
 
                     @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editschedule", "next", true, true, Request))
                     @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(true, false))
-                    @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editschedule", "prev", true, false, Request))
 
-                    @{Html.RenderPartial("~/Views/Shared/_ActivityFormSchedule.cshtml", (ActivitySchedule)ViewBag.Schedule);}
+                    @{
+                        Html.RenderPartial(
+                            "~/Views/Shared/_ActivityFormSchedule.cshtml", 
+                            (ActivitySchedule)ViewBag.Schedule, 
+                            new ViewDataDictionary() { { "ActivityType", (int)Model.ActivityTypeId } });
+                    }
 
                     <div class="form-group">
                         <div class="col-sm-6 col-sm-offset-3">

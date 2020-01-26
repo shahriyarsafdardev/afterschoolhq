@@ -33,19 +33,21 @@
         </div>
         <div class="hidden-lg hidden-sm hidden-md">
             <select class="form-control" onchange="handleNav(this.value)">
-                <optgroup label="Navigation">
-                    @*
-                    <option value="modal-activityadd">Add @UILabel.ActivityLabel(ActivityType.Activity)</option>
-                    <option value="@Url.Action("gotoedit", "registration", new { id = Model.Uid.ToString() })">Edit Registration</option>
-                    <option value="modal-sendreg">Send Reg Info</option>
-                    @if (canMergeWithRegistrations.Any())
-                    {
-                        <option value="modal-regmerge">Merge</option>
-                    }
-                    *@
-                    <option value="modal-deletereg">Delete</option>
-                    <option value="@listUrl">&laquo; Back to List</option>
-                </optgroup>
+                <option value="">Navigation</option>
+                <!--
+                <option value="modal-activity-add">Add Activity</option>
+                -->
+                <option value="@Url.Action("update", "registration", new { id = Model.Uid.ToString() })">Edit Registration</option>
+                <!--
+                <option value="modal-confirmation">Send Reg Info</option>
+                @if (canMergeWithRegistrations.Any())
+                {
+                    <option value="modal-regmerge">Merge</option>
+                }
+                <option value="modal-deletereg">Delete</option>
+                
+                -->
+                <option value="@listUrl">&laquo; Back to List</option>
             </select>
         </div>
     </div>

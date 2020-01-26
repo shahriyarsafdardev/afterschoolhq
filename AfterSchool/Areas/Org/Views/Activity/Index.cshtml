@@ -4,6 +4,7 @@
     SystemMessages msgs = (SystemMessages)ViewBag.Messages;
     var needToUpgrade = (bool)ViewBag.NeedToUpgrade;
     var hasArchivedActivities = (bool)ViewBag.HasArchivedActivities;
+    var activityType = (ActivityType)ViewBag.ActivityType;
 }
 
 @{Html.RenderPartial("OrgAccountHeader", SessionVariables.CurrentAccount.ID.ToString());}
@@ -17,16 +18,16 @@
             <div class="pull-right">
                 @if (!needToUpgrade)
                 {
-                    <a href="@Url.Action("editsetup", "activity", new { isnew = 1 })" class="btn btn-primary">
+                    <a href="@Url.Action("editsetup", "activity", new { isnew = 1, type = (int)activityType })" class="btn btn-primary">
                         <i class="icon icon-left s7-plus"></i>
-                        Add @UILabel.ActivityLabel(ActivityType.Activity)
+                        Add @UILabel.ActivityLabel(activityType)
                     </a>
                 }
                 else
                 {
                     <button class="btn btn-primary md-trigger" data-modal="modal-offering">
                         <i class="icon icon-left s7-plus"></i>
-                        Add @UILabel.ActivityLabel(ActivityType.Activity)
+                        Add @UILabel.ActivityLabel(activityType)
                     </button>
                     <div id="modal-offering" class="md-modal colored-header custom-width md-effect-9">
                         <form id="form-upgrade" action="" method="post">
@@ -36,7 +37,7 @@
                                     <h3 class="modal-title">Upgrade Your Account</h3>
                                 </div>
                                 <div class="modal-body form">
-                                    <p>You have reached your limit of @UILabel.ActivityLabel(ActivityType.Activity, true). Time to upgrade :).</p>
+                                    <p>You have reached your limit of @UILabel.ActivityLabel(activityType, true). Time to upgrade :).</p>
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
@@ -47,14 +48,14 @@
                     </div>
                 }
             </div>
-            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", UILabel.ActivityLabel(ActivityType.Activity, true)); }
+            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", UILabel.ActivityLabel(activityType, true)); }
             <div class="clearfix"></div>
         </div>
         <div class="panel-body">
             @{ Html.RenderPartial(
-                "~/Views/Shared/_Activities.cshtml",
-                Model,
-                new ViewDataDictionary() {
+                 "~/Views/Shared/_Activities.cshtml",
+                 Model,
+                 new ViewDataDictionary() {
                     { "Account", SessionVariables.CurrentAccount },
                     { "AccountPackage", SessionVariables.AccountPackage },
                     { "PagingModel", ViewBag.PagingModel },
@@ -62,9 +63,10 @@
                     { "Groups", ViewBag.Groups },
                     { "Group", ViewBag.Group },
                     { "NeedToUpgrade", needToUpgrade },
-                    { "HasArchivedActivities", hasArchivedActivities }
-                    }
-                ); }
+                    { "HasArchivedActivities", hasArchivedActivities },
+                    { "ActivityType", (int)activityType }
+                     }
+                 ); }
         </div>
     </div>
 </div>
