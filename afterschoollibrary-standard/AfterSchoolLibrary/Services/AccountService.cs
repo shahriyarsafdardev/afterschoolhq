@@ -1391,16 +1391,27 @@ namespace AfterSchoolLibrary.Services
             return newap;
         }
 
-        private static void EnsureDefaultPackageFeatures(this Account account, AccountPackage newap, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void EnsureDefaultPackageFeatures(this Account account, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
+            account.EnsureDefaultPackageFeatures(null, loggedInUser, msgs, dc);
+        }
+
+        public static void EnsureDefaultPackageFeatures(this Account account, AccountPackage ap, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (ap.IsEmpty())
+                ap = account.GetActiveAccountPackage(msgs, dc);
+
+            if (ap.IsEmpty())
+                return;
+
             if (account.AccountTypeId == AccountType.School)
             {
-                newap.AddOrUpdatePackageFeature(FeatureType.ManagePermissionSlips, 1, loggedInUser, msgs, dc);
-                newap.AddOrUpdatePackageFeature(FeatureType.ManageFieldTrips, 1, loggedInUser, msgs, dc);
-                newap.AddOrUpdatePackageFeature(FeatureType.ManageActivityGroups, 1, loggedInUser, msgs, dc);
+                ap.AddOrUpdatePackageFeature(FeatureType.ManagePermissionSlips, 1, loggedInUser, msgs, dc);
+                ap.AddOrUpdatePackageFeature(FeatureType.ManageFieldTrips, 1, loggedInUser, msgs, dc);
+                ap.AddOrUpdatePackageFeature(FeatureType.ManageActivityGroups, 1, loggedInUser, msgs, dc);
             }
 
-            newap.AddOrUpdatePackageFeature(FeatureType.AcceptACH, 1, loggedInUser, msgs, dc);
+            ap.AddOrUpdatePackageFeature(FeatureType.AcceptACH, 1, loggedInUser, msgs, dc);
         }
 
         public static int GetTrialDaysRemaining(this Account account, AccountPackage currentPackage, SystemMessages msgs = null, DatabaseConnection dc = null)

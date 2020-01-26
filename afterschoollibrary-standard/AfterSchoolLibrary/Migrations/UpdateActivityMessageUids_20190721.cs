@@ -9,9 +9,9 @@ namespace AfterSchoolLibrary.Migrations
 {
     public class UpdateActivityMessageUids_20190721
     {
-        public static SystemMessages Do(DatabaseConnection dc)
+        public static void Do(SystemMessages msgs, DatabaseConnection dc)
         {
-            return Migration.Run
+            Migration.Run
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
@@ -27,6 +27,7 @@ namespace AfterSchoolLibrary.Migrations
                     });
                 },
                 uniqueIdenfier: "UpdateActivityMessageUids-20190721",
+                msgs: msgs,
                 dc: dc
             );
         }

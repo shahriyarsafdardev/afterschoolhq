@@ -310,16 +310,17 @@ namespace AfterSchoolLibrary.Helpers
                 {
                     amsgs.AddRange(AdditionalData(adc));
 
-                    amsgs.AddRange(Migrations.UpdateRegistrantSubscriptionPlans_20190821.Do(adc));
-                    amsgs.AddRange(Migrations.InvalidateRegistrantAccounts_20190721.Do(adc));
-                    amsgs.AddRange(Migrations.UpdateRegistrantAccess_20190721.Do(adc));
-                    amsgs.AddRange(Migrations.UpdateRequiresParentalConsent_20190721.Do(adc));
-                    amsgs.AddRange(Migrations.UpdateActivityMessageUids_20190721.Do(adc));
-                    amsgs.AddRange(Migrations.UpdateSendToStaff_20190721.Do(adc));
-                    amsgs.AddRange(Migrations.InvalidateRegistrantAccounts_20190721.Do(adc));
-                    amsgs.AddRange(Migrations.CreatePayoutsForConnectedAccounts_20191226.Do(adc));
-                    amsgs.AddRange(Migrations.UpdateRequiresParentalConsentForActivityGroup_20191226.Do(adc));
-                    amsgs.AddRange(Migrations.UpdatePlanPaymentStartType_20191230.Do(adc));
+                    Migrations.UpdateRegistrantSubscriptionPlans_20190821.Do(amsgs, adc);
+                    Migrations.InvalidateRegistrantAccounts_20190721.Do(amsgs, adc);
+                    Migrations.UpdateRegistrantAccess_20190721.Do(amsgs, adc);
+                    Migrations.UpdateRequiresParentalConsent_20190721.Do(amsgs, adc);
+                    Migrations.UpdateActivityMessageUids_20190721.Do(amsgs, adc);
+                    Migrations.UpdateSendToStaff_20190721.Do(amsgs, adc);
+                    Migrations.InvalidateRegistrantAccounts_20190721.Do(amsgs, adc);
+                    Migrations.CreatePayoutsForConnectedAccounts_20191226.Do(amsgs, adc);
+                    Migrations.UpdateRequiresParentalConsentForActivityGroup_20191226.Do(amsgs, adc);
+                    Migrations.UpdatePlanPaymentStartType_20191230.Do(amsgs, adc);
+                    Migrations.AddFieldTripsFeatureToSchools_20200126.Do(amsgs, adc);
 
                     // amsgs.AddRange(MigrateToBCrypt(adc));
 

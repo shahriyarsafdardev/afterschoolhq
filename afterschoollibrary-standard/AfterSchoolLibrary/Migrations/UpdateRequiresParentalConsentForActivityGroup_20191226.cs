@@ -9,9 +9,9 @@ namespace AfterSchoolLibrary.Migrations
 {
     public class UpdateRequiresParentalConsentForActivityGroup_20191226
     {
-        public static SystemMessages Do(DatabaseConnection dc)
+        public static void Do(SystemMessages msgs, DatabaseConnection dc)
         {
-            return Migration.Run
+            Migration.Run
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
@@ -22,6 +22,7 @@ namespace AfterSchoolLibrary.Migrations
                        dc: adc));
                 },
                 uniqueIdenfier: "UpdateRequiresParentalConsentForActivityGroup_20191226",
+                msgs: msgs,
                 dc: dc
             );
         }
