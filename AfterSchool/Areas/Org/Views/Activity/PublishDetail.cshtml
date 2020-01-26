@@ -7,6 +7,10 @@
     var showCopyWithStudents = "1";
     var mustRequestToPublish = (bool)ViewBag.MustRequestToPublish;
     var showCopyButton = (bool)ViewBag.ShowCopyButton;
+    var showSetupPayments = Model.ProviderAccountId.IsEmpty() &&
+                            !SessionVariables.CurrentAccount.CanReceivePaymentDeposits() &&
+                            !SessionVariables.CurrentAccount.HasTreasurer() &&
+                            !Model.IsFree;
 
     if (Request["isnew"] == "1")
     {
@@ -82,7 +86,7 @@
 
                 <div class="panel-body">
 
-                    @if (Model.ProviderAccountId.IsEmpty() && !SessionVariables.CurrentAccount.CanReceivePaymentDeposits() && !SessionVariables.CurrentAccount.HasTreasurer())
+                    @if (showSetupPayments)
                     {
                         <div>
                             <div role="alert" class="alert alert-success alert-icon">
