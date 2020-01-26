@@ -80,7 +80,7 @@
             }
             else
             {
-                <a href="@Url.Action("index", "activity", new { type = (int)Model.ActivityTypeId })" class="btn btn-alt5">Back to List &raquo;</a>
+                <a href="@Url.Action("index", "activity", new { type = (int)Model.ActivityTypeId })" class="btn btn-alt5">&laquo; All @UILabel.ActivityLabel(Model.ActivityTypeId, true)</a>
             }
         </div>
         <div class="hidden-lg hidden-sm hidden-md">
@@ -122,7 +122,7 @@
                 }
                 else
                 {
-                    <option value="@Url.Action("index", "activity", new { type = (int)Model.ActivityTypeId })">Back to List</option>
+                    <option value="@Url.Action("index", "activity", new { type = (int)Model.ActivityTypeId })">All @UILabel.ActivityLabel(Model.ActivityTypeId, true)</option>
                 }
             </select>
         </div>
