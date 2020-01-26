@@ -783,13 +783,13 @@
                     if (coupon.AmountTypeId === @((int)CouponAmountType.Percentage)) { // percentage coupon type
                         if (coupon.AppliesTo === @((int)CouponApplyType.SubscriptionPlan)) { // subscription plan
                             totalDueToday = amount + (spAmount * (1 - coupon.Amount));
-                        } else if (coupon.AppliesTo === @((int)CouponApplyType.TuitionFee)) { // Tuition Fee
+                        } else if (coupon.AppliesTo === @((int)CouponApplyType.TuitionFee)) { // Registration Fee
                             totalDueToday = amount * (1 - coupon.Amount) + spAmount;
                         }
                     } else { // flat amount coupon type
-                        if (coupon.AppliesTo === @((int)CouponApplyType.SubscriptionPlan) || !paymentOption) { // subscription plan or tuition fee without payment plan
+                        if (coupon.AppliesTo === @((int)CouponApplyType.SubscriptionPlan) || !paymentOption) { // subscription plan or registration fee without payment plan
                             totalDueToday = amount - coupon.Amount + spAmount;
-                        } else { // tuition fee with payment plan
+                        } else { // registration fee with payment plan
                             var totalCost = amount * numberInMonths;
 
                             totalDueToday = (amount - ((totalCost - coupon.Amount) / numberInMonths)) + spAmount;

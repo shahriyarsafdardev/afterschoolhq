@@ -307,10 +307,10 @@ namespace AfterSchoolLibrary.Helpers
                     cost = (checkoutObject.TuitionCostNoFees + checkoutObject.GetTuitionConvenienceFee(msgs, dc)).ToCurrency();
                     ccFee = checkoutObject.GetTuitionCreditCardFee(msgs, dc).ToCurrency();
 
-                    additionalDetails = "tuition fee";
+                    additionalDetails = "registration fee";
                 }
 
-                // add tuition fee row
+                // add registration fee row
                 var tuitionFeeModel = new NameValueCollection()
                 {
                     { "Description", description },
@@ -335,7 +335,7 @@ namespace AfterSchoolLibrary.Helpers
                 cost = checkoutObject.GetSubscriptionCostTodayWithConvenienceFee(msgs, dc).ToCurrency();
                 ccFee = checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc).ToCurrency();
 
-                // add tuition fee row
+                // add registration fee row
                 var subscriptionFeeModel = new NameValueCollection()
                 {
                     { "Description", description },

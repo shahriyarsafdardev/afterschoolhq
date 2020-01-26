@@ -2474,18 +2474,18 @@ namespace AfterSchoolLibrary.Services
                         msgs: amsgs,
                         dc: adc);
 
-                    // process payment by to account, includes tuition fee
+                    // process payment by to account, includes registration fee
                     if (!checkoutObject.ParticipationObject.IsTuitionFree && checkoutObject.PaymentPlan.IsEmpty())
                         AccountService.ProcessTuitionFee(checkoutObject, loggedInUser, amsgs, adc);
 
-                    // Process Subscriptions separately, don't charge all at once for the tuition Fee
+                    // Process Subscriptions separately, don't charge all at once for the registration Fee
 
                     // TODO: Decide if master account registrant should be added to plans or the account copy
                     // get the registrant record that was created just for the account
                     var accountRegistrant = checkoutObject.Registration.GetRegistrant(amsgs, adc);
 
                     // if they have a subscription plan
-                    // will also process tuition fees
+                    // will also process registration fees
                     if (checkoutObject.SubscriptionPlan.IsNotEmpty())
                         accountRegistrant.StartSubscriptionPlan(
                             checkoutObject: checkoutObject,
