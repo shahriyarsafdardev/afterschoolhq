@@ -256,10 +256,10 @@ namespace AfterSchoolLibrary.Models
         
         public AccountPackageFeature AddPackageFeature(PackageFeature pf, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return AddPackageFeature(pf.FeatureTypeId, pf.Max.Value, loggedInUser, msgs, dc);
+            return AddOrUpdatePackageFeature(pf.FeatureTypeId, pf.Max.Value, loggedInUser, msgs, dc);
         }
 
-        public AccountPackageFeature AddPackageFeature(FeatureType featureTypeId, decimal maxValue, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public AccountPackageFeature AddOrUpdatePackageFeature(FeatureType featureTypeId, decimal maxValue, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var apf = AccountPackageFeature.LoadByAccountPackageIdByFeatureTypeId(this.ID.Value, featureTypeId, msgs, dc);
 
@@ -268,13 +268,14 @@ namespace AfterSchoolLibrary.Models
                 apf = new AccountPackageFeature();
                 apf.AccountPackageId = this.ID;
                 apf.FeatureTypeId = featureTypeId;
-                apf.Max = maxValue;
                 apf.CreateDate = DateTime.UtcNow;
                 apf.CreatedBy = loggedInUser?.ID.IfEmpty(0);
-                apf.LastModifiedDate = DateTime.UtcNow;
-                apf.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
-                msgs.AddRange(apf.Save(dc: dc));
             }
+
+            apf.Max = maxValue;
+            apf.LastModifiedDate = DateTime.UtcNow;
+            apf.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+            msgs.AddRange(apf.Save(dc: dc));
 
             return apf;
         }

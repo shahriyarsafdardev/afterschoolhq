@@ -911,6 +911,9 @@ namespace AfterSchoolLibrary.Services
                     RequiresParentalConsent = true
                 };
 
+                if (activityType.In(new ActivityType[] { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
+                    activity.IsInviteOnly = true;
+
                 if (group.IsEmpty() && !form.IsNumber())
                     msgs.Add("Registration Form is required", MessageType.UserError);
             }
@@ -2248,6 +2251,28 @@ namespace AfterSchoolLibrary.Services
                 var accountOwner = locationOwner.GetAccountOwner(msgs, dc);
                 msgs.AddRange(Helpers.EmailHelper.SendPublishRequestNotification(activity, locationOwner, accountOwner, loggedInUser));
             }
+        }
+
+        public static void EmailInvitedContacts(int id, int periodId, List<int> contactIds, string emailmessage, string inviteUrl, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            var activity = Activity.Load(id, msgs, dc);
+            var account = activity.GetAccount(msgs, dc);
+            var loggedInUser = WebUser.Load(loggedInUserId, msgs, dc);
+            var contacts = Registrant.LoadList(contactIds, msgs, dc);
+            var period = RegistrationPeriod.Load(periodId, msgs, dc);
+
+            if (contacts.IsNotEmpty() && contacts.Any())
+                contacts.ForEach(contact => {
+                    Helpers.EmailHelper.SendActivityInviteEmail(
+                        contact,
+                        account,
+                        activity,
+                        period,
+                        loggedInUser,
+                        emailmessage,
+                        msgs);
+                });
         }
     }
 }

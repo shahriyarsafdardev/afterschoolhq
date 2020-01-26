@@ -1254,38 +1254,27 @@ namespace AfterSchoolLibrary.Services
             {
                 // new sign up
                 if (activePackage.IsEmpty())
-                {
                     signupType = SignUpType.NewAccountSignUp;
-                }
+
                 // could be downgrading to a free account
                 else if (activePackage.PackageId != p.ID)
-                {
                     signupType = SignUpType.ChangePackage;
-                }
             }
             else
             {
                 if (activePackage.IsEmpty())
-                {
                     trialDayCount = (p.HasFeature(FeatureType.TrialDays, msgs, dc) ? p.GetFeature(FeatureType.TrialDays, msgs, dc).GetMaxValue() : 0).ToInteger();
-                }
                 else if (activePackage.HasFeature(FeatureType.TrialDays, msgs, dc))
-                {
                     trialDayCount = account.GetTrialDaysRemaining(activePackage, msgs, dc);
-                }
 
                 if (trialDayCount > 0)
                 {
                     // totally new
                     if (activePackage.IsEmpty())
-                    {
                         signupType = SignUpType.TrialSignUp;
-                    }
                     // still during the trial but changing packages with no new payment info
                     else
-                    {
                         signupType = SignUpType.ChangePackageDuringTrial;
-                    }
                 }
             }
 
@@ -1376,7 +1365,6 @@ namespace AfterSchoolLibrary.Services
 
                         // ensure package features are added
                         account.EnsureDefaultPackageFeatures(newap, loggedInUser, msgs, dc);
-                        
 
                         // make sure the account package is set to the real trial days passed in
                         if (amsgs.HasNoErrors())
@@ -1407,12 +1395,12 @@ namespace AfterSchoolLibrary.Services
         {
             if (account.AccountTypeId == AccountType.School)
             {
-                newap.AddPackageFeature(FeatureType.ManagePermissionSlips, 1, loggedInUser, msgs, dc);
-                newap.AddPackageFeature(FeatureType.ManageFieldTrips, 1, loggedInUser, msgs, dc);
-                newap.AddPackageFeature(FeatureType.ManageActivityGroups, 1, loggedInUser, msgs, dc);
+                newap.AddOrUpdatePackageFeature(FeatureType.ManagePermissionSlips, 1, loggedInUser, msgs, dc);
+                newap.AddOrUpdatePackageFeature(FeatureType.ManageFieldTrips, 1, loggedInUser, msgs, dc);
+                newap.AddOrUpdatePackageFeature(FeatureType.ManageActivityGroups, 1, loggedInUser, msgs, dc);
             }
 
-            newap.AddPackageFeature(FeatureType.AcceptACH, 1, loggedInUser, msgs, dc);
+            newap.AddOrUpdatePackageFeature(FeatureType.AcceptACH, 1, loggedInUser, msgs, dc);
         }
 
         public static int GetTrialDaysRemaining(this Account account, AccountPackage currentPackage, SystemMessages msgs = null, DatabaseConnection dc = null)

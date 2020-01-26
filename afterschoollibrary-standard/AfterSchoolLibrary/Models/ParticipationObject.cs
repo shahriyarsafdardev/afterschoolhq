@@ -106,6 +106,7 @@ namespace AfterSchoolLibrary.Models
             AllowToPayLater = activity.AllowToPayLater;
             IsTuitionFree = (!activity.CostPerRegistrant.HasValue || activity.CostPerRegistrant.Value == 0.ToDecimal());
             RequiresParentalConsent = activity.RequiresParentalConsent;
+            IsInviteOnly = activity.IsInviteOnly;
 
             if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
             {

@@ -20,7 +20,7 @@
             <div class="pull-right">
                 @if (Request["returnUrl"].IsNotEmpty())
                 {
-                    <a class="btn btn-primary btn-space" href="@Request["returnUrl"]">
+                    <a class="btn btn-primary btn-space" href="@Request["returnUrl"]&ret=1">
                         &laquo; Return
                     </a>
                 }
@@ -99,7 +99,7 @@
                                     {
                                         <div class="form-group">
                                             <label>List Name</label>
-                                            <input type="text" name="listname" id="listname" class="form-control" placeholder="Enter your list name" required />
+                                            <input type="text" name="listname" id="listname" class="form-control" placeholder="Enter your list name (ex. Mrs. Miller's 2nd Grade Class)" value="" required />
                                             <input type="hidden" name="createlist" value="1" />
                                         </div>
                                     }
