@@ -908,12 +908,13 @@ namespace AfterSchoolLibrary.Services
                     SeatsAvailable = seatsavailable.ToString().ToInteger(),
                     WaitingListSeats = waitinglistseats.ToString().ToInteger(),
                     AccountId = account.ID,
-                    LocationId = account.DefaultLocationId,
                     RequiresParentalConsent = true
                 };
 
                 if (activityType.In(new ActivityType[] { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
                     activity.IsInviteOnly = true;
+                else
+                    activity.LocationId = account.DefaultLocationId;
 
                 if (group.IsEmpty() && !form.IsNumber())
                     msgs.Add("Registration Form is required", MessageType.UserError);
