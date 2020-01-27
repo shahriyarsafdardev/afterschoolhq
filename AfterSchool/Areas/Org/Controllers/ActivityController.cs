@@ -280,7 +280,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         private bool GetIsFullScreen(Activity activity, string groupUid = "")
         {
-            ViewBag.FullScreenExitUrl = Url.Action("index", "activity");
+            ViewBag.FullScreenExitUrl = Url.Action("index", "activity", new { type = (int)activity.ActivityTypeId });
 
             if (groupUid.IsNotEmpty())
                 ViewBag.FullScreenExitUrl = Url.Action("activities", "group", new { id = groupUid });
