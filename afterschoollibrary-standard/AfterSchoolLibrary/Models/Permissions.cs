@@ -36,6 +36,12 @@
                         case PermissionType.LeaguesEdit:
                         case PermissionType.LeaguesManage:
                         case PermissionType.LeaguesView:
+                        case PermissionType.PermissionSlipsEdit:
+                        case PermissionType.PermissionSlipsManage:
+                        case PermissionType.PermissionSlipsView:
+                        case PermissionType.FieldTripsEdit:
+                        case PermissionType.FieldTripsManage:
+                        case PermissionType.FieldTripsView:
                             return true;
                             
                     }
