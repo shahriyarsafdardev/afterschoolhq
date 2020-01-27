@@ -53,12 +53,13 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Index(string group, string pn, string rpp, string archive, string copyerror)
+        public ActionResult Index(string group, string pn, string rpp, string archive, string copyerror, string type)
         {
             var msgs = new SystemMessages();
             int pageNumber = 1;
             int recordsPerPage = 10;
             bool isArchived = false;
+            var activityType = ActivityType.Activity;
 
             if (pn.IsNumber() && pn.ToInteger() > 0)
                 pageNumber = pn.ToInteger();
@@ -68,6 +69,9 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (archive.IsBoolean())
                 isArchived = archive.ToBoolean();
+
+            if (type.IsNotEmpty() && type.IsNumber())
+                activityType = type.ToInteger().ToEnum<ActivityType>();
 
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
@@ -86,9 +90,9 @@ namespace AfterSchool.Areas.Org.Controllers
             }
             else
             {
-                totalActivityCount = SessionVariables.CurrentAccount.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.CurrentUser, ActivityType.Activity, isArchived, false, true, msgs);
-                activities = SessionVariables.CurrentAccount.GetActivities(SessionVariables.AccountUserType, SessionVariables.CurrentUser, ActivityType.Activity, isArchived, false, true, start, length, msgs);
-                hasArchivedActivities = SessionVariables.CurrentAccount.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.CurrentUser, ActivityType.Activity, true, false, true, msgs) > 0;
+                totalActivityCount = SessionVariables.CurrentAccount.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.CurrentUser, activityType, isArchived, false, true, msgs);
+                activities = SessionVariables.CurrentAccount.GetActivities(SessionVariables.AccountUserType, SessionVariables.CurrentUser, activityType, isArchived, false, true, start, length, msgs);
+                hasArchivedActivities = SessionVariables.CurrentAccount.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.CurrentUser, activityType, true, false, true, msgs) > 0;
             }
 
             var totalPages = Math.Ceiling(totalActivityCount.ToDouble() / recordsPerPage).ToInteger();
@@ -109,6 +113,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Group = activityGroup;
             ViewBag.NeedToUpgrade = totalActivityCount >= SessionVariables.AccountPackage.GetFeature(FeatureType.Activities).GetMaxValue();
             ViewBag.HasArchivedActivities = hasArchivedActivities;
+            ViewBag.ActivityType = activityType;
 
             ViewBag.PagingModel = new PagingModel()
             {
@@ -121,11 +126,11 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult EditSetup(string id, string group)
+        public ActionResult EditSetup(string id, string group, string type)
         {
             var msgs = new SystemMessages();
             ActivityGroup activityGroup = null;
-            Activity activity = null;
+            Activity activity;
 
             if (id.IsGuid())
             {
@@ -136,6 +141,9 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 activity = SessionVariables.CurrentAccount.GetDefaultNewActivity();
                 activity.RegistrationModeId = RegistrationMode.Register;
+
+                if (type.IsNotEmpty() && type.IsNumber())
+                    activity.ActivityTypeId = type.ToInteger().ToEnum<ActivityType>();
 
                 //this means a new activity is  being added to an existing enrollment group
                 if (group.IsGuid())
@@ -153,10 +161,10 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd)
+        public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd, string type)
         {
             var msgs = new SystemMessages();
-            Activity activity = null;
+            Activity activity;
             ActivityGroup activityGroup = null;
 
             var values = new Dictionary<string, object>()
@@ -172,7 +180,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 { "timezone", timezone },
                 { "form", form },
                 { "regmode", regmode },
-                { "group", group }
+                { "group", group },
+                { "type", type }
             };
 
             activity = Activity.LoadByUid(id.ToGuid());
@@ -226,17 +235,22 @@ namespace AfterSchool.Areas.Org.Controllers
                 switch (cmd)
                 {
                     case "next":
-                        if (activity.ActivityTypeId == ActivityType.Activity)
+                        switch(activity.ActivityTypeId)
                         {
-                            ViewBag.ActiveMenu = "EditRestrictions";
-                            return View("EditRestrictions", activity);
+                            case ActivityType.Activity:
+                                ViewBag.ActiveMenu = "EditRestrictions";
+                                return View("EditRestrictions", activity);
+                            case ActivityType.FieldTrip:
+                            case ActivityType.Team:
+                                LoadEditScheduleViewBag(activity, activity.ActivityScheduleId?.ToString());
+                                ViewBag.ActiveMenu = "EditSchedule";
+                                return View("editschedule", activity);
+                            case ActivityType.PermissionSlip:
+                                ViewBag.ActiveMenu = "EditDetails";
+                                return View("EditDetails", activity);
+
                         }
-                        else
-                        {
-                            LoadEditScheduleViewBag(activity, activity.ActivityScheduleId?.ToString());
-                            ViewBag.ActiveMenu = "EditSchedule";
-                            return View("editschedule", activity);
-                        }
+                        break;
                 }
             }
 
@@ -430,8 +444,17 @@ namespace AfterSchool.Areas.Org.Controllers
                         ViewBag.ActiveMenu = "EditDetails";
                         return View("EditDetails", activity);
                     case "next":
-                        ViewBag.ActiveMenu = "EditLocation";
-                        return View("EditLocation", activity);
+                        if (activity.ActivityTypeId == ActivityType.Activity)
+                        {
+                            ViewBag.ActiveMenu = "EditLocation";
+                            return View("EditLocation", activity);
+                        }
+                        else
+                        {
+                            LoadEditCostViewBag(activity, msgs);
+                            ViewBag.ActiveMenu = "EditCost";
+                            return View("editcost", activity);
+                        }
                 }
             }
 
@@ -635,7 +658,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         ViewBag.ActiveMenu = "EditRestrictions";
                         return View("EditRestrictions", activity);
                     case "next":
-                        if (activity.ActivityTypeId == ActivityType.Activity)
+                        if (activity.ActivityTypeId != ActivityType.Team)
                         {
                             ViewBag.ActiveMenu = "EditDetails";
                             return View("EditDetails", activity);

@@ -74,6 +74,7 @@ property: LocationId, int?, Int
 property: IsDeleted, bool, Bit
 property: IsPublished, bool, Bit
 property: IsArchived, bool, Bit
+property: IsInviteOnly, bool, Bit
 property: ActivityGroupId, int?, Int
 property: ActivityScheduleId, int?, Int
 property: UniqueName, string, NVarChar "100"
@@ -1641,7 +1642,7 @@ values: NotSet, Individual, Organization
 [begin]
 type: Enum
 name: FeatureType
-values: NotSet, Attendance, AcceptPayments, Messaging, CustomUrl, TeamAccounts, WaitingList, ManageForms, ManageLocations, ManageActivityGroups, Activities, Participants, AllowApplications, Lottery, TrialDays, ManageContacts, ViewInsights, PaymentsPercentageFee, PaymentsPercentageFlatFee, ManageExternalLeagues, UseStripeConnectedAccount, AcceptACH, ManageLeagues
+values: NotSet, Attendance, AcceptPayments, Messaging, CustomUrl, TeamAccounts, WaitingList, ManageForms, ManageLocations, ManageActivityGroups, Activities, Participants, AllowApplications, Lottery, TrialDays, ManageContacts, ViewInsights, PaymentsPercentageFee, PaymentsPercentageFlatFee, ManageExternalLeagues, UseStripeConnectedAccount, AcceptACH, ManageLeagues, ManageFieldTrips, ManagePermissionSlips
 [end]
 
 [begin]
@@ -1731,7 +1732,7 @@ values: NotSet, Session, League
 [begin]
 type: Enum
 name: ActivityType
-values: NotSet, Activity, Team
+values: NotSet, Activity, Team, FieldTrip, PermissionSlip
 [end]
 
 [begin]
@@ -1809,7 +1810,7 @@ values: NotSet, Subscription, PaymentPlan
 [begin]
 type: Enum
 name: PermissionType
-values: NotSet, AccountingView, AccountingEdit, AccountingManage, TeamView, TeamEdit, TeamManage, AccountSettingsView, AccountSettingsEdit, AccountSettingsManage, ContactsView, ContactsEdit, ContactsManage, FormsView, FormsEdit, FormsManage, StudentsView, StudentsEdit, StudentsManage, ActivitiesView, ActivitiesEdit, ActivitiesManage, SessionsView, SessionsEdit, SessionsManage, LeaguesView, LeaguesEdit, LeaguesManage
+values: NotSet, AccountingView, AccountingEdit, AccountingManage, TeamView, TeamEdit, TeamManage, AccountSettingsView, AccountSettingsEdit, AccountSettingsManage, ContactsView, ContactsEdit, ContactsManage, FormsView, FormsEdit, FormsManage, StudentsView, StudentsEdit, StudentsManage, ActivitiesView, ActivitiesEdit, ActivitiesManage, SessionsView, SessionsEdit, SessionsManage, LeaguesView, LeaguesEdit, LeaguesManage, FieldTripsView, FieldTripsEdit, FieldTripsManage, PermissionSlipsView, PermissionSlipsEdit, PermissionSlipsManage
 [end]
 
 [begin]

@@ -9,9 +9,9 @@ namespace AfterSchoolLibrary.Migrations
 {
     public class UpdateRegistrantAccess_20190721
     {
-        public static SystemMessages Do(DatabaseConnection dc = null)
+        public static void Do(SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return Migration.Run
+            Migration.Run
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
@@ -35,6 +35,7 @@ namespace AfterSchoolLibrary.Migrations
                     });
                 },
                 uniqueIdenfier: "UpdateRegistrantAccess-20190721",
+                msgs: msgs,
                 dc: dc
             );
         }

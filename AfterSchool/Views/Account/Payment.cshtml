@@ -269,7 +269,7 @@
                                 <div class="row">
                                     <div class="col-md-6 col-md-offset-3 col-sm-12 padding-30">
 
-                                        <form class="form-horizontal" action="@Url.Action("payment", "account", new { id = registration.Uid })" method="post" id="existing-payment-form">
+                                        <form class="form-horizontal existing-payment-form" action="@Url.Action("payment", "account", new { id = registration.Uid })" method="post" id="existing-payment-form-ach">
 
                                             <input type="hidden" name="paymentoption" id="paymentoption-existing" class="payment-option" value="0" />
                                             <input type="hidden" name="coupon" class="coupon" value="" />
@@ -293,7 +293,7 @@
                                                 <p>&nbsp;</p>
                                             </div>
                                             <div class="form-group">
-                                                <button type="submit" class="btn btn-register btn-lg" id="btn-paywithexistingach">
+                                                <button type="submit" class="btn btn-register btn-lg btn-pay" id="btn-paywithexistingach">
                                                     Pay via ACH -
                                                     <span class="total-due-today-ach"></span>*
                                                     &raquo;
@@ -314,7 +314,7 @@
                                     <p class="text-muted">
                                         Clicking "Pay via ACH" will allow you to connect and pay using your bank account. After you login and select the account to use, it will checkout and complete your purchase using your bank account information.
                                     </p>
-                                    <button id="plaid-button" class="btn btn-register@(bankAccounts.Any() ? "-default" : "") btn-lg">
+                                    <button id="plaid-button" class="btn btn-register@(bankAccounts.Any() ? "-default" : "") btn-lg btn-pay">
                                         Pay via ACH -
                                         $<span class="total-due-today-ach"></span>*
                                         &raquo;
@@ -340,7 +340,7 @@
                         {
                             <div class="row">
                                 <div class="col-md-6 col-md-offset-3 col-sm-12">
-                                    <form class="form-horizontal" action="@Url.Action("payment", "account", new { id = registration.Uid })" method="post" id="existing-payment-form">
+                                    <form class="form-horizontal existing-payment-form" action="@Url.Action("payment", "account", new { id = registration.Uid })" method="post" id="existing-payment-form-cc">
                                         <input type="hidden" name="paymentoption" id="paymentoption-existing" class="payment-option" value="0" />
                                         <input type="hidden" name="coupon" class="coupon" value="" />
                                         <div class="form-group">
@@ -364,7 +364,7 @@
                                             <p>&nbsp;</p>
                                         </div>
                                         <div class="form-group">
-                                            <button type="submit" class="btn btn-register-default btn-lg" id="btn-paywithexistingcard">
+                                            <button type="submit" class="btn btn-register-default btn-lg btn-pay" id="btn-paywithexistingcard">
                                                 Pay via Card -
                                                 <span class="total-due-today-cc"></span>*
                                                 &raquo;
@@ -412,7 +412,7 @@
                                     </div>
 
                                     <div class="form-group padding-v-20">
-                                        <button type="button" id="btn-paywithnewcard" class="btn btn-register-default btn-lg">
+                                        <button type="button" id="btn-paywithnewcard" class="btn btn-register-default btn-lg btn-pay">
                                             Pay via Card -
                                             <span class="total-due-today-cc"></span>*
                                             &raquo;
@@ -633,24 +633,20 @@
             @: updateCC(getTotalCCFee(0), 0);
         }
 
-        $('#existing-payment-form').submit(function () {
-            $('#btn-paywithexistingcard').html('Processing Payment...');
+        $('.existing-payment-form').submit(function () {
+            $('.btn-pay').html('Processing Payment...');
 
             disableButtons();
         });
     });
 
     function disableButtons() {
-        $('#btn-paywithexistingach').prop('disabled', true);
-        $('#btn-paywithexistingcard').prop('disabled', true);
-        $('#btn-paywithnewcard').prop('disabled', true);
+        $('.btn-pay').prop('disabled', true);
         $('#plaid-button').prop('disabled', true);
     }
 
     function enableButtons() {
-        $('#btn-paywithexistingach').prop('disabled', false);
-        $('#btn-paywithexistingcard').prop('disabled', false);
-        $('#btn-paywithnewcard').prop('disabled', false);
+        $('.btn-pay').prop('disabled', false);
         $('#plaid-button').prop('disabled', false);
     }
 </script>
@@ -670,7 +666,7 @@
                     // Inform the customer that there was an error.
                     var errorElement = document.getElementById('card-errors');
                     errorElement.textContent = result.error.message;
-                    $('#btn-paywithnewcard').html('Review Purchase');
+                    // $('#btn-paywithnewcard').html('Review Purchase');
                     enableButtons();
 
                 } else {
@@ -787,13 +783,13 @@
                     if (coupon.AmountTypeId === @((int)CouponAmountType.Percentage)) { // percentage coupon type
                         if (coupon.AppliesTo === @((int)CouponApplyType.SubscriptionPlan)) { // subscription plan
                             totalDueToday = amount + (spAmount * (1 - coupon.Amount));
-                        } else if (coupon.AppliesTo === @((int)CouponApplyType.TuitionFee)) { // Tuition Fee
+                        } else if (coupon.AppliesTo === @((int)CouponApplyType.TuitionFee)) { // Registration Fee
                             totalDueToday = amount * (1 - coupon.Amount) + spAmount;
                         }
                     } else { // flat amount coupon type
-                        if (coupon.AppliesTo === @((int)CouponApplyType.SubscriptionPlan) || !paymentOption) { // subscription plan or tuition fee without payment plan
+                        if (coupon.AppliesTo === @((int)CouponApplyType.SubscriptionPlan) || !paymentOption) { // subscription plan or registration fee without payment plan
                             totalDueToday = amount - coupon.Amount + spAmount;
-                        } else { // tuition fee with payment plan
+                        } else { // registration fee with payment plan
                             var totalCost = amount * numberInMonths;
 
                             totalDueToday = (amount - ((totalCost - coupon.Amount) / numberInMonths)) + spAmount;

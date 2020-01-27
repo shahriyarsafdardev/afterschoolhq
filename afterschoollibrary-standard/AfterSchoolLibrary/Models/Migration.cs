@@ -166,9 +166,9 @@ namespace AfterSchoolLibrary.Models
 
         public delegate void MigrationAction(SystemMessages msgs, DatabaseConnection dc);
 
-        public static SystemMessages Run(MigrationAction action, string uniqueIdenfier, DatabaseConnection dc)
+        public static void Run(MigrationAction action, string uniqueIdenfier, SystemMessages msgs, DatabaseConnection dc)
         {
-            var msgs = new SystemMessages();
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             if (!Migration.ExistsByUniqueIdentifier(uniqueIdenfier, msgs, dc))
             {
@@ -177,8 +177,6 @@ namespace AfterSchoolLibrary.Models
                 if (msgs.HasNoErrors())
                     Migration.CreateNew(uniqueIdenfier, msgs, dc);
             }
-
-            return msgs;
         }
 
         #endregion

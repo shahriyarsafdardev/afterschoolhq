@@ -1182,6 +1182,7 @@ namespace AfterSchoolLibrary.Services
         public static AccountPackage SetDefaultAccountPackage(this Account account, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var package = Package.Load(start: 0, length: 1, msgs: msgs, dc: dc).First();
+
             return account.AddPackage(package.ID.Value, BillingPeriodType.Month, loggedInUser, msgs, dc);
         }
 
@@ -1253,38 +1254,27 @@ namespace AfterSchoolLibrary.Services
             {
                 // new sign up
                 if (activePackage.IsEmpty())
-                {
                     signupType = SignUpType.NewAccountSignUp;
-                }
+
                 // could be downgrading to a free account
                 else if (activePackage.PackageId != p.ID)
-                {
                     signupType = SignUpType.ChangePackage;
-                }
             }
             else
             {
                 if (activePackage.IsEmpty())
-                {
                     trialDayCount = (p.HasFeature(FeatureType.TrialDays, msgs, dc) ? p.GetFeature(FeatureType.TrialDays, msgs, dc).GetMaxValue() : 0).ToInteger();
-                }
                 else if (activePackage.HasFeature(FeatureType.TrialDays, msgs, dc))
-                {
                     trialDayCount = account.GetTrialDaysRemaining(activePackage, msgs, dc);
-                }
 
                 if (trialDayCount > 0)
                 {
                     // totally new
                     if (activePackage.IsEmpty())
-                    {
                         signupType = SignUpType.TrialSignUp;
-                    }
                     // still during the trial but changing packages with no new payment info
                     else
-                    {
                         signupType = SignUpType.ChangePackageDuringTrial;
-                    }
                 }
             }
 
@@ -1371,7 +1361,10 @@ namespace AfterSchoolLibrary.Services
                         }
 
                         if (amsgs.HasNoErrors() && newap.ID.HasValue)
-                            amsgs.AddRange(package.CopyFeaturesToAccountPackage(newap, loggedInUserId, adc));
+                            package.CopyFeaturesToAccountPackage(newap, loggedInUserId, amsgs, adc);
+
+                        // ensure package features are added
+                        account.EnsureDefaultPackageFeatures(newap, loggedInUser, msgs, dc);
 
                         // make sure the account package is set to the real trial days passed in
                         if (amsgs.HasNoErrors())
@@ -1398,15 +1391,37 @@ namespace AfterSchoolLibrary.Services
             return newap;
         }
 
+        public static void EnsureDefaultPackageFeatures(this Account account, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            account.EnsureDefaultPackageFeatures(null, loggedInUser, msgs, dc);
+        }
+
+        public static void EnsureDefaultPackageFeatures(this Account account, AccountPackage ap, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (ap.IsEmpty())
+                ap = account.GetActiveAccountPackage(msgs, dc);
+
+            if (ap.IsEmpty())
+                return;
+
+            if (account.AccountTypeId == AccountType.School)
+            {
+                ap.AddOrUpdatePackageFeature(FeatureType.ManagePermissionSlips, 1, loggedInUser, msgs, dc);
+                ap.AddOrUpdatePackageFeature(FeatureType.ManageFieldTrips, 1, loggedInUser, msgs, dc);
+                ap.AddOrUpdatePackageFeature(FeatureType.ManageActivityGroups, 1, loggedInUser, msgs, dc);
+            }
+
+            ap.AddOrUpdatePackageFeature(FeatureType.AcceptACH, 1, loggedInUser, msgs, dc);
+        }
+
         public static int GetTrialDaysRemaining(this Account account, AccountPackage currentPackage, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var daysRemaining = 0;
             var firstAccountPackage = account.GetAccountPackages(msgs, dc).OrderBy(x => x.StartDate.Value).First();
             var daysSinceSignUp = (DateTime.UtcNow - firstAccountPackage.StartDate.Value).Days;
             if (daysSinceSignUp < currentPackage.GetFeature(FeatureType.TrialDays, msgs, dc).GetMaxValue() + 1) // they get the full last day
-            {
                 daysRemaining = (currentPackage.GetFeature(FeatureType.TrialDays, msgs, dc).GetMaxValue() - daysSinceSignUp).ToInteger();
-            }
+
             return daysRemaining;
         }
 
@@ -2470,18 +2485,18 @@ namespace AfterSchoolLibrary.Services
                         msgs: amsgs,
                         dc: adc);
 
-                    // process payment by to account, includes tuition fee
+                    // process payment by to account, includes registration fee
                     if (!checkoutObject.ParticipationObject.IsTuitionFree && checkoutObject.PaymentPlan.IsEmpty())
                         AccountService.ProcessTuitionFee(checkoutObject, loggedInUser, amsgs, adc);
 
-                    // Process Subscriptions separately, don't charge all at once for the tuition Fee
+                    // Process Subscriptions separately, don't charge all at once for the registration Fee
 
                     // TODO: Decide if master account registrant should be added to plans or the account copy
                     // get the registrant record that was created just for the account
                     var accountRegistrant = checkoutObject.Registration.GetRegistrant(amsgs, adc);
 
                     // if they have a subscription plan
-                    // will also process tuition fees
+                    // will also process registration fees
                     if (checkoutObject.SubscriptionPlan.IsNotEmpty())
                         accountRegistrant.StartSubscriptionPlan(
                             checkoutObject: checkoutObject,

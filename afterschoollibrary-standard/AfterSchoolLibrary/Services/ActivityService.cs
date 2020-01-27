@@ -53,13 +53,19 @@ namespace AfterSchoolLibrary.Services
             if (Utilities.RemoveHTMLAndEntities(activity.Details).IsBlank())
                 totalErrors++;
 
-            totalFields++;
-            if (!activity.HasSchedule)
-                totalErrors++;
+            if (activity.ActivityTypeId != ActivityType.PermissionSlip)
+            {
+                totalFields++;
+                if (!activity.HasSchedule || activity.ActivityTypeId == ActivityType.PermissionSlip)
+                    totalErrors++;
+            }
 
-            totalFields++;
-            if (!activity.LocationId.HasValue)
-                totalErrors++;
+            if (activity.ActivityTypeId.NotIn(new List<ActivityType>() { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
+            {
+                totalFields++;
+                if (!activity.LocationId.HasValue)
+                    totalErrors++;
+            }
 
             //totalFields++;
             //if (CostPerRegistrant.HasValue && CostPerRegistrant.Value > 0 && !AllowToPayLater && !AcceptCreditCard)
@@ -685,6 +691,7 @@ namespace AfterSchoolLibrary.Services
                 LocationId = activity.LocationId,
                 RequiresParentalConsent = activity.RequiresParentalConsent,
                 InstructorId = activity.InstructorId,
+                IsInviteOnly = activity.IsInviteOnly,
             };
         }
 
@@ -827,24 +834,34 @@ namespace AfterSchoolLibrary.Services
             var providerlastname = values.GetValueOrDefault("providerlastname");
             var provideremail = values.GetValueOrDefault("provideremail");
             var providerphone = values.GetValueOrDefault("providerphone");
+            var type = values.GetValueOrDefault("type");
+
+            var activityType = ActivityType.NotSet;
+
+            if (type.IsNotEmpty() && type.IsNumber())
+                activityType = type.ToString().ToInteger().ToEnum<ActivityType>();
 
             if (!activityId.IsNumber() || activityId.ToInteger() == 0)
             {
                 if (name.IsEmpty())
                     msgs.Add("Activity Name is required", MessageType.UserError);
 
-                if (!seatsavailable.IsNumber())
+                if (activityType.NotIn(new List<ActivityType>() { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
                 {
-                    msgs.Add("Total Available Seats is required and must be greater than 0", MessageType.UserError);
-                }
-                else
-                {
-                    var ap = account.GetActiveAccountPackage(msgs, dc);
-                    var maxParticipants = ap.GetFeature(FeatureType.Participants, msgs, dc).Max.Value;
-                    if (maxParticipants < seatsavailable.ToString().ToInteger())
-                        msgs.Add(string.Format("Total Available Seats is required and must be less than or equal to {0}", maxParticipants), MessageType.UserError);
+                    if (!seatsavailable.IsNumber())
+                    {
+                        msgs.Add("Total Available Seats is required and must be greater than 0", MessageType.UserError);
+                    }
+                    else
+                    {
+                        var ap = account.GetActiveAccountPackage(msgs, dc);
+                        var maxParticipants = ap.GetFeature(FeatureType.Participants, msgs, dc).Max.Value;
+                        if (maxParticipants < seatsavailable.ToString().ToInteger())
+                            msgs.Add(string.Format("Total Available Seats is required and must be less than or equal to {0}", maxParticipants), MessageType.UserError);
 
+                    }
                 }
+
                 if (group.IsEmpty() && registrationperiod.ToString().ToInteger() > 0)
                 {
                     if (!$"{registrationopendate} {registrationopentime}".IsDateTime())
@@ -885,7 +902,7 @@ namespace AfterSchoolLibrary.Services
             {
                 activity = new Activity
                 {
-                    ActivityTypeId = ActivityType.Activity,
+                    ActivityTypeId = activityType,
                     CreateDate = DateTime.UtcNow,
                     CreatedBy = loggedInUserId,
                     SeatsAvailable = seatsavailable.ToString().ToInteger(),
@@ -894,6 +911,9 @@ namespace AfterSchoolLibrary.Services
                     LocationId = account.DefaultLocationId,
                     RequiresParentalConsent = true
                 };
+
+                if (activityType.In(new ActivityType[] { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
+                    activity.IsInviteOnly = true;
 
                 if (group.IsEmpty() && !form.IsNumber())
                     msgs.Add("Registration Form is required", MessageType.UserError);
@@ -2232,6 +2252,28 @@ namespace AfterSchoolLibrary.Services
                 var accountOwner = locationOwner.GetAccountOwner(msgs, dc);
                 msgs.AddRange(Helpers.EmailHelper.SendPublishRequestNotification(activity, locationOwner, accountOwner, loggedInUser));
             }
+        }
+
+        public static void EmailInvitedContacts(int id, int periodId, List<int> contactIds, string emailmessage, string inviteUrl, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            var activity = Activity.Load(id, msgs, dc);
+            var account = activity.GetAccount(msgs, dc);
+            var loggedInUser = WebUser.Load(loggedInUserId, msgs, dc);
+            var contacts = Registrant.LoadList(contactIds, msgs, dc);
+            var period = RegistrationPeriod.Load(periodId, msgs, dc);
+
+            if (contacts.IsNotEmpty() && contacts.Any())
+                contacts.ForEach(contact => {
+                    Helpers.EmailHelper.SendActivityInviteEmail(
+                        contact,
+                        account,
+                        activity,
+                        period,
+                        loggedInUser,
+                        emailmessage,
+                        msgs);
+                });
         }
     }
 }

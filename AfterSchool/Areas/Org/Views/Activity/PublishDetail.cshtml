@@ -7,6 +7,10 @@
     var showCopyWithStudents = "1";
     var mustRequestToPublish = (bool)ViewBag.MustRequestToPublish;
     var showCopyButton = (bool)ViewBag.ShowCopyButton;
+    var showSetupPayments = Model.ProviderAccountId.IsEmpty() &&
+                            !SessionVariables.CurrentAccount.CanReceivePaymentDeposits() &&
+                            !SessionVariables.CurrentAccount.HasTreasurer() &&
+                            !Model.IsFree;
 
     if (Request["isnew"] == "1")
     {
@@ -51,6 +55,12 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <div class="btn-group pull-right">
+
+                        @if (!Model.ActivityGroupId.HasValue)
+                        {
+                            <a href="@Url.Action("inviteto", "contact", new { id = Model.Uid, type = "activity" })" class="btn btn-default">Invite Parents &raquo;</a>
+                        }
+
                         @if (Model.IsPublishable && !mustRequestToPublish)
                         {                            
                             if (!Model.IsPublished)
@@ -79,7 +89,7 @@
 
                 <div class="panel-body">
 
-                    @if (Model.ProviderAccountId.IsEmpty() && !SessionVariables.CurrentAccount.CanReceivePaymentDeposits() && !SessionVariables.CurrentAccount.HasTreasurer())
+                    @if (showSetupPayments)
                     {
                         <div>
                             <div role="alert" class="alert alert-success alert-icon">
@@ -154,18 +164,21 @@
                             else
                             {
                                 <table class="table table-striped">
-                                    <tr>
-                                        <td>Organization Home Page</td>
-                                        <td>
-                                            <input type="text" value="@SessionVariables.CurrentAccount.ShortHomePageUrl" id="account-reg-url" onclick="this.select()" class="form-control inline" />
-                                        </td>
-                                        <td>
-                                            <span onclick="WebPage.copySelection('account-reg-url', 'URL has been copied')" title="Copy Url">
-                                                <i class="s7-copy-file icon-large text-success pointer"></i>
-                                            </span>
-                                            <a href="@SessionVariables.CurrentAccount.ShortHomePageUrl" target="_blank" title="View Page"><i class="s7-link icon-large"></i></a>
-                                        </td>
-                                    </tr>
+                                    @if (!Model.IsInviteOnly)
+                                    {
+                                        <tr>
+                                            <td>Organization Home Page</td>
+                                            <td>
+                                                <input type="text" value="@SessionVariables.CurrentAccount.ShortHomePageUrl" id="account-reg-url" onclick="this.select()" class="form-control inline" />
+                                            </td>
+                                            <td>
+                                                <span onclick="WebPage.copySelection('account-reg-url', 'URL has been copied')" title="Copy Url">
+                                                    <i class="s7-copy-file icon-large text-success pointer"></i>
+                                                </span>
+                                                <a href="@SessionVariables.CurrentAccount.ShortHomePageUrl" target="_blank" title="View Page"><i class="s7-link icon-large"></i></a>
+                                            </td>
+                                        </tr>
+                                    }
                                     @if (Model.IsPublished)
                                     {
                                         if (Model.ActivityGroupId.HasValue)
@@ -224,7 +237,7 @@
                                 else
                                 {
                                     <a href="@Url.Action("summary", "activity", new { id = Model.Uid })" class="btn btn-default btn-lg center-block">
-                                        View @UILabel.ActivityLabel(ActivityType.Activity) Summary
+                                        View Summary
                                     </a>
                                 }
 
@@ -232,7 +245,7 @@
                             <div class="col-md-4">
                                 <a href="@SessionVariables.CurrentAccount.HomePageUrl" class="btn btn-default btn-lg center-block" target="_blank">
                                     <i class="s7-link"></i>
-                                    View @UILabel.ActivityLabel(ActivityType.Activity)
+                                    View Public Page
                                 </a>
                             </div>
 

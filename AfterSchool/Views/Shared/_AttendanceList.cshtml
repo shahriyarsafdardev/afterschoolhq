@@ -35,7 +35,14 @@
     </div>
 </div>
 
-<a href="@Url.Action("trackattendance", controller, new { id = Model.Uid.ToString() })" class="btn btn-primary btn-space">Take Attendance</a>
+@if (Model.HasSchedule)
+{
+    <a href="@Url.Action("trackattendance", controller, new { id = Model.Uid.ToString() })" class="btn btn-primary btn-space">Take Attendance</a>
+}
+else if (Model.ActivityTypeId.NotIn(new ActivityType[] { ActivityType.PermissionSlip, ActivityType.FieldTrip }))
+{
+    <p>In order to take attendance, please <a href="@Url.Action("editschedule", "activity", new { id = Model.Uid })">add a schedule</a> to @Model.Name</p>
+}
 
 <div class="table-responsive">
     <table class="table table-hover">

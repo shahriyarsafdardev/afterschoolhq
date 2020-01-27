@@ -59,6 +59,7 @@ namespace AfterSchoolLibrary.Models
 		public bool IsDeleted { get { return (bool)MDV["IsDeleted"].Value; } set { MDV["IsDeleted"].Value = value; } }
 		public bool IsPublished { get { return (bool)MDV["IsPublished"].Value; } set { MDV["IsPublished"].Value = value; } }
 		public bool IsArchived { get { return (bool)MDV["IsArchived"].Value; } set { MDV["IsArchived"].Value = value; } }
+		public bool IsInviteOnly { get { return (bool)MDV["IsInviteOnly"].Value; } set { MDV["IsInviteOnly"].Value = value; } }
 		public int? ActivityGroupId { get { return (int?)MDV["ActivityGroupId"].Value; } set { MDV["ActivityGroupId"].Value = value; } }
 		public int? ActivityScheduleId { get { return (int?)MDV["ActivityScheduleId"].Value; } set { MDV["ActivityScheduleId"].Value = value; } }
 		public string UniqueName { get { return (string)MDV["UniqueName"].Value; } set { MDV["UniqueName"].Value = value; } }
@@ -104,6 +105,7 @@ namespace AfterSchoolLibrary.Models
 			this.IsDeleted = false;
 			this.IsPublished = false;
 			this.IsArchived = false;
+			this.IsInviteOnly = false;
 			this.ActivityTypeId = ActivityType.NotSet;
 			this.LeaderTypeId = ActivityLeaderType.NotSet;
 			this.RequiresParentalConsent = false;
@@ -143,6 +145,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "IsDeleted", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "IsPublished", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "IsArchived", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "IsInviteOnly", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "ActivityGroupId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ActivityScheduleId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "UniqueName", System.Data.SqlDbType.NVarChar , "100");
@@ -342,6 +345,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["IsArchived"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsInviteOnly"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();

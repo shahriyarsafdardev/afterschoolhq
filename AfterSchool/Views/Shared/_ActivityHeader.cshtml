@@ -45,10 +45,12 @@
             @if(Model.IsPublished || registrantCount > 0)
             {
                 <a href="@Url.Action("registrants", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "registrants" ? "-active" : "")"><i class="s7-user"></i> @UILabel.RegistrantLabel(true)</a>
-                if (SessionVariables.AccountPackage.HasFeature(FeatureType.Attendance))
+
+                if (SessionVariables.AccountPackage.HasFeature(FeatureType.Attendance) && Model.ActivityTypeId.NotIn(new ActivityType[] { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
                 {
                     <a href="@Url.Action("attendance", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "attendance" ? "-active" : "")"><i class="s7-check"></i> Attendance</a>
                 }
+
                 if (SessionVariables.AccountPackage.HasFeature(FeatureType.Messaging))
                 {
                     <a href="@Url.Action("messages", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "messages" ? "-active" : "")"><i class="s7-mail"></i> Messaging</a>
@@ -65,16 +67,20 @@
                 }                
             }
 
-            @if (Model.ActivityTypeId == ActivityType.Activity && (isActivityLeader || SessionVariables.CurrentUser.CanPublishActivity(SessionVariables.CurrentAccount, Model)))
+            @if (Model.ActivityTypeId != ActivityType.Team && (isActivityLeader || SessionVariables.CurrentUser.CanPublishActivity(SessionVariables.CurrentAccount, Model)))
             {
                 <a href="@Url.Action("publishdetail", "activity", new { id = Model.Uid })" class="btn @publishClass"><i class="s7-link"></i> Publish...</a>
             }
 
             @if (Model.ActivityGroupId.HasValue)
             {
-                <a href="@Url.Action("activities", "group", new {id = group.Uid})" class="btn btn-alt5">
+                <a href="@Url.Action("activities", "group", new { id = group.Uid })" class="btn btn-alt5">
                     <i class="s7-date"></i> @UILabel.ActivityGroupLabel(group.ActivityGroupTypeId) &raquo;
                 </a>
+            }
+            else
+            {
+                <a href="@Url.Action("index", "activity", new { type = (int)Model.ActivityTypeId })" class="btn btn-alt5">&laquo; All @UILabel.ActivityLabel(Model.ActivityTypeId, true)</a>
             }
         </div>
         <div class="hidden-lg hidden-sm hidden-md">
@@ -113,6 +119,10 @@
                 @if (Model.ActivityGroupId.HasValue)
                 {
                     <option value="@Url.Action("summary", "group", new { id = group.Uid })">@UILabel.ActivityGroupLabel(group.ActivityGroupTypeId) &raquo;</option>
+                }
+                else
+                {
+                    <option value="@Url.Action("index", "activity", new { type = (int)Model.ActivityTypeId })">All @UILabel.ActivityLabel(Model.ActivityTypeId, true)</option>
                 }
             </select>
         </div>

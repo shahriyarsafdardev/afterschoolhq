@@ -1,0 +1,24 @@
+﻿<div>
+  <p>
+    @Model.Greeting,
+  </p>
+  
+  @Model.CustomMessage
+  
+  <p>
+    @Model.SenderDisplayName at @Model.AccountName has invited you to register for @Model.ActivityName! @Model.RegistrationOpenText
+  </p>
+  <ul>
+    <li>
+      To <strong>accept this invite and register</strong>, please click the following link: <a href="@Model.ViewLink">@Model.ViewLink</a>
+    </li>
+  </ul>
+
+  <p>
+    If you have any issues signing up please contact us at <a href="mailto:@Model.SupportEmail">@Model.SupportEmail</a>
+  </p>
+  
+  <p>
+    Your @Model.ProductName Team
+  </p>
+</div>
