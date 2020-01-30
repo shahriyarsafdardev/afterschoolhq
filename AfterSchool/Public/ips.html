@@ -7,9 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <link rel="shortcut icon" type="image/png" href="favicon.png">
     
-	<link rel="stylesheet" type="text/css" href="./css/bootstrap.min.css?3278">
-	<link rel="stylesheet" type="text/css" href="style.css?5662">
-	<link rel="stylesheet" type="text/css" href="./css/animate.min.css?6855">
+	<link rel="stylesheet" type="text/css" href="./css/bootstrap.min.css?1480">
+	<link rel="stylesheet" type="text/css" href="style.css?8611">
+	<link rel="stylesheet" type="text/css" href="./css/animate.min.css?8199">
 	<link rel="stylesheet" type="text/css" href="./css/font-awesome.min.css">
 	<link rel="stylesheet" type="text/css" href="./css/ionicons.min.css">
 	<link href='https://fonts.googleapis.com/css?family=Montserrat&display=swap&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
@@ -87,7 +87,7 @@
 					AfterSchool HQ @ IPS
 				</h1>
 				<div class="form-group">
-					<input class="form-control" placeholder="Search Schools" />
+					<input class="form-control" placeholder="Search Schools" id="search" />
 				</div>
 			</div>
 		</div>
@@ -96,12 +96,34 @@
 <!-- bloc-77 END -->
 
 <!-- bloc-78 -->
-<div class="bloc l-bloc" id="bloc-78">
-	<div class="container bloc-lg">
+<div class="bloc l-bloc full-width-bloc" id="bloc-78">
+	<div class="container bloc-lg row-marginless">
 		<div class="row">
-			<div class="col">
+			<div class="col col-lg-12">
 				<div id="schools-container">
+					<div class="ips-row">
+						<div class="col-sm-12 col-md-4 school-info-holder" school-name="Anna Brochhausen School 88">
+							<div class="school-card text-center">
+								<div class="school-info-holder">
+									<h3 class="mg-md">
+										Anna Brochhausen School 88<br>
+									</h3>
+									<p class="school-address">
+										5801 E. 16th Street Indianapolis, IN 46218 US
+									</p>
+								</div>
+								<div class="card-btn-holder">
+									<a href="index.html" class="btn btn-d btn-lg btn-green">View Activities</a>
+								</div>
+							</div>
+						</div>
+					</div>
 				</div>
+			</div>
+			<div class="col col-lg-12 " id="no-matches">
+				<h4 class="mg-md text-lg-center padding-40 d-block">
+					Sorry there are no schools that match your search
+				</h4>
 			</div>
 		</div>
 	</div>
@@ -199,23 +221,40 @@
 <!-- Main container END -->
     
 
-<script src="./js/jquery-3.3.1.min.js?786"></script>
-<script src="./js/bootstrap.bundle.min.js?75"></script>
-<script src="./js/blocs.min.js?2625"></script>
+<script src="./js/jquery-3.3.1.min.js?1718"></script>
+<script src="./js/bootstrap.bundle.min.js?6622"></script>
+<script src="./js/blocs.min.js?2920"></script>
 <script src="./js/lazysizes.min.js" defer></script>
-<script src="./js/scrollFX.js?5107"></script>
+<script src="./js/scrollFX.js?3302"></script>
 <!-- Additional JS END -->
 
 <script>
+	var totalSchools = 0;
+	var schoolsVisible = 0;
+	
     $(document).ready(function () {
+    	
+    	$('#no-matches').addClass('object-hidden');
+    	
         $('#search').keyup(function () {
-            $('.school-info-holder').removeClass('hide');
+            $('.school-info-holder').removeClass('object-hidden');
+            $('#no-matches').addClass('object-hidden');
+            
+            schoolsVisible = totalSchools;
             let searchVal = $('#search').val().toLowerCase();
+            
             $('.school-info-holder').each(function () {
                 if ($(this).attr('school-name') && $(this).attr('school-name').toLowerCase().indexOf(searchVal) == -1) {
-                    $(this).addClass('hide');
+                    $(this).addClass('object-hidden');
+                    schoolsVisible--;
                 }
             });
+            
+            console.log(schoolsVisible);
+            if (schoolsVisible <= 0){
+            	console.log('removeClass');
+            	$('#no-matches').removeClass('object-hidden');
+            } 
         });
     });
 </script>
@@ -230,6 +269,7 @@
 
                     for (school of data.schools) {
                         addSchoolToDom(school);
+                        totalSchools++;
                     }
                 } else {
                     Notifications.showErrors(data.messages);
