@@ -1,0 +1,302 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <link rel="shortcut icon" type="image/png" href="favicon.png">
+    
+	<link rel="stylesheet" type="text/css" href="./css/bootstrap.min.css?5790">
+	<link rel="stylesheet" type="text/css" href="style.css?7648">
+	<link rel="stylesheet" type="text/css" href="./css/animate.min.css?5208">
+	<link rel="stylesheet" type="text/css" href="./css/font-awesome.min.css">
+	<link rel="stylesheet" type="text/css" href="./css/ionicons.min.css">
+	<link href='https://fonts.googleapis.com/css?family=Montserrat&display=swap&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+    <title>Contact</title>
+
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    
+<!-- Analytics -->
+ 
+<!-- Analytics END -->
+    
+</head>
+<body>
+<!-- Main container -->
+<div class="page-container">
+    
+<!-- bloc-46 -->
+<div class="bloc bgc-dark-cerulean d-bloc" id="bloc-46">
+	<div class="container bloc-sm">
+		<div class="row">
+			<div class="col">
+				<nav class="navbar row navbar-expand-md navbar-dark" role="navigation">
+					<a class="navbar-brand" href="index.html"><img src="img/lazyload-ph.png" data-src="img/ahq-logo.png" alt="logo" class="lazyload" /></a>
+					<button id="nav-toggle" type="button" class="ml-auto ui-navbar-toggler navbar-toggler border-0 p-0" data-toggle="collapse" data-target=".navbar-16846" aria-expanded="false" aria-label="Toggle navigation">
+						<span class="navbar-toggler-icon"></span>
+					</button>
+					<div class="collapse navbar-collapse navbar-16846">
+						<ul class="site-navigation nav navbar-nav ml-auto">
+							<li class="nav-item">
+								<a href="index.html" class="nav-link">Home</a>
+							</li>
+							<li class="nav-item">
+								<a href="about.html" class="nav-link a-btn">About</a>
+							</li>
+							<li class="nav-item">
+								<div class="dropdown btn-dropdown">
+									<a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" aria-expanded="false">For Schools</a>
+									<ul class="dropdown-menu" role="menu">
+										<li class="nav-item">
+											<a href="manage-programs.html" class="nav-link">Manage Programs</a>
+										</li>
+										<li class="nav-item">
+											<a href="new-programs.html" class="nav-link">Add New Programs</a>
+										</li>
+									</ul>
+								</div>
+							</li>
+							<li class="nav-item">
+								<a href="teachers.html" class="a-btn nav-link">For Teachers</a>
+							</li>
+							<li class="nav-item">
+								<a href="providers.html" class="nav-link">For Providers</a>
+							</li>
+							<li class="nav-item">
+								<a href="https://afterschoolhq.com/login" class="nav-link a-btn" data-target="_blank" target="_blank">Login</a>
+							</li>
+							<li class="navbar-signup">
+								<a href="https://afterschoolhq.com/demo" class="nav-link a-btn" data-target="_blank" target="_blank">Sign Up</a>
+							</li>
+						</ul>
+					</div>
+				</nav>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- bloc-46 END -->
+
+<!-- bloc-47 -->
+<div class="bloc l-bloc" id="bloc-47">
+	<div class="container bloc-lg">
+		<div class="row">
+			<div class="col-md-6">
+				<h1 class="mg-md">
+					Contact Us
+				</h1>
+				<p>
+					We would love to hear from you.
+				</p>
+				<p class="mg-md">
+					<span class="fa fa-map-marker"></span>&nbsp;12175 Visionary Way #710,&nbsp;Fishers, Indiana, USA<br>
+				</p>
+				<p class="mg-md">
+					<span class="fa fa-envelope"></span>&nbsp;hello@afterschoolhq.com<br>
+				</p>
+				<p class="mg-md">
+					<span class="fa fa-phone"></span>&nbsp;317-316-0596
+				</p>
+			</div>
+			<div class="col-md-6">
+				<div class="form-group">
+					<div class="text-success submit-contact-success object-hidden">
+						<p>
+							Your message has been sent
+						</p>
+					</div>
+					<div class="text-danger submit-contact-error object-hidden">
+						<p class="d-block">
+							Error sending message
+						</p>
+					</div>
+					<div class="form-group">
+						<label>
+							Name
+						</label>
+						<input class="form-control" id="contact-form-name" />
+					</div>
+					<div class="form-group">
+						<label>
+							Email
+						</label>
+						<input class="form-control" id="contact-form-email" />
+					</div>
+					<div class="form-group">
+						<label>
+							Message
+						</label><textarea class="form-control" rows="4" cols="50" id="contact-form-message"></textarea>
+					</div>
+					<div class="g-recaptcha" data-sitekey="6Lfg2BEUAAAAADCXTFVlYUywSoqvMUgLd-tERDxO">
+					</div>
+					<div class="margin-v-20">
+						<a href="#" class="btn btn-lg float-lg-none btn-block btn-green-munsell" id="btn-contact-form-submit">Submit</a>
+					</div>
+				</div>
+				<div class=" ">
+					<script>
+
+    function submitContactForm() {
+
+        var params = 'name=' + $('#contact-form-name').val() +
+            '&email=' + $('#contact-form-email').val() +
+            '&message=' + $('#contact-form-message').val() +
+            '&g_recaptcha_response=' + $('#g-recaptcha-response').val();
+
+        $('#btn-contact-form-submit').html('Submitting...');
+        $('#btn-contact-form-submit').prop('disabled', true);
+
+        $.post(
+            'https://afterschoolhq.com/services/submitcontactform',
+            params,
+            function (data) {
+
+                $('#btn-contact-form-submit').html('Submit');
+                $('#btn-contact-form-submit').prop('disabled', false);
+                grecaptcha.reset();
+
+                if (data && data.status == 'ok') {
+
+                    $('#contact-form-name').val('');
+                    $('#contact-form-email').val('');
+                    $('#contact-form-message').val('');
+
+                    $('.submit-contact-error').addClass('object-hidden');
+                    $('.submit-contact-success').removeClass('object-hidden');
+
+                } else {
+
+                    $('.submit-contact-success').addClass('object-hidden');
+                    $('.submit-contact-error').removeClass('object-hidden');
+                    $('.submit-contact-error').html('');
+
+                    for (var message of data.messages) {
+                        $('.submit-contact-error').append('<p>');
+                        $('.submit-contact-error').append(message.Text);
+                        $('.submit-contact-error').append('</p>');
+                    }
+
+                }
+            }
+        );
+    }
+</script>
+					
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- bloc-47 END -->
+
+<!-- ScrollToTop Button -->
+<a class="bloc-button btn btn-d scrollToTop" onclick="scrollToTarget('1',this)"><span class="fa fa-chevron-up"></span></a>
+<!-- ScrollToTop Button END-->
+
+
+<!-- bloc-7 -->
+<div class="bloc bg-092515-SeattleHigh5-Globalist-JT006 b-parallax bloc-bg-texture texture-darken l-bloc" id="bloc-7">
+	<div class="container bloc-lg">
+		<div class="row">
+			<div class="col-md-9">
+				<h2 class="mg-clear text-center text-md-left tc-white scroll-fx-left-in-fade">
+					Join the mission to transform 3 to 6 pm <br>for students across America
+				</h2>
+			</div>
+			<div class="align-self-center col-md-3">
+				<a href="https://cdn.forms-content.sg-form.com/2264ee63-3d60-11ea-bc6e-de8a795ca004" class="btn btn-block btn-green-munsell btn-subscribe-style scroll-fx-right-in-fade" data-target="_blank" rel="nofollow" target="_blank">Subscribe</a>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- bloc-7 END -->
+
+<!-- bloc-8 -->
+<div class="bloc bgc-olive-drab-7 d-bloc" id="bloc-8">
+	<div class="container bloc-lg">
+		<div class="row">
+			<div class="col-md-3 col-sm-6 padding-40">
+				<h4 class="mg-md text-sm-left tc-white text-left">
+					Contact
+				</h4>
+				<p>
+					12175 Visionary Way<br>Suite 710<br>Fishers, Indiana 46038<br>(317) 316-0596
+				</p><img src="img/lazyload-ph.png" data-src="img/ahq-flight-logo@0-75x.png" class="img-fluid footer-logo float-lg-none lazyload" alt="ahq flight-logo@0-75x" />
+			</div>
+			<div class="col-md-3 col-sm-6 padding-40">
+				<h4 class="mg-md text-sm-left tc-white text-left">
+					Company
+				</h4><a href="about.html" class="a-btn a-block footer-link text-left">About</a><a href="contact.html" class="a-btn a-block footer-link text-left">Contact</a><a href="tos.html" class="a-btn a-block footer-link text-left">Terms of Service</a><a href="privacy.html" class="a-btn a-block footer-link text-left">Privacy Policy</a><a href="copyright.html" class="a-btn a-block footer-link text-left">Copyright</a>
+			</div>
+			<div class="col-md-3 col-sm-6 d-sm-block d-none">
+			</div>
+			<div class="col-md-3 col-sm-6 padding-40">
+				<h4 class="mg-md text-sm-left tc-white text-left">
+					Connect
+				</h4>
+				<div class="row">
+					<div class="col-6 col-sm-2 col offset-sm-0">
+						<div class="text-center">
+							<a href="https://facebook.com/afterschoolhq" data-target="_blank" target="_blank"><span class="fa fa-facebook-official icon-md"></span></a>
+						</div>
+					</div>
+					<div class="col-6 col-sm-2">
+						<div class="text-center">
+							<a href="https://twitter.com/afterschoolhq/" data-target="_blank" target="_blank"><span class="fa fa-twitter icon-md none"></span></a>
+						</div>
+					</div>
+					<div class="col-6 col-sm-2">
+						<div class="text-center">
+							<a href="mailto:hello@afterschoolhq.com"><span class="fa fa-envelope-o icon-md"></span></a>
+						</div>
+					</div>
+					<div class="col-lg-2 col-6 col-sm-2">
+						<div class="text-center">
+							<a href="https://www.linkedin.com/company/afterschoolhq/" data-target="_blank" target="_blank"><span class="ion ion-social-linkedin icon-md"></span></a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- bloc-8 END -->
+
+<!-- bloc-9 -->
+<div class="bloc bgc-black d-bloc" id="bloc-9">
+	<div class="container bloc-lg">
+		<div class="row">
+			<div class="col">
+				<p class="text-lg-center mx-auto d-block text-sm-center text-center">
+					AfterSchool HQ is made with ❤️ in Fishers, IN
+				</p>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- bloc-9 END -->
+
+</div>
+<!-- Main container END -->
+    
+
+<script src="./js/jquery-3.3.1.min.js?6043"></script>
+<script src="./js/bootstrap.bundle.min.js?2535"></script>
+<script src="./js/blocs.min.js?4325"></script>
+<script src="./js/lazysizes.min.js" defer></script>
+<script src="./js/scrollFX.js?7893"></script>
+<!-- Additional JS END -->
+
+<script>
+    $(document).ready(function(){
+        $('#btn-contact-form-submit').click(submitContactForm);
+    });
+</script>
+
+<!-- Preloader -->
+<div id="page-loading-blocs-notifaction" class="page-preloader"></div>
+<!-- Preloader END -->
+
+</body>
+</html>
