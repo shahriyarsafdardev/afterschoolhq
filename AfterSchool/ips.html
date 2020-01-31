@@ -7,9 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <link rel="shortcut icon" type="image/png" href="favicon.png">
     
-	<link rel="stylesheet" type="text/css" href="./css/bootstrap.min.css?9863">
-	<link rel="stylesheet" type="text/css" href="style.css?3077">
-	<link rel="stylesheet" type="text/css" href="./css/animate.min.css?4851">
+	<link rel="stylesheet" type="text/css" href="./css/bootstrap.min.css?5025">
+	<link rel="stylesheet" type="text/css" href="style.css?7122">
+	<link rel="stylesheet" type="text/css" href="./css/animate.min.css?5192">
 	<link rel="stylesheet" type="text/css" href="./css/font-awesome.min.css">
 	<link rel="stylesheet" type="text/css" href="./css/ionicons.min.css">
 	<link href='https://fonts.googleapis.com/css?family=Montserrat&display=swap&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
@@ -107,9 +107,9 @@
 <div class="bloc l-bloc full-width-bloc" id="bloc-78">
 	<div class="container bloc-lg row-marginless">
 		<div class="row" id="schools-container">
-			<div class="school-info-holder object-hidden col-lg-3">
-				<div class="school-card text-center">
-					<div class="school-info-holder">
+			<div class="school-info-holder d-block col-lg-4">
+				<div class="school-card text-center ">
+					<div class="school-details">
 						<h3 class="mg-md school-card-title">
 							Anna Brochhausen School 88<br>
 						</h3>
@@ -122,9 +122,9 @@
 					</div>
 				</div>
 			</div>
-			<div class="school-info-holder object-hidden col-lg-3">
+			<div class="school-info-holder object-hidden col-lg-4">
 				<div class="school-card text-center">
-					<div class="school-info-holder">
+					<div class="school-details">
 						<h3 class="mg-md school-card-title">
 							Anna Brochhausen School 88<br>
 						</h3>
@@ -153,7 +153,7 @@
 <div class="bloc blue-background bloc-bg-texture texture-fabric none full-width-bloc d-bloc" id="bloc-79">
 	<div class="container bloc-lg row-marginless">
 		<div class="row">
-			<div class="padding-40 offset-lg-2 col-lg-8 ">
+			<div class="padding-40 offset-lg-2 col-lg-8">
 				<img src="img/lazyload-ph.png" data-src="img/icon-rocket.png" class="img-fluid mx-auto d-block margin-20 scroll-fx-zoom-push scroll-fx-up-in-fade lazyload" alt="icon rocket" />
 				<h2 class="mg-md text-center padding-40 scroll-fx-zoom-push scroll-fx-up-in-fade">
 					Learn how AfterSchool HQ boosts students participation in unique learning experiences
@@ -289,11 +289,11 @@
 <!-- Main container END -->
     
 
-<script src="./js/jquery-3.3.1.min.js?4301"></script>
-<script src="./js/bootstrap.bundle.min.js?6973"></script>
-<script src="./js/blocs.min.js?9058"></script>
+<script src="./js/jquery-3.3.1.min.js?752"></script>
+<script src="./js/bootstrap.bundle.min.js?7433"></script>
+<script src="./js/blocs.min.js?1733"></script>
 <script src="./js/lazysizes.min.js" defer></script>
-<script src="./js/scrollFX.js?2792"></script>
+<script src="./js/scrollFX.js?2349"></script>
 <!-- Additional JS END -->
 
 <script>
@@ -317,8 +317,6 @@
                     schoolsVisible--;
                 }
             });
-            
-            console.log(schoolsVisible);
             
             if (schoolsVisible <= 0){
             	$('#no-matches').removeClass('object-hidden');
@@ -348,7 +346,7 @@
 
     function addSchoolToDom(school) {
         var schoolsContainer = $('#schools-container');
-        schoolsContainer.append('<div class="col-lg-4 col-sm-6 school-info-holder" school-name="' + school.Name + '"><div class="school-card text-center"><div class="school-info-holder"><h3 class="school-card-title">' + school.Name + '</h3><p class="school-address">' + school.Address + '</p></div><div class="card-btn-holder"><a href="' + school.Link + '" class="btn btn-green"> View Activities </a></div></div></div>');
+        schoolsContainer.append('<div class="col-lg-4 col-sm-6 school-info-holder" school-name="' + school.Name + '"><div class="school-card text-center"><div class="school-details"><h3 class="school-card-title">' + school.Name + '</h3><p class="school-address">' + school.Address + '</p></div><div class="card-btn-holder"><a href="' + school.Link + '" class="btn btn-green"> View Activities </a></div></div></div>');
     }
 </script>
 
