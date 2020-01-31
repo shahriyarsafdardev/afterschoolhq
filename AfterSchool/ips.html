@@ -7,9 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <link rel="shortcut icon" type="image/png" href="favicon.png">
     
-	<link rel="stylesheet" type="text/css" href="./css/bootstrap.min.css?7678">
-	<link rel="stylesheet" type="text/css" href="style.css?3514">
-	<link rel="stylesheet" type="text/css" href="./css/animate.min.css?8024">
+	<link rel="stylesheet" type="text/css" href="./css/bootstrap.min.css?3388">
+	<link rel="stylesheet" type="text/css" href="style.css?2150">
+	<link rel="stylesheet" type="text/css" href="./css/animate.min.css?8876">
 	<link rel="stylesheet" type="text/css" href="./css/font-awesome.min.css">
 	<link rel="stylesheet" type="text/css" href="./css/ionicons.min.css">
 	<link href='https://fonts.googleapis.com/css?family=Montserrat&display=swap&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
@@ -107,10 +107,10 @@
 <div class="bloc l-bloc full-width-bloc" id="bloc-78">
 	<div class="container bloc-lg row-marginless">
 		<div class="row" id="schools-container">
-			<div class="school-info-holder col-lg-4 object-hidden">
+			<div class="school-info-holder object-hidden col-lg-3">
 				<div class="school-card text-center">
 					<div class="school-info-holder">
-						<h3 class="mg-md">
+						<h3 class="mg-md school-card-title">
 							Anna Brochhausen School 88<br>
 						</h3>
 						<p class="school-address">
@@ -122,10 +122,10 @@
 					</div>
 				</div>
 			</div>
-			<div class="school-info-holder col-lg-4 object-hidden">
+			<div class="school-info-holder object-hidden col-lg-3 ">
 				<div class="school-card text-center">
 					<div class="school-info-holder">
-						<h3 class="mg-md">
+						<h3 class="mg-md school-card-title">
 							Anna Brochhausen School 88<br>
 						</h3>
 						<p>
@@ -289,11 +289,11 @@
 <!-- Main container END -->
     
 
-<script src="./js/jquery-3.3.1.min.js?5018"></script>
-<script src="./js/bootstrap.bundle.min.js?40"></script>
-<script src="./js/blocs.min.js?7325"></script>
+<script src="./js/jquery-3.3.1.min.js?3590"></script>
+<script src="./js/bootstrap.bundle.min.js?5725"></script>
+<script src="./js/blocs.min.js?9548"></script>
 <script src="./js/lazysizes.min.js" defer></script>
-<script src="./js/scrollFX.js?1466"></script>
+<script src="./js/scrollFX.js?6288"></script>
 <!-- Additional JS END -->
 
 <script>
@@ -348,7 +348,7 @@
 
     function addSchoolToDom(school) {
         var schoolsContainer = $('#schools-container');
-        schoolsContainer.append('<div class="col-lg-4 school-info-holder" school-name="' + school.Name + '"><div class="school-card text-center"><div class="school-info-holder"><h3>' + school.Name + '</h3><p class="school-address">' + school.Address + '</p></div><div class="card-btn-holder"><a href="' + school.Link + '" class="btn btn-green"> View Activities </a></div></div></div>');
+        schoolsContainer.append('<div class="col-lg-3 school-info-holder" school-name="' + school.Name + '"><div class="school-card text-center"><div class="school-info-holder"><h3 class="school-card-title">' + school.Name + '</h3><p class="school-address">' + school.Address + '</p></div><div class="card-btn-holder"><a href="' + school.Link + '" class="btn btn-green"> View Activities </a></div></div></div>');
     }
 </script>
 
