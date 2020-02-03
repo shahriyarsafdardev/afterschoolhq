@@ -306,18 +306,18 @@ namespace AfterSchool.Controllers
             return Json(new { status = "error", messages = msgs, amount, subscriptionPlanAmount }, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult SubmitContactForm(string email, string subject, string message, string g_recaptcha_response)
+        public ActionResult SubmitContactForm(string name, string email, string message, string g_recaptcha_response)
         {
             if (!IsRequestFromApp())
                 return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
 
             var msgs = new SystemMessages();
 
-            if (!email.IsMatch(BasicLibrary.Utilities.EmailRegEx))
-                msgs.Add("Please enter an email", MessageType.UserError);
+            if (name.IsBlank())
+                msgs.Add("Please enter your name", MessageType.UserError);
 
-            if (subject.IsBlank())
-                msgs.Add("Please enter a subject", MessageType.UserError);
+            if (!email.IsMatch(BasicLibrary.Utilities.EmailRegEx))
+                msgs.Add("Please enter your email", MessageType.UserError);
 
             if (message.IsBlank())
                 msgs.Add("Please enter a message", MessageType.UserError);
@@ -327,10 +327,9 @@ namespace AfterSchool.Controllers
             if (msgs.HasNoErrors())
                 msgs.AddRange(EmailHelper.SendEmail(
                     toEmail: "sales@afterschoolhq.com",
-                    subject: string.Format("WEBSITE FORM: {0}", subject),
+                    subject: $"WEBSITE FORM FROM: {name}",
                     body: string.Format("<p>from: <a href=\"mailto:{0}\">{0}</a></p><p>{1}</p>", email, message),
-                    isAfterSchool: true
-                    ));
+                    isAfterSchool: true));
 
             var status = msgs.HasNoErrors() ? "ok" : "error";
 
