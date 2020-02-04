@@ -16,7 +16,7 @@ namespace AfterSchool.Controllers
         {
             if (Models.Utilities.IsAfterSchool())
             {
-                return Redirect("/public/");
+                return Redirect("/");
             }
             else
             {
