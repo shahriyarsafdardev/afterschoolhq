@@ -141,6 +141,7 @@ else
                     {
                         var reservedTextClass = activity.IsFull() ? "text-danger text-bold" : "";
                         var waitingTextClass = activity.IsWaitingListFull() ? "text-danger text-bold" : "";
+                        var showLink = activity.BelongsTo(SessionVariables.CurrentAccount);
 
                         <tr>
                             <td>
@@ -149,52 +150,109 @@ else
                             <td>
                                 @activity.Name @(activity.ActivityGroupId.HasValue ? "- " + activity.ActivityGroupName : "")
                                 @if (activity.LocationId.HasValue)
-                                { 
-                                    <span>
-                                        @@ <a href="@Url.Action("editlocation", "activity", new { id = activity.Uid })">@(activity.GetLocation()?.Name)</a>
-                                    </span>
+                                {
+                                    if (showLink)
+                                    {
+                                        <span>
+                                            @@ <a href="@Url.Action("editlocation", "activity", new { id = activity.Uid })">@(activity.GetLocation()?.Name)</a>
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span>
+                                            @@ @(activity.GetLocation()?.Name)
+                                        </span>
+                                    }
                                 }
                             </td>
                             @if (activityType != ActivityType.PermissionSlip)
                             {
                                 <td class="text-center">
-                                    @if (activity.HasSchedule)
+                                    @if (showLink)
                                     {
-                                        <a href="@Url.Action("editschedule", "activity", new { id = activity.Uid })">
-                                            @activity.GetFirstDate().ToShortDateString().Replace("/", "-")
-                                        </a>
+                                        if (activity.HasSchedule)
+                                        {
+                                            <a href="@Url.Action("editschedule", "activity", new { id = activity.Uid })">
+                                                @activity.GetFirstDate().ToShortDateString().Replace("/", "-")
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <a href="@Url.Action("editschedule", "activity", new { id = activity.Uid })">-</a>
+                                        }
                                     }
                                     else
                                     {
-                                        <a href="@Url.Action("editschedule", "activity", new { id = activity.Uid })">-</a>
+                                        if (activity.HasSchedule)
+                                        {
+                                            <span>
+                                                @activity.GetFirstDate().ToShortDateString().Replace("/", "-")
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span>-</span>
+                                        }
                                     }
                                 </td>
                                 <td class="text-center">
-                                    @if (activity.GetDaysOfTheWeek().Any())
+                                    @if (showLink)
                                     {
-                                        <a href="@Url.Action("editschedule", "activity", new { id = activity.Uid })">
-                                            @activity.GetDaysOfTheWeek().OrderBy(x => (int)x).Select(x => x.ToString().MaxChars(2)).ToStringList(", ")
-                                        </a>
+                                        if (activity.GetDaysOfTheWeek().Any())
+                                        {
+                                            <a href="@Url.Action("editschedule", "activity", new { id = activity.Uid })">
+                                                @activity.GetDaysOfTheWeek().OrderBy(x => (int)x).Select(x => x.ToString().MaxChars(2)).ToStringList(", ")
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <a href="@Url.Action("editschedule", "activity", new { id = activity.Uid })">-</a>
+                                        }
                                     }
                                     else
                                     {
-                                        <a href="@Url.Action("editschedule", "activity", new { id = activity.Uid })">-</a>
+                                        if (activity.GetDaysOfTheWeek().Any())
+                                        {
+                                            <span>
+                                                @activity.GetDaysOfTheWeek().OrderBy(x => (int)x).Select(x => x.ToString().MaxChars(2)).ToStringList(", ")
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span>-</span>
+                                        }
                                     }
                                 </td>
                             }
                             @if (activityType.NotIn(new ActivityType[] { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
                             {
                                 <td class="text-center">
-                                    @if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
+                                    @if (showLink)
                                     {
-                                        <a href="@Url.Action("editrestrictions", "activity", new { id = activity.Uid })">
-                                            @activity.GetStartingGradeLevel().Name - @activity.GetEndingGradeLevel().Name
-                                        </a>
+                                        if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
+                                        {
+                                            <a href="@Url.Action("editrestrictions", "activity", new { id = activity.Uid })">
+                                                @activity.GetStartingGradeLevel().Name - @activity.GetEndingGradeLevel().Name
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <a href="@Url.Action("editrestrictions", "activity", new { id = activity.Uid })">-</a>
+                                        }
                                     }
                                     else
                                     {
-                                        <a href="@Url.Action("editrestrictions", "activity", new { id = activity.Uid })">-</a>
-                                    }                                
+                                        if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
+                                        {
+                                            <span>
+                                                @activity.GetStartingGradeLevel().Name - @activity.GetEndingGradeLevel().Name
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span>-</span>
+                                        }
+                                    }
                                 </td>
                             }
                             <td class="text-center @reservedTextClass">
