@@ -90,9 +90,36 @@ namespace AfterSchool.Areas.Org.Controllers
             }
             else
             {
-                totalActivityCount = SessionVariables.CurrentAccount.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.CurrentUser, activityType, isArchived, false, true, msgs);
-                activities = SessionVariables.CurrentAccount.GetActivities(SessionVariables.AccountUserType, SessionVariables.CurrentUser, activityType, isArchived, false, true, start, length, msgs);
-                hasArchivedActivities = SessionVariables.CurrentAccount.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.CurrentUser, activityType, true, false, true, msgs) > 0;
+                var getUngroupActivitiesOnly = SessionVariables.CurrentAccount.AccountTypeId == AccountType.School;
+
+                totalActivityCount = SessionVariables.CurrentAccount.GetActivityCount(
+                    SessionVariables.AccountUserType, 
+                    SessionVariables.CurrentUser, 
+                    activityType, 
+                    isArchived, 
+                    false,
+                    getUngroupActivitiesOnly, 
+                    msgs);
+
+                activities = SessionVariables.CurrentAccount.GetActivities(
+                    SessionVariables.AccountUserType, 
+                    SessionVariables.CurrentUser, 
+                    activityType, 
+                    isArchived, 
+                    false,
+                    getUngroupActivitiesOnly, 
+                    start, 
+                    length, 
+                    msgs);
+
+                hasArchivedActivities = SessionVariables.CurrentAccount.GetActivityCount(
+                    SessionVariables.AccountUserType, 
+                    SessionVariables.CurrentUser, 
+                    activityType,
+                    true, 
+                    false,
+                    getUngroupActivitiesOnly, 
+                    msgs) > 0;
             }
 
             var totalPages = Math.Ceiling(totalActivityCount.ToDouble() / recordsPerPage).ToInteger();
