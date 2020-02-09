@@ -2025,6 +2025,11 @@ namespace AfterSchoolLibrary.Services
             return Account.Load(activity.AccountId.Value, msgs, dc);
         }
 
+        public static bool BelongsTo(this Activity activity, Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return activity.AccountId == account.ID;
+        }
+
         public static SystemMessages MarkAsDeleted(this Activity activity, int loggedInUserId, DatabaseConnection dc = null)
         {
             activity.IsDeleted = true;

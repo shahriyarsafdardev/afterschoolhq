@@ -17,7 +17,12 @@
 <div class="panel panel-default">
     <div class="panel-heading">
         <div class="div-group pull-right">
-            <a href="@Url.Action("edit", "registration", new { id = Model.GetRegistration().Uid.ToString(), returnUrl = Request.Url.ToString() })" class="btn btn-primary">View Full Registration</a>
+            @if (activity.BelongsTo(account))
+            {
+                <a href="@Url.Action("edit", "registration", new { id = Model.GetRegistration().Uid.ToString(), returnUrl = Request.Url.ToString() })" class="btn btn-primary">
+                    View Full Registration
+                </a>
+            }
             <a href="@Url.Action(backtolistAction, backtolistController, new { id = activity.Uid })" class="btn btn-default">&laquo; Back to List</a>
         </div>
         @Model.RegistrantName
@@ -74,7 +79,7 @@
                     Payment Information
                 </div>
                 <div class="panel-body">
-                    <form id="form-add-payment" action="@Url.Action("AddPayment", "activity", new { id = Model.ID })" method="post">
+                    <form id="form-add-payment" action="@Url.Action("AddPayment", "activity", new { id = Model.Uid })" method="post">
                         <div class="table-responsive">
                             <table class="table table-striped">
                                 <tr>
@@ -152,7 +157,7 @@
                         Coupons
                     </div>
                     <div class="panel-body">
-                        <form action="@Url.Action("attachcoupon", "activity", new { id = Model.ID })" method="post">
+                        <form action="@Url.Action("attachcoupon", "activity", new { id = Model.Uid })" method="post">
                             <div class="table-responsive">
                                 <table class="table table-striped">
                                     @foreach (var attachedCoupon in attachedCoupons)

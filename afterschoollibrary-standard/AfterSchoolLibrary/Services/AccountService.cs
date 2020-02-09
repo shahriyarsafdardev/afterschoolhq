@@ -160,9 +160,9 @@ namespace AfterSchoolLibrary.Services
         public static List<Activity> GetActivities(this Account account, UserType userType, WebUser user, ActivityType? activityType, bool? isArchived, bool? isDeleted, bool? ungroupedOnly, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (user.IsEmpty() || userType.In(AccountService.AdminUserTypes))
-                return Activity.LoadByAccountId(account.ID.Value, null, null, activityType, isArchived, isDeleted, true, start, length, msgs, dc).ToList();
+                return Activity.LoadByAccountId(account.ID.Value, null, null, activityType, isArchived, isDeleted, ungroupedOnly, start, length, msgs, dc).ToList();
 
-            return Activity.LoadByAccountId(account.ID.Value, null, null, activityType, isArchived, isDeleted, true, start, length, msgs, dc)
+            return Activity.LoadByAccountId(account.ID.Value, null, null, activityType, isArchived, isDeleted, ungroupedOnly, start, length, msgs, dc)
                     .Where(activity => user.HasAccessToActivity(activity, msgs, dc))
                     .ToList();
         }
@@ -3031,6 +3031,45 @@ namespace AfterSchoolLibrary.Services
         public static bool IsNewProviderForOtherAccounts(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return account.IsProviderForOtherAccounts(msgs, dc) && !account.CanReceivePaymentDeposits(msgs, dc);
+        }
+
+        #endregion
+
+        #region Stats
+
+        public static decimal GetTotalHoursEnrolled(this Account account, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return Account.GetTotalMinutesEnrolled(account.ID.Value, startDateTime, endDateTime, msgs, dc) / 60;
+        }
+
+        public static int GetTotalSeatsOffered(this Account account, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return Account.GetTotalSeatsOffered(account.ID.Value, startDateTime, endDateTime, msgs, dc) / 60;
+        }
+
+        public static decimal GetTotalHoursOffered(this Account account, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return Account.GetTotalMinutesOffered(account.ID.Value, startDateTime, endDateTime, msgs, dc) / 60;
+        }
+
+        public static int GetTotalStudentsServed(this Account account, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return Account.GetTotalStudentsServed(account.ID.Value, startDateTime, endDateTime, msgs, dc) / 60;
+        }
+
+        public static List<(string ActivityName, int RegistrationCount)> GetRegistrationCountByActivity(this Account account, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return Account.GetRegistrationCountByActivity(account.ID.Value, startDateTime, endDateTime, msgs, dc);
+        }
+
+        public static List<(string Grade, int RegistrationCount)> GetRegistrationCountByGrade(this Account account, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return Account.GetRegistrationCountByGrade(account.ID.Value, startDateTime, endDateTime, msgs, dc);
+        }
+
+        public static (decimal totalProcessed, decimal totalProfit) GetTotalProcessedAndProfit(this Account account, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return Account.GetTotalProcessedAndProfit(account.ID.Value, startDateTime, endDateTime, msgs, dc);
         }
 
         #endregion

@@ -521,6 +521,328 @@ namespace AfterSchoolLibrary.Models
             return new List<Account>();
         }
 
+        public static int GetTotalMinutesEnrolled(int? accountId, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+
+            var sql = @"With A as
+                (
+	                select 
+		                acc.Name as AccountName, a.Name as ActivityName, ai.StartDateTime, ai.EndDateTime, 
+		                DATEDIFF(MINUTE, ai.StartDateTime, ai.EndDateTime) as TotalMinutes,
+		                (select count(*) from RegistrantActivity ra where ra.ParticipationObjectId = a.ID and ra.ParticipationObjectTypeId = 1 and  and ra.AssignmentTypeId in (1,6,7)) as StudentsInClass
+	                from 
+		                ActivityInstance ai inner join
+		                Activity a on ai.ActivityScheduleId = a.ActivityScheduleId inner join
+		                Account acc on a.AccountId = acc.ID
+                    where";
+
+            if (accountId.HasValue)
+                sql += $"(acc.ID = {accountId} or a.LocationId in (select id from Location where Location.HostAccountId = {accountId}))";
+            else
+                sql += "acc.IsTest = 0";
+
+            if (startDateTime.HasValue)
+                sql += $" and ai.StartDateTime >= '{startDateTime.Value.ToString()}'";
+
+            if (endDateTime.HasValue)
+                sql += $" and ai.EndDateTime <= '{endDateTime.Value.ToString()}'";
+
+            sql += @"),
+                B as
+                (
+	                select AccountName, ActivityName, StartDateTime, EndDateTime, TotalMinutes, StudentsInClass, TotalMinutes * StudentsInClass as TotalMinutesPerClass from A
+                )
+                select sum(TotalMinutesPerClass) as Minutes from B";
+
+            var dt = dq.ExecuteSelect(sql, msgs);
+
+            if (dt.Rows.Any())
+                return dt.Rows[0][0].ToString().ToInteger();
+
+            return 0;
+        }
+
+        public static int GetTotalSeatsOffered(int? accountId, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+
+            var sql = @"With A as
+                (
+	                select 
+		                a.SeatsAvailable
+	                from 
+		                ActivityInstance ai inner join
+		                Activity a on ai.ActivityScheduleId = a.ActivityScheduleId inner join
+		                Account acc on a.AccountId = acc.ID
+                    where";
+
+            if (accountId.HasValue)
+                sql += $"(acc.ID = {accountId} or a.LocationId in (select id from Location where Location.HostAccountId = {accountId}))";
+            else
+                sql += "acc.IsTest = 0";
+
+            if (startDateTime.HasValue)
+                sql += $" and ai.StartDateTime >= '{startDateTime.Value.ToString()}'";
+
+            if (endDateTime.HasValue)
+                sql += $" and ai.EndDateTime <= '{endDateTime.Value.ToString()}'";
+
+            sql += @")
+                select sum(SeatsAvailable) from A";
+
+            var dt = dq.ExecuteSelect(sql, msgs);
+
+            if (dt.Rows.Any())
+                return dt.Rows[0][0].ToString().ToInteger();
+
+            return 0;
+        }
+
+        public static int GetTotalMinutesOffered(int? accountId, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+
+            var sql = @"With A as
+                (
+	                select 
+		                a.SeatsAvailable,
+		                DATEDIFF(MINUTE, ai.StartDateTime, ai.EndDateTime) as TotalMinutes,
+		                a.SeatsAvailable * DATEDIFF(MINUTE, ai.StartDateTime, ai.EndDateTime) as MaximumMinutesOffered
+	                from 
+		                ActivityInstance ai inner join
+		                Activity a on ai.ActivityScheduleId = a.ActivityScheduleId inner join
+		                Account acc on a.AccountId = acc.ID
+                    where";
+
+            if (accountId.HasValue)
+                sql += $"(acc.ID = {accountId} or a.LocationId in (select id from Location where Location.HostAccountId = {accountId}))";
+            else
+                sql += "acc.IsTest = 0";
+
+            if (startDateTime.HasValue)
+                sql += $" and ai.StartDateTime >= '{startDateTime.Value.ToString()}'";
+
+            if (endDateTime.HasValue)
+                sql += $" and ai.EndDateTime <= '{endDateTime.Value.ToString()}'";
+
+            sql += @")
+                select sum(MaximumMinutesOffered) from A";
+
+            var dt = dq.ExecuteSelect(sql, msgs);
+
+            if (dt.Rows.Any())
+                return dt.Rows[0][0].ToString().ToInteger();
+
+            return 0;
+        }
+
+        public static int GetTotalStudentsServed(int? accountId, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+
+            var sql = @"
+	                select 
+		                count(*)
+	                from 
+		                Registration r inner join 
+		                Account acc on r.accountid = acc.id inner join
+		                Activity a on acc.id = a.ID
+                    where
+                        r.FirstRegistrationId is null and
+		                r.CompletionStatusId = 2";
+
+            if (accountId.HasValue)
+                sql += $" and (acc.ID = {accountId} or a.LocationId in (select id from Location where Location.HostAccountId = {accountId}))";
+            else
+                sql += " and acc.IsTest = 0";
+
+            if (startDateTime.HasValue)
+                sql += $" and r.CreateDate >= '{startDateTime.Value.ToString()}'";
+
+            if (endDateTime.HasValue)
+                sql += $" and r.CreateDate <= '{endDateTime.Value.ToString()}'";
+
+            var dt = dq.ExecuteSelect(sql, msgs);
+
+            if (dt.Rows.Any())
+                return dt.Rows[0][0].ToString().ToInteger();
+
+            return 0;
+        }
+
+        public static List<(string ActivityName, int RegistrationCount)> GetRegistrationCountByActivity(int? accountId, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+
+            var sql = @"
+	                select 
+                        distinct 
+                            act.Name, count(ra.id) as RegistrationCount
+                        from 
+                            RegistrantActivity ra inner join
+                            Registrant r on ra.registrantid = r.id inner join
+                            Account a on r.AccountId = a.ID inner join
+                            Activity act on ra.ParticipationObjectId = act.ID and ra.ParticipationObjectTypeId = 1
+                        where 
+                            r.ParentRegistrantId is not null";
+
+            if (accountId.HasValue)
+                sql += $" and (acc.ID = {accountId} or a.LocationId in (select id from Location where Location.HostAccountId = {accountId}))";
+            else
+                sql += " and acc.IsTest = 0";
+
+            if (startDateTime.HasValue)
+                sql += $" and ra.CreateDate >= '{startDateTime.Value.ToString()}'";
+
+            if (endDateTime.HasValue)
+                sql += $" and ra.CreateDate <= '{endDateTime.Value.ToString()}'";
+
+            sql += @"
+                        group by act.name
+                        order by act.Name";
+
+            return dq.ExecuteSelect(sql, msgs)
+                        .AsEnumerable()
+                        .ToList()
+                        .ConvertAll(row => { 
+                            return (
+                                ActivityName: row["Name"].ToString(),
+                                RegistrationCount: row["RegistrationCount"].ToString().ToInteger()
+                            ); 
+                        });            
+        }
+
+        public static List<(string Grade, int RegistrationCount)> GetRegistrationCountByGrade(int? accountId, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+
+            var sql = @"
+	                select
+	                    Name,
+	                    Abbreviation,
+	                    (
+		                    select count(r.id) 
+		                    from 
+			                    Registration r inner join
+			                    FormQuestionAnswer fqa on r.ID = fqa.RegistrationId inner join
+			                    RegistrantActivity ra on r.ID = ra.RegistrationId inner join
+			                    Activity a on ra.ParticipationObjectId = a.ID and ra.ParticipationObjectTypeId = 1 inner join 
+			                    Account acc on a.AccountId = acc.ID
+		                    where 
+			                    fqa.QuestionDataTypeId = 44 and
+			                    (fqa.Text = gl.Abbreviation or fqa.Text = gl.Name)";
+
+            if (accountId.HasValue)
+                sql += $" and (acc.AccountId = {accountId} or a.LocationId in (select id from Location where Location.HostAccountId = {accountId}))";
+            else
+                sql += " and acc.IsTest = 0";
+
+            if (startDateTime.HasValue)
+                sql += $" and ra.CreateDate >= '{startDateTime.Value.ToString()}'";
+
+            if (endDateTime.HasValue)
+                sql += $" and ra.CreateDate <= '{endDateTime.Value.ToString()}'";
+
+            sql += @"
+                        ) as RegistrationCount
+                    from 
+	                    GradeLevel gl
+                    Group By
+	                    Name,
+	                    Abbreviation";
+
+            return dq.ExecuteSelect(sql, msgs)
+                        .AsEnumerable()
+                        .ToList()
+                        .ConvertAll(row => {
+                            return (
+                                Grade: row["Name"].ToString(),
+                                NumberOfRegistrations: row["RegistrationCount"].ToString().ToInteger()
+                            );
+                        });
+        }
+
+        public static (decimal totalProcessed, decimal totalProfit) GetTotalProcessedAndProfit(int? accountId, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+
+            var sql = $@"
+                        With A as
+                        (
+	                        select
+		                        ID,
+		                        BillerAccountId,
+		                        Amount,
+		                        ConvenienceFeeCharged,
+		                        PaymentTypeFeeCharged,
+		                        PaymentTypeId,
+		                        (Case PaymentTypeId
+			                        When {(int)PaymentType.CreditCard} Then
+				                        (Amount * {Billing.StripeHelper.StripePercentFee}) + {Billing.StripeHelper.StripeFlatFee}
+			                        When {(int)PaymentType.ACH} Then
+				                        (Amount * {Billing.StripeHelper.StripeBankPercentFee})
+		                        End) as StripeFee
+	                        From 
+		                        [Transaction]
+	                        Where
+		                        PaymentSourceTypeId = {(int)PaymentSourceType.AfterSchoolPlatform} and
+		                        ConvenienceFeeCharged is not null and 
+		                        ConvenienceFeeCharged > 0 and
+		                        ID in 
+		                        (
+			                        select 
+				                        ap.TransactionId
+			                        from 
+				                        ActivityPayment ap inner join
+				                        Activity a on ap.ParticipationObjectId = a.ID and ap.ParticipationObjectTypeId = {(int)ParticipationObjectType.Activity}
+			                        where";
+
+            if (accountId.HasValue)
+                sql += $" a.AccountId = {accountId.Value} or a.LocationId in (select id from location where HostAccountId = {accountId.Value})";
+            else
+                sql += " and acc.IsTest = 0";
+
+            sql += ")";
+
+            if (startDateTime.HasValue)
+                sql += $" and CreateDate >= '{startDateTime.Value.ToString()}'";
+
+            if (endDateTime.HasValue)
+                sql += $" and CreateDate <= '{endDateTime.Value.ToString()}'";
+
+            sql += @"
+                        ),
+                        B As
+                        (
+	                        Select 
+		                        ID,
+		                        Amount,
+		                        ConvenienceFeeCharged,
+		                        PaymentTypeFeeCharged,
+		                        PaymentTypeId,
+		                        StripeFee,
+		                        (ConvenienceFeeCharged + PaymentTypeFeeCharged - StripeFee) as Profit
+	                        from A
+                        )
+                        Select ISNULL(Sum(Amount), 0) as Amount, ISNULL(Sum(Profit), 0) as Profit from B
+                        ";
+
+            var dt = dq.ExecuteSelect(sql, msgs);
+
+            if (dt.Rows.Any())
+                return (dt.Rows[0][0].ToString().ToDecimal(), dt.Rows[0][1].ToString().ToDecimal());
+
+            return (0, 0);
+        }
+
         #endregion
     }
 }
