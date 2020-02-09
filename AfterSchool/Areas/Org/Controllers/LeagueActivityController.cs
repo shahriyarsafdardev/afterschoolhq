@@ -1231,7 +1231,7 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult RegistrantDetail(string id)
         {
-            var ra = RegistrantActivity.Load(id.ToInteger());
+            var ra = RegistrantActivity.LoadByUid(id.ToGuid());
             var activity = Activity.Load(ra.ParticipationObjectId.Value);
 
             ViewBag.Messages = new SystemMessages();
@@ -1243,7 +1243,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult RegistrantDetail(string id, string datepaid, string amountpaid, string paymenttype)
         {
             var msgs = new SystemMessages();
-            var ra = RegistrantActivity.Load(id.ToInteger());
+            var ra = RegistrantActivity.LoadByUid(id.ToGuid());
             var activity = ra.GetActivity();
 
             if (!datepaid.IsDateTime())
@@ -1273,9 +1273,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.AddRange(payment.Save());
 
                 if (msgs.HasNoErrors())
-                {
                     msgs.Add("Payment details have been updated", MessageType.Success);
-                }
             }
 
             ViewBag.Messages = msgs;

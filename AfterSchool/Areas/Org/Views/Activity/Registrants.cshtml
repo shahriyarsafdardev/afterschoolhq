@@ -127,9 +127,12 @@
                 <div class="col-md-8">
                     <div class="btn-group pull-right">
 
-                        <a href="@Url.Action("addregistration", "activity" , new { id = Model.Uid })" class="btn btn-primary btn-space">
-                            Add Student
-                        </a>
+                        @if (ViewBag.IsActivityLeader)
+                        {
+                            <a href="@Url.Action("addregistration", "activity", new { id = Model.Uid })" class="btn btn-primary btn-space">
+                                Add Student
+                            </a>
+                        }
 
                         <a href="@Url.Action("registrantsummary", "activity" , new { id = Model.Uid })" class="btn btn-default btn-space">
                             Send Registration Report

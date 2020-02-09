@@ -160,9 +160,9 @@ namespace AfterSchoolLibrary.Services
         public static List<Activity> GetActivities(this Account account, UserType userType, WebUser user, ActivityType? activityType, bool? isArchived, bool? isDeleted, bool? ungroupedOnly, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (user.IsEmpty() || userType.In(AccountService.AdminUserTypes))
-                return Activity.LoadByAccountId(account.ID.Value, null, null, activityType, isArchived, isDeleted, true, start, length, msgs, dc).ToList();
+                return Activity.LoadByAccountId(account.ID.Value, null, null, activityType, isArchived, isDeleted, ungroupedOnly, start, length, msgs, dc).ToList();
 
-            return Activity.LoadByAccountId(account.ID.Value, null, null, activityType, isArchived, isDeleted, true, start, length, msgs, dc)
+            return Activity.LoadByAccountId(account.ID.Value, null, null, activityType, isArchived, isDeleted, ungroupedOnly, start, length, msgs, dc)
                     .Where(activity => user.HasAccessToActivity(activity, msgs, dc))
                     .ToList();
         }

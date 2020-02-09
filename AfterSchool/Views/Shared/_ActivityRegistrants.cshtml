@@ -48,7 +48,7 @@
                         <td>
                             @if (ra.RegistrationId.HasValue && ra.AssignmentTypeId != RegistrationAssignmentType.Invited)
                             {
-                                <a href="@Url.Action(editaction, editcontroller, new { id = ra.ID })" class="btn btn-default btn-sm">
+                                <a href="@Url.Action(editaction, editcontroller, new { id = ra.Uid })" class="btn btn-default btn-sm">
                                     <i class="icon icon-left s7-user"></i> View Details
                                 </a>
                             }
