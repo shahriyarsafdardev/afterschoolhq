@@ -72,7 +72,7 @@
                 <a href="@Url.Action("publishdetail", "activity", new { id = Model.Uid })" class="btn @publishClass"><i class="s7-link"></i> Publish...</a>
             }
 
-            @if (Model.ActivityGroupId.HasValue)
+            @if (Model.ActivityGroupId.HasValue && Model.BelongsTo(SessionVariables.CurrentAccount))
             {
                 <a href="@Url.Action("activities", "group", new { id = group.Uid })" class="btn btn-alt5">
                     <i class="s7-date"></i> @UILabel.ActivityGroupLabel(group.ActivityGroupTypeId) &raquo;
@@ -116,7 +116,7 @@
                     }
                     <option value="@Url.Action("publishdetail", "activity", new { id = Model.Uid })">Publish...</option>
                 }
-                @if (Model.ActivityGroupId.HasValue)
+                @if (Model.ActivityGroupId.HasValue && Model.BelongsTo(SessionVariables.CurrentAccount))
                 {
                     <option value="@Url.Action("summary", "group", new { id = group.Uid })">@UILabel.ActivityGroupLabel(group.ActivityGroupTypeId) &raquo;</option>
                 }

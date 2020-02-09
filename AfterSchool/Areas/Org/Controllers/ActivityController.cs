@@ -1236,7 +1236,7 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult RegistrantDetail(string id)
         {
-            var registrantActivity = RegistrantActivity.Load(id.ToInteger());
+            var registrantActivity = RegistrantActivity.LoadByUid(id.ToGuid());
             var activity = Activity.Load(registrantActivity.ParticipationObjectId.Value);
 
             ViewBag.Messages = new SystemMessages();
@@ -1249,7 +1249,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult AddPayment(string id, string datepaid, string amountpaid, string paymenttype)
         {
             var msgs = new SystemMessages();
-            var registrantActivity = RegistrantActivity.Load(id.ToInteger());
+            var registrantActivity = RegistrantActivity.LoadByUid(id.ToGuid());
             var activity = registrantActivity.GetActivity();
 
             if (!datepaid.IsDateTime())
@@ -1305,7 +1305,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult AttachCoupon(string id, decimal couponAmount, CouponAmountType discountType, DateTime? expirationDate, CouponApplyType couponApplyType, StripeCouponDuration duration, int durationInMonths)
         {
             var msgs = new SystemMessages();
-            var registrantActivity = RegistrantActivity.Load(id.ToInteger());
+            var registrantActivity = RegistrantActivity.LoadByUid(id.ToGuid());
             var activity = registrantActivity.GetActivity();
             
             // check coupon's minimum amount

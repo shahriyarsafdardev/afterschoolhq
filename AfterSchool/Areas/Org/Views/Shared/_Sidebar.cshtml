@@ -92,7 +92,7 @@
             {
                 if (CanView(FeatureType.Activities, SessionVariables.AccountUserType, PermissionType.ActivitiesView))
                 {
-                    <li>
+                    <li class="@activityactive">
                         <a href="@Url.Action("index", "activity")"><i class="icon s7-gleam"></i> @UILabel.ActivityLabel(ActivityType.Activity, true)</a>
                     </li>
                 }
