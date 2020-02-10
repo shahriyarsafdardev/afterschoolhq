@@ -323,6 +323,11 @@ namespace AfterSchoolLibrary.Models
             return 0;
         }
 
+		public Transaction GetTransaction(SystemMessages msgs = null, DatabaseConnection dc = null)
+		{
+			return Transaction.Load(this.TransactionId.Value, msgs, dc);
+		}
+
         #endregion
     }
 }
