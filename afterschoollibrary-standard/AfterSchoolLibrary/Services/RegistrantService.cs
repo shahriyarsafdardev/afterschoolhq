@@ -551,8 +551,23 @@ namespace AfterSchoolLibrary.Services
                     dc: dc);
         }
 
+        public static List<RegistrantSubscriptionPlan> GetMasterRegistrantSubscriptionPlans(this Registrant registrant, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var submittedRecords = registrant.GetSubmittedRecords(msgs);
+            var plans = new List<RegistrantSubscriptionPlan>();
+
+            submittedRecords.ForEach(submittedRecord => {
+                plans.AddRange(submittedRecord.GetRegistrantSubscriptionPlans(msgs, dc));
+            });
+
+            return plans;
+        }
+
         public static List<RegistrantSubscriptionPlan> GetRegistrantSubscriptionPlans(this Registrant registrant, SystemMessages msgs, DatabaseConnection dc = null)
         {
+            if (registrant.IsMaster)
+                return registrant.GetMasterRegistrantSubscriptionPlans(msgs, dc);
+
             return RegistrantSubscriptionPlan.LoadByRegistrantId(registrant.ID.Value, msgs, dc);
         }
 
