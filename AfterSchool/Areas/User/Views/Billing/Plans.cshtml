@@ -39,15 +39,21 @@
                                 var billingPeriodTypeId = plan.BillingPeriodTypeId;
                                 var payments = plan.GetPayments();
                                 var nextPaymentDate = "N/A";
+                                var amount = plan.TotalPaidWithFees;
 
                                 if (billingPeriodTypeId == BillingPeriodType.NotSet)
                                 {
                                     billingPeriodTypeId = originalPlan.BillingPeriodTypeId;
                                 }
 
-                                if (payments.Any())
+                                if (payments.Any() && payments.Last().CreateDate.Value.AddMonths(1).IsOnOrAfter(DateTime.UtcNow))
                                 {
                                     nextPaymentDate = payments.Last().CreateDate.Value.AddMonths(1).ToShortDateString();
+                                }
+
+                                if (amount == 0)
+                                {
+                                    amount = plan.Amount.Value;
                                 }
 
                                 <tr>
