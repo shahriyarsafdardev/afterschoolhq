@@ -61,7 +61,7 @@
                                         @plan.StartDate.ToShortDateString()
                                     </td>
                                     <td class="text-center">
-                                        @plan.Amount.ToCurrency() / @billingPeriodTypeId.ToString().ToLower()
+                                        @plan.TotalPaidWithFees.ToCurrency() / @billingPeriodTypeId.ToString().ToLower()
                                     </td>
                                     <td class="text-center">
                                         @if (plan.TotalPeriods.HasValue)
