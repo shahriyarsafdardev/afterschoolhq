@@ -131,7 +131,7 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                 return ReturnOK(msgs);
             }
 
-            if (stripeInvoice.AmountPaid == 0)
+            if (stripeInvoice.AmountPaid <= 0)
             {
                 msgs.Add($"Ignoring - $0 was paid", MessageType.Notice);
                 return ReturnOK(msgs);
