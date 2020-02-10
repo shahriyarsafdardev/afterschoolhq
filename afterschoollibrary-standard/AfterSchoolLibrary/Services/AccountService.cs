@@ -3074,9 +3074,5 @@ namespace AfterSchoolLibrary.Services
 
         #endregion
 
-        #region "Payment Plans & Subscriptions"
-
-
-        #endregion
     }
 }
