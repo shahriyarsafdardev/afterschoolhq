@@ -281,9 +281,12 @@ namespace AfterSchoolLibrary.Models
         {
             get
             {
-                return Amount.Value + 
-                    (ConvenienceFeesPaidBy == FeesPaidByType.Parent ? ConvenienceFee.Value : 0) + 
-                    (PaymentTypeFeesPaidBy == FeesPaidByType.Parent ? PaymentTypeFee.Value : 0);
+				if (Amount.HasValue)
+					return Amount.Value + 
+						(ConvenienceFeesPaidBy == FeesPaidByType.Parent ? ConvenienceFee.Value : 0) + 
+						(PaymentTypeFeesPaidBy == FeesPaidByType.Parent ? PaymentTypeFee.Value : 0);
+
+				return 0;
             }
         }
 
