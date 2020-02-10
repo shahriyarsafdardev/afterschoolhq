@@ -490,6 +490,7 @@
     <Compile Include="Areas\User\Controllers\ActivityController.cs" />
     <Compile Include="Areas\User\Controllers\FamilyController.cs" />
     <Compile Include="Areas\User\Controllers\HomeController.cs" />
+    <Compile Include="Areas\User\Controllers\BillingController.cs" />
     <Compile Include="Areas\User\Controllers\ProfileController.cs" />
     <Compile Include="Areas\User\Controllers\ScheduleController.cs" />
     <Compile Include="Areas\User\Models\ParticipationViewModel.cs" />
@@ -1190,6 +1191,9 @@
     <Content Include="fonts\ionicons.eot" />
     <Content Include="fonts\ionicons.ttf" />
     <Content Include="fonts\ionicons.woff" />
+    <Content Include="Areas\User\Views\Billing\Transactions.cshtml" />
+    <Content Include="Areas\User\Views\Billing\Plans.cshtml" />
+    <Content Include="Areas\User\Views\Shared\_BillingHeader.cshtml" />
     <None Include="Scripts\jquery-3.0.0-vsdoc.js" />
     <Content Include="Scripts\jquery-3.0.0.js" />
     <Content Include="Scripts\jquery-3.0.0.min.js" />
