@@ -53,7 +53,14 @@
 
                                 if (amount == 0)
                                 {
-                                    amount = originalPlan.CostPerPeriod.Value;
+                                    if (payments.Any())
+                                    {
+                                        amount = payments.Last().GetTransaction().Amount.Value;
+                                    }
+                                    else
+                                    {
+                                        amount = originalPlan.CostPerPeriod.Value;
+                                    }
                                 }
 
                                 <tr>
