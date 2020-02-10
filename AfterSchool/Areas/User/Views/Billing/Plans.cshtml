@@ -1,0 +1,108 @@
+﻿@model List<RegistrantSubscriptionPlan>
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+}
+
+@{ Html.RenderPartial("_UserAccountHeader"); }
+
+<div class="main-content">
+    
+    @{ Html.RenderPartial("_BillingHeader"); }
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="s7-info"></i> Plans
+        </div>
+        <div class="panel-body">
+
+            <div class="table-responsive">
+                <table class="table table-hover table-condensed" id="transaction-table">
+                    <thead>
+                        <tr>
+                            <th>@UILabel.ActivityLabel(ActivityType.Activity)</th>
+                            <th class="text-center">@UILabel.RegistrantLabel()</th>
+                            <th class="text-center">Start Date</th>
+                            <th class="text-center">Payment</th>
+                            <th class="text-center">Payments</th>
+                            <th class="text-center">Next Payment Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Any())
+                        {
+                            foreach (var plan in Model)
+                            {
+                                var originalPlan = plan.GetSubscriptionPlan();
+                                var participationObject = originalPlan.GetParticipationObject();
+                                var registrant = plan.GetRegistrant();
+                                var paymentCount = plan.GetPaymentCount();
+                                var billingPeriodTypeId = plan.BillingPeriodTypeId;
+                                var payments = plan.GetPayments();
+                                var nextPaymentDate = "N/A";
+
+                                if (billingPeriodTypeId == BillingPeriodType.NotSet)
+                                {
+                                    billingPeriodTypeId = originalPlan.BillingPeriodTypeId;
+                                }
+
+                                if (payments.Any())
+                                {
+                                    nextPaymentDate = payments.Last().CreateDate.Value.AddMonths(1).ToShortDateString();
+                                }
+
+                                <tr>
+                                    <td>
+                                        @participationObject.Name
+                                    </td>
+                                    <td class="text-center">
+                                        @registrant.DisplayName
+                                    </td>
+                                    <td class="text-center">
+                                        @plan.StartDate.ToShortDateString()
+                                    </td>
+                                    <td class="text-center">
+                                        @plan.Amount.ToCurrency() / @billingPeriodTypeId.ToString().ToLower()
+                                    </td>
+                                    <td class="text-center">
+                                        @if (plan.TotalPeriods.HasValue)
+                                        {
+                                            <span>
+                                                @paymentCount of @plan.TotalPeriods.Value
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span>N/A</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        @nextPaymentDate
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8">There are no plans</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @{
+                Html.RenderPartial(
+                    "~/Views/Shared/_Paging.cshtml",
+                    (PagingModel)ViewBag.PagingModel,
+                    new ViewDataDictionary()
+                    {
+                    { "controller", "orders" },
+                    { "action", "transactions" },
+                    { "querystring", $"sdate={Request["sdate"]}&edate={Request["edate"]}&poId={Request["poId"]}&poTypeId={Request["poTypeId"]}" }
+                }
+                );
+            }
+        </div>
+    </div>
+</div>

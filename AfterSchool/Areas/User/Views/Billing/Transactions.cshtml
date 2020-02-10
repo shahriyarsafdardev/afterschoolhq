@@ -1,0 +1,139 @@
+﻿@model List<Transaction>
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+}
+
+@{ Html.RenderPartial("_UserAccountHeader"); }
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("_BillingHeader"); }
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="s7-credit"></i> Transactions
+        </div>
+        <div class="panel-body">
+
+            <div class="row">
+                <div class="col-md-2">
+                    @{
+                        Html.RenderPartial(
+                            "~/Views/Shared/Components/_Date.cshtml",
+                            new FormInputViewModel()
+                            {
+                                Id = "startdate",
+                                Name = "startdate",
+                                Value = Request["sdate"],
+                                Placeholder = "From Date"
+                            }
+                        );
+                    }
+                </div>
+                <div class="col-md-2">
+                    @{
+                        Html.RenderPartial(
+                            "~/Views/Shared/Components/_Date.cshtml",
+                            new FormInputViewModel()
+                            {
+                                Id = "enddate",
+                                Name = "enddate",
+                                Value = Request["edate"],
+                                Placeholder = "To Date"
+                            }
+                        );
+                    }
+                </div>
+                <div class="col-md-4">
+                    <button type="button" class="btn btn-primary btn-lg" onclick="search()">Search</button>
+                    <button type="button" class="hide btn btn-primary btn-lg" onclick="DownloadToCSV()">Export To CSV</button>
+                </div>
+
+                <script>
+                    function search() {
+                        window.location.href = `@Url.Action("transactions", "billing")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}`;
+                    }
+                    function DownloadToCSV() {
+                            window.location.href = `@Url.Action("transactions", "billing")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}`;
+                    }
+
+                </script>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover table-condensed" id="transaction-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Created On</th>
+                            <th>For</th>
+                            <th>Item Description</th>
+                            <th class="text-center">Total Amt Paid</th>
+                            <th class="text-center">Payment Method</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Count > 0)
+                        {
+                            foreach (var transaction in Model)
+                            {
+                                var purchase = transaction.GetPurchase();
+                                var registrant = Registrant.Load(purchase.RegistrantId.Value);
+                                var participationObjects = transaction.GetParticipationObjects();
+
+                                <tr id="@transaction.Uid" data-refunded-amount="@transaction.GetRefundedAmount().ToCurrency()">
+                                    <td>
+                                        @transaction.GetTransactionNumber()
+                                    </td>
+                                    <td>
+                                        @transaction.CreateDate.ToShortDateTimeString()
+                                    </td>
+                                    <td>
+                                        @if (transaction.IsCharge())
+                                        {
+                                            @registrant.DisplayName
+                                        }
+                                        else
+                                        {
+                                            @transaction.GetBillerAccount().Name
+                                        }
+                                    </td>
+                                    <td>
+                                        @participationObjects.DistinctBy(po => new { po.ObjectID, po.ObjectType }).Select(po => po.Name).ToStringList(", ")
+                                    </td>
+                                    <td class="text-center">
+                                        @transaction.GetPayerAmount().ToCurrency()
+                                    </td>
+                                    <td class="text-center">
+                                        @transaction.PaymentTypeId.ToString().SplitByUpperCase()
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8">There are no transactions</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @{
+                Html.RenderPartial(
+                    "~/Views/Shared/_Paging.cshtml",
+                    (PagingModel)ViewBag.PagingModel,
+                    new ViewDataDictionary()
+                    {
+                    { "controller", "billing" },
+                    { "action", "transactions" },
+                    { "querystring", $"sdate={Request["sdate"]}&edate={Request["edate"]}&poId={Request["poId"]}&poTypeId={Request["poTypeId"]}" }
+                }
+                );
+            }
+        </div>
+    </div>
+</div>
