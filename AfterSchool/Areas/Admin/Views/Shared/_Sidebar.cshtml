@@ -23,9 +23,13 @@
             <li>
                 <a href="@Url.Action("myprofile", "user")"><i class="icon s7-user"></i><span>Profile</span></a>
             </li>
-            <li>
+            <li class="hide">
                 <a href="@Url.Action("index", "upload")"><i class="icon s7-upload"></i><span>Upload Schools</span></a>
             </li>
+            @if (SessionVariables.CurrentUser.HasMultipleAccounts())
+            {
+                <li class=""><a href="@Url.Action("switch", "logout", new { area = "" })"><i class="icon s7-users"></i> Switch Accounts</a></li>
+            }
             <li>
                 <a href="@Url.Action("index", "logout", new { area = "" })"><i class="icon s7-power"></i><span>Logout</span></a>
             </li>

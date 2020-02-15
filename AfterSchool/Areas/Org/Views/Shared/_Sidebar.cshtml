@@ -14,7 +14,8 @@
         profileactive = "",
         accountingactive = "",
         leagueexternalactive = "",
-        activitycenteractive = "";
+        activitycenteractive = "",
+        accountsubmenuactive = "";
 
     switch (controller)
     {
@@ -22,6 +23,10 @@
         case "group":
         case "league":
             activitycenteractive = "active";
+            break;
+        case "account":
+        case "user":
+            accountsubmenuactive = "active";
             break;
     }
 
@@ -59,7 +64,7 @@
                 accountactive = "active";
             }
             break;
-        case "profile":
+        case "user":
             profileactive = "active";
             break;
         case "accounting":
@@ -157,18 +162,26 @@
                 <li class="@accountingactive"><a href="@Url.Action("index", "accounting")"><i class="icon s7-cash"></i> Accounting</a></li>
             }
 
-            @if (CanView(FeatureType.TeamAccounts, SessionVariables.AccountUserType, PermissionType.TeamView))
-            {
-                <li class="@teamactive"><a href="@Url.Action("team", "account")"><i class="icon s7-users"></i> Staff</a></li>
-            }
+            <li class="parent @accountsubmenuactive">
+                <a href="#"><i class="icon s7-settings"></i> <span>Account &amp; Settings</span></a>
+                <ul class="sub-menu">
 
-            @if (CanView(FeatureType.Activities, SessionVariables.AccountUserType, PermissionType.AccountSettingsView))
-            {
-                <li class="@accountactive"><a href="@Url.Action("edit", "account")"><i class="icon s7-edit"></i> Settings</a></li>
-            }
-            <li class="@profileactive"><a href="@Url.Action("edit", "user")"><i class="icon s7-user"></i><span>Profile</span></a></li>
-            <li class=""><a href="@Url.Action("index", "logout", new { area = "" })"><i class="icon s7-power"></i> Logout</a></li>
-        </ul>
-        <!--Sidebar bottom content-->
-    </div>
+                    @if (CanView(FeatureType.TeamAccounts, SessionVariables.AccountUserType, PermissionType.TeamView))
+                    {
+                        <li class="@teamactive"><a href="@Url.Action("team", "account")"><i class="icon s7-users"></i> Staff</a></li>
+                    }
+                    @if (CanView(FeatureType.Activities, SessionVariables.AccountUserType, PermissionType.AccountSettingsView))
+                    {
+                        <li class="@accountactive"><a href="@Url.Action("edit", "account")"><i class="icon s7-edit"></i> Account Settings</a></li>
+                    }
+                    <li class="@profileactive"><a href="@Url.Action("edit", "user")"><i class="icon s7-user"></i> <span>Profile</span></a></li>
+                    @if (SessionVariables.CurrentUser.HasMultipleAccounts())
+                    {
+                        <li class=""><a href="@Url.Action("switch", "logout", new { area = "" })"><i class="icon s7-users"></i> Switch Accounts</a></li>
+                    }
+                    <li class=""><a href="@Url.Action("index", "logout", new { area = "" })"><i class="icon s7-power"></i> Logout</a></li>
+                </ul>
+            </li>
+            <!--Sidebar bottom content-->
+</div>
 </div>

@@ -94,6 +94,11 @@ namespace AfterSchoolLibrary.Services
                 .ToList();
         }
 
+        public static bool HasMultipleAccounts(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return AccountWebUser.GetCount(new System.Collections.Hashtable() { { "WebUserId", user.ID.Value }, { "IsActive", true } }, msgs, dc) > 1;                
+        }
+
         public static UserType GetUserType(this WebUser user, Account account, DatabaseConnection dc = null)
         {
             if (!account.IsEmpty())
