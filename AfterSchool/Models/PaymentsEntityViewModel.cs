@@ -234,8 +234,8 @@ namespace AfterSchool.Models
                 {
                     Document = new Stripe.PersonVerificationDocumentOptions()
                     {
-                        FrontFileId = DocumentFrontId,
-                        BackFileId = DocumentBackId
+                        // FrontFileId = DocumentFrontId,
+                        // BackFileId = DocumentBackId
                     }
                 }
             };

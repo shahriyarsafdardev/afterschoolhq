@@ -2106,7 +2106,7 @@ namespace AfterSchoolLibrary.Services
                 tokenOrSourceId: checkoutObject.StripeSourceId.IfEmpty(checkoutObject.CreditCardPurchaseObject?.StripeToken),
                 totalAmount: checkoutObject.GetTuitionCostWithFees(msgs, dc),
                 description: $"{checkoutObject.ParticipationObject.Name} Registration",
-                statementDescriptor: $"AHQ/{checkoutObject.BillingAccount.Name}",
+                statementDescriptor: $"{checkoutObject.BillingAccount.Name}",
                 metaData: new Dictionary<string, string>()
                 {
                     { "ActivityUid", checkoutObject.ParticipationObject.Uid.ToString() },

@@ -263,11 +263,11 @@ namespace AfterSchoolLibrary.Billing
                     Address = address
                 };
 
-            if (fullSSN.IsNotEmpty())
-                options.Individual.PersonalIdNumber = fullSSN;
+            // if (fullSSN.IsNotEmpty())
+            //    options.Individual.PersonalIdNumber = fullSSN;
 
-            if (documentFileId.IsNotEmpty())
-                options.Individual.Verification.Document.FrontFileId = documentFileId;
+            // if (documentFileId.IsNotEmpty())
+            //    options.Individual.Verification.Document.FrontFileId = documentFileId;
 
             Stripe.Account account = null;
 
@@ -984,11 +984,11 @@ namespace AfterSchoolLibrary.Billing
 
             var options = new Stripe.SubscriptionCreateOptions
             {
-                CustomerId = customerId,
+                Customer = customerId,
                 CollectionMethod = "charge_automatically",
                 DefaultSource = sourceId,
-                CouponId = stripeCouponId,
-                Items = new List<SubscriptionItemOption>() { new SubscriptionItemOption() { PlanId = planId, Quantity = 1 } },
+                Coupon = stripeCouponId,
+                Items = new List<SubscriptionItemOptions>() { new SubscriptionItemOptions() { Plan = planId, Quantity = 1 } },
                 Metadata = metaData,
                 Prorate = false,               
             };
@@ -1036,11 +1036,11 @@ namespace AfterSchoolLibrary.Billing
 
             if (newPlanId.IsNotBlank())
             {
-                options.Items = new List<Stripe.SubscriptionItemUpdateOption>()
+                options.Items = new List<Stripe.SubscriptionItemOptions>()
                     {
-                        new Stripe.SubscriptionItemUpdateOption()
+                        new Stripe.SubscriptionItemOptions()
                         {
-                            PlanId = newPlanId,
+                            Plan = newPlanId,
                             Quantity = 1
                         }
                     };
@@ -1423,8 +1423,8 @@ namespace AfterSchoolLibrary.Billing
                 Currency = "usd",
                 Description = description,
                 Source = tokenOrSourceId,
-                StatementDescriptor = statementDescriptor.Replace("'", "").MaxChars(22),
-                CustomerId = fromCustomerId,
+                StatementDescriptorSuffix = statementDescriptor.Replace("'", "").MaxChars(22),
+                Customer = fromCustomerId,
                 Metadata = metaData
             };
 
@@ -1459,7 +1459,7 @@ namespace AfterSchoolLibrary.Billing
             var charges = new List<Stripe.Charge>();
             var options = new Stripe.ChargeListOptions
             {
-                CustomerId = customerId,
+                Customer = customerId,
                 Limit = 10
             };
 
@@ -1491,7 +1491,7 @@ namespace AfterSchoolLibrary.Billing
 
             var options = new Stripe.TokenCreateOptions()
             {
-                CustomerId = customerId,
+                Customer = customerId,
                 Card = new AnyOf<string, CreditCardOptions>(sourceId)
             };
 
@@ -1532,7 +1532,7 @@ namespace AfterSchoolLibrary.Billing
                 Amount = (totalAmount * 100).ToInteger(),
                 Reason = reason,
                 ReverseTransfer = true,
-                ChargeId = chargeId
+                Charge = chargeId
             };
 
             Stripe.Refund refund = null;
@@ -1557,7 +1557,7 @@ namespace AfterSchoolLibrary.Billing
             var refunds = new List<Stripe.Refund>();
             var options = new Stripe.RefundListOptions
             {
-                 ChargeId = chargeId
+                 Charge = chargeId
             };
 
             try

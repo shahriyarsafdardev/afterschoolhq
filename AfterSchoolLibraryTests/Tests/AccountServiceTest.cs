@@ -513,7 +513,7 @@ namespace AfterSchoolLibraryTests.Tests
                 },
                 Relationship = new Stripe.PersonRelationshipOptions()
                 {
-                    AccountOpener = true,
+                    // AccountOpener = true,
                     Title = "President",
                     Owner = true,
                     PercentOwnership = 100
