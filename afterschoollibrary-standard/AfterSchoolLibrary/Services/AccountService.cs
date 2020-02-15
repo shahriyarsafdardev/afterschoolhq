@@ -42,6 +42,14 @@ namespace AfterSchoolLibrary.Services
             return ActivitySchedule.LoadByAccountId(account.ID.Value, msgs, dc);
         }
 
+        public static void MarkAsDeleted(this Account account, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            account.IsDeleted = true;
+            account.LastModifiedDate = DateTime.UtcNow;
+            account.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+            msgs.AddRange(account.Save(dc));
+        }
+
         #region ActivityMessages
 
         public static List<ActivityMessage> GetActivityMessages(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)

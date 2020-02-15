@@ -31,5 +31,10 @@ namespace AfterSchoolLibrary.Services
             awu.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
             msgs.AddRange(awu.Save(dc));
         }
+
+        public static Account GetAccount(this AccountWebUser awu, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return Account.Load(awu.ID.Value, msgs, dc);
+        }
     }
 }

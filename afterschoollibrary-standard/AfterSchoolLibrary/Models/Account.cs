@@ -45,6 +45,7 @@ namespace AfterSchoolLibrary.Models
 		public bool StripeChargesEnabled { get { return (bool)MDV["StripeChargesEnabled"].Value; } set { MDV["StripeChargesEnabled"].Value = value; } }
 		public bool StripePayoutsEnabled { get { return (bool)MDV["StripePayoutsEnabled"].Value; } set { MDV["StripePayoutsEnabled"].Value = value; } }
 		public bool IsTest { get { return (bool)MDV["IsTest"].Value; } set { MDV["IsTest"].Value = value; } }
+		public bool IsDeleted { get { return (bool)MDV["IsDeleted"].Value; } set { MDV["IsDeleted"].Value = value; } }
 		
 
         public Account()
@@ -62,6 +63,7 @@ namespace AfterSchoolLibrary.Models
 			this.StripeChargesEnabled = false;
 			this.StripePayoutsEnabled = false;
 			this.IsTest = false;
+			this.IsDeleted = false;
 			
         }
 
@@ -93,6 +95,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "StripeChargesEnabled", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "StripePayoutsEnabled", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "IsTest", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "IsDeleted", System.Data.SqlDbType.Bit);
 				
                 return _dp;
             }
@@ -252,6 +255,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["IsTest"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsDeleted"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
@@ -472,23 +479,27 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetSearchCount(string search, List<AccountType> accountTypes, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetSearchCount(string search, List<AccountType> accountTypes, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
+            
             if (search.IsNotEmpty())
                 dq.Criterias.Add(ObjectMap["Name"], search, DatabaseCriteriaOperatorEnum.Like);
+
+            dq.Criterias.Add(ObjectMap["IsDeleted"], isDeleted);
             dq.Criterias.Add(ObjectMap["AccountTypeId"], accountTypes.Select(x => (int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
             return dq.GetCount(msgs);
         }
 
-        public static List<Account> Search(string search, List<AccountType> accountTypes, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Account> Search(string search, List<AccountType> accountTypes, bool isDeleted, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
             if (search.IsNotEmpty())
                 dq.Criterias.Add(ObjectMap["Name"], search, DatabaseCriteriaOperatorEnum.Like);
             dq.Criterias.Add(ObjectMap["AccountTypeId"], accountTypes.Select(x => (int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], isDeleted);
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);

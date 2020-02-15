@@ -20,7 +20,7 @@ namespace AfterSchoolLibrary.Migrations
 
                     users.ForEach(user => {
 
-                        // get all parent awus for the user
+                        // get all registrant awus for the user
                         var awus = AccountWebUser
                                     .LoadByWebUserIdByIsDeleted(user.ID.Value, false, amsgs, adc)
                                     .Where(awu => awu.AccountAccountTypeId == AccountType.Registrant)
@@ -35,6 +35,7 @@ namespace AfterSchoolLibrary.Migrations
                             // delete all except for the first record
                             awus.Except(awus.First().AsList()).ToList().ForEach(awu => {
 
+                                var account = awu.GetAccount(amsgs, adc);
                                 var registrants = Registrant
                                                     .LoadByAccountIdByIsDeleted(awu.WebUserId.Value, false, amsgs, adc)
                                                     .Where(registrant => registrant.IsParentOrGuardian && registrant.IsMaster)
@@ -68,6 +69,7 @@ namespace AfterSchoolLibrary.Migrations
 
                                 // deactivate the awu
                                 awu.MarkAsDeleted(user, amsgs, adc);
+                                account.MarkAsDeleted(user, amsgs, adc);
 
                             });
                         }

@@ -347,6 +347,7 @@ property: ConvenienceFeesPaidBy, FeesPaidByType, Int
 property: StripeChargesEnabled, bool, Bit
 property: StripePayoutsEnabled, bool, Bit
 property: IsTest, bool, Bit
+property: IsDeleted, bool, Bit
 baseproperty: Name, required
 loadmethod: OwnerId, List<>
 loadmethod: UniqueName

@@ -214,6 +214,7 @@ namespace AfterSchoolLibrary.Models
 			Account.Update(new Hashtable(){{"StripeChargesEnabled",false}}, new Hashtable(){{"StripeChargesEnabled", DBNull.Value}}, Account.ObjectMap, dc);
 			Account.Update(new Hashtable(){{"StripePayoutsEnabled",false}}, new Hashtable(){{"StripePayoutsEnabled", DBNull.Value}}, Account.ObjectMap, dc);
 			Account.Update(new Hashtable(){{"IsTest",false}}, new Hashtable(){{"IsTest", DBNull.Value}}, Account.ObjectMap, dc);
+			Account.Update(new Hashtable(){{"IsDeleted",false}}, new Hashtable(){{"IsDeleted", DBNull.Value}}, Account.ObjectMap, dc);
 			CheckPaymentAccount.Update(new Hashtable(){{"IsVerified",false}}, new Hashtable(){{"IsVerified", DBNull.Value}}, CheckPaymentAccount.ObjectMap, dc);
 			CheckPaymentAccount.Update(new Hashtable(){{"LegalEntityTypeId",0}}, new Hashtable(){{"LegalEntityTypeId", DBNull.Value}}, CheckPaymentAccount.ObjectMap, dc);
 			BankPaymentAccount.Update(new Hashtable(){{"IsVerified",false}}, new Hashtable(){{"IsVerified", DBNull.Value}}, BankPaymentAccount.ObjectMap, dc);
