@@ -18,7 +18,7 @@ namespace AfterSchoolLibrary.Migrations
                 {
                     var users = WebUser.Load(msgs: amsgs, dc: adc);
 
-                    users.ForEach(user => {
+                    users.First().AsList().ForEach(user => {
 
                         // get all registrant awus for the user
                         var awus = AccountWebUser
@@ -31,23 +31,37 @@ namespace AfterSchoolLibrary.Migrations
                         if (awus.Count > 1)
                         {
                             var firstMasterRegistrant = user.GetMasterRegistrant(amsgs, adc);
+                            var firstAccount = awus.First().GetAccount(amsgs, adc);
 
                             // delete all except for the first record
-                            awus.Except(awus.First().AsList()).ToList().ForEach(awu => {
+                            awus.Where(awu => awu.ID != awus.First().ID).ToList().ForEach(awu => {
 
                                 var account = awu.GetAccount(amsgs, adc);
-                                var registrants = Registrant
-                                                    .LoadByAccountIdByIsDeleted(awu.WebUserId.Value, false, amsgs, adc)
-                                                    .Where(registrant => registrant.IsParentOrGuardian && registrant.IsMaster)
+
+                                // give me all registrants for this account
+                                var allregistrants = Registrant.LoadByAccountIdByIsDeleted(awu.AccountId.Value, false, amsgs, adc)
+                                                        .Where(registrant =>
+                                                                registrant.IsMaster && 
+                                                                registrant.ID != firstMasterRegistrant.ID)
+                                                        .ToList();
+
+                                // give me only parent registrants that are duplicates of the first parent registrant
+                                var registrants = allregistrants
+                                                    .Where(registrant =>
+                                                                registrant.IsParentOrGuardian && 
+                                                                registrant.FirstName.IsSameAs(firstMasterRegistrant.FirstName))
                                                     .ToList();
+
+                                // give me all other registrants, parents & children
+                                var otherRegistrants = allregistrants
+                                                        .Where(registrant => !registrant.FirstName.IsSameAs(firstMasterRegistrant.FirstName) || !registrant.IsParentOrGuardian)
+                                                        .ToList();
 
                                 // delete all duplicate registrants
                                 if (registrants.Any())
                                 {
                                     var lastCompletedRegistrant = registrants
-                                                                    .Where(registrant => 
-                                                                                registrant.ProfileStatusId == RegistrantProfileStatus.Completed &&
-                                                                                registrant.FirstName.IsSameAs(firstMasterRegistrant.FirstName))
+                                                                    .Where(registrant => registrant.ProfileStatusId == RegistrantProfileStatus.Completed)
                                                                     .OrderBy(registrant => registrant.CreateDate)
                                                                     .LastOrDefault();
 
@@ -68,6 +82,14 @@ namespace AfterSchoolLibrary.Migrations
                                         registrant.MarkAsDeleted(user, amsgs, adc);
                                     });
                                 }
+
+                                // move other registrants to original account
+                                if (otherRegistrants.Any())
+                                    otherRegistrants.ForEach(registrant =>
+                                    {
+                                        registrant.AccountId = firstAccount.ID.Value;
+                                        amsgs.AddRange(registrant.Save(adc));
+                                    });
 
                                 // deactivate the awu
                                 awu.MarkAsDeleted(user, amsgs, adc);
