@@ -26,12 +26,14 @@ namespace AfterSchoolLibrary.Models
 		/// Required.
 		/// </summary>
 		public int? WebUserId { get { return (int?)MDV["WebUserId"].Value; } set { MDV["WebUserId"].Value = value; } }
+		public bool IsDeleted { get { return (bool)MDV["IsDeleted"].Value; } set { MDV["IsDeleted"].Value = value; } }
 		
 
         public RegistrantWebUser()
         {
             this.Config(ObjectMap, DatabaseQuery, typeof(RegistrantWebUser).Name, "ID");
             this.LoadObjectValues(ObjectMap);
+			this.IsDeleted = false;
 			
         }
 
@@ -44,6 +46,7 @@ namespace AfterSchoolLibrary.Models
                 _dp = BasicObject.get_BaseObjectMap(className);
 				_dp.Add(className, "RegistrantId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "WebUserId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "IsDeleted", System.Data.SqlDbType.Bit);
 				
                 return _dp;
             }
@@ -129,6 +132,10 @@ namespace AfterSchoolLibrary.Models
 			dps.Add(ObjectMap["WebUserId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsDeleted"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -139,19 +146,21 @@ namespace AfterSchoolLibrary.Models
 			return RegistrantWebUser.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
-		public static List<RegistrantWebUser> LoadByRegistrantId(int RegistrantId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<RegistrantWebUser> LoadByRegistrantIdByIsDeleted(int RegistrantId, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
+			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<RegistrantWebUser> LoadByWebUserId(int WebUserId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<RegistrantWebUser> LoadByWebUserIdByIsDeleted(int WebUserId, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["WebUserId"], WebUserId);
+			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
@@ -169,6 +178,12 @@ namespace AfterSchoolLibrary.Models
         #endregion
 
 		#region "UserDefined"
+
+		public void MarkAsDeleted(SystemMessages msgs, DatabaseConnection dc = null)
+		{
+			this.IsDeleted = true;
+			msgs.AddRange(this.Save(dc));
+		}
 
         #endregion
     }

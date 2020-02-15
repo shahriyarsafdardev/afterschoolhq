@@ -495,6 +495,7 @@ property: WebUserId, int?, Int, required
 property: IsActive, bool, Bit
 property: IsDefault, bool, Bit
 property: UserTypeId, UserType, Int
+property: IsDeleted, bool, Bit
 join: WebUser.ID, WebUserId, InnerJoin
 join: Account.ID, AccountId, InnerJoin
 joinproperty: WebUser.Username, string, NVarChar
@@ -512,12 +513,12 @@ joinproperty: Account.IsAdminAccount, bool, Bit
 joinproperty: Account.CreateDate, DateTime?, DateTime
 joinproperty: Account.IsActive, bool, Bit
 joinproperty: Account.AccountTypeId, AccountType, Int
-loadmethod: AccountId, List<>
-loadmethod: WebUserId, List<>
+loadmethod: AccountId|IsDeleted, List<>
+loadmethod: WebUserId|IsDeleted, List<>
 loadmethod: AccountId|WebUserId
 loadmethod: WebUserId|IsDefault
-loadmethod: WebUserId|IsActive, List<>
-loadmethod: AccountId|IsActive, List<>
+loadmethod: WebUserId|IsActive|IsDeleted, List<>
+loadmethod: AccountId|IsActive|IsDeleted, List<>
 loadmethod: AccountId|UserTypeId, List<>
 [end]
 
@@ -666,13 +667,14 @@ property: IsParentOrGuardian, bool, Bit
 property: AllowTextMessages, bool, Bit
 property: SchoolLocationId, int?, Int, , The location id of the school the registrant is attending
 property: ProfileStatusId, RegistrantProfileStatus, Int, , The status of the profile - completed, started, out of date
-loadmethod: AccountId, List<>
+property: IsDeleted, bool, Bit
+loadmethod: AccountId|IsDeleted, List<>
 loadmethod: ParentRegistrantId, List<>
-loadmethod: AccountId|RegistrantTypeId, List<>
-loadmethod: AccountId|IsContactOnly, List<>
+loadmethod: AccountId|RegistrantTypeId|IsDeleted, List<>
+loadmethod: AccountId|IsContactOnly|IsDeleted, List<>
 loadmethod: Uid
-loadmethod: WebUserId, List<>
-loadmethod: WebUserId|IsMaster, List<>
+loadmethod: WebUserId|IsDeleted, List<>
+loadmethod: WebUserId|IsMaster|IsDeleted, List<>
 loadmethod: FirstRegistrantId, List<>
 loadmethod: ParentRegistrantId|AccountId, List<>
 [end]
@@ -684,8 +686,9 @@ description: Maintains the relationship between a Registrant and Webuser. Meanin
 inherits: BasicObject
 property: RegistrantId, int?, Int, required
 property: WebUserId, int?, Int, required
-loadmethod: RegistrantId, List<>
-loadmethod: WebUserId, List<>
+property: IsDeleted, bool, Bit
+loadmethod: RegistrantId|IsDeleted, List<>
+loadmethod: WebUserId|IsDeleted, List<>
 loadmethod: RegistrantId|WebUserId
 [end]
 

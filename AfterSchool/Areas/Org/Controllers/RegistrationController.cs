@@ -212,7 +212,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                     //5 MB = 5242880 Bytes
                                     //File uploaded here should be less than of 5MB
                                     if (currentFileSizeInBytes <= 5242880)
-                                        submittedRecord.AddAnswer(
+                                        submittedRecord.AddOrUpdateAnswer(
                                             file: Request.Files[qvm.Name].InputStream,
                                             filename: Request.Files[qvm.Name].FileName,
                                             question: qvm.Question,
@@ -225,7 +225,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                 }
                             }
                             else
-                                submittedRecord.AddAnswer(
+                                submittedRecord.AddOrUpdateAnswer(
                                     answerText: qvm.Value.IfEmpty("").Trim(),
                                     question: qvm.Question,
                                     registrationId: registration.ID,

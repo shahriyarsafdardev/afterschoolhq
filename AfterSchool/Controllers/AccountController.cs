@@ -268,7 +268,7 @@ namespace AfterSchool.Controllers
                                 // will be used later to copy information over to student records
                                 qvms.ForEach(qvm =>
                                 {
-                                    registrant.AddAnswer(
+                                    registrant.AddOrUpdateAnswer(
                                         answerText: qvm.Value.IfEmpty("").Trim(),
                                         question: qvm.Question,
                                         loggedInUser: user,
@@ -363,7 +363,7 @@ namespace AfterSchool.Controllers
                         // will be used later to copy information over to student records
                         qvms.ForEach(qvm =>
                         {
-                            parentRegistrant.AddAnswer(
+                            parentRegistrant.AddOrUpdateAnswer(
                                 answerText: qvm.Value.IfEmpty("").Trim(),
                                 question: qvm.Question,
                                 loggedInUser: SessionVariables.CurrentUser,
@@ -529,7 +529,7 @@ namespace AfterSchool.Controllers
 
                         qvms.ForEach(qvm =>
                         {
-                            otherParent.AddAnswer(
+                            otherParent.AddOrUpdateAnswer(
                                 answerText: qvm.Value.IfEmpty("").Trim(),
                                 question: qvm.Question,
                                 loggedInUser: SessionVariables.CurrentUser,
@@ -637,7 +637,7 @@ namespace AfterSchool.Controllers
                         // will be used later to copy information over to student records
                         qvms.ForEach(qvm =>
                         {
-                            parentRegistrant.AddAnswer(
+                            parentRegistrant.AddOrUpdateAnswer(
                                 answerText: qvm.Value.IfEmpty("").Trim(),
                                 question: qvm.Question,
                                 loggedInUser: SessionVariables.CurrentUser,
@@ -825,7 +825,7 @@ namespace AfterSchool.Controllers
                         // will be used later to copy information over to student records
                         qvms.ForEach(qvm =>
                         {
-                            student.AddAnswer(
+                            student.AddOrUpdateAnswer(
                                 answerText: qvm.Value.IfEmpty("").Trim(),
                                 question: qvm.Question,
                                 loggedInUser: SessionVariables.CurrentUser,
@@ -843,7 +843,7 @@ namespace AfterSchool.Controllers
                             .ToList()
                             .ForEach(answer =>
                             {
-                                student.AddAnswer(
+                                student.AddOrUpdateAnswer(
                                     answerText: answer.Text.IfEmpty("").Trim(),
                                     question: answer.ToFormQuestion(msgs: amsgs, dc: adc),
                                     loggedInUser: SessionVariables.CurrentUser,
@@ -1035,7 +1035,7 @@ namespace AfterSchool.Controllers
                         // will be used later to copy information over to student records
                         qvms.ForEach(qvm =>
                         {
-                            registrant.AddAnswer(
+                            registrant.AddOrUpdateAnswer(
                                 answerText: qvm.Value.IfEmpty("").Trim(),
                                 question: qvm.Question,
                                 loggedInUser: currentUser,
@@ -1253,7 +1253,7 @@ namespace AfterSchool.Controllers
                         .ToList()
                         .ForEach(qvm =>
                         {
-                            currentRegistrant.AddAnswer(
+                            currentRegistrant.AddOrUpdateAnswer(
                                 answerText: qvm.Value,
                                 question: qvm.Question,
                                 loggedInUser: currentUser,
@@ -1291,8 +1291,8 @@ namespace AfterSchool.Controllers
                                 dc: adc);
 
                         //copy all answers from the main account to the registrant & registration :)
-                        currentRegistrant.CopyAnswers(
-                            copyingRegistrant: submittedRecord,
+                        currentRegistrant.CopyAnswersTo(
+                            copyToRegistrant: submittedRecord,
                             registration: registration,
                             loggedInUser: currentUser,
                             msgs: amsgs,
@@ -1311,7 +1311,7 @@ namespace AfterSchool.Controllers
                                     //5 MB = 5242880 Bytes
                                     //File uploaded here should be less than of 5MB
                                     if (currentFileSizeInBytes <= 5242880)
-                                        submittedRecord.AddAnswer(
+                                        submittedRecord.AddOrUpdateAnswer(
                                             file: Request.Files[qvm.Name].InputStream,
                                             filename: Request.Files[qvm.Name].FileName,
                                             question: qvm.Question,
@@ -1324,7 +1324,7 @@ namespace AfterSchool.Controllers
                                 }
                             }
                             else
-                                submittedRecord.AddAnswer(
+                                submittedRecord.AddOrUpdateAnswer(
                                     answerText: qvm.Value,
                                     question: qvm.Question,
                                     registrationId: registration.ID,
@@ -1801,7 +1801,7 @@ namespace AfterSchool.Controllers
                                 // add answers to student registrant record
                                 qvms.ForEach(qvm =>
                                 {
-                                    registrant.AddAnswer(
+                                    registrant.AddOrUpdateAnswer(
                                         answerText: qvm.Value.IfEmpty("").Trim(),
                                         question: qvm.Question,
                                         loggedInUser: user,
@@ -1948,7 +1948,7 @@ namespace AfterSchool.Controllers
                     // add answers to student registrant record
                     qvms.ForEach(qvm =>
                         {
-                            parentRegistrant.AddAnswer(
+                            parentRegistrant.AddOrUpdateAnswer(
                                 answerText: qvm.Value.IfEmpty("").Trim(),
                                 question: qvm.Question,
                                 loggedInUser: SessionVariables.CurrentUser,

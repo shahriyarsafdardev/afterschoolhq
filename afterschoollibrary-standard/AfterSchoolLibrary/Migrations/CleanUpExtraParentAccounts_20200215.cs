@@ -22,34 +22,52 @@ namespace AfterSchoolLibrary.Migrations
 
                         // get all parent awus for the user
                         var awus = AccountWebUser
-                                    .LoadByWebUserId(user.ID.Value, amsgs, adc)
+                                    .LoadByWebUserIdByIsDeleted(user.ID.Value, false, amsgs, adc)
                                     .Where(awu => awu.AccountAccountTypeId == AccountType.Registrant)
                                     .OrderBy(awu => awu.ID)
                                     .ToList();
 
-                        // if there is more than one parent account for the user then there's a duplicate parent account
+                        // if there is more than one registrant account for the user then there's a duplicate account
                         if (awus.Count > 1)
                         {
+                            var firstMasterRegistrant = user.GetMasterRegistrant(amsgs, adc);
+
                             // delete all except for the first record
                             awus.Except(awus.First().AsList()).ToList().ForEach(awu => {
 
-                                var registrants = Registrant.LoadByAccountId(awu.AccountId.Value, amsgs, adc);
+                                var registrants = Registrant
+                                                    .LoadByAccountIdByIsDeleted(awu.WebUserId.Value, false, amsgs, adc)
+                                                    .Where(registrant => registrant.IsParentOrGuardian && registrant.IsMaster)
+                                                    .ToList();
 
-                                // delete all registrants
+                                // delete all duplicate registrants
                                 if (registrants.Any())
-                                    registrants.ForEach(registrant => {
+                                {
+                                    var lastCompletedRegistrant = registrants
+                                                                    .Where(registrant => registrant.ProfileStatusId == RegistrantProfileStatus.Completed)
+                                                                    .OrderBy(registrant => registrant.CreateDate)
+                                                                    .LastOrDefault();
 
+                                    if (lastCompletedRegistrant.IsNotEmpty() && firstMasterRegistrant.LastModifiedDate.Value.IsBefore(lastCompletedRegistrant.LastModifiedDate.Value))
+                                    {
+                                        lastCompletedRegistrant.CopyAnswersTo(firstMasterRegistrant, null, user, amsgs, adc);
+                                        firstMasterRegistrant.UpdateProfileStatus(RegistrantProfileStatus.Completed, user, amsgs, adc);
+                                    }
+
+                                    registrants.ForEach(registrant =>
+                                    {
                                         // delete registrant web user connections
                                         var rwu = RegistrantWebUser.LoadByRegistrantIdByWebUserId(registrant.ID.Value, user.ID.Value, amsgs, adc);
 
                                         if (rwu.IsNotEmpty())
-                                            amsgs.AddRange(rwu.Delete(adc));
+                                            rwu.MarkAsDeleted(amsgs, adc);
 
-                                        amsgs.AddRange(registrant.Delete(adc)); 
+                                        registrant.MarkAsDeleted(user, amsgs, adc);
                                     });
+                                }
 
-                                // delete the awu
-                                amsgs.AddRange(awu.Delete(adc));
+                                // deactivate the awu
+                                awu.MarkAsDeleted(user, amsgs, adc);
 
                             });
                         }

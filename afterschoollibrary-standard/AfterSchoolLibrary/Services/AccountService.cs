@@ -26,7 +26,7 @@ namespace AfterSchoolLibrary.Services
 
         public static List<WebUser> GetAccountOwnersAndAdmins(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountWebUser.LoadByAccountIdByIsActive(account.ID.Value, true, msgs, dc)
+            return AccountWebUser.LoadByAccountIdByIsActiveByIsDeleted(account.ID.Value, true, false, msgs, dc)
                 .Where(x => x.UserTypeId == UserType.Administrator || x.UserTypeId == UserType.Owner)
                 .Select(x => x.ToWebUser())
                 .ToList();
@@ -214,7 +214,7 @@ namespace AfterSchoolLibrary.Services
 
         public static List<Registrant> GetContacts(this Account account, int? start = null, int? length = null, DatabaseConnection dc = null)
         {
-            return Registrant.LoadByAccountId(account.ID.Value, start, length, dc: dc);
+            return Registrant.LoadByAccountIdByIsDeleted(account.ID.Value, false, start, length, dc: dc);
         }
 
         public static List<ContactList> GetContactLists(this Account account, int? start = null, int? length = null, DatabaseConnection dc = null)
@@ -448,12 +448,12 @@ namespace AfterSchoolLibrary.Services
 
         public static List<AccountWebUser> GetMembers(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountWebUser.LoadByAccountId(account.ID.Value, msgs, dc);
+            return AccountWebUser.LoadByAccountIdByIsDeleted(account.ID.Value, false, msgs, dc);
         }
 
         public static List<AccountWebUser> GetActiveMembers(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountWebUser.LoadByAccountIdByIsActive(account.ID.Value, true, msgs, dc);
+            return AccountWebUser.LoadByAccountIdByIsActiveByIsDeleted(account.ID.Value, true, false, msgs, dc);
         }
 
         public static AccountWebUser AddUser(this Account account, WebUser user, UserType ut, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
@@ -1075,7 +1075,7 @@ namespace AfterSchoolLibrary.Services
                     // add answers                    
                     questionsAndAnswers.ForEach(questionAndAnswer =>
                     {
-                        student.AddAnswer(
+                        student.AddOrUpdateAnswer(
                             answerText: questionAndAnswer.answer.IfEmpty("").Trim(),
                             question: questionAndAnswer.question,
                             registrationId: registration.ID,
@@ -1866,7 +1866,7 @@ namespace AfterSchoolLibrary.Services
 
         public static Registrant GetFirstParentOrGuardianRegistrant(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Registrant.LoadByAccountId(account.ID.Value, msgs, dc)
+            return Registrant.LoadByAccountIdByIsDeleted(account.ID.Value, false, msgs, dc)
                 .Where(registrant => registrant.IsParentOrGuardian)
                 .OrderBy(registrant => registrant.ID)
                 .FirstOrDefault();
@@ -1874,7 +1874,7 @@ namespace AfterSchoolLibrary.Services
 
         public static Registrant GetSecondParentOrGuardianRegistrant(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var registrants = Registrant.LoadByAccountId(account.ID.Value, msgs, dc)
+            var registrants = Registrant.LoadByAccountIdByIsDeleted(account.ID.Value, false, msgs, dc)
                 .Where(registrant => registrant.IsParentOrGuardian)
                 .OrderBy(registrant => registrant.ID)
                 .ToList();
@@ -1887,7 +1887,7 @@ namespace AfterSchoolLibrary.Services
 
         public static List<Registrant> GetChildrenRegistrants(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Registrant.LoadByAccountId(account.ID.Value, msgs, dc)
+            return Registrant.LoadByAccountIdByIsDeleted(account.ID.Value, false, msgs, dc)
                 .Where(registrant => !registrant.IsParentOrGuardian)
                 .OrderBy(registrant => registrant.DisplayName)
                 .ToList();

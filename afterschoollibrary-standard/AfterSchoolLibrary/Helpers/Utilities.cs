@@ -1780,7 +1780,7 @@ namespace AfterSchoolLibrary.Helpers
                     {
                         msgs.AddRange(account.Delete(dc: dc));
                     }
-                    var awus = AccountWebUser.LoadByWebUserId(user.ID.Value, dc: dc);
+                    var awus = AccountWebUser.LoadByWebUserIdByIsDeleted(user.ID.Value, false, msgs, dc);
                     foreach (var awu in awus)
                     {
                         msgs.AddRange(awu.Delete(dc: dc));
