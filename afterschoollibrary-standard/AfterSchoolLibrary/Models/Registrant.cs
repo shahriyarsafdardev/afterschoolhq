@@ -42,6 +42,7 @@ namespace AfterSchoolLibrary.Models
 		/// The status of the profile - completed
 		/// </summary>
 		public RegistrantProfileStatus ProfileStatusId { get { return (RegistrantProfileStatus)MDV["ProfileStatusId"].Value; } set { MDV["ProfileStatusId"].Value = value; } }
+		public bool IsDeleted { get { return (bool)MDV["IsDeleted"].Value; } set { MDV["IsDeleted"].Value = value; } }
 		
 
         public Registrant()
@@ -55,6 +56,7 @@ namespace AfterSchoolLibrary.Models
 			this.IsParentOrGuardian = false;
 			this.AllowTextMessages = false;
 			this.ProfileStatusId = RegistrantProfileStatus.NotSet;
+			this.IsDeleted = false;
 			
         }
 
@@ -77,6 +79,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "AllowTextMessages", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "SchoolLocationId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ProfileStatusId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "IsDeleted", System.Data.SqlDbType.Bit);
 				
                 return _dp;
             }
@@ -202,6 +205,10 @@ namespace AfterSchoolLibrary.Models
 			dps.Add(ObjectMap["ProfileStatusId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsDeleted"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -212,11 +219,12 @@ namespace AfterSchoolLibrary.Models
 			return Registrant.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
-		public static List<Registrant> LoadByAccountId(int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Registrant> LoadByAccountIdByIsDeleted(int AccountId, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
@@ -228,21 +236,23 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<Registrant> LoadByAccountIdByRegistrantTypeId(int AccountId, RegistrantType RegistrantTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Registrant> LoadByAccountIdByRegistrantTypeIdByIsDeleted(int AccountId, RegistrantType RegistrantTypeId, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
 			dq.Criterias.Add(ObjectMap["RegistrantTypeId"], RegistrantTypeId);
+			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<Registrant> LoadByAccountIdByIsContactOnly(int AccountId, bool IsContactOnly, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Registrant> LoadByAccountIdByIsContactOnlyByIsDeleted(int AccountId, bool IsContactOnly, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
 			dq.Criterias.Add(ObjectMap["IsContactOnly"], IsContactOnly);
+			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
@@ -254,20 +264,22 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static List<Registrant> LoadByWebUserId(int WebUserId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Registrant> LoadByWebUserIdByIsDeleted(int WebUserId, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["WebUserId"], WebUserId);
+			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<Registrant> LoadByWebUserIdByIsMaster(int WebUserId, bool IsMaster, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Registrant> LoadByWebUserIdByIsMasterByIsDeleted(int WebUserId, bool IsMaster, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["WebUserId"], WebUserId);
 			dq.Criterias.Add(ObjectMap["IsMaster"], IsMaster);
+			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
@@ -413,11 +425,12 @@ namespace AfterSchoolLibrary.Models
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static List<Registrant> LoadByAccountId(int AccountId, int? start, int? length, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<Registrant> LoadByAccountIdByIsDeleted(int AccountId, bool isDeleted, int? start, int? length, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], isDeleted);
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);

@@ -15,7 +15,9 @@ namespace AfterSchoolLibrary.Models
     {
 		#region "ClassGenerator"
 		public static DatabaseCredentials ProductionCredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }
-		public static DatabaseCredentials LocalCredentials { get { return new DatabaseCredentials("localhost", "AfterSchool", "AfterSchoolUser", "Nj8Ed$wpLfJ"); } }
+
+		public static DatabaseCredentials LocalCredentials { get { return new DatabaseCredentials("afterschool-production.cdyenngbc33v.us-east-2.rds.amazonaws.com", "AfterSchool", "AfterSchoolProd", "pNeiDj$nwpPynDhXfghT"); } }
+		// public static DatabaseCredentials LocalCredentials { get { return new DatabaseCredentials("localhost", "AfterSchool", "AfterSchoolUser", "Nj8Ed$wpLfJ"); } }
 		public static DatabaseCredentials CICredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }
 		public static DatabaseCredentials QACredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }
 		public static DatabaseCredentials TestCredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }
@@ -214,6 +216,7 @@ namespace AfterSchoolLibrary.Models
 			Account.Update(new Hashtable(){{"StripeChargesEnabled",false}}, new Hashtable(){{"StripeChargesEnabled", DBNull.Value}}, Account.ObjectMap, dc);
 			Account.Update(new Hashtable(){{"StripePayoutsEnabled",false}}, new Hashtable(){{"StripePayoutsEnabled", DBNull.Value}}, Account.ObjectMap, dc);
 			Account.Update(new Hashtable(){{"IsTest",false}}, new Hashtable(){{"IsTest", DBNull.Value}}, Account.ObjectMap, dc);
+			Account.Update(new Hashtable(){{"IsDeleted",false}}, new Hashtable(){{"IsDeleted", DBNull.Value}}, Account.ObjectMap, dc);
 			CheckPaymentAccount.Update(new Hashtable(){{"IsVerified",false}}, new Hashtable(){{"IsVerified", DBNull.Value}}, CheckPaymentAccount.ObjectMap, dc);
 			CheckPaymentAccount.Update(new Hashtable(){{"LegalEntityTypeId",0}}, new Hashtable(){{"LegalEntityTypeId", DBNull.Value}}, CheckPaymentAccount.ObjectMap, dc);
 			BankPaymentAccount.Update(new Hashtable(){{"IsVerified",false}}, new Hashtable(){{"IsVerified", DBNull.Value}}, BankPaymentAccount.ObjectMap, dc);
@@ -232,6 +235,7 @@ namespace AfterSchoolLibrary.Models
 			AccountWebUser.Update(new Hashtable(){{"IsActive",false}}, new Hashtable(){{"IsActive", DBNull.Value}}, AccountWebUser.ObjectMap, dc);
 			AccountWebUser.Update(new Hashtable(){{"IsDefault",false}}, new Hashtable(){{"IsDefault", DBNull.Value}}, AccountWebUser.ObjectMap, dc);
 			AccountWebUser.Update(new Hashtable(){{"UserTypeId",0}}, new Hashtable(){{"UserTypeId", DBNull.Value}}, AccountWebUser.ObjectMap, dc);
+			AccountWebUser.Update(new Hashtable(){{"IsDeleted",false}}, new Hashtable(){{"IsDeleted", DBNull.Value}}, AccountWebUser.ObjectMap, dc);
 			RegistrationPeriod.Update(new Hashtable(){{"RegistrationModeId",0}}, new Hashtable(){{"RegistrationModeId", DBNull.Value}}, RegistrationPeriod.ObjectMap, dc);
 			ActivityRegistrationPeriod.Update(new Hashtable(){{"IsActive",false}}, new Hashtable(){{"IsActive", DBNull.Value}}, ActivityRegistrationPeriod.ObjectMap, dc);
 			ActivityGroup.Update(new Hashtable(){{"RegistrationModeId",0}}, new Hashtable(){{"RegistrationModeId", DBNull.Value}}, ActivityGroup.ObjectMap, dc);
@@ -253,6 +257,8 @@ namespace AfterSchoolLibrary.Models
 			Registrant.Update(new Hashtable(){{"IsParentOrGuardian",false}}, new Hashtable(){{"IsParentOrGuardian", DBNull.Value}}, Registrant.ObjectMap, dc);
 			Registrant.Update(new Hashtable(){{"AllowTextMessages",false}}, new Hashtable(){{"AllowTextMessages", DBNull.Value}}, Registrant.ObjectMap, dc);
 			Registrant.Update(new Hashtable(){{"ProfileStatusId",0}}, new Hashtable(){{"ProfileStatusId", DBNull.Value}}, Registrant.ObjectMap, dc);
+			Registrant.Update(new Hashtable(){{"IsDeleted",false}}, new Hashtable(){{"IsDeleted", DBNull.Value}}, Registrant.ObjectMap, dc);
+			RegistrantWebUser.Update(new Hashtable(){{"IsDeleted",false}}, new Hashtable(){{"IsDeleted", DBNull.Value}}, RegistrantWebUser.ObjectMap, dc);
 			ActivityPayment.Update(new Hashtable(){{"ParticipationObjectTypeId",0}}, new Hashtable(){{"ParticipationObjectTypeId", DBNull.Value}}, ActivityPayment.ObjectMap, dc);
 			RegistrantActivity.Update(new Hashtable(){{"ParticipationObjectTypeId",0}}, new Hashtable(){{"ParticipationObjectTypeId", DBNull.Value}}, RegistrantActivity.ObjectMap, dc);
 			RegistrantActivity.Update(new Hashtable(){{"AssignmentTypeId",0}}, new Hashtable(){{"AssignmentTypeId", DBNull.Value}}, RegistrantActivity.ObjectMap, dc);
@@ -398,12 +404,12 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountProperty_AccountId_AccountPropertyTypeId ON [AccountProperty] (AccountId,AccountPropertyTypeId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountProperty_AccountPropertyTypeId_ActivityGroupId ON [AccountProperty] (ActivityGroupId,AccountPropertyTypeId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountProperty_AccountPropertyTypeId_ActivityId ON [AccountProperty] (ActivityId,AccountPropertyTypeId)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountWebUser_AccountId ON [AccountWebUser] (AccountId)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountWebUser_WebUserId ON [AccountWebUser] (WebUserId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountWebUser_AccountId_IsDeleted ON [AccountWebUser] (AccountId,IsDeleted)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountWebUser_IsDeleted_WebUserId ON [AccountWebUser] (WebUserId,IsDeleted)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountWebUser_AccountId_WebUserId ON [AccountWebUser] (AccountId,WebUserId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountWebUser_IsDefault_WebUserId ON [AccountWebUser] (WebUserId,IsDefault)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountWebUser_IsActive_WebUserId ON [AccountWebUser] (WebUserId,IsActive)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountWebUser_AccountId_IsActive ON [AccountWebUser] (AccountId,IsActive)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountWebUser_IsActive_IsDeleted_WebUserId ON [AccountWebUser] (WebUserId,IsActive,IsDeleted)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountWebUser_AccountId_IsActive_IsDeleted ON [AccountWebUser] (AccountId,IsActive,IsDeleted)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountWebUser_AccountId_UserTypeId ON [AccountWebUser] (AccountId,UserTypeId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrationPeriod_AccountId ON [RegistrationPeriod] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrationPeriod_Uid ON [RegistrationPeriod] (Uid)"));
@@ -429,17 +435,17 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountActivityGroup_AccountId_IsPublished ON [AccountActivityGroup] (AccountId,IsPublished)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountActivityGroup_AccountId_InviteStatusId ON [AccountActivityGroup] (AccountId,InviteStatusId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountActivityGroup_AccountId_ActivityGroupId ON [AccountActivityGroup] (AccountId,ActivityGroupId)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registrant_AccountId ON [Registrant] (AccountId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registrant_AccountId_IsDeleted ON [Registrant] (AccountId,IsDeleted)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registrant_ParentRegistrantId ON [Registrant] (ParentRegistrantId)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registrant_AccountId_RegistrantTypeId ON [Registrant] (AccountId,RegistrantTypeId)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registrant_AccountId_IsContactOnly ON [Registrant] (AccountId,IsContactOnly)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registrant_AccountId_IsDeleted_RegistrantTypeId ON [Registrant] (AccountId,RegistrantTypeId,IsDeleted)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registrant_AccountId_IsContactOnly_IsDeleted ON [Registrant] (AccountId,IsContactOnly,IsDeleted)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registrant_Uid ON [Registrant] (Uid)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registrant_WebUserId ON [Registrant] (WebUserId)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registrant_IsMaster_WebUserId ON [Registrant] (WebUserId,IsMaster)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registrant_IsDeleted_WebUserId ON [Registrant] (WebUserId,IsDeleted)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registrant_IsDeleted_IsMaster_WebUserId ON [Registrant] (WebUserId,IsMaster,IsDeleted)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registrant_FirstRegistrantId ON [Registrant] (FirstRegistrantId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registrant_AccountId_ParentRegistrantId ON [Registrant] (ParentRegistrantId,AccountId)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrantWebUser_RegistrantId ON [RegistrantWebUser] (RegistrantId)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrantWebUser_WebUserId ON [RegistrantWebUser] (WebUserId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrantWebUser_IsDeleted_RegistrantId ON [RegistrantWebUser] (RegistrantId,IsDeleted)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrantWebUser_IsDeleted_WebUserId ON [RegistrantWebUser] (WebUserId,IsDeleted)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrantWebUser_RegistrantId_WebUserId ON [RegistrantWebUser] (RegistrantId,WebUserId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ContactList_AccountId ON [ContactList] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ContactListRegistrant_ContactListId_RegistrantId ON [ContactListRegistrant] (ContactListId,RegistrantId)"));

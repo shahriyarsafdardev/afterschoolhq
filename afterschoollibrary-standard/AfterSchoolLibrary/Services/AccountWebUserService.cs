@@ -23,5 +23,18 @@ namespace AfterSchoolLibrary.Services
             awu.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
             return awu.Save(dc);
         }
+
+        public static void MarkAsDeleted(this AccountWebUser awu, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            awu.IsDeleted = true;
+            awu.LastModifiedDate = DateTime.UtcNow;
+            awu.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+            msgs.AddRange(awu.Save(dc));
+        }
+
+        public static Account GetAccount(this AccountWebUser awu, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return Account.Load(awu.AccountId.Value, msgs, dc);
+        }
     }
 }

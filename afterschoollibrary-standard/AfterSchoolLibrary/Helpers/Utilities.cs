@@ -321,6 +321,9 @@ namespace AfterSchoolLibrary.Helpers
                     Migrations.UpdateRequiresParentalConsentForActivityGroup_20191226.Do(amsgs, adc);
                     Migrations.UpdatePlanPaymentStartType_20191230.Do(amsgs, adc);
                     Migrations.AddFieldTripsFeatureToSchools_20200126.Do(amsgs, adc);
+                    Migrations.CleanUpExtraParentAccounts_20200215.Do(amsgs, adc);
+
+                    // amsgs.Add("rollback please", MessageType.Error);
 
                     // amsgs.AddRange(MigrateToBCrypt(adc));
 
@@ -1779,7 +1782,7 @@ namespace AfterSchoolLibrary.Helpers
                     {
                         msgs.AddRange(account.Delete(dc: dc));
                     }
-                    var awus = AccountWebUser.LoadByWebUserId(user.ID.Value, dc: dc);
+                    var awus = AccountWebUser.LoadByWebUserIdByIsDeleted(user.ID.Value, false, msgs, dc);
                     foreach (var awu in awus)
                     {
                         msgs.AddRange(awu.Delete(dc: dc));

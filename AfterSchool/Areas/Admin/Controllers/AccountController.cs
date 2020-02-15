@@ -44,8 +44,8 @@ namespace AfterSchool.Areas.Admin.Controllers
             if (type != AccountType.NotSet)
                 accountTypes = type.AsList();
 
-            var count = Account.GetSearchCount(search, accountTypes, msgs);
-            var accounts = Account.Search(search, accountTypes, start, length, msgs);
+            var count = Account.GetSearchCount(search, accountTypes, false, msgs);
+            var accounts = Account.Search(search, accountTypes, false, start, length, msgs);
             var totalPages = Math.Ceiling(count.ToDouble() / recordsPerPage).ToInteger();
 
             ViewBag.Messages = msgs;
