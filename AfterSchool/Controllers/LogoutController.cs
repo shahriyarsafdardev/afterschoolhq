@@ -29,5 +29,10 @@ namespace AfterSchool.Controllers
             return Logout(returnurl);
         }
 
+        public ActionResult Switch()
+        {
+            return SwitchAccount();
+        }
+
     }
 }
