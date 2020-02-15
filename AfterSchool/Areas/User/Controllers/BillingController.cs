@@ -27,6 +27,7 @@ namespace AfterSchool.Areas.User.Controllers
             var msgs = new SystemMessages();
             int pageNumber = 1;
             int recordsPerPage = 25;
+            var earliestCorrectTransactionRecards = new DateTime(2019, 12, 1);
 
             if (pn.IsNumber() && pn.ToInteger() > 0)
                 pageNumber = pn.ToInteger();
@@ -43,6 +44,9 @@ namespace AfterSchool.Areas.User.Controllers
             var endDate = edate.IsDateTime() ?
                 SessionVariables.CurrentAccount.ConvertFromAccountTimeZone(edate.ToDateTime().AddDays(1).AddMilliseconds(-1)) :
                 new DateTime?();
+
+            if (!startDate.HasValue || startDate.Value < earliestCorrectTransactionRecards)
+                startDate = earliestCorrectTransactionRecards;
 
             // transaction count
             var totalTransactionCount = SessionVariables.CurrentAccount.GetPaidTransactionCount(startDate, endDate, msgs);
@@ -79,7 +83,7 @@ namespace AfterSchool.Areas.User.Controllers
                 plans.AddRange(registrant.GetRegistrantSubscriptionPlans(msgs));
             });
 
-            return View(plans.OrderByDescending(x => x.CreateDate.Value).ToList());
+            return View(plans.Where(plan => plan.CreateDate >= new DateTime(2019,12,1)).OrderByDescending(x => x.CreateDate.Value).ToList());
         }
     }
 }

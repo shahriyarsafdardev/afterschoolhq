@@ -215,6 +215,14 @@ namespace AfterSchool.Models
             }
         }
 
+        internal ActionResult SwitchAccount()
+        {
+            SessionVariables.CurrentAccount = null;
+            SessionVariables.CurrentRegistrant = null;
+
+            return RedirectToAction("select", "login");
+        }
+
         internal ActionResult Logout(string returnUrl = null, bool goToLoginScreenBeforeReturn = false)
         {
             SessionVariables.CurrentUser = null;
