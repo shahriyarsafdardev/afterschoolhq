@@ -45,7 +45,9 @@ namespace AfterSchoolLibrary.Migrations
                                 if (registrants.Any())
                                 {
                                     var lastCompletedRegistrant = registrants
-                                                                    .Where(registrant => registrant.ProfileStatusId == RegistrantProfileStatus.Completed)
+                                                                    .Where(registrant => 
+                                                                                registrant.ProfileStatusId == RegistrantProfileStatus.Completed &&
+                                                                                registrant.FirstName.IsSameAs(firstMasterRegistrant.FirstName))
                                                                     .OrderBy(registrant => registrant.CreateDate)
                                                                     .LastOrDefault();
 

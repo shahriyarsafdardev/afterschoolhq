@@ -323,6 +323,8 @@ namespace AfterSchoolLibrary.Helpers
                     Migrations.AddFieldTripsFeatureToSchools_20200126.Do(amsgs, adc);
                     Migrations.CleanUpExtraParentAccounts_20200215.Do(amsgs, adc);
 
+                    amsgs.Add("rollback please", MessageType.Error);
+
                     // amsgs.AddRange(MigrateToBCrypt(adc));
 
                     // amsgs.AddRange(MigrateChargesAndPayoutsEnabled(adc));
