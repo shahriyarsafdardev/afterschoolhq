@@ -321,6 +321,7 @@ namespace AfterSchoolLibrary.Helpers
                     Migrations.UpdateRequiresParentalConsentForActivityGroup_20191226.Do(amsgs, adc);
                     Migrations.UpdatePlanPaymentStartType_20191230.Do(amsgs, adc);
                     Migrations.AddFieldTripsFeatureToSchools_20200126.Do(amsgs, adc);
+                    Migrations.CleanUpExtraParentAccounts_20200215.Do(amsgs, adc);
 
                     // amsgs.AddRange(MigrateToBCrypt(adc));
 
