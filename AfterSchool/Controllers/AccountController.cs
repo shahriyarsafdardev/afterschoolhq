@@ -85,9 +85,7 @@ namespace AfterSchool.Controllers
                 if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant)
                 {
                     //check if the user has a parent account
-                    registrantAccount = SessionVariables.CurrentUser
-                                            .GetAccounts(msgs)
-                                            .FirstOrDefault(x => x.AccountTypeId == AccountType.Registrant);
+                    registrantAccount = SessionVariables.CurrentUser.GetRegistrantAccount(msgs);
 
                     // if no parent account, then create one real quick
                     if (registrantAccount.IsEmpty())
@@ -232,30 +230,38 @@ namespace AfterSchool.Controllers
                         }
 
                         if (amsgs.HasNoErrors())
+                        {
+                            account = user.GetRegistrantAccount(amsgs, adc);
+
                             // create account
-                            account = user.AddNewRegistrantAccount(
-                                userType: UserType.Owner,
-                                isActive: true,
-                                isAfterSchool: SessionVariables.IsAfterSchool.Value,
-                                loggedInUser: user,
-                                msgs: amsgs,
-                                dc: adc);
+                            if (account.IsEmpty())
+                                account = user.AddNewRegistrantAccount(
+                                    userType: UserType.Owner,
+                                    isActive: true,
+                                    isAfterSchool: SessionVariables.IsAfterSchool.Value,
+                                    loggedInUser: user,
+                                    msgs: amsgs,
+                                    dc: adc);
+                        }
 
                         if (amsgs.HasNoErrors())
                         {
-                            // create parent registrant record
-                            var registrant = account.CreateRegistrant(
-                                registrantOwner: user,
-                                canBeAccessedBy: user.AsList(),
-                                registrantType: RegistrantType.Individual,
-                                isMaster: true,
-                                isParentOrGuardian: true,
-                                allowTextMessages: textnotifications.IfBlank("0").ToBoolean(),
-                                schoolLocationId: null,
-                                profileStatus: RegistrantProfileStatus.Started,
-                                loggedInUser: user,
-                                msgs: amsgs,
-                                dc: adc);
+                            var registrant = account.GetFirstParentOrGuardianRegistrant(amsgs, adc);
+
+                            if (registrant.IsEmpty())
+                                // create parent registrant record
+                                registrant = account.CreateRegistrant(
+                                    registrantOwner: user,
+                                    canBeAccessedBy: user.AsList(),
+                                    registrantType: RegistrantType.Individual,
+                                    isMaster: true,
+                                    isParentOrGuardian: true,
+                                    allowTextMessages: textnotifications.IfBlank("0").ToBoolean(),
+                                    schoolLocationId: null,
+                                    profileStatus: RegistrantProfileStatus.Started,
+                                    loggedInUser: user,
+                                    msgs: amsgs,
+                                    dc: adc);
 
                             if (amsgs.HasNoErrors())
                                 // add answers to parent registrant record

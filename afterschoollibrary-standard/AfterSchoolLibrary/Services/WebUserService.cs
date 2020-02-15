@@ -94,6 +94,16 @@ namespace AfterSchoolLibrary.Services
                 .ToList();
         }
 
+        public static Account GetRegistrantAccount(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return user.GetAccounts(msgs, dc).FirstOrDefault(account => account.AccountTypeId == AccountType.Registrant);
+        }
+
+        public static bool HasRegistrantAccount(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return user.GetRegistrantAccount(msgs, dc).IsNotEmpty();
+        }
+
         public static bool HasMultipleAccounts(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return AccountWebUser.GetCount(new System.Collections.Hashtable() { { "WebUserId", user.ID.Value }, { "IsActive", true } }, msgs, dc) > 1;                
