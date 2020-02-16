@@ -143,7 +143,7 @@ namespace AfterSchool.Areas.User.Controllers
 
                             qvms.ForEach(qvm =>
                             {
-                                registrant.AddAnswer(
+                                registrant.AddOrUpdateAnswer(
                                     answerText: qvm.Value.IfEmpty("").Trim(),
                                     question: qvm.Question,
                                     loggedInUser: SessionVariables.CurrentUser,
@@ -265,7 +265,7 @@ namespace AfterSchool.Areas.User.Controllers
 
                             qvms.ForEach(qvm =>
                             {
-                                registrant.AddAnswer(
+                                registrant.AddOrUpdateAnswer(
                                     answerText: qvm.Value.IfEmpty("").Trim(),
                                     question: qvm.Question,
                                     loggedInUser: SessionVariables.CurrentUser,
@@ -406,7 +406,7 @@ namespace AfterSchool.Areas.User.Controllers
                         {
                             qvms.ForEach(qvm =>
                             {
-                                registrant.AddAnswer(
+                                registrant.AddOrUpdateAnswer(
                                     answerText: qvm.Value.IfEmpty("").Trim(),
                                     question: qvm.Question,
                                     loggedInUser: SessionVariables.CurrentUser,
@@ -547,7 +547,7 @@ namespace AfterSchool.Areas.User.Controllers
                         {
                             qvms.ForEach(qvm =>
                             {
-                                registrant.AddAnswer(
+                                registrant.AddOrUpdateAnswer(
                                     answerText: qvm.Value.IfEmpty("").Trim(),
                                     question: qvm.Question,
                                     loggedInUser: SessionVariables.CurrentUser,
@@ -678,7 +678,7 @@ namespace AfterSchool.Areas.User.Controllers
 
                             qvms.ForEach(qvm =>
                             {
-                                registrant.AddAnswer(
+                                registrant.AddOrUpdateAnswer(
                                     answerText: qvm.Value.IfEmpty("").Trim(),
                                     question: qvm.Question,
                                     loggedInUser: SessionVariables.CurrentUser,
@@ -768,7 +768,7 @@ namespace AfterSchool.Areas.User.Controllers
                     .ForEach(answer =>
                     {
                         students.ForEach(student => {
-                            student.AddAnswer(
+                            student.AddOrUpdateAnswer(
                                 answerText: answer.Text.IfEmpty("").Trim(),
                                 question: answer.ToFormQuestion(msgs: msgs, dc: dc),
                                     loggedInUser: SessionVariables.CurrentUser,

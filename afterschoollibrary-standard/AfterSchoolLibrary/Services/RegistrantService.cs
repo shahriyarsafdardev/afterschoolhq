@@ -807,7 +807,7 @@ namespace AfterSchoolLibrary.Services
             var parentAnswer = fromRegistrant.GetAnswer(fromType, msgs, dc);
             var studentQuestion = questions.Find(question => question.QuestionDataTypeId == toType);
             if (studentQuestion.IsNotEmpty() && parentAnswer.IsNotEmpty())
-                return registrant.AddAnswer(parentAnswer.Text, studentQuestion, loggedInUser, msgs, dc);
+                return registrant.AddOrUpdateAnswer(parentAnswer.Text, studentQuestion, loggedInUser, msgs, dc);
 
             return null;
         }
@@ -833,36 +833,36 @@ namespace AfterSchoolLibrary.Services
             return amazonFilePath;
         }
 
-        public static FormQuestionAnswer AddAnswer(this Registrant registrant, System.IO.Stream file, string filename, FormQuestion question, int? registrationId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static FormQuestionAnswer AddOrUpdateAnswer(this Registrant registrant, System.IO.Stream file, string filename, FormQuestion question, int? registrationId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (question.IsNotEmpty())
             {
                 var amazonFilePath = registrant.UploadFile(file, filename, question, msgs, dc);
                 
                 if (msgs.HasNoErrors())
-                    return registrant.AddAnswer(amazonFilePath, question, registrationId, loggedInUser, msgs, dc);
+                    return registrant.AddOrUpdateAnswer(amazonFilePath, question, registrationId, loggedInUser, msgs, dc);
             }
 
             return null;
         }
 
-        public static FormQuestionAnswer AddAnswer(this Registrant registrant, string answerText, FormQuestion question, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static FormQuestionAnswer AddOrUpdateAnswer(this Registrant registrant, string answerText, FormQuestion question, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (question.IsNotEmpty())
-                return registrant.AddAnswer(answerText, question, null, loggedInUser, msgs, dc);
+                return registrant.AddOrUpdateAnswer(answerText, question, null, loggedInUser, msgs, dc);
 
             return null;
         }
 
-        public static FormQuestionAnswer AddAnswer(this Registrant registrant, string answerText, FormQuestion question, int? registrationId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static FormQuestionAnswer AddOrUpdateAnswer(this Registrant registrant, string answerText, FormQuestion question, int? registrationId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (question.IsNotEmpty())
-                return registrant.AddAnswer(answerText, question.ID, question.QuestionDataTypeId, question.Text, registrationId, loggedInUser, msgs, dc);
+                return registrant.AddOrUpdateAnswer(answerText, question.ID, question.QuestionDataTypeId, question.Text, registrationId, loggedInUser, msgs, dc);
 
             return null;
         }
 
-        public static FormQuestionAnswer AddAnswer(this Registrant registrant, string answerText, int? questionId, QuestionDataType questionDataType, string questionText, int? registrationId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static FormQuestionAnswer AddOrUpdateAnswer(this Registrant registrant, string answerText, int? questionId, QuestionDataType questionDataType, string questionText, int? registrationId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -963,13 +963,13 @@ namespace AfterSchoolLibrary.Services
 
             if (questions.IsEmpty())
                 questions.ForEach(question =>
-                    copy.AddAnswer(question.GetAnswer(registrant.ID.Value, msgs, dc).Text, question, null, loggedInUser, msgs, dc)
+                    copy.AddOrUpdateAnswer(question.GetAnswer(registrant.ID.Value, msgs, dc).Text, question, null, loggedInUser, msgs, dc)
                 );
 
             return copy;
         }
 
-        public static void CopyAnswers(this Registrant registrant, Registrant copyingRegistrant, Registration registration, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void CopyAnswersTo(this Registrant registrant, Registrant copyToRegistrant, Registration registration, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
               (
@@ -979,7 +979,7 @@ namespace AfterSchoolLibrary.Services
                       var answers = registrant.GetAnswers(amsgs, adc);
                       answers.ForEach(answer =>
                       {
-                          copyingRegistrant.AddAnswer(
+                          copyToRegistrant.AddOrUpdateAnswer(
                               answerText: answer.Text,
                               question: answer.ToFormQuestion(true, amsgs, adc),
                               registrationId: registration?.ID,
@@ -1158,7 +1158,7 @@ namespace AfterSchoolLibrary.Services
                 masterRegistrant = registrant.GetMasterRegistrant(msgs, dc);
 
             if (!masterRegistrant.IsEmpty())
-                return Registrant.LoadByAccountId(masterRegistrant.AccountId.Value, msgs, dc)
+                return Registrant.LoadByAccountIdByIsDeleted(masterRegistrant.AccountId.Value, false, msgs, dc)
                     .Where(item => item.IsParentOrGuardian)
                     .OrderBy(item => item.ID)
                     .FirstOrDefault();
@@ -1191,6 +1191,14 @@ namespace AfterSchoolLibrary.Services
                 registrant.ID.Value, 
                 msgs, 
                 dc);
+        }
+
+        public static void MarkAsDeleted(this Registrant registrant, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            registrant.IsDeleted = true;
+            registrant.LastModifiedDate = DateTime.UtcNow;
+            registrant.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+            msgs.AddRange(registrant.Save(dc));
         }
     }
 }
