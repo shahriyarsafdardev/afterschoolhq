@@ -112,7 +112,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static ActivityGroup LoadObject(System.Data.DataRow row)
+        public static ActivityGroup LoadObject(System.Data.DataRow row)
         {
             ActivityGroup obj = new ActivityGroup();
             obj.LoadObjectValues(ObjectMap, row);

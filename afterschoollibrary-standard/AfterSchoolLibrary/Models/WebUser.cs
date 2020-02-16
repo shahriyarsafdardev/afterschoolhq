@@ -63,7 +63,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static WebUser LoadObject(System.Data.DataRow row)
+        public static WebUser LoadObject(System.Data.DataRow row)
         {
             WebUser obj = new WebUser();
             obj.LoadObjectValues(ObjectMap, row);

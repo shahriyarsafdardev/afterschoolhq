@@ -61,7 +61,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static ActivityFile LoadObject(System.Data.DataRow row)
+        public static ActivityFile LoadObject(System.Data.DataRow row)
         {
             ActivityFile obj = new ActivityFile();
             obj.LoadObjectValues(ObjectMap, row);

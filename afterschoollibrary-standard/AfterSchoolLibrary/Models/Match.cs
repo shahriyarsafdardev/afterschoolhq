@@ -53,7 +53,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static Match LoadObject(System.Data.DataRow row)
+        public static Match LoadObject(System.Data.DataRow row)
         {
             Match obj = new Match();
             obj.LoadObjectValues(ObjectMap, row);

@@ -66,7 +66,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static ActivityInstance LoadObject(System.Data.DataRow row)
+        public static ActivityInstance LoadObject(System.Data.DataRow row)
         {
             ActivityInstance obj = new ActivityInstance();
             obj.LoadObjectValues(ObjectMap, row);

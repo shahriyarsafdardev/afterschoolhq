@@ -57,7 +57,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static ContactListRegistrant LoadObject(System.Data.DataRow row)
+        public static ContactListRegistrant LoadObject(System.Data.DataRow row)
         {
             ContactListRegistrant obj = new ContactListRegistrant();
             obj.LoadObjectValues(ObjectMap, row);

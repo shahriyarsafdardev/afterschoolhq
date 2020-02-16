@@ -52,7 +52,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static RegistrantWebUser LoadObject(System.Data.DataRow row)
+        public static RegistrantWebUser LoadObject(System.Data.DataRow row)
         {
             RegistrantWebUser obj = new RegistrantWebUser();
             obj.LoadObjectValues(ObjectMap, row);

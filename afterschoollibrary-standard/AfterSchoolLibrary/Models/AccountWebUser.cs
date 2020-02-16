@@ -91,7 +91,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static AccountWebUser LoadObject(System.Data.DataRow row)
+        public static AccountWebUser LoadObject(System.Data.DataRow row)
         {
             AccountWebUser obj = new AccountWebUser();
             obj.LoadObjectValues(ObjectMap, row);

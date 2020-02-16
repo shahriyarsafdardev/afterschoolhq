@@ -80,7 +80,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static AccountActivityGroup LoadObject(System.Data.DataRow row)
+        public static AccountActivityGroup LoadObject(System.Data.DataRow row)
         {
             AccountActivityGroup obj = new AccountActivityGroup();
             obj.LoadObjectValues(ObjectMap, row);

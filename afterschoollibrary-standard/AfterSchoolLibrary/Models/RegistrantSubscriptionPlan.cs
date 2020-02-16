@@ -86,7 +86,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static RegistrantSubscriptionPlan LoadObject(System.Data.DataRow row)
+        public static RegistrantSubscriptionPlan LoadObject(System.Data.DataRow row)
         {
             RegistrantSubscriptionPlan obj = new RegistrantSubscriptionPlan();
             obj.LoadObjectValues(ObjectMap, row);

@@ -78,7 +78,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static RegistrantActivityGroup LoadObject(System.Data.DataRow row)
+        public static RegistrantActivityGroup LoadObject(System.Data.DataRow row)
         {
             RegistrantActivityGroup obj = new RegistrantActivityGroup();
             obj.LoadObjectValues(ObjectMap, row);

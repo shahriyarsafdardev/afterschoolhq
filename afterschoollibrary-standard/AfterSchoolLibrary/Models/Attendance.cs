@@ -59,7 +59,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static Attendance LoadObject(System.Data.DataRow row)
+        public static Attendance LoadObject(System.Data.DataRow row)
         {
             Attendance obj = new Attendance();
             obj.LoadObjectValues(ObjectMap, row);

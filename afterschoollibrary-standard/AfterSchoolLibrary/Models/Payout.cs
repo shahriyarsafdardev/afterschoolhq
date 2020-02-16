@@ -79,7 +79,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static Payout LoadObject(System.Data.DataRow row)
+        public static Payout LoadObject(System.Data.DataRow row)
         {
             Payout obj = new Payout();
             obj.LoadObjectValues(ObjectMap, row);

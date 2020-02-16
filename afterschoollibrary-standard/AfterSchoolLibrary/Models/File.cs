@@ -48,7 +48,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static File LoadObject(System.Data.DataRow row)
+        public static File LoadObject(System.Data.DataRow row)
         {
             File obj = new File();
             obj.LoadObjectValues(ObjectMap, row);

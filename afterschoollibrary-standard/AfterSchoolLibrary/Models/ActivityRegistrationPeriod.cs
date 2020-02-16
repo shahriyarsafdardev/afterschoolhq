@@ -64,7 +64,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static ActivityRegistrationPeriod LoadObject(System.Data.DataRow row)
+        public static ActivityRegistrationPeriod LoadObject(System.Data.DataRow row)
         {
             ActivityRegistrationPeriod obj = new ActivityRegistrationPeriod();
             obj.LoadObjectValues(ObjectMap, row);

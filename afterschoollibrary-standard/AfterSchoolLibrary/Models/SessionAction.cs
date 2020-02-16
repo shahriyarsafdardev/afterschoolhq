@@ -95,7 +95,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static SessionAction LoadObject(System.Data.DataRow row)
+        public static SessionAction LoadObject(System.Data.DataRow row)
         {
             SessionAction obj = new SessionAction();
             obj.LoadObjectValues(ObjectMap, row);

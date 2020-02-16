@@ -54,7 +54,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static ObjectTag LoadObject(System.Data.DataRow row)
+        public static ObjectTag LoadObject(System.Data.DataRow row)
         {
             ObjectTag obj = new ObjectTag();
             obj.LoadObjectValues(ObjectMap, row);

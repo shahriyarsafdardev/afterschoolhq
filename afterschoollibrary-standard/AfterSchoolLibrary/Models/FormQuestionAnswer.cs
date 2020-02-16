@@ -80,7 +80,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static FormQuestionAnswer LoadObject(System.Data.DataRow row)
+        public static FormQuestionAnswer LoadObject(System.Data.DataRow row)
         {
             FormQuestionAnswer obj = new FormQuestionAnswer();
             obj.LoadObjectValues(ObjectMap, row);

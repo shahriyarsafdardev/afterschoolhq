@@ -106,7 +106,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static Transaction LoadObject(System.Data.DataRow row)
+        public static Transaction LoadObject(System.Data.DataRow row)
         {
             Transaction obj = new Transaction();
             obj.LoadObjectValues(ObjectMap, row);

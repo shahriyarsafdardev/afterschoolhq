@@ -78,7 +78,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static AccountPackage LoadObject(System.Data.DataRow row)
+        public static AccountPackage LoadObject(System.Data.DataRow row)
         {
             AccountPackage obj = new AccountPackage();
             obj.LoadObjectValues(ObjectMap, row);
