@@ -48,7 +48,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static Tag LoadObject(System.Data.DataRow row)
+        public static Tag LoadObject(System.Data.DataRow row)
         {
             Tag obj = new Tag();
             obj.LoadObjectValues(ObjectMap, row);

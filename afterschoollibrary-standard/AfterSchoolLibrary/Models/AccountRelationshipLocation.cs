@@ -60,7 +60,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static AccountRelationshipLocation LoadObject(System.Data.DataRow row)
+        public static AccountRelationshipLocation LoadObject(System.Data.DataRow row)
         {
             AccountRelationshipLocation obj = new AccountRelationshipLocation();
             obj.LoadObjectValues(ObjectMap, row);

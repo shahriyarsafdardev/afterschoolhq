@@ -52,7 +52,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static Location LoadObject(System.Data.DataRow row)
+        public static Location LoadObject(System.Data.DataRow row)
         {
             Location obj = new Location();
             obj.LoadObjectValues(ObjectMap, row);

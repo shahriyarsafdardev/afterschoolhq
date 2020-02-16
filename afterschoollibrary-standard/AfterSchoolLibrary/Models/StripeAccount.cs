@@ -115,7 +115,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static StripeAccount LoadObject(System.Data.DataRow row)
+        public static StripeAccount LoadObject(System.Data.DataRow row)
         {
             StripeAccount obj = new StripeAccount();
             obj.LoadObjectValues(ObjectMap, row);

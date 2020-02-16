@@ -57,7 +57,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static CheckPaymentAccount LoadObject(System.Data.DataRow row)
+        public static CheckPaymentAccount LoadObject(System.Data.DataRow row)
         {
             CheckPaymentAccount obj = new CheckPaymentAccount();
             obj.LoadObjectValues(ObjectMap, row);

@@ -53,7 +53,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static ActivityGradeLevel LoadObject(System.Data.DataRow row)
+        public static ActivityGradeLevel LoadObject(System.Data.DataRow row)
         {
             ActivityGradeLevel obj = new ActivityGradeLevel();
             obj.LoadObjectValues(ObjectMap, row);

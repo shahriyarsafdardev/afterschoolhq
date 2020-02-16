@@ -50,7 +50,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static AccountProperty LoadObject(System.Data.DataRow row)
+        public static AccountProperty LoadObject(System.Data.DataRow row)
         {
             AccountProperty obj = new AccountProperty();
             obj.LoadObjectValues(ObjectMap, row);

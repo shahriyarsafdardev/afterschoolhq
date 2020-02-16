@@ -53,7 +53,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static ActivityDay LoadObject(System.Data.DataRow row)
+        public static ActivityDay LoadObject(System.Data.DataRow row)
         {
             ActivityDay obj = new ActivityDay();
             obj.LoadObjectValues(ObjectMap, row);

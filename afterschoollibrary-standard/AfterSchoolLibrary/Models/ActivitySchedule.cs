@@ -76,7 +76,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static ActivitySchedule LoadObject(System.Data.DataRow row)
+        public static ActivitySchedule LoadObject(System.Data.DataRow row)
         {
             ActivitySchedule obj = new ActivitySchedule();
             obj.LoadObjectValues(ObjectMap, row);

@@ -44,7 +44,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static Migration LoadObject(System.Data.DataRow row)
+        public static Migration LoadObject(System.Data.DataRow row)
         {
             Migration obj = new Migration();
             obj.LoadObjectValues(ObjectMap, row);

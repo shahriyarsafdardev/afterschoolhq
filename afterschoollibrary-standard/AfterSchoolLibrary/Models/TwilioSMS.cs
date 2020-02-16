@@ -57,7 +57,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static TwilioSMS LoadObject(System.Data.DataRow row)
+        public static TwilioSMS LoadObject(System.Data.DataRow row)
         {
             TwilioSMS obj = new TwilioSMS();
             obj.LoadObjectValues(ObjectMap, row);

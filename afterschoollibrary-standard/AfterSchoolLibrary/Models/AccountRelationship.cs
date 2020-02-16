@@ -57,7 +57,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static AccountRelationship LoadObject(System.Data.DataRow row)
+        public static AccountRelationship LoadObject(System.Data.DataRow row)
         {
             AccountRelationship obj = new AccountRelationship();
             obj.LoadObjectValues(ObjectMap, row);

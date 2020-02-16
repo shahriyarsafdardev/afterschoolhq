@@ -101,7 +101,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static Account LoadObject(System.Data.DataRow row)
+        public static Account LoadObject(System.Data.DataRow row)
         {
             Account obj = new Account();
             obj.LoadObjectValues(ObjectMap, row);

@@ -52,7 +52,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static AttachedCoupon LoadObject(System.Data.DataRow row)
+        public static AttachedCoupon LoadObject(System.Data.DataRow row)
         {
             AttachedCoupon obj = new AttachedCoupon();
             obj.LoadObjectValues(ObjectMap, row);

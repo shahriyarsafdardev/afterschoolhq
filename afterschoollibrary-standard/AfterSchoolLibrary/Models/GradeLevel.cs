@@ -41,7 +41,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static GradeLevel LoadObject(System.Data.DataRow row)
+        public static GradeLevel LoadObject(System.Data.DataRow row)
         {
             GradeLevel obj = new GradeLevel();
             obj.LoadObjectValues(ObjectMap, row);

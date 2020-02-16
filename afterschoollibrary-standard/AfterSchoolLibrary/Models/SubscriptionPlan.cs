@@ -81,7 +81,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static SubscriptionPlan LoadObject(System.Data.DataRow row)
+        public static SubscriptionPlan LoadObject(System.Data.DataRow row)
         {
             SubscriptionPlan obj = new SubscriptionPlan();
             obj.LoadObjectValues(ObjectMap, row);

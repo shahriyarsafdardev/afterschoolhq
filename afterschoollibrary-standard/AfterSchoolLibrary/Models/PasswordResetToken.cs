@@ -55,7 +55,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static PasswordResetToken LoadObject(System.Data.DataRow row)
+        public static PasswordResetToken LoadObject(System.Data.DataRow row)
         {
             PasswordResetToken obj = new PasswordResetToken();
             obj.LoadObjectValues(ObjectMap, row);

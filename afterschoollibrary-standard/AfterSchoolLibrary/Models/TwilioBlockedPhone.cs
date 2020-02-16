@@ -45,7 +45,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static TwilioBlockedPhone LoadObject(System.Data.DataRow row)
+        public static TwilioBlockedPhone LoadObject(System.Data.DataRow row)
         {
             TwilioBlockedPhone obj = new TwilioBlockedPhone();
             obj.LoadObjectValues(ObjectMap, row);
