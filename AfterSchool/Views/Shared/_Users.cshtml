@@ -65,7 +65,9 @@
                         @if (isAfterSchoolAdmin)
                         {
                             <td>
-                                <a href="@Url.Action("edit", "user", new { id = user.Uid, returnUrl = returnUrl })" class="btn btn-default btn-xs"><i class="icon icon-left s7-edit"></i> Edit</a>
+                                <a href="@Url.Action("impersonate", "user", new { id = accountId, uid = @user.Uid })" class="btn btn-default btn-xs">
+                                    <i class="icon icon-left s7-user"></i> View
+                                </a>
                             </td>
                         }
                         <td>@user.DisplayName</td>
@@ -81,9 +83,9 @@
                             <div class="btn-group">
                                 @if (isAfterSchoolAdmin)
                                 {
-                                    <a href="@Url.Action("impersonate", "user", new { id = accountId, uid = @user.Uid })" class="btn btn-default btn-sm">
-                                        <i class="icon icon-left s7-user"></i> Impersonate
-                                    </a>
+                                    <a href="@Url.Action("edit", "user", new { id = user.Uid, returnUrl = returnUrl })" class="btn btn-default btn-xs">
+                                        <i class="icon icon-left s7-edit"></i> Edit
+                                    </a>                                    
                                 }
                                 else if (!user.IsRegistered)
                                 {
