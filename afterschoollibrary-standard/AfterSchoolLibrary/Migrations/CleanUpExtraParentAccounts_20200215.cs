@@ -32,7 +32,7 @@ namespace AfterSchoolLibrary.Migrations
                         {
                             var firstMasterRegistrant = user.GetAllRegistrants(amsgs, adc).FirstOrDefault(registrant => registrant.IsMaster && registrant.IsParentOrGuardian);
 
-                            if (firstMasterRegistrant.IsNotEmpty() && firstMasterRegistrant.IsParentOrGuardian)
+                            if (firstMasterRegistrant.IsNotEmpty())
                             {
                                 var firstAccount = awus.First().GetAccount(amsgs, adc);
 
