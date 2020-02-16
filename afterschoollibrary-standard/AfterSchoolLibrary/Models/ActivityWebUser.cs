@@ -66,7 +66,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static ActivityWebUser LoadObject(System.Data.DataRow row)
+        public static ActivityWebUser LoadObject(System.Data.DataRow row)
         {
             ActivityWebUser obj = new ActivityWebUser();
             obj.LoadObjectValues(ObjectMap, row);

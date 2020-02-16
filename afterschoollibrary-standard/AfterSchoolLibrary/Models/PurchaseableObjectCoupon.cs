@@ -55,7 +55,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static PurchaseableObjectCoupon LoadObject(System.Data.DataRow row)
+        public static PurchaseableObjectCoupon LoadObject(System.Data.DataRow row)
         {
             PurchaseableObjectCoupon obj = new PurchaseableObjectCoupon();
             obj.LoadObjectValues(ObjectMap, row);

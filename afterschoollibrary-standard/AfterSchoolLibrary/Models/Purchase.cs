@@ -57,7 +57,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static Purchase LoadObject(System.Data.DataRow row)
+        public static Purchase LoadObject(System.Data.DataRow row)
         {
             Purchase obj = new Purchase();
             obj.LoadObjectValues(ObjectMap, row);

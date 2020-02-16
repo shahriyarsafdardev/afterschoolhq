@@ -44,7 +44,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static Cart LoadObject(System.Data.DataRow row)
+        public static Cart LoadObject(System.Data.DataRow row)
         {
             Cart obj = new Cart();
             obj.LoadObjectValues(ObjectMap, row);

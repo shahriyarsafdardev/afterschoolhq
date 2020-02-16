@@ -55,7 +55,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static Form LoadObject(System.Data.DataRow row)
+        public static Form LoadObject(System.Data.DataRow row)
         {
             Form obj = new Form();
             obj.LoadObjectValues(ObjectMap, row);

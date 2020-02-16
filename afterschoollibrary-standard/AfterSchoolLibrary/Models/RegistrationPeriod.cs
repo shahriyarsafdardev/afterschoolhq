@@ -54,7 +54,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static RegistrationPeriod LoadObject(System.Data.DataRow row)
+        public static RegistrationPeriod LoadObject(System.Data.DataRow row)
         {
             RegistrationPeriod obj = new RegistrationPeriod();
             obj.LoadObjectValues(ObjectMap, row);

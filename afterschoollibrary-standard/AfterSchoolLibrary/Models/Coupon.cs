@@ -77,7 +77,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static Coupon LoadObject(System.Data.DataRow row)
+        public static Coupon LoadObject(System.Data.DataRow row)
         {
             Coupon obj = new Coupon();
             obj.LoadObjectValues(ObjectMap, row);

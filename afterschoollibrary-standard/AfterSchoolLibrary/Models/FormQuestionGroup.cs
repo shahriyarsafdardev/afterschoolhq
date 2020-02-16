@@ -52,7 +52,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static FormQuestionGroup LoadObject(System.Data.DataRow row)
+        public static FormQuestionGroup LoadObject(System.Data.DataRow row)
         {
             FormQuestionGroup obj = new FormQuestionGroup();
             obj.LoadObjectValues(ObjectMap, row);

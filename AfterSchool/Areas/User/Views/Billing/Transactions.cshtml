@@ -71,6 +71,7 @@
                             <th>ID</th>
                             <th>Created On</th>
                             <th>For</th>
+                            <th>Paid to</th>
                             <th>Item Description</th>
                             <th class="text-center">Total Amt Paid</th>
                             <th class="text-center">Payment Method</th>
@@ -84,6 +85,7 @@
                                 var purchase = transaction.GetPurchase();
                                 var registrant = Registrant.Load(purchase.RegistrantId.Value);
                                 var participationObjects = transaction.GetParticipationObjects();
+                                var billerAccount = transaction.GetBillerAccount();
 
                                 <tr id="@transaction.Uid" data-refunded-amount="@transaction.GetRefundedAmount().ToCurrency()">
                                     <td>
@@ -99,8 +101,11 @@
                                         }
                                         else
                                         {
-                                            @transaction.GetBillerAccount().Name
+                                            @billerAccount.Name
                                         }
+                                    </td>
+                                    <td>
+                                        @billerAccount.Name
                                     </td>
                                     <td>
                                         @participationObjects.DistinctBy(po => new { po.ObjectID, po.ObjectType }).Select(po => po.Name).ToStringList(", ")

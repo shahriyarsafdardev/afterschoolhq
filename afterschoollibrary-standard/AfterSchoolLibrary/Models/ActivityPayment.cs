@@ -71,7 +71,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static ActivityPayment LoadObject(System.Data.DataRow row)
+        public static ActivityPayment LoadObject(System.Data.DataRow row)
         {
             ActivityPayment obj = new ActivityPayment();
             obj.LoadObjectValues(ObjectMap, row);

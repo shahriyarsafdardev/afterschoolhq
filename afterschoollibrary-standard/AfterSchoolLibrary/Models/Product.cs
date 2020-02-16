@@ -55,7 +55,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static Product LoadObject(System.Data.DataRow row)
+        public static Product LoadObject(System.Data.DataRow row)
         {
             Product obj = new Product();
             obj.LoadObjectValues(ObjectMap, row);

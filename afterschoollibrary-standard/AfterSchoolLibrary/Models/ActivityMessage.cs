@@ -66,7 +66,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static ActivityMessage LoadObject(System.Data.DataRow row)
+        public static ActivityMessage LoadObject(System.Data.DataRow row)
         {
             ActivityMessage obj = new ActivityMessage();
             obj.LoadObjectValues(ObjectMap, row);

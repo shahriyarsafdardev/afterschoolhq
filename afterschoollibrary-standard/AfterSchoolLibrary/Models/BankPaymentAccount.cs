@@ -82,7 +82,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static BankPaymentAccount LoadObject(System.Data.DataRow row)
+        public static BankPaymentAccount LoadObject(System.Data.DataRow row)
         {
             BankPaymentAccount obj = new BankPaymentAccount();
             obj.LoadObjectValues(ObjectMap, row);

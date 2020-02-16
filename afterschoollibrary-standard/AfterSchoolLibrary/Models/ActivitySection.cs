@@ -44,7 +44,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static ActivitySection LoadObject(System.Data.DataRow row)
+        public static ActivitySection LoadObject(System.Data.DataRow row)
         {
             ActivitySection obj = new ActivitySection();
             obj.LoadObjectValues(ObjectMap, row);

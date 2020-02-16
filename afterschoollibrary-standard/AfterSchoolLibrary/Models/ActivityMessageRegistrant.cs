@@ -65,7 +65,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static ActivityMessageRegistrant LoadObject(System.Data.DataRow row)
+        public static ActivityMessageRegistrant LoadObject(System.Data.DataRow row)
         {
             ActivityMessageRegistrant obj = new ActivityMessageRegistrant();
             obj.LoadObjectValues(ObjectMap, row);

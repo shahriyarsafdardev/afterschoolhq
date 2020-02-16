@@ -63,7 +63,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static ActivityForm LoadObject(System.Data.DataRow row)
+        public static ActivityForm LoadObject(System.Data.DataRow row)
         {
             ActivityForm obj = new ActivityForm();
             obj.LoadObjectValues(ObjectMap, row);

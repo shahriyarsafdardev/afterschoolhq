@@ -49,7 +49,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        protected static AccountPackageFeature LoadObject(System.Data.DataRow row)
+        public static AccountPackageFeature LoadObject(System.Data.DataRow row)
         {
             AccountPackageFeature obj = new AccountPackageFeature();
             obj.LoadObjectValues(ObjectMap, row);
