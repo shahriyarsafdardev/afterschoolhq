@@ -1373,6 +1373,8 @@ property: PaymentTypeFeesPaidBy, FeesPaidByType, Int
 property: ConvenienceFeesPaidBy, FeesPaidByType, Int
 property: PaymentTypeId, PaymentType, Int, required
 property: BillingPeriodTypeId, BillingPeriodType, Int
+property: DateCancelled, DateTime?, DateTime
+property: ValidUntil, DateTime?, DateTime
 loadmethod: PurchaseId, List<>
 loadmethod: RegistrantId, List<>
 loadmethod: SubscriptionPlanId, List<>

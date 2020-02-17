@@ -26,12 +26,7 @@
 
                         @if (Model.RegistrantActivity.AssignmentTypeId != RegistrationAssignmentType.Declined)
                         {
-                            <a class="padding-10 md-trigger"
-                                data-modal="modal-withdraw"
-                                style="display:block"
-                                href="javascript:withdraw('@Model.SubmittedRecord.Uid', '@Model.ParticipationObject.ObjectID', '@((int)Model.ParticipationObject.ObjectType)', '@UI.JavascriptSafeString(Model.SubmittedRecord.FirstName)', '@UI.JavascriptSafeString(Model.ParticipationObject.Name)')">
-                                Withdraw Registration &raquo;
-                            </a>
+                            Html.RenderPartial("Activities/_WithdrawLink", Model);
                         }
 
                         @if (!Model.ParticipationObject.IsFree)

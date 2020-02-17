@@ -47,6 +47,8 @@ namespace AfterSchoolLibrary.Models
 		/// </summary>
 		public PaymentType PaymentTypeId { get { return (PaymentType)MDV["PaymentTypeId"].Value; } set { MDV["PaymentTypeId"].Value = value; } }
 		public BillingPeriodType BillingPeriodTypeId { get { return (BillingPeriodType)MDV["BillingPeriodTypeId"].Value; } set { MDV["BillingPeriodTypeId"].Value = value; } }
+		public DateTime? DateCancelled { get { return (DateTime?)MDV["DateCancelled"].Value; } set { MDV["DateCancelled"].Value = value; } }
+		public DateTime? ValidUntil { get { return (DateTime?)MDV["ValidUntil"].Value; } set { MDV["ValidUntil"].Value = value; } }
 		
 
         public RegistrantSubscriptionPlan()
@@ -81,6 +83,8 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "ConvenienceFeesPaidBy", System.Data.SqlDbType.Int);
 				_dp.Add(className, "PaymentTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "BillingPeriodTypeId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "DateCancelled", System.Data.SqlDbType.DateTime);
+				_dp.Add(className, "ValidUntil", System.Data.SqlDbType.DateTime);
 				
                 return _dp;
             }
@@ -218,6 +222,14 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["BillingPeriodTypeId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["DateCancelled"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ValidUntil"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

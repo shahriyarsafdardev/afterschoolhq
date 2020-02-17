@@ -83,5 +83,54 @@ namespace AfterSchoolLibrary.Services
 
             return payment;
         }
+
+        public static DateTime? GetLastPaymentDate(this RegistrantSubscriptionPlan rsp)
+        {
+            switch(rsp.BillingPeriodTypeId)
+            {
+                case BillingPeriodType.Day:
+                    return rsp.StartDate.Value.AddDays(rsp.TotalPeriods.Value);
+                case BillingPeriodType.Month:
+                    return rsp.StartDate.Value.AddMonths(rsp.TotalPeriods.Value);
+                case BillingPeriodType.Week:
+                    return rsp.StartDate.Value.AddWeeks(rsp.TotalPeriods.Value);
+                case BillingPeriodType.Year:
+                    return rsp.StartDate.Value.AddYears(rsp.TotalPeriods.Value);
+            }
+
+            return new DateTime?();
+        }
+
+        public static DateTime? GetValidUntilDate(this RegistrantSubscriptionPlan rsp, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var lastPayment = rsp.GetPayments(msgs, dc).LastOrDefault();
+            var validUntil = DateTime.UtcNow;
+
+            if (lastPayment.IsNotEmpty())
+            {
+                switch(rsp.BillingPeriodTypeId)
+                {
+                    case BillingPeriodType.Day:
+                        return lastPayment.CreateDate.Value.AddDays(1).AddMilliseconds(-1).Date;
+                    case BillingPeriodType.Month:
+                        return lastPayment.CreateDate.Value.AddMonths(1).AddMilliseconds(-1).Date;
+                    case BillingPeriodType.Week:
+                        return lastPayment.CreateDate.Value.AddWeeks(1).AddMilliseconds(-1).Date;
+                    case BillingPeriodType.Year:
+                        return lastPayment.CreateDate.Value.AddYears(1).AddMilliseconds(-1).Date;
+                }
+            }
+
+            return null;
+        }
+
+        public static void MarkAsCancelled(this RegistrantSubscriptionPlan rsp, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {            
+            rsp.DateCancelled = DateTime.UtcNow;
+            rsp.ValidUntil = rsp.GetValidUntilDate(msgs, dc) ?? DateTime.UtcNow;
+            rsp.LastModifiedDate = DateTime.UtcNow;
+            rsp.LastModifiedBy = loggedInUser.ID;
+            msgs.AddRange(rsp.Save(dc));
+        }
     }
 }
