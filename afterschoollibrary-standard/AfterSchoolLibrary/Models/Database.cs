@@ -42,6 +42,7 @@ namespace AfterSchoolLibrary.Models
 			ActivityMessage.Create(dc);
 			ActivityMessageRegistrant.Create(dc);
 			Account.Create(dc);
+			AccountProfile.Create(dc);
 			CheckPaymentAccount.Create(dc);
 			BankPaymentAccount.Create(dc);
 			StripeAccount.Create(dc);
@@ -119,6 +120,7 @@ namespace AfterSchoolLibrary.Models
 			ActivityMessage.Alter(dc);
 			ActivityMessageRegistrant.Alter(dc);
 			Account.Alter(dc);
+			AccountProfile.Alter(dc);
 			CheckPaymentAccount.Alter(dc);
 			BankPaymentAccount.Alter(dc);
 			StripeAccount.Alter(dc);
@@ -387,6 +389,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Account_StripeUserId ON [Account] (StripeUserId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Account_StripeCustomerId ON [Account] (StripeCustomerId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Account_InviteCodeToShare ON [Account] (InviteCodeToShare)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountProfile_AccountId ON [AccountProfile] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_CheckPaymentAccount_AccountId ON [CheckPaymentAccount] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_BankPaymentAccount_AccountId ON [BankPaymentAccount] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_StripeAccount_AccountId ON [StripeAccount] (AccountId)"));

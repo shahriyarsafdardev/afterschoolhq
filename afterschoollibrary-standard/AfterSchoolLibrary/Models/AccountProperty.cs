@@ -172,13 +172,13 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static AccountProperty LoadByAccountIdByAccountPropertyTypeId(int AccountId, AccountPropertyType AccountPropertyTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<AccountProperty> LoadByAccountIdByAccountPropertyTypeId(int AccountId, AccountPropertyType AccountPropertyTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
 			dq.Criterias.Add(ObjectMap["AccountPropertyTypeId"], AccountPropertyTypeId);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
 		public static AccountProperty LoadByActivityGroupIdByAccountPropertyTypeId(int ActivityGroupId, AccountPropertyType AccountPropertyTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)

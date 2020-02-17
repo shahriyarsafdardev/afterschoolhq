@@ -361,6 +361,19 @@ loadmethod: InviteCodeToShare
 
 [begin]
 type: Class
+name: AccountProfile
+description: holds all the profile and style information for the account
+inherits: BasicObjectWithModified
+property: AccountId, int?, Int
+property: Logo, string, NVarChar "400"
+property: HeaderImage, string, NVarChar "400"
+property: Headline, string, NVarChar "400"
+property: About, string, NVarChar "4000"
+loadmethod: AccountId
+[end]
+
+[begin]
+type: Class
 name: CheckPaymentAccount
 description: Where legal details and other info is stored for the account holder, specifically for sending checks
 inherits: BaseLocation
@@ -481,7 +494,7 @@ property: Value, string, NVarChar "4000"
 loadmethod: AccountId, List<>
 loadmethod: ActivityGroupId, List<>
 loadmethod: ActivityId, List<>
-loadmethod: AccountId|AccountPropertyTypeId
+loadmethod: AccountId|AccountPropertyTypeId, List<>
 loadmethod: ActivityGroupId|AccountPropertyTypeId
 loadmethod: ActivityId|AccountPropertyTypeId
 [end]
@@ -1697,7 +1710,7 @@ values: None, MaleOnly, FemaleOnly
 [begin]
 type: Enum
 name: AccountPropertyType
-values: NotSet, LandingPageText, RegistrationThankYouEmail, ApplicationThankYouEmail, NoActivitiesText, FacebookAdPixel
+values: NotSet, LandingPageText, RegistrationThankYouEmail, ApplicationThankYouEmail, NoActivitiesText, FacebookAdPixel, Award, Certification
 [end]
 
 [begin]

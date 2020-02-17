@@ -942,9 +942,9 @@ namespace AfterSchoolLibrary.Services
             return account.ConvertToAccountTimeZone(DateTime.UtcNow);
         }
 
-        public static AccountProperty GetAccountProperty(this Account account, AccountPropertyType propertyType, DatabaseConnection dc = null)
+        public static List<AccountProperty> GetAccountProperties(this Account account, AccountPropertyType propertyType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountProperty.LoadByAccountIdByAccountPropertyTypeId(account.ID.Value, propertyType, dc: dc);
+            return AccountProperty.LoadByAccountIdByAccountPropertyTypeId(account.ID.Value, propertyType, msgs, dc);
         }
 
         #endregion
@@ -3049,6 +3049,25 @@ namespace AfterSchoolLibrary.Services
         public static (decimal totalProcessed, decimal totalProfit) GetTotalProcessedAndProfit(this Account account, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return Account.GetTotalProcessedAndProfit(account.ID.Value, startDateTime, endDateTime, msgs, dc);
+        }
+
+        #endregion
+
+        #region "Profile"
+
+        public static AccountProfile GetOrCreateAccountProfile(this Account account, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var profile = account.GetAccountProfile(msgs, dc);
+
+            if (profile.IsEmpty())
+                profile = AccountProfileService.CreateNewAccountProfile(account, loggedInUser, msgs, dc);
+
+            return profile;
+        }
+
+        public static AccountProfile GetAccountProfile(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return AccountProfile.LoadByAccountId(account.ID.Value, msgs, dc);
         }
 
         #endregion

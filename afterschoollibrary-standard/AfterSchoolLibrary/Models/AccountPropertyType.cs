@@ -5,5 +5,7 @@ public enum AccountPropertyType
 	RegistrationThankYouEmail,
 	ApplicationThankYouEmail,
 	NoActivitiesText,
-	FacebookAdPixel
+	FacebookAdPixel,
+	Award,
+	Certification
 }

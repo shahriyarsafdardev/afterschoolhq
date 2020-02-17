@@ -882,94 +882,101 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(form);
         }
 
+        private AccountProfile StyleViewBag(SystemMessages msgs)
+        {
+            var profile = SessionVariables.CurrentAccount.GetOrCreateAccountProfile(SessionVariables.LoggedInUser, msgs);
+            ViewBag.Messages = msgs;
 
-        //[HttpGet]
-        //public ActionResult Style()
-        //{
-        //    ViewBag.AccountPackage = SessionVariables.AccountPackage;
-        //    ViewBag.Messages = new SystemMessages();
-        //    ViewBag.LandingPage = SessionVariables.CurrentAccount.GetAccountProperty(AccountPropertyType.LandingPageText);
-        //    ViewBag.RegThankYou = SessionVariables.CurrentAccount.GetAccountProperty(AccountPropertyType.RegistrationThankYouEmail);
-        //    return View(SessionVariables.CurrentAccount);
-        //}
+            var awards = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.Award);
+            var certifications = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.Certification);
 
-        //[ValidateInput(false)]
-        //[HttpPost]
-        //public ActionResult Style(string id, string logourl, string landingpagetext, string regthankyoutext)
-        //{
-        //    var msgs = new SystemMessages();
-        //    var a = SessionVariables.CurrentAccount;
+            while (awards.Count < 5)
+                awards.Add(new AccountProperty());
 
-        //    a.LogoUrl = logourl;
+            while (certifications.Count < 5)
+                certifications.Add(new AccountProperty());
 
-        //    var landingPage = a.GetAccountProperty(AccountPropertyType.LandingPageText);
-        //    var thankyou = a.GetAccountProperty(AccountPropertyType.RegistrationThankYouEmail);
+            var ah = AfterSchoolLibrary.Helpers.Utilities.GetNewAmazonHelper();
 
-        //    if (landingPage.IsEmpty())
-        //    {
-        //        landingPage = new AccountProperty() { Value = landingpagetext };
-        //        landingPage.AccountPropertyTypeId = AccountPropertyType.LandingPageText;
-        //        landingPage.CreateDate = DateTime.UtcNow;
-        //        landingPage.CreatedBy = SessionVariables.LoggedInUser.ID;
-        //        landingPage.AccountId = a.ID;
-        //    }
-        //    else
-        //    {
-        //        landingPage.Value = landingpagetext;
-        //    }
+            if (profile.Logo.IsNotBlank())
+                ViewBag.LogoUrl = ah.GetFileLink(profile.Logo, true, null, true);
 
-        //    if (thankyou.IsEmpty())
-        //    {
-        //        thankyou = new AccountProperty() { Value = regthankyoutext };
-        //        thankyou.AccountPropertyTypeId = AccountPropertyType.RegistrationThankYouEmail;
-        //        thankyou.CreateDate = DateTime.UtcNow;
-        //        thankyou.CreatedBy = SessionVariables.LoggedInUser.ID;
-        //        thankyou.AccountId = a.ID;
-        //    }
-        //    else
-        //    {
-        //        thankyou.Value = regthankyoutext;
-        //    }
+            if (profile.HeaderImage.IsNotBlank())
+                ViewBag.HeaderImageUrl = ah.GetFileLink(profile.HeaderImage, true, null, true);
 
-        //    if (msgs.HasNoErrors())
-        //    {
-        //        Database.ExecuteTransaction(
-        //            action: (SystemMessages amsgs, DatabaseConnection adc) => {
-        //                a.LastModifiedDate = DateTime.UtcNow;
-        //                a.LastModifiedBy = SessionVariables.LoggedInUser.ID;
-        //                amsgs.AddRange(a.Save(adc));
+            ViewBag.Awards = awards;
+            ViewBag.Certifications = certifications;
 
-        //                if (amsgs.HasNoErrors())
-        //                {
-        //                    landingPage.LastModifiedDate = DateTime.UtcNow;
-        //                    landingPage.LastModifiedBy = SessionVariables.LoggedInUser.ID;
-        //                    amsgs.AddRange(landingPage.Save(adc));
-        //                }
+            return profile;
+        }
 
-        //                if (amsgs.HasNoErrors())
-        //                {
-        //                    thankyou.LastModifiedDate = DateTime.UtcNow;
-        //                    thankyou.LastModifiedBy = SessionVariables.LoggedInUser.ID;
-        //                    amsgs.AddRange(thankyou.Save(adc));
-        //                }
-        //            },
-        //            onSuccess: (SystemMessages smsgs) => {
-        //                msgs.AddRange(smsgs);
-        //                msgs.Add("Saved Successfully", MessageType.Success);
-        //            },
-        //            onFailure: (SystemMessages fmsgs) => {
-        //                msgs.AddRange(fmsgs);
-        //            }
-        //        );
+        [HttpGet]
+        public ActionResult Style()
+        {
+            var msgs = new SystemMessages();
+            return View(StyleViewBag(msgs));
+        }
 
-        //    }
+        [ValidateInput(false)]
+        [HttpPost]
+        public ActionResult Style(string id, string logo, string headerimage, string about, string headline)
+        {
+            var msgs = new SystemMessages();
+            var profile = SessionVariables.CurrentAccount.GetAccountProfile(msgs);
+            var allowedFiles = new string[] { ".png", ".jpg", ".jpeg" };
+            var maxSizeInBytes = 1024 * 1024 * 2;
 
-        //    ViewBag.Messages = msgs;
-        //    ViewBag.AccountPackage = SessionVariables.AccountPackage;
-        //    ViewBag.LandingPage = landingPage;
-        //    ViewBag.RegThankYou = thankyou;
-        //    return View(a);
-        //}
+            if (logo.IsNotEmpty())
+            {
+                if (Request.Files["logo"].ContentLength == 0 || 
+                    !Request.Files["logo"].FileName.Contains(allowedFiles) ||
+                    Request.Files["logo"].ContentLength > maxSizeInBytes)
+                    msgs.Add("Please upload a valid jpg or png file", MessageType.UserError);
+            }
+
+            if (headerimage.IsNotEmpty())
+            {
+                if (Request.Files["headerimage"].ContentLength == 0 || 
+                    !Request.Files["headerimage"].FileName.Contains(allowedFiles) ||
+                    Request.Files["headerimage"].ContentLength > maxSizeInBytes)
+                    msgs.Add("Please upload a valid jpg or png file", MessageType.UserError);
+            }
+
+            if (msgs.HasNoErrors())
+            {
+                if (logo.IsNotEmpty())
+                {
+                    profile.UploadLogo(
+                        SessionVariables.CurrentAccount,
+                        Request.Files["logo"].InputStream,
+                        Request.Files["logo"].FileName,
+                        SessionVariables.LoggedInUser,
+                        msgs);
+                }
+
+                if (headerimage.IsNotEmpty())
+                {
+                    profile.UploadHeaderImage(
+                        SessionVariables.CurrentAccount,
+                        Request.Files["headerimage"].InputStream,
+                        Request.Files["headerimage"].FileName,
+                        SessionVariables.LoggedInUser,
+                        msgs);
+                }
+
+                profile.UpdateProfile(
+                    headline,
+                    about,
+                    Request.Params.Filter("award-id-"),
+                    Request.Params.Filter("award-new-"),
+                    Request.Params.Filter("certification-id-"),
+                    Request.Params.Filter("certification-new-"),
+                    SessionVariables.LoggedInUser,
+                    msgs);
+            }
+
+            return View(StyleViewBag(msgs));
+        }
 
         //[HttpGet]
         //public ActionResult Integrations()
