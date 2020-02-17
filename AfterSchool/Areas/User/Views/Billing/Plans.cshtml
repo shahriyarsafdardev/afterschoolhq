@@ -61,7 +61,7 @@
                                     billingPeriodTypeId = originalPlan.BillingPeriodTypeId;
                                 }
 
-                                if (payments.Any() && payments.Last().CreateDate.Value.AddMonths(1).IsOnOrAfter(DateTime.UtcNow))
+                                if (payments.Any() && payments.Last().CreateDate.Value.AddMonths(1).IsOnOrAfter(DateTime.UtcNow) && !plan.DateCancelled.HasValue)
                                 {
                                     nextPaymentDate = payments.Last().CreateDate.Value.AddMonths(1).ToShortDateString();
                                 }
@@ -87,7 +87,7 @@
                                 }
                                 else
                                 {
-                                    endDate = plan.DateEnded.ToShortDateString("-");
+                                    endDate = plan.DateCancelled.ToShortDateString("-");
                                 }
 
                                 <tr>
