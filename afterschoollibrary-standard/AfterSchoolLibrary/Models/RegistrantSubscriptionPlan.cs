@@ -47,6 +47,8 @@ namespace AfterSchoolLibrary.Models
 		/// </summary>
 		public PaymentType PaymentTypeId { get { return (PaymentType)MDV["PaymentTypeId"].Value; } set { MDV["PaymentTypeId"].Value = value; } }
 		public BillingPeriodType BillingPeriodTypeId { get { return (BillingPeriodType)MDV["BillingPeriodTypeId"].Value; } set { MDV["BillingPeriodTypeId"].Value = value; } }
+		public DateTime? DateCancelled { get { return (DateTime?)MDV["DateCancelled"].Value; } set { MDV["DateCancelled"].Value = value; } }
+		public DateTime? ValidUntil { get { return (DateTime?)MDV["ValidUntil"].Value; } set { MDV["ValidUntil"].Value = value; } }
 		
 
         public RegistrantSubscriptionPlan()
@@ -81,6 +83,8 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "ConvenienceFeesPaidBy", System.Data.SqlDbType.Int);
 				_dp.Add(className, "PaymentTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "BillingPeriodTypeId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "DateCancelled", System.Data.SqlDbType.DateTime);
+				_dp.Add(className, "ValidUntil", System.Data.SqlDbType.DateTime);
 				
                 return _dp;
             }
@@ -220,6 +224,14 @@ namespace AfterSchoolLibrary.Models
 			dps.Add(ObjectMap["BillingPeriodTypeId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["DateCancelled"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ValidUntil"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -298,22 +310,25 @@ namespace AfterSchoolLibrary.Models
         public Registrant GetRegistrant(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Registrant.Load(this.RegistrantId.Value, msgs, dc);
-        }
+		}
 
-        public static bool ExistsByParticipationObjectByRegistrants(int participationObjectId, ParticipationObjectType participationObjectType, List<int> registrantIds, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
-            dq.Connection = dc;
-            dq.UseParameterizedQuery = false;
-            dq.Criterias.Add(ObjectMap["RegistrantId"], registrantIds, DatabaseCriteriaOperatorEnum.In);
+		public static bool ExistsByParticipationObjectByRegistrants(int participationObjectId, ParticipationObjectType participationObjectType, List<int> registrantIds, bool includeExpired = false, SystemMessages msgs = null, DatabaseConnection dc = null)
+		{
+			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.UseParameterizedQuery = false;
+			dq.Criterias.Add(ObjectMap["RegistrantId"], registrantIds, DatabaseCriteriaOperatorEnum.In);
 
-            dq.Joins.Add(SubscriptionPlan.ObjectMap["ID"], ObjectMap["SubscriptionPlanId"], DatabaseJoinTypeEnum.InnerJoin);
-            dq.Criterias.Add(SubscriptionPlan.ObjectMap["participationObjectId"], participationObjectId);
-            dq.Criterias.Add(SubscriptionPlan.ObjectMap["participationObjectTypeId"], (int)participationObjectType);
+			if (!includeExpired)
+				dq.Criterias.Add(ObjectMap["DateCancelled"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
 
-            return dq.GetCount(msgs) > 0;
-        }
+			dq.Joins.Add(SubscriptionPlan.ObjectMap["ID"], ObjectMap["SubscriptionPlanId"], DatabaseJoinTypeEnum.InnerJoin);
+			dq.Criterias.Add(SubscriptionPlan.ObjectMap["participationObjectId"], participationObjectId);
+			dq.Criterias.Add(SubscriptionPlan.ObjectMap["participationObjectTypeId"], (int)participationObjectType);
 
-        #endregion
-    }
+			return dq.GetCount(msgs) > 0;
+		}
+
+		#endregion
+	}
 }

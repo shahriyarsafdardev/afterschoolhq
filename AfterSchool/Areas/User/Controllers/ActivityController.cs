@@ -55,7 +55,7 @@ namespace AfterSchool.Areas.User.Controllers
         }
 
         [HttpGet]
-        public ActionResult Withdraw(string id, string po, string type)
+        public ActionResult Withdraw(string id, string po, string type, string returnurl)
         {
             var msgs = new SystemMessages();
             var registrant = Registrant.LoadByUid(id.ToGuid());
@@ -65,6 +65,9 @@ namespace AfterSchool.Areas.User.Controllers
                 participationObjectType: (ParticipationObjectType)type.ToInteger(), 
                 loggedInUser: SessionVariables.CurrentUser, 
                 msgs: msgs);
+
+            if (returnurl.IsNotBlank())
+                return Redirect(returnurl);
 
             return RedirectToAction("Index");
         }

@@ -41,25 +41,15 @@ namespace AfterSchoolLibrary.Services
 
         public static List<ActivityPayment> GetPayments(this RegistrantSubscriptionPlan registrantSubscriptionPlan, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var plan = registrantSubscriptionPlan.GetSubscriptionPlan(msgs, dc);
-            return ActivityPayment.LoadByParticipationObjectByRegistrant(
-                plan.ParticipationObjectId.Value,
-                plan.ParticipationObjectTypeId,
-                registrantSubscriptionPlan.RegistrantId.Value,
+            return ActivityPayment.LoadByRegistrantSubscriptionPlanId(
+                registrantSubscriptionPlan.ID.Value,
                 msgs,
                 dc);
         }
 
         public static int GetPaymentCount(this RegistrantSubscriptionPlan registrantSubscriptionPlan, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var plan = registrantSubscriptionPlan.GetSubscriptionPlan(msgs, dc);
-            return ActivityPayment.LoadByParticipationObjectByRegistrant(
-                plan.ParticipationObjectId.Value,
-                plan.ParticipationObjectTypeId,
-                registrantSubscriptionPlan.RegistrantId.Value,
-                msgs,
-                dc)
-                .Count(payment => payment.Amount.Value > 0);
+            return registrantSubscriptionPlan.GetPayments(msgs, dc).Count(payment => payment.Amount.Value > 0);
         }
 
         public static ActivityPayment AddPayment(this RegistrantSubscriptionPlan registrantSubscriptionPlan, Transaction transaction, decimal amount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
@@ -77,11 +67,80 @@ namespace AfterSchoolLibrary.Services
                 CreateDate = DateTime.UtcNow,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
                 LastModifiedDate = DateTime.UtcNow,
-                LastModifiedBy = loggedInUser?.ID.IfEmpty(0)
+                LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
+                RegistrantSubscriptionPlanId = registrantSubscriptionPlan.ID,
             };
             msgs.AddRange(payment.Save(dc));
 
             return payment;
+        }
+
+        public static DateTime? GetLastPaymentDate(this RegistrantSubscriptionPlan rsp)
+        {
+            switch(rsp.BillingPeriodTypeId)
+            {
+                case BillingPeriodType.Day:
+                    return rsp.StartDate.Value.AddDays(rsp.TotalPeriods.Value);
+                case BillingPeriodType.Month:
+                    return rsp.StartDate.Value.AddMonths(rsp.TotalPeriods.Value);
+                case BillingPeriodType.Week:
+                    return rsp.StartDate.Value.AddWeeks(rsp.TotalPeriods.Value);
+                case BillingPeriodType.Year:
+                    return rsp.StartDate.Value.AddYears(rsp.TotalPeriods.Value);
+            }
+
+            return new DateTime?();
+        }
+
+        public static DateTime? GetValidUntilDate(this RegistrantSubscriptionPlan rsp, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var lastPayment = rsp.GetPayments(msgs, dc).LastOrDefault();
+
+            if (lastPayment.IsNotEmpty())
+            {
+                var billingPeriodType = rsp.BillingPeriodTypeId;
+
+                if (billingPeriodType == BillingPeriodType.NotSet)
+                    billingPeriodType = rsp.GetSubscriptionPlan(msgs, dc).BillingPeriodTypeId;
+
+                switch(billingPeriodType)
+                {
+                    case BillingPeriodType.Day:
+                        return lastPayment.CreateDate.Value.AddDays(1).AddMilliseconds(-1).Date;
+                    case BillingPeriodType.Month:
+                        return lastPayment.CreateDate.Value.AddMonths(1).AddMilliseconds(-1).Date;
+                    case BillingPeriodType.Week:
+                        return lastPayment.CreateDate.Value.AddWeeks(1).AddMilliseconds(-1).Date;
+                    case BillingPeriodType.Year:
+                        return lastPayment.CreateDate.Value.AddYears(1).AddMilliseconds(-1).Date;
+                }
+            }
+
+            return null;
+        }
+
+        public static void MarkAsCancelled(this RegistrantSubscriptionPlan rsp, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {            
+            rsp.DateCancelled = DateTime.UtcNow;
+            rsp.ValidUntil = rsp.GetValidUntilDate(msgs, dc);
+            rsp.LastModifiedDate = DateTime.UtcNow;
+            rsp.LastModifiedBy = loggedInUser.ID;
+            msgs.AddRange(rsp.Save(dc));
+        }
+
+        public static ParticipationObject GetParticipationObject(this RegistrantSubscriptionPlan registrantSubscriptionPlan, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return registrantSubscriptionPlan.GetSubscriptionPlan(msgs, dc).GetParticipationObject(msgs, dc);
+        }
+
+        public static bool IsForParticipationObject(this RegistrantSubscriptionPlan registrantSubscriptionPlan, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var plan = registrantSubscriptionPlan.GetSubscriptionPlan(msgs, dc);
+
+            if (plan.ParticipationObjectId == participationObject.ObjectID && plan.ParticipationObjectTypeId == participationObject.ObjectType)
+                return true;
+
+            return false;
         }
     }
 }

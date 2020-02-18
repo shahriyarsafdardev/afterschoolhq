@@ -3,8 +3,8 @@
 @{ 
     var participationObject = (ParticipationObject)ViewBag.ParticipationObject;
 
-    var registered = "Registered";
-    var register = "Register";
+    var registered = "Enrolled";
+    var register = "Enroll";
 
     if (participationObject.RegistrationMode == RegistrationMode.Apply)
     {
@@ -19,8 +19,15 @@
     {
         if (Model.HasWithdrawn(participationObject))
         {
-            btnText = $"Withdrawn";
-            disabledText = " disabled=\"disabled\" ";
+            if (participationObject.SubscriptionPlans.Any() && Model.HasCancelledSubscription(participationObject))
+            {                
+                btnText = $"Re-Enroll";
+            }
+            else
+            {                
+                btnText = $"Withdrawn";
+                disabledText = " disabled=\"disabled\" ";
+            }
         }
         else if (!Model.HasConsentFor(participationObject))
         {
@@ -48,7 +55,7 @@
     else
     {
         if (!participationObject.IsStudentGradeInRange(Model))
-        {            
+        {
             btnText = "Ineligible - Grade";
             disabledText = " disabled=\"disabled\" ";
         }

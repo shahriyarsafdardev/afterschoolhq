@@ -263,7 +263,7 @@ namespace AfterSchool.Controllers
         }
 
         [HttpGet]
-        public ActionResult Register(string accountname, string activitytype, string activityname)
+        public ActionResult Register(string accountname, string activitytype, string activityname, string reg)
         {
             if (isUnsupportedBrowser())
                 return RedirectUnsupportedBrowser();
@@ -281,11 +281,11 @@ namespace AfterSchool.Controllers
 
             var participationObject = activity.GetParticipationObject(msgs);
 
-            return RedirectToRegistration(account, participationObject, msgs);
+            return RedirectToRegistration(account, participationObject, reg, msgs);
         }
 
         [HttpGet]
-        public ActionResult RegisterSession(string accountname, string sessionname)
+        public ActionResult RegisterSession(string accountname, string sessionname, string reg)
         {
             if (isUnsupportedBrowser())
                 return RedirectUnsupportedBrowser();
@@ -303,7 +303,7 @@ namespace AfterSchool.Controllers
 
             var participationObject = session.GetParticipationObject(msgs);
 
-            return RedirectToRegistration(account, participationObject, msgs);
+            return RedirectToRegistration(account, participationObject, reg, msgs);
         }
 
         [HttpGet]
@@ -365,7 +365,7 @@ namespace AfterSchool.Controllers
         }
 
         [HttpGet]
-        public ActionResult RegisterLeague(string accountname, string activitygrouptype, string externalaccountname, string group)
+        public ActionResult RegisterLeague(string accountname, string activitygrouptype, string externalaccountname, string group, string reg)
         {
             if (isUnsupportedBrowser())
                 return RedirectUnsupportedBrowser();
@@ -402,10 +402,10 @@ namespace AfterSchool.Controllers
                 participationObject = activityGroup.GetParticipationObject(msgs);
             }
 
-            return RedirectToRegistration(account, participationObject, msgs);
+            return RedirectToRegistration(account, participationObject, reg, msgs);
         }
 
-        private ActionResult RedirectToRegistration(Account account, ParticipationObject participationObject, SystemMessages msgs)
+        private ActionResult RedirectToRegistration(Account account, ParticipationObject participationObject, string reg, SystemMessages msgs)
         {
             SetRegistrationStartPage(account);
 
@@ -419,6 +419,9 @@ namespace AfterSchool.Controllers
                 return Redirect(participationObject.GetHomePageUrl());
 
             SessionVariables.Cart.AddCartItem(participationObject, msgs);
+
+            if (reg.IsGuid())
+                SessionVariables.CurrentRegistrant = Registrant.LoadByUid(reg.ToGuid(), msgs);
 
             if (SessionVariables.CurrentRegistrant.IsEmpty())
                 return RedirectToAction("getstarted", "account", new { area = "", regaccount = account.Uid });

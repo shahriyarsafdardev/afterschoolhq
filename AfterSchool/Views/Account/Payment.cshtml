@@ -1,5 +1,4 @@
-﻿@model List<Registrant>
-@{
+﻿@{
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
     ViewBag.Title = "Payment";
     var msgs = (SystemMessages)ViewBag.Messages;
@@ -23,8 +22,16 @@
 {
     if (plan.IsNotEmpty())
     {
+        var planStartDate = SessionVariables.CurrentRegistrant.GetPlanStartDate(plan, participationObject);
+        var startDateText = "today";
+
+        if (planStartDate.Date != DateTime.UtcNow.Date)
+        {
+            startDateText = planStartDate.ToLongDateString();
+        }
+
         <span>
-            @(includePlus ? "plus a" : "") subscription of <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong> each <strong>@plan.BillingPeriodTypeId.ToString().ToLower()</strong>
+            @(includePlus ? "plus a" : "") subscription of <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong> each <strong>@plan.BillingPeriodTypeId.ToString().ToLower()</strong> starting <strong>@startDateText</strong>
         </span>
     }
 }
@@ -70,9 +77,9 @@
 
                                 @foreach (var plan in participationObject.PaymentPlans)
                                 {
-                                    var now = participationObject.OwnerAccount.ConvertToAccountTimeZone(DateTime.UtcNow);
-                                    var planStartDate = participationObject.StartDate.Value.IsBefore(now) ? now : participationObject.StartDate.Value;
-                                    var startToday = plan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout || planStartDate.IsBefore(now);
+                                    var today = participationObject.OwnerAccount.ConvertToAccountTimeZone(DateTime.UtcNow).Date;
+                                    var planStartDate = participationObject.StartDate.Value.Date.IsBefore(today) ? today : participationObject.StartDate.Value.Date;
+                                    var startToday = plan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout || planStartDate.IsOnOrBefore(today);
 
                                     <div class="am-radio">
                                         <input type="radio" name="paymentoption" id="paymentoption-@plan.ID" class="payment-option-radio" value="@plan.ID" />
@@ -97,7 +104,7 @@
                                                     else
                                                     {
                                                         <span>
-                                                            one month from today
+                                                            one @plan.BillingPeriodTypeId.ToString().ToLower() from today
                                                         </span>
                                                     }
                                                 </span>

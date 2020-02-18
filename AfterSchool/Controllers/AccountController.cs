@@ -1496,8 +1496,9 @@ namespace AfterSchool.Controllers
                 msgs.Add("Please enter your payment information", MessageType.UserError);
 
             var registration = PaymentViewBag(id, participationObject, msgs);
+            var hasWithdrawn = SessionVariables.CurrentRegistrant.HasWithdrawn(participationObject, msgs);
 
-            if (registration.IsAlreadyPaidFor(msgs))
+            if (registration.IsAlreadyPaidFor(msgs) && !hasWithdrawn)
                 return RedirectToAction("thankyou", new { id = registration.Uid });
 
             if (msgs.HasNoErrors())

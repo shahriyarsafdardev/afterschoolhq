@@ -250,7 +250,7 @@ namespace AfterSchoolLibrary.Services
             };
         }
 
-        public static bool CancelSubscription(this SubscriptionPlan plan, RegistrantSubscriptionPlan rsp, Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool CancelSubscription(this SubscriptionPlan plan, RegistrantSubscriptionPlan rsp, Account billingAccount, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (plan.PlanTypeId == SubscriptionPlanType.Subscription)
             {                
@@ -263,6 +263,8 @@ namespace AfterSchoolLibrary.Services
                     rsp.StripeSubscriptionId,
                     stripeUserId
                 ));
+
+                rsp.MarkAsCancelled(loggedInUser, msgs, dc);
 
                 if (msgs.HasNoErrors())
                     return true;
