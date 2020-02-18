@@ -23,8 +23,8 @@
                         <tr>
                             <th>@UILabel.ActivityLabel(ActivityType.Activity)</th>
                             <th class="text-center">@UILabel.RegistrantLabel()</th>
-                            <th class="text-center">Start Date</th>
-                            <th class="text-center">Date Ended</th>
+                            <th class="text-center">Plan Start Date</th>
+                            <th class="text-center">Date Cancelled</th>
                             <th class="text-center">Payment</th>
                             <th class="text-center">Payments</th>
                             <th class="text-center">Next Payment Date</th>
@@ -61,9 +61,16 @@
                                     billingPeriodTypeId = originalPlan.BillingPeriodTypeId;
                                 }
 
-                                if (payments.Any() && payments.Last().CreateDate.Value.AddMonths(1).IsOnOrAfter(DateTime.UtcNow) && !plan.DateCancelled.HasValue)
+                                if (!plan.DateCancelled.HasValue)
                                 {
-                                    nextPaymentDate = payments.Last().CreateDate.Value.AddMonths(1).ToShortDateString();
+                                    if (payments.Any() && payments.Last().CreateDate.Value.AddMonths(1).IsOnOrAfter(DateTime.UtcNow))
+                                    {
+                                        nextPaymentDate = payments.Last().CreateDate.Value.AddMonths(1).ToShortDateString();
+                                    }
+                                    else if (plan.StartDate.Value.IsAfter(DateTime.UtcNow))
+                                    {
+                                        nextPaymentDate = plan.StartDate.Value.ToShortDateString();
+                                    }
                                 }
 
                                 if (amount == 0)

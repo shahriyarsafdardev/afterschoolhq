@@ -24,7 +24,7 @@
                     </button>
                     <div class="dropdown-menu dropdown-menu-right">
 
-                        @if (Model.RegistrantActivity.AssignmentTypeId != RegistrationAssignmentType.Declined)
+                        @if (Model.RegistrantActivity.AssignmentTypeId.NotIn(new RegistrationAssignmentType[] { RegistrationAssignmentType.Withdrawn, RegistrationAssignmentType.Declined }))
                         {
                             Html.RenderPartial("Activities/_WithdrawLink", Model);
                         }
