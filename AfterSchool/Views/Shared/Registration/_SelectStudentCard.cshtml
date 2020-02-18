@@ -3,8 +3,8 @@
 @{ 
     var participationObject = (ParticipationObject)ViewBag.ParticipationObject;
 
-    var registered = "Registered";
-    var register = "Register";
+    var registered = "Enrolled";
+    var register = "Enroll";
 
     if (participationObject.RegistrationMode == RegistrationMode.Apply)
     {
@@ -19,7 +19,7 @@
     {
         if (Model.HasWithdrawn(participationObject))
         {
-            if (participationObject.SubscriptionPlans.Any() && SessionVariables.CurrentRegistrant.HasCancelledSubscription(participationObject))
+            if (participationObject.SubscriptionPlans.Any() && Model.HasCancelledSubscription(participationObject))
             {                
                 btnText = $"Re-Enroll";
             }

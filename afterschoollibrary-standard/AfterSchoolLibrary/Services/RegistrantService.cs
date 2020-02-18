@@ -277,7 +277,6 @@ namespace AfterSchoolLibrary.Services
             return registrant
                     .GetRegistrantSubscriptionPlans(msgs, dc)
                     .Where(rsp => rsp.DateCancelled.HasValue && rsp.IsForParticipationObject(participationObject, msgs, dc))
-                    .OrderBy(rsp => rsp.ValidUntil)
                     .ToList();
         }
 
