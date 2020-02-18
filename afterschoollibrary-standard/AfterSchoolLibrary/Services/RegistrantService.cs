@@ -163,17 +163,17 @@ namespace AfterSchoolLibrary.Services
             return (customer, sourceId);
         }
 
-        public static void StartPaymentPlan(this Registrant registrant, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void StartPaymentPlan(this Registrant submittedRecord, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            registrant.StartPlan(checkoutObject, SubscriptionPlanType.PaymentPlan, loggedInUser, msgs, dc);
+            submittedRecord.StartPlan(checkoutObject, SubscriptionPlanType.PaymentPlan, loggedInUser, msgs, dc);
         }
 
-        public static void StartSubscriptionPlan(this Registrant registrant, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void StartSubscriptionPlan(this Registrant submittedRecord, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            registrant.StartPlan(checkoutObject, SubscriptionPlanType.Subscription, loggedInUser, msgs, dc);
+            submittedRecord.StartPlan(checkoutObject, SubscriptionPlanType.Subscription, loggedInUser, msgs, dc);
         }        
 
-        public static void StartPlan(this Registrant registrant, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void StartPlan(this Registrant submittedRecord, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -183,7 +183,7 @@ namespace AfterSchoolLibrary.Services
             var (customer, sourceId) = GetCustomerAndSourceForSubscription(checkoutObject, useStripeConnectedAccount);
             var plan = subscriptionPlanType == SubscriptionPlanType.PaymentPlan ? checkoutObject.PaymentPlan : checkoutObject.SubscriptionPlan;
             var stripeCouponId = plan.DoesCouponApply(checkoutObject.Coupon) ? checkoutObject.Coupon.StripeCouponId : null;
-            DateTime? startDateTime = GetPlanStartDate(plan, checkoutObject, DateTime.UtcNow);
+            var startDateTime = submittedRecord.GetPlanStartDate(plan, checkoutObject.ParticipationObject, msgs, dc);
             var platformFeePercent = new decimal?();
             string stripeAccountId = null;
 
@@ -221,7 +221,7 @@ namespace AfterSchoolLibrary.Services
             var purchase = checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc);
 
             checkoutObject.RegistrantSubscriptionPlan = plan.AddRegistrant(
-                registrant,
+                submittedRecord,
                 startDateTime,
                 purchase,
                 subscription.Id,
@@ -265,15 +265,67 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        private static DateTime GetPlanStartDate(SubscriptionPlan plan, CheckoutObject checkoutObject, DateTime initialDate)
+        public static bool HasCancelledSubscription(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            return registrant
+                    .GetCancelledRegistrantSubscriptionPlans(participationObject, msgs, dc)
+                    .Any();
+        }
+
+        public static List<RegistrantSubscriptionPlan> GetCancelledRegistrantSubscriptionPlans(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return registrant
+                    .GetRegistrantSubscriptionPlans(msgs, dc)
+                    .Where(rsp => rsp.DateCancelled.HasValue && rsp.IsForParticipationObject(participationObject, msgs, dc))
+                    .ToList();
+        }
+
+        public static bool HasUnexpiredCancelledSubscription(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return registrant
+                    .GetUnexpiredCancelledRegistrantSubscriptionPlans(participationObject, msgs, dc)
+                    .Any();
+        }
+
+        public static DateTime? GetUnexpiredCancelledSubscriptionExpireDate(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return registrant
+                    .GetUnexpiredCancelledRegistrantSubscriptionPlans(participationObject, msgs, dc)
+                    .OrderByDescending(rsp => rsp.ValidUntil)
+                    .FirstOrDefault()?
+                    .ValidUntil.Value;
+        }
+
+        public static List<RegistrantSubscriptionPlan> GetUnexpiredCancelledRegistrantSubscriptionPlans(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return registrant
+                    .GetRegistrantSubscriptionPlans(msgs, dc)
+                    .Where(rsp => 
+                                rsp.DateCancelled.HasValue && 
+                                rsp.ValidUntil.HasValue && 
+                                rsp.ValidUntil.Value.IsOnOrAfter(DateTime.UtcNow) && 
+                                rsp.IsForParticipationObject(participationObject, msgs, dc))
+                    .OrderBy(rsp => rsp.ValidUntil)
+                    .ToList();
+        }
+
+        public static DateTime GetPlanStartDate(this Registrant registrant, SubscriptionPlan plan, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var initialDate = DateTime.UtcNow;
+
             if (plan.PlanTypeId == SubscriptionPlanType.Subscription || plan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts)
             {
-                var firstActivityDate = checkoutObject.ParticipationObject.StartDate;
+                if (plan.PlanTypeId == SubscriptionPlanType.Subscription)
+                {
+                    var rsps = registrant.GetUnexpiredCancelledRegistrantSubscriptionPlans(participationObject, msgs, dc);
+
+                    if (rsps.Any(rsp => rsp.ValidUntil.HasValue))
+                        return rsps.Last().ValidUntil.Value.AddDays(1);
+                }
 
                 // can't start in the past
-                if (firstActivityDate.HasValue && firstActivityDate.Value.IsAfter(initialDate))
-                    return firstActivityDate.Value;
+                if (participationObject.StartDate.HasValue && participationObject.StartDate.Value.IsAfter(initialDate))
+                    return participationObject.StartDate.Value;
             }
 
             return initialDate;
@@ -571,20 +623,20 @@ namespace AfterSchoolLibrary.Services
             return RegistrantSubscriptionPlan.LoadByRegistrantId(registrant.ID.Value, msgs, dc);
         }
 
-        public static bool CancelSubcriptionIfExists(this Registrant registrant, int participationObjectId, ParticipationObjectType participationObjectType, SystemMessages msgs, DatabaseConnection dc = null)
+        public static bool CancelSubcriptionIfExists(this Registrant registrant, int participationObjectId, ParticipationObjectType participationObjectType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             // TODO: Has to be a better way
             if (!registrant.HasPlan(participationObjectId, participationObjectType, msgs, dc))
                 return false;
 
             var rsps = registrant.GetRegistrantSubscriptionPlans(msgs, dc);
-            foreach (var rsp in rsps)
+            foreach (var rsp in rsps.Where(rsp => !rsp.DateCancelled.HasValue))
             {
                 var plan = rsp.GetSubscriptionPlan(msgs, dc);
                 var isSubscription = plan.PlanTypeId == SubscriptionPlanType.Subscription;
 
                 if (plan.ParticipationObjectId == participationObjectId && plan.ParticipationObjectTypeId == participationObjectType && isSubscription)
-                    return plan.CancelSubscription(rsp, plan.GetAccount(msgs, dc), msgs, dc);
+                    return plan.CancelSubscription(rsp, plan.GetAccount(msgs, dc), loggedInUser, msgs, dc);
             }
 
             return false;
@@ -1022,7 +1074,7 @@ namespace AfterSchoolLibrary.Services
 
                     // cancel subscription if it has one
                     if (msgs.HasNoErrors())
-                        registrant.CancelSubcriptionIfExists(participationObjectId, participationObjectType, amsgs, adc);
+                        registrant.CancelSubcriptionIfExists(participationObjectId, participationObjectType, loggedInUser, amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {

@@ -1272,6 +1272,8 @@
     <Content Include="Areas\User\Views\Billing\Plans.cshtml" />
     <Content Include="Areas\User\Views\Shared\_BillingHeader.cshtml" />
     <Content Include="RollbarPayloadsStore.db" />
+    <Content Include="Areas\User\Views\Shared\Modals\_Withdraw.cshtml" />
+    <Content Include="Areas\User\Views\Shared\Activities\_WithdrawLink.cshtml" />
     <None Include="Scripts\jquery-3.0.0-vsdoc.js" />
     <Content Include="Scripts\jquery-3.0.0.js" />
     <Content Include="Scripts\jquery-3.0.0.min.js" />

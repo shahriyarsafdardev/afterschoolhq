@@ -6,7 +6,7 @@
 @{ Html.RenderPartial("_UserAccountHeader"); }
 
 <div class="main-content">
-    
+
     @{ Html.RenderPartial("_BillingHeader"); }
 
     <div class="panel panel-default">
@@ -23,10 +23,12 @@
                         <tr>
                             <th>@UILabel.ActivityLabel(ActivityType.Activity)</th>
                             <th class="text-center">@UILabel.RegistrantLabel()</th>
-                            <th class="text-center">Start Date</th>
+                            <th class="text-center">Plan Start Date</th>
+                            <th class="text-center">Date Cancelled</th>
                             <th class="text-center">Payment</th>
                             <th class="text-center">Payments</th>
                             <th class="text-center">Next Payment Date</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -37,20 +39,56 @@
                                 var originalPlan = plan.GetSubscriptionPlan();
                                 var participationObject = originalPlan.GetParticipationObject();
                                 var registrant = plan.GetRegistrant();
-                                var paymentCount = plan.GetPaymentCount();
+                                var masterRegistrant = registrant.GetMasterRegistrant();
+                                var regStatus = RegistrationStatus.Current;
+
+                                if (originalPlan.PlanTypeId == SubscriptionPlanType.Subscription)
+                                {
+                                    if (plan.StartDate.Value.IsAfter(DateTime.UtcNow))
+                                    {
+                                        regStatus = RegistrationStatus.Future;
+                                    }
+                                    else if (plan.ValidUntil.HasValue && plan.ValidUntil.Value.IsBefore(DateTime.UtcNow))
+                                    {
+                                        regStatus = RegistrationStatus.Past;
+                                    }
+                                }
+                                else
+                                {
+                                    if (participationObject.StartDate.Value.IsAfter(DateTime.UtcNow))
+                                    {
+                                        regStatus = RegistrationStatus.Future;
+                                    }
+                                    else if (participationObject.EndDate.HasValue && participationObject.EndDate.Value.IsBefore(DateTime.UtcNow))
+                                    {
+                                        regStatus = RegistrationStatus.Past;
+                                    }
+                                }
+
+                                var registrantActivity = registrant.GetRegistrantActivity(participationObject, msgs);
+                                var participationVM = new ParticipationViewModel(participationObject, registrantActivity, registrant, regStatus);
+
                                 var billingPeriodTypeId = plan.BillingPeriodTypeId;
                                 var payments = plan.GetPayments();
-                                var nextPaymentDate = "N/A";
+                                var nextPaymentDate = "-";
                                 var amount = plan.TotalPaidWithFees;
+                                var endDate = "-";
 
                                 if (billingPeriodTypeId == BillingPeriodType.NotSet)
                                 {
                                     billingPeriodTypeId = originalPlan.BillingPeriodTypeId;
                                 }
 
-                                if (payments.Any() && payments.Last().CreateDate.Value.AddMonths(1).IsOnOrAfter(DateTime.UtcNow))
+                                if (!plan.DateCancelled.HasValue)
                                 {
-                                    nextPaymentDate = payments.Last().CreateDate.Value.AddMonths(1).ToShortDateString();
+                                    if (payments.Any() && payments.Last().CreateDate.Value.AddMonths(1).IsOnOrAfter(DateTime.UtcNow))
+                                    {
+                                        nextPaymentDate = payments.Last().CreateDate.Value.AddMonths(1).ToShortDateString();
+                                    }
+                                    else if (plan.StartDate.Value.IsAfter(DateTime.UtcNow))
+                                    {
+                                        nextPaymentDate = plan.StartDate.Value.ToShortDateString();
+                                    }
                                 }
 
                                 if (amount == 0)
@@ -65,9 +103,21 @@
                                     }
                                 }
 
+                                if (originalPlan.PlanTypeId == SubscriptionPlanType.PaymentPlan)
+                                {
+                                    if (payments.Count == plan.TotalPeriods)
+                                    {
+                                        endDate = plan.GetLastPaymentDate().ToShortDateString();
+                                    }
+                                }
+                                else
+                                {
+                                    endDate = plan.DateCancelled.ToShortDateString("-");
+                                }
+
                                 <tr>
                                     <td>
-                                        @participationObject.Name
+                                        @participationObject.Name - @originalPlan.PlanTypeId.ToString().SplitByUpperCase()
                                     </td>
                                     <td class="text-center">
                                         @registrant.DisplayName
@@ -76,22 +126,40 @@
                                         @plan.StartDate.ToShortDateString()
                                     </td>
                                     <td class="text-center">
+                                        @endDate
+                                    </td>
+                                    <td class="text-center">
                                         @plan.TotalPaidWithFees.ToCurrency() / @billingPeriodTypeId.ToString().ToLower()
                                     </td>
                                     <td class="text-center">
                                         @if (plan.TotalPeriods.HasValue)
                                         {
                                             <span>
-                                                @paymentCount of @plan.TotalPeriods.Value
+                                                @payments.Count of @plan.TotalPeriods.Value
                                             </span>
                                         }
                                         else
                                         {
-                                            <span>@paymentCount payment(s)</span>
+                                            <span>@payments.Count payment(s)</span>
                                         }
                                     </td>
                                     <td class="text-center">
                                         @nextPaymentDate
+                                    </td>
+                                    <td>
+                                        @if (regStatus != RegistrationStatus.Past)
+                                        {
+                                            if (!plan.DateCancelled.HasValue)
+                                            {
+                                                Html.RenderPartial("Activities/_WithdrawLink",
+                                                    participationVM,
+                                                    new ViewDataDictionary() { { "ReturnUrl", Url.Action("plans", "billing") } });
+                                            }
+                                            else if (registrantActivity.AssignmentTypeId == RegistrationAssignmentType.Withdrawn && registrantActivity.AssignmentTypeId.NotIn(Registration.ReservedStatuses))
+                                            {
+                                                <a href="@participationObject.GetRegistrationPageUrl()?reg=@masterRegistrant.Uid" class="btn btn-link">Re-Enroll &raquo;</a>
+                                            }
+                                        }
                                     </td>
                                 </tr>
                             }
@@ -115,9 +183,11 @@
                     { "controller", "orders" },
                     { "action", "transactions" },
                     { "querystring", $"sdate={Request["sdate"]}&edate={Request["edate"]}&poId={Request["poId"]}&poTypeId={Request["poTypeId"]}" }
-                }
+            }
                 );
             }
         </div>
     </div>
 </div>
+
+@{ Html.RenderPartial("Modals/_Withdraw"); }

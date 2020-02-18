@@ -16,7 +16,10 @@ namespace AfterSchool.Models
 
         public static string JavascriptSafeString(string value)
         {
-            return value.Replace("'", "\\'");
+            if (value.IsNotEmpty())
+                return value.Replace("'", "\\'");
+
+            return "";
         }
 
         public static string RenderMessagesToHtml(SystemMessages msgs)

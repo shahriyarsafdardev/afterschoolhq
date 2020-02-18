@@ -2501,12 +2501,12 @@ namespace AfterSchoolLibrary.Services
 
                     // TODO: Decide if master account registrant should be added to plans or the account copy
                     // get the registrant record that was created just for the account
-                    var accountRegistrant = checkoutObject.Registration.GetRegistrant(amsgs, adc);
+                    var submittedRecord = checkoutObject.Registration.GetRegistrant(amsgs, adc);
 
                     // if they have a subscription plan
                     // will also process registration fees
                     if (checkoutObject.SubscriptionPlan.IsNotEmpty())
-                        accountRegistrant.StartSubscriptionPlan(
+                        submittedRecord.StartSubscriptionPlan(
                             checkoutObject: checkoutObject,
                             loggedInUser: loggedInUser,
                             msgs: amsgs,
@@ -2533,7 +2533,7 @@ namespace AfterSchoolLibrary.Services
                             );
                         }
 
-                        accountRegistrant.StartPaymentPlan(
+                        submittedRecord.StartPaymentPlan(
                             checkoutObject: checkoutObject,
                             loggedInUser: loggedInUser,
                             msgs: amsgs,
