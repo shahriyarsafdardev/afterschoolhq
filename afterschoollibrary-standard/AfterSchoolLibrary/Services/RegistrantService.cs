@@ -630,7 +630,7 @@ namespace AfterSchoolLibrary.Services
                 return false;
 
             var rsps = registrant.GetRegistrantSubscriptionPlans(msgs, dc);
-            foreach (var rsp in rsps)
+            foreach (var rsp in rsps.Where(rsp => !rsp.DateCancelled.HasValue))
             {
                 var plan = rsp.GetSubscriptionPlan(msgs, dc);
                 var isSubscription = plan.PlanTypeId == SubscriptionPlanType.Subscription;

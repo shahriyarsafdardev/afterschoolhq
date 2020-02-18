@@ -39,6 +39,7 @@
                                 var originalPlan = plan.GetSubscriptionPlan();
                                 var participationObject = originalPlan.GetParticipationObject();
                                 var registrant = plan.GetRegistrant();
+                                var masterRegistrant = registrant.GetMasterRegistrant();
                                 var regStatus = originalPlan.PlanTypeId == SubscriptionPlanType.Subscription ?
                                                     RegistrationStatus.Current :
                                                     participationObject.StartDate.Value.IsAfter(DateTime.UtcNow) ?
@@ -129,11 +130,18 @@
                                         @nextPaymentDate
                                     </td>
                                     <td>
-                                        @if (regStatus != RegistrationStatus.Past && registrantActivity.AssignmentTypeId.In(Registration.ReservedStatuses))
+                                        @if (regStatus != RegistrationStatus.Past)
                                         {
-                                            Html.RenderPartial("Activities/_WithdrawLink", 
-                                                participationVM, 
-                                                new ViewDataDictionary() { { "ReturnUrl", Url.Action("plans", "billing") } });
+                                            if (!plan.DateCancelled.HasValue)
+                                            {
+                                                Html.RenderPartial("Activities/_WithdrawLink",
+                                                    participationVM,
+                                                    new ViewDataDictionary() { { "ReturnUrl", Url.Action("plans", "billing") } });
+                                            }
+                                            else if (registrantActivity.AssignmentTypeId == RegistrationAssignmentType.Withdrawn && registrantActivity.AssignmentTypeId.NotIn(Registration.ReservedStatuses))
+                                            {
+                                                <a href="@participationObject.GetRegistrationPageUrl()?reg=@masterRegistrant.Uid" class="btn btn-link">Re-Enroll &raquo;</a>
+                                            }
                                         }
                                     </td>
                                 </tr>
