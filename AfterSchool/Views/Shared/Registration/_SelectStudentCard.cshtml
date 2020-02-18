@@ -19,7 +19,7 @@
     {
         if (Model.HasWithdrawn(participationObject))
         {
-            if (participationObject.SubscriptionPlans.Any())
+            if (participationObject.SubscriptionPlans.Any() && SessionVariables.CurrentRegistrant.HasCancelledSubscription(participationObject))
             {                
                 btnText = $"Re-Enroll";
             }

@@ -41,25 +41,15 @@ namespace AfterSchoolLibrary.Services
 
         public static List<ActivityPayment> GetPayments(this RegistrantSubscriptionPlan registrantSubscriptionPlan, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var plan = registrantSubscriptionPlan.GetSubscriptionPlan(msgs, dc);
-            return ActivityPayment.LoadByParticipationObjectByRegistrant(
-                plan.ParticipationObjectId.Value,
-                plan.ParticipationObjectTypeId,
-                registrantSubscriptionPlan.RegistrantId.Value,
+            return ActivityPayment.LoadByRegistrantSubscriptionPlanId(
+                registrantSubscriptionPlan.ID.Value,
                 msgs,
                 dc);
         }
 
         public static int GetPaymentCount(this RegistrantSubscriptionPlan registrantSubscriptionPlan, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var plan = registrantSubscriptionPlan.GetSubscriptionPlan(msgs, dc);
-            return ActivityPayment.LoadByParticipationObjectByRegistrant(
-                plan.ParticipationObjectId.Value,
-                plan.ParticipationObjectTypeId,
-                registrantSubscriptionPlan.RegistrantId.Value,
-                msgs,
-                dc)
-                .Count(payment => payment.Amount.Value > 0);
+            return registrantSubscriptionPlan.GetPayments(msgs, dc).Count(payment => payment.Amount.Value > 0);
         }
 
         public static ActivityPayment AddPayment(this RegistrantSubscriptionPlan registrantSubscriptionPlan, Transaction transaction, decimal amount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
@@ -77,7 +67,8 @@ namespace AfterSchoolLibrary.Services
                 CreateDate = DateTime.UtcNow,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
                 LastModifiedDate = DateTime.UtcNow,
-                LastModifiedBy = loggedInUser?.ID.IfEmpty(0)
+                LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
+                RegistrantSubscriptionPlanId = registrantSubscriptionPlan.ID,
             };
             msgs.AddRange(payment.Save(dc));
 
@@ -104,7 +95,6 @@ namespace AfterSchoolLibrary.Services
         public static DateTime? GetValidUntilDate(this RegistrantSubscriptionPlan rsp, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var lastPayment = rsp.GetPayments(msgs, dc).LastOrDefault();
-            var validUntil = DateTime.UtcNow;
 
             if (lastPayment.IsNotEmpty())
             {
@@ -127,10 +117,25 @@ namespace AfterSchoolLibrary.Services
         public static void MarkAsCancelled(this RegistrantSubscriptionPlan rsp, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {            
             rsp.DateCancelled = DateTime.UtcNow;
-            rsp.ValidUntil = rsp.GetValidUntilDate(msgs, dc) ?? DateTime.UtcNow;
+            rsp.ValidUntil = rsp.GetValidUntilDate(msgs, dc);
             rsp.LastModifiedDate = DateTime.UtcNow;
             rsp.LastModifiedBy = loggedInUser.ID;
             msgs.AddRange(rsp.Save(dc));
+        }
+
+        public static ParticipationObject GetParticipationObject(this RegistrantSubscriptionPlan registrantSubscriptionPlan, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return registrantSubscriptionPlan.GetSubscriptionPlan(msgs, dc).GetParticipationObject(msgs, dc);
+        }
+
+        public static bool IsForParticipationObject(this RegistrantSubscriptionPlan registrantSubscriptionPlan, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var plan = registrantSubscriptionPlan.GetSubscriptionPlan(msgs, dc);
+
+            if (plan.ParticipationObjectId == participationObject.ObjectID && plan.ParticipationObjectTypeId == participationObject.ObjectType)
+                return true;
+
+            return false;
         }
     }
 }
