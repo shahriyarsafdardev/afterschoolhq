@@ -98,7 +98,12 @@ namespace AfterSchoolLibrary.Services
 
             if (lastPayment.IsNotEmpty())
             {
-                switch(rsp.BillingPeriodTypeId)
+                var billingPeriodType = rsp.BillingPeriodTypeId;
+
+                if (billingPeriodType == BillingPeriodType.NotSet)
+                    billingPeriodType = rsp.GetSubscriptionPlan(msgs, dc).BillingPeriodTypeId;
+
+                switch(billingPeriodType)
                 {
                     case BillingPeriodType.Day:
                         return lastPayment.CreateDate.Value.AddDays(1).AddMilliseconds(-1).Date;
