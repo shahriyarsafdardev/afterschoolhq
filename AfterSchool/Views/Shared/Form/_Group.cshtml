@@ -9,16 +9,21 @@
             .Select(question => question.ToFormQuestionViewModel())
             .ToList();
     }
+
+    var showGroup = qvms.Any(qvm => qvm.Question.QuestionTypeId != QuestionType.TextBlock);
 }
 
-<div class="panel panel-default question-group">
-    <div class="panel-heading">
-        @Model.Name
+@if (showGroup)
+{
+    <div class="panel panel-default question-group">
+        <div class="panel-heading">
+            @Model.Name
+        </div>
+        <div class="panel-body">
+            @foreach (var qvm in qvms)
+            {
+                Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
+            }
+        </div>
     </div>
-    <div class="panel-body">
-        @foreach (var qvm in qvms)
-        {
-            Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
-        }
-    </div>
-</div>
+}

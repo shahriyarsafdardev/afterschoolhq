@@ -680,9 +680,17 @@ namespace AfterSchoolLibrary.Services
             return HasParticipationAssignment(masterRegistrant, participationObject, RegistrationAssignmentType.Reserved.AsList(), hasParentalConsent, msgs, dc);
         }
 
-        public static bool HasWithdrawn(this Registrant masterRegistrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool HasWithdrawn(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return HasParticipationAssignment(masterRegistrant, participationObject, RegistrationAssignmentType.Withdrawn.AsList(), null, msgs, dc);
+            if (registrant.IsMaster)
+                return HasParticipationAssignment(registrant, participationObject, RegistrationAssignmentType.Withdrawn.AsList(), null, msgs, dc);
+
+            var ra = registrant.GetRegistrantActivity(participationObject, msgs, dc);
+
+            if (ra.IsNotEmpty())
+                return ra.AssignmentTypeId == RegistrationAssignmentType.Withdrawn;
+
+            return false;
         }
 
         public static bool HasSubmittedFor(this Registrant masterRegistrant, ParticipationObject participationObject, bool? hasParentalConsent, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -749,21 +757,24 @@ namespace AfterSchoolLibrary.Services
             return copy;
         }
 
-        public static bool IsRegistrationDone(this Registrant submittedRecord, Registration registration, ParticipationObject participationObject, SystemMessages msgs, DatabaseConnection dc = null)
+        public static bool NeedsToRegister(this Registrant submittedRecord, Registration registration, ParticipationObject participationObject, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (submittedRecord.IsEmpty())
-                return false;
+                return true;
 
             if (registration.IsEmpty())
-                return false;
+                return true;
 
             if (participationObject.RequiresParentalConsent && registration.ESignature.IsEmpty())
-                return false;
+                return true;
+
+            if (submittedRecord.HasWithdrawn(participationObject, msgs, dc))
+                return true;
 
             if (participationObject.ShouldParentPay() && !submittedRecord.IsReservedAndPaidFor(participationObject, null, msgs, dc))
-                return false;
+                return true;
 
-            return true;
+            return false;
         }
 
         public static List<Registrant> GetSubmittedRecords(this Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
