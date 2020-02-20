@@ -1167,10 +1167,10 @@ namespace AfterSchool.Controllers
                     new { Area = "user", id = SessionVariables.CurrentRegistrant.Uid, reg = registration?.Uid, student = SessionVariables.CurrentRegistrant?.Uid });
 
 
-            var isRegistrationDone = submittedRecord.IsRegistrationDone(registration, participationObject, msgs);
+            var needsToRegister = submittedRecord.NeedsToRegister(registration, participationObject, msgs);
 
             // current registrant is already registered
-            if (isRegistrationDone && !participationObject.IsSession())
+            if (!needsToRegister && !participationObject.IsSession())
                 return RedirectToAction("select");
 
             // need to see if there are any questions required by the form on the activity/activity group that haven't been collected on the main form
@@ -1402,7 +1402,8 @@ namespace AfterSchool.Controllers
                         NumberOfSeats = 1,
                         ParticipationObject = participationObject,
                         Registration = registration,
-                        MasterRegistrant = SessionVariables.CurrentRegistrant
+                        MasterRegistrant = SessionVariables.CurrentRegistrant,
+                        SubscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault(),
                     },
                     sendConfirmationEmail: true,
                     loggedInUser: SessionVariables.CurrentUser,

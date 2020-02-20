@@ -14,17 +14,18 @@
 
     var disabledText = "";
     var btnText = "";
+    var btnUrl = $"javascript:checkEligibility('Model.Uid', '{Url.Action("setstudent", "account", new { id = Model.Uid })}', 'btn-register-{Model.Uid}')";
 
     if (Model.HasSubmittedFor(participationObject, null))
     {
         if (Model.HasWithdrawn(participationObject))
         {
             if (participationObject.SubscriptionPlans.Any() && Model.HasCancelledSubscription(participationObject))
-            {                
+            {
                 btnText = $"Re-Enroll";
             }
             else
-            {                
+            {
                 btnText = $"Withdrawn";
                 disabledText = " disabled=\"disabled\" ";
             }
@@ -41,6 +42,7 @@
         else if (!Model.IsReservedAndPaidFor(participationObject, null) && !Model.IsAppliedFor(participationObject, null) && !Model.MasterRegistrantHasPlan(participationObject))
         {
             btnText = "Pay Now";
+            btnUrl = Url.Action("makepayment", "account", new { id = Model.GetRegistrationWithParticipationObject(participationObject).Uid });
         }
         else if (participationObject.IsSession())
         {
@@ -77,7 +79,7 @@
             </div>
             <div class="panel-body">
                 <p>
-                    <a href="javascript:checkEligibility('@Model.Uid', '@Url.Action("setstudent", "account", new { id = Model.Uid })', 'btn-register-@Model.Uid')"
+                    <a href="@btnUrl"
                        id="btn-register-@Model.Uid"
                        class="btn btn-register btn-lg"
                        @disabledText>
