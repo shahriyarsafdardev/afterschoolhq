@@ -242,6 +242,11 @@ namespace AfterSchoolLibrary.Models
 
         #region QueryObjects
 
+        public bool IsMatch(ParticipationObject participationObject)
+        {
+            return participationObject.ObjectID == this.ObjectID && participationObject.ObjectType == this.ObjectType;
+        }
+
         public bool IsNotFreeAndCanAcceptPayments
         {
             get
