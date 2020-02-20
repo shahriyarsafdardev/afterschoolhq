@@ -1402,7 +1402,8 @@ namespace AfterSchool.Controllers
                         NumberOfSeats = 1,
                         ParticipationObject = participationObject,
                         Registration = registration,
-                        MasterRegistrant = SessionVariables.CurrentRegistrant
+                        MasterRegistrant = SessionVariables.CurrentRegistrant,
+                        SubscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault(),
                     },
                     sendConfirmationEmail: true,
                     loggedInUser: SessionVariables.CurrentUser,

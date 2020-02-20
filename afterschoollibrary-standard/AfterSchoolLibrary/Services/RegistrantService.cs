@@ -1151,9 +1151,37 @@ namespace AfterSchoolLibrary.Services
             return reg;
         }
 
+        public static List<Registration> GetRegistrationsFromMaster(this Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (!registrant.IsMaster)
+                registrant.GetRegistrations(msgs, dc);
+
+            var registrations = new List<Registration>();
+            var submittedRecords = registrant.GetSubmittedRecords(msgs, dc);
+
+            submittedRecords.ForEach(submittedRecord => registrations.AddRange(submittedRecord.GetRegistrations(msgs, dc)));
+
+            return registrations;
+        }
+
         public static List<Registration> GetRegistrations(this Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            if (registrant.IsMaster)
+                return registrant.GetRegistrationsFromMaster(msgs, dc);
+
             return Registration.LoadByRegistrantId(registrant.ID.Value, msgs, dc: dc);
+        }
+
+        public static Registration GetRegistrationWithParticipationObject(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var registrations = registrant.GetRegistrations(msgs, dc);
+
+            foreach(var registration in registrations.Where(registration => registration.AccountId == participationObject.OwnerAccount.ID)) {
+                if (registration.GetParticipationObjects(msgs, dc).Any(po => po.IsMatch(participationObject)))
+                    return registration;
+            };
+
+            return null;
         }
 
         public static List<Registrant> FindRelatedRegistrants(this Registrant registrant, string firstName = null, string lastName = null, string email = null, SystemMessages msgs = null, DatabaseConnection dc = null)
