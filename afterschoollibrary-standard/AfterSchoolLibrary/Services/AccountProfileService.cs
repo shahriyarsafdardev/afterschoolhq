@@ -52,6 +52,16 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
+        public static string GetHeaderImageUrl(this AccountProfile profile, SystemMessages msgs = null)
+        {
+            return Helpers.Utilities.GetNewAmazonHelper().GetFileLink(profile.HeaderImage, true, null, true);
+        }
+
+        public static string GetLogoUrl(this AccountProfile profile, SystemMessages msgs = null)
+        {
+            return Helpers.Utilities.GetNewAmazonHelper().GetFileLink(profile.Logo, true, null, true);
+        }
+
         public static List<AccountProperty> GetAwards(this AccountProfile profile, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return AccountProperty.LoadByAccountIdByAccountPropertyTypeId(profile.AccountId.Value, AccountPropertyType.Award, msgs, dc);

@@ -1,6 +1,33 @@
 ﻿@model Account
-<div class="reg-header">
+
+@{
+    var regHeaderStyle = "";
+    var profile = Model.GetAccountProfile();
+    var showLogo = false;
+    var logoUrl = "";
+
+    if (profile.HeaderImage.IsNotEmpty())
+    {
+        regHeaderStyle = $"background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url({profile.GetHeaderImageUrl()})";
+    }
+
+    if (profile.Logo.IsNotEmpty())
+    {
+        showLogo = true;
+        logoUrl = profile.GetLogoUrl();
+    }
+}
+
+<div class="reg-header" style="@regHeaderStyle">
     <div class="reg-header-overlay">
+
+        @if (showLogo)
+        {
+            <div class="reg-header-logo">
+                <img src="@logoUrl" />
+            </div>
+        }
+
         <h1 class="activity-title text-center">
             <span>@Model.Name</span>
             @if (ViewBag.Session != null)
@@ -12,5 +39,12 @@
                 <span class="badge badge-danger">DEMO</span>
             }
         </h1>
+
+        @if (profile.Headline.IsNotEmpty())
+        {
+            <p class="reg-header-headline">
+                @profile.Headline
+            </p>
+        }
     </div>
 </div>

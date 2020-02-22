@@ -24,6 +24,10 @@ body.registration {
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
+    min-height: 400px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 /*
@@ -34,6 +38,21 @@ body.registration {
 */
 
 .reg-header-overlay {
+}
+
+.reg-header-logo{
+    margin: auto;
+}
+
+.reg-header-logo > img {
+    max-height: 100px;
+    margin: auto;
+    display: block;
+}
+
+.reg-header-headline {
+    text-align: center;
+    font-size: 1.25em;
 }
 
 .activity-title {
@@ -54,7 +73,7 @@ body.registration {
 
 .search-field {
     background: #fff;
-    border-radius: 26px;
+    border-radius: 10px;
     color: #777777;
     border: 2px solid #eaeaea;
 }
@@ -64,7 +83,7 @@ body.registration {
 }
 
 .reg-form-control {
-    border-radius: 30px;
+    border-radius: 10px;
 }
 
 .panel-h3 {
