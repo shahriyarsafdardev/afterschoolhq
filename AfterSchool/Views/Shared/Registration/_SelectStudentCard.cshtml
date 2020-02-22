@@ -14,7 +14,7 @@
 
     var disabledText = "";
     var btnText = "";
-    var btnUrl = $"javascript:checkEligibility('Model.Uid', '{Url.Action("setstudent", "account", new { id = Model.Uid })}', 'btn-register-{Model.Uid}')";
+    var btnUrl = $"javascript:checkEligibility('{Model.Uid}', '{Url.Action("setstudent", "account", new { id = Model.Uid })}', 'btn-register-{Model.Uid}')";
 
     if (Model.HasSubmittedFor(participationObject, null))
     {
