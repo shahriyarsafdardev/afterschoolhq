@@ -39,6 +39,11 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
+        public static Account GetAccount(this AccountProfile profile, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Account.Load(profile.AccountId.Value, msgs, dc);
+        }
+
         public static void UploadHeaderImage(this AccountProfile profile, Account account, System.IO.Stream stream, string filename, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var ah = Helpers.Utilities.GetNewAmazonHelper();
@@ -54,12 +59,18 @@ namespace AfterSchoolLibrary.Services
 
         public static string GetHeaderImageUrl(this AccountProfile profile, SystemMessages msgs = null)
         {
-            return Helpers.Utilities.GetNewAmazonHelper().GetFileLink(profile.HeaderImage, true, null, true);
+            if (profile.HeaderImage.IsNotBlank())
+                return Helpers.Utilities.GetNewAmazonHelper().GetFileLink(profile.HeaderImage, true, null, true);
+
+            return null;
         }
 
         public static string GetLogoUrl(this AccountProfile profile, SystemMessages msgs = null)
         {
-            return Helpers.Utilities.GetNewAmazonHelper().GetFileLink(profile.Logo, true, null, true);
+            if (profile.Logo.IsNotBlank())
+                return Helpers.Utilities.GetNewAmazonHelper().GetFileLink(profile.Logo, true, null, true);
+
+            return null;
         }
 
         public static List<AccountProperty> GetAwards(this AccountProfile profile, SystemMessages msgs, DatabaseConnection dc = null)

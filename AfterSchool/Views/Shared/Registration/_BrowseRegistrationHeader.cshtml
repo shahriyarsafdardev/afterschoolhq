@@ -1,20 +1,19 @@
-﻿@model Account
+﻿@model RegistrationHeaderViewModel
 
 @{
     var regHeaderStyle = "";
-    var profile = Model.GetAccountProfile();
     var showLogo = false;
     var logoUrl = "";
 
-    if (profile.HeaderImage.IsNotEmpty())
+    if (Model.HeaderUrl.IsNotEmpty())
     {
-        regHeaderStyle = $"background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url({profile.GetHeaderImageUrl()})";
+        regHeaderStyle = $"background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url({Model.HeaderUrl})";
     }
 
-    if (profile.Logo.IsNotEmpty())
+    if (Model.LogoUrl.IsNotEmpty())
     {
         showLogo = true;
-        logoUrl = profile.GetLogoUrl();
+        logoUrl = Model.LogoUrl;
     }
 }
 
@@ -29,7 +28,7 @@
         }
 
         <h1 class="activity-title text-center">
-            <span>@Model.Name</span>
+            <span>@Model.Title</span>
             @if (ViewBag.Session != null)
             {
                 @: - @(((ParticipationObject)ViewBag.Session).Name)
@@ -40,10 +39,10 @@
             }
         </h1>
 
-        @if (profile.Headline.IsNotEmpty())
+        @if (Model.Headline.IsNotEmpty())
         {
             <p class="reg-header-headline">
-                @profile.Headline
+                @Model.Headline
             </p>
         }
     </div>
