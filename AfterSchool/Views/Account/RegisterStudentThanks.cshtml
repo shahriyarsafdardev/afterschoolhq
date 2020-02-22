@@ -7,7 +7,7 @@
     var registration = (Registration)ViewBag.Registration;
     var registrant = registration.GetRegistrant();
     var assignmentType = registration.GetRegistrantActivities().First().AssignmentTypeId;
-    var participationObject = registration.GetParticipationObject();
+    var participationObject = registration.GetParticipationObjects().FirstOrDefault();
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
