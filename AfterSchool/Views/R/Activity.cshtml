@@ -17,24 +17,13 @@
             { "CanPublishActivity", ViewBag.CanPublishActivity },
             { "ParticipationObject", Model },
             { "Session", session }
-        }
+                }
     );
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-<div class="reg-header text-center">
-    <h1 class="activity-title">
-        @Model.Name
-        @if (!Model.OwnerAccount.ID.HasValue)
-        {
-            <span class="badge badge-danger">DEMO</span>
-        }
-    </h1>
-    <div class="activity-headline">
-        @Model.Description
-    </div>
-</div>
+@{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", new RegistrationHeaderViewModel(Model)); }
 
 <div>
     <div class="col-md-8 col-md-offset-2 participation-object participation-object-detail"
@@ -59,7 +48,7 @@
                             {
                                 <span>
                                     @ParticipationObjectUI.PrintDaysOfWeekOrStartDate(Model) &bull;
-                                </span>                            
+                                </span>
                             }
 
                             @if (!Model.ActivityType.HasValue || Model.ActivityType.Value.NotIn(new ActivityType[] { ActivityType.PermissionSlip, ActivityType.FieldTrip }))
@@ -82,7 +71,7 @@
                                    { "condensed", true },
                                    { "canRegisterFor", ViewBag.CanRegisterFor },
                                    { "session", session }
-                               }
+               }
                             );
                         }
                     </div>

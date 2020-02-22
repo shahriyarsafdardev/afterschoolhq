@@ -23,6 +23,7 @@ namespace AfterSchoolLibrary.Models
 		public string HeaderImage { get { return (string)MDV["HeaderImage"].Value; } set { MDV["HeaderImage"].Value = value; } }
 		public string Headline { get { return (string)MDV["Headline"].Value; } set { MDV["Headline"].Value = value; } }
 		public string About { get { return (string)MDV["About"].Value; } set { MDV["About"].Value = value; } }
+		public string PrimaryColor { get { return (string)MDV["PrimaryColor"].Value; } set { MDV["PrimaryColor"].Value = value; } }
 		
 
         public AccountProfile()
@@ -44,6 +45,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "HeaderImage", System.Data.SqlDbType.NVarChar , "400");
 				_dp.Add(className, "Headline", System.Data.SqlDbType.NVarChar , "400");
 				_dp.Add(className, "About", System.Data.SqlDbType.NVarChar , "4000");
+				_dp.Add(className, "PrimaryColor", System.Data.SqlDbType.NVarChar , "20");
 				
                 return _dp;
             }
@@ -135,6 +137,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["About"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["PrimaryColor"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

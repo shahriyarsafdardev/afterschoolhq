@@ -90,18 +90,30 @@
 
                     <div class="form-group">
                         <label class="col-md-3 control-label">
+                            Profile Primary Color
+                        </label>
+                        <div class="col-md-9">
+                            <input type="text" class="form-control" name="primarycolor" id="primarycolor" value="@Model.PrimaryColor" />
+                            <p class="text-muted">
+                                <em>Enter your primary color for your profile</em>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">
                             About @SessionVariables.CurrentAccount.Name
                         </label>
                         <div class="col-md-9">
                             @{ Html.RenderPartial(
-                                "~/Views/Shared/_TextEditor.cshtml",
-                                Model.About,
-                                new ViewDataDictionary() {
+                                 "~/Views/Shared/_TextEditor.cshtml",
+                                 Model.About,
+                                 new ViewDataDictionary() {
                                     { "required", false },
                                     { "name", "about" },
                                     { "id", "about" }
-                                }
-                                ); }
+             }
+                                 ); }
 
                             <p class="text-muted">
                                 <em>Tell us what is special about what you do. Max of 1000 characters</em>

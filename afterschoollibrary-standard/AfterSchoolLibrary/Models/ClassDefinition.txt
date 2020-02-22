@@ -369,6 +369,7 @@ property: Logo, string, NVarChar "400"
 property: HeaderImage, string, NVarChar "400"
 property: Headline, string, NVarChar "400"
 property: About, string, NVarChar "4000"
+property: PrimaryColor, string, NVarChar "20"
 loadmethod: AccountId
 [end]
 

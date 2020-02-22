@@ -2,7 +2,6 @@
 
 @{
     var regHeaderStyle = "";
-    var showLogo = false;
     var logoUrl = "";
 
     if (Model.HeaderUrl.IsNotEmpty())
@@ -12,7 +11,6 @@
 
     if (Model.LogoUrl.IsNotEmpty())
     {
-        showLogo = true;
         logoUrl = Model.LogoUrl;
     }
 }
@@ -20,7 +18,7 @@
 <div class="reg-header" style="@regHeaderStyle">
     <div class="reg-header-overlay">
 
-        @if (showLogo)
+        @if (logoUrl.IsNotBlank())
         {
             <div class="reg-header-logo">
                 <img src="@logoUrl" />
@@ -29,11 +27,11 @@
 
         <h1 class="activity-title text-center">
             <span>@Model.Title</span>
-            @if (ViewBag.Session != null)
+            @if (Model.SessionName.IsNotEmpty())
             {
                 @: - @(((ParticipationObject)ViewBag.Session).Name)
             }
-            @if (!Model.ID.HasValue)
+            @if (Model.IsDemo)
             {
                 <span class="badge badge-danger">DEMO</span>
             }

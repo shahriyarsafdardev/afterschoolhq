@@ -627,6 +627,7 @@
     <Compile Include="Models\PaymentsEntityViewModel.cs" />
     <Compile Include="Models\RebornImage.cs" />
     <Compile Include="Models\RegistrantImportField.cs" />
+    <Compile Include="Models\RegistrationHeaderViewModel.cs" />
     <Compile Include="Models\RollbarExceptionFilter.cs" />
     <Compile Include="Models\SessionHelper.cs" />
     <Compile Include="Models\CookieVariables.cs" />

@@ -22,13 +22,11 @@
         new ViewDataDictionary()
         {
             { "ParticipationObject", Model }
-                }
+                        }
     );
 }
 
-<div class="reg-header">
-    <h1 class="text-center">Registering <u>@SessionVariables.CurrentRegistrant.FirstName</u> for <u>@Model.Name</u></h1>
-</div>
+@{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", new RegistrationHeaderViewModel(Model, $"Registering <u>{SessionVariables.CurrentRegistrant.FirstName}</u> for <u>{Model.Name}</u>", "")); }
 
 <div>
     <div class="col-md-12">
@@ -111,6 +109,6 @@
         new ViewDataDictionary()
         {
             { "IsDuringCheckout", true }
-                    }
+                                }
     );
 }

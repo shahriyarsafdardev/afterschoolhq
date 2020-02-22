@@ -18,11 +18,11 @@
         {
             { "ParticipationObject", participationObject },
             { "IsDuringProfileSetup", true }
-        }
+                }
     );
 }
 
-@{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", participationObject); }
+@{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", new RegistrationHeaderViewModel(participationObject, true)); }
 
 <div>
     <div class="col-md-12">
@@ -81,7 +81,7 @@
                                                     { "searchOnly", true },
                                                     { "placeholderText", "Enter your school name" },
                                                     { "locationType", (int)LocationType.School }
-                                }
+                }
                             );
                         }
 
@@ -120,6 +120,6 @@
         {
             { "IsDuringCheckout", true },
             { "AllowToModifyCart", false }
-        }
+                    }
     );
 }

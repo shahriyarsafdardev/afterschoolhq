@@ -8,7 +8,7 @@
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-@{ 
+@{
     Html.RenderPartial(
         "~/Views/Shared/Registration/_AccountTopBar.cshtml",
         SessionVariables.RegistrationStartPageAccount,
@@ -16,11 +16,11 @@
         {
             { "ParticipationObject", participationObject },
             { "IsDuringProfileSetup", true }
-        }
+                }
     );
 }
 
-@{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", participationObject); }
+@{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", new RegistrationHeaderViewModel(participationObject, true)); }
 
 <div>
     <div class="col-md-12">
@@ -89,6 +89,6 @@
         {
             { "IsDuringCheckout", true },
             { "AllowToModifyCart", false }
-        }
+                    }
     );
 }

@@ -83,7 +83,7 @@ namespace AfterSchoolLibrary.Services
             return AccountProperty.LoadByAccountIdByAccountPropertyTypeId(profile.AccountId.Value, AccountPropertyType.Certification, msgs, dc);
         }
 
-        public static void UpdateProfile(this AccountProfile profile, string headline, string about, NameValueCollection savedAwards, NameValueCollection newAwards, NameValueCollection savedCertifications, NameValueCollection newCertifications, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void UpdateProfile(this AccountProfile profile, string headline, string about, string primaryColor, NameValueCollection savedAwards, NameValueCollection newAwards, NameValueCollection savedCertifications, NameValueCollection newCertifications, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
             (
@@ -94,6 +94,9 @@ namespace AfterSchoolLibrary.Services
 
                     if (about.IsNotBlank())
                         profile.About = about.MaxChars(1000);
+
+                    if (primaryColor.IsNotBlank())
+                        profile.PrimaryColor = primaryColor.MaxChars(20);
 
                     amsgs.AddRange(profile.Save(adc));
 

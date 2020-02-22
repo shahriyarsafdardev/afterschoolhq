@@ -919,7 +919,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult Style(string id, string logo, string headerimage, string about, string headline)
+        public ActionResult Style(string id, string logo, string headerimage, string about, string headline, string primaryColor)
         {
             var msgs = new SystemMessages();
             var profile = SessionVariables.CurrentAccount.GetAccountProfile(msgs);
@@ -967,6 +967,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 profile.UpdateProfile(
                     headline,
                     about,
+                    primaryColor,
                     Request.Params.Filter("award-id-"),
                     Request.Params.Filter("award-new-"),
                     Request.Params.Filter("certification-id-"),

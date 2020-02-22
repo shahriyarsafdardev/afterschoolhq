@@ -36,12 +36,7 @@
     }
 }
 
-<div class="reg-header">
-    <h1>@participationObject.Name Payment</h1>
-    <div>
-        Please submit payment to finalize your registration
-    </div>
-</div>
+@{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", new RegistrationHeaderViewModel(participationObject, $"{participationObject.Name} Payment", "Please submit payment to finalize your registration")); }
 
 <div>
     <div class="col-md-12">
@@ -84,7 +79,7 @@
                                     <div class="am-radio">
                                         <input type="radio" name="paymentoption" id="paymentoption-@plan.ID" class="payment-option-radio" value="@plan.ID" />
                                         <label for="paymentoption-@plan.ID">
-                                            Pay <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong> 
+                                            Pay <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong>
 
                                             @Html.Raw(startToday ? "<strong>today</strong>" : $"on <strong>{planStartDate.ToLongDateString()}</strong>")
 
@@ -93,7 +88,7 @@
                                                 <span>
                                                     and
                                                     <strong>@(plan.TotalPeriods - 1)</strong> more payment@(plan.TotalPeriods > 2 ? "s" : "") of
-                                                    <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong> 
+                                                    <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong>
                                                     @if (plan.TotalPeriods > 2)
                                                     {
                                                         <span>
@@ -109,7 +104,7 @@
                                                     }
                                                 </span>
                                             }
-                                            
+
                                             @PrintSubscriptionCost(subscriptionPlan, participationObject)
                                         </label>
                                         <span id="payment-plan-cost-@plan.ID" class="hide">@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount)</span>
@@ -120,7 +115,7 @@
 
                                 <hr />
                             </div>
-                        </div>                        
+                        </div>
                     }
                     else if (subscriptionPlan.IsNotEmpty())
                     {
@@ -261,7 +256,7 @@
                 </div>
 
                 <div class="margin-t-20 padding-v-20">
-                
+
                     @if (acceptACH)
                     {
                         <div id="payment-info-ach">

@@ -25,17 +25,11 @@
         new ViewDataDictionary()
         {
             { "ParticipationObject", participationObject }
-                }
+                        }
     );
 }
 
-
-<div class="reg-header">
-    <div class="text-center">
-        <h1>Complete registration for <u>@participationObject.Name</u></h1>
-        <p>Please select which student you&#39;d like to register below.</p>
-    </div>
-</div>
+@{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", new RegistrationHeaderViewModel(participationObject, $"Complete registration for <u>{participationObject.Name}</u>", "Please select which student you'd like to register below.")); }
 
 <div>
 
@@ -58,6 +52,6 @@
         new ViewDataDictionary()
         {
             { "IsDuringCheckout", true }
-                    }
+                                }
     );
 }

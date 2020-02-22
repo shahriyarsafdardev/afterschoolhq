@@ -10,24 +10,18 @@
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-@{ 
+@{
     Html.RenderPartial(
         "~/Views/Shared/Registration/_AccountTopBar.cshtml",
         SessionVariables.RegistrationStartPageAccount,
         new ViewDataDictionary()
         {
             { "ParticipationObject", Model }
-        }
+                }
     );
 }
 
-<div class="reg-header">
-    <div>        
-        <div>
-            <h1 class="text-center">You are registering for: @Model.Name</h1>
-        </div>
-    </div>
-</div>
+@{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", new RegistrationHeaderViewModel(Model, true)); }
 
 <div>
     <div class="am-content">
@@ -44,14 +38,14 @@
                             You've already registered for @Model.Name
                         </p>
 
-                          <div class="padding-v-20">
+                        <div class="padding-v-20">
                             <a href="@SessionVariables.RegistrationStartPageAccount.HomePageUrl" class="btn btn-register btn-lg">&laquo; View More Activities</a>
                         </div>
                     }
                     else
-                    { 
+                    {
                         <form method="post" id="register-form" class="form-horizontal" action="@Url.Action("RegisterStudent", "account")">
-                            
+
                             @if (sessionActivities.IsNotEmpty() && sessionActivities.Any())
                             {
                                 Html.RenderPartial(
@@ -109,6 +103,6 @@
         new ViewDataDictionary()
         {
             { "IsDuringCheckout", true }
-        }
+                    }
     );
 }
