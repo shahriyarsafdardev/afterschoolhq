@@ -74,7 +74,7 @@
                                 }
                                 <a href="@dashboardUrl" class="btn btn-link">View @accountOrDashboard</a>
 
-                                if (SessionVariables.LoggedInUser.HasMultipleAccounts())
+                                if (SessionVariables.CurrentUser.HasMultipleAccounts())
                                 {
                                     <a href="@Url.Action("switch", "logout", new { returnurl = returnUrl })" class="btn btn-link">Switch Accounts</a>
                                 }
