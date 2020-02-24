@@ -157,16 +157,32 @@ body.registration {
 }
 
 .btn-register, .btn-register-default {
-    background: #00ae85;
+    /* background: #00ae85;*/
+    background-color: #333;
     color: #fff;
     padding: 11px 0px;
     width: 100%;
-    border-radius: 24px;
+    border-radius: 10px;
     font-weight: 600;
     letter-spacing: 2.5px;
     text-transform: uppercase;
     word-break: break-word;
     margin: 5px 0px;
+    transition: all 0.3s;
+    border: none;
+}
+
+.btn-register:hover, .btn-register-default:hover {
+    /* background: #139476; */
+    background-color: #444;
+    color: #fff;
+    transition: all 0.3s;
+}
+
+.btn-register:active, .btn-register-default:active {
+    /* background: #139476; */
+    background-color: #444;
+    color: #fff;
     transition: all 0.3s;
 }
 
@@ -198,12 +214,6 @@ body.registration {
     transition: all 0.3s;
 }
 
-.btn-register:hover {
-    background: #139476;
-    color: #fff;
-    transition: all 0.3s;
-}
-
 .btn-waitlist:hover {
     background: #e59b41;
     color: #fff;
@@ -227,6 +237,21 @@ body.registration {
     min-height: 350px;
     position: relative;
     border-radius: 10px;
+}
+
+.participation-object > .panel > .panel-h3 {
+    background-color: #e7e7e7;
+    height: 70px;
+}
+
+.participation-object > .panel > .panel-h3 > h3 {
+    vertical-align: middle;
+    display: table-cell;
+    width: 100%;
+    height: 70px;
+    padding-right: 20px;
+    color: #555;
+    font-size: 20px;
 }
 
 .participation-object > .panel > .panel-footer {
@@ -330,6 +355,10 @@ body.registration {
     top: -13px;
 }
 
+.participation-object-detail {
+    margin-top: -50px;
+}
+
 .participation-object-detail > .panel {
     border-radius: 10px;
     overflow: hidden;
@@ -345,3 +374,8 @@ body.registration {
     font-weight: bold;
 }
 
+.am-checkbox input[type="checkbox"]:checked + label:before, .am-radio input[type="checkbox"]:checked + label:before, .am-checkbox input[type="radio"]:checked + label:before, .am-radio input[type="radio"]:checked + label:before {
+    content: "\e6cd";
+    color: #333;
+    border-color: #333;
+}

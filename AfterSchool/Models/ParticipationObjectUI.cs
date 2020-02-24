@@ -25,6 +25,14 @@ namespace AfterSchool.Models
             return "No Location Available";
         }
 
+        public static string PrintLocation(Location location)
+        {
+            if (location.IsNotEmpty())
+                return location.FormatAddress();
+
+            return "No Location Available";
+        }
+
         public static string PrintTuitionFee(ParticipationObject participationObject, bool displayCheckoutPrice)
         {
             if (participationObject.Cost.HasValue)

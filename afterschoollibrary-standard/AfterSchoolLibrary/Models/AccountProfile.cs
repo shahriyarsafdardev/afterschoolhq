@@ -24,6 +24,9 @@ namespace AfterSchoolLibrary.Models
 		public string Headline { get { return (string)MDV["Headline"].Value; } set { MDV["Headline"].Value = value; } }
 		public string About { get { return (string)MDV["About"].Value; } set { MDV["About"].Value = value; } }
 		public string PrimaryColor { get { return (string)MDV["PrimaryColor"].Value; } set { MDV["PrimaryColor"].Value = value; } }
+		public string Website { get { return (string)MDV["Website"].Value; } set { MDV["Website"].Value = value; } }
+		public int? GradeLevelStart { get { return (int?)MDV["GradeLevelStart"].Value; } set { MDV["GradeLevelStart"].Value = value; } }
+		public int? GradeLevelEnd { get { return (int?)MDV["GradeLevelEnd"].Value; } set { MDV["GradeLevelEnd"].Value = value; } }
 		
 
         public AccountProfile()
@@ -46,6 +49,9 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "Headline", System.Data.SqlDbType.NVarChar , "400");
 				_dp.Add(className, "About", System.Data.SqlDbType.NVarChar , "4000");
 				_dp.Add(className, "PrimaryColor", System.Data.SqlDbType.NVarChar , "20");
+				_dp.Add(className, "Website", System.Data.SqlDbType.NVarChar , "100");
+				_dp.Add(className, "GradeLevelStart", System.Data.SqlDbType.Int);
+				_dp.Add(className, "GradeLevelEnd", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
@@ -141,6 +147,18 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["PrimaryColor"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["Website"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["GradeLevelStart"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["GradeLevelEnd"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

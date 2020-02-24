@@ -468,7 +468,7 @@ div.filter-full-width > span {
 }
 
 .widget.widget-tile .icon {
-    color: #00b492; /*9cb6d8*/;
+    color: #00b492; /*9cb6d8;*/
 }
 
 .switch-button input[type="checkbox"]:checked + span {
@@ -547,7 +547,7 @@ div.filter-full-width > span {
 }
 
 .panel-alt6 .panel-heading, .panel-full-alt6 .panel-heading {
-    background-color: #2f3c40;
+    background-color: #e7e7e7; /*#2f3c40;*/
     margin: 0;
     padding-left: 20px;
     padding-right: 20px;

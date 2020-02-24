@@ -146,6 +146,7 @@ namespace AfterSchool.Controllers
                 qvms.Find(item => item.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone).Value = SessionVariables.CurrentUser.Phone;
 
             ViewBag.RegistrationAccount = registrationAccount;
+            ViewBag.AccountProfile = registrationAccount.GetAccountProfile(msgs);
             ViewBag.Messages = msgs;
 
             return View(qvms);

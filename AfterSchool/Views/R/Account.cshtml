@@ -1,0 +1,149 @@
+﻿@model Account
+@{
+    Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
+    ViewBag.Title = Model.Name;
+
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var accountProfile = (AccountProfile)ViewBag.AccountProfile;
+    var location = (Location)ViewBag.Location;
+    var awards = (List<AccountProperty>)ViewBag.Awards;
+    var certifications = (List<AccountProperty>)ViewBag.Certifications;
+    var gradeLevelStart = (GradeLevel)ViewBag.GradeLevelStart;
+    var gradeLevelEnd = (GradeLevel)ViewBag.GradeLevelEnd;
+}
+
+@{
+    Html.RenderPartial(
+        "~/Views/Shared/Registration/_AccountTopBar.cshtml",
+        Model,
+        new ViewDataDictionary()
+        {
+            { "LoginReturnUrl", Model.HomePageUrl }
+                }
+    );
+}
+
+@{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+@{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", new RegistrationHeaderViewModel(Model, (AccountProfile)ViewBag.AccountProfile)); }
+
+<div>
+    <div class="col-md-8 col-md-offset-2 participation-object participation-object-detail">
+
+        <div class="panel panel-alt6">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-8 col-md-12">
+                        <h3 class="text-center">
+                            Serving @gradeLevelStart.Name - @gradeLevelEnd.Name Grade
+                        </h3>
+                    </div>
+                    <div class="col-lg-4 col-md-12">
+                        <a href="@Model.BrowseUrl" class="btn btn-register btn-block">
+                            View All Activities
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+
+                <div class="col-md-8">
+
+                    <div class="activity-detail-block">
+                        <h3>About</h3>
+                        @Html.Raw(accountProfile.About)
+                    </div>
+
+                </div>
+                <div class="col-md-4">
+
+                    @if (awards.Any())
+                    {
+                        <div class="activity-detail-block">
+                            <strong>Awards</strong>
+                            <ul>
+                                @foreach (var award in awards.Where(x => x.Value.IsNotEmpty()))
+                                {
+                                    <li>@award.Value</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+
+                    @if (certifications.Any())
+                    {
+                        <div class="activity-detail-block">
+                            <strong>Certifications</strong>
+                            <ul>
+                                @foreach (var certification in certifications.Where(x => x.Value.IsNotEmpty()))
+                                {
+                                    <li>@certification.Value</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+
+                    <div class="activity-detail-block">
+                        <h3>Contact</h3>
+                        <p>
+                            @if (Model.Phone.IsNotBlank())
+                            {
+                                <span>@Model.Phone</span><br />
+                            }
+                            <a href="mailto:@Model.Email)">Send Email</a><br />
+
+                            @if (accountProfile.Website.IsNotEmpty())
+                            {
+                                <a href="@(accountProfile.Website.StartsWith("http") ? "" : "https://")@accountProfile.Website" target="_blank">Visit Website</a><br />
+                            }
+                        </p>
+                    </div>
+                </div>
+
+                <div class="margin-b-20">
+                    &nbsp;
+                </div>
+
+                <hr />
+
+                @if (location.IsNotEmpty())
+                {
+                    <div class="margin-t-20">
+                        <div class="col-md-12">
+                            <div class="activity-detail-block">
+                                <div class="row">
+                                    <div>
+                                        <h3>Location</h3>
+                                    </div>
+                                    <div>
+                                        <p>
+                                            @ParticipationObjectUI.PrintLocation(location)
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="position: relative; margin-left: -20px; margin-right: -20px">
+                            <iframe width="100%" height="300" frameborder="0" style="border:0"
+                                    src="https://www.google.com/maps/embed/v1/place?q=@Url.Encode($"{location.GetAddress()}")&key=AIzaSyAdjn8QBBStTz9TDAjZOyijAato7uzvjjk" allowfullscreen></iframe>
+                        </div>
+
+                    </div>
+                }
+
+                <div class="col-md-8 col-md-offset-2">
+                    <div class="margin-v-30">
+                        <a href="@Model.BrowseUrl" class="btn btn-register btn-block">
+                            View All Activities
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-footer">
+                <p class="text-center">
+                    Test
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

@@ -904,6 +904,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (profile.HeaderImage.IsNotBlank())
                 ViewBag.HeaderImageUrl = ah.GetFileLink(profile.HeaderImage, true, null, true);
 
+            ViewBag.Grades = GradeLevel.Load();
             ViewBag.Awards = awards;
             ViewBag.Certifications = certifications;
 
@@ -919,7 +920,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult Style(string id, string logo, string headerimage, string about, string headline, string primaryColor)
+        public ActionResult Style(string id, string logo, string headerimage, string about, string headline, string primaryColor, string website, string mingrade, string maxgrade)
         {
             var msgs = new SystemMessages();
             var profile = SessionVariables.CurrentAccount.GetAccountProfile(msgs);
@@ -941,6 +942,9 @@ namespace AfterSchool.Areas.Org.Controllers
                     Request.Files["headerimage"].ContentLength > maxSizeInBytes)
                     msgs.Add("Please upload a valid jpg or png file", MessageType.UserError);
             }
+
+            if (website.IsNotEmpty() && !website.IsRegExMatch(BasicLibrary.Utilities.WebsiteRegEx))
+                msgs.Add("Please enter a valid website address", MessageType.UserError);
 
             if (msgs.HasNoErrors())
             {
@@ -968,6 +972,9 @@ namespace AfterSchool.Areas.Org.Controllers
                     headline,
                     about,
                     primaryColor,
+                    website,
+                    mingrade,
+                    maxgrade,
                     Request.Params.Filter("award-id-"),
                     Request.Params.Filter("award-new-"),
                     Request.Params.Filter("certification-id-"),
@@ -975,6 +982,9 @@ namespace AfterSchool.Areas.Org.Controllers
                     SessionVariables.LoggedInUser,
                     msgs);
             }
+
+            if (msgs.HasNoErrors())
+                msgs.Add("Saved Successfully", MessageType.Success);
 
             return View(StyleViewBag(msgs));
         }

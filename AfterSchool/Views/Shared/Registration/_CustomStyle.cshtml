@@ -1,0 +1,38 @@
+﻿@model AccountProfile
+
+@{ 
+    var color = Model?.PrimaryColor.TrimStart('#');
+}
+
+@if (color.IsNotEmpty() && false)
+{
+    <style>
+        .btn-register{
+            border-color: #@color; 
+            background-color: #@color;
+        }
+
+        .btn-register:hover{
+            border-color: #@color; 
+            background-color: #@color;
+        }
+
+        .btn-register-default{
+            border-color: #@color;
+            background-color: #@color;
+        }
+
+        .btn-register-default:hover{
+            border-color: #@color; 
+            background-color: #@color;
+        }
+
+        a {
+            color: #@color;
+        }
+
+        a:hover {
+            color: #@color;
+        }
+    </style>
+}

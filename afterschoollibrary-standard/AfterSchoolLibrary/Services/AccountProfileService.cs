@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Collections.Specialized;
+using System.Linq;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -73,17 +74,17 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        public static List<AccountProperty> GetAwards(this AccountProfile profile, SystemMessages msgs, DatabaseConnection dc = null)
+        public static List<AccountProperty> GetAwards(this AccountProfile profile, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return AccountProperty.LoadByAccountIdByAccountPropertyTypeId(profile.AccountId.Value, AccountPropertyType.Award, msgs, dc);
         }
 
-        public static List<AccountProperty> GetCertifications(this AccountProfile profile, SystemMessages msgs, DatabaseConnection dc = null)
+        public static List<AccountProperty> GetCertifications(this AccountProfile profile, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return AccountProperty.LoadByAccountIdByAccountPropertyTypeId(profile.AccountId.Value, AccountPropertyType.Certification, msgs, dc);
         }
 
-        public static void UpdateProfile(this AccountProfile profile, string headline, string about, string primaryColor, NameValueCollection savedAwards, NameValueCollection newAwards, NameValueCollection savedCertifications, NameValueCollection newCertifications, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void UpdateProfile(this AccountProfile profile, string headline, string about, string primaryColor, string website, string mingrade, string maxgrade, NameValueCollection savedAwards, NameValueCollection newAwards, NameValueCollection savedCertifications, NameValueCollection newCertifications, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
             (
@@ -97,6 +98,15 @@ namespace AfterSchoolLibrary.Services
 
                     if (primaryColor.IsNotBlank())
                         profile.PrimaryColor = primaryColor.MaxChars(20);
+
+                    if (website.IsNotBlank())
+                        profile.Website = website.MaxChars(400);
+
+                    if (mingrade.IsInteger())
+                        profile.GradeLevelStart = mingrade.ToInteger();
+
+                    if (maxgrade.IsInteger())
+                        profile.GradeLevelEnd = maxgrade.ToInteger();
 
                     amsgs.AddRange(profile.Save(adc));
 
@@ -121,18 +131,21 @@ namespace AfterSchoolLibrary.Services
 
         public static void AddProperty(this AccountProfile profile, string value, AccountPropertyType propertyType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var property = new AccountProperty()
+            if (value.IsNotEmpty())
             {
-                AccountId = profile.AccountId,
-                CreatedBy = loggedInUser.ID,
-                CreateDate = DateTime.UtcNow,
-                LastModifiedBy = loggedInUser.ID,
-                LastModifiedDate = DateTime.UtcNow,
-                Value = value,
-                AccountPropertyTypeId = propertyType,
-            };
+                var property = new AccountProperty()
+                {
+                    AccountId = profile.AccountId,
+                    CreatedBy = loggedInUser.ID,
+                    CreateDate = DateTime.UtcNow,
+                    LastModifiedBy = loggedInUser.ID,
+                    LastModifiedDate = DateTime.UtcNow,
+                    Value = value,
+                    AccountPropertyTypeId = propertyType,
+                };
 
-            msgs.AddRange(property.Save(dc));
+                msgs.AddRange(property.Save(dc));
+            }
         }
 
         public static void UpdateProperites(NameValueCollection properties, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
@@ -156,6 +169,22 @@ namespace AfterSchoolLibrary.Services
             {
                 msgs.AddRange(property.Delete(dc));
             }
+        }
+
+        public static GradeLevel GetGradeLevelStart(this AccountProfile profile, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (profile.GradeLevelStart.HasValue)
+                return GradeLevel.Load(profile.GradeLevelStart.Value, msgs, dc);
+
+            return GradeLevel.Load(msgs: msgs, dc: dc).FirstOrDefault();
+        }
+
+        public static GradeLevel GetGradeLevelEnd(this AccountProfile profile, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (profile.GradeLevelEnd.HasValue)
+                return GradeLevel.Load(profile.GradeLevelEnd.Value, msgs, dc);
+
+            return GradeLevel.Load(msgs: msgs, dc: dc).LastOrDefault();
         }
     }
 }

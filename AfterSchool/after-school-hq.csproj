@@ -1659,7 +1659,7 @@
     <Content Include="Scripts\popper-utils.js.map" />
     <Content Include="Views\Shared\ActivityGroup\_Setup.cshtml" />
     <Content Include="Views\Shared\_ActivityGroups.cshtml" />
-    <Content Include="Views\R\Home.cshtml" />
+    <Content Include="Views\R\Account.cshtml" />
     <Content Include="Views\R\Browse.cshtml" />
     <Content Include="Views\R\Activity.cshtml" />
     <Content Include="Views\Account\GetStarted.cshtml" />
@@ -1747,6 +1747,7 @@
     <Content Include="Views\Shared\Registration\_SelectStudentCard.cshtml" />
     <Content Include="Views\Shared\Registration\_NewStudentCard.cshtml" />
     <Content Include="Views\Shared\Registration\_GradeIneligibility.cshtml" />
+    <Content Include="Views\Shared\Registration\_CustomStyle.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -17,13 +17,13 @@
             { "CanPublishActivity", ViewBag.CanPublishActivity },
             { "ParticipationObject", Model },
             { "Session", session }
-                }
+        }
     );
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-@{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", new RegistrationHeaderViewModel(Model)); }
+@{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", new RegistrationHeaderViewModel(Model, (AccountProfile)ViewBag.AccountProfile)); }
 
 <div>
     <div class="col-md-8 col-md-offset-2 participation-object participation-object-detail"
@@ -43,7 +43,7 @@
             <div class="panel-heading">
                 <div class="row">
                     <div class="col-lg-8 col-md-12">
-                        <h3 class="text-white text-center">
+                        <h3 class="text-center">
                             @if (Model.Schedule.IsNotEmpty())
                             {
                                 <span>
@@ -70,8 +70,9 @@
                                {
                                    { "condensed", true },
                                    { "canRegisterFor", ViewBag.CanRegisterFor },
-                                   { "session", session }
-               }
+                                   { "session", session },
+                                   { "accountprofile", ViewBag.AccountProfile }
+                                }
                             );
                         }
                     </div>

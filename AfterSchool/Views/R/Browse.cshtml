@@ -20,7 +20,12 @@
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-@{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", new RegistrationHeaderViewModel(Model, (ParticipationObject)ViewBag.Session)); }
+@{ Html.RenderPartial(
+       "~/Views/Shared/Registration/_RegistrationHeader.cshtml", 
+       new RegistrationHeaderViewModel(
+           Model, 
+           (AccountProfile)ViewBag.AccountProfile, 
+           (ParticipationObject)ViewBag.Session)); }
 
 @{ Html.RenderPartial("~/Views/Shared/Registration/_FirstTimeInformation.cshtml", Model); }
 
