@@ -323,6 +323,7 @@ namespace AfterSchoolLibrary.Helpers
                     Migrations.AddFieldTripsFeatureToSchools_20200126.Do(amsgs, adc);
                     Migrations.CleanUpExtraParentAccounts_20200215.Do(amsgs, adc);
                     Migrations.ReattachTransactionsToNonDeletedAccounts_20200216.Do(amsgs, adc);
+                    Migrations.FixTransactionsForDeletedAccounts_20200227.Do(amsgs, adc);
 
                     // amsgs.Add("rollback please", MessageType.Error);
 
