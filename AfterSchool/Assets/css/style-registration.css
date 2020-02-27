@@ -45,7 +45,7 @@ body.registration {
 }
 
 .reg-header-logo > img {
-    max-height: 100px;
+    height: 100px;
     margin: auto;
     display: block;
 }
@@ -362,6 +362,10 @@ body.registration {
 .participation-object-detail > .panel {
     border-radius: 10px;
     overflow: hidden;
+}
+
+.participation-object-detail > .panel > .panel-body{
+    padding-bottom: 60px;
 }
 
 .firsttime-information {

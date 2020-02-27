@@ -920,7 +920,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult Style(string id, string logo, string headerimage, string about, string headline, string primaryColor, string website, string mingrade, string maxgrade)
+        public ActionResult Style(string id, string logo, string headerimage, string about, string headline, string primaryColor, string website, string mingrade, string maxgrade, string twitter, string facebook, string instagram, string linkedin)
         {
             var msgs = new SystemMessages();
             var profile = SessionVariables.CurrentAccount.GetAccountProfile(msgs);
@@ -975,6 +975,10 @@ namespace AfterSchool.Areas.Org.Controllers
                     website,
                     mingrade,
                     maxgrade,
+                    twitter,
+                    facebook,
+                    instagram,
+                    linkedin,
                     Request.Params.Filter("award-id-"),
                     Request.Params.Filter("award-new-"),
                     Request.Params.Filter("certification-id-"),

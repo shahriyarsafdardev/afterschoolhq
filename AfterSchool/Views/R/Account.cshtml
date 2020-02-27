@@ -10,6 +10,7 @@
     var certifications = (List<AccountProperty>)ViewBag.Certifications;
     var gradeLevelStart = (GradeLevel)ViewBag.GradeLevelStart;
     var gradeLevelEnd = (GradeLevel)ViewBag.GradeLevelEnd;
+    var participationObjects = (List<ParticipationObject>)ViewBag.ParticipationObjects;
 }
 
 @{
@@ -55,6 +56,7 @@
                     </div>
 
                 </div>
+
                 <div class="col-md-4">
 
                     @if (awards.Any())
@@ -97,6 +99,25 @@
                                 <a href="@(accountProfile.Website.StartsWith("http") ? "" : "https://")@accountProfile.Website" target="_blank">Visit Website</a><br />
                             }
                         </p>
+
+                        <p class="padding-v-20">
+                            @if (accountProfile.Twitter.IsNotEmpty())
+                            {
+                                <a href="https://twitter.com/@(accountProfile.Twitter.TrimStart('@'))" target="_blank" class="icon-large margin-r-20"><i class="ion-social-twitter-outline"></i></a>
+                            }
+                            @if (accountProfile.Instagram.IsNotEmpty())
+                            {
+                                <a href="https://instagram.com/@(accountProfile.Instagram.TrimStart('@'))" target="_blank" class="icon-large margin-r-20"><i class="ion-social-instagram-outline"></i></a>
+                            }
+                            @if (accountProfile.Facebook.IsNotEmpty())
+                            {
+                                <a href="@accountProfile.Facebook" target="_blank" class="icon-large margin-r-20"><i class="ion-social-facebook-outline"></i></a>
+                            }
+                            @if (accountProfile.LinkedIn.IsNotEmpty())
+                            {
+                                <a href="@accountProfile.LinkedIn" target="_blank" class="icon-large margin-r-20"><i class="ion-social-linkedin-outline"></i></a>
+                            }
+                        </p>
                     </div>
                 </div>
 
@@ -104,18 +125,53 @@
                     &nbsp;
                 </div>
 
-                <hr />
+                @if (participationObjects.Any())
+                {
+                    <hr />
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="activity-detail-block">
+                                <h3 class="text-center">@UILabel.ActivityLabel(ActivityType.Activity, true) Open for Registration</h3>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div style="position: relative; margin-left: -20px; margin-right: -20px;">
+                            @foreach (var item in participationObjects.Take(3))
+                            {
+                                Html.RenderPartial("~/Views/Shared/Registration/_BrowseParticipationObject.cshtml", item);
+                            }
+                        </div>
+                    </div>
+
+                    <div class="clearfix"></div>
+
+                    <div class="row">
+                        <div class="col-md-8 col-md-offset-2">
+                            <div class="margin-v-30">
+                                <a href="@Model.BrowseUrl" class="btn btn-register btn-block">
+                                    View All Activities
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+
 
                 @if (location.IsNotEmpty())
                 {
+                    <hr />
+
                     <div class="margin-t-20">
                         <div class="col-md-12">
                             <div class="activity-detail-block">
                                 <div class="row">
                                     <div>
-                                        <h3>Location</h3>
+                                        <h3 class="text-center">Location</h3>
                                     </div>
-                                    <div>
+                                    <div class="text-center">
                                         <p>
                                             @ParticipationObjectUI.PrintLocation(location)
                                         </p>
@@ -130,14 +186,6 @@
 
                     </div>
                 }
-
-                <div class="col-md-8 col-md-offset-2">
-                    <div class="margin-v-30">
-                        <a href="@Model.BrowseUrl" class="btn btn-register btn-block">
-                            View All Activities
-                        </a>
-                    </div>
-                </div>
             </div>
             <div class="panel-footer">
                 <p class="text-center">

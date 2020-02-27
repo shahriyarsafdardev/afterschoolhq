@@ -373,6 +373,10 @@ property: PrimaryColor, string, NVarChar "20"
 property: Website, string, NVarChar "400"
 property: GradeLevelStart, int?, Int
 property: GradeLevelEnd, int?, Int
+property: Twitter, string, NVarChar "100"
+property: Facebook, string, NVarChar "100"
+property: Instagram, string, NVarChar "100"
+property: LinkedIn, string, NVarChar "100"
 loadmethod: AccountId
 [end]
 

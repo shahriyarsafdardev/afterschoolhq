@@ -36,6 +36,8 @@ namespace AfterSchoolLibrary.Services
             if (msgs.HasNoErrors())
             {
                 profile.Logo = amazonLocation;
+                profile.LastModifiedBy = loggedInUser.ID;
+                profile.LastModifiedDate = DateTime.UtcNow;
                 msgs.AddRange(profile.Save(dc));
             }
         }
@@ -54,6 +56,8 @@ namespace AfterSchoolLibrary.Services
             if (msgs.HasNoErrors())
             {
                 profile.HeaderImage = amazonLocation;
+                profile.LastModifiedBy = loggedInUser.ID;
+                profile.LastModifiedDate = DateTime.UtcNow;
                 msgs.AddRange(profile.Save(dc));
             }
         }
@@ -84,7 +88,7 @@ namespace AfterSchoolLibrary.Services
             return AccountProperty.LoadByAccountIdByAccountPropertyTypeId(profile.AccountId.Value, AccountPropertyType.Certification, msgs, dc);
         }
 
-        public static void UpdateProfile(this AccountProfile profile, string headline, string about, string primaryColor, string website, string mingrade, string maxgrade, NameValueCollection savedAwards, NameValueCollection newAwards, NameValueCollection savedCertifications, NameValueCollection newCertifications, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void UpdateProfile(this AccountProfile profile, string headline, string about, string primaryColor, string website, string mingrade, string maxgrade, string twitter, string facebook, string instagram, string linkedin, NameValueCollection savedAwards, NameValueCollection newAwards, NameValueCollection savedCertifications, NameValueCollection newCertifications, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
             (
@@ -107,6 +111,18 @@ namespace AfterSchoolLibrary.Services
 
                     if (maxgrade.IsInteger())
                         profile.GradeLevelEnd = maxgrade.ToInteger();
+
+                    if (twitter.IsNotEmpty())
+                        profile.Twitter = twitter;
+
+                    if (instagram.IsNotEmpty())
+                        profile.Instagram = instagram;
+
+                    if (facebook.IsNotEmpty())
+                        profile.Facebook = facebook;
+
+                    if (instagram.IsNotEmpty())
+                        profile.LinkedIn = linkedin;
 
                     amsgs.AddRange(profile.Save(adc));
 

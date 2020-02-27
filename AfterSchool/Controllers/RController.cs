@@ -59,8 +59,22 @@ namespace AfterSchool.Controllers
             ViewBag.GradeLevelStart = profile.GetGradeLevelStart(msgs);
             ViewBag.GradeLevelEnd = profile.GetGradeLevelEnd(msgs);
             ViewBag.Messages = msgs;
+            ViewBag.ParticipationObjects = GetParticipationObjects(account, msgs).Where(po => po.RegistrationPeriod.IsOpen(account, msgs)).ToList();
 
             return View(account);
+        }
+
+        private List<ParticipationObject> GetParticipationObjects(Account account, SystemMessages msgs)
+        {
+            var participationObjects = new List<ParticipationObject>();
+            participationObjects.AddRange(account.GetPublishedParticipationObjects(msgs));
+
+            return participationObjects
+                        .Where(po => (!po.IsActivity() || !po.GetActivity().ActivityGroupId.HasValue) && !po.IsInviteOnly)
+                        .OrderBy(po => po.RegistrationPeriod.IsClosed(account, msgs))
+                        .ThenBy(po => po.RegistrationPeriod.WillOpen(account, msgs))
+                        .ThenBy(po => po.RegistrationPeriod.IsOpen(account, msgs))
+                        .ToList();
         }
 
         [HttpGet]
@@ -85,15 +99,9 @@ namespace AfterSchool.Controllers
 
             if (account.IsNotEmpty())
             {
-                participationObjects.AddRange(account.GetPublishedParticipationObjects(msgs));
                 locations.AddRange(account.GetAllAvailableLocations(msgs));
 
-                participationObjects = participationObjects
-                                        .Where(po => (!po.IsActivity() || !po.GetActivity().ActivityGroupId.HasValue) && !po.IsInviteOnly)
-                                        .OrderBy(po => po.RegistrationPeriod.IsClosed(account, msgs))
-                                        .ThenBy(po => po.RegistrationPeriod.WillOpen(account, msgs))
-                                        .ThenBy(po => po.RegistrationPeriod.IsOpen(account, msgs))
-                                        .ToList();
+                participationObjects = GetParticipationObjects(account, msgs);
 
                 regOpened = participationObjects.Where(po => po.RegistrationPeriod.IsOpen(account, msgs)).ToList();
                 regWillOpen = participationObjects.Where(po => po.RegistrationPeriod.WillOpen(account, msgs)).ToList();

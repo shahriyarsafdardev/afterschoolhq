@@ -49,157 +49,224 @@
             <div class="panel-body">
                 <div class="col-md-8 col-lg-9">
 
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label">Logo</label>
-                        <div class="col-sm-6">
-                            <input type="file" class="form-control" name="logo" id="logo" />
-                            <p class="text-muted"><em>Please upload your logo. A square logo is best with a size of 400px x 400px. File size should be no larger than 1MB</em></p>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Design
                         </div>
-                        <div class="col-sm-3">
-                            @if (logoUrl.IsNotBlank())
-                            {
-                                <img src="@logoUrl" width="100" />
-                            }
-                        </div>
-                    </div>
+                        <div class="panel-body">
 
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label">Profile Header Image</label>
-                        <div class="col-sm-6">
-                            <input type="file" class="form-control" name="headerimage" id="headerimage" />
-                            <p class="text-muted"><em>Please select a header image, no larger than 2MB</em></p>
-                        </div>
-                        <div class="col-sm-3">
-                            @if (headerImageUrl.IsNotBlank())
-                            {
-                                <img src="@headerImageUrl" width="100" />
-                            }
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="col-md-3 control-label">
-                            Profile Headline
-                        </label>
-                        <div class="col-md-9">
-                            <input type="text" class="form-control" name="headline" id="headline" value="@Model.Headline" />
-                            <p class="text-muted">
-                                <em>Short tagline describing what you do. Max 100 characters. This will be placed right below your logo on your homepage</em>
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="col-md-3 control-label">
-                            Website Url
-                        </label>
-                        <div class="col-md-9">
-                            <input type="text" class="form-control" name="website" id="website" value="@Model.Website" />
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="col-md-3 control-label">
-                            Grades Served
-                        </label>
-                        <div class="col-md-9">
-                            <select id="mingrade" name="mingrade" class="form-control">
-                                @foreach (var grade in grades)
-                                {
-                                    <option value="@grade.ID" @(Model.GradeLevelStart == grade.ID ? " selected=\"selected\" " : "")>@grade.Name</option>
-                                }
-                            </select>
-                            <p class="margin-v-10">
-                                To
-                            </p>
-                            <select id="maxgrade" name="maxgrade" class="form-control">
-                                @foreach (var grade in grades)
-                                {
-                                    var selected = "";
-
-                                    if (Model.GradeLevelEnd == grade.ID || (!Model.GradeLevelEnd.HasValue && grade.ID == grades.Last().ID))
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">Logo</label>
+                                <div class="col-sm-6">
+                                    <input type="file" class="form-control" name="logo" id="logo" />
+                                    <p class="text-muted"><em>Please upload your logo. A square logo is best with a size of 400px x 400px. File size should be no larger than 1MB</em></p>
+                                </div>
+                                <div class="col-sm-3">
+                                    @if (logoUrl.IsNotBlank())
                                     {
-                                        selected = " selected=\"selected\" ";
+                                        <img src="@logoUrl" width="100" />
                                     }
-
-                                    <option value="@grade.ID" @selected)>@grade.Name</option>
-                                }
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group hide">
-                        <label class="col-md-3 control-label">
-                            Profile Primary Color
-                        </label>
-                        <div class="col-md-9">
-                            <input type="text" class="form-control" name="primarycolor" id="primarycolor" value="@Model.PrimaryColor" />
-                            <p class="text-muted">
-                                <em>Enter your primary color for your profile</em>
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="col-md-3 control-label">
-                            About @SessionVariables.CurrentAccount.Name
-                        </label>
-                        <div class="col-md-9">
-                            @{ Html.RenderPartial(
-                                   "~/Views/Shared/_TextEditor.cshtml",
-                                   Model.About,
-                                   new ViewDataDictionary() {
-                                    { "required", false },
-                                    { "name", "about" },
-                                    { "id", "about" }
-}
-                                   ); }
-
-                            <p class="text-muted">
-                                <em>Tell us what is special about what you do. Max of 1000 characters</em>
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label">Awards &amp; Accolades<br />(enter up to 5)</label>
-                        <div class="col-sm-9">
-                            @for (var i = 0; i < awards.Count; i++)
-                            {
-                                var id = $"new-{i}";
-
-                                if (awards[i].ID.HasValue)
-                                {
-                                    id = $"id-{awards[i].ID}";
-                                }
-
-                                <div class="input-group input-group-md xs-mb-15">
-                                    <span class="input-group-addon">@(i + 1)</span>
-                                    <span><input type="text" class="form-control" name="award-@id" id="award-@id" value="@awards[i].Value" /></span>
                                 </div>
-                            }
-                        </div>
-                    </div>
+                            </div>
 
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label">Certifications<br />(enter up to 5)</label>
-                        <div class="col-sm-9">
-                            @for (var i = 0; i < certifications.Count; i++)
-                            {
-                                var id = $"new-{i}";
-
-                                if (certifications[i].ID.HasValue)
-                                {
-                                    id = $"id-{certifications[i].ID}";
-                                }
-                                <div class="input-group input-group-md xs-mb-15">
-                                    <span class="input-group-addon">@(i + 1)</span>
-                                    <span><input type="text" class="form-control" name="certification-@id" id="certification-@id" value="@certifications[i].Value" /></span>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">Profile Header Image</label>
+                                <div class="col-sm-6">
+                                    <input type="file" class="form-control" name="headerimage" id="headerimage" />
+                                    <p class="text-muted"><em>Please select a header image, no larger than 2MB</em></p>
                                 </div>
-                            }
+                                <div class="col-sm-3">
+                                    @if (headerImageUrl.IsNotBlank())
+                                    {
+                                        <img src="@headerImageUrl" width="100" />
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="form-group hide">
+                                <label class="col-md-3 control-label">
+                                    Profile Primary Color
+                                </label>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" name="primarycolor" id="primarycolor" value="@Model.PrimaryColor" />
+                                    <p class="text-muted">
+                                        <em>Enter your primary color for your profile</em>
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Website &amp; Social Links
+                        </div>
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">
+                                    Website Url
+                                </label>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" name="website" id="website" value="@Model.Website" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">
+                                    Twitter Handle
+                                </label>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" name="twitter" id="twitter" value="@Model.Twitter" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">
+                                    Instagram Handle
+                                </label>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" name="instagram" id="instagram" value="@Model.Instagram" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">
+                                    Facebook Page Url
+                                </label>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" name="facebook" id="facebook" value="@Model.Facebook" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">
+                                    LinkedIn Url
+                                </label>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" name="linkedin" id="linkedin" value="@Model.LinkedIn" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            About Your Program
+                        </div>
+                        <div class="panel-body">
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">
+                                    Profile Headline
+                                </label>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" name="headline" id="headline" value="@Model.Headline" />
+                                    <p class="text-muted">
+                                        <em>Short tagline describing what you do. Max 100 characters. This will be placed right below your logo on your homepage</em>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">
+                                    About @SessionVariables.CurrentAccount.Name
+                                </label>
+                                <div class="col-md-9">
+                                    @{ Html.RenderPartial(
+                                        "~/Views/Shared/_TextEditor.cshtml",
+                                        Model.About,
+                                        new ViewDataDictionary() {
+                                            { "required", false },
+                                            { "name", "about" },
+                                            { "id", "about" }
+                                        }
+                                        ); }
+
+                                    <p class="text-muted">
+                                        <em>Tell us what is special about what you do. Max of 1000 characters</em>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">Awards &amp; Accolades<br />(enter up to 5)</label>
+                                <div class="col-sm-9">
+                                    @for (var i = 0; i < awards.Count; i++)
+                                    {
+                                        var id = $"new-{i}";
+
+                                        if (awards[i].ID.HasValue)
+                                        {
+                                            id = $"id-{awards[i].ID}";
+                                        }
+
+                                        <div class="input-group input-group-md xs-mb-15">
+                                            <span class="input-group-addon">@(i + 1)</span>
+                                            <span><input type="text" class="form-control" name="award-@id" id="award-@id" value="@awards[i].Value" /></span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">Certifications<br />(enter up to 5)</label>
+                                <div class="col-sm-9">
+                                    @for (var i = 0; i < certifications.Count; i++)
+                                    {
+                                        var id = $"new-{i}";
+
+                                        if (certifications[i].ID.HasValue)
+                                        {
+                                            id = $"id-{certifications[i].ID}";
+                                        }
+                                        <div class="input-group input-group-md xs-mb-15">
+                                            <span class="input-group-addon">@(i + 1)</span>
+                                            <span><input type="text" class="form-control" name="certification-@id" id="certification-@id" value="@certifications[i].Value" /></span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Additional Details
+                        </div>
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">
+                                    Grades Served
+                                </label>
+                                <div class="col-md-9">
+                                    <select id="mingrade" name="mingrade" class="form-control">
+                                        @foreach (var grade in grades)
+                                        {
+                                            <option value="@grade.ID" @(Model.GradeLevelStart == grade.ID ? " selected=\"selected\" " : "")>@grade.Name</option>
+                                        }
+                                    </select>
+                                    <p class="margin-v-10">
+                                        To
+                                    </p>
+                                    <select id="maxgrade" name="maxgrade" class="form-control">
+                                        @foreach (var grade in grades)
+                                        {
+                                            var selected = "";
+
+                                            if (Model.GradeLevelEnd == grade.ID || (!Model.GradeLevelEnd.HasValue && grade.ID == grades.Last().ID))
+                                            {
+                                                selected = " selected=\"selected\" ";
+                                            }
+
+                                            <option value="@grade.ID" @selected )>@grade.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                                        
                     @SubmitButtons()
 
                 </div>

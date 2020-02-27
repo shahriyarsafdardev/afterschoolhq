@@ -4,7 +4,7 @@
     var color = Model?.PrimaryColor.TrimStart('#');
 }
 
-@if (color.IsNotEmpty() && false)
+@if (color.IsNotEmpty())
 {
     <style>
         .btn-register{
@@ -33,6 +33,18 @@
 
         a:hover {
             color: #@color;
+        }
+    </style>
+}
+else
+{
+    <style>       
+        a {
+            color: #555;
+        }
+
+        a:hover {
+            color: #555;
         }
     </style>
 }
