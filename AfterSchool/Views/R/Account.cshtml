@@ -8,9 +8,11 @@
     var location = (Location)ViewBag.Location;
     var awards = (List<AccountProperty>)ViewBag.Awards;
     var certifications = (List<AccountProperty>)ViewBag.Certifications;
+    var photos = (List<AccountProperty>)ViewBag.Photos;
     var gradeLevelStart = (GradeLevel)ViewBag.GradeLevelStart;
     var gradeLevelEnd = (GradeLevel)ViewBag.GradeLevelEnd;
     var participationObjects = (List<ParticipationObject>)ViewBag.ParticipationObjects;
+    var takeActivities = participationObjects.Count >= 6 ? 6 : 3;
 }
 
 @{
@@ -20,7 +22,7 @@
         new ViewDataDictionary()
         {
             { "LoginReturnUrl", Model.HomePageUrl }
-                }
+        }
     );
 }
 
@@ -62,7 +64,7 @@
                     @if (awards.Any())
                     {
                         <div class="activity-detail-block">
-                            <strong>Awards</strong>
+                            <h3>Awards</h3>
                             <ul>
                                 @foreach (var award in awards.Where(x => x.Value.IsNotEmpty()))
                                 {
@@ -75,7 +77,7 @@
                     @if (certifications.Any())
                     {
                         <div class="activity-detail-block">
-                            <strong>Certifications</strong>
+                            <h3>Certifications</h3>
                             <ul>
                                 @foreach (var certification in certifications.Where(x => x.Value.IsNotEmpty()))
                                 {
@@ -127,38 +129,64 @@
 
                 @if (participationObjects.Any())
                 {
-                    <hr />
+                    <div>
+                        <hr />
                     
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="activity-detail-block">
-                                <h3 class="text-center">@UILabel.ActivityLabel(ActivityType.Activity, true) Open for Registration</h3>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="activity-detail-block">
+                                    <h3 class="text-center">@UILabel.ActivityLabel(ActivityType.Activity, true) Open for Registration</h3>
+                                </div>
                             </div>
                         </div>
-                    </div>
                     
-                    <div class="row">
-                        <div style="position: relative; margin-left: -20px; margin-right: -20px;">
-                            @foreach (var item in participationObjects.Take(3))
-                            {
-                                Html.RenderPartial("~/Views/Shared/Registration/_BrowseParticipationObject.cshtml", item);
-                            }
+                        <div class="row">
+                            <div style="position: relative; margin-left: -20px; margin-right: -20px;">
+                                @foreach (var item in participationObjects.Take(takeActivities))
+                                {
+                                    Html.RenderPartial("~/Views/Shared/Registration/_BrowseParticipationObject.cshtml", item);
+                                }
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="clearfix"></div>
+                        <div class="clearfix"></div>
 
-                    <div class="row">
-                        <div class="col-md-8 col-md-offset-2">
-                            <div class="margin-v-30">
-                                <a href="@Model.BrowseUrl" class="btn btn-register btn-block">
-                                    View All Activities
-                                </a>
+                        <div class="row">
+                            <div class="col-md-8 col-md-offset-2">
+                                <div class="margin-v-30">
+                                    <a href="@Model.BrowseUrl" class="btn btn-register btn-block">
+                                        View All Activities
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
                 }
 
+                @if (photos.Any())
+                {
+                    <div>
+                        <hr />
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="activity-detail-block">
+                                    <h3 class="text-center">Photos</h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div style="position: relative; margin-left: -20px; margin-right: -20px;">
+                                @foreach (var item in photos.Take(6))
+                                {
+                                    <div class="col-md-4">
+                                        <img src="@item.Value" width="100%" />
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
 
                 @if (location.IsNotEmpty())
                 {
@@ -189,7 +217,7 @@
             </div>
             <div class="panel-footer">
                 <p class="text-center">
-                    Test
+                    
                 </p>
             </div>
         </div>

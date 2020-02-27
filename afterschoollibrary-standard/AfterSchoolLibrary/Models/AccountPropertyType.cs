@@ -7,5 +7,6 @@ public enum AccountPropertyType
 	NoActivitiesText,
 	FacebookAdPixel,
 	Award,
-	Certification
+	Certification,
+	Photo
 }

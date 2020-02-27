@@ -50,7 +50,7 @@ namespace AfterSchoolLibrary.Services
         public static void UploadHeaderImage(this AccountProfile profile, Account account, System.IO.Stream stream, string filename, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var ah = Helpers.Utilities.GetNewAmazonHelper();
-            var amazonLocation = $"{account.UniqueName}/headerimage/{filename}";
+            var amazonLocation = BuildAmazonLocation(account, "headerimage", filename);
             msgs.AddRange(ah.AddFile(stream, amazonLocation, true));
 
             if (msgs.HasNoErrors())
@@ -60,6 +60,27 @@ namespace AfterSchoolLibrary.Services
                 profile.LastModifiedDate = DateTime.UtcNow;
                 msgs.AddRange(profile.Save(dc));
             }
+        }
+
+        public static void UploadGalleryPhoto(this AccountProfile profile, Account account, System.IO.Stream stream, string filename, string photoId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var ah = Helpers.Utilities.GetNewAmazonHelper();
+            var amazonLocation = BuildAmazonLocation(account, "photos", filename);
+            msgs.AddRange(ah.AddFile(stream, amazonLocation, true));
+
+            if (msgs.HasNoErrors())
+            {
+                if (photoId.IsNotEmpty())
+                    UpdateProperty(photoId.ToInteger(), amazonLocation, loggedInUser, msgs, dc);
+                else
+                    profile.AddProperty(amazonLocation, AccountPropertyType.Photo, loggedInUser, msgs, dc);                
+            }
+        }
+
+        private static string BuildAmazonLocation(Account account, string folder, string filename)
+        {
+            var ah = Helpers.Utilities.GetNewAmazonHelper();
+            return $"{account.UniqueName}/{folder}/{filename}";
         }
 
         public static string GetHeaderImageUrl(this AccountProfile profile, SystemMessages msgs = null)
@@ -88,6 +109,11 @@ namespace AfterSchoolLibrary.Services
             return AccountProperty.LoadByAccountIdByAccountPropertyTypeId(profile.AccountId.Value, AccountPropertyType.Certification, msgs, dc);
         }
 
+        public static List<AccountProperty> GetPhotos(this AccountProfile profile, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return AccountProperty.LoadByAccountIdByAccountPropertyTypeId(profile.AccountId.Value, AccountPropertyType.Photo, msgs, dc);
+        }
+
         public static void UpdateProfile(this AccountProfile profile, string headline, string about, string primaryColor, string website, string mingrade, string maxgrade, string twitter, string facebook, string instagram, string linkedin, NameValueCollection savedAwards, NameValueCollection newAwards, NameValueCollection savedCertifications, NameValueCollection newCertifications, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
@@ -98,7 +124,7 @@ namespace AfterSchoolLibrary.Services
                         profile.Headline = headline.MaxChars(400);
 
                     if (about.IsNotBlank())
-                        profile.About = about.MaxChars(1000);
+                        profile.About = about.MaxChars(4000);
 
                     if (primaryColor.IsNotBlank())
                         profile.PrimaryColor = primaryColor.MaxChars(20);
@@ -126,8 +152,8 @@ namespace AfterSchoolLibrary.Services
 
                     amsgs.AddRange(profile.Save(adc));
 
-                    UpdateProperites(savedAwards, loggedInUser, amsgs, adc);
-                    UpdateProperites(savedCertifications, loggedInUser, amsgs, adc);
+                    UpdateProperties(savedAwards, loggedInUser, amsgs, adc);
+                    UpdateProperties(savedCertifications, loggedInUser, amsgs, adc);
 
                     profile.AddProperties(newAwards, AccountPropertyType.Award, loggedInUser, amsgs, adc);
                     profile.AddProperties(newCertifications, AccountPropertyType.Certification, loggedInUser, amsgs, adc);
@@ -164,7 +190,7 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
-        public static void UpdateProperites(NameValueCollection properties, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void UpdateProperties(NameValueCollection properties, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             foreach (var key in properties.AllKeys)
                 UpdateProperty(key.Split('-')[2].ToInteger(), properties[key], loggedInUser, msgs, dc);

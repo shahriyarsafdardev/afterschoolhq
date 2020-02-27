@@ -51,11 +51,16 @@ namespace AfterSchool.Controllers
             SetRegistrationStartPage(account, true);
 
             var profile = account.GetAccountProfile(msgs);
+            var photos = profile.GetPhotos(msgs);
+            var ah = AfterSchoolLibrary.Helpers.Utilities.GetNewAmazonHelper();
+
+            photos.ForEach(photo => photo.Value = ah.GetFileLink(photo.Value, true, null, true));
 
             ViewBag.AccountProfile = profile;
             ViewBag.Location = account.GetDefaultLocation(msgs);
             ViewBag.Awards = profile.GetAwards(msgs);
             ViewBag.Certifications = profile.GetCertifications(msgs);
+            ViewBag.Photos = photos;
             ViewBag.GradeLevelStart = profile.GetGradeLevelStart(msgs);
             ViewBag.GradeLevelEnd = profile.GetGradeLevelEnd(msgs);
             ViewBag.Messages = msgs;

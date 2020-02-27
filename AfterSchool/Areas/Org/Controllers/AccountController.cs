@@ -889,12 +889,16 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var awards = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.Award);
             var certifications = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.Certification);
+            var photos = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.Photo);
 
             while (awards.Count < 5)
                 awards.Add(new AccountProperty());
 
             while (certifications.Count < 5)
                 certifications.Add(new AccountProperty());
+
+            while (photos.Count < 6)
+                photos.Add(new AccountProperty());
 
             var ah = AfterSchoolLibrary.Helpers.Utilities.GetNewAmazonHelper();
 
@@ -904,9 +908,12 @@ namespace AfterSchool.Areas.Org.Controllers
             if (profile.HeaderImage.IsNotBlank())
                 ViewBag.HeaderImageUrl = ah.GetFileLink(profile.HeaderImage, true, null, true);
 
+            photos.ForEach(photo => photo.Value = ah.GetFileLink(photo.Value, true, null, true));
+
             ViewBag.Grades = GradeLevel.Load();
             ViewBag.Awards = awards;
             ViewBag.Certifications = certifications;
+            ViewBag.Photos = photos;
 
             return profile;
         }
@@ -949,23 +956,47 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 if (logo.IsNotEmpty())
-                {
                     profile.UploadLogo(
                         SessionVariables.CurrentAccount,
                         Request.Files["logo"].InputStream,
                         Request.Files["logo"].FileName,
-                        SessionVariables.LoggedInUser,
+                        SessionVariables.CurrentUser,
                         msgs);
-                }
 
                 if (headerimage.IsNotEmpty())
-                {
                     profile.UploadHeaderImage(
                         SessionVariables.CurrentAccount,
                         Request.Files["headerimage"].InputStream,
                         Request.Files["headerimage"].FileName,
-                        SessionVariables.LoggedInUser,
+                        SessionVariables.CurrentUser,
                         msgs);
+
+                
+                foreach (var key in Request.Files.AllKeys.Where(key => key.Contains("photo-")))
+                {
+                    var file = Request.Files[key];
+                    if (file.IsNotEmpty() && file.FileName.IsNotBlank())
+                    {
+                        if (file.FileName.Contains(allowedFiles) && file.ContentLength <= maxSizeInBytes)
+                        {
+                            var photoId = "";
+
+                            if (!key.Contains("new"))
+                                photoId = key.Split('-')[2];
+
+                            profile.UploadGalleryPhoto(
+                                    SessionVariables.CurrentAccount,
+                                    Request.Files[key].InputStream,
+                                    Request.Files[key].FileName,
+                                    photoId,
+                                    SessionVariables.CurrentUser,
+                                    msgs);
+                        }
+                        else
+                        {
+                            msgs.Add("Please upload a valid jpg or png file", MessageType.UserError);
+                        }
+                    }
                 }
 
                 profile.UpdateProfile(
@@ -983,7 +1014,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     Request.Params.Filter("award-new-"),
                     Request.Params.Filter("certification-id-"),
                     Request.Params.Filter("certification-new-"),
-                    SessionVariables.LoggedInUser,
+                    SessionVariables.CurrentUser,
                     msgs);
             }
 
