@@ -4,6 +4,16 @@
     var color = Model?.PrimaryColor.TrimStart('#');
 }
 
+<style>
+    .profile-photo-gallery {
+        background-position: center;
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: 50% 50%;
+        height: 300px;
+    }
+</style>
+
 @if (color.IsNotEmpty())
 {
     <style>

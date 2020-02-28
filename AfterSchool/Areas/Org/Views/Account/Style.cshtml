@@ -279,23 +279,25 @@
                                     @for (var i = 0; i < photos.Count; i++)
                                     {
                                         var id = $"new-{i}";
+                                        var hide = "";
 
                                         if (photos[i].ID.HasValue)
                                         {
                                             id = $"id-{photos[i].ID}";
+                                            hide = "hide";
                                         }
 
                                         <div class="input-group input-group-md xs-mb-15">                                            
                                             @if (photos[i].ID.HasValue)
                                             {
-                                                <img src="@photos[i].Value" width="50" />
-                                                <a href="#"><i class="s7-close icon-large"></i></a>
+                                                <div class="photo-view-@i">
+                                                    <img src="@photos[i].Value" width="50" />
+                                                    <i class="s7-close icon-large pointer" onclick="removePhoto('@i')"></i>
+                                                </div>
                                             }
-                                            else
-                                            {
-                                                <span class="input-group-addon">@(i + 1)</span>
-                                                <span><input type="file" class="form-control" name="photo-@id" id="photo-@id" /></span>
-                                            }
+                                            
+                                            <span class="input-group-addon photo-add-@i @hide">@(i + 1)</span>
+                                            <span><input type="file" class="form-control photo-add-@i @hide" name="photo-@id" id="photo-@id" /></span>
                                         </div>
                                     }
                                 </div>
@@ -312,3 +314,9 @@
     </form>
 </div>
 
+<script>
+    function removePhoto(id) {
+        $('.photo-view-' + id).addClass('hide');
+        $('.photo-add-' + id).removeClass('hide');
+    }
+</script>

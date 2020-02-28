@@ -179,8 +179,8 @@
                             <div style="position: relative; margin-left: -20px; margin-right: -20px;">
                                 @foreach (var item in photos.Take(6))
                                 {
-                                    <div class="col-md-4">
-                                        <img src="@item.Value" width="100%" />
+                                    <div class="col-md-4 profile-photo-gallery" style="background-image: url('@item.Value');">
+                                        
                                     </div>
                                 }
                             </div>
