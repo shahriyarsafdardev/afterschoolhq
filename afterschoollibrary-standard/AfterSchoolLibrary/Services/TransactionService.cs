@@ -282,5 +282,34 @@ namespace AfterSchoolLibrary.Services
 
             return null;
         }
+
+        public static void MarkAsDeleted(this Transaction transaction, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var payments = transaction.GetPayments(msgs, dc);
+
+            payments.ForEach(payment => {
+                payment.MarkAsDeleted(loggedInUser, msgs, dc);
+            });
+
+            transaction.IsDeleted = true;
+            transaction.LastModifiedDate = DateTime.UtcNow;
+            transaction.LastModifiedBy = loggedInUser.ID;
+            msgs.AddRange(transaction.Save(dc));
+        }
+
+        public static List<ActivityPayment> GetPayments(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return ActivityPayment.LoadByTransactionIdByIsDeleted(transaction.ID.Value, false, msgs, dc);
+        }
+
+        public static Transaction Refund(this Transaction transaction, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return AccountService.CreateRefundTransactionPayment(
+                    transaction,
+                    transaction.GetPayerAmount(),
+                    loggedInUser,
+                    msgs
+                );
+        }
     }
 }

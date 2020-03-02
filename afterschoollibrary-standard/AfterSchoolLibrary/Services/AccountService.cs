@@ -2383,10 +2383,10 @@ namespace AfterSchoolLibrary.Services
                     msgs,
                     dc);
 
-                var registrant = Registrant.Load(originalTransaction.GetPurchase().RegistrantId.Value);
+                var registrant = Registrant.Load(originalTransaction.GetPurchase(msgs, dc).RegistrantId.Value);
 
                 // need to track the refund
-                originalTransaction.GetParticipationObjects().FirstOrDefault().AddPayment(
+                originalTransaction.GetParticipationObjects(msgs, dc).FirstOrDefault().AddPayment(
                     amount: -amount,
                     registrant: registrant,
                     transaction: transaction,
@@ -2394,6 +2394,7 @@ namespace AfterSchoolLibrary.Services
                     loggedInUser: loggedInUser,
                     msgs: msgs,
                     dc: dc);
+
                 return transaction;
             }
 

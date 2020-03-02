@@ -65,5 +65,41 @@ namespace AfterSchool.Areas.Admin.Controllers
             };
             return View(allTransactions);
         }
+
+        public ActionResult Delete(string id)
+        {
+            var msgs = new SystemMessages();
+
+            if (id.IsGuid())
+            {
+                var transaction = Transaction.LoadByUid(id.ToGuid(), msgs);
+
+                if (transaction.IsNotEmpty())
+                    transaction.MarkAsDeleted(SessionVariables.LoggedInUser, msgs);
+
+                if (msgs.HasNoErrors())
+                    return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult Refund(string id)
+        {
+            var msgs = new SystemMessages();
+
+            if (id.IsGuid())
+            {
+                var transaction = Transaction.LoadByUid(id.ToGuid(), msgs);
+
+                if (transaction.IsNotEmpty())
+                    transaction.Refund(SessionVariables.LoggedInUser, msgs);
+
+                if (msgs.HasNoErrors())
+                    return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+        }
     }
 }
