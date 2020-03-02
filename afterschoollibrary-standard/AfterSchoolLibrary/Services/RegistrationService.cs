@@ -906,6 +906,7 @@ namespace AfterSchoolLibrary.Services
                     registrantActivity.ParticipationObjectId.Value,
                     registrantActivity.ParticipationObjectTypeId,
                     registration.RegistrantId.Value,
+                    false,
                     msgs,
                     dc) > 0;
             }

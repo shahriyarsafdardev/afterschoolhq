@@ -280,7 +280,7 @@ namespace AfterSchoolLibrary.Models
 
 		#region "UserDefined"
 
-        public static decimal GetTotalPaidByAccount(int accountId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetTotalPaidByAccount(int accountId, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -290,15 +290,16 @@ namespace AfterSchoolLibrary.Models
             sp.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
             dq.SelectParameters.Add(sp);
             dq.Criterias.Add(ObjectMap["accountId"], accountId);
+			dq.Criterias.Add(ObjectMap["isDeleted"], isDeleted);
 
-            var results = dq.Select(msgs);
+			var results = dq.Select(msgs);
             if (results.Rows.Any())
                 return results.Rows[0][0].ToString().ToDecimal();
 
             return 0;
         }
 
-        public static decimal GetTotalPaidByParticipationObject(int objectId, ParticipationObjectType objectType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetTotalPaidByParticipationObject(int objectId, ParticipationObjectType objectType, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -309,15 +310,16 @@ namespace AfterSchoolLibrary.Models
             dq.SelectParameters.Add(sp);
             dq.Criterias.Add(ObjectMap["participationObjectTypeId"], (int)objectType);
             dq.Criterias.Add(ObjectMap["participationObjectId"], objectId);
+			dq.Criterias.Add(ObjectMap["isDeleted"], isDeleted);
 
-            var results = dq.Select(msgs);
+			var results = dq.Select(msgs);
             if (results.Rows.Any())
                 return results.Rows[0][0].ToString().ToDecimal();
 
             return 0;
         }
 
-        public static decimal GetTotalPaidByParticipationObjectByRegistrant(int objectId, ParticipationObjectType objectType, int registrantId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetTotalPaidByParticipationObjectByRegistrant(int objectId, ParticipationObjectType objectType, int registrantId, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -328,9 +330,10 @@ namespace AfterSchoolLibrary.Models
             dq.SelectParameters.Add(sp);
             dq.Criterias.Add(ObjectMap["participationObjectTypeId"], (int)objectType);
             dq.Criterias.Add(ObjectMap["participationObjectId"], objectId);
-            dq.Criterias.Add(ObjectMap["registrantId"], registrantId);
+			dq.Criterias.Add(ObjectMap["registrantId"], registrantId);
+			dq.Criterias.Add(ObjectMap["isDeleted"], isDeleted);
 
-            var results = dq.Select(msgs);
+			var results = dq.Select(msgs);
             if (results.Rows.Any())
                 return results.Rows[0][0].ToString().ToDecimal();
 
