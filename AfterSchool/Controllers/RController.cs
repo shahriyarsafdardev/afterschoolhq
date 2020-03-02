@@ -47,10 +47,17 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
 
+            if (account.IsEmpty())
+                return HttpNotFound();
+
             RestartRegistrationSession();
             SetRegistrationStartPage(account, true);
 
             var profile = account.GetAccountProfile(msgs);
+
+            if (profile.IsEmpty())
+                return Redirect(account.BrowseUrl);
+
             var photos = profile.GetPhotos(msgs);
             var ah = AfterSchoolLibrary.Helpers.Utilities.GetNewAmazonHelper();
 
@@ -65,6 +72,7 @@ namespace AfterSchool.Controllers
             ViewBag.GradeLevelEnd = profile.GetGradeLevelEnd(msgs);
             ViewBag.Messages = msgs;
             ViewBag.ParticipationObjects = GetParticipationObjects(account, msgs).Where(po => po.RegistrationPeriod.IsOpen(account, msgs)).ToList();
+            ViewBag.Locations = account.GetAllAvailableLocations(msgs);
 
             return View(account);
         }
@@ -90,6 +98,9 @@ namespace AfterSchool.Controllers
 
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname);
+
+            if (account.IsEmpty())
+                return HttpNotFound();
 
             RestartRegistrationSession();
             SetRegistrationStartPage(account, true);
