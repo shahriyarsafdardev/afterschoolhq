@@ -49,10 +49,10 @@ namespace AfterSchool.Areas.User.Controllers
                 startDate = earliestCorrectTransactionRecards;
 
             // transaction count
-            var totalTransactionCount = SessionVariables.CurrentAccount.GetPaidTransactionCount(startDate, endDate, msgs);
+            var totalTransactionCount = SessionVariables.CurrentAccount.GetPaidTransactionCount(startDate, endDate, false, msgs);
 
             // transaction data
-            var allTransactions = SessionVariables.CurrentAccount.GetPaidTransactions(startDate, endDate, start, length, msgs);
+            var allTransactions = SessionVariables.CurrentAccount.GetPaidTransactions(startDate, endDate, false, start, length, msgs);
 
             var totalPages = Math.Ceiling(totalTransactionCount.ToDouble() / recordsPerPage).ToInteger();
 

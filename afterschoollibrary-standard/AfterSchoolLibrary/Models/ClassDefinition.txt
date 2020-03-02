@@ -733,14 +733,15 @@ property: ParticipationObjectTypeId, ParticipationObjectType, Int, required
 property: ParticipationObjectId, int?, Int, required
 property: TransactionId, int?, Int
 property: RegistrantSubscriptionPlanId, int?, Int
-loadmethod: ActivityId, List<>
-loadmethod: AccountId, List<>
-loadmethod: RegistrantId, List<>
-loadmethod: RegistrantSubscriptionPlanId, List<>
+property: IsDeleted, bool, Bit
+loadmethod: ActivityId|IsDeleted, List<>
+loadmethod: AccountId|IsDeleted, List<>
+loadmethod: RegistrantId|IsDeleted, List<>
+loadmethod: RegistrantSubscriptionPlanId|IsDeleted, List<>
 loadmethod: Uid
-loadmethod: ParticipationObjectId|ParticipationObjectTypeId, List<>, LoadByParticipationObject
-loadmethod: ParticipationObjectId|ParticipationObjectTypeId|RegistrantId, List<>, LoadByParticipationObjectByRegistrant
-loadmethod: TransactionId, List<>
+loadmethod: ParticipationObjectId|ParticipationObjectTypeId|IsDeleted, List<>, LoadByParticipationObject
+loadmethod: ParticipationObjectId|ParticipationObjectTypeId|RegistrantId|IsDeleted, List<>, LoadByParticipationObjectByRegistrant
+loadmethod: TransactionId|IsDeleted, List<>
 [end]
 
 [begin]
@@ -1404,16 +1405,17 @@ property: StripeChargeOrRefundId, string, NVarChar "50"
 property: PaymentSourceTypeId, PaymentSourceType, Int
 property: OriginalTransactionId, int?, Int
 property: PayoutId, int?, Int, , If associated to a payout then it cannot be requested for another payout
+property: IsDeleted, bool, Bit
 property: PlatformPercentFee, decimal?, Decimal "10,2", , deprecated
 property: PlatformFlatFee, decimal?, Decimal "10,2", , deprecated
-loadmethod: BillerAccountId, List<>
-loadmethod: PayerAccountId, List<>
+loadmethod: BillerAccountId|IsDeleted, List<>
+loadmethod: PayerAccountId|IsDeleted, List<>
 loadmethod: Uid
-loadmethod: BillerAccountId|TransactionTypeId, List<>
-loadmethod: PayerAccountId|TransactionTypeId, List<>
+loadmethod: BillerAccountId|TransactionTypeId|IsDeleted, List<>
+loadmethod: PayerAccountId|TransactionTypeId|IsDeleted, List<>
 loadmethod: StripeChargeOrRefundId
-loadmethod: OriginalTransactionId, List<>
-loadmethod: PayoutId, List<>
+loadmethod: OriginalTransactionId|IsDeleted, List<>
+loadmethod: PayoutId|IsDeleted, List<>
 [end]
 
 [begin]

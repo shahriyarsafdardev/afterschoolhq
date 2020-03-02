@@ -41,8 +41,9 @@ namespace AfterSchoolLibrary.Services
 
         public static List<ActivityPayment> GetPayments(this RegistrantSubscriptionPlan registrantSubscriptionPlan, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityPayment.LoadByRegistrantSubscriptionPlanId(
+            return ActivityPayment.LoadByRegistrantSubscriptionPlanIdByIsDeleted(
                 registrantSubscriptionPlan.ID.Value,
+                false,
                 msgs,
                 dc);
         }

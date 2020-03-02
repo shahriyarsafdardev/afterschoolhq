@@ -75,7 +75,7 @@ namespace AfterSchoolLibrary.Services
 
         public static List<ParticipationObject> GetParticipationObjects(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityPayment.LoadByTransactionId(transaction.ID.Value, msgs, dc)
+            return ActivityPayment.LoadByTransactionIdByIsDeleted(transaction.ID.Value, false, msgs, dc)
                 .Select(payment =>
                     new ParticipationObject(payment.ParticipationObjectId.Value, payment.ParticipationObjectTypeId, msgs, dc)
                 )
@@ -199,7 +199,7 @@ namespace AfterSchoolLibrary.Services
         {
             if (transaction.IsCharge())
             {
-                var totalRefund = -Transaction.GetTotalRefundByOriginalTransaction(transaction.ID.Value, msgs, dc);
+                var totalRefund = -Transaction.GetTotalRefundByOriginalTransaction(transaction.ID.Value, false, msgs, dc);
 
                 return totalRefund == transaction.Amount;
             }
@@ -209,7 +209,7 @@ namespace AfterSchoolLibrary.Services
 
         public static decimal GetRefundedAmount(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return -Transaction.GetTotalRefundByOriginalTransaction(transaction.ID.Value, msgs, dc);
+            return -Transaction.GetTotalRefundByOriginalTransaction(transaction.ID.Value, false, msgs, dc);
         }
 
         public static Payout GetPayout(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)

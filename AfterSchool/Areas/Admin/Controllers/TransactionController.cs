@@ -40,10 +40,10 @@ namespace AfterSchool.Areas.Admin.Controllers
                 new DateTime?();
 
             // transaction count
-            var totalTransactionCount = Transaction.GetCount(startDate, endDate, msgs);
+            var totalTransactionCount = Transaction.GetCount(startDate, endDate, false, msgs);
 
             // transaction data
-            var allTransactions = Transaction.LoadByDate(startDate, endDate, start, length, msgs);
+            var allTransactions = Transaction.LoadByDate(startDate, endDate, false, start, length, msgs);
 
             var totalPages = Math.Ceiling(totalTransactionCount.ToDouble() / recordsPerPage).ToInteger();
 
@@ -52,9 +52,9 @@ namespace AfterSchool.Areas.Admin.Controllers
                     transaction.CreateDate = SessionVariables.CurrentAccount.ConvertToAccountTimeZone(transaction.CreateDate.Value);
             });
 
-            ViewBag.TotalAmountPaid = Transaction.GetTotalAmountBilledOut(startDate, endDate, msgs);
-            ViewBag.TotalFeesPaid = Transaction.GetTotalFeesPaid(startDate, endDate, msgs);
-            ViewBag.TotalProfit = Transaction.GetTotalAHQProfit(startDate, endDate, msgs);
+            ViewBag.TotalAmountPaid = Transaction.GetTotalAmountBilledOut(startDate, endDate, false, msgs);
+            ViewBag.TotalFeesPaid = Transaction.GetTotalFeesPaid(startDate, endDate, false, msgs);
+            ViewBag.TotalProfit = Transaction.GetTotalAHQProfit(startDate, endDate, false, msgs);
             ViewBag.Messages = msgs;
             ViewBag.PagingModel = new PagingModel()
             {
