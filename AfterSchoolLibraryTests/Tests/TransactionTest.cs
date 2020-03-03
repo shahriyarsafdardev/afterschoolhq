@@ -231,8 +231,6 @@ namespace AfterSchoolLibraryTests.Tests
                 purchase,
                 "Net Club refund",
                 TransactionType.Refund,
-                PaymentType.ACH,
-                PaymentSourceType.AfterSchoolPlatform,
                 "re_1DNlPlCEgXQRZLhk3Rzzyzj6",
                 originalTransaction,
                 BillerAccountOwner,

@@ -55,6 +55,7 @@ namespace AfterSchool.Areas.Admin.Controllers
             ViewBag.TotalAmountPaid = Transaction.GetTotalAmountBilledOut(startDate, endDate, false, msgs);
             ViewBag.TotalFeesPaid = Transaction.GetTotalFeesPaid(startDate, endDate, false, msgs);
             ViewBag.TotalProfit = Transaction.GetTotalAHQProfit(startDate, endDate, false, msgs);
+            ViewBag.TotalRefunded = Transaction.GetTotalAmountRefunded(startDate, endDate, false, msgs);
             ViewBag.Messages = msgs;
             ViewBag.PagingModel = new PagingModel()
             {
@@ -66,6 +67,7 @@ namespace AfterSchool.Areas.Admin.Controllers
             return View(allTransactions);
         }
 
+        [HttpGet]
         public ActionResult Delete(string id)
         {
             var msgs = new SystemMessages();
@@ -81,9 +83,10 @@ namespace AfterSchool.Areas.Admin.Controllers
                     return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
             }
 
-            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+            return Json(new { status = "error", messages = msgs.ToList() }, JsonRequestBehavior.AllowGet);
         }
 
+        [HttpGet]
         public ActionResult Refund(string id)
         {
             var msgs = new SystemMessages();
@@ -92,14 +95,14 @@ namespace AfterSchool.Areas.Admin.Controllers
             {
                 var transaction = Transaction.LoadByUid(id.ToGuid(), msgs);
 
-                if (transaction.IsNotEmpty())
+                if (transaction.IsNotEmpty() && !transaction.HasRefunds())
                     transaction.Refund(SessionVariables.LoggedInUser, msgs);
 
                 if (msgs.HasNoErrors())
                     return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
             }
 
-            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+            return Json(new { status = "error", messages = msgs.ToList() }, JsonRequestBehavior.AllowGet);
         }
     }
 }

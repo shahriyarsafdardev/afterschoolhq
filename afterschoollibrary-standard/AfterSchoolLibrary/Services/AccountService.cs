@@ -2132,18 +2132,6 @@ namespace AfterSchoolLibrary.Services
             return charge;
         }
 
-        public static Stripe.Refund ProcessRefund(string chargeId, decimal totalAmount, Account billingAccount, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            var refund = Billing.StripeHelper.CreateRefund(
-                chargeId: chargeId,
-                totalAmount: totalAmount,
-                reason: Billing.StripeRefundReason.RequestedByCustomer.ToString().SplitByUpperCase().Replace(" ", "_").ToLower(),
-                msgs: msgs
-                );
-
-            return refund;
-        }
-
         internal static Purchase AddPurchase(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return PurchaseService.CreateNew(
@@ -2158,20 +2146,6 @@ namespace AfterSchoolLibrary.Services
             return TransactionService.CreateNew(
                     checkoutObject,
                     transactionType,
-                    loggedInUser,
-                    msgs,
-                    dc);
-        }
-
-        internal static Transaction AddTransaction(Transaction orginalTransaction, string stripeRefundId, decimal amount, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            return TransactionService.CreateNewRefund(
-                    orginalTransaction,
-                    amount,
-                    stripeRefundId,
-                    transactionType,
-                    paymentType,
-                    paymentSourceType,
                     loggedInUser,
                     msgs,
                     dc);
@@ -2359,46 +2333,6 @@ namespace AfterSchoolLibrary.Services
                 if (ra.IsNotEmpty() && ra.AssignmentTypeId != RegistrationAssignmentType.Reserved)
                     ra.ChangeSeatAssignment(RegistrationAssignmentType.Reserved, loggedInUser, msgs, dc);
             }
-        }
-
-        public static Transaction CreateRefundTransactionPayment(Transaction originalTransaction, decimal amount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            var refund = AccountService.ProcessRefund(
-                originalTransaction.StripeChargeOrRefundId,
-                amount,
-                originalTransaction.GetPayerAccount(),
-                msgs
-            );
-
-            if (refund != null && refund.Status == Billing.StripeRefundStatus.Succeeded.ToString().ToLower())
-            {
-                var transaction = AccountService.AddTransaction(
-                    originalTransaction,
-                    refund.Id,
-                    -amount,
-                    TransactionType.Refund,
-                    PaymentType.ACH,
-                    PaymentSourceType.AfterSchoolPlatform,
-                    loggedInUser,
-                    msgs,
-                    dc);
-
-                var registrant = Registrant.Load(originalTransaction.GetPurchase(msgs, dc).RegistrantId.Value);
-
-                // need to track the refund
-                originalTransaction.GetParticipationObjects(msgs, dc).FirstOrDefault().AddPayment(
-                    amount: -amount,
-                    registrant: registrant,
-                    transaction: transaction,
-                    registrantSubscriptionPlan: null,
-                    loggedInUser: loggedInUser,
-                    msgs: msgs,
-                    dc: dc);
-
-                return transaction;
-            }
-
-            return null;
         }
 
         public static void ProcessTuitionFee(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
