@@ -76,6 +76,7 @@
                             <th>Type</th>
                             <th class="text-center">Amount</th>
                             <th class="text-center">Payment Method</th>
+                            <th class="text-center">Status</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -116,12 +117,35 @@
                                     </td>
                                     <td class="text-center">
                                         @transaction.GetPayerAmount().ToCurrency()
+
+                                        @if (transaction.IsRefund())
+                                        {
+                                            <i class="s7-back-2"></i>
+                                        }
                                     </td>
                                     <td class="text-center">
                                         @transaction.PaymentTypeId.ToString().SplitByUpperCase()
                                     </td>
-                                    <td>
+                                    <td class="text-center">
                                         @if (transaction.IsCharge())
+                                        {
+                                            if (transaction.HasRefunds())
+                                            {
+                                                @:Refunded
+                                            }
+                                            else
+                                            {
+                                                @:Paid
+                                            }
+
+                                        }
+                                        else if (transaction.IsRefund())
+                                        {
+                                            @:-
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (transaction.IsCharge() && !transaction.HasRefunds())
                                         {
                                             <a href="mailto:@billerAccount.Email?subject=@UI.JavascriptSafeString($"Refund Request for {transaction.Description}")">
                                                 Request Refund

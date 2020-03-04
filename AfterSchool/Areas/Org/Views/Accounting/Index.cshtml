@@ -3,9 +3,11 @@
     var msgs = (SystemMessages)ViewBag.Messages;
     var transactionCount = ((PagingModel)ViewBag.PagingModel).TotalCount;
     var totalTransactionAmount = (decimal)ViewBag.TotalAmountPaid;
-    var avgTransactionAmount = transactionCount == 0 ? 0 : totalTransactionAmount / transactionCount;
+    var totalAmountRefunded = (decimal)ViewBag.TotalAmountRefunded;
+    var totalAmount = totalTransactionAmount - totalAmountRefunded;
+    var avgTransactionAmount = transactionCount == 0 ? 0 : totalAmount / transactionCount;
     var totalFees = (decimal)ViewBag.TotalFeesPaid;
-    var totalPayout = totalTransactionAmount - totalFees;
+    var totalPayout = totalAmount - totalFees;
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -53,7 +55,7 @@
                 <div class="col-md-3">
                     <div class="widget widget-tile widget-bordered">
                         <div class="data-info">
-                            <div data-toggle="counter" data-end="@totalTransactionAmount" id="totalTransactionAmount" data-decimals="2" data-suffix="" class="value">@totalTransactionAmount.ToCurrency()</div>
+                            <div data-toggle="counter" data-end="@totalAmount" id="totalTransactionAmount" data-decimals="2" data-suffix="" class="value">@totalAmount.ToCurrency()</div>
                             <div class="desc">Total Amt</div>
                         </div>
                         <div class="icon"><span class=""></span></div>
@@ -147,7 +149,7 @@
                             <th>Payer</th>
                             <th>For</th>
                             <th>Item Description</th>
-                            <th class="text-center">Total Amt Paid</th>
+                            <th class="text-center">Amount</th>
                             <th class="text-center">Platform Fee</th>
                             <th class="text-center">Your Amount</th>
                             <th class="text-center">Status</th>
@@ -162,11 +164,10 @@
                             {
                                 var purchase = transaction.GetPurchase();
                                 var registrant = Registrant.Load(purchase.RegistrantId.Value);
-                                var participationObjects = transaction.GetParticipationObjects();
                                 var currentStatus = transaction.GetStatus();
                                 var disableChk = !transaction.CanRequestPayout() ? "disabled" : "";
 
-                                <tr id="@transaction.Uid" data-refunded-amount="@transaction.GetRefundedAmount().ToCurrency()">
+                                <tr id="@transaction.Uid">
                                     <td>
                                         <span class="am-checkbox">
                                             <input type="checkbox" 
@@ -197,16 +198,35 @@
                                         }
                                     </td>
                                     <td>
-                                        @participationObjects.DistinctBy(po => new { po.ObjectID, po.ObjectType }).Select(po => po.Name).ToStringList(", ")
+                                        @transaction.Description
                                     </td>
                                     <td class="text-center">
                                         @transaction.GetBillerAmount().ToCurrency()
+
+                                        @if (transaction.IsRefund())
+                                        {
+                                            <i class="s7-back-2"></i>
+                                        }
                                     </td>
                                     <td class="text-center">
-                                        @transaction.GetFeesChargedToBiller().ToCurrency()
+                                        @if (transaction.IsCharge())
+                                        {
+                                            @transaction.GetFeesChargedToBiller().ToCurrency()
+                                        }
+                                        else
+                                        {
+                                            @:-
+                                        }
                                     </td>
                                     <td class="text-center">
-                                        @transaction.GetBillerPayout().ToCurrency()
+                                        @if (transaction.IsCharge())
+                                        {
+                                            @transaction.GetBillerPayout().ToCurrency()
+                                        }
+                                        else
+                                        {
+                                            @:-
+                                        }
                                     </td>
                                     <td class="text-center">
                                         @currentStatus

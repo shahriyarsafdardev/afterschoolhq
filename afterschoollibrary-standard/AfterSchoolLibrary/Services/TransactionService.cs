@@ -72,6 +72,11 @@ namespace AfterSchoolLibrary.Services
             return transaction.TransactionTypeId == TransactionType.Charge;
         }
 
+        public static bool IsRefund(this Transaction transaction)
+        {
+            return transaction.TransactionTypeId == TransactionType.Refund;
+        }
+
 
         public static List<ParticipationObject> GetParticipationObjects(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -249,6 +254,7 @@ namespace AfterSchoolLibrary.Services
                 DateTime.UtcNow.IsOnOrAfter(transaction.CreateDate.Value.AddDays(transaction.GetWaitPeriodInDays())) &&
                 !transaction.PlatformPercentFee.HasValue &&
                 transaction.PaymentSourceTypeId == PaymentSourceType.AfterSchoolPlatform &&
+                transaction.IsCharge() &&
                 !transaction.HasRefunds(msgs, dc);
         }
 

@@ -49,14 +49,14 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             // transaction count
-            var totalBilledTransactionCount = SessionVariables.CurrentAccount.GetBilledTransactionCount(startDate, endDate, poFilter, false);
-            var totalPaidTransactionCount = SessionVariables.CurrentAccount.GetPaidTransactionCount(startDate, endDate, poFilter, false);
-            var totalTransactionCount = totalBilledTransactionCount + totalPaidTransactionCount;
+            var totalTransactionCount = SessionVariables.CurrentAccount.GetTransactionCount(startDate, endDate, poFilter, false);
+            // var totalPaidTransactionCount = SessionVariables.CurrentAccount.GetPaidTransactionCount(startDate, endDate, poFilter, false);
+            // var totalTransactionCount = totalBilledTransactionCount + totalPaidTransactionCount;
 
             // transaction data
-            var billedTransactions = SessionVariables.CurrentAccount.GetBilledTransactions(startDate, endDate, poFilter, false, start, length);
-            var paidTransactions = SessionVariables.CurrentAccount.GetPaidTransactions(startDate, endDate, poFilter, false, start, length);
-            var allTransactions = billedTransactions.Concat(paidTransactions).ToList();
+            var allTransactions = SessionVariables.CurrentAccount.GetTransactions(startDate, endDate, poFilter, false, start, length);
+            // var paidTransactions = SessionVariables.CurrentAccount.GetPaidTransactions(startDate, endDate, poFilter, false, start, length);
+            // var allTransactions = billedTransactions.Concat(paidTransactions).ToList();
 
             var totalPages = Math.Ceiling(totalTransactionCount.ToDouble() / recordsPerPage).ToInteger();
 
@@ -65,14 +65,14 @@ namespace AfterSchool.Areas.Org.Controllers
             );
 
             var allPos = Transaction.GetParticipationObjectsByBillerAccountId(SessionVariables.CurrentAccount.ID.Value, null, null, false);
-            allPos.AddRange(Transaction.GetParticipationObjectsByPayerAccountId(SessionVariables.CurrentAccount.ID.Value, null, null, false));
+            // allPos.AddRange(Transaction.GetParticipationObjectsByPayerAccountId(SessionVariables.CurrentAccount.ID.Value, null, null, false));
             var allParticipationObjects = allPos.DistinctBy(po => (po.ID, po.ParticipationObjectTypeId, po.Name));
 
             // sort transactions
             // allTransactions = allTransactions.OrderByDescending(x => x.ID).ToList();
 
             ViewBag.TotalAmountPaid = SessionVariables.CurrentAccount.GetTotalAmountBilledOut(startDate, endDate, msgs);
-            ViewBag.TotalAmountRefunded = SessionVariables.CurrentAccount.GetTotalAmountRefundedTo(startDate, endDate, msgs);
+            ViewBag.TotalAmountRefunded = SessionVariables.CurrentAccount.GetTotalAmountRefunded(startDate, endDate, msgs);
             ViewBag.TotalFeesPaid = SessionVariables.CurrentAccount.GetTotalFeesPaidAsBiller(startDate, endDate, msgs);
             ViewBag.ParticipationObjects = allParticipationObjects;
             ViewBag.Messages = msgs;
