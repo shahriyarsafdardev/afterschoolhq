@@ -391,6 +391,11 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
+        public static List<Transaction> LoadByAccountId(int accountId, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, bool isDeleted, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            return LoadByBillerOrPayerAccountId(accountId, accountId, startDate, endDate, participationObjects, isDeleted, start, length, msgs, dc);
+        }
+
         public static List<Transaction> LoadByBillerAccountId(int BillerAccountId, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, bool isDeleted, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             return LoadByBillerOrPayerAccountId(BillerAccountId, null, startDate, endDate, participationObjects, isDeleted, start, length, msgs, dc);
@@ -409,11 +414,21 @@ namespace AfterSchoolLibrary.Models
 
             dq.Criterias.Add(ObjectMap["IsDeleted"], isDeleted);
 
-            if (BillerAccountId.HasValue)
-                dq.Criterias.Add(ObjectMap["BillerAccountId"], BillerAccountId.Value);
+            if (BillerAccountId.HasValue && PayerAccountId.HasValue)
+            {
+                var dcs = new DatabaseCriterias(LogicalOperatorType.Or);
+                dcs.Add(ObjectMap["BillerAccountId"], BillerAccountId.Value);
+                dcs.Add(ObjectMap["PayerAccountId"], PayerAccountId.Value);
+                dq.Criterias.Add(dcs);
+            }
+            else
+            {
+                if (BillerAccountId.HasValue)
+                    dq.Criterias.Add(ObjectMap["BillerAccountId"], BillerAccountId.Value);
 
-            if (PayerAccountId.HasValue)
-                dq.Criterias.Add(ObjectMap["PayerAccountId"], PayerAccountId.Value);
+                if (PayerAccountId.HasValue)
+                    dq.Criterias.Add(ObjectMap["PayerAccountId"], PayerAccountId.Value);
+            }
 
             if (startDate.HasValue)
                 dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
@@ -486,6 +501,11 @@ namespace AfterSchoolLibrary.Models
             return GetCountByBillerOrPayerAccountId(null, PayerAccountId, startDate, endDate, participationObjects, isDeleted, msgs, dc);
         }
 
+        public static int GetCountByAccountId(int accountId, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, bool isDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            return GetCountByBillerOrPayerAccountId(accountId, accountId, startDate, endDate, participationObjects, isDeleted, msgs, dc);
+        }
+
         private static int GetCountByBillerOrPayerAccountId(int? BillerAccountId, int? PayerAccountId, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, bool isDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
@@ -494,11 +514,21 @@ namespace AfterSchoolLibrary.Models
 
             dq.Criterias.Add(ObjectMap["IsDeleted"], isDeleted);
 
-            if (BillerAccountId.HasValue)
-                dq.Criterias.Add(ObjectMap["BillerAccountId"], BillerAccountId.Value);
+            if (BillerAccountId.HasValue && PayerAccountId.HasValue)
+            {
+                var dcs = new DatabaseCriterias(LogicalOperatorType.Or);
+                dcs.Add(ObjectMap["BillerAccountId"], BillerAccountId.Value);
+                dcs.Add(ObjectMap["PayerAccountId"], PayerAccountId.Value);
+                dq.Criterias.Add(dcs);
+            }
+            else
+            {
+                if (BillerAccountId.HasValue)
+                    dq.Criterias.Add(ObjectMap["BillerAccountId"], BillerAccountId.Value);
 
-            if (PayerAccountId.HasValue)
-                dq.Criterias.Add(ObjectMap["PayerAccountId"], PayerAccountId.Value);
+                if (PayerAccountId.HasValue)
+                    dq.Criterias.Add(ObjectMap["PayerAccountId"], PayerAccountId.Value);
+            }
 
             if (startDate.HasValue)
                 dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);

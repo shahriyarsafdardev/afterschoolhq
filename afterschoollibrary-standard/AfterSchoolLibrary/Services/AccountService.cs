@@ -2014,6 +2014,11 @@ namespace AfterSchoolLibrary.Services
             return Transaction.LoadByBillerAccountId(account.ID.Value, startDate, endDate, participationObjects, isDeleted, start, length, msgs, dc);
         }
 
+        public static List<Transaction> GetTransactions(this Account account, DateTime? startDate, DateTime? endDate, bool isDeleted, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.LoadByAccountId(account.ID.Value, startDate, endDate, null, isDeleted, start, length, msgs, dc);
+        }
+
         public static List<Transaction> GetPaidTransactions(this Account account, DateTime? startDate, DateTime? endDate, bool isDeleted, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Transaction.LoadByPayerAccountId(account.ID.Value, startDate, endDate, null, isDeleted, start, length, msgs, dc);
@@ -2037,6 +2042,11 @@ namespace AfterSchoolLibrary.Services
         public static int GetPaidTransactionCount(this Account account, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Transaction.GetCountByPayerAccountId(account.ID.Value, startDate, endDate, null, isDeleted, msgs, dc);
+        }
+
+        public static int GetTransactionCount(this Account account, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.GetCountByAccountId(account.ID.Value, startDate, endDate, null, isDeleted, msgs, dc);
         }
 
         public static int GetPaidTransactionCount(this Account account, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
