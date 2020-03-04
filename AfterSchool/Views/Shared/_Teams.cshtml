@@ -7,7 +7,7 @@
     var groups = (List<ActivityGroup>)ViewData["Groups"];
     var needToUpgrade = (bool)ViewData["NeedToUpgrade"];
 
-    var addUrl = Url.Action("editsetup", "activity");
+    var addUrl = Url.Action("editsetup", "activity", new { type = (int)ActivityType.Team });
     var pagingController = "activity";
     var pagingAction = "index";
     var id = "";
@@ -20,7 +20,7 @@
 
     if (group.IsNotEmpty())
     {
-        addUrl = Url.Action("editsetup", "activity", new { group = group.Uid });
+        addUrl = Url.Action("editsetup", "activity", new { group = group.Uid, type = (int)ActivityType.Team });
         pagingController = "group";
         pagingAction = "activities";
         id = group.Uid.ToString();

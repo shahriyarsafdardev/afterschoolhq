@@ -10,7 +10,7 @@
 
     if (showAdd)
     {
-        addActivityUrl = Url.Action("editsetup", "activity", new { isnew = 1, Area = "org" });
+        addActivityUrl = Url.Action("editsetup", "activity", new { isnew = 1, type = (int)ActivityType.Activity, Area = "org" });
 
         if (!Model.ID.HasValue)
         {

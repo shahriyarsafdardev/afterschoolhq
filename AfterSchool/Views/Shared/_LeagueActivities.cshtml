@@ -18,7 +18,7 @@
 
     if (group.IsNotEmpty())
     {
-        addUrl = Url.Action("editsetup", "activity", new { group = group.Uid });
+        addUrl = Url.Action("editsetup", "activity", new { group = group.Uid, type = (int)ActivityType.Team });
         pagingController = "group";
         pagingAction = "activities";
         id = group.Uid.ToString();
