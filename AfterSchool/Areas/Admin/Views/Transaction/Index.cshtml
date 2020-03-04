@@ -202,11 +202,18 @@
                                     <td class="text-center">
                                         @if (transaction.IsCharge())
                                         {
-                                            @currentStatus
+                                            if (transaction.HasRefunds())
+                                            {
+                                                @:Refunded
+                                            }
+                                            else
+                                            {
+                                                @currentStatus
+                                            }
                                         }
                                         else
                                         {
-                                            @:Refunded
+                                            @:-
                                         }
                                     </td>
                                     <td class="text-center">

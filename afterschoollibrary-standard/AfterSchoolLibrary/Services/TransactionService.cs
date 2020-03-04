@@ -171,8 +171,6 @@ namespace AfterSchoolLibrary.Services
                 StripeChargeOrRefundId = stripeChargeOrRefundId,
                 TransactionTypeId = transactionType,
                 PaymentSourceTypeId = originalTransaction.PaymentSourceTypeId,
-                PlatformFlatFee = 0,
-                PlatformPercentFee = 0,
                 OriginalTransactionId = originalTransaction.ID.Value,
             };
             msgs.AddRange(transaction.Save(dc));
@@ -222,6 +220,9 @@ namespace AfterSchoolLibrary.Services
         {
             if (transaction.PaymentSourceTypeId != PaymentSourceType.AfterSchoolPlatform)
                 return "N/A";
+
+            if (transaction.IsRefund())
+                return "Processed";
 
             if (transaction.PlatformPercentFee.HasValue)
                 return "Paid";
