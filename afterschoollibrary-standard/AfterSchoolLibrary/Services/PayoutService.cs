@@ -217,7 +217,7 @@ namespace AfterSchoolLibrary.Services
 
         public static List<Transaction> GetTransactions(this Payout payout, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Transaction.LoadByPayoutId(payout.ID.Value, msgs, dc);
+            return Transaction.LoadByPayoutIdByIsDeleted(payout.ID.Value, false, msgs, dc);
         }
 
         public static void AddTransactions(this Payout payout, List<Transaction> transactions, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)

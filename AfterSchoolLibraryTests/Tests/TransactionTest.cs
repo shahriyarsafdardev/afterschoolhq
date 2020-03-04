@@ -109,7 +109,7 @@ namespace AfterSchoolLibraryTests.Tests
         {
             var transaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, msgs, dc);
 
-            Assert.Single(Transaction.LoadByBillerAccountId(BillerAccount.ID.Value, msgs, dc));
+            Assert.Single(Transaction.LoadByBillerAccountIdByIsDeleted(BillerAccount.ID.Value, false, msgs, dc));
         }
 
         [Fact]
@@ -129,6 +129,7 @@ namespace AfterSchoolLibraryTests.Tests
                 null, 
                 null, 
                 participationObjects, 
+                false,
                 null, 
                 null, 
                 msgs, 
@@ -142,7 +143,7 @@ namespace AfterSchoolLibraryTests.Tests
         {
             var transaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, msgs, dc);
 
-            Assert.Single(Transaction.LoadByPayerAccountId(PayerAccount.ID.Value, msgs, dc));
+            Assert.Single(Transaction.LoadByPayoutIdByIsDeleted(PayerAccount.ID.Value, false, msgs, dc));
         }
 
         [Fact]
@@ -162,6 +163,7 @@ namespace AfterSchoolLibraryTests.Tests
                 null,
                 null,
                 participationObjects,
+                false,
                 null,
                 null,
                 msgs,
@@ -194,7 +196,7 @@ namespace AfterSchoolLibraryTests.Tests
                 var transaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, amount, msgs, dc);
             }
 
-            Assert.Equal(amounts.Sum(), Transaction.GetTotalAmountBilledByBillerAccount(BillerAccount.ID.Value, null, null, msgs, dc));
+            Assert.Equal(amounts.Sum(), Transaction.GetTotalAmountBilledByBillerAccount(BillerAccount.ID.Value, null, null, false, msgs, dc));
         }
 
         [Fact]
@@ -213,7 +215,7 @@ namespace AfterSchoolLibraryTests.Tests
                 var transaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, amount, msgs, dc);
             }
 
-            Assert.Equal(amounts.Sum(), Transaction.GetTotalAmountPaidByPayerAccount(PayerAccount.ID.Value, null, null, msgs, dc));
+            Assert.Equal(amounts.Sum(), Transaction.GetTotalAmountPaidByPayerAccount(PayerAccount.ID.Value, null, null, false, msgs, dc));
         }
 
         [Fact]
@@ -229,8 +231,6 @@ namespace AfterSchoolLibraryTests.Tests
                 purchase,
                 "Net Club refund",
                 TransactionType.Refund,
-                PaymentType.ACH,
-                PaymentSourceType.AfterSchoolPlatform,
                 "re_1DNlPlCEgXQRZLhk3Rzzyzj6",
                 originalTransaction,
                 BillerAccountOwner,

@@ -1271,7 +1271,7 @@ namespace AfterSchoolLibrary.Services
 
         public static decimal GetAmountPaid(this Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityPayment.LoadByRegistrantId(registrant.ID.Value, msgs, dc).Sum(payment => payment.Amount.Value);
+            return ActivityPayment.LoadByRegistrantIdByIsDeleted(registrant.ID.Value, false, msgs, dc).Sum(payment => payment.Amount.Value);
         }
 
         public static RegistrantActivity GetRegistrantActivity(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs, DatabaseConnection dc = null)

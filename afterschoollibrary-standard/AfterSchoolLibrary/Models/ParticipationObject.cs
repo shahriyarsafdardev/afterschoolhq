@@ -602,8 +602,9 @@ namespace AfterSchoolLibrary.Models
         {
             return ActivityPayment.GetTotalPaidByParticipationObjectByRegistrant(
                 this.ObjectID.Value, 
-                this.ObjectType, 
+                this.ObjectType,
                 registrantId, 
+                false,
                 msgs, 
                 dc);
         }
