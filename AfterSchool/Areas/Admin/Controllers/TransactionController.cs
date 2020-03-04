@@ -83,7 +83,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                     return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
             }
 
-            return Json(new { status = "error", messages = msgs.ToList() }, JsonRequestBehavior.AllowGet);
+            return Json(new { status = "error", messages = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
         }
 
         [HttpGet]
@@ -102,7 +102,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                     return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
             }
 
-            return Json(new { status = "error", messages = msgs.ToList() }, JsonRequestBehavior.AllowGet);
+            return Json(new { status = "error", messages = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
         }
     }
 }
