@@ -72,10 +72,15 @@ namespace AfterSchoolLibrary.Services
             return transaction.TransactionTypeId == TransactionType.Charge;
         }
 
+        public static bool IsRefund(this Transaction transaction)
+        {
+            return transaction.TransactionTypeId == TransactionType.Refund;
+        }
+
 
         public static List<ParticipationObject> GetParticipationObjects(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityPayment.LoadByTransactionId(transaction.ID.Value, msgs, dc)
+            return ActivityPayment.LoadByTransactionIdByIsDeleted(transaction.ID.Value, false, msgs, dc)
                 .Select(payment =>
                     new ParticipationObject(payment.ParticipationObjectId.Value, payment.ParticipationObjectTypeId, msgs, dc)
                 )
@@ -147,27 +152,7 @@ namespace AfterSchoolLibrary.Services
             return transaction;
         }
 
-
-        public static Transaction CreateNewRefund(Transaction originalTransaction, decimal amount, string refundId, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            // inverse billing and paying for refund
-            return CreateNew(
-                originalTransaction.GetBillerAccount(),
-                originalTransaction.GetPayerAccount(),
-                amount,
-                originalTransaction.GetPurchase(),
-                originalTransaction.GetParticipationObjects().FirstOrDefault().Name,
-                transactionType,
-                paymentType,
-                paymentSourceType,
-                refundId,
-                originalTransaction,
-                loggedInUser,
-                msgs,
-                dc);
-        }
-
-        public static Transaction CreateNew(Account purchasingAccount, Account billingAccount, decimal amount, Purchase purchase, string participationObjectName, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, string stripeChargeOrRefundId, Transaction originalTransaction, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Transaction CreateNew(Account purchasingAccount, Account billingAccount, decimal amount, Purchase purchase, string participationObjectName, TransactionType transactionType, string stripeChargeOrRefundId, Transaction originalTransaction, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -178,16 +163,14 @@ namespace AfterSchoolLibrary.Services
                 Description = $"{participationObjectName} refund",
                 PayerAccountId = purchasingAccount.ID.Value,
                 PurchaseId = purchase.ID.Value,
-                PaymentTypeId = paymentType,
+                PaymentTypeId = originalTransaction.PaymentTypeId,
                 CreateDate = DateTime.UtcNow,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
                 LastModifiedDate = DateTime.UtcNow,
                 LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
                 StripeChargeOrRefundId = stripeChargeOrRefundId,
                 TransactionTypeId = transactionType,
-                PaymentSourceTypeId = paymentSourceType,
-                PlatformFlatFee = 0,
-                PlatformPercentFee = 0,
+                PaymentSourceTypeId = originalTransaction.PaymentSourceTypeId,
                 OriginalTransactionId = originalTransaction.ID.Value,
             };
             msgs.AddRange(transaction.Save(dc));
@@ -199,7 +182,7 @@ namespace AfterSchoolLibrary.Services
         {
             if (transaction.IsCharge())
             {
-                var totalRefund = -Transaction.GetTotalRefundByOriginalTransaction(transaction.ID.Value, msgs, dc);
+                var totalRefund = -Transaction.GetTotalRefundByOriginalTransaction(transaction.ID.Value, false, msgs, dc);
 
                 return totalRefund == transaction.Amount;
             }
@@ -209,7 +192,7 @@ namespace AfterSchoolLibrary.Services
 
         public static decimal GetRefundedAmount(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return -Transaction.GetTotalRefundByOriginalTransaction(transaction.ID.Value, msgs, dc);
+            return Transaction.GetTotalRefundByOriginalTransaction(transaction.ID.Value, false, msgs, dc);
         }
 
         public static Payout GetPayout(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -238,8 +221,14 @@ namespace AfterSchoolLibrary.Services
             if (transaction.PaymentSourceTypeId != PaymentSourceType.AfterSchoolPlatform)
                 return "N/A";
 
+            if (transaction.IsRefund())
+                return "Processed";
+
             if (transaction.PlatformPercentFee.HasValue)
                 return "Paid";
+
+            if (transaction.HasRefunds())
+                return "Refunded";
 
             var currentPayout = GetPayout(transaction, msgs);
 
@@ -260,12 +249,14 @@ namespace AfterSchoolLibrary.Services
             return "Ready For Payout";
         }
 
-        public static bool CanRequestPayout(this Transaction transaction)
+        public static bool CanRequestPayout(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return transaction.PayoutId == null &&
+            return !transaction.HasPayout &&
                 DateTime.UtcNow.IsOnOrAfter(transaction.CreateDate.Value.AddDays(transaction.GetWaitPeriodInDays())) &&
                 !transaction.PlatformPercentFee.HasValue &&
-                transaction.PaymentSourceTypeId == PaymentSourceType.AfterSchoolPlatform;
+                transaction.PaymentSourceTypeId == PaymentSourceType.AfterSchoolPlatform &&
+                transaction.IsCharge() &&
+                !transaction.HasRefunds(msgs, dc);
         }
 
         public static Payout CreatePayout(this Transaction transaction, PayoutStatus payoutStatus, PaymentType paymentType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -281,6 +272,74 @@ namespace AfterSchoolLibrary.Services
                     dc: dc);
 
             return null;
+        }
+
+        public static void MarkAsDeleted(this Transaction transaction, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var payments = transaction.GetPayments(msgs, dc);
+
+            payments.ForEach(payment => {
+                payment.MarkAsDeleted(loggedInUser, msgs, dc);
+            });
+
+            transaction.IsDeleted = true;
+            transaction.LastModifiedDate = DateTime.UtcNow;
+            transaction.LastModifiedBy = loggedInUser.ID;
+            msgs.AddRange(transaction.Save(dc));
+        }
+
+        public static List<ActivityPayment> GetPayments(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return ActivityPayment.LoadByTransactionIdByIsDeleted(transaction.ID.Value, false, msgs, dc);
+        }
+
+        public static Transaction Refund(this Transaction transaction, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var refund = Billing.StripeHelper.CreateRefund(
+                chargeId: transaction.StripeChargeOrRefundId,
+                totalAmount: transaction.GetPayerAmount(),
+                reason: Billing.StripeRefundReason.RequestedByCustomer.ToString().SplitByUpperCase().Replace(" ", "_").ToLower(),
+                msgs: msgs);
+
+            if (msgs.HasNoErrors())
+                return transaction.CreateNewRefund(
+                    amount: transaction.GetPayerAmount(),
+                    refundId: refund.Id,
+                    transactionType: TransactionType.Refund,
+                    paymentType: transaction.PaymentTypeId,
+                    paymentSourceType: PaymentSourceType.AfterSchoolPlatform,
+                    loggedInUser: loggedInUser,
+                    msgs: msgs,
+                    dc: dc);
+
+            return null;
+        }
+
+        public static Transaction CreateNewRefund(this Transaction originalTransaction, decimal amount, string refundId, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            // inverse billing and paying for refund
+            return CreateNew(
+                originalTransaction.GetBillerAccount(),
+                originalTransaction.GetPayerAccount(),
+                amount,
+                originalTransaction.GetPurchase(),
+                originalTransaction.GetParticipationObjects().FirstOrDefault().Name,
+                transactionType,
+                refundId,
+                originalTransaction,
+                loggedInUser,
+                msgs,
+                dc);
+        }
+
+        public static bool HasRefunds(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.LoadByOriginalTransactionIdByIsDeleted(transaction.ID.Value, false, msgs, dc).Any();
+        }
+
+        public static bool CanRefund(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return !transaction.HasPayout && !transaction.HasRefunds(msgs, dc) && transaction.TransactionTypeId == TransactionType.Charge;
         }
     }
 }

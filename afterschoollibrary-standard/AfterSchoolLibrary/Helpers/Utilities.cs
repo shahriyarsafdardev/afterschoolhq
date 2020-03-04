@@ -622,6 +622,7 @@ namespace AfterSchoolLibrary.Helpers
                                         activityId, 
                                         ParticipationObjectType.Activity, 
                                         child.ID.Value,
+                                        false,
                                         msgs, 
                                         dc);
 

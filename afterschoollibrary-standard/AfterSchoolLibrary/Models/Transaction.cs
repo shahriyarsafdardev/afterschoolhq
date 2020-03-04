@@ -61,6 +61,7 @@ namespace AfterSchoolLibrary.Models
 		/// If associated to a payout then it cannot be requested for another payout
 		/// </summary>
 		public int? PayoutId { get { return (int?)MDV["PayoutId"].Value; } set { MDV["PayoutId"].Value = value; } }
+		public bool IsDeleted { get { return (bool)MDV["IsDeleted"].Value; } set { MDV["IsDeleted"].Value = value; } }
 		public decimal? PlatformPercentFee { get { return (decimal?)MDV["PlatformPercentFee"].Value; } set { MDV["PlatformPercentFee"].Value = value; } }
 		public decimal? PlatformFlatFee { get { return (decimal?)MDV["PlatformFlatFee"].Value; } set { MDV["PlatformFlatFee"].Value = value; } }
 		
@@ -73,6 +74,7 @@ namespace AfterSchoolLibrary.Models
 			this.Uid = Guid.NewGuid();
 			this.TransactionTypeId = TransactionType.NotSet;
 			this.PaymentSourceTypeId = PaymentSourceType.NotSet;
+			this.IsDeleted = false;
 			
         }
 
@@ -99,6 +101,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "PaymentSourceTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "OriginalTransactionId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "PayoutId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "IsDeleted", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "PlatformPercentFee", System.Data.SqlDbType.Decimal , "10,2");
 				_dp.Add(className, "PlatformFlatFee", System.Data.SqlDbType.Decimal , "10,2");
 				
@@ -251,6 +254,10 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsDeleted"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["PlatformPercentFee"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
@@ -268,19 +275,21 @@ namespace AfterSchoolLibrary.Models
 			return Transaction.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
-		public static List<Transaction> LoadByBillerAccountId(int BillerAccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Transaction> LoadByBillerAccountIdByIsDeleted(int BillerAccountId, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["BillerAccountId"], BillerAccountId);
+			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<Transaction> LoadByPayerAccountId(int PayerAccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Transaction> LoadByPayerAccountIdByIsDeleted(int PayerAccountId, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["PayerAccountId"], PayerAccountId);
+			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
@@ -292,21 +301,23 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static List<Transaction> LoadByBillerAccountIdByTransactionTypeId(int BillerAccountId, TransactionType TransactionTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Transaction> LoadByBillerAccountIdByTransactionTypeIdByIsDeleted(int BillerAccountId, TransactionType TransactionTypeId, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["BillerAccountId"], BillerAccountId);
 			dq.Criterias.Add(ObjectMap["TransactionTypeId"], TransactionTypeId);
+			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<Transaction> LoadByPayerAccountIdByTransactionTypeId(int PayerAccountId, TransactionType TransactionTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Transaction> LoadByPayerAccountIdByTransactionTypeIdByIsDeleted(int PayerAccountId, TransactionType TransactionTypeId, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["PayerAccountId"], PayerAccountId);
 			dq.Criterias.Add(ObjectMap["TransactionTypeId"], TransactionTypeId);
+			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
@@ -318,19 +329,21 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static List<Transaction> LoadByOriginalTransactionId(int OriginalTransactionId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Transaction> LoadByOriginalTransactionIdByIsDeleted(int OriginalTransactionId, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["OriginalTransactionId"], OriginalTransactionId);
+			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<Transaction> LoadByPayoutId(int PayoutId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Transaction> LoadByPayoutIdByIsDeleted(int PayoutId, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["PayoutId"], PayoutId);
+			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
@@ -340,6 +353,14 @@ namespace AfterSchoolLibrary.Models
 
 		#region "UserDefined"
 
+        public bool HasPayout
+        {
+            get
+            {
+                return PayoutId.HasValue;
+            }
+        }
+
         public static List<Transaction> LoadList(List<int> ids, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
@@ -348,11 +369,13 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static List<Transaction> LoadByDate(DateTime? startDate, DateTime? endDate, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<Transaction> LoadByDate(DateTime? startDate, DateTime? endDate, bool isDeleted, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
+
+            dq.Criterias.Add(ObjectMap["IsDeleted"], isDeleted);
 
             if (startDate.HasValue)
                 dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
@@ -368,27 +391,44 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static List<Transaction> LoadByBillerAccountId(int BillerAccountId, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<Transaction> LoadByAccountId(int accountId, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, bool isDeleted, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
-            return LoadByBillerOrPayerAccountId(BillerAccountId, null, startDate, endDate, participationObjects, start, length, msgs, dc);
+            return LoadByBillerOrPayerAccountId(accountId, accountId, startDate, endDate, participationObjects, isDeleted, start, length, msgs, dc);
         }
 
-        public static List<Transaction> LoadByPayerAccountId(int PayerAccountId, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<Transaction> LoadByBillerAccountId(int BillerAccountId, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, bool isDeleted, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
-            return LoadByBillerOrPayerAccountId(null, PayerAccountId, startDate, endDate, participationObjects, start, length, msgs, dc);
+            return LoadByBillerOrPayerAccountId(BillerAccountId, null, startDate, endDate, participationObjects, isDeleted, start, length, msgs, dc);
         }
 
-        private static List<Transaction> LoadByBillerOrPayerAccountId(int? BillerAccountId, int? PayerAccountId, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<Transaction> LoadByPayerAccountId(int PayerAccountId, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, bool isDeleted, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            return LoadByBillerOrPayerAccountId(null, PayerAccountId, startDate, endDate, participationObjects, isDeleted, start, length, msgs, dc);
+        }
+
+        private static List<Transaction> LoadByBillerOrPayerAccountId(int? BillerAccountId, int? PayerAccountId, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, bool isDeleted, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
 
-            if (BillerAccountId.HasValue)
-                dq.Criterias.Add(ObjectMap["BillerAccountId"], BillerAccountId.Value);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], isDeleted);
 
-            if (PayerAccountId.HasValue)
-                dq.Criterias.Add(ObjectMap["PayerAccountId"], PayerAccountId.Value);
+            if (BillerAccountId.HasValue && PayerAccountId.HasValue)
+            {
+                var dcs = new DatabaseCriterias(LogicalOperatorType.Or);
+                dcs.Add(ObjectMap["BillerAccountId"], BillerAccountId.Value);
+                dcs.Add(ObjectMap["PayerAccountId"], PayerAccountId.Value);
+                dq.Criterias.Add(dcs);
+            }
+            else
+            {
+                if (BillerAccountId.HasValue)
+                    dq.Criterias.Add(ObjectMap["BillerAccountId"], BillerAccountId.Value);
+
+                if (PayerAccountId.HasValue)
+                    dq.Criterias.Add(ObjectMap["PayerAccountId"], PayerAccountId.Value);
+            }
 
             if (startDate.HasValue)
                 dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
@@ -436,10 +476,12 @@ namespace AfterSchoolLibrary.Models
             return activityPaymentQuery;
         }
 
-        public static int GetCount(DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static int GetCount(DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
+
+            dq.Criterias.Add(ObjectMap["IsDeleted"], isDeleted);
 
             if (startDate.HasValue)
                 dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
@@ -449,27 +491,44 @@ namespace AfterSchoolLibrary.Models
             return dq.GetCount(msgs);
         }
 
-        public static int GetCountByBillerAccountId(int BillerAccountId, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetCountByBillerAccountId(int BillerAccountId, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return GetCountByBillerOrPayerAccountId(BillerAccountId, null, startDate, endDate, participationObjects, msgs, dc);
+            return GetCountByBillerOrPayerAccountId(BillerAccountId, null, startDate, endDate, participationObjects, isDeleted, msgs, dc);
         }
 
-        public static int GetCountByPayerAccountId(int PayerAccountId, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static int GetCountByPayerAccountId(int PayerAccountId, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, bool isDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
-            return GetCountByBillerOrPayerAccountId(null, PayerAccountId, startDate, endDate, participationObjects, msgs, dc);
+            return GetCountByBillerOrPayerAccountId(null, PayerAccountId, startDate, endDate, participationObjects, isDeleted, msgs, dc);
         }
 
-        private static int GetCountByBillerOrPayerAccountId(int? BillerAccountId, int? PayerAccountId, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static int GetCountByAccountId(int accountId, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, bool isDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            return GetCountByBillerOrPayerAccountId(accountId, accountId, startDate, endDate, participationObjects, isDeleted, msgs, dc);
+        }
+
+        private static int GetCountByBillerOrPayerAccountId(int? BillerAccountId, int? PayerAccountId, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, bool isDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
 
-            if (BillerAccountId.HasValue)
-                dq.Criterias.Add(ObjectMap["BillerAccountId"], BillerAccountId.Value);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], isDeleted);
 
-            if (PayerAccountId.HasValue)
-                dq.Criterias.Add(ObjectMap["PayerAccountId"], PayerAccountId.Value);
+            if (BillerAccountId.HasValue && PayerAccountId.HasValue)
+            {
+                var dcs = new DatabaseCriterias(LogicalOperatorType.Or);
+                dcs.Add(ObjectMap["BillerAccountId"], BillerAccountId.Value);
+                dcs.Add(ObjectMap["PayerAccountId"], PayerAccountId.Value);
+                dq.Criterias.Add(dcs);
+            }
+            else
+            {
+                if (BillerAccountId.HasValue)
+                    dq.Criterias.Add(ObjectMap["BillerAccountId"], BillerAccountId.Value);
+
+                if (PayerAccountId.HasValue)
+                    dq.Criterias.Add(ObjectMap["PayerAccountId"], PayerAccountId.Value);
+            }
 
             if (startDate.HasValue)
                 dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
@@ -485,21 +544,23 @@ namespace AfterSchoolLibrary.Models
             return dq.GetCount(msgs);
         }
 
-        public static List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)> GetParticipationObjectsByBillerAccountId(int BillerAccountId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)> GetParticipationObjectsByBillerAccountId(int BillerAccountId, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
-            return GetParticipationObjectsByBillerOrPayerAccountId(BillerAccountId, null, startDate, endDate, msgs, dc);
+            return GetParticipationObjectsByBillerOrPayerAccountId(BillerAccountId, null, startDate, endDate, isDeleted, msgs, dc);
         }
 
-        public static List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)> GetParticipationObjectsByPayerAccountId(int PayerAccountId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)> GetParticipationObjectsByPayerAccountId(int PayerAccountId, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
-            return GetParticipationObjectsByBillerOrPayerAccountId(null, PayerAccountId, startDate, endDate, msgs, dc);
+            return GetParticipationObjectsByBillerOrPayerAccountId(null, PayerAccountId, startDate, endDate, isDeleted, msgs, dc);
         }
 
-        private static List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)> GetParticipationObjectsByBillerOrPayerAccountId(int? billerAccountId, int? payerAccountId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        private static List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)> GetParticipationObjectsByBillerOrPayerAccountId(int? billerAccountId, int? payerAccountId, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
+
+            dq.Criterias.Add(ObjectMap["IsDeleted"], isDeleted);
 
             if (billerAccountId.HasValue)
                 dq.Criterias.Add(ObjectMap["billerAccountId"], billerAccountId.Value);
@@ -538,16 +599,17 @@ namespace AfterSchoolLibrary.Models
             return list;
         }
 
-        public static int GetCountByPurchaseId(int PurchaseId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static int GetCountByPurchaseId(int PurchaseId, bool isDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["PurchaseId"], PurchaseId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], isDeleted);
 
             return dq.GetCount(msgs);
         }
 
-        public static decimal GetTotalFeesPaid(DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetTotalFeesPaid(DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -557,6 +619,9 @@ namespace AfterSchoolLibrary.Models
             var sp = new SelectParameter(ObjectMap["Amount"]);
             sp.Function = $"ISNULL(SUM({ObjectMap["PlatformFlatFee"].ParameterFullName} + ({ObjectMap["PlatformPercentFee"].ParameterFullName} * {ObjectMap["Amount"].ParameterFullName})), 0) + ISNULL(SUM({ObjectMap["PaymentTypeFeeCharged"].ParameterFullName} + {ObjectMap["ConvenienceFeeCharged"].ParameterFullName}), 0)";
             dq.SelectParameters.Add(sp);
+
+            dq.Criterias.Add(ObjectMap["IsDeleted"], isDeleted);
+            dq.Criterias.Add(ObjectMap["TransactionTypeId"], (int)TransactionType.Charge);
 
             if (startDate.HasValue)
                 dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
@@ -571,7 +636,7 @@ namespace AfterSchoolLibrary.Models
             return 0;
         }
 
-        public static decimal GetTotalAHQProfit(DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetTotalAHQProfit(DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -584,6 +649,9 @@ namespace AfterSchoolLibrary.Models
                             ISNULL(SUM({ObjectMap["PaymentTypeFeeCharged"].ParameterFullName} + {ObjectMap["ConvenienceFeeCharged"].ParameterFullName} - ({Billing.StripeHelper.StripePercentFee} * {ObjectMap["Amount"].ParameterFullName}) - {Billing.StripeHelper.StripeFlatFee}), 0)";
             dq.SelectParameters.Add(sp);
 
+            dq.Criterias.Add(ObjectMap["IsDeleted"], isDeleted);
+            dq.Criterias.Add(ObjectMap["TransactionTypeId"], (int)TransactionType.Charge);
+
             if (startDate.HasValue)
                 dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
 
@@ -597,7 +665,7 @@ namespace AfterSchoolLibrary.Models
             return 0;
         }
 
-        public static decimal GetTotalFeesPaidByBillerAccount(int BillerAccountId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetTotalFeesPaidByBillerAccount(int BillerAccountId, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -608,7 +676,9 @@ namespace AfterSchoolLibrary.Models
             sp.Function = $"ISNULL(SUM({ObjectMap["PlatformFlatFee"].ParameterFullName} + ({ObjectMap["PlatformPercentFee"].ParameterFullName} * {ObjectMap["Amount"].ParameterFullName})), 0)";
             dq.SelectParameters.Add(sp);
 
+            dq.Criterias.Add(ObjectMap["IsDeleted"], isDeleted);
             dq.Criterias.Add(ObjectMap["BillerAccountId"], BillerAccountId);
+            dq.Criterias.Add(ObjectMap["TransactionTypeId"], (int)TransactionType.Charge);
 
             if (startDate.HasValue)
                 dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
@@ -619,13 +689,13 @@ namespace AfterSchoolLibrary.Models
             var results = dq.Select(msgs);
             if (results.Rows.Any())
                 return results.Rows[0][0].ToString().ToDecimal() + 
-                    GetTotalConvenienceFeesPaidByBillerAccount(BillerAccountId, startDate, endDate, msgs, dc) +
-                    GetTotalPaymentTypeFeesPaidByBillerAccount(BillerAccountId, startDate, endDate, msgs, dc);
+                    GetTotalConvenienceFeesPaidByBillerAccount(BillerAccountId, startDate, endDate, isDeleted, msgs, dc) +
+                    GetTotalPaymentTypeFeesPaidByBillerAccount(BillerAccountId, startDate, endDate, isDeleted, msgs, dc);
 
             return 0;
         }
 
-        public static decimal GetTotalAmountBilledOut(DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetTotalAmountBilledOut(DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -635,6 +705,36 @@ namespace AfterSchoolLibrary.Models
             var sp = new SelectParameter(ObjectMap["Amount"]);
             sp.Function = $"ISNULL(SUM({ObjectMap["Amount"].ParameterFullName}), 0)";
             dq.SelectParameters.Add(sp);
+
+            dq.Criterias.Add(ObjectMap["IsDeleted"], isDeleted);
+            dq.Criterias.Add(ObjectMap["TransactionTypeId"], (int)TransactionType.Charge);
+
+            if (startDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+
+            if (endDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+
+            var results = dq.Select(msgs);
+            if (results.Rows.Any())
+                return results.Rows[0][0].ToString().ToDecimal();
+
+            return 0;
+        }
+
+        public static decimal GetTotalAmountRefunded(DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseParameterizedQuery = false;
+            dq.SelectParameters.Clear();
+
+            var sp = new SelectParameter(ObjectMap["Amount"]);
+            sp.Function = $"ISNULL(SUM({ObjectMap["Amount"].ParameterFullName}), 0)";
+            dq.SelectParameters.Add(sp);
+
+            dq.Criterias.Add(ObjectMap["IsDeleted"], isDeleted);
+            dq.Criterias.Add(ObjectMap["TransactionTypeId"], (int)TransactionType.Refund);
 
             if (startDate.HasValue)
                 dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
@@ -659,7 +759,7 @@ namespace AfterSchoolLibrary.Models
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public static decimal GetTotalAmountBilledByBillerAccount(int BillerAccountId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetTotalAmountBilledByBillerAccount(int BillerAccountId, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -671,6 +771,7 @@ namespace AfterSchoolLibrary.Models
             dq.SelectParameters.Add(sp);
 
             dq.Criterias.Add(ObjectMap["BillerAccountId"], BillerAccountId);
+            dq.Criterias.Add(ObjectMap["isDeleted"], isDeleted);
 
             if (startDate.HasValue)
                 dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
@@ -681,13 +782,13 @@ namespace AfterSchoolLibrary.Models
             var results = dq.Select(msgs);
             if (results.Rows.Any())
                 return results.Rows[0][0].ToString().ToDecimal() -
-                    GetTotalConvenienceFeesNotPaidByBillerAccount(BillerAccountId, startDate, endDate, msgs, dc) -
-                    GetTotalPaymentTypeFeesNotPaidByBillerAccount(BillerAccountId, startDate, endDate, msgs, dc);
+                    GetTotalConvenienceFeesNotPaidByBillerAccount(BillerAccountId, startDate, endDate, isDeleted, msgs, dc) -
+                    GetTotalPaymentTypeFeesNotPaidByBillerAccount(BillerAccountId, startDate, endDate, isDeleted, msgs, dc);
 
             return 0;
         }
 
-        public static decimal GetTotalConvenienceFeesNotPaidByBillerAccount(int BillerAccountId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetTotalConvenienceFeesNotPaidByBillerAccount(int BillerAccountId, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -700,6 +801,7 @@ namespace AfterSchoolLibrary.Models
 
             dq.Criterias.Add(ObjectMap["BillerAccountId"], BillerAccountId);
             dq.Criterias.Add(ObjectMap["ConvenienceFeePayerAccountId"], BillerAccountId, DatabaseCriteriaOperatorEnum.NotEqualTo);
+            dq.Criterias.Add(ObjectMap["isDeleted"], isDeleted);
 
             if (startDate.HasValue)
                 dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
@@ -714,7 +816,7 @@ namespace AfterSchoolLibrary.Models
             return 0;
         }
 
-        public static decimal GetTotalPaymentTypeFeesNotPaidByBillerAccount(int BillerAccountId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetTotalPaymentTypeFeesNotPaidByBillerAccount(int BillerAccountId, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -726,6 +828,7 @@ namespace AfterSchoolLibrary.Models
             dq.SelectParameters.Add(sp);
 
             dq.Criterias.Add(ObjectMap["BillerAccountId"], BillerAccountId);
+            dq.Criterias.Add(ObjectMap["isDeleted"], isDeleted);
             dq.Criterias.Add(ObjectMap["PaymentTypeFeePayerAccountId"], BillerAccountId, DatabaseCriteriaOperatorEnum.NotEqualTo);
 
             if (startDate.HasValue)
@@ -741,7 +844,7 @@ namespace AfterSchoolLibrary.Models
             return 0;
         }
 
-        public static decimal GetTotalConvenienceFeesPaidByBillerAccount(int BillerAccountId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetTotalConvenienceFeesPaidByBillerAccount(int BillerAccountId, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -753,6 +856,7 @@ namespace AfterSchoolLibrary.Models
             dq.SelectParameters.Add(sp);
 
             dq.Criterias.Add(ObjectMap["ConvenienceFeePayerAccountId"], BillerAccountId);
+            dq.Criterias.Add(ObjectMap["isDeleted"], isDeleted);
 
             if (startDate.HasValue)
                 dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
@@ -767,7 +871,7 @@ namespace AfterSchoolLibrary.Models
             return 0;
         }
 
-        public static decimal GetTotalPaymentTypeFeesPaidByBillerAccount(int BillerAccountId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetTotalPaymentTypeFeesPaidByBillerAccount(int BillerAccountId, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -779,6 +883,7 @@ namespace AfterSchoolLibrary.Models
             dq.SelectParameters.Add(sp);
 
             dq.Criterias.Add(ObjectMap["PaymentTypeFeePayerAccountId"], BillerAccountId);
+            dq.Criterias.Add(ObjectMap["isDeleted"], isDeleted);
 
             if (startDate.HasValue)
                 dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
@@ -793,7 +898,7 @@ namespace AfterSchoolLibrary.Models
             return 0;
         }
 
-        public static decimal GetTotalAmountPaidByPayerAccount(int PayerAccountId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetTotalAmountPaidByPayerAccount(int PayerAccountId, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
 
             DatabaseQuery dq = DatabaseQuery;
@@ -806,6 +911,7 @@ namespace AfterSchoolLibrary.Models
             dq.SelectParameters.Add(sp);
 
             dq.Criterias.Add(ObjectMap["PayerAccountId"], PayerAccountId);
+            dq.Criterias.Add(ObjectMap["isDeleted"], isDeleted);
 
             if (startDate.HasValue)
                 dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
@@ -820,7 +926,7 @@ namespace AfterSchoolLibrary.Models
             return 0;
         }
 
-        public static decimal GetTotalRefundByOriginalTransaction(int OriginalTransactionId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetTotalRefundByOriginalTransaction(int OriginalTransactionId, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
 
             DatabaseQuery dq = DatabaseQuery;
@@ -833,6 +939,7 @@ namespace AfterSchoolLibrary.Models
             dq.SelectParameters.Add(sp);
 
             dq.Criterias.Add(ObjectMap["OriginalTransactionId"], OriginalTransactionId);
+            dq.Criterias.Add(ObjectMap["isDeleted"], isDeleted);
 
             var results = dq.Select(msgs);
             if (results.Rows.Any())

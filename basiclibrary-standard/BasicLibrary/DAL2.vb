@@ -706,8 +706,6 @@ Namespace DataAccess
 
                 dt = New DataTable
 
-
-                dt = New DataTable
                 Connection.CreateSqlCommand(sql.ToString)
                 If Timeout.HasValue Then
                     Connection.GetSqlCommand.CommandTimeout = Timeout.Value

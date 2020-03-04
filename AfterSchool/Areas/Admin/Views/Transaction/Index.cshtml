@@ -4,8 +4,9 @@
     var transactionCount = ((PagingModel)ViewBag.PagingModel).TotalCount;
     var totalTransactionAmount = (decimal)ViewBag.TotalAmountPaid;
     var avgTransactionAmount = transactionCount == 0 ? 0 : totalTransactionAmount / transactionCount;
+    var totalRefunded = (decimal)ViewBag.TotalRefunded;
     var totalFees = (decimal)ViewBag.TotalFeesPaid;
-    var totalPayout = totalTransactionAmount - totalFees;
+    var totalPayout = totalTransactionAmount - totalFees - totalRefunded;
     var totalProfit = (decimal)ViewBag.TotalProfit;
 }
 
@@ -140,12 +141,12 @@
                             <th>Biller</th>
                             <th>Payer</th>
                             <th>Item Description</th>
-                            <th class="text-center">Total Amt Paid</th>
+                            <th class="text-center">Amount</th>
                             <th class="text-center">Platform Fee</th>
                             <th class="text-center">Payout Amount</th>
                             <th class="text-center">Status</th>
                             <th class="text-center">Type</th>
-                            @*<th>Refund</th>*@
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -159,7 +160,7 @@
                                 var currentStatus = transaction.GetStatus();
                                 var disableChk = !transaction.CanRequestPayout() ? "disabled" : "";
 
-                                <tr id="@transaction.Uid" data-refunded-amount="@transaction.GetRefundedAmount().ToCurrency()">
+                                <tr id="row-@transaction.Uid">
                                     <td>
                                         @transaction.GetTransactionNumber()
                                     </td>
@@ -173,40 +174,73 @@
                                         @transaction.GetPayerAccount().Name
                                     </td>
                                     <td>
-                                        @participationObjects.DistinctBy(po => new { po.ObjectID, po.ObjectType }).Select(po => po.Name).ToStringList(", ")
+                                        @transaction.Description
                                     </td>
                                     <td class="text-center">
-                                        @transaction.GetPayerAmount().ToCurrency()
+                                        @(transaction.IsRefund() ? "-" : "")@transaction.GetPayerAmount().ToCurrency()
                                     </td>
                                     <td class="text-center">
-                                        @transaction.GetFeesChargedToPayer().ToCurrency()
+                                        @if (transaction.IsCharge())
+                                        {
+                                            @transaction.GetFeesChargedToPayer().ToCurrency()
+                                        }
+                                        else
+                                        {
+                                            @:-
+                                        }
                                     </td>
                                     <td class="text-center">
-                                        @transaction.GetBillerPayout().ToCurrency()
+                                        @if (transaction.IsCharge())
+                                        {
+                                            @transaction.GetBillerPayout().ToCurrency()
+                                        }
+                                        else
+                                        {
+                                            @:-
+                                        }
                                     </td>
                                     <td class="text-center">
-                                        @currentStatus
+                                        @if (transaction.IsCharge())
+                                        {
+                                            if (transaction.HasRefunds())
+                                            {
+                                                @:Refunded
+                                            }
+                                            else
+                                            {
+                                                @currentStatus
+                                            }
+                                        }
+                                        else
+                                        {
+                                            @:-
+                                        }
                                     </td>
                                     <td class="text-center">
                                         @transaction.PaymentTypeId.ToString().SplitByUpperCase()
                                     </td>
-                                    @*<td>
-                                    @if (transaction.IsCharge() && !transaction.IsTotallyRefunded())
-                                    {
-                                        <button onclick="openDialog('@transaction.Uid')"
-                                                class="md-trigger"
-                                                data-modal="modal-refund">
-                                            Refund
-                                        </button>
-                                    }
-                                </td>*@
+                                    <td>
+                                        <div class="btn-group">                                           
+                                            <button onclick="setTransaction('@transaction.Uid', '@transaction.GetTransactionNumber()', '@transaction.Amount.ToCurrency()')"
+                                                    class="md-trigger btn btn-sm btn-alt6"
+                                                    data-modal="modal-refund"
+                                                    @(!transaction.CanRefund() ? "disabled=\"disabled\"": "")>
+                                                <i class="s7-back"></i>
+                                            </button>
+                                            <button onclick="setTransaction('@transaction.Uid', '@transaction.GetTransactionNumber()')"
+                                                    class="md-trigger btn btn-sm btn-danger"
+                                                    data-modal="modal-delete">
+                                                <i class="s7-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
                                 </tr>
                             }
                         }
                         else
                         {
                             <tr>
-                                <td colspan="8">There are no transactions</td>
+                                <td colspan="9">There are no transactions</td>
                             </tr>
                         }
                     </tbody>
@@ -229,155 +263,90 @@
     </div>
 </div>
 
-<div id="modal-refund" class="md-modal colored-header custom-width md-effect-9">
-
+<div id="modal-delete" class="md-modal colored-header custom-width md-effect-9">
     <div class="md-content">
         <div class="modal-header">
             <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
-            <h3 class="modal-title">Refund</h3>
+            <h3 class="modal-title">Mark as Deleted?</h3>
         </div>
         <div class="modal-body form">
             <div class="form-group">
-                <div class="col-sm-5">
-                    <div class="input-group input-group-lg xs-mb-15">
-                        <span>Amount refunded: </span>
-                        <span id="refunded-amount" style="color: red"></span>
-                    </div>
-                    <div class="input-group input-group-lg xs-mb-15">
-                        <span class="input-group-addon">$</span>
-                        <input type="number" onblur="validateForm()" onchange="validateForm()" class="form-control" id="amount" placeholder="amount" required min="0.1" step="0.1" />
-                    </div>
-                </div>
-
-                <div class="col-sm-7">
-                </div>
-            </div>
-            <br />
-            <div class="form-group">
-                <div class="col-sm-12">
-                    <h5 style="margin-left: 50px"><b style="color: #ef6262">This is not reversable!</b></h5>
-                </div>
+                Are you sure you want to delete transaction <strong><span class="transaction-id"></span></strong> and related payments?
             </div>
         </div>
         <div class="modal-footer">
             <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-            <button type="button" id="confirm-refund-btn" disabled data-dismiss="modal" onclick="confirmRefund()" class="btn btn-primary md-close">Refund</button>
+            <button type="button" id="confirm-delete-btn" data-dismiss="modal" onclick="deleteTransaction()" class="btn btn-danger md-close">
+                Delete Transaction &raquo;
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="modal-refund" class="md-modal colored-header custom-width md-effect-9">
+    <div class="md-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+            <h3 class="modal-title">Refund?</h3>
+        </div>
+        <div class="modal-body form">
+            <div class="form-group">
+                <p>
+                    Are you sure you want to refund transaction <strong><span class="transaction-id"></span></strong> for the amount of <strong><span class="transaction-amount"></span></strong>?
+                </p>
+                <p>
+                    This cannot be undone
+                </p>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+            <button type="button" id="confirm-delete-btn" data-dismiss="modal" onclick="refundTransaction()" class="btn btn-primary md-close">
+                Refund Transaction &raquo;
+            </button>
         </div>
     </div>
 </div>
 
 
 <script>
-     var selectedTransactions = [];
-     function validateForm() {
-        var val = parseFloat($("#amount").val());
-        var isValid = val >= 0.1;
+    var transactionUid = null;
 
-        $("#confirm-refund-btn").attr('disabled', !isValid);
-     }
-
-    function requestPayout() {
-        $("#TransactionIds").val(this.selectedTransactions.join());
-        $("#requestPayoutForm").submit();
+    function setTransaction(uid, id, amount) {
+        transactionUid = uid;
+        $('.transaction-id').html(id);
+        $('.transaction-amount').html(amount);
     }
 
-    function openDialog(newUid) {
-        $("#modal-refund").data("uid", newUid);
-        $("#refunded-amount").text($("#" + newUid).data('refunded-amount'));
+    function deleteTransaction() {
+        $.get(
+            '@Url.Action("delete", "transaction")/' + transactionUid,
+            function (data) {
+                if (data && data.status == 'ok') {
+
+                    $('#row-' + transactionUid).addClass('hide');
+                    Notifications.showMessage('Success', 'Transaction has been deleted', true)
+
+                } else {
+                    Notifications.showErrors(data.messages);
+                }
+            }
+        );
     }
 
-      function selectTransaction(id, event) {
-        if (event.checked) {
-            this.selectedTransactions.push(id);
-        }
-        else {
-            var index = this.selectedTransactions.map(x => {
-                    return x;
-                }).indexOf(id);
-            this.selectedTransactions.splice(index, 1);
-        }
-        if (this.selectedTransactions.length > 0)
-            $("#request-payout").attr("disabled", false);
-        else
-            $("#request-payout").attr("disabled", true);
+    function refundTransaction() {
+        $.get(
+            '@Url.Action("refund", "transaction")/' + transactionUid,
+            function (data) {
+                if (data && data.status == 'ok') {
+
+                    Notifications.showMessage('Success', 'Transaction has been refunded', true)
+
+                } else {
+                    Notifications.showErrors(data.messages);
+                }
+            }
+        );
     }
 
-    function selectAllTransaction(event) {
-        var allChkBoxes = $(".chkTransaction");
-        allChkBoxes.map(function (e) {
-            if (event.checked) {
-                if ($(this).prop("checked") == false)
-                    this.click();
-               }
-             else {
-                if ($(this).prop("checked") == true)
-                    this.click();
-              }
-           })
-    }
-
-    function confirmRefund() {
-        var amount = $("#amount").val();
-
-        if (!!amount) {
-            var uid = $("#modal-refund").data("uid");
-
-            $.post(
-                "@Url.Action("refund", "Accounting")",
-                { uid: uid, amount: amount },
-                function (data) {
-                    if (data.status === "ok") {
-                        var transaction = data.transaction;
-
-                        // update the page header
-                        var transactionNumber = parseInt($("#transactionCount").data("end")) + 1;
-                        var totalTransactionAmount = (parseFloat($("#totalTransactionAmount").data("end")) + parseFloat(transaction.totalPaid)).toFixed(2);
-                        var totalPayout = (parseFloat($("#totalPayout").data("end")) + parseFloat(transaction.payout)).toFixed(2);
-                        var avgTransactionAmount = (totalTransactionAmount / transactionNumber).toFixed(2);
-
-                        $("#transactionCount").data("end", transactionNumber);
-                        $("#transactionCount").text(transactionNumber);
-                        $("#avgTransactionAmount").data("end", avgTransactionAmount);
-                        $("#avgTransactionAmount").text("$" + avgTransactionAmount);
-                        $("#totalTransactionAmount").data("end", totalTransactionAmount);
-                        $("#totalTransactionAmount").text("$" + totalTransactionAmount);
-                        $("#totalPayout").data("end", totalPayout);
-                        $("#totalPayout").text("$" + totalPayout);
-                        $("#" + transaction.originalTransactionUid).data('refunded-amount', "$"+ data.refundedAmount.toFixed(2));
-
-                        // update the transaction table
-                        $("#transaction-table tr:first").after('<tr>' +
-                            '<td>' + transaction.id + '</td>' +
-                            '<td>' + transaction.createdOn + '</td>' +
-                            '<td>' + transaction.payer + '</td>' +
-                            '<td>' + transaction.refundFor + '</td>' +
-                            '<td>' + transaction.itemDescription + '</td>' +
-                            '<td>-$' + (-transaction.totalPaid).toFixed(2) + '</td>' +
-                            '<td>$' + transaction.platformFee.toFixed(2) + '</td>' +
-                            '<td>-$' + (-transaction.payout).toFixed(2) + '</td>' +
-                            '<td></td>' +
-                            '</tr>'
-                        );
-                        Notifications.showBar({
-                            title: 'Success',
-                            message: `<strong>Successful operation!</strong>`,
-                            success: true
-                        });
-                    } else {
-                        var items = "";
-                        for (var message of data.messages) {
-                            items += "<li>" + message.Text + "</li>";
-                        }
-
-                        Notifications.showBar({
-                            title: 'Error',
-                            message: '<ul>' + items + '</ul>',
-                            success: false
-                        });
-                    }
-                },
-                "json"
-            );
-        }
-    }
 </script>

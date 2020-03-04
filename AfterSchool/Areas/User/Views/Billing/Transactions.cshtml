@@ -73,8 +73,10 @@
                             <th>For</th>
                             <th>Paid to</th>
                             <th>Item Description</th>
-                            <th class="text-center">Total Amt Paid</th>
+                            <th>Type</th>
+                            <th class="text-center">Amount</th>
                             <th class="text-center">Payment Method</th>
+                            <th class="text-center">Status</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -85,11 +87,9 @@
                             {
                                 var purchase = transaction.GetPurchase();
                                 var registrant = Registrant.Load(purchase.RegistrantId.Value);
-                                var participationObjects = transaction.GetParticipationObjects();
                                 var billerAccount = transaction.GetBillerAccount();
-                                var description = participationObjects.DistinctBy(po => new { po.ObjectID, po.ObjectType }).Select(po => po.Name).ToStringList(", ");
 
-                                <tr id="@transaction.Uid" data-refunded-amount="@transaction.GetRefundedAmount().ToCurrency()">
+                                <tr id="@transaction.Uid">
                                     <td>
                                         @transaction.GetTransactionNumber()
                                     </td>
@@ -109,19 +109,48 @@
                                     <td>
                                         @billerAccount.Name
                                     </td>
+                                    <td>                                       
+                                        @transaction.Description
+                                    </td>
                                     <td>
-                                        @description
+                                        @transaction.TransactionTypeId.ToString()
                                     </td>
                                     <td class="text-center">
                                         @transaction.GetPayerAmount().ToCurrency()
+
+                                        @if (transaction.IsRefund())
+                                        {
+                                            <i class="s7-back-2"></i>
+                                        }
                                     </td>
                                     <td class="text-center">
                                         @transaction.PaymentTypeId.ToString().SplitByUpperCase()
                                     </td>
+                                    <td class="text-center">
+                                        @if (transaction.IsCharge())
+                                        {
+                                            if (transaction.HasRefunds())
+                                            {
+                                                @:Refunded
+                                            }
+                                            else
+                                            {
+                                                @:Paid
+                                            }
+
+                                        }
+                                        else if (transaction.IsRefund())
+                                        {
+                                            @:-
+                                        }
+                                    </td>
                                     <td>
-                                        <a href="mailto:@billerAccount.Email?subject=@UI.JavascriptSafeString($"Refund Request for {description}")">
-                                            Request Refund
-                                        </a>
+                                        @if (transaction.IsCharge() && !transaction.HasRefunds())
+                                        {
+                                            <a href="mailto:@billerAccount.Email?subject=@UI.JavascriptSafeString($"Refund Request for {transaction.Description}")">
+                                                Request Refund
+                                            </a>
+                                        }
                                     </td>
                                 </tr>
                             }

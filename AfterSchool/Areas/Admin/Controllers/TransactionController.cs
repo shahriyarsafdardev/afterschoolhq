@@ -40,10 +40,10 @@ namespace AfterSchool.Areas.Admin.Controllers
                 new DateTime?();
 
             // transaction count
-            var totalTransactionCount = Transaction.GetCount(startDate, endDate, msgs);
+            var totalTransactionCount = Transaction.GetCount(startDate, endDate, false, msgs);
 
             // transaction data
-            var allTransactions = Transaction.LoadByDate(startDate, endDate, start, length, msgs);
+            var allTransactions = Transaction.LoadByDate(startDate, endDate, false, start, length, msgs);
 
             var totalPages = Math.Ceiling(totalTransactionCount.ToDouble() / recordsPerPage).ToInteger();
 
@@ -52,9 +52,10 @@ namespace AfterSchool.Areas.Admin.Controllers
                     transaction.CreateDate = SessionVariables.CurrentAccount.ConvertToAccountTimeZone(transaction.CreateDate.Value);
             });
 
-            ViewBag.TotalAmountPaid = Transaction.GetTotalAmountBilledOut(startDate, endDate, msgs);
-            ViewBag.TotalFeesPaid = Transaction.GetTotalFeesPaid(startDate, endDate, msgs);
-            ViewBag.TotalProfit = Transaction.GetTotalAHQProfit(startDate, endDate, msgs);
+            ViewBag.TotalAmountPaid = Transaction.GetTotalAmountBilledOut(startDate, endDate, false, msgs);
+            ViewBag.TotalFeesPaid = Transaction.GetTotalFeesPaid(startDate, endDate, false, msgs);
+            ViewBag.TotalProfit = Transaction.GetTotalAHQProfit(startDate, endDate, false, msgs);
+            ViewBag.TotalRefunded = Transaction.GetTotalAmountRefunded(startDate, endDate, false, msgs);
             ViewBag.Messages = msgs;
             ViewBag.PagingModel = new PagingModel()
             {
@@ -64,6 +65,44 @@ namespace AfterSchool.Areas.Admin.Controllers
                 TotalPages = totalPages
             };
             return View(allTransactions);
+        }
+
+        [HttpGet]
+        public ActionResult Delete(string id)
+        {
+            var msgs = new SystemMessages();
+
+            if (id.IsGuid())
+            {
+                var transaction = Transaction.LoadByUid(id.ToGuid(), msgs);
+
+                if (transaction.IsNotEmpty())
+                    transaction.MarkAsDeleted(SessionVariables.LoggedInUser, msgs);
+
+                if (msgs.HasNoErrors())
+                    return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(new { status = "error", messages = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public ActionResult Refund(string id)
+        {
+            var msgs = new SystemMessages();
+
+            if (id.IsGuid())
+            {
+                var transaction = Transaction.LoadByUid(id.ToGuid(), msgs);
+
+                if (transaction.IsNotEmpty() && !transaction.HasRefunds())
+                    transaction.Refund(SessionVariables.LoggedInUser, msgs);
+
+                if (msgs.HasNoErrors())
+                    return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(new { status = "error", messages = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
         }
     }
 }

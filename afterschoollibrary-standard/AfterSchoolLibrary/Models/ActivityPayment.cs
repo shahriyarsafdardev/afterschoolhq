@@ -39,6 +39,7 @@ namespace AfterSchoolLibrary.Models
 		public int? ParticipationObjectId { get { return (int?)MDV["ParticipationObjectId"].Value; } set { MDV["ParticipationObjectId"].Value = value; } }
 		public int? TransactionId { get { return (int?)MDV["TransactionId"].Value; } set { MDV["TransactionId"].Value = value; } }
 		public int? RegistrantSubscriptionPlanId { get { return (int?)MDV["RegistrantSubscriptionPlanId"].Value; } set { MDV["RegistrantSubscriptionPlanId"].Value = value; } }
+		public bool IsDeleted { get { return (bool)MDV["IsDeleted"].Value; } set { MDV["IsDeleted"].Value = value; } }
 		
 
         public ActivityPayment()
@@ -47,6 +48,7 @@ namespace AfterSchoolLibrary.Models
             this.LoadObjectValues(ObjectMap);
 			this.Uid = Guid.NewGuid();
 			this.ParticipationObjectTypeId = ParticipationObjectType.NotSet;
+			this.IsDeleted = false;
 			
         }
 
@@ -66,6 +68,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "ParticipationObjectId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "TransactionId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrantSubscriptionPlanId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "IsDeleted", System.Data.SqlDbType.Bit);
 				
                 return _dp;
             }
@@ -183,6 +186,10 @@ namespace AfterSchoolLibrary.Models
 			dps.Add(ObjectMap["RegistrantSubscriptionPlanId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsDeleted"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -193,35 +200,39 @@ namespace AfterSchoolLibrary.Models
 			return ActivityPayment.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
-		public static List<ActivityPayment> LoadByActivityId(int ActivityId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<ActivityPayment> LoadByActivityIdByIsDeleted(int ActivityId, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ActivityId"], ActivityId);
+			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<ActivityPayment> LoadByAccountId(int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<ActivityPayment> LoadByAccountIdByIsDeleted(int AccountId, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<ActivityPayment> LoadByRegistrantId(int RegistrantId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<ActivityPayment> LoadByRegistrantIdByIsDeleted(int RegistrantId, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
+			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<ActivityPayment> LoadByRegistrantSubscriptionPlanId(int RegistrantSubscriptionPlanId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<ActivityPayment> LoadByRegistrantSubscriptionPlanIdByIsDeleted(int RegistrantSubscriptionPlanId, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["RegistrantSubscriptionPlanId"], RegistrantSubscriptionPlanId);
+			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
@@ -233,30 +244,33 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static List<ActivityPayment> LoadByParticipationObject(int ParticipationObjectId, ParticipationObjectType ParticipationObjectTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<ActivityPayment> LoadByParticipationObject(int ParticipationObjectId, ParticipationObjectType ParticipationObjectTypeId, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ParticipationObjectId"], ParticipationObjectId);
 			dq.Criterias.Add(ObjectMap["ParticipationObjectTypeId"], ParticipationObjectTypeId);
+			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<ActivityPayment> LoadByParticipationObjectByRegistrant(int ParticipationObjectId, ParticipationObjectType ParticipationObjectTypeId, int RegistrantId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<ActivityPayment> LoadByParticipationObjectByRegistrant(int ParticipationObjectId, ParticipationObjectType ParticipationObjectTypeId, int RegistrantId, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ParticipationObjectId"], ParticipationObjectId);
 			dq.Criterias.Add(ObjectMap["ParticipationObjectTypeId"], ParticipationObjectTypeId);
 			dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
+			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<ActivityPayment> LoadByTransactionId(int TransactionId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<ActivityPayment> LoadByTransactionIdByIsDeleted(int TransactionId, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["TransactionId"], TransactionId);
+			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
@@ -266,7 +280,7 @@ namespace AfterSchoolLibrary.Models
 
 		#region "UserDefined"
 
-        public static decimal GetTotalPaidByAccount(int accountId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetTotalPaidByAccount(int accountId, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -276,15 +290,16 @@ namespace AfterSchoolLibrary.Models
             sp.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
             dq.SelectParameters.Add(sp);
             dq.Criterias.Add(ObjectMap["accountId"], accountId);
+			dq.Criterias.Add(ObjectMap["isDeleted"], isDeleted);
 
-            var results = dq.Select(msgs);
+			var results = dq.Select(msgs);
             if (results.Rows.Any())
                 return results.Rows[0][0].ToString().ToDecimal();
 
             return 0;
         }
 
-        public static decimal GetTotalPaidByParticipationObject(int objectId, ParticipationObjectType objectType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetTotalPaidByParticipationObject(int objectId, ParticipationObjectType objectType, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -295,15 +310,16 @@ namespace AfterSchoolLibrary.Models
             dq.SelectParameters.Add(sp);
             dq.Criterias.Add(ObjectMap["participationObjectTypeId"], (int)objectType);
             dq.Criterias.Add(ObjectMap["participationObjectId"], objectId);
+			dq.Criterias.Add(ObjectMap["isDeleted"], isDeleted);
 
-            var results = dq.Select(msgs);
+			var results = dq.Select(msgs);
             if (results.Rows.Any())
                 return results.Rows[0][0].ToString().ToDecimal();
 
             return 0;
         }
 
-        public static decimal GetTotalPaidByParticipationObjectByRegistrant(int objectId, ParticipationObjectType objectType, int registrantId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetTotalPaidByParticipationObjectByRegistrant(int objectId, ParticipationObjectType objectType, int registrantId, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -314,9 +330,10 @@ namespace AfterSchoolLibrary.Models
             dq.SelectParameters.Add(sp);
             dq.Criterias.Add(ObjectMap["participationObjectTypeId"], (int)objectType);
             dq.Criterias.Add(ObjectMap["participationObjectId"], objectId);
-            dq.Criterias.Add(ObjectMap["registrantId"], registrantId);
+			dq.Criterias.Add(ObjectMap["registrantId"], registrantId);
+			dq.Criterias.Add(ObjectMap["isDeleted"], isDeleted);
 
-            var results = dq.Select(msgs);
+			var results = dq.Select(msgs);
             if (results.Rows.Any())
                 return results.Rows[0][0].ToString().ToDecimal();
 

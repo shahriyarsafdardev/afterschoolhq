@@ -383,7 +383,7 @@ namespace AfterSchoolLibrary.Services
 
         public static decimal GetTotalPaid(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityPayment.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs, dc).Sum(payment => payment.Amount.Value);
+            return ActivityPayment.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, false, msgs, dc).Sum(payment => payment.Amount.Value);
         }
 
         public static GradeLevel GetStartingGradeLevel(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -495,7 +495,7 @@ namespace AfterSchoolLibrary.Services
 
         public static decimal GetTotalAmountPaid(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityPayment.GetTotalPaidByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs, dc);
+            return ActivityPayment.GetTotalPaidByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, false, msgs, dc);
         }
 
         public static Activity CopyWithRegistrants(this Activity activity, string newName, bool useSameForm, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)

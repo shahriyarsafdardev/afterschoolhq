@@ -687,7 +687,7 @@ namespace AfterSchoolLibrary.Services
             var purchase = registration.GetPurchase(msgs);
 
             if (purchase.IsNotEmpty())
-                return Transaction.GetCountByPurchaseId(purchase.ID.Value) > 0;
+                return Transaction.GetCountByPurchaseId(purchase.ID.Value, false) > 0;
 
             return false;
         }
@@ -906,6 +906,7 @@ namespace AfterSchoolLibrary.Services
                     registrantActivity.ParticipationObjectId.Value,
                     registrantActivity.ParticipationObjectTypeId,
                     registration.RegistrantId.Value,
+                    false,
                     msgs,
                     dc) > 0;
             }

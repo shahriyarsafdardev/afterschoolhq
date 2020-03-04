@@ -1531,11 +1531,11 @@ namespace AfterSchoolLibrary.Billing
             {
                 Amount = (totalAmount * 100).ToInteger(),
                 Reason = reason,
-                ReverseTransfer = true,
+                // ReverseTransfer = true,
                 Charge = chargeId
             };
 
-            Stripe.Refund refund = null;
+            Refund refund = null;
 
             try
             {
