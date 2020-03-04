@@ -98,7 +98,7 @@
                 if (CanView(FeatureType.Activities, SessionVariables.AccountUserType, PermissionType.ActivitiesView))
                 {
                     <li class="@activityactive">
-                        <a href="@Url.Action("index", "activity")"><i class="icon s7-gleam"></i> @UILabel.ActivityLabel(ActivityType.Activity, true)</a>
+                        <a href="@Url.Action("index", "activity", new { type = (int)ActivityType.Activity })"><i class="icon s7-gleam"></i> @UILabel.ActivityLabel(ActivityType.Activity, true)</a>
                     </li>
                 }
             }
@@ -110,7 +110,7 @@
                         @if (CanView(FeatureType.Activities, SessionVariables.AccountUserType, PermissionType.ActivitiesView))
                         {
                             <li>
-                                <a href="@Url.Action("index", "activity")"><i class="icon s7-gleam"></i> Extracurricular @UILabel.ActivityLabel(ActivityType.Activity, true)</a>
+                                <a href="@Url.Action("index", "activity", new { type = (int)ActivityType.Activity })"><i class="icon s7-gleam"></i> Extracurricular @UILabel.ActivityLabel(ActivityType.Activity, true)</a>
                             </li>
                         }
                         @if (CanView(FeatureType.ManageFieldTrips, SessionVariables.AccountUserType, PermissionType.FieldTripsView))

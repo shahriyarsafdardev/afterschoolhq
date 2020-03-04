@@ -22,7 +22,7 @@
         attendanceRate = ((totalPresent.ToDouble() / (totalPresent + totalAbsent)) * 100).Round(1).ToString("###.#");
     }
 
-    var addUrl = Url.Action("editsetup", "activity", new { isnew = 1 });
+    var addUrl = Url.Action("editsetup", "activity", new { isnew = 1, type = (int)ActivityType.Activity });
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -38,7 +38,7 @@
             @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.ActivitiesEdit))
             {
                 <div class="pull-right">
-                    <a href="@Url.Action("editsetup", "activity", new { isnew = 1 })" class="btn btn-primary">
+                    <a href="@Url.Action("editsetup", "activity", new { isnew = 1, type = (int)ActivityType.Activity })" class="btn btn-primary">
                         <i class="icon icon-left s7-plus"></i>
                         Add @UILabel.ActivityLabel(ActivityType.Activity)
                     </a>
