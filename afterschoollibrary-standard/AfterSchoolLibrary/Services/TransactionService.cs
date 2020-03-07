@@ -39,8 +39,19 @@ namespace AfterSchoolLibrary.Services
             return total;
         }
 
-        public static decimal GetBillerAmount(this Transaction transaction)
+        public static Transaction GetOriginalTransaction(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            if (transaction.OriginalTransactionId.HasValue)
+                return Transaction.Load(transaction.OriginalTransactionId.Value, msgs, dc);
+
+            return null;
+        }
+
+        public static decimal GetBillerAmount(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (transaction.IsRefund())
+                return transaction.GetOriginalTransaction(msgs, dc).GetBillerAmount(msgs, dc);
+
             return transaction.Amount.Value - transaction.GetFeesChargedToPayer();
         }
 
