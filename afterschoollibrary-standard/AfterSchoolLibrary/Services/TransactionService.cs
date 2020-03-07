@@ -50,10 +50,7 @@ namespace AfterSchoolLibrary.Services
         public static decimal GetBillerAmount(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (transaction.IsRefund())
-            {
-                var originalTransaction = transaction.GetOriginalTransaction(msgs, dc);
-                return originalTransaction.Amount.Value - originalTransaction.GetFeesChargedToPayer();
-            }
+                return transaction.GetOriginalTransaction(msgs, dc).GetBillerAmount(msgs, dc);
 
             return transaction.Amount.Value - transaction.GetFeesChargedToPayer();
         }
