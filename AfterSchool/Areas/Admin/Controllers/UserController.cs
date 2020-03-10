@@ -80,10 +80,10 @@ namespace AfterSchool.Areas.Admin.Controllers
             else if (user.IsNotEmpty() && !user.Email.IsSameAs(email) && WebUser.ExistsByEmail(email, msgs))
                 msgs.Add("Email is already in use", MessageType.UserError);
 
-            if (!phone.IsPhone())
-                msgs.Add("Phone must be unique and a valid US phone number", MessageType.UserError);
-            else if (user.IsNotEmpty() && !user.Phone.IsSameAs(phone) && WebUser.ExistsByPhone(phone, msgs))
-                msgs.Add("Phone number is already in use", MessageType.UserError);
+            //if (!phone.IsPhone())
+            //    msgs.Add("Phone must be unique and a valid US phone number", MessageType.UserError);
+            //else if (user.IsNotEmpty() && !user.Phone.IsSameAs(phone) && WebUser.ExistsByPhone(phone, msgs))
+            //    msgs.Add("Phone number is already in use", MessageType.UserError);
 
             if (password1 != password2)
                 msgs.Add("Password do not match", MessageType.UserError);

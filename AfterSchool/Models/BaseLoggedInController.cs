@@ -65,7 +65,7 @@ namespace AfterSchool.Models
 
         private bool HasAccess()
         {
-            if (SessionVariables.CurrentUser.IsEmpty())
+            if (!IsLoggedIn())
                 return false;
 
             if (AllowedAccountTypes.IsNotEmpty() &&
@@ -79,17 +79,7 @@ namespace AfterSchool.Models
         protected override void OnActionExecuting(ActionExecutingContext filterContext)
         {
             if (!HasAccess())
-            {
-                filterContext.Result = RedirectToAction(
-                    "index",
-                    "login",
-                    new
-                    {
-                        returnurl = filterContext.HttpContext.Request.Url.PathAndQuery,
-                        area = ""
-                    }
-                );
-            }
+                filterContext.Result = Logout();
 
             base.OnActionExecuting(filterContext);
         }

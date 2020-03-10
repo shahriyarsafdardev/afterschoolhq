@@ -68,7 +68,7 @@ namespace AfterSchool.Models
 
         protected bool IsLoggedIn()
         {
-            return !SessionVariables.CurrentUser.IsEmpty();
+            return !SessionVariables.CurrentUser.IsEmpty() && SessionVariables.CurrentUser.IsActive;
         }
 
         protected void HandleIsLoggedIn(HttpContextBase requestContext)
@@ -251,7 +251,7 @@ namespace AfterSchool.Models
             if (returnUrl.IsNotEmpty() && !goToLoginScreenBeforeReturn)
                 return Redirect(returnUrl);
 
-            return RedirectToAction("index", "Login", new { returnurl = returnUrl });
+            return RedirectToAction("index", "Login", new { returnurl = returnUrl, area = "" });
         }
 
         internal ActionResult HandleRedirectAfterLogin(string returnUrl)
