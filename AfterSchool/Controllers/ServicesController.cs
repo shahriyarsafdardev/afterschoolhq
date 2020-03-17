@@ -366,5 +366,22 @@ namespace AfterSchool.Controllers
                 schools = schoolList
             }, JsonRequestBehavior.AllowGet);
         }
+
+        [HttpGet]
+        public ActionResult IsInUse(string email)
+        {
+            if (!IsRequestFromApp())
+                return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
+
+            var msgs = new SystemMessages();
+
+            if (email.IsEmpty() || !email.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
+                msgs.Add("Invalid Request", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+                return Json(new { status = "ok", isInUse = WebUser.ExistsByEmail(email, msgs) }, JsonRequestBehavior.AllowGet);
+
+            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+        }
     }
 }

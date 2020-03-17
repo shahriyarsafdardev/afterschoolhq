@@ -302,6 +302,46 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
+        public static WebUser StartUserAccount(string firstName, string lastName, string email, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (firstName.IsEmpty())
+                msgs.Add("First Name is required", MessageType.UserError);
+            if (lastName.IsEmpty())
+                msgs.Add("Last Name is required", MessageType.UserError);
+
+            if (email.IsEmpty())
+                msgs.Add("Email is required", MessageType.UserError);
+            else if (!email.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
+                msgs.Add("Email must valid", MessageType.UserError);
+            else if (WebUser.ExistsByEmail(email, msgs, dc))
+                msgs.Add("Email is already in use, do you already have an account?", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                var user = new WebUser()
+                {
+                    FirstName = firstName,
+                    LastName = lastName,
+                    Email = email,
+                    Phone = null,
+                    IsActive = false,
+                    IsRegistered = false,
+                    VerifiedAccount = false,
+                    CreateDate = DateTime.UtcNow,
+                    CreatedBy = 0,
+                    LastModifiedDate = DateTime.UtcNow,
+                    LastModifiedBy = 0, 
+                    Username = WebUserService.GenerateUsername(firstName, lastName)
+                };
+
+                msgs.AddRange(user.Save(dc));
+
+                return user;
+            }
+
+            return null;
+        }
+
         public static WebUser CreateNewWithNoPhone(string firstName, string lastName, string email, string password, bool isActive, bool isRegistered, bool isVerified, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (firstName.IsEmpty())
