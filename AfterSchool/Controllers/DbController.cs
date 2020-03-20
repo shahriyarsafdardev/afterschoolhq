@@ -9,6 +9,8 @@ using AfterSchool.Models;
 using AfterSchoolLibrary;
 using System.Text.RegularExpressions;
 using System.Collections;
+using BasicLibrary.DataAccess;
+using AfterSchoolLibrary.Models;
 
 namespace AfterSchool.Controllers
 {
@@ -31,6 +33,16 @@ namespace AfterSchool.Controllers
                 return Json(new { status = "ok", messages = msgs }, JsonRequestBehavior.AllowGet);
             }
             
+            return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult Try(string id)
+        {
+            var msgs = new SystemMessages();
+            var dc = new DatabaseConnection(Database.LocalCredentials.ConnectionString);
+
+            AfterSchoolLibrary.Migrations.UpdateTransactionsFromStripe_20200320.Do(msgs, dc);
+
             return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
         }
     }
