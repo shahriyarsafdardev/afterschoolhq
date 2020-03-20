@@ -233,6 +233,8 @@ namespace AfterSchoolLibraryTests.Tests
                 TransactionType.Refund,
                 "re_1DNlPlCEgXQRZLhk3Rzzyzj6",
                 originalTransaction,
+                originalTransaction.PaymentTypeId,
+                originalTransaction.PaymentSourceTypeId,
                 BillerAccountOwner,
                 msgs: msgs,
                 dc: dc);

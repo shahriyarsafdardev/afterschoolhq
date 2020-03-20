@@ -4,7 +4,8 @@
     var transactionCount = ((PagingModel)ViewBag.PagingModel).TotalCount;
     var totalTransactionAmount = (decimal)ViewBag.TotalAmountPaid;
     var totalAmountRefunded = (decimal)ViewBag.TotalAmountRefunded;
-    var totalAmount = totalTransactionAmount - totalAmountRefunded;
+    var totalAmountRefundedAHQ = (decimal)ViewBag.TotalAmountRefundedAHQ;
+    var totalAmount = totalTransactionAmount - totalAmountRefundedAHQ;
     var avgTransactionAmount = transactionCount == 0 ? 0 : totalAmount / transactionCount;
     var totalFees = (decimal)ViewBag.TotalFeesPaid;
     var totalPayout = totalAmount - totalFees;
@@ -154,7 +155,7 @@
                             <th class="text-center">Your Amount</th>
                             <th class="text-center">Status</th>
                             <th class="text-center">Type</th>
-                            @*<th>Refund</th>*@
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -170,10 +171,10 @@
                                 <tr id="@transaction.Uid">
                                     <td>
                                         <span class="am-checkbox">
-                                            <input type="checkbox" 
-                                                   id="selectTransaction-@transaction.ID" 
-                                                   @disableChk 
-                                                   class="chkTransaction" 
+                                            <input type="checkbox"
+                                                   id="selectTransaction-@transaction.ID"
+                                                   @disableChk
+                                                   class="chkTransaction"
                                                    onchange="selectTransaction(@transaction.ID,this)" />
                                             <label for="selectTransaction-@transaction.ID"></label>
                                         </span>
@@ -232,28 +233,41 @@
                                         @currentStatus
                                     </td>
                                     <td class="text-center">
-                                        @transaction.PaymentTypeId.ToString().SplitByUpperCase()
+                                        @if (transaction.PaymentTypeId == PaymentType.NotSet)
+                                        {
+                                            @:-
+                                        }
+                                        else
+                                        {
+                                            @transaction.PaymentTypeId.ToString().SplitByUpperCase()
+                                        }
                                     </td>
                                     <td>
-                                        @if (transaction.IsCharge() && !transaction.IsTotallyRefunded())
+                                        @if (transaction.IsCharge() && !transaction.IsTotallyRefunded(false))
                                         {
                                             var hasUnfulfilledRequest = transaction.HasUnfulfilledRefundRequests();
 
-                                        <button onclick="requestRefund('@transaction.Uid', @transaction.GetRefundableAmount().ToString("#.00"))"
-                                                class="md-trigger btn btn-default"
-                                                data-modal="modal-request-refund"
-                                                @(hasUnfulfilledRequest ? "disabled=\"disabled\"" : "")>
+                                            <button onclick="requestRefund('@transaction.Uid', @transaction.GetRefundableAmount().ToString("#.00"))"
+                                                    class="md-trigger btn btn-default"
+                                                    data-modal="modal-request-refund"
+                                                    @(hasUnfulfilledRequest ? "disabled=\"disabled\"" : "")>
 
-                                            @if (hasUnfulfilledRequest)
-                                            {
-                                                @:Refund Requested
-                                            }
-                                            else
-                                            {
-                                                @:Request Refund <i class="s7-back-2"></i>
-                                            }
+                                                @if (hasUnfulfilledRequest)
+                                                {
+                                                    @:Refund Requested
+                                                }
+                                                else
+                                                {
+                                                    @:Request Refund <i class="s7-back-2"></i>
+                                                }
 
-                                        </button>
+                                            </button>
+
+                                            <button onclick="manualRefund('@transaction.Uid')"
+                                                    class="md-trigger btn btn-default"
+                                                    data-modal="modal-manual-refund">
+                                                Manual Refund
+                                            </button>
                                         }
                                     </td>
                                 </tr>
@@ -278,7 +292,7 @@
                     { "controller", "accounting" },
                     { "action", "index" },
                     { "querystring", $"sdate={Request["sdate"]}&edate={Request["edate"]}&poId={Request["poId"]}&poTypeId={Request["poTypeId"]}" }
-            }
+        }
                 );
             }
         </div>
@@ -307,6 +321,27 @@
     </div>
 </div>
 
+<div id="modal-manual-refund" class="md-modal colored-header custom-width md-effect-9">
+
+    <div class="md-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+            <h3 class="modal-title">Enter Manual Refund Amount</h3>
+        </div>
+        <div class="modal-body form">
+            <p>NOTE: This is for you to track refunds that you manually handled through your own means such as cash, check, PayPal, Venmo, CashApp, etc.</p>
+            <div class="form-group">
+                <input type="number" id="manual-refund-amount" class="form-control" placeholder="Refund Amount" required="required" max="" min="1" step=".01" />
+            </div>
+            <input type="hidden" id="manual-refund-transaction-uid" value="" />
+        </div>
+        <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+            <button type="button" id="btn-manual-refund" data-dismiss="modal" onclick="processManualRefund()" class="btn btn-primary md-close">Add Manual Refund &raquo;</button>
+        </div>
+    </div>
+</div>
+
 <form action="@Url.Action("RequestPayout","Accounting")" id="requestPayoutForm" method="post">
     @Html.Hidden("TransactionIds")
 </form>
@@ -318,6 +353,29 @@
             canProcessAmount();
         });
     });
+
+    function manualRefund(uid) {
+        $('#manual-refund-transaction-uid').val(uid);
+    }
+
+    function processManualRefund() {
+
+        const uid = $('#manual-refund-transaction-uid').val();
+        const amount = $('#manual-refund-amount').val();
+
+        $.get(
+            '@Url.Action("ProcessManualRefund", "accounting")?uid=' + uid + '&amount=' + amount,
+            function (data) {
+                if (data && data.status == 'ok') {
+                    Notifications.showMessage('Success', 'Your refund for <strong>$' + amount + '</strong> has been saved', true);
+                    location.reload();
+                } else {
+                    Notifications.showErrors(data.messages);
+                }
+            }
+        );
+
+    }
 
     function requestRefund(uid, maxAmount) {
         $('#refund-request-transaction-uid').val(uid);
@@ -338,7 +396,7 @@
             $('#refund-request-notes').addClass('text-danger');
             return false;
         }
-        
+
         $('#btn-request-refund').prop('disabled', false);
         $('#refund-request-notes').removeClass('text-danger');
         return true;
