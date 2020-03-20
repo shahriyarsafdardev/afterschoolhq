@@ -208,7 +208,7 @@ namespace AfterSchoolLibrary.Services
 
         public static bool IsAmountRefundable(this Transaction transaction, decimal amount, bool allowFullAmountRefund = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return amount <= transaction.GetRefundableAmount(allowFullAmountRefund, msgs, dc);
+            return amount >= 1 && amount <= transaction.GetRefundableAmount(allowFullAmountRefund, msgs, dc);
         }
 
         public static decimal GetRefundableAmount(this Transaction transaction, bool allowFullAmountRefund = false, SystemMessages msgs = null, DatabaseConnection dc = null)
