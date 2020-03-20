@@ -2335,6 +2335,7 @@ namespace AfterSchoolLibrary.Services
                 registrant: registrant,
                 transaction: transaction,
                 registrantSubscriptionPlan: checkoutObject.RegistrantSubscriptionPlan,
+                createDate: checkoutObject.Date,
                 loggedInUser: loggedInUser,
                 msgs: msgs,
                 dc: dc);
@@ -2674,6 +2675,16 @@ namespace AfterSchoolLibrary.Services
         public static decimal GetTotalAmountRefunded(this Account account, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Transaction.GetTotalAmountPaidByPayerAccount(account.ID.Value, startDate, endDate, false, msgs, dc);
+        }
+
+        public static decimal GetTotalAmountRefundedManually(this Account account, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.GetTotalAmountPaidByPayerAccount(account.ID.Value, PaymentSourceType.Manual, startDate, endDate, false, msgs, dc);
+        }
+
+        public static decimal GetTotalAmountRefundedAHQ(this Account account, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.GetTotalAmountPaidByPayerAccount(account.ID.Value, PaymentSourceType.AfterSchoolPlatform, startDate, endDate, false, msgs, dc);
         }
 
         public static List<RefundRequest> GetRefundRequests(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)

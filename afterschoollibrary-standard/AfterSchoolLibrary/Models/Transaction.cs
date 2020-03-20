@@ -926,6 +926,35 @@ namespace AfterSchoolLibrary.Models
             return 0;
         }
 
+        public static decimal GetTotalAmountPaidByPayerAccount(int PayerAccountId, PaymentSourceType paymentSourceType, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+
+            DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseParameterizedQuery = false;
+            dq.SelectParameters.Clear();
+
+            var sp = new SelectParameter(ObjectMap["Amount"]);
+            sp.Function = $"ISNULL(SUM({ObjectMap["Amount"].ParameterFullName}), 0)";
+            dq.SelectParameters.Add(sp);
+
+            dq.Criterias.Add(ObjectMap["PayerAccountId"], PayerAccountId);
+            dq.Criterias.Add(ObjectMap["isDeleted"], isDeleted);
+            dq.Criterias.Add(ObjectMap["PaymentSourceTypeId"], (int)paymentSourceType);
+
+            if (startDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+
+            if (endDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+
+            var results = dq.Select(msgs);
+            if (results.Rows.Any())
+                return results.Rows[0][0].ToString().ToDecimal();
+
+            return 0;
+        }
+
         public static decimal GetTotalRefundByOriginalTransaction(int OriginalTransactionId, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
 
@@ -946,6 +975,39 @@ namespace AfterSchoolLibrary.Models
                 return results.Rows[0][0].ToString().ToDecimal();
 
             return 0;
+        }
+
+        public static decimal GetTotalRefundByOriginalTransaction(int OriginalTransactionId, PaymentSourceType paymentSourceType, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+
+            DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseParameterizedQuery = false;
+            dq.SelectParameters.Clear();
+
+            var sp = new SelectParameter(ObjectMap["Amount"]);
+            sp.Function = $"ISNULL(SUM({ObjectMap["Amount"].ParameterFullName}), 0)";
+            dq.SelectParameters.Add(sp);
+
+            dq.Criterias.Add(ObjectMap["OriginalTransactionId"], OriginalTransactionId);
+            dq.Criterias.Add(ObjectMap["isDeleted"], isDeleted);
+            dq.Criterias.Add(ObjectMap["PaymentSourceTypeId"], (int)paymentSourceType);
+
+            var results = dq.Select(msgs);
+            if (results.Rows.Any())
+                return results.Rows[0][0].ToString().ToDecimal();
+
+            return 0;
+        }
+
+        public static List<Transaction> LoadByOriginalTransactionIdByIsDeleted(int OriginalTransactionId, PaymentSourceType paymentSourceType, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["OriginalTransactionId"], OriginalTransactionId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
+            dq.Criterias.Add(ObjectMap["PaymentSourceTypeId"], (int)paymentSourceType);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
         public static List<Transaction> GetUnmarkedConnectedAccountTransactions(SystemMessages msgs, DatabaseConnection dc = null)

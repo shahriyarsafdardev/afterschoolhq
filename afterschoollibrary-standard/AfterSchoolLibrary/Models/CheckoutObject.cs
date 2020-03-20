@@ -35,10 +35,12 @@ namespace AfterSchoolLibrary.Models
         public RegistrantSubscriptionPlan RegistrantSubscriptionPlan { get; set; }
         public Account ConvenienceFeePayer { get; set; }
         public Account CreditCardFeePayer { get; set; }
+        public DateTime Date { get; set; }
 
         public CheckoutObject()
         {
             Products = new List<Product>();
+            Date = DateTime.UtcNow;
         }
 
         public bool HasStripeSourceId
