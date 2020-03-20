@@ -25,10 +25,10 @@ namespace AfterSchoolLibrary.Services
             {
                 AmountPaid = totalCost,
                 CouponId = checkoutObject.Coupon?.ID,
-                CreateDate = DateTime.UtcNow,
+                CreateDate = checkoutObject.Date,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
                 LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
-                LastModifiedDate = DateTime.UtcNow,
+                LastModifiedDate = checkoutObject.Date,
                 LoggedInUserId = loggedInUser?.ID.IfEmpty(0),
                 NumberOfSeats = checkoutObject.NumberOfSeats,
                 PurchaserAccountId = checkoutObject.PayingAccount?.ID,

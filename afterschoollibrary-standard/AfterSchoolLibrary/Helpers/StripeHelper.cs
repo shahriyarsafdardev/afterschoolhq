@@ -1476,6 +1476,30 @@ namespace AfterSchoolLibrary.Billing
             return charges;
         }
 
+        public static List<Stripe.Charge> GetCharges(string startingAfter, int limit, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var charges = new List<Stripe.Charge>();
+            var options = new Stripe.ChargeListOptions
+            {
+                StartingAfter = startingAfter,
+                Limit = limit,               
+            };
+
+            try
+            {
+                charges.AddRange(GetChargeService().List(options).ToList());
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Error retrieving charges", MessageType.UserError);
+            }
+
+            return charges;
+        }
+
         #endregion
 
         #region StripeTokens
@@ -1638,6 +1662,33 @@ namespace AfterSchoolLibrary.Billing
             }
 
             return coupon;
+        }
+
+        #endregion
+
+        #region StripeInvoices
+        private static Stripe.InvoiceService GetInvoiceService()
+        {
+            return new Stripe.InvoiceService(StripeClient);
+        }
+
+        public static Stripe.Invoice GetInvoice(string invoiceId, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            Stripe.Invoice invoice = null;
+
+            try
+            {
+                invoice = GetInvoiceService().Get(invoiceId);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.Error, ex);
+                msgs.Add($"Invoice doesn't exist", MessageType.UserError);
+            }
+
+            return invoice;
         }
 
         #endregion

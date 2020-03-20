@@ -283,14 +283,17 @@ namespace AfterSchoolLibrary.Services
                 if (totalPayments >= totalPeriods)
                 {
                     string stripeUserId = null;
-
+                    
                     if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
                         stripeUserId = billingAccount.StripeUserId;
 
-                    msgs.AddRange(Billing.StripeHelper.CancelSubscription(
-                        rsp.StripeSubscriptionId,
-                        stripeUserId
-                    ));
+                    var stripeSubscription = Billing.StripeHelper.GetSubscription(rsp.StripeSubscriptionId, stripeUserId, msgs);
+
+                    if (stripeSubscription.IsNotEmpty() && !stripeSubscription.CanceledAt.HasValue)
+                        msgs.AddRange(Billing.StripeHelper.CancelSubscription(
+                            rsp.StripeSubscriptionId,
+                            stripeUserId
+                        ));
 
                     if (msgs.HasNoErrors())
                         return true;

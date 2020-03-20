@@ -127,12 +127,13 @@ namespace AfterSchoolLibrary.Services
                 checkoutObject.ConvenienceFeeOverrideAmount ?? checkoutObject.GetTuitionConvenienceFee(msgs, dc),
                 checkoutObject.PaymentTypeFeeOverrideAmount ?? checkoutObject.GetTuitionCreditCardFee(msgs, dc),
                 checkoutObject.StripeChargeId,
+                checkoutObject.Date,
                 loggedInUser,
                 msgs,
                 dc);
         }
 
-        public static Transaction CreateNew(Account payingAccount, Account billingAccount, Account ConvenienceFeePayer, Account PaymentTypeFeePayer, decimal? amount, string participationObjectName, int? purchaseId, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, decimal? platformFee, decimal? platformPercentFee, decimal convenienceFee, decimal paymentTypeFee, string stripeChargeOrRefundId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Transaction CreateNew(Account payingAccount, Account billingAccount, Account ConvenienceFeePayer, Account PaymentTypeFeePayer, decimal? amount, string participationObjectName, int? purchaseId, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, decimal? platformFee, decimal? platformPercentFee, decimal convenienceFee, decimal paymentTypeFee, string stripeChargeOrRefundId, DateTime createDate, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -144,9 +145,9 @@ namespace AfterSchoolLibrary.Services
                 PayerAccountId = payingAccount?.ID,
                 PaymentTypeId = paymentType,
                 PurchaseId = purchaseId,
-                CreateDate = DateTime.UtcNow,
+                CreateDate = createDate,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
-                LastModifiedDate = DateTime.UtcNow,
+                LastModifiedDate = createDate,
                 LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
                 PlatformFlatFee = platformFee,
                 PlatformPercentFee = platformPercentFee,

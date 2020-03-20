@@ -2335,6 +2335,7 @@ namespace AfterSchoolLibrary.Services
                 registrant: registrant,
                 transaction: transaction,
                 registrantSubscriptionPlan: checkoutObject.RegistrantSubscriptionPlan,
+                createDate: checkoutObject.Date,
                 loggedInUser: loggedInUser,
                 msgs: msgs,
                 dc: dc);
