@@ -1,0 +1,107 @@
+﻿@model List<RefundRequest>
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var totalRequestAmount = Model.Sum(request => request.Amount.Value);
+    var totalAmountAvailable = (decimal)ViewBag.AmountAvailableToRefund;
+}
+
+@{Html.RenderPartial("OrgAccountHeader");}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("_AccountingHeader"); }
+
+    <div class="panel panel-default">
+
+        <div class="panel-heading">
+            <i class="s7-note2"></i> Refund Requests
+            <div class="clearfix"></div>
+        </div>
+
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="widget widget-tile widget-bordered">
+                        <div class="data-info">
+                            <div data-toggle="counter" data-end="@totalRequestAmount" id="payoutCount" data-decimals="0" data-suffix="" class="value">@totalRequestAmount.ToCurrency()</div>
+                            <div class="desc">Total Amount Requested</div>
+                        </div>
+                        <div class="icon"><span class=""></span></div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="widget widget-tile widget-bordered">
+                        <div class="data-info">
+                            <div data-toggle="counter" data-end="@totalAmountAvailable" id="avgPayoutAmount" data-decimals="2" data-suffix="" class="value">@totalAmountAvailable.ToCurrency()</div>
+                            <div class="desc">Amount Available to Refund</div>
+                        </div>
+                        <div class="icon"><span class=""></span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover table-condensed" id="transaction-table">
+                    <thead>
+                        <tr>
+                            <th class="text-center">Requested On</th>
+                            <th class="text-center">Requested By</th>
+                            <th class="text-center">Transaction #</th>
+                            <th class="text-center">Description</th>
+                            <th class="text-center">Transaction Amount</th>
+                            <th class="text-center">Refund Requested</th>
+                            <th class="text-center">Request Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Count > 0)
+                        {
+                            foreach (var request in Model)
+                            {
+                                var transaction = request.GetTransaction();
+
+                                <tr id="@request.Uid">
+                                    <td class="text-center">
+                                        @request.CreateDate.ToShortDateTimeString()
+                                    </td>
+                                    <td class="text-center">
+                                        @request.GetCreator().DisplayName
+                                    </td>
+                                    <td class="text-center">
+                                        @transaction.GetTransactionNumber()
+                                    </td>
+                                    <td class="text-center">
+                                        @transaction.Description
+                                    </td>
+                                    <td class="text-center">
+                                        @transaction.GetBillerAmount().ToCurrency()
+                                    </td>
+                                    <td class="text-center">
+                                        @request.Amount.ToCurrency()
+                                    </td>
+                                    <td class="text-center">
+                                        @if (request.RequestFulfilled)
+                                        {
+                                            @:Completed
+                                        }
+                                        else
+                                        {
+                                            @:Pending
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6">There are no refund requests</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
