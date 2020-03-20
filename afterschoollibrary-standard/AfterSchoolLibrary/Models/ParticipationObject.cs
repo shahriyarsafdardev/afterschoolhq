@@ -609,7 +609,7 @@ namespace AfterSchoolLibrary.Models
                 dc);
         }
 
-        public ActivityPayment AddPayment(decimal amount, Registrant registrant, Transaction transaction, RegistrantSubscriptionPlan registrantSubscriptionPlan, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public ActivityPayment AddPayment(decimal amount, Registrant registrant, Transaction transaction, RegistrantSubscriptionPlan registrantSubscriptionPlan, DateTime createDate, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var payment = new ActivityPayment()
             {
@@ -620,9 +620,9 @@ namespace AfterSchoolLibrary.Models
                 AccountId = this.PaymentAccount.ID,
                 TransactionId = transaction.ID,
                 RegistrantSubscriptionPlanId = registrantSubscriptionPlan?.ID,
-                CreateDate = DateTime.UtcNow,
+                CreateDate = createDate,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
-                LastModifiedDate = DateTime.UtcNow,
+                LastModifiedDate = createDate,
                 LastModifiedBy = loggedInUser?.ID.IfEmpty(0)
             };
 

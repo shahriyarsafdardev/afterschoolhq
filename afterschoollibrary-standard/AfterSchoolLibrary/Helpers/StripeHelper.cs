@@ -1476,6 +1476,30 @@ namespace AfterSchoolLibrary.Billing
             return charges;
         }
 
+        public static List<Stripe.Charge> GetCharges(string startingAfter, int limit, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var charges = new List<Stripe.Charge>();
+            var options = new Stripe.ChargeListOptions
+            {
+                StartingAfter = startingAfter,
+                Limit = limit,
+            };
+
+            try
+            {
+                charges.AddRange(GetChargeService().List(options).ToList());
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Error retrieving charges", MessageType.UserError);
+            }
+
+            return charges;
+        }
+
         #endregion
 
         #region StripeTokens
