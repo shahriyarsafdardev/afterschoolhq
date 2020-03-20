@@ -48,16 +48,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 poFilter.Add((poId.ToInteger(), (ParticipationObjectType)poTypeId.ToInteger()));
             }
 
-            // transaction count
             var totalTransactionCount = SessionVariables.CurrentAccount.GetTransactionCount(startDate, endDate, poFilter, false);
-            // var totalPaidTransactionCount = SessionVariables.CurrentAccount.GetPaidTransactionCount(startDate, endDate, poFilter, false);
-            // var totalTransactionCount = totalBilledTransactionCount + totalPaidTransactionCount;
-
-            // transaction data
             var allTransactions = SessionVariables.CurrentAccount.GetTransactions(startDate, endDate, poFilter, false, start, length);
-            // var paidTransactions = SessionVariables.CurrentAccount.GetPaidTransactions(startDate, endDate, poFilter, false, start, length);
-            // var allTransactions = billedTransactions.Concat(paidTransactions).ToList();
-
             var totalPages = Math.Ceiling(totalTransactionCount.ToDouble() / recordsPerPage).ToInteger();
 
             allTransactions.ForEach(transaction =>
@@ -65,14 +57,12 @@ namespace AfterSchool.Areas.Org.Controllers
             );
 
             var allPos = Transaction.GetParticipationObjectsByBillerAccountId(SessionVariables.CurrentAccount.ID.Value, null, null, false);
-            // allPos.AddRange(Transaction.GetParticipationObjectsByPayerAccountId(SessionVariables.CurrentAccount.ID.Value, null, null, false));
             var allParticipationObjects = allPos.DistinctBy(po => (po.ID, po.ParticipationObjectTypeId, po.Name));
-
-            // sort transactions
-            // allTransactions = allTransactions.OrderByDescending(x => x.ID).ToList();
 
             ViewBag.TotalAmountPaid = SessionVariables.CurrentAccount.GetTotalAmountBilledOut(startDate, endDate, msgs);
             ViewBag.TotalAmountRefunded = SessionVariables.CurrentAccount.GetTotalAmountRefunded(startDate, endDate, msgs);
+            ViewBag.TotalAmountRefundedManual = SessionVariables.CurrentAccount.GetTotalAmountRefundedManually(startDate, endDate, msgs);
+            ViewBag.TotalAmountRefundedAHQ = SessionVariables.CurrentAccount.GetTotalAmountRefundedAHQ(startDate, endDate, msgs);
             ViewBag.TotalFeesPaid = SessionVariables.CurrentAccount.GetTotalFeesPaidAsBiller(startDate, endDate, msgs);
             ViewBag.ParticipationObjects = allParticipationObjects;
             ViewBag.Messages = msgs;
@@ -271,6 +261,26 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = new SystemMessages();
             ViewBag.AmountAvailableToRefund = SessionVariables.CurrentAccount.GetMaxAmountAvailableForPayout();
             return View(SessionVariables.CurrentAccount.GetRefundRequests().OrderByDescending(request => request.CreateDate).ToList());
+        }
+
+        [HttpGet]
+        public ActionResult ProcessManualRefund(string uid, string amount)
+        {
+            var msgs = new SystemMessages();
+
+            if (uid.IsGuid() && amount.IsNumber())
+            {
+                var transaction = Transaction.LoadByUid(uid.ToGuid(), msgs);
+
+                if (transaction.IsNotEmpty())
+                    transaction.ManualRefund(amount.ToDecimal(), SessionVariables.LoggedInUser, msgs);
+
+                if (msgs.HasNoErrors())
+                    return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+
+            }
+
+            return new JsonResult { Data = new { status = "error", messages = msgs }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
         }
 
         [HttpGet]

@@ -2677,6 +2677,16 @@ namespace AfterSchoolLibrary.Services
             return Transaction.GetTotalAmountPaidByPayerAccount(account.ID.Value, startDate, endDate, false, msgs, dc);
         }
 
+        public static decimal GetTotalAmountRefundedManually(this Account account, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.GetTotalAmountPaidByPayerAccount(account.ID.Value, PaymentSourceType.Manual, startDate, endDate, false, msgs, dc);
+        }
+
+        public static decimal GetTotalAmountRefundedAHQ(this Account account, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.GetTotalAmountPaidByPayerAccount(account.ID.Value, PaymentSourceType.AfterSchoolPlatform, startDate, endDate, false, msgs, dc);
+        }
+
         public static List<RefundRequest> GetRefundRequests(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return RefundRequest.LoadByAccountId(account.ID.Value, msgs, dc);
