@@ -1588,6 +1588,20 @@ loadmethod: UniqueIdentifier
 [end]
 
 [begin]
+type: Class
+name: RefundRequest
+inherits: BasicObjectWithModified
+property: Amount, decimal?, Money, Required
+property: TransactionId, int?, Int, Required
+property: Uid, Guid, UniqueIdentifier
+property: RequestFulfilled, bool, Bit
+property: AccountId, int?, Int, Required
+loadmethod: Uid
+loadmethod: TransactionId, List<>
+loadmethod: AccountId, List<>
+[end]
+
+[begin]
 type: Enum
 name: CouponAmountType
 values: NotSet, Percentage, FlatAmount

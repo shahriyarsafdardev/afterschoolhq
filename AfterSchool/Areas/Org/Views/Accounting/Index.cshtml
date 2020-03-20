@@ -234,23 +234,35 @@
                                     <td class="text-center">
                                         @transaction.PaymentTypeId.ToString().SplitByUpperCase()
                                     </td>
-                                        @*<td>
-                                                @if (transaction.IsCharge() && !transaction.IsTotallyRefunded())
-                                                {
-                                                    <button onclick="openDialog('@transaction.Uid')"
-                                                            class="md-trigger"
-                                                            data-modal="modal-refund">
-                                                        Refund
-                                                    </button>
-                                                }
-                                            </td>*@
+                                    <td>
+                                        @if (transaction.IsCharge() && !transaction.IsTotallyRefunded())
+                                        {
+                                            var hasUnfulfilledRequest = transaction.HasUnfulfilledRefundRequests();
+
+                                        <button onclick="requestRefund('@transaction.Uid', @transaction.GetRefundableAmount().ToString("#.00"))"
+                                                class="md-trigger btn btn-default"
+                                                data-modal="modal-request-refund"
+                                                @(hasUnfulfilledRequest ? "disabled=\"disabled\"" : "")>
+
+                                            @if (hasUnfulfilledRequest)
+                                            {
+                                                @:Refund Requested
+                                            }
+                                            else
+                                            {
+                                                @:Request Refund <i class="s7-back-2"></i>
+                                            }
+
+                                        </button>
+                                        }
+                                    </td>
                                 </tr>
                             }
                         }
                         else
                         {
                             <tr>
-                                <td colspan="8">There are no transactions</td>
+                                <td colspan="10">There are no transactions</td>
                             </tr>
                         }
                     </tbody>
@@ -273,39 +285,24 @@
     </div>
 </div>
 
-<div id="modal-refund" class="md-modal colored-header custom-width md-effect-9">
+<div id="modal-request-refund" class="md-modal colored-header custom-width md-effect-9">
 
     <div class="md-content">
         <div class="modal-header">
             <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
-            <h3 class="modal-title">Refund</h3>
+            <h3 class="modal-title">Request Refund</h3>
         </div>
         <div class="modal-body form">
             <div class="form-group">
-                <div class="col-sm-5">
-                    <div class="input-group input-group-lg xs-mb-15">
-                        <span>Amount refunded: </span>
-                        <span id="refunded-amount" style="color: red"></span>
-                    </div>
-                    <div class="input-group input-group-lg xs-mb-15">
-                        <span class="input-group-addon">$</span>
-                        <input type="number" onblur="validateForm()" onchange="validateForm()" class="form-control" id="amount" placeholder="amount" required min="0.1" step="0.1" />
-                    </div>
-                </div>
-
-                <div class="col-sm-7">
-                </div>
+                <input type="number" id="refund-request-amount" class="form-control" placeholder="Refund Amount" required="required" max="" min="1" step=".01" />
+                <p class="text-muted text-small" id="refund-request-notes">Please enter an amount between $1 and $<span class="refund-request-max-amount"></span></p>
             </div>
-            <br />
-            <div class="form-group">
-                <div class="col-sm-12">
-                    <h5 style="margin-left: 50px"><b style="color: #ef6262">This is not reversable!</b></h5>
-                </div>
-            </div>
+            <input type="hidden" id="refund-request-transaction-uid" value="" />
+            <input type="hidden" id="refund-request-max-amount" value="" />
         </div>
         <div class="modal-footer">
             <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-            <button type="button" id="confirm-refund-btn" disabled data-dismiss="modal" onclick="confirmRefund()" class="btn btn-primary md-close">Refund</button>
+            <button type="button" id="btn-request-refund" data-dismiss="modal" onclick="processRefundRequest()" class="btn btn-primary md-close">Request Refund &raquo;</button>
         </div>
     </div>
 </div>
@@ -315,25 +312,73 @@
 </form>
 
 <script>
-     var selectedTransactions = [];
-     function validateForm() {
+
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('#refund-request-amount').blur(function () {
+            canProcessAmount();
+        });
+    });
+
+    function requestRefund(uid, maxAmount) {
+        $('#refund-request-transaction-uid').val(uid);
+        $('#refund-request-max-amount').val(maxAmount);
+        $('.refund-request-max-amount').html(maxAmount);
+        $('#refund-request-amount').attr('max', maxAmount);
+        $('#refund-request-amount').val(maxAmount);
+
+        canProcessAmount();
+    }
+
+    function canProcessAmount() {
+        const amount = $('#refund-request-amount').val();
+        const maxAmount = $('#refund-request-max-amount').val();
+
+        if (parseFloat(amount) > parseFloat(maxAmount) || parseFloat(amount) < 1) {
+            $('#btn-request-refund').prop('disabled', true);
+            $('#refund-request-notes').addClass('text-danger');
+            return false;
+        }
+        
+        $('#btn-request-refund').prop('disabled', false);
+        $('#refund-request-notes').removeClass('text-danger');
+        return true;
+    }
+
+    function processRefundRequest() {
+
+        const uid = $('#refund-request-transaction-uid').val();
+        const amount = $('#refund-request-amount').val();
+
+        if (canProcessAmount()) {
+            $.get(
+                '@Url.Action("RequestRefund", "accounting")?uid=' + uid + '&amount=' + amount,
+                function (data) {
+                    if (data && data.status == 'ok') {
+                        Notifications.showMessage('Success', 'Your refund request for <strong>$' + amount + '</strong> has been submitted and will be processed shortly', true);
+                        location.reload();
+                    } else {
+                        Notifications.showErrors(data.messages);
+                    }
+                }
+            );
+        }
+
+    }
+
+    var selectedTransactions = [];
+    function validateForm() {
         var val = parseFloat($("#amount").val());
         var isValid = val >= 0.1;
 
         $("#confirm-refund-btn").attr('disabled', !isValid);
-     }
+    }
 
     function requestPayout() {
         $("#TransactionIds").val(this.selectedTransactions.join());
         $("#requestPayoutForm").submit();
     }
 
-    function openDialog(newUid) {
-        $("#modal-refund").data("uid", newUid);
-        $("#refunded-amount").text($("#" + newUid).data('refunded-amount'));
-    }
-
-      function selectTransaction(id, event) {
+    function selectTransaction(id, event) {
         if (event.checked) {
             this.selectedTransactions.push(id);
         }

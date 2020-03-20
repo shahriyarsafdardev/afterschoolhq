@@ -189,6 +189,11 @@ namespace AfterSchoolLibrary.Services
             return transaction;
         }
 
+        public static bool HasUnfulfilledRefundRequests(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RefundRequest.GetCountByTransactionIdByRequestFulfilled(transaction.ID.Value, false, msgs, dc) > 0;
+        }
+
         public static bool IsTotallyRefunded(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (transaction.IsCharge())
@@ -199,6 +204,19 @@ namespace AfterSchoolLibrary.Services
             }
 
             return false;
+        }
+
+        public static bool IsAmountRefundable(this Transaction transaction, decimal amount, bool allowFullAmountRefund = false, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return amount <= transaction.GetRefundableAmount(allowFullAmountRefund, msgs, dc);
+        }
+
+        public static decimal GetRefundableAmount(this Transaction transaction, bool allowFullAmountRefund = false, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (allowFullAmountRefund)
+                return transaction.GetPayerAmount() - transaction.GetRefundedAmount(msgs, dc);
+
+            return transaction.GetBillerAmount(msgs, dc) - transaction.GetRefundedAmount(msgs, dc);
         }
 
         public static decimal GetRefundedAmount(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -304,26 +322,53 @@ namespace AfterSchoolLibrary.Services
             return ActivityPayment.LoadByTransactionIdByIsDeleted(transaction.ID.Value, false, msgs, dc);
         }
 
-        public static Transaction Refund(this Transaction transaction, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static RefundRequest RequestRefund(this Transaction transaction, decimal refundAmount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var refund = Billing.StripeHelper.CreateRefund(
-                chargeId: transaction.StripeChargeOrRefundId,
-                totalAmount: transaction.GetPayerAmount(),
-                reason: Billing.StripeRefundReason.RequestedByCustomer.ToString().SplitByUpperCase().Replace(" ", "_").ToLower(),
-                msgs: msgs);
+            if (!transaction.IsAmountRefundable(refundAmount, false, msgs))
+                msgs.Add("Amount is not refundable", MessageType.UserError);
 
             if (msgs.HasNoErrors())
-                return transaction.CreateNewRefund(
-                    amount: transaction.GetPayerAmount(),
-                    refundId: refund.Id,
-                    transactionType: TransactionType.Refund,
-                    paymentType: transaction.PaymentTypeId,
-                    paymentSourceType: PaymentSourceType.AfterSchoolPlatform,
-                    loggedInUser: loggedInUser,
-                    msgs: msgs,
-                    dc: dc);
+                return RefundRequestService.CreateNewRefundRequest(transaction, refundAmount, loggedInUser, msgs, dc);
 
             return null;
+        }
+
+        public static Transaction Refund(this Transaction transaction, decimal refundAmount, bool allowFullAmountRefund, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (!transaction.IsAmountRefundable(refundAmount, allowFullAmountRefund, msgs))
+                msgs.Add("Amount is not refundable", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                var refund = Billing.StripeHelper.CreateRefund(
+                                chargeId: transaction.StripeChargeOrRefundId,
+                                totalAmount: refundAmount,
+                                reason: Billing.StripeRefundReason.RequestedByCustomer.ToString().SplitByUpperCase().Replace(" ", "_").ToLower(),
+                                msgs: msgs);
+
+                if (msgs.HasNoErrors())
+                    return transaction.CreateNewRefund(
+                        amount: refundAmount,
+                        refundId: refund.Id,
+                        transactionType: TransactionType.Refund,
+                        paymentType: transaction.PaymentTypeId,
+                        paymentSourceType: PaymentSourceType.AfterSchoolPlatform,
+                        loggedInUser: loggedInUser,
+                        msgs: msgs,
+                        dc: dc);
+            }
+
+            return null;
+        }
+
+        public static Transaction Refund(this Transaction transaction, decimal refundAmount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return transaction.Refund(refundAmount, false, loggedInUser, msgs, dc);
+        }
+
+        public static Transaction RefundPayerFullAmount(this Transaction transaction, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return transaction.Refund(transaction.GetPayerAmount(), true, loggedInUser, msgs, dc);
         }
 
         public static Transaction CreateNewRefund(this Transaction originalTransaction, decimal amount, string refundId, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)

@@ -95,6 +95,7 @@ namespace AfterSchoolLibrary.Models
 			TwilioSMS.Create(dc);
 			TwilioBlockedPhone.Create(dc);
 			Migration.Create(dc);
+			RefundRequest.Create(dc);
 			
 
 			return msgs;
@@ -171,6 +172,7 @@ namespace AfterSchoolLibrary.Models
 			TwilioSMS.Alter(dc);
 			TwilioBlockedPhone.Alter(dc);
 			Migration.Alter(dc);
+			RefundRequest.Alter(dc);
 			
 
 			return msgs;
@@ -314,6 +316,7 @@ namespace AfterSchoolLibrary.Models
 			Coupon.Update(new Hashtable(){{"AppliesTo",0}}, new Hashtable(){{"AppliesTo", DBNull.Value}}, Coupon.ObjectMap, dc);
 			AttachedCoupon.Update(new Hashtable(){{"IsUsed",false}}, new Hashtable(){{"IsUsed", DBNull.Value}}, AttachedCoupon.ObjectMap, dc);
 			PurchaseableObjectCoupon.Update(new Hashtable(){{"PurchaseableObjectTypeId",0}}, new Hashtable(){{"PurchaseableObjectTypeId", DBNull.Value}}, PurchaseableObjectCoupon.ObjectMap, dc);
+			RefundRequest.Update(new Hashtable(){{"RequestFulfilled",false}}, new Hashtable(){{"RequestFulfilled", DBNull.Value}}, RefundRequest.ObjectMap, dc);
 			
 			//**ENDUPDATES**//
 
@@ -593,6 +596,9 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_TwilioSMS_RegistrantId ON [TwilioSMS] (RegistrantId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_TwilioBlockedPhone_Phone ON [TwilioBlockedPhone] (Phone)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Migration_UniqueIdentifier ON [Migration] (UniqueIdentifier)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RefundRequest_Uid ON [RefundRequest] (Uid)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RefundRequest_TransactionId ON [RefundRequest] (TransactionId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RefundRequest_AccountId ON [RefundRequest] (AccountId)"));
 			
 
 			return msgs;
