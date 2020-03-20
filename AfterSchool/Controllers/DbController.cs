@@ -35,15 +35,5 @@ namespace AfterSchool.Controllers
             
             return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
         }
-
-        public ActionResult Try(string id)
-        {
-            var msgs = new SystemMessages();
-            var dc = new DatabaseConnection(Database.LocalCredentials.ConnectionString);
-
-            AfterSchoolLibrary.Migrations.UpdateTransactionsFromStripe_20200320.Do(msgs, dc);
-
-            return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
-        }
     }
 }

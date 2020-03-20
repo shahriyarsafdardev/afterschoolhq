@@ -10,7 +10,7 @@ namespace AfterSchoolLibrary.Billing
 {
     public class StripeHelper
     {
-        private static string TestSecretKey { get { return "sk_live_SDa559erkpDCJ9BkrPS58GrC"; } } // "sk_test_gfeMjl5rgl16L1HHITh3YT5s"; } }
+        private static string TestSecretKey { get { return "sk_test_gfeMjl5rgl16L1HHITh3YT5s"; } }
         private static string TestPublishableKey { get { return "pk_test_wuL50O8i1mAzrmV2xDAXuClJ"; } }
         private static string LiveSecretKey { get { return ConfigurationManager.AppSettings["Stripe.LiveSecretKey"]; } }
         private static string LivePublishableKey { get { return ConfigurationManager.AppSettings["Stripe.LivePublishableKey"]; } }

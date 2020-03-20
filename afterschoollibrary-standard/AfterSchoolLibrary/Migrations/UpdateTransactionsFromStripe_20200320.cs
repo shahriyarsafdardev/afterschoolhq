@@ -20,6 +20,8 @@ namespace AfterSchoolLibrary.Migrations
                     string lastObjectId = null;
                     var charges = new List<Stripe.Charge>();
                     var pageLimit = 50;
+                    var untilDate = ("12/01/2019").ToDateTime();
+                    var lastDate = DateTime.UtcNow;
 
                     do
                     {
@@ -27,7 +29,7 @@ namespace AfterSchoolLibrary.Migrations
 
                         charges.ForEach(charge =>
                         {
-                            if (charge.InvoiceId.IsNotEmpty())
+                            if (charge.InvoiceId.IsNotEmpty() && charge.Status == "succeeded" && !charge.Refunded && charge.Created >= untilDate)
                             {
                                 var transaction = Transaction.LoadByStripeChargeOrRefundId(charge.Id, amsgs, adc);
 
@@ -39,7 +41,7 @@ namespace AfterSchoolLibrary.Migrations
                                     if (subscription.IsNotEmpty())
                                     {
                                         var stripePlan = subscription.Plan;
-                                        var plan = SubscriptionPlan.Load(new Hashtable() { { "StripeSubscriptionId", stripePlan.Id } }, null, null, amsgs, adc).FirstOrDefault();
+                                        var plan = SubscriptionPlan.Load(new Hashtable() { { "StripePlanId", stripePlan.Id } }, null, null, amsgs, adc).FirstOrDefault();
                                         var rsp = RegistrantSubscriptionPlan.LoadByStripeSubscriptionId(subscription.Id, amsgs, adc);
                                         var registrant = rsp.GetRegistrant(amsgs, adc);
                                         var masterRegistrant = registrant.GetMasterRegistrant(amsgs, adc);
@@ -52,16 +54,21 @@ namespace AfterSchoolLibrary.Migrations
                                         var payingAccount = Account.LoadByUid(payingAccountUid, amsgs, adc);
                                         var activity = Activity.LoadByUid(activityUid, amsgs, dc);
 
+                                        var paymentType = charge.PaymentMethodDetails.Card.IsNotEmpty() ? PaymentType.CreditCard : PaymentType.ACH;
+                                        var convenienceFeeOverrideAmount = plan.GetConvenienceFee(billingAccount, amsgs, adc);
+                                        var paymentTypeFeeOverrideAmount = paymentType == PaymentType.CreditCard ? plan.GetCreditCardFee(billingAccount, amsgs, dc) : 0;
+                                        var participationObject = activity.GetParticipationObject(amsgs, adc);
+
                                         var checkoutObject = new CheckoutObject()
                                         {
                                             PayingAccount = payingAccount,
                                             BillingAccount = billingAccount,
-                                            OverrideAmount = charge.Amount,
-                                            ConvenienceFeeOverrideAmount = Billing.Platform.GetConvenienceFee(stripePlan.AmountDecimal.Value, billingAccount),
-                                            PaymentTypeFeeOverrideAmount = Billing.Platform.GetCreditCardFee(stripePlan.AmountDecimal.Value, billingAccount),
-                                            ParticipationObject = activity.GetParticipationObject(amsgs, adc),
+                                            OverrideAmount = charge.Amount / 100M,
+                                            ConvenienceFeeOverrideAmount = convenienceFeeOverrideAmount,
+                                            PaymentTypeFeeOverrideAmount = paymentTypeFeeOverrideAmount,
+                                            ParticipationObject = participationObject,
                                             PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
-                                            PaymentType = charge.PaymentMethodDetails.Card.IsNotEmpty() ? PaymentType.CreditCard : PaymentType.ACH,
+                                            PaymentType = paymentType,
                                             StripeChargeId = charge.Id,
                                             SubscriptionPlan = plan.PlanTypeId == SubscriptionPlanType.Subscription ? plan : null,
                                             PaymentPlan = plan.PlanTypeId == SubscriptionPlanType.PaymentPlan ? plan : null,
@@ -74,17 +81,16 @@ namespace AfterSchoolLibrary.Migrations
                                             Date = charge.Created,
                                         };
 
-                                        // billingAccount.ProcessSubscriptionPlanPayment(checkoutObject, plan, rsp, msgs);
+                                      billingAccount.ProcessSubscriptionPlanPayment(checkoutObject, plan, rsp, amsgs, adc);
                                     }
                                 }
                             }
 
                             lastObjectId = charge.Id;
+                            lastDate = charge.Created;
                         });
                     } 
-                    while (charges.Count == pageLimit);
-
-                    amsgs.Add("Error", MessageType.UserError);
+                    while (charges.Count == pageLimit && lastDate >= untilDate);
                 },
                 uniqueIdenfier: "UpdateTransactionsFromStripe_20200320",
                 msgs: msgs,
