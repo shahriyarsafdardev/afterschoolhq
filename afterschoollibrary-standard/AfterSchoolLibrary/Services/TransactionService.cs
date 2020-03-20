@@ -211,7 +211,7 @@ namespace AfterSchoolLibrary.Services
                 if (!includeFees)
                     amount = transaction.GetBillerAmount(msgs, dc);
 
-                return amount == transaction.GetRefundedAmount(msgs, dc);
+                return transaction.GetRefundedAmount(msgs, dc) >= amount;
             }
 
             return false;
