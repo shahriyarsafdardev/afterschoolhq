@@ -2676,6 +2676,11 @@ namespace AfterSchoolLibrary.Services
             return Transaction.GetTotalAmountPaidByPayerAccount(account.ID.Value, startDate, endDate, false, msgs, dc);
         }
 
+        public static List<RefundRequest> GetRefundRequests(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RefundRequest.LoadByAccountId(account.ID.Value, msgs, dc);
+        }
+
         public static decimal GetSubscriptionPlatformFeePercent(this Account billingAccount, SubscriptionPlan plan, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (plan.CostPerPeriod <= 0)

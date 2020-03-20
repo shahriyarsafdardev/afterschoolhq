@@ -265,6 +265,34 @@ namespace AfterSchool.Areas.Org.Controllers
             return null;
         }
 
+        [HttpGet]
+        public ActionResult RefundRequests()
+        {
+            ViewBag.Messages = new SystemMessages();
+            ViewBag.AmountAvailableToRefund = SessionVariables.CurrentAccount.GetMaxAmountAvailableForPayout();
+            return View(SessionVariables.CurrentAccount.GetRefundRequests().OrderByDescending(request => request.CreateDate).ToList());
+        }
+
+        [HttpGet]
+        public ActionResult RequestRefund(string uid, string amount)
+        {
+            var msgs = new SystemMessages();
+
+            if (uid.IsGuid() && amount.IsNumber())
+            {
+                var transaction = Transaction.LoadByUid(uid.ToGuid(), msgs);
+
+                if (transaction.IsNotEmpty())
+                    transaction.RequestRefund(amount.ToDecimal(), SessionVariables.LoggedInUser, msgs);
+
+                if (msgs.HasNoErrors())
+                    return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+
+            }
+
+            return new JsonResult { Data = new { status = "error", messages = msgs }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+        }
+
         //[HttpPost]
         //public ActionResult Refund(string uid, string amount)
         //{

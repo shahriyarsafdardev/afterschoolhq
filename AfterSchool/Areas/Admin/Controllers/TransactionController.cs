@@ -96,7 +96,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                 var transaction = Transaction.LoadByUid(id.ToGuid(), msgs);
 
                 if (transaction.IsNotEmpty() && !transaction.HasRefunds())
-                    transaction.Refund(SessionVariables.LoggedInUser, msgs);
+                    transaction.RefundPayerFullAmount(SessionVariables.LoggedInUser, msgs);
 
                 if (msgs.HasNoErrors())
                     return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
