@@ -68,6 +68,54 @@ namespace AfterSchool.Areas.Admin.Controllers
         }
 
         [HttpGet]
+        public ActionResult RefundRequests(string pn, string rpp, string sdate, string edate)
+        {
+            var msgs = new SystemMessages();
+            int pageNumber = 1;
+            int recordsPerPage = 25;
+
+            if (pn.IsNumber() && pn.ToInteger() > 0)
+                pageNumber = pn.ToInteger();
+
+            if (rpp.IsNumber() && rpp.ToInteger() > 0)
+                recordsPerPage = rpp.ToInteger();
+
+            var start = recordsPerPage * (pageNumber - 1);
+            var length = recordsPerPage;
+
+            var startDate = sdate.IsDateTime() ?
+                SessionVariables.CurrentAccount.ConvertFromAccountTimeZone(sdate.ToDateTime()) :
+                new DateTime?();
+            var endDate = edate.IsDateTime() ?
+                SessionVariables.CurrentAccount.ConvertFromAccountTimeZone(edate.ToDateTime().AddDays(1).AddMilliseconds(-1)) :
+                new DateTime?();
+
+            var requestCount = RefundRequest.GetCount(startDate, endDate, msgs);
+            var requests = RefundRequest.LoadByDate(startDate, endDate, start, length, msgs);
+
+            var totalPages = Math.Ceiling(requestCount.ToDouble() / recordsPerPage).ToInteger();
+
+            requests.ForEach(request => {
+                if (SessionVariables.CurrentAccount.TimeZone.IsNotEmpty())
+                    request.CreateDate = SessionVariables.CurrentAccount.ConvertToAccountTimeZone(request.CreateDate.Value);
+            });
+
+            ViewBag.TotalAmountPaid = Transaction.GetTotalAmountBilledOut(startDate, endDate, false, msgs);
+            ViewBag.TotalFeesPaid = Transaction.GetTotalFeesPaid(startDate, endDate, false, msgs);
+            ViewBag.TotalProfit = Transaction.GetTotalAHQProfit(startDate, endDate, false, msgs);
+            ViewBag.TotalRefunded = Transaction.GetTotalAmountRefunded(startDate, endDate, false, msgs);
+            ViewBag.Messages = msgs;
+            ViewBag.PagingModel = new PagingModel()
+            {
+                TotalCount = requestCount,
+                PageNumber = pageNumber,
+                RecordsPerPage = recordsPerPage,
+                TotalPages = totalPages
+            };
+            return View(requests);
+        }
+
+        [HttpGet]
         public ActionResult Delete(string id)
         {
             var msgs = new SystemMessages();
@@ -87,7 +135,7 @@ namespace AfterSchool.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        public ActionResult Refund(string id)
+        public ActionResult Refund(string id, string request, string refundcc, string refundcf)
         {
             var msgs = new SystemMessages();
 
@@ -95,12 +143,32 @@ namespace AfterSchool.Areas.Admin.Controllers
             {
                 var transaction = Transaction.LoadByUid(id.ToGuid(), msgs);
 
-                if (transaction.IsNotEmpty() && !transaction.HasRefunds())
-                    transaction.RefundPayerFullAmount(SessionVariables.LoggedInUser, msgs);
+                if (request.IsNotEmpty())
+                {
+                    if (request.IsGuid())
+                    {
+                        var refundRequest = RefundRequest.LoadByUid(request.ToGuid(), msgs);
+                        var refundCreditFees = refundcc.IsBoolean() && refundcc.ToBoolean();
+                        var refundConvenienceFees = refundcf.IsBoolean() && refundcf.ToBoolean();
+
+                        if (refundRequest.IsNotEmpty() && refundRequest.CanRefundAmountRequested(msgs))
+                            refundRequest.ApproveAndProcessRequest(true, refundCreditFees, refundConvenienceFees, SessionVariables.LoggedInUser, msgs);
+                    }
+                    else
+                        msgs.Add("Invalid Request", MessageType.UserError);
+                }
+                else
+                {
+                    if (transaction.IsNotEmpty() && !transaction.HasRefunds())
+                        transaction.RefundPayerFullAmount(SessionVariables.LoggedInUser, msgs);
+                    else
+                        msgs.Add("Invalid Request", MessageType.UserError);
+                }
 
                 if (msgs.HasNoErrors())
                     return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
             }
+
 
             return Json(new { status = "error", messages = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
         }

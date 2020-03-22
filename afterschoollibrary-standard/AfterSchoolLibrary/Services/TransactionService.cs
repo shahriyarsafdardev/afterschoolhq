@@ -225,7 +225,7 @@ namespace AfterSchoolLibrary.Services
         public static decimal GetRefundableAmount(this Transaction transaction, bool allowFullAmountRefund = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (allowFullAmountRefund)
-                return transaction.GetPayerAmount() - transaction.GetRefundedAmount(msgs, dc);
+                return transaction.GetPayerAmount() - transaction.GetRefundedAmountAHQ(msgs, dc);
 
             return transaction.GetBillerAmount(msgs, dc) - transaction.GetRefundedAmountAHQ(msgs, dc);
         }
