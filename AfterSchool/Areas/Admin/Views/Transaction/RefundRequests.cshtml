@@ -1,0 +1,220 @@
+﻿@model List<RefundRequest>
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+}
+
+@{ Html.RenderPartial("AdminHeader"); }
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("_TransactionsHeader"); }
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <div class="panel panel-default">
+
+        <div class="panel-heading">
+            <i class="s7-note2"></i> Refund Requests
+            <div class="clearfix"></div>
+        </div>
+
+        <div class="panel-body">
+
+            <div class="row">
+                <div class="col-md-2">
+                    @{
+                        Html.RenderPartial(
+                            "~/Views/Shared/Components/_Date.cshtml",
+                            new FormInputViewModel()
+                            {
+                                Id = "startdate",
+                                Name = "startdate",
+                                Value = Request["sdate"],
+                                Placeholder = "From Date"
+                            }
+                        );
+                    }
+                </div>
+                <div class="col-md-2">
+                    @{
+                        Html.RenderPartial(
+                            "~/Views/Shared/Components/_Date.cshtml",
+                            new FormInputViewModel()
+                            {
+                                Id = "enddate",
+                                Name = "enddate",
+                                Value = Request["edate"],
+                                Placeholder = "To Date"
+                            }
+                        );
+                    }
+                </div>
+                <div class="col-md-4">
+                    <button type="button" class="btn btn-primary btn-lg" onclick="search()">Search</button>
+                </div>
+
+                <script>
+                    function search() {
+                        window.location.href = `@Url.Action("refundrequests", "transaction")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}`;
+                    }
+
+                </script>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover table-condensed" id="transaction-table">
+                    <thead>
+                        <tr>
+                            <th class="text-center">Requested On</th>
+                            <th class="text-center">Requested By</th>
+                            <th class="text-center">Transaction #</th>
+                            <th class="text-center">Description</th>
+                            <th class="text-center">Transaction Amount</th>
+                            <th class="text-center">Refund Requested</th>
+                            <th class="text-center">Request Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Count > 0)
+                        {
+                            foreach (var request in Model)
+                            {
+                                var transaction = request.GetTransaction();
+
+                                <tr id="@request.Uid">
+                                    <td class="text-center">
+                                        @request.CreateDate.ToShortDateTimeString()
+                                    </td>
+                                    <td class="text-center">
+                                        @request.GetCreator().DisplayName
+                                    </td>
+                                    <td class="text-center">
+                                        @transaction.GetTransactionNumber()
+                                    </td>
+                                    <td class="text-center">
+                                        @transaction.Description
+                                    </td>
+                                    <td class="text-center">
+                                        @transaction.GetBillerAmount().ToCurrency()
+                                    </td>
+                                    <td class="text-center">
+                                        @request.Amount.ToCurrency()
+                                    </td>
+                                    <td class="text-center">
+                                        @if (request.RequestFulfilled)
+                                        {
+                                            @:Completed
+                                        }
+                                        else
+                                        {
+                                            @:Pending
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button onclick="setTransaction('@transaction.Uid', '@request.Uid', '@transaction.GetTransactionNumber()', '@request.Amount.ToCurrency()', '@((int)transaction.PaymentTypeId)')"
+                                                    class="md-trigger btn btn-sm btn-alt6"
+                                                    data-modal="modal-refund"
+                                                    @(!request.CanRefundAmountRequested() ? "disabled=\"disabled\"" : "")>
+                                                <i class="s7-back"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6">There are no refund requests</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @{
+                Html.RenderPartial(
+                    "~/Views/Shared/_Paging.cshtml",
+                    (PagingModel)ViewBag.PagingModel,
+                    new ViewDataDictionary()
+                    {
+                    { "controller", "transaction" },
+                    { "action", "index" },
+                    { "querystring", $"sdate={Request["sdate"]}&edate={Request["edate"]}&poId={Request["poId"]}&poTypeId={Request["poTypeId"]}" }
+}
+                );
+            }
+        </div>
+    </div>
+</div>
+
+<div id="modal-refund" class="md-modal colored-header custom-width md-effect-9">
+    <div class="md-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+            <h3 class="modal-title">Refund?</h3>
+        </div>
+        <div class="modal-body form">
+            <div class="form-group">
+                <div class="am-checkbox">
+                    <input type="checkbox" class="form-control" id="refund-cc-fee" />
+                    <label for="refund-cc-fee">Refund Credit Card Fees?</label>
+                </div>
+                <div class="am-checkbox">
+                    <input type="checkbox" class="form-control" id="refund-convenience-fee" />
+                    <label for="refund-convenience-fee">Refund Convenience Fees?</label>
+                </div>
+                <p>
+                    Are you sure you want to refund transaction <strong><span class="transaction-id"></span></strong> for the amount of <strong><span class="transaction-amount"></span></strong>?
+                </p>
+                <p>
+                    This cannot be undone
+                </p>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+            <button type="button" id="confirm-delete-btn" data-dismiss="modal" onclick="refundTransaction()" class="btn btn-primary md-close">
+                Refund Transaction &raquo;
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    var transactionUid = null;
+    var requestUid = null;
+
+    function setTransaction(uid, rUid, id, amount, ttype) {
+        transactionUid = uid;
+        requestUid = rUid;
+        $('.transaction-id').html(id);
+        $('.transaction-amount').html(amount);
+
+        if (ttype == '@((int)PaymentType.ACH)') {
+            $('#refund-cc-fee').parent().addClass('hide');
+        } else {
+            $('#refund-cc-fee').parent().removeClass('hide');
+        }
+    }
+
+    function refundTransaction() {
+
+        const refundCC = $('#refund-cc-fee').is(':checked') ? 1 : 0;
+        const refundCF = $('#refund-convenience-fee').is(':checked') ? 1 : 0;
+
+        $.get(
+            '@Url.Action("refund", "transaction")/' + transactionUid + '?request=' + requestUid + '&refundcc=' + refundCC + '&refundcf=' + refundCF,
+            function (data) {
+                if (data && data.status == 'ok') {
+                    Notifications.showMessage('Success', 'Transaction has been refunded', true);
+                } else {
+                    Notifications.showErrors(data.messages);
+                }
+            }
+        );
+    }
+
+</script>

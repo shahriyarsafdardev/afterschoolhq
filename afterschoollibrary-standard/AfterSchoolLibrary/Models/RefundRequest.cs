@@ -211,6 +211,38 @@ namespace AfterSchoolLibrary.Models
 			return dq.GetCount(msgs);
 		}
 
+		public static int GetCount(DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			dq.Connection = dc;
+
+			if (startDate.HasValue)
+				dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+			if (endDate.HasValue)
+				dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+
+			return dq.GetCount(msgs);
+		}
+
+		public static List<RefundRequest> LoadByDate(DateTime? startDate, DateTime? endDate, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.UseParameterizedQuery = false;
+
+			if (startDate.HasValue)
+				dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+
+			if (endDate.HasValue)
+				dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+
+			dq.OrderBys.Add(ObjectMap["CreateDate"], OrderByDirectionEnum.Descending);
+
+			dq.SelectRange.Start = start;
+			dq.SelectRange.Length = length;
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
 		#endregion
-    }
+	}
 }
