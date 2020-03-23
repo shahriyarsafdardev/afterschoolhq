@@ -463,7 +463,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 if (msgs.HasNoErrors() && beforeProviderAccountId != activity.ProviderAccountId)
-                    ActivityService.NotifyProviderOfNewActivity(activity, SessionVariables.LoggedInUser, msgs);
+                    ActivityService.NotifyProviderOfNewActivity(activity, SessionVariables.CurrentUser, msgs);
 
                 switch (cmd)
                 {

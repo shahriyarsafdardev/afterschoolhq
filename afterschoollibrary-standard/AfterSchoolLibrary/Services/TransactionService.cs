@@ -199,7 +199,11 @@ namespace AfterSchoolLibrary.Services
 
         public static bool HasUnfulfilledRefundRequests(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return RefundRequest.GetCountByTransactionIdByRequestFulfilled(transaction.ID.Value, false, msgs, dc) > 0;
+            return RefundRequest.GetCountByTransactionId(
+                        transaction.ID.Value, 
+                        RefundRequest.InProcessStatuses,
+                        msgs, 
+                        dc) > 0;
         }
 
         public static bool IsTotallyRefunded(this Transaction transaction, bool includeFees, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -228,6 +232,29 @@ namespace AfterSchoolLibrary.Services
                 return transaction.GetPayerAmount() - transaction.GetRefundedAmountAHQ(msgs, dc);
 
             return transaction.GetBillerAmount(msgs, dc) - transaction.GetRefundedAmountAHQ(msgs, dc);
+        }
+
+        public static bool CanRefundTransactionFee(this Transaction transaction)
+        {
+            return false;
+        }
+
+        public static bool CanRefundConvenienceFee(this Transaction transaction)
+        {
+            return transaction.CreateDate.Value.IsAfter(DateTime.UtcNow.AddDays(-2));
+        }
+
+        public static decimal GetParentRefundableAmount(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var amount = transaction.GetBillerAmount(msgs, dc);
+
+            if (transaction.CanRefundConvenienceFee())
+                amount += transaction.ConvenienceFeeCharged.Value;
+
+            if (transaction.CanRefundTransactionFee())
+                amount += transaction.PaymentTypeFeeCharged.Value;
+
+            return amount;
         }
 
         public static decimal GetRefundedAmount(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -343,13 +370,13 @@ namespace AfterSchoolLibrary.Services
             return ActivityPayment.LoadByTransactionIdByIsDeleted(transaction.ID.Value, false, msgs, dc);
         }
 
-        public static RefundRequest RequestRefund(this Transaction transaction, decimal refundAmount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static RefundRequest RequestRefund(this Transaction transaction, decimal refundAmount, RefundRequestStatus refundRequestStatus, string reason, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            if (!transaction.IsAmountRefundable(refundAmount, false, msgs))
+            if (!transaction.IsAmountRefundable(refundAmount, refundRequestStatus == RefundRequestStatus.RequestedByParent, msgs))
                 msgs.Add("Amount is not refundable", MessageType.UserError);
 
             if (msgs.HasNoErrors())
-                return RefundRequestService.CreateNewRefundRequest(transaction, refundAmount, loggedInUser, msgs, dc);
+                return RefundRequestService.CreateNewRefundRequest(transaction, refundAmount, refundRequestStatus, reason, loggedInUser, msgs, dc);
 
             return null;
         }

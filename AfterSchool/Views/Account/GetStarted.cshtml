@@ -78,7 +78,7 @@
                             }
                         }
 
-                        @if (SessionVariables.LoggedInUser.IsEmpty())
+                        @if (SessionVariables.CurrentUser.IsEmpty())
                         {
                             <div class="form-group new-account">
                                 <label for="password1" class="control-label col-md-3">

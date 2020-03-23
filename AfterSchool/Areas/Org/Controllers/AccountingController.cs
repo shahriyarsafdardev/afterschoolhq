@@ -264,7 +264,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult ProcessManualRefund(string uid, string amount)
+        public ActionResult ProcessManualRefund(string uid, string amount, string reason)
         {
             var msgs = new SystemMessages();
 
@@ -273,7 +273,27 @@ namespace AfterSchool.Areas.Org.Controllers
                 var transaction = Transaction.LoadByUid(uid.ToGuid(), msgs);
 
                 if (transaction.IsNotEmpty())
-                    transaction.ManualRefund(amount.ToDecimal(), SessionVariables.LoggedInUser, msgs);
+                    transaction.ManualRefund(amount.ToDecimal(), SessionVariables.CurrentUser, msgs);
+
+                if (msgs.HasNoErrors())
+                    return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+
+            }
+
+            return new JsonResult { Data = new { status = "error", messages = msgs }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+        }
+
+        [HttpPost]
+        public ActionResult RequestRefund(string uid, string amount, string reason)
+        {
+            var msgs = new SystemMessages();
+
+            if (uid.IsGuid() && amount.IsNumber())
+            {
+                var transaction = Transaction.LoadByUid(uid.ToGuid(), msgs);
+
+                if (transaction.IsNotEmpty())
+                    transaction.RequestRefund(amount.ToDecimal(), RefundRequestStatus.RequestedByProvider, reason, SessionVariables.CurrentUser, msgs);
 
                 if (msgs.HasNoErrors())
                     return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
@@ -284,16 +304,16 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult RequestRefund(string uid, string amount)
+        public ActionResult ApproveRefundRequest(string uid)
         {
             var msgs = new SystemMessages();
 
-            if (uid.IsGuid() && amount.IsNumber())
+            if (uid.IsGuid())
             {
-                var transaction = Transaction.LoadByUid(uid.ToGuid(), msgs);
+                var request = RefundRequest.LoadByUid(uid.ToGuid(), msgs);
 
-                if (transaction.IsNotEmpty())
-                    transaction.RequestRefund(amount.ToDecimal(), SessionVariables.LoggedInUser, msgs);
+                if (request.IsNotEmpty())
+                    request.UpdateStatus(RefundRequestStatus.ApprovedByProvider, SessionVariables.CurrentUser, msgs);
 
                 if (msgs.HasNoErrors())
                     return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
@@ -303,58 +323,24 @@ namespace AfterSchool.Areas.Org.Controllers
             return new JsonResult { Data = new { status = "error", messages = msgs }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
         }
 
-        //[HttpPost]
-        //public ActionResult Refund(string uid, string amount)
-        //{
-        //    var msgs = new SystemMessages();
-        //    var originalTransaction = Transaction.LoadByUid(uid.ToGuid());
-        //    var loggedInUser = SessionVariables.LoggedInUser;
+        [HttpGet]
+        public ActionResult DenyRefundRequest(string uid)
+        {
+            var msgs = new SystemMessages();
 
-        //    if (originalTransaction == null)
-        //        msgs.Add("Invalid transaction", MessageType.UserError);
-        //    else
-        //    {
-        //        var totalRefund = Transaction.GetTotalRefundByOriginalTransaction(originalTransaction.ID.Value);
-        //        var maximumRefund = originalTransaction.Amount + totalRefund;
+            if (uid.IsGuid())
+            {
+                var request = RefundRequest.LoadByUid(uid.ToGuid(), msgs);
 
-        //        if (amount.ToDecimal() > maximumRefund)
-        //            msgs.Add($"The maximum amount to refund is {maximumRefund.ToCurrency()}", MessageType.UserError);
-        //    }
+                if (request.IsNotEmpty())
+                    request.UpdateStatus(RefundRequestStatus.DeniedByProvider, SessionVariables.CurrentUser, msgs);
 
-        //    if (amount.ToDouble() < 0.1)
-        //        msgs.Add("The minimum amount to refund is $0.10", MessageType.UserError);
+                if (msgs.HasNoErrors())
+                    return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
 
-        //    if (msgs.HasNoErrors())
-        //    {
-        //        var newTransaction = AccountService.CreateRefundTransactionPayment(
-        //            originalTransaction,
-        //            amount.ToDecimal(),
-        //            loggedInUser,
-        //            msgs
-        //        );
+            }
 
-        //        if (newTransaction != null)
-        //        {
-        //            var transaction = new
-        //            {
-        //                id = newTransaction.GetTransactionNumber(),
-        //                originalTransactionUid = originalTransaction.Uid,
-        //                createdOn = newTransaction.CreateDate.ToShortDateTimeString(),
-        //                payer = newTransaction.GetPayerAccount().Name,
-        //                refundFor = newTransaction.GetBillerAccount().Name,
-        //                itemDescription = newTransaction.GetParticipationObjects().DistinctBy(po => new { po.ObjectID, po.ObjectType }).Select(po => po.Name).ToStringList(", "),
-        //                totalPaid = newTransaction.Amount,
-        //                platformFee = newTransaction.GetPlatformFee(),
-        //                payout = newTransaction.GetPayout(),
-        //            };
-
-        //            return new JsonResult { Data = new { status = "ok", transaction, refundedAmount = originalTransaction.GetRefundedAmount() } };
-        //        }
-        //        else
-        //            msgs.Add("Error when processing the refund", MessageType.Error);
-        //    }
-
-        //    return new JsonResult { Data = new { status = "error", messages = msgs } };
-        //}
+            return new JsonResult { Data = new { status = "error", messages = msgs }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+        }
     }
 }

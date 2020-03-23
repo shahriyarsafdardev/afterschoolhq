@@ -350,7 +350,7 @@
 
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         $('#refund-request-amount').blur(function () {
-            canProcessAmount();
+            canProcessRequest();
         });
     });
 
@@ -368,7 +368,7 @@
             function (data) {
                 if (data && data.status == 'ok') {
                     Notifications.showMessage('Success', 'Your refund for <strong>$' + amount + '</strong> has been saved', true);
-                    location.reload();
+                    setTimeout(function () { location.reload() }, 500);
                 } else {
                     Notifications.showErrors(data.messages);
                 }
@@ -384,16 +384,20 @@
         $('#refund-request-amount').attr('max', maxAmount);
         $('#refund-request-amount').val(maxAmount);
 
-        canProcessAmount();
+        canProcessRequest();
     }
 
-    function canProcessAmount() {
+    function canProcessRequest() {
         const amount = $('#refund-request-amount').val();
         const maxAmount = $('#refund-request-max-amount').val();
 
         if (parseFloat(amount) > parseFloat(maxAmount) || parseFloat(amount) < 1) {
             $('#btn-request-refund').prop('disabled', true);
             $('#refund-request-notes').addClass('text-danger');
+            return false;
+        }
+
+        if ($('#refund-reason').val().trim().length == 0) {
             return false;
         }
 
@@ -406,14 +410,16 @@
 
         const uid = $('#refund-request-transaction-uid').val();
         const amount = $('#refund-request-amount').val();
+        const reason = $('#refund-reason').val();
 
-        if (canProcessAmount()) {
-            $.get(
-                '@Url.Action("RequestRefund", "accounting")?uid=' + uid + '&amount=' + amount,
+        if (canProcessRequest()) {
+            $.post(
+                '@Url.Action("requestrefund", "accounting")',
+                'uid=' + uid + '&amount=' + amount + '&reason=' + encodeURIComponent(reason),
                 function (data) {
                     if (data && data.status == 'ok') {
                         Notifications.showMessage('Success', 'Your refund request for <strong>$' + amount + '</strong> has been submitted and will be processed shortly', true);
-                        location.reload();
+                        setTimeout(function () { location.reload() }, 500);
                     } else {
                         Notifications.showErrors(data.messages);
                     }

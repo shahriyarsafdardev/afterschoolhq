@@ -9,7 +9,7 @@ namespace AfterSchoolLibrary.Services
 {
     public static class RefundRequestService
     {
-        public static RefundRequest CreateNewRefundRequest(Transaction transaction, decimal amount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static RefundRequest CreateNewRefundRequest(Transaction transaction, decimal amount, RefundRequestStatus refundRequestStatus, string reason, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var refundRequest = new RefundRequest()
             {
@@ -21,6 +21,8 @@ namespace AfterSchoolLibrary.Services
                 LastModifiedBy = loggedInUser.ID.Value,
                 RequestFulfilled = false,
                 AccountId = transaction.BillerAccountId,
+                RefundRequestStatusId = refundRequestStatus,
+                RequestReason = reason,
             };
 
             msgs.AddRange(refundRequest.Save(dc));
@@ -48,7 +50,6 @@ namespace AfterSchoolLibrary.Services
             var transaction = request.GetTransaction(msgs, dc);
 
             if (transaction.IsNotEmpty() && !transaction.IsDeleted)
-            {
                 Database.ExecuteTransaction
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
@@ -67,20 +68,25 @@ namespace AfterSchoolLibrary.Services
                         transaction.Refund(refundAmount, allowFullRefundAmount, transaction.PaymentSourceTypeId, loggedInuser, amsgs, adc);
 
                         if (msgs.HasNoErrors())
-                        {
-                            request.RequestFulfilled = true;
-                            amsgs.AddRange(request.Save(adc));
-                        }
+                            request.UpdateStatus(RefundRequestStatus.Completed, loggedInuser, amsgs, adc);
+
                     },
                     onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                     onException: (SystemMessages emsgs) => msgs.AddRange(emsgs)
                 );
-            }
             else
                 msgs.Add("Invalid transaction", MessageType.UserError);
 
             return msgs.HasNoErrors();
+        }
+
+        public static void UpdateStatus(this RefundRequest request, RefundRequestStatus status, WebUser loggedInuser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            request.RefundRequestStatusId = status;
+            request.LastModifiedBy = loggedInuser.ID;
+            request.LastModifiedDate = DateTime.UtcNow;
+            msgs.AddRange(request.Save(dc));
         }
 
     }

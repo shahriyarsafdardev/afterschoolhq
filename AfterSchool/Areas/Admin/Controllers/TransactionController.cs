@@ -125,7 +125,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                 var transaction = Transaction.LoadByUid(id.ToGuid(), msgs);
 
                 if (transaction.IsNotEmpty())
-                    transaction.MarkAsDeleted(SessionVariables.LoggedInUser, msgs);
+                    transaction.MarkAsDeleted(SessionVariables.CurrentUser, msgs);
 
                 if (msgs.HasNoErrors())
                     return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
@@ -152,7 +152,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                         var refundConvenienceFees = refundcf.IsBoolean() && refundcf.ToBoolean();
 
                         if (refundRequest.IsNotEmpty() && refundRequest.CanRefundAmountRequested(msgs))
-                            refundRequest.ApproveAndProcessRequest(true, refundCreditFees, refundConvenienceFees, SessionVariables.LoggedInUser, msgs);
+                            refundRequest.ApproveAndProcessRequest(true, refundCreditFees, refundConvenienceFees, SessionVariables.CurrentUser, msgs);
                     }
                     else
                         msgs.Add("Invalid Request", MessageType.UserError);
@@ -160,7 +160,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                 else
                 {
                     if (transaction.IsNotEmpty() && !transaction.HasRefunds())
-                        transaction.RefundPayerFullAmount(SessionVariables.LoggedInUser, msgs);
+                        transaction.RefundPayerFullAmount(SessionVariables.CurrentUser, msgs);
                     else
                         msgs.Add("Invalid Request", MessageType.UserError);
                 }
@@ -171,6 +171,26 @@ namespace AfterSchool.Areas.Admin.Controllers
 
 
             return Json(new { status = "error", messages = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public ActionResult DenyRefundRequest(string uid)
+        {
+            var msgs = new SystemMessages();
+
+            if (uid.IsGuid())
+            {
+                var request = RefundRequest.LoadByUid(uid.ToGuid(), msgs);
+
+                if (request.IsNotEmpty())
+                    request.UpdateStatus(RefundRequestStatus.DeniedByAfterSchoolHQ, SessionVariables.CurrentUser, msgs);
+
+                if (msgs.HasNoErrors())
+                    return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+
+            }
+
+            return new JsonResult { Data = new { status = "error", messages = msgs }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
         }
     }
 }
