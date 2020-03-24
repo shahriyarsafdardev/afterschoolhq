@@ -106,10 +106,10 @@
                                     <td>
                                         @if (request.RefundRequestStatusId == RefundRequestStatus.RequestedByParent)
                                         {
-                                            <button type="button" class="btn btn-default md-trigger" id="btn-approve" onclick="approve('@request.Uid')" data-modal="modal-confirm-approve">
+                                            <button type="button" class="btn btn-default btn-sm md-trigger" id="btn-approve" onclick="approve('@request.Uid')" data-modal="modal-confirm-approve">
                                                 Approve
                                             </button>
-                                            <button type="button" class="btn btn-default md-trigger" id="btn-deny" onclick="deny('@request.Uid')" data-modal="modal-confirm-deny">
+                                            <button type="button" class="btn btn-default btn-sm md-trigger" id="btn-deny" onclick="deny('@request.Uid')" data-modal="modal-confirm-deny">
                                                 Deny
                                             </button>
                                         }

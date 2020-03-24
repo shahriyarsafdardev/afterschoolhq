@@ -116,7 +116,7 @@
                                                     Approve &amp; Refund
                                                 </button>
 
-                                                <button onclick="denyRefund('@request.Uid')"
+                                                <button onclick="deny('@request.Uid')"
                                                         class="md-trigger btn btn-sm btn-alt6"
                                                         data-modal="modal-confirm-deny">
                                                     Deny
@@ -180,7 +180,7 @@
         </div>
         <div class="modal-footer">
             <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-            <button type="button" id="confirm-delete-btn" data-dismiss="modal" onclick="refundTransaction()" class="btn btn-primary md-close">
+            <button type="button" id="confirm-delete-btn" onclick="refundTransaction()" class="btn btn-primary">
                 Refund Transaction &raquo;
             </button>
         </div>
@@ -200,7 +200,7 @@
         </div>
         <div class="modal-footer">
             <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-            <button type="button" data-dismiss="modal" class="btn btn-default md-close" id="btn-deny-confirm" onclick="confirmDeny()">Deny Refund &raquo;</button>
+            <button type="button" class="btn btn-primary" id="btn-deny-confirm" onclick="confirmDeny()">Deny Refund &raquo;</button>
         </div>
     </div>
 </div>
@@ -242,12 +242,12 @@
     }
     
 
-    function deny(request) {
-        requestUid = request;
+    function deny(rUid) {
+        requestUid = rUid;
     }
 
     function confirmDeny() {
-        $.get('@Url.Action("denyrefund", "transaction")?uid=' + requestUid, function (data) {
+        $.get('@Url.Action("denyrefundrequest", "transaction")?uid=' + requestUid, function (data) {
 
             if (data && data.status == 'ok') {
                 Notifications.showMessage('Success', 'The refund request has been denied', true);

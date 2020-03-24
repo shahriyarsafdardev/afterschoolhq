@@ -150,7 +150,7 @@
                                             var hasUnfulfilledRequest = transaction.HasUnfulfilledRefundRequests();
 
                                             <button onclick="requestRefund('@transaction.Uid', @transaction.GetParentRefundableAmount().ToString("#.00"))"
-                                                    class="md-trigger btn btn-default"
+                                                    class="md-trigger btn btn-default btn-sm"
                                                     data-modal="modal-request-refund"
                                                     @(hasUnfulfilledRequest ? "disabled=\"disabled\"" : "")>
 
@@ -195,8 +195,6 @@
     </div>
 </div>
 
-
-
 <div id="modal-request-refund" class="md-modal colored-header custom-width md-effect-9">
 
     <div class="md-content">
@@ -219,7 +217,7 @@
         </div>
         <div class="modal-footer">
             <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-            <button type="button" id="btn-request-refund" data-dismiss="modal" onclick="processRefundRequest()" class="btn btn-primary md-close">Request Refund &raquo;</button>
+            <button type="button" id="btn-request-refund" onclick="processRefundRequest()" class="btn btn-primary md-close">Request Refund &raquo;</button>
         </div>
     </div>
 </div>
