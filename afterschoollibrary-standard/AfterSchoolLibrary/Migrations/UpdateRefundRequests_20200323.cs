@@ -22,6 +22,15 @@ namespace AfterSchoolLibrary.Migrations
                             request.UpdateStatus(RefundRequestStatus.Completed, new WebUser() { ID = 1 }, amsgs, adc);
                         else
                             request.UpdateStatus(RefundRequestStatus.RequestedByProvider, new WebUser() { ID = request.CreatedBy }, amsgs, adc);
+
+                        request.RequestedRefundTypeId = RefundType.Refund;
+                        request.ApprovedRefundTypeId = RefundType.Refund;
+
+                        if (request.RefundRequestStatusId == RefundRequestStatus.Completed)
+                            request.ApprovedDate = request.LastModifiedDate;
+
+                        amsgs.AddRange(request.Save(adc));
+
                     });
                 },
                 uniqueIdenfier: "UpdateRefundRequests_20200323",
