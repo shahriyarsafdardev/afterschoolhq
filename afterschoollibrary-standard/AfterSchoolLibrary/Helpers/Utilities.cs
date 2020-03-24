@@ -328,6 +328,8 @@ namespace AfterSchoolLibrary.Helpers
                     if (Utilities.IsProduction)
                         Migrations.UpdateTransactionsFromStripe_20200320.Do(amsgs, adc);
 
+                    Migrations.UpdateRefundRequests_20200323.Do(amsgs, adc);
+
                     // amsgs.Add("rollback please", MessageType.Error);
 
                     // amsgs.AddRange(MigrateToBCrypt(adc));

@@ -183,7 +183,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                 var request = RefundRequest.LoadByUid(uid.ToGuid(), msgs);
 
                 if (request.IsNotEmpty())
-                    request.UpdateStatus(RefundRequestStatus.DeniedByAfterSchoolHQ, SessionVariables.CurrentUser, msgs);
+                    request.DenyRequestAsAHQ(null, SessionVariables.CurrentUser, msgs);
 
                 if (msgs.HasNoErrors())
                     return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };

@@ -81,11 +81,35 @@ namespace AfterSchoolLibrary.Services
             return msgs.HasNoErrors();
         }
 
+        public static void DenyRequestAsProvider(this RefundRequest request, string reason, WebUser loggedInuser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            request.UpdateStatus(RefundRequestStatus.DeniedByProvider, reason, loggedInuser, msgs, dc);
+        }
+
+        public static void DenyRequestAsAHQ(this RefundRequest request, string reason, WebUser loggedInuser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            request.UpdateStatus(RefundRequestStatus.DeniedByProvider, reason, loggedInuser, msgs, dc);
+        }
+
         public static void UpdateStatus(this RefundRequest request, RefundRequestStatus status, WebUser loggedInuser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            request.UpdateStatus(status, null, loggedInuser, msgs, dc);
+        }
+
+        public static void UpdateStatus(this RefundRequest request, RefundRequestStatus status, string reason, WebUser loggedInuser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             request.RefundRequestStatusId = status;
             request.LastModifiedBy = loggedInuser.ID;
             request.LastModifiedDate = DateTime.UtcNow;
+
+            if (status == RefundRequestStatus.ApprovedByAfterSchoolHQ)
+                request.ApprovedDate = DateTime.UtcNow;
+            else if (status == RefundRequestStatus.DeniedByAfterSchoolHQ || status == RefundRequestStatus.DeniedByProvider)
+            {
+                request.DeniedDate = DateTime.UtcNow;
+                request.DeniedReason = reason;
+            }
+
             msgs.AddRange(request.Save(dc));
         }
 

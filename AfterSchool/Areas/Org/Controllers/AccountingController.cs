@@ -333,7 +333,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 var request = RefundRequest.LoadByUid(uid.ToGuid(), msgs);
 
                 if (request.IsNotEmpty())
-                    request.UpdateStatus(RefundRequestStatus.DeniedByProvider, SessionVariables.CurrentUser, msgs);
+                    request.DenyRequestAsProvider(null, SessionVariables.CurrentUser, msgs);
 
                 if (msgs.HasNoErrors())
                     return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
