@@ -23,6 +23,8 @@ namespace AfterSchoolLibrary.Services
                 AccountId = transaction.BillerAccountId,
                 RefundRequestStatusId = refundRequestStatus,
                 RequestReason = reason,
+                ApprovedRefundTypeId = RefundType.Refund,
+                RequestedRefundTypeId = RefundType.Refund,
             };
 
             msgs.AddRange(refundRequest.Save(dc));
