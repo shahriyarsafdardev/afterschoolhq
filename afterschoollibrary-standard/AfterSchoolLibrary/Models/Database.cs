@@ -317,6 +317,9 @@ namespace AfterSchoolLibrary.Models
 			AttachedCoupon.Update(new Hashtable(){{"IsUsed",false}}, new Hashtable(){{"IsUsed", DBNull.Value}}, AttachedCoupon.ObjectMap, dc);
 			PurchaseableObjectCoupon.Update(new Hashtable(){{"PurchaseableObjectTypeId",0}}, new Hashtable(){{"PurchaseableObjectTypeId", DBNull.Value}}, PurchaseableObjectCoupon.ObjectMap, dc);
 			RefundRequest.Update(new Hashtable(){{"RequestFulfilled",false}}, new Hashtable(){{"RequestFulfilled", DBNull.Value}}, RefundRequest.ObjectMap, dc);
+			RefundRequest.Update(new Hashtable(){{"RefundRequestStatusId",0}}, new Hashtable(){{"RefundRequestStatusId", DBNull.Value}}, RefundRequest.ObjectMap, dc);
+			RefundRequest.Update(new Hashtable(){{"RequestedRefundTypeId",0}}, new Hashtable(){{"RequestedRefundTypeId", DBNull.Value}}, RefundRequest.ObjectMap, dc);
+			RefundRequest.Update(new Hashtable(){{"ApprovedRefundTypeId",0}}, new Hashtable(){{"ApprovedRefundTypeId", DBNull.Value}}, RefundRequest.ObjectMap, dc);
 			
 			//**ENDUPDATES**//
 
@@ -599,6 +602,8 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RefundRequest_Uid ON [RefundRequest] (Uid)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RefundRequest_TransactionId ON [RefundRequest] (TransactionId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RefundRequest_AccountId ON [RefundRequest] (AccountId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RefundRequest_AccountId_RefundRequestStatusId ON [RefundRequest] (AccountId,RefundRequestStatusId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RefundRequest_RefundRequestStatusId ON [RefundRequest] (RefundRequestStatusId)"));
 			
 
 			return msgs;

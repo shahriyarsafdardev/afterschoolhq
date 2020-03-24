@@ -27,7 +27,7 @@ namespace AfterSchool.Areas.User.Controllers
             var msgs = new SystemMessages();
             int pageNumber = 1;
             int recordsPerPage = 25;
-            var earliestCorrectTransactionRecards = new DateTime(2019, 12, 1);
+            var earliestCorrectTransactionRecords = new DateTime(2019, 12, 1);
 
             if (pn.IsNumber() && pn.ToInteger() > 0)
                 pageNumber = pn.ToInteger();
@@ -45,8 +45,8 @@ namespace AfterSchool.Areas.User.Controllers
                 SessionVariables.CurrentAccount.ConvertFromAccountTimeZone(edate.ToDateTime().AddDays(1).AddMilliseconds(-1)) :
                 new DateTime?();
 
-            if (!startDate.HasValue || startDate.Value < earliestCorrectTransactionRecards)
-                startDate = earliestCorrectTransactionRecards;
+            if (!startDate.HasValue || startDate.Value < earliestCorrectTransactionRecords)
+                startDate = earliestCorrectTransactionRecords;
 
             // transaction count
             var totalTransactionCount = SessionVariables.CurrentAccount.GetTransactionCount(startDate, endDate, false, msgs);
@@ -84,6 +84,26 @@ namespace AfterSchool.Areas.User.Controllers
             });
 
             return View(plans.Where(plan => plan.CreateDate >= new DateTime(2019,12,1)).OrderByDescending(x => x.CreateDate.Value).ToList());
+        }
+
+        [HttpPost]
+        public ActionResult RequestRefund(string uid, string amount, string reason)
+        {
+            var msgs = new SystemMessages();
+
+            if (uid.IsGuid() && amount.IsNumber())
+            {
+                var transaction = Transaction.LoadByUid(uid.ToGuid(), msgs);
+
+                if (transaction.IsNotEmpty())
+                    transaction.RequestRefund(amount.ToDecimal(), RefundRequestStatus.RequestedByParent, reason, SessionVariables.CurrentUser, msgs);
+
+                if (msgs.HasNoErrors())
+                    return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+
+            }
+
+            return new JsonResult { Data = new { status = "error", messages = msgs }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
         }
     }
 }

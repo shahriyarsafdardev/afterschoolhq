@@ -36,7 +36,7 @@
         }
     }
 
-    function checkEligibility(registrantUid, continueUrl, statusUpdateId, ) {
+    function checkEligibility(registrantUid, continueUrl, statusUpdateId) {
 
         var origStatusText = "";
 
@@ -56,7 +56,7 @@
 
                         $('#ineligible-student').html(data.studentName);
 
-                        for (const activity of data.activities) {
+                        for (let activity of data.activities) {
                             $('#ineligibile-activities').append(activity + '<br />');
                         }
 

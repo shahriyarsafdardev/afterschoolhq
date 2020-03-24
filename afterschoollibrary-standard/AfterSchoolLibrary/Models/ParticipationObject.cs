@@ -491,7 +491,7 @@ namespace AfterSchoolLibrary.Models
 
             var gradeLevels = GradeLevel.Load(msgs: msgs, dc: dc).OrderBy(gradeLevel => gradeLevel.ID).ToList();
             var registrantGradeLevelAnswer = registrant.GetAnswer(QuestionDataType.RegistrantGrade, msgs, dc);
-            var registrantGradeLevel = gradeLevels.FirstOrDefault(gradeLevel => gradeLevel.Abbreviation.IsSameAs(registrantGradeLevelAnswer.Text));
+            var registrantGradeLevel = gradeLevels.FirstOrDefault(gradeLevel => gradeLevel.Abbreviation.IsSameAs(registrantGradeLevelAnswer.Text) || (registrantGradeLevelAnswer.Text.MaxChars(gradeLevel.Abbreviation.Length) == gradeLevel.Abbreviation));
 
             if (!MinGradeId.HasValue)
                 MinGradeId = gradeLevels.First().ID;

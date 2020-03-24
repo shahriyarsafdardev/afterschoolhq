@@ -9,7 +9,7 @@ namespace AfterSchoolLibrary.Services
 {
     public static class RefundRequestService
     {
-        public static RefundRequest CreateNewRefundRequest(Transaction transaction, decimal amount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static RefundRequest CreateNewRefundRequest(Transaction transaction, decimal amount, RefundRequestStatus refundRequestStatus, string reason, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var refundRequest = new RefundRequest()
             {
@@ -21,6 +21,10 @@ namespace AfterSchoolLibrary.Services
                 LastModifiedBy = loggedInUser.ID.Value,
                 RequestFulfilled = false,
                 AccountId = transaction.BillerAccountId,
+                RefundRequestStatusId = refundRequestStatus,
+                RequestReason = reason,
+                ApprovedRefundTypeId = RefundType.Refund,
+                RequestedRefundTypeId = RefundType.Refund,
             };
 
             msgs.AddRange(refundRequest.Save(dc));
@@ -48,7 +52,6 @@ namespace AfterSchoolLibrary.Services
             var transaction = request.GetTransaction(msgs, dc);
 
             if (transaction.IsNotEmpty() && !transaction.IsDeleted)
-            {
                 Database.ExecuteTransaction
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
@@ -67,20 +70,49 @@ namespace AfterSchoolLibrary.Services
                         transaction.Refund(refundAmount, allowFullRefundAmount, transaction.PaymentSourceTypeId, loggedInuser, amsgs, adc);
 
                         if (msgs.HasNoErrors())
-                        {
-                            request.RequestFulfilled = true;
-                            amsgs.AddRange(request.Save(adc));
-                        }
+                            request.UpdateStatus(RefundRequestStatus.Completed, loggedInuser, amsgs, adc);
+
                     },
                     onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                     onException: (SystemMessages emsgs) => msgs.AddRange(emsgs)
                 );
-            }
             else
                 msgs.Add("Invalid transaction", MessageType.UserError);
 
             return msgs.HasNoErrors();
+        }
+
+        public static void DenyRequestAsProvider(this RefundRequest request, string reason, WebUser loggedInuser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            request.UpdateStatus(RefundRequestStatus.DeniedByProvider, reason, loggedInuser, msgs, dc);
+        }
+
+        public static void DenyRequestAsAHQ(this RefundRequest request, string reason, WebUser loggedInuser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            request.UpdateStatus(RefundRequestStatus.DeniedByProvider, reason, loggedInuser, msgs, dc);
+        }
+
+        public static void UpdateStatus(this RefundRequest request, RefundRequestStatus status, WebUser loggedInuser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            request.UpdateStatus(status, null, loggedInuser, msgs, dc);
+        }
+
+        public static void UpdateStatus(this RefundRequest request, RefundRequestStatus status, string reason, WebUser loggedInuser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            request.RefundRequestStatusId = status;
+            request.LastModifiedBy = loggedInuser.ID;
+            request.LastModifiedDate = DateTime.UtcNow;
+
+            if (status == RefundRequestStatus.ApprovedByAfterSchoolHQ || status == RefundRequestStatus.ApprovedManualRefund)
+                request.ApprovedDate = DateTime.UtcNow;
+            else if (status == RefundRequestStatus.DeniedByAfterSchoolHQ || status == RefundRequestStatus.DeniedByProvider)
+            {
+                request.DeniedDate = DateTime.UtcNow;
+                request.DeniedReason = reason;
+            }
+
+            msgs.AddRange(request.Save(dc));
         }
 
     }

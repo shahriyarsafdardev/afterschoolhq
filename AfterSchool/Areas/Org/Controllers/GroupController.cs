@@ -371,7 +371,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult NotifyAll(string id)
         {
             var group = ActivityGroup.LoadByUid(id.ToGuid());
-            var loggedInUserId = SessionVariables.LoggedInUser.ID.Value;
+            var loggedInUserId = SessionVariables.CurrentUser.ID.Value;
             
             BackgroundJob.Enqueue(() => ActivityGroupService.SendLotteryResults(group.ID.Value, loggedInUserId, null, null));
 
