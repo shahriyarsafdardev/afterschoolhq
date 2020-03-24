@@ -72,6 +72,7 @@
                             <th class="text-center">Transaction Amount</th>
                             <th class="text-center">Refund Requested</th>
                             <th class="text-center">Request Status</th>
+                            <th class="text-center"></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -95,29 +96,33 @@
                                         @transaction.Description
                                     </td>
                                     <td class="text-center">
-                                        @transaction.GetBillerAmount().ToCurrency()
+                                        @transaction.GetPayerAmount().ToCurrency()
                                     </td>
                                     <td class="text-center">
                                         @request.Amount.ToCurrency()
                                     </td>
                                     <td class="text-center">
-                                        @if (request.RequestFulfilled)
-                                        {
-                                            @:Completed
-                                        }
-                                        else
-                                        {
-                                            @:Pending
-                                        }
+                                        @request.RefundRequestStatusId.ToString().SplitByUpperCase()
                                     </td>
                                     <td>
                                         <div class="btn-group">
-                                            <button onclick="setTransaction('@transaction.Uid', '@request.Uid', '@transaction.GetTransactionNumber()', '@request.Amount.ToCurrency()', '@((int)transaction.PaymentTypeId)')"
-                                                    class="md-trigger btn btn-sm btn-alt6"
-                                                    data-modal="modal-refund"
-                                                    @(!request.CanRefundAmountRequested() ? "disabled=\"disabled\"" : "")>
-                                                <i class="s7-back"></i>
-                                            </button>
+
+                                            @if (request.IsReadyForAHQApproval)
+                                            {
+                                                <button onclick="setTransaction('@transaction.Uid', '@request.Uid', '@transaction.GetTransactionNumber()', '@request.Amount.ToCurrency()', '@((int)transaction.PaymentTypeId)')"
+                                                        class="md-trigger btn btn-sm btn-alt6"
+                                                        data-modal="modal-refund"
+                                                        @(!request.CanRefundAmountRequested() ? "disabled=\"disabled\"" : "")>
+                                                    Approve &amp; Refund
+                                                </button>
+
+                                                <button onclick="deny('@request.Uid')"
+                                                        class="md-trigger btn btn-sm btn-alt6"
+                                                        data-modal="modal-confirm-deny">
+                                                    Deny
+                                                </button>
+                                            }
+
                                         </div>
                                     </td>
                                 </tr>
@@ -126,7 +131,7 @@
                         else
                         {
                             <tr>
-                                <td colspan="6">There are no refund requests</td>
+                                <td colspan="8">There are no refund requests</td>
                             </tr>
                         }
                     </tbody>
@@ -175,9 +180,27 @@
         </div>
         <div class="modal-footer">
             <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-            <button type="button" id="confirm-delete-btn" data-dismiss="modal" onclick="refundTransaction()" class="btn btn-primary md-close">
+            <button type="button" id="confirm-delete-btn" onclick="refundTransaction()" class="btn btn-primary">
                 Refund Transaction &raquo;
             </button>
+        </div>
+    </div>
+</div>
+
+<div id="modal-confirm-deny" class="md-modal colored-header custom-width md-effect-9">
+    <div class="md-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+            <h3 class="modal-title">Deny?</h3>
+        </div>
+        <div class="modal-body form">
+
+            Are you sure you want to <strong>deny</strong> this refund request?
+
+        </div>
+        <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+            <button type="button" class="btn btn-primary" id="btn-deny-confirm" onclick="confirmDeny()">Deny Refund &raquo;</button>
         </div>
     </div>
 </div>
@@ -210,11 +233,30 @@
             function (data) {
                 if (data && data.status == 'ok') {
                     Notifications.showMessage('Success', 'Transaction has been refunded', true);
+                    setTimeout(function () { location.reload() }, 500);
                 } else {
                     Notifications.showErrors(data.messages);
                 }
             }
         );
+    }
+    
+
+    function deny(rUid) {
+        requestUid = rUid;
+    }
+
+    function confirmDeny() {
+        $.get('@Url.Action("denyrefundrequest", "transaction")?uid=' + requestUid, function (data) {
+
+            if (data && data.status == 'ok') {
+                Notifications.showMessage('Success', 'The refund request has been denied', true);
+                setTimeout(function () { location.reload() }, 500);
+            } else {
+                Notifications.showErrors(data.messages);
+            }
+
+        });
     }
 
 </script>

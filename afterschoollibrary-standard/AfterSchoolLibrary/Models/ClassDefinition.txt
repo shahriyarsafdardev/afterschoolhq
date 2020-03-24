@@ -1596,9 +1596,30 @@ property: TransactionId, int?, Int, Required
 property: Uid, Guid, UniqueIdentifier
 property: RequestFulfilled, bool, Bit
 property: AccountId, int?, Int, Required
+property: RefundRequestStatusId, RefundRequestStatus, Int, Required
+property: RequestReason, string, NVarChar "400"
+property: DeniedReason, string, NVarChar "400"
+property: ApprovedDate, DateTime?, DateTime
+property: DeniedDate, DateTime?, DateTime
+property: RequestedRefundTypeId, RefundType, Int, Required
+property: ApprovedRefundTypeId, RefundType, Int, Required
 loadmethod: Uid
 loadmethod: TransactionId, List<>
 loadmethod: AccountId, List<>
+loadmethod: AccountId|RefundRequestStatusId, List<>
+loadmethod: RefundRequestStatusId, List<>
+[end]
+
+[begin]
+type: Enum
+name: RefundType
+values: NotSet, Refund, Credit
+[end]
+
+[begin]
+type: Enum
+name: RefundRequestStatus
+values: NotSet, RequestedByParent, RequestedByProvider, ApprovedByProvider, ApprovedByAfterSchoolHQ, Completed, DeniedByProvider, DeniedByAfterSchoolHQ, ApprovedManualRefund
 [end]
 
 [begin]

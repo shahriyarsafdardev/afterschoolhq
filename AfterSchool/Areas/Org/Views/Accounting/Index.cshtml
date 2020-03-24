@@ -155,7 +155,7 @@
                             <th class="text-center">Your Amount</th>
                             <th class="text-center">Status</th>
                             <th class="text-center">Type</th>
-                            <th></th>
+                            <th>Refunds</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -248,25 +248,32 @@
                                             var hasUnfulfilledRequest = transaction.HasUnfulfilledRefundRequests();
 
                                             <button onclick="requestRefund('@transaction.Uid', @transaction.GetRefundableAmount().ToString("#.00"))"
-                                                    class="md-trigger btn btn-default"
+                                                    class="md-trigger btn btn-sm btn-default"
                                                     data-modal="modal-request-refund"
                                                     @(hasUnfulfilledRequest ? "disabled=\"disabled\"" : "")>
 
                                                 @if (hasUnfulfilledRequest)
                                                 {
-                                                    @:Refund Requested
+                                                    if (transaction.HasManuallyApprovedRefundRequest())
+                                                    {
+                                                        @:Approved
+                                                    }
+                                                    else
+                                                    {
+                                                        @:Requested
+                                                    }
                                                 }
                                                 else
                                                 {
-                                                    @:Request Refund <i class="s7-back-2"></i>
+                                                    @:Request
                                                 }
 
                                             </button>
 
                                             <button onclick="manualRefund('@transaction.Uid')"
-                                                    class="md-trigger btn btn-default"
+                                                    class="md-trigger btn btn-sm btn-default"
                                                     data-modal="modal-manual-refund">
-                                                Manual Refund
+                                                Manual
                                             </button>
                                         }
                                     </td>
@@ -311,12 +318,17 @@
                 <input type="number" id="refund-request-amount" class="form-control" placeholder="Refund Amount" required="required" max="" min="1" step=".01" />
                 <p class="text-muted text-small" id="refund-request-notes">Please enter an amount between $1 and $<span class="refund-request-max-amount"></span></p>
             </div>
+            <div class="form-group">
+                <label for="request-reason">Reason</label>
+                <input type="text" id="refund-reason" maxlength="100" class="form-control" />
+                <p class="text-muted text-small" id="refund-request-reason-notes">Please enter a reason</p>
+            </div>
             <input type="hidden" id="refund-request-transaction-uid" value="" />
             <input type="hidden" id="refund-request-max-amount" value="" />
         </div>
         <div class="modal-footer">
             <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-            <button type="button" id="btn-request-refund" data-dismiss="modal" onclick="processRefundRequest()" class="btn btn-primary md-close">Request Refund &raquo;</button>
+            <button type="button" id="btn-request-refund" onclick="processRefundRequest()" class="btn btn-primary">Request Refund &raquo;</button>
         </div>
     </div>
 </div>
@@ -337,7 +349,7 @@
         </div>
         <div class="modal-footer">
             <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-            <button type="button" id="btn-manual-refund" data-dismiss="modal" onclick="processManualRefund()" class="btn btn-primary md-close">Add Manual Refund &raquo;</button>
+            <button type="button" id="btn-manual-refund" onclick="processManualRefund()" class="btn btn-primary">Add Manual Refund &raquo;</button>
         </div>
     </div>
 </div>
@@ -350,7 +362,7 @@
 
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         $('#refund-request-amount').blur(function () {
-            canProcessAmount();
+            canProcessRequest();
         });
     });
 
@@ -368,7 +380,7 @@
             function (data) {
                 if (data && data.status == 'ok') {
                     Notifications.showMessage('Success', 'Your refund for <strong>$' + amount + '</strong> has been saved', true);
-                    location.reload();
+                    setTimeout(function () { location.reload() }, 500);
                 } else {
                     Notifications.showErrors(data.messages);
                 }
@@ -383,11 +395,9 @@
         $('.refund-request-max-amount').html(maxAmount);
         $('#refund-request-amount').attr('max', maxAmount);
         $('#refund-request-amount').val(maxAmount);
-
-        canProcessAmount();
     }
 
-    function canProcessAmount() {
+    function canProcessRequest() {
         const amount = $('#refund-request-amount').val();
         const maxAmount = $('#refund-request-max-amount').val();
 
@@ -397,8 +407,15 @@
             return false;
         }
 
+        if ($('#refund-reason').val().trim().length == 0) {
+            $('#btn-request-refund').prop('disabled', true);
+            $('#refund-request-reason-notes').addClass('text-danger');
+            return false;
+        }
+
         $('#btn-request-refund').prop('disabled', false);
         $('#refund-request-notes').removeClass('text-danger');
+        $('#refund-request-reason-notes').removeClass('text-danger');
         return true;
     }
 
@@ -406,14 +423,16 @@
 
         const uid = $('#refund-request-transaction-uid').val();
         const amount = $('#refund-request-amount').val();
+        const reason = $('#refund-reason').val();
 
-        if (canProcessAmount()) {
-            $.get(
-                '@Url.Action("RequestRefund", "accounting")?uid=' + uid + '&amount=' + amount,
+        if (canProcessRequest()) {
+            $.post(
+                '@Url.Action("requestrefund", "accounting")',
+                'uid=' + uid + '&amount=' + amount + '&reason=' + encodeURIComponent(reason),
                 function (data) {
                     if (data && data.status == 'ok') {
                         Notifications.showMessage('Success', 'Your refund request for <strong>$' + amount + '</strong> has been submitted and will be processed shortly', true);
-                        location.reload();
+                        setTimeout(function () { location.reload() }, 500);
                     } else {
                         Notifications.showErrors(data.messages);
                     }
@@ -473,7 +492,7 @@
             var uid = $("#modal-refund").data("uid");
 
             $.post(
-                "@Url.Action("refund", "Accounting")",
+                "@Url.Action("refund", "accounting")",
                 { uid: uid, amount: amount },
                 function (data) {
                     if (data.status === "ok") {

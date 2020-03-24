@@ -32,6 +32,22 @@ namespace AfterSchoolLibrary.Models
 		/// Required.
 		/// </summary>
 		public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
+		/// <summary>
+		/// Required.
+		/// </summary>
+		public RefundRequestStatus RefundRequestStatusId { get { return (RefundRequestStatus)MDV["RefundRequestStatusId"].Value; } set { MDV["RefundRequestStatusId"].Value = value; } }
+		public string RequestReason { get { return (string)MDV["RequestReason"].Value; } set { MDV["RequestReason"].Value = value; } }
+		public string DeniedReason { get { return (string)MDV["DeniedReason"].Value; } set { MDV["DeniedReason"].Value = value; } }
+		public DateTime? ApprovedDate { get { return (DateTime?)MDV["ApprovedDate"].Value; } set { MDV["ApprovedDate"].Value = value; } }
+		public DateTime? DeniedDate { get { return (DateTime?)MDV["DeniedDate"].Value; } set { MDV["DeniedDate"].Value = value; } }
+		/// <summary>
+		/// Required.
+		/// </summary>
+		public RefundType RequestedRefundTypeId { get { return (RefundType)MDV["RequestedRefundTypeId"].Value; } set { MDV["RequestedRefundTypeId"].Value = value; } }
+		/// <summary>
+		/// Required.
+		/// </summary>
+		public RefundType ApprovedRefundTypeId { get { return (RefundType)MDV["ApprovedRefundTypeId"].Value; } set { MDV["ApprovedRefundTypeId"].Value = value; } }
 		
 
         public RefundRequest()
@@ -40,6 +56,9 @@ namespace AfterSchoolLibrary.Models
             this.LoadObjectValues(ObjectMap);
 			this.Uid = Guid.NewGuid();
 			this.RequestFulfilled = false;
+			this.RefundRequestStatusId = RefundRequestStatus.NotSet;
+			this.RequestedRefundTypeId = RefundType.NotSet;
+			this.ApprovedRefundTypeId = RefundType.NotSet;
 			
         }
 
@@ -55,6 +74,13 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
 				_dp.Add(className, "RequestFulfilled", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "RefundRequestStatusId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "RequestReason", System.Data.SqlDbType.NVarChar , "400");
+				_dp.Add(className, "DeniedReason", System.Data.SqlDbType.NVarChar , "400");
+				_dp.Add(className, "ApprovedDate", System.Data.SqlDbType.DateTime);
+				_dp.Add(className, "DeniedDate", System.Data.SqlDbType.DateTime);
+				_dp.Add(className, "RequestedRefundTypeId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "ApprovedRefundTypeId", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
@@ -112,6 +138,12 @@ namespace AfterSchoolLibrary.Models
 				msgs.Add("TransactionId is required on RefundRequest object", MessageType.Error);
 			if (this.AccountId.IsEmpty())
 				msgs.Add("AccountId is required on RefundRequest object", MessageType.Error);
+			if (this.RefundRequestStatusId.IsEmpty())
+				msgs.Add("RefundRequestStatusId is required on RefundRequest object", MessageType.Error);
+			if (this.RequestedRefundTypeId.IsEmpty())
+				msgs.Add("RequestedRefundTypeId is required on RefundRequest object", MessageType.Error);
+			if (this.ApprovedRefundTypeId.IsEmpty())
+				msgs.Add("ApprovedRefundTypeId is required on RefundRequest object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(RefundRequest).Name));
@@ -154,6 +186,34 @@ namespace AfterSchoolLibrary.Models
 			dps.Add(ObjectMap["AccountId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["RefundRequestStatusId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["RequestReason"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["DeniedReason"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ApprovedDate"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["DeniedDate"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["RequestedRefundTypeId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ApprovedRefundTypeId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -188,11 +248,92 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
+		public static List<RefundRequest> LoadByAccountIdByRefundRequestStatusId(int AccountId, RefundRequestStatus RefundRequestStatusId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+			dq.Criterias.Add(ObjectMap["RefundRequestStatusId"], RefundRequestStatusId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<RefundRequest> LoadByRefundRequestStatusId(RefundRequestStatus RefundRequestStatusId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["RefundRequestStatusId"], RefundRequestStatusId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
 		
 
         #endregion
 
 		#region "UserDefined"
+
+		public bool IsCompleted 
+		{
+			get
+			{
+				return this.RefundRequestStatusId == RefundRequestStatus.Completed;
+			}
+		}
+
+		public bool IsApprovedByProvider
+		{
+			get
+			{
+				return this.RefundRequestStatusId == RefundRequestStatus.ApprovedByProvider;
+			}
+		}
+
+		public bool IsApprovedByAfterSchoolHQ
+		{
+			get
+			{
+				return this.RefundRequestStatusId == RefundRequestStatus.ApprovedByAfterSchoolHQ;
+			}
+		}
+
+		public bool IsApproved
+		{
+			get
+			{
+				return IsApprovedByProvider && IsApprovedByAfterSchoolHQ;
+			}
+		}
+
+		public bool IsDenied
+		{
+			get
+			{
+				return this.RefundRequestStatusId.In(new RefundRequestStatus[] { RefundRequestStatus.DeniedByAfterSchoolHQ, RefundRequestStatus.DeniedByProvider });
+			}
+		}
+
+		public bool IsReadyForAHQApproval
+		{
+			get
+			{
+				return this.RefundRequestStatusId.In(new RefundRequestStatus[] { RefundRequestStatus.ApprovedByProvider, RefundRequestStatus.RequestedByProvider });
+			}
+		}
+
+		public static List<RefundRequestStatus> InProcessStatuses
+		{
+			get
+			{
+				return Enum.GetValues(typeof(RefundRequestStatus)).Cast<RefundRequestStatus>().Where(x => x.NotIn(ClosedStatuses)).ToList();
+			}
+		}
+
+		public static List<RefundRequestStatus> ClosedStatuses
+		{
+			get
+			{
+				return (new RefundRequestStatus[] { RefundRequestStatus.NotSet, RefundRequestStatus.DeniedByAfterSchoolHQ, RefundRequestStatus.DeniedByProvider, RefundRequestStatus.Completed }).ToList();
+			}
+		}
 
 		public static int GetCountByTransactionId(int TransactionId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
@@ -202,12 +343,12 @@ namespace AfterSchoolLibrary.Models
 			return dq.GetCount(msgs);
 		}
 
-		public static int GetCountByTransactionIdByRequestFulfilled(int TransactionId, bool RequestFulfilled, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static int GetCountByTransactionId(int TransactionId, List<RefundRequestStatus> refundRequestStatuses, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["TransactionId"], TransactionId);
-			dq.Criterias.Add(ObjectMap["RequestFulfilled"], RequestFulfilled);
+			dq.Criterias.Add(ObjectMap["RefundRequestStatusId"], refundRequestStatuses.Select(x=>(int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
 			return dq.GetCount(msgs);
 		}
 
@@ -244,5 +385,5 @@ namespace AfterSchoolLibrary.Models
 		}
 
 		#endregion
-	}
+    }
 }
