@@ -254,7 +254,14 @@
 
                                                 @if (hasUnfulfilledRequest)
                                                 {
-                                                    @:Requested
+                                                    if (transaction.HasManuallyApprovedRefundRequest())
+                                                    {
+                                                        @:Approved
+                                                    }
+                                                    else
+                                                    {
+                                                        @:Requested
+                                                    }
                                                 }
                                                 else
                                                 {

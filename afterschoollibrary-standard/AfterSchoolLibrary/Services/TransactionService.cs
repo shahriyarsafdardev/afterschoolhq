@@ -200,9 +200,18 @@ namespace AfterSchoolLibrary.Services
         public static bool HasUnfulfilledRefundRequests(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return RefundRequest.GetCountByTransactionId(
-                        transaction.ID.Value, 
+                        transaction.ID.Value,
                         RefundRequest.InProcessStatuses,
-                        msgs, 
+                        msgs,
+                        dc) > 0;
+        }
+
+        public static bool HasManuallyApprovedRefundRequest(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RefundRequest.GetCountByTransactionId(
+                        transaction.ID.Value,
+                        RefundRequestStatus.ApprovedManualRefund.AsList(),
+                        msgs,
                         dc) > 0;
         }
 

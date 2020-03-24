@@ -7,5 +7,6 @@ public enum RefundRequestStatus
 	ApprovedByAfterSchoolHQ,
 	Completed,
 	DeniedByProvider,
-	DeniedByAfterSchoolHQ
+	DeniedByAfterSchoolHQ,
+	ApprovedManualRefund
 }

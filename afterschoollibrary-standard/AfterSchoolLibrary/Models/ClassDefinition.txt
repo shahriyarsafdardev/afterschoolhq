@@ -1619,7 +1619,7 @@ values: NotSet, Refund, Credit
 [begin]
 type: Enum
 name: RefundRequestStatus
-values: NotSet, RequestedByParent, RequestedByProvider, ApprovedByProvider, ApprovedByAfterSchoolHQ, Completed, DeniedByProvider, DeniedByAfterSchoolHQ
+values: NotSet, RequestedByParent, RequestedByProvider, ApprovedByProvider, ApprovedByAfterSchoolHQ, Completed, DeniedByProvider, DeniedByAfterSchoolHQ, ApprovedManualRefund
 [end]
 
 [begin]

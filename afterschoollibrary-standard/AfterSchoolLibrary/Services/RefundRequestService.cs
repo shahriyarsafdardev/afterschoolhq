@@ -102,7 +102,7 @@ namespace AfterSchoolLibrary.Services
             request.LastModifiedBy = loggedInuser.ID;
             request.LastModifiedDate = DateTime.UtcNow;
 
-            if (status == RefundRequestStatus.ApprovedByAfterSchoolHQ)
+            if (status == RefundRequestStatus.ApprovedByAfterSchoolHQ || status == RefundRequestStatus.ApprovedManualRefund)
                 request.ApprovedDate = DateTime.UtcNow;
             else if (status == RefundRequestStatus.DeniedByAfterSchoolHQ || status == RefundRequestStatus.DeniedByProvider)
             {

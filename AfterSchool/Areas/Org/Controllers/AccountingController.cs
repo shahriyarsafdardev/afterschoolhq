@@ -324,6 +324,26 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
+        public ActionResult ApproveManualRefundRequest(string uid)
+        {
+            var msgs = new SystemMessages();
+
+            if (uid.IsGuid())
+            {
+                var request = RefundRequest.LoadByUid(uid.ToGuid(), msgs);
+
+                if (request.IsNotEmpty())
+                    request.UpdateStatus(RefundRequestStatus.ApprovedManualRefund, SessionVariables.CurrentUser, msgs);
+
+                if (msgs.HasNoErrors())
+                    return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+
+            }
+
+            return new JsonResult { Data = new { status = "error", messages = msgs }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+        }
+
+        [HttpGet]
         public ActionResult DenyRefundRequest(string uid)
         {
             var msgs = new SystemMessages();
