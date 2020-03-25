@@ -72,6 +72,7 @@
                             <th class="text-center">Transaction Amount</th>
                             <th class="text-center">Refund Requested</th>
                             <th class="text-center">Request Status</th>
+                            <th class="text-center">Available $</th>
                             <th class="text-center"></th>
                         </tr>
                     </thead>
@@ -81,6 +82,7 @@
                             foreach (var request in Model)
                             {
                                 var transaction = request.GetTransaction();
+                                var billerAccount = transaction.GetBillerAccount();
 
                                 <tr id="@request.Uid">
                                     <td class="text-center">
@@ -103,6 +105,9 @@
                                     </td>
                                     <td class="text-center">
                                         @request.RefundRequestStatusId.ToString().SplitByUpperCase()
+                                    </td>
+                                    <td class="text-center">
+                                        @billerAccount.GetMaxAmountAvailableForPayout().ToCurrency()
                                     </td>
                                     <td>
                                         <div class="btn-group">
