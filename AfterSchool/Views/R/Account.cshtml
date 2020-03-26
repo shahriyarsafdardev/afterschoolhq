@@ -32,7 +32,7 @@
 @{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", new RegistrationHeaderViewModel(Model, (AccountProfile)ViewBag.AccountProfile)); }
 
 <div>
-    <div class="col-md-8 col-md-offset-2 participation-object participation-object-detail">
+    <div class="col-lg-8 col-lg-offset-2 participation-object participation-object-detail">
 
         <div class="panel panel-alt6">
             <div class="panel-heading">
@@ -51,88 +51,9 @@
             </div>
             <div class="panel-body">
 
-                <div class="col-md-8">
-
-                    <div class="activity-detail-block">
-                        <h3>About</h3>
-                        @Html.Raw(accountProfile.About)
-                    </div>
-
-                </div>
-
-                <div class="col-md-4">
-
-                    @if (awards.Any())
-                    {
-                        <div class="activity-detail-block">
-                            <h3>Awards</h3>
-                            <ul>
-                                @foreach (var award in awards.Where(x => x.Value.IsNotEmpty()))
-                                {
-                                    <li>@award.Value</li>
-                                }
-                            </ul>
-                        </div>
-                    }
-
-                    @if (certifications.Any())
-                    {
-                        <div class="activity-detail-block">
-                            <h3>Certifications</h3>
-                            <ul>
-                                @foreach (var certification in certifications.Where(x => x.Value.IsNotEmpty()))
-                                {
-                                    <li>@certification.Value</li>
-                                }
-                            </ul>
-                        </div>
-                    }
-
-                    <div class="activity-detail-block">
-                        <h3>Contact</h3>
-                        <p>
-                            @if (Model.Phone.IsNotBlank())
-                            {
-                                <span>@Model.Phone</span><br />
-                            }
-                            <a href="mailto:@Model.Email)">Send Email</a><br />
-
-                            @if (accountProfile.Website.IsNotEmpty())
-                            {
-                                <a href="@(accountProfile.Website.StartsWith("http") ? "" : "https://")@accountProfile.Website" target="_blank">Visit Website</a><br />
-                            }
-                        </p>
-
-                        <p class="padding-v-20">
-                            @if (accountProfile.Twitter.IsNotEmpty())
-                            {
-                                <a href="https://twitter.com/@(accountProfile.Twitter.TrimStart('@'))" target="_blank" class="icon-large margin-r-20"><i class="ion-social-twitter-outline"></i></a>
-                            }
-                            @if (accountProfile.Instagram.IsNotEmpty())
-                            {
-                                <a href="https://instagram.com/@(accountProfile.Instagram.TrimStart('@'))" target="_blank" class="icon-large margin-r-20"><i class="ion-social-instagram-outline"></i></a>
-                            }
-                            @if (accountProfile.Facebook.IsNotEmpty())
-                            {
-                                <a href="@accountProfile.Facebook" target="_blank" class="icon-large margin-r-20"><i class="ion-social-facebook-outline"></i></a>
-                            }
-                            @if (accountProfile.LinkedIn.IsNotEmpty())
-                            {
-                                <a href="@accountProfile.LinkedIn" target="_blank" class="icon-large margin-r-20"><i class="ion-social-linkedin-outline"></i></a>
-                            }
-                        </p>
-                    </div>
-                </div>
-
-                <div class="margin-b-20">
-                    &nbsp;
-                </div>
-
                 @if (participationObjects.Any())
                 {
                     <div>
-                        <hr />
-
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="activity-detail-block">
@@ -167,8 +88,7 @@
                 @if (photos.Any())
                 {
                     <div>
-                        <hr />
-                        <div class="row">
+                        <div class="row hide">
                             <div class="col-md-12">
                                 <div class="activity-detail-block">
                                     <h3 class="text-center">Photos</h3>
@@ -188,6 +108,87 @@
                         </div>
                     </div>
                 }
+                
+                <div class="row">
+
+                    <div class="col-md-8">
+
+                        <div class="activity-detail-block">
+                            <h3>About</h3>
+                            @Html.Raw(accountProfile.About)
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+                        @if (awards.Any())
+                        {
+                            <div class="activity-detail-block">
+                                <h3>Awards</h3>
+                                <ul>
+                                    @foreach (var award in awards.Where(x => x.Value.IsNotEmpty()))
+                                    {
+                                        <li>@award.Value</li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+
+                        @if (certifications.Any())
+                        {
+                            <div class="activity-detail-block">
+                                <h3>Certifications</h3>
+                                <ul>
+                                    @foreach (var certification in certifications.Where(x => x.Value.IsNotEmpty()))
+                                    {
+                                        <li>@certification.Value</li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+
+                        <div class="activity-detail-block">
+                            <h3>Contact</h3>
+                            <p>
+                                @if (Model.Phone.IsNotBlank())
+                                {
+                                    <span>@Model.Phone</span><br />
+                                }
+                                <a href="mailto:@Model.Email)">Send Email</a><br />
+
+                                @if (accountProfile.Website.IsNotEmpty())
+                                {
+                                    <a href="@(accountProfile.Website.StartsWith("http") ? "" : "https://")@accountProfile.Website" target="_blank">Visit Website</a><br />
+                                }
+                            </p>
+
+                            <p class="padding-v-20">
+                                @if (accountProfile.Twitter.IsNotEmpty())
+                                {
+                                    <a href="https://twitter.com/@(accountProfile.Twitter.TrimStart('@'))" target="_blank" class="icon-large margin-r-20"><i class="ion-social-twitter-outline"></i></a>
+                                }
+                                @if (accountProfile.Instagram.IsNotEmpty())
+                                {
+                                    <a href="https://instagram.com/@(accountProfile.Instagram.TrimStart('@'))" target="_blank" class="icon-large margin-r-20"><i class="ion-social-instagram-outline"></i></a>
+                                }
+                                @if (accountProfile.Facebook.IsNotEmpty())
+                                {
+                                    <a href="@accountProfile.Facebook" target="_blank" class="icon-large margin-r-20"><i class="ion-social-facebook-outline"></i></a>
+                                }
+                                @if (accountProfile.LinkedIn.IsNotEmpty())
+                                {
+                                    <a href="@accountProfile.LinkedIn" target="_blank" class="icon-large margin-r-20"><i class="ion-social-linkedin-outline"></i></a>
+                                }
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="margin-b-20">
+                        &nbsp;
+                    </div>
+
+                </div>
 
                 @if (locations.Any())
                 {
@@ -212,11 +213,11 @@
                         </div>
                         <div style="position: relative; margin-left: -20px; margin-right: -20px">
                             <iframe width="100%"
-                                        height="300"
-                                        frameborder="0"
-                                        style="border:0"
-                                        src="https://www.google.com/maps/embed/v1/place?q=@Url.Encode(location.GetAddress())&key=AIzaSyAdjn8QBBStTz9TDAjZOyijAato7uzvjjk"
-                                        allowfullscreen>
+                                    height="300"
+                                    frameborder="0"
+                                    style="border:0"
+                                    src="https://www.google.com/maps/embed/v1/place?q=@Url.Encode(location.GetAddress())&key=AIzaSyAdjn8QBBStTz9TDAjZOyijAato7uzvjjk"
+                                    allowfullscreen>
                             </iframe>
                         </div>
 
