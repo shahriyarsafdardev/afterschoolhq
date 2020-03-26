@@ -377,6 +377,7 @@ property: Twitter, string, NVarChar "100"
 property: Facebook, string, NVarChar "100"
 property: Instagram, string, NVarChar "100"
 property: LinkedIn, string, NVarChar "100"
+property: GenderRestriction, GenderRestrictionType, Int
 loadmethod: AccountId
 [end]
 
@@ -1718,7 +1719,7 @@ values: None, MaleOnly, FemaleOnly
 [begin]
 type: Enum
 name: AccountPropertyType
-values: NotSet, LandingPageText, RegistrationThankYouEmail, ApplicationThankYouEmail, NoActivitiesText, FacebookAdPixel, Award, Certification, Photo, ServicesOffered, OfferingTiming
+values: NotSet, LandingPageText, RegistrationThankYouEmail, ApplicationThankYouEmail, NoActivitiesText, FacebookAdPixel, Award, Certification, Photo, ServiceOffered, TimeOffered, PricingOption, Classifications, SoftSkills, AcademicSubjects, TeachingMethods
 [end]
 
 [begin]

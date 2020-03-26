@@ -8,5 +8,12 @@ public enum AccountPropertyType
 	FacebookAdPixel,
 	Award,
 	Certification,
-	Photo
+	Photo,
+	ServiceOffered,
+	TimeOffered,
+	PricingOption,
+	Classifications,
+	SoftSkills,
+	AcademicSubjects,
+	TeachingMethods
 }

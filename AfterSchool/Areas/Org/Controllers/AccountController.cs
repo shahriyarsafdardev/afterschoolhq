@@ -885,11 +885,17 @@ namespace AfterSchool.Areas.Org.Controllers
         private AccountProfile StyleViewBag(SystemMessages msgs)
         {
             var profile = SessionVariables.CurrentAccount.GetOrCreateAccountProfile(SessionVariables.LoggedInUser, msgs);
-            ViewBag.Messages = msgs;
 
-            var awards = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.Award);
-            var certifications = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.Certification);
-            var photos = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.Photo);
+            var awards = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.Award, msgs);
+            var certifications = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.Certification, msgs);
+            var photos = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.Photo, msgs);
+            var classifications = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.Classifications);
+            var softSkills = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.SoftSkills);
+            var academicSubjects = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.AcademicSubjects);
+            var teachingMethods = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.TeachingMethods);
+            var servicesOffered = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.ServiceOffered);
+            var timesOffered = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.TimeOffered);
+            var pricingOptions = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.PricingOption);
 
             while (awards.Count < 5)
                 awards.Add(new AccountProperty());
@@ -910,10 +916,18 @@ namespace AfterSchool.Areas.Org.Controllers
 
             photos.ForEach(photo => photo.Value = ah.GetFileLink(photo.Value, true, null, true));
 
+            ViewBag.Messages = msgs;
             ViewBag.Grades = GradeLevel.Load();
             ViewBag.Awards = awards;
             ViewBag.Certifications = certifications;
             ViewBag.Photos = photos;
+            ViewBag.ServicesOffered = servicesOffered;
+            ViewBag.TimesOffered = timesOffered;
+            ViewBag.PricingOptions = pricingOptions;
+            ViewBag.Classifications = classifications;
+            ViewBag.SoftSkills = softSkills;
+            ViewBag.AcademicSubjects = academicSubjects;
+            ViewBag.TeachingMethods = teachingMethods;
 
             return profile;
         }
@@ -927,7 +941,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult Style(string id, string logo, string headerimage, string about, string headline, string primaryColor, string website, string mingrade, string maxgrade, string twitter, string facebook, string instagram, string linkedin)
+        public ActionResult Style(string id, string logo, string headerimage, string about, string headline, string primaryColor, string website, string mingrade, string maxgrade, string twitter, string facebook, string instagram, string linkedin, string genderrestriction, string classifications, string softskills, string academicsubjects, string teachingmethods)
         {
             var msgs = new SystemMessages();
             var profile = SessionVariables.CurrentAccount.GetAccountProfile(msgs);
@@ -1010,10 +1024,18 @@ namespace AfterSchool.Areas.Org.Controllers
                     facebook,
                     instagram,
                     linkedin,
+                    genderrestriction,
                     Request.Params.Filter("award-id-"),
                     Request.Params.Filter("award-new-"),
                     Request.Params.Filter("certification-id-"),
                     Request.Params.Filter("certification-new-"),
+                    Request.Params.Filter("services-offered-"),
+                    Request.Params.Filter("times-offered-"),
+                    Request.Params.Filter("pricing-options-"),
+                    classifications,
+                    softskills,
+                    academicsubjects,
+                    teachingmethods,
                     SessionVariables.CurrentUser,
                     msgs);
             }

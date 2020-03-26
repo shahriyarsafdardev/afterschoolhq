@@ -31,12 +31,14 @@ namespace AfterSchoolLibrary.Models
 		public string Facebook { get { return (string)MDV["Facebook"].Value; } set { MDV["Facebook"].Value = value; } }
 		public string Instagram { get { return (string)MDV["Instagram"].Value; } set { MDV["Instagram"].Value = value; } }
 		public string LinkedIn { get { return (string)MDV["LinkedIn"].Value; } set { MDV["LinkedIn"].Value = value; } }
+		public GenderRestrictionType GenderRestriction { get { return (GenderRestrictionType)MDV["GenderRestriction"].Value; } set { MDV["GenderRestriction"].Value = value; } }
 		
 
         public AccountProfile()
         {
             this.Config(ObjectMap, DatabaseQuery, typeof(AccountProfile).Name, "ID");
             this.LoadObjectValues(ObjectMap);
+			this.GenderRestriction = GenderRestrictionType.None;
 			
         }
 
@@ -60,6 +62,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "Facebook", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "Instagram", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "LinkedIn", System.Data.SqlDbType.NVarChar , "100");
+				_dp.Add(className, "GenderRestriction", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
@@ -183,6 +186,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["LinkedIn"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["GenderRestriction"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

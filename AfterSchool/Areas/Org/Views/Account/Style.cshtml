@@ -8,6 +8,14 @@
     var logoUrl = (string)ViewBag.LogoUrl;
     var headerImageUrl = (string)ViewBag.HeaderImageUrl;
     var grades = (List<GradeLevel>)ViewBag.Grades;
+
+    var classifications = (List<AccountProperty>)ViewBag.Classifications;
+    var softSkills = (List<AccountProperty>)ViewBag.SoftSkills;
+    var academicSubjects = (List<AccountProperty>)ViewBag.AcademicSubjects;
+    var teachingMethods = (List<AccountProperty>)ViewBag.TeachingMethods;
+    var servicesOffered = (List<AccountProperty>)ViewBag.ServicesOffered;
+    var timesOffered = (List<AccountProperty>)ViewBag.TimesOffered;
+    var pricingOptions = (List<AccountProperty>)ViewBag.PricingOptions;
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -286,21 +294,24 @@
                                         <input type="radio"
                                                name="genderrestrictions"
                                                id="genderrestrictions-@((int)GenderRestrictionType.None)"
-                                               value="@((int)GenderRestrictionType.None)" />
+                                               value="@((int)GenderRestrictionType.None)"
+                                               @(Model.GenderRestriction == GenderRestrictionType.None ? "checked=\"checked\"" : "") />
                                         <label for="genderrestrictions-@((int)GenderRestrictionType.None)">All Genders</label>
                                     </div>
                                     <div class="am-radio">
                                         <input type="radio"
                                                name="genderrestrictions"
                                                id="genderrestrictions-@((int)GenderRestrictionType.MaleOnly)"
-                                               value="@((int)GenderRestrictionType.None)" />
+                                               value="@((int)GenderRestrictionType.None)"
+                                               @(Model.GenderRestriction == GenderRestrictionType.MaleOnly ? "checked=\"checked\"" : "") />
                                         <label for="genderrestrictions-@((int)GenderRestrictionType.MaleOnly)">Boys</label>
                                     </div>
                                     <div class="am-radio">
                                         <input type="radio"
                                                name="genderrestrictions"
                                                id="genderrestrictions-@((int)GenderRestrictionType.FemaleOnly)"
-                                               value="@((int)GenderRestrictionType.None)" />
+                                               value="@((int)GenderRestrictionType.None)"
+                                               @(Model.GenderRestriction == GenderRestrictionType.FemaleOnly ? "checked=\"checked\"" : "") />
                                         <label for="genderrestrictions-@((int)GenderRestrictionType.FemaleOnly)">Girls</label>
                                     </div>
                                 </div>
@@ -315,7 +326,8 @@
                                             <input type="checkbox"
                                                    name="services-offered-@item.ToLower()"
                                                    id="services-offered-@item.ToLower()"
-                                                   value="1" />
+                                                   value="@item" 
+                                                   @(servicesOffered.Select(x=>x.Value.ToLower()).Contains(item.ToLower()) ? "checked=\"checked\"" : "") />
                                             <label for="services-offered-@item.ToLower()">@item</label>
                                         </div>
                                     }
@@ -326,14 +338,15 @@
                             <div class="form-group">
                                 <label class="col-md-3 control-label">My program offers</label>
                                 <div class="col-md-9">
-                                    @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.TimingOfferings)
+                                    @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.OfferingTimes)
                                     {
                                         <div class="am-checkbox">
                                             <input type="checkbox"
-                                                   name="programs-offered-@item.ToLower()"
-                                                   id="programs-offered-@item.ToLower()"
-                                                   value="1" />
-                                            <label for="programs-offered-@item.ToLower()">@item</label>
+                                                   name="times-offered-@item.ToLower()"
+                                                   id="times-offered-@item.ToLower()"
+                                                   value="@item"
+                                                   @(timesOffered.Select(x => x.Value.ToLower()).Contains(item.ToLower()) ? "checked=\"checked\"" : "") />
+                                            <label for="times-offered-@item.ToLower()">@item</label>
                                         </div>
                                     }
 
@@ -343,13 +356,14 @@
                             <div class="form-group">
                                 <label class="col-md-3 control-label">Pricing options</label>
                                 <div class="col-md-9">
-                                    @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.PricingDetails)
+                                    @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.PricingOptions)
                                     {
                                         <div class="am-checkbox">
                                             <input type="checkbox"
                                                    name="pricing-options-@item.ToLower()"
                                                    id="pricing-options-@item.ToLower()"
-                                                   value="1" />
+                                                   value="@item"
+                                                   @(pricingOptions.Select(x => x.Value.ToLower()).Contains(item.ToLower()) ? "checked=\"checked\"" : "") />
                                             <label for="pricing-options-@item.ToLower()">@item</label>
                                         </div>
                                     }
@@ -358,11 +372,11 @@
                             </div>
 
                             @SubmitButtons()
-
+                             
                         </div>
                     </div>
 
-                    <!-- Additional Details -->
+                    <!-- Classifications -->
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             Classifications
@@ -371,7 +385,7 @@
                             <div class="form-group">
                                 <label class="col-md-3 control-label">Program Classifications (up to 3)</label>
                                 <div class="col-md-9">
-                                    <input type="text" name="classifications" id="classifications" class="form-control" data-role="tagsinput" />
+                                    <input type="text" name="classifications" id="classifications" class="form-control" data-role="tagsinput" value="@classifications.Select(x => x.Value).ToStringList(",")" />
                                     <p class="text-small text-muted">ex: Karate, Sports, Arts, Pottery, Dance, Football</p>
                                 </div>
                             </div>
@@ -379,7 +393,7 @@
                             <div class="form-group">
                                 <label class="col-md-3 control-label">Soft Skills (up to 10)</label>
                                 <div class="col-md-9">
-                                    <input type="text" name="softskills" id="softskills" class="form-control" data-role="tagsinput" />
+                                    <input type="text" name="softskills" id="softskills" class="form-control" data-role="tagsinput" value="@softSkills.Select(x => x.Value).ToStringList(",")" />
                                     <p class="text-small text-muted">ex: Leadership, Teamwork, Communication</p>
                                 </div>
                             </div>
@@ -387,7 +401,7 @@
                             <div class="form-group">
                                 <label class="col-md-3 control-label">Academic Subjects Taughts (up to 5)</label>
                                 <div class="col-md-9">
-                                    <input type="text" name="academicsubjects" id="academicsubjects" class="form-control" data-role="tagsinput" />
+                                    <input type="text" name="academicsubjects" id="academicsubjects" class="form-control" data-role="tagsinput" value="@academicSubjects.Select(x => x.Value).ToStringList(",")" />
                                     <p class="text-small text-muted">ex: Math, Science, Language Arts, Physical Education</p>
                                 </div>
                             </div>
@@ -395,7 +409,7 @@
                             <div class="form-group">
                                 <label class="col-md-3 control-label">Teaching Methods (up to 3)</label>
                                 <div class="col-md-9">
-                                    <input type="text" name="teachingmethods" id="teachingmethods" class="form-control" data-role="tagsinput" />
+                                    <input type="text" name="teachingmethods" id="teachingmethods" class="form-control" data-role="tagsinput" value="@teachingMethods.Select(x => x.Value).ToStringList(",")" />
                                     <p class="text-small text-muted">ex: Project Based Learning, Team work, Games</p>
                                 </div>
                             </div>

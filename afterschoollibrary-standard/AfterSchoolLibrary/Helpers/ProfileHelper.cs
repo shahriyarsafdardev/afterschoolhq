@@ -14,7 +14,7 @@ namespace AfterSchoolLibrary.Helpers
             }
         }
         
-        public static string[] TimingOfferings
+        public static string[] OfferingTimes
         {
             get
             {
@@ -22,7 +22,7 @@ namespace AfterSchoolLibrary.Helpers
             }
         }
 
-        public static string[] PricingDetails
+        public static string[] PricingOptions
         {
             get
             {

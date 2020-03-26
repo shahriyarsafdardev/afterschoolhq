@@ -114,7 +114,7 @@ namespace AfterSchoolLibrary.Services
             return AccountProperty.LoadByAccountIdByAccountPropertyTypeId(profile.AccountId.Value, AccountPropertyType.Photo, msgs, dc);
         }
 
-        public static void UpdateProfile(this AccountProfile profile, string headline, string about, string primaryColor, string website, string mingrade, string maxgrade, string twitter, string facebook, string instagram, string linkedin, NameValueCollection savedAwards, NameValueCollection newAwards, NameValueCollection savedCertifications, NameValueCollection newCertifications, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void UpdateProfile(this AccountProfile profile, string headline, string about, string primaryColor, string website, string mingrade, string maxgrade, string twitter, string facebook, string instagram, string linkedin, string genderrestriction, NameValueCollection savedAwards, NameValueCollection newAwards, NameValueCollection savedCertifications, NameValueCollection newCertifications, NameValueCollection servicesOffered, NameValueCollection timesOffered, NameValueCollection pricingOptions, string classifications, string softskills, string academicsubjects, string teachingmethods, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
             (
@@ -150,6 +150,9 @@ namespace AfterSchoolLibrary.Services
                     if (instagram.IsNotEmpty())
                         profile.LinkedIn = linkedin;
 
+                    if (genderrestriction.IsInteger())
+                        profile.GenderRestriction = (GenderRestrictionType)genderrestriction.ToInteger();
+
                     amsgs.AddRange(profile.Save(adc));
 
                     UpdateProperties(savedAwards, loggedInUser, amsgs, adc);
@@ -157,12 +160,27 @@ namespace AfterSchoolLibrary.Services
 
                     profile.AddProperties(newAwards, AccountPropertyType.Award, loggedInUser, amsgs, adc);
                     profile.AddProperties(newCertifications, AccountPropertyType.Certification, loggedInUser, amsgs, adc);
+                    profile.AddProperties(servicesOffered, AccountPropertyType.ServiceOffered, loggedInUser, amsgs, adc);
+                    profile.AddProperties(timesOffered, AccountPropertyType.TimeOffered, loggedInUser, amsgs, adc);
+                    profile.AddProperties(pricingOptions, AccountPropertyType.PricingOption, loggedInUser, amsgs, adc);
+
+                    profile.AddProperties(classifications.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.Classifications, loggedInUser, msgs, dc);
+                    profile.AddProperties(softskills.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.SoftSkills, loggedInUser, msgs, dc);
+                    profile.AddProperties(academicsubjects.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.AcademicSubjects, loggedInUser, msgs, dc);
+                    profile.AddProperties(teachingmethods.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.TeachingMethods, loggedInUser, msgs, dc);
+
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                 onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
+        }
+
+        public static void AddProperties(this AccountProfile profile, IEnumerable<string> properties, AccountPropertyType propertyType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            foreach (var value in properties)
+                profile.AddProperty(value, propertyType, loggedInUser, msgs, dc);
         }
 
         public static void AddProperties(this AccountProfile profile, NameValueCollection properties, AccountPropertyType propertyType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
