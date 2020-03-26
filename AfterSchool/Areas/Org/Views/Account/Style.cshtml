@@ -19,8 +19,9 @@
     @{Html.RenderPartial("~/Views/Shared/_AccountDetailsHeader.cshtml", SessionVariables.CurrentAccount);}
 
 
-    @helper SubmitButtons(bool showDiscard = true) { 
-            
+    @helper SubmitButtons(bool showDiscard = true)
+    {
+
         <div class="form-group">
             <label class="col-sm-3 control-label"></label>
             <div class="col-sm-9">
@@ -41,15 +42,16 @@
     }
 
     <form method="post" action="@Url.Action("style", "account")" class="form-horizontal" enctype="multipart/form-data">
-    
+
         <div class="panel panel-default">
             <div class="panel-heading">
                 <i class="s7-edit"></i> Account - Design &amp; Style
-                <button type="submit" class="btn btn-primary pull-right">Save Profile &raquo;</button>
+                <button type="submit" class="btn btn-primary pull-right hide">Save Profile &raquo;</button>
             </div>
             <div class="panel-body">
                 <div class="col-md-8 col-lg-9">
 
+                    <!-- Design -->
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             Design
@@ -95,9 +97,13 @@
                                     </p>
                                 </div>
                             </div>
+
+                            @SubmitButtons()
+
                         </div>
                     </div>
 
+                    <!-- Website & Social Links -->
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             Website &amp; Social Links
@@ -147,9 +153,13 @@
                                     <input type="text" class="form-control" name="linkedin" id="linkedin" value="@Model.LinkedIn" />
                                 </div>
                             </div>
+
+                            @SubmitButtons()
+
                         </div>
                     </div>
 
+                    <!-- About -->
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             About Your Program
@@ -174,14 +184,14 @@
                                 </label>
                                 <div class="col-md-9">
                                     @{ Html.RenderPartial(
-                                        "~/Views/Shared/_TextEditor.cshtml",
-                                        Model.About,
-                                        new ViewDataDictionary() {
+                                                  "~/Views/Shared/_TextEditor.cshtml",
+                                                  Model.About,
+                                                  new ViewDataDictionary() {
                                             { "required", false },
                                             { "name", "about" },
                                             { "id", "about" }
-                                        }
-                                        ); }
+}
+                                                  ); }
 
                                     <p class="text-muted">
                                         <em>Tell us what is special about what you do. Max of 4000 characters</em>
@@ -228,9 +238,12 @@
                                 </div>
                             </div>
 
+                            @SubmitButtons()
+
                         </div>
                     </div>
 
+                    <!-- Additional Details -->
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             Additional Details
@@ -265,9 +278,134 @@
                                     </select>
                                 </div>
                             </div>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">My program is designed for</label>
+                                <div class="col-md-9">
+                                    <div class="am-radio">
+                                        <input type="radio"
+                                               name="genderrestrictions"
+                                               id="genderrestrictions-@((int)GenderRestrictionType.None)"
+                                               value="@((int)GenderRestrictionType.None)" />
+                                        <label for="genderrestrictions-@((int)GenderRestrictionType.None)">All Genders</label>
+                                    </div>
+                                    <div class="am-radio">
+                                        <input type="radio"
+                                               name="genderrestrictions"
+                                               id="genderrestrictions-@((int)GenderRestrictionType.MaleOnly)"
+                                               value="@((int)GenderRestrictionType.None)" />
+                                        <label for="genderrestrictions-@((int)GenderRestrictionType.MaleOnly)">Boys</label>
+                                    </div>
+                                    <div class="am-radio">
+                                        <input type="radio"
+                                               name="genderrestrictions"
+                                               id="genderrestrictions-@((int)GenderRestrictionType.FemaleOnly)"
+                                               value="@((int)GenderRestrictionType.None)" />
+                                        <label for="genderrestrictions-@((int)GenderRestrictionType.FemaleOnly)">Girls</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">Services Offered</label>
+                                <div class="col-md-9">
+                                    @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.ServicesOfferings)
+                                    {
+                                        <div class="am-checkbox">
+                                            <input type="checkbox"
+                                                   name="services-offered-@item.ToLower()"
+                                                   id="services-offered-@item.ToLower()"
+                                                   value="1" />
+                                            <label for="services-offered-@item.ToLower()">@item</label>
+                                        </div>
+                                    }
+
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">My program offers</label>
+                                <div class="col-md-9">
+                                    @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.TimingOfferings)
+                                    {
+                                        <div class="am-checkbox">
+                                            <input type="checkbox"
+                                                   name="programs-offered-@item.ToLower()"
+                                                   id="programs-offered-@item.ToLower()"
+                                                   value="1" />
+                                            <label for="programs-offered-@item.ToLower()">@item</label>
+                                        </div>
+                                    }
+
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">Pricing options</label>
+                                <div class="col-md-9">
+                                    @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.PricingDetails)
+                                    {
+                                        <div class="am-checkbox">
+                                            <input type="checkbox"
+                                                   name="pricing-options-@item.ToLower()"
+                                                   id="pricing-options-@item.ToLower()"
+                                                   value="1" />
+                                            <label for="pricing-options-@item.ToLower()">@item</label>
+                                        </div>
+                                    }
+
+                                </div>
+                            </div>
+
+                            @SubmitButtons()
+
                         </div>
                     </div>
-                         
+
+                    <!-- Additional Details -->
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Classifications
+                        </div>
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">Program Classifications (up to 3)</label>
+                                <div class="col-md-9">
+                                    <input type="text" name="classifications" id="classifications" class="form-control" data-role="tagsinput" />
+                                    <p class="text-small text-muted">ex: Karate, Sports, Arts, Pottery, Dance, Football</p>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">Soft Skills (up to 10)</label>
+                                <div class="col-md-9">
+                                    <input type="text" name="softskills" id="softskills" class="form-control" data-role="tagsinput" />
+                                    <p class="text-small text-muted">ex: Leadership, Teamwork, Communication</p>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">Academic Subjects Taughts (up to 5)</label>
+                                <div class="col-md-9">
+                                    <input type="text" name="academicsubjects" id="academicsubjects" class="form-control" data-role="tagsinput" />
+                                    <p class="text-small text-muted">ex: Math, Science, Language Arts, Physical Education</p>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">Teaching Methods (up to 3)</label>
+                                <div class="col-md-9">
+                                    <input type="text" name="teachingmethods" id="teachingmethods" class="form-control" data-role="tagsinput" />
+                                    <p class="text-small text-muted">ex: Project Based Learning, Team work, Games</p>
+                                </div>
+                            </div>
+
+                            @SubmitButtons()
+
+                        </div>
+                    </div>
+
+                    <!-- Photos -->
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             <h3>Photo Gallery</h3>
@@ -287,7 +425,7 @@
                                             hide = "hide";
                                         }
 
-                                        <div class="input-group input-group-md xs-mb-15">                                            
+                                        <div class="input-group input-group-md xs-mb-15">
                                             @if (photos[i].ID.HasValue)
                                             {
                                                 <div class="photo-view-@i">
@@ -295,7 +433,7 @@
                                                     <i class="s7-close icon-large pointer" onclick="removePhoto('@i')"></i>
                                                 </div>
                                             }
-                                            
+
                                             <span class="input-group-addon photo-add-@i @hide">@(i + 1)</span>
                                             <span><input type="file" class="form-control photo-add-@i @hide" name="photo-@id" id="photo-@id" /></span>
                                         </div>
@@ -320,3 +458,33 @@
         $('.photo-add-' + id).removeClass('hide');
     }
 </script>
+
+@section head
+{
+    <link href="~/Assets/tagsinput/tagsinput.css" rel="stylesheet" type="text/css" />
+
+    <style>
+        .badge-info {
+            background-color: #00c5a3;
+        }
+    </style>
+}
+
+@section scripts
+{
+    <script src="~/Assets/tagsinput/tagsinput.js"></script>
+    <script>
+        $('#classifications').tagsinput({
+          maxTags: 3
+        });
+        $('#softskills').tagsinput({
+          maxTags: 10
+        });
+        $('#academicsubjects').tagsinput({
+          maxTags: 5
+        });
+        $('#teachingmethods').tagsinput({
+          maxTags: 3
+        });
+    </script>
+}

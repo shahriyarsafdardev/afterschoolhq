@@ -1,7 +1,7 @@
 ﻿@model AccountProfile
 
 @{ 
-    var color = Model?.PrimaryColor.TrimStart('#');
+    var color = Model?.PrimaryColor?.TrimStart('#');
 }
 
 <style>
