@@ -504,6 +504,7 @@ loadmethod: AccountId, List<>
 loadmethod: ActivityGroupId, List<>
 loadmethod: ActivityId, List<>
 loadmethod: AccountId|AccountPropertyTypeId, List<>
+loadmethod: AccountId|AccountPropertyTypeId|Value
 loadmethod: ActivityGroupId|AccountPropertyTypeId
 loadmethod: ActivityId|AccountPropertyTypeId
 [end]

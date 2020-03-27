@@ -160,6 +160,7 @@ namespace AfterSchoolLibrary.Services
 
                     profile.AddProperties(newAwards, AccountPropertyType.Award, loggedInUser, amsgs, adc);
                     profile.AddProperties(newCertifications, AccountPropertyType.Certification, loggedInUser, amsgs, adc);
+
                     profile.AddProperties(servicesOffered, AccountPropertyType.ServiceOffered, loggedInUser, amsgs, adc);
                     profile.AddProperties(timesOffered, AccountPropertyType.TimeOffered, loggedInUser, amsgs, adc);
                     profile.AddProperties(pricingOptions, AccountPropertyType.PricingOption, loggedInUser, amsgs, adc);
@@ -193,18 +194,23 @@ namespace AfterSchoolLibrary.Services
         {
             if (value.IsNotEmpty())
             {
-                var property = new AccountProperty()
-                {
-                    AccountId = profile.AccountId,
-                    CreatedBy = loggedInUser.ID,
-                    CreateDate = DateTime.UtcNow,
-                    LastModifiedBy = loggedInUser.ID,
-                    LastModifiedDate = DateTime.UtcNow,
-                    Value = value,
-                    AccountPropertyTypeId = propertyType,
-                };
+                var property = AccountProperty.LoadByAccountIdByAccountPropertyTypeIdByValue(profile.AccountId.Value, propertyType, value, msgs, dc);
 
-                msgs.AddRange(property.Save(dc));
+                if (property.IsEmpty())
+                {
+                    property = new AccountProperty()
+                    {
+                        AccountId = profile.AccountId,
+                        CreatedBy = loggedInUser.ID,
+                        CreateDate = DateTime.UtcNow,
+                        LastModifiedBy = loggedInUser.ID,
+                        LastModifiedDate = DateTime.UtcNow,
+                        Value = value,
+                        AccountPropertyTypeId = propertyType,
+                    };
+
+                    msgs.AddRange(property.Save(dc));
+                }
             }
         }
 

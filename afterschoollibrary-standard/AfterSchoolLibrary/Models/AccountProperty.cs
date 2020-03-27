@@ -181,6 +181,16 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
+		public static AccountProperty LoadByAccountIdByAccountPropertyTypeIdByValue(int AccountId, AccountPropertyType AccountPropertyTypeId, string Value, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+			dq.Criterias.Add(ObjectMap["AccountPropertyTypeId"], AccountPropertyTypeId);
+			dq.Criterias.Add(ObjectMap["Value"], Value);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
+
 		public static AccountProperty LoadByActivityGroupIdByAccountPropertyTypeId(int ActivityGroupId, AccountPropertyType AccountPropertyTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
@@ -199,9 +209,9 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
+		
 
-
-		#endregion
+        #endregion
 
 		#region "UserDefined"
 
@@ -215,5 +225,5 @@ namespace AfterSchoolLibrary.Models
 		}
 
 		#endregion
-	}
+    }
 }

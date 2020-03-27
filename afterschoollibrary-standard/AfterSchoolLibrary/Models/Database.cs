@@ -412,6 +412,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountProperty_ActivityGroupId ON [AccountProperty] (ActivityGroupId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountProperty_ActivityId ON [AccountProperty] (ActivityId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountProperty_AccountId_AccountPropertyTypeId ON [AccountProperty] (AccountId,AccountPropertyTypeId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountProperty_AccountId_AccountPropertyTypeId_Value ON [AccountProperty] (AccountId,AccountPropertyTypeId,Value)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountProperty_AccountPropertyTypeId_ActivityGroupId ON [AccountProperty] (ActivityGroupId,AccountPropertyTypeId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountProperty_AccountPropertyTypeId_ActivityId ON [AccountProperty] (ActivityId,AccountPropertyTypeId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountWebUser_AccountId_IsDeleted ON [AccountWebUser] (AccountId,IsDeleted)"));
