@@ -199,12 +199,21 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		
 
-        #endregion
+
+		#endregion
 
 		#region "UserDefined"
 
-        #endregion
-    }
+		public static List<AccountProperty> LoadByAccountIdByAccountPropertyTypes(int AccountId, List<AccountPropertyType> AccountPropertyTypeIds, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+			dq.Criterias.Add(ObjectMap["AccountPropertyTypeId"], AccountPropertyTypeIds.Select(x => (int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		#endregion
+	}
 }

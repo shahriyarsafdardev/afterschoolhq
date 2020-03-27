@@ -73,6 +73,16 @@ namespace AfterSchool.Controllers
             ViewBag.Messages = msgs;
             ViewBag.ParticipationObjects = GetParticipationObjects(account, msgs).Where(po => po.RegistrationPeriod.IsOpen(account, msgs)).ToList();
             ViewBag.Locations = account.GetAllAvailableLocations(msgs);
+            ViewBag.AccountProperties = account.GetAccountProperties(
+                                            new List<AccountPropertyType>() 
+                                            { 
+                                                AccountPropertyType.AcademicSubjects, 
+                                                AccountPropertyType.Classifications, 
+                                                AccountPropertyType.ServiceOffered, 
+                                                AccountPropertyType.SoftSkills, 
+                                                AccountPropertyType.TeachingMethods, 
+                                                AccountPropertyType.TimeOffered 
+                                            }, msgs);
 
             return View(account);
         }

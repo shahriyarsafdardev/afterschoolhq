@@ -16,32 +16,50 @@
 }
 
 <div class="reg-header" style="@regHeaderStyle">
-    <div class="reg-header-overlay">
+    <div class="reg-header-overlay col-md-8 col-md-offset-2">
 
         @if (logoUrl.IsNotBlank())
         {
-            <div class="reg-header-logo">
-                <img src="@logoUrl" />
+            <div class="col-md-2">
+                <div class="reg-header-logo">
+                    <img src="@logoUrl" />
+                </div>
             </div>
         }
 
-        <h1 class="activity-title text-center">
-            <span>@Model.Title</span>
-            @if (Model.SessionName.IsNotEmpty())
-            {
-                @: - @(((ParticipationObject)ViewBag.Session).Name)
-            }
-            @if (Model.IsDemo)
-            {
-                <span class="badge badge-danger">DEMO</span>
-            }
-        </h1>
+        <div class="col-md-8">
+            <h1 class="activity-title">
+                <span>@Model.Title</span>
+                @if (Model.SessionName.IsNotEmpty())
+                {
+                    @: - @(((ParticipationObject)ViewBag.Session).Name)
+                }
+                @if (Model.IsDemo)
+                {
+                    <span class="badge badge-danger">DEMO</span>
+                }
+            </h1>
 
-        @if (Model.Headline.IsNotEmpty())
-        {
-            <p class="reg-header-headline">
-                @Model.Headline
-            </p>
-        }
+            @if (Model.Headline.IsNotEmpty())
+            {
+                <p class="reg-header-headline">
+                    @Model.Headline
+                </p>
+            }
+        </div>
+
+        <div class="col-md-2">
+            <div class="pull-right padding-v-20">
+                <a href="" class="btn btn-header-action">
+                    <i class="icon icon-left s7-add-user"></i>
+                    Follow
+                </a>
+                <a href="" class="btn btn-header-action">
+                    <i class="icon icon-left s7-cash"></i>
+                    Pay
+                </a>
+            </div>
+        </div>
+
     </div>
 </div>

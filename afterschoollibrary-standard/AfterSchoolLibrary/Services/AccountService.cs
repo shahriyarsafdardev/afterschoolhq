@@ -947,6 +947,11 @@ namespace AfterSchoolLibrary.Services
             return AccountProperty.LoadByAccountIdByAccountPropertyTypeId(account.ID.Value, propertyType, msgs, dc);
         }
 
+        public static List<AccountProperty> GetAccountProperties(this Account account, List<AccountPropertyType> propertyTypes, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return AccountProperty.LoadByAccountIdByAccountPropertyTypes(account.ID.Value, propertyTypes, msgs, dc);
+        }
+
         #endregion
 
         #region Attendance

@@ -72,13 +72,23 @@ namespace AfterSchool.Models
             return new List<string>();
         }
 
-        public static string PrintDaysOfWeekOrStartDate(ParticipationObject participationObject)
+        public static string PrintDaysOfWeekOrStartDate(ParticipationObject participationObject, bool longFormat = false)
         {
             if (participationObject.Schedule.IsNotEmpty())
+            {
+                if (longFormat)
+                    return participationObject.Schedule.GetDaysOfTheWeek().OrderBy(x => (int)x).Select(x => x.ToString()).ToStringList(",");
+
                 return participationObject.Schedule.GetDaysOfTheWeek().OrderBy(x => (int)x).Select(x => x.ToString().MaxChars(2)).ToStringList(",");
+            }
 
             if (participationObject.StartDate.HasValue)
+            {
+                if (longFormat)
+                    return $"Starts: {participationObject.StartDate.Value.ToLongDateTimeString()}";
+
                 return $"Starts: {participationObject.StartDate.Value.ToString("M/d")}";
+            }
 
             return "No Schedule";
         }
