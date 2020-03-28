@@ -47,7 +47,7 @@ body.registration {
     height: 125px;
     display: block;
     margin: auto;
-    margin-top: 40px;
+    margin-top: 25px;
 }
 
 .activity-title {
@@ -182,6 +182,34 @@ body.registration {
 .btn-register:active, .btn-register-default:active {
     /* background: #139476; */
     background-color: #444;
+    color: #fff;
+    transition: all 0.3s;
+}
+
+
+.btn-register-primary {
+    background-color: #00ae85;
+    color: #fff;
+    padding: 11px 0px;
+    width: 100%;
+    border-radius: 10px;
+    font-weight: 600;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    word-break: break-word;
+    margin: 5px 0px;
+    transition: all 0.3s;
+    border: none;
+}
+
+.btn-register-primary:hover {
+    background: #139476;
+    color: #fff;
+    transition: all 0.3s;
+}
+
+.btn-register-primary:active {
+    background: #139476;
     color: #fff;
     transition: all 0.3s;
 }

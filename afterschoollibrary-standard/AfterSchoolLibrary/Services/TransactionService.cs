@@ -385,7 +385,7 @@ namespace AfterSchoolLibrary.Services
                 msgs.Add("Amount is not refundable", MessageType.UserError);
 
             if (msgs.HasNoErrors())
-                return RefundRequestService.CreateNewRefundRequest(transaction, refundAmount, refundRequestStatus, reason, loggedInUser, msgs, dc);
+                return RefundRequestService.CreateNew(transaction, refundAmount, refundRequestStatus, reason, loggedInUser, msgs, dc);
 
             return null;
         }

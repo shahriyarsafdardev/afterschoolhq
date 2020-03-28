@@ -3075,6 +3075,18 @@ namespace AfterSchoolLibrary.Services
             return AccountProfile.LoadByAccountId(account.ID.Value, msgs, dc);
         }
 
+        public static Subscriber AddOrUpdateSubscriber(this Account account, WebUser user, SubscriberStatus status, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var subscriber = Subscriber.LoadByAccountIdByWebUserId(account.ID.Value, user.ID.Value, msgs, dc);
+
+            if (subscriber.IsEmpty())
+                return SubscriberService.CreateNew(account, user, status, loggedInUser, msgs, dc);
+
+            subscriber.UpdateSubscriber(status, loggedInUser, msgs, dc);
+
+            return subscriber;
+        }
+
         #endregion
 
     }

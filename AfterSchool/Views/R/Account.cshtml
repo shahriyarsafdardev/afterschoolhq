@@ -105,8 +105,43 @@
                                 <div class="col-md-4">
                                     @foreach (var property in accountProperties.OrderBy(x => x.Value).Skip(i * propertiesPerCol).ToList().Take(propertiesPerCol))
                                     {
+                                        var icon = "";
+                                        var iconTitle = "";
+
+                                        switch(property.AccountPropertyTypeId)
+                                        {
+                                            case AccountPropertyType.Classifications:
+                                                icon = "s7-gleam";
+                                                iconTitle = "Activity Type";
+                                                break;
+                                            case AccountPropertyType.AcademicSubjects:
+                                                icon = "s7-study";
+                                                iconTitle = "Academic Subject";
+                                                break;
+                                            case AccountPropertyType.PricingOption:
+                                                icon = "s7-cash";
+                                                iconTitle = "Pricing Option";
+                                                break;
+                                            case AccountPropertyType.ServiceOffered:
+                                                icon = "s7-ticket";
+                                                iconTitle = "Type of Service";
+                                                break;
+                                            case AccountPropertyType.SoftSkills:
+                                                icon = "s7-users";
+                                                iconTitle = "Soft Skill";
+                                                break;
+                                            case AccountPropertyType.TeachingMethods:
+                                                icon = "s7-display2";
+                                                iconTitle = "Teaching Method";
+                                                break;
+                                            case AccountPropertyType.TimeOffered:
+                                                icon = "s7-clock";
+                                                iconTitle = "Time Offered";
+                                                break;
+                                        }
+
                                         <p class="activity-detail-block">
-                                            <i class="s7-check-circle text-success icon-large" style="padding-top: 20px;"></i>
+                                            <i class="@icon icon-large text-success" style="padding-top: 20px;" title="@iconTitle"></i>
                                             <span class="text-medium" style="margin-top: -30px;">@property.Value</span>
                                         </p>
                                     }
@@ -130,7 +165,7 @@
                             @foreach (var award in awards.Where(x => x.Value.IsNotEmpty()))
                             {
                                 <p class="activity-detail-block">
-                                    <i class="s7-star text-warning icon-large"></i>
+                                    <i class="s7-medal text-warning icon-large"></i>
                                     <span class="text-medium-small">@award.Value</span>
                                 </p>
                             }
@@ -149,7 +184,7 @@
                             @foreach (var certification in certifications.Where(x => x.Value.IsNotEmpty()))
                             {
                                 <p class="activity-detail-block">
-                                    <i class="s7-check text-success icon-large" style="padding-top: 20px;"></i>
+                                    <i class="s7-star text-warning icon-large" style="padding-top: 20px;"></i>
                                     <span class="text-medium-small" style="margin-top: -30px;">@certification.Value</span>
                                 </p>
                             }

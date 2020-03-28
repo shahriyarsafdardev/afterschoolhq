@@ -3,6 +3,7 @@
 @{
     var regHeaderStyle = "";
     var logoUrl = "";
+    var isFollowing = false;
 
     if (Model.HeaderUrl.IsNotEmpty())
     {
@@ -12,6 +13,11 @@
     if (Model.LogoUrl.IsNotEmpty())
     {
         logoUrl = Model.LogoUrl;
+    }
+
+    if (SessionVariables.CurrentUser.IsNotEmpty())
+    {
+        isFollowing = SessionVariables.CurrentUser.IsSubscribedTo(Model.Account);
     }
 }
 
@@ -31,7 +37,7 @@
 
             <div class="col-md-7">
                 <h1 class="activity-title">
-                    <span>@Model.Title</span>
+                    <span>@Html.Raw(Model.Title)</span>
                     @if (Model.SessionName.IsNotEmpty())
                     {
                         @: - @(((ParticipationObject)ViewBag.Session).Name)
@@ -50,36 +56,113 @@
                 }
             </div>
             
-            <div class="col-md-3">
-                <div class="pull-right padding-v-20">
+            @if (Model.ParticipationObject.IsEmpty())
+            {
+                <div class="col-md-3">
+                    <div class="pull-right padding-v-20">
 
-                    <button onclick="follow()" class="btn btn-header-action">
-                        <i class="icon icon-left s7-add-user"></i>
-                        Follow Educator
-                    </button>
-                    <button onclick="share()" class="btn btn-header-action">
-                        <i class="icon icon-left ion-share"></i>
-                        Share
-                    </button>
+                        @if (isFollowing)
+                        {
+                            <button onclick="unfollow()" class="btn btn-register" id="btn-follow">
+                                Unfollow Educator
+                            </button>
+                        }
+                        else
+                        {
+                            <button onclick="follow()" class="btn btn-header-action" id="btn-follow">
+                                <i class="icon icon-left s7-add-user"></i>
+                                Follow Educator
+                            </button>
+                        }
 
-                    @if (Model.ParticipationObject.IsEmpty())
-                    {
-                        <button onclick="location.href='@Model.Account.BrowseUrl'" class="btn btn-header-action">
-                            <i class="icon icon-left s7-gleam"></i>
-                            View @UILabel.ActivityLabel(ActivityType.Activity, true)
+                        <button onclick="share()" class="btn btn-header-action">
+                            <i class="icon icon-left ion-share"></i>
+                            Share
+
+                            @if (Model.ParticipationObject.IsNotEmpty())
+                            {
+                                @UILabel.ActivityLabel(ActivityType.Activity, false)
+                            }
+                            else
+                            {
+                                @:Profile
+                            }
+
                         </button>
-                    }
-                    else
-                    {
-                        <button onclick="interested()" class="btn btn-header-action">
-                            <i class="icon icon-left s7-star"></i>
-                            Express Interest
-                        </button>
-                    }
+
+                        @if (Model.ParticipationObject.IsEmpty())
+                        {
+                            <button onclick="location.href='@Model.Account.BrowseUrl'" class="btn btn-header-action">
+                                <i class="icon icon-left s7-gleam"></i>
+                                View @UILabel.ActivityLabel(ActivityType.Activity, true)
+                            </button>
+                        }
+                        else
+                        {
+                            <button onclick="interested()" class="btn btn-header-action">
+                                <i class="icon icon-left s7-bell"></i>
+                                I'm Interested
+                            </button>
+                        }
+                    </div>
+                    <div class="clearfix"></div>
                 </div>
-                <div class="clearfix"></div>
-            </div>
+            }
 
         </div>
     </div>
 </div>
+
+<script>
+    function follow() {
+        $('#btn-follow').val('...');
+        $('#btn-follow').prop('disabled', true);
+
+        $.get('@Url.Action("follow", "services")/@Model.Account.Uid', function (data) {
+
+            if (data && data.status == 'ok') {
+
+                $('#btn-follow').html('Unfollow Educator');
+                $('#btn-follow').attr('onclick', 'unfollow()');
+                $('#btn-follow').removeClass('btn-header-action');
+                $('#btn-follow').addClass('btn-register');
+
+                Notifications.showMessage('Success', '<p>You are now following <strong>@Model.Account.Name</strong>.</p><p>You will receive notifications when @Model.Account.Name publishes new activities.</p>', true);
+                
+            } else {
+                Notifications.showErrors(data.messages);
+            }
+
+            $('#btn-follow').prop('disabled', false);
+        });
+    }
+
+    function unfollow() {
+        $('#btn-follow').val('...');
+        $('#btn-follow').prop('disabled', true);
+
+        $.get('@Url.Action("unfollow", "services")/@Model.Account.Uid', function (data) {
+
+            if (data && data.status == 'ok') {
+
+                $('#btn-follow').html('<i class="icon icon-left s7-add-user"></i> Follow Educator');
+                $('#btn-follow').attr('onclick', 'follow()');
+                $('#btn-follow').removeClass('btn-register');
+                $('#btn-follow').addClass('btn-header-action');
+                
+            } else {
+                Notifications.showErrors(data.messages);
+            }
+
+            $('#btn-follow').prop('disabled', false);
+        });
+    }
+
+    function share() {
+
+    }
+
+    function interested() {
+
+    }
+</script>

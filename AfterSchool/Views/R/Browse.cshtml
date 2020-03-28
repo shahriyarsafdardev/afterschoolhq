@@ -37,60 +37,64 @@
         // Html.RenderPartial("~/Views/Shared/Registration/_AddActivity.cshtml", Model);
     }
 
-    @if (!registrationOpen.Any() && !registrationWillOpen.Any() && !registrationClosed.Any())
-    {
-        <div class="row">
-            <div class="col-md-12 text-center">
-                <h3>No activities currently open for registration</h3>
-                <p>Have questions? Please contact @Model.Name @@ @Html.Raw(Model.Phone.IsNotBlank() ? Model.Phone : $"<a href=\"mailto:{Model.Email}\">{Model.Email}</a>")</p>
+    <div class="col-md-8 col-md-offset-2">
+        @if (!registrationOpen.Any() && !registrationWillOpen.Any() && !registrationClosed.Any())
+        {
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <h3>No activities currently open for registration</h3>
+                    <p>Have questions? Please contact @Model.Name @@ @Html.Raw(Model.Phone.IsNotBlank() ? Model.Phone : $"<a href=\"mailto:{Model.Email}\">{Model.Email}</a>")</p>
+                </div>
             </div>
-        </div>
-    }
+        }
 
-    @if (registrationOpen.Any())
-    {
-        <div class="row">
-            <div class="col-md-12 text-center">
-                <h3>Open for Registration</h3>
+        @if (registrationOpen.Any())
+        {
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <h3>Open for Registration</h3>
+                </div>
+
+                @foreach (var item in registrationOpen)
+                {
+                    Html.RenderPartial("~/Views/Shared/Registration/_BrowseParticipationObjectWide.cshtml", item);
+                }
             </div>
+            <hr />
+        }
 
-            @foreach (var item in registrationOpen)
-            {
-                Html.RenderPartial("~/Views/Shared/Registration/_BrowseParticipationObject.cshtml", item);
-            }
-        </div>
-        <hr />
-    }
+        @if (registrationWillOpen.Any())
+        {
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <h3>Registration Opening Soon</h3>
+                </div>
 
-    @if (registrationWillOpen.Any())
-    {
-        <div class="row">
-            <div class="col-md-12 text-center">
-                <h3>Registration Opening Soon</h3>
+                @foreach (var item in registrationWillOpen)
+                {
+                    Html.RenderPartial("~/Views/Shared/Registration/_BrowseParticipationObjectWide.cshtml", item);
+                }
             </div>
+            <hr />
+        }
 
-            @foreach (var item in registrationWillOpen)
-            {
-                Html.RenderPartial("~/Views/Shared/Registration/_BrowseParticipationObject.cshtml", item);
-            }
-        </div>
-        <hr />
-    }
+        @if (registrationClosed.Any())
+        {
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <h3>Registration Closed</h3>
+                </div>
 
-    @if (registrationClosed.Any())
-    {
-        <div class="row">
-            <div class="col-md-12 text-center">
-                <h3>Registration Closed</h3>
+                @foreach (var item in registrationClosed)
+                {
+                    Html.RenderPartial("~/Views/Shared/Registration/_BrowseParticipationObjectWide.cshtml", item);
+                }
             </div>
+            <hr />
+        }
+    </div>
 
-            @foreach (var item in registrationClosed)
-            {
-                Html.RenderPartial("~/Views/Shared/Registration/_BrowseParticipationObject.cshtml", item);
-            }
-        </div>
-        <hr />
-    }
+    
 
 </div>
 

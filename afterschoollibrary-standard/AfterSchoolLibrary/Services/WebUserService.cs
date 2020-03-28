@@ -677,5 +677,10 @@ namespace AfterSchoolLibrary.Services
                 msgs, 
                 dc) > 0;
         }
+
+        public static bool IsSubscribedTo(this WebUser user, Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Subscriber.GetCountByAccountIdByWebUserIdByStatus(account.ID.Value, user.ID.Value, SubscriberStatus.Subscribed, msgs, dc) > 0;
+        }
     }
 }

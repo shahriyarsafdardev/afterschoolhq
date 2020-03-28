@@ -1634,6 +1634,28 @@ loadmethod: RefundRequestStatusId, List<>
 [end]
 
 [begin]
+type: Class
+name: Subscriber
+inherits: BasicObjectWithModified
+property: WebUserId, int?, Int, Required, The user who is subscribed
+property: Uid, Guid, UniqueIdentifier, Required
+property: AccountId, int?, Int, Required, The account the user is subscribed to
+property: SubscriberStatusId, SubscriberStatus, Int
+loadmethod: Uid
+loadmethod: AccountId|WebUserId
+loadmethod: WebUserId, List<>
+loadmethod: AccountId, List<>
+loadmethod: WebUserId|SubscriberStatusId, List<>
+loadmethod: AccountId|SubscriberStatusId, List<>
+[end]
+
+[begin]
+type: Enum
+name: SubscriberStatus
+values: NotSet, Subscribed, Unsubscribed
+[end]
+
+[begin]
 type: Enum
 name: RefundType
 values: NotSet, Refund, Credit

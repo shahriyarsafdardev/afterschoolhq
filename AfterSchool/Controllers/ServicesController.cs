@@ -186,6 +186,80 @@ namespace AfterSchool.Controllers
 
         #endregion
 
+        #region Profile
+
+        [HttpGet]
+        public ActionResult Follow(string id)
+        {
+            if (!IsRequestFromApp())
+                return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
+
+            var msgs = new SystemMessages();
+            Account account = null;
+
+            if (SessionVariables.CurrentUser.IsEmpty())
+                return new HttpUnauthorizedResult();
+
+            if (!id.IsGuid())
+                msgs.Add("Invalid Request", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                account = Account.LoadByUid(id.ToGuid(), msgs);
+
+                if (account.IsEmpty())
+                    msgs.Add("Invalid request", MessageType.UserError);
+            }
+
+            if (msgs.HasNoErrors())
+            {
+                account.AddOrUpdateSubscriber(SessionVariables.CurrentUser, SubscriberStatus.Subscribed, SessionVariables.CurrentUser, msgs);
+
+                if (msgs.HasNoErrors())
+                    return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+
+        }
+
+        [HttpGet]
+        public ActionResult Unfollow(string id)
+        {
+            if (!IsRequestFromApp())
+                return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
+
+            var msgs = new SystemMessages();
+            Account account = null;
+
+            if (SessionVariables.CurrentUser.IsEmpty())
+                return new HttpUnauthorizedResult();
+
+            if (!id.IsGuid())
+                msgs.Add("Invalid Request", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                account = Account.LoadByUid(id.ToGuid(), msgs);
+
+                if (account.IsEmpty())
+                    msgs.Add("Invalid request", MessageType.UserError);
+            }
+
+            if (msgs.HasNoErrors())
+            {
+                account.AddOrUpdateSubscriber(SessionVariables.CurrentUser, SubscriberStatus.Unsubscribed, SessionVariables.CurrentUser, msgs);
+
+                if (msgs.HasNoErrors())
+                    return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+
+        }
+
+        #endregion
+
         public ActionResult LeadForm(string org, string name, string email, string phone, string comments)
         {
             if (!IsRequestFromApp())

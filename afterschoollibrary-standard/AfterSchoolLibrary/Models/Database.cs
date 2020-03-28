@@ -97,6 +97,7 @@ namespace AfterSchoolLibrary.Models
 			TwilioBlockedPhone.Create(dc);
 			Migration.Create(dc);
 			RefundRequest.Create(dc);
+			Subscriber.Create(dc);
 			
 
 			return msgs;
@@ -175,6 +176,7 @@ namespace AfterSchoolLibrary.Models
 			TwilioBlockedPhone.Alter(dc);
 			Migration.Alter(dc);
 			RefundRequest.Alter(dc);
+			Subscriber.Alter(dc);
 			
 
 			return msgs;
@@ -323,6 +325,7 @@ namespace AfterSchoolLibrary.Models
 			RefundRequest.Update(new Hashtable(){{"RefundRequestStatusId",0}}, new Hashtable(){{"RefundRequestStatusId", DBNull.Value}}, RefundRequest.ObjectMap, dc);
 			RefundRequest.Update(new Hashtable(){{"RequestedRefundTypeId",0}}, new Hashtable(){{"RequestedRefundTypeId", DBNull.Value}}, RefundRequest.ObjectMap, dc);
 			RefundRequest.Update(new Hashtable(){{"ApprovedRefundTypeId",0}}, new Hashtable(){{"ApprovedRefundTypeId", DBNull.Value}}, RefundRequest.ObjectMap, dc);
+			Subscriber.Update(new Hashtable(){{"SubscriberStatusId",0}}, new Hashtable(){{"SubscriberStatusId", DBNull.Value}}, Subscriber.ObjectMap, dc);
 			
 			//**ENDUPDATES**//
 
@@ -609,6 +612,12 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RefundRequest_AccountId ON [RefundRequest] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RefundRequest_AccountId_RefundRequestStatusId ON [RefundRequest] (AccountId,RefundRequestStatusId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RefundRequest_RefundRequestStatusId ON [RefundRequest] (RefundRequestStatusId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Subscriber_Uid ON [Subscriber] (Uid)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Subscriber_AccountId_WebUserId ON [Subscriber] (AccountId,WebUserId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Subscriber_WebUserId ON [Subscriber] (WebUserId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Subscriber_AccountId ON [Subscriber] (AccountId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Subscriber_SubscriberStatusId_WebUserId ON [Subscriber] (WebUserId,SubscriberStatusId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Subscriber_AccountId_SubscriberStatusId ON [Subscriber] (AccountId,SubscriberStatusId)"));
 			
 
 			return msgs;
