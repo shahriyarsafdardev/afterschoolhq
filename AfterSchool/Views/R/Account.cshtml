@@ -33,10 +33,10 @@
 @{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", new RegistrationHeaderViewModel(Model, (AccountProfile)ViewBag.AccountProfile)); }
 
 <div>
-    <div class="col-lg-8 col-lg-offset-2 participation-object participation-object-detail">
+    <div class="col-md-12 col-lg-8 col-lg-offset-2 participation-object participation-object-detail">
 
         <div class="panel panel-alt6">
-            <div class="panel-heading">
+            <div class="panel-heading" style="width: 100%;">
                 <div class="row">
                     <div class="col-md-12">
                         <h3 class="text-center">
@@ -47,46 +47,16 @@
             </div>
             <div class="panel-body">
 
-                @if (accountProperties.Any())
-                {
-                    var propertiesPerCol = Math.Ceiling(accountProperties.Count / 3.0).ToInteger();
-
-                    <div class="margin-t-20">
-                        <div class="row padding-h-30">
-                            <div class="activity-detail-block">
-                                <h2>Service Offering</h2>
-                            </div>
-
-                            @for (int i = 0; i < 3; i++)
-                            {
-                                <div class="col-md-4">
-                                    @foreach (var property in accountProperties.OrderBy(x => x.Value).Skip(i * propertiesPerCol).ToList().Take(propertiesPerCol))
-                                    {
-                                        <p class="activity-detail-block">
-                                            <i class="s7-check-circle text-success icon-large" style="padding-top: 20px;"></i>
-                                            <span class="text-medium" style="margin-top: -30px;">@property.Value</span>
-                                        </p>
-                                    }
-                                </div>
-                            }
-                        </div>
-                    </div>
-
-                    <div class="margin-v-40">
-                        <hr style="border-color: #efefef;" />
-                    </div>
-                }
-
                 @if (participationObjects.Any())
                 {
-                    <div class="margin-t-20">
+                    <div>
                         <div class="row">
-                            <div class="col-md-8">
+                            <div class="col-md-12 col-lg-8">
                                 <div class="activity-detail-block">
-                                    <h2>@UILabel.ActivityLabel(ActivityType.Activity, true) Open for Registration</h2>
+                                    <h2>Now Registering</h2>
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-12 col-lg-4">
                                 <div class="padding-v-20 pull-right">
                                     <a href="@Model.BrowseUrl">
                                         View All Activities
@@ -120,6 +90,36 @@
                     </div>
                 }
 
+                @if (accountProperties.Any())
+                {
+                    var propertiesPerCol = Math.Ceiling(accountProperties.Count / 3.0).ToInteger();
+
+                    <div class="margin-t-20">
+                        <div class="row padding-h-30">
+                            <div class="activity-detail-block">
+                                <h2>Services Offered</h2>
+                            </div>
+
+                            @for (int i = 0; i < 3; i++)
+                            {
+                                <div class="col-md-4">
+                                    @foreach (var property in accountProperties.OrderBy(x => x.Value).Skip(i * propertiesPerCol).ToList().Take(propertiesPerCol))
+                                    {
+                                        <p class="activity-detail-block">
+                                            <i class="s7-check-circle text-success icon-large" style="padding-top: 20px;"></i>
+                                            <span class="text-medium" style="margin-top: -30px;">@property.Value</span>
+                                        </p>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="margin-v-40">
+                        <hr style="border-color: #efefef;" />
+                    </div>
+                }
+
                 @if (awards.Any())
                 {
                     <div class="margin-t-20">
@@ -150,7 +150,7 @@
                             {
                                 <p class="activity-detail-block">
                                     <i class="s7-check text-success icon-large" style="padding-top: 20px;"></i>
-                                    <span class="text-medium" style="margin-top: -30px;">@certification.Value</span>
+                                    <span class="text-medium-small" style="margin-top: -30px;">@certification.Value</span>
                                 </p>
                             }
 

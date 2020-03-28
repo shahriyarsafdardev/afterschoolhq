@@ -13,6 +13,9 @@ namespace AfterSchool.Models
         public bool IsDemo { get; set; }
         public string SessionName { get; set; }
         public string PrimaryColor { get; set; }
+        public Account Account { get; set; }
+        public AccountProfile AccountProfile { get; set; }
+        public ParticipationObject ParticipationObject { get; set; }
 
         public RegistrationHeaderViewModel()
         {
@@ -21,47 +24,54 @@ namespace AfterSchool.Models
 
         public RegistrationHeaderViewModel(ParticipationObject participationObject, AccountProfile profile)
         {
-            var account = participationObject.OwnerAccount;
+            ParticipationObject = participationObject;
+            Account = participationObject.OwnerAccount;
+            AccountProfile = profile;
 
             HeaderUrl = profile?.GetHeaderImageUrl();
             LogoUrl = profile?.GetLogoUrl();
-            Title = participationObject.Name;
-            Headline = participationObject.Description;
-            IsDemo = !account.ID.HasValue;
-            PrimaryColor = profile?.PrimaryColor;
+            Title = ParticipationObject.Name;
+            Headline = ParticipationObject.Description;
+            IsDemo = !Account.ID.HasValue;
+            PrimaryColor = AccountProfile?.PrimaryColor;
         }
 
         public RegistrationHeaderViewModel(ParticipationObject participationObject, bool IsDuringRegistration)
         {
-            var account = participationObject.OwnerAccount;
-            var profile = account.GetAccountProfile();
+            ParticipationObject = participationObject;
+            Account = participationObject.OwnerAccount;
+            AccountProfile = Account.GetAccountProfile();
 
-            HeaderUrl = profile?.GetHeaderImageUrl();
-            LogoUrl = profile?.GetLogoUrl();
-            Title = participationObject.Name;
-            PrimaryColor = profile?.PrimaryColor;
+            HeaderUrl = AccountProfile?.GetHeaderImageUrl();
+            LogoUrl = AccountProfile?.GetLogoUrl();
+            Title = ParticipationObject.Name;
+            PrimaryColor = AccountProfile?.PrimaryColor;
 
             if (IsDuringRegistration)
                 Headline = "Registration";
 
-            IsDemo = !account.ID.HasValue;
+            IsDemo = !Account.ID.HasValue;
         }
 
         public RegistrationHeaderViewModel(ParticipationObject participationObject, string title, string headline)
         {
-            var account = participationObject.OwnerAccount;
-            var profile = account.GetAccountProfile();
+            ParticipationObject = participationObject;
+            Account = participationObject.OwnerAccount;
+            AccountProfile = Account.GetAccountProfile();
 
-            HeaderUrl = profile?.GetHeaderImageUrl();
-            LogoUrl = profile?.GetLogoUrl();
+            HeaderUrl = AccountProfile?.GetHeaderImageUrl();
+            LogoUrl = AccountProfile?.GetLogoUrl();
             Title = title;
             Headline = headline;
-            IsDemo = !account.ID.HasValue;
-            PrimaryColor = profile?.PrimaryColor;
+            IsDemo = !Account.ID.HasValue;
+            PrimaryColor = AccountProfile?.PrimaryColor;
         }
 
         public RegistrationHeaderViewModel(Account account, AccountProfile profile)
         {
+            Account = account;
+            AccountProfile = profile;
+
             HeaderUrl = profile?.GetHeaderImageUrl();
             LogoUrl = profile?.GetLogoUrl();
             Title = account.Name;
@@ -72,6 +82,10 @@ namespace AfterSchool.Models
 
         public RegistrationHeaderViewModel(Account account, AccountProfile profile, ParticipationObject session)
         {
+            ParticipationObject = session;
+            Account = account;
+            AccountProfile = profile;
+
             HeaderUrl = profile?.GetHeaderImageUrl();
             LogoUrl = profile?.GetLogoUrl();
             Title = account.Name;
@@ -83,18 +97,5 @@ namespace AfterSchool.Models
                 SessionName = session.Name;
 
         }
-
-        public RegistrationHeaderViewModel(string title, string headline, string logoUrl, string headerUrl, string sessionName, string primaryColor, bool isDemo)
-        {
-            Headline = title;
-            Title = headline;
-            LogoUrl = logoUrl;
-            HeaderUrl = headerUrl;
-            IsDemo = isDemo;
-            SessionName = sessionName;
-            PrimaryColor = primaryColor;
-        }
-
-      
     }
 }

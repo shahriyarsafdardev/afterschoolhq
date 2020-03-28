@@ -15,51 +15,71 @@
     }
 }
 
-<div class="reg-header" style="@regHeaderStyle">
-    <div class="reg-header-overlay col-md-8 col-md-offset-2">
+<div class="row">
 
-        @if (logoUrl.IsNotBlank())
-        {
-            <div class="col-md-2">
-                <div class="reg-header-logo">
-                    <img src="@logoUrl" />
-                </div>
-            </div>
-        }
+    <div class="reg-header" style="@regHeaderStyle">
+        <div class="reg-header-overlay col-md-8 col-md-offset-2">
 
-        <div class="col-md-8">
-            <h1 class="activity-title">
-                <span>@Model.Title</span>
-                @if (Model.SessionName.IsNotEmpty())
-                {
-                    @: - @(((ParticipationObject)ViewBag.Session).Name)
-                }
-                @if (Model.IsDemo)
-                {
-                    <span class="badge badge-danger">DEMO</span>
-                }
-            </h1>
-
-            @if (Model.Headline.IsNotEmpty())
+            @if (logoUrl.IsNotBlank())
             {
-                <p class="reg-header-headline">
-                    @Model.Headline
-                </p>
+                <div class="col-md-2">
+                    <div class="reg-header-logo">
+                        <img src="@logoUrl" />
+                    </div>
+                </div>
             }
-        </div>
 
-        <div class="col-md-2">
-            <div class="pull-right padding-v-20">
-                <a href="" class="btn btn-header-action">
-                    <i class="icon icon-left s7-add-user"></i>
-                    Follow
-                </a>
-                <a href="" class="btn btn-header-action">
-                    <i class="icon icon-left s7-cash"></i>
-                    Pay
-                </a>
+            <div class="col-md-7">
+                <h1 class="activity-title">
+                    <span>@Model.Title</span>
+                    @if (Model.SessionName.IsNotEmpty())
+                    {
+                        @: - @(((ParticipationObject)ViewBag.Session).Name)
+                    }
+                    @if (Model.IsDemo)
+                    {
+                        <span class="badge badge-danger">DEMO</span>
+                    }
+                </h1>
+
+                @if (Model.Headline.IsNotEmpty())
+                {
+                    <p class="reg-header-headline">
+                        @Model.Headline
+                    </p>
+                }
             </div>
-        </div>
+            
+            <div class="col-md-3">
+                <div class="pull-right padding-v-20">
 
+                    <button onclick="follow()" class="btn btn-header-action">
+                        <i class="icon icon-left s7-add-user"></i>
+                        Follow Educator
+                    </button>
+                    <button onclick="share()" class="btn btn-header-action">
+                        <i class="icon icon-left ion-share"></i>
+                        Share
+                    </button>
+
+                    @if (Model.ParticipationObject.IsEmpty())
+                    {
+                        <button onclick="location.href='@Model.Account.BrowseUrl'" class="btn btn-header-action">
+                            <i class="icon icon-left s7-gleam"></i>
+                            View @UILabel.ActivityLabel(ActivityType.Activity, true)
+                        </button>
+                    }
+                    else
+                    {
+                        <button onclick="interested()" class="btn btn-header-action">
+                            <i class="icon icon-left s7-star"></i>
+                            Express Interest
+                        </button>
+                    }
+                </div>
+                <div class="clearfix"></div>
+            </div>
+
+        </div>
     </div>
 </div>

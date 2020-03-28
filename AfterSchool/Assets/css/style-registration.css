@@ -46,7 +46,8 @@ body.registration {
 .reg-header-logo > img {
     height: 125px;
     display: block;
-    margin-top: 20px;
+    margin: auto;
+    margin-top: 40px;
 }
 
 .activity-title {
