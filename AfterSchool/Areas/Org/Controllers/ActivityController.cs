@@ -603,7 +603,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [HttpPost]
         [ValidateInput(false)]
-        public ActionResult EditSchedule(string id, string cmd, string schedule, string scheduledetails, string requiresalldays, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime, string isongoing)
+        public ActionResult EditSchedule(string id, string cmd, string schedule, string scheduledetails, string requiresalldays, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime, string isongoing, string hasschedule)
         {
             var msgs = new SystemMessages();
             var inSessionDates = new List<DateRange>();
@@ -614,27 +614,29 @@ namespace AfterSchool.Areas.Org.Controllers
             activity = Activity.LoadByUid(id.ToGuid());
             if (activity.IsNotEmpty())
             {
-                var filteredParams = Request.Params.Filter("schedulerepeat-");
-                var days = ActivityScheduleUI.PrepDaysOfWeek(filteredParams);
-
-                if (days.Count == 0 && repeatsweekly == "1")
-                    msgs.Add("Please select at least one day", MessageType.UserError);
-
-                if (msgs.HasNoErrors())
+                if (hasschedule.IsBoolean() && hasschedule.ToBoolean())
                 {
-                    inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
-                    outOfSessionDates = ActivityScheduleUI.PrepScheduleDatesClosed(Request.Params.Filter("meeting-closed-"));
+                    var filteredParams = Request.Params.Filter("schedulerepeat-");
+                    var days = ActivityScheduleUI.PrepDaysOfWeek(filteredParams);
 
-                    inSessionDates.ForEach(dateRange =>
+                    if (days.Count == 0 && repeatsweekly == "1")
+                        msgs.Add("Please select at least one day", MessageType.UserError);
+
+                    if (msgs.HasNoErrors())
                     {
-                        if (dateRange.StartDate > dateRange.EndDate)
-                            msgs.Add("Please ensure start dates and end times are earlier than the corresponding end date and end times", MessageType.UserError);
-                    });
-                }
+                        inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
+                        outOfSessionDates = ActivityScheduleUI.PrepScheduleDatesClosed(Request.Params.Filter("meeting-closed-"));
 
-                if (msgs.HasNoErrors())
-                {
-                    values = new Dictionary<string, object>()
+                        inSessionDates.ForEach(dateRange =>
+                        {
+                            if (dateRange.StartDate > dateRange.EndDate)
+                                msgs.Add("Please ensure start dates and end times are earlier than the corresponding end date and end times", MessageType.UserError);
+                        });
+                    }
+
+                    if (msgs.HasNoErrors())
+                    {
+                        values = new Dictionary<string, object>()
                     {
                         { "scheduledetails", scheduledetails},
                         { "days", days.Select(x => (int)x).ToStrings().ToStringList() },
@@ -649,13 +651,14 @@ namespace AfterSchool.Areas.Org.Controllers
                         { "isongoing", isongoing }
                     };
 
-                    activity = ActivityService.EditExisting(
-                        loggedInUserId: SessionVariables.CurrentUser.ID.Value,
-                        account: SessionVariables.CurrentAccount,
-                        activityId: activity.ID.Value.ToString(),
-                        values: values,
-                        msgs: msgs
-                    );
+                        activity = ActivityService.EditExisting(
+                            loggedInUserId: SessionVariables.CurrentUser.ID.Value,
+                            account: SessionVariables.CurrentAccount,
+                            activityId: activity.ID.Value.ToString(),
+                            values: values,
+                            msgs: msgs
+                        );
+                    }
                 }
             }
 
@@ -720,7 +723,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult EditLocation(string id, string location, string locationname, string locationdetails, string address1, string address2, string city, string state, string postalcode, string mylocation, string locationtype, string cmd)
+        public ActionResult EditLocation(string id, string location, string locationname, string locationdetails, string address1, string address2, string city, string state, string postalcode, string mylocation, string locationtype, string cmd, string activitylocationtype)
         {
             var msgs = new SystemMessages();
             Activity activity = Activity.LoadByUid(id.ToGuid());
@@ -738,7 +741,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "state", state},
                     { "postalcode", postalcode},
                     { "mylocation", mylocation },
-                    { "locationtype", locationtype }
+                    { "locationtype", locationtype },
+                    { "activitylocationtype", activitylocationtype }
                 };
 
                 activity = ActivityService.EditExisting(

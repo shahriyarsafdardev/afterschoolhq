@@ -6,33 +6,92 @@
     </div>
     <div class="panel-body">
 
-        @{
-            Html.RenderPartial(
-                "~/Views/Shared/Components/_LocationAddOrEdit.cshtml",
-                null,
-                new ViewDataDictionary() { { "LocationId", Model.LocationId }, { "AccountId", Model.AccountId } });
-        }
-
         <div class="form-group">
-            <label class="col-sm-3 control-label">
-                Room Number / Specific Instructions
+            <label class="col-md-3 control-label">
+                Location
             </label>
-            <div class="col-sm-9">
-                @{
-                    Html.RenderPartial(
-                     "~/Views/Shared/_TextEditor.cshtml",
-                     Model.LocationDetails,
-                     new ViewDataDictionary() {
-                            //{ "required", true },
-                            { "name", "locationdetails" },
-                            { "id", "locationdetails" }
-                     }
-                     );
-                }
-                <p class="text-muted"><em>Enter your room number or any special instructions or information about the location? Such as pick up or drop off locations?</em></p>
+            <div class="col-md-9">
+                <div class="am-radio">
+                    <span>
+                        <input type="radio"
+                               name="activitylocationtype"
+                               id="activitylocationtype-@((int)ActivityLocationType.NotSet)"
+                               value="@((int)ActivityLocationType.NotSet)"
+                               class="activitylocationtype"
+                               @(Model.ActivityLocationTypeId == ActivityLocationType.NotSet ? "checked=\"checked\"" : "") />
+                        <label for="activitylocationtype-@((int)ActivityLocationType.NotSet)">None</label>
+                        &nbsp;
+                    </span>
+                    <span>
+                        <input type="radio"
+                               name="activitylocationtype"
+                               id="activitylocationtype-@((int)ActivityLocationType.Physical)"
+                               value="@((int)ActivityLocationType.Physical)"
+                               class="activitylocationtype"
+                               @(Model.ActivityLocationTypeId == ActivityLocationType.Physical ? "checked=\"checked\"" : "") />
+                        <label for="activitylocationtype-@((int)ActivityLocationType.Physical)">Physical</label>
+                        &nbsp;
+                    </span>
+                    <span>
+                        <input type="radio"
+                               name="activitylocationtype"
+                               id="activitylocationtype-@((int)ActivityLocationType.Virtual)"
+                               value="@((int)ActivityLocationType.Virtual)"
+                               class="activitylocationtype"
+                               @(Model.ActivityLocationTypeId == ActivityLocationType.Virtual ? "checked=\"checked\"" : "") />
+                        <label for="activitylocationtype-@((int)ActivityLocationType.Virtual)">Virtual</label>
+                        &nbsp;
+                    </span>
+                </div>
             </div>
         </div>
 
+        <div id="physical-location" class="hide">
+
+            @{
+                Html.RenderPartial(
+                    "~/Views/Shared/Components/_LocationAddOrEdit.cshtml",
+                    null,
+                    new ViewDataDictionary() { { "LocationId", Model.LocationId }, { "AccountId", Model.AccountId } });
+            }
+
+            <div class="form-group">
+                <label class="col-sm-3 control-label">
+                    Room Number / Specific Instructions
+                </label>
+                <div class="col-sm-9">
+                    @{
+                        Html.RenderPartial(
+                         "~/Views/Shared/_TextEditor.cshtml",
+                         Model.LocationDetails,
+                         new ViewDataDictionary() {
+                            //{ "required", true },
+                            { "name", "locationdetails" },
+                            { "id", "locationdetails" }
+                            }
+                         );
+                    }
+                    <p class="text-muted"><em>Enter your room number or any special instructions or information about the location? Such as pick up or drop off locations?</em></p>
+                </div>
+            </div>
+
+        </div>
 
     </div>
 </div>
+
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+
+        $('.activitylocationtype').click(function () {
+
+            if ($(this).val() == '@((int)ActivityLocationType.Physical)') {
+                $('#physical-location').removeClass('hide');
+            } else {
+                $('#physical-location').addClass('hide');
+            }
+
+        });
+
+    });
+</script>

@@ -50,6 +50,21 @@ body.registration {
     margin-top: 25px;
 }
 
+.reg-header .dropdown-menu {
+    padding: 10px;
+    font-size: 1.10em;
+    margin-top: -12px;
+    background-color: #444;
+    border: none;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    text-align: center;
+}
+.reg-header .dropdown-menu > a {
+    color: #fff;
+    text-align: center;
+}
+
 .activity-title {
     font-size: 4em;
 }

@@ -84,6 +84,7 @@ property: DateSubmittedToActivityGroup, DateTime?, DateTime, , Used to track whe
 property: AccountActivityGroupId, int?, Int, , When a activity is part of a league that is from an external source (such as a team) then it should be linked to the account version of that league
 property: LeaderTypeId, ActivityLeaderType, Int, , Track what kind of leader it is - internal or external
 property: RequiresParentalConsent, bool, Bit, , let us know whether the parent needs to consent
+property: ActivityLocationTypeId, ActivityLocationType, Int, , Physical or Virtual
 -property: AllowPreRegistration, bool, Bit
 -property: RegistrationTimeZone, string, NVarChar "30"
 -property: AcceptPayPal, bool, Bit
@@ -1857,6 +1858,12 @@ values: NotSet, PerRegistrant, PerActivity
 type: Enum
 name: LocationType
 values: NotSet, School, Business, NonProfit
+[end]
+
+[begin]
+type: Enum
+name: ActivityLocationType
+values: NotSet, Physical, Virtual
 [end]
 
 [begin]

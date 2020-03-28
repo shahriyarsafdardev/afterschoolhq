@@ -5,6 +5,22 @@
     var account = (Account)ViewBag.Account;
     var msgs = (SystemMessages)ViewBag.Messages;
     var session = (ParticipationObject)ViewBag.Session;
+    var showLocation = false;
+
+    if (Model.Location.IsNotEmpty())
+    {
+        if (Model.IsActivity())
+        {
+            if (Model.ActivityLocationType == ActivityLocationType.Physical)
+            {
+                showLocation = true;
+            }
+        }
+        else
+        {
+            showLocation = true;
+        }
+    }
 }
 
 @{
@@ -154,7 +170,7 @@
 
                 <hr />
 
-                @if (Model.Location.IsNotEmpty() && (!Model.ActivityType.HasValue || Model.ActivityType.Value.NotIn(new ActivityType[] { ActivityType.FieldTrip, ActivityType.PermissionSlip })))
+                @if (showLocation)
                 {
                     <div class="margin-t-20">
                         <div class="col-md-12">

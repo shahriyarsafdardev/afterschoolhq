@@ -163,6 +163,20 @@ namespace AfterSchool.Controllers
             return View(account);
         }
 
+        public ActionResult Pay(string accountname)
+        {
+            if (isUnsupportedBrowser())
+                return RedirectUnsupportedBrowser();
+
+            var msgs = new SystemMessages();
+            var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
+
+            if (account.IsEmpty())
+                return HttpNotFound();
+
+            return View(account);
+        }
+
         [HttpGet]
         public ActionResult Activity(string accountname, string activitytype, string activityname, string preview)
         {

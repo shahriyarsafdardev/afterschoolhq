@@ -1792,6 +1792,7 @@
     <Content Include="Start\fonts\fontawesome-webfont.woff2" />
     <Content Include="Start\fonts\FontAwesome.otf" />
     <Content Include="Views\Shared\Registration\_BrowseParticipationObjectWide.cshtml" />
+    <Content Include="Views\R\Pay.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
