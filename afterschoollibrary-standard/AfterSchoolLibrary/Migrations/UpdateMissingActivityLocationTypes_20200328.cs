@@ -19,7 +19,7 @@ namespace AfterSchoolLibrary.Migrations
                         Activity.ObjectMap,
                         adc));
                 },
-                uniqueIdenfier: "AddFieldTripsFeatureToSchools-20200126",
+                uniqueIdenfier: "UpdateMissingActivityLocationTypes_20200328",
                 msgs: msgs,
                 dc: dc
             );
