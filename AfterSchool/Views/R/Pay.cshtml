@@ -5,16 +5,8 @@
 
     var msgs = (SystemMessages)ViewBag.Messages;
     var accountProfile = (AccountProfile)ViewBag.AccountProfile;
-    var location = (Location)ViewBag.Location;
-    var awards = (List<AccountProperty>)ViewBag.Awards;
-    var certifications = (List<AccountProperty>)ViewBag.Certifications;
-    var photos = (List<AccountProperty>)ViewBag.Photos;
-    var gradeLevelStart = (GradeLevel)ViewBag.GradeLevelStart;
-    var gradeLevelEnd = (GradeLevel)ViewBag.GradeLevelEnd;
-    var participationObjects = (List<ParticipationObject>)ViewBag.ParticipationObjects;
-    var takeActivities = participationObjects.Count >= 6 ? 6 : 3;
-    var locations = (List<Location>)ViewBag.Locations;
-    var accountProperties = (List<AccountProperty>)ViewBag.AccountProperties;
+    var sources = (List<Stripe.Source>)ViewBag.Sources;
+    var bankAccounts = (List<Stripe.BankAccount>)ViewBag.BankAccounts;
 }
 
 @{
@@ -24,13 +16,23 @@
         new ViewDataDictionary()
         {
             { "LoginReturnUrl", Model.HomePageUrl }
-                }
+        }
     );
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-@{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", new RegistrationHeaderViewModel(Model, (AccountProfile)ViewBag.AccountProfile)); }
+@{ 
+    Html.RenderPartial
+    (
+        "~/Views/Shared/Registration/_RegistrationHeader.cshtml",
+        new RegistrationHeaderViewModel(Model, (AccountProfile)ViewBag.AccountProfile),
+        new ViewDataDictionary()
+        {
+            { "hidebuttons", true }
+        }
+    );
+}
 
 <div>
     <div class="col-md-12 col-lg-8 col-lg-offset-2 participation-object participation-object-detail">
@@ -47,78 +49,127 @@
             </div>
             <div class="panel-body">
 
-               Make a payment
+                <div class="row pay-amount">
+                    <div class="col-md-4 col-md-offset-4 col-sm-12 padding-30">
+                        <div class="form-group">
+                            <label for="amount" class="text-medium">Enter amount you want to pay</label>
+                            <div class="input-group input-group-prepend">
+                                <span class="input-group-addon">$</span>
+                                <input type="number" name="amount" id="amount" value="" class="form-control text-right text-medium" style="padding-right: 5px;" min="5.00" step=".01" />
+                            </div>
+                            <p class="text-muted text-small" id="amount-error">Please enter an amount greater than or equal to $5</p>
+                        </div>
+
+                        <div class="form-group">
+                            <button class="btn btn-register-primary" id="btn-validate" onclick="validateAmount()">
+                                Continue &raquo;
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row pay-buttons hide">
+
+                    <div class="row">
+                        <div class="col-md-4 col-md-offset-4 col-sm-12">
+                            <div class="form-group text-center text-medium">
+                                <button onclick="showAmount()" class="btn btn-register">&laquo; Change Payment Amount</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        @{ 
+                            Html.RenderPartial(
+                                "~/Views/Shared/Registration/_PayButtons.cshtml",
+                                new ViewDataDictionary()
+                                {
+                                    { "sources", sources },
+                                    { "bankAccounts", bankAccounts },
+                                    { "formActionUrl", Url.Action("pay", "account", new { id = Model.Uid }) },
+                                    { "acceptACH", true }
+                                }
+                            );
+                        }
+                    </div>
+                </div>
 
             </div>
             <div class="panel-footer">
                 <div class="col-md-12 text-center">
                     <p class="padding-v-20 padding-h-30">
-                        @if (Model.Phone.IsNotBlank())
-                        {
-                            <a href="tel:@Model.Phone"
-                               target="_blank"
-                               class="icon-xlarge margin-h-30"
-                               style="text-decoration: none;">
-                                <i class="ion-android-phone-portrait"></i>
-                            </a>
-                        }
-                        @if (accountProfile.Website.IsNotBlank())
-                        {
-                            <a href="@(accountProfile.Website.StartsWith("http") ? "" : "https://")@accountProfile.Website"
-                               target="_blank"
-                               class="icon-xlarge margin-h-30"
-                               style="text-decoration: none;">
-                                <i class="ion-ios-world-outline"></i>
-                            </a>
-                        }
-                        @if (Model.Email.IsNotBlank())
-                        {
-                            <a href="mailto:@Model.Email"
-                               target="_blank"
-                               class="icon-xlarge margin-h-30"
-                               style="text-decoration: none;">
-                                <i class="ion-ios-email-outline"></i>
-                            </a>
-                        }
-                        @if (accountProfile.Twitter.IsNotEmpty())
-                        {
-                            <a href="https://twitter.com/@(accountProfile.Twitter.TrimStart('@'))"
-                               target="_blank"
-                               class="icon-xlarge margin-h-30"
-                               style="text-decoration: none;">
-                                <i class="ion-social-twitter-outline"></i>
-                            </a>
-                        }
-                        @if (accountProfile.Instagram.IsNotEmpty())
-                        {
-                            <a href="https://instagram.com/@(accountProfile.Instagram.TrimStart('@'))"
-                               target="_blank"
-                               class="icon-xlarge margin-h-30"
-                               style="text-decoration: none;">
-                                <i class="ion-social-instagram-outline"></i>
-                            </a>
-                        }
-                        @if (accountProfile.Facebook.IsNotEmpty())
-                        {
-                            <a href="@accountProfile.Facebook"
-                               target="_blank"
-                               class="icon-xlarge margin-h-30"
-                               style="text-decoration: none;">
-                                <i class="ion-social-facebook-outline"></i>
-                            </a>
-                        }
-                        @if (accountProfile.LinkedIn.IsNotEmpty())
-                        {
-                            <a href="@accountProfile.LinkedIn"
-                               target="_blank"
-                               class="icon-xlarge margin-h-30"
-                               style="text-decoration: none;">
-                                <i class="ion-social-linkedin-outline"></i>
-                            </a>
-                        }
+                        
                     </p>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    function validateAmount() {
+
+        const amount = $('#amount').val();
+
+        if (amount.trim().length == 0 || isNaN(amount)) {
+            showAmountError();
+            return;
+        }
+
+        if (parseFloat(amount) < 5) {
+            showAmountError();
+            return;
+        }
+
+        hideAmountError();
+
+        $.get('@Url.Action("getcreditcardfees", "services")/@Model.Uid?amount=' + amount, function (data) {
+
+            if (data && data.status == 'ok') {
+
+                const ccFees = data.creditCardFee;
+                const achAmount = parseFloat(amount);
+                const ccAmount = achAmount + ccFees
+
+                $('.total-due-today-ach').html(achAmount.toFixed(2));
+                $('.total-due-today-cc').html(ccAmount.toFixed(2));
+                $('.total-fee-ccf').html(ccFees.toFixed(2));
+                
+                const hiddenFieldcc = '<input type="hidden" name="amount" value="' + achAmount.toFixed(2) + '">';
+                const hiddenFieldach = '<input type="hidden" name="amount" value="' + achAmount.toFixed(2) + '">';
+                
+                $('#existing-payment-form-cc').append(hiddenFieldcc);
+                $('#payment-form').append(hiddenFieldcc);                
+                $('#existing-payment-form-ach').append(hiddenFieldach);
+                $('#payment-form-ach').append(hiddenFieldach);
+
+                showPayButtons();
+
+            } else {
+                Notifications.showErrors(data.messages);
+            }
+        });
+
+    }
+
+    function showAmountError() {
+        if (!$('#amount-error').hasClass('text-danger')) {
+            $('#amount-error').addClass('text-danger');
+        }
+    }
+
+    function hideAmountError() {
+        $('#amount-error').removeClass('text-danger');
+    }
+
+    function showAmount() {
+        $('.pay-buttons').addClass('hide');
+        $('.pay-amount').removeClass('hide');
+    }
+
+    function showPayButtons() {
+        $('.pay-buttons').removeClass('hide');
+        $('.pay-amount').addClass('hide');
+    }
+
+</script>

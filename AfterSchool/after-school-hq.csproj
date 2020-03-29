@@ -1793,6 +1793,8 @@
     <Content Include="Start\fonts\FontAwesome.otf" />
     <Content Include="Views\Shared\Registration\_BrowseParticipationObjectWide.cshtml" />
     <Content Include="Views\R\Pay.cshtml" />
+    <Content Include="Views\Shared\Registration\_PayButtons.cshtml" />
+    <Content Include="Views\Account\PaymentThankYou.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

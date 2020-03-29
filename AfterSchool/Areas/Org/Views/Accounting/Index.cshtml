@@ -164,7 +164,7 @@
                             foreach (var transaction in Model)
                             {
                                 var purchase = transaction.GetPurchase();
-                                var registrant = Registrant.Load(purchase.RegistrantId.Value);
+                                var registrant = purchase.IsNotEmpty() ? Registrant.Load(purchase.RegistrantId.Value) : null;
                                 var currentStatus = transaction.GetStatus();
                                 var disableChk = !transaction.CanRequestPayout() ? "disabled" : "";
 
@@ -191,7 +191,14 @@
                                     <td>
                                         @if (transaction.IsCharge())
                                         {
-                                            @registrant.DisplayName
+                                            if (registrant.IsNotEmpty())
+                                            {
+                                                @registrant.DisplayName
+                                            }
+                                            else
+                                            {
+                                                @:-
+                                            }
                                         }
                                         else
                                         {

@@ -86,7 +86,7 @@
                             foreach (var transaction in Model)
                             {
                                 var purchase = transaction.GetPurchase();
-                                var registrant = Registrant.Load(purchase.RegistrantId.Value);
+                                var registrant = purchase.IsNotEmpty() ? Registrant.Load(purchase.RegistrantId.Value) : null;
                                 var billerAccount = transaction.GetBillerAccount();
 
                                 <tr id="@transaction.Uid">
@@ -99,7 +99,14 @@
                                     <td>
                                         @if (transaction.IsCharge())
                                         {
-                                            @registrant.DisplayName
+                                            if (registrant.IsNotEmpty())
+                                            {
+                                                @registrant.DisplayName
+                                            }
+                                            else
+                                            {
+                                                @:-
+                                            }
                                         }
                                         else
                                         {

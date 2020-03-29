@@ -1946,6 +1946,26 @@ namespace AfterSchoolLibrary.Services
             return registrant;
         }
 
+        public static bool HasRegistrationsWith(this Account familyAccount, Account providerAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var registrants = familyAccount.GetChildrenRegistrants(msgs, dc);
+            var activities = providerAccount.GetActivities(UserType.Administrator, null, null, null, false, false, null, null, msgs, dc);
+            var participationObjects = activities.Select(activity => new ParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, false, msgs, dc)).ToList();
+            var submittedRecordIds = new List<int>();
+            var assignmentTypes = new List<RegistrationAssignmentType>()
+            {
+                RegistrationAssignmentType.Applied,
+                RegistrationAssignmentType.Reserved,
+                RegistrationAssignmentType.ReservedPendingPayment,
+                RegistrationAssignmentType.ReservedPendingParentalConsent,
+                RegistrationAssignmentType.WaitingList
+            };
+
+            registrants.ForEach(registrant => submittedRecordIds.AddRange(registrant.GetSubmittedRecords(providerAccount.ID.Value, msgs, dc).Select(x => x.ID.Value)));
+
+            return RegistrantActivity.ExistsByParticipationObjectsByRegistrants(participationObjects, submittedRecordIds, assignmentTypes, true, msgs, dc);
+        }
+
         #endregion
 
         #region Finance
@@ -2078,7 +2098,7 @@ namespace AfterSchoolLibrary.Services
                 return (totalAmountToCharge * percentageFee) + flatFee;
             }
 
-            return Platform.GetConvenienceFee(totalAmountToCharge, billingAccount);
+            return Platform.GetConvenienceFee(totalAmountToCharge);
         }
 
         public static decimal GetPlatformPercentFee(this Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -2133,26 +2153,26 @@ namespace AfterSchoolLibrary.Services
 
             // only charge tuition during checkout, because subscriptions are billed through stripe
             var charge = StripeHelper.CreateCharge(
-                fromCustomerId: customerId,
-                destinationAccountId: useStripeConnectedAccount ? checkoutObject.BillingAccount.StripeUserId : null,
-                platformFee: useStripeConnectedAccount ? platformFeeAmount : new decimal?(),
-                tokenOrSourceId: checkoutObject.StripeSourceId.IfEmpty(checkoutObject.CreditCardPurchaseObject?.StripeToken),
-                totalAmount: checkoutObject.GetTuitionCostWithFees(msgs, dc),
-                description: $"{checkoutObject.ParticipationObject.Name} Registration",
-                statementDescriptor: $"{checkoutObject.BillingAccount.Name}",
-                metaData: new Dictionary<string, string>()
-                {
-                    { "ActivityUid", checkoutObject.ParticipationObject.Uid.ToString() },
-                    { "BillingAccountUid", checkoutObject.BillingAccount.Uid.ToString() },
-                    { "PayingAccountUid", checkoutObject.PayingAccount.Uid.ToString() },
-                    { "RegistrationUid", checkoutObject.Registration.Uid.ToString() },
-                    { "CreditCardFeePayer", checkoutObject.CreditCardFeePayer.Uid.ToString() },
-                    { "ConvenienceFeePayer", checkoutObject.ConvenienceFeePayer.Uid.ToString() },
-                    { "PurchasedBy", checkoutObject.MasterRegistrant.DisplayName },
-                    { "BilledBy", checkoutObject.BillingAccount.Name }
-                },
-                msgs: msgs
-                );
+                                fromCustomerId: customerId,
+                                destinationAccountId: useStripeConnectedAccount ? checkoutObject.BillingAccount.StripeUserId : null,
+                                platformFee: useStripeConnectedAccount ? platformFeeAmount : new decimal?(),
+                                tokenOrSourceId: checkoutObject.StripeSourceId.IfEmpty(checkoutObject.CreditCardPurchaseObject?.StripeToken),
+                                totalAmount: checkoutObject.GetStripeAmount(msgs, dc),
+                                description: checkoutObject.Description,
+                                statementDescriptor: $"{checkoutObject.BillingAccount.Name}",
+                                metaData: new Dictionary<string, string>()
+                                {
+                                    { "ActivityUid", checkoutObject.ParticipationObject?.Uid.ToString() },
+                                    { "BillingAccountUid", checkoutObject.BillingAccount.Uid.ToString() },
+                                    { "PayingAccountUid", checkoutObject.PayingAccount.Uid.ToString() },
+                                    { "RegistrationUid", checkoutObject.Registration?.Uid.ToString() },
+                                    { "CreditCardFeePayer", checkoutObject.CreditCardFeePayer.Uid.ToString() },
+                                    { "ConvenienceFeePayer", checkoutObject.ConvenienceFeePayer.Uid.ToString() },
+                                    { "PurchasedBy", checkoutObject.MasterRegistrant?.DisplayName },
+                                    { "BilledBy", checkoutObject.BillingAccount.Name }
+                                },
+                                msgs: msgs
+                            );
 
             return charge;
         }
@@ -2267,7 +2287,7 @@ namespace AfterSchoolLibrary.Services
             return copiedSource.Id;
         }
 
-        private static void ProcessTuitionWithStripe(CheckoutObject checkoutObject, SystemMessages msgs, DatabaseConnection dc = null)
+        private static void ProcessPaymentWithStripe(CheckoutObject checkoutObject, SystemMessages msgs, DatabaseConnection dc = null)
         {
             // if user wants to save payment info, do it before you charge the card
             // can't use a token twice
@@ -2361,10 +2381,10 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
-        public static void ProcessTuitionFee(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void ProcessRegistrationFee(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (checkoutObject.TuitionCostNoFees > 0)
-                AccountService.ProcessTuitionWithStripe(checkoutObject, msgs, dc);
+                AccountService.ProcessPaymentWithStripe(checkoutObject, msgs, dc);
 
             // must wait until after charges happen to know what card id is charged for sure
             // add purchase
@@ -2456,7 +2476,7 @@ namespace AfterSchoolLibrary.Services
 
                     // process payment by to account, includes registration fee
                     if (!checkoutObject.ParticipationObject.IsTuitionFree && checkoutObject.PaymentPlan.IsEmpty())
-                        AccountService.ProcessTuitionFee(checkoutObject, loggedInUser, amsgs, adc);
+                        AccountService.ProcessRegistrationFee(checkoutObject, loggedInUser, amsgs, adc);
 
                     // Process Subscriptions separately, don't charge all at once for the registration Fee
 
@@ -2511,6 +2531,37 @@ namespace AfterSchoolLibrary.Services
                         checkoutObject.PayingAccount.MarkCouponAsUsed(checkoutObject.Coupon);
 
                     checkoutObject.Registration.SendConfirmation(checkoutObject, null, loggedInUser, true, msgs, dc);
+                },
+                onFailure: (SystemMessages amsgs) => msgs.AddRange(amsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
+                dc: dc
+            );
+
+        }
+
+        public static void ProcessPayment(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    AccountService.ProcessPaymentWithStripe(checkoutObject, msgs, dc);
+
+                    // must wait until after charges happen to know what card id is charged for sure
+                    // add purchase
+                    if (msgs.HasNoErrors())
+                        AccountService.AddTransaction(
+                            checkoutObject,
+                            TransactionType.Charge,
+                            loggedInUser,
+                            msgs,
+                            dc);
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
+
+                    Helpers.EmailHelper.SendPaymentConfirmation(checkoutObject, null, loggedInUser, true, msgs, dc);
                 },
                 onFailure: (SystemMessages amsgs) => msgs.AddRange(amsgs),
                 onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
@@ -2720,7 +2771,7 @@ namespace AfterSchoolLibrary.Services
                 feeAmount = Platform.GetTotalFees(plan.CostPerPeriod.Value, billingAccount);
 
                 if (!billingAccount.IsConvenienceFeeTakenOutOfCost)
-                    billedCostPerPeriod += Platform.GetConvenienceFee(billedCostPerPeriod, billingAccount);
+                    billedCostPerPeriod += Platform.GetConvenienceFee(billedCostPerPeriod);
 
                 if (!billingAccount.IsCreditCardFeeTakenOutOfCost)
                     billedCostPerPeriod += Platform.GetCreditCardFee(billedCostPerPeriod, billingAccount);

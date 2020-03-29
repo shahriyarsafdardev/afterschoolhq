@@ -66,6 +66,40 @@ namespace AfterSchool.Controllers
         }
 
         [HttpGet]
+        public ActionResult GetCreditCardFees(string id, string amount)
+        {
+
+            if (!IsRequestFromApp())
+                return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
+
+            var msgs = new SystemMessages();
+            Account account = null;
+
+            if (!id.IsGuid())
+                msgs.Add("Invalid request", MessageType.UserError);
+
+            if (!amount.IsNumber())
+                msgs.Add("Invalid request", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                account = Account.LoadByUid(id.ToGuid(), msgs);
+
+                if (account.IsEmpty())
+                    msgs.Add("Invalid request", MessageType.UserError);
+            }
+
+            if (msgs.HasNoErrors())
+            {
+                var fee = AfterSchoolLibrary.Billing.Platform.GetCreditCardFee(amount.ToDecimal(), account);
+                return Json(new { status = "ok", creditCardFee = fee, creditCardFeeFormatted = fee.ToCurrency() }, JsonRequestBehavior.AllowGet);
+
+            }
+
+            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
         public ActionResult GetCartItem(string uid)
         {
             if (!IsRequestFromApp())

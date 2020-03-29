@@ -174,6 +174,11 @@ namespace AfterSchool.Controllers
             if (account.IsEmpty())
                 return HttpNotFound();
 
+            ViewBag.Sources = SessionVariables.CurrentAccount.GetStripeSources(msgs);
+            ViewBag.BankAccounts = SessionVariables.CurrentAccount.GetStripeBankAccounts(msgs);
+            ViewBag.AccountProfile = account.GetAccountProfile(msgs);
+            ViewBag.Messages = msgs;
+
             return View(account);
         }
 

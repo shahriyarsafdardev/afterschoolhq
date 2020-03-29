@@ -422,6 +422,15 @@ namespace AfterSchoolLibrary.Models
 
         }
 
+        public string PayUrl
+        {
+            get
+            {
+                return $"{HomePageUrl}/pay";
+            }
+
+        }
+
         public string ShortHomePageUrl
         {
             get

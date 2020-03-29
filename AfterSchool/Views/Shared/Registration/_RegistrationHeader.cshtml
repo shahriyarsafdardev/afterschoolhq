@@ -7,6 +7,7 @@
     var midColSpan = 7;
     var showFollow = false;
     var showUnfollow = true;
+    var hideButtons = false;
 
     if (Model.ParticipationObject.IsNotEmpty())
     {
@@ -29,6 +30,11 @@
 
         showFollow = !isFollowing;
         showUnfollow = isFollowing;
+    }
+
+    if (ViewData["hidebuttons"] != null)
+    {
+        hideButtons = ViewData["hidebuttons"].ToString().ToBoolean();
     }
 }
 
@@ -67,7 +73,7 @@
                 }
             </div>
             
-            @if (Model.ParticipationObject.IsEmpty())
+            @if (Model.ParticipationObject.IsEmpty() && !hideButtons)
             {
                 <div class="col-md-3">
                     <div class="pull-right padding-v-20">
@@ -108,6 +114,14 @@
                                 <i class="icon icon-left s7-gleam"></i>
                                 View @UILabel.ActivityLabel(ActivityType.Activity, true)
                             </button>
+
+                            if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentAccount.HasRegistrationsWith(Model.Account))
+                            {
+                                <button onclick="location.href='@Model.Account.PayUrl'" class="btn btn-header-action">
+                                    <i class="icon icon-left s7-credit"></i>
+                                    Make A Payment
+                                </button>
+                            }
                         }
                         else
                         {

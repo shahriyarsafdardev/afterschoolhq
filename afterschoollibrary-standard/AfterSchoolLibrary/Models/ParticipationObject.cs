@@ -663,7 +663,7 @@ namespace AfterSchoolLibrary.Models
         public decimal GetConvenienceFee(FeesPaidByType feesPaidByType)
         {
             if (Cost.HasValue && PaymentAccount.ConvenienceFeesPaidBy == feesPaidByType && !UseStripeConnectedAccount)
-                return Billing.Platform.GetConvenienceFee(Cost.Value, PaymentAccount);
+                return Billing.Platform.GetConvenienceFee(Cost.Value);
 
             return 0;
         }

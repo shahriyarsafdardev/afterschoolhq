@@ -380,6 +380,42 @@ namespace AfterSchoolLibrary.Models
             return dq.GetCount(msgs) > 0;
         }
 
+        public static bool ExistsByParticipationObjectsByRegistrants(List<ParticipationObject> participationObjects, List<int> registrantIds, List<RegistrationAssignmentType> assignmentTypes, bool? hasParentalConsent, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseParameterizedQuery = false;
+
+            if (participationObjects.Any())
+            {
+                var dcs1 = new DatabaseCriterias(LogicalOperatorType.Or);
+
+                participationObjects.ForEach(participationObject => {
+                    var dcs2 = new DatabaseCriterias(LogicalOperatorType.And);
+                    dcs2.Add(ObjectMap["participationObjectId"], participationObject.ObjectID);
+                    dcs2.Add(ObjectMap["participationObjectTypeId"], (int)participationObject.ObjectType);
+                    dcs1.Add(dcs2);
+                });
+
+                dq.Criterias.Add(dcs1);
+            }
+
+            dq.Criterias.Add(ObjectMap["RegistrantId"], registrantIds, DatabaseCriteriaOperatorEnum.In);
+
+            if (assignmentTypes.IsNotEmpty() && assignmentTypes.Count > 0)
+                dq.Criterias.Add(ObjectMap["AssignmentTypeId"], assignmentTypes.Select(x => (int)x).ToArray(), DatabaseCriteriaOperatorEnum.In);
+
+            if (hasParentalConsent.HasValue)
+            {
+                var criteriaOperator = hasParentalConsent.Value ? DatabaseCriteriaOperatorEnum.IsNot : DatabaseCriteriaOperatorEnum.Is;
+
+                dq.Joins.Add(Registration.ObjectMap["ID"], ObjectMap["RegistrationId"], DatabaseJoinTypeEnum.InnerJoin);
+                dq.Criterias.Add(Registration.ObjectMap["ESignature"], DBNull.Value, criteriaOperator);
+            }
+
+            return dq.GetCount(msgs) > 0;
+        }
+
         private Registration _Registration = null;
         public Registration GetRegistration(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
