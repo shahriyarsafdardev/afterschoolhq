@@ -9,11 +9,6 @@
     var showUnfollow = true;
     var hideButtons = false;
 
-    if (Model.ParticipationObject.IsNotEmpty())
-    {
-        midColSpan = 10;
-    }
-
     if (Model.HeaderUrl.IsNotEmpty())
     {
         regHeaderStyle = $"background-image: linear-gradient(rgba(0, 0, 0, .5), rgba(0, 0, 0, .5)), url({Model.HeaderUrl})";
@@ -35,6 +30,12 @@
     if (ViewData["hidebuttons"] != null)
     {
         hideButtons = ViewData["hidebuttons"].ToString().ToBoolean();
+    }
+
+    if (Model.ParticipationObject.IsNotEmpty() || hideButtons)
+    {
+        midColSpan = 10;
+        hideButtons = true;
     }
 }
 
@@ -73,7 +74,7 @@
                 }
             </div>
             
-            @if (Model.ParticipationObject.IsEmpty() && !hideButtons)
+            @if (!hideButtons)
             {
                 <div class="col-md-3">
                     <div class="pull-right padding-v-20">

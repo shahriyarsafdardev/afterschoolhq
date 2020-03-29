@@ -249,7 +249,7 @@
                                             @transaction.PaymentTypeId.ToString().SplitByUpperCase()
                                         }
                                     </td>
-                                    <td>
+                                    <td class="text-center">
                                         @if (transaction.IsCharge() && !transaction.IsTotallyRefunded(false))
                                         {
                                             var hasUnfulfilledRequest = transaction.HasUnfulfilledRefundRequests();
