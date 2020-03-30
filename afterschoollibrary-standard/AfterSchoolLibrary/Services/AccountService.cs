@@ -2446,6 +2446,9 @@ namespace AfterSchoolLibrary.Services
                         loggedInUser: loggedInUser,
                         msgs: amsgs,
                         dc: adc);
+
+                    // subscribe to the account
+                    checkoutObject.BillingAccount.AddOrUpdateSubscriber(loggedInUser, SubscriberStatus.Subscribed, loggedInUser, amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {

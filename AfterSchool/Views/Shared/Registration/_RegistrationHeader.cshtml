@@ -85,28 +85,31 @@
             
             @if (!hideButtons)
             {
+                var followButtonAttrs = $"class=\"btn btn-header-action {(isFollowing ? "hide" : "")} md-trigger\" data-modal=\"modal-login\" onclick=\"setLoginAction(function (callback) {{ follow(callback); }})\" id=\"btn-follow\"";
+
+                if (SessionVariables.CurrentUser.IsNotEmpty())
+                {
+                    followButtonAttrs = $"onclick=\"follow()\" class=\"btn btn-header-action {(isFollowing ? "hide" : "")}\" id=\"btn-follow\"";
+                }
+
                 <div class="col-lg-3 col-md-12">
                     <div class="padding-v-20 text-center">
-
-                        @if (SessionVariables.CurrentUser.IsNotEmpty())
-                        {
-                            <div>
-                                <div class="btn-group @(!isFollowing ? "hide" : "")" style="width:100%;" id="btn-unfollow">
-                                    <button class="btn btn-register dropdown-toggle" data-toggle="dropdown">
-                                        Following
-                                        <span class="caret"></span>
-                                    </button>
-                                    <div class="dropdown-menu pointer" style="width:100%;">
-                                        <a class="dropdown-item text-center" href="#" onclick="unfollow()" style="display: inline">Unfollow</a>
-                                    </div>
-                                </div>
-
-                                <button onclick="follow()" class="btn btn-header-action @(isFollowing ? "hide" : "")" id="btn-follow">
-                                    <i class="icon icon-left s7-add-user"></i>
-                                    Follow <span class="">Educator</span>
+                        
+                        <div>
+                            <div class="btn-group @(!isFollowing ? "hide" : "")" style="width:100%;" id="btn-unfollow">
+                                <button class="btn btn-register dropdown-toggle" data-toggle="dropdown">
+                                    Following
+                                    <span class="caret"></span>
                                 </button>
+                                <div class="dropdown-menu pointer" style="width:100%;">
+                                    <a class="dropdown-item text-center" href="#" onclick="unfollow()" style="display: inline">Unfollow</a>
+                                </div>
                             </div>
-                        }
+                            <button @Html.Raw(followButtonAttrs)>
+                                <i class="icon icon-left s7-add-user"></i>
+                                Follow <span class="">Educator</span>
+                            </button>
+                        </div>
 
                         <button onclick="share()" class="btn btn-header-action hide">
                             <i class="icon icon-left ion-share"></i>
@@ -164,7 +167,7 @@
 </div>
 
 <script>
-    function follow() {
+    function follow(callback) {
         $('#btn-follow').val('...');
         $('#btn-follow').prop('disabled', true);
 
@@ -173,9 +176,13 @@
             if (data && data.status == 'ok') {
                 
                 $('#btn-follow').addClass('hide');
-                $('#btn-unfollow').removeClass('hide');
+                $('#btn-unfollow').removeClass('hide');                
 
-                Notifications.showMessage('Success', '<p>You are now following <strong>@Model.Account.Name</strong>.</p><p>You will receive notifications when @Model.Account.Name publishes new activities.</p>', true);
+                if (callback) {
+                    callback();
+                } else {
+                    Notifications.showMessage('Success', '<p>You are now following <strong>@Model.Account.Name</strong>.</p><p>You will receive notifications when @Model.Account.Name publishes new activities.</p>', true);
+                }
                 
             } else {
                 Notifications.showErrors(data.messages);
@@ -185,7 +192,7 @@
         });
     }
 
-    function unfollow() {
+    function unfollow(callback) {
         $('#btn-follow').val('...');
         $('#btn-follow').prop('disabled', true);
 
@@ -195,6 +202,10 @@
                 
                 $('#btn-follow').removeClass('hide');
                 $('#btn-unfollow').addClass('hide');
+
+                if (callback) {
+                    callback();
+                }
                 
             } else {
                 Notifications.showErrors(data.messages);

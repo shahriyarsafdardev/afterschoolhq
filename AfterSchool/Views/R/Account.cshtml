@@ -15,6 +15,7 @@
     var takeActivities = 3;
     var locations = (List<Location>)ViewBag.Locations;
     var accountProperties = (List<AccountProperty>)ViewBag.AccountProperties;
+    var followers = Model.GetSubscriberCount();
 }
 
 @{
@@ -38,10 +39,22 @@
         <div class="panel panel-alt6">
             <div class="panel-heading" style="width: 100%;">
                 <div class="row">
-                    <div class="col-md-12">
-                        <h3 class="text-center">
+                    <div class="col-lg-4">
+                        <h4 class="text-center">
                             Serving @gradeLevelStart.Name - @gradeLevelEnd.Name Grade
-                        </h3>
+                        </h4>
+                    </div>
+                    <div class="col-lg-4">
+                        <h4 class="text-center">
+                            Serving @gradeLevelStart.Name - @gradeLevelEnd.Name Grade
+                        </h4>
+                    </div>
+                    <div class="col-lg-4">
+                        <h4 class="text-center">
+                            <span class="badge badge-gray">
+                                @followers Followers
+                            </span>
+                        </h4>
                     </div>
                 </div>
             </div>
