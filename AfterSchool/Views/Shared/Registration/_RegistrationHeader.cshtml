@@ -130,7 +130,7 @@
                                 View @UILabel.ActivityLabel(ActivityType.Activity, true)
                             </button>
 
-                            if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentAccount.HasRegistrationsWith(Model.Account))
+                            if (SessionVariables.CurrentUser.IsNotEmpty())
                             {
                                 <button onclick="location.href='@Model.Account.PayUrl'" class="btn btn-header-action">
                                     <i class="icon icon-left s7-credit"></i>
