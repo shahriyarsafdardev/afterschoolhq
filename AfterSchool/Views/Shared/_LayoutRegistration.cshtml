@@ -1,13 +1,30 @@
-﻿<!DOCTYPE html>
+﻿@{ 
+    var accountProfile = (AccountProfile)ViewBag.AccountProfile;
+    var account = accountProfile?.GetAccount();
+    var author = account?.Name;
+    var description = accountProfile?.Headline;
+    var propertyTypes = new List<AccountPropertyType>() { AccountPropertyType.AcademicSubjects, AccountPropertyType.Classifications, AccountPropertyType.PricingOption, AccountPropertyType.ServiceOffered, AccountPropertyType.SoftSkills, AccountPropertyType.TeachingMethods, AccountPropertyType.TimeOffered };
+    var keywords = account.GetAccountProperties(propertyTypes).Select(x => x.Value).ToStringList(", ");
+    var previewImage = accountProfile?.GetLogoUrl();
+
+    if (previewImage.IsBlank())
+    {
+        previewImage = accountProfile?.GetHeaderImageUrl();
+    }
+}
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
+    <meta name="description" content="@description">
+    <meta name="author" content="@author">
     <link rel="shortcut icon" href="/favicon.png">
     <link href="https://fonts.googleapis.com/css?family=Montserrat:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i&amp;subset=cyrillic,cyrillic-ext,latin-ext,vietnamese" rel="stylesheet">
-    <meta name="keywords" content="">
+    <meta name="keywords" content="@keywords">
+    <meta property="og:image" content="@previewImage" />
+
     <title>@ViewBag.Title - @UILabel.ProductName()</title>
 
     @{Html.RenderPartial("~/Views/Shared/_HeadIncludes.cshtml");}
@@ -15,7 +32,7 @@
 
     <link href="~/Assets/css/style-registration.css?v=1.02" type="text/css" rel="stylesheet" />
 
-    @{Html.RenderPartial("~/Views/Shared/Registration/_CustomStyle.cshtml", (AccountProfile)ViewBag.AccountProfile ?? new AccountProfile());}
+    @{Html.RenderPartial("~/Views/Shared/Registration/_CustomStyle.cshtml", accountProfile);}
 
     @*@Html.Raw(SessionVariables.CurrentAccount?.GetAccountProperty(AccountPropertyType.FacebookAdPixel)?.Value)*@
     @RenderSection("fbadevents", required: false)
