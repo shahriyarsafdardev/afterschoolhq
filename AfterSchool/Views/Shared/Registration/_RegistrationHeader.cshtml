@@ -11,7 +11,7 @@
 
     if (Model.HeaderUrl.IsNotEmpty())
     {
-        regHeaderStyle = $"background-image: linear-gradient(rgba(0, 0, 0, .5), rgba(0, 0, 0, .5)), url({Model.HeaderUrl})";
+        regHeaderStyle = $"background-image: linear-gradient(rgba(0, 0, 0, .8), rgba(0, 0, 0, .8)), url({Model.HeaderUrl})";
     }
 
     if (Model.LogoUrl.IsNotEmpty())
@@ -103,7 +103,7 @@
 
                                 <button onclick="follow()" class="btn btn-header-action @(isFollowing ? "hide" : "")" id="btn-follow">
                                     <i class="icon icon-left s7-add-user"></i>
-                                    Follow Educator
+                                    Follow <span class="">Educator</span>
                                 </button>
                             </div>
                         }
@@ -127,21 +127,21 @@
                         {
                             <button onclick="location.href='@Model.Account.BrowseUrl'" class="btn btn-header-action">
                                 <i class="icon icon-left s7-gleam"></i>
-                                View @UILabel.ActivityLabel(ActivityType.Activity, true)
+                                <span class="">View @UILabel.ActivityLabel(ActivityType.Activity, true)</span>
                             </button>
                             
                             if (SessionVariables.CurrentUser.IsNotEmpty())
                             {
                                 <button onclick="location.href='@Model.Account.PayUrl'" class="btn btn-header-action">
                                     <i class="icon icon-left s7-credit"></i>
-                                    Make A Payment
+                                    <span class="">Make A Payment</span>
                                 </button>
                             }
                             else
                             {
                                 <button type="button" class="btn btn-header-action md-trigger" data-modal="modal-login" onclick="setLoginRedirect('@Model.Account.PayUrl')" >
                                     <i class="icon icon-left s7-credit"></i>
-                                    Make A Payment
+                                    <span class="">Make A Payment</span>
                                 </button>
                             }
                         }
@@ -149,7 +149,7 @@
                         {
                             <button onclick="interested()" class="btn btn-header-action hide">
                                 <i class="icon icon-left s7-bell"></i>
-                                I'm Interested
+                                <span class="">I'm Interested</span>
                             </button>
                         }
                     </div>
