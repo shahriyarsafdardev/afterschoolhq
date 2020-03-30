@@ -87,8 +87,10 @@
 
             if ($(this).val() == '@((int)ActivityLocationType.Physical)') {
                 $('#physical-location').removeClass('hide');
+                $('.my-location').prop("required", true);
             } else {
                 $('#physical-location').addClass('hide');
+                $('.my-location').prop("required", false);
             }
 
         });
