@@ -165,10 +165,10 @@ namespace AfterSchoolLibrary.Services
                     profile.AddProperties(timesOffered, AccountPropertyType.TimeOffered, loggedInUser, amsgs, adc);
                     profile.AddProperties(pricingOptions, AccountPropertyType.PricingOption, loggedInUser, amsgs, adc);
 
-                    profile.AddProperties(classifications.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.Classifications, loggedInUser, msgs, dc);
-                    profile.AddProperties(softskills.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.SoftSkills, loggedInUser, msgs, dc);
-                    profile.AddProperties(academicsubjects.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.AcademicSubjects, loggedInUser, msgs, dc);
-                    profile.AddProperties(teachingmethods.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.TeachingMethods, loggedInUser, msgs, dc);
+                    profile.AddProperties(classifications.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.Classifications, loggedInUser, amsgs, adc);
+                    profile.AddProperties(softskills.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.SoftSkills, loggedInUser, amsgs, adc);
+                    profile.AddProperties(academicsubjects.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.AcademicSubjects, loggedInUser, amsgs, adc);
+                    profile.AddProperties(teachingmethods.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.TeachingMethods, loggedInUser, amsgs, adc);
 
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
