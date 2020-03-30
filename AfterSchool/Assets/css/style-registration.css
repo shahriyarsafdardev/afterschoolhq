@@ -496,3 +496,9 @@ body.registration {
     color: #333;
     border-color: #333;
 }
+
+.footer-social-icon {
+    display: inline-block;
+    width: 80px;
+    text-align: center;
+}

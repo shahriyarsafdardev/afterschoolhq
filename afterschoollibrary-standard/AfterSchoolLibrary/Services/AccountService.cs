@@ -2446,6 +2446,9 @@ namespace AfterSchoolLibrary.Services
                         loggedInUser: loggedInUser,
                         msgs: amsgs,
                         dc: adc);
+
+                    // subscribe to the account
+                    checkoutObject.BillingAccount.AddOrUpdateSubscriber(loggedInUser, SubscriberStatus.Subscribed, loggedInUser, amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {
@@ -3072,24 +3075,24 @@ namespace AfterSchoolLibrary.Services
 
         #region Stats
 
-        public static decimal GetTotalHoursEnrolled(this Account account, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        public static decimal GetTotalHoursEnrolled(this Account account, DateTime? startDateTime = null, DateTime? endDateTime = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Account.GetTotalMinutesEnrolled(account.ID.Value, startDateTime, endDateTime, msgs, dc) / 60;
         }
 
-        public static int GetTotalSeatsOffered(this Account account, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        public static int GetTotalSeatsOffered(this Account account, DateTime? startDateTime = null, DateTime? endDateTime = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Account.GetTotalSeatsOffered(account.ID.Value, startDateTime, endDateTime, msgs, dc) / 60;
+            return Account.GetTotalSeatsOffered(account.ID.Value, startDateTime, endDateTime, msgs, dc);
         }
 
-        public static decimal GetTotalHoursOffered(this Account account, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        public static decimal GetTotalHoursOffered(this Account account, DateTime? startDateTime = null, DateTime? endDateTime = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Account.GetTotalMinutesOffered(account.ID.Value, startDateTime, endDateTime, msgs, dc) / 60;
         }
 
-        public static int GetTotalStudentsServed(this Account account, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        public static int GetTotalStudentsServed(this Account account, DateTime? startDateTime = null, DateTime? endDateTime = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Account.GetTotalStudentsServed(account.ID.Value, startDateTime, endDateTime, msgs, dc) / 60;
+            return Account.GetTotalStudentsServed(account.ID.Value, startDateTime, endDateTime, msgs, dc);
         }
 
         public static List<(string ActivityName, int RegistrationCount)> GetRegistrationCountByActivity(this Account account, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)

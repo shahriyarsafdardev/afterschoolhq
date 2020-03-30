@@ -16,6 +16,8 @@ namespace AfterSchool.Models
         public Account Account { get; set; }
         public AccountProfile AccountProfile { get; set; }
         public ParticipationObject ParticipationObject { get; set; }
+        public decimal NumberOfHoursEnrolled { get; set; }
+        public decimal NumberOfStudentsServed { get; set; }
 
         public int Followers { get; set; }
 
@@ -37,6 +39,8 @@ namespace AfterSchool.Models
             IsDemo = !Account.ID.HasValue;
             PrimaryColor = AccountProfile?.PrimaryColor;
             Followers = Account.GetSubscriberCount();
+            NumberOfHoursEnrolled = Account.GetTotalHoursEnrolled();
+            NumberOfStudentsServed = Account.GetTotalStudentsServed();
         }
 
         public RegistrationHeaderViewModel(ParticipationObject participationObject, bool IsDuringRegistration)
@@ -50,6 +54,8 @@ namespace AfterSchool.Models
             Title = ParticipationObject.Name;
             PrimaryColor = AccountProfile?.PrimaryColor;
             Followers = Account.GetSubscriberCount();
+            NumberOfHoursEnrolled = Account.GetTotalHoursEnrolled();
+            NumberOfStudentsServed = Account.GetTotalStudentsServed();
 
             if (IsDuringRegistration)
                 Headline = "Registration";
@@ -70,6 +76,8 @@ namespace AfterSchool.Models
             IsDemo = !Account.ID.HasValue;
             PrimaryColor = AccountProfile?.PrimaryColor;
             Followers = Account.GetSubscriberCount();
+            NumberOfHoursEnrolled = Account.GetTotalHoursEnrolled();
+            NumberOfStudentsServed = Account.GetTotalStudentsServed();
         }
 
         public RegistrationHeaderViewModel(Account account, AccountProfile profile)
@@ -84,6 +92,8 @@ namespace AfterSchool.Models
             IsDemo = !account.ID.HasValue;
             PrimaryColor = profile?.PrimaryColor;
             Followers = Account.GetSubscriberCount();
+            NumberOfHoursEnrolled = Account.GetTotalHoursEnrolled();
+            NumberOfStudentsServed = Account.GetTotalStudentsServed();
         }
 
         public RegistrationHeaderViewModel(Account account, AccountProfile profile, ParticipationObject session)
@@ -99,6 +109,8 @@ namespace AfterSchool.Models
             IsDemo = !account.ID.HasValue;
             PrimaryColor = profile?.PrimaryColor;
             Followers = Account.GetSubscriberCount();
+            NumberOfHoursEnrolled = Account.GetTotalHoursEnrolled();
+            NumberOfStudentsServed = Account.GetTotalStudentsServed();
 
             if (session.IsNotEmpty())
                 SessionName = session.Name;
