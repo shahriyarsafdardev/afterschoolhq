@@ -345,7 +345,7 @@ namespace AfterSchoolLibrary.Services
                 ownerAccount = subscriptionPlan.GetAccount(msgs, dc);
 
             if (subscriptionPlan.CostPerPeriod.HasValue && !ownerAccount.HasFeature(FeatureType.UseStripeConnectedAccount))
-                return Billing.Platform.GetConvenienceFee(subscriptionPlan.CostPerPeriod.Value, ownerAccount);
+                return Billing.Platform.GetConvenienceFee(subscriptionPlan.CostPerPeriod.Value);
 
             return 0;
         }

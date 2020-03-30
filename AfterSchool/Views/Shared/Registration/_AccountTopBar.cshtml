@@ -34,7 +34,7 @@
             &laquo; Return to @session.Name Home
         </a>
     }
-    else if (Model.IsNotEmpty() && !($"{Model.HomePageUrl}/browse".ToLower().Contains(Request.Url.AbsolutePath.ToLower())))
+    else if (Model.IsNotEmpty() && !(Model.HomePageUrl.ToLower().Contains(Request.Url.AbsolutePath.ToLower())))
     {
         <a href="@Model.HomePageUrl" class="btn btn-link">
             &laquo; Return to @Model.Name Home

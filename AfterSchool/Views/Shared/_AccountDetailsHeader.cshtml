@@ -20,7 +20,7 @@
             <a href="@Url.Action("location", "account")" class="btn btn-alt6@(actionName == "location" ? "-active" : "")">Location</a>
             <a href="@Url.Action("forms", "account")" class="btn btn-alt6@(actionName == "forms" ? "-active" : "")">Forms</a>
 
-            <a href="@Url.Action("style", "account")" class="hide btn btn-alt6@(actionName == "style" ? "-active" : "")">Content</a>
+            <a href="@Url.Action("style", "account")" class="btn btn-alt6@(actionName == "style" ? "-active" : "")">Profile Setup</a>
             <a href="@Url.Action("integrations", "account")" class="hide btn btn-alt6@(actionName == "integrations" ? "-active" : "")">Integrations</a>
             <a href="@Url.Action(defaultPaymentsAction, "account")" class="btn btn-alt6@(actionName == defaultPaymentsAction ? "-active" : "")">Accept Payments</a>
             @if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.ActivityProvider)
@@ -44,6 +44,7 @@
                 <option value="@Url.Action("edit", "account")">Details</option>
                 <option value="@Url.Action("location", "account")">Location</option>
                 <option value="@Url.Action("forms", "account")">Forms</option>
+                <option value="@Url.Action("style", "account")">Profile Setup</option>
                 <option value="@Url.Action(defaultPaymentsAction, "account")">Accept Payments</option>
                 @if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.ActivityProvider)
                 {

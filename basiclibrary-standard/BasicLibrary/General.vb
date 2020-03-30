@@ -904,6 +904,7 @@ Public Class Utilities
     Public Const NoAlphaNumericCharactersRegEx As String = "[^A-Za-z0-9]"
     Public Const QuestionsRegEx As String = "((?<=\.|\?|\!)|^)[\s]?[\w\s\d\,\-\$#@%&\*\(\)\+\=\{\}\[\]\|:;\<\>~`/\^'""]*\?"
     Public Const NonNumericCharsRegEx As String = "[$,A-Za-z\(\)]"
+    Public Const WebsiteRegEx As String = "^(http(s)?\://)?[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(/\S*)?$"
 
     Private Shared _connectionString As String
     Public Shared Property ConnectionString() As String

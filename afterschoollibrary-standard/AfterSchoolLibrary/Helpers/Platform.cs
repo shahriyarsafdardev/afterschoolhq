@@ -15,7 +15,7 @@ namespace AfterSchoolLibrary.Billing
                 return 0;
 
             // Because stripe will take their charge out of the total charge with the convenience fee
-            var costWithConvenienceFee = cost + GetConvenienceFee(cost, billingAccount);
+            var costWithConvenienceFee = cost + GetConvenienceFee(cost);
             var stripeFee = StripeHelper.GetStripeFee(costWithConvenienceFee, billingAccount.IsCreditCardFeeTakenOutOfCost);
 
             // always round up to nearest dollar or .5
@@ -26,7 +26,7 @@ namespace AfterSchoolLibrary.Billing
             return Math.Ceiling(stripeFee) - .01M;
         }
 
-        public static decimal GetConvenienceFee(decimal cost, Account billingAccount)
+        public static decimal GetConvenienceFee(decimal cost)
         {
             var fee = 0M;
 
@@ -34,14 +34,6 @@ namespace AfterSchoolLibrary.Billing
                 return 0;
 
             fee = (cost * ConveniencePercentFee) + ConvenienceFlatFee;
-            //if (billingAccount.IsConvenienceFeeTakenOutOfCost)
-            //    fee = (cost * ConveniencePercentFee) + ConvenienceFlatFee;
-            //else
-            //    fee = ((cost + ConvenienceFlatFee) / (1 - ConveniencePercentFee)) - cost;
-
-            // always round up to nearest dollar or .5
-            // result should always be 3.50 or 4.00 or 2.50 or 3.00, etc. Max of $10
-            // return Math.Min(Math.Ceiling(fee * 2) / 2, 10M);
 
             var finalFee = Math.Ceiling(fee * 2) / 2;
 
@@ -53,12 +45,12 @@ namespace AfterSchoolLibrary.Billing
 
         public static decimal GetTotalFees(decimal cost, Account billingAccount)
         {
-            return GetConvenienceFee(cost, billingAccount) + GetCreditCardFee(cost, billingAccount);
+            return GetConvenienceFee(cost) + GetCreditCardFee(cost, billingAccount);
         }
 
         public static decimal GetCostWithConvenienceFee(decimal cost, Account billingAccount)
         {
-            return cost + GetConvenienceFee(cost, billingAccount);
+            return cost + GetConvenienceFee(cost);
         }
 
         public static decimal GetFinalTotalCost(decimal cost, Account billingAccount)

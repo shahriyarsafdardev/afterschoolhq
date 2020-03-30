@@ -9,7 +9,7 @@
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-@{ 
+@{
     Html.RenderPartial(
         "~/Views/Shared/Registration/_AccountTopBar.cshtml",
         SessionVariables.RegistrationStartPageAccount,
@@ -21,7 +21,17 @@
     );
 }
 
-@{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", participationObject); }
+@{
+    Html.RenderPartial
+    (
+        "~/Views/Shared/Registration/_RegistrationHeader.cshtml",
+        new RegistrationHeaderViewModel(participationObject, true),
+        new ViewDataDictionary()
+        {
+            { "hidebuttons", true }
+        }
+    );
+}
 
 <div>
     <div class="col-md-12">
@@ -48,7 +58,7 @@
                         }
 
                         <div class="padding-v-20">
-                            <button type="submit" id="btn-add-parent" class="btn btn-register btn-lg">Save &amp; Continue &raquo;</button>
+                            <button type="submit" id="btn-add-parent" class="btn btn-register-primary btn-lg">Save &amp; Continue &raquo;</button>
                         </div>
 
                         <div class="row">
@@ -82,6 +92,6 @@
         {
             { "IsDuringCheckout", true },
             { "AllowToModifyCart", false }
-        }
+                    }
     );
 }

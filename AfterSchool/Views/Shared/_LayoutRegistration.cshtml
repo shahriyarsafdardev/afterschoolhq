@@ -7,15 +7,17 @@
     <meta name="author" content="">
     <link rel="shortcut icon" href="/favicon.png">
     <link href="https://fonts.googleapis.com/css?family=Montserrat:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i&amp;subset=cyrillic,cyrillic-ext,latin-ext,vietnamese" rel="stylesheet">
-    <meta name="keywords" content="app, responsive, jquery, bootstrap, dashboard, admin">
+    <meta name="keywords" content="">
     <title>@ViewBag.Title - @UILabel.ProductName()</title>
 
     @{Html.RenderPartial("~/Views/Shared/_HeadIncludes.cshtml");}
     @{Html.RenderPartial("~/Views/Shared/_ZendeskWidget.cshtml");}
 
-    <link href="~/Assets/css/style-registration.css?v=1.01" type="text/css" rel="stylesheet" />
+    <link href="~/Assets/css/style-registration.css?v=1.02" type="text/css" rel="stylesheet" />
 
-    @Html.Raw(SessionVariables.CurrentAccount?.GetAccountProperty(AccountPropertyType.FacebookAdPixel)?.Value)
+    @{Html.RenderPartial("~/Views/Shared/Registration/_CustomStyle.cshtml", (AccountProfile)ViewBag.AccountProfile ?? new AccountProfile());}
+
+    @*@Html.Raw(SessionVariables.CurrentAccount?.GetAccountProperty(AccountPropertyType.FacebookAdPixel)?.Value)*@
     @RenderSection("fbadevents", required: false)
     @RenderSection("header", required: false)
 

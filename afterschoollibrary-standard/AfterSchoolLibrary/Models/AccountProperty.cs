@@ -172,12 +172,22 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static AccountProperty LoadByAccountIdByAccountPropertyTypeId(int AccountId, AccountPropertyType AccountPropertyTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<AccountProperty> LoadByAccountIdByAccountPropertyTypeId(int AccountId, AccountPropertyType AccountPropertyTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
 			dq.Criterias.Add(ObjectMap["AccountPropertyTypeId"], AccountPropertyTypeId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static AccountProperty LoadByAccountIdByAccountPropertyTypeIdByValue(int AccountId, AccountPropertyType AccountPropertyTypeId, string Value, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+			dq.Criterias.Add(ObjectMap["AccountPropertyTypeId"], AccountPropertyTypeId);
+			dq.Criterias.Add(ObjectMap["Value"], Value);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
@@ -205,6 +215,15 @@ namespace AfterSchoolLibrary.Models
 
 		#region "UserDefined"
 
-        #endregion
+		public static List<AccountProperty> LoadByAccountIdByAccountPropertyTypes(int AccountId, List<AccountPropertyType> AccountPropertyTypeIds, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+			dq.Criterias.Add(ObjectMap["AccountPropertyTypeId"], AccountPropertyTypeIds.Select(x => (int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		#endregion
     }
 }

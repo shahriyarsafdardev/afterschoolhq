@@ -53,19 +53,19 @@ namespace AfterSchoolLibrary.Services
             if (Utilities.RemoveHTMLAndEntities(activity.Details).IsBlank())
                 totalErrors++;
 
-            if (activity.ActivityTypeId != ActivityType.PermissionSlip)
-            {
-                totalFields++;
-                if (!activity.HasSchedule || activity.ActivityTypeId == ActivityType.PermissionSlip)
-                    totalErrors++;
-            }
+            //if (activity.ActivityTypeId != ActivityType.PermissionSlip)
+            //{
+            //    totalFields++;
+            //    if (!activity.HasSchedule || activity.ActivityTypeId == ActivityType.PermissionSlip)
+            //        totalErrors++;
+            //}
 
-            if (activity.ActivityTypeId.NotIn(new List<ActivityType>() { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
-            {
-                totalFields++;
-                if (!activity.LocationId.HasValue)
-                    totalErrors++;
-            }
+            //if (activity.ActivityTypeId.NotIn(new List<ActivityType>() { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
+            //{
+            //    totalFields++;
+            //    if (!activity.LocationId.HasValue)
+            //        totalErrors++;
+            //}
 
             //totalFields++;
             //if (CostPerRegistrant.HasValue && CostPerRegistrant.Value > 0 && !AllowToPayLater && !AcceptCreditCard)
@@ -789,6 +789,7 @@ namespace AfterSchoolLibrary.Services
             var postalcode = values.GetValueOrDefault("postalcode");
             var ismylocation = values.GetValueOrDefault("mylocation");
             var locationtype = values.GetValueOrDefault("locationtype");
+            var activitylocationtype = values.GetValueOrDefault("activitylocationtype");
             var cost = values.GetValueOrDefault("cost");
             var costdescription = values.GetValueOrDefault("costdescription");
             var acceptpaypal = values.GetValueOrDefault("acceptpaypal");
@@ -913,8 +914,6 @@ namespace AfterSchoolLibrary.Services
 
                 if (activityType.In(new ActivityType[] { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
                     activity.IsInviteOnly = true;
-                else
-                    activity.LocationId = account.DefaultLocationId;
 
                 if (group.IsEmpty() && !form.IsNumber())
                     msgs.Add("Registration Form is required", MessageType.UserError);
@@ -1109,29 +1108,39 @@ namespace AfterSchoolLibrary.Services
                                 ));
 
                         //setup location
-                        if (amsgs.HasNoErrors() && (location.IsNotEmpty() || locationname.IsNotEmpty()))
+                        if (activitylocationtype.IsNotEmpty() && activitylocationtype.IsNumber())
                         {
-                            var hostAccountId = ismylocation.IfEmpty("").ToBoolean() ? account.ID : new int?();
+                            activity.ActivityLocationTypeId = activitylocationtype.ToString().ToInteger().ToEnum<ActivityLocationType>();
+                            amsgs.AddRange(activity.Save(adc));
 
-                            amsgs.AddRange(activity.SetupLocation(
-                                location.IfEmpty(""),
-                                locationname.IfEmpty(""),
-                                address1.IfEmpty(""),
-                                address2.IfEmpty(""),
-                                city.IfEmpty(""),
-                                state.IfEmpty(""),
-                                postalcode.IfEmpty(""),
-                                locationdetails.IfEmpty(""),
-                                ismylocation.IfEmpty(""),
-                                locationtype.IfEmpty(""),
-                                loggedInUserId,
-                                adc
-                                ));
+                            if (activity.ActivityLocationTypeId == ActivityLocationType.Physical)
+                            {
+                                if (amsgs.HasNoErrors() && (location.IsNotEmpty() || locationname.IsNotEmpty()))
+                                {
+                                    var hostAccountId = ismylocation.IfEmpty("").ToBoolean() ? account.ID : new int?();
 
-                            if (!account.DefaultLocationId.HasValue)
-                                msgs.AddRange(account.SetDefaultLocation(activity.LocationId.Value, loggedInUserId, dc));
+                                    amsgs.AddRange(activity.SetupLocation(
+                                        location.IfEmpty(""),
+                                        locationname.IfEmpty(""),
+                                        address1.IfEmpty(""),
+                                        address2.IfEmpty(""),
+                                        city.IfEmpty(""),
+                                        state.IfEmpty(""),
+                                        postalcode.IfEmpty(""),
+                                        locationdetails.IfEmpty(""),
+                                        ismylocation.IfEmpty(""),
+                                        locationtype.IfEmpty(""),
+                                        loggedInUserId,
+                                        adc
+                                        ));
+
+                                    if (!account.DefaultLocationId.HasValue)
+                                        msgs.AddRange(account.SetDefaultLocation(activity.LocationId.Value, loggedInUserId, dc));
+                                }
+                            }
+
                         }
-                       
+
                         //setup provider
                         if (amsgs.HasNoErrors() && activity.LeaderTypeId == ActivityLeaderType.ExternalProvider && (provider.IsNumber() || providername.IsNotEmpty()))
                             amsgs.AddRange(activity.SetupProvider(

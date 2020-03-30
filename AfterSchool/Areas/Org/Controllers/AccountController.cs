@@ -882,94 +882,169 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(form);
         }
 
+        private AccountProfile StyleViewBag(SystemMessages msgs)
+        {
+            var profile = SessionVariables.CurrentAccount.GetOrCreateAccountProfile(SessionVariables.LoggedInUser, msgs);
 
-        //[HttpGet]
-        //public ActionResult Style()
-        //{
-        //    ViewBag.AccountPackage = SessionVariables.AccountPackage;
-        //    ViewBag.Messages = new SystemMessages();
-        //    ViewBag.LandingPage = SessionVariables.CurrentAccount.GetAccountProperty(AccountPropertyType.LandingPageText);
-        //    ViewBag.RegThankYou = SessionVariables.CurrentAccount.GetAccountProperty(AccountPropertyType.RegistrationThankYouEmail);
-        //    return View(SessionVariables.CurrentAccount);
-        //}
+            var awards = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.Award, msgs);
+            var certifications = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.Certification, msgs);
+            var photos = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.Photo, msgs);
+            var classifications = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.Classifications);
+            var softSkills = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.SoftSkills);
+            var academicSubjects = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.AcademicSubjects);
+            var teachingMethods = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.TeachingMethods);
+            var servicesOffered = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.ServiceOffered);
+            var timesOffered = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.TimeOffered);
+            var pricingOptions = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.PricingOption);
 
-        //[ValidateInput(false)]
-        //[HttpPost]
-        //public ActionResult Style(string id, string logourl, string landingpagetext, string regthankyoutext)
-        //{
-        //    var msgs = new SystemMessages();
-        //    var a = SessionVariables.CurrentAccount;
+            while (awards.Count < 5)
+                awards.Add(new AccountProperty());
 
-        //    a.LogoUrl = logourl;
+            while (certifications.Count < 5)
+                certifications.Add(new AccountProperty());
 
-        //    var landingPage = a.GetAccountProperty(AccountPropertyType.LandingPageText);
-        //    var thankyou = a.GetAccountProperty(AccountPropertyType.RegistrationThankYouEmail);
+            while (photos.Count < 6)
+                photos.Add(new AccountProperty());
 
-        //    if (landingPage.IsEmpty())
-        //    {
-        //        landingPage = new AccountProperty() { Value = landingpagetext };
-        //        landingPage.AccountPropertyTypeId = AccountPropertyType.LandingPageText;
-        //        landingPage.CreateDate = DateTime.UtcNow;
-        //        landingPage.CreatedBy = SessionVariables.LoggedInUser.ID;
-        //        landingPage.AccountId = a.ID;
-        //    }
-        //    else
-        //    {
-        //        landingPage.Value = landingpagetext;
-        //    }
+            var ah = AfterSchoolLibrary.Helpers.Utilities.GetNewAmazonHelper();
 
-        //    if (thankyou.IsEmpty())
-        //    {
-        //        thankyou = new AccountProperty() { Value = regthankyoutext };
-        //        thankyou.AccountPropertyTypeId = AccountPropertyType.RegistrationThankYouEmail;
-        //        thankyou.CreateDate = DateTime.UtcNow;
-        //        thankyou.CreatedBy = SessionVariables.LoggedInUser.ID;
-        //        thankyou.AccountId = a.ID;
-        //    }
-        //    else
-        //    {
-        //        thankyou.Value = regthankyoutext;
-        //    }
+            if (profile.Logo.IsNotBlank())
+                ViewBag.LogoUrl = ah.GetFileLink(profile.Logo, true, null, true);
 
-        //    if (msgs.HasNoErrors())
-        //    {
-        //        Database.ExecuteTransaction(
-        //            action: (SystemMessages amsgs, DatabaseConnection adc) => {
-        //                a.LastModifiedDate = DateTime.UtcNow;
-        //                a.LastModifiedBy = SessionVariables.LoggedInUser.ID;
-        //                amsgs.AddRange(a.Save(adc));
+            if (profile.HeaderImage.IsNotBlank())
+                ViewBag.HeaderImageUrl = ah.GetFileLink(profile.HeaderImage, true, null, true);
 
-        //                if (amsgs.HasNoErrors())
-        //                {
-        //                    landingPage.LastModifiedDate = DateTime.UtcNow;
-        //                    landingPage.LastModifiedBy = SessionVariables.LoggedInUser.ID;
-        //                    amsgs.AddRange(landingPage.Save(adc));
-        //                }
+            photos.ForEach(photo => photo.Value = ah.GetFileLink(photo.Value, true, null, true));
 
-        //                if (amsgs.HasNoErrors())
-        //                {
-        //                    thankyou.LastModifiedDate = DateTime.UtcNow;
-        //                    thankyou.LastModifiedBy = SessionVariables.LoggedInUser.ID;
-        //                    amsgs.AddRange(thankyou.Save(adc));
-        //                }
-        //            },
-        //            onSuccess: (SystemMessages smsgs) => {
-        //                msgs.AddRange(smsgs);
-        //                msgs.Add("Saved Successfully", MessageType.Success);
-        //            },
-        //            onFailure: (SystemMessages fmsgs) => {
-        //                msgs.AddRange(fmsgs);
-        //            }
-        //        );
+            ViewBag.Messages = msgs;
+            ViewBag.Grades = GradeLevel.Load();
+            ViewBag.Awards = awards;
+            ViewBag.Certifications = certifications;
+            ViewBag.Photos = photos;
+            ViewBag.ServicesOffered = servicesOffered;
+            ViewBag.TimesOffered = timesOffered;
+            ViewBag.PricingOptions = pricingOptions;
+            ViewBag.Classifications = classifications;
+            ViewBag.SoftSkills = softSkills;
+            ViewBag.AcademicSubjects = academicSubjects;
+            ViewBag.TeachingMethods = teachingMethods;
 
-        //    }
+            return profile;
+        }
 
-        //    ViewBag.Messages = msgs;
-        //    ViewBag.AccountPackage = SessionVariables.AccountPackage;
-        //    ViewBag.LandingPage = landingPage;
-        //    ViewBag.RegThankYou = thankyou;
-        //    return View(a);
-        //}
+        [HttpGet]
+        public ActionResult Style()
+        {
+            var msgs = new SystemMessages();
+            return View(StyleViewBag(msgs));
+        }
+
+        [ValidateInput(false)]
+        [HttpPost]
+        public ActionResult Style(string id, string logo, string headerimage, string about, string headline, string primaryColor, string website, string mingrade, string maxgrade, string twitter, string facebook, string instagram, string linkedin, string genderrestriction, string classifications, string softskills, string academicsubjects, string teachingmethods)
+        {
+            var msgs = new SystemMessages();
+            var profile = SessionVariables.CurrentAccount.GetAccountProfile(msgs);
+            var allowedFiles = new string[] { ".png", ".jpg", ".jpeg" };
+            var maxSizeInBytes = 1024 * 1024 * 2;
+
+            if (logo.IsNotEmpty())
+            {
+                if (Request.Files["logo"].ContentLength == 0 || 
+                    !Request.Files["logo"].FileName.Contains(allowedFiles) ||
+                    Request.Files["logo"].ContentLength > maxSizeInBytes)
+                    msgs.Add("Please upload a valid jpg or png file", MessageType.UserError);
+            }
+
+            if (headerimage.IsNotEmpty())
+            {
+                if (Request.Files["headerimage"].ContentLength == 0 || 
+                    !Request.Files["headerimage"].FileName.Contains(allowedFiles) ||
+                    Request.Files["headerimage"].ContentLength > maxSizeInBytes)
+                    msgs.Add("Please upload a valid jpg or png file", MessageType.UserError);
+            }
+
+            if (website.IsNotEmpty() && !website.IsRegExMatch(BasicLibrary.Utilities.WebsiteRegEx))
+                msgs.Add("Please enter a valid website address", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                if (logo.IsNotEmpty())
+                    profile.UploadLogo(
+                        SessionVariables.CurrentAccount,
+                        Request.Files["logo"].InputStream,
+                        Request.Files["logo"].FileName,
+                        SessionVariables.CurrentUser,
+                        msgs);
+
+                if (headerimage.IsNotEmpty())
+                    profile.UploadHeaderImage(
+                        SessionVariables.CurrentAccount,
+                        Request.Files["headerimage"].InputStream,
+                        Request.Files["headerimage"].FileName,
+                        SessionVariables.CurrentUser,
+                        msgs);
+
+                
+                foreach (var key in Request.Files.AllKeys.Where(key => key.Contains("photo-")))
+                {
+                    var file = Request.Files[key];
+                    if (file.IsNotEmpty() && file.FileName.IsNotBlank())
+                    {
+                        if (file.FileName.Contains(allowedFiles) && file.ContentLength <= maxSizeInBytes)
+                        {
+                            var photoId = "";
+
+                            if (!key.Contains("new"))
+                                photoId = key.Split('-')[2];
+
+                            profile.UploadGalleryPhoto(
+                                    SessionVariables.CurrentAccount,
+                                    Request.Files[key].InputStream,
+                                    Request.Files[key].FileName,
+                                    photoId,
+                                    SessionVariables.CurrentUser,
+                                    msgs);
+                        }
+                        else
+                        {
+                            msgs.Add("Please upload a valid jpg or png file", MessageType.UserError);
+                        }
+                    }
+                }
+
+                profile.UpdateProfile(
+                    headline,
+                    about,
+                    primaryColor,
+                    website,
+                    mingrade,
+                    maxgrade,
+                    twitter,
+                    facebook,
+                    instagram,
+                    linkedin,
+                    genderrestriction,
+                    Request.Params.Filter("award-id-"),
+                    Request.Params.Filter("award-new-"),
+                    Request.Params.Filter("certification-id-"),
+                    Request.Params.Filter("certification-new-"),
+                    Request.Params.Filter("services-offered-"),
+                    Request.Params.Filter("times-offered-"),
+                    Request.Params.Filter("pricing-options-"),
+                    classifications,
+                    softskills,
+                    academicsubjects,
+                    teachingmethods,
+                    SessionVariables.CurrentUser,
+                    msgs);
+            }
+
+            if (msgs.HasNoErrors())
+                msgs.Add("Saved Successfully", MessageType.Success);
+
+            return View(StyleViewBag(msgs));
+        }
 
         //[HttpGet]
         //public ActionResult Integrations()

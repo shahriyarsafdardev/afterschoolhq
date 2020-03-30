@@ -66,6 +66,40 @@ namespace AfterSchool.Controllers
         }
 
         [HttpGet]
+        public ActionResult GetCreditCardFees(string id, string amount)
+        {
+
+            if (!IsRequestFromApp())
+                return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
+
+            var msgs = new SystemMessages();
+            Account account = null;
+
+            if (!id.IsGuid())
+                msgs.Add("Invalid request", MessageType.UserError);
+
+            if (!amount.IsNumber())
+                msgs.Add("Invalid request", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                account = Account.LoadByUid(id.ToGuid(), msgs);
+
+                if (account.IsEmpty())
+                    msgs.Add("Invalid request", MessageType.UserError);
+            }
+
+            if (msgs.HasNoErrors())
+            {
+                var fee = AfterSchoolLibrary.Billing.Platform.GetCreditCardFee(amount.ToDecimal(), account);
+                return Json(new { status = "ok", creditCardFee = fee, creditCardFeeFormatted = fee.ToCurrency() }, JsonRequestBehavior.AllowGet);
+
+            }
+
+            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
         public ActionResult GetCartItem(string uid)
         {
             if (!IsRequestFromApp())
@@ -182,6 +216,80 @@ namespace AfterSchool.Controllers
         public ActionResult HasDemoOrgName()
         {
             return Json(new { status = "ok", hasDemoOrgName = CookieVariables.DemoOrgName.IsNotBlank() }, JsonRequestBehavior.AllowGet);
+        }
+
+        #endregion
+
+        #region Profile
+
+        [HttpGet]
+        public ActionResult Follow(string id)
+        {
+            if (!IsRequestFromApp())
+                return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
+
+            var msgs = new SystemMessages();
+            Account account = null;
+
+            if (SessionVariables.CurrentUser.IsEmpty())
+                return new HttpUnauthorizedResult();
+
+            if (!id.IsGuid())
+                msgs.Add("Invalid Request", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                account = Account.LoadByUid(id.ToGuid(), msgs);
+
+                if (account.IsEmpty())
+                    msgs.Add("Invalid request", MessageType.UserError);
+            }
+
+            if (msgs.HasNoErrors())
+            {
+                account.AddOrUpdateSubscriber(SessionVariables.CurrentUser, SubscriberStatus.Subscribed, SessionVariables.CurrentUser, msgs);
+
+                if (msgs.HasNoErrors())
+                    return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+
+        }
+
+        [HttpGet]
+        public ActionResult Unfollow(string id)
+        {
+            if (!IsRequestFromApp())
+                return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
+
+            var msgs = new SystemMessages();
+            Account account = null;
+
+            if (SessionVariables.CurrentUser.IsEmpty())
+                return new HttpUnauthorizedResult();
+
+            if (!id.IsGuid())
+                msgs.Add("Invalid Request", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                account = Account.LoadByUid(id.ToGuid(), msgs);
+
+                if (account.IsEmpty())
+                    msgs.Add("Invalid request", MessageType.UserError);
+            }
+
+            if (msgs.HasNoErrors())
+            {
+                account.AddOrUpdateSubscriber(SessionVariables.CurrentUser, SubscriberStatus.Unsubscribed, SessionVariables.CurrentUser, msgs);
+
+                if (msgs.HasNoErrors())
+                    return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+
         }
 
         #endregion
@@ -365,6 +473,23 @@ namespace AfterSchool.Controllers
                 messages = msgs, 
                 schools = schoolList
             }, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public ActionResult IsInUse(string email)
+        {
+            if (!IsRequestFromApp())
+                return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
+
+            var msgs = new SystemMessages();
+
+            if (email.IsEmpty() || !email.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
+                msgs.Add("Invalid Request", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+                return Json(new { status = "ok", isInUse = WebUser.ExistsByEmail(email, msgs) }, JsonRequestBehavior.AllowGet);
+
+            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
         }
     }
 }

@@ -22,13 +22,21 @@
         new ViewDataDictionary()
         {
             { "ParticipationObject", Model }
-                }
+                        }
     );
 }
 
-<div class="reg-header">
-    <h1 class="text-center">Registering <u>@SessionVariables.CurrentRegistrant.FirstName</u> for <u>@Model.Name</u></h1>
-</div>
+@{
+    Html.RenderPartial
+    (
+        "~/Views/Shared/Registration/_RegistrationHeader.cshtml",
+        new RegistrationHeaderViewModel(Model, $"Registering <u>{SessionVariables.CurrentRegistrant.FirstName}</u> for <u>{Model.Name}</u>", ""),
+        new ViewDataDictionary()
+        {
+            { "hidebuttons", true }
+        }
+    );
+}
 
 <div>
     <div class="col-md-12">
@@ -67,7 +75,7 @@
                     </div>
 
                     <div class="padding-v-20">
-                        <button type="submit" id="btn-register" class="btn btn-register btn-lg">
+                        <button type="submit" id="btn-register" class="btn btn-register-primary btn-lg">
                             @if (!Model.ShouldParentPay())
                             {
                                 @: Complete Registration &raquo;
@@ -111,6 +119,6 @@
         new ViewDataDictionary()
         {
             { "IsDuringCheckout", true }
-                    }
+                                }
     );
 }

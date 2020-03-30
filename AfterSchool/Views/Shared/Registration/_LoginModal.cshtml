@@ -42,6 +42,8 @@
 </div>
 
 <script>
+    let authorizationFormRedirectUrl = null;
+
     function authorize() {
 
         params = 'username=' + encodeURIComponent($('#username').val()) + '&password=' + encodeURIComponent($('#password').val()) + '&source=parent-login';
@@ -58,7 +60,10 @@
                 if (data && data.status == 'ok') {
                     $('#btn-login').html('Redirecting...');
 
-                    if (data.isNewAccount) {
+                    if (authorizationFormRedirectUrl) {
+                        location.href = authorizationFormRedirectUrl;
+                    }
+                    else if (data.isNewAccount) {
                         location.reload();
                     } else {
                         location.href = '@ViewData["ReturnUrl"]';
@@ -72,5 +77,9 @@
 
             }
         )
+    }
+
+    function setLoginRedirect(url) {
+        authorizationFormRedirectUrl = url;
     }
 </script>

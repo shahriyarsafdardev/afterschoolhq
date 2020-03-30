@@ -1,7 +1,214 @@
-﻿@model ParticipationObject
+﻿@model RegistrationHeaderViewModel
 
-<div class="reg-header">
-    <div>
-        <h1 class="text-center">You are registering for: @Model.Name</h1>
+@{
+    var regHeaderStyle = "";
+    var logoUrl = "";
+    var isFollowing = false;
+    var midColSpan = 7;
+    var showFollow = false;
+    var showUnfollow = true;
+    var hideButtons = false;
+
+    if (Model.HeaderUrl.IsNotEmpty())
+    {
+        regHeaderStyle = $"background-image: linear-gradient(rgba(0, 0, 0, .5), rgba(0, 0, 0, .5)), url({Model.HeaderUrl})";
+    }
+
+    if (Model.LogoUrl.IsNotEmpty())
+    {
+        logoUrl = Model.LogoUrl;
+    }
+
+    if (SessionVariables.CurrentUser.IsNotEmpty())
+    {
+        isFollowing = SessionVariables.CurrentUser.IsSubscribedTo(Model.Account);
+
+        showFollow = !isFollowing;
+        showUnfollow = isFollowing;
+    }
+
+    if (ViewData["hidebuttons"] != null)
+    {
+        hideButtons = ViewData["hidebuttons"].ToString().ToBoolean();
+    }
+
+    if (hideButtons)
+    {
+        midColSpan = 10;
+        hideButtons = true;
+    }
+
+    if (Model.AccountProfile.IsEmpty())
+    {
+        midColSpan = 12;
+        hideButtons = true;
+    }
+    else if (logoUrl.IsBlank())
+    {
+        midColSpan = 9;
+    }
+}
+
+<div class="row">
+    <div class="reg-header" style="@regHeaderStyle">
+        <div class="reg-header-overlay col-md-8 col-md-offset-2">
+
+            @if (logoUrl.IsNotBlank())
+            {
+                <div class="col-lg-2 col-md-12">
+                    <div class="reg-header-logo">
+                        <img src="@logoUrl" onclick="location.href='@Model.Account.HomePageUrl'" class="pointer" />
+                    </div>
+                </div>
+            }
+
+            <div class="col-lg-@midColSpan col-md-12">
+                <h1 class="activity-title">
+                    <span>@Html.Raw(Model.Title)</span>
+                    @if (Model.SessionName.IsNotEmpty())
+                    {
+                        @: - @(((ParticipationObject)ViewBag.Session).Name)
+                    }
+                    @if (Model.IsDemo)
+                    {
+                        <span class="badge badge-danger">DEMO</span>
+                    }
+                </h1>
+
+                @if (Model.Headline.IsNotEmpty())
+                {
+                    <p class="reg-header-headline">
+                        @Model.Headline
+                    </p>
+                }
+            </div>
+            
+            @if (!hideButtons)
+            {
+                <div class="col-lg-3 col-md-12">
+                    <div class="padding-v-20 text-center">
+
+                        @if (SessionVariables.CurrentUser.IsNotEmpty())
+                        {
+                            <div>
+                                <div class="btn-group @(!isFollowing ? "hide" : "")" style="width:100%;" id="btn-unfollow">
+                                    <button class="btn btn-register dropdown-toggle" data-toggle="dropdown">
+                                        Following
+                                        <span class="caret"></span>
+                                    </button>
+                                    <div class="dropdown-menu pointer" style="width:100%;">
+                                        <a class="dropdown-item text-center" href="#" onclick="unfollow()" style="display: inline">Unfollow</a>
+                                    </div>
+                                </div>
+
+                                <button onclick="follow()" class="btn btn-header-action @(isFollowing ? "hide" : "")" id="btn-follow">
+                                    <i class="icon icon-left s7-add-user"></i>
+                                    Follow Educator
+                                </button>
+                            </div>
+                        }
+
+                        <button onclick="share()" class="btn btn-header-action hide">
+                            <i class="icon icon-left ion-share"></i>
+                            Share
+
+                            @if (Model.ParticipationObject.IsNotEmpty())
+                            {
+                                @UILabel.ActivityLabel(ActivityType.Activity, false)
+                            }
+                            else
+                            {
+                                @:Profile
+                            }
+
+                        </button>
+
+                        @if (Model.ParticipationObject.IsEmpty())
+                        {
+                            <button onclick="location.href='@Model.Account.BrowseUrl'" class="btn btn-header-action">
+                                <i class="icon icon-left s7-gleam"></i>
+                                View @UILabel.ActivityLabel(ActivityType.Activity, true)
+                            </button>
+                            
+                            if (SessionVariables.CurrentUser.IsNotEmpty())
+                            {
+                                <button onclick="location.href='@Model.Account.PayUrl'" class="btn btn-header-action">
+                                    <i class="icon icon-left s7-credit"></i>
+                                    Make A Payment
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="button" class="btn btn-header-action md-trigger" data-modal="modal-login" onclick="setLoginRedirect('@Model.Account.PayUrl')" >
+                                    <i class="icon icon-left s7-credit"></i>
+                                    Make A Payment
+                                </button>
+                            }
+                        }
+                        else
+                        {
+                            <button onclick="interested()" class="btn btn-header-action hide">
+                                <i class="icon icon-left s7-bell"></i>
+                                I'm Interested
+                            </button>
+                        }
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+            }
+
+        </div>
+
+        <div class="clearfix"></div>
     </div>
 </div>
+
+<script>
+    function follow() {
+        $('#btn-follow').val('...');
+        $('#btn-follow').prop('disabled', true);
+
+        $.get('@Url.Action("follow", "services")/@Model.Account.Uid', function (data) {
+
+            if (data && data.status == 'ok') {
+                
+                $('#btn-follow').addClass('hide');
+                $('#btn-unfollow').removeClass('hide');
+
+                Notifications.showMessage('Success', '<p>You are now following <strong>@Model.Account.Name</strong>.</p><p>You will receive notifications when @Model.Account.Name publishes new activities.</p>', true);
+                
+            } else {
+                Notifications.showErrors(data.messages);
+            }
+
+            $('#btn-follow').prop('disabled', false);
+        });
+    }
+
+    function unfollow() {
+        $('#btn-follow').val('...');
+        $('#btn-follow').prop('disabled', true);
+
+        $.get('@Url.Action("unfollow", "services")/@Model.Account.Uid', function (data) {
+
+            if (data && data.status == 'ok') {
+                
+                $('#btn-follow').removeClass('hide');
+                $('#btn-unfollow').addClass('hide');
+                
+            } else {
+                Notifications.showErrors(data.messages);
+            }
+
+            $('#btn-follow').prop('disabled', false);
+        });
+    }
+
+    function share() {
+
+    }
+
+    function interested() {
+
+    }
+</script>

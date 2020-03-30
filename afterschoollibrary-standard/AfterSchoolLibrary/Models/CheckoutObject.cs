@@ -43,6 +43,30 @@ namespace AfterSchoolLibrary.Models
             Date = DateTime.UtcNow;
         }
 
+        private string _description;
+        public string Description
+        {
+            get
+            {
+                if (ParticipationObject.IsNotEmpty())
+                    return $"{this.ParticipationObject.Name} Registration";
+
+                return _description;
+            }
+            set
+            {
+                _description = value;
+            }
+        }
+
+        public decimal GetStripeAmount(SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (OverrideAmount.HasValue)
+                return OverrideAmount.Value;
+
+            return this.GetTuitionCostWithFees(msgs, dc);
+        }
+
         public bool HasStripeSourceId
         {
             get
@@ -189,7 +213,7 @@ namespace AfterSchoolLibrary.Models
         public decimal GetTuitionConvenienceFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (!IsTuitionFree && !GetUseStripeConnectedAccount(msgs, dc))
-                return Billing.Platform.GetConvenienceFee(TuitionCostNoFees, BillingAccount);
+                return Billing.Platform.GetConvenienceFee(TuitionCostNoFees);
 
             return 0;
         }
@@ -231,7 +255,7 @@ namespace AfterSchoolLibrary.Models
         public decimal GetSubscriptionCostTodayConvenienceFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (!GetUseStripeConnectedAccount(msgs, dc))
-                return Billing.Platform.GetConvenienceFee(SubscriptionCostTodayNoFees, BillingAccount);
+                return Billing.Platform.GetConvenienceFee(SubscriptionCostTodayNoFees);
 
             return 0;
         }
@@ -273,7 +297,7 @@ namespace AfterSchoolLibrary.Models
         public decimal GetPaymentPlanCostTodayConvenienceFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (!GetUseStripeConnectedAccount(msgs, dc))
-                return Billing.Platform.GetConvenienceFee(PaymentPlanCostTodayNoFees, BillingAccount);
+                return Billing.Platform.GetConvenienceFee(PaymentPlanCostTodayNoFees);
 
             return 0;
         }
