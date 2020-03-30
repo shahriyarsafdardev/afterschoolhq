@@ -258,66 +258,80 @@
                     <p class="padding-v-20 padding-h-30">
                         @if (Model.Phone.IsNotBlank())
                         {
-                            <a href="tel:@Model.Phone"
-                               target="_blank"
-                               class="icon-xlarge margin-h-30"
-                               style="text-decoration: none;">
-                                <i class="ion-android-phone-portrait"></i>
-                            </a>
+                            <div class="footer-social-icon">
+                                <a href="tel:@Model.Phone"
+                                   target="_blank"
+                                   class="icon-xlarge margin-h-30"
+                                   style="text-decoration: none;">
+                                    <i class="ion-android-phone-portrait"></i>
+                                </a>
+                            </div>
                         }
                         @if (accountProfile.Website.IsNotBlank())
                         {
-                            <a href="@(accountProfile.Website.StartsWith("http") ? "" : "https://")@accountProfile.Website"
-                               target="_blank"
-                               class="icon-xlarge margin-h-30"
-                               style="text-decoration: none;">
-                                <i class="ion-ios-world-outline"></i>
-                            </a>
+                            <div class="footer-social-icon">
+                                <a href="@(accountProfile.Website.StartsWith("http") ? "" : "https://")@accountProfile.Website"
+                                   target="_blank"
+                                   class="icon-xlarge margin-h-30"
+                                   style="text-decoration: none;">
+                                    <i class="ion-ios-world-outline"></i>
+                                </a>
+                            </div>
                         }
                         @if (Model.Email.IsNotBlank())
                         {
-                            <a href="mailto:@Model.Email"
-                               target="_blank"
-                               class="icon-xlarge margin-h-30"
-                               style="text-decoration: none;">
-                                <i class="ion-ios-email-outline"></i>
-                            </a>
+                            <div class="footer-social-icon">
+                                <a href="mailto:@Model.Email"
+                                   target="_blank"
+                                   class="icon-xlarge margin-h-30"
+                                   style="text-decoration: none;">
+                                    <i class="ion-ios-email-outline"></i>
+                                </a>
+                            </div>
                         }
                         @if (accountProfile.Twitter.IsNotEmpty())
                         {
-                            <a href="https://twitter.com/@(accountProfile.Twitter.TrimStart('@'))"
-                               target="_blank"
-                               class="icon-xlarge margin-h-30"
-                               style="text-decoration: none;">
-                                <i class="ion-social-twitter-outline"></i>
-                            </a>
+                            <div class="footer-social-icon">
+                                <a href="https://twitter.com/@(accountProfile.Twitter.TrimStart('@'))"
+                                   target="_blank"
+                                   class="icon-xlarge margin-h-30"
+                                   style="text-decoration: none;">
+                                    <i class="ion-social-twitter-outline"></i>
+                                </a>
+                            </div>
                         }
                         @if (accountProfile.Instagram.IsNotEmpty())
                         {
-                            <a href="https://instagram.com/@(accountProfile.Instagram.TrimStart('@'))"
-                               target="_blank"
-                               class="icon-xlarge margin-h-30"
-                               style="text-decoration: none;">
-                                <i class="ion-social-instagram-outline"></i>
-                            </a>
+                            <div class="footer-social-icon">
+                                <a href="https://instagram.com/@(accountProfile.Instagram.TrimStart('@'))"
+                                   target="_blank"
+                                   class="icon-xlarge margin-h-30"
+                                   style="text-decoration: none;">
+                                    <i class="ion-social-instagram-outline"></i>
+                                </a>
+                            </div>
                         }
                         @if (accountProfile.Facebook.IsNotEmpty())
                         {
-                            <a href="@accountProfile.Facebook"
-                               target="_blank"
-                               class="icon-xlarge margin-h-30"
-                               style="text-decoration: none;">
-                                <i class="ion-social-facebook-outline"></i>
-                            </a>
+                            <div class="footer-social-icon">
+                                <a href="@accountProfile.Facebook"
+                                   target="_blank"
+                                   class="icon-xlarge margin-h-30"
+                                   style="text-decoration: none;">
+                                    <i class="ion-social-facebook-outline"></i>
+                                </a>
+                            </div>
                         }
                         @if (accountProfile.LinkedIn.IsNotEmpty())
                         {
-                            <a href="@accountProfile.LinkedIn"
-                               target="_blank"
-                               class="icon-xlarge margin-h-30"
-                               style="text-decoration: none;">
-                                <i class="ion-social-linkedin-outline"></i>
-                            </a>
+                            <div class="footer-social-icon">
+                                <a href="@accountProfile.LinkedIn"
+                                   target="_blank"
+                                   class="icon-xlarge margin-h-30"
+                                   style="text-decoration: none;">
+                                    <i class="ion-social-linkedin-outline"></i>
+                                </a>
+                            </div>
                         }
                     </p>
                 </div>
