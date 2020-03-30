@@ -81,6 +81,22 @@
                         @Model.Headline
                     </p>
                 }
+
+                <div>
+                    @if (Model.Followers > 0)
+                    {
+                        <span class="badge badge-darkgray profile-badge text-small"><icon class="s7-user"></icon> @Model.Followers follower@(Model.Followers == 1 ? "" : "s")</span>
+                    }
+                    @if (Model.NumberOfHoursEnrolled > 0)
+                    {
+                        <span class="badge badge-darkgray profile-badge text-small"><icon class="s7-clock"></icon> @Model.NumberOfHoursEnrolled hours of education provided</span>
+                    }
+                    @if (Model.NumberOfStudentsServed > 0)
+                    {
+                        <span class="badge badge-darkgray profile-badge text-small"><icon class="s7-study"></icon> @Model.NumberOfStudentsServed students served</span>
+                    }
+                </div>
+
             </div>
             
             @if (!hideButtons)

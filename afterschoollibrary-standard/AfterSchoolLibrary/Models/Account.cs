@@ -560,7 +560,7 @@ namespace AfterSchoolLibrary.Models
 	                select 
 		                acc.Name as AccountName, a.Name as ActivityName, ai.StartDateTime, ai.EndDateTime, 
 		                DATEDIFF(MINUTE, ai.StartDateTime, ai.EndDateTime) as TotalMinutes,
-		                (select count(*) from RegistrantActivity ra where ra.ParticipationObjectId = a.ID and ra.ParticipationObjectTypeId = 1 and  and ra.AssignmentTypeId in (1,6,7)) as StudentsInClass
+		                (select count(*) from RegistrantActivity ra where ra.ParticipationObjectId = a.ID and ra.ParticipationObjectTypeId = 1 and ra.AssignmentTypeId in (1,6,7)) as StudentsInClass
 	                from 
 		                ActivityInstance ai inner join
 		                Activity a on ai.ActivityScheduleId = a.ActivityScheduleId inner join
