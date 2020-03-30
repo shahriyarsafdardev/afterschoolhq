@@ -227,6 +227,15 @@ namespace AfterSchoolLibrary.Models
 			return dq.GetCount(msgs);
 		}
 
+		public static int GetCountByAccountIdByStatus(int AccountId, SubscriberStatus status, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+			dq.Criterias.Add(ObjectMap["SubscriberStatusId"], (int)status);
+			return dq.GetCount(msgs);
+		}
+
 		#endregion
-    }
+	}
 }

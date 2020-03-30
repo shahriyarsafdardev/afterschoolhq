@@ -17,6 +17,8 @@ namespace AfterSchool.Models
         public AccountProfile AccountProfile { get; set; }
         public ParticipationObject ParticipationObject { get; set; }
 
+        public int Followers { get; set; }
+
         public RegistrationHeaderViewModel()
         {
 
@@ -34,6 +36,7 @@ namespace AfterSchool.Models
             Headline = ParticipationObject.Description;
             IsDemo = !Account.ID.HasValue;
             PrimaryColor = AccountProfile?.PrimaryColor;
+            Followers = Account.GetSubscriberCount();
         }
 
         public RegistrationHeaderViewModel(ParticipationObject participationObject, bool IsDuringRegistration)
@@ -46,6 +49,7 @@ namespace AfterSchool.Models
             LogoUrl = AccountProfile?.GetLogoUrl();
             Title = ParticipationObject.Name;
             PrimaryColor = AccountProfile?.PrimaryColor;
+            Followers = Account.GetSubscriberCount();
 
             if (IsDuringRegistration)
                 Headline = "Registration";
@@ -65,6 +69,7 @@ namespace AfterSchool.Models
             Headline = headline;
             IsDemo = !Account.ID.HasValue;
             PrimaryColor = AccountProfile?.PrimaryColor;
+            Followers = Account.GetSubscriberCount();
         }
 
         public RegistrationHeaderViewModel(Account account, AccountProfile profile)
@@ -78,6 +83,7 @@ namespace AfterSchool.Models
             Headline = profile?.Headline;
             IsDemo = !account.ID.HasValue;
             PrimaryColor = profile?.PrimaryColor;
+            Followers = Account.GetSubscriberCount();
         }
 
         public RegistrationHeaderViewModel(Account account, AccountProfile profile, ParticipationObject session)
@@ -92,6 +98,7 @@ namespace AfterSchool.Models
             Headline = profile?.Headline;
             IsDemo = !account.ID.HasValue;
             PrimaryColor = profile?.PrimaryColor;
+            Followers = Account.GetSubscriberCount();
 
             if (session.IsNotEmpty())
                 SessionName = session.Name;

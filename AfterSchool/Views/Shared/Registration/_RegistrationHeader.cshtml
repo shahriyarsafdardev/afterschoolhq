@@ -40,20 +40,19 @@
 }
 
 <div class="row">
-
     <div class="reg-header" style="@regHeaderStyle">
         <div class="reg-header-overlay col-md-8 col-md-offset-2">
 
             @if (logoUrl.IsNotBlank())
             {
-                <div class="col-md-2">
+                <div class="col-lg-2 col-md-12">
                     <div class="reg-header-logo">
                         <img src="@logoUrl" onclick="location.href='@Model.Account.HomePageUrl'" class="pointer" />
                     </div>
                 </div>
             }
 
-            <div class="col-md-@midColSpan">
+            <div class="col-lg-@midColSpan col-md-12">
                 <h1 class="activity-title">
                     <span>@Html.Raw(Model.Title)</span>
                     @if (Model.SessionName.IsNotEmpty())
@@ -76,8 +75,8 @@
             
             @if (!hideButtons)
             {
-                <div class="col-md-3">
-                    <div class="pull-right padding-v-20">
+                <div class="col-lg-3 col-md-12">
+                    <div class="padding-v-20 text-center">
 
                         @if (SessionVariables.CurrentUser.IsNotEmpty())
                         {
@@ -149,6 +148,8 @@
             }
 
         </div>
+
+        <div class="clearfix"></div>
     </div>
 </div>
 
