@@ -432,6 +432,92 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
+        public static void SendPaymentConfirmation(CheckoutObject checkoutObject, string customMessage, WebUser loggedInUser, bool sendBcc, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            msgs = msgs ?? new SystemMessages();
+            
+            var isAfterSchool = checkoutObject.PayingAccount.IsAfterSchool;
+            var purchaserAccount = checkoutObject.PayingAccount;
+            var purchaser = checkoutObject.PayingAccount.GetAccountOwner(msgs, dc);
+            var billingAccount = checkoutObject.BillingAccount;
+            var billingAccountOwner = billingAccount.GetAccountOwner(msgs, dc);
+            var masterRegistrant = checkoutObject.MasterRegistrant;
+            var parentOrGuardian = masterRegistrant.GetParentOrGuardian(msgs, dc);
+            var canAccountAcceptPayments = billingAccount.CanProcessPayments(msgs, dc);
+            var registration = checkoutObject.Registration;
+            var totalCostWithFees = checkoutObject.GetStripeAmount(msgs, dc);
+            var totalCost = totalCostWithFees - checkoutObject.PaymentTypeFeeOverrideAmount.Value;
+
+            var receiptRows = "";
+
+            // add registration fee row
+            var subscriptionFeeModel = new NameValueCollection()
+                {
+                    { "Description", $"Payment to {billingAccount.Name}" },
+                    { "Quantity",  "1"},
+                    { "Cost", totalCost.ToCurrency() },
+                    { "AdditionalDetails", "" }
+                };
+
+            receiptRows += ProcessTemplate(
+                    EmailTemplates.Registration_Confirmation_Rows,
+                    subscriptionFeeModel,
+                    "Registration_Confirmation_Rows",
+                    msgs);
+
+            var model = new NameValueCollection()
+            {
+                { "FirstName", loggedInUser.FirstName },
+                { "ProductName", Utilities.AppName(isAfterSchool) },
+                { "LoginLink", Utilities.LoginUrl() },
+                { "ActivityContactEmail", billingAccount.Email },
+                { "ActivityContactPhone", billingAccount.Phone },
+                { "ActivityContactName", billingAccount.Name },
+                { "BillerAccountName", billingAccount.Name },
+                { "BillerAccountLink", billingAccount.HomePageUrl },
+                { "AmountDueOrPaid", "Amount Paid" },
+                { "TotalCost", totalCostWithFees.ToCurrency() },
+                { "BodyRows", receiptRows },
+                { "CustomMessage", customMessage },
+                { "CreditCardFee", checkoutObject.PaymentTypeFeeOverrideAmount.ToCurrency() },
+                { "RegistrationDetails", "Login to your account to view more details about this payment."}
+            };
+
+            var subject = $"Payment receipt for {billingAccount.Name}";
+            var body = ProcessTemplate(
+                EmailTemplates.Registration_Confirmation,
+                model,
+                "Registration_Confirmation",
+                msgs);
+
+            // SEND EMAILS
+            var mailMsgs = new SystemMessages();
+
+            // Send email to registerer
+            mailMsgs.AddRange(SendGridHelper.SendMail(
+                fromEmail: Email.SendGridNoReplyEmailAddress(isAfterSchool),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(loggedInUser.Email),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)));
+
+            // send bcc to activity contact
+            if (sendBcc)
+            {
+                var emails = new List<string>() { billingAccount.Email };
+
+                emails.ForEach(email =>
+                    SendGridHelper.SendMail(
+                        fromEmail: Email.SendGridNoReplyEmailAddress(isAfterSchool),
+                        toEmail: new SendGrid.Helpers.Mail.EmailAddress(email),
+                        subject: $"Payment CC: {subject}",
+                        body: body,
+                        emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)));
+            }
+
+            msgs.AddRange(mailMsgs);
+        }
+
         public static SystemMessages SendPasswordReset(WebUser user, PasswordResetToken token, bool isAfterSchool)
         {
             var msgs = new SystemMessages();

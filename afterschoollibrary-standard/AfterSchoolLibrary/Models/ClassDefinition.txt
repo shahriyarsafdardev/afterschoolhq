@@ -84,6 +84,7 @@ property: DateSubmittedToActivityGroup, DateTime?, DateTime, , Used to track whe
 property: AccountActivityGroupId, int?, Int, , When a activity is part of a league that is from an external source (such as a team) then it should be linked to the account version of that league
 property: LeaderTypeId, ActivityLeaderType, Int, , Track what kind of leader it is - internal or external
 property: RequiresParentalConsent, bool, Bit, , let us know whether the parent needs to consent
+property: ActivityLocationTypeId, ActivityLocationType, Int, , Physical or Virtual
 -property: AllowPreRegistration, bool, Bit
 -property: RegistrationTimeZone, string, NVarChar "30"
 -property: AcceptPayPal, bool, Bit
@@ -361,6 +362,28 @@ loadmethod: InviteCodeToShare
 
 [begin]
 type: Class
+name: AccountProfile
+description: holds all the profile and style information for the account
+inherits: BasicObjectWithModified
+property: AccountId, int?, Int
+property: Logo, string, NVarChar "400"
+property: HeaderImage, string, NVarChar "400"
+property: Headline, string, NVarChar "400"
+property: About, string, NVarChar "4000"
+property: PrimaryColor, string, NVarChar "20"
+property: Website, string, NVarChar "400"
+property: GradeLevelStart, int?, Int
+property: GradeLevelEnd, int?, Int
+property: Twitter, string, NVarChar "100"
+property: Facebook, string, NVarChar "100"
+property: Instagram, string, NVarChar "100"
+property: LinkedIn, string, NVarChar "100"
+property: GenderRestriction, GenderRestrictionType, Int
+loadmethod: AccountId
+[end]
+
+[begin]
+type: Class
 name: CheckPaymentAccount
 description: Where legal details and other info is stored for the account holder, specifically for sending checks
 inherits: BaseLocation
@@ -481,7 +504,8 @@ property: Value, string, NVarChar "4000"
 loadmethod: AccountId, List<>
 loadmethod: ActivityGroupId, List<>
 loadmethod: ActivityId, List<>
-loadmethod: AccountId|AccountPropertyTypeId
+loadmethod: AccountId|AccountPropertyTypeId, List<>
+loadmethod: AccountId|AccountPropertyTypeId|Value
 loadmethod: ActivityGroupId|AccountPropertyTypeId
 loadmethod: ActivityId|AccountPropertyTypeId
 [end]
@@ -1611,6 +1635,28 @@ loadmethod: RefundRequestStatusId, List<>
 [end]
 
 [begin]
+type: Class
+name: Subscriber
+inherits: BasicObjectWithModified
+property: WebUserId, int?, Int, Required, The user who is subscribed
+property: Uid, Guid, UniqueIdentifier, Required
+property: AccountId, int?, Int, Required, The account the user is subscribed to
+property: SubscriberStatusId, SubscriberStatus, Int
+loadmethod: Uid
+loadmethod: AccountId|WebUserId
+loadmethod: WebUserId, List<>
+loadmethod: AccountId, List<>
+loadmethod: WebUserId|SubscriberStatusId, List<>
+loadmethod: AccountId|SubscriberStatusId, List<>
+[end]
+
+[begin]
+type: Enum
+name: SubscriberStatus
+values: NotSet, Subscribed, Unsubscribed
+[end]
+
+[begin]
 type: Enum
 name: RefundType
 values: NotSet, Refund, Credit
@@ -1697,7 +1743,7 @@ values: None, MaleOnly, FemaleOnly
 [begin]
 type: Enum
 name: AccountPropertyType
-values: NotSet, LandingPageText, RegistrationThankYouEmail, ApplicationThankYouEmail, NoActivitiesText, FacebookAdPixel
+values: NotSet, LandingPageText, RegistrationThankYouEmail, ApplicationThankYouEmail, NoActivitiesText, FacebookAdPixel, Award, Certification, Photo, ServiceOffered, TimeOffered, PricingOption, Classifications, SoftSkills, AcademicSubjects, TeachingMethods
 [end]
 
 [begin]
@@ -1812,6 +1858,12 @@ values: NotSet, PerRegistrant, PerActivity
 type: Enum
 name: LocationType
 values: NotSet, School, Business, NonProfit
+[end]
+
+[begin]
+type: Enum
+name: ActivityLocationType
+values: NotSet, Physical, Virtual
 [end]
 
 [begin]

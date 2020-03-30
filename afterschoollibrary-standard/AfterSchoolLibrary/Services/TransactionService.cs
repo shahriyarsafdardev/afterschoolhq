@@ -124,7 +124,7 @@ namespace AfterSchoolLibrary.Services
                 checkoutObject.ConvenienceFeePayer,
                 checkoutObject.CreditCardFeePayer,
                 checkoutObject.OverrideAmount ?? checkoutObject.GetTuitionCostWithFees(msgs, dc),
-                checkoutObject.ParticipationObject.Name,
+                checkoutObject.ParticipationObject?.Name,
                 checkoutObject.Purchase?.ID,
                 transactionType,
                 checkoutObject.PaymentType,
@@ -134,13 +134,14 @@ namespace AfterSchoolLibrary.Services
                 checkoutObject.ConvenienceFeeOverrideAmount ?? checkoutObject.GetTuitionConvenienceFee(msgs, dc),
                 checkoutObject.PaymentTypeFeeOverrideAmount ?? checkoutObject.GetTuitionCreditCardFee(msgs, dc),
                 checkoutObject.StripeChargeId,
+                checkoutObject.Description,
                 checkoutObject.Date,
                 loggedInUser,
                 msgs,
                 dc);
         }
 
-        public static Transaction CreateNew(Account payingAccount, Account billingAccount, Account ConvenienceFeePayer, Account PaymentTypeFeePayer, decimal? amount, string participationObjectName, int? purchaseId, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, decimal? platformFee, decimal? platformPercentFee, decimal convenienceFee, decimal paymentTypeFee, string stripeChargeOrRefundId, DateTime createDate, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Transaction CreateNew(Account payingAccount, Account billingAccount, Account ConvenienceFeePayer, Account PaymentTypeFeePayer, decimal? amount, string participationObjectName, int? purchaseId, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, decimal? platformFee, decimal? platformPercentFee, decimal convenienceFee, decimal paymentTypeFee, string stripeChargeOrRefundId, string description, DateTime createDate, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -148,7 +149,7 @@ namespace AfterSchoolLibrary.Services
             {
                 Amount = amount,
                 BillerAccountId = billingAccount.ID.Value,
-                Description = $"{participationObjectName} registration",
+                Description = description,
                 PayerAccountId = payingAccount?.ID,
                 PaymentTypeId = paymentType,
                 PurchaseId = purchaseId,
@@ -385,7 +386,7 @@ namespace AfterSchoolLibrary.Services
                 msgs.Add("Amount is not refundable", MessageType.UserError);
 
             if (msgs.HasNoErrors())
-                return RefundRequestService.CreateNewRefundRequest(transaction, refundAmount, refundRequestStatus, reason, loggedInUser, msgs, dc);
+                return RefundRequestService.CreateNew(transaction, refundAmount, refundRequestStatus, reason, loggedInUser, msgs, dc);
 
             return null;
         }

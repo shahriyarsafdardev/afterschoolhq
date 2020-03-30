@@ -1,0 +1,365 @@
+﻿@model Account
+@{
+    Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
+    ViewBag.Title = Model.Name;
+
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var accountProfile = (AccountProfile)ViewBag.AccountProfile;
+    var location = (Location)ViewBag.Location;
+    var awards = (List<AccountProperty>)ViewBag.Awards;
+    var certifications = (List<AccountProperty>)ViewBag.Certifications;
+    var photos = (List<AccountProperty>)ViewBag.Photos;
+    var gradeLevelStart = (GradeLevel)ViewBag.GradeLevelStart;
+    var gradeLevelEnd = (GradeLevel)ViewBag.GradeLevelEnd;
+    var participationObjects = (List<ParticipationObject>)ViewBag.ParticipationObjects;
+    var takeActivities = 3;
+    var locations = (List<Location>)ViewBag.Locations;
+    var accountProperties = (List<AccountProperty>)ViewBag.AccountProperties;
+}
+
+@{
+    Html.RenderPartial(
+        "~/Views/Shared/Registration/_AccountTopBar.cshtml",
+        Model,
+        new ViewDataDictionary()
+        {
+            { "LoginReturnUrl", Model.HomePageUrl }
+        }
+    );
+}
+
+@{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+@{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", new RegistrationHeaderViewModel(Model, (AccountProfile)ViewBag.AccountProfile)); }
+
+<div>
+    <div class="col-md-12 col-lg-8 col-lg-offset-2 participation-object participation-object-detail">
+
+        <div class="panel panel-alt6">
+            <div class="panel-heading" style="width: 100%;">
+                <div class="row">
+                    <div class="col-md-12">
+                        <h3 class="text-center">
+                            Serving @gradeLevelStart.Name - @gradeLevelEnd.Name Grade
+                        </h3>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+
+                @if (participationObjects.Any())
+                {
+                    <div>
+                        <div class="row">
+                            <div class="col-md-12 col-lg-8">
+                                <div class="activity-detail-block">
+                                    <h2>Now Registering</h2>
+                                </div>
+                            </div>
+                            <div class="col-md-12 col-lg-4">
+                                <div class="padding-v-20 pull-right">
+                                    <a href="@Model.BrowseUrl">
+                                        View All Activities
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div style="position: relative; margin-left: -20px; margin-right: -20px;">
+                                @foreach (var item in participationObjects.Take(takeActivities))
+                                {
+                                    Html.RenderPartial("~/Views/Shared/Registration/_BrowseParticipationObjectWide.cshtml", item);
+                                }
+                            </div>
+                        </div>
+
+                        @if (participationObjects.Count > takeActivities)
+                        {
+                            <div class="row">
+                                <div class="col-md-4 col-md-offset-4">
+                                    <a href="@Model.BrowseUrl" class="btn btn-register">
+                                        View More Activities &raquo;
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+
+                @if (photos.Any())
+                {
+                    <div class="margin-t-20">
+                        <div class="row">
+                            <div style="position: relative; margin-left: -20px; margin-right: -20px;">
+                                @foreach (var item in photos.Take(6))
+                                {
+                                    <div class="col-md-4 profile-photo-gallery" style="background-image: url('@item.Value');"></div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                @if (accountProperties.Any())
+                {
+                    var propertiesPerCol = Math.Ceiling(accountProperties.Count / 3.0).ToInteger();
+
+                    <div class="margin-t-20">
+                        <div class="row padding-h-30">
+                            <div class="activity-detail-block">
+                                <h2>Services Offered</h2>
+                            </div>
+
+                            @for (int i = 0; i < 3; i++)
+                            {
+                                <div class="col-md-4">
+                                    @foreach (var property in accountProperties.OrderBy(x => x.Value).Skip(i * propertiesPerCol).ToList().Take(propertiesPerCol))
+                                    {
+                                        var icon = "";
+                                        var iconTitle = "";
+
+                                        switch(property.AccountPropertyTypeId)
+                                        {
+                                            case AccountPropertyType.Classifications:
+                                                icon = "s7-gleam";
+                                                iconTitle = "Activity Type";
+                                                break;
+                                            case AccountPropertyType.AcademicSubjects:
+                                                icon = "s7-study";
+                                                iconTitle = "Academic Subject";
+                                                break;
+                                            case AccountPropertyType.PricingOption:
+                                                icon = "s7-cash";
+                                                iconTitle = "Pricing Option";
+                                                break;
+                                            case AccountPropertyType.ServiceOffered:
+                                                icon = "s7-ticket";
+                                                iconTitle = "Type of Service";
+                                                break;
+                                            case AccountPropertyType.SoftSkills:
+                                                icon = "s7-users";
+                                                iconTitle = "Soft Skill";
+                                                break;
+                                            case AccountPropertyType.TeachingMethods:
+                                                icon = "s7-display2";
+                                                iconTitle = "Teaching Method";
+                                                break;
+                                            case AccountPropertyType.TimeOffered:
+                                                icon = "s7-clock";
+                                                iconTitle = "Time Offered";
+                                                break;
+                                        }
+
+                                        <p class="activity-detail-block">
+                                            <i class="@icon icon-large text-success" style="padding-top: 20px;" title="@iconTitle"></i>
+                                            <span class="text-medium" style="margin-top: -30px;">@property.Value</span>
+                                        </p>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="margin-v-40">
+                        <hr style="border-color: #efefef;" />
+                    </div>
+                }
+
+                @if (awards.Any())
+                {
+                    <div class="margin-t-20">
+                        <div class="row padding-h-30">
+
+                            <h2>Awards</h2>
+
+                            @foreach (var award in awards.Where(x => x.Value.IsNotEmpty()))
+                            {
+                                <p class="activity-detail-block">
+                                    <i class="s7-medal text-warning icon-large"></i>
+                                    <span class="text-medium-small">@award.Value</span>
+                                </p>
+                            }
+
+                        </div>
+                    </div>
+
+                }
+
+                @if (certifications.Any())
+                {
+                    <div class="margin-t-20">
+                        <div class="row padding-h-30">
+                            <h2>Certifications</h2>
+
+                            @foreach (var certification in certifications.Where(x => x.Value.IsNotEmpty()))
+                            {
+                                <p class="activity-detail-block">
+                                    <i class="s7-star text-warning icon-large" style="padding-top: 20px;"></i>
+                                    <span class="text-medium-small" style="margin-top: -30px;">@certification.Value</span>
+                                </p>
+                            }
+
+                        </div>
+                    </div>
+                }
+
+                @if (accountProfile.About.IsNotBlank())
+                {
+                    <div class="margin-t-20">
+                        <div class="row padding-h-30">
+                            <h2>About</h2>
+                            <div class="activity-detail-block">
+                                @Html.Raw(accountProfile.About)
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                @if (locations.Any())
+                {
+                    var locationsQuery = locations.Select(l => Url.Encode(l.GetAddress())).ToStringList(",");
+
+                    <div class="margin-t-20">
+                        <div class="row padding-h-30">
+                            <div class="col-md-12">
+                                <div class="activity-detail-block">
+                                    <div class="row">
+                                        <div>
+                                            <h2>Location</h2>
+                                        </div>
+                                        <div>
+                                            <p>
+                                                @ParticipationObjectUI.PrintLocation(location)
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="height: 400px;">
+                        <div style="position: relative; margin-left: -20px; margin-right: -20px">
+                            <iframe width="100%"
+                                    height="300"
+                                    frameborder="0"
+                                    style="border:0"
+                                    src="https://www.google.com/maps/embed/v1/place?q=@Url.Encode(location.GetAddress())&key=AIzaSyAdjn8QBBStTz9TDAjZOyijAato7uzvjjk"
+                                    allowfullscreen>
+                            </iframe>
+                        </div>
+                    </div>
+                }
+
+            </div>
+            <div class="panel-footer">
+                <div class="col-md-12 text-center">
+                    <p class="padding-v-20 padding-h-30">
+                        @if (Model.Phone.IsNotBlank())
+                        {
+                            <a href="tel:@Model.Phone"
+                               target="_blank"
+                               class="icon-xlarge margin-h-30"
+                               style="text-decoration: none;">
+                                <i class="ion-android-phone-portrait"></i>
+                            </a>
+                        }
+                        @if (accountProfile.Website.IsNotBlank())
+                        {
+                            <a href="@(accountProfile.Website.StartsWith("http") ? "" : "https://")@accountProfile.Website"
+                               target="_blank"
+                               class="icon-xlarge margin-h-30"
+                               style="text-decoration: none;">
+                                <i class="ion-ios-world-outline"></i>
+                            </a>
+                        }
+                        @if (Model.Email.IsNotBlank())
+                        {
+                            <a href="mailto:@Model.Email"
+                               target="_blank"
+                               class="icon-xlarge margin-h-30"
+                               style="text-decoration: none;">
+                                <i class="ion-ios-email-outline"></i>
+                            </a>
+                        }
+                        @if (accountProfile.Twitter.IsNotEmpty())
+                        {
+                            <a href="https://twitter.com/@(accountProfile.Twitter.TrimStart('@'))"
+                               target="_blank"
+                               class="icon-xlarge margin-h-30"
+                               style="text-decoration: none;">
+                                <i class="ion-social-twitter-outline"></i>
+                            </a>
+                        }
+                        @if (accountProfile.Instagram.IsNotEmpty())
+                        {
+                            <a href="https://instagram.com/@(accountProfile.Instagram.TrimStart('@'))"
+                               target="_blank"
+                               class="icon-xlarge margin-h-30"
+                               style="text-decoration: none;">
+                                <i class="ion-social-instagram-outline"></i>
+                            </a>
+                        }
+                        @if (accountProfile.Facebook.IsNotEmpty())
+                        {
+                            <a href="@accountProfile.Facebook"
+                               target="_blank"
+                               class="icon-xlarge margin-h-30"
+                               style="text-decoration: none;">
+                                <i class="ion-social-facebook-outline"></i>
+                            </a>
+                        }
+                        @if (accountProfile.LinkedIn.IsNotEmpty())
+                        {
+                            <a href="@accountProfile.LinkedIn"
+                               target="_blank"
+                               class="icon-xlarge margin-h-30"
+                               style="text-decoration: none;">
+                                <i class="ion-social-linkedin-outline"></i>
+                            </a>
+                        }
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*
+    <script>
+
+        function codeAddress() {
+        var address = document.getElementById('address').value;
+        geocoder.geocode( { 'address': address}, function(results, status) {
+          if (status == 'OK') {
+            map.setCenter(results[0].geometry.location);
+            var marker = new google.maps.Marker({
+                map: map,
+                position: results[0].geometry.location
+            });
+          } else {
+            alert('Geocode was not successful for the following reason: ' + status);
+          }
+        });
+      }
+
+    // Initialize and add the map
+    function initMap() {
+        var bounds = new google.maps.LatLngBounds();
+        var position = new google.maps.LatLng(markers[i][1], markers[i][2]);
+        var map = new google.maps.Map(document.getElementById('map'), {zoom: 4, mapTypeId: 'roadmap'});
+        // The marker, positioned at Uluru
+        var marker = new google.maps.Marker({position: uluru, map: map});
+    }
+    </script>
+    <!--Load the API from the specified URL
+    * The async attribute allows the browser to render the page while the API loads
+    * The key parameter will contain your own API key (which is not needed for this tutorial)
+    * The callback parameter executes the initMap() function
+    -->
+    <script async defer
+            src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap">
+    </script>
+
+*@

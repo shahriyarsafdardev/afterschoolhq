@@ -172,7 +172,7 @@
                     }
                     @if (CanView(FeatureType.Activities, SessionVariables.AccountUserType, PermissionType.AccountSettingsView))
                     {
-                        <li class="@accountactive"><a href="@Url.Action("edit", "account")"><i class="icon s7-edit"></i> Account Settings</a></li>
+                        <li class="@accountactive"><a href="@Url.Action("edit", "account")"><i class="icon s7-edit"></i> Settings</a></li>
                     }
                     <li class="@profileactive"><a href="@Url.Action("edit", "user")"><i class="icon s7-user"></i> <span>Profile</span></a></li>
                     @if (SessionVariables.CurrentUser.HasMultipleAccounts())

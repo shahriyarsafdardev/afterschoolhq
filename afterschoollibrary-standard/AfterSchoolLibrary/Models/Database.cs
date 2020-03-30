@@ -42,6 +42,7 @@ namespace AfterSchoolLibrary.Models
 			ActivityMessage.Create(dc);
 			ActivityMessageRegistrant.Create(dc);
 			Account.Create(dc);
+			AccountProfile.Create(dc);
 			CheckPaymentAccount.Create(dc);
 			BankPaymentAccount.Create(dc);
 			StripeAccount.Create(dc);
@@ -96,6 +97,7 @@ namespace AfterSchoolLibrary.Models
 			TwilioBlockedPhone.Create(dc);
 			Migration.Create(dc);
 			RefundRequest.Create(dc);
+			Subscriber.Create(dc);
 			
 
 			return msgs;
@@ -119,6 +121,7 @@ namespace AfterSchoolLibrary.Models
 			ActivityMessage.Alter(dc);
 			ActivityMessageRegistrant.Alter(dc);
 			Account.Alter(dc);
+			AccountProfile.Alter(dc);
 			CheckPaymentAccount.Alter(dc);
 			BankPaymentAccount.Alter(dc);
 			StripeAccount.Alter(dc);
@@ -173,6 +176,7 @@ namespace AfterSchoolLibrary.Models
 			TwilioBlockedPhone.Alter(dc);
 			Migration.Alter(dc);
 			RefundRequest.Alter(dc);
+			Subscriber.Alter(dc);
 			
 
 			return msgs;
@@ -197,6 +201,7 @@ namespace AfterSchoolLibrary.Models
 			Activity.Update(new Hashtable(){{"ActivityTypeId",0}}, new Hashtable(){{"ActivityTypeId", DBNull.Value}}, Activity.ObjectMap, dc);
 			Activity.Update(new Hashtable(){{"LeaderTypeId",0}}, new Hashtable(){{"LeaderTypeId", DBNull.Value}}, Activity.ObjectMap, dc);
 			Activity.Update(new Hashtable(){{"RequiresParentalConsent",false}}, new Hashtable(){{"RequiresParentalConsent", DBNull.Value}}, Activity.ObjectMap, dc);
+			Activity.Update(new Hashtable(){{"ActivityLocationTypeId",0}}, new Hashtable(){{"ActivityLocationTypeId", DBNull.Value}}, Activity.ObjectMap, dc);
 			Location.Update(new Hashtable(){{"IsDefault",false}}, new Hashtable(){{"IsDefault", DBNull.Value}}, Location.ObjectMap, dc);
 			Location.Update(new Hashtable(){{"LocationTypeId",0}}, new Hashtable(){{"LocationTypeId", DBNull.Value}}, Location.ObjectMap, dc);
 			Location.Update(new Hashtable(){{"IsTest",false}}, new Hashtable(){{"IsTest", DBNull.Value}}, Location.ObjectMap, dc);
@@ -217,6 +222,7 @@ namespace AfterSchoolLibrary.Models
 			Account.Update(new Hashtable(){{"StripePayoutsEnabled",false}}, new Hashtable(){{"StripePayoutsEnabled", DBNull.Value}}, Account.ObjectMap, dc);
 			Account.Update(new Hashtable(){{"IsTest",false}}, new Hashtable(){{"IsTest", DBNull.Value}}, Account.ObjectMap, dc);
 			Account.Update(new Hashtable(){{"IsDeleted",false}}, new Hashtable(){{"IsDeleted", DBNull.Value}}, Account.ObjectMap, dc);
+			AccountProfile.Update(new Hashtable(){{"GenderRestriction",0}}, new Hashtable(){{"GenderRestriction", DBNull.Value}}, AccountProfile.ObjectMap, dc);
 			CheckPaymentAccount.Update(new Hashtable(){{"IsVerified",false}}, new Hashtable(){{"IsVerified", DBNull.Value}}, CheckPaymentAccount.ObjectMap, dc);
 			CheckPaymentAccount.Update(new Hashtable(){{"LegalEntityTypeId",0}}, new Hashtable(){{"LegalEntityTypeId", DBNull.Value}}, CheckPaymentAccount.ObjectMap, dc);
 			BankPaymentAccount.Update(new Hashtable(){{"IsVerified",false}}, new Hashtable(){{"IsVerified", DBNull.Value}}, BankPaymentAccount.ObjectMap, dc);
@@ -320,6 +326,7 @@ namespace AfterSchoolLibrary.Models
 			RefundRequest.Update(new Hashtable(){{"RefundRequestStatusId",0}}, new Hashtable(){{"RefundRequestStatusId", DBNull.Value}}, RefundRequest.ObjectMap, dc);
 			RefundRequest.Update(new Hashtable(){{"RequestedRefundTypeId",0}}, new Hashtable(){{"RequestedRefundTypeId", DBNull.Value}}, RefundRequest.ObjectMap, dc);
 			RefundRequest.Update(new Hashtable(){{"ApprovedRefundTypeId",0}}, new Hashtable(){{"ApprovedRefundTypeId", DBNull.Value}}, RefundRequest.ObjectMap, dc);
+			Subscriber.Update(new Hashtable(){{"SubscriberStatusId",0}}, new Hashtable(){{"SubscriberStatusId", DBNull.Value}}, Subscriber.ObjectMap, dc);
 			
 			//**ENDUPDATES**//
 
@@ -387,6 +394,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Account_StripeUserId ON [Account] (StripeUserId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Account_StripeCustomerId ON [Account] (StripeCustomerId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Account_InviteCodeToShare ON [Account] (InviteCodeToShare)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountProfile_AccountId ON [AccountProfile] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_CheckPaymentAccount_AccountId ON [CheckPaymentAccount] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_BankPaymentAccount_AccountId ON [BankPaymentAccount] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_StripeAccount_AccountId ON [StripeAccount] (AccountId)"));
@@ -408,6 +416,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountProperty_ActivityGroupId ON [AccountProperty] (ActivityGroupId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountProperty_ActivityId ON [AccountProperty] (ActivityId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountProperty_AccountId_AccountPropertyTypeId ON [AccountProperty] (AccountId,AccountPropertyTypeId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountProperty_AccountId_AccountPropertyTypeId_Value ON [AccountProperty] (AccountId,AccountPropertyTypeId,Value)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountProperty_AccountPropertyTypeId_ActivityGroupId ON [AccountProperty] (ActivityGroupId,AccountPropertyTypeId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountProperty_AccountPropertyTypeId_ActivityId ON [AccountProperty] (ActivityId,AccountPropertyTypeId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountWebUser_AccountId_IsDeleted ON [AccountWebUser] (AccountId,IsDeleted)"));
@@ -604,6 +613,12 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RefundRequest_AccountId ON [RefundRequest] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RefundRequest_AccountId_RefundRequestStatusId ON [RefundRequest] (AccountId,RefundRequestStatusId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RefundRequest_RefundRequestStatusId ON [RefundRequest] (RefundRequestStatusId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Subscriber_Uid ON [Subscriber] (Uid)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Subscriber_AccountId_WebUserId ON [Subscriber] (AccountId,WebUserId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Subscriber_WebUserId ON [Subscriber] (WebUserId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Subscriber_AccountId ON [Subscriber] (AccountId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Subscriber_SubscriberStatusId_WebUserId ON [Subscriber] (WebUserId,SubscriberStatusId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Subscriber_AccountId_SubscriberStatusId ON [Subscriber] (AccountId,SubscriberStatusId)"));
 			
 
 			return msgs;

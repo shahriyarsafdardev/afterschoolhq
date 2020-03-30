@@ -146,6 +146,7 @@ namespace AfterSchool.Controllers
                 qvms.Find(item => item.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone).Value = SessionVariables.CurrentUser.Phone;
 
             ViewBag.RegistrationAccount = registrationAccount;
+            ViewBag.AccountProfile = participationObject.OwnerAccount.GetAccountProfile(msgs);
             ViewBag.Messages = msgs;
 
             return View(qvms);
@@ -1615,6 +1616,78 @@ namespace AfterSchool.Controllers
             return HandleIsLoggedIn() ?? MakePaymentActionGet(id);
         }
 
+        [HttpPost]
+        public ActionResult Pay(string id, string ccsource, string banksource, string stripetoken, string plaidtoken, string plaidaccountid, string savepaymentinfo, string paymentoption, string amount)
+        {
+            var msgs = new SystemMessages();
+
+            if (ccsource.IsEmpty() && stripetoken.IsEmpty() && plaidtoken.IsEmpty() && banksource.IsEmpty())
+                msgs.Add("Please enter your payment information", MessageType.UserError);
+            
+            var billingAccount = Account.LoadByUid(id.ToGuid(), msgs);
+
+            if (msgs.HasNoErrors())
+            {
+                var payingAccount = SessionVariables.CurrentAccount;
+                var convenienceFeePayer = billingAccount;
+                var creditCardFeePayer = payingAccount;
+                var cost = amount.ToDecimal();
+                var convenienceFee = AfterSchoolLibrary.Billing.Platform.GetConvenienceFee(cost);
+                var ccFee = 0M;
+                var overrideAmount = cost;
+
+                BankAccountPurchaseObject bankAccountPurchaseObject = null;
+                CreditCardPurchaseObject creditCardPurchaseObject = null;
+
+                if (plaidtoken.IsNotEmpty() || banksource.IsNotEmpty())
+                {
+                    bankAccountPurchaseObject = new BankAccountPurchaseObject()
+                    {
+                        PlaidPublicToken = plaidtoken,
+                        PlaidAccountId = plaidaccountid,
+                        StripeSourceId = banksource
+                    };
+                }
+                else if (ccsource.IsNotEmpty() || stripetoken.IsNotEmpty())
+                {
+                    creditCardPurchaseObject = new CreditCardPurchaseObject()
+                    {
+                        StripeToken = stripetoken,
+                        StripeSourceId = ccsource
+                    };
+
+                    ccFee = AfterSchoolLibrary.Billing.Platform.GetCreditCardFee(cost, billingAccount);
+                    overrideAmount += ccFee;
+                }
+
+                AccountService.ProcessPayment(
+                    checkoutObject: new CheckoutObject()
+                    {
+                        OverrideAmount = overrideAmount,
+                        ConvenienceFeeOverrideAmount = convenienceFee,
+                        PaymentTypeFeeOverrideAmount = ccFee,
+                        PayingAccount = payingAccount,
+                        BillingAccount = billingAccount,
+                        CreditCardPurchaseObject = creditCardPurchaseObject,
+                        BankAccountPurchaseObject = bankAccountPurchaseObject,
+                        SavePaymentInfo = savepaymentinfo.IfEmpty("0").ToBoolean(),
+                        PaymentType = bankAccountPurchaseObject.IsNotEmpty() ? PaymentType.ACH : PaymentType.CreditCard,
+                        PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
+                        ConvenienceFeePayer = convenienceFeePayer,
+                        CreditCardFeePayer = creditCardFeePayer,
+                        MasterRegistrant = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant(msgs),
+                        Description = $"{billingAccount.Name} Payment"
+                    },
+                    loggedInUser: SessionVariables.CurrentUser,
+                    msgs: msgs);
+            }
+
+            if (msgs.HasNoErrors())
+                return RedirectToAction("paymentthankyou", new { id = billingAccount.Uid });
+
+            return View();
+        }
+
         #endregion
 
         #region ThankYou
@@ -1650,6 +1723,22 @@ namespace AfterSchool.Controllers
         public ActionResult ThankYou(string id)
         {
             return HandleIsLoggedIn() ?? ThankYouActionGet(id);
+        }
+
+        private ActionResult PaymentThankYouActionGet(string accountUid)
+        {
+            var msgs = new SystemMessages();
+
+            ViewBag.Messages = msgs;
+            ViewBag.Account = Account.LoadByUid(accountUid.ToGuid(), msgs);
+
+            return View();
+        }
+
+        [HttpGet]
+        public ActionResult PaymentThankYou(string id)
+        {
+            return HandleIsLoggedIn() ?? PaymentThankYouActionGet(id);
         }
 
         #endregion

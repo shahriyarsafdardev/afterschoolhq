@@ -87,6 +87,10 @@ namespace AfterSchoolLibrary.Models
 		/// let us know whether the parent needs to consent
 		/// </summary>
 		public bool RequiresParentalConsent { get { return (bool)MDV["RequiresParentalConsent"].Value; } set { MDV["RequiresParentalConsent"].Value = value; } }
+		/// <summary>
+		/// Physical or Virtual
+		/// </summary>
+		public ActivityLocationType ActivityLocationTypeId { get { return (ActivityLocationType)MDV["ActivityLocationTypeId"].Value; } set { MDV["ActivityLocationTypeId"].Value = value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
 		public string AccountTimeZone { get { return (string)MDV["AccountTimeZone"].Value; } }
 		public bool? ActivityGroupIsArchived { get { return (bool?)MDV["ActivityGroupIsArchived"].Value; } }
@@ -109,6 +113,7 @@ namespace AfterSchoolLibrary.Models
 			this.ActivityTypeId = ActivityType.NotSet;
 			this.LeaderTypeId = ActivityLeaderType.NotSet;
 			this.RequiresParentalConsent = false;
+			this.ActivityLocationTypeId = ActivityLocationType.NotSet;
 			
         }
 
@@ -155,6 +160,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "AccountActivityGroupId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "LeaderTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RequiresParentalConsent", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "ActivityLocationTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "AccountTimeZone", typeof(Account).Name, "TimeZone", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "ActivityGroupIsArchived", typeof(ActivityGroup).Name, "IsArchived", System.Data.SqlDbType.Bit, "ActivityGroup");
@@ -385,6 +391,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["RequiresParentalConsent"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ActivityLocationTypeId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

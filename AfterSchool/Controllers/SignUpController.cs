@@ -638,5 +638,33 @@ namespace AfterSchool.Controllers
 
             return View(newAccount);
         }
+
+
+        /* APIS */
+        [HttpPost]
+        public ActionResult Personal(string firstname, string lastname, string email)
+        {
+            var msgs = new SystemMessages();
+
+            if (firstname.IsBlank())
+                msgs.Add("First Name is required", MessageType.UserError);
+
+            if (lastname.IsBlank())
+                msgs.Add("Last Name is required", MessageType.UserError);
+
+            if (email.IsBlank() || !email.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
+                msgs.Add("Email is required and must be a valid email address", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                var webUser = WebUserService.StartUserAccount(firstname, lastname, email, msgs);
+
+                if (msgs.HasNoErrors())
+                    return Json(new { status = "ok", token = webUser.Uid }, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(new { status = "error", messages = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
+
+        }
     }
 }

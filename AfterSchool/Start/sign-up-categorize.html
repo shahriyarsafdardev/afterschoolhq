@@ -1,0 +1,279 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <link rel="shortcut icon" type="image/png" href="favicon.png">
+    
+	<link rel="stylesheet" type="text/css" href="./css/bootstrap.min.css?947">
+	<link rel="stylesheet" type="text/css" href="style.css?5741">
+	<link rel="stylesheet" type="text/css" href="./css/custom.css?5058">
+	
+	<link rel="stylesheet" type="text/css" href="./css/font-awesome.min.css">
+	<link href='https://fonts.googleapis.com/css?family=Montserrat&display=swap&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+    <title>Sign-Up-Individual-3</title>
+
+
+    
+<!-- Analytics -->
+ 
+<!-- Analytics END -->
+    
+</head>
+<body>
+<!-- Main container -->
+<div class="page-container">
+    
+<!-- bloc-0 -->
+<div class="bloc bgc-dark-cerulean bg-image-3 bloc-bg-texture texture-darken d-bloc" id="bloc-0">
+	<div class="container bloc-sm">
+		<div class="row">
+			<div class="col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-6 offset-lg-3">
+				<img src="img/ahq-logo.png" class="img-fluid mx-auto d-block" alt="ahq logo" />
+			</div>
+		</div>
+	</div>
+</div>
+<!-- bloc-0 END -->
+
+<!-- bloc-7 -->
+<div class="bloc l-bloc" id="bloc-7">
+	<div class="container bloc-sm">
+		<div class="row">
+			<div class="col-lg-4 offset-lg-4 col-sm-8 offset-sm-2">
+				<h2 class="mg-md text-center blue-text">
+					Tell us more
+				</h2>
+				<p class="text-center">
+					This helps parents find you when searching
+				</p>
+				<div class="divider-h">
+					<span class="divider"></span>
+				</div>
+				<div class="form-group">
+					<label>
+						What grades do you serve?<br>
+					</label>
+					<div class="row">
+						<div class="col-lg-5">
+							<select class="form-control grade-select" required id="sel-grade-start" data-validate-error="Select a grade">
+								<option value="1">
+									Option 2
+								</option>
+							</select>
+						</div>
+						<div class="col-lg-2 align-self-center">
+							<p class="text-lg-center">
+								To
+							</p>
+						</div>
+						<div class="col-lg-5">
+							<select class="form-control grade-select" id="sel-grade-end" required data-validate-error="Select a grade">
+								<option value="0">
+									Option 1
+								</option>
+								<option value="1">
+									Option 2
+								</option>
+							</select>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label>
+						My program is designed for:
+					</label>
+					<div required required-count="1" data-validate-error="Select one option">
+						<div class="form-check">
+							<input class="form-check-input" type="radio" name="gender-restrictions" value="0" checked="checked" id="chk-gender-all" />
+							<label class="form-check-label">
+								All Genders
+							</label>
+						</div>
+						<div class="form-check">
+							<input class="form-check-input" type="radio" name="gender-restrictions" value="1" id="chk-gender-boys" />
+							<label class="form-check-label">
+								Boys
+							</label>
+						</div>
+						<div class="form-check">
+							<input class="form-check-input" type="radio" name="gender-restrictions" value="2" id="chk-gender-girls" />
+							<label class="form-check-label">
+								Girls
+							</label>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label>
+						Services Offered (select at least one):<br>
+					</label>
+					<div required required-count="1" data-validate-error="Select at least one option" id="div-services-offered">
+						<div class="form-check">
+							<input class="form-check-input" type="checkbox" id="chk-services-classes" />
+							<label class="form-check-label">
+								Classes
+							</label>
+						</div>
+						<div class="form-check">
+							<input class="form-check-input" type="checkbox" id="chk-services-events" />
+							<label class="form-check-label">
+								Events
+							</label>
+						</div>
+						<div class="form-check">
+							<input class="form-check-input" type="checkbox" id="chk-services-camps" />
+							<label class="form-check-label">
+								Camps
+							</label>
+						</div>
+						<div class="form-check">
+							<input class="form-check-input" type="checkbox" id="chk-services-field-trips" />
+							<label class="form-check-label">
+								Field Trips
+							</label>
+						</div>
+						<div class="form-check">
+							<input class="form-check-input" type="checkbox" id="chk-services-workshops" />
+							<label class="form-check-label">
+								Workshops
+							</label>
+						</div>
+						<div class="form-check">
+							<input class="form-check-input" type="checkbox" id="chk-services-virtual-learning" />
+							<label class="form-check-label">
+								Virtual Learning
+							</label>
+						</div>
+						<div class="form-check">
+							<input class="form-check-input" type="checkbox" id="chk-services-tutoring" />
+							<label class="form-check-label">
+								Tutoring
+							</label>
+						</div>
+						<div class="form-check">
+							<input class="form-check-input" type="checkbox" id="chk-services-mentoring" />
+							<label class="form-check-label">
+								Mentoring
+							</label>
+						</div>
+						<div class="form-check">
+							<input class="form-check-input" type="checkbox" id="chk-services-jobs" />
+							<label class="form-check-label">
+								Jobs
+							</label>
+						</div>
+						<div class="form-check">
+							<input class="form-check-input" type="checkbox" id="chk-services-counseling" />
+							<label class="form-check-label">
+								Counseling
+							</label>
+						</div>
+						<div class="form-check">
+							<input class="form-check-input" type="checkbox" id="chk-services-resources" />
+							<label class="form-check-label">
+								Resources
+							</label>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label>
+						Pricing Details (check all that apply):<br>
+					</label>
+					<div>
+						<div class="form-check">
+							<input class="form-check-input" type="checkbox" id="chk-free-available" />
+							<label class="form-check-label">
+								Free activities available
+							</label>
+						</div>
+						<div class="form-check">
+							<input class="form-check-input" type="checkbox" id="chk-scholarships-available" />
+							<label class="form-check-label">
+								Scholarships available
+							</label>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label>
+						My program offers (check all that apply):<br>
+					</label>
+					<div id="div-programs-offered">
+						<div class="form-check">
+							<input class="form-check-input" type="checkbox" id="chk-after-school-programs" />
+							<label class="form-check-label">
+								After-school programs
+							</label>
+						</div>
+						<div class="form-check">
+							<input class="form-check-input" type="checkbox" id="chk-before-school-programs" />
+							<label class="form-check-label">
+								Before-school programs
+							</label>
+						</div>
+						<div class="form-check">
+							<input class="form-check-input" type="checkbox" id="chk-during-school-programs" />
+							<label class="form-check-label">
+								During-school programs
+							</label>
+						</div>
+						<div class="form-check">
+							<input class="form-check-input" type="checkbox" id="chk-evening-programs" />
+							<label class="form-check-label">
+								Evening programs
+							</label>
+						</div>
+						<div class="form-check">
+							<input class="form-check-input" type="checkbox" id="chk-weekend-programs" />
+							<label class="form-check-label">
+								Weekend programs
+							</label>
+						</div>
+						<div class="form-check">
+							<input class="form-check-input" type="checkbox" id="chk-summer-programs" />
+							<label class="form-check-label">
+								Summer programs
+							</label>
+						</div>
+					</div>
+				</div><a href="sign-up-categorize-2.html" class="btn btn-persian-green margin-v-40 btn-xl btn-block" id="btn-submit" button-action="program-offerings">Continue ><br></a>
+				<div><div class="progress mb-3">
+  <div class="progress-bar" role="progressbar" style="width: 40%; background-color: rgb(0, 81, 124);" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100">40%</div>
+</div>
+				</div><a href="javascript:history.go(-1)" class="a-btn a-block text-lg-center text-center">&lt; Back</a>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- bloc-7 END -->
+
+<!-- ScrollToTop Button -->
+<a class="bloc-button btn btn-d scrollToTop" onclick="scrollToTarget('1',this)"><span class="fa fa-chevron-up"></span></a>
+<!-- ScrollToTop Button END-->
+
+
+</div>
+<!-- Main container END -->
+    
+
+<!-- Additional JS -->
+<script src="./js/jquery-3.3.1.min.js?2415"></script>
+<script src="./js/bootstrap.bundle.min.js?153"></script>
+<script src="./js/blocs.min.js?5604"></script>
+<script src="./js/lazysizes.min.js" defer></script>
+<script src="./js/app-custom.js?6724"></script>
+<script src="./js/get-grades.js?4737"></script>
+<!-- Additional JS END -->
+
+
+
+<!-- Preloader -->
+<div id="page-loading-blocs-notifaction" class="page-preloader"></div>
+<!-- Preloader END -->
+
+</body>
+</html>

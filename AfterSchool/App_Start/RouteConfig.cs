@@ -106,6 +106,15 @@ namespace AfterSchool
                 });
 
             routes.MapRoute(
+                "AccountPay",
+                "{accountname}/pay",
+                new
+                {
+                    controller = "r",
+                    action = "pay",
+                });
+
+            routes.MapRoute(
                 "LeagueRegister1",
                 "{accountname}/league/{group}/register",
                 new

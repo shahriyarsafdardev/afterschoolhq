@@ -9,7 +9,7 @@ namespace AfterSchoolLibrary.Services
 {
     public static class RefundRequestService
     {
-        public static RefundRequest CreateNewRefundRequest(Transaction transaction, decimal amount, RefundRequestStatus refundRequestStatus, string reason, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static RefundRequest CreateNew(Transaction transaction, decimal amount, RefundRequestStatus refundRequestStatus, string reason, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var refundRequest = new RefundRequest()
             {

@@ -44,11 +44,60 @@ namespace AfterSchool.Controllers
             if (isUnsupportedBrowser())
                 return RedirectUnsupportedBrowser();
 
-            var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname);
+            var msgs = new SystemMessages();
+            var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
+
+            if (account.IsEmpty())
+                return HttpNotFound();
 
             RestartRegistrationSession();
             SetRegistrationStartPage(account, true);
-            return Redirect($"/{accountname}/browse");            
+
+            var profile = account.GetAccountProfile(msgs);
+
+            if (profile.IsEmpty())
+                return Redirect(account.BrowseUrl);
+
+            var photos = profile.GetPhotos(msgs);
+            var ah = AfterSchoolLibrary.Helpers.Utilities.GetNewAmazonHelper();
+
+            photos.ForEach(photo => photo.Value = ah.GetFileLink(photo.Value, true, null, true));
+
+            ViewBag.AccountProfile = profile;
+            ViewBag.Location = account.GetDefaultLocation(msgs);
+            ViewBag.Awards = profile.GetAwards(msgs);
+            ViewBag.Certifications = profile.GetCertifications(msgs);
+            ViewBag.Photos = photos;
+            ViewBag.GradeLevelStart = profile.GetGradeLevelStart(msgs);
+            ViewBag.GradeLevelEnd = profile.GetGradeLevelEnd(msgs);
+            ViewBag.Messages = msgs;
+            ViewBag.ParticipationObjects = GetParticipationObjects(account, msgs).Where(po => po.RegistrationPeriod.IsOpen(account, msgs)).ToList();
+            ViewBag.Locations = account.GetAllAvailableLocations(msgs);
+            ViewBag.AccountProperties = account.GetAccountProperties(
+                                            new List<AccountPropertyType>() 
+                                            { 
+                                                AccountPropertyType.AcademicSubjects, 
+                                                AccountPropertyType.Classifications, 
+                                                AccountPropertyType.ServiceOffered, 
+                                                AccountPropertyType.SoftSkills, 
+                                                AccountPropertyType.TeachingMethods, 
+                                                AccountPropertyType.TimeOffered 
+                                            }, msgs);
+
+            return View(account);
+        }
+
+        private List<ParticipationObject> GetParticipationObjects(Account account, SystemMessages msgs)
+        {
+            var participationObjects = new List<ParticipationObject>();
+            participationObjects.AddRange(account.GetPublishedParticipationObjects(msgs));
+
+            return participationObjects
+                        .Where(po => (!po.IsActivity() || !po.GetActivity().ActivityGroupId.HasValue) && !po.IsInviteOnly)
+                        .OrderBy(po => po.RegistrationPeriod.IsClosed(account, msgs))
+                        .ThenBy(po => po.RegistrationPeriod.WillOpen(account, msgs))
+                        .ThenBy(po => po.RegistrationPeriod.IsOpen(account, msgs))
+                        .ToList();
         }
 
         [HttpGet]
@@ -59,6 +108,9 @@ namespace AfterSchool.Controllers
 
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname);
+
+            if (account.IsEmpty())
+                return HttpNotFound();
 
             RestartRegistrationSession();
             SetRegistrationStartPage(account, true);
@@ -73,15 +125,9 @@ namespace AfterSchool.Controllers
 
             if (account.IsNotEmpty())
             {
-                participationObjects.AddRange(account.GetPublishedParticipationObjects(msgs));
                 locations.AddRange(account.GetAllAvailableLocations(msgs));
 
-                participationObjects = participationObjects
-                                        .Where(po => (!po.IsActivity() || !po.GetActivity().ActivityGroupId.HasValue) && !po.IsInviteOnly)
-                                        .OrderBy(po => po.RegistrationPeriod.IsClosed(account, msgs))
-                                        .ThenBy(po => po.RegistrationPeriod.WillOpen(account, msgs))
-                                        .ThenBy(po => po.RegistrationPeriod.IsOpen(account, msgs))
-                                        .ToList();
+                participationObjects = GetParticipationObjects(account, msgs);
 
                 regOpened = participationObjects.Where(po => po.RegistrationPeriod.IsOpen(account, msgs)).ToList();
                 regWillOpen = participationObjects.Where(po => po.RegistrationPeriod.WillOpen(account, msgs)).ToList();
@@ -112,6 +158,26 @@ namespace AfterSchool.Controllers
             ViewBag.Cart = SessionVariables.Cart;
             ViewBag.Locations = locations;
             ViewBag.ParticipationObjects = participationObjects;
+            ViewBag.AccountProfile = account.GetAccountProfile(msgs);
+
+            return View(account);
+        }
+
+        public ActionResult Pay(string accountname)
+        {
+            if (isUnsupportedBrowser())
+                return RedirectUnsupportedBrowser();
+
+            var msgs = new SystemMessages();
+            var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
+
+            if (account.IsEmpty())
+                return HttpNotFound();
+
+            ViewBag.Sources = SessionVariables.CurrentAccount.GetStripeSources(msgs);
+            ViewBag.BankAccounts = SessionVariables.CurrentAccount.GetStripeBankAccounts(msgs);
+            ViewBag.AccountProfile = account.GetAccountProfile(msgs);
+            ViewBag.Messages = msgs;
 
             return View(account);
         }
@@ -126,6 +192,7 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);  
             var canPublishActivity = false;
+            var accountProfile = account.GetAccountProfile(msgs);
             ParticipationObject session = null;
 
             if (account.IsNotEmpty())
@@ -175,6 +242,7 @@ namespace AfterSchool.Controllers
             ViewBag.CanPublishActivity = canPublishActivity;
             ViewBag.CanRegisterFor = true;
             ViewBag.Session = session;
+            ViewBag.AccountProfile = account.GetAccountProfile();
 
             return View(participationObject);
         }
@@ -189,6 +257,7 @@ namespace AfterSchool.Controllers
 
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
+            var accountProfile = account.GetAccountProfile(msgs);
 
             if (account.IsEmpty())
                 return HttpNotFound();
@@ -210,6 +279,7 @@ namespace AfterSchool.Controllers
             ViewBag.Messages = msgs;
             ViewBag.Account = account;
             ViewBag.CanRegisterFor = canRegisterFor;
+            ViewBag.AccountProfile = account.GetAccountProfile(msgs);
 
             return View("activity", session.GetParticipationObject());
         }
@@ -258,6 +328,7 @@ namespace AfterSchool.Controllers
 
             ViewBag.Messages = msgs;
             ViewBag.Account = account;
+            ViewBag.AccountProfile = account.GetAccountProfile(msgs);
 
             return View("activity", participationObject);
         }
@@ -360,6 +431,7 @@ namespace AfterSchool.Controllers
             ViewBag.RegistrationOpened = opened;
             ViewBag.RegistrationClosed = closed;
             ViewBag.RegistrationWillOpen = willOpen;
+            ViewBag.AccountProfile = account.GetAccountProfile(msgs);
 
             return View("browse", account);
         }

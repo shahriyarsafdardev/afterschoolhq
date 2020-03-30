@@ -5,6 +5,22 @@
     var account = (Account)ViewBag.Account;
     var msgs = (SystemMessages)ViewBag.Messages;
     var session = (ParticipationObject)ViewBag.Session;
+    var showLocation = false;
+
+    if (Model.Location.IsNotEmpty())
+    {
+        if (Model.IsActivity())
+        {
+            if (Model.ActivityLocationType == ActivityLocationType.Physical)
+            {
+                showLocation = true;
+            }
+        }
+        else
+        {
+            showLocation = true;
+        }
+    }
 }
 
 @{
@@ -23,21 +39,10 @@
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-<div class="reg-header text-center">
-    <h1 class="activity-title">
-        @Model.Name
-        @if (!Model.OwnerAccount.ID.HasValue)
-        {
-            <span class="badge badge-danger">DEMO</span>
-        }
-    </h1>
-    <div class="activity-headline">
-        @Model.Description
-    </div>
-</div>
+@{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", new RegistrationHeaderViewModel(Model, (AccountProfile)ViewBag.AccountProfile)); }
 
 <div>
-    <div class="col-md-8 col-md-offset-2 participation-object participation-object-detail"
+    <div class="col-lg-8 col-lg-offset-2 col-md-12 participation-object participation-object-detail"
          id="@Model.Uid"
          mingrade="@Model.MinGradeId"
          maxgrade="@Model.MaxGradeId"
@@ -54,12 +59,12 @@
             <div class="panel-heading">
                 <div class="row">
                     <div class="col-lg-8 col-md-12">
-                        <h3 class="text-white text-center">
+                        <h3 class="text-center">
                             @if (Model.Schedule.IsNotEmpty())
                             {
                                 <span>
                                     @ParticipationObjectUI.PrintDaysOfWeekOrStartDate(Model) &bull;
-                                </span>                            
+                                </span>
                             }
 
                             @if (!Model.ActivityType.HasValue || Model.ActivityType.Value.NotIn(new ActivityType[] { ActivityType.PermissionSlip, ActivityType.FieldTrip }))
@@ -81,8 +86,9 @@
                                {
                                    { "condensed", true },
                                    { "canRegisterFor", ViewBag.CanRegisterFor },
-                                   { "session", session }
-                               }
+                                   { "session", session },
+                                   { "accountprofile", ViewBag.AccountProfile }
+                                }
                             );
                         }
                     </div>
@@ -90,81 +96,86 @@
             </div>
             <div class="panel-body">
 
-                <div class="col-md-8">
+                <div class="row">
+                    <div class="col-lg-8 col-md-12">
 
-                    <div class="activity-detail-block">
-                        <h3>Description</h3>
-                        @Html.Raw(Model.Details)
+                        <div class="activity-detail-block">
+                            <h3>Description</h3>
+                            @Html.Raw(Model.Details)
+                        </div>
+
+                    </div>
+                    <div class="col-lg-4 col-md-12">
+
+                        <div class="activity-detail-block">
+                            @{ Html.RenderPartial("~/Views/Shared/ParticipationObject/_PaymentInfo.cshtml", Model); }
+                        </div>
+
+                        @if (Model.IsActivityGroup() && Model.GetActivityGroup().IsInviteOnly)
+                        {
+                            <div class="activity-detail-block">
+                                <strong>Registration unavailable: Requires Invite to Register</strong>
+                            </div>
+                        }
+
+                        @if (Model.Schedule.IsNotEmpty() || Model.StartDate.HasValue)
+                        {
+                            <div class="activity-detail-block">
+                                <h3>Schedule</h3>
+
+                                @if (Model.StartDate.HasValue && (!Model.EndDate.HasValue || Model.StartDate.Value.Date != Model.EndDate.Value.Date))
+                                {
+                                    <p>
+                                        Starts: <strong>@Model.StartDate.Value.ToLongDateString()</strong><br />
+                                        @if (Model.EndDate.HasValue)
+                                        {
+                                            <span>
+                                                Ends: <strong>@Model.EndDate.Value.ToLongDateString()</strong>
+                                            </span>
+                                        }
+                                    </p>
+                                }
+
+                                @if (Model.Schedule.IsNotEmpty())
+                                {
+                                    <p>
+                                        @{ Html.RenderPartial("_ActivityScheduleHtml", Model.Schedule); }
+                                    </p>
+                                }
+                            </div>
+                        }
+
+                        <div class="activity-detail-block">
+                            <h3>Contact</h3>
+                            <p>
+                                @Model.ContactName.IfEmpty(Model.OwnerAccount.Name)<br />
+                                @if (Model.ContactPhone.IfEmpty(Model.OwnerAccount.Phone).IsNotBlank())
+                                {
+                                    <span>@Model.ContactPhone.IfEmpty(Model.OwnerAccount.Phone)</span><br />
+                                }
+                                <a href="mailto:@Model.ContactEmail.IfEmpty(Model.OwnerAccount.Email)">Send Email</a><br />
+                            </p>
+                        </div>
+
+                        @if (Model.RequiresParentalConsent)
+                        {
+                            <div class="activity-detail-block">
+                                <strong>Requires Parental Consent</strong>
+                            </div>
+                        }
                     </div>
 
                 </div>
-                <div class="col-md-4">
 
-                    <div class="activity-detail-block">
-                        @{ Html.RenderPartial("~/Views/Shared/ParticipationObject/_PaymentInfo.cshtml", Model); }
+                <div class="row">
+                    <div class="margin-b-20">
+                        &nbsp;
                     </div>
 
-                    @if (Model.IsActivityGroup() && Model.GetActivityGroup().IsInviteOnly)
-                    {
-                        <div class="activity-detail-block">
-                            <strong>Registration unavailable: Requires Invite to Register</strong>
-                        </div>
-                    }
-
-                    @if (Model.Schedule.IsNotEmpty() || Model.StartDate.HasValue)
-                    {
-                        <div class="activity-detail-block">
-                            <h3>Schedule</h3>
-
-                            @if (Model.StartDate.HasValue && (!Model.EndDate.HasValue || Model.StartDate.Value.Date != Model.EndDate.Value.Date))
-                            {
-                                <p>
-                                    Starts: <strong>@Model.StartDate.Value.ToLongDateString()</strong><br />
-                                    @if (Model.EndDate.HasValue)
-                                    {
-                                        <span>
-                                            Ends: <strong>@Model.EndDate.Value.ToLongDateString()</strong>
-                                        </span>
-                                    }
-                                </p>
-                            }
-
-                            @if (Model.Schedule.IsNotEmpty())
-                            {
-                                <p>
-                                    @{ Html.RenderPartial("_ActivityScheduleHtml", Model.Schedule); }
-                                </p>
-                            }
-                        </div>
-                    }
-
-                    <div class="activity-detail-block">
-                        <h3>Contact</h3>
-                        <p>
-                            @Model.ContactName.IfEmpty(Model.OwnerAccount.Name)<br />
-                            @if (Model.ContactPhone.IfEmpty(Model.OwnerAccount.Phone).IsNotBlank())
-                            {
-                                <span>@Model.ContactPhone.IfEmpty(Model.OwnerAccount.Phone)</span><br />
-                            }
-                            <a href="mailto:@Model.ContactEmail.IfEmpty(Model.OwnerAccount.Email)">Send Email</a><br />
-                        </p>
-                    </div>
-
-                    @if (Model.RequiresParentalConsent)
-                    {
-                        <div class="activity-detail-block">
-                            <strong>Requires Parental Consent</strong>
-                        </div>
-                    }
+                    <hr />
                 </div>
 
-                <div class="margin-b-20">
-                    &nbsp;
-                </div>
-
-                <hr />
-
-                @if (Model.Location.IsNotEmpty() && (!Model.ActivityType.HasValue || Model.ActivityType.Value.NotIn(new ActivityType[] { ActivityType.FieldTrip, ActivityType.PermissionSlip })))
+                @if (showLocation)
                 {
                     <div class="margin-t-20">
                         <div class="col-md-12">
@@ -193,9 +204,11 @@
                     </div>
                 }
 
-                <div class="col-md-8 col-md-offset-2">
-                    <div class="margin-v-30">
-                        @{ Html.RenderPartial("~/Views/Shared/Registration/_RegisterButton.cshtml", Model); }
+                <div class="row">
+                    <div class="col-md-8 col-md-offset-2">
+                        <div class="margin-v-30">
+                            @{ Html.RenderPartial("~/Views/Shared/Registration/_RegisterButton.cshtml", Model); }
+                        </div>
                     </div>
                 </div>
             </div>

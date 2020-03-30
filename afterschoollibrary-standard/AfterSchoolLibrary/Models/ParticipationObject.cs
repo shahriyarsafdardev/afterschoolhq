@@ -50,6 +50,7 @@ namespace AfterSchoolLibrary.Models
 
         public ActivityType? ActivityType { get; set; }
         public ActivityGroupType? ActivityGroupType { get; set; }
+        public ActivityLocationType ActivityLocationType { get; set; }
 
         public ParticipationObject(int participationObjectId, ParticipationObjectType participationObjectType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -107,6 +108,7 @@ namespace AfterSchoolLibrary.Models
             IsTuitionFree = (!activity.CostPerRegistrant.HasValue || activity.CostPerRegistrant.Value == 0.ToDecimal());
             RequiresParentalConsent = activity.RequiresParentalConsent;
             IsInviteOnly = activity.IsInviteOnly;
+            ActivityLocationType = activity.ActivityLocationTypeId;
 
             if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
             {
@@ -661,7 +663,7 @@ namespace AfterSchoolLibrary.Models
         public decimal GetConvenienceFee(FeesPaidByType feesPaidByType)
         {
             if (Cost.HasValue && PaymentAccount.ConvenienceFeesPaidBy == feesPaidByType && !UseStripeConnectedAccount)
-                return Billing.Platform.GetConvenienceFee(Cost.Value, PaymentAccount);
+                return Billing.Platform.GetConvenienceFee(Cost.Value);
 
             return 0;
         }
