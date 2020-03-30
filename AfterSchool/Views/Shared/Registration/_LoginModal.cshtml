@@ -43,6 +43,7 @@
 
 <script>
     let authorizationFormRedirectUrl = null;
+    let authorizationFormAction = null;
 
     function authorize() {
 
@@ -62,6 +63,9 @@
 
                     if (authorizationFormRedirectUrl) {
                         location.href = authorizationFormRedirectUrl;
+                    } else if (authorizationFormAction) {
+                        $('#modal-login').removeClass('md-show');
+                        authorizationFormAction(function () { location.reload(); });
                     }
                     else if (data.isNewAccount) {
                         location.reload();
@@ -81,5 +85,9 @@
 
     function setLoginRedirect(url) {
         authorizationFormRedirectUrl = url;
+    }
+
+    function setLoginAction(url) {
+        authorizationFormAction = url;
     }
 </script>

@@ -30,7 +30,7 @@ namespace AfterSchool.Controllers
                     false, 
                     "AfterSchool HQ"));
 
-                return Json(new { status = "ok", messages = msgs }, JsonRequestBehavior.AllowGet);
+                return Json(new { status = "ok", messages = msgs.ToList().Select(x => new { x.MessageType, x.Text } ) }, JsonRequestBehavior.AllowGet);
             }
             
             return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);

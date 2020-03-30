@@ -533,6 +533,14 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
+        public static WebUser GetWebUser(this Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (registrant.WebUserId.HasValue)
+                return WebUser.Load(registrant.WebUserId.Value, msgs, dc);
+
+            return null;
+        }
+
         public static void SetProfileAsCompleted(this Registrant registrant, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             registrant.UpdateProfileStatus(RegistrantProfileStatus.Completed, loggedInUser, msgs, dc);
