@@ -21,7 +21,17 @@
     );
 }
 
-@{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", participationObject); }
+@{
+    Html.RenderPartial
+    (
+        "~/Views/Shared/Registration/_RegistrationHeader.cshtml",
+        new RegistrationHeaderViewModel(participationObject, true),
+        new ViewDataDictionary()
+        {
+            { "hidebuttons", true }
+        }
+    );
+}
 
 <div>
     <div class="col-md-12">

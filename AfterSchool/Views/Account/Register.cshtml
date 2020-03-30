@@ -26,7 +26,17 @@
     );
 }
 
-@{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", new RegistrationHeaderViewModel(Model, $"Registering <u>{SessionVariables.CurrentRegistrant.FirstName}</u> for <u>{Model.Name}</u>", "")); }
+@{
+    Html.RenderPartial
+    (
+        "~/Views/Shared/Registration/_RegistrationHeader.cshtml",
+        new RegistrationHeaderViewModel(Model, $"Registering <u>{SessionVariables.CurrentRegistrant.FirstName}</u> for <u>{Model.Name}</u>", ""),
+        new ViewDataDictionary()
+        {
+            { "hidebuttons", true }
+        }
+    );
+}
 
 <div>
     <div class="col-md-12">

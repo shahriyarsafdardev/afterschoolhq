@@ -32,7 +32,7 @@
         hideButtons = ViewData["hidebuttons"].ToString().ToBoolean();
     }
 
-    if (Model.ParticipationObject.IsNotEmpty() || hideButtons)
+    if (hideButtons)
     {
         midColSpan = 10;
         hideButtons = true;

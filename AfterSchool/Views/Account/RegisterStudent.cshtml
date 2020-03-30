@@ -17,11 +17,21 @@
         new ViewDataDictionary()
         {
             { "ParticipationObject", Model }
-                }
+                        }
     );
 }
 
-@{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", new RegistrationHeaderViewModel(Model, true)); }
+@{
+    Html.RenderPartial
+    (
+        "~/Views/Shared/Registration/_RegistrationHeader.cshtml",
+        new RegistrationHeaderViewModel(Model, true),
+        new ViewDataDictionary()
+        {
+            { "hidebuttons", true }
+        }
+    );
+}
 
 <div>
     <div class="am-content">
@@ -103,6 +113,6 @@
         new ViewDataDictionary()
         {
             { "IsDuringCheckout", true }
-                    }
+                                }
     );
 }
