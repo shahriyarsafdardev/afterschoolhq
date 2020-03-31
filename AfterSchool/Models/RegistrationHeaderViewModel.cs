@@ -18,8 +18,19 @@ namespace AfterSchool.Models
         public ParticipationObject ParticipationObject { get; set; }
         public decimal NumberOfHoursEnrolled { get; set; }
         public decimal NumberOfStudentsServed { get; set; }
-
         public int Followers { get; set; }
+        public string FollowersFormatted 
+        { 
+            get
+            {
+                if (Followers >= 1000000)
+                    return $"{Followers.ToString("#.0")}M";
+                else if (Followers >= 1000)
+                    return $"{Followers.ToString("#.0")}k";
+
+                return $"{Followers.ToString()}";
+            }
+        }
 
         public RegistrationHeaderViewModel()
         {

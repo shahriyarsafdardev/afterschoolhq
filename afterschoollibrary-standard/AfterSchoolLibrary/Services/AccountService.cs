@@ -1948,22 +1948,7 @@ namespace AfterSchoolLibrary.Services
 
         public static bool HasRegistrationsWith(this Account familyAccount, Account providerAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var registrants = familyAccount.GetChildrenRegistrants(msgs, dc);
-            var activities = providerAccount.GetActivities(UserType.Administrator, null, null, null, false, false, null, null, msgs, dc);
-            var participationObjects = activities.Select(activity => new ParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, false, msgs, dc)).ToList();
-            var submittedRecordIds = new List<int>();
-            var assignmentTypes = new List<RegistrationAssignmentType>()
-            {
-                RegistrationAssignmentType.Applied,
-                RegistrationAssignmentType.Reserved,
-                RegistrationAssignmentType.ReservedPendingPayment,
-                RegistrationAssignmentType.ReservedPendingParentalConsent,
-                RegistrationAssignmentType.WaitingList
-            };
-
-            registrants.ForEach(registrant => submittedRecordIds.AddRange(registrant.GetSubmittedRecords(providerAccount.ID.Value, msgs, dc).Select(x => x.ID.Value)));
-
-            return RegistrantActivity.ExistsByParticipationObjectsByRegistrants(participationObjects, submittedRecordIds, assignmentTypes, true, msgs, dc);
+            return Account.GetConnectedEducatorAccountCount(familyAccount.ID.Value, providerAccount.ID.Value, msgs, dc) > 0;
         }
 
         #endregion
@@ -3077,37 +3062,37 @@ namespace AfterSchoolLibrary.Services
 
         public static decimal GetTotalHoursEnrolled(this Account account, DateTime? startDateTime = null, DateTime? endDateTime = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Account.GetTotalMinutesEnrolled(account.ID.Value, startDateTime, endDateTime, msgs, dc) / 60;
+            return Account.LoadTotalMinutesEnrolled(account.ID.Value, startDateTime, endDateTime, msgs, dc) / 60;
         }
 
         public static int GetTotalSeatsOffered(this Account account, DateTime? startDateTime = null, DateTime? endDateTime = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Account.GetTotalSeatsOffered(account.ID.Value, startDateTime, endDateTime, msgs, dc);
+            return Account.LoadTotalSeatsOffered(account.ID.Value, startDateTime, endDateTime, msgs, dc);
         }
 
         public static decimal GetTotalHoursOffered(this Account account, DateTime? startDateTime = null, DateTime? endDateTime = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Account.GetTotalMinutesOffered(account.ID.Value, startDateTime, endDateTime, msgs, dc) / 60;
+            return Account.LoadTotalMinutesOffered(account.ID.Value, startDateTime, endDateTime, msgs, dc) / 60;
         }
 
         public static int GetTotalStudentsServed(this Account account, DateTime? startDateTime = null, DateTime? endDateTime = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Account.GetTotalStudentsServed(account.ID.Value, startDateTime, endDateTime, msgs, dc);
+            return Account.LoadTotalStudentsServed(account.ID.Value, startDateTime, endDateTime, msgs, dc);
         }
 
         public static List<(string ActivityName, int RegistrationCount)> GetRegistrationCountByActivity(this Account account, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return Account.GetRegistrationCountByActivity(account.ID.Value, startDateTime, endDateTime, msgs, dc);
+            return Account.LoadRegistrationCountByActivity(account.ID.Value, startDateTime, endDateTime, msgs, dc);
         }
 
         public static List<(string Grade, int RegistrationCount)> GetRegistrationCountByGrade(this Account account, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return Account.GetRegistrationCountByGrade(account.ID.Value, startDateTime, endDateTime, msgs, dc);
+            return Account.LoadRegistrationCountByGrade(account.ID.Value, startDateTime, endDateTime, msgs, dc);
         }
 
         public static (decimal totalProcessed, decimal totalProfit) GetTotalProcessedAndProfit(this Account account, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return Account.GetTotalProcessedAndProfit(account.ID.Value, startDateTime, endDateTime, msgs, dc);
+            return Account.LoadTotalProcessedAndProfit(account.ID.Value, startDateTime, endDateTime, msgs, dc);
         }
 
         #endregion
