@@ -4,7 +4,7 @@
     var author = account?.Name;
     var description = accountProfile?.Headline;
     var propertyTypes = new List<AccountPropertyType>() { AccountPropertyType.AcademicSubjects, AccountPropertyType.Classifications, AccountPropertyType.PricingOption, AccountPropertyType.ServiceOffered, AccountPropertyType.SoftSkills, AccountPropertyType.TeachingMethods, AccountPropertyType.TimeOffered };
-    var keywords = account.GetAccountProperties(propertyTypes).Select(x => x.Value).ToStringList(", ");
+    var keywords = account?.GetAccountProperties(propertyTypes).Select(x => x.Value).ToStringList(", ");
     var previewImage = accountProfile?.GetLogoUrl();
 
     if (previewImage.IsBlank())
