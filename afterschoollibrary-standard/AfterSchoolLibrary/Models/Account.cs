@@ -550,7 +550,7 @@ namespace AfterSchoolLibrary.Models
             return new List<Account>();
         }
 
-        public static int GetTotalMinutesEnrolled(int? accountId, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        public static int LoadTotalMinutesEnrolled(int? accountId, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -593,7 +593,7 @@ namespace AfterSchoolLibrary.Models
             return 0;
         }
 
-        public static int GetTotalSeatsOffered(int? accountId, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        public static int LoadTotalSeatsOffered(int? accountId, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -630,7 +630,7 @@ namespace AfterSchoolLibrary.Models
             return 0;
         }
 
-        public static int GetTotalMinutesOffered(int? accountId, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        public static int LoadTotalMinutesOffered(int? accountId, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -669,7 +669,7 @@ namespace AfterSchoolLibrary.Models
             return 0;
         }
 
-        public static int GetTotalStudentsServed(int? accountId, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        public static int LoadTotalStudentsServed(int? accountId, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -704,7 +704,7 @@ namespace AfterSchoolLibrary.Models
             return 0;
         }
 
-        public static List<(string ActivityName, int RegistrationCount)> GetRegistrationCountByActivity(int? accountId, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        public static List<(string ActivityName, int RegistrationCount)> LoadRegistrationCountByActivity(int? accountId, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -747,7 +747,7 @@ namespace AfterSchoolLibrary.Models
                         });            
         }
 
-        public static List<(string Grade, int RegistrationCount)> GetRegistrationCountByGrade(int? accountId, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        public static List<(string Grade, int RegistrationCount)> LoadRegistrationCountByGrade(int? accountId, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -798,7 +798,7 @@ namespace AfterSchoolLibrary.Models
                         });
         }
 
-        public static (decimal totalProcessed, decimal totalProfit) GetTotalProcessedAndProfit(int? accountId, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        public static (decimal totalProcessed, decimal totalProfit) LoadTotalProcessedAndProfit(int? accountId, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -870,6 +870,52 @@ namespace AfterSchoolLibrary.Models
                 return (dt.Rows[0][0].ToString().ToDecimal(), dt.Rows[0][1].ToString().ToDecimal());
 
             return (0, 0);
+        }
+
+        public static List<Account> LoadConnectedEducatorAccounts(int familyAccountId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+
+            var sql = $@"
+	                select 
+	                    a2.*
+                    from 
+	                    account a1 inner join
+	                    registrant r1 on a1.ID = r1.AccountId inner join
+	                    registrant r2 on r1.ID = r2.ParentRegistrantId inner join
+	                    account a2 on r2.AccountId = a2.ID
+                    where 
+	                    a1.ID = {familyAccountId}
+                    order by a1.Name";
+
+            return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static int GetConnectedEducatorAccountCount(int familyAccountId, int providerAccount, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+
+            var sql = $@"
+	                select 
+	                    count(a2.*)
+                    from 
+	                    account a1 inner join
+	                    registrant r1 on a1.ID = r1.AccountId inner join
+	                    registrant r2 on r1.ID = r2.ParentRegistrantId inner join
+	                    account a2 on r2.AccountId = a2.ID
+                    where 
+	                    a1.ID = {familyAccountId} and
+                        a2.ID = {providerAccount}
+                    order by a1.Name";
+
+            var dt = dq.ExecuteSelect(sql, msgs);
+
+            if (dt.Rows.Any())
+                return dt.Rows[0][0].ToString().ToInteger();
+
+            return 0;
         }
 
         #endregion
