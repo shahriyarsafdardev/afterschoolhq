@@ -44,7 +44,10 @@ namespace AfterSchoolLibrary.Services
 
         public static Account GetAccount(this AccountProfile profile, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Account.Load(profile.AccountId.Value, msgs, dc);
+            if (profile.AccountId.HasValue)
+                return Account.Load(profile.AccountId.Value, msgs, dc);
+
+            return null;
         }
 
         public static void UploadHeaderImage(this AccountProfile profile, Account account, System.IO.Stream stream, string filename, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
