@@ -19,14 +19,38 @@ namespace AfterSchool.Models
         public decimal NumberOfHoursEnrolled { get; set; }
         public decimal NumberOfStudentsServed { get; set; }
         public int Followers { get; set; }
-        public string FollowersFormatted 
-        { 
+        public string NumberOfHoursEnrolledFormatted
+        {
+            get
+            {
+                if (NumberOfHoursEnrolled >= 1000000)
+                    return $"{(NumberOfHoursEnrolled / 1000000M).ToString("#.0")}M";
+                else if (NumberOfHoursEnrolled >= 1000)
+                    return $"{(NumberOfHoursEnrolled / 1000M).ToString("#.0")}k";
+
+                return $"{NumberOfHoursEnrolled.ToString()}";
+            }
+        }
+        public string NumberOfStudentsServedFormatted
+        {
+            get
+            {
+                if (NumberOfStudentsServed >= 1000000)
+                    return $"{(NumberOfStudentsServed / 100000M).ToString("#.0")}M";
+                else if (NumberOfStudentsServed >= 1000)
+                    return $"{(NumberOfStudentsServed / 1000M).ToString("#.0")}k";
+
+                return $"{NumberOfStudentsServed.ToString()}";
+            }
+        }
+        public string FollowersFormatted
+        {
             get
             {
                 if (Followers >= 1000000)
-                    return $"{Followers.ToString("#.0")}M";
+                    return $"{(Followers / 1000000M).ToString("#.0")}M";
                 else if (Followers >= 1000)
-                    return $"{Followers.ToString("#.0")}k";
+                    return $"{(Followers / 1000M).ToString("#.0")}k";
 
                 return $"{Followers.ToString()}";
             }
