@@ -1,5 +1,5 @@
 ﻿@{ 
-    var accountProfile = (AccountProfile)ViewBag.AccountProfile;
+    var accountProfile = (AccountProfile)ViewBag.AccountProfile ?? new AccountProfile();
     var account = accountProfile?.GetAccount();
     var author = account?.Name;
     var description = accountProfile?.Headline;
