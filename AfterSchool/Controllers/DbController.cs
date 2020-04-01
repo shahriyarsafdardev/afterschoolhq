@@ -50,11 +50,11 @@ namespace AfterSchool.Controllers
                     indexXml.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
                     indexXml.Append("<sitemapindex xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">");
                     indexXml.Append("<sitemap>");
-                    indexXml.Append("<loc>https://afterschoolhq.com/sitemap-home.xml</loc>");
+                    indexXml.Append($"<loc>{AfterSchoolLibrary.Helpers.Utilities.BaseUrl()}/sitemap-home.xml</loc>");
                     indexXml.Append($"<lastmod>{DateTime.UtcNow.ToRfc3339String()}</lastmod>");
                     indexXml.Append("</sitemap>");
                     indexXml.Append("<sitemap>");
-                    indexXml.Append("<loc>https://afterschoolhq.com/sitemap-profiles.xml</loc>");
+                    indexXml.Append($"<loc>{AfterSchoolLibrary.Helpers.Utilities.BaseUrl()}/sitemap-profiles.xml</loc>");
                     indexXml.Append($"<lastmod>{DateTime.UtcNow.ToRfc3339String()}</lastmod>");
                     indexXml.Append("</sitemap>");
                     indexXml.Append("</sitemapindex>");
