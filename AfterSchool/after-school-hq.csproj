@@ -712,7 +712,9 @@
     <Content Include="privacy.html" />
     <Content Include="provider-faq.html" />
     <Content Include="providers.html" />
-    <Content Include="sitemap.xml" />
+    <Content Include="sitemap-home.xml" />
+    <Content Include="sitemap_index.xml" />
+    <Content Include="sitemap-profiles.xml" />
     <Content Include="Start\css\bootstrap.min.css" />
     <Content Include="Start\css\custom.css" />
     <Content Include="Start\css\font-awesome.min.css" />

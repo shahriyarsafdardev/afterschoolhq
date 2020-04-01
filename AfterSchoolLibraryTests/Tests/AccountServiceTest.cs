@@ -184,7 +184,7 @@ namespace AfterSchoolLibraryTests.Tests
                 AccountType.SchoolDistrict
             };
 
-            Assert.Single(Account.LoadByAccountTypeIds(accountTypes, null, null, msgs, dc));
+            Assert.Single(Account.LoadByAccountTypeIds(accountTypes, false, null, null, msgs, dc));
         }
 
         //[Theory(DisplayName = "Get Platform Flat Fee")]

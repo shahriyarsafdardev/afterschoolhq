@@ -1,3 +1,4 @@
+
 [namespace:AfterSchoolLibrary.Models]
 
 [begin]
@@ -380,6 +381,11 @@ property: Instagram, string, NVarChar "100"
 property: LinkedIn, string, NVarChar "100"
 property: GenderRestriction, GenderRestrictionType, Int
 loadmethod: AccountId
+join: Account.ID, AccountId, InnerJoin
+joinproperty: Account.Name, string, NVarChar
+joinproperty: Account.UniqueName, string, NVarChar
+joinproperty: Account.IsTest, bool, Bit
+joinproperty: Account.IsDeleted, bool, Bit
 [end]
 
 [begin]
