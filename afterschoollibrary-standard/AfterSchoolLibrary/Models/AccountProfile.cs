@@ -32,6 +32,10 @@ namespace AfterSchoolLibrary.Models
 		public string Instagram { get { return (string)MDV["Instagram"].Value; } set { MDV["Instagram"].Value = value; } }
 		public string LinkedIn { get { return (string)MDV["LinkedIn"].Value; } set { MDV["LinkedIn"].Value = value; } }
 		public GenderRestrictionType GenderRestriction { get { return (GenderRestrictionType)MDV["GenderRestriction"].Value; } set { MDV["GenderRestriction"].Value = value; } }
+		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
+		public string AccountUniqueName { get { return (string)MDV["AccountUniqueName"].Value; } }
+		public bool AccountIsTest { get { return (bool)MDV["AccountIsTest"].Value; } }
+		public bool AccountIsDeleted { get { return (bool)MDV["AccountIsDeleted"].Value; } }
 		
 
         public AccountProfile()
@@ -63,6 +67,10 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "Instagram", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "LinkedIn", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "GenderRestriction", System.Data.SqlDbType.Int);
+				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
+				_dp.Add(className, "AccountUniqueName", typeof(Account).Name, "UniqueName", System.Data.SqlDbType.NVarChar, "Account");
+				_dp.Add(className, "AccountIsTest", typeof(Account).Name, "IsTest", System.Data.SqlDbType.Bit, "Account");
+				_dp.Add(className, "AccountIsDeleted", typeof(Account).Name, "IsDeleted", System.Data.SqlDbType.Bit, "Account");
 				
                 return _dp;
             }
@@ -80,6 +88,7 @@ namespace AfterSchoolLibrary.Models
             get
             {
                 BasicLibrary.DataAccess.DatabaseQuery dq = BaseObject.get_DatabaseQuery(ObjectMap, typeof(AccountProfile).Name);
+				dq.Joins.Add(Account.ObjectMap["ID"], AccountProfile.ObjectMap["AccountId"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.InnerJoin, "Account");
 				
                 return dq;
             }
@@ -215,6 +224,16 @@ namespace AfterSchoolLibrary.Models
         #endregion
 
 		#region "UserDefined"
+
+		public static AccountProfile GetLastUpdatedProfile(SystemMessages msgs, DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.SelectRange.Start = 0;
+			dq.SelectRange.Length = 1;
+			dq.OrderBys.Add(ObjectMap["LastModifiedDate"], OrderByDirectionEnum.Descending);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
 
         #endregion
     }

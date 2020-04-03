@@ -47,6 +47,7 @@ namespace AfterSchoolLibrary.Models
         public bool IsInviteOnly { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
+        public DateTime? LastModifiedDate { get; set; }
 
         public ActivityType? ActivityType { get; set; }
         public ActivityGroupType? ActivityGroupType { get; set; }
@@ -109,6 +110,7 @@ namespace AfterSchoolLibrary.Models
             RequiresParentalConsent = activity.RequiresParentalConsent;
             IsInviteOnly = activity.IsInviteOnly;
             ActivityLocationType = activity.ActivityLocationTypeId;
+            LastModifiedDate = activity.LastModifiedDate;
 
             if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
             {
@@ -165,6 +167,7 @@ namespace AfterSchoolLibrary.Models
             RequiresParentalConsent = activityGroup.RequiresParentalConsent;
             StartDate = activityGroup.StartDate;
             EndDate = activityGroup.EndDate;
+            LastModifiedDate = activityGroup.LastModifiedDate;
 
             if (loadAllDetails)
             {
@@ -207,6 +210,7 @@ namespace AfterSchoolLibrary.Models
             // Description = activityGroup.Description;
             RegistrationMode = RegistrationMode.Apply; // aag.RegistrationModeId;
             IsTuitionFree = (!aag.Cost.HasValue || aag.Cost.Value == 0.ToDecimal());
+            LastModifiedDate = activityGroup.LastModifiedDate;
 
             if (loadAllDetails)
             {
