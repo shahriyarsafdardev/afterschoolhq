@@ -8,6 +8,14 @@
     var showFollow = false;
     var showUnfollow = true;
     var hideButtons = false;
+    var shareUrl = Model.Account.ShortHomePageUrl;
+    var shareObject = Model.Account.Name;
+
+    if (Model.ParticipationObject.IsNotEmpty())
+    {
+        shareUrl = Model.ParticipationObject.GetHomePageUrl();
+        shareObject = $"{Model.ParticipationObject.Name} by {Model.Account.Name}";
+    }
 
     if (Model.HeaderUrl.IsNotEmpty())
     {
@@ -206,12 +214,12 @@
 
                         <div>
                             <p>
-                                Share <strong>@Model.Account.Name</strong> with your friends and family via Web Link, Twitter, or Facebook
+                                Share <strong>@shareObject</strong> with your friends and family via Web Link, Twitter, or Facebook
                             </p>
                         </div>
 
                         <div class="footer-social-icon text-center">
-                            <input type="text" value="@Model.Account.ShortHomePageUrl" id="account-reg-url" onclick="this.select()" class="form-control inline hidden" />
+                            <input type="text" value="@shareUrl" id="account-reg-url" onclick="this.select()" class="form-control inline hidden" />
                             <span class="icon-xlarge pointer"
                                   style="text-decoration: none;"
                                   onclick="WebPage.copySelection('account-reg-url', 'URL has been copied')"
@@ -230,7 +238,7 @@
                         </div>
 
                         <div class="footer-social-icon">
-                            <a href="http://twitter.com/share?text=@Url.Encode($"Check out {Model.Account.Name} on {AfterSchoolLibrary.Helpers.Utilities.AppName()}")&url=@Url.Encode(Model.Account.ShortHomePageUrl)&hashtags=Education,AfterschoolActivities,AfterSchoolHQ"
+                            <a href="http://twitter.com/share?text=@Url.Encode($"Check out {shareObject} on {AfterSchoolLibrary.Helpers.Utilities.AppName()}")&url=@Url.Encode(shareUrl)&hashtags=Education,AfterschoolActivities,AfterSchoolHQ"
                                class="icon-xlarge"
                                style="text-decoration: none;"
                                target="_blank"
@@ -241,7 +249,7 @@
                         </div>
 
                         <div class="footer-social-icon text-center">
-                            <a href="https://www.facebook.com/sharer/sharer.php?u=@Url.Encode(Model.Account.ShortHomePageUrl)"
+                            <a href="https://www.facebook.com/sharer/sharer.php?u=@Url.Encode(shareUrl)"
                                class="icon-xlarge margin-h-30"
                                style="text-decoration: none;"
                                target="_blank"
