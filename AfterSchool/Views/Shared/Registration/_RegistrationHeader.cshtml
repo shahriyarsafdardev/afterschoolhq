@@ -136,7 +136,7 @@
                             </button>
                         </div>
 
-                        <button onclick="share()" class="btn btn-header-action hide">
+                        <button class="btn btn-header-action md-trigger" data-modal="modal-share">
                             <i class="icon icon-left ion-share"></i>
                             Share
 
@@ -191,6 +191,73 @@
     </div>
 </div>
 
+<div id="modal-share" class="md-modal colored-header modal-colored-header modal-colored-header-dark custom-width md-effect-9">
+
+    <div class="md-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+            <h3 class="modal-title">Share</h3>
+        </div>
+        <div class="modal-body">
+
+            <div class="col-md-12">
+                <div class="login-form">
+                    <div class="form-group text-center">
+
+                        <div>
+                            <p>
+                                Share <strong>@Model.Account.Name</strong> with your friends and family via Web Link, Twitter, or Facebook
+                            </p>
+                        </div>
+
+                        <div class="footer-social-icon text-center">
+                            <input type="text" value="@Model.Account.ShortHomePageUrl" id="account-reg-url" onclick="this.select()" class="form-control inline hidden" />
+                            <span class="icon-xlarge pointer"
+                                  style="text-decoration: none;"
+                                  onclick="WebPage.copySelection('account-reg-url', 'URL has been copied')"
+                                  title="Copy Url">
+                                <i class="ion-ios-world-outline"></i>
+                            </span>
+                            <span style="font-size: 12px;">Copy Url</span>
+                        </div>
+
+                        <div class="footer-social-icon text-center hide">
+                            <span class="icon-xlarge"
+                                  style="text-decoration: none;">
+                                <i class="ion-ios-email-outline"></i>
+                            </span>
+                            <span style="font-size: 12px;">Email</span>
+                        </div>
+
+                        <div class="footer-social-icon">
+                            <a href="http://twitter.com/share?text=@Url.Encode($"Check out {Model.Account.Name} on {AfterSchoolLibrary.Helpers.Utilities.AppName()}")&url=@Url.Encode(Model.Account.ShortHomePageUrl)&hashtags=Education,AfterschoolActivities,AfterSchoolHQ"
+                               class="icon-xlarge"
+                               style="text-decoration: none;"
+                               target="_blank"
+                               title="Share to Twitter">
+                                <i class="ion-social-twitter-outline"></i>
+                            </a>
+                            <span style="font-size: 12px;">Twitter</span>
+                        </div>
+
+                        <div class="footer-social-icon text-center">
+                            <a href="https://www.facebook.com/sharer/sharer.php?u=@Url.Encode(Model.Account.ShortHomePageUrl)"
+                               class="icon-xlarge margin-h-30"
+                               style="text-decoration: none;"
+                               target="_blank"
+                               title="Share to Facebook">
+                                <i class="ion-social-facebook-outline"></i>
+                            </a>
+                            <span style="font-size: 12px;">Facebook</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
 <script>
     function follow(callback) {
         $('#btn-follow').val('...');
@@ -241,7 +308,7 @@
     }
 
     function share() {
-
+        $('#modal-share').addClass('md-show');
     }
 
     function interested() {
