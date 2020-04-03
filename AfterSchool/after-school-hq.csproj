@@ -590,6 +590,7 @@
     <Compile Include="Controllers\RegController.cs" />
     <Compile Include="Controllers\ServicesController.cs" />
     <Compile Include="Controllers\SignUpController.cs" />
+    <Compile Include="Controllers\SitemapController.cs" />
     <Compile Include="Helpers\ActivitySetupHelper.cs" />
     <Compile Include="Helpers\RecaptchaHelper.cs" />
     <Compile Include="Models\ActivityScheduleUI.cs" />
@@ -712,7 +713,7 @@
     <Content Include="privacy.html" />
     <Content Include="provider-faq.html" />
     <Content Include="providers.html" />
-    <Content Include="sitemap.xml" />
+    <Content Include="sitemap-home.xml" />
     <Content Include="Start\css\bootstrap.min.css" />
     <Content Include="Start\css\custom.css" />
     <Content Include="Start\css\font-awesome.min.css" />
@@ -1809,6 +1810,7 @@
     <Folder Include="Areas\WebHooks\Views\Shared\" />
     <Folder Include="Areas\WebHooks\Views\Stripe\" />
     <Folder Include="Areas\WebHooks\Views\Twilio\" />
+    <Folder Include="Views\Sitemap\" />
     <Folder Include="Views\User\" />
   </ItemGroup>
   <ItemGroup>
