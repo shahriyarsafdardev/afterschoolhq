@@ -53,9 +53,9 @@ namespace AfterSchool
                 new { controller = "logout", action = "index", id = UrlParameter.Optional });
 
             routes.MapRoute(
-                "Reg",
-                "reg/{action}/{id}",
-                new { controller = "reg", action = "index", id = UrlParameter.Optional });
+                "Sitemap",
+                "sitemap/{action}/{id}",
+                new { controller = "sitemap", action = "index", id = UrlParameter.Optional });
 
             routes.MapRoute(
                 "SignUp",

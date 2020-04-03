@@ -225,6 +225,16 @@ namespace AfterSchoolLibrary.Models
 
 		#region "UserDefined"
 
+		public static AccountProfile GetLastUpdatedProfile(SystemMessages msgs, DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.SelectRange.Start = 0;
+			dq.SelectRange.Length = 1;
+			dq.OrderBys.Add(ObjectMap["LastModifiedDate"], OrderByDirectionEnum.Descending);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
+
         #endregion
     }
 }
