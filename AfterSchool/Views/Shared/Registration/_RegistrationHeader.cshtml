@@ -275,7 +275,8 @@
             $('.btn-share').click(function () {
                 navigator.share({
                     title: '@shareObject',
-                    url: '@shareUrl'
+                    url: '@shareUrl',
+                    text: 'Check out @shareObject on @AfterSchoolLibrary.Helpers.Utilities.AppName()'
                 }).then(() => {
                     console.log('Thanks for sharing!');
                 }).catch(console.error);
