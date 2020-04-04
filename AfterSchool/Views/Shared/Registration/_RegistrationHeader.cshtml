@@ -144,7 +144,7 @@
                             </button>
                         </div>
 
-                        <button class="btn btn-header-action md-trigger" data-modal="modal-share">
+                        <button class="btn btn-header-action btn-share">
                             <i class="icon icon-left ion-share"></i>
                             Share
 
@@ -203,7 +203,7 @@
 
     <div class="md-content">
         <div class="modal-header">
-            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+            <button type="button" data-dismiss="modal" id="modal-share-close" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
             <h3 class="modal-title">Share</h3>
         </div>
         <div class="modal-body">
@@ -222,11 +222,11 @@
                             <input type="text" value="@shareUrl" id="account-reg-url" onclick="this.select()" class="form-control inline hidden" />
                             <span class="icon-xlarge pointer"
                                   style="text-decoration: none;"
-                                  onclick="WebPage.copySelection('account-reg-url', 'URL has been copied')"
+                                  onclick="copyUrlToShare()"
                                   title="Copy Url">
                                 <i class="ion-ios-world-outline"></i>
                             </span>
-                            <span style="font-size: 12px;">Copy Url</span>
+                            <span style="font-size: 12px;" id="copy-url-text">Copy Url</span>
                         </div>
 
                         <div class="footer-social-icon text-center hide">
@@ -267,6 +267,33 @@
 </div>
 
 <script>
+
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+
+        if (navigator.share) {
+
+            $('.btn-share').click(function () {
+                navigator.share({
+                    title: '@shareObject',
+                    url: '@shareUrl',
+                    text: 'Check out @shareObject on @AfterSchoolLibrary.Helpers.Utilities.AppName()'
+                }).then(() => {
+                    console.log('Thanks for sharing!');
+                }).catch(console.error);
+            });
+            
+        } else {
+            $('.btn-share').click(function () {
+                $('#modal-share').addClass('md-show');
+                $('#modal-share-close').click(function () {
+                    $('#modal-share').removeClass('md-show');
+                });
+            });
+            
+        }
+
+    });
+
     function follow(callback) {
         $('#btn-follow').val('...');
         $('#btn-follow').prop('disabled', true);
@@ -315,11 +342,17 @@
         });
     }
 
-    function share() {
-        $('#modal-share').addClass('md-show');
-    }
-
     function interested() {
 
+    }
+
+    function copyUrlToShare() {
+        WebPage.copySelection('account-reg-url', 'URL has been copied', function () {
+            $('#copy-url-text').html('Copied!');
+
+            setTimeout(function () {
+                $('#copy-url-text').html('Copy Url');
+            }, 3000);
+        })
     }
 </script>

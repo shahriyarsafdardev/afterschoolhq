@@ -259,13 +259,17 @@ var WebPage = {
         var url = window.location.href.split('?');
         return url[0];
     },
-    copySelection: function (id, successText) {
+    copySelection: function (id, successText, callback) {
         var copyText = document.getElementById(id);
         copyText.select();
         copyText.setSelectionRange(0, 99999);
         document.execCommand("copy");
 
         Notifications.showMessage("Copied", successText, true);
+
+        if (callback) {
+            callback();
+        }
     }
 }
 
