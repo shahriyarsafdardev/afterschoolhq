@@ -1,6 +1,6 @@
 ﻿@model List<AccountProperty>
 @{
-    var maxPhotos = 5; // Math.Min(Model.Count, 6);
+    var maxPhotos = Math.Min(Model.Count, 6);
 }
 
 @if (maxPhotos == 5)
@@ -19,12 +19,12 @@ else if (maxPhotos == 4 || maxPhotos == 2)
 {
     foreach (var item in Model.Take(maxPhotos))
     {
-        <div class="col-md-6 profile-photo-gallery" style="background-image: url('@item.Value');"></div>
+        <div class="col-md-6 profile-photo-gallery@(maxPhotos == 2 ? "-tall" : "")" style="background-image: url('@item.Value');"></div>
     }
 }
 else if (maxPhotos == 1)
 {
-    <div class="col-md-12 profile-photo-gallery" style="background-image: url('@Model.First().Value');"></div>
+    <div class="col-md-12 profile-photo-gallery-tall" style="background-image: url('@Model.First().Value');"></div>
 }
 else
 {
