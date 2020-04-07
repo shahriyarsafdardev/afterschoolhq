@@ -10,6 +10,7 @@
     var hideButtons = false;
     var shareUrl = Model.Account.ShortHomePageUrl;
     var shareObject = Model.Account.Name;
+    var isInEditMode = SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentUser.HasAccessTo(Model.Account);
 
     if (Model.ParticipationObject.IsNotEmpty())
     {
@@ -57,9 +58,37 @@
     }
 }
 
+@helper renderEditButtion(string anchor)
+{
+    if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentUser.HasAccessTo(Model.Account))
+    {
+        <span>
+            <a href="@Url.Action("style", "account", new { area = "org", isfullscreen = 1, returnurl = Request.Url })#@anchor"
+               class="btn btn-alt7 btn-sm">
+                Edit &raquo;
+            </a>
+        </span>
+    }
+}
+
 <div class="row">
+
+    @if (isInEditMode)
+    {
+        <div class="profile-edit-bar text-center hide">
+            <a href="@Url.Action("style", "account", new { area = "org", isfullscreen = 1, returnurl = Request.Url })"
+               class="btn btn-alt7 btn-lg btn-block">
+                Edit Your Educator Profile &raquo;
+            </a>
+        </div>
+    }
+
     <div class="reg-header" style="@regHeaderStyle">
         <div class="reg-header-overlay col-md-8 col-md-offset-2">
+
+            <div>
+                @renderEditButtion("header")
+            </div>
 
             @if (logoUrl.IsNotBlank())
             {
@@ -94,28 +123,28 @@
                     @if (Model.Followers > 0)
                     {
                         <span class="badge badge-darkgray profile-badge text-small">
-                            <icon class="s7-user"></icon> 
+                            <icon class="s7-user"></icon>
                             @Model.FollowersFormatted follower@(Model.Followers == 1 ? "" : "s")
                         </span>
                     }
                     @if (Model.NumberOfHoursEnrolled > 0)
                     {
                         <span class="badge badge-darkgray profile-badge text-small">
-                            <icon class="s7-clock"></icon> 
+                            <icon class="s7-clock"></icon>
                             @Model.NumberOfHoursEnrolledFormatted hrs of education provided
                         </span>
                     }
                     @if (Model.NumberOfStudentsServed > 0)
                     {
                         <span class="badge badge-darkgray profile-badge text-small">
-                            <icon class="s7-study"></icon> 
+                            <icon class="s7-study"></icon>
                             @Model.NumberOfStudentsServedFormatted students served
                         </span>
                     }
                 </div>
 
             </div>
-            
+
             @if (!hideButtons)
             {
                 var followButtonAttrs = $"class=\"btn btn-header-action {(isFollowing ? "hide" : "")} md-trigger\" data-modal=\"modal-login\" onclick=\"setLoginAction(function (callback) {{ follow(callback); }})\" id=\"btn-follow\"";
@@ -127,7 +156,7 @@
 
                 <div class="col-lg-3 col-md-12">
                     <div class="padding-v-20 text-center">
-                        
+
                         <div>
                             <div class="btn-group @(!isFollowing ? "hide" : "")" style="width:100%;" id="btn-unfollow">
                                 <button class="btn btn-register dropdown-toggle" data-toggle="dropdown">
@@ -165,7 +194,7 @@
                                 <i class="icon icon-left s7-gleam"></i>
                                 <span class="">View @UILabel.ActivityLabel(ActivityType.Activity, true)</span>
                             </button>
-                            
+
                             if (SessionVariables.CurrentUser.IsNotEmpty())
                             {
                                 <button onclick="location.href='@Model.Account.PayUrl'" class="btn btn-header-action">
@@ -175,7 +204,7 @@
                             }
                             else
                             {
-                                <button type="button" class="btn btn-header-action md-trigger" data-modal="modal-login" onclick="setLoginRedirect('@Model.Account.PayUrl')" >
+                                <button type="button" class="btn btn-header-action md-trigger" data-modal="modal-login" onclick="setLoginRedirect('@Model.Account.PayUrl')">
                                     <i class="icon icon-left s7-credit"></i>
                                     <span class="">Make A Payment</span>
                                 </button>
@@ -281,7 +310,7 @@
                     console.log('Thanks for sharing!');
                 }).catch(console.error);
             });
-            
+
         } else {
             $('.btn-share').click(function () {
                 $('#modal-share').addClass('md-show');
@@ -289,7 +318,7 @@
                     $('#modal-share').removeClass('md-show');
                 });
             });
-            
+
         }
 
     });
@@ -301,16 +330,16 @@
         $.get('@Url.Action("follow", "services")/@Model.Account.Uid', function (data) {
 
             if (data && data.status == 'ok') {
-                
+
                 $('#btn-follow').addClass('hide');
-                $('#btn-unfollow').removeClass('hide');                
+                $('#btn-unfollow').removeClass('hide');
 
                 if (callback) {
                     callback();
                 } else {
                     Notifications.showMessage('Success', '<p>You are now following <strong>@Model.Account.Name</strong>.</p><p>You will receive notifications when @Model.Account.Name publishes new activities.</p>', true);
                 }
-                
+
             } else {
                 Notifications.showErrors(data.messages);
             }
@@ -326,14 +355,14 @@
         $.get('@Url.Action("unfollow", "services")/@Model.Account.Uid', function (data) {
 
             if (data && data.status == 'ok') {
-                
+
                 $('#btn-follow').removeClass('hide');
                 $('#btn-unfollow').addClass('hide');
 
                 if (callback) {
                     callback();
                 }
-                
+
             } else {
                 Notifications.showErrors(data.messages);
             }
