@@ -15,6 +15,7 @@
     var takeActivities = 3;
     var locations = (List<Location>)ViewBag.Locations;
     var accountProperties = (List<AccountProperty>)ViewBag.AccountProperties;
+    var isInEditMode = SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentUser.HasAccessTo(Model);
 }
 
 @{
@@ -24,13 +25,26 @@
         new ViewDataDictionary()
         {
             { "LoginReturnUrl", Model.HomePageUrl }
-        }
+                }
     );
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
 @{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", new RegistrationHeaderViewModel(Model, (AccountProfile)ViewBag.AccountProfile)); }
+
+@helper renderEditButtion(string anchor)
+{
+    if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentUser.HasAccessTo(Model))
+    {
+        <span>
+            <a href="@Url.Action("style", "account", new { area = "org", isfullscreen = 1, returnurl = Request.Url })#@anchor"
+               class="btn btn-alt7 btn-sm">
+                Edit &raquo;
+            </a>
+        </span>
+    }
+}
 
 <div>
     <div class="col-md-12 col-lg-8 col-lg-offset-2 participation-object participation-object-detail">
@@ -43,6 +57,7 @@
                             @if (gradeLevelStart.IsNotEmpty() && gradeLevelEnd.IsNotEmpty())
                             {
                                 <span>Serving @gradeLevelStart.Name - @gradeLevelEnd.Name Grade</span>
+                                @renderEditButtion("grades")
                             }
                         </h3>
                     </div>
@@ -92,13 +107,16 @@
 
                 @if (photos.Any())
                 {
+
                     <div class="margin-t-20">
                         <div class="row">
+                            <div style="position: relative; margin-left: -5px; margin-right: -5px;">
+                                @renderEditButtion("photos")
+                            </div>
+                        </div>
+                        <div class="row">
                             <div style="position: relative; margin-left: -20px; margin-right: -20px;">
-                                @foreach (var item in photos.Take(6))
-                                {
-                                    <div class="col-md-4 profile-photo-gallery" style="background-image: url('@item.Value');"></div>
-                                }
+                                @{ Html.RenderPartial("~/Views/Shared/Registration/_ProfilePhotoGallery.cshtml", photos); };
                             </div>
                         </div>
                     </div>
@@ -111,7 +129,7 @@
                     <div class="margin-t-20">
                         <div class="row padding-h-30">
                             <div class="activity-detail-block">
-                                <h2>Services Offered</h2>
+                                <h2>Services Offered @renderEditButtion("services")</h2>
                             </div>
 
                             @for (int i = 0; i < 3; i++)
@@ -122,7 +140,7 @@
                                         var icon = "";
                                         var iconTitle = "";
 
-                                        switch(property.AccountPropertyTypeId)
+                                        switch (property.AccountPropertyTypeId)
                                         {
                                             case AccountPropertyType.Classifications:
                                                 icon = "s7-gleam";
@@ -174,7 +192,7 @@
                     <div class="margin-t-20">
                         <div class="row padding-h-30">
 
-                            <h2>Awards</h2>
+                            <h2>Awards @renderEditButtion("awards")</h2>
 
                             @foreach (var award in awards.Where(x => x.Value.IsNotEmpty()))
                             {
@@ -193,7 +211,7 @@
                 {
                     <div class="margin-t-20">
                         <div class="row padding-h-30">
-                            <h2>Certifications</h2>
+                            <h2>Certifications @renderEditButtion("certifications")</h2>
 
                             @foreach (var certification in certifications.Where(x => x.Value.IsNotEmpty()))
                             {
@@ -211,7 +229,7 @@
                 {
                     <div class="margin-t-20">
                         <div class="row padding-h-30">
-                            <h2>About</h2>
+                            <h2>About @renderEditButtion("profileabout")</h2>
                             <div class="activity-detail-block">
                                 @Html.Raw(accountProfile.About)
                             </div>
@@ -258,7 +276,10 @@
             </div>
             <div class="panel-footer">
                 <div class="col-md-12 text-center">
-                    <p class="padding-v-20 padding-h-30">
+                    <div class="padding-v-20 padding-h-30">
+
+                        @renderEditButtion("links")
+
                         @if (Model.Phone.IsNotBlank())
                         {
                             <div class="footer-social-icon">
@@ -336,7 +357,7 @@
                                 </a>
                             </div>
                         }
-                    </p>
+                    </div>
                 </div>
             </div>
         </div>

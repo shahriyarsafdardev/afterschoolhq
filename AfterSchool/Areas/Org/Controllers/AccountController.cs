@@ -22,7 +22,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         private bool GetIsFullScreen()
         {
-            return Request["isnew"] == "1";
+            return Request["isnew"] == "1" || Request["isfullscreen"] == "1";
         }
 
         [HttpGet]
@@ -928,6 +928,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.SoftSkills = softSkills;
             ViewBag.AcademicSubjects = academicSubjects;
             ViewBag.TeachingMethods = teachingMethods;
+            ViewBag.IsFullScreen = GetIsFullScreen();
 
             return profile;
         }
