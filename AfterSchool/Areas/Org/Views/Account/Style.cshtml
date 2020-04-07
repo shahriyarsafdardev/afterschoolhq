@@ -39,7 +39,7 @@
         Html.RenderPartial(
             "_ExitFullScreen",
             Request["returnurl"],
-            new ViewDataDictionary() { { "fullscreenExitText", exitText }, { "showFloatingExit", true } });
+            new ViewDataDictionary() { { "fullscreenExitText", exitText } });
     }
 
     @helper SubmitButtons(bool showDiscard = true)
