@@ -60,7 +60,7 @@
 
 @helper renderEditButtion(string anchor)
 {
-    if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentUser.HasAccessTo(Model.Account))
+    if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentUser.HasAccessTo(Model.Account) && Request["edit"] == "1")
     {
         <span>
             <a href="@Url.Action("style", "account", new { area = "org", isfullscreen = 1, returnurl = Request.Url })#@anchor"
