@@ -1,12 +1,19 @@
 ﻿@model string
 @{
     var fullscreenExitUrl = Model;
+    var fullscreenExitText = (string)ViewBag.FullscreenExitText;
+
     if (fullscreenExitUrl.IsBlank())
     {
         fullscreenExitUrl = (string)ViewBag.FullScreenExitUrl;
     }
+
+    if (fullscreenExitText.IsBlank())
+    {
+        fullscreenExitText = "X";
+    }
 }
 
 <div class="pull-right">
-    <a href="@fullscreenExitUrl" class="btn btn-default">X</a>
+    <a href="@fullscreenExitUrl" class="btn btn-default">@Html.Raw(fullscreenExitText)</a>
 </div>

@@ -58,6 +58,17 @@
 }
 
 <div class="row">
+
+    @if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentUser.HasAccessTo(Model.Account))
+    {
+        <div class="profile-edit-bar text-center">
+            <a href="@Url.Action("style", "account", new { area = "org", isfullscreen = 1, returnurl = Model.Account.HomePageUrl })" 
+               class="btn btn-alt7 btn-lg btn-block">
+                Edit Your Educator Profile &raquo;
+            </a>
+        </div>
+    }
+
     <div class="reg-header" style="@regHeaderStyle">
         <div class="reg-header-overlay col-md-8 col-md-offset-2">
 

@@ -16,6 +16,13 @@
     var servicesOffered = (List<AccountProperty>)ViewBag.ServicesOffered;
     var timesOffered = (List<AccountProperty>)ViewBag.TimesOffered;
     var pricingOptions = (List<AccountProperty>)ViewBag.PricingOptions;
+    var isFullScreen = (bool)ViewBag.IsFullScreen;
+    var formAction = Url.Action("style", "account", new { isfullscreen = Request["isfullscreen"], returnurl = Request["returnurl"] });
+
+    if (isFullScreen)
+    {
+        Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
+    }
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -26,6 +33,10 @@
 
     @{Html.RenderPartial("~/Views/Shared/_AccountDetailsHeader.cshtml", SessionVariables.CurrentAccount);}
 
+    @if (isFullScreen)
+    {
+        Html.RenderPartial("_ExitFullScreen", Request["returnurl"], new ViewDataDictionary() { { "fullscreenExitText", "Done - View My Profile &raquo;" } });
+    }
 
     @helper SubmitButtons(bool showDiscard = true)
     {
@@ -49,11 +60,11 @@
         </div>
     }
 
-    <form method="post" action="@Url.Action("style", "account")" class="form-horizontal" enctype="multipart/form-data">
+    <form method="post" action="@formAction" class="form-horizontal" enctype="multipart/form-data">
 
         <div class="panel panel-default">
             <div class="panel-heading">
-                <i class="s7-edit"></i> Account - Design &amp; Style
+                <i class="s7-edit"></i> Account - Profile
                 <button type="submit" class="btn btn-primary pull-right hide">Save Profile &raquo;</button>
             </div>
             <div class="panel-body">

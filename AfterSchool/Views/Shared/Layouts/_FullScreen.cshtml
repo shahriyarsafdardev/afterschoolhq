@@ -13,6 +13,8 @@
     @{Html.RenderPartial("~/Views/Shared/_ZendeskWidget.cshtml");}
     @{Html.RenderPartial("~/Views/Shared/_MediumEditorScripts.cshtml");}
 
+    @RenderSection("head", required: false)
+
 </head>
 <body>
     <div class="am-wrapper notopmenu">
