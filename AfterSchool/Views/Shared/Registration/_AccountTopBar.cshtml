@@ -74,6 +74,26 @@
                                 }
                                 <a href="@dashboardUrl" class="btn btn-link">View @accountOrDashboard</a>
 
+                                if (SessionVariables.CurrentUser.HasAccessTo(Model))
+                                {
+                                    var editModeUrl = Model.HomePageUrl;
+                                    var isInEditMode = Request["edit"] == "1";
+
+                                    if (!isInEditMode)
+                                    {
+                                        if (editModeUrl.Contains("?"))
+                                        {
+                                            editModeUrl += "&";
+                                        }
+                                        else
+                                        {
+                                            editModeUrl += "?";
+                                        }
+                                    }
+
+                                    <a href="@(editModeUrl)@(!isInEditMode ? "edit=1" : "")" class="btn btn-link">Toggle Edit Mode</a>
+                                }
+
                                 if (SessionVariables.CurrentUser.HasMultipleAccounts())
                                 {
                                     <a href="@Url.Action("switch", "logout", new { returnurl = returnUrl })" class="btn btn-link">Switch Accounts</a>
