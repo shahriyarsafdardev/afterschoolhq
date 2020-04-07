@@ -71,9 +71,10 @@
                 <div class="col-md-8 col-lg-9">
 
                     <!-- Design -->
+                    <a name="design"></a>
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            Design
+                            Header Design
                         </div>
                         <div class="panel-body">
 
@@ -105,6 +106,18 @@
                                 </div>
                             </div>
 
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">
+                                    Profile Headline
+                                </label>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" name="headline" id="headline" value="@Model.Headline" />
+                                    <p class="text-muted">
+                                        <em>Short tagline describing what you do. Max 100 characters. This will be placed right below your logo on your homepage</em>
+                                    </p>
+                                </div>
+                            </div>
+
                             <div class="form-group hide">
                                 <label class="col-md-3 control-label">
                                     Profile Primary Color
@@ -122,147 +135,50 @@
                         </div>
                     </div>
 
-                    <!-- Website & Social Links -->
+                    <!-- Photos -->
+                    <a name="photos"></a>
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            Website &amp; Social Links
+                            <h3>Photo Gallery</h3>
                         </div>
                         <div class="panel-body">
                             <div class="form-group">
-                                <label class="col-md-3 control-label">
-                                    Website Url
-                                </label>
-                                <div class="col-md-9">
-                                    <input type="text" class="form-control" name="website" id="website" value="@Model.Website" />
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">
-                                    Twitter Handle
-                                </label>
-                                <div class="col-md-9">
-                                    <input type="text" class="form-control" name="twitter" id="twitter" value="@Model.Twitter" />
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">
-                                    Instagram Handle
-                                </label>
-                                <div class="col-md-9">
-                                    <input type="text" class="form-control" name="instagram" id="instagram" value="@Model.Instagram" />
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">
-                                    Facebook Page Url
-                                </label>
-                                <div class="col-md-9">
-                                    <input type="text" class="form-control" name="facebook" id="facebook" value="@Model.Facebook" />
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">
-                                    LinkedIn Url
-                                </label>
-                                <div class="col-md-9">
-                                    <input type="text" class="form-control" name="linkedin" id="linkedin" value="@Model.LinkedIn" />
-                                </div>
-                            </div>
-
-                            @SubmitButtons()
-
-                        </div>
-                    </div>
-
-                    <!-- About -->
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            About Your Program
-                        </div>
-                        <div class="panel-body">
-
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">
-                                    Profile Headline
-                                </label>
-                                <div class="col-md-9">
-                                    <input type="text" class="form-control" name="headline" id="headline" value="@Model.Headline" />
-                                    <p class="text-muted">
-                                        <em>Short tagline describing what you do. Max 100 characters. This will be placed right below your logo on your homepage</em>
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">
-                                    About @SessionVariables.CurrentAccount.Name
-                                </label>
-                                <div class="col-md-9">
-                                    @{ Html.RenderPartial(
-                                                  "~/Views/Shared/_TextEditor.cshtml",
-                                                  Model.About,
-                                                  new ViewDataDictionary() {
-                                            { "required", false },
-                                            { "name", "about" },
-                                            { "id", "about" }
-}
-                                                  ); }
-
-                                    <p class="text-muted">
-                                        <em>Tell us what is special about what you do. Max of 4000 characters</em>
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label">Awards &amp; Accolades<br />(enter up to 5)</label>
+                                <label class="col-sm-3 control-label">Photos</label>
                                 <div class="col-sm-9">
-                                    @for (var i = 0; i < awards.Count; i++)
+                                    @for (var i = 0; i < photos.Count; i++)
                                     {
                                         var id = $"new-{i}";
+                                        var hide = "";
 
-                                        if (awards[i].ID.HasValue)
+                                        if (photos[i].ID.HasValue)
                                         {
-                                            id = $"id-{awards[i].ID}";
+                                            id = $"id-{photos[i].ID}";
+                                            hide = "hide";
                                         }
 
                                         <div class="input-group input-group-md xs-mb-15">
-                                            <span class="input-group-addon">@(i + 1)</span>
-                                            <span><input type="text" class="form-control" name="award-@id" id="award-@id" value="@awards[i].Value" /></span>
-                                        </div>
-                                    }
-                                </div>
-                            </div>
+                                            @if (photos[i].ID.HasValue)
+                                            {
+                                                <div class="photo-view-@i">
+                                                    <img src="@photos[i].Value" width="50" />
+                                                    <i class="s7-close icon-large pointer" onclick="removePhoto('@i')"></i>
+                                                </div>
+                                            }
 
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label">Certifications<br />(enter up to 5)</label>
-                                <div class="col-sm-9">
-                                    @for (var i = 0; i < certifications.Count; i++)
-                                    {
-                                        var id = $"new-{i}";
-
-                                        if (certifications[i].ID.HasValue)
-                                        {
-                                            id = $"id-{certifications[i].ID}";
-                                        }
-                                        <div class="input-group input-group-md xs-mb-15">
-                                            <span class="input-group-addon">@(i + 1)</span>
-                                            <span><input type="text" class="form-control" name="certification-@id" id="certification-@id" value="@certifications[i].Value" /></span>
+                                            <span class="input-group-addon photo-add-@i @hide">@(i + 1)</span>
+                                            <span><input type="file" class="form-control photo-add-@i @hide" name="photo-@id" id="photo-@id" /></span>
                                         </div>
                                     }
                                 </div>
                             </div>
 
                             @SubmitButtons()
-
                         </div>
                     </div>
 
                     <!-- Additional Details -->
+                    <a name="details"></a>
+                    <a name="grades"></a>
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             Additional Details
@@ -328,6 +244,19 @@
                                 </div>
                             </div>
 
+                            @SubmitButtons()
+
+                        </div>
+                    </div>
+
+                    <!-- services -->
+                    <a name="services"></a>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Services &amp; Classifications
+                        </div>
+                        <div class="panel-body">
+
                             <div class="form-group">
                                 <label class="col-md-3 control-label">Services Offered</label>
                                 <div class="col-md-9">
@@ -337,8 +266,8 @@
                                             <input type="checkbox"
                                                    name="services-offered-@item.ToLower()"
                                                    id="services-offered-@item.ToLower()"
-                                                   value="@item" 
-                                                   @(servicesOffered.Select(x=>x.Value.ToLower()).Contains(item.ToLower()) ? "checked=\"checked\"" : "") />
+                                                   value="@item"
+                                                   @(servicesOffered.Select(x => x.Value.ToLower()).Contains(item.ToLower()) ? "checked=\"checked\"" : "") />
                                             <label for="services-offered-@item.ToLower()">@item</label>
                                         </div>
                                     }
@@ -382,17 +311,6 @@
                                 </div>
                             </div>
 
-                            @SubmitButtons()
-                             
-                        </div>
-                    </div>
-
-                    <!-- Classifications -->
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            Classifications
-                        </div>
-                        <div class="panel-body">
                             <div class="form-group">
                                 <label class="col-md-3 control-label">Program Classifications (up to 3)</label>
                                 <div class="col-md-9">
@@ -430,45 +348,137 @@
                         </div>
                     </div>
 
-                    <!-- Photos -->
+                    <!-- About -->
+                    <a name="profileabout"></a>
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <h3>Photo Gallery</h3>
+                            About Your Program
                         </div>
                         <div class="panel-body">
+
                             <div class="form-group">
-                                <label class="col-sm-3 control-label">Photos</label>
+                                <label class="col-md-3 control-label">
+                                    About @SessionVariables.CurrentAccount.Name
+                                </label>
+                                <div class="col-md-9">
+                                    @{ Html.RenderPartial(
+                                                                "~/Views/Shared/_TextEditor.cshtml",
+                                                                Model.About,
+                                                                new ViewDataDictionary() {
+                                            { "required", false },
+                                            { "name", "about" },
+                                            { "id", "about" }
+}
+                                                                ); }
+
+                                    <p class="text-muted">
+                                        <em>Tell us what is special about what you do. Max of 4000 characters</em>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <a name="awards"></a>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">Awards &amp; Accolades<br />(enter up to 5)</label>
                                 <div class="col-sm-9">
-                                    @for (var i = 0; i < photos.Count; i++)
+                                    @for (var i = 0; i < awards.Count; i++)
                                     {
                                         var id = $"new-{i}";
-                                        var hide = "";
 
-                                        if (photos[i].ID.HasValue)
+                                        if (awards[i].ID.HasValue)
                                         {
-                                            id = $"id-{photos[i].ID}";
-                                            hide = "hide";
+                                            id = $"id-{awards[i].ID}";
                                         }
 
                                         <div class="input-group input-group-md xs-mb-15">
-                                            @if (photos[i].ID.HasValue)
-                                            {
-                                                <div class="photo-view-@i">
-                                                    <img src="@photos[i].Value" width="50" />
-                                                    <i class="s7-close icon-large pointer" onclick="removePhoto('@i')"></i>
-                                                </div>
-                                            }
-
-                                            <span class="input-group-addon photo-add-@i @hide">@(i + 1)</span>
-                                            <span><input type="file" class="form-control photo-add-@i @hide" name="photo-@id" id="photo-@id" /></span>
+                                            <span class="input-group-addon">@(i + 1)</span>
+                                            <span><input type="text" class="form-control" name="award-@id" id="award-@id" value="@awards[i].Value" /></span>
                                         </div>
                                     }
                                 </div>
                             </div>
+
+                            <a name="certifications"></a>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">Certifications<br />(enter up to 5)</label>
+                                <div class="col-sm-9">
+                                    @for (var i = 0; i < certifications.Count; i++)
+                                    {
+                                        var id = $"new-{i}";
+
+                                        if (certifications[i].ID.HasValue)
+                                        {
+                                            id = $"id-{certifications[i].ID}";
+                                        }
+                                        <div class="input-group input-group-md xs-mb-15">
+                                            <span class="input-group-addon">@(i + 1)</span>
+                                            <span><input type="text" class="form-control" name="certification-@id" id="certification-@id" value="@certifications[i].Value" /></span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            @SubmitButtons()
+
                         </div>
                     </div>
 
-                    @SubmitButtons()
+                    <!-- Website & Social Links -->
+                    <a name="links"></a>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Website &amp; Social Links
+                        </div>
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">
+                                    Website Url
+                                </label>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" name="website" id="website" value="@Model.Website" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">
+                                    Twitter Handle
+                                </label>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" name="twitter" id="twitter" value="@Model.Twitter" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">
+                                    Instagram Handle
+                                </label>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" name="instagram" id="instagram" value="@Model.Instagram" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">
+                                    Facebook Page Url
+                                </label>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" name="facebook" id="facebook" value="@Model.Facebook" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">
+                                    LinkedIn Url
+                                </label>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" name="linkedin" id="linkedin" value="@Model.LinkedIn" />
+                                </div>
+                            </div>
+
+                            @SubmitButtons()
+
+                        </div>
+                    </div>
 
                 </div>
             </div>
