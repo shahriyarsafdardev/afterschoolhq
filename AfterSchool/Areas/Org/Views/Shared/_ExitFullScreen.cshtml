@@ -2,6 +2,7 @@
 @{
     var fullscreenExitUrl = Model;
     var fullscreenExitText = (string)ViewBag.FullscreenExitText;
+    var showFloatingExit = false;
 
     if (fullscreenExitUrl.IsBlank())
     {
@@ -12,8 +13,15 @@
     {
         fullscreenExitText = "X";
     }
+
+    if (ViewBag.ShowFloatingExit != null)
+    {
+        showFloatingExit = (bool)ViewBag.ShowFloatingExit;
+    }
 }
 
 <div class="pull-right">
     <a href="@fullscreenExitUrl" class="btn btn-default">@Html.Raw(fullscreenExitText)</a>
 </div>
+
+
