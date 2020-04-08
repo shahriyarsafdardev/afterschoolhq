@@ -74,7 +74,7 @@
                                 }
                                 <a href="@dashboardUrl" class="btn btn-link">View @accountOrDashboard</a>
 
-                                if (SessionVariables.CurrentUser.HasAccessTo(Model))
+                                if (Model.HasAccountProfile() && SessionVariables.CurrentUser.HasAccessTo(Model))
                                 {
                                     var editModeUrl = Model.HomePageUrl;
                                     var isInEditMode = Request["edit"] == "1";
