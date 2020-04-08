@@ -158,7 +158,13 @@
         </div>
         <div class="modal-body form">
 
-            Are you sure you want to <strong>deny</strong> this refund request?
+            <p>Are you sure you want to <strong>deny</strong> this refund request?</p>
+
+            <div class="form-group">
+                <label for="request-reason">Reason</label>
+                <input type="text" id="deny-reason" maxlength="100" class="form-control" />
+                <p class="text-muted text-small" id="deny-reason-notes">Please enter a reason</p>
+            </div>
 
         </div>
         <div class="modal-footer">
@@ -202,21 +208,50 @@
         });
     }
 
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('#deny-reason').blur(function () {
+            canProcessDenial();
+        });
+    });
+
     function deny(request) {
         uid = request;
     }
 
     function confirmDeny() {
-        $.get('@Url.Action("denyrefundrequest", "accounting")?uid=' + uid, function (data) {
 
-            if (data && data.status == 'ok') {
-                Notifications.showMessage('Success', 'The refund request has been denied', true);
-                setTimeout(function () { location.reload() }, 500);
-            } else {
-                Notifications.showErrors(data.messages);
-            }
+        const reason = $('#deny-reason').val();
 
-        });
+        if (canProcessDenial()) {
+
+            const params = 'uid=' + uid + '&reason=' + encodeURIComponent(reason);
+            $('#btn-deny-confirm').prop('disabled', true);
+
+            $.post('@Url.Action("denyrefundrequest", "accounting")', params, function (data) {
+
+                if (data && data.status == 'ok') {
+                    Notifications.showMessage('Success', 'The refund request has been denied', true);
+                    setTimeout(function () { location.reload() }, 1000);
+                } else {
+                    Notifications.showErrors(data.messages);
+                }
+                
+                $('#btn-deny-confirm').prop('disabled', false);
+
+            });
+        }
+    }
+
+    function canProcessDenial() {
+        if ($('#deny-reason').val().trim().length == 0) {
+            $('#btn-deny-confirm').prop('disabled', true);
+            $('#deny-reason-notes').addClass('text-danger');
+            return false;
+        }
+        
+        $('#btn-deny-confirm').prop('disabled', false);
+        $('#deny-reason-notes').removeClass('text-danger');
+        return true;
     }
 
 </script>

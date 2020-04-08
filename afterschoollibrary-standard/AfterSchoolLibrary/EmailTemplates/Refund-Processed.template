@@ -1,0 +1,15 @@
+﻿<div>
+  <p>@Model.FirstName,</p>
+
+  <p>
+    Your refund request has been approved and processed for the amount of @Model.RefundAmount.
+  </p>
+
+  <p>
+    It generally takes 5 to 10 business days for refunds to be processed and be available in your account. If you have issues or questions please contact @Model.ProductName Support via email at <a href="mailto:@Model.SupportEmail">@Model.SupportEmail</a>.
+  </p>
+  
+  <p>
+    Your @Model.ProductName Team
+  </p>
+</div>

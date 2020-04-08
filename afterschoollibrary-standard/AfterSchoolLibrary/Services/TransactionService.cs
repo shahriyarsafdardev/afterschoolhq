@@ -382,11 +382,16 @@ namespace AfterSchoolLibrary.Services
 
         public static RefundRequest RequestRefund(this Transaction transaction, decimal refundAmount, RefundRequestStatus refundRequestStatus, string reason, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
+            RefundRequest request = null;
+
             if (!transaction.IsAmountRefundable(refundAmount, refundRequestStatus == RefundRequestStatus.RequestedByParent, msgs))
                 msgs.Add("Amount is not refundable", MessageType.UserError);
 
             if (msgs.HasNoErrors())
-                return RefundRequestService.CreateNew(transaction, refundAmount, refundRequestStatus, reason, loggedInUser, msgs, dc);
+                request = RefundRequestService.CreateNew(transaction, refundAmount, refundRequestStatus, reason, loggedInUser, msgs, dc);
+
+            if (msgs.HasNoErrors())
+                Helpers.EmailHelper.SendRefundRequestToProvider(request, loggedInUser, msgs, dc);
 
             return null;
         }
@@ -398,28 +403,30 @@ namespace AfterSchoolLibrary.Services
 
         public static Transaction Refund(this Transaction transaction, decimal refundAmount, bool allowFullAmountRefund, PaymentSourceType paymentSourceType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
+            Transaction refund = null;
+
             if (!transaction.IsAmountRefundable(refundAmount, allowFullAmountRefund, msgs))
                 msgs.Add("Amount is not refundable", MessageType.UserError);
 
             if (msgs.HasNoErrors())
             {
-                string refundId = null;
+                string stripeRefundId = null;
 
                 if (paymentSourceType == PaymentSourceType.AfterSchoolPlatform)
                 {
-                    var refund = Billing.StripeHelper.CreateRefund(
+                    var stripeRefund = Billing.StripeHelper.CreateRefund(
                                     chargeId: transaction.StripeChargeOrRefundId,
                                     totalAmount: refundAmount,
                                     reason: Billing.StripeRefundReason.RequestedByCustomer.ToString().SplitByUpperCase().Replace(" ", "_").ToLower(),
                                     msgs: msgs);
 
-                    refundId = refund.Id;
+                    stripeRefundId = stripeRefund.Id;
                 }
 
                 if (msgs.HasNoErrors())
-                    return transaction.CreateNewRefund(
+                    refund = transaction.CreateNewRefund(
                         amount: refundAmount,
-                        refundId: refundId,
+                        refundId: stripeRefundId,
                         transactionType: TransactionType.Refund,
                         paymentType: paymentSourceType == PaymentSourceType.Manual ? PaymentType.NotSet : transaction.PaymentTypeId,
                         paymentSourceType: paymentSourceType,
@@ -428,7 +435,7 @@ namespace AfterSchoolLibrary.Services
                         dc: dc);
             }
 
-            return null;
+            return refund;
         }
 
         public static Transaction Refund(this Transaction transaction, decimal refundAmount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)

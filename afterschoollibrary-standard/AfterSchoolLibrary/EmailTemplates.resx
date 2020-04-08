@@ -151,6 +151,15 @@
   <data name="Publish_Request" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>emailtemplates\publish-request.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="Refund_Denied" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>emailtemplates\refund-denied.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Refund_Processed" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>emailtemplates\refund-processed.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Refund_Requested" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>emailtemplates\refund-requested.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="Registration_Confirmation" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>emailtemplates\registration-confirmation.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

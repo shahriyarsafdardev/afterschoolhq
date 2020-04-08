@@ -1828,7 +1828,7 @@ namespace AfterSchoolLibrary.Services
         {
             var msgs = new SystemMessages();
 
-            var email = "sample@afterschoolhq.com";
+            var email = "darye+sample@afterschoolhq.com";
             var phone = "(317) 316-0596";
             var firstName = "Sample";
             var lastName = "User";

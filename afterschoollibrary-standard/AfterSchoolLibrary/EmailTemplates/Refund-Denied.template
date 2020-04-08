@@ -1,0 +1,20 @@
+﻿<div>
+  <p>@Model.FirstName,</p>
+  
+  <p>
+      We regret to inform you that your refund request for @Model.RequestAmount has been denied by @Model.ProviderAccountName.
+  </p>
+
+  <p>
+    Reason: <br />
+    @Model.DeniedReason
+  </p>
+
+  <p>
+    If you have any questions or concerns please contact @Model.ProviderAccountName directly. If you need to dispute this claim, please contact @Model.ProductName Support via email at <a href="mailto:@Model.SupportEmail">@Model.SupportEmail</a>.
+  </p>
+  
+  <p>
+    Your @Model.ProductName Team
+  </p>
+</div>
