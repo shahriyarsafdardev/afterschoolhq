@@ -3114,6 +3114,11 @@ namespace AfterSchoolLibrary.Services
             return AccountProfile.LoadByAccountId(account.ID.Value, msgs, dc);
         }
 
+        public static bool HasAccountProfile(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return AccountProfile.GetCountByAccountId(account.ID.Value, msgs, dc) > 0;
+        }
+
         public static Subscriber AddOrUpdateSubscriber(this Account account, WebUser user, SubscriberStatus status, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var subscriber = Subscriber.LoadByAccountIdByWebUserId(account.ID.Value, user.ID.Value, msgs, dc);
