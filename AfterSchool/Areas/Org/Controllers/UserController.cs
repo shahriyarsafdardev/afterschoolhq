@@ -70,7 +70,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 user.Email = email;
                 user.LastModifiedDate = DateTime.UtcNow;
                 user.LastModifiedBy = SessionVariables.CurrentUser.ID;
-                user.IsActive = !isactive.IsEmpty();
+                // user.IsActive = !isactive.IsEmpty();
 
                 if (!password1.IsEmpty())
                 {

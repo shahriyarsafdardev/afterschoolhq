@@ -47,7 +47,7 @@ namespace AfterSchoolLibrary.Services
             return request.GetTransaction(msgs, dc).IsAmountRefundable(request.Amount.Value, true, msgs, dc);
         }
 
-        public static bool ApproveAndProcessRequest(this RefundRequest request, bool allowFullRefundAmount, bool refundCCFees, bool refundConvenienceFees, WebUser loggedInuser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static bool ApproveAndProcessRequest(this RefundRequest request, bool allowFullRefundAmount, bool refundCCFees, bool refundConvenienceFees, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var transaction = request.GetTransaction(msgs, dc);
 
@@ -67,10 +67,10 @@ namespace AfterSchoolLibrary.Services
                                 refundAmount += transaction.ConvenienceFeeCharged.Value;
                         }
 
-                        transaction.Refund(refundAmount, allowFullRefundAmount, transaction.PaymentSourceTypeId, loggedInuser, amsgs, adc);
+                        var refund = transaction.Refund(refundAmount, allowFullRefundAmount, transaction.PaymentSourceTypeId, loggedInUser, amsgs, adc);
 
                         if (msgs.HasNoErrors())
-                            request.UpdateStatus(RefundRequestStatus.Completed, loggedInuser, amsgs, adc);
+                            request.MarkAsCompleted(refund, loggedInUser, amsgs, adc);
 
                     },
                     onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
@@ -83,14 +83,38 @@ namespace AfterSchoolLibrary.Services
             return msgs.HasNoErrors();
         }
 
-        public static void DenyRequestAsProvider(this RefundRequest request, string reason, WebUser loggedInuser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void DenyRequestAsProvider(this RefundRequest request, string reason, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            request.UpdateStatus(RefundRequestStatus.DeniedByProvider, reason, loggedInuser, msgs, dc);
+            request.UpdateStatus(RefundRequestStatus.DeniedByProvider, reason, loggedInUser, msgs, dc);
+
+            if (msgs.HasNoErrors())
+                Helpers.EmailHelper.SendRefundRequestDeniedByProvider(request, loggedInUser, msgs, dc);
         }
 
         public static void DenyRequestAsAHQ(this RefundRequest request, string reason, WebUser loggedInuser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             request.UpdateStatus(RefundRequestStatus.DeniedByProvider, reason, loggedInuser, msgs, dc);
+        }
+
+        public static void ApproveRequestAsProvider(this RefundRequest request, string reason, WebUser loggedInuser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            request.UpdateStatus(RefundRequestStatus.ApprovedByProvider, reason, loggedInuser, msgs, dc);
+
+            if (msgs.HasNoErrors())
+                Helpers.EmailHelper.SendRefundRequestToSupport(request, loggedInuser, msgs, dc);
+        }
+
+        public static void ApproveRequestAsAHQ(this RefundRequest request, string reason, WebUser loggedInuser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            request.UpdateStatus(RefundRequestStatus.ApprovedByAfterSchoolHQ, reason, loggedInuser, msgs, dc);
+        }
+
+        public static void MarkAsCompleted(this RefundRequest request, Transaction refund, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            request.UpdateStatus(RefundRequestStatus.Completed, loggedInUser, msgs, dc);
+
+            if (msgs.HasNoErrors())
+                Helpers.EmailHelper.SendRefundRequestProcessed(request, refund, loggedInUser, msgs, dc);
         }
 
         public static void UpdateStatus(this RefundRequest request, RefundRequestStatus status, WebUser loggedInuser, SystemMessages msgs, DatabaseConnection dc = null)

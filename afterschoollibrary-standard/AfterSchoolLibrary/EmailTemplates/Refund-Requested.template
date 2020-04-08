@@ -1,0 +1,20 @@
+﻿<div>
+  <p>@Model.FirstName,</p>
+  
+  <p>
+      @Model.RequesterFirstName has requested a refund in the amount of @Model.RequestAmount.
+  </p>
+
+  <p>
+    Reason: <br />
+    @Model.RequestReason
+  </p>
+
+  <p>
+    <a href="@Model.RequestViewUrl">Click here to approve or deny this request in @Model.ProductName</a>
+  </p>
+  
+  <p>
+    Your @Model.ProductName Team
+  </p>
+</div>

@@ -313,7 +313,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 var request = RefundRequest.LoadByUid(uid.ToGuid(), msgs);
 
                 if (request.IsNotEmpty())
-                    request.UpdateStatus(RefundRequestStatus.ApprovedByProvider, SessionVariables.CurrentUser, msgs);
+                    request.ApproveRequestAsProvider(null, SessionVariables.CurrentUser, msgs);
 
                 if (msgs.HasNoErrors())
                     return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
@@ -343,8 +343,8 @@ namespace AfterSchool.Areas.Org.Controllers
             return new JsonResult { Data = new { status = "error", messages = msgs }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
         }
 
-        [HttpGet]
-        public ActionResult DenyRefundRequest(string uid)
+        [HttpPost]
+        public ActionResult DenyRefundRequest(string uid, string reason)
         {
             var msgs = new SystemMessages();
 
@@ -353,7 +353,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 var request = RefundRequest.LoadByUid(uid.ToGuid(), msgs);
 
                 if (request.IsNotEmpty())
-                    request.DenyRequestAsProvider(null, SessionVariables.CurrentUser, msgs);
+                    request.DenyRequestAsProvider(reason, SessionVariables.CurrentUser, msgs);
 
                 if (msgs.HasNoErrors())
                     return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
