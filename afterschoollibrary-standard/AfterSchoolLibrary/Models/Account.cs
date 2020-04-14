@@ -585,7 +585,7 @@ namespace AfterSchoolLibrary.Models
                 (
 	                select AccountName, ActivityName, StartDateTime, EndDateTime, TotalMinutes, StudentsInClass, TotalMinutes * StudentsInClass as TotalMinutesPerClass from A
                 )
-                select sum(TotalMinutesPerClass) as Minutes from B";
+                select ISNULL(sum(TotalMinutesPerClass), 0) as Minutes from B";
 
             var dt = dq.ExecuteSelect(sql, msgs);
 
@@ -622,7 +622,7 @@ namespace AfterSchoolLibrary.Models
                 sql += $" and ai.EndDateTime <= '{endDateTime.Value.ToString()}'";
 
             sql += @")
-                select sum(SeatsAvailable) from A";
+                select ISNULL(sum(SeatsAvailable), 0) from A";
 
             var dt = dq.ExecuteSelect(sql, msgs);
 
@@ -661,7 +661,7 @@ namespace AfterSchoolLibrary.Models
                 sql += $" and ai.EndDateTime <= '{endDateTime.Value.ToString()}'";
 
             sql += @")
-                select sum(MaximumMinutesOffered) from A";
+                select ISNULL(sum(MaximumMinutesOffered), 0) from A";
 
             var dt = dq.ExecuteSelect(sql, msgs);
 
