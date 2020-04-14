@@ -552,6 +552,159 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
+        public static void SendRefundRequestToProvider(RefundRequest request, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var transaction = request.GetTransaction(msgs);
+            var billingAccountOwner = transaction.GetBillerAccount(msgs).GetAccountOwner(msgs);
+            var firstName = billingAccountOwner.FirstName;
+
+            var model = new NameValueCollection()
+            {
+                { "FirstName", firstName },
+                { "ProductName", Utilities.AppName(true) },
+                { "RequesterFirstName", loggedInUser.FirstName },
+                { "RequestAmount", request.Amount.Value.ToCurrency() },
+                { "RequestReason", request.RequestReason },
+                { "RequestViewUrl", $"{Utilities.BaseUrl()}/org/accounting/refundrequests/" },
+            };
+
+            var body = ProcessTemplate(
+                EmailTemplates.Refund_Requested,
+                model,
+                "refund_requested-1.0.1",
+                msgs
+                );
+
+            var subject = $"A refund has been requested by ${loggedInUser.DisplayName}";
+
+            var mailMsgs = SendGridHelper.SendMail(
+                fromEmail: Email.SendGridNoReplyEmailAddress(true),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(billingAccountOwner.Email),              
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(true)
+                );
+
+            // CC Support Team
+            mailMsgs.AddRange(SendGridHelper.SendMail(
+                fromEmail: Email.SendGridNoReplyEmailAddress(true),
+                toEmail: Email.SendGridSupportEmailAddress,
+                subject: $"CC: {subject}",
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(true)
+                ));
+
+            Utilities.SystemErrorLog(mailMsgs);
+        }
+
+        public static void SendRefundRequestToSupport(RefundRequest request, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var model = new NameValueCollection()
+            {
+                { "FirstName", "Support" },
+                { "ProductName", Utilities.AppName(true) },
+                { "RequesterFirstName", loggedInUser.FirstName },
+                { "RequestAmount", request.Amount.Value.ToCurrency() },
+                { "RequestReason", request.RequestReason },
+                { "RequestViewUrl", $"{Utilities.BaseUrl()}/admin/transaction/refundrequests/" },
+            };
+
+            var body = ProcessTemplate(
+                EmailTemplates.Refund_Requested,
+                model,
+                "refund_requested-1.0.1",
+                msgs
+                );
+
+            var subject = $"A refund has been requested/approved by {loggedInUser.DisplayName}";
+
+            var mailMsgs = SendGridHelper.SendMail(
+                fromEmail: Email.SendGridNoReplyEmailAddress(true),
+                toEmail: Email.SendGridSupportEmailAddress,
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(true)
+                );
+
+            Utilities.SystemErrorLog(mailMsgs);
+        }
+
+        public static void SendRefundRequestProcessed(RefundRequest request, Transaction refund, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var requester = request.GetCreator(msgs, dc);
+
+            var model = new NameValueCollection()
+            {
+                { "FirstName",  requester.FirstName},
+                { "ProductName", Utilities.AppName(true) },
+                { "RefundAmount", refund.Amount.ToCurrency() },
+                { "SupportEmail", Email.AppSupportEmailAddress },
+            };
+
+            var body = ProcessTemplate(
+                EmailTemplates.Refund_Processed,
+                model,
+                "refund_processed-1.0.1",
+                msgs
+                );
+
+            var subject = $"Your refund request has been approved and processed";
+
+            var mailMsgs = SendGridHelper.SendMail(
+                fromEmail: Email.SendGridNoReplyEmailAddress(true),
+                toEmail: Email.SendGridSupportEmailAddress,
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(true));
+
+            Utilities.SystemErrorLog(mailMsgs);
+        }
+
+        public static void SendRefundRequestDeniedByProvider(RefundRequest request, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var transaction = request.GetTransaction(msgs, dc);
+            var providerAccount = transaction.GetBillerAccount(msgs, dc);
+            var requester = request.GetCreator(msgs, dc);
+
+            var model = new NameValueCollection()
+            {
+                { "FirstName", requester.FirstName },
+                { "ProductName", Utilities.AppName(true) },
+                { "ProviderAccountName", providerAccount.Name },
+                { "RequestAmount", request.Amount.Value.ToCurrency() },
+                { "DeniedReason", request.DeniedReason },
+                { "SupportEmail", Email.AppSupportEmailAddress },
+            };
+
+            var body = ProcessTemplate(
+                EmailTemplates.Refund_Denied,
+                model,
+                "refund_denied-1.0.1",
+                msgs
+                );
+
+            var subject = $"Your refund request has been denied";
+
+            var mailMsgs = SendGridHelper.SendMail(
+                fromEmail: Email.SendGridNoReplyEmailAddress(true),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(requester.Email),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(true)
+                );
+
+            // CC Support Team
+            mailMsgs.AddRange(SendGridHelper.SendMail(
+                fromEmail: Email.SendGridNoReplyEmailAddress(true),
+                toEmail: Email.SendGridSupportEmailAddress,
+                subject: $"CC: {subject}",
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(true)
+                ));
+
+            Utilities.SystemErrorLog(mailMsgs);
+        }
+
         public static SystemMessages SendAttachedCoupon(AttachedCoupon attachedCoupon)
         {
             var msgs = new SystemMessages();
