@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace AfterSchool.Areas.User.Models
+namespace AfterSchool.Models
 {
     public class ParticipationViewModel
     {

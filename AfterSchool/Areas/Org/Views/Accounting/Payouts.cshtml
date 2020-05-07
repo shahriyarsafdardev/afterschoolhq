@@ -35,35 +35,6 @@
     <div class="panel panel-default">
 
         <div class="panel-heading">
-
-            @*<div class="pull-right">
-                @if (!canReceiveDeposits)
-                {
-                    <button class="btn btn-primary">
-                        Setup Payment Account &raquo;
-                    </button>
-                }
-                else if (canrequestanotherpayout)
-                {
-                    <button class="btn btn-primary md-trigger" data-modal="modal-payout-request">
-                        request payout
-                    </button>
-                }
-                else if (maxRequestAmount >= minRequestAmount)
-                {
-                    <button class="btn btn-primary" disabled>
-                        @if (canReceiveACHDeposits)
-                        {
-                            @: Must wait @payoutWaitingDaysDeposits day from your last payout request
-                        }
-                        else
-                        {
-                            @: Must wait @payoutWaitingDaysChecks days from your last payout request
-                        }                        
-                    </button>
-                }
-            </div>*@
-
             <i class="s7-note2"></i> Payouts
             <div class="clearfix"></div>
         </div>

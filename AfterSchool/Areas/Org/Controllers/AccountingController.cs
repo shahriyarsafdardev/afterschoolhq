@@ -62,7 +62,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.TotalAmountPaid = SessionVariables.CurrentAccount.GetTotalAmountBilledOut(startDate, endDate, msgs);
             ViewBag.TotalAmountRefunded = SessionVariables.CurrentAccount.GetTotalAmountRefunded(startDate, endDate, msgs);
             ViewBag.TotalAmountRefundedManual = SessionVariables.CurrentAccount.GetTotalAmountRefundedManually(startDate, endDate, msgs);
-            ViewBag.TotalAmountRefundedAHQ = SessionVariables.CurrentAccount.GetTotalAmountRefundedAHQ(startDate, endDate, msgs);
+            ViewBag.TotalAmountRefundedAHQ = SessionVariables.CurrentAccount.GetTotalAmountRefundedAHQ(true, startDate, endDate, msgs);
             ViewBag.TotalFeesPaid = SessionVariables.CurrentAccount.GetTotalFeesPaidAsBiller(startDate, endDate, msgs);
             ViewBag.ParticipationObjects = allParticipationObjects;
             ViewBag.Messages = msgs;
@@ -253,6 +253,26 @@ namespace AfterSchool.Areas.Org.Controllers
             Response.BinaryWrite(filebytes);
             Response.End();
             return null;
+        }
+
+        [HttpGet]
+        public ActionResult Subscriptions()
+        {
+            var msgs = new SystemMessages();
+            var plans = SessionVariables.CurrentAccount.GetSubscriptionPlans(msgs);
+            var subscriptions = new List<RegistrantSubscriptionPlan>();
+
+            plans.ForEach(plan => {
+                subscriptions.AddRange(plan.GetRegistrantSubscriptionPlans(msgs));
+            });
+
+            subscriptions = subscriptions.Where(subscription => subscription.CreateDate >= new DateTime(2019, 12, 1))
+                                .OrderByDescending(x => x.CreateDate.Value)
+                                .ToList();
+
+            ViewBag.Messages = msgs;
+
+            return View(subscriptions);
         }
 
         [HttpGet]

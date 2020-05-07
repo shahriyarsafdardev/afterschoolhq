@@ -955,9 +955,41 @@ namespace AfterSchoolLibrary.Models
             return 0;
         }
 
-        public static decimal GetTotalRefundByOriginalTransaction(int OriginalTransactionId, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetTotalFeesPaidByPayerAccount(int PayerAccountId, PaymentSourceType paymentSourceType, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
 
+            DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseParameterizedQuery = false;
+            dq.SelectParameters.Clear();
+
+            var sp = new SelectParameter(ObjectMap["ConvenienceFeeCharged"]);
+            sp.Function = $"ISNULL(SUM({ObjectMap["ConvenienceFeeCharged"].ParameterFullName}), 0)";
+            dq.SelectParameters.Add(sp);
+
+            var sp2 = new SelectParameter(ObjectMap["PaymentTypeFeeCharged"]);
+            sp2.Function = $"ISNULL(SUM({ObjectMap["PaymentTypeFeeCharged"].ParameterFullName}), 0)";
+            dq.SelectParameters.Add(sp2);
+
+            dq.Criterias.Add(ObjectMap["PayerAccountId"], PayerAccountId);
+            dq.Criterias.Add(ObjectMap["isDeleted"], isDeleted);
+            dq.Criterias.Add(ObjectMap["PaymentSourceTypeId"], (int)paymentSourceType);
+
+            if (startDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+
+            if (endDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+
+            var results = dq.Select(msgs);
+            if (results.Rows.Any())
+                return results.Rows[0][0].ToString().ToDecimal() + results.Rows[0][0].ToString().ToDecimal();
+
+            return 0;
+        }
+
+        public static decimal GetTotalRefundByOriginalTransaction(int OriginalTransactionId, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
             DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;

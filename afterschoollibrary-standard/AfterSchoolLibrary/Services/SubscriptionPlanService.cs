@@ -376,5 +376,10 @@ namespace AfterSchoolLibrary.Services
                 msgs,
                 dc);
         }
+
+        public static List<RegistrantSubscriptionPlan> GetRegistrantSubscriptionPlans(this SubscriptionPlan plan, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return RegistrantSubscriptionPlan.LoadBySubscriptionPlanId(plan.ID.Value, msgs, dc);
+        }
     }
 }

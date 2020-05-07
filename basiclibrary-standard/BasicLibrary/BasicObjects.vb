@@ -198,16 +198,14 @@ Public Class BaseObject
                     doAdd = True
                 Else
                     Dim errCount As Integer = 0
-                    Try
-                        OriginalDataValues(i).Value.ToString()
-                    Catch ex As Exception
+
+                    If OriginalDataValues(i) Is Nothing OrElse OriginalDataValues(i).Value Is Nothing Then
                         errCount += 1
-                    End Try
-                    Try
-                        ModifiedDataValues(i).Value.ToString()
-                    Catch ex As Exception
+                    End If
+
+                    If ModifiedDataValues(i) Is Nothing OrElse ModifiedDataValues(i).Value Is Nothing Then
                         errCount += 1
-                    End Try
+                    End If
 
                     If errCount = 1 Then
                         doAdd = True
