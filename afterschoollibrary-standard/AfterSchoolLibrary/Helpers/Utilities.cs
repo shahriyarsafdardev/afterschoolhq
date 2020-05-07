@@ -331,6 +331,7 @@ namespace AfterSchoolLibrary.Helpers
                     Migrations.UpdateRefundRequests_20200323.Do(amsgs, adc);
                     Migrations.UpdateMissingActivityLocationTypes_20200328.Do(amsgs, adc);
                     Migrations.UpdateFollowers_20200331.Do(amsgs, adc);
+                    Migrations.AddFeesRefundedToTransactions_20200507.Do(amsgs, adc);
 
                     // amsgs.Add("rollback please", MessageType.Error);
 

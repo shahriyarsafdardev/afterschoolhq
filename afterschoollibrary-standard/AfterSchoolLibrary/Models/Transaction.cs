@@ -983,7 +983,7 @@ namespace AfterSchoolLibrary.Models
 
             var results = dq.Select(msgs);
             if (results.Rows.Any())
-                return results.Rows[0][0].ToString().ToDecimal() + results.Rows[0][0].ToString().ToDecimal();
+                return results.Rows[0][0].ToString().ToDecimal() + results.Rows[0][1].ToString().ToDecimal();
 
             return 0;
         }

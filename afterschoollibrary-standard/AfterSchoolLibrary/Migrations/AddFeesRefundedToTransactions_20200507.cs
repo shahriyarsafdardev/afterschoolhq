@@ -33,6 +33,18 @@ namespace AfterSchoolLibrary.Migrations
                                 refund.PaymentTypeFeeCharged = originalTransaction.PaymentTypeFeeCharged;
                                 amsgs.AddRange(refund.Save(adc));
                             }
+                            else if (refund.Amount == originalTransaction.Amount - originalTransaction.ConvenienceFeeCharged)
+                            {
+                                refund.ConvenienceFeeCharged = 0;
+                                refund.PaymentTypeFeeCharged = originalTransaction.PaymentTypeFeeCharged;
+                                amsgs.AddRange(refund.Save(adc));
+                            }
+                            else if (refund.Amount == originalTransaction.Amount - originalTransaction.PaymentTypeFeeCharged)
+                            {
+                                refund.ConvenienceFeeCharged = originalTransaction.ConvenienceFeeCharged;
+                                refund.PaymentTypeFeeCharged = 0;
+                                amsgs.AddRange(refund.Save(adc));
+                            }
                         }
                     });
                 },

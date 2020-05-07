@@ -1999,13 +1999,12 @@ namespace AfterSchoolLibrary.Services
             return Payout.GetLastPayout(account.ID.Value, msgs, dc);
         }
 
-        public static decimal GetMaxAmountAvailableForPayout(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetMaxAmountAvailableForPayout(this Account account, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var totalPayoutAmount = account.GetTotalPayoutAmount(null, msgs: msgs, dc: dc);
-            var totalAmountPaid = account.GetTotalAmountBilledOut(msgs: msgs, dc: dc);
-            // var totalAmountRefunded = account.GetTotalAmountRefundedTo(startDate, endDate, msgs);
-            var totalFeesPaid = account.GetTotalFeesPaidAsBiller(null, null, msgs);
-            var totalRefunds = account.GetTotalAmountRefundedAHQ(true, null, null, msgs);
+            var totalPayoutAmount = account.GetTotalPayoutAmount(null, startDate, endDate, msgs, dc);
+            var totalAmountPaid = account.GetTotalAmountBilledOut(startDate, endDate, msgs, dc);
+            var totalFeesPaid = account.GetTotalFeesPaidAsBiller(startDate, endDate, msgs, dc);
+            var totalRefunds = account.GetTotalAmountRefundedAHQ(true, startDate, endDate, msgs, dc);
 
             return totalAmountPaid - totalFeesPaid - totalPayoutAmount - totalRefunds;
         }

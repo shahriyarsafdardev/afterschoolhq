@@ -244,6 +244,11 @@ namespace AfterSchoolLibrary.Services
             return transaction.GetBillerAmount(msgs, dc) - transaction.GetRefundedAmountAHQ(msgs, dc);
         }
 
+        public static bool HasRefundableAmount(this Transaction transaction, bool allowFullAmountRefund = false, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return transaction.GetRefundableAmount(allowFullAmountRefund, msgs, dc) > 0;
+        }
+
         public static bool CanRefundTransactionFee(this Transaction transaction)
         {
             return false;
@@ -314,10 +319,10 @@ namespace AfterSchoolLibrary.Services
             if (transaction.PlatformPercentFee.HasValue)
                 return "Paid";
 
-            if (transaction.HasRefunds())
+            if (!transaction.HasRefundableAmount(false, msgs, dc))
                 return "Refunded";
 
-            var currentPayout = GetPayout(transaction, msgs);
+            var currentPayout = GetPayout(transaction, msgs, dc);
 
             if (currentPayout.IsNotEmpty())
                 switch (currentPayout.PayoutStatusId)
@@ -333,6 +338,12 @@ namespace AfterSchoolLibrary.Services
             if (DateTime.UtcNow.IsBefore(transaction.CreateDate.Value.AddDays(transaction.GetWaitPeriodInDays())))
                 return "Incoming";
 
+            if (transaction.HasRefundsAHQ(msgs, dc) && transaction.HasRefundableAmount(false, msgs, dc))
+                return "Partially Refunded / Ready for Payout";
+
+            if (transaction.HasRefundsManual(msgs, dc))
+                return "Manual Refund / Ready For Payout";
+
             return "Ready For Payout";
         }
 
@@ -343,7 +354,7 @@ namespace AfterSchoolLibrary.Services
                 !transaction.PlatformPercentFee.HasValue &&
                 transaction.PaymentSourceTypeId == PaymentSourceType.AfterSchoolPlatform &&
                 transaction.IsCharge() &&
-                !transaction.HasRefundsAHQ(msgs, dc);
+                transaction.HasRefundableAmount(false, msgs, dc);
         }
 
         public static Payout CreatePayout(this Transaction transaction, PayoutStatus payoutStatus, PaymentType paymentType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)

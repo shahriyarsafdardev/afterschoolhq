@@ -64,6 +64,8 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.TotalAmountRefundedManual = SessionVariables.CurrentAccount.GetTotalAmountRefundedManually(startDate, endDate, msgs);
             ViewBag.TotalAmountRefundedAHQ = SessionVariables.CurrentAccount.GetTotalAmountRefundedAHQ(true, startDate, endDate, msgs);
             ViewBag.TotalFeesPaid = SessionVariables.CurrentAccount.GetTotalFeesPaidAsBiller(startDate, endDate, msgs);
+            ViewBag.TotalPaidOut = SessionVariables.CurrentAccount.GetTotalPayoutAmount(PayoutStatus.Completed, startDate, endDate, msgs);
+            ViewBag.TotalAvailableForPayout = SessionVariables.CurrentAccount.GetMaxAmountAvailableForPayout(startDate, endDate, msgs);
             ViewBag.ParticipationObjects = allParticipationObjects;
             ViewBag.Messages = msgs;
             ViewBag.PagingModel = new PagingModel()
@@ -113,7 +115,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.CanReceiveACHDeposits = SessionVariables.CurrentAccount.CanReceiveACHDeposits(msgs);
             ViewBag.CanReceiveDeposits = SessionVariables.CurrentAccount.CanReceivePaymentDeposits(msgs);
-            ViewBag.MaxRequestAmount = SessionVariables.CurrentAccount.GetMaxAmountAvailableForPayout(msgs);
+            ViewBag.MaxRequestAmount = SessionVariables.CurrentAccount.GetMaxAmountAvailableForPayout(msgs: msgs);
             ViewBag.LastPayout = SessionVariables.CurrentAccount.GetLastPayout(msgs);
             ViewBag.TotalPayoutAmount = totalPayoutAmount;
             ViewBag.TotalPendingAmount = SessionVariables.CurrentAccount.GetTotalPayoutAmount(PayoutStatus.InProgress, msgs: msgs);

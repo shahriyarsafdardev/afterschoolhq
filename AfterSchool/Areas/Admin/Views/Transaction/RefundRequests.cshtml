@@ -67,6 +67,7 @@
                         <tr>
                             <th class="text-center">Requested On</th>
                             <th class="text-center">Requested By</th>
+                            <th class="text-center">For</th>
                             <th class="text-center">Transaction #</th>
                             <th class="text-center">Description</th>
                             <th class="text-center">Transaction Amount</th>
@@ -90,6 +91,9 @@
                                     </td>
                                     <td class="text-center">
                                         @request.GetCreator().DisplayName
+                                    </td>
+                                    <td class="text-center">
+                                        @transaction.GetPayerAccount().Name
                                     </td>
                                     <td class="text-center">
                                         @transaction.GetTransactionNumber()

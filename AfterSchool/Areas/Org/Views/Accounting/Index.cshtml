@@ -5,10 +5,10 @@
     var totalTransactionAmount = (decimal)ViewBag.TotalAmountPaid;
     var totalAmountRefunded = (decimal)ViewBag.TotalAmountRefunded;
     var totalAmountRefundedAHQ = (decimal)ViewBag.TotalAmountRefundedAHQ;
-    var totalAmount = totalTransactionAmount - totalAmountRefundedAHQ;
-    var avgTransactionAmount = transactionCount == 0 ? 0 : totalAmount / transactionCount;
+    var avgTransactionAmount = transactionCount == 0 ? 0 : totalTransactionAmount / transactionCount;
     var totalFees = (decimal)ViewBag.TotalFeesPaid;
-    var totalPayout = totalAmount - totalFees;
+    var totalPaidOut = (decimal)ViewBag.TotalPaidOut;
+    var totalAvailableForPayout = (decimal)ViewBag.TotalAvailableForPayout;
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -32,49 +32,9 @@
         </div>
 
         <div class="panel-body">
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="widget widget-tile widget-bordered">
-                        <div class="data-info">
-                            <div data-toggle="counter" data-end="@transactionCount" id="transactionCount" data-decimals="0" data-suffix="" class="value">@transactionCount</div>
-                            <div class="desc">Total Transactions</div>
-                        </div>
-                        <div class="icon"><span class=""></span></div>
-                    </div>
-                </div>
-
-                <div class="col-md-3">
-                    <div class="widget widget-tile widget-bordered">
-                        <div class="data-info">
-                            <div data-toggle="counter" data-end="@avgTransactionAmount" id="avgTransactionAmount" data-decimals="2" data-suffix="" class="value">@avgTransactionAmount.ToCurrency()</div>
-                            <div class="desc">Avg Transaction Amt</div>
-                        </div>
-                        <div class="icon"><span class=""></span></div>
-                    </div>
-                </div>
-
-                <div class="col-md-3">
-                    <div class="widget widget-tile widget-bordered">
-                        <div class="data-info">
-                            <div data-toggle="counter" data-end="@totalAmount" id="totalTransactionAmount" data-decimals="2" data-suffix="" class="value">@totalAmount.ToCurrency()</div>
-                            <div class="desc">Total Amt</div>
-                        </div>
-                        <div class="icon"><span class=""></span></div>
-                    </div>
-                </div>
-
-                <div class="col-md-3">
-                    <div class="widget widget-tile widget-bordered">
-                        <div class="data-info">
-                            <div data-toggle="counter" data-end="@totalPayout" id="totalPayout" data-decimals="2" data-suffix="" class="value">@totalPayout.ToCurrency()</div>
-                            <div class="desc">Total Payout</div>
-                        </div>
-                        <div class="icon"><span class=""></span></div>
-                    </div>
-                </div>
-            </div>
 
             <div class="row">
+
                 <div class="col-md-2">
                     @{
                         Html.RenderPartial(
@@ -133,6 +93,68 @@
                     }
 
                 </script>
+            </div>
+
+            <div class="row">
+                <div class="col-md-2">
+                    <div class="widget widget-tile widget-bordered">
+                        <div class="data-info">
+                            <div data-toggle="counter" data-end="@transactionCount" id="transactionCount" data-decimals="0" data-suffix="" class="value">@transactionCount</div>
+                            <div class="desc">Total Transactions</div>
+                        </div>
+                        <div class="icon"><span class=""></span></div>
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <div class="widget widget-tile widget-bordered">
+                        <div class="data-info">
+                            <div data-toggle="counter" data-end="@avgTransactionAmount" id="avgTransactionAmount" data-decimals="2" data-suffix="" class="value">@avgTransactionAmount.ToCurrency()</div>
+                            <div class="desc">Avg Transaction Amt</div>
+                        </div>
+                        <div class="icon"><span class=""></span></div>
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <div class="widget widget-tile widget-bordered">
+                        <div class="data-info">
+                            <div data-toggle="counter" data-end="@totalTransactionAmount" id="totalTransactionAmount" data-decimals="2" data-suffix="" class="value">@totalTransactionAmount.ToCurrency()</div>
+                            <div class="desc">Total Amt</div>
+                        </div>
+                        <div class="icon"><span class=""></span></div>
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <div class="widget widget-tile widget-bordered">
+                        <div class="data-info">
+                            <div data-toggle="counter" data-end="@totalAmountRefunded" id="totalAmountRefunded" data-decimals="2" data-suffix="" class="value">@totalAmountRefunded.ToCurrency()</div>
+                            <div class="desc">Total Refunded</div>
+                        </div>
+                        <div class="icon"><span class=""></span></div>
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <div class="widget widget-tile widget-bordered">
+                        <div class="data-info">
+                            <div data-toggle="counter" data-end="@totalPaidOut" id="totalPayout" data-decimals="2" data-suffix="" class="value">@totalPaidOut.ToCurrency()</div>
+                            <div class="desc">Total Paid Out</div>
+                        </div>
+                        <div class="icon"><span class=""></span></div>
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <div class="widget widget-tile widget-bordered">
+                        <div class="data-info">
+                            <div data-toggle="counter" data-end="@totalAvailableForPayout" id="totalPayout" data-decimals="2" data-suffix="" class="value">@totalAvailableForPayout.ToCurrency()</div>
+                            <div class="desc">Available For Payout</div>
+                        </div>
+                        <div class="icon"><span class=""></span></div>
+                    </div>
+                </div>
             </div>
 
             <div class="table-responsive">
@@ -306,7 +328,7 @@
                     { "controller", "accounting" },
                     { "action", "index" },
                     { "querystring", $"sdate={Request["sdate"]}&edate={Request["edate"]}&poId={Request["poId"]}&poTypeId={Request["poTypeId"]}" }
-        }
+    }
                 );
             }
         </div>
