@@ -13,12 +13,13 @@ namespace AfterSchoolLibrary.Services
         public static Payout CreateNew(Account account, List<Transaction> transactions, PayoutStatus payoutStatus, PaymentType paymentType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             Payout payout = null;
-            var amount = transactions.Sum(transaction => transaction.GetBillerAmount());
 
             Database.ExecuteTransaction
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
+                    var amount = transactions.Sum(transaction => transaction.GetBillerPayout(amsgs, adc));
+
                     payout = new Payout()
                     {
                         AccountId = account.ID,
@@ -42,7 +43,6 @@ namespace AfterSchoolLibrary.Services
                 onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
-           
 
             return payout;
         }

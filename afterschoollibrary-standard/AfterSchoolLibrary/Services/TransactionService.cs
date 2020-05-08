@@ -67,9 +67,9 @@ namespace AfterSchoolLibrary.Services
             return transaction.Amount.Value;
         }
 
-        public static decimal GetBillerPayout(this Transaction transaction)
+        public static decimal GetBillerPayout(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return transaction.GetBillerAmount() - transaction.GetFeesChargedToBiller();
+            return transaction.GetBillerAmount(msgs, dc) - transaction.GetFeesChargedToBiller() - transaction.GetRefundedAmountAHQ(true, msgs, dc);
         }
 
         public static Purchase GetPurchase(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -239,9 +239,9 @@ namespace AfterSchoolLibrary.Services
         public static decimal GetRefundableAmount(this Transaction transaction, bool allowFullAmountRefund = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (allowFullAmountRefund)
-                return transaction.GetPayerAmount() - transaction.GetRefundedAmountAHQ(msgs, dc);
+                return transaction.GetPayerAmount() - transaction.GetRefundedAmountAHQ(false, msgs, dc);
 
-            return transaction.GetBillerAmount(msgs, dc) - transaction.GetRefundedAmountAHQ(msgs, dc);
+            return transaction.GetBillerAmount(msgs, dc) - transaction.GetRefundedAmountAHQ(true, msgs, dc);
         }
 
         public static bool HasRefundableAmount(this Transaction transaction, bool allowFullAmountRefund = false, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -282,9 +282,20 @@ namespace AfterSchoolLibrary.Services
             return Transaction.GetTotalRefundByOriginalTransaction(transaction.ID.Value, PaymentSourceType.Manual, false, msgs, dc);
         }
 
-        public static decimal GetRefundedAmountAHQ(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetRefundedAmountAHQ(this Transaction transaction, bool getOnlyProviderAmount = true, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Transaction.GetTotalRefundByOriginalTransaction(transaction.ID.Value, PaymentSourceType.AfterSchoolPlatform, false, msgs, dc);
+            var amount = Transaction.GetTotalRefundByOriginalTransaction(transaction.ID.Value, PaymentSourceType.AfterSchoolPlatform, false, msgs, dc);
+
+            if (getOnlyProviderAmount)
+                amount -= Transaction.GetTotalRefundFeesByOriginalTransaction(
+                            transaction.ID.Value, 
+                            transaction.PayerAccountId, 
+                            PaymentSourceType.AfterSchoolPlatform, 
+                            false, 
+                            msgs, 
+                            dc);
+
+            return amount;
         }
 
         public static Payout GetPayout(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)

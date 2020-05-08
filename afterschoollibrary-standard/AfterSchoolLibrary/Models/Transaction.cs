@@ -1032,6 +1032,62 @@ namespace AfterSchoolLibrary.Models
             return 0;
         }
 
+        public static decimal GetTotalRefundFeesByOriginalTransaction(int OriginalTransactionId, int? feePayerId, PaymentSourceType paymentSourceType, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+
+            DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseParameterizedQuery = false;
+            dq.SelectParameters.Clear();
+
+            var sp = new SelectParameter(ObjectMap["ConvenienceFeeCharged"]);
+            sp.Function = $"ISNULL(SUM({ObjectMap["ConvenienceFeeCharged"].ParameterFullName}), 0)";
+            dq.SelectParameters.Add(sp);
+
+            var sp2 = new SelectParameter(ObjectMap["PaymentTypeFeeCharged"]);
+            sp2.Function = $"ISNULL(SUM({ObjectMap["PaymentTypeFeeCharged"].ParameterFullName}), 0)";
+            dq.SelectParameters.Add(sp2);
+
+            var sp3 = new SelectParameter(ObjectMap["ConvenienceFeePayerAccountId"]);
+            dq.SelectParameters.Add(sp3);
+
+            var sp4 = new SelectParameter(ObjectMap["PaymentTypeFeePayerAccountId"]);
+            dq.SelectParameters.Add(sp4);
+
+            dq.Criterias.Add(ObjectMap["OriginalTransactionId"], OriginalTransactionId);
+            dq.Criterias.Add(ObjectMap["isDeleted"], isDeleted);
+            dq.Criterias.Add(ObjectMap["PaymentSourceTypeId"], (int)paymentSourceType);
+
+            dq.GroupBys.Add(ObjectMap["ConvenienceFeePayerAccountId"]);
+            dq.GroupBys.Add(ObjectMap["PaymentTypeFeePayerAccountId"]);
+
+            var results = dq.Select(msgs);
+            if (results.Rows.Any())
+            {
+                var convenienceFee = results.Rows[0][0].ToString().ToDecimal();
+                var transactionFee = results.Rows[0][1].ToString().ToDecimal();
+
+                if (feePayerId.HasValue)
+                {
+                    var convenienceFeePayerId = results.Rows[0][2].ToString().ToInteger();
+                    var transactionFeePayerId = results.Rows[0][3].ToString().ToInteger();
+                    var fees = 0M;
+
+                    if (feePayerId == convenienceFeePayerId)
+                        fees += convenienceFee;
+
+                    if (feePayerId == transactionFeePayerId)
+                        fees += transactionFee;
+
+                    return fees;
+                }
+
+                return convenienceFee + transactionFee;
+            }   
+
+            return 0;
+        }
+
         public static List<Transaction> LoadByOriginalTransactionIdByIsDeleted(int OriginalTransactionId, PaymentSourceType paymentSourceType, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
