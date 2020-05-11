@@ -28,15 +28,23 @@ namespace AfterSchoolLibrary.Services
 
         public static decimal GetFeesChargedToPayer(this Transaction transaction)
         {
-            var total = 0M;
+            return transaction.GetPaymentTypeFeesChargedToPayer() + transaction.GetConvenienceFeesChargedToPayer();
+        }
 
+        public static decimal GetConvenienceFeesChargedToPayer(this Transaction transaction)
+        {
             if (transaction.ConvenienceFeePayerAccountId == transaction.PayerAccountId)
-                total += transaction.ConvenienceFeeCharged.Value;
+                return transaction.ConvenienceFeeCharged.Value;
 
+            return 0;
+        }
+
+        public static decimal GetPaymentTypeFeesChargedToPayer(this Transaction transaction)
+        {            
             if (transaction.PaymentTypeFeePayerAccountId == transaction.PayerAccountId)
-                total += transaction.PaymentTypeFeeCharged.Value;
+                return transaction.PaymentTypeFeeCharged.Value;
 
-            return total;
+            return 0;
         }
 
         public static Transaction GetOriginalTransaction(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -67,9 +75,9 @@ namespace AfterSchoolLibrary.Services
             return transaction.Amount.Value;
         }
 
-        public static decimal GetBillerPayout(this Transaction transaction)
+        public static decimal GetBillerPayout(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return transaction.GetBillerAmount() - transaction.GetFeesChargedToBiller();
+            return transaction.GetBillerAmount(msgs, dc) - transaction.GetFeesChargedToBiller() - transaction.GetRefundedAmountAHQ(true, msgs, dc);
         }
 
         public static Purchase GetPurchase(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -172,17 +180,17 @@ namespace AfterSchoolLibrary.Services
             return transaction;
         }
 
-        public static Transaction CreateNew(Account purchasingAccount, Account billingAccount, decimal amount, Purchase purchase, string participationObjectName, TransactionType transactionType, string stripeChargeOrRefundId, Transaction originalTransaction, PaymentType paymentType, PaymentSourceType paymentSourceType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Transaction CreateNew(Account purchasingAccount, Account billingAccount, decimal amount, decimal? convenienceFeeAmount, int? convenienceFeePayerId, decimal? paymentTypeFeeAmount, int? paymentTypeFeePayerId, Purchase purchase, string refundDescription, TransactionType transactionType, string stripeChargeOrRefundId, Transaction originalTransaction, PaymentType paymentType, PaymentSourceType paymentSourceType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var transaction = new Transaction()
             {
                 Amount = amount,
-                BillerAccountId = billingAccount.ID.Value,
-                Description = $"{participationObjectName} refund",
-                PayerAccountId = purchasingAccount.ID.Value,
-                PurchaseId = purchase.ID.Value,
+                BillerAccountId = billingAccount?.ID,
+                Description = refundDescription,
+                PayerAccountId = purchasingAccount?.ID,
+                PurchaseId = purchase?.ID,
                 PaymentTypeId = paymentType,
                 CreateDate = DateTime.UtcNow,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
@@ -191,7 +199,11 @@ namespace AfterSchoolLibrary.Services
                 StripeChargeOrRefundId = stripeChargeOrRefundId,
                 TransactionTypeId = transactionType,
                 PaymentSourceTypeId = paymentSourceType,
-                OriginalTransactionId = originalTransaction.ID.Value,
+                OriginalTransactionId = originalTransaction?.ID,
+                ConvenienceFeeCharged = convenienceFeeAmount,
+                PaymentTypeFeeCharged = paymentTypeFeeAmount,
+                ConvenienceFeePayerAccountId = convenienceFeePayerId,
+                PaymentTypeFeePayerAccountId = paymentTypeFeePayerId
             };
             msgs.AddRange(transaction.Save(dc));
 
@@ -239,9 +251,14 @@ namespace AfterSchoolLibrary.Services
         public static decimal GetRefundableAmount(this Transaction transaction, bool allowFullAmountRefund = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (allowFullAmountRefund)
-                return transaction.GetPayerAmount() - transaction.GetRefundedAmountAHQ(msgs, dc);
+                return transaction.GetPayerAmount() - transaction.GetRefundedAmountAHQ(false, msgs, dc);
 
-            return transaction.GetBillerAmount(msgs, dc) - transaction.GetRefundedAmountAHQ(msgs, dc);
+            return transaction.GetBillerAmount(msgs, dc) - transaction.GetRefundedAmountAHQ(true, msgs, dc);
+        }
+
+        public static bool HasRefundableAmount(this Transaction transaction, bool allowFullAmountRefund = false, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return transaction.GetRefundableAmount(allowFullAmountRefund, msgs, dc) > 0;
         }
 
         public static bool CanRefundTransactionFee(this Transaction transaction)
@@ -277,9 +294,20 @@ namespace AfterSchoolLibrary.Services
             return Transaction.GetTotalRefundByOriginalTransaction(transaction.ID.Value, PaymentSourceType.Manual, false, msgs, dc);
         }
 
-        public static decimal GetRefundedAmountAHQ(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetRefundedAmountAHQ(this Transaction transaction, bool getOnlyProviderAmount = true, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Transaction.GetTotalRefundByOriginalTransaction(transaction.ID.Value, PaymentSourceType.AfterSchoolPlatform, false, msgs, dc);
+            var amount = Transaction.GetTotalRefundByOriginalTransaction(transaction.ID.Value, PaymentSourceType.AfterSchoolPlatform, false, msgs, dc);
+
+            if (getOnlyProviderAmount)
+                amount -= Transaction.GetTotalRefundFeesByOriginalTransaction(
+                            transaction.ID.Value, 
+                            transaction.PayerAccountId, 
+                            PaymentSourceType.AfterSchoolPlatform, 
+                            false, 
+                            msgs, 
+                            dc);
+
+            return amount;
         }
 
         public static Payout GetPayout(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -314,10 +342,10 @@ namespace AfterSchoolLibrary.Services
             if (transaction.PlatformPercentFee.HasValue)
                 return "Paid";
 
-            if (transaction.HasRefunds())
+            if (!transaction.HasRefundableAmount(false, msgs, dc))
                 return "Refunded";
 
-            var currentPayout = GetPayout(transaction, msgs);
+            var currentPayout = GetPayout(transaction, msgs, dc);
 
             if (currentPayout.IsNotEmpty())
                 switch (currentPayout.PayoutStatusId)
@@ -333,6 +361,12 @@ namespace AfterSchoolLibrary.Services
             if (DateTime.UtcNow.IsBefore(transaction.CreateDate.Value.AddDays(transaction.GetWaitPeriodInDays())))
                 return "Incoming";
 
+            if (transaction.HasRefundsAHQ(msgs, dc) && transaction.HasRefundableAmount(false, msgs, dc))
+                return "Partially Refunded / Ready for Payout";
+
+            if (transaction.HasRefundsManual(msgs, dc))
+                return "Manual Refund / Ready For Payout";
+
             return "Ready For Payout";
         }
 
@@ -343,7 +377,8 @@ namespace AfterSchoolLibrary.Services
                 !transaction.PlatformPercentFee.HasValue &&
                 transaction.PaymentSourceTypeId == PaymentSourceType.AfterSchoolPlatform &&
                 transaction.IsCharge() &&
-                !transaction.HasRefundsAHQ(msgs, dc);
+                transaction.HasRefundableAmount(false, msgs, dc) &&
+                !transaction.HasUnfulfilledRefundRequests(msgs, dc);
         }
 
         public static Payout CreatePayout(this Transaction transaction, PayoutStatus payoutStatus, PaymentType paymentType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -396,12 +431,20 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        public static Transaction Refund(this Transaction transaction, decimal refundAmount, bool allowFullAmountRefund, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Transaction Refund(this Transaction transaction, decimal refundAmount, bool allowFullAmountRefund, decimal? convenienceFeeAmount, decimal? paymentTypeFeeAmount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return transaction.Refund(refundAmount, allowFullAmountRefund, PaymentSourceType.AfterSchoolPlatform, loggedInUser, msgs, dc);
+            return transaction.Refund(
+                        refundAmount, 
+                        allowFullAmountRefund, 
+                        convenienceFeeAmount, 
+                        paymentTypeFeeAmount, 
+                        PaymentSourceType.AfterSchoolPlatform, 
+                        loggedInUser, 
+                        msgs, 
+                        dc);
         }
 
-        public static Transaction Refund(this Transaction transaction, decimal refundAmount, bool allowFullAmountRefund, PaymentSourceType paymentSourceType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Transaction Refund(this Transaction transaction, decimal refundAmount, bool allowFullAmountRefund, decimal? convenienceFeeAmount, decimal? paymentTypeFeeAmount, PaymentSourceType paymentSourceType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             Transaction refund = null;
 
@@ -420,12 +463,17 @@ namespace AfterSchoolLibrary.Services
                                     reason: Billing.StripeRefundReason.RequestedByCustomer.ToString().SplitByUpperCase().Replace(" ", "_").ToLower(),
                                     msgs: msgs);
 
-                    stripeRefundId = stripeRefund.Id;
+                    if (stripeRefund.IsNotEmpty())
+                        stripeRefundId = stripeRefund.Id;
+                    else
+                        msgs.Add("Error creating refund", MessageType.UserError);
                 }
 
                 if (msgs.HasNoErrors())
                     refund = transaction.CreateNewRefund(
-                        amount: refundAmount,
+                        fullAmount: refundAmount,
+                        convenienceFeeAmount: convenienceFeeAmount,
+                        paymentTypeFeeAmount: paymentTypeFeeAmount,
                         refundId: stripeRefundId,
                         transactionType: TransactionType.Refund,
                         paymentType: paymentSourceType == PaymentSourceType.Manual ? PaymentType.NotSet : transaction.PaymentTypeId,
@@ -440,28 +488,45 @@ namespace AfterSchoolLibrary.Services
 
         public static Transaction Refund(this Transaction transaction, decimal refundAmount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return transaction.Refund(refundAmount, false, loggedInUser, msgs, dc);
+            return transaction.Refund(refundAmount, false, null, null, loggedInUser, msgs, dc);
         }
 
         public static Transaction ManualRefund(this Transaction transaction, decimal refundAmount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return transaction.Refund(refundAmount, false, PaymentSourceType.Manual, loggedInUser, msgs, dc);
+            return transaction.Refund(refundAmount, false, null, null, PaymentSourceType.Manual, loggedInUser, msgs, dc);
         }
 
         public static Transaction RefundPayerFullAmount(this Transaction transaction, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            return transaction.Refund(transaction.GetPayerAmount(), true, loggedInUser, msgs, dc);
+        {            
+            return transaction.Refund(
+                    transaction.GetPayerAmount(), 
+                    true, 
+                    transaction.GetConvenienceFeesChargedToPayer(),
+                    transaction.GetPaymentTypeFeesChargedToPayer(),
+                    loggedInUser, 
+                    msgs, 
+                    dc);
         }
 
-        public static Transaction CreateNewRefund(this Transaction originalTransaction, decimal amount, string refundId, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Transaction CreateNewRefund(this Transaction originalTransaction, decimal fullAmount, decimal? convenienceFeeAmount, decimal? paymentTypeFeeAmount, string refundId, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            var refundDescription = "Payment refund";
+            var participationObjects = originalTransaction.GetParticipationObjects(msgs, dc);
+
+            if (participationObjects.Any())
+                refundDescription = $"{participationObjects.FirstOrDefault().Name} refund";
+
             // inverse billing and paying for refund
             return CreateNew(
                 originalTransaction.GetBillerAccount(),
                 originalTransaction.GetPayerAccount(),
-                amount,
+                fullAmount,
+                convenienceFeeAmount,
+                originalTransaction.ConvenienceFeePayerAccountId,
+                paymentTypeFeeAmount,
+                originalTransaction.PaymentTypeFeePayerAccountId,
                 originalTransaction.GetPurchase(),
-                originalTransaction.GetParticipationObjects().FirstOrDefault().Name,
+                refundDescription,
                 transactionType,
                 refundId,
                 originalTransaction,

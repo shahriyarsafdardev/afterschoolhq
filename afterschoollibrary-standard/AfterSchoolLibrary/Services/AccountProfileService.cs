@@ -164,14 +164,14 @@ namespace AfterSchoolLibrary.Services
                     profile.AddProperties(newAwards, AccountPropertyType.Award, loggedInUser, amsgs, adc);
                     profile.AddProperties(newCertifications, AccountPropertyType.Certification, loggedInUser, amsgs, adc);
 
-                    profile.AddProperties(servicesOffered, AccountPropertyType.ServiceOffered, loggedInUser, amsgs, adc);
-                    profile.AddProperties(timesOffered, AccountPropertyType.TimeOffered, loggedInUser, amsgs, adc);
-                    profile.AddProperties(pricingOptions, AccountPropertyType.PricingOption, loggedInUser, amsgs, adc);
+                    profile.ManageProperties(servicesOffered, AccountPropertyType.ServiceOffered, loggedInUser, amsgs, adc);
+                    profile.ManageProperties(timesOffered, AccountPropertyType.TimeOffered, loggedInUser, amsgs, adc);
+                    profile.ManageProperties(pricingOptions, AccountPropertyType.PricingOption, loggedInUser, amsgs, adc);
 
-                    profile.AddProperties(classifications.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.Classifications, loggedInUser, amsgs, adc);
-                    profile.AddProperties(softskills.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.SoftSkills, loggedInUser, amsgs, adc);
-                    profile.AddProperties(academicsubjects.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.AcademicSubjects, loggedInUser, amsgs, adc);
-                    profile.AddProperties(teachingmethods.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.TeachingMethods, loggedInUser, amsgs, adc);
+                    profile.ManageProperties(classifications.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.Classifications, loggedInUser, amsgs, adc);
+                    profile.ManageProperties(softskills.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.SoftSkills, loggedInUser, amsgs, adc);
+                    profile.ManageProperties(academicsubjects.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.AcademicSubjects, loggedInUser, amsgs, adc);
+                    profile.ManageProperties(teachingmethods.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.TeachingMethods, loggedInUser, amsgs, adc);
 
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
@@ -179,6 +179,39 @@ namespace AfterSchoolLibrary.Services
                 onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
+        }
+
+        public static void ManageProperties(this AccountProfile profile, IEnumerable<string> properties, AccountPropertyType propertyType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var existingProperties = profile.GetProperties(propertyType, msgs, dc);
+
+            existingProperties.ForEach(existingProperty => {
+                if (existingProperty.Value.NotIn(properties))
+                    msgs.AddRange(existingProperty.Delete(dc));
+            });
+
+            profile.AddProperties(properties, propertyType, loggedInUser, msgs, dc);
+        }
+
+        public static void ManageProperties(this AccountProfile profile, NameValueCollection properties, AccountPropertyType propertyType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var existingProperties = profile.GetProperties(propertyType, msgs, dc);
+            var newValues = new List<string>();
+
+            foreach (var key in properties.AllKeys)
+                newValues.Add(properties[key]);
+
+            existingProperties.ForEach(existingProperty => {
+                if (existingProperty.Value.NotIn(newValues))
+                    msgs.AddRange(existingProperty.Delete(dc));
+            });
+
+            profile.AddProperties(properties, propertyType, loggedInUser, msgs, dc);
+        }
+
+        public static List<AccountProperty> GetProperties(this AccountProfile profile, AccountPropertyType propertyType, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return AccountProperty.LoadByAccountIdByAccountPropertyTypeId(profile.AccountId.Value, propertyType, msgs, dc);
         }
 
         public static void AddProperties(this AccountProfile profile, IEnumerable<string> properties, AccountPropertyType propertyType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
@@ -208,7 +241,7 @@ namespace AfterSchoolLibrary.Services
                         CreateDate = DateTime.UtcNow,
                         LastModifiedBy = loggedInUser.ID,
                         LastModifiedDate = DateTime.UtcNow,
-                        Value = value,
+                        Value = value.Trim(),
                         AccountPropertyTypeId = propertyType,
                     };
 
@@ -229,7 +262,7 @@ namespace AfterSchoolLibrary.Services
 
             if (value.IsNotBlank())
             {
-                property.Value = value;
+                property.Value = value.Trim();
                 property.LastModifiedBy = loggedInUser.ID;
                 property.LastModifiedDate = DateTime.UtcNow;
                 msgs.AddRange(property.Save(dc));

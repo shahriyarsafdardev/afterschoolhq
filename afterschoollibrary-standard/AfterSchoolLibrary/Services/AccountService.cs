@@ -1999,14 +1999,14 @@ namespace AfterSchoolLibrary.Services
             return Payout.GetLastPayout(account.ID.Value, msgs, dc);
         }
 
-        public static decimal GetMaxAmountAvailableForPayout(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetMaxAmountAvailableForPayout(this Account account, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var totalPayoutAmount = account.GetTotalPayoutAmount(null, msgs: msgs, dc: dc);
-            var totalAmountPaid = account.GetTotalAmountBilledOut(msgs: msgs, dc: dc);
-            // var totalAmountRefunded = account.GetTotalAmountRefundedTo(startDate, endDate, msgs);
-            var totalFeesPaid = account.GetTotalFeesPaidAsBiller(null, null, msgs);
+            var totalPayoutAmount = account.GetTotalPayoutAmount(null, startDate, endDate, msgs, dc);
+            var totalAmountPaid = account.GetTotalAmountBilledOut(startDate, endDate, msgs, dc);
+            var totalFeesPaid = account.GetTotalFeesPaidAsBiller(startDate, endDate, msgs, dc);
+            var totalRefunds = account.GetTotalAmountRefundedAHQ(true, startDate, endDate, msgs, dc);
 
-            return totalAmountPaid - totalFeesPaid - totalPayoutAmount;
+            return totalAmountPaid - totalFeesPaid - totalPayoutAmount - totalRefunds;
         }
 
         public static int GetPayoutCount(this Account account, PayoutStatus? payoutStatus, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -2726,9 +2726,21 @@ namespace AfterSchoolLibrary.Services
             return Transaction.GetTotalAmountPaidByPayerAccount(account.ID.Value, PaymentSourceType.Manual, startDate, endDate, false, msgs, dc);
         }
 
-        public static decimal GetTotalAmountRefundedAHQ(this Account account, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return Transaction.GetTotalAmountPaidByPayerAccount(account.ID.Value, PaymentSourceType.AfterSchoolPlatform, startDate, endDate, false, msgs, dc);
+        public static decimal GetTotalAmountRefundedAHQ(this Account account, bool getProviderAmountOnly, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {           
+            var amountRefunded = Transaction.GetTotalAmountPaidByPayerAccount(account.ID.Value, PaymentSourceType.AfterSchoolPlatform, startDate, endDate, false, msgs, dc);
+
+            if (getProviderAmountOnly)
+                amountRefunded -= Transaction.GetTotalFeesPaidByPayerAccount(
+                                        account.ID.Value, 
+                                        PaymentSourceType.AfterSchoolPlatform, 
+                                        startDate, 
+                                        endDate, 
+                                        false, 
+                                        msgs, 
+                                        dc);
+
+            return amountRefunded;
         }
 
         public static List<RefundRequest> GetRefundRequests(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -3134,6 +3146,15 @@ namespace AfterSchoolLibrary.Services
         public static int GetSubscriberCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Subscriber.GetCountByAccountIdByStatus(account.ID.Value, SubscriberStatus.Subscribed, msgs, dc);
+        }
+
+        #endregion
+
+        #region SubscriptionPlans
+
+        public static List<SubscriptionPlan> GetSubscriptionPlans(this Account account, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return SubscriptionPlan.LoadByPlanOwnerAccountId(account.ID.Value, msgs);
         }
 
         #endregion

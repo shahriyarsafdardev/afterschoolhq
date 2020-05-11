@@ -62,8 +62,10 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.TotalAmountPaid = SessionVariables.CurrentAccount.GetTotalAmountBilledOut(startDate, endDate, msgs);
             ViewBag.TotalAmountRefunded = SessionVariables.CurrentAccount.GetTotalAmountRefunded(startDate, endDate, msgs);
             ViewBag.TotalAmountRefundedManual = SessionVariables.CurrentAccount.GetTotalAmountRefundedManually(startDate, endDate, msgs);
-            ViewBag.TotalAmountRefundedAHQ = SessionVariables.CurrentAccount.GetTotalAmountRefundedAHQ(startDate, endDate, msgs);
+            ViewBag.TotalAmountRefundedAHQ = SessionVariables.CurrentAccount.GetTotalAmountRefundedAHQ(true, startDate, endDate, msgs);
             ViewBag.TotalFeesPaid = SessionVariables.CurrentAccount.GetTotalFeesPaidAsBiller(startDate, endDate, msgs);
+            ViewBag.TotalPaidOut = SessionVariables.CurrentAccount.GetTotalPayoutAmount(PayoutStatus.Completed, startDate, endDate, msgs);
+            ViewBag.TotalAvailableForPayout = SessionVariables.CurrentAccount.GetMaxAmountAvailableForPayout(startDate, endDate, msgs);
             ViewBag.ParticipationObjects = allParticipationObjects;
             ViewBag.Messages = msgs;
             ViewBag.PagingModel = new PagingModel()
@@ -113,7 +115,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.CanReceiveACHDeposits = SessionVariables.CurrentAccount.CanReceiveACHDeposits(msgs);
             ViewBag.CanReceiveDeposits = SessionVariables.CurrentAccount.CanReceivePaymentDeposits(msgs);
-            ViewBag.MaxRequestAmount = SessionVariables.CurrentAccount.GetMaxAmountAvailableForPayout(msgs);
+            ViewBag.MaxRequestAmount = SessionVariables.CurrentAccount.GetMaxAmountAvailableForPayout(msgs: msgs);
             ViewBag.LastPayout = SessionVariables.CurrentAccount.GetLastPayout(msgs);
             ViewBag.TotalPayoutAmount = totalPayoutAmount;
             ViewBag.TotalPendingAmount = SessionVariables.CurrentAccount.GetTotalPayoutAmount(PayoutStatus.InProgress, msgs: msgs);
@@ -157,7 +159,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 var transactions = Transaction.LoadList(ids);
 
                 ViewBag.TranIds = transactionIds;
-                ViewBag.TotalPayoutAmount = transactions.Sum(p => p.GetBillerPayout()).ToCurrency();
+                ViewBag.TotalPayoutAmount = transactions.Sum(transaction => transaction.GetBillerPayout()).ToCurrency();
                 ViewBag.Messages = msgs;
 
                 return View(transactions);
@@ -170,20 +172,25 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var transactionIds = Request.Form["TransactionIds"];
             var transactions = new List<Transaction>();
+            var msgs = new SystemMessages();
 
             if (!string.IsNullOrEmpty(transactionIds))
             {
-                var msgs = new SystemMessages();
-                var ids = transactionIds.Split(',').Select(p => Convert.ToInt32(p)).ToList();
+                var ids = transactionIds.Split(',').Select(p => p.ToInteger()).ToList();
 
                 transactions = Transaction.LoadList(ids).ToList();
                 ViewBag.TotalAmount = transactions.Sum(p => p.GetBillerPayout()).ToCurrency();
+                ViewBag.TranIds = transactionIds;
+                ViewBag.TotalPayoutAmount = ViewBag.TotalAmount;
 
-                SessionVariables.CurrentAccount.RequestNewPayout(transactions, loggedInUser: SessionVariables.CurrentUser, msgs);
+                SessionVariables.CurrentAccount.RequestNewPayout(transactions, SessionVariables.CurrentUser, msgs);
 
                 if (msgs.HasNoErrors())
                     return View();
             }
+
+            ViewBag.Messages = msgs;
+
             return View("RequestPayout", transactions);
         }
 
@@ -253,6 +260,26 @@ namespace AfterSchool.Areas.Org.Controllers
             Response.BinaryWrite(filebytes);
             Response.End();
             return null;
+        }
+
+        [HttpGet]
+        public ActionResult Subscriptions()
+        {
+            var msgs = new SystemMessages();
+            var plans = SessionVariables.CurrentAccount.GetSubscriptionPlans(msgs);
+            var subscriptions = new List<RegistrantSubscriptionPlan>();
+
+            plans.ForEach(plan => {
+                subscriptions.AddRange(plan.GetRegistrantSubscriptionPlans(msgs));
+            });
+
+            subscriptions = subscriptions.Where(subscription => subscription.CreateDate >= new DateTime(2019, 12, 1))
+                                .OrderByDescending(x => x.CreateDate.Value)
+                                .ToList();
+
+            ViewBag.Messages = msgs;
+
+            return View(subscriptions);
         }
 
         [HttpGet]

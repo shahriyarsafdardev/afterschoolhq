@@ -1,0 +1,229 @@
+﻿@model List<RegistrantSubscriptionPlan>
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+}
+
+@{Html.RenderPartial("OrgAccountHeader");}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("_AccountingHeader"); }
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <div class="panel panel-default">
+
+        <div class="panel-heading">
+            <i class="s7-note2"></i> Plans
+            <div class="clearfix"></div>
+        </div>
+
+        <div class="panel-body">
+
+            <p>Records start as of 12/1/2019</p>
+
+            <div class="table-responsive">
+                <table class="table table-hover table-condensed" id="transaction-table">
+                    <thead>
+                        <tr>
+                            <th>@UILabel.ActivityLabel(ActivityType.Activity)</th>
+                            <th class="text-center">@UILabel.RegistrantLabel()</th>
+                            <th class="text-center">Plan Start Date</th>
+                            <th class="text-center">Date Cancelled</th>
+                            <th class="text-center">Payment</th>
+                            <th class="text-center">Payments</th>
+                            <th class="text-center">Next Payment Date</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Any())
+                        {
+                            foreach (var plan in Model)
+                            {
+                                var originalPlan = plan.GetSubscriptionPlan();
+                                var participationObject = originalPlan.GetParticipationObject();
+                                var registrant = plan.GetRegistrant();
+                                var masterRegistrant = registrant.GetMasterRegistrant();
+                                var regStatus = RegistrationStatus.Current;
+
+                                if (originalPlan.PlanTypeId == SubscriptionPlanType.Subscription)
+                                {
+                                    if (plan.StartDate.Value.IsAfter(DateTime.UtcNow))
+                                    {
+                                        regStatus = RegistrationStatus.Future;
+                                    }
+                                    else if (plan.ValidUntil.HasValue && plan.ValidUntil.Value.IsBefore(DateTime.UtcNow))
+                                    {
+                                        regStatus = RegistrationStatus.Past;
+                                    }
+                                }
+                                else
+                                {
+                                    if (participationObject.StartDate.Value.IsAfter(DateTime.UtcNow))
+                                    {
+                                        regStatus = RegistrationStatus.Future;
+                                    }
+                                    else if (participationObject.EndDate.HasValue && participationObject.EndDate.Value.IsBefore(DateTime.UtcNow))
+                                    {
+                                        regStatus = RegistrationStatus.Past;
+                                    }
+                                }
+
+                                var registrantActivity = registrant.GetRegistrantActivity(participationObject, msgs);
+                                var participationVM = new ParticipationViewModel(participationObject, registrantActivity, registrant, regStatus);
+
+                                var billingPeriodTypeId = plan.BillingPeriodTypeId;
+                                var payments = plan.GetPayments();
+                                var nextPaymentDate = "-";
+                                var amount = plan.TotalPaidWithFees;
+                                var endDate = "-";
+
+                                if (billingPeriodTypeId == BillingPeriodType.NotSet)
+                                {
+                                    billingPeriodTypeId = originalPlan.BillingPeriodTypeId;
+                                }
+
+                                if (!plan.DateCancelled.HasValue)
+                                {
+                                    if (payments.Any() && payments.Last().CreateDate.Value.AddMonths(1).IsOnOrAfter(DateTime.UtcNow))
+                                    {
+                                        nextPaymentDate = payments.Last().CreateDate.Value.AddMonths(1).ToShortDateString();
+                                    }
+                                    else if (plan.StartDate.Value.IsAfter(DateTime.UtcNow))
+                                    {
+                                        nextPaymentDate = plan.StartDate.Value.ToShortDateString();
+                                    }
+                                }
+
+                                if (amount == 0)
+                                {
+                                    if (payments.Any())
+                                    {
+                                        amount = payments.Last().GetTransaction().Amount.Value;
+                                    }
+                                    else
+                                    {
+                                        amount = originalPlan.CostPerPeriod.Value;
+                                    }
+                                }
+
+                                if (originalPlan.PlanTypeId == SubscriptionPlanType.PaymentPlan)
+                                {
+                                    if (payments.Count == plan.TotalPeriods)
+                                    {
+                                        endDate = plan.GetLastPaymentDate().ToShortDateString();
+                                    }
+                                }
+                                else
+                                {
+                                    endDate = plan.DateCancelled.ToShortDateString("-");
+                                }
+
+                                <tr>
+                                    <td>
+                                        @participationObject.Name - @originalPlan.PlanTypeId.ToString().SplitByUpperCase()
+                                    </td>
+                                    <td class="text-center">
+                                        @registrant.DisplayName
+                                    </td>
+                                    <td class="text-center">
+                                        @plan.StartDate.ToShortDateString()
+                                    </td>
+                                    <td class="text-center">
+                                        @endDate
+                                    </td>
+                                    <td class="text-center">
+                                        @plan.TotalPaidWithFees.ToCurrency() / @billingPeriodTypeId.ToString().ToLower()
+                                    </td>
+                                    <td class="text-center">
+                                        @if (plan.TotalPeriods.HasValue)
+                                        {
+                                            <span>
+                                                @payments.Count of @plan.TotalPeriods.Value
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span>@payments.Count payment(s)</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        @nextPaymentDate
+                                    </td>
+                                    <td class="hide">
+                                        @if (regStatus != RegistrationStatus.Past)
+                                        {
+                                            if (!plan.DateCancelled.HasValue)
+                                            {
+                                                <button 
+                                                        class="btn btn-default btn-sm md-trigger"
+                                                        data-modal="modal-withdraw"
+                                                        onclick="withdraw('@registrant.Uid', '@participationObject.ObjectID', '@((int)participationObject.ObjectType)', '@UI.JavascriptSafeString(registrant.FirstName)', '@UI.JavascriptSafeString(participationObject.Name)', '@UI.JavascriptSafeString(participationObject.ContactName)')"
+                                                        >
+                                                    Withdraw &amp; Cancel Payments
+                                                </button>
+                                            }
+                                            else if (registrantActivity.AssignmentTypeId == RegistrationAssignmentType.Withdrawn && registrantActivity.AssignmentTypeId.NotIn(Registration.ReservedStatuses))
+                                            {
+                                                @:-
+                                            }
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8">There are no plans</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @*@{
+                    Html.RenderPartial(
+                        "~/Views/Shared/_Paging.cshtml",
+                        (PagingModel)ViewBag.PagingModel,
+                        new ViewDataDictionary()
+                        {
+                        { "controller", "accounting" },
+                        { "action", "subscriptions" },
+                        { "querystring", $"sdate={Request["sdate"]}&edate={Request["edate"]}&poId={Request["poId"]}&poTypeId={Request["poTypeId"]}" }
+                    });
+                }*@
+        </div>
+    </div>
+</div>
+
+
+<div id="modal-withdraw" class="md-modal colored-header custom-width md-effect-9">
+    <form id="form-withdraw" action="" method="post">
+        <div class="md-content">
+            <div class="modal-header">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+                <h3 class="modal-title"><i class="s7-attention"></i> Withdrawal Confirmation</h3>
+            </div>
+            <div class="modal-body form">
+                <p class="text-medium-small">Are you sure you want to <strong>withdraw</strong> <strong><span id="withdraw-name"></span></strong> from <strong><span id="withdraw-activity"></span></strong>?</p>
+                <p>&nbsp;</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+                <a href="" class="btn btn-danger padding-h-20" id="btn-confirm-withdraw">Withdraw &amp; Cancel Payments &raquo;</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    function withdraw(registrant, po, type, registrantName, activityName, providerName, returnUrl) {
+        $('#withdraw-name').html(registrantName);
+        $('#withdraw-activity').html(activityName);
+        $('#withdraw-provider').html(providerName);
+
+        $('#btn-confirm-withdraw').attr('href', `@Url.Action("withdrawandcancel", "accounting")?reg=${registrant}?po=${po}&type=${type}&returnurl=${encodeURI(returnUrl)}`);
+    }
+</script>
