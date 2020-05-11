@@ -57,17 +57,33 @@ namespace AfterSchoolLibrary.Services
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
                         var refundAmount = request.Amount.Value;
+                        var convenienceFee = new decimal?();
+                        var paymentTypeFee = new decimal?();
 
                         if (allowFullRefundAmount && refundAmount <= transaction.GetBillerAmount(amsgs, adc))
                         {
                             if (refundCCFees)
-                                refundAmount += transaction.PaymentTypeFeeCharged.Value;
+                            {
+                                paymentTypeFee = transaction.PaymentTypeFeeCharged;
+                                refundAmount += transaction.GetPaymentTypeFeesChargedToPayer();
+                            }
 
                             if (refundConvenienceFees)
-                                refundAmount += transaction.ConvenienceFeeCharged.Value;
+                            {
+                                convenienceFee = transaction.ConvenienceFeeCharged;
+                                refundAmount += transaction.GetConvenienceFeesChargedToPayer();
+                            }
                         }
 
-                        var refund = transaction.Refund(refundAmount, allowFullRefundAmount, transaction.PaymentSourceTypeId, loggedInUser, amsgs, adc);
+                        var refund = transaction.Refund(
+                                        refundAmount, 
+                                        allowFullRefundAmount, 
+                                        convenienceFee,
+                                        paymentTypeFee,
+                                        transaction.PaymentSourceTypeId, 
+                                        loggedInUser, 
+                                        amsgs, 
+                                        adc);
 
                         if (msgs.HasNoErrors())
                             request.MarkAsCompleted(refund, loggedInUser, amsgs, adc);
