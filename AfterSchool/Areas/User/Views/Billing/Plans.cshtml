@@ -180,8 +180,8 @@
                     (PagingModel)ViewBag.PagingModel,
                     new ViewDataDictionary()
                     {
-                    { "controller", "orders" },
-                    { "action", "transactions" },
+                    { "controller", "billing" },
+                    { "action", "plans" },
                     { "querystring", $"sdate={Request["sdate"]}&edate={Request["edate"]}&poId={Request["poId"]}&poTypeId={Request["poTypeId"]}" }
             }
                 );

@@ -21,8 +21,8 @@ namespace AfterSchool.Areas.User.Controllers
             return View();
         }
 
-       [HttpGet]
-       public ActionResult Transactions(string pn, string rpp, string sdate, string edate)
+        [HttpGet]
+        public ActionResult Transactions(string pn, string rpp, string sdate, string edate)
         {
             var msgs = new SystemMessages();
             int pageNumber = 1;

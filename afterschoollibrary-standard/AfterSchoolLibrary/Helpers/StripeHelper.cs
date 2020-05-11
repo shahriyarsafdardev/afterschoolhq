@@ -1567,8 +1567,17 @@ namespace AfterSchoolLibrary.Billing
             }
             catch (StripeException ex)
             {
-                msgs.Add(ex.Message, MessageType.UserError, ex);
-                msgs.Add($"Error refunding", MessageType.UserError);
+                if (ex.StripeError.Code == "charge_already_refunded")
+                {
+                    var refunds = GetRefunds(chargeId, msgs);
+                    var amount = Convert.ToInt64(totalAmount * 100);
+                    refund = refunds.FirstOrDefault(x => x.Amount == amount);
+                }
+                else
+                {
+                    msgs.Add(ex.Message, MessageType.UserError, ex);
+                    msgs.Add($"Error refunding", MessageType.UserError);
+                }
             }
 
             return refund;

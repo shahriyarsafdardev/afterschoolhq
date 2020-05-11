@@ -1,7 +1,7 @@
 ﻿@model List<RefundRequest>
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
-    var totalRequestAmount = Model.Sum(request => request.Amount.Value);
+    var totalRequestAmount = Model.Sum(request => Math.Min(request.Amount.Value, request.GetTransaction().GetBillerAmount()));
     var totalAmountAvailable = (decimal)ViewBag.AmountAvailableToRefund;
 }
 
@@ -47,6 +47,7 @@
                         <tr>
                             <th class="text-center">Requested On</th>
                             <th class="text-center">Requested By</th>
+                            <th class="text-center">For</th>
                             <th class="text-center">Transaction #</th>
                             <th class="text-center">Description</th>
                             <th class="text-center">Transaction Amount</th>
@@ -68,6 +69,9 @@
                                     </td>
                                     <td class="text-center">
                                         @request.GetCreator().DisplayName
+                                    </td>
+                                    <td class="text-center">
+                                        @transaction.GetPayerAccount().Name
                                     </td>
                                     <td class="text-center">
                                         @transaction.GetTransactionNumber()

@@ -10,14 +10,19 @@
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
     <div class="panel panel-default">
         <div class="panel-heading">
+            
             Request Payouts - Preview
+            
             <div class="pull-right">
                     Total: @ViewBag.TotalPayoutAmount
             </div>
+            
             <div class="clearfix"></div>
+
             <div style="font-size: 13px">
                 <p>Please review the following transactions to ensure all of the correct transactions are listed</p>
             </div>
+
             <div>
                 <div class="pull-left">
                     <button class="btn btn-default" onclick="returnToTransactions()">
@@ -45,6 +50,7 @@
                             <th>Item Description</th>
                             <th class="text-center">Total Amt Paid</th>
                             <th class="text-center">Platform Fee</th>
+                            <th class="text-center">Amount Refunded</th>
                             <th class="text-center">Your Amount</th>
                         </tr>
                     </thead>
@@ -82,6 +88,9 @@
                                 </td>
                                 <td class="text-center">
                                     @transaction.GetFeesChargedToBiller().ToCurrency()
+                                </td>
+                                <td class="text-center">
+                                    @transaction.GetRefundedAmountAHQ(true).ToCurrency()
                                 </td>
                                 <td class="text-center">
                                     @transaction.GetBillerPayout().ToCurrency()
