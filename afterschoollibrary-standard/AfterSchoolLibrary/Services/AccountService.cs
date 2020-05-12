@@ -2005,8 +2005,10 @@ namespace AfterSchoolLibrary.Services
             var totalAmountPaid = account.GetTotalAmountBilledOut(startDate, endDate, msgs, dc);
             var totalFeesPaid = account.GetTotalFeesPaidAsBiller(startDate, endDate, msgs, dc);
             var totalRefunds = account.GetTotalAmountRefundedAHQ(true, startDate, endDate, msgs, dc);
+            var totalDebits = account.GetTotalAmountDebited(startDate, endDate, msgs, dc);
+            var totalCredits = account.GetTotalAmountCredited(startDate, endDate, msgs, dc);
 
-            return totalAmountPaid - totalFeesPaid - totalPayoutAmount - totalRefunds;
+            return totalAmountPaid - totalFeesPaid - totalPayoutAmount - totalRefunds + totalCredits - totalDebits;
         }
 
         public static int GetPayoutCount(this Account account, PayoutStatus? payoutStatus, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -2723,7 +2725,7 @@ namespace AfterSchoolLibrary.Services
 
         public static decimal GetTotalAmountRefundedManually(this Account account, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Transaction.GetTotalAmountPaidByPayerAccount(account.ID.Value, PaymentSourceType.Manual, startDate, endDate, false, msgs, dc);
+            return Transaction.GetTotalAmountPaidByPayerAccount(account.ID.Value, PaymentSourceType.ManualProvider, startDate, endDate, false, msgs, dc);
         }
 
         public static decimal GetTotalAmountRefundedAHQ(this Account account, bool getProviderAmountOnly, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -2741,6 +2743,16 @@ namespace AfterSchoolLibrary.Services
                                         dc);
 
             return amountRefunded;
+        }
+
+        public static decimal GetTotalAmountCredited(this Account account, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.GetTotalAmountCreditedToAccount(account.ID.Value, startDate, endDate, false, msgs, dc);
+        }
+
+        public static decimal GetTotalAmountDebited(this Account account, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.GetTotalAmountDebitedFromAccount(account.ID.Value, startDate, endDate, false, msgs, dc);
         }
 
         public static List<RefundRequest> GetRefundRequests(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)

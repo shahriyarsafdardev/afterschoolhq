@@ -1,12 +1,16 @@
 ﻿
 @{
     var actionName = ViewContext.RouteData.Values["action"].ToString().ToLower();
+    var controllerName = ViewContext.RouteData.Values["controller"].ToString().ToLower();
 }
 
 <div class="btn-toolbar">
     <div class="btn-group hidden-xs">
-        <a class="btn btn-alt6@(actionName == "index" ? "-active" : "")" href="@Url.Action("index", "transaction")">
+        <a class="btn btn-alt6@(actionName == "index" && controllerName == "transaction" ? "-active" : "")" href="@Url.Action("index", "transaction")">
             Transactions
+        </a>
+        <a class="btn btn-alt6@(actionName == "index" && controllerName == "payout" ? "-active" : "")" href="@Url.Action("index", "payout")">
+            Payouts
         </a>
         <a class="btn btn-alt6@(actionName == "refundrequests" ? "-active" : "")" href="@Url.Action("refundrequests", "transaction")">
             Refund Requests
@@ -16,6 +20,7 @@
         <select class="form-control" onchange="handleNav(this.value)">
             <optgroup label="Navigation">
                 <option value="@Url.Action("index", "transaction")">Transactions</option>
+                <option value="@Url.Action("index", "payout")">Payouts</option>
                 <option value="@Url.Action("refundrequests", "transaction")">Refund Requests</option>
             </optgroup>
         </select>

@@ -1287,7 +1287,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         Registration = registrantActivity.GetRegistration(msgs),
                         MasterRegistrant = masterRegistrant,
                         PaymentType = (PaymentType)paymenttype.ToInteger(),
-                        PaymentSourceType = PaymentSourceType.Manual,
+                        PaymentSourceType = PaymentSourceType.ManualProvider,
                         OverrideAmount = amountpaid.ToDecimal()
                     },
                     loggedInUser: SessionVariables.CurrentUser,

@@ -235,7 +235,7 @@
                                     <td class="text-center">
                                         @transaction.GetBillerAmount().ToCurrency()
 
-                                        @if (transaction.IsRefund())
+                                        @if (transaction.IsRefund() || transaction.IsDebit())
                                         {
                                             <i class="s7-back-2"></i>
                                         }
@@ -277,11 +277,12 @@
                                         @if (transaction.IsCharge() && !transaction.IsTotallyRefunded(false))
                                         {
                                             var hasUnfulfilledRequest = transaction.HasUnfulfilledRefundRequests();
+                                            var disableRequest = hasUnfulfilledRequest || !transaction.CanRefundViaStripe();
 
                                             <button onclick="requestRefund('@transaction.Uid', @transaction.GetRefundableAmount().ToString("#.00"))"
                                                     class="md-trigger btn btn-sm btn-default"
                                                     data-modal="modal-request-refund"
-                                                    @(hasUnfulfilledRequest ? "disabled=\"disabled\"" : "")>
+                                                    @(disableRequest ? "disabled=\"disabled\"" : "")>
 
                                                 @if (hasUnfulfilledRequest)
                                                 {
