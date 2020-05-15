@@ -97,7 +97,7 @@
                                     @transaction.GetFeesChargedToBiller().ToCurrency()
                                 </td>
                                 <td class="text-center">
-                                    @transaction.GetRefundedAmountAHQ(true).ToCurrency()
+                                    @transaction.GetRefundedAmountAHQWithoutFees().ToCurrency()
                                 </td>
                                 <td class="text-center">
                                     @transaction.GetBillerPayout().ToCurrency()
