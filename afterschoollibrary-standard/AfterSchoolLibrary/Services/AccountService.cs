@@ -2031,14 +2031,11 @@ namespace AfterSchoolLibrary.Services
                                             msgs, 
                                             dc);
 
-            var totalFeesPaidACH = 0;  // account.GetTotalFeesPaidAsBiller(PaymentType.ACH, startDate, achEndDate, msgs, dc);
-            var totalFeesPaidCredit = 0; // account.GetTotalFeesPaidAsBiller(PaymentType.CreditCard, startDate, creditEndDate, msgs, dc);
-
             var totalRefunds = account.GetTotalAmountRefundedAHQ(true, startDate, endDate, msgs, dc);
             var totalDebits = account.GetTotalAmountDebited(startDate, endDate, msgs, dc);
             var totalCredits = account.GetTotalAmountCredited(startDate, endDate, msgs, dc);
 
-            return totalAmountBilledACH + totalAmountBilledCredit - totalFeesPaidACH - totalFeesPaidCredit - totalPayoutAmount - totalRefunds + totalCredits - totalDebits;
+            return totalAmountBilledACH + totalAmountBilledCredit + totalCredits - totalPayoutAmount - totalRefunds - totalDebits;
         }
 
         public static int GetPayoutCount(this Account account, PayoutStatus? payoutStatus, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
