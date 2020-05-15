@@ -2031,11 +2031,23 @@ namespace AfterSchoolLibrary.Services
                                             msgs, 
                                             dc);
 
+            var totalFeesPaidACH = account.GetTotalFeesPaidAsBiller(PaymentType.ACH, startDate, achEndDate, msgs, dc);
+            var totalFeesPaidCredit = account.GetTotalFeesPaidAsBiller(PaymentType.CreditCard, startDate, creditEndDate, msgs, dc);
+            var totalFeesRefunded = account.GetTotalFeesRefunded(startDate, endDate, msgs, dc);
+
             var totalRefunds = account.GetTotalAmountRefundedAHQ(true, startDate, endDate, msgs, dc);
             var totalDebits = account.GetTotalAmountDebited(startDate, endDate, msgs, dc);
             var totalCredits = account.GetTotalAmountCredited(startDate, endDate, msgs, dc);
 
-            return totalAmountBilledACH + totalAmountBilledCredit + totalCredits - totalPayoutAmount - totalRefunds - totalDebits;
+            return totalAmountBilledACH + 
+                    totalAmountBilledCredit +
+                    totalFeesRefunded +
+                    totalCredits - 
+                    totalFeesPaidACH - 
+                    totalFeesPaidCredit - 
+                    totalPayoutAmount - 
+                    totalRefunds - 
+                    totalDebits;
         }
 
         public static int GetPayoutCount(this Account account, PayoutStatus? payoutStatus, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -2755,6 +2767,11 @@ namespace AfterSchoolLibrary.Services
         public static decimal GetTotalAmountRefundedManually(this Account account, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Transaction.GetTotalAmountPaidByPayerAccount(account.ID.Value, PaymentSourceType.ManualProvider, startDate, endDate, false, msgs, dc);
+        }
+
+        public static decimal GetTotalFeesRefunded(this Account account, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.GetTotalConvenienceFeesPaidByPayerAccount(account.ID.Value, null, startDate, endDate, false, msgs, dc) + Transaction.GetTotalPaymentTypeFeesPaidByPayerAccount(account.ID.Value, null, startDate, endDate, false, msgs, dc);
         }
 
         public static decimal GetTotalAmountRefundedAHQ(this Account account, bool getProviderAmountOnly, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
