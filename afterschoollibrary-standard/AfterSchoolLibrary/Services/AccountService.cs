@@ -2001,14 +2001,44 @@ namespace AfterSchoolLibrary.Services
 
         public static decimal GetMaxAmountAvailableForPayout(this Account account, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            var achWaitDays = TransactionService.GetWaitPeriodInDays(PaymentType.ACH);
+            var creditWaitDays = TransactionService.GetWaitPeriodInDays(PaymentType.CreditCard);
+            var achEndDate = endDate;
+            var creditEndDate = endDate;
+            var utcNow = DateTime.UtcNow.Date.AddDays(1).AddMilliseconds(-1);
+
+            if (!endDate.HasValue || utcNow.AddDays(achWaitDays * -1).IsBefore(endDate.Value))
+                achEndDate = utcNow.AddDays(achWaitDays * -1);
+
+            if (!endDate.HasValue || utcNow.AddDays(creditWaitDays * -1).IsBefore(endDate.Value))
+                creditEndDate = utcNow.AddDays(creditWaitDays * -1);
+
             var totalPayoutAmount = account.GetTotalPayoutAmount(null, startDate, endDate, msgs, dc);
-            var totalAmountPaid = account.GetTotalAmountBilledOut(startDate, endDate, msgs, dc);
-            var totalFeesPaid = account.GetTotalFeesPaidAsBiller(startDate, endDate, msgs, dc);
+            
+            var totalAmountBilledACH = account.GetTotalAmountBilledOut(
+                                        PaymentSourceType.AfterSchoolPlatform, 
+                                        PaymentType.ACH, 
+                                        startDate, 
+                                        achEndDate, 
+                                        msgs, 
+                                        dc);
+
+            var totalAmountBilledCredit = account.GetTotalAmountBilledOut(
+                                            PaymentSourceType.AfterSchoolPlatform, 
+                                            PaymentType.CreditCard, 
+                                            startDate, 
+                                            creditEndDate,
+                                            msgs, 
+                                            dc);
+
+            var totalFeesPaidACH = 0;  // account.GetTotalFeesPaidAsBiller(PaymentType.ACH, startDate, achEndDate, msgs, dc);
+            var totalFeesPaidCredit = 0; // account.GetTotalFeesPaidAsBiller(PaymentType.CreditCard, startDate, creditEndDate, msgs, dc);
+
             var totalRefunds = account.GetTotalAmountRefundedAHQ(true, startDate, endDate, msgs, dc);
             var totalDebits = account.GetTotalAmountDebited(startDate, endDate, msgs, dc);
             var totalCredits = account.GetTotalAmountCredited(startDate, endDate, msgs, dc);
 
-            return totalAmountPaid - totalFeesPaid - totalPayoutAmount - totalRefunds + totalCredits - totalDebits;
+            return totalAmountBilledACH + totalAmountBilledCredit - totalFeesPaidACH - totalFeesPaidCredit - totalPayoutAmount - totalRefunds + totalCredits - totalDebits;
         }
 
         public static int GetPayoutCount(this Account account, PayoutStatus? payoutStatus, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -2708,19 +2738,21 @@ namespace AfterSchoolLibrary.Services
             return Payout.GetTotalAmountByAccountId(account.ID.Value, payoutStatus, startDate, endDate, msgs, dc);
         }
 
-        public static decimal GetTotalAmountBilledOut(this Account account, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetTotalAmountBilledOut(this Account account, PaymentSourceType? paymentSourceType = null, PaymentType? paymentType = null, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Transaction.GetTotalAmountBilledByBillerAccount(account.ID.Value, startDate, endDate, false, msgs, dc);
+            return Transaction.GetTotalAmountBilledByBillerAccount(account.ID.Value, paymentSourceType, paymentType, startDate, endDate, false, msgs, dc);
         }
 
-        public static decimal GetTotalFeesPaidAsBiller(this Account account, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetTotalFeesPaidAsBiller(this Account account, PaymentType? paymentType, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Transaction.GetTotalFeesPaidByBillerAccount(account.ID.Value, startDate, endDate, false, msgs, dc);
+            return Transaction.GetTotalFeesPaidByBillerAccount(account.ID.Value, paymentType, startDate, endDate, false, msgs, dc);
         }
 
         public static decimal GetTotalAmountRefunded(this Account account, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Transaction.GetTotalAmountPaidByPayerAccount(account.ID.Value, startDate, endDate, false, msgs, dc);
+            return Transaction.GetTotalAmountPaidByPayerAccount(account.ID.Value, startDate, endDate, false, msgs, dc) -        
+                    Transaction.GetTotalConvenienceFeesNotPaidByPayerAccount(account.ID.Value, startDate, endDate, false, msgs, dc) -
+                    Transaction.GetTotalPaymentTypeFeesNotPaidByPayerAccount(account.ID.Value, startDate, endDate, false, msgs, dc);
         }
 
         public static decimal GetTotalAmountRefundedManually(this Account account, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -2729,18 +2761,30 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static decimal GetTotalAmountRefundedAHQ(this Account account, bool getProviderAmountOnly, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {           
+        {
+            var totalFeesPaidByPayer = 0M;
             var amountRefunded = Transaction.GetTotalAmountPaidByPayerAccount(account.ID.Value, PaymentSourceType.AfterSchoolPlatform, startDate, endDate, false, msgs, dc);
 
             if (getProviderAmountOnly)
-                amountRefunded -= Transaction.GetTotalFeesPaidByPayerAccount(
-                                        account.ID.Value, 
-                                        PaymentSourceType.AfterSchoolPlatform, 
-                                        startDate, 
-                                        endDate, 
-                                        false, 
-                                        msgs, 
-                                        dc);
+            {
+                totalFeesPaidByPayer += Transaction.GetTotalConvenienceFeesNotPaidByPayerAccount(
+                                            account.ID.Value,
+                                            startDate,
+                                            endDate,
+                                            false,
+                                            msgs,
+                                            dc);
+
+                totalFeesPaidByPayer += Transaction.GetTotalPaymentTypeFeesNotPaidByPayerAccount(
+                                            account.ID.Value,
+                                            startDate,
+                                            endDate,
+                                            false,
+                                            msgs,
+                                            dc);
+
+                amountRefunded -= totalFeesPaidByPayer;
+            }
 
             return amountRefunded;
         }

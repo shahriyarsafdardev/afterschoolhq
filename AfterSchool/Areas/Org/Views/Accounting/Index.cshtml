@@ -114,7 +114,7 @@
                     <div class="widget widget-tile widget-bordered">
                         <div class="data-info">
                             <div data-toggle="counter" data-end="@totalTransactionAmount" id="totalTransactionAmount" data-decimals="2" data-suffix="" class="value">@totalTransactionAmount.ToCurrency()</div>
-                            <div class="desc">Total Amt</div>
+                            <div class="desc">Total Sold &amp; Credits</div>
                         </div>
                         <div class="icon"><span class=""></span></div>
                     </div>
@@ -124,7 +124,7 @@
                     <div class="widget widget-tile widget-bordered">
                         <div class="data-info">
                             <div data-toggle="counter" data-end="@totalAmountRefunded" id="totalAmountRefunded" data-decimals="2" data-suffix="" class="value">@totalAmountRefunded.ToCurrency()</div>
-                            <div class="desc">Total Refunded</div>
+                            <div class="desc">Total Refunds &amp; Debits</div>
                         </div>
                         <div class="icon"><span class=""></span></div>
                     </div>
@@ -251,7 +251,7 @@
                                         }
                                     </td>
                                     <td class="text-center">
-                                        @if (transaction.IsCharge())
+                                        @if (transaction.IsCharge() || transaction.IsCredit())
                                         {
                                             @transaction.GetBillerPayout().ToCurrency()
                                         }

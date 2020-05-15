@@ -17,10 +17,10 @@ namespace AfterSchoolLibrary.Services
 
             var total = 0M;
 
-            if (transaction.ConvenienceFeePayerAccountId == transaction.BillerAccountId)
+            if (transaction.ConvenienceFeePayerAccountId == transaction.BillerAccountId && transaction.ConvenienceFeeCharged.HasValue)
                 total += transaction.ConvenienceFeeCharged.Value;
 
-            if (transaction.PaymentTypeFeePayerAccountId == transaction.BillerAccountId)
+            if (transaction.PaymentTypeFeePayerAccountId == transaction.BillerAccountId && transaction.PaymentTypeFeeCharged.HasValue)
                 total += transaction.PaymentTypeFeeCharged.Value;
 
             return total;
@@ -78,6 +78,11 @@ namespace AfterSchoolLibrary.Services
         public static decimal GetBillerPayout(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return transaction.GetBillerAmount(msgs, dc) - transaction.GetFeesChargedToBiller() - transaction.GetRefundedAmountAHQWithoutFees(msgs, dc);
+        }
+
+        public static bool HasBillerPayout(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return transaction.GetBillerPayout(msgs, dc) > 0;
         }
 
         public static Purchase GetPurchase(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -286,7 +291,7 @@ namespace AfterSchoolLibrary.Services
             if (allowFullAmountRefund)
                 return transaction.GetPayerAmount() - transaction.GetRefundedAmountAHQ(msgs, dc);
 
-            return transaction.GetBillerAmount(msgs, dc) - transaction.GetRefundedAmountAHQWithoutFees(msgs, dc);
+            return transaction.GetBillerPayout(msgs, dc); // - transaction.GetRefundedAmountAHQWithoutFees(msgs, dc);
         }
 
         public static bool HasRefundableAmount(this Transaction transaction, bool allowFullAmountRefund = false, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -416,9 +421,9 @@ namespace AfterSchoolLibrary.Services
             return !transaction.HasPayout &&
                 DateTime.UtcNow.IsOnOrAfter(transaction.CreateDate.Value.AddDays(transaction.GetWaitPeriodInDays())) &&
                 !transaction.PlatformPercentFee.HasValue &&
-                transaction.PaymentSourceTypeId == PaymentSourceType.AfterSchoolPlatform &&
-                transaction.IsCharge() &&
-                transaction.HasRefundableAmount(false, msgs, dc) &&
+                ((transaction.PaymentSourceTypeId == PaymentSourceType.AfterSchoolPlatform && transaction.IsCharge()) || 
+                (transaction.PaymentSourceTypeId == PaymentSourceType.ManualAfterSchoolHQ && transaction.IsCredit())) &&
+                transaction.HasBillerPayout(msgs, dc) &&
                 !transaction.HasUnfulfilledRefundRequests(msgs, dc);
         }
 

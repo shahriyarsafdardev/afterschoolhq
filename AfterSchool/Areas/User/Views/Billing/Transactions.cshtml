@@ -85,8 +85,7 @@
                         {
                             foreach (var transaction in Model)
                             {
-                                var purchase = transaction.GetPurchase();
-                                var registrant = purchase.IsNotEmpty() ? Registrant.Load(purchase.RegistrantId.Value) : null;
+                                var registrant = transaction.GetPurchase()?.GetRegistrant();
                                 var billerAccount = transaction.GetBillerAccount();
 
                                 <tr id="@transaction.Uid">
