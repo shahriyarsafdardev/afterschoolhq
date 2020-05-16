@@ -77,7 +77,31 @@ namespace AfterSchoolLibrary.Services
 
         public static decimal GetBillerPayout(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return transaction.GetBillerAmount(msgs, dc) - transaction.GetFeesChargedToBiller() - transaction.GetRefundedAmountAHQWithoutFees(msgs, dc);
+            if (transaction.IsCharge())
+                return transaction.GetBillerAmount(msgs, dc) - transaction.GetFeesChargedToBiller() - transaction.GetRefundedAmountAHQWithoutFees(msgs, dc);
+
+            if (transaction.IsCredit())
+            {
+                var totalCredited = Transaction.GetTotalAmountCreditedToAccount(
+                                            transaction.BillerAccountId.Value,
+                                            null,
+                                            transaction.CreateDate.Value.AddSeconds(1),
+                                            false,
+                                            msgs,
+                                            dc);
+
+                var totalDebited = Transaction.GetTotalAmountDebitedFromAccount(
+                                    transaction.BillerAccountId.Value,
+                                    null,
+                                    transaction.CreateDate.Value,
+                                    false,
+                                    msgs,
+                                    dc);
+
+                return totalCredited - totalDebited;
+            }
+
+            return 0;
         }
 
         public static bool HasBillerPayout(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
