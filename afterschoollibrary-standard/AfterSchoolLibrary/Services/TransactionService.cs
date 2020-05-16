@@ -418,13 +418,37 @@ namespace AfterSchoolLibrary.Services
 
         public static bool CanRequestPayout(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return !transaction.HasPayout &&
-                DateTime.UtcNow.IsOnOrAfter(transaction.CreateDate.Value.AddDays(transaction.GetWaitPeriodInDays())) &&
-                !transaction.PlatformPercentFee.HasValue &&
-                ((transaction.PaymentSourceTypeId == PaymentSourceType.AfterSchoolPlatform && transaction.IsCharge()) || 
-                (transaction.PaymentSourceTypeId == PaymentSourceType.ManualAfterSchoolHQ && transaction.IsCredit())) &&
-                transaction.HasBillerPayout(msgs, dc) &&
-                !transaction.HasUnfulfilledRefundRequests(msgs, dc);
+            if (!transaction.HasPayout && transaction.HasBillerPayout(msgs, dc))
+            {
+                if (transaction.PaymentSourceTypeId == PaymentSourceType.AfterSchoolPlatform && transaction.IsCharge())
+                    return
+                        DateTime.UtcNow.IsOnOrAfter(transaction.CreateDate.Value.AddDays(transaction.GetWaitPeriodInDays())) &&
+                        !transaction.PlatformPercentFee.HasValue &&
+                        !transaction.HasUnfulfilledRefundRequests(msgs, dc);
+
+                if ((transaction.PaymentSourceTypeId == PaymentSourceType.ManualAfterSchoolHQ && transaction.IsCredit()))
+                {
+                    var totalCredited = Transaction.GetTotalAmountCreditedToAccount(
+                                            transaction.BillerAccountId.Value,
+                                            null,
+                                            transaction.CreateDate.Value.AddSeconds(1),
+                                            false,
+                                            msgs,
+                                            dc);
+
+                    var totalDebited = Transaction.GetTotalAmountDebitedFromAccount(
+                                        transaction.BillerAccountId.Value,
+                                        null,
+                                        transaction.CreateDate.Value,
+                                        false,
+                                        msgs,
+                                        dc);
+
+                    return totalCredited - totalDebited > 0;
+                }
+            }
+
+            return false;
         }
 
         public static Payout CreatePayout(this Transaction transaction, PayoutStatus payoutStatus, PaymentType paymentType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
