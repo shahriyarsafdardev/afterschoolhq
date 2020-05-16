@@ -41,5 +41,13 @@ namespace AfterSchoolLibrary.Services
 
             return purchase;
         }
+
+        public static Registrant GetRegistrant(this Purchase purchase, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (purchase.RegistrantId.HasValue)
+                return Registrant.Load(purchase.RegistrantId.Value, msgs, dc);
+
+            return null;
+        }
     }
 }

@@ -56,6 +56,7 @@ namespace AfterSchool.Areas.Admin.Controllers
             ViewBag.TotalFeesPaid = Transaction.GetTotalFeesPaid(startDate, endDate, false, msgs);
             ViewBag.TotalProfit = Transaction.GetTotalAHQProfit(startDate, endDate, false, msgs);
             ViewBag.TotalRefunded = Transaction.GetTotalAmountRefunded(startDate, endDate, false, msgs);
+            ViewBag.Accounts = Account.Load(msgs: msgs);
             ViewBag.Messages = msgs;
             ViewBag.PagingModel = new PagingModel()
             {
@@ -132,6 +133,47 @@ namespace AfterSchool.Areas.Admin.Controllers
             }
 
             return Json(new { status = "error", messages = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public ActionResult Create(Guid accountUid, decimal amount, int transactionType, string note)
+        {
+            var msgs = new SystemMessages();
+            var account = Account.LoadByUid(accountUid, msgs);
+
+            if (account.IsNotEmpty())
+            {
+                var transactionTypeId = (TransactionType)transactionType;
+                var ahqAccount = AccountService.GetAfterSchoolAccount(msgs);
+                Account fromAccount = null;
+                Account toAccount = null;
+
+                if (transactionTypeId == TransactionType.Debit)
+                {
+                    fromAccount = account;
+                    toAccount = ahqAccount;
+                }
+                else if (transactionTypeId == TransactionType.Credit)
+                {
+                    toAccount = account;
+                    fromAccount = ahqAccount;
+                }
+
+                TransactionService.CreateNew(
+                        fromAccount,
+                        toAccount,
+                        amount,
+                        note,
+                        transactionTypeId,
+                        PaymentSourceType.ManualAfterSchoolHQ,
+                        SessionVariables.CurrentUser,
+                        msgs);
+
+                return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+
+            }
+
+            return new JsonResult { Data = new { status = "error", messages = msgs }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
         }
 
         [HttpGet]

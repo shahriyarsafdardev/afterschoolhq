@@ -59,11 +59,11 @@ namespace AfterSchool.Areas.Org.Controllers
             var allPos = Transaction.GetParticipationObjectsByBillerAccountId(SessionVariables.CurrentAccount.ID.Value, null, null, false);
             var allParticipationObjects = allPos.DistinctBy(po => (po.ID, po.ParticipationObjectTypeId, po.Name));
 
-            ViewBag.TotalAmountPaid = SessionVariables.CurrentAccount.GetTotalAmountBilledOut(startDate, endDate, msgs);
+            ViewBag.TotalAmountPaid = SessionVariables.CurrentAccount.GetTotalAmountBilledOut(null, null, startDate, endDate, msgs);
             ViewBag.TotalAmountRefunded = SessionVariables.CurrentAccount.GetTotalAmountRefunded(startDate, endDate, msgs);
             ViewBag.TotalAmountRefundedManual = SessionVariables.CurrentAccount.GetTotalAmountRefundedManually(startDate, endDate, msgs);
             ViewBag.TotalAmountRefundedAHQ = SessionVariables.CurrentAccount.GetTotalAmountRefundedAHQ(true, startDate, endDate, msgs);
-            ViewBag.TotalFeesPaid = SessionVariables.CurrentAccount.GetTotalFeesPaidAsBiller(startDate, endDate, msgs);
+            ViewBag.TotalFeesPaid = SessionVariables.CurrentAccount.GetTotalFeesPaidAsBiller(null, startDate, endDate, msgs);
             ViewBag.TotalPaidOut = SessionVariables.CurrentAccount.GetTotalPayoutAmount(PayoutStatus.Completed, startDate, endDate, msgs);
             ViewBag.TotalAvailableForPayout = SessionVariables.CurrentAccount.GetMaxAmountAvailableForPayout(startDate, endDate, msgs);
             ViewBag.ParticipationObjects = allParticipationObjects;
@@ -234,15 +234,14 @@ namespace AfterSchool.Areas.Org.Controllers
             table.Add(row);
             foreach (var t in allTransactions)
             {
-                var purchase = t.GetPurchase();
-                var registrant = Registrant.Load(purchase.RegistrantId.Value);
+                var registrant = t.GetPurchase()?.GetRegistrant();
                 var participationObjects = t.GetParticipationObjects();
 
                 row = new List<string>();
                 row.Add(t.GetTransactionNumber());
                 row.Add(t.CreateDate.ToShortDateTimeString());
                 row.Add(t.GetPayerAccount().Name);
-                row.Add(t.IsCharge() ? registrant.DisplayName : t.GetBillerAccount().Name);
+                row.Add(t.IsCharge() && registrant.IsNotEmpty() ? registrant.DisplayName : t.GetBillerAccount().Name);
                 row.Add(participationObjects.DistinctBy(po => new { po.ObjectID, po.ObjectType }).Select(po => po.Name).ToStringList(", "));
                 row.Add(t.GetBillerAmount().ToCurrency());
                 row.Add(t.GetFeesChargedToBiller().ToCurrency());

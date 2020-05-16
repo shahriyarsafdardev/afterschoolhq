@@ -1833,7 +1833,7 @@ values: NotSet, Activity, Team, FieldTrip, PermissionSlip
 [begin]
 type: Enum
 name: TransactionType
-values: NotSet, Charge, Refund
+values: NotSet, Charge, Refund, Credit, Debit
 [end]
 
 [begin]
@@ -1851,7 +1851,7 @@ values: NotSet, Activity, ActivityGroup, AccountActivityGroup, Product
 [begin]
 type: Enum
 name: PaymentSourceType
-values: NotSet, AfterSchoolPlatform, Manual
+values: NotSet, AfterSchoolPlatform, ManualProvider, ManualAfterSchoolHQ
 [end]
 
 [begin]
