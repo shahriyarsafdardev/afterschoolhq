@@ -151,7 +151,7 @@
                                         }
                                     </td>
                                     <td>
-                                        @if (transaction.IsCharge() && !transaction.IsTotallyRefunded(false))
+                                        @if (transaction.IsCharge() && !transaction.IsTotallyRefunded(false) && transaction.CanParentRequestRefund())
                                         {
                                             var hasUnfulfilledRequest = transaction.HasUnfulfilledRefundRequests();
 
@@ -211,7 +211,7 @@
         <div class="modal-body form">
             <div class="form-group">
                 <input type="number" id="refund-request-amount" class="form-control" placeholder="Refund Amount" required="required" max="" min="1" step=".01" />
-                <p class="text-muted text-small" id="refund-request-notes">Please enter an amount between $1 and $<span class="refund-request-max-amount"></span>. Credit card transaction fees are non-refundable. Convenience Fees are refundable up to 48 hours after your purchase. <a href="~/parent-faq.html" target="_blank">Click here for more info about our billing policies</a></p>
+                <p class="text-muted text-small" id="refund-request-notes">Please enter an amount between $1 and $<span class="refund-request-max-amount"></span>. Credit card transaction fees are non-refundable. <a href="~/parent-faq.html" target="_blank">Click here for more info about our billing policies</a></p>
             </div>
             <div class="form-group">
                 <label for="request-reason">Reason</label>

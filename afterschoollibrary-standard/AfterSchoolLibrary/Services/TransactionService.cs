@@ -315,7 +315,7 @@ namespace AfterSchoolLibrary.Services
             if (allowFullAmountRefund)
                 return transaction.GetPayerAmount() - transaction.GetRefundedAmountAHQ(msgs, dc);
 
-            return transaction.GetBillerPayout(msgs, dc); // - transaction.GetRefundedAmountAHQWithoutFees(msgs, dc);
+            return transaction.GetBillerPayout(msgs, dc) + transaction.GetFeesChargedToBiller();
         }
 
         public static bool HasRefundableAmount(this Transaction transaction, bool allowFullAmountRefund = false, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -330,7 +330,7 @@ namespace AfterSchoolLibrary.Services
 
         public static bool CanRefundConvenienceFee(this Transaction transaction)
         {
-            return transaction.CreateDate.Value.IsAfter(DateTime.UtcNow.AddDays(-2));
+            return true; // transaction.CreateDate.Value.IsAfter(DateTime.UtcNow.AddDays(-2));
         }
 
         public static decimal GetParentRefundableAmount(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -652,11 +652,20 @@ namespace AfterSchoolLibrary.Services
         public static bool HasRefundsManual(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Transaction.LoadByOriginalTransactionIdByIsDeleted(transaction.ID.Value, PaymentSourceType.ManualProvider, false, msgs, dc).Any();
-        }
+        }   
 
-        public static bool CanRefund(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool CanParentRequestRefund(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return !transaction.HasPayout && !transaction.HasRefunds(msgs, dc) && transaction.TransactionTypeId == TransactionType.Charge;
+            if (transaction.IsCharge())
+            {
+                if (transaction.PaymentTypeId == PaymentType.CreditCard)
+                    return true;
+
+                if (transaction.PaymentTypeId == PaymentType.ACH && transaction.CreateDate.Value.IsOnOrAfter(DateTime.UtcNow.AddDays(-90)))
+                    return true;
+            }
+
+            return false;
         }
     }
 }
