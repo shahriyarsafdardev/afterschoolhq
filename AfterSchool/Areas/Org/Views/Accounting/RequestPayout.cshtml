@@ -57,9 +57,9 @@
                     <tbody>
                         @foreach (var transaction in Model)
                         {
-                            var purchase = transaction.GetPurchase();
-                            var registrant = Registrant.Load(purchase.RegistrantId.Value);
+                            var registrant = transaction.GetPurchase()?.GetRegistrant();
                             var participationObjects = transaction.GetParticipationObjects();
+
                             <tr id="@transaction.Uid" data-refunded-amount="@transaction.GetRefundedAmount().ToCurrency()">
                                 <td>
                                     @transaction.GetTransactionNumber()
@@ -73,7 +73,14 @@
                                 <td>
                                     @if (transaction.IsCharge())
                                     {
-                                        @registrant.DisplayName
+                                        if (registrant.IsNotEmpty())
+                                        {
+                                            @registrant.DisplayName
+                                        }
+                                        else
+                                        {
+                                            @transaction.GetPayerAccount().Name
+                                        }
                                     }
                                     else
                                     {
@@ -90,7 +97,7 @@
                                     @transaction.GetFeesChargedToBiller().ToCurrency()
                                 </td>
                                 <td class="text-center">
-                                    @transaction.GetRefundedAmountAHQ(true).ToCurrency()
+                                    @transaction.GetRefundedAmountAHQWithoutFees().ToCurrency()
                                 </td>
                                 <td class="text-center">
                                     @transaction.GetBillerPayout().ToCurrency()

@@ -8,6 +8,7 @@
     var totalFees = (decimal)ViewBag.TotalFeesPaid;
     var totalPayout = totalTransactionAmount - totalFees - totalRefunded;
     var totalProfit = (decimal)ViewBag.TotalProfit;
+    var accounts = (List<Account>)ViewBag.Accounts;
 }
 
 @{ Html.RenderPartial("AdminHeader"); }
@@ -26,6 +27,42 @@
         </div>
 
         <div class="panel-body">
+
+            <div class="row">
+                <div class="col-md-2">
+                    @{
+                        Html.RenderPartial(
+                            "~/Views/Shared/Components/_Date.cshtml",
+                            new FormInputViewModel()
+                            {
+                                Id = "startdate",
+                                Name = "startdate",
+                                Value = Request["sdate"],
+                                Placeholder = "From Date"
+                            }
+                        );
+                    }
+                </div>
+                <div class="col-md-2">
+                    @{
+                        Html.RenderPartial(
+                            "~/Views/Shared/Components/_Date.cshtml",
+                            new FormInputViewModel()
+                            {
+                                Id = "enddate",
+                                Name = "enddate",
+                                Value = Request["edate"],
+                                Placeholder = "To Date"
+                            }
+                        );
+                    }
+                </div>
+                <div class="col-md-4">
+                    <button type="button" class="btn btn-primary btn-lg" onclick="search()">Search</button>
+                    <button type="button" class="btn btn-primary btn-lg hide" onclick="DownloadToCSV()">Export To CSV</button>
+                </div>
+            </div>
+
             <div class="row">
 
                 <div class="col-md-2">
@@ -87,41 +124,6 @@
                         <div class="icon"><span class=""></span></div>
                     </div>
                 </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-2">
-                    @{
-                        Html.RenderPartial(
-                            "~/Views/Shared/Components/_Date.cshtml",
-                            new FormInputViewModel()
-                            {
-                                Id = "startdate",
-                                Name = "startdate",
-                                Value = Request["sdate"],
-                                Placeholder = "From Date"
-                            }
-                        );
-                    }
-                </div>
-                <div class="col-md-2">
-                    @{
-                        Html.RenderPartial(
-                            "~/Views/Shared/Components/_Date.cshtml",
-                            new FormInputViewModel()
-                            {
-                                Id = "enddate",
-                                Name = "enddate",
-                                Value = Request["edate"],
-                                Placeholder = "To Date"
-                            }
-                        );
-                    }
-                </div>
-                <div class="col-md-4">
-                    <button type="button" class="btn btn-primary btn-lg" onclick="search()">Search</button>
-                    <button type="button" class="btn btn-primary btn-lg hide" onclick="DownloadToCSV()">Export To CSV</button>
-                </div>
 
                 <script>
                     function search() {
@@ -132,6 +134,16 @@
                     }
 
                 </script>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <button type="button"
+                            class="btn btn-primary md-trigger" 
+                            data-modal="modal-create-transaction">
+                        Create Transaction
+                    </button>
+                </div>
             </div>
 
             <div class="table-responsive">
@@ -232,11 +244,11 @@
                                         @transaction.PaymentTypeId.ToString().SplitByUpperCase()
                                     </td>
                                     <td>
-                                        <div class="btn-group">                                           
+                                        <div class="btn-group">
                                             <button onclick="setTransaction('@transaction.Uid', '@transaction.GetTransactionNumber()', '@transaction.Amount.ToCurrency()')"
                                                     class="md-trigger btn btn-sm btn-alt6"
                                                     data-modal="modal-refund"
-                                                    @(!transaction.CanRefund() ? "disabled=\"disabled\"": "")>
+                                                    @(!transaction.CanRefund() ? "disabled=\"disabled\"" : "")>
                                                 <i class="s7-back"></i>
                                             </button>
                                             <button onclick="setTransaction('@transaction.Uid', '@transaction.GetTransactionNumber()')"
@@ -320,6 +332,48 @@
     </div>
 </div>
 
+<div id="modal-create-transaction" class="md-modal colored-header custom-width md-effect-9">
+    <div class="md-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+            <h3 class="modal-title">Create Transaction</h3>
+        </div>
+        <div class="modal-body form">
+            <div class="form-group">
+                <label>Account</label>
+                <select class="form-control" id="create-transaction-account">
+                    <option value="">Select...</option>
+                    @foreach (var account in accounts)
+                    {
+                        <option value="@account.Uid">@account.AccountNumber - @account.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Amount</label>
+                <input type="number" value="1.00" id="create-transaction-amount" class="form-control" step=".01" max="1000" min="1" />
+            </div>
+            <div class="form-group">
+                <label>Transaction Type</label>
+                <select class="form-control" id="create-transaction-type">
+                    <option value="">Select...</option>
+                    <option value="@((int)TransactionType.Credit)">@TransactionType.Credit.ToString()</option>
+                    <option value="@((int)TransactionType.Debit)">@TransactionType.Debit.ToString()</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Note</label>
+                <input type="text" value="" id="create-transaction-note" class="form-control" maxlength="400" />
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+            <button type="button" id="confirm-create-transaction-btn" data-dismiss="modal" onclick="createTransaction()" class="btn btn-primary md-close">
+                Create Transaction &raquo;
+            </button>
+        </div>
+    </div>
+</div>
 
 <script>
     var transactionUid = null;
@@ -328,6 +382,52 @@
         transactionUid = uid;
         $('.transaction-id').html(id);
         $('.transaction-amount').html(amount);
+    }
+
+    function createTransaction() {
+
+        var validated = true;
+
+        if ($('#create-transaction-account').val().length == 0)
+            validated = false;
+
+        if (isNaN($('#create-transaction-amount').val()))
+            validated = false;
+
+        if (isNaN($('#create-transaction-type').val()))
+            validated = false;
+
+        if ($('#create-transaction-note').val().length == 0)
+            validated = false;
+
+        if (validated) {
+
+            var accountUid = $('#create-transaction-account').val();
+            var amount = $('#create-transaction-amount').val();
+            var transactionType = $('#create-transaction-type').val();
+            var note = $('#create-transaction-note').val();
+
+            var parameters = `accountuid=${accountUid}&amount=${amount}&transactionType=${transactionType}&note=${encodeURIComponent(note)}`;
+
+            $.post(
+                '@Url.Action("create", "transaction")',
+                parameters,
+                function (data) {
+                    if (data && data.status == 'ok') {
+                        Notifications.showMessage('Success', 'Transaction has been created', true)
+
+                        setTimeout(function () {
+                            location.reload();
+                        }, 500);
+
+                    } else {
+                        Notifications.showErrors(data.messages);
+                    }
+                }
+            )
+
+        }
+
     }
 
     function deleteTransaction() {

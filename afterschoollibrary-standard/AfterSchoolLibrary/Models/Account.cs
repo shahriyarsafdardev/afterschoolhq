@@ -479,6 +479,15 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
+        public static int Load(List<AccountType> accountTypes, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["AccountTypeId"], accountTypes.Select(x => (int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], isDeleted);
+            return dq.GetCount(msgs);
+        }
+
         public static int GetCount(List<AccountType> accountTypes, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
