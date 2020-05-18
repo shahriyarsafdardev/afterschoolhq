@@ -47,7 +47,7 @@ namespace AfterSchoolLibrary.Services
             return request.GetTransaction(msgs, dc).IsAmountRefundable(request.Amount.Value, true, msgs, dc);
         }
 
-        public static bool ApproveAndProcessRequest(this RefundRequest request, bool allowFullRefundAmount, bool refundCCFees, bool refundConvenienceFees, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static bool ApproveAndProcessRequest(this RefundRequest request, bool allowFullRefundAmount, bool refundCCFees, bool refundConvenienceFees, PaymentSourceType paymentSourceType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var transaction = request.GetTransaction(msgs, dc);
 
@@ -80,7 +80,7 @@ namespace AfterSchoolLibrary.Services
                                         allowFullRefundAmount, 
                                         convenienceFee,
                                         paymentTypeFee,
-                                        transaction.PaymentSourceTypeId, 
+                                        paymentSourceType, 
                                         loggedInUser, 
                                         amsgs, 
                                         adc);

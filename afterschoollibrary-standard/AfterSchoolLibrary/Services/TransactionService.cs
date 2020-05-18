@@ -219,7 +219,7 @@ namespace AfterSchoolLibrary.Services
             return transaction;
         }
 
-        public static Transaction CreateNew(Account purchasingAccount, Account billingAccount, decimal amount, decimal? convenienceFeeAmount, int? convenienceFeePayerId, decimal? paymentTypeFeeAmount, int? paymentTypeFeePayerId, Purchase purchase, string refundDescription, TransactionType transactionType, string stripeChargeOrRefundId, Transaction originalTransaction, PaymentType paymentType, PaymentSourceType paymentSourceType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Transaction CreateNew(Account payingAccount, Account billingAccount, decimal amount, decimal? convenienceFeeAmount, int? convenienceFeePayerId, decimal? paymentTypeFeeAmount, int? paymentTypeFeePayerId, Purchase purchase, string refundDescription, TransactionType transactionType, string stripeChargeOrRefundId, Transaction originalTransaction, PaymentType paymentType, PaymentSourceType paymentSourceType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -228,7 +228,7 @@ namespace AfterSchoolLibrary.Services
                 Amount = amount,
                 BillerAccountId = billingAccount?.ID,
                 Description = refundDescription,
-                PayerAccountId = purchasingAccount?.ID,
+                PayerAccountId = payingAccount?.ID,
                 PurchaseId = purchase?.ID,
                 PaymentTypeId = paymentType,
                 CreateDate = DateTime.UtcNow,
@@ -576,6 +576,18 @@ namespace AfterSchoolLibrary.Services
                         msgs.Add("Error creating refund", MessageType.UserError);
                 }
 
+                var paymentType = transaction.PaymentTypeId;
+                var refundingAccount = transaction.GetBillerAccount(msgs, dc);
+                var refundedAccount = transaction.GetPayerAccount(msgs, dc);
+
+                if (paymentSourceType == PaymentSourceType.ManualProvider)
+                    paymentType = PaymentType.NotSet;
+                else if (paymentSourceType == PaymentSourceType.ManualAfterSchoolHQ)
+                {
+                    paymentType = PaymentType.Check;
+                    refundingAccount = AccountService.GetAfterSchoolAccount(msgs, dc);
+                }
+
                 if (msgs.HasNoErrors())
                     refund = transaction.CreateNewRefund(
                         fullAmount: refundAmount,
@@ -583,8 +595,10 @@ namespace AfterSchoolLibrary.Services
                         paymentTypeFeeAmount: paymentTypeFeeAmount,
                         refundId: stripeRefundId,
                         transactionType: TransactionType.Refund,
-                        paymentType: paymentSourceType == PaymentSourceType.ManualProvider ? PaymentType.NotSet : transaction.PaymentTypeId,
+                        paymentType: paymentType,
                         paymentSourceType: paymentSourceType,
+                        payingAccount: refundingAccount,
+                        billingAccount: refundedAccount,
                         loggedInUser: loggedInUser,
                         msgs: msgs,
                         dc: dc);
@@ -617,6 +631,23 @@ namespace AfterSchoolLibrary.Services
 
         public static Transaction CreateNewRefund(this Transaction originalTransaction, decimal fullAmount, decimal? convenienceFeeAmount, decimal? paymentTypeFeeAmount, string refundId, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            return originalTransaction.CreateNewRefund(
+                fullAmount,
+                convenienceFeeAmount,
+                paymentTypeFeeAmount,
+                refundId,
+                transactionType,
+                paymentType,
+                paymentSourceType,
+                originalTransaction.GetBillerAccount(),
+                originalTransaction.GetPayerAccount(),
+                loggedInUser,
+                msgs,
+                dc);
+        }
+
+        public static Transaction CreateNewRefund(this Transaction originalTransaction, decimal fullAmount, decimal? convenienceFeeAmount, decimal? paymentTypeFeeAmount, string refundId, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, Account payingAccount, Account billingAccount, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
             var refundDescription = "Payment refund";
             var participationObjects = originalTransaction.GetParticipationObjects(msgs, dc);
 
@@ -625,8 +656,8 @@ namespace AfterSchoolLibrary.Services
 
             // inverse billing and paying for refund
             return CreateNew(
-                originalTransaction.GetBillerAccount(),
-                originalTransaction.GetPayerAccount(),
+                payingAccount,
+                billingAccount,
                 fullAmount,
                 convenienceFeeAmount,
                 originalTransaction.ConvenienceFeePayerAccountId,
