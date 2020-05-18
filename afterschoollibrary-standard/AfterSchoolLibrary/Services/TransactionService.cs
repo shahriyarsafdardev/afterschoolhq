@@ -312,10 +312,15 @@ namespace AfterSchoolLibrary.Services
 
         public static decimal GetRefundableAmount(this Transaction transaction, bool allowFullAmountRefund = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (allowFullAmountRefund)
-                return transaction.GetPayerAmount() - transaction.GetRefundedAmountAHQ(msgs, dc);
+            if (transaction.IsCharge())
+            {
+                if (allowFullAmountRefund)
+                    return transaction.GetPayerAmount() - transaction.GetRefundedAmountAHQ(msgs, dc);
 
-            return transaction.GetBillerPayout(msgs, dc) + transaction.GetFeesChargedToBiller();
+                return transaction.GetBillerPayout(msgs, dc) + transaction.GetFeesChargedToBiller();
+            }
+
+            return 0;
         }
 
         public static bool HasRefundableAmount(this Transaction transaction, bool allowFullAmountRefund = false, SystemMessages msgs = null, DatabaseConnection dc = null)

@@ -169,8 +169,7 @@
                         {
                             foreach (var transaction in Model)
                             {
-                                var purchase = transaction.GetPurchase();
-                                var registrant = purchase.IsNotEmpty() ? Registrant.Load(purchase.RegistrantId.Value) : null;
+                                var registrant = transaction.GetPurchase()?.GetRegistrant();
                                 var currentStatus = transaction.GetStatus();
                                 var disableChk = !transaction.CanRequestPayout() ? "disabled" : "";
 
@@ -248,7 +247,7 @@
                                             <button onclick="setTransaction('@transaction.Uid', '@transaction.GetTransactionNumber()', '@transaction.Amount.ToCurrency()')"
                                                     class="md-trigger btn btn-sm btn-alt6"
                                                     data-modal="modal-refund"
-                                                    @(!transaction.CanRefund() ? "disabled=\"disabled\"" : "")>
+                                                    @(!transaction.HasRefundableAmount(true) ? "disabled=\"disabled\"" : "")>
                                                 <i class="s7-back"></i>
                                             </button>
                                             <button onclick="setTransaction('@transaction.Uid', '@transaction.GetTransactionNumber()')"
