@@ -57,11 +57,14 @@ namespace AfterSchool.Areas.Org.Controllers
                 null,
                 msgs);
 
+            var totalPaid = SessionVariables.CurrentAccount.GetTotalAmountBilledOut(paymentSourceType: PaymentSourceType.AfterSchoolPlatform, msgs: msgs) +                     
+                            SessionVariables.CurrentAccount.GetTotalAmountBilledOut(paymentSourceType: PaymentSourceType.ManualProvider, msgs: msgs);
+
             ViewBag.Messages = msgs;
             ViewBag.Actions = actions;
             ViewBag.HasVisitorAccountsToApprove = SessionVariables.CurrentAccount.GetRequestedVisitorAccountsCount(msgs) > 0;
             ViewBag.HasOutstandingLeagueInvites = SessionVariables.CurrentAccount.GetExternalLeagueInviteCount(msgs) > 0;
-            ViewBag.TotalPaid = SessionVariables.CurrentAccount.GetTotalAmountBilledOut(msgs: msgs);
+            ViewBag.TotalPaid = totalPaid;
             ViewBag.ActivityCount = activityCount;
             ViewBag.CurrentRegistrations = account.GetRegistrationsByDate(DateTime.UtcNow.AddDays(-30), DateTime.UtcNow, msgs);
             ViewBag.RegistrationCount = account.GetRegistrationCountByDate(DateTime.UtcNow.AddDays(-30), DateTime.UtcNow, msgs);
