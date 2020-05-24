@@ -55,9 +55,14 @@
                             <label for="amount" class="text-medium">Enter amount you want to pay</label>
                             <div class="input-group input-group-prepend">
                                 <span class="input-group-addon">$</span>
-                                <input type="number" name="amount" id="amount" value="" class="form-control text-right text-medium" style="padding-right: 5px;" min="5.00" step=".01" />
+                                <input type="number" name="amount" id="amount" value="" class="form-control text-medium" style="padding-right: 5px;" min="5.00" step=".01" />
                             </div>
                             <p class="text-muted text-small" id="amount-error">Please enter an amount greater than or equal to $5</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="paymentdescription" class="text-medium">What is this for?</label>
+                            <textarea class="form-control" id="payment-description"></textarea>
                         </div>
 
                         <div class="form-group">
@@ -145,6 +150,10 @@
                 $('#payment-form').append(hiddenFieldcc);                
                 $('#existing-payment-form-ach').append(hiddenFieldach);
                 $('#payment-form-ach').append(hiddenFieldach);
+
+                console.log($('#payment-description').val());
+
+                $('.payment-description').val($('#payment-description').val());
 
                 showPayButtons();
 
