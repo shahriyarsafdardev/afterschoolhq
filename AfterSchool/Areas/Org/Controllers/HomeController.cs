@@ -57,8 +57,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 null,
                 msgs);
 
-            var totalPaid = SessionVariables.CurrentAccount.GetTotalAmountBilledOut(paymentSourceType: PaymentSourceType.AfterSchoolPlatform, msgs: msgs) +                     
-                            SessionVariables.CurrentAccount.GetTotalAmountBilledOut(paymentSourceType: PaymentSourceType.ManualProvider, msgs: msgs);
+            var totalPaid = SessionVariables.CurrentAccount.GetTotalAmountBilledOut(search: null, paymentSourceType: PaymentSourceType.AfterSchoolPlatform, msgs: msgs) +                     
+                            SessionVariables.CurrentAccount.GetTotalAmountBilledOut(search: null, paymentSourceType: PaymentSourceType.ManualProvider, msgs: msgs);
 
             ViewBag.Messages = msgs;
             ViewBag.Actions = actions;

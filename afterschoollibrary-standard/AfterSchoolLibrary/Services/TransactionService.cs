@@ -85,6 +85,7 @@ namespace AfterSchoolLibrary.Services
                 var totalCredited = Transaction.GetTotalAmountCreditedToAccount(
                                             transaction.BillerAccountId.Value,
                                             null,
+                                            null,
                                             transaction.CreateDate.Value.AddSeconds(1),
                                             false,
                                             msgs,
@@ -92,6 +93,7 @@ namespace AfterSchoolLibrary.Services
 
                 var totalDebited = Transaction.GetTotalAmountDebitedFromAccount(
                                     transaction.BillerAccountId.Value,
+                                    null,
                                     null,
                                     transaction.CreateDate.Value,
                                     false,
@@ -478,6 +480,7 @@ namespace AfterSchoolLibrary.Services
                     var totalCredited = Transaction.GetTotalAmountCreditedToAccount(
                                             transaction.BillerAccountId.Value,
                                             null,
+                                            null,
                                             transaction.CreateDate.Value.AddSeconds(1),
                                             false,
                                             msgs,
@@ -485,6 +488,7 @@ namespace AfterSchoolLibrary.Services
 
                     var totalDebited = Transaction.GetTotalAmountDebitedFromAccount(
                                         transaction.BillerAccountId.Value,
+                                        null,
                                         null,
                                         transaction.CreateDate.Value,
                                         false,

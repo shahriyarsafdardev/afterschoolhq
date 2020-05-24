@@ -334,7 +334,7 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static decimal GetTotalAmountByAccountId(int accountId, PayoutStatus? payoutStatusId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static decimal GetTotalAmountByAccountId(int accountId, string search, PayoutStatus? payoutStatusId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -350,6 +350,9 @@ namespace AfterSchoolLibrary.Models
             if (payoutStatusId.HasValue)
                 dq.Criterias.Add(ObjectMap["PayoutStatusId"], (int)payoutStatusId.Value);
 
+            if (search.IsNotBlank())
+                AddSearchQuery(dq, search);
+
             if (startDate.HasValue)
                 dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
 
@@ -361,6 +364,13 @@ namespace AfterSchoolLibrary.Models
                 return results.Rows[0][0].ToString().ToDecimal();
 
             return 0;
+        }
+
+        private static void AddSearchQuery(DatabaseQuery dq, string search)
+        {
+            dq.Joins.Add(Transaction.ObjectMap["PayoutId"], ObjectMap["ID"], DatabaseJoinTypeEnum.InnerJoin);
+
+            Transaction.AddSearchQueryJoins(dq, search);
         }
 
         public static decimal GetTotalAmount(PayoutStatus? payoutStatusId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)

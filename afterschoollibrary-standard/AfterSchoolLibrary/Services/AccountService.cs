@@ -1999,7 +1999,7 @@ namespace AfterSchoolLibrary.Services
             return Payout.GetLastPayout(account.ID.Value, msgs, dc);
         }
 
-        public static decimal GetMaxAmountAvailableForPayout(this Account account, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetMaxAmountAvailableForPayout(this Account account, string search, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var achWaitDays = TransactionService.GetWaitPeriodInDays(PaymentType.ACH);
             var creditWaitDays = TransactionService.GetWaitPeriodInDays(PaymentType.CreditCard);
@@ -2013,9 +2013,10 @@ namespace AfterSchoolLibrary.Services
             if (!endDate.HasValue || utcNow.AddDays(creditWaitDays * -1).IsBefore(endDate.Value))
                 creditEndDate = utcNow.AddDays(creditWaitDays * -1);
 
-            var totalPayoutAmount = account.GetTotalPayoutAmount(null, startDate, endDate, msgs, dc);
+            var totalPayoutAmount = account.GetTotalPayoutAmount(search, null, startDate, endDate, msgs, dc);
             
             var totalAmountBilledACH = account.GetTotalAmountBilledOut(
+                                        search,
                                         PaymentSourceType.AfterSchoolPlatform, 
                                         PaymentType.ACH, 
                                         startDate, 
@@ -2024,6 +2025,7 @@ namespace AfterSchoolLibrary.Services
                                         dc);
 
             var totalAmountBilledCredit = account.GetTotalAmountBilledOut(
+                                            search,
                                             PaymentSourceType.AfterSchoolPlatform, 
                                             PaymentType.CreditCard, 
                                             startDate, 
@@ -2031,13 +2033,13 @@ namespace AfterSchoolLibrary.Services
                                             msgs, 
                                             dc);
 
-            var totalFeesPaidACH = account.GetTotalFeesPaidAsBiller(PaymentType.ACH, startDate, achEndDate, msgs, dc);
-            var totalFeesPaidCredit = account.GetTotalFeesPaidAsBiller(PaymentType.CreditCard, startDate, creditEndDate, msgs, dc);
-            var totalFeesRefunded = account.GetTotalFeesRefunded(startDate, endDate, msgs, dc);
+            var totalFeesPaidACH = account.GetTotalFeesPaidAsBiller(search, PaymentType.ACH, startDate, achEndDate, msgs, dc);
+            var totalFeesPaidCredit = account.GetTotalFeesPaidAsBiller(search, PaymentType.CreditCard, startDate, creditEndDate, msgs, dc);
+            var totalFeesRefunded = account.GetTotalFeesRefunded(search, startDate, endDate, msgs, dc);
 
-            var totalRefunds = account.GetTotalAmountRefundedAHQ(true, startDate, endDate, msgs, dc);
-            var totalDebits = account.GetTotalAmountDebited(startDate, endDate, msgs, dc);
-            var totalCredits = account.GetTotalAmountCredited(startDate, endDate, msgs, dc);
+            var totalRefunds = account.GetTotalAmountRefundedAHQ(search, true, startDate, endDate, msgs, dc);
+            var totalDebits = account.GetTotalAmountDebited(search, startDate, endDate, msgs, dc);
+            var totalCredits = account.GetTotalAmountCredited(search, startDate, endDate, msgs, dc);
 
             return totalAmountBilledACH + 
                     totalAmountBilledCredit +
@@ -2055,64 +2057,64 @@ namespace AfterSchoolLibrary.Services
             return Payout.GetCountByAccountId(account.ID.Value, payoutStatus, startDate, endDate, msgs, dc);
         }
 
-        public static List<Transaction> GetBilledTransactions(this Account account, DateTime? startDate, DateTime? endDate, bool isDeleted, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Transaction> GetBilledTransactions(this Account account, string search, DateTime? startDate, DateTime? endDate, bool isDeleted, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Transaction.LoadByBillerAccountId(account.ID.Value, startDate, endDate, null, isDeleted, start, length, msgs, dc);
+            return Transaction.LoadByBillerAccountId(account.ID.Value, search, startDate, endDate, null, isDeleted, start, length, msgs, dc);
         }
 
-        public static List<Transaction> GetBilledTransactions(this Account account, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, bool isDeleted, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Transaction> GetBilledTransactions(this Account account, string search, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, bool isDeleted, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Transaction.LoadByBillerAccountId(account.ID.Value, startDate, endDate, participationObjects, isDeleted, start, length, msgs, dc);
+            return Transaction.LoadByBillerAccountId(account.ID.Value, search, startDate, endDate, participationObjects, isDeleted, start, length, msgs, dc);
         }
 
-        public static List<Transaction> GetPaidTransactions(this Account account, DateTime? startDate, DateTime? endDate, bool isDeleted, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Transaction> GetPaidTransactions(this Account account, string search, DateTime? startDate, DateTime? endDate, bool isDeleted, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Transaction.LoadByPayerAccountId(account.ID.Value, startDate, endDate, null, isDeleted, start, length, msgs, dc);
+            return Transaction.LoadByPayerAccountId(account.ID.Value, search, startDate, endDate, null, isDeleted, start, length, msgs, dc);
         }
 
-        public static List<Transaction> GetPaidTransactions(this Account account, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, bool isDeleted, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Transaction> GetPaidTransactions(this Account account, string search, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, bool isDeleted, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Transaction.LoadByPayerAccountId(account.ID.Value, startDate, endDate, participationObjects, isDeleted, start, length, msgs, dc);
+            return Transaction.LoadByPayerAccountId(account.ID.Value, search, startDate, endDate, participationObjects, isDeleted, start, length, msgs, dc);
         }
 
-        public static List<Transaction> GetTransactions(this Account account, DateTime? startDate, DateTime? endDate, bool isDeleted, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Transaction> GetTransactions(this Account account, string search, DateTime? startDate, DateTime? endDate, bool isDeleted, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Transaction.LoadByAccountId(account.ID.Value, startDate, endDate, null, isDeleted, start, length, msgs, dc);
+            return Transaction.LoadByAccountId(account.ID.Value, search, startDate, endDate, null, isDeleted, start, length, msgs, dc);
         }
 
-        public static List<Transaction> GetTransactions(this Account account, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, bool isDeleted, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Transaction> GetTransactions(this Account account, string search, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, bool isDeleted, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Transaction.LoadByAccountId(account.ID.Value, startDate, endDate, participationObjects, isDeleted, start, length, msgs, dc);
+            return Transaction.LoadByAccountId(account.ID.Value, search, startDate, endDate, participationObjects, isDeleted, start, length, msgs, dc);
         }
 
-        public static int GetBilledTransactionCount(this Account account, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetBilledTransactionCount(this Account account, string search, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Transaction.GetCountByBillerAccountId(account.ID.Value, startDate, endDate, null, isDeleted, msgs, dc);
+            return Transaction.GetCountByBillerAccountId(account.ID.Value, search, startDate, endDate, null, isDeleted, msgs, dc);
         }
 
-        public static int GetBilledTransactionCount(this Account account, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetBilledTransactionCount(this Account account, string search, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Transaction.GetCountByBillerAccountId(account.ID.Value, startDate, endDate, participationObjects, isDeleted, msgs, dc);
+            return Transaction.GetCountByBillerAccountId(account.ID.Value, search, startDate, endDate, participationObjects, isDeleted, msgs, dc);
         }
 
-        public static int GetPaidTransactionCount(this Account account, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetPaidTransactionCount(this Account account, string search, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Transaction.GetCountByPayerAccountId(account.ID.Value, startDate, endDate, null, isDeleted, msgs, dc);
+            return Transaction.GetCountByPayerAccountId(account.ID.Value, search, startDate, endDate, null, isDeleted, msgs, dc);
         }
 
-        public static int GetPaidTransactionCount(this Account account, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetPaidTransactionCount(this Account account, string search, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Transaction.GetCountByPayerAccountId(account.ID.Value, startDate, endDate, participationObjects, isDeleted, msgs, dc);
+            return Transaction.GetCountByPayerAccountId(account.ID.Value, search, startDate, endDate, participationObjects, isDeleted, msgs, dc);
         }
 
-        public static int GetTransactionCount(this Account account, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetTransactionCount(this Account account, string search, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Transaction.GetCountByAccountId(account.ID.Value, startDate, endDate, null, isDeleted, msgs, dc);
+            return Transaction.GetCountByAccountId(account.ID.Value, search, startDate, endDate, null, isDeleted, msgs, dc);
         }
 
-        public static int GetTransactionCount(this Account account, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetTransactionCount(this Account account, string search, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Transaction.GetCountByAccountId(account.ID.Value, startDate, endDate, participationObjects, isDeleted, msgs, dc);
+            return Transaction.GetCountByAccountId(account.ID.Value, search, startDate, endDate, participationObjects, isDeleted, msgs, dc);
         }
 
         public static decimal CalculatePlatformFeeAmount(this Account billingAccount, decimal totalAmountToCharge, SystemMessages msgs, DatabaseConnection dc = null)
@@ -2742,47 +2744,49 @@ namespace AfterSchoolLibrary.Services
                 msgs: msgs);
         }
 
-        public static decimal GetTotalPayoutAmount(this Account account, PayoutStatus? payoutStatus, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetTotalPayoutAmount(this Account account, string search, PayoutStatus? payoutStatus, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Payout.GetTotalAmountByAccountId(account.ID.Value, payoutStatus, startDate, endDate, msgs, dc);
+            return Payout.GetTotalAmountByAccountId(account.ID.Value, search, payoutStatus, startDate, endDate, msgs, dc);
         }
 
-        public static decimal GetTotalAmountBilledOut(this Account account, PaymentSourceType? paymentSourceType = null, PaymentType? paymentType = null, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetTotalAmountBilledOut(this Account account, string search, PaymentSourceType? paymentSourceType = null, PaymentType? paymentType = null, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Transaction.GetTotalAmountBilledByBillerAccount(account.ID.Value, paymentSourceType, paymentType, startDate, endDate, false, msgs, dc);
+            return Transaction.GetTotalAmountBilledByBillerAccount(account.ID.Value, search, paymentSourceType, paymentType, startDate, endDate, false, msgs, dc);
         }
 
-        public static decimal GetTotalFeesPaidAsBiller(this Account account, PaymentType? paymentType, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetTotalFeesPaidAsBiller(this Account account, string search, PaymentType? paymentType, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Transaction.GetTotalFeesPaidByBillerAccount(account.ID.Value, paymentType, startDate, endDate, false, msgs, dc);
+            return Transaction.GetTotalFeesPaidByBillerAccount(account.ID.Value, search, paymentType, startDate, endDate, false, msgs, dc);
         }
 
-        public static decimal GetTotalAmountRefunded(this Account account, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetTotalAmountRefunded(this Account account, string search, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Transaction.GetTotalAmountPaidByPayerAccount(account.ID.Value, startDate, endDate, false, msgs, dc) -        
-                    Transaction.GetTotalConvenienceFeesNotPaidByPayerAccount(account.ID.Value, startDate, endDate, false, msgs, dc) -
-                    Transaction.GetTotalPaymentTypeFeesNotPaidByPayerAccount(account.ID.Value, startDate, endDate, false, msgs, dc);
+            return Transaction.GetTotalAmountPaidByPayerAccount(account.ID.Value, search, null, startDate, endDate, false, msgs, dc) -        
+                    Transaction.GetTotalConvenienceFeesNotPaidByPayerAccount(account.ID.Value, search, startDate, endDate, false, msgs, dc) -
+                    Transaction.GetTotalPaymentTypeFeesNotPaidByPayerAccount(account.ID.Value, search, startDate, endDate, false, msgs, dc);
         }
 
-        public static decimal GetTotalAmountRefundedManually(this Account account, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetTotalAmountRefundedManually(this Account account, string search, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Transaction.GetTotalAmountPaidByPayerAccount(account.ID.Value, PaymentSourceType.ManualProvider, startDate, endDate, false, msgs, dc);
+            return Transaction.GetTotalAmountPaidByPayerAccount(account.ID.Value, search, PaymentSourceType.ManualProvider, startDate, endDate, false, msgs, dc);
         }
 
-        public static decimal GetTotalFeesRefunded(this Account account, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetTotalFeesRefunded(this Account account, string search, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Transaction.GetTotalConvenienceFeesPaidByPayerAccount(account.ID.Value, null, startDate, endDate, false, msgs, dc) + Transaction.GetTotalPaymentTypeFeesPaidByPayerAccount(account.ID.Value, null, startDate, endDate, false, msgs, dc);
+            return Transaction.GetTotalConvenienceFeesPaidByPayerAccount(account.ID.Value, search, null, startDate, endDate, false, msgs, dc) + 
+                    Transaction.GetTotalPaymentTypeFeesPaidByPayerAccount(account.ID.Value, search, null, startDate, endDate, false, msgs, dc);
         }
 
-        public static decimal GetTotalAmountRefundedAHQ(this Account account, bool getProviderAmountOnly, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetTotalAmountRefundedAHQ(this Account account, string search, bool getProviderAmountOnly, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var totalFeesPaidByPayer = 0M;
-            var amountRefunded = Transaction.GetTotalAmountPaidByPayerAccount(account.ID.Value, PaymentSourceType.AfterSchoolPlatform, startDate, endDate, false, msgs, dc);
+            var amountRefunded = Transaction.GetTotalAmountPaidByPayerAccount(account.ID.Value, search, PaymentSourceType.AfterSchoolPlatform, startDate, endDate, false, msgs, dc);
 
             if (getProviderAmountOnly)
             {
                 totalFeesPaidByPayer += Transaction.GetTotalConvenienceFeesNotPaidByPayerAccount(
                                             account.ID.Value,
+                                            search,
                                             startDate,
                                             endDate,
                                             false,
@@ -2791,6 +2795,7 @@ namespace AfterSchoolLibrary.Services
 
                 totalFeesPaidByPayer += Transaction.GetTotalPaymentTypeFeesNotPaidByPayerAccount(
                                             account.ID.Value,
+                                            search,
                                             startDate,
                                             endDate,
                                             false,
@@ -2803,14 +2808,14 @@ namespace AfterSchoolLibrary.Services
             return amountRefunded;
         }
 
-        public static decimal GetTotalAmountCredited(this Account account, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetTotalAmountCredited(this Account account, string search, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Transaction.GetTotalAmountCreditedToAccount(account.ID.Value, startDate, endDate, false, msgs, dc);
+            return Transaction.GetTotalAmountCreditedToAccount(account.ID.Value, search, startDate, endDate, false, msgs, dc);
         }
 
-        public static decimal GetTotalAmountDebited(this Account account, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetTotalAmountDebited(this Account account, string search, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Transaction.GetTotalAmountDebitedFromAccount(account.ID.Value, startDate, endDate, false, msgs, dc);
+            return Transaction.GetTotalAmountDebitedFromAccount(account.ID.Value, search, startDate, endDate, false, msgs, dc);
         }
 
         public static List<RefundRequest> GetRefundRequests(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)

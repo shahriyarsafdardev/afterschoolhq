@@ -18,7 +18,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         // GET: Org/Accounting
         [HttpGet]
-        public ActionResult Index(string pn, string rpp, string sdate, string edate, string poId, string poTypeId)
+        public ActionResult Index(string pn, string rpp, string sdate, string edate, string poId, string poTypeId, string q)
         {
             var msgs = new SystemMessages();
             int pageNumber = 1;
@@ -48,8 +48,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 poFilter.Add((poId.ToInteger(), (ParticipationObjectType)poTypeId.ToInteger()));
             }
 
-            var totalTransactionCount = SessionVariables.CurrentAccount.GetTransactionCount(startDate, endDate, poFilter, false);
-            var allTransactions = SessionVariables.CurrentAccount.GetTransactions(startDate, endDate, poFilter, false, start, length);
+            var totalTransactionCount = SessionVariables.CurrentAccount.GetTransactionCount(q, startDate, endDate, poFilter, false);
+            var allTransactions = SessionVariables.CurrentAccount.GetTransactions(q, startDate, endDate, poFilter, false, start, length);
             var totalPages = Math.Ceiling(totalTransactionCount.ToDouble() / recordsPerPage).ToInteger();
 
             allTransactions.ForEach(transaction =>
@@ -59,13 +59,13 @@ namespace AfterSchool.Areas.Org.Controllers
             var allPos = Transaction.GetParticipationObjectsByBillerAccountId(SessionVariables.CurrentAccount.ID.Value, null, null, false);
             var allParticipationObjects = allPos.DistinctBy(po => (po.ID, po.ParticipationObjectTypeId, po.Name));
 
-            ViewBag.TotalAmountPaid = SessionVariables.CurrentAccount.GetTotalAmountBilledOut(null, null, startDate, endDate, msgs);
-            ViewBag.TotalAmountRefunded = SessionVariables.CurrentAccount.GetTotalAmountRefunded(startDate, endDate, msgs);
-            ViewBag.TotalAmountRefundedManual = SessionVariables.CurrentAccount.GetTotalAmountRefundedManually(startDate, endDate, msgs);
-            ViewBag.TotalAmountRefundedAHQ = SessionVariables.CurrentAccount.GetTotalAmountRefundedAHQ(true, startDate, endDate, msgs);
-            ViewBag.TotalFeesPaid = SessionVariables.CurrentAccount.GetTotalFeesPaidAsBiller(null, startDate, endDate, msgs);
-            ViewBag.TotalPaidOut = SessionVariables.CurrentAccount.GetTotalPayoutAmount(PayoutStatus.Completed, startDate, endDate, msgs);
-            ViewBag.TotalAvailableForPayout = SessionVariables.CurrentAccount.GetMaxAmountAvailableForPayout(startDate, endDate, msgs);
+            ViewBag.TotalAmountPaid = SessionVariables.CurrentAccount.GetTotalAmountBilledOut(q, null, null, startDate, endDate, msgs);
+            ViewBag.TotalAmountRefunded = SessionVariables.CurrentAccount.GetTotalAmountRefunded(q, startDate, endDate, msgs);
+            ViewBag.TotalAmountRefundedManual = SessionVariables.CurrentAccount.GetTotalAmountRefundedManually(q, startDate, endDate, msgs);
+            ViewBag.TotalAmountRefundedAHQ = SessionVariables.CurrentAccount.GetTotalAmountRefundedAHQ(q, true, startDate, endDate, msgs);
+            ViewBag.TotalFeesPaid = SessionVariables.CurrentAccount.GetTotalFeesPaidAsBiller(q, null, startDate, endDate, msgs);
+            ViewBag.TotalPaidOut = SessionVariables.CurrentAccount.GetTotalPayoutAmount(q, PayoutStatus.Completed, startDate, endDate, msgs);
+            ViewBag.TotalAvailableForPayout = SessionVariables.CurrentAccount.GetMaxAmountAvailableForPayout(q, startDate, endDate, msgs);
             ViewBag.ParticipationObjects = allParticipationObjects;
             ViewBag.Messages = msgs;
             ViewBag.PagingModel = new PagingModel()
@@ -101,7 +101,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 SessionVariables.CurrentAccount.ConvertFromAccountTimeZone(edate.ToDateTime().AddDays(1).AddMilliseconds(-1)) :
                 new DateTime?();
 
-            var totalPayoutAmount = SessionVariables.CurrentAccount.GetTotalPayoutAmount(PayoutStatus.Completed, startDate, endDate, msgs);
+            var totalPayoutAmount = SessionVariables.CurrentAccount.GetTotalPayoutAmount(null, PayoutStatus.Completed, startDate, endDate, msgs);
             var totalPayoutCount = SessionVariables.CurrentAccount.GetPayoutCount(null, startDate, endDate);
             var payouts = SessionVariables.CurrentAccount.GetPayouts(null, startDate, endDate, start, length);
             var totalPages = Math.Ceiling(totalPayoutCount.ToDouble() / recordsPerPage).ToInteger();
@@ -115,10 +115,10 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.CanReceiveACHDeposits = SessionVariables.CurrentAccount.CanReceiveACHDeposits(msgs);
             ViewBag.CanReceiveDeposits = SessionVariables.CurrentAccount.CanReceivePaymentDeposits(msgs);
-            ViewBag.MaxRequestAmount = SessionVariables.CurrentAccount.GetMaxAmountAvailableForPayout(msgs: msgs);
+            ViewBag.MaxRequestAmount = SessionVariables.CurrentAccount.GetMaxAmountAvailableForPayout(search: null, msgs: msgs);
             ViewBag.LastPayout = SessionVariables.CurrentAccount.GetLastPayout(msgs);
             ViewBag.TotalPayoutAmount = totalPayoutAmount;
-            ViewBag.TotalPendingAmount = SessionVariables.CurrentAccount.GetTotalPayoutAmount(PayoutStatus.InProgress, msgs: msgs);
+            ViewBag.TotalPendingAmount = SessionVariables.CurrentAccount.GetTotalPayoutAmount(null, PayoutStatus.InProgress, msgs: msgs);
             ViewBag.Messages = msgs;
             ViewBag.PagingModel = new PagingModel()
             {
@@ -160,7 +160,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 ViewBag.TranIds = transactionIds;
                 ViewBag.TotalPayoutAmount = transactions.Sum(transaction => transaction.GetBillerPayout(msgs));
-                ViewBag.MaxPayoutAvailable = SessionVariables.CurrentAccount.GetMaxAmountAvailableForPayout(msgs: msgs);
+                ViewBag.MaxPayoutAvailable = SessionVariables.CurrentAccount.GetMaxAmountAvailableForPayout(search: null, msgs: msgs);
                 ViewBag.Messages = msgs;
 
                 return View(transactions);
@@ -195,7 +195,7 @@ namespace AfterSchool.Areas.Org.Controllers
             return View("RequestPayout", transactions);
         }
 
-        public ActionResult DownloadCSV(string sdate, string edate, string poId, string poTypeId)
+        public ActionResult DownloadCSV(string sdate, string edate, string poId, string poTypeId, string q)
         {
             var startDate = sdate.IsDateTime() ?
                 SessionVariables.CurrentAccount.ConvertFromAccountTimeZone(sdate.ToDateTime()) :
@@ -213,8 +213,8 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             // transaction data
-            var billedTransactions = SessionVariables.CurrentAccount.GetBilledTransactions(startDate, endDate, poFilter, false, null, null);
-            var paidTransactions = SessionVariables.CurrentAccount.GetPaidTransactions(startDate, endDate, poFilter, false, null, null);
+            var billedTransactions = SessionVariables.CurrentAccount.GetBilledTransactions(q, startDate, endDate, poFilter, false, null, null);
+            var paidTransactions = SessionVariables.CurrentAccount.GetPaidTransactions(q, startDate, endDate, poFilter, false, null, null);
             var allTransactions = billedTransactions.Concat(paidTransactions).ToList();
 
             allTransactions.ForEach(transaction =>
@@ -286,7 +286,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult RefundRequests()
         {
             ViewBag.Messages = new SystemMessages();
-            ViewBag.AmountAvailableToRefund = SessionVariables.CurrentAccount.GetMaxAmountAvailableForPayout();
+            ViewBag.AmountAvailableToRefund = SessionVariables.CurrentAccount.GetMaxAmountAvailableForPayout(search: null);
             return View(SessionVariables.CurrentAccount.GetRefundRequests().OrderByDescending(request => request.CreateDate).ToList());
         }
 
