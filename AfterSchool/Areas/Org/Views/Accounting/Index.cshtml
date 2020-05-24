@@ -9,6 +9,8 @@
     var totalFees = (decimal)ViewBag.TotalFeesPaid;
     var totalPaidOut = (decimal)ViewBag.TotalPaidOut;
     var totalAvailableForPayout = (decimal)ViewBag.TotalAvailableForPayout;
+
+    var isSearchResult = Request["sdate"].IsNotBlank() || Request["edate"].IsNotBlank() || Request["q"].IsNotBlank();
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -59,7 +61,9 @@
                 </div>
                 <div class="col-md-2">
                     <div class="form-group">
-                        <select id="participationObjects" class="form-control">
+                        <input type="text" class="form-control" id="search" value="@Request["q"]" />
+                        
+                        <select id="participationObjects" class="form-control hide">
                             <option data-type="" value="">Activities</option>
                             @foreach (var po in (List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)>)ViewBag.ParticipationObjects)
                             {
@@ -71,6 +75,7 @@
                                 <option value="@po.ID" data-type="@((int)po.ParticipationObjectTypeId)" @selected>@po.Name</option>
                             }
                         </select>
+
                     </div>
                 </div>
                 <div class="col-md-4">
@@ -80,10 +85,10 @@
 
                 <script>
                     function search() {
-                        window.location.href = `@Url.Action("index", "accounting")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}&poId=${encodeURIComponent($('#participationObjects').val())}&poTypeId=${encodeURIComponent($('#participationObjects option:selected').data('type'))}`;
+                        window.location.href = `@Url.Action("index", "accounting")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}&q=${encodeURIComponent($('#search').val())}&poId=${encodeURIComponent($('#participationObjects').val())}&poTypeId=${encodeURIComponent($('#participationObjects option:selected').data('type'))}`;
                     }
                     function DownloadToCSV() {
-                         window.location.href = `@Url.Action("DownloadCSV", "accounting")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}&poId=${encodeURIComponent($('#participationObjects').val())}&poTypeId=${encodeURIComponent($('#participationObjects option:selected').data('type'))}`;
+                        window.location.href = `@Url.Action("DownloadCSV", "accounting")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}&q=${encodeURIComponent($('#search').val())}&poId=${encodeURIComponent($('#participationObjects').val())}&poTypeId=${encodeURIComponent($('#participationObjects option:selected').data('type'))}`;
                     }
 
                 </script>
@@ -130,25 +135,28 @@
                     </div>
                 </div>
 
-                <div class="col-md-2">
-                    <div class="widget widget-tile widget-bordered">
-                        <div class="data-info">
-                            <div data-toggle="counter" data-end="@totalPaidOut" id="totalPayout" data-decimals="2" data-suffix="" class="value">@totalPaidOut.ToCurrency()</div>
-                            <div class="desc">Total Paid Out</div>
+                @if (!isSearchResult)
+                {
+                    <div class="col-md-2">
+                        <div class="widget widget-tile widget-bordered">
+                            <div class="data-info">
+                                <div data-toggle="counter" data-end="@totalPaidOut" id="totalPayout" data-decimals="2" data-suffix="" class="value">@totalPaidOut.ToCurrency()</div>
+                                <div class="desc">Total Paid Out</div>
+                            </div>
+                            <div class="icon"><span class=""></span></div>
                         </div>
-                        <div class="icon"><span class=""></span></div>
                     </div>
-                </div>
 
-                <div class="col-md-2">
-                    <div class="widget widget-tile widget-bordered">
-                        <div class="data-info">
-                            <div data-toggle="counter" data-end="@totalAvailableForPayout" id="totalPayout" data-decimals="2" data-suffix="" class="value">@totalAvailableForPayout.ToCurrency()</div>
-                            <div class="desc">Available For Payout</div>
+                    <div class="col-md-2">
+                        <div class="widget widget-tile widget-bordered">
+                            <div class="data-info">
+                                <div data-toggle="counter" data-end="@totalAvailableForPayout" id="totalPayout" data-decimals="2" data-suffix="" class="value">@totalAvailableForPayout.ToCurrency()</div>
+                                <div class="desc">Available For Payout</div>
+                            </div>
+                            <div class="icon"><span class=""></span></div>
                         </div>
-                        <div class="icon"><span class=""></span></div>
                     </div>
-                </div>
+                }
             </div>
 
             <div class="row">

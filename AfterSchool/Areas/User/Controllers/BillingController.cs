@@ -22,7 +22,7 @@ namespace AfterSchool.Areas.User.Controllers
         }
 
         [HttpGet]
-        public ActionResult Transactions(string pn, string rpp, string sdate, string edate)
+        public ActionResult Transactions(string pn, string rpp, string sdate, string edate, string q)
         {
             var msgs = new SystemMessages();
             int pageNumber = 1;
@@ -49,10 +49,10 @@ namespace AfterSchool.Areas.User.Controllers
                 startDate = earliestCorrectTransactionRecords;
 
             // transaction count
-            var totalTransactionCount = SessionVariables.CurrentAccount.GetTransactionCount(startDate, endDate, false, msgs);
+            var totalTransactionCount = SessionVariables.CurrentAccount.GetTransactionCount(q, startDate, endDate, false, msgs);
 
             // transaction data
-            var allTransactions = SessionVariables.CurrentAccount.GetTransactions(startDate, endDate, false, start, length, msgs);
+            var allTransactions = SessionVariables.CurrentAccount.GetTransactions(q, startDate, endDate, false, start, length, msgs);
 
             var totalPages = Math.Ceiling(totalTransactionCount.ToDouble() / recordsPerPage).ToInteger();
 
