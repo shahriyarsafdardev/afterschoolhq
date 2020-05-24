@@ -27,6 +27,7 @@
 
                             <input type="hidden" name="paymentoption" id="paymentoption-existing" class="payment-option" value="0" />
                             <input type="hidden" name="coupon" class="coupon" value="" />
+                            <textarea name="paymentdescription" id="payment-description-existing-ach" class="hide payment-description"></textarea>
 
                             <div class="form-group">
                                 <label class="col-md-3 control-label">
@@ -76,6 +77,8 @@
 
                     <form action="@formActionUrl" method="post" id="payment-form-ach">
 
+                        <textarea name="paymentdescription" id="payment-description-new-ach" class="hide payment-description"></textarea>
+
                     </form>
 
                 </div>
@@ -102,6 +105,8 @@
                     <form class="form-horizontal existing-payment-form" action="@formActionUrl" method="post" id="existing-payment-form-cc">
                         <input type="hidden" name="paymentoption" id="paymentoption-existing" class="payment-option" value="0" />
                         <input type="hidden" name="coupon" class="coupon" value="" />
+                        <textarea name="paymentdescription" id="payment-description-existing-cc" class="hide payment-description"></textarea>
+
                         <div class="form-group">
                             <label class="col-md-3 control-label">
                                 Select Card
@@ -142,6 +147,7 @@
                 <form action="@formActionUrl" method="post" id="payment-form" class="form-horizontal">
 
                     <input type="hidden" name="paymentoption" id="paymentoption-new" class="payment-option" value="0" />
+                    <textarea name="paymentdescription" id="payment-description-new-cc" class="hide payment-description"></textarea>
                     @*<input type="hidden" name="coupon" class="coupon" value="" />*@
 
                     <div class="form-group">
@@ -178,7 +184,7 @@
                             &raquo;
                         </button>
                     </div>
-                    
+
                 </form>
 
             </div>
@@ -439,6 +445,7 @@
             // Insert the token ID into the form so it gets submitted to the server
             var form = $('#payment-form');
             form.append('<input type="hidden" name="stripetoken" value="' + token.id + '" />')
+            form.append('<textarea name="paymentdescription" class="hide">' + $('#payment-description-new-cc').val() + '</textarea>');
             form.submit();
         }
     });
@@ -475,8 +482,9 @@
         function plaidTokenHandler(token, accountId) {
             // Insert the token ID into the form so it gets submitted to the server
             var form = $('#payment-form-ach');
-            form.append('<input type="hidden" name="plaidtoken" value="' + token + '" />')
-            form.append('<input type="hidden" name="plaidaccountid" value="' + accountId + '" />')
+            form.append('<input type="hidden" name="plaidtoken" value="' + token + '" />');
+            form.append('<input type="hidden" name="plaidaccountid" value="' + accountId + '" />');
+            form.append('<textarea name="paymentdescription" class="hide">' + $('#payment-description-new-ach').val() + '</textarea>');
             form.submit();
         }
 

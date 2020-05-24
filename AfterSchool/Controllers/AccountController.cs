@@ -1617,7 +1617,7 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public ActionResult Pay(string id, string ccsource, string banksource, string stripetoken, string plaidtoken, string plaidaccountid, string savepaymentinfo, string paymentoption, string amount)
+        public ActionResult Pay(string id, string ccsource, string banksource, string stripetoken, string plaidtoken, string plaidaccountid, string savepaymentinfo, string paymentoption, string amount, string paymentdescription)
         {
             var msgs = new SystemMessages();
 
@@ -1635,6 +1635,7 @@ namespace AfterSchool.Controllers
                 var convenienceFee = AfterSchoolLibrary.Billing.Platform.GetConvenienceFee(cost);
                 var ccFee = 0M;
                 var overrideAmount = cost;
+                var description = paymentdescription.IsNotBlank() ? paymentdescription : $"{billingAccount.Name} Payment";
 
                 BankAccountPurchaseObject bankAccountPurchaseObject = null;
                 CreditCardPurchaseObject creditCardPurchaseObject = null;
@@ -1676,7 +1677,7 @@ namespace AfterSchool.Controllers
                         ConvenienceFeePayer = convenienceFeePayer,
                         CreditCardFeePayer = creditCardFeePayer,
                         MasterRegistrant = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant(msgs),
-                        Description = $"{billingAccount.Name} Payment"
+                        Description = description,
                     },
                     loggedInUser: SessionVariables.CurrentUser,
                     msgs: msgs);
