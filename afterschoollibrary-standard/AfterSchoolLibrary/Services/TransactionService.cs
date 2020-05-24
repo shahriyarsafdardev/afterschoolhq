@@ -364,25 +364,42 @@ namespace AfterSchoolLibrary.Services
         public static decimal GetRefundedAmountAHQ(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Transaction.GetTotalRefundByOriginalTransaction(
-                    transaction.ID.Value, 
-                    PaymentSourceType.AfterSchoolPlatform, 
-                    false, 
-                    msgs, 
-                    dc);
+                        transaction.ID.Value, 
+                        PaymentSourceType.AfterSchoolPlatform, 
+                        false, 
+                        msgs, 
+                        dc) 
+                    + 
+                    Transaction.GetTotalRefundByOriginalTransaction(
+                        transaction.ID.Value,
+                        PaymentSourceType.ManualAfterSchoolHQ,
+                        false,
+                        msgs,
+                        dc);
+        }
+
+        public static decimal GetRefundedAHQFees(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.GetTotalRefundFeesByOriginalTransaction(
+                        transaction.ID.Value,
+                        null,
+                        PaymentSourceType.AfterSchoolPlatform,
+                        false,
+                        msgs,
+                        dc)
+                    +
+                    Transaction.GetTotalRefundFeesByOriginalTransaction(
+                        transaction.ID.Value,
+                        null,
+                        PaymentSourceType.ManualAfterSchoolHQ,
+                        false,
+                        msgs,
+                        dc);
         }
 
         public static decimal GetRefundedAmountAHQWithoutFees(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var totalRefund = transaction.GetRefundedAmountAHQ(msgs, dc);
-            var totalFees = Transaction.GetTotalRefundFeesByOriginalTransaction(
-                                transaction.ID.Value,
-                                null,
-                                PaymentSourceType.AfterSchoolPlatform,
-                                false,
-                                msgs,
-                                dc);
-
-            return totalRefund - totalFees;
+            return transaction.GetRefundedAmountAHQ(msgs, dc) - transaction.GetRefundedAHQFees(msgs, dc);
         }
 
         public static Payout GetPayout(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -453,7 +470,8 @@ namespace AfterSchoolLibrary.Services
                     return
                         DateTime.UtcNow.IsOnOrAfter(transaction.CreateDate.Value.AddDays(transaction.GetWaitPeriodInDays())) &&
                         !transaction.PlatformPercentFee.HasValue &&
-                        !transaction.HasUnfulfilledRefundRequests(msgs, dc);
+                        !transaction.HasUnfulfilledRefundRequests(msgs, dc) &&
+                        transaction.HasRefundableAmount(false, msgs, dc);
 
                 if ((transaction.PaymentSourceTypeId == PaymentSourceType.ManualAfterSchoolHQ && transaction.IsCredit()))
                 {
