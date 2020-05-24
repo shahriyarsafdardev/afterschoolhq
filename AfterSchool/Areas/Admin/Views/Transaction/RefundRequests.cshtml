@@ -179,6 +179,12 @@
                     <input type="checkbox" class="form-control" id="refund-convenience-fee" />
                     <label for="refund-convenience-fee">Refund Convenience Fees?</label>
                 </div>
+                <div class="form-group">
+                    <select id="paymentsource" class="form-control">
+                        <option value="@((int)PaymentSourceType.AfterSchoolPlatform)">@PaymentSourceType.AfterSchoolPlatform.ToString().SplitByUpperCase()</option>
+                        <option value="@((int)PaymentSourceType.ManualAfterSchoolHQ)">@PaymentSourceType.ManualAfterSchoolHQ.ToString().SplitByUpperCase()</option>
+                    </select>
+                </div>
                 <p>
                     Are you sure you want to refund transaction <strong><span class="transaction-id"></span></strong> for the amount of <strong><span class="transaction-amount"></span></strong>?
                 </p>
@@ -236,9 +242,10 @@
 
         const refundCC = $('#refund-cc-fee').is(':checked') ? 1 : 0;
         const refundCF = $('#refund-convenience-fee').is(':checked') ? 1 : 0;
+        const paymentSource = $('#paymentsource').val();
 
         $.get(
-            '@Url.Action("refund", "transaction")/' + transactionUid + '?request=' + requestUid + '&refundcc=' + refundCC + '&refundcf=' + refundCF,
+            '@Url.Action("refund", "transaction")/' + transactionUid + '?request=' + requestUid + '&refundcc=' + refundCC + '&refundcf=' + refundCF + '&paymentsource=' + paymentSource,
             function (data) {
                 if (data && data.status == 'ok') {
                     Notifications.showMessage('Success', 'Transaction has been refunded', true);

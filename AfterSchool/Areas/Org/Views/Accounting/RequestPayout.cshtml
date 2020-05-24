@@ -1,6 +1,9 @@
 ﻿@model List<Transaction>
 @{ 
     var msgs = (SystemMessages)ViewBag.Messages;
+    var payoutRequest = (decimal)ViewBag.TotalPayoutAmount;
+    var maxPayout = (decimal)ViewBag.MaxPayoutAvailable;
+    var diff = payoutRequest - maxPayout;
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -14,7 +17,16 @@
             Request Payouts - Preview
             
             <div class="pull-right">
-                    Total: @ViewBag.TotalPayoutAmount
+                <p>
+                    @if (diff > 0)
+                    {                
+                        @: @payoutRequest.ToCurrency() Requested - @diff.ToCurrency() Owed = @maxPayout.ToCurrency() Total
+                    }
+                    else
+                    {
+                        @payoutRequest.ToCurrency()
+                    }
+                </p>
             </div>
             
             <div class="clearfix"></div>

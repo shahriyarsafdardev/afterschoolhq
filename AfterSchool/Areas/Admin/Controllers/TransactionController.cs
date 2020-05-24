@@ -177,7 +177,7 @@ namespace AfterSchool.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        public ActionResult Refund(string id, string request, string refundcc, string refundcf)
+        public ActionResult Refund(string id, string request, string refundcc, string refundcf, PaymentSourceType paymentsource)
         {
             var msgs = new SystemMessages();
 
@@ -194,7 +194,13 @@ namespace AfterSchool.Areas.Admin.Controllers
                         var refundConvenienceFees = refundcf.IsBoolean() && refundcf.ToBoolean();
 
                         if (refundRequest.IsNotEmpty() && refundRequest.CanRefundAmountRequested(msgs))
-                            refundRequest.ApproveAndProcessRequest(true, refundCreditFees, refundConvenienceFees, SessionVariables.CurrentUser, msgs);
+                            refundRequest.ApproveAndProcessRequest(
+                                true, 
+                                refundCreditFees, 
+                                refundConvenienceFees,
+                                paymentsource,
+                                SessionVariables.CurrentUser, 
+                                msgs);
                     }
                     else
                         msgs.Add("Invalid Request", MessageType.UserError);
