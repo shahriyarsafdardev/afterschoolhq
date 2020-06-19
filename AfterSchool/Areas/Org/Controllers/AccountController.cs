@@ -952,7 +952,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (logo.IsNotEmpty())
             {
                 if (Request.Files["logo"].ContentLength == 0 || 
-                    !Request.Files["logo"].FileName.Contains(allowedFiles) ||
+                    !Request.Files["logo"].FileName.ToLower().Contains(allowedFiles) ||
                     Request.Files["logo"].ContentLength > maxSizeInBytes)
                     msgs.Add("Please upload a valid jpg or png file", MessageType.UserError);
             }
@@ -960,7 +960,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (headerimage.IsNotEmpty())
             {
                 if (Request.Files["headerimage"].ContentLength == 0 || 
-                    !Request.Files["headerimage"].FileName.Contains(allowedFiles) ||
+                    !Request.Files["headerimage"].FileName.ToLower().Contains(allowedFiles) ||
                     Request.Files["headerimage"].ContentLength > maxSizeInBytes)
                     msgs.Add("Please upload a valid jpg or png file", MessageType.UserError);
             }
