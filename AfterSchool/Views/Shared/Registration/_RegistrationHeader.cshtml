@@ -346,6 +346,11 @@
                 <div id="claim-profile-done" class="hide">
                     <h2>Thank you!</h2>
                     <p>Your information has been submitted. Someone will be in touch with you shortly.</p>
+                    <p>
+                        <button type="button" data-dismiss="modal" id="modal-share-close" class="btn btn-primary btn-lg btn-block md-close">
+                            Close
+                        </button>
+                    </p>
                 </div>
             </div>
         </div>
@@ -443,7 +448,7 @@
 
     function resetClaimForm() {
         $('#claim-profile-form').removeClass('hide');
-        $('#claim-profile-done').addClass('hide');
+        // $('#claim-profile-done').addClass('hide');
     }
 
     function claimProfile() {
