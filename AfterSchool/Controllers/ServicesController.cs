@@ -222,6 +222,48 @@ namespace AfterSchool.Controllers
 
         #region Profile
 
+        [HttpPost]
+        public ActionResult ClaimProfile(string profile, string firstname, string lastname, string email, string phone)
+        {
+            if (!IsRequestFromApp())
+                return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
+
+            var msgs = new SystemMessages();
+
+            if (!profile.IsGuid())
+                msgs.Add("Invalid request", MessageType.UserError);
+
+            if (firstname.IsEmpty())
+                msgs.Add("First Name is required", MessageType.UserError);
+
+            if (lastname.IsEmpty())
+                msgs.Add("Last Name is required", MessageType.UserError);
+
+            if (!email.IsEmail())
+                msgs.Add("Email is required", MessageType.UserError);
+
+            if (!phone.IsPhone())
+                msgs.Add("Valid phone is required", MessageType.UserError);
+
+            Account account = null;
+
+            if (msgs.HasNoErrors())
+                account = Account.LoadByUid(profile.ToGuid(), msgs);
+
+            if (msgs.HasNoErrors() && account.IsNotEmpty() && !account.IsClaimed)
+            {
+                EmailHelper.SendEmail(
+                    "sales@afterschoolhq.com",
+                    $"AHQ Profile Claim Form - {account.Name}",
+                    $"<p>Organization: {account.Name}<br />Name: {firstname} {lastname}<br />Email: {email}<br />Phone: {phone}<br /></p>",
+                    true);
+
+                return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+        }
+
         [HttpGet]
         public ActionResult Follow(string id)
         {
