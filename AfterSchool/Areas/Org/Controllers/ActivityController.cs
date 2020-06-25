@@ -1753,7 +1753,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = Activity.LoadByUid(id.ToGuid());
             var msgs = new SystemMessages();
 
-            ViewBag.Users = SessionVariables.CurrentAccount.GetMembers(msgs: msgs).Select(x => x.ToWebUser()).ToList();
+            ViewBag.Users = SessionVariables.CurrentAccount.GetUsers(msgs: msgs);
             ViewBag.Messages = msgs;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             return View(activity);
@@ -1773,7 +1773,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                     activity = Activity.LoadByUid(id.ToGuid(), amsgs, adc);
                     account = activity.GetAccount(amsgs, adc);
-                    users = account.GetMembers(msgs: amsgs, dc: adc).Select(x => x.ToWebUser()).ToList();
+                    users = account.GetUsers(msgs: amsgs, dc: adc);
 
                     users.ForEach(user =>
                     {

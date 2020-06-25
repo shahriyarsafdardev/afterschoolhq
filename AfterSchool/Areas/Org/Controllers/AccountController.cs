@@ -547,7 +547,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Team()
         {
             var msgs = new SystemMessages();
-            var members = SessionVariables.CurrentAccount.GetMembers(msgs: msgs).Select(x => x.ToWebUser()).ToList();
+            var members = SessionVariables.CurrentAccount.GetUsers(msgs: msgs);
 
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Members = members;
@@ -600,7 +600,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
                 msgs.Add("All invites have been sent", MessageType.Success);
 
-            var members = SessionVariables.CurrentAccount.GetMembers().Select(x => x.ToWebUser()).ToList();
+            var members = SessionVariables.CurrentAccount.GetUsers(msgs: msgs);
             ViewBag.Messages = msgs;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Members = members;

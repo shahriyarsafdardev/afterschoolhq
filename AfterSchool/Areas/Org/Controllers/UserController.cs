@@ -21,7 +21,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Index(int? start = null, int? length = null)
         {
             ViewBag.Messages = new SystemMessages();
-            return View(SessionVariables.CurrentAccount.GetMembers().Select(x=>x.ToWebUser()));
+            return View(SessionVariables.CurrentAccount.GetUsers());
         }
 
         [HttpGet]
