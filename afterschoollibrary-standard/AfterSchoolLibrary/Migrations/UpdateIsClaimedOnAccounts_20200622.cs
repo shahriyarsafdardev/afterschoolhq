@@ -15,7 +15,11 @@ namespace AfterSchoolLibrary.Migrations
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    amsgs.AddRange(Account.Update(new Hashtable() { { "IsClaimed", true } }, new Hashtable(), Account.ObjectMap, adc));
+                    amsgs.AddRange(Account.Update(
+                        new Hashtable() { { "IsClaimed", true } }, 
+                        new Hashtable() { { "IsClaimed", DBNull.Value } }, 
+                        Account.ObjectMap, 
+                        adc));
                 },
                 uniqueIdenfier: "UpdateIsClaimedOnAccounts_20200622",
                 msgs: msgs,
