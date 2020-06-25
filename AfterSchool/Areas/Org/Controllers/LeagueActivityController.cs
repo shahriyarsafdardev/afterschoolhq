@@ -1909,12 +1909,13 @@ namespace AfterSchool.Areas.Org.Controllers
             Account account = null;
             List<WebUser> users = null;
 
-            Database.ExecuteTransaction(
+            Database.ExecuteTransaction
+            (
                 action: (SystemMessages amsgs, DatabaseConnection adc) => {
 
                     activity = Activity.LoadByUid(id.ToGuid(), amsgs, adc);
                     account = activity.GetAccount(amsgs, adc);
-                    users = account.GetActiveMembers(amsgs, adc).Select(x => x.ToWebUser()).ToList();
+                    users = account.GetActiveMembers(msgs: amsgs, dc: adc).Select(x => x.ToWebUser()).ToList();
 
                     foreach (var user in users)
                     {
@@ -1922,7 +1923,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         if (doNotSkip)
                         {
-                            var awu = user.GetActivityWebUser(activity, dc: adc);
+                            var awu = user.GetActivityWebUser(activity, amsgs, adc);
 
                             if (Request["onteam-" + user.ID.Value.ToString()].IsNotEmpty())
                             {

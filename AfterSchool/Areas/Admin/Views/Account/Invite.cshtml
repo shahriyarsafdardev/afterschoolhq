@@ -14,7 +14,7 @@
     <div class="panel panel-default">
 
         <div class="panel-heading">
-            <i class="s7-id"></i> Invite Organization
+            <i class="s7-id"></i> Add Organization
         </div>
 
         <div class="panel-body">
@@ -41,7 +41,7 @@
                 }
                 else
                 {
-                     <div class="form-group">
+                    <div class="form-group">
                         <div class="col-sm-3 control-label">
                             Organization Name
                         </div>
@@ -67,6 +67,12 @@
                                     }
                                 }
                             </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Time Zone</label>
+                        <div class="col-sm-9">
+                            @{ Html.RenderPartial("~/Views/Shared/Components/_TimezoneDropdown.cshtml", Model.TimeZone.IfEmpty("")); }
                         </div>
                     </div>
                 }
@@ -105,40 +111,51 @@
                         </select>
                     </div>
                 </div>
-                
-               
 
-                <div class="row">
-                    <div class="col-sm-6 col-sm-offset-3">
-                        <h3>Personal Details</h3>
-                        <hr />
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Is Unclaimed</label>
+                    <div class="col-sm-6">
+                        @{ Html.RenderPartial(
+                            "~/Views/Shared/_SwitchButton.cshtml",
+                            false,
+                            new ViewDataDictionary() { { "checkboxname", "isunclaimed" }, { "checkboxid", "isunclaimed" } });
+                        }
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <div class="col-sm-3 control-label">
-                        First Name
+                <div id="personal-info">
+                    <div class="row">
+                        <div class="col-sm-6 col-sm-offset-3">
+                            <h3>Personal Details</h3>
+                            <hr />
+                        </div>
                     </div>
-                    <div class="col-sm-6">
-                        <input type="text" maxlength="50" name="firstname" id="firstname" class="form-control" value="@Request["firstname"]" />
-                    </div>
-                </div>
 
-                <div class="form-group">
-                    <div class="col-sm-3 control-label">
-                        Last Name
+                    <div class="form-group">
+                        <div class="col-sm-3 control-label">
+                            First Name
+                        </div>
+                        <div class="col-sm-6">
+                            <input type="text" maxlength="50" name="firstname" id="firstname" class="form-control" value="@Request["firstname"]" />
+                        </div>
                     </div>
-                    <div class="col-sm-6">
-                        <input type="text" maxlength="50" name="lastname" id="lastname" class="form-control" value="@Request["lastname"]" />
-                    </div>
-                </div>
 
-                <div class="form-group">
-                    <div class="col-sm-3 control-label">
-                        Email
+                    <div class="form-group">
+                        <div class="col-sm-3 control-label">
+                            Last Name
+                        </div>
+                        <div class="col-sm-6">
+                            <input type="text" maxlength="50" name="lastname" id="lastname" class="form-control" value="@Request["lastname"]" />
+                        </div>
                     </div>
-                    <div class="col-sm-6">
-                        <input type="text" maxlength="50" name="email" id="email" class="form-control" value="@Request["email"]" />
+
+                    <div class="form-group">
+                        <div class="col-sm-3 control-label">
+                            Email
+                        </div>
+                        <div class="col-sm-6">
+                            <input type="text" maxlength="50" name="email" id="email" class="form-control" value="@Request["email"]" />
+                        </div>
                     </div>
                 </div>
 
@@ -146,7 +163,7 @@
                     <label class="col-sm-3 control-label"></label>
                     <div class="col-sm-6">
                         <button type="reset" class="btn btn-default" onclick="location.href='@Url.Action("index", "account")'">Cancel</button>
-                        <button type="submit" id="submit-btn" class="btn btn-primary pull-right"><i class="s7-paper-plane"></i> Send Invite</button>
+                        <button type="submit" id="submit-btn" class="btn btn-primary pull-right"><i class="s7-paper-plane"></i> <span id="btn-add-account-text">Send Invite</span></button>
                     </div>
                 </div>
             </form>
@@ -160,7 +177,19 @@
             //disable the submit button
             $("#submit-btn").attr("disabled", true);
         });
+
+        $('#isunclaimed').click(toggleIsUnclaimed);
     });
+
+    function toggleIsUnclaimed() {
+        if ($('#isunclaimed').is(':checked')) {
+            $('#personal-info').addClass('hide');
+            $('#btn-add-account-text').html('Add Account');
+        } else {
+            $('#personal-info').removeClass('hide');
+            $('#btn-add-account-text').html('Send Invite');
+        }
+    }
 </script>
 
 

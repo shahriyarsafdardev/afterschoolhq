@@ -197,7 +197,7 @@ namespace AfterSchoolLibrary.Services
         {
             get
             {
-                return new UserType[] { UserType.Administrator, UserType.Owner, UserType.SuperAdmin, UserType.Treasurer };
+                return new UserType[] { UserType.Administrator, UserType.Owner, UserType.SuperAdmin, UserType.Treasurer, UserType.TechSupport };
             }
         }
 
@@ -420,55 +420,64 @@ namespace AfterSchoolLibrary.Services
 
         #region Users
 
-        public static int GetUserCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetMemberCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return AccountWebUser.GetCount(
-                new Hashtable() { { "AccountId", account.ID } },
+                new Hashtable() { 
+                    { "AccountId", account.ID },
+                    { "IsDeleted", false },
+                    { "IsGhostAccount", false }
+                },
                 msgs,
-                dc
-                );
+                dc);
         }
 
-        public static int GetActiveUserCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetActiveMemberCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return AccountWebUser.GetCount(
                 new Hashtable() {
                     { "AccountId", account.ID },
-                    { "IsActive", true }
+                    { "IsActive", true },
+                    { "IsDeleted", false },
+                    { "IsGhostAccount", false }
                 },
                 msgs,
-                dc
-                );
+                dc);
         }
 
         public static List<WebUser> GetUsers(this Account account, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountWebUser.Load(
-                new Hashtable() { { "AccountId", account.ID } },
-                start,
-                length,
-                msgs,
-                dc
-                )
-                .Select(x => x.ToWebUser())
-                .ToList();
+            return account.GetMembers(start, length, msgs, dc)
+                    .Select(x => x.ToWebUser())
+                    .ToList();
         }
 
-        public static List<AccountWebUser> GetMembers(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<AccountWebUser> GetMembers(this Account account, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountWebUser.LoadByAccountIdByIsDeleted(account.ID.Value, false, msgs, dc);
+            return AccountWebUser.LoadByAccountId(account.ID.Value, false, false, start, length, msgs, dc);
         }
 
-        public static List<AccountWebUser> GetActiveMembers(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<AccountWebUser> GetActiveMembers(this Account account, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountWebUser.LoadByAccountIdByIsActiveByIsDeleted(account.ID.Value, true, false, msgs, dc);
+            return AccountWebUser.LoadByAccountId(account.ID.Value, true, false, false, start, length, msgs, dc);
         }
 
         public static AccountWebUser AddUser(this Account account, WebUser user, UserType ut, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
+            return AddUser(account, user, ut, false, loggedInUser, msgs, dc);
+        }
+
+        public static AccountWebUser AddGhostUser(this Account account, WebUser user, UserType ut, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return AddUser(account, user, ut, true, loggedInUser, msgs, dc);
+        }
+
+        public static AccountWebUser AddUser(this Account account, WebUser user, UserType ut, bool isGhostAccount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
             AccountWebUser awu = null;
 
-            Database.ExecuteTransaction(
+            Database.ExecuteTransaction
+            (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     awu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, user.ID.Value, amsgs, adc);
@@ -481,7 +490,8 @@ namespace AfterSchoolLibrary.Services
                             WebUserId = user.ID.Value,
                             AccountId = account.ID.Value,
                             IsDefault = false,
-                            IsActive = user.IsActive
+                            IsActive = user.IsActive,
+                            IsGhostAccount = isGhostAccount,
                         };
                     else
                         awu.IsActive = true;
@@ -1482,7 +1492,17 @@ namespace AfterSchoolLibrary.Services
             return CreateNew(orgName, null, null, false, accountType, null, null, null, null, loggedInUser, isAfterSchool, false, msgs, dc);
         }
 
+        public static Account CreateNewUnclaimedAccount(string orgName, string email, string phone, bool isActive, AccountType accountType, WebUser accountOwner, int? packageId, BillingPeriodType? packageBillingPeriod, string timeZone, WebUser loggedInUser, bool isAfterSchool, bool createWithStripe, SystemMessages msgs, DatabaseConnection dc)
+        {
+            return CreateNew(orgName, email, phone, isActive, accountType, accountOwner, packageId, packageBillingPeriod, timeZone, loggedInUser, isAfterSchool, createWithStripe, false, msgs, dc);
+        }
+
         public static Account CreateNew(string orgName, string email, string phone, bool isActive, AccountType accountType, WebUser accountOwner, int? packageId, BillingPeriodType? packageBillingPeriod, string timeZone, WebUser loggedInUser, bool isAfterSchool, bool createWithStripe, SystemMessages msgs, DatabaseConnection dc)
+        {
+            return CreateNew(orgName, email, phone, isActive, accountType, accountOwner, packageId, packageBillingPeriod, timeZone, loggedInUser, isAfterSchool, createWithStripe, true, msgs, dc);
+        }
+
+        public static Account CreateNew(string orgName, string email, string phone, bool isActive, AccountType accountType, WebUser accountOwner, int? packageId, BillingPeriodType? packageBillingPeriod, string timeZone, WebUser loggedInUser, bool isAfterSchool, bool createWithStripe, bool isClaimed, SystemMessages msgs, DatabaseConnection dc)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             var uniqueName = AccountService.GenerateUniqueName(orgName, null, dc: dc);
@@ -1504,7 +1524,8 @@ namespace AfterSchoolLibrary.Services
                 UniqueName = uniqueName,
                 ConvenienceFeesPaidBy = FeesPaidByType.Parent,
                 CreditCardFeesPaidBy = FeesPaidByType.Parent,
-                TimeZone = timeZone
+                TimeZone = timeZone,
+                IsClaimed = isClaimed,
             };
 
             if (createWithStripe)

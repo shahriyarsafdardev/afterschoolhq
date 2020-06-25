@@ -186,7 +186,7 @@ namespace AfterSchool.Models
             }
             else
             {
-                var awus = AccountWebUser.LoadByWebUserIdByIsActiveByIsDeleted(user.ID.Value, true, false);
+                var awus = AccountWebUser.LoadByWebUserId(user.ID.Value, true, false, false, msgs);
 
                 if (awus.Count == 1)
                 {

@@ -350,6 +350,7 @@ property: StripeChargesEnabled, bool, Bit
 property: StripePayoutsEnabled, bool, Bit
 property: IsTest, bool, Bit
 property: IsDeleted, bool, Bit
+property: IsClaimed, bool, Bit
 baseproperty: Name, required
 loadmethod: OwnerId, List<>
 loadmethod: UniqueName
@@ -527,6 +528,7 @@ property: IsActive, bool, Bit
 property: IsDefault, bool, Bit
 property: UserTypeId, UserType, Int
 property: IsDeleted, bool, Bit
+property: IsGhostAccount, bool, Bit
 join: WebUser.ID, WebUserId, InnerJoin
 join: Account.ID, AccountId, InnerJoin
 joinproperty: WebUser.Username, string, NVarChar
@@ -1713,7 +1715,7 @@ values: NotSet, RegistrantFirstName, RegistrantLastName, RegistrantEmail, Regist
 [begin]
 type: Enum
 name: UserType
-values: NotSet, SuperAdmin, Owner, Administrator, Student, Instructor, Staff, Parent, ProgramDirector, Treasurer
+values: NotSet, SuperAdmin, Owner, Administrator, Student, Instructor, Staff, Parent, ProgramDirector, Treasurer, TechSupport
 [end]
 
 [begin]

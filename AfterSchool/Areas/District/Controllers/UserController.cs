@@ -22,8 +22,9 @@ namespace AfterSchool.Areas.District.Controllers
         [HttpGet]
         public ActionResult Index(string pn, string rpp)
         {
-            int pageNumber = 1;
-            int recordsPerPage = 10;
+            var pageNumber = 1;
+            var recordsPerPage = 10;
+            var msgs = new SystemMessages();
 
             if (pn.IsNumber() && pn.ToInteger() > 0)
                 pageNumber = pn.ToInteger();
@@ -34,11 +35,11 @@ namespace AfterSchool.Areas.District.Controllers
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
 
-            int userCount = SessionVariables.CurrentAccount.GetUserCount();
-            var users = SessionVariables.CurrentAccount.GetUsers();
+            int userCount = SessionVariables.CurrentAccount.GetMemberCount(msgs);
+            var users = SessionVariables.CurrentAccount.GetUsers(start, length, msgs);
             var totalPages = Math.Ceiling(userCount.ToDouble() / recordsPerPage).ToInteger();
 
-            ViewBag.Messages = new SystemMessages();
+            ViewBag.Messages = msgs;
             ViewBag.PagingModel = new PagingModel()
             {
                 TotalCount = userCount,

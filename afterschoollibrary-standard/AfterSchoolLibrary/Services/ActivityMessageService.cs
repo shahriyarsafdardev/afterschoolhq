@@ -70,7 +70,7 @@ namespace AfterSchoolLibrary.Services
 
         private static void SendMessageToTeamMembers(this ActivityMessage activityMessage, Account account, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var members = account.GetActiveMembers(msgs, dc).DistinctBy(member => member.WebUserId).ToList();
+            var members = account.GetActiveMembers(msgs: msgs, dc: dc).DistinctBy(member => member.WebUserId).ToList();
 
             activityMessage.SendMessageToTeamMembers(
                 members.Select(member => member.ToWebUser()).ToList(),

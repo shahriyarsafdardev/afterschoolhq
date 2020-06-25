@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Security.Cryptography;
-using System.Text;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System.Linq;
 using SendGrid.Helpers.Mail;
 using AfterSchoolLibrary.Models;
-using BCrypt.Net;
+using System.Collections;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -21,7 +19,6 @@ namespace AfterSchoolLibrary.Services
         public static string EncryptPassword(string password)
         {
             return BCrypt.Net.BCrypt.HashPassword(password, BCrypt.Net.BCrypt.GenerateSalt());
-            return Convert.ToBase64String(Encryption.Encrypt(password, Helpers.Utilities.AppAESKey, Helpers.Utilities.AppIV));
         }
 
         public static string DecryptPassword(string password)
@@ -89,7 +86,7 @@ namespace AfterSchoolLibrary.Services
 
         public static List<Account> GetAccounts(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountWebUser.LoadByWebUserIdByIsActiveByIsDeleted(user.ID.Value, true, false, msgs, dc)
+            return AccountWebUser.LoadByWebUserId(user.ID.Value, true, false, false, msgs, dc)
                 .Select(x => x.ToAccount(true, msgs, dc))
                 .ToList();
         }
@@ -106,7 +103,14 @@ namespace AfterSchoolLibrary.Services
 
         public static bool HasMultipleAccounts(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountWebUser.GetCount(new System.Collections.Hashtable() { { "WebUserId", user.ID.Value }, { "IsActive", true }, { "IsDeleted", false } }, msgs, dc) > 1;                
+            return AccountWebUser.GetCount(
+                    new Hashtable() 
+                    { 
+                        { "WebUserId", user.ID.Value }, 
+                        { "IsActive", true }, 
+                        { "IsDeleted", false }, 
+                        { "IsGhostAccount", false } 
+                    }, msgs, dc) > 1;                
         }
 
         public static UserType GetUserType(this WebUser user, Account account, DatabaseConnection dc = null)
@@ -152,9 +156,9 @@ namespace AfterSchoolLibrary.Services
         {
             return ActivityWebUser.LoadByActivityIdByWebUserId(a.ID.Value, user.ID.Value, msgs, dc).IsNotEmpty();
         }
-        public static bool IsActivityLeader(this WebUser user, Activity a, DatabaseConnection dc = null)
+        public static bool IsActivityLeader(this WebUser user, Activity a, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var awu = user.GetActivityWebUser(a, dc: dc);
+            var awu = user.GetActivityWebUser(a, msgs, dc);
             return awu.IsNotEmpty() && awu.IsLeader;
         }
 
@@ -170,10 +174,11 @@ namespace AfterSchoolLibrary.Services
             return false;
         }
 
-        public static ActivityWebUser GetActivityWebUser(this WebUser user, Activity a, DatabaseConnection dc = null)
+        public static ActivityWebUser GetActivityWebUser(this WebUser user, Activity a, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return a.ID.HasValue ? ActivityWebUser.LoadByActivityIdByWebUserId(a.ID.Value, user.ID.Value, dc: dc) : null;
+            return a.ID.HasValue ? ActivityWebUser.LoadByActivityIdByWebUserId(a.ID.Value, user.ID.Value, msgs, dc) : null;
         }
+
         public static bool IsActiveFor(this WebUser user, Account a, DatabaseConnection dc = null)
         {
             return user.HasAccessTo(a, dc: dc);

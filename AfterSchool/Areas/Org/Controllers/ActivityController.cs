@@ -1751,9 +1751,10 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Team(string id)
         {
             var activity = Activity.LoadByUid(id.ToGuid());
+            var msgs = new SystemMessages();
 
-            ViewBag.Messages = new SystemMessages();
-            ViewBag.Users = SessionVariables.CurrentAccount.GetMembers().Select(x => x.ToWebUser()).ToList();
+            ViewBag.Users = SessionVariables.CurrentAccount.GetUsers(msgs: msgs);
+            ViewBag.Messages = msgs;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             return View(activity);
         }
@@ -1766,20 +1767,21 @@ namespace AfterSchool.Areas.Org.Controllers
             Account account = null;
             List<WebUser> users = null;
 
-            Database.ExecuteTransaction(
+            Database.ExecuteTransaction
+            (
                 action: (SystemMessages amsgs, DatabaseConnection adc) => {
 
                     activity = Activity.LoadByUid(id.ToGuid(), amsgs, adc);
                     account = activity.GetAccount(amsgs, adc);
-                    users = account.GetMembers(amsgs, adc).Select(x => x.ToWebUser()).ToList();
+                    users = account.GetUsers(msgs: amsgs, dc: adc);
 
-                    foreach (var user in users)
+                    users.ForEach(user =>
                     {
                         var doNotSkip = !(activity.CreatedBy.Value == user.ID.Value || SessionVariables.CurrentUser.ID == user.ID);
 
                         if (doNotSkip)
                         {
-                            var awu = user.GetActivityWebUser(activity, dc: adc);
+                            var awu = user.GetActivityWebUser(activity, amsgs, adc);
 
                             if (Request["onteam-" + user.ID.Value.ToString()].IsNotEmpty())
                             {
@@ -1793,13 +1795,9 @@ namespace AfterSchool.Areas.Org.Controllers
                                 }
 
                                 if (Request["isleader-" + user.ID.Value.ToString()].IsNotEmpty())
-                                {
                                     awu.IsLeader = true;
-                                }
                                 else
-                                {
                                     awu.IsLeader = false;
-                                }
 
                                 awu.LastModifiedDate = DateTime.UtcNow;
                                 awu.LastModifiedBy = SessionVariables.CurrentUser.ID;
@@ -1807,19 +1805,16 @@ namespace AfterSchool.Areas.Org.Controllers
 
                             }
                             else if (awu.IsNotEmpty())
-                            {
                                 amsgs.AddRange(awu.Delete(adc));
-                            }
                         }
-                    }
+                    });
                 },
                 onSuccess: (SystemMessages smsgs) => {
                     msgs.AddRange(smsgs);
                     msgs.Add("The Activity Team has been updated", MessageType.Success);
                 },
-                onFailure: (SystemMessages fmsgs) => {
-                    msgs.AddRange(fmsgs);
-                }
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
             );
 
             ViewBag.Messages = msgs;

@@ -544,13 +544,15 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Team(string id)
+        public ActionResult Team()
         {
-            var members = SessionVariables.CurrentAccount.GetMembers().Select(x => x.ToWebUser()).ToList();
-            ViewBag.Messages = new SystemMessages();
+            var msgs = new SystemMessages();
+            var members = SessionVariables.CurrentAccount.GetUsers(msgs: msgs);
+
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Members = members;
-            ViewBag.NeedToUpgrade = members.Count >= SessionVariables.AccountPackage.GetFeature(FeatureType.TeamAccounts).GetMaxValue();
+            ViewBag.NeedToUpgrade = members.Count >= SessionVariables.AccountPackage.GetFeature(FeatureType.TeamAccounts, msgs).GetMaxValue();
+            ViewBag.Messages = msgs;
             return View(SessionVariables.CurrentAccount);
         }
 
@@ -598,7 +600,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
                 msgs.Add("All invites have been sent", MessageType.Success);
 
-            var members = SessionVariables.CurrentAccount.GetMembers().Select(x => x.ToWebUser()).ToList();
+            var members = SessionVariables.CurrentAccount.GetUsers(msgs: msgs);
             ViewBag.Messages = msgs;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Members = members;
