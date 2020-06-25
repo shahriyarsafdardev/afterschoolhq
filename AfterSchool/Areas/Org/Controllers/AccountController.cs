@@ -544,13 +544,15 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Team(string id)
+        public ActionResult Team()
         {
-            var members = SessionVariables.CurrentAccount.GetMembers().Select(x => x.ToWebUser()).ToList();
-            ViewBag.Messages = new SystemMessages();
+            var msgs = new SystemMessages();
+            var members = SessionVariables.CurrentAccount.GetMembers(msgs: msgs).Select(x => x.ToWebUser()).ToList();
+
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Members = members;
-            ViewBag.NeedToUpgrade = members.Count >= SessionVariables.AccountPackage.GetFeature(FeatureType.TeamAccounts).GetMaxValue();
+            ViewBag.NeedToUpgrade = members.Count >= SessionVariables.AccountPackage.GetFeature(FeatureType.TeamAccounts, msgs).GetMaxValue();
+            ViewBag.Messages = msgs;
             return View(SessionVariables.CurrentAccount);
         }
 

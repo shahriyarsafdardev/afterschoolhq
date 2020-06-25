@@ -9,5 +9,6 @@ public enum UserType
 	Staff,
 	Parent,
 	ProgramDirector,
-	Treasurer
+	Treasurer,
+	TechSupport
 }
