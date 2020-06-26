@@ -57,9 +57,9 @@
                     <label class="col-sm-3 control-label">Is Active</label>
                     <div class="col-sm-6">
                         @{ Html.RenderPartial(
-                      "~/Views/Shared/_SwitchButton.cshtml",
-                      Model.IsActive,
-                      new ViewDataDictionary() { { "checkboxname", "isactive" }, { "checkboxid", "isactive" } });
+                          "~/Views/Shared/_SwitchButton.cshtml",
+                          Model.IsActive,
+                          new ViewDataDictionary() { { "checkboxname", "isactive" }, { "checkboxid", "isactive" } });
                         }
                     </div>
                 </div>

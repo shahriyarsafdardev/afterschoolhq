@@ -14,7 +14,7 @@
         <div class="panel-heading">
             <a href="@Url.Action("invite", "account")" class="btn btn-primary btn-space pull-right">
                 <i class="icon icon-left s7-plus"></i>
-                Invite Account
+                Add Account
             </a>
             <i class="s7-id"></i> Accounts
         </div>
@@ -57,11 +57,11 @@
                         foreach (var account in Model)
                         {
                             <tr>
-                                <td>
-                                    @if (account.GetActiveUserCount() > 0)
-                                    {
-                                        <a href="@Url.Action("impersonate", "user", new { id = account.ID })" class="btn btn-primary btn-xs"><i class="icon icon-left s7-id"></i> View</a>
-                                    }
+                                <td>                                    
+                                    <a href="@Url.Action("loginto", "account", new { id = account.Uid })" class="btn btn-primary btn-xs">
+                                        <i class="icon icon-left s7-id"></i> 
+                                        Login
+                                    </a>
                                 </td>
                                 <td>@account.Name</td>
                                 <td>@account.AccountNumber</td>
@@ -69,13 +69,13 @@
                                 <td>@account.IsActive.ToYesNo()</td>
                                 <td>@account.CreateDate.Value.ToLongDateString()</td>
                                 <td>
-                                    @if (account.GetUserCount() == 0)
+                                    @if (account.GetMemberCount() == 0)
                                     {
                                         <a href="@Url.Action("invite", "account", new { id = account.Uid })" class="btn btn-default btn-sm">
                                             Invite To Account
                                         </a>
                                     }
-                                    else if (account.GetActiveUserCount() == 0)
+                                    else if (account.GetActiveMemberCount() == 0)
                                     {
                                         <a href="@Url.Action("resendinvite", "account", new { id = account.Uid })" class="btn btn-default btn-sm">
                                             Resend Invite

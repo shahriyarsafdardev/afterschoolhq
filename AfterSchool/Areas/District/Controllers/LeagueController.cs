@@ -268,7 +268,7 @@ namespace AfterSchool.Areas.District.Controllers
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
 
-            int userCount = SessionVariables.CurrentAccount.GetUserCount();
+            int userCount = SessionVariables.CurrentAccount.GetMemberCount();
             var activityGroup = ActivityGroup.LoadByUid(id.ToGuid());
             var teams = activityGroup.GetLeagueTeams(SessionVariables.CurrentAccount, AccountType.School);
     

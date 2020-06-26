@@ -30,6 +30,7 @@ namespace AfterSchoolLibrary.Models
 		public bool IsDefault { get { return (bool)MDV["IsDefault"].Value; } set { MDV["IsDefault"].Value = value; } }
 		public UserType UserTypeId { get { return (UserType)MDV["UserTypeId"].Value; } set { MDV["UserTypeId"].Value = value; } }
 		public bool IsDeleted { get { return (bool)MDV["IsDeleted"].Value; } set { MDV["IsDeleted"].Value = value; } }
+		public bool IsGhostAccount { get { return (bool)MDV["IsGhostAccount"].Value; } set { MDV["IsGhostAccount"].Value = value; } }
 		public string WebUserUsername { get { return (string)MDV["WebUserUsername"].Value; } }
 		public string WebUserEmail { get { return (string)MDV["WebUserEmail"].Value; } }
 		public string WebUserFirstName { get { return (string)MDV["WebUserFirstName"].Value; } }
@@ -55,6 +56,7 @@ namespace AfterSchoolLibrary.Models
 			this.IsDefault = false;
 			this.UserTypeId = UserType.NotSet;
 			this.IsDeleted = false;
+			this.IsGhostAccount = false;
 			
         }
 
@@ -71,6 +73,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "IsDefault", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "UserTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "IsDeleted", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "IsGhostAccount", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "WebUserUsername", typeof(WebUser).Name, "Username", System.Data.SqlDbType.NVarChar, "WebUser");
 				_dp.Add(className, "WebUserEmail", typeof(WebUser).Name, "Email", System.Data.SqlDbType.NVarChar, "WebUser");
 				_dp.Add(className, "WebUserFirstName", typeof(WebUser).Name, "FirstName", System.Data.SqlDbType.NVarChar, "WebUser");
@@ -187,6 +190,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["IsDeleted"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsGhostAccount"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
@@ -327,8 +334,44 @@ namespace AfterSchoolLibrary.Models
         public bool HasPermission(PermissionType permissionType)
         {
             return Permissions.HasPermission(this.UserTypeId, permissionType);
-        }
+		}
 
-        #endregion
+		public static List<AccountWebUser> LoadByWebUserId(int WebUserId, bool IsActive, bool IsDeleted, bool isGhostAccount, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["WebUserId"], WebUserId);
+			dq.Criterias.Add(ObjectMap["IsActive"], IsActive);
+			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
+			dq.Criterias.Add(ObjectMap["IsGhostAccount"], isGhostAccount);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<AccountWebUser> LoadByAccountId(int AccountId, bool IsDeleted, bool isGhostAccount, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
+			dq.Criterias.Add(ObjectMap["IsGhostAccount"], isGhostAccount);
+			dq.SelectRange.Start = start;
+			dq.SelectRange.Length = length;
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<AccountWebUser> LoadByAccountId(int AccountId, bool IsActive, bool IsDeleted, bool isGhostAccount, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+			dq.Criterias.Add(ObjectMap["IsActive"], IsActive);
+			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
+			dq.Criterias.Add(ObjectMap["IsGhostAccount"], isGhostAccount);
+			dq.SelectRange.Start = start;
+			dq.SelectRange.Length = length;
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		#endregion
     }
 }

@@ -337,7 +337,7 @@ namespace AfterSchoolLibraryTests.Tests
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             var awu = Factories.ActivityWebUserFactory.Create(activity, user, msgs, dc: dc);
 
-            Assert.NotNull(user.GetActivityWebUser(activity, dc: dc));
+            Assert.NotNull(user.GetActivityWebUser(activity, msgs, dc));
         }
 
         [Fact(DisplayName = "Is User the activity leader for an activity")]

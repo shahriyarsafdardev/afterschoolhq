@@ -222,6 +222,7 @@ namespace AfterSchoolLibrary.Models
 			Account.Update(new Hashtable(){{"StripePayoutsEnabled",false}}, new Hashtable(){{"StripePayoutsEnabled", DBNull.Value}}, Account.ObjectMap, dc);
 			Account.Update(new Hashtable(){{"IsTest",false}}, new Hashtable(){{"IsTest", DBNull.Value}}, Account.ObjectMap, dc);
 			Account.Update(new Hashtable(){{"IsDeleted",false}}, new Hashtable(){{"IsDeleted", DBNull.Value}}, Account.ObjectMap, dc);
+			Account.Update(new Hashtable(){{"IsClaimed",false}}, new Hashtable(){{"IsClaimed", DBNull.Value}}, Account.ObjectMap, dc);
 			AccountProfile.Update(new Hashtable(){{"GenderRestriction",0}}, new Hashtable(){{"GenderRestriction", DBNull.Value}}, AccountProfile.ObjectMap, dc);
 			CheckPaymentAccount.Update(new Hashtable(){{"IsVerified",false}}, new Hashtable(){{"IsVerified", DBNull.Value}}, CheckPaymentAccount.ObjectMap, dc);
 			CheckPaymentAccount.Update(new Hashtable(){{"LegalEntityTypeId",0}}, new Hashtable(){{"LegalEntityTypeId", DBNull.Value}}, CheckPaymentAccount.ObjectMap, dc);
@@ -242,6 +243,7 @@ namespace AfterSchoolLibrary.Models
 			AccountWebUser.Update(new Hashtable(){{"IsDefault",false}}, new Hashtable(){{"IsDefault", DBNull.Value}}, AccountWebUser.ObjectMap, dc);
 			AccountWebUser.Update(new Hashtable(){{"UserTypeId",0}}, new Hashtable(){{"UserTypeId", DBNull.Value}}, AccountWebUser.ObjectMap, dc);
 			AccountWebUser.Update(new Hashtable(){{"IsDeleted",false}}, new Hashtable(){{"IsDeleted", DBNull.Value}}, AccountWebUser.ObjectMap, dc);
+			AccountWebUser.Update(new Hashtable(){{"IsGhostAccount",false}}, new Hashtable(){{"IsGhostAccount", DBNull.Value}}, AccountWebUser.ObjectMap, dc);
 			RegistrationPeriod.Update(new Hashtable(){{"RegistrationModeId",0}}, new Hashtable(){{"RegistrationModeId", DBNull.Value}}, RegistrationPeriod.ObjectMap, dc);
 			ActivityRegistrationPeriod.Update(new Hashtable(){{"IsActive",false}}, new Hashtable(){{"IsActive", DBNull.Value}}, ActivityRegistrationPeriod.ObjectMap, dc);
 			ActivityGroup.Update(new Hashtable(){{"RegistrationModeId",0}}, new Hashtable(){{"RegistrationModeId", DBNull.Value}}, ActivityGroup.ObjectMap, dc);

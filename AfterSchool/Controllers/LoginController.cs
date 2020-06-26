@@ -104,9 +104,11 @@ namespace AfterSchool.Controllers
                 return LoginRedirect();
             }
 
+            var accounts = SessionVariables.CurrentUser.GetAccounts(msgs);
+
             ViewBag.ReturnUrl = returnurl;
             ViewBag.Messages = msgs;
-            return View(SessionVariables.CurrentUser.GetAccounts());
+            return View(accounts);
         }
 
         [HttpGet]

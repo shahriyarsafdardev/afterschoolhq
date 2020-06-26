@@ -9,6 +9,7 @@ using AfterSchoolLibrary.Services;
 using AfterSchool.Models;
 using System.Collections;
 using BasicLibrary.DataAccess;
+using System.Web.WebPages;
 
 namespace AfterSchool.Areas.Admin.Controllers
 {
@@ -96,15 +97,17 @@ namespace AfterSchool.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public ActionResult Invite(string id, string orgname, string accounttype, string package, string billingperiod, string email, string firstname, string lastname, string message)
+        public ActionResult Invite(string id, string orgname, string accounttype, string package, string billingperiod, string email, string firstname, string lastname, string message, string isUnclaimed, string timezone)
         {
             var msgs = new SystemMessages();
+            var sendInvite = !isUnclaimed.IsNumber();
+
             WebUser user = null;
             Account account = null;
 
             if (!id.IsGuid())
             {
-                if (orgname.IsEmpty())
+                if (orgname.IsBlank())
                     msgs.Add("Organization Name is required", MessageType.UserError);
                 if (!accounttype.IsNumber())
                     msgs.Add("Organization type is required", MessageType.UserError);
@@ -117,15 +120,15 @@ namespace AfterSchool.Areas.Admin.Controllers
             if (!billingperiod.IsNumber())
                 msgs.Add("Billing Period is required", MessageType.UserError);
 
-            if (email.IsEmpty())
-                msgs.Add("Email is required", MessageType.UserError);
-            else if (!email.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
-                msgs.Add("Email must be valid", MessageType.UserError);
-
-            if (firstname.IsEmpty())
-                msgs.Add("First Name is required", MessageType.UserError);
-            if (lastname.IsEmpty())
-                msgs.Add("Last Name is required", MessageType.UserError);
+            if (sendInvite)
+            {
+                if (!email.IsEmail())
+                    msgs.Add("Email is required and must be valid", MessageType.UserError);
+                if (firstname.IsBlank())
+                    msgs.Add("First Name is required", MessageType.UserError);
+                if (lastname.IsBlank())
+                    msgs.Add("Last Name is required", MessageType.UserError);
+            }
 
             if (msgs.HasNoErrors())
             {
@@ -143,18 +146,21 @@ namespace AfterSchool.Areas.Admin.Controllers
                                 adc
                             );
 
-                            user = account.AddUser(
-                                firstname, 
-                                lastname, 
-                                email, 
-                                UserType.Owner, 
-                                SessionVariables.CurrentUser, 
-                                amsgs, 
-                                adc);
+                            if (sendInvite)
+                                user = account.AddUser(
+                                    firstname, 
+                                    lastname, 
+                                    email, 
+                                    UserType.Owner, 
+                                    SessionVariables.CurrentUser, 
+                                    amsgs, 
+                                    adc);
                         }
                         else
                         {
-                            user = WebUserService.InviteNew(
+                            if (sendInvite)
+                            {
+                                user = WebUserService.InviteNew(
                                 firstName: firstname,
                                 lastName: lastname,
                                 email: email,
@@ -162,29 +168,48 @@ namespace AfterSchool.Areas.Admin.Controllers
                                 msgs: amsgs,
                                 dc: adc);
 
-                            account = user.AddNewAccount(
-                                orgName: orgname,
-                                phone: null,
-                                isActive: true,
-                                accountType: (AccountType)accounttype.ToInteger(),
-                                packageId: package.ToInteger(),
-                                packageBillingPeriod: (BillingPeriodType)billingperiod.ToInteger(),
-                                timeZone: null,
-                                isAfterSchool: SessionVariables.IsAfterSchool.Value,
-                                loggedInUser: SessionVariables.CurrentUser,
-                                msgs: amsgs,
-                                dc: adc);
+                                account = user.AddNewAccount(
+                                    orgName: orgname,
+                                    phone: null,
+                                    isActive: true,
+                                    accountType: (AccountType)accounttype.ToInteger(),
+                                    packageId: package.ToInteger(),
+                                    packageBillingPeriod: (BillingPeriodType)billingperiod.ToInteger(),
+                                    timeZone: timezone,
+                                    isAfterSchool: SessionVariables.IsAfterSchool.Value,
+                                    loggedInUser: SessionVariables.CurrentUser,
+                                    msgs: amsgs,
+                                    dc: adc);
+                            }
+                            else
+                            {
+                                account = AccountService.CreateNewUnclaimedAccount(
+                                            orgName: orgname, 
+                                            email: null,
+                                            phone: null,
+                                            isActive: true,
+                                            accountType:(AccountType)accounttype.ToInteger(),
+                                            accountOwner: SessionVariables.CurrentUser,
+                                            packageId: package.ToInteger(),
+                                            packageBillingPeriod: (BillingPeriodType)billingperiod.ToInteger(),
+                                            timeZone: timezone,
+                                            loggedInUser: SessionVariables.CurrentUser,
+                                            isAfterSchool: false,
+                                            createWithStripe: false,
+                                            msgs: amsgs, 
+                                            dc: adc);
+                            }
                         }
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
                         msgs.AddRange(smsgs);
-                        msgs.AddRange(account.SendInvitedEmail(user, SessionVariables.CurrentUser, message));
+
+                        if (sendInvite)
+                            msgs.AddRange(account.SendInvitedEmail(user, SessionVariables.CurrentUser, message));
                     },
-                    onFailure: (SystemMessages fmsgs) =>
-                    {
-                        msgs.AddRange(fmsgs);
-                    }
+                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                    onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
                 );             
             }
 
@@ -196,6 +221,26 @@ namespace AfterSchool.Areas.Admin.Controllers
             ViewBag.Account = account;
             ViewBag.Packages = Package.LoadByIsActiveByIsAfterSchool(true, SessionVariables.IsAfterSchool.Value);
             return View();
+        }
+
+        public ActionResult LoginTo(string id)
+        {
+            var msgs = new SystemMessages();
+
+            if (id.IsGuid())
+            {
+                var account = Account.LoadByUid(id.ToGuid(), msgs);
+
+                if (!SessionVariables.CurrentUser.HasAccessTo(account, msgs))
+                    account.AddGhostUser(SessionVariables.CurrentUser, UserType.TechSupport, SessionVariables.CurrentUser, msgs);
+
+                SessionVariables.OriginalLoggedInUser = SessionVariables.CurrentUser;
+                LoadSessionInfo(SessionVariables.CurrentUser, account, false, msgs);
+
+                return LoginRedirect();
+            }
+
+            return RedirectToAction("index");
         }
     }
 }

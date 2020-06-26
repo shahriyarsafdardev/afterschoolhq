@@ -174,7 +174,8 @@
                         </div>
 
                         <button class="btn btn-header-action btn-share">
-                            <i class="icon icon-left ion-share"></i>
+                            <i class="icon icon-left ion-share hide"></i>
+                            <i class="icon icon-left s7-share"></i>
                             Share
 
                             @if (Model.ParticipationObject.IsNotEmpty())
@@ -195,18 +196,28 @@
                                 <span class="">View @UILabel.ActivityLabel(ActivityType.Activity, true)</span>
                             </button>
 
-                            if (SessionVariables.CurrentUser.IsNotEmpty())
+                            if (Model.Account.IsClaimed)
                             {
-                                <button onclick="location.href='@Model.Account.PayUrl'" class="btn btn-header-action">
-                                    <i class="icon icon-left s7-credit"></i>
-                                    <span class="">Make A Payment</span>
-                                </button>
+                                if (SessionVariables.CurrentUser.IsNotEmpty())
+                                {
+                                    <button onclick="location.href='@Model.Account.PayUrl'" class="btn btn-header-action">
+                                        <i class="icon icon-left s7-credit"></i>
+                                        <span class="">Make A Payment</span>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-header-action md-trigger" data-modal="modal-login" onclick="setLoginRedirect('@Model.Account.PayUrl')">
+                                        <i class="icon icon-left s7-credit"></i>
+                                        <span class="">Make A Payment</span>
+                                    </button>
+                                }
                             }
                             else
                             {
-                                <button type="button" class="btn btn-header-action md-trigger" data-modal="modal-login" onclick="setLoginRedirect('@Model.Account.PayUrl')">
-                                    <i class="icon icon-left s7-credit"></i>
-                                    <span class="">Make A Payment</span>
+                                <button class="btn btn-header-action md-trigger" data-modal="modal-claim-profile" onclick="resetClaimForm()">
+                                    <i class="icon icon-left s7-door-lock"></i>
+                                    <span class="">Claim Profile</span>
                                 </button>
                             }
                         }
@@ -231,14 +242,10 @@
 <div id="modal-share" class="md-modal colored-header modal-colored-header modal-colored-header-dark custom-width md-effect-9">
 
     <div class="md-content">
-        <div class="modal-header">
-            <button type="button" data-dismiss="modal" id="modal-share-close" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
-            <h3 class="modal-title">Share</h3>
-        </div>
         <div class="modal-body">
-
+            <button type="button" data-dismiss="modal" id="modal-share-close" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
             <div class="col-md-12">
-                <div class="login-form">
+                <div>
                     <div class="form-group text-center">
 
                         <div>
@@ -287,10 +294,65 @@
                             </a>
                             <span style="font-size: 12px;">Facebook</span>
                         </div>
+
+                        <div class="footer-social-icon text-center hide">
+                            <span id="share-more"
+                                  class="icon-xlarge margin-h-30"
+                                  style="text-decoration: none; cursor: pointer;"
+                                  target="_blank"
+                                  title="More...">
+                                <i class="ion-ios-more"></i>
+                            </span>
+                            <span style="font-size: 12px; text-align: center;">More</span>
+                        </div>
+
                     </div>
                 </div>
             </div>
 
+        </div>
+    </div>
+</div>
+
+<div id="modal-claim-profile" class="md-modal colored-header modal-colored-header modal-colored-header-dark custom-width md-effect-9">
+    <div class="md-content">
+        <div class="modal-body">
+            <button type="button" data-dismiss="modal" id="modal-share-close" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+            <div class="col-md-12">
+                <div id="claim-profile-form">
+                    <div class="form-group">
+                        <p>Please submit your information below to begin the claim process</p>
+                    </div>
+                    <div class="form-group">
+                        <label>First Name</label>
+                        <input id="claim-firstname" type="text" autocomplete="off" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name</label>
+                        <input id="claim-lastname" type="text" autocomplete="off" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input id="claim-email" type="email" autocomplete="off" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input id="claim-phone" type="text" autocomplete="off" class="form-control" required>
+                    </div>
+                    <div class="form-group claim-profile-submit text-center">
+                        <button type="button" id="btn-claim-profile" class="btn btn-primary btn-lg btn-block" onclick="claimProfile()">Claim Profile</button>
+                    </div>
+                </div>
+                <div id="claim-profile-done" class="hide">
+                    <h2>Thank you!</h2>
+                    <p>Your information has been submitted. Someone will be in touch with you shortly.</p>
+                    <p>
+                        <button type="button" data-dismiss="modal" id="modal-share-close" class="btn btn-primary btn-lg btn-block md-close">
+                            Close
+                        </button>
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -300,8 +362,8 @@
     PageEvent.add(PageEvent.AFTER_INIT, function () {
 
         if (navigator.share) {
-
-            $('.btn-share').click(function () {
+            $('#share-more').parent().removeClass('hide');
+            $('#share-more').click(function () {
                 navigator.share({
                     title: '@shareObject',
                     url: '@shareUrl',
@@ -311,15 +373,14 @@
                 }).catch(console.error);
             });
 
-        } else {
-            $('.btn-share').click(function () {
-                $('#modal-share').addClass('md-show');
-                $('#modal-share-close').click(function () {
-                    $('#modal-share').removeClass('md-show');
-                });
-            });
-
         }
+
+        $('.btn-share').click(function () {
+            $('#modal-share').addClass('md-show');
+            $('#modal-share-close').click(function () {
+                $('#modal-share').removeClass('md-show');
+            });
+        });
 
     });
 
@@ -384,4 +445,35 @@
             }, 3000);
         })
     }
-</script>
+
+    function resetClaimForm() {
+        $('#claim-profile-form').removeClass('hide');
+        $('#claim-profile-done').addClass('hide');
+    }
+
+    function claimProfile() {
+
+        params = 'profile=@Model.Account.Uid&firstname=' + encodeURIComponent($('#claim-firstname').val()) + '&lastname=' + encodeURIComponent($('#claim-lastname').val()) + '&email=' + encodeURIComponent($('#claim-email').val()) + '&phone=' + encodeURIComponent($('#claim-phone').val());
+
+        $('#btn-claim-profile').html('Submitting...');
+        $('#btn-claim-profile').prop('disabled', true);
+
+        $.post(
+            '@Url.Action("claimprofile", "services")',
+            params,
+            function (data) {
+
+                $('#btn-claim-profile').prop('disabled', false);
+                $('#btn-claim-profile').html('Claim Profile');
+
+                if (data && data.status == 'ok') {
+                    $('#claim-profile-form').addClass('hide');
+                    $('#claim-profile-done').removeClass('hide');
+                } else {
+                    Notifications.showErrors(data.messages);
+                }
+
+            }
+        )
+    }
+    </script>

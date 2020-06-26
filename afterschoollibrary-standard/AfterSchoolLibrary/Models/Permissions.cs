@@ -7,7 +7,8 @@
             switch(userType)
             {
                 case UserType.Owner:
-                case UserType.Administrator:                   
+                case UserType.Administrator:
+                case UserType.TechSupport:
                     return true;
                 case UserType.Treasurer:
                     switch (permissionType)

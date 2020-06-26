@@ -46,6 +46,7 @@ namespace AfterSchoolLibrary.Models
 		public bool StripePayoutsEnabled { get { return (bool)MDV["StripePayoutsEnabled"].Value; } set { MDV["StripePayoutsEnabled"].Value = value; } }
 		public bool IsTest { get { return (bool)MDV["IsTest"].Value; } set { MDV["IsTest"].Value = value; } }
 		public bool IsDeleted { get { return (bool)MDV["IsDeleted"].Value; } set { MDV["IsDeleted"].Value = value; } }
+		public bool IsClaimed { get { return (bool)MDV["IsClaimed"].Value; } set { MDV["IsClaimed"].Value = value; } }
 		
 
         public Account()
@@ -64,6 +65,7 @@ namespace AfterSchoolLibrary.Models
 			this.StripePayoutsEnabled = false;
 			this.IsTest = false;
 			this.IsDeleted = false;
+			this.IsClaimed = false;
 			
         }
 
@@ -96,6 +98,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "StripePayoutsEnabled", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "IsTest", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "IsDeleted", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "IsClaimed", System.Data.SqlDbType.Bit);
 				
                 return _dp;
             }
@@ -259,6 +262,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["IsDeleted"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsClaimed"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
