@@ -243,69 +243,77 @@
 
     <div class="md-content">
         <div class="modal-body">
-            <button type="button" data-dismiss="modal" id="modal-share-close" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
-            <div class="col-md-12">
-                <div>
-                    <div class="form-group text-center">
+            
+            <div class="row">
+                <button type="button" data-dismiss="modal" id="modal-share-close" aria-hidden="true" class="close md-close">
+                    <i class="icon s7-close"></i>
+                </button>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-12">
+                    <div>
+                        <div class="form-group text-center">
 
-                        <div>
-                            <p>
-                                Share <strong>@shareObject</strong> with your friends and family via Web Link, Twitter, or Facebook
-                            </p>
+                            <div>
+                                <p>
+                                    Share <strong>@shareObject</strong> with your friends and family via Web Link, Twitter, or Facebook
+                                </p>
+                            </div>
+
+                            <div class="footer-social-icon text-center">
+                                <input type="text" value="@shareUrl" id="account-reg-url" onclick="this.select()" class="form-control inline hidden" />
+                                <span class="icon-xlarge pointer"
+                                      style="text-decoration: none;"
+                                      onclick="copyUrlToShare()"
+                                      title="Copy Url">
+                                    <i class="ion-ios-world-outline"></i>
+                                </span>
+                                <span style="font-size: 12px;" id="copy-url-text">Copy Url</span>
+                            </div>
+
+                            <div class="footer-social-icon text-center hide">
+                                <span class="icon-xlarge"
+                                      style="text-decoration: none;">
+                                    <i class="ion-ios-email-outline"></i>
+                                </span>
+                                <span style="font-size: 12px;">Email</span>
+                            </div>
+
+                            <div class="footer-social-icon">
+                                <a href="http://twitter.com/share?text=@Url.Encode($"Check out {shareObject} on {AfterSchoolLibrary.Helpers.Utilities.AppName()}")&url=@Url.Encode(shareUrl)&hashtags=Education,AfterschoolActivities,AfterSchoolHQ"
+                                   class="icon-xlarge"
+                                   style="text-decoration: none;"
+                                   target="_blank"
+                                   title="Share to Twitter">
+                                    <i class="ion-social-twitter-outline"></i>
+                                </a>
+                                <span style="font-size: 12px;">Twitter</span>
+                            </div>
+
+                            <div class="footer-social-icon text-center">
+                                <a href="https://www.facebook.com/sharer/sharer.php?u=@Url.Encode(shareUrl)"
+                                   class="icon-xlarge margin-h-30"
+                                   style="text-decoration: none;"
+                                   target="_blank"
+                                   title="Share to Facebook">
+                                    <i class="ion-social-facebook-outline"></i>
+                                </a>
+                                <span style="font-size: 12px;">Facebook</span>
+                            </div>
+
+                            <div class="footer-social-icon text-center hide">
+                                <span id="share-more"
+                                      class="icon-xlarge margin-h-30"
+                                      style="text-decoration: none; cursor: pointer;"
+                                      target="_blank"
+                                      title="More...">
+                                    <i class="ion-ios-more"></i>
+                                </span>
+                                <span style="font-size: 12px; text-align: center;">More</span>
+                            </div>
+
                         </div>
-
-                        <div class="footer-social-icon text-center">
-                            <input type="text" value="@shareUrl" id="account-reg-url" onclick="this.select()" class="form-control inline hidden" />
-                            <span class="icon-xlarge pointer"
-                                  style="text-decoration: none;"
-                                  onclick="copyUrlToShare()"
-                                  title="Copy Url">
-                                <i class="ion-ios-world-outline"></i>
-                            </span>
-                            <span style="font-size: 12px;" id="copy-url-text">Copy Url</span>
-                        </div>
-
-                        <div class="footer-social-icon text-center hide">
-                            <span class="icon-xlarge"
-                                  style="text-decoration: none;">
-                                <i class="ion-ios-email-outline"></i>
-                            </span>
-                            <span style="font-size: 12px;">Email</span>
-                        </div>
-
-                        <div class="footer-social-icon">
-                            <a href="http://twitter.com/share?text=@Url.Encode($"Check out {shareObject} on {AfterSchoolLibrary.Helpers.Utilities.AppName()}")&url=@Url.Encode(shareUrl)&hashtags=Education,AfterschoolActivities,AfterSchoolHQ"
-                               class="icon-xlarge"
-                               style="text-decoration: none;"
-                               target="_blank"
-                               title="Share to Twitter">
-                                <i class="ion-social-twitter-outline"></i>
-                            </a>
-                            <span style="font-size: 12px;">Twitter</span>
-                        </div>
-
-                        <div class="footer-social-icon text-center">
-                            <a href="https://www.facebook.com/sharer/sharer.php?u=@Url.Encode(shareUrl)"
-                               class="icon-xlarge margin-h-30"
-                               style="text-decoration: none;"
-                               target="_blank"
-                               title="Share to Facebook">
-                                <i class="ion-social-facebook-outline"></i>
-                            </a>
-                            <span style="font-size: 12px;">Facebook</span>
-                        </div>
-
-                        <div class="footer-social-icon text-center hide">
-                            <span id="share-more"
-                                  class="icon-xlarge margin-h-30"
-                                  style="text-decoration: none; cursor: pointer;"
-                                  target="_blank"
-                                  title="More...">
-                                <i class="ion-ios-more"></i>
-                            </span>
-                            <span style="font-size: 12px; text-align: center;">More</span>
-                        </div>
-
                     </div>
                 </div>
             </div>
@@ -317,40 +325,46 @@
 <div id="modal-claim-profile" class="md-modal colored-header modal-colored-header modal-colored-header-dark custom-width md-effect-9">
     <div class="md-content">
         <div class="modal-body">
-            <button type="button" data-dismiss="modal" id="modal-share-close" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
-            <div class="col-md-12">
-                <div id="claim-profile-form">
-                    <div class="form-group">
-                        <p>Please submit your information below to begin the claim process</p>
+            <div class="row">
+                <button type="button" data-dismiss="modal" id="modal-share-close" aria-hidden="true" class="close md-close">
+                    <i class="icon s7-close"></i>
+                </button>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div id="claim-profile-form">
+                        <div class="form-group">
+                            <p>Please submit your information below to begin the claim process</p>
+                        </div>
+                        <div class="form-group">
+                            <label>First Name</label>
+                            <input id="claim-firstname" type="text" autocomplete="off" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Last Name</label>
+                            <input id="claim-lastname" type="text" autocomplete="off" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input id="claim-email" type="email" autocomplete="off" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Phone</label>
+                            <input id="claim-phone" type="text" autocomplete="off" class="form-control" required>
+                        </div>
+                        <div class="form-group claim-profile-submit text-center">
+                            <button type="button" id="btn-claim-profile" class="btn btn-primary btn-lg btn-block" onclick="claimProfile()">Claim Profile</button>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>First Name</label>
-                        <input id="claim-firstname" type="text" autocomplete="off" class="form-control" required>
+                    <div id="claim-profile-done" class="hide">
+                        <h2>Thank you!</h2>
+                        <p>Your information has been submitted. Someone will be in touch with you shortly.</p>
+                        <p>
+                            <button type="button" data-dismiss="modal" id="modal-share-close" class="btn btn-primary btn-lg btn-block md-close">
+                                Close
+                            </button>
+                        </p>
                     </div>
-                    <div class="form-group">
-                        <label>Last Name</label>
-                        <input id="claim-lastname" type="text" autocomplete="off" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input id="claim-email" type="email" autocomplete="off" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Phone</label>
-                        <input id="claim-phone" type="text" autocomplete="off" class="form-control" required>
-                    </div>
-                    <div class="form-group claim-profile-submit text-center">
-                        <button type="button" id="btn-claim-profile" class="btn btn-primary btn-lg btn-block" onclick="claimProfile()">Claim Profile</button>
-                    </div>
-                </div>
-                <div id="claim-profile-done" class="hide">
-                    <h2>Thank you!</h2>
-                    <p>Your information has been submitted. Someone will be in touch with you shortly.</p>
-                    <p>
-                        <button type="button" data-dismiss="modal" id="modal-share-close" class="btn btn-primary btn-lg btn-block md-close">
-                            Close
-                        </button>
-                    </p>
                 </div>
             </div>
         </div>
