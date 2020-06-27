@@ -10756,7 +10756,7 @@ li.L9 {
   font-size: 14px;
 }
 .login-container .panel-default .panel-body .form-group .remember {
-  text-align: right;
+  /*text-align: right;*/
   color: #a3a2a2;
 }
 .login-container .panel-default .panel-body .form-group .remember label {

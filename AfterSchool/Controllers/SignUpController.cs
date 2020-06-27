@@ -376,15 +376,11 @@ namespace AfterSchool.Controllers
             {
                 user = WebUser.LoadByUid(id.ToGuid());
                 if(user.IsRegistered)
-                {
                     user = null;
-                }
             }
 
             if (user.IsEmpty())
-            {
                 msgs.Add("Invalid id", MessageType.UserError);
-            }
 
             ViewBag.Messages = msgs;
             return View(user);
@@ -642,8 +638,11 @@ namespace AfterSchool.Controllers
 
         /* APIS */
         [HttpPost]
-        public ActionResult Personal(string firstname, string lastname, string email)
+        public ActionResult Personal(string firstname, string lastname, string email, string remember)
         {
+            if (!IsRequestFromApp())
+                return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
+
             var msgs = new SystemMessages();
 
             if (firstname.IsBlank())
@@ -655,12 +654,28 @@ namespace AfterSchool.Controllers
             if (email.IsBlank() || !email.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
                 msgs.Add("Email is required and must be a valid email address", MessageType.UserError);
 
+            WebUser user = null;
+            Account account = null;
+
             if (msgs.HasNoErrors())
             {
-                var webUser = WebUserService.StartUserAccount(firstname, lastname, email, msgs);
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        user = WebUserService.StartUserAccount(firstname, lastname, email, amsgs, adc);
+                        account = user.AddNewRegistrantAccount(UserType.Parent, true, true, user, amsgs, adc);
+                    },
+                    onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                    onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                );
 
                 if (msgs.HasNoErrors())
-                    return Json(new { status = "ok", token = webUser.Uid }, JsonRequestBehavior.AllowGet);
+                {
+                    LoadSessionInfo(user, account, remember.ToBoolean(), msgs);
+                    return Json(new { status = "ok", isNewAccount = true }, JsonRequestBehavior.AllowGet);
+                }
             }
 
             return Json(new { status = "error", messages = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
