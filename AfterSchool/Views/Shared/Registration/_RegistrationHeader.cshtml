@@ -200,7 +200,14 @@
                             {
                                 if (SessionVariables.CurrentUser.IsNotEmpty())
                                 {
-                                    <button onclick="location.href='@Model.Account.PayUrl'" class="btn btn-header-action">
+                                    var payUrl = Model.Account.PayUrl;
+
+                                    if (!SessionVariables.CurrentUser.IsActive)
+                                    {
+                                        payUrl = Url.Action("confirm", "signup", new { id = SessionVariables.CurrentUser.Uid, returnurl = payUrl });
+                                    }
+
+                                    <button onclick="location.href='@payUrl'" class="btn btn-header-action">
                                         <i class="icon icon-left s7-credit"></i>
                                         <span class="">Make A Payment</span>
                                     </button>

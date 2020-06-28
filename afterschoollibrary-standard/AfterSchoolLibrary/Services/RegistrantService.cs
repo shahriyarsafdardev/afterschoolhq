@@ -954,7 +954,7 @@ namespace AfterSchoolLibrary.Services
                 answer = new FormQuestionAnswer
                 {
                     RegistrantId = registrant.ID,
-                    FormQuestionId = questionId.Value,
+                    FormQuestionId = questionId,
                     QuestionDataTypeId = questionDataType,
                     QuestionText = questionText,
                     CreateDate = DateTime.UtcNow,

@@ -206,6 +206,34 @@ namespace AfterSchoolLibrary.Services
             return uniqueName;
         }
 
+        public static void ConfirmAccount(this WebUser user, string password, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    user.IsRegistered = true;
+                    user.IsActive = true;
+                    user.Password = WebUserService.EncryptPassword(password);
+                    msgs.AddRange(user.Save(dc));
+
+                    var awus = AccountWebUser.LoadByWebUserIdByIsDeleted(user.ID.Value, false, msgs, dc);
+                    awus.ForEach(awu => {
+                        awu.IsActive = true;
+                        msgs.AddRange(awu.Save(dc));
+                    });
+                },
+                onSuccess: (SystemMessages smsgs) => 
+                {
+                    msgs.AddRange(smsgs);
+                    user.SendVerificationEmail();
+                },
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
+                dc: dc
+            );
+        }
+
         public static SystemMessages SendVerificationEmail(int userId)
         {
             var msgs = new SystemMessages();
@@ -520,23 +548,51 @@ namespace AfterSchoolLibrary.Services
         /// <returns></returns>
         public static Account AddNewRegistrantAccount(this WebUser user, UserType userType, bool isActive, int? packageId, BillingPeriodType? packageBillingPeriod, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var account = AccountService.CreateNew(
-                orgName: $"{user.LastName} Family",
-                email: user.Email,
-                phone: user.Phone,
-                isActive: isActive,
-                accountType: AccountType.Registrant,
-                accountOwner: userType == UserType.Owner ? user : null,
-                packageId: null,
-                packageBillingPeriod: null,
-                timeZone: null,
-                createWithStripe: true,
-                loggedInUser: loggedInUser,
-                isAfterSchool: isAfterSchool,
-                msgs: msgs,
-                dc: dc);
+            Account account = null;
 
-            user.AddAccount(account, userType, loggedInUser, msgs, dc);
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    account = AccountService.CreateNew(
+                                    orgName: $"{user.LastName} Family",
+                                    email: user.Email,
+                                    phone: user.Phone,
+                                    isActive: isActive,
+                                    accountType: AccountType.Registrant,
+                                    accountOwner: userType == UserType.Owner ? user : null,
+                                    packageId: null,
+                                    packageBillingPeriod: null,
+                                    timeZone: null,
+                                    createWithStripe: true,
+                                    loggedInUser: loggedInUser,
+                                    isAfterSchool: isAfterSchool,
+                                    msgs: amsgs,
+                                    dc: adc);
+
+                    user.AddAccount(account, userType, loggedInUser, amsgs, adc);
+
+                    account.CreateRegistrant(
+                        firstName: user.FirstName,
+                        lastName: user.LastName,
+                        email: user.Email,
+                        registrantOwner: user,
+                        canBeAccessedBy: user.AsList(),
+                        registrantType: RegistrantType.Individual,
+                        isMaster: true,
+                        isParentOrGuardian: true,
+                        allowTextMessages: false,
+                        schoolLocationId: null,
+                        profileStatus: RegistrantProfileStatus.Started,
+                        loggedInUser: user,
+                        msgs: amsgs,
+                        dc: adc);
+                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
+                dc: dc
+            );            
 
             return account;
         }

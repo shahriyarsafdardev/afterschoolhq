@@ -85,7 +85,7 @@
                                 }
                                 else if (!SessionVariables.CurrentUser.IsRegistered)
                                 {
-                                    <a href="@Url.Action("confirm", "signup", new { id = SessionVariables.CurrentUser.Uid })" class="btn btn-link">Complete account setup &raquo;</a>
+                                    <a href="@Url.Action("confirm", "signup", new { id = SessionVariables.CurrentUser.Uid, returnurl = Request.Url.ToString() })" class="btn btn-link">Complete account setup &raquo;</a>
                                 }
 
                                 if (Model.HasAccountProfile() && SessionVariables.CurrentUser.HasAccessTo(Model))

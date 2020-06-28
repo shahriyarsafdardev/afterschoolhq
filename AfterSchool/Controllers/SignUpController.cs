@@ -387,38 +387,30 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public ActionResult Confirm(string id, string firstname, string lastname, string email, string password1, string password2)
+        public ActionResult Confirm(string id, string firstname, string lastname, string email, string password1, string password2, string returnurl)
         {
             var msgs = new SystemMessages();
 
             if (!id.IsGuid())
-            {
                 msgs.Add("Invalid id", MessageType.UserError);
-            }
+
             if (firstname.IsEmpty())
-            {
                 msgs.Add("First Name is required", MessageType.UserError);
-            }
+
             if (lastname.IsEmpty())
-            {
-                msgs.Add("First Name is required", MessageType.UserError);
-            }
-            if (email.IsEmpty() || !email.IsMatch(BasicLibrary.Utilities.EmailRegEx))
-            {
+                msgs.Add("Last Name is required", MessageType.UserError);
+
+            if (email.IsEmpty() || !email.IsEmail())
                 msgs.Add("Email is required", MessageType.UserError);
-            }
+
             if (password1.IsEmpty())
-            {
                 msgs.Add("Password is required", MessageType.UserError);
-            }
+
             if (password2.IsEmpty())
-            {
                 msgs.Add("Verify Password is required", MessageType.UserError);
-            }
+
             if (password1 != password2)
-            {
                 msgs.Add("Passwords must match", MessageType.UserError);
-            }
 
             var user = WebUser.LoadByUid(id.ToGuid());
             if (user.IsNotEmpty())
@@ -434,14 +426,11 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
-                user.IsRegistered = true;
-                user.IsActive = true;
-                user.Password = WebUserService.EncryptPassword(password1);
-                msgs.AddRange(user.Save());
-
-                user.SendVerificationEmail(SessionVariables.IsAfterSchool.Value);
-
+                user.ConfirmAccount(password1, msgs);
                 SessionVariables.CurrentUser = user;
+
+                if (returnurl.IsNotEmpty())
+                    return Redirect(returnurl);
 
                 return RedirectToAction("index", "home", new { area = "user" });
             }
@@ -664,7 +653,9 @@ namespace AfterSchool.Controllers
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
                         user = WebUserService.StartUserAccount(firstname, lastname, email, amsgs, adc);
-                        account = user.AddNewRegistrantAccount(UserType.Parent, true, true, user, amsgs, adc);
+
+                        if (user.IsNotEmpty())
+                            account = user.AddNewRegistrantAccount(UserType.Parent, true, true, user, amsgs, adc);
                     },
                     onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
