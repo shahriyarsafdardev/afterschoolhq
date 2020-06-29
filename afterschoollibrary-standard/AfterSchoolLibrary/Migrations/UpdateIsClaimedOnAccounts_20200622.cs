@@ -17,7 +17,7 @@ namespace AfterSchoolLibrary.Migrations
                 {
                     amsgs.AddRange(Account.Update(
                         new Hashtable() { { "IsClaimed", true } }, 
-                        new Hashtable() { { "IsClaimed", DBNull.Value } }, 
+                        new Hashtable() { }, 
                         Account.ObjectMap, 
                         adc));
                 },

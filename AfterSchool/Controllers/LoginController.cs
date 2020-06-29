@@ -41,7 +41,7 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public ActionResult Index(string username, string password, string returnurl)
+        public ActionResult Index(string username, string password, string remember, string returnurl)
         {
             var msgs = new SystemMessages();
 
@@ -65,7 +65,7 @@ namespace AfterSchool.Controllers
                 if (user.IsEmpty())
                     msgs.Add("Invalid username and/or password", MessageType.UserError);
                 else
-                    LoadSessionInfo(user, null, !Request.Params["remember"].IsEmpty(), msgs);
+                    LoadSessionInfo(user, null, remember.ToBoolean(), msgs);
             }
 
             ViewBag.Messages = msgs;
@@ -96,7 +96,10 @@ namespace AfterSchool.Controllers
 
             if (account.IsNotEmpty())
             {
-                LoadSessionInfo(SessionVariables.CurrentUser, account);
+                var remember = CookieVariables.CurrentUser.IsGuid();
+                
+                ClearCookies();
+                LoadSessionInfo(SessionVariables.CurrentUser, account, remember);
 
                 if (returnurl.IsNotEmpty())
                     return Redirect(returnurl);
@@ -202,8 +205,11 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public ActionResult Authorize(string username, string password, string source)
+        public ActionResult Authorize(string username, string password, string remember, string source)
         {
+            if (!IsRequestFromApp())
+                return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
+
             var msgs = new SystemMessages();
             var isNewParentAccount = false;
 
@@ -227,7 +233,7 @@ namespace AfterSchool.Controllers
                 if (user.IsEmpty())
                     msgs.Add("Invalid username and/or password", MessageType.UserError);
                 else
-                    LoadSessionInfo(user, null, Request.Params["remember"].IsNotEmpty(), source, msgs);
+                    LoadSessionInfo(user, null, remember.ToBoolean(), source, msgs);
             }
 
             if (msgs.HasNoErrors())

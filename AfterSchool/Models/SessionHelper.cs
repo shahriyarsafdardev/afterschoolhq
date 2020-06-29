@@ -12,6 +12,8 @@ namespace AfterSchool.Models
             var id = (string)HttpContext.Current.Session["CurrentAccount"];
             if (id.IsNotEmpty())
                 return Account.Load(id.ToInteger(), msgs, dc);
+            else if (CookieVariables.CurrentAccount.IsGuid())
+                return Account.LoadByUid(CookieVariables.CurrentAccount.ToGuid(), msgs, dc);
 
             return null;
         }
@@ -30,6 +32,8 @@ namespace AfterSchool.Models
             var id = (string)HttpContext.Current.Session["LoggedInUser"];
             if (id.IsNotEmpty())
                 return WebUser.Load(id.ToInteger(), msgs, dc);
+            else if (CookieVariables.CurrentUser.IsGuid())
+                return WebUser.LoadByUid(CookieVariables.CurrentUser.ToGuid(), msgs, dc);
 
             return null;
         }

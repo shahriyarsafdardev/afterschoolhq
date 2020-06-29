@@ -56,6 +56,30 @@ namespace AfterSchool.Models
             }
         }
 
+        public static string CurrentUser
+        {
+            get
+            {
+                return GetCookie("CurrentUser");
+            }
+            set
+            {
+                SetCookie("CurrentUser", value);
+            }
+        }
+
+        public static string CurrentAccount
+        {
+            get
+            {
+                return GetCookie("CurrentAccount");
+            }
+            set
+            {
+                SetCookie("CurrentAccount", value);
+            }
+        }
+
         private static string GetCookie(string key)
         {
             if (HttpContext.Current.Request.Cookies[key].IsNotEmpty())
@@ -66,9 +90,16 @@ namespace AfterSchool.Models
 
         private static void SetCookie(string key, string value)
         {
-            HttpContext.Current.Response.Cookies.Remove(key);
-
-            if (value.IsNotEmpty())
+            if (HttpContext.Current.Request.Cookies[key].IsNotEmpty() && value == null)
+            {
+                var cookie = new HttpCookie(key)
+                {
+                    Expires = DateTime.UtcNow.AddDays(-1),
+                    HttpOnly = true
+                };
+                HttpContext.Current.Response.Cookies.Add(cookie);
+            }
+            else if (value.IsNotEmpty())
             {
                 var cookie = new HttpCookie(key)
                 {
