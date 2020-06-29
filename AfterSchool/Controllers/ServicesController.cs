@@ -16,21 +16,6 @@ namespace AfterSchool.Controllers
     {
         // GET: Services
 
-        private bool IsRequestFromApp()
-        {
-            var origin = (Request.Headers["Origin"] ?? Request.Headers["Referer"]).ToLower();
-            if (origin.StartsWith("https://afterschoolhq.com") ||
-                origin.StartsWith("https://qa.afterschoolhq.com") ||
-                origin.StartsWith("https://ci.afterschoolhq.com") ||
-                origin.StartsWith("https://staging.afterschoolhq.com") ||
-                origin.StartsWith("http://localhost:54849"))
-            {
-                return true;
-            }
-
-            return false;
-        }
-
         #region Checkout
 
         [HttpGet]

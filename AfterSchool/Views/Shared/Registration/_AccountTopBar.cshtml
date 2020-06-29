@@ -50,9 +50,15 @@
 
                 @if (SessionVariables.CurrentUser.IsNotEmpty())
                 {
-                    <span class="reg-login-bar-title">@SessionVariables.CurrentAccount.Name</span>
+                    if (SessionVariables.CurrentAccount.IsNotEmpty())
+                    {
+                        <span class="reg-login-bar-title">@SessionVariables.CurrentAccount.Name</span>
+                    }
+                    else
+                    {
+                        <span class="reg-login-bar-title">@SessionVariables.CurrentUser.DisplayName</span>
+                    }
                 }
-
             </div>
 
             @if (!isDuringProfileSetup)
@@ -72,7 +78,15 @@
                                         Approve &amp; Publish Activity &raquo;
                                     </a>
                                 }
-                                <a href="@dashboardUrl" class="btn btn-link">View @accountOrDashboard</a>
+
+                                if (SessionVariables.CurrentUser.IsActive)
+                                {
+                                    <a href="@dashboardUrl" class="btn btn-link">View @accountOrDashboard</a>
+                                }
+                                else if (!SessionVariables.CurrentUser.IsRegistered)
+                                {
+                                    <a href="@Url.Action("confirm", "signup", new { id = SessionVariables.CurrentUser.Uid, returnurl = Request.Url.ToString() })" class="btn btn-link">Complete account setup &raquo;</a>
+                                }
 
                                 if (Model.HasAccountProfile() && SessionVariables.CurrentUser.HasAccessTo(Model))
                                 {

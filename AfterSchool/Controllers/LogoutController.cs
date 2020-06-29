@@ -21,8 +21,12 @@ namespace AfterSchool.Controllers
 
             if (SessionVariables.OriginalLoggedInUser.IsNotEmpty())
             {
-                LoadSessionInfo(SessionVariables.OriginalLoggedInUser, msgs: msgs);
-                SessionVariables.OriginalLoggedInUser = null;
+                var remember = CookieVariables.CurrentUser.IsGuid();
+                
+                ClearCookies();
+                LoadSessionInfo(SessionVariables.OriginalLoggedInUser, null, remember, msgs);
+                ClearOriginalLoggedInUser();
+
                 return LoginRedirect();
             }
 

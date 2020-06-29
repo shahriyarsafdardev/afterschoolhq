@@ -21,6 +21,21 @@ namespace AfterSchool.Models
 
         }
 
+        protected bool IsRequestFromApp()
+        {
+            var origin = (Request.Headers["Origin"] ?? Request.Headers["Referer"]).ToLower();
+            if (origin.StartsWith("https://afterschoolhq.com") ||
+                origin.StartsWith("https://qa.afterschoolhq.com") ||
+                origin.StartsWith("https://ci.afterschoolhq.com") ||
+                origin.StartsWith("https://staging.afterschoolhq.com") ||
+                origin.StartsWith("http://localhost:54849"))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         protected override void Initialize(System.Web.Routing.RequestContext requestContext)
         {
             base.Initialize(requestContext);
@@ -209,9 +224,11 @@ namespace AfterSchool.Models
                 SessionVariables.AccountPackage = SessionVariables.CurrentAccount.GetActiveAccountPackage();
 
             //set login cookies
-            if (doRememberMe)
+            if (doRememberMe && SessionVariables.CurrentUser.IsNotEmpty())
             {
                 // TO DO: RE-ADD Remember me code
+                CookieVariables.CurrentUser = SessionVariables.CurrentUser.Uid.ToString();
+                CookieVariables.CurrentAccount = SessionVariables.CurrentAccount?.Uid.ToString();
             }
         }
 
@@ -223,30 +240,24 @@ namespace AfterSchool.Models
             return RedirectToAction("select", "login");
         }
 
+        internal void ClearOriginalLoggedInUser()
+        {
+            SessionVariables.OriginalLoggedInUser = null;
+        }
+
+        internal void ClearCookies()
+        {
+            CookieVariables.CurrentUser = null;
+            CookieVariables.CurrentAccount = null;
+        }
+
         internal ActionResult Logout(string returnUrl = null, bool goToLoginScreenBeforeReturn = false)
         {
             SessionVariables.CurrentUser = null;
             SessionVariables.OriginalLoggedInUser = null;
             SessionVariables.CurrentAccount = null;
             SessionVariables.CurrentRegistrant = null;
-
-            // Clear login cookies
-            if (!Request.Cookies["sessionuser"].IsEmpty())
-            {
-                HttpCookie cookieUser = Request.Cookies["sessionuser"];
-                Response.Cookies.Remove("sessionuser");
-                cookieUser.Expires = DateTime.Now.AddDays(-1);
-                cookieUser.Value = null;
-                Response.SetCookie(cookieUser);
-            }
-            if (!Request.Cookies["sessionAccount"].IsEmpty())
-            {
-                HttpCookie cookieUser = Request.Cookies["sessionAccount"];
-                Response.Cookies.Remove("sessionAccount");
-                cookieUser.Expires = DateTime.Now.AddDays(-1);
-                cookieUser.Value = null;
-                Response.SetCookie(cookieUser);
-            }
+            ClearCookies();
 
             if (returnUrl.IsNotEmpty() && !goToLoginScreenBeforeReturn)
                 return Redirect(returnUrl);

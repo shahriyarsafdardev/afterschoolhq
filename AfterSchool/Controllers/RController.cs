@@ -174,6 +174,12 @@ namespace AfterSchool.Controllers
             if (account.IsEmpty())
                 return HttpNotFound();
 
+            if (SessionVariables.CurrentUser.IsEmpty())
+                return Redirect(account.HomePageUrl);
+
+            if (!SessionVariables.CurrentUser.IsActive)
+                return Redirect(Url.Action("confirm", "signup", new { id = SessionVariables.CurrentUser.Uid, returnurl = account.PayUrl }));
+
             ViewBag.Sources = SessionVariables.CurrentAccount.GetStripeSources(msgs);
             ViewBag.BankAccounts = SessionVariables.CurrentAccount.GetStripeBankAccounts(msgs);
             ViewBag.AccountProfile = account.GetAccountProfile(msgs);
