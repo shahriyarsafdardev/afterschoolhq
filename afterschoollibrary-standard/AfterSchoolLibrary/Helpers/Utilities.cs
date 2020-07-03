@@ -772,8 +772,8 @@ namespace AfterSchoolLibrary.Helpers
                 var toAccount = Account.Load(transaction.BillerAccountId.Value, msgs, dc);
                 if (toAccount.IsNotEmpty())
                 {
-                    transaction.PlatformPercentFee = toAccount.GetPlatformPercentFee(msgs, dc);
-                    transaction.PlatformFlatFee = toAccount.GetPlatformFlatFee(msgs, dc);
+                    transaction.PlatformPercentFee = toAccount.GetPlatformConveniencePercentFee(msgs, dc);
+                    transaction.PlatformFlatFee = toAccount.GetPlatformConvenienceFlatFee(msgs, dc);
                     msgs.AddRange(transaction.Save(dc));
                 }
             });

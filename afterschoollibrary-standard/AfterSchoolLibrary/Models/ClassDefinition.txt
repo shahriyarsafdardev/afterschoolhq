@@ -321,11 +321,11 @@ name: Account
 serializable: true
 description: The main organization and account holder in the system
 inherits: BaseCompany
--property: StripeAccessToken, string, NVarChar "100"
--property: StripePublishableKey, string, NVarChar "100"
--property: StripeSecretKey, string, NVarChar "100"
+property: StripeAccessToken, string, NVarChar "400"
+property: StripePublishableKey, string, NVarChar "400"
+property: StripeSecretKey, string, NVarChar "400"
+property: StripeRefreshToken, string, NVarChar "400"
 -property: PayPalEmailAddress, string, NVarChar "100"
--property: StripeRefreshToken, string, NVarChar "100"
 -property: StripeDefaultCardId, string, NVarChar "50"
 -property: LandingPageText, string, NVarChar "4000"
 property: Uid, Guid, UniqueIdentifier, required
@@ -1685,7 +1685,7 @@ values: NotSet, Percentage, FlatAmount
 [begin]
 type: Enum
 name: CouponApplyType
-values: NotSet, All, Any, SubscriptionPlan, TuitionFee
+values: NotSet, All, Any, SubscriptionPlan, RegistrationFee
 [end]
 
 [begin]

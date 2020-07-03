@@ -18,6 +18,10 @@ namespace AfterSchoolLibrary.Models
     {
 		#region "ClassGenerator"
 
+		public string StripeAccessToken { get { return (string)MDV["StripeAccessToken"].Value; } set { MDV["StripeAccessToken"].Value = value; } }
+		public string StripePublishableKey { get { return (string)MDV["StripePublishableKey"].Value; } set { MDV["StripePublishableKey"].Value = value; } }
+		public string StripeSecretKey { get { return (string)MDV["StripeSecretKey"].Value; } set { MDV["StripeSecretKey"].Value = value; } }
+		public string StripeRefreshToken { get { return (string)MDV["StripeRefreshToken"].Value; } set { MDV["StripeRefreshToken"].Value = value; } }
 		/// <summary>
 		/// Required.
 		/// </summary>
@@ -76,6 +80,10 @@ namespace AfterSchoolLibrary.Models
                 BasicLibrary.DataAccess.DatabaseParameters _dp = new BasicLibrary.DataAccess.DatabaseParameters();
                 string className = typeof(Account).Name;
                 _dp = BaseCompany.get_BaseObjectMap(className);
+				_dp.Add(className, "StripeAccessToken", System.Data.SqlDbType.NVarChar , "400");
+				_dp.Add(className, "StripePublishableKey", System.Data.SqlDbType.NVarChar , "400");
+				_dp.Add(className, "StripeSecretKey", System.Data.SqlDbType.NVarChar , "400");
+				_dp.Add(className, "StripeRefreshToken", System.Data.SqlDbType.NVarChar , "400");
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
 				_dp.Add(className, "UniqueName", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "OwnerId", System.Data.SqlDbType.Int);
@@ -175,6 +183,22 @@ namespace AfterSchoolLibrary.Models
         {
             SystemMessages msgs = new SystemMessages();
             BasicLibrary.DataAccess.DatabaseParameters dps;
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["StripeAccessToken"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["StripePublishableKey"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["StripeSecretKey"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["StripeRefreshToken"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["Uid"]);

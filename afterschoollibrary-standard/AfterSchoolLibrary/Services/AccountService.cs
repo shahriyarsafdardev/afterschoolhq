@@ -709,6 +709,19 @@ namespace AfterSchoolLibrary.Services
 
         #region Stripe
 
+        public static void DisconnectStripeConnect(this Account account, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            account.StripeUserId = null;
+            account.StripePublishableKey = null;
+            account.StripeAccessToken = null;
+            account.StripeRefreshToken = null;
+            account.StripeSecretKey = null;
+            account.StripeChargesEnabled = false;
+            account.StripePayoutsEnabled = false;
+
+            msgs.AddRange(account.Save(dc));
+        }
+
         public static SystemMessages SaveWithStripe(this Account account, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
@@ -1276,7 +1289,7 @@ namespace AfterSchoolLibrary.Services
             if (p.IsFree(billingPeriodType) || (activePackage.IsNotEmpty() && activePackage.IsFree))
             {
                 // new sign up
-                if (activePackage.IsEmpty())
+                if (activePackage.IsEmpty() || !account.IsClaimed)
                     signupType = SignUpType.NewAccountSignUp;
 
                 // could be downgrading to a free account
@@ -2185,19 +2198,21 @@ namespace AfterSchoolLibrary.Services
             return Transaction.GetCountByAccountId(account.ID.Value, search, startDate, endDate, participationObjects, isDeleted, msgs, dc);
         }
 
-        public static decimal CalculatePlatformFeeAmount(this Account billingAccount, decimal totalAmountToCharge, SystemMessages msgs, DatabaseConnection dc = null)
+        public static decimal CalculatePlatformConvenienceFeeAmount(this Account billingAccount, decimal totalAmountToCharge, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
             {
                 var percentageFee = billingAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue();
                 var flatFee = billingAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFlatFee, msgs, dc).GetMaxValue();
-                return (totalAmountToCharge * percentageFee) + flatFee;
+
+                if (percentageFee != 0 || flatFee != 0)
+                    return (totalAmountToCharge * percentageFee) + flatFee;
             }
 
             return Platform.GetConvenienceFee(totalAmountToCharge);
         }
 
-        public static decimal GetPlatformPercentFee(this Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetPlatformConveniencePercentFee(this Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
                 return billingAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue();
@@ -2205,7 +2220,7 @@ namespace AfterSchoolLibrary.Services
             return Platform.ConveniencePercentFee;
         }
 
-        public static decimal GetPlatformFlatFee(this Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetPlatformConvenienceFlatFee(this Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
                 return billingAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFlatFee, msgs, dc).GetMaxValue();
@@ -2213,10 +2228,10 @@ namespace AfterSchoolLibrary.Services
             return Platform.ConvenienceFlatFee;
         }
 
-        internal static string GetStripeSourceFromToken(this Account fromAccount, string stripeToken, SystemMessages msgs = null)
+        internal static string GetStripeSourceFromToken(this Account payingAccount, Account billingAccount, string stripeToken, SystemMessages msgs = null)
         {
-            var source = StripeHelper.CreateCreditCardSource(stripeToken, msgs);
-            StripeHelper.AddNewCardToCustomer(fromAccount.StripeCustomerId, source, null, msgs);
+            var source = StripeHelper.CreateCreditCardSource(stripeToken, billingAccount.StripeUserId, msgs);
+            StripeHelper.AddNewCardToCustomer(payingAccount.StripeCustomerId, source, null, msgs);
             return source.Id;
         }
 
@@ -2245,7 +2260,7 @@ namespace AfterSchoolLibrary.Services
 
             // if can charge fees we bill it directly from our AHQ account
             var useStripeConnectedAccount = checkoutObject.BillingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
-            var platformFeeAmount = checkoutObject.BillingAccount.CalculatePlatformFeeAmount(checkoutObject.TuitionCostNoFees, msgs, dc);
+            var platformFeeAmount = checkoutObject.CalculatePlatformFeeAmount(msgs, dc);
 
             // only charge tuition during checkout, because subscriptions are billed through stripe
             var charge = StripeHelper.CreateCharge(
@@ -2479,7 +2494,7 @@ namespace AfterSchoolLibrary.Services
 
         public static void ProcessRegistrationFee(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            if (checkoutObject.TuitionCostNoFees > 0)
+            if (checkoutObject.RegistrationCostNoFees > 0)
                 AccountService.ProcessPaymentWithStripe(checkoutObject, msgs, dc);
 
             // must wait until after charges happen to know what card id is charged for sure
@@ -2574,7 +2589,7 @@ namespace AfterSchoolLibrary.Services
                         dc: adc);
 
                     // process payment by to account, includes registration fee
-                    if (!checkoutObject.ParticipationObject.IsTuitionFree && checkoutObject.PaymentPlan.IsEmpty())
+                    if (!checkoutObject.ParticipationObject.IsRegistrationFree && checkoutObject.PaymentPlan.IsEmpty())
                         AccountService.ProcessRegistrationFee(checkoutObject, loggedInUser, amsgs, adc);
 
                     // Process Subscriptions separately, don't charge all at once for the registration Fee
@@ -2597,7 +2612,7 @@ namespace AfterSchoolLibrary.Services
                     {
                         // create a stripe coupon if needed
                         var coupon = checkoutObject.Coupon;
-                        if (coupon.IsNotEmpty() && coupon.DoesApplyToTuitionFee())
+                        if (coupon.IsNotEmpty() && coupon.DoesApplyToRegistrationFee())
                         {
                             var discountValue = coupon.Amount;
                             if (coupon.AmountTypeId == CouponAmountType.FlatAmount) // calculate the new discount amount for the coupon
@@ -2774,7 +2789,8 @@ namespace AfterSchoolLibrary.Services
 
         public static bool CanReceivePaymentDeposits(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.CanReceiveACHDeposits(msgs, dc) || account.GetCheckPaymentAccount(msgs, dc).IsNotEmpty();
+            return account.CanReceiveACHDeposits(msgs, dc) || 
+                account.GetCheckPaymentAccount(msgs, dc).IsNotEmpty();
         }
 
         public static bool CanReceiveACHDeposits(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -2898,28 +2914,14 @@ namespace AfterSchoolLibrary.Services
 
             decimal feeAmount = 0;
             decimal billedCostPerPeriod = plan.CostPerPeriod.Value;
+            
+            feeAmount = Platform.GetTotalFees(plan.CostPerPeriod.Value, billingAccount);
 
-            if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
-            {
-                var platformFeeAmount = billingAccount.CalculatePlatformFeeAmount(plan.CostPerPeriod.Value, msgs, dc);
-                var stripeFeeAmount = plan.GetStripeFeeAmountWithConnectedAccount();
+            if (!billingAccount.IsConvenienceFeeTakenOutOfCost)
+                billedCostPerPeriod += Platform.GetConvenienceFee(billedCostPerPeriod);
 
-                if (platformFeeAmount > stripeFeeAmount)
-                    feeAmount = platformFeeAmount - stripeFeeAmount;
-                else
-                    feeAmount = 0;
-            }
-            else
-            {
-                feeAmount = Platform.GetTotalFees(plan.CostPerPeriod.Value, billingAccount);
-
-                if (!billingAccount.IsConvenienceFeeTakenOutOfCost)
-                    billedCostPerPeriod += Platform.GetConvenienceFee(billedCostPerPeriod);
-
-                if (!billingAccount.IsCreditCardFeeTakenOutOfCost)
-                    billedCostPerPeriod += Platform.GetCreditCardFee(billedCostPerPeriod, billingAccount);
-
-            }
+            if (!billingAccount.IsCreditCardFeeTakenOutOfCost)
+                billedCostPerPeriod += Platform.GetCreditCardFee(billedCostPerPeriod, billingAccount);
 
             return Math.Round(feeAmount / billedCostPerPeriod, 4);
         }

@@ -185,7 +185,7 @@ namespace AfterSchoolLibrary.Services
                 return msgs;
             
             var (account, uid, name, uniqueName) = subscriptionPlan.GetActivityInfoDuringSave(msgs, dc);
-            string stripeUserId = account.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc) ? account.StripeUserId : null;
+            string stripeUserId = null; // account.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc) ? account.StripeUserId : null;
 
             // do stripe
             var product = subscriptionPlan.GetOrCreateStripeProduct(account, uid, name, uniqueName, stripeUserId, msgs);
@@ -256,8 +256,8 @@ namespace AfterSchoolLibrary.Services
             {                
                 string stripeUserId = null;
 
-                if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
-                    stripeUserId = billingAccount.StripeUserId;
+                //if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
+                //    stripeUserId = billingAccount.StripeUserId;
 
                 msgs.AddRange(Billing.StripeHelper.CancelSubscription(
                     rsp.StripeSubscriptionId,
@@ -284,8 +284,8 @@ namespace AfterSchoolLibrary.Services
                 {
                     string stripeUserId = null;
                     
-                    if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
-                        stripeUserId = billingAccount.StripeUserId;
+                    //if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
+                    //    stripeUserId = billingAccount.StripeUserId;
 
                     var stripeSubscription = Billing.StripeHelper.GetSubscription(rsp.StripeSubscriptionId, stripeUserId, msgs);
 
@@ -333,7 +333,7 @@ namespace AfterSchoolLibrary.Services
             if (ownerAccount.IsEmpty())
                 ownerAccount = subscriptionPlan.GetAccount(msgs, dc);
 
-            if (subscriptionPlan.CostPerPeriod.HasValue && !ownerAccount.HasFeature(FeatureType.UseStripeConnectedAccount))
+            if (subscriptionPlan.CostPerPeriod.HasValue)
                 return Billing.Platform.GetCreditCardFee(subscriptionPlan.CostPerPeriod.Value, ownerAccount);
 
             return 0;
@@ -344,7 +344,7 @@ namespace AfterSchoolLibrary.Services
             if (ownerAccount.IsEmpty())
                 ownerAccount = subscriptionPlan.GetAccount(msgs, dc);
 
-            if (subscriptionPlan.CostPerPeriod.HasValue && !ownerAccount.HasFeature(FeatureType.UseStripeConnectedAccount))
+            if (subscriptionPlan.CostPerPeriod.HasValue)
                 return Billing.Platform.GetConvenienceFee(subscriptionPlan.CostPerPeriod.Value);
 
             return 0;
@@ -354,7 +354,7 @@ namespace AfterSchoolLibrary.Services
         {
             if (coupon.IsNotEmpty() && coupon.ID.HasValue)
             {
-                if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan && coupon.DoesApplyToTuitionFee())
+                if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan && coupon.DoesApplyToRegistrationFee())
                     return true;
                 else if (plan.PlanTypeId == SubscriptionPlanType.Subscription && coupon.DoesApplyToSubscriptionPlan())
                     return true;

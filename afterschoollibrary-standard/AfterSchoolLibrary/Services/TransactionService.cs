@@ -166,22 +166,23 @@ namespace AfterSchoolLibrary.Services
         public static Transaction CreateNew(CheckoutObject checkoutObject, TransactionType transactionType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var useConnectedAccount = checkoutObject.BillingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
+            var usePlatformFees = useConnectedAccount && !checkoutObject.OverrideAmount.HasValue;
 
             return CreateNew(
                 checkoutObject.PayingAccount,
                 checkoutObject.BillingAccount,
                 checkoutObject.ConvenienceFeePayer,
                 checkoutObject.CreditCardFeePayer,
-                checkoutObject.OverrideAmount ?? checkoutObject.GetTuitionCostWithFees(msgs, dc),
+                checkoutObject.OverrideAmount ?? checkoutObject.GetRegistrationCostWithFees(msgs, dc),
                 checkoutObject.ParticipationObject?.Name,
                 checkoutObject.Purchase?.ID,
                 transactionType,
                 checkoutObject.PaymentType,
                 checkoutObject.PaymentSourceType,
-                useConnectedAccount ? checkoutObject.GetPlatformFlatFee(msgs, dc) : new decimal?(), // deprecated property
-                useConnectedAccount ? checkoutObject.GetPlatformPercentFee(msgs, dc) : new decimal?(), // deprecated property
-                checkoutObject.ConvenienceFeeOverrideAmount ?? checkoutObject.GetTuitionConvenienceFee(msgs, dc),
-                checkoutObject.PaymentTypeFeeOverrideAmount ?? checkoutObject.GetTuitionCreditCardFee(msgs, dc),
+                usePlatformFees ? checkoutObject.GetPlatformFlatFee(msgs, dc) : new decimal?(), // deprecated property
+                usePlatformFees ? checkoutObject.GetPlatformPercentFee(msgs, dc) : new decimal?(), // deprecated property
+                checkoutObject.ConvenienceFeeOverrideAmount ?? checkoutObject.GetRegistrationConvenienceFee(msgs, dc),
+                checkoutObject.PaymentTypeFeeOverrideAmount ?? checkoutObject.GetRegistrationCreditCardFee(msgs, dc),
                 checkoutObject.StripeChargeId,
                 checkoutObject.Description,
                 checkoutObject.Date,

@@ -22,14 +22,14 @@ namespace AfterSchoolLibraryTests.Tests
         [InlineData(50, 54.48)]
         [InlineData(100, 108.98)]
         [InlineData(200, 216.98)]
-        public void GetCheckoutCostWithCreditCardTest(decimal tuitionFee, double expectedResult)
+        public void GetCheckoutCostWithCreditCardTest(decimal registrationFee, double expectedResult)
         {
             var accountOwner = WebUserFactory.Create(msgs, dc);
             var account = AccountFactory.Create(accountOwner, msgs, dc);
             var package = PackageFactory.Create(msgs, dc);
             var accountPackage = AccountPackageFactory.Create(account, package, msgs, dc);
 
-            Assert.Equal(expectedResult.ToDecimal(), Platform.GetFinalTotalCost(tuitionFee, account));
+            Assert.Equal(expectedResult.ToDecimal(), Platform.GetFinalTotalCost(registrationFee, account));
         }
 
         [Theory(DisplayName = "Get Total Checkout Cost without Credit Card ")]
@@ -38,14 +38,14 @@ namespace AfterSchoolLibraryTests.Tests
         [InlineData(50, 52.49)]
         [InlineData(100, 104.99)]
         [InlineData(200, 209.99)]
-        public void GetCheckoutCostWithoutCreditCardTest(decimal tuitionFee, double expectedResult)
+        public void GetCheckoutCostWithoutCreditCardTest(decimal registrationFee, double expectedResult)
         {
             var accountOwner = WebUserFactory.Create(msgs, dc);
             var account = AccountFactory.Create(accountOwner, msgs, dc);
             var package = PackageFactory.Create(msgs, dc);
             var accountPackage = AccountPackageFactory.Create(account, package, msgs, dc);
 
-            Assert.Equal(expectedResult.ToDecimal(), Platform.GetCostWithConvenienceFee(tuitionFee, account));
+            Assert.Equal(expectedResult.ToDecimal(), Platform.GetCostWithConvenienceFee(registrationFee, account));
         }
     }
 }

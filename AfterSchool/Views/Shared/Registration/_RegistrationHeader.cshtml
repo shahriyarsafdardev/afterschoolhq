@@ -10,7 +10,7 @@
     var hideButtons = false;
     var shareUrl = Model.Account.ShortHomePageUrl;
     var shareObject = Model.Account.Name;
-    var isInEditMode = SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentUser.HasAccessTo(Model.Account);
+    var isInEditMode = SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentUser.HasAccessTo(Model.Account) && Request["edit"] == "1";
 
     if (Model.ParticipationObject.IsNotEmpty())
     {
@@ -198,31 +198,41 @@
 
                             if (Model.Account.IsClaimed)
                             {
-                                if (SessionVariables.CurrentUser.IsNotEmpty())
+                                if (Model.Account.CanProcessPayments())
                                 {
-                                    var payUrl = Model.Account.PayUrl;
-
-                                    if (!SessionVariables.CurrentUser.IsActive)
+                                    if (SessionVariables.CurrentUser.IsNotEmpty())
                                     {
-                                        payUrl = Url.Action("confirm", "signup", new { id = SessionVariables.CurrentUser.Uid, returnurl = payUrl });
-                                    }
+                                        var payUrl = Model.Account.PayUrl;
 
-                                    <button onclick="location.href='@payUrl'" class="btn btn-header-action">
-                                        <i class="icon icon-left s7-credit"></i>
-                                        <span class="">Make A Payment</span>
-                                    </button>
+                                        if (!SessionVariables.CurrentUser.IsActive)
+                                        {
+                                            payUrl = Url.Action("confirm", "signup", new { id = SessionVariables.CurrentUser.Uid, returnurl = payUrl });
+                                        }
+
+                                        <button onclick="location.href='@payUrl'" class="btn btn-header-action">
+                                            <i class="icon icon-left s7-credit"></i>
+                                            <span class="">Make A Payment</span>
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="btn btn-header-action md-trigger" data-modal="modal-login" onclick="setLoginRedirect('@Model.Account.PayUrl', true)">
+                                            <i class="icon icon-left s7-credit"></i>
+                                            <span class="">Make A Payment</span>
+                                        </button>
+                                    }
                                 }
                                 else
                                 {
-                                    <button type="button" class="btn btn-header-action md-trigger" data-modal="modal-login" onclick="setLoginRedirect('@Model.Account.PayUrl', true)">
-                                        <i class="icon icon-left s7-credit"></i>
-                                        <span class="">Make A Payment</span>
-                                    </button>
+                                    <a href="@Url.Action("paymentsoptions", "account", new { area = "org", isfullscreen = 1, source = "profile" })"  
+                                        class="btn btn-header-action-callout">
+                                        Enable Payments
+                                    </a>
                                 }
                             }
                             else
                             {
-                                <button class="btn btn-header-action md-trigger" data-modal="modal-claim-profile" onclick="resetClaimForm()">
+                                <button class="btn btn-header-action md-trigger btn-danger" data-modal="modal-claim-profile" onclick="resetClaimForm()">
                                     <i class="icon icon-left s7-door-lock"></i>
                                     <span class="">Claim Profile</span>
                                 </button>

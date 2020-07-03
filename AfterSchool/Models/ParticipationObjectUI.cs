@@ -33,7 +33,7 @@ namespace AfterSchool.Models
             return "No Location Available";
         }
 
-        public static string PrintTuitionFee(ParticipationObject participationObject, bool displayCheckoutPrice)
+        public static string PrintRegistrationFee(ParticipationObject participationObject, bool displayCheckoutPrice)
         {
             if (participationObject.Cost.HasValue)
             {

@@ -304,14 +304,14 @@ namespace AfterSchoolLibrary.Helpers
                 }
                 else
                 {
-                    cost = (checkoutObject.TuitionCostNoFees + checkoutObject.GetTuitionConvenienceFee(msgs, dc)).ToCurrency();
-                    ccFee = checkoutObject.GetTuitionCreditCardFee(msgs, dc).ToCurrency();
+                    cost = (checkoutObject.RegistrationCostNoFees + checkoutObject.GetRegistrationConvenienceFee(msgs, dc)).ToCurrency();
+                    ccFee = checkoutObject.GetRegistrationCreditCardFee(msgs, dc).ToCurrency();
 
                     additionalDetails = "registration fee";
                 }
 
                 // add registration fee row
-                var tuitionFeeModel = new NameValueCollection()
+                var registrationFeeModel = new NameValueCollection()
                 {
                     { "Description", description },
                     { "Quantity",  "1"},
@@ -321,7 +321,7 @@ namespace AfterSchoolLibrary.Helpers
 
                 receiptRows += ProcessTemplate(
                     EmailTemplates.Registration_Confirmation_Rows,
-                    tuitionFeeModel,
+                    registrationFeeModel,
                     "Registration_Confirmation_Rows",
                     msgs);
             }
@@ -992,7 +992,7 @@ namespace AfterSchoolLibrary.Helpers
             var model = new NameValueCollection()
             {
                 { "FirstName", invitedUser.FirstName },
-                { "ProductName", Utilities.AppName(invitedAccount.IsAfterSchool) },
+                { "ProductName", Utilities.AppName() },
                 { "SupportEmail", Email.AppSupportEmailAddress },
                 { "InviteUrl", invitedUser.GetInviteUrl(invitedAccount) },
                 { "CustomMessage", customMessage }

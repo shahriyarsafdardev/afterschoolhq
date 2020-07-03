@@ -1534,12 +1534,6 @@ namespace AfterSchool.Controllers
                         StripeSourceId = ccSourceId
                     };
 
-                if (participationObject.UseStripeConnectedAccount)
-                {
-                    convenienceFeePayer = billingAccount;
-                    creditCardFeePayer = billingAccount;
-                }
-
                 if (paymentoption.IsNotEmpty() && paymentoption.IsNumber())
                     paymentPlan = SubscriptionPlan.Load(paymentoption.ToInteger(), msgs);
 

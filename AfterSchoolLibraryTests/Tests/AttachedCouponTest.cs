@@ -20,7 +20,7 @@ namespace AfterSchoolLibraryTests.Tests
         {
             SendingAccountOwner = WebUserFactory.Create(msgs, dc);
             SendingAccount = AccountFactory.Create(SendingAccountOwner, msgs, dc);
-            Coupon = CouponFactory.Create(SendingAccount, 50, CouponApplyType.TuitionFee, CouponAmountType.Percentage, msgs, dc);
+            Coupon = CouponFactory.Create(SendingAccount, 50, CouponApplyType.RegistrationFee, CouponAmountType.Percentage, msgs, dc);
             ReceivingAccountOwner = WebUserFactory.Create(msgs, dc);
             ReceivingAccount = AccountFactory.Create(ReceivingAccountOwner, msgs, dc);
         }
