@@ -27,7 +27,7 @@ namespace AfterSchool.Models
             UserType usertype = UserType.NotSet;
 
             if (HttpContext.Current.Session["AccountUserType"] != null)
-                usertype =(UserType)HttpContext.Current.Session["AccountUserType"];
+                usertype = (UserType)HttpContext.Current.Session["AccountUserType"];
             else if (SessionVariables.CurrentAccount.IsNotEmpty() && SessionVariables.CurrentUser.IsNotEmpty())
                 usertype = SessionVariables.CurrentUser.GetUserType(SessionVariables.CurrentAccount, msgs, dc);
 
