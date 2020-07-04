@@ -215,9 +215,6 @@ namespace AfterSchool.Models
                 }
             }
 
-            if (SessionVariables.CurrentAccount.IsNotEmpty())
-                SessionVariables.AccountPackage = SessionVariables.CurrentAccount.GetActiveAccountPackage();
-
             //set login cookies
             if (doRememberMe && SessionVariables.CurrentUser.IsNotEmpty())
             {

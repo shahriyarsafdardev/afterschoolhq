@@ -81,10 +81,16 @@ namespace AfterSchool.Models
         public static AccountPackage GetAccountPackage(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var id = (string)HttpContext.Current.Session["AccountPackage"];
-            if (id.IsNotEmpty())
-                return AccountPackage.Load(id.ToInteger(), msgs, dc);
+            AccountPackage ap = null;
 
-            return null;
+            if (id.IsNotEmpty())
+                ap =  AccountPackage.Load(id.ToInteger(), msgs, dc);
+            else if (SessionVariables.CurrentAccount.IsNotEmpty())
+                ap = SessionVariables.CurrentAccount.GetActiveAccountPackage();
+
+            SessionVariables.AccountPackage = ap;
+
+            return ap;
         }
 
         public static string GetSessionInvite(SystemMessages msgs = null, DatabaseConnection dc = null)
