@@ -73,7 +73,19 @@ namespace AfterSchool.Models
                     SessionHelper.RemoveFromSession("CurrentAccount");
             }
         }
-        
+
+        public static UserType AccountUserType
+        {
+            get
+            {
+                return SessionHelper.GetAccountUserType();
+            }
+            set
+            {
+                HttpContext.Current.Session["AccountUserType"] = value;
+            }
+        }
+
         public static Account RegistrationStartPageAccount
         {
             get
@@ -86,18 +98,6 @@ namespace AfterSchool.Models
                     SessionHelper.AddToSession("RegistrationStartPageAccount", value.ID.Value.ToString());
                 else
                     SessionHelper.RemoveFromSession("RegistrationStartPageAccount");
-            }
-        }
-
-        public static UserType AccountUserType
-        {
-            get
-            {
-                return (UserType)HttpContext.Current.Session["AccountUserType"];
-            }
-            set
-            {
-                HttpContext.Current.Session["AccountUserType"] = value;
             }
         }
 

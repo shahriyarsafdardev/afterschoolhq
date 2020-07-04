@@ -197,7 +197,6 @@ namespace AfterSchool.Models
             if (account.IsNotEmpty())
             {
                 SessionVariables.CurrentAccount = account;
-                SessionVariables.AccountUserType = SessionVariables.CurrentUser.GetUserType(account);
             }
             else
             {
@@ -206,17 +205,13 @@ namespace AfterSchool.Models
                 if (awus.Count == 1)
                 {
                     SessionVariables.CurrentAccount = awus.First().ToAccount(true);
-                    SessionVariables.AccountUserType = awus.First().UserTypeId;
                 }
                 else if (source == "parent-login")
                 {
                     var awu = awus.FirstOrDefault(item => item.AccountAccountTypeId == AccountType.Registrant);
 
                     if (awu.IsNotEmpty())
-                    {
                         SessionVariables.CurrentAccount = awu.ToAccount(true);
-                        SessionVariables.AccountUserType = awu.UserTypeId;
-                    }
                 }
             }
 

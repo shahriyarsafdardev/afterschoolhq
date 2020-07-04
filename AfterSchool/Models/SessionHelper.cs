@@ -2,6 +2,7 @@
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Services;
 
 namespace AfterSchool.Models
 {
@@ -10,12 +11,29 @@ namespace AfterSchool.Models
         public static Account GetAccount(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var id = (string)HttpContext.Current.Session["CurrentAccount"];
-            if (id.IsNotEmpty())
-                return Account.Load(id.ToInteger(), msgs, dc);
-            else if (CookieVariables.CurrentAccount.IsGuid())
-                return Account.LoadByUid(CookieVariables.CurrentAccount.ToGuid(), msgs, dc);
+            Account account = null;
 
-            return null;
+            if (id.IsNotEmpty())
+                account = Account.Load(id.ToInteger(), msgs, dc);
+            else if (CookieVariables.CurrentAccount.IsGuid())
+                account = Account.LoadByUid(CookieVariables.CurrentAccount.ToGuid(), msgs, dc);
+
+            SessionVariables.CurrentAccount = account;
+
+            return account;
+        }
+        public static UserType GetAccountUserType(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            UserType usertype = UserType.NotSet;
+
+            if (HttpContext.Current.Session["AccountUserType"] != null)
+                usertype = (UserType)HttpContext.Current.Session["AccountUserType"];
+            else if (SessionVariables.CurrentAccount.IsNotEmpty() && SessionVariables.CurrentUser.IsNotEmpty())
+                usertype = SessionVariables.CurrentUser.GetUserType(SessionVariables.CurrentAccount, msgs, dc);
+
+            SessionVariables.AccountUserType = usertype;
+
+            return usertype;
         }
 
         public static Registrant GetCurrentRegistrant(SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -30,12 +48,16 @@ namespace AfterSchool.Models
         public static WebUser GetCurrentUser(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var id = (string)HttpContext.Current.Session["LoggedInUser"];
-            if (id.IsNotEmpty())
-                return WebUser.Load(id.ToInteger(), msgs, dc);
-            else if (CookieVariables.CurrentUser.IsGuid())
-                return WebUser.LoadByUid(CookieVariables.CurrentUser.ToGuid(), msgs, dc);
+            WebUser user = null;
 
-            return null;
+            if (id.IsNotEmpty())
+                user = WebUser.Load(id.ToInteger(), msgs, dc);
+            else if (CookieVariables.CurrentUser.IsGuid())
+                user = WebUser.LoadByUid(CookieVariables.CurrentUser.ToGuid(), msgs, dc);
+
+            SessionVariables.CurrentUser = user;
+
+            return user;
         }
 
         public static WebUser GetOriginalLoggedInUser(SystemMessages msgs = null, DatabaseConnection dc = null)
