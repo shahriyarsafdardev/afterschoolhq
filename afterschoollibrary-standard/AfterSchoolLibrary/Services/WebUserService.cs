@@ -113,35 +113,31 @@ namespace AfterSchoolLibrary.Services
                     }, msgs, dc) > 1;                
         }
 
-        public static UserType GetUserType(this WebUser user, Account account, DatabaseConnection dc = null)
+        public static UserType GetUserType(this WebUser user, Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (!account.IsEmpty())
             {
-                var awu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, user.ID.Value, dc: dc);
+                var awu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, user.ID.Value, msgs, dc);
                 if (!awu.IsEmpty())
                     return awu.UserTypeId;
             }
             return UserType.NotSet;
         }
-        public static SystemMessages UpdateLastActivity(this WebUser user, DatabaseConnection dc = null)
+        public static void UpdateLastActivity(this WebUser user, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
             user.LastActivity = DateTime.UtcNow;
-            msgs.AddRange(user.Save(dc: dc));
-            return msgs;
+            msgs.AddRange(user.Save(dc));
         }
-        public static SystemMessages UpdateLastLogin(this WebUser user, DatabaseConnection dc = null)
+        public static void UpdateLastLogin(this WebUser user, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
             user.LastLogin = DateTime.UtcNow;
-            msgs.AddRange(user.Save(dc: dc));
-            return msgs;
+            msgs.AddRange(user.Save(dc));
         }
-        public static bool HasPermission(this WebUser user, PermissionType permissionType, Account account, DatabaseConnection dc = null)
+        public static bool HasPermission(this WebUser user, PermissionType permissionType, Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (!account.IsEmpty())
             {
-                var awu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, user.ID.Value, dc: dc);
+                var awu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, user.ID.Value, msgs, dc);
                 if (awu.IsEmpty() == false && awu.UserTypeId != UserType.NotSet)
                     return awu.HasPermission(permissionType);
             }

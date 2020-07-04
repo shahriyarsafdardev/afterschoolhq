@@ -213,19 +213,19 @@ namespace AfterSchoolLibraryTests.Tests
             var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
             var awu = Factories.AccountWebUserFactory.Create(account, user, ut, true, msgs, dc: dc);
 
-            Assert.Equal(ut, user.GetUserType(account, dc: dc));
+            Assert.Equal(ut, user.GetUserType(account, msgs, dc));
         }
         
         [Fact(DisplayName = "Updates the last activity date for the user")]
         public void UpdateLastActivityTest()
         {
             var testdate = new DateTime();
-            var user = Factories.WebUserFactory.Create(msgs, dc: dc);
+            var user = Factories.WebUserFactory.Create(msgs, dc);
             user.LastActivity = testdate;
-            msgs.AddRange(user.Save(dc: dc));
+            msgs.AddRange(user.Save(dc));
 
             var pre = user.LastActivity;
-            msgs.AddRange(user.UpdateLastActivity(dc: dc));
+            user.UpdateLastActivity(msgs, dc);
             var post = user.LastActivity;
 
             Assert.NotEqual(pre, post);
@@ -235,12 +235,12 @@ namespace AfterSchoolLibraryTests.Tests
         public void UpdateLastLoginTest()
         {
             var testdate = new DateTime();
-            var user = Factories.WebUserFactory.Create(msgs, dc: dc);
+            var user = Factories.WebUserFactory.Create(msgs, dc);
             user.LastLogin = testdate;
             msgs.AddRange(user.Save(dc: dc));
 
             var pre = user.LastLogin;
-            msgs.AddRange(user.UpdateLastLogin(dc: dc));
+            user.UpdateLastLogin(msgs, dc);
             var post = user.LastLogin;
 
             Assert.NotEqual(pre, post);
