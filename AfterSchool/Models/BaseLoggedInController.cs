@@ -21,6 +21,9 @@ namespace AfterSchool.Models
         protected override void Initialize(System.Web.Routing.RequestContext requestContext)
         {
             base.Initialize(requestContext);
+
+            var msgs = new SystemMessages();
+
             if (SessionVariables.CurrentUser.IsEmpty())
             {
                 WebUser user = null;
@@ -56,7 +59,7 @@ namespace AfterSchool.Models
 
             if (SessionVariables.CurrentUser.IsNotEmpty())
             {
-                SessionVariables.CurrentUser.UpdateLastActivity();
+                SessionVariables.CurrentUser.UpdateLastActivity(msgs);
 
                 if (SessionVariables.CurrentAccount.IsEmpty())
                     BaseLoggedInController.CheckAccount(requestContext.HttpContext.Request);

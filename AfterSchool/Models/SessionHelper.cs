@@ -2,6 +2,7 @@
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Services;
 
 namespace AfterSchool.Models
 {
@@ -16,6 +17,19 @@ namespace AfterSchool.Models
                 return Account.LoadByUid(CookieVariables.CurrentAccount.ToGuid(), msgs, dc);
 
             return null;
+        }
+        public static UserType GetAccountUserType(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            UserType usertype = UserType.NotSet;
+
+            if (HttpContext.Current.Session["AccountUserType"] != null)
+                usertype =(UserType)HttpContext.Current.Session["AccountUserType"];
+            else if (SessionVariables.CurrentAccount.IsNotEmpty() && SessionVariables.CurrentUser.IsNotEmpty())
+                usertype = SessionVariables.CurrentUser.GetUserType(SessionVariables.CurrentAccount, msgs, dc);
+
+            SessionVariables.AccountUserType = usertype;
+
+            return usertype;
         }
 
         public static Registrant GetCurrentRegistrant(SystemMessages msgs = null, DatabaseConnection dc = null)
