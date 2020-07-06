@@ -1311,7 +1311,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
                 catch (Exception ex)
                 {
-                    msgs.Add("An error occurred while connecting your Stripe account.", MessageType.Error, ex);
+                    msgs.Add($"An error occurred while connecting your Stripe account - {ex.Message}", MessageType.Error, ex);
                 }
             }
             else
