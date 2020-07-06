@@ -334,7 +334,6 @@ namespace AfterSchoolLibrary.Helpers
                     Migrations.AddFeesRefundedToTransactions_20200507.Do(amsgs, adc);
                     Migrations.UpdateIsClaimedOnAccounts_20200622.Do(amsgs, adc);
                     Migrations.AddUsedStripeConnectToTransactions_20200705.Do(amsgs, adc);
-                    Migrations.IncreaseStripeKeyColumnSizes_20200126.Do(amsgs, adc);
 
                     // amsgs.Add("rollback please", MessageType.Error);
 
