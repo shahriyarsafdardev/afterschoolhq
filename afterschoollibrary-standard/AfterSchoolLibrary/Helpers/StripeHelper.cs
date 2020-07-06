@@ -1715,7 +1715,7 @@ namespace AfterSchoolLibrary.Billing
             catch (StripeException ex)
             {
                 msgs.Add(ex.Message, MessageType.Error, ex);
-                msgs.Add($"Error connecting stripe account", MessageType.UserError);
+                msgs.Add($"Error connecting stripe account - {ex.Message}", MessageType.UserError);
             }
 
             return token;
