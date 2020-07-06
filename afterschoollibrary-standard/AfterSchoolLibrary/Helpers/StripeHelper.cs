@@ -1688,6 +1688,67 @@ namespace AfterSchoolLibrary.Billing
         }
 
         #endregion
+
+        #region StripeOAuth
+
+        private static Stripe.OAuthTokenService GetOAuthTokenService()
+        {
+            return new Stripe.OAuthTokenService(StripeClient);
+        }
+
+        public static Stripe.OAuthToken CompleteOAuthConnection(string code, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var options = new OAuthTokenCreateOptions
+            {
+                GrantType = "authorization_code",
+                Code = code,
+            };
+
+            OAuthToken token = null;
+
+            try
+            {
+                token = GetOAuthTokenService().Create(options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.Error, ex);
+                msgs.Add($"Error connecting stripe account", MessageType.UserError);
+            }
+
+            return token;
+        }
+
+        public static Stripe.OAuthDeauthorize DeauthorizeOAuthConnection(string stripeAccountId, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var options = new OAuthDeauthorizeOptions
+            {
+                ClientId = PlatformClientId,
+                StripeUserId = stripeAccountId,
+            };
+
+            OAuthDeauthorize oAuthDeauthorize = null;
+
+            try
+            {
+                oAuthDeauthorize = GetOAuthTokenService().Deauthorize(options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.Error, ex);
+                msgs.Add($"Error deauthorizing account", MessageType.UserError);
+            }
+
+            return oAuthDeauthorize;
+        }
+
+
+
+        #endregion
     }
 
     public enum StripeTestCardType

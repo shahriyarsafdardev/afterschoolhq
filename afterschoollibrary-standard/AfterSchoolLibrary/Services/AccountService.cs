@@ -709,6 +709,24 @@ namespace AfterSchoolLibrary.Services
 
         #region Stripe
 
+        public static void CompleteStripeConnect(this Account account, string code, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var token = StripeHelper.CompleteOAuthConnection(code, msgs);
+
+            account.StripePublishableKey = token.StripePublishableKey;
+            account.StripeAccessToken = token.AccessToken;
+            account.StripeRefreshToken = token.RefreshToken;
+            account.StripeUserId = token.StripeUserId;
+            account.StripeChargesEnabled = true;
+            account.StripePayoutsEnabled = true;
+            msgs.AddRange(account.Save(dc));
+
+            if (msgs.HasNoErrors())
+                msgs.Add("Your account has been connected to Stripe", MessageType.Success);
+            else
+                account.DisconnectStripeConnect(msgs);
+        }
+
         public static void DisconnectStripeConnect(this Account account, SystemMessages msgs, DatabaseConnection dc = null)
         {
             account.StripeUserId = null;
@@ -720,6 +738,9 @@ namespace AfterSchoolLibrary.Services
             account.StripePayoutsEnabled = false;
 
             msgs.AddRange(account.Save(dc));
+
+            if (account.StripeUserId.IsNotEmpty())
+                StripeHelper.DeauthorizeOAuthConnection(account.StripeUserId, msgs);
         }
 
         public static SystemMessages SaveWithStripe(this Account account, DatabaseConnection dc = null)

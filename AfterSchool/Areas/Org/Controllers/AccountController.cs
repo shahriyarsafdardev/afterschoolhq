@@ -157,6 +157,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Account = account;
             ViewBag.IsFullScreen = GetIsFullScreen();
+            ViewBag.Messages = new SystemMessages();
             return View();
         }
 
@@ -1260,64 +1261,9 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
 
             if (Request["error"].IsEmpty())
-            {
-                try
-                {
-                    string code = Request["code"];
-
-                    var rc = new RestClient("https://connect.stripe.com/oauth/token");
-                    rc.RequestMethod = RestClientRequestMethod.POST;
-                    rc.Parameters.Add("client_secret", StripeHelper.SecretKey);
-                    rc.Parameters.Add("code", code);
-                    rc.Parameters.Add("grant_type", "authorization_code");
-                    rc.Parameters.Add("client_id", StripeHelper.PlatformClientId);
-                    rc.ContentType = RestClientContentTypeEnum.URLEncoded;
-                    string responseFromServer = rc.DoRequest();
-
-                    dynamic results = responseFromServer.FromJSON();
-
-                    string token_type = results["token_type"];
-                    string stripe_publishable_key = results["stripe_publishable_key"];
-                    bool livemode = results["livemode"];
-                    string stripe_user_id = results["stripe_user_id"];
-                    string refresh_token = results["refresh_token"];
-                    string access_token = results["access_token"];
-                    string scope = results["scope"];
-
-                    var account = SessionVariables.CurrentAccount;
-                    account.StripePublishableKey = stripe_publishable_key;
-                    account.StripeAccessToken = access_token;
-                    account.StripeRefreshToken = refresh_token;
-                    account.StripeUserId = stripe_user_id;
-                    account.StripeChargesEnabled = true;
-                    account.StripePayoutsEnabled = true;
-                    msgs.AddRange(account.Save());
-
-                    if (msgs.HasNoErrors())
-                    {
-                        msgs.Add("Your account has been connected to Stripe", MessageType.Success);
-                    }
-                    else
-                    {
-                        account.StripePublishableKey = "";
-                        account.StripeAccessToken = "";
-                        account.StripeRefreshToken = "";
-                        account.StripeUserId = "";
-                        account.StripeChargesEnabled = false;
-                        account.StripePayoutsEnabled = false;
-                        msgs.AddRange(account.Save());
-                    }
-
-                }
-                catch (Exception ex)
-                {
-                    msgs.Add($"An error occurred while connecting your Stripe account - {ex.Message}", MessageType.UserError, ex);
-                }
-            }
+                SessionVariables.CurrentAccount.CompleteStripeConnect(Request["code"], msgs);
             else
-            {
                 msgs.Add("It appears you have canceled your request to connect your Stripe account.", MessageType.Notice);
-            }
 
             ViewBag.Messages = msgs;
 

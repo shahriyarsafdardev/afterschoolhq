@@ -86,7 +86,7 @@
                                             {
                                                 var redirectUri = Server.UrlEncode($"{AfterSchoolLibrary.Helpers.Utilities.BaseUrl()}/org/account/oauthstripe/");
 
-                                                <a href="https://connect.stripe.com/express/oauth/authorize?redirect_uri=@redirectUri&state=@Request["source"]&client_id=@AfterSchoolLibrary.Billing.StripeHelper.PlatformClientId&stripe_user[email]=@account.Email"
+                                                <a href="https://connect.stripe.com/express/oauth/authorize?redirect_uri=@redirectUri&state=@Request["source"]&client_id=@AfterSchoolLibrary.Billing.StripeHelper.PlatformClientId&stripe_user[email]=@account.Email&stripe_user[url]=@account.ShortHomePageUrl"
                                                     class="btn btn-alt5 btn-xl btn-block">
                                                     Choose Direct Deposits &raquo;
                                                 </a>
