@@ -18,6 +18,8 @@
 }
 
 <div class="main-content">
+    
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
     @{ Html.RenderPartial("~/Views/Shared/_AccountDetailsHeader.cshtml", account); }
 
