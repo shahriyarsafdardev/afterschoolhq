@@ -30,7 +30,7 @@ namespace AfterSchoolLibraryTests.Tests
         {
             var product = CreateStripeProduct(Guid.NewGuid().ToString());
             Assert.NotNull(product);
-            msgs.AddRange(StripeHelper.DeleteProduct(product.Id, null));
+            msgs.AddRange(StripeHelper.DeleteProduct(product.Id));
         }
 
         [Fact]
@@ -38,7 +38,7 @@ namespace AfterSchoolLibraryTests.Tests
         {
             var product = CreateStripeProduct(Guid.NewGuid().ToString());
             Assert.NotNull(StripeHelper.GetProduct(product.Id, null, msgs));
-            msgs.AddRange(StripeHelper.DeleteProduct(product.Id, null));
+            msgs.AddRange(StripeHelper.DeleteProduct(product.Id));
         }
 
         [Fact]
@@ -46,7 +46,7 @@ namespace AfterSchoolLibraryTests.Tests
         {
             var productId = Guid.NewGuid().ToString();
             var product = CreateStripeProduct(productId);
-            msgs.AddRange(StripeHelper.DeleteProduct(productId, null));
+            msgs.AddRange(StripeHelper.DeleteProduct(productId));
 
             Assert.Null(StripeHelper.GetProduct(productId, null, msgs));
         }
@@ -60,7 +60,7 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.Equal(newName, product2.Name);
 
-            msgs.AddRange(StripeHelper.DeleteProduct(product.Id, null));
+            msgs.AddRange(StripeHelper.DeleteProduct(product.Id));
         }
 
         [Fact]
@@ -70,7 +70,7 @@ namespace AfterSchoolLibraryTests.Tests
             var plan = CreateStripePlan(product, Guid.NewGuid().ToString());
             Assert.NotNull(plan);
             msgs.AddRange(StripeHelper.DeletePlan(plan.Id, null));
-            msgs.AddRange(StripeHelper.DeleteProduct(product.Id, null));
+            msgs.AddRange(StripeHelper.DeleteProduct(product.Id));
         }
 
         [Fact]
@@ -80,7 +80,7 @@ namespace AfterSchoolLibraryTests.Tests
             var plan = CreateStripePlan(product, Guid.NewGuid().ToString());
             Assert.NotNull(StripeHelper.GetPlan(plan.Id, null, msgs));
             msgs.AddRange(StripeHelper.DeletePlan(plan.Id, null));
-            msgs.AddRange(StripeHelper.DeleteProduct(product.Id, null));
+            msgs.AddRange(StripeHelper.DeleteProduct(product.Id));
         }
 
         [Fact]
@@ -95,7 +95,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(updatedNickname, plan2.Nickname);
 
             msgs.AddRange(StripeHelper.DeletePlan(plan.Id, null));
-            msgs.AddRange(StripeHelper.DeleteProduct(product.Id, null));
+            msgs.AddRange(StripeHelper.DeleteProduct(product.Id));
         }
 
         [Fact]
@@ -109,7 +109,7 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.Null(StripeHelper.GetPlan(planId, null, msgs));
 
-            msgs.AddRange(StripeHelper.DeleteProduct(product.Id, null));
+            msgs.AddRange(StripeHelper.DeleteProduct(product.Id));
         }
 
         [Fact]
