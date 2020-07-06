@@ -84,16 +84,23 @@
     PageEvent.add(PageEvent.AFTER_INIT, function () {
 
         $('.activitylocationtype').click(function () {
-
-            if ($(this).val() == '@((int)ActivityLocationType.Physical)') {
-                $('#physical-location').removeClass('hide');
-                $('.my-location').prop("required", true);
-            } else {
-                $('#physical-location').addClass('hide');
-                $('.my-location').prop("required", false);
-            }
-
+            toggleLocationEdit($(this));
         });
 
+        if ($('#activitylocationtype-@((int)ActivityLocationType.Physical)').is(':checked')) {
+            toggleLocationEdit($('#activitylocationtype-@((int)ActivityLocationType.Physical)'));
+        }
+
     });
+
+    function toggleLocationEdit(obj) {
+        if (obj.val() == '@((int)ActivityLocationType.Physical)') {
+            $('#physical-location').removeClass('hide');
+            $('.my-location').prop("required", true);
+        } else {
+            $('#physical-location').addClass('hide');
+            $('.my-location').prop("required", false);
+        }
+    }
+
 </script>
