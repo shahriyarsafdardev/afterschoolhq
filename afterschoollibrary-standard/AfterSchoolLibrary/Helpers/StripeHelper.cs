@@ -977,17 +977,17 @@ namespace AfterSchoolLibrary.Billing
                 Coupon = stripeCouponId,
                 Items = new List<SubscriptionItemOptions>() { new SubscriptionItemOptions() { Plan = planId, Quantity = 1 } },
                 Metadata = metaData,
-                Prorate = false,               
+                Prorate = false,
             };
 
             if (startDate.Value.AddDays(-1).IsAfter(DateTime.UtcNow))
                 options.TrialEnd = startDate.Value.AddDays(-1);
 
             if (stripeAccountId.IsNotEmpty())
-                options.TransferData = new SubscriptionTransferDataOptions() 
-                { 
-                    Destination = stripeAccountId, 
-                    AmountPercent = platformFeePercent * 100 
+                options.TransferData = new SubscriptionTransferDataOptions()
+                {
+                    Destination = stripeAccountId,
+                    AmountPercent = 100 - (platformFeePercent * 100) 
                 };
 
             try

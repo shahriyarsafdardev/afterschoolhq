@@ -127,40 +127,12 @@ namespace AfterSchoolLibrary.Services
             return user;
         }
 
-        private static (Stripe.Customer customer, string sourceId) GetCustomerAndSourceForSubscription(CheckoutObject checkoutObject, bool useStripeConnectedAccount)
-        {
-            // have to copy the source from the platform to be able to move it to the stripe connected account
-            // unless you're not using connected accounts for subscriptions
-            var msgs = new SystemMessages();
-            var billingAccount = checkoutObject.BillingAccount;
-            var payingAccount = checkoutObject.PayingAccount;
-            string sourceId = null;
-            Stripe.Customer customer = null;
+        private static (Stripe.Customer customer, string sourceId) GetCustomerAndSourceForSubscription(CheckoutObject checkoutObject, SystemMessages msgs)
+        {           
+            if (checkoutObject.StripeSourceId.IsEmpty())
+                checkoutObject.LoadStripeSource(msgs);
 
-            if (!useStripeConnectedAccount)
-            {
-                customer = payingAccount.GetStripeCustomer(msgs);
-                    
-                if (checkoutObject.StripeSourceId.IsEmpty())
-                    checkoutObject.LoadStripeSource(msgs);
-
-                sourceId = checkoutObject.StripeSourceId;
-            }
-            else
-            {
-                // if running the billing through stripe connected account
-                sourceId = payingAccount.CopyStripeSourceToAccount(checkoutObject, msgs);
-
-                // create the customer on the connected account
-                customer = Billing.StripeHelper.CreateCustomer(
-                    description: payingAccount.Name,
-                    email: payingAccount.Email,
-                    sourceId: sourceId,
-                    stripeAccountId: billingAccount.StripeUserId,
-                    msgs: msgs);
-            }
-
-            return (customer, sourceId);
+            return (checkoutObject.PayingAccount.GetStripeCustomer(msgs), checkoutObject.StripeSourceId);
         }
 
         public static void StartPaymentPlan(this Registrant submittedRecord, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -180,7 +152,7 @@ namespace AfterSchoolLibrary.Services
             var billingAccount = checkoutObject.BillingAccount;
             var purchasingAccount = checkoutObject.PayingAccount;            
             var useStripeConnectedAccount = billingAccount.HasAccountPackageFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
-            var (customer, sourceId) = GetCustomerAndSourceForSubscription(checkoutObject, useStripeConnectedAccount);
+            var (customer, sourceId) = GetCustomerAndSourceForSubscription(checkoutObject, msgs);
             var plan = subscriptionPlanType == SubscriptionPlanType.PaymentPlan ? checkoutObject.PaymentPlan : checkoutObject.SubscriptionPlan;
             var stripeCouponId = plan.DoesCouponApply(checkoutObject.Coupon) ? checkoutObject.Coupon.StripeCouponId : null;
             var startDateTime = submittedRecord.GetPlanStartDate(plan, checkoutObject.ParticipationObject, msgs, dc);

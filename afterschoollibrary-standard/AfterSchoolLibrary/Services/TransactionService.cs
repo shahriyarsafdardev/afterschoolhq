@@ -186,12 +186,13 @@ namespace AfterSchoolLibrary.Services
                 checkoutObject.StripeChargeId,
                 checkoutObject.Description,
                 checkoutObject.Date,
+                useConnectedAccount,
                 loggedInUser,
                 msgs,
                 dc);
         }
 
-        public static Transaction CreateNew(Account payingAccount, Account billingAccount, Account ConvenienceFeePayer, Account PaymentTypeFeePayer, decimal? amount, string participationObjectName, int? purchaseId, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, decimal? platformFee, decimal? platformPercentFee, decimal convenienceFee, decimal paymentTypeFee, string stripeChargeOrRefundId, string description, DateTime createDate, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Transaction CreateNew(Account payingAccount, Account billingAccount, Account ConvenienceFeePayer, Account PaymentTypeFeePayer, decimal? amount, string participationObjectName, int? purchaseId, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, decimal? platformFee, decimal? platformPercentFee, decimal convenienceFee, decimal paymentTypeFee, string stripeChargeOrRefundId, string description, DateTime createDate, bool usedStripeConnect, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -216,13 +217,14 @@ namespace AfterSchoolLibrary.Services
                 PaymentTypeFeePayerAccountId = PaymentTypeFeePayer?.ID,
                 ConvenienceFeeCharged = convenienceFee,
                 PaymentTypeFeeCharged = paymentTypeFee,
+                UsedStripeConnect = usedStripeConnect,
             };
             msgs.AddRange(transaction.Save(dc));
 
             return transaction;
         }
 
-        public static Transaction CreateNew(Account payingAccount, Account billingAccount, decimal amount, decimal? convenienceFeeAmount, int? convenienceFeePayerId, decimal? paymentTypeFeeAmount, int? paymentTypeFeePayerId, Purchase purchase, string refundDescription, TransactionType transactionType, string stripeChargeOrRefundId, Transaction originalTransaction, PaymentType paymentType, PaymentSourceType paymentSourceType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Transaction CreateNew(Account payingAccount, Account billingAccount, decimal amount, decimal? convenienceFeeAmount, int? convenienceFeePayerId, decimal? paymentTypeFeeAmount, int? paymentTypeFeePayerId, Purchase purchase, string refundDescription, TransactionType transactionType, string stripeChargeOrRefundId, Transaction originalTransaction, PaymentType paymentType, PaymentSourceType paymentSourceType, bool usedStripeConnect, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -245,23 +247,24 @@ namespace AfterSchoolLibrary.Services
                 ConvenienceFeeCharged = convenienceFeeAmount,
                 PaymentTypeFeeCharged = paymentTypeFeeAmount,
                 ConvenienceFeePayerAccountId = convenienceFeePayerId,
-                PaymentTypeFeePayerAccountId = paymentTypeFeePayerId
+                PaymentTypeFeePayerAccountId = paymentTypeFeePayerId,
+                UsedStripeConnect = usedStripeConnect,
             };
             msgs.AddRange(transaction.Save(dc));
 
             return transaction;
         }
 
-        public static Transaction CreateNew(Account fromAccount, Account toAccount, decimal amount, string description, TransactionType transactionType, PaymentSourceType paymentSourceType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Transaction CreateNew(Account payingAccount, Account billingAccount, decimal amount, string description, TransactionType transactionType, PaymentSourceType paymentSourceType, bool usedStripeConnect, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var transaction = new Transaction()
             {
                 Amount = amount,
-                BillerAccountId = toAccount?.ID,
+                BillerAccountId = billingAccount?.ID,
                 Description = description,
-                PayerAccountId = fromAccount?.ID,
+                PayerAccountId = payingAccount?.ID,
                 PaymentTypeId = PaymentType.NotSet,
                 CreateDate = DateTime.UtcNow,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
@@ -269,6 +272,7 @@ namespace AfterSchoolLibrary.Services
                 LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
                 TransactionTypeId = transactionType,
                 PaymentSourceTypeId = paymentSourceType,
+                UsedStripeConnect = usedStripeConnect,
             };
             msgs.AddRange(transaction.Save(dc));
 
@@ -472,7 +476,7 @@ namespace AfterSchoolLibrary.Services
                 if (transaction.PaymentSourceTypeId == PaymentSourceType.AfterSchoolPlatform && transaction.IsCharge())
                     return
                         DateTime.UtcNow.IsOnOrAfter(transaction.CreateDate.Value.AddDays(transaction.GetWaitPeriodInDays())) &&
-                        !transaction.PlatformPercentFee.HasValue &&
+                        !transaction.UsedStripeConnect &&
                         !transaction.HasUnfulfilledRefundRequests(msgs, dc) &&
                         transaction.HasRefundableAmount(false, msgs, dc);
 
@@ -620,8 +624,8 @@ namespace AfterSchoolLibrary.Services
                         transactionType: TransactionType.Refund,
                         paymentType: paymentType,
                         paymentSourceType: paymentSourceType,
-                        payingAccount: refundingAccount,
-                        billingAccount: refundedAccount,
+                        refundingAccount: refundingAccount,
+                        refundedAccount: refundedAccount,
                         loggedInUser: loggedInUser,
                         msgs: msgs,
                         dc: dc);
@@ -669,18 +673,18 @@ namespace AfterSchoolLibrary.Services
                 dc);
         }
 
-        public static Transaction CreateNewRefund(this Transaction originalTransaction, decimal fullAmount, decimal? convenienceFeeAmount, decimal? paymentTypeFeeAmount, string refundId, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, Account payingAccount, Account billingAccount, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Transaction CreateNewRefund(this Transaction originalTransaction, decimal fullAmount, decimal? convenienceFeeAmount, decimal? paymentTypeFeeAmount, string refundId, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, Account refundingAccount, Account refundedAccount, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var refundDescription = "Payment refund";
             var participationObjects = originalTransaction.GetParticipationObjects(msgs, dc);
+            var useStripeConnect = refundingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
 
             if (participationObjects.Any())
                 refundDescription = $"{participationObjects.FirstOrDefault().Name} refund";
 
-            // inverse billing and paying for refund
             return CreateNew(
-                payingAccount,
-                billingAccount,
+                refundingAccount,
+                refundedAccount,
                 fullAmount,
                 convenienceFeeAmount,
                 originalTransaction.ConvenienceFeePayerAccountId,
@@ -693,6 +697,7 @@ namespace AfterSchoolLibrary.Services
                 originalTransaction,
                 paymentType,
                 paymentSourceType,
+                useStripeConnect,
                 loggedInUser,
                 msgs,
                 dc);

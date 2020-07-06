@@ -1438,6 +1438,7 @@ property: PaymentSourceTypeId, PaymentSourceType, Int
 property: OriginalTransactionId, int?, Int
 property: PayoutId, int?, Int, , If associated to a payout then it cannot be requested for another payout
 property: IsDeleted, bool, Bit
+property: UsedStripeConnect, bool, Bit, If using stripe connect during purchase then no payout is allowed because its automatic
 property: PlatformPercentFee, decimal?, Decimal "10,2", , deprecated
 property: PlatformFlatFee, decimal?, Decimal "10,2", , deprecated
 loadmethod: BillerAccountId|IsDeleted, List<>

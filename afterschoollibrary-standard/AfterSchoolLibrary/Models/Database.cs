@@ -315,6 +315,7 @@ namespace AfterSchoolLibrary.Models
 			Transaction.Update(new Hashtable(){{"TransactionTypeId",0}}, new Hashtable(){{"TransactionTypeId", DBNull.Value}}, Transaction.ObjectMap, dc);
 			Transaction.Update(new Hashtable(){{"PaymentSourceTypeId",0}}, new Hashtable(){{"PaymentSourceTypeId", DBNull.Value}}, Transaction.ObjectMap, dc);
 			Transaction.Update(new Hashtable(){{"IsDeleted",false}}, new Hashtable(){{"IsDeleted", DBNull.Value}}, Transaction.ObjectMap, dc);
+			Transaction.Update(new Hashtable(){{"UsedStripeConnect",false}}, new Hashtable(){{"UsedStripeConnect", DBNull.Value}}, Transaction.ObjectMap, dc);
 			Payout.Update(new Hashtable(){{"PayoutStatusId",0}}, new Hashtable(){{"PayoutStatusId", DBNull.Value}}, Payout.ObjectMap, dc);
 			Payout.Update(new Hashtable(){{"PaymentTypeId",0}}, new Hashtable(){{"PaymentTypeId", DBNull.Value}}, Payout.ObjectMap, dc);
 			Product.Update(new Hashtable(){{"IsActive",false}}, new Hashtable(){{"IsActive", DBNull.Value}}, Product.ObjectMap, dc);
