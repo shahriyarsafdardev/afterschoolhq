@@ -1717,6 +1717,10 @@ namespace AfterSchoolLibrary.Billing
                 msgs.Add(ex.Message, MessageType.Error, ex);
                 msgs.Add($"Error connecting stripe account - {ex.Message}", MessageType.UserError);
             }
+            catch(Exception ex)
+            {
+                msgs.Add($"Error connecting stripe account - {ex.Message}", MessageType.UserError);
+            }
 
             return token;
         }
@@ -1740,7 +1744,11 @@ namespace AfterSchoolLibrary.Billing
             catch (StripeException ex)
             {
                 msgs.Add(ex.Message, MessageType.Error, ex);
-                msgs.Add($"Error deauthorizing account", MessageType.UserError);
+                msgs.Add($"Error deauthorizing account - {ex.Message}", MessageType.UserError);
+            }
+            catch (Exception ex)
+            {
+                msgs.Add($"Error deauthorizing account - {ex.Message}", MessageType.UserError);
             }
 
             return oAuthDeauthorize;

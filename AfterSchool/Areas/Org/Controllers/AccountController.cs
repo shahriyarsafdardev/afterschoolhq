@@ -1265,13 +1265,12 @@ namespace AfterSchool.Areas.Org.Controllers
             else
                 msgs.Add("It appears you have canceled your request to connect your Stripe account.", MessageType.Notice);
 
-            ViewBag.Messages = msgs;
-
             if (msgs.HasNoErrors())
                 return RedirectToAction("paymentsdone", new { source = Request["state"], isfullscreen = Request["isfullscreen"] });
 
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.IsFullScreen = GetIsFullScreen();
+            ViewBag.Messages = msgs;
 
             return View("PaymentsOptions");
         }
