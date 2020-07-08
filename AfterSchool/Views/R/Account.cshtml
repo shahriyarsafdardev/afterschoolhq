@@ -372,6 +372,17 @@
                                 </a>
                             </div>
                         }
+                        @if (accountProfile.YouTube.IsNotEmpty())
+                        {
+                            <div class="footer-social-icon">
+                                <a href="@accountProfile.YouTube"
+                                   target="_blank"
+                                   class="icon-xlarge margin-h-30"
+                                   style="text-decoration: none;">
+                                    <i class="ion-social-youtube-outline"></i>
+                                </a>
+                            </div>
+                        }
                         @if (accountProfile.LinkedIn.IsNotEmpty())
                         {
                             <div class="footer-social-icon">

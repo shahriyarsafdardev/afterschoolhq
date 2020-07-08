@@ -117,7 +117,7 @@ namespace AfterSchoolLibrary.Services
             return AccountProperty.LoadByAccountIdByAccountPropertyTypeId(profile.AccountId.Value, AccountPropertyType.Photo, msgs, dc);
         }
 
-        public static void UpdateProfile(this AccountProfile profile, string headline, string about, string primaryColor, string website, string mingrade, string maxgrade, string twitter, string facebook, string instagram, string linkedin, string genderrestriction, NameValueCollection savedAwards, NameValueCollection newAwards, NameValueCollection savedCertifications, NameValueCollection newCertifications, NameValueCollection servicesOffered, NameValueCollection timesOffered, NameValueCollection pricingOptions, string classifications, string softskills, string academicsubjects, string teachingmethods, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void UpdateProfile(this AccountProfile profile, string headline, string about, string primaryColor, string website, string mingrade, string maxgrade, string twitter, string facebook, string instagram, string linkedin, string youtube, string genderrestriction, NameValueCollection savedAwards, NameValueCollection newAwards, NameValueCollection savedCertifications, NameValueCollection newCertifications, NameValueCollection servicesOffered, NameValueCollection timesOffered, NameValueCollection pricingOptions, string classifications, string softskills, string academicsubjects, string teachingmethods, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
             (
@@ -150,8 +150,11 @@ namespace AfterSchoolLibrary.Services
                     if (facebook.IsNotEmpty())
                         profile.Facebook = facebook;
 
-                    if (instagram.IsNotEmpty())
+                    if (linkedin.IsNotEmpty())
                         profile.LinkedIn = linkedin;
+
+                    if (youtube.IsNotEmpty())
+                        profile.YouTube = youtube;
 
                     if (genderrestriction.IsInteger())
                         profile.GenderRestriction = (GenderRestrictionType)genderrestriction.ToInteger();

@@ -945,7 +945,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult Style(string id, string logo, string headerimage, string about, string headline, string primaryColor, string website, string mingrade, string maxgrade, string twitter, string facebook, string instagram, string linkedin, string genderrestriction, string classifications, string softskills, string academicsubjects, string teachingmethods)
+        public ActionResult Style(string id, string logo, string headerimage, string about, string headline, string primaryColor, string website, string mingrade, string maxgrade, string twitter, string facebook, string instagram, string linkedin, string youtube, string genderrestriction, string classifications, string softskills, string academicsubjects, string teachingmethods)
         {
             var msgs = new SystemMessages();
             var profile = SessionVariables.CurrentAccount.GetAccountProfile(msgs);
@@ -1028,6 +1028,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     facebook,
                     instagram,
                     linkedin,
+                    youtube,
                     genderrestriction,
                     Request.Params.Filter("award-id-"),
                     Request.Params.Filter("award-new-"),
