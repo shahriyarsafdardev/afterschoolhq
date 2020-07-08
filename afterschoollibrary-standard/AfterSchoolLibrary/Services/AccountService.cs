@@ -2251,7 +2251,7 @@ namespace AfterSchoolLibrary.Services
 
         internal static string GetStripeSourceFromToken(this Account payingAccount, Account billingAccount, string stripeToken, SystemMessages msgs = null)
         {
-            var source = StripeHelper.CreateCreditCardSource(stripeToken, billingAccount.StripeUserId, msgs);
+            var source = StripeHelper.CreateCreditCardSource(stripeToken, msgs);
             StripeHelper.AddNewCardToCustomer(payingAccount.StripeCustomerId, source, null, msgs);
             return source.Id;
         }
