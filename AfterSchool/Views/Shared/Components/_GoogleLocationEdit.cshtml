@@ -2,23 +2,30 @@
 
 @{ 
     var types = ViewData["types"];
+    var description = "Enter the name of your organization, your full address, your city and state, or your county and state.";
+
+    if (ViewData["description"].IsNotEmpty())
+    {
+        description = ViewData["description"].ToString();
+    }
+
 }
 
 <input type="text" class="form-control" name="location" id="location" value="@(Model?.FormatAddress(false))" placeholder="" />
-<input type="hidden" id="streetnumber" name="streetnumber" value="" />
-<input type="hidden" id="streetname" name="streetname" value="" />
-<input type="hidden" id="address2" name="address2" value="" />
-<input type="hidden" id="neighborhood" name="neighborhood" value="" />
-<input type="hidden" id="city" name="city" value="" />
-<input type="hidden" id="state" name="state" value="" />
-<input type="hidden" id="postalcode" name="postalcode" value="" />
-<input type="hidden" id="county" name="county" value="" />
-<input type="hidden" id="country" name="country" value="" />
-<input type="hidden" id="placeid" name="placeid" value="" />
-<input type="hidden" id="locationname" name="locationname" value="" />
+<input type="hidden" id="streetnumber" name="streetnumber" value="@(Model?.StreetNumber)" />
+<input type="hidden" id="streetname" name="streetname" value="@(Model?.StreetName)" />
+<input type="hidden" id="address2" name="address2" value="@(Model?.Address2)" />
+<input type="hidden" id="neighborhood" name="neighborhood" value="@(Model?.Neighborhood)" />
+<input type="hidden" id="city" name="city" value="@(Model?.City)" />
+<input type="hidden" id="state" name="state" value="@(Model?.State)" />
+<input type="hidden" id="postalcode" name="postalcode" value="@(Model?.PostalCode)" />
+<input type="hidden" id="county" name="county" value="@(Model?.County)" />
+<input type="hidden" id="country" name="country" value="@(Model?.Country)" />
+<input type="hidden" id="placeid" name="placeid" value="@(Model?.GooglePlaceId)" />
+<input type="hidden" id="locationname" name="locationname" value="@(Model?.Name)" />
 
 <p class="text-muted">
-    Enter the name of your organization, your full address, your city and state, or your county and state.
+    @description
 </p>
 
 <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBq47Ro2O69sQhVLEW4_2L0ClOBSW_Srmc&libraries=places"></script>
@@ -31,8 +38,8 @@
         var options = {
             @if (types.IsNotEmpty())
             {
-                @:types: ['(@types)']
-            }            
+                @:types: ['@types'],
+            }
         };
 
         autocomplete = new google.maps.places.Autocomplete(input, options);
@@ -43,6 +50,8 @@
 
             const place = autocomplete.getPlace();
             const components = place.address_components;
+
+            // console.log(components);
 
             $('#placeid').val(place.place_id);
             $('#locationname').val(place.name);
