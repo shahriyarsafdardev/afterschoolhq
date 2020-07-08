@@ -1,6 +1,10 @@
 ﻿@model AccountProfile
 @{
-    ViewBag.Title = "Style - " + SessionVariables.CurrentAccount.Name;
+    var account = (Account)ViewBag.Account;
+    var location = (Location)ViewBag.Location;
+
+    ViewBag.Title = "Style - " + account.Name;
+
     var msgs = (SystemMessages)ViewBag.Messages;
     var awards = (List<AccountProperty>)ViewBag.Awards;
     var certifications = (List<AccountProperty>)ViewBag.Certifications;
@@ -43,7 +47,7 @@
     }
 
     @helper SubmitButtons(bool showDiscard = true)
-    {        
+    {
         <div class="form-group">
             <label class="col-sm-3 control-label"></label>
             <div class="col-sm-9">
@@ -63,461 +67,516 @@
         </div>
     }
 
-<form method="post" action="@formAction" class="form-horizontal" enctype="multipart/form-data">
+    <form method="post" action="@formAction" class="form-horizontal" enctype="multipart/form-data">
 
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <i class="s7-edit"></i> Account - Profile
-            <button type="submit" class="btn btn-primary pull-right hide">Save Changes &raquo;</button>
-        </div>
-        <div class="panel-body">
-            <div class="col-md-8 col-lg-9">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <i class="s7-edit"></i> Account - Profile
+                <button type="submit" class="btn btn-primary pull-right hide">Save Changes &raquo;</button>
+            </div>
+            <div class="panel-body">
+                <div class="col-md-8 col-lg-9">
 
-                <!-- Design -->
-                <a name="design"></a>
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        Header Design
-                    </div>
-                    <div class="panel-body">
-
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label">Logo</label>
-                            <div class="col-sm-6">
-                                <input type="file" class="form-control" name="logo" id="logo" />
-                                <p class="text-muted"><em>Please upload your logo. A square logo is best with a size of 400px x 400px. File size should be no larger than 1MB</em></p>
-                            </div>
-                            <div class="col-sm-3">
-                                @if (logoUrl.IsNotBlank())
-                                {
-                                    <img src="@logoUrl" width="100" />
-                                }
-                            </div>
+                    <!-- Design -->
+                    <a name="design"></a>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Header Design
                         </div>
+                        <div class="panel-body">
 
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label">Profile Header Image</label>
-                            <div class="col-sm-6">
-                                <input type="file" class="form-control" name="headerimage" id="headerimage" />
-                                <p class="text-muted"><em>Please select a header image, no larger than 2MB</em></p>
-                            </div>
-                            <div class="col-sm-3">
-                                @if (headerImageUrl.IsNotBlank())
-                                {
-                                    <img src="@headerImageUrl" width="100" />
-                                }
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="col-md-3 control-label">
-                                Profile Headline
-                            </label>
-                            <div class="col-md-9">
-                                <input type="text" class="form-control" name="headline" id="headline" value="@Model.Headline" />
-                                <p class="text-muted">
-                                    <em>Short tagline describing what you do. Max 100 characters. This will be placed right below your logo on your homepage</em>
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="form-group hide">
-                            <label class="col-md-3 control-label">
-                                Profile Primary Color
-                            </label>
-                            <div class="col-md-9">
-                                <input type="text" class="form-control" name="primarycolor" id="primarycolor" value="@Model.PrimaryColor" />
-                                <p class="text-muted">
-                                    <em>Enter your primary color for your profile</em>
-                                </p>
-                            </div>
-                        </div>
-
-                        @if (!isFullScreen)
-                        {
-                            @SubmitButtons()
-                        }
-
-                    </div>
-                </div>
-
-                <!-- Photos -->
-                <a name="photos"></a>
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3>Photo Gallery</h3>
-                    </div>
-                    <div class="panel-body">
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label">Photos</label>
-                            <div class="col-sm-9">
-                                @for (var i = 0; i < photos.Count; i++)
-                                {
-                                    var id = $"new-{i}";
-                                    var hide = "";
-
-                                    if (photos[i].ID.HasValue)
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">Logo</label>
+                                <div class="col-sm-6">
+                                    <input type="file" class="form-control" name="logo" id="logo" />
+                                    <p class="text-muted"><em>Please upload your logo. A square logo is best with a size of 400px x 400px. File size should be no larger than 1MB</em></p>
+                                </div>
+                                <div class="col-sm-3">
+                                    @if (logoUrl.IsNotBlank())
                                     {
-                                        id = $"id-{photos[i].ID}";
-                                        hide = "hide";
+                                        <img src="@logoUrl" width="100" />
                                     }
+                                </div>
+                            </div>
 
-                                    <div class="input-group input-group-md xs-mb-15">
-                                        @if (photos[i].ID.HasValue)
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">Profile Header Image</label>
+                                <div class="col-sm-6">
+                                    <input type="file" class="form-control" name="headerimage" id="headerimage" />
+                                    <p class="text-muted"><em>Please select a header image, no larger than 2MB</em></p>
+                                </div>
+                                <div class="col-sm-3">
+                                    @if (headerImageUrl.IsNotBlank())
+                                    {
+                                        <img src="@headerImageUrl" width="100" />
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">
+                                    Header Title
+                                </label>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" name="title" id="title" value="@Model.Title" />
+                                    <p class="text-muted">
+                                        <em>Your organization or program name</em>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">
+                                    Header Subtitle
+                                </label>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" name="headline" id="headline" value="@Model.Headline" />
+                                    <p class="text-muted">
+                                        <em>Short tagline describing what you do. Max 100 characters. This will be placed right below your logo on your homepage</em>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="form-group hide">
+                                <label class="col-md-3 control-label">
+                                    Profile Primary Color
+                                </label>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" name="primarycolor" id="primarycolor" value="@Model.PrimaryColor" />
+                                    <p class="text-muted">
+                                        <em>Enter your primary color for your profile</em>
+                                    </p>
+                                </div>
+                            </div>
+
+                            @if (!isFullScreen)
+                            {
+                                @SubmitButtons()
+                            }
+
+                        </div>
+                    </div>
+
+                    <!-- Contact Information -->
+                    <a name="contactinfo"></a>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Contact Info
+                        </div>
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">
+                                    Profile Email Address
+                                </label>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" name="email" id="email" value="@account.Email" placeholder="" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">
+                                    Profile Phone Number
+                                </label>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" name="phone" id="phone" value="@account.Phone" placeholder="" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">
+                                    Location
+                                </label>
+                                <div class="col-md-9">
+                                    @{ Html.RenderPartial("~/Views/Shared/Components/_GoogleLocationEdit.cshtml", location); }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Website & Social Links -->
+                    <a name="links"></a>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Website &amp; Social Links
+                        </div>
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">
+                                    Website Url
+                                </label>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" name="website" id="website" value="@Model.Website" placeholder="https://your-website.com" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">
+                                    Twitter Handle
+                                </label>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" name="twitter" id="twitter" value="@Model.Twitter" placeholder="@("@your_twitter_handle")" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">
+                                    Instagram Handle
+                                </label>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" name="instagram" id="instagram" value="@Model.Instagram" placeholder="@("@your_instagram_handle")" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">
+                                    Facebook Page Url
+                                </label>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" name="facebook" id="facebook" value="@Model.Facebook" placeholder="https://facebook.com/your-page" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">
+                                    YouTube Url
+                                </label>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" name="youtube" id="youtube" value="@Model.YouTube" placeholder="https://youtube.com/your-page" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">
+                                    LinkedIn Url
+                                </label>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" name="linkedin" id="linkedin" value="@Model.LinkedIn" placeholder="https://linkedin.com/your-page" />
+                                </div>
+                            </div>
+
+                            @if (!isFullScreen)
+                            {
+                                @SubmitButtons()
+                            }
+
+                        </div>
+                    </div>
+
+                    <!-- Photos -->
+                    <a name="photos"></a>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3>Photo Gallery</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">Photos</label>
+                                <div class="col-sm-9">
+                                    @for (var i = 0; i < photos.Count; i++)
+                                    {
+                                        var id = $"new-{i}";
+                                        var hide = "";
+
+                                        if (photos[i].ID.HasValue)
                                         {
-                                            <div class="photo-view-@i">
-                                                <img src="@photos[i].Value" width="50" />
-                                                <i class="s7-close icon-large pointer" onclick="removePhoto('@i')"></i>
-                                            </div>
+                                            id = $"id-{photos[i].ID}";
+                                            hide = "hide";
                                         }
 
-                                        <span class="input-group-addon photo-add-@i @hide">@(i + 1)</span>
-                                        <span><input type="file" class="form-control photo-add-@i @hide" name="photo-@id" id="photo-@id" /></span>
-                                    </div>
-                                }
-                            </div>
-                        </div>
+                                        <div class="input-group input-group-md xs-mb-15">
+                                            @if (photos[i].ID.HasValue)
+                                            {
+                                                <div class="photo-view-@i">
+                                                    <img src="@photos[i].Value" width="50" />
+                                                    <i class="s7-close icon-large pointer" onclick="removePhoto('@i')"></i>
+                                                </div>
+                                            }
 
-                        @if (!isFullScreen)
-                        {
-                            @SubmitButtons()
-                        }
-                    </div>
-                </div>
-
-                <!-- Additional Details -->
-                <a name="details"></a>
-                <a name="grades"></a>
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        Additional Details
-                    </div>
-                    <div class="panel-body">
-                        <div class="form-group">
-                            <label class="col-md-3 control-label">
-                                Grades Served
-                            </label>
-                            <div class="col-md-9">
-                                <select id="mingrade" name="mingrade" class="form-control">
-                                    @foreach (var grade in grades)
-                                    {
-                                        <option value="@grade.ID" @(Model.GradeLevelStart == grade.ID ? " selected=\"selected\" " : "")>@grade.Name</option>
+                                            <span class="input-group-addon photo-add-@i @hide">@(i + 1)</span>
+                                            <span><input type="file" class="form-control photo-add-@i @hide" name="photo-@id" id="photo-@id" /></span>
+                                        </div>
                                     }
-                                </select>
-                                <p class="margin-v-10">
-                                    To
-                                </p>
-                                <select id="maxgrade" name="maxgrade" class="form-control">
-                                    @foreach (var grade in grades)
-                                    {
-                                        var selected = "";
+                                </div>
+                            </div>
 
-                                        if (Model.GradeLevelEnd == grade.ID || (!Model.GradeLevelEnd.HasValue && grade.ID == grades.Last().ID))
+                            @if (!isFullScreen)
+                            {
+                                @SubmitButtons()
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Additional Details -->
+                    <a name="details"></a>
+                    <a name="grades"></a>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Additional Details
+                        </div>
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">
+                                    Grades Served
+                                </label>
+                                <div class="col-md-9">
+                                    <select id="mingrade" name="mingrade" class="form-control">
+                                        @foreach (var grade in grades)
                                         {
-                                            selected = " selected=\"selected\" ";
+                                            <option value="@grade.ID" @(Model.GradeLevelStart == grade.ID ? " selected=\"selected\" " : "")>@grade.Name</option>
                                         }
+                                    </select>
+                                    <p class="margin-v-10">
+                                        To
+                                    </p>
+                                    <select id="maxgrade" name="maxgrade" class="form-control">
+                                        @foreach (var grade in grades)
+                                        {
+                                            var selected = "";
 
-                                        <option value="@grade.ID" @selected )>@grade.Name</option>
+                                            if (Model.GradeLevelEnd == grade.ID || (!Model.GradeLevelEnd.HasValue && grade.ID == grades.Last().ID))
+                                            {
+                                                selected = " selected=\"selected\" ";
+                                            }
+
+                                            <option value="@grade.ID" @selected )>@grade.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">My program is designed for</label>
+                                <div class="col-md-9">
+                                    <div class="am-radio">
+                                        <input type="radio"
+                                               name="genderrestrictions"
+                                               id="genderrestrictions-@((int)GenderRestrictionType.None)"
+                                               value="@((int)GenderRestrictionType.None)"
+                                               @(Model.GenderRestriction == GenderRestrictionType.None ? "checked=\"checked\"" : "") />
+                                        <label for="genderrestrictions-@((int)GenderRestrictionType.None)">All Genders</label>
+                                    </div>
+                                    <div class="am-radio">
+                                        <input type="radio"
+                                               name="genderrestrictions"
+                                               id="genderrestrictions-@((int)GenderRestrictionType.MaleOnly)"
+                                               value="@((int)GenderRestrictionType.None)"
+                                               @(Model.GenderRestriction == GenderRestrictionType.MaleOnly ? "checked=\"checked\"" : "") />
+                                        <label for="genderrestrictions-@((int)GenderRestrictionType.MaleOnly)">Boys</label>
+                                    </div>
+                                    <div class="am-radio">
+                                        <input type="radio"
+                                               name="genderrestrictions"
+                                               id="genderrestrictions-@((int)GenderRestrictionType.FemaleOnly)"
+                                               value="@((int)GenderRestrictionType.None)"
+                                               @(Model.GenderRestriction == GenderRestrictionType.FemaleOnly ? "checked=\"checked\"" : "") />
+                                        <label for="genderrestrictions-@((int)GenderRestrictionType.FemaleOnly)">Girls</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if (!isFullScreen)
+                            {
+                                @SubmitButtons()
+                            }
+
+                        </div>
+                    </div>
+
+                    <!-- services -->
+                    <a name="services"></a>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Services &amp; Classifications
+                        </div>
+                        <div class="panel-body">
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">Services Offered</label>
+                                <div class="col-md-9">
+                                    @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.ServicesOfferings)
+                                    {
+                                        <div class="am-checkbox">
+                                            <input type="checkbox"
+                                                   name="services-offered-@item.ToLower()"
+                                                   id="services-offered-@item.ToLower()"
+                                                   value="@item"
+                                                   @(servicesOffered.Select(x => x.Value.ToLower()).Contains(item.ToLower()) ? "checked=\"checked\"" : "") />
+                                            <label for="services-offered-@item.ToLower()">@item</label>
+                                        </div>
                                     }
-                                </select>
-                            </div>
-                        </div>
 
-                        <div class="form-group">
-                            <label class="col-md-3 control-label">My program is designed for</label>
-                            <div class="col-md-9">
-                                <div class="am-radio">
-                                    <input type="radio"
-                                           name="genderrestrictions"
-                                           id="genderrestrictions-@((int)GenderRestrictionType.None)"
-                                           value="@((int)GenderRestrictionType.None)"
-                                           @(Model.GenderRestriction == GenderRestrictionType.None ? "checked=\"checked\"" : "") />
-                                    <label for="genderrestrictions-@((int)GenderRestrictionType.None)">All Genders</label>
-                                </div>
-                                <div class="am-radio">
-                                    <input type="radio"
-                                           name="genderrestrictions"
-                                           id="genderrestrictions-@((int)GenderRestrictionType.MaleOnly)"
-                                           value="@((int)GenderRestrictionType.None)"
-                                           @(Model.GenderRestriction == GenderRestrictionType.MaleOnly ? "checked=\"checked\"" : "") />
-                                    <label for="genderrestrictions-@((int)GenderRestrictionType.MaleOnly)">Boys</label>
-                                </div>
-                                <div class="am-radio">
-                                    <input type="radio"
-                                           name="genderrestrictions"
-                                           id="genderrestrictions-@((int)GenderRestrictionType.FemaleOnly)"
-                                           value="@((int)GenderRestrictionType.None)"
-                                           @(Model.GenderRestriction == GenderRestrictionType.FemaleOnly ? "checked=\"checked\"" : "") />
-                                    <label for="genderrestrictions-@((int)GenderRestrictionType.FemaleOnly)">Girls</label>
                                 </div>
                             </div>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">Times offered</label>
+                                <div class="col-md-9">
+                                    @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.OfferingTimes)
+                                    {
+                                        <div class="am-checkbox">
+                                            <input type="checkbox"
+                                                   name="times-offered-@item.ToLower()"
+                                                   id="times-offered-@item.ToLower()"
+                                                   value="@item"
+                                                   @(timesOffered.Select(x => x.Value.ToLower()).Contains(item.ToLower()) ? "checked=\"checked\"" : "") />
+                                            <label for="times-offered-@item.ToLower()">@item</label>
+                                        </div>
+                                    }
+
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">Pricing options</label>
+                                <div class="col-md-9">
+                                    @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.PricingOptions)
+                                    {
+                                        <div class="am-checkbox">
+                                            <input type="checkbox"
+                                                   name="pricing-options-@item.ToLower()"
+                                                   id="pricing-options-@item.ToLower()"
+                                                   value="@item"
+                                                   @(pricingOptions.Select(x => x.Value.ToLower()).Contains(item.ToLower()) ? "checked=\"checked\"" : "") />
+                                            <label for="pricing-options-@item.ToLower()">@item</label>
+                                        </div>
+                                    }
+
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">Program Classifications (up to 3)</label>
+                                <div class="col-md-9">
+                                    <input type="text" name="classifications" id="classifications" class="form-control" data-role="tagsinput" value="@classifications.Select(x => x.Value).ToStringList(",")" />
+                                    <p class="text-small text-muted">ex: Karate, Sports, Arts, Pottery, Dance, Football</p>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">Soft Skills (up to 10)</label>
+                                <div class="col-md-9">
+                                    <input type="text" name="softskills" id="softskills" class="form-control" data-role="tagsinput" value="@softSkills.Select(x => x.Value).ToStringList(",")" />
+                                    <p class="text-small text-muted">ex: Leadership, Teamwork, Communication</p>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">Academic Subjects Taughts (up to 5)</label>
+                                <div class="col-md-9">
+                                    <input type="text" name="academicsubjects" id="academicsubjects" class="form-control" data-role="tagsinput" value="@academicSubjects.Select(x => x.Value).ToStringList(",")" />
+                                    <p class="text-small text-muted">ex: Math, Science, Language Arts, Physical Education</p>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">Teaching Methods (up to 3)</label>
+                                <div class="col-md-9">
+                                    <input type="text" name="teachingmethods" id="teachingmethods" class="form-control" data-role="tagsinput" value="@teachingMethods.Select(x => x.Value).ToStringList(",")" />
+                                    <p class="text-small text-muted">ex: Project Based Learning, Team work, Games</p>
+                                </div>
+                            </div>
+
+                            @if (!isFullScreen)
+                            {
+                                @SubmitButtons()
+                            }
+
                         </div>
-
-                        @if (!isFullScreen)
-                        {
-                            @SubmitButtons()
-                        }
-
                     </div>
-                </div>
 
-                <!-- services -->
-                <a name="services"></a>
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        Services &amp; Classifications
-                    </div>
-                    <div class="panel-body">
-
-                        <div class="form-group">
-                            <label class="col-md-3 control-label">Services Offered</label>
-                            <div class="col-md-9">
-                                @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.ServicesOfferings)
-                                {
-                                    <div class="am-checkbox">
-                                        <input type="checkbox"
-                                               name="services-offered-@item.ToLower()"
-                                               id="services-offered-@item.ToLower()"
-                                               value="@item"
-                                               @(servicesOffered.Select(x => x.Value.ToLower()).Contains(item.ToLower()) ? "checked=\"checked\"" : "") />
-                                        <label for="services-offered-@item.ToLower()">@item</label>
-                                    </div>
-                                }
-
-                            </div>
+                    <!-- About -->
+                    <a name="profileabout"></a>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            About Your Program
                         </div>
+                        <div class="panel-body">
 
-                        <div class="form-group">
-                            <label class="col-md-3 control-label">Times offered</label>
-                            <div class="col-md-9">
-                                @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.OfferingTimes)
-                                {
-                                    <div class="am-checkbox">
-                                        <input type="checkbox"
-                                               name="times-offered-@item.ToLower()"
-                                               id="times-offered-@item.ToLower()"
-                                               value="@item"
-                                               @(timesOffered.Select(x => x.Value.ToLower()).Contains(item.ToLower()) ? "checked=\"checked\"" : "") />
-                                        <label for="times-offered-@item.ToLower()">@item</label>
-                                    </div>
-                                }
-
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="col-md-3 control-label">Pricing options</label>
-                            <div class="col-md-9">
-                                @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.PricingOptions)
-                                {
-                                    <div class="am-checkbox">
-                                        <input type="checkbox"
-                                               name="pricing-options-@item.ToLower()"
-                                               id="pricing-options-@item.ToLower()"
-                                               value="@item"
-                                               @(pricingOptions.Select(x => x.Value.ToLower()).Contains(item.ToLower()) ? "checked=\"checked\"" : "") />
-                                        <label for="pricing-options-@item.ToLower()">@item</label>
-                                    </div>
-                                }
-
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="col-md-3 control-label">Program Classifications (up to 3)</label>
-                            <div class="col-md-9">
-                                <input type="text" name="classifications" id="classifications" class="form-control" data-role="tagsinput" value="@classifications.Select(x => x.Value).ToStringList(",")" />
-                                <p class="text-small text-muted">ex: Karate, Sports, Arts, Pottery, Dance, Football</p>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="col-md-3 control-label">Soft Skills (up to 10)</label>
-                            <div class="col-md-9">
-                                <input type="text" name="softskills" id="softskills" class="form-control" data-role="tagsinput" value="@softSkills.Select(x => x.Value).ToStringList(",")" />
-                                <p class="text-small text-muted">ex: Leadership, Teamwork, Communication</p>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="col-md-3 control-label">Academic Subjects Taughts (up to 5)</label>
-                            <div class="col-md-9">
-                                <input type="text" name="academicsubjects" id="academicsubjects" class="form-control" data-role="tagsinput" value="@academicSubjects.Select(x => x.Value).ToStringList(",")" />
-                                <p class="text-small text-muted">ex: Math, Science, Language Arts, Physical Education</p>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="col-md-3 control-label">Teaching Methods (up to 3)</label>
-                            <div class="col-md-9">
-                                <input type="text" name="teachingmethods" id="teachingmethods" class="form-control" data-role="tagsinput" value="@teachingMethods.Select(x => x.Value).ToStringList(",")" />
-                                <p class="text-small text-muted">ex: Project Based Learning, Team work, Games</p>
-                            </div>
-                        </div>
-
-                        @if (!isFullScreen)
-                        {
-                            @SubmitButtons()
-                        }
-
-                    </div>
-                </div>
-
-                <!-- About -->
-                <a name="profileabout"></a>
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        About Your Program
-                    </div>
-                    <div class="panel-body">
-
-                        <div class="form-group">
-                            <label class="col-md-3 control-label">
-                                About @SessionVariables.CurrentAccount.Name
-                            </label>
-                            <div class="col-md-9">
-                                @{ Html.RenderPartial(
-                                                               "~/Views/Shared/_TextEditor.cshtml",
-                                                               Model.About,
-                                                               new ViewDataDictionary() {
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">
+                                    About @SessionVariables.CurrentAccount.Name
+                                </label>
+                                <div class="col-md-9">
+                                    @{ Html.RenderPartial(
+                                        "~/Views/Shared/_TextEditor.cshtml",
+                                        Model.About,
+                                        new ViewDataDictionary() {
                                             { "required", false },
                                             { "name", "about" },
                                             { "id", "about" }
 }
-                                                               ); }
+                                    ); }
 
-                                <p class="text-muted">
-                                    <em>Tell us what is special about what you do. Max of 4000 characters</em>
-                                </p>
+                                    <p class="text-muted">
+                                        <em>Tell us what is special about what you do. Max of 4000 characters</em>
+                                    </p>
+                                </div>
                             </div>
-                        </div>
 
-                        <a name="awards"></a>
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label">Awards &amp; Accolades<br />(enter up to 5)</label>
-                            <div class="col-sm-9">
-                                @for (var i = 0; i < awards.Count; i++)
-                                {
-                                    var id = $"new-{i}";
-
-                                    if (awards[i].ID.HasValue)
+                            <a name="awards"></a>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">Awards &amp; Accolades<br />(enter up to 5)</label>
+                                <div class="col-sm-9">
+                                    @for (var i = 0; i < awards.Count; i++)
                                     {
-                                        id = $"id-{awards[i].ID}";
+                                        var id = $"new-{i}";
+
+                                        if (awards[i].ID.HasValue)
+                                        {
+                                            id = $"id-{awards[i].ID}";
+                                        }
+
+                                        <div class="input-group input-group-md xs-mb-15">
+                                            <span class="input-group-addon">@(i + 1)</span>
+                                            <span><input type="text" class="form-control" name="award-@id" id="award-@id" value="@awards[i].Value" /></span>
+                                        </div>
                                     }
-
-                                    <div class="input-group input-group-md xs-mb-15">
-                                        <span class="input-group-addon">@(i + 1)</span>
-                                        <span><input type="text" class="form-control" name="award-@id" id="award-@id" value="@awards[i].Value" /></span>
-                                    </div>
-                                }
+                                </div>
                             </div>
-                        </div>
 
-                        <a name="certifications"></a>
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label">Certifications<br />(enter up to 5)</label>
-                            <div class="col-sm-9">
-                                @for (var i = 0; i < certifications.Count; i++)
-                                {
-                                    var id = $"new-{i}";
-
-                                    if (certifications[i].ID.HasValue)
+                            <a name="certifications"></a>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">Certifications<br />(enter up to 5)</label>
+                                <div class="col-sm-9">
+                                    @for (var i = 0; i < certifications.Count; i++)
                                     {
-                                        id = $"id-{certifications[i].ID}";
+                                        var id = $"new-{i}";
+
+                                        if (certifications[i].ID.HasValue)
+                                        {
+                                            id = $"id-{certifications[i].ID}";
+                                        }
+                                        <div class="input-group input-group-md xs-mb-15">
+                                            <span class="input-group-addon">@(i + 1)</span>
+                                            <span><input type="text" class="form-control" name="certification-@id" id="certification-@id" value="@certifications[i].Value" /></span>
+                                        </div>
                                     }
-                                    <div class="input-group input-group-md xs-mb-15">
-                                        <span class="input-group-addon">@(i + 1)</span>
-                                        <span><input type="text" class="form-control" name="certification-@id" id="certification-@id" value="@certifications[i].Value" /></span>
-                                    </div>
-                                }
+                                </div>
                             </div>
+
+                            @if (!isFullScreen)
+                            {
+                                @SubmitButtons()
+                            }
+
                         </div>
-
-                        @if (!isFullScreen)
-                        {
-                            @SubmitButtons()
-                        }
-
                     </div>
-                </div>
 
-                <!-- Website & Social Links -->
-                <a name="links"></a>
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        Website &amp; Social Links
-                    </div>
-                    <div class="panel-body">
-                        <div class="form-group">
-                            <label class="col-md-3 control-label">
-                                Website Url
-                            </label>
-                            <div class="col-md-9">
-                                <input type="text" class="form-control" name="website" id="website" value="@Model.Website" />
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="col-md-3 control-label">
-                                Twitter Handle
-                            </label>
-                            <div class="col-md-9">
-                                <input type="text" class="form-control" name="twitter" id="twitter" value="@Model.Twitter" />
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="col-md-3 control-label">
-                                Instagram Handle
-                            </label>
-                            <div class="col-md-9">
-                                <input type="text" class="form-control" name="instagram" id="instagram" value="@Model.Instagram" />
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="col-md-3 control-label">
-                                Facebook Page Url
-                            </label>
-                            <div class="col-md-9">
-                                <input type="text" class="form-control" name="facebook" id="facebook" value="@Model.Facebook" />
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="col-md-3 control-label">
-                                LinkedIn Url
-                            </label>
-                            <div class="col-md-9">
-                                <input type="text" class="form-control" name="linkedin" id="linkedin" value="@Model.LinkedIn" />
-                            </div>
-                        </div>
-
-                        @if (!isFullScreen)
-                        {
-                            @SubmitButtons()
-                        }
-
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </div>
-
-    @if (isFullScreen)
-    {
-        <div style="position:fixed; bottom: 0px; width: 100%; margin-left: -50px; background-color: #fff; z-index: 1001; padding: 20px; border-top: solid 1px #efefef">
-            <div class="row">
-                <div class="col-md-12 text-center">
-                    <button type="submit" class="btn btn-primary btn-lg">Save Changes</button>
-                    <a href="@Request["returnurl"]" class="btn btn-alt6 btn-lg">@Html.Raw(exitText)</a>
                 </div>
             </div>
         </div>
-    }
 
-</form>
+        @if (isFullScreen)
+        {
+            <div style="position:fixed; bottom: 0px; width: 100%; margin-left: -50px; background-color: #fff; z-index: 1001; padding: 20px; border-top: solid 1px #efefef">
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <button type="submit" class="btn btn-primary btn-lg">Save Changes</button>
+                        <a href="@Request["returnurl"]" class="btn btn-alt6 btn-lg">@Html.Raw(exitText)</a>
+                    </div>
+                </div>
+            </div>
+        }
+
+    </form>
 </div>
 
 <script>
@@ -555,4 +614,5 @@
             maxTags: 3
         });
     </script>
+
 }

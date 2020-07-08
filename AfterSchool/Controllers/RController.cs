@@ -64,7 +64,7 @@ namespace AfterSchool.Controllers
             photos.ForEach(photo => photo.Value = ah.GetFileLink(photo.Value, true, null, true));
 
             ViewBag.AccountProfile = profile;
-            ViewBag.Location = account.GetDefaultLocation(msgs);
+            ViewBag.Location = profile.GetLocation(msgs) ?? account.GetDefaultLocation(msgs);
             ViewBag.Awards = profile.GetAwards(msgs);
             ViewBag.Certifications = profile.GetCertifications(msgs);
             ViewBag.Photos = photos;

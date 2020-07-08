@@ -82,19 +82,18 @@
                             }
                         }
 
-                        @{
-                            Html.RenderPartial(
-                                "~/Views/Shared/_LocationEdit.cshtml",
-                                school ?? new Location(),
-                                new ViewDataDictionary()
-                                {
-                                                    { "label", "Enter your school" },
-                                                    { "searchOnly", true },
-                                                    { "placeholderText", "Enter your school name" },
-                                                    { "locationType", (int)LocationType.School }
-                }
-                            );
-                        }
+                        <div class="form-group">
+                            <div class="col-md-3 control-label">
+                                School
+                            </div>
+                            <div class="col-md-6">
+                                @{ Html.RenderPartial(
+                                       "~/Views/Shared/Components/_GoogleLocationEdit.cshtml", 
+                                       new Location() { }, 
+                                       new ViewDataDictionary() { { "types", "establishment" }, { "description", "Enter your school name" } }); 
+                                }
+                            </div>
+                        </div>
 
                         <div class="padding-v-20">
                             <button type="submit" id="btn-add-student" class="btn btn-register-primary btn-lg">Save &amp; Continue &raquo;</button>

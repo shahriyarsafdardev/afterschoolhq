@@ -169,6 +169,37 @@ namespace AfterSchoolLibrary.Services
             return location;
         }
 
+        public static Location CreateOrUpdateFromGoogle(string locationName, string streetNumber, string streetName, string address2, string neighborhood, string city, string county, string state, string postalCode, string country, string googlePlaceId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var location = Location.LoadByGooglePlaceId(googlePlaceId, msgs, dc);
+
+            if (location.IsEmpty())
+                location = new Location()
+                {
+                    GooglePlaceId = googlePlaceId,
+                    CreateDate = DateTime.UtcNow,
+                    CreatedBy = loggedInUser?.ID,
+                };
+
+            location.Name = locationName;
+            location.StreetNumber = streetNumber;
+            location.StreetName = streetName;
+            location.Address1 = $"{streetNumber} {streetName}";
+            location.Address2 = address2;
+            location.Neighborhood = neighborhood;
+            location.City = city;
+            location.County = county;
+            location.State = state;
+            location.PostalCode = postalCode;
+            location.Country = country;
+            location.LastModifiedDate = DateTime.UtcNow;
+            location.LastModifiedBy = loggedInUser?.ID;
+
+            msgs.AddRange(location.Save(dc));
+
+            return location;
+        }
+
         public static bool DoesLocationAlreadyExist(string locationName, string address1, string address2, string city, string state, string postalCode, string country, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return Location.GetCount(

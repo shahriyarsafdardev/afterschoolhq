@@ -740,7 +740,7 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public ActionResult AddStudent(string id, string samehomeaddress, string location, string createuseraccount)
+        public ActionResult AddStudent(string id, string samehomeaddress, string createuseraccount, string locationname, string streetnumber, string streetname, string address2, string neighborhood, string city, string county, string state, string postalcode, string country, string placeid)
         {
             var results = CheckRedirect(checkForEmptyCart: true);
             if (results.IsNotEmpty()) return results;
@@ -786,6 +786,11 @@ namespace AfterSchool.Controllers
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
                         var canBeAccessedBy = SessionVariables.CurrentUser.AsList();
+                        Location school = null;
+                        
+                        if (placeid.IsNotEmpty())
+                            school = LocationService.CreateOrUpdateFromGoogle(locationname, streetnumber, streetname, address2, neighborhood, city, county, state, postalcode, country, placeid, SessionVariables.CurrentUser, amsgs, adc);
+
 
                         // create student account if requested by parent
                         if (createuseraccount.IsNumber())
@@ -816,7 +821,7 @@ namespace AfterSchool.Controllers
                             isMaster: true,
                             isParentOrGuardian: false,
                             allowTextMessages: false,
-                            schoolLocationId: location.IsNumber() ? location.ToInteger() : new int?(),
+                            schoolLocationId: school.IsNotEmpty() ? school.ID : new int?(),
                             profileStatus: RegistrantProfileStatus.Started,
                             loggedInUser: SessionVariables.CurrentUser,
                             msgs: amsgs,

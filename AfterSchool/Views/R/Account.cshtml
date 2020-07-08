@@ -263,9 +263,9 @@
                     </div>
                 }
 
-                @if (locations.Any())
+                @if (location.IsNotEmpty())
                 {
-                    var locationsQuery = locations.Select(l => Url.Encode(l.GetAddress())).ToStringList(",");
+                    // var locationsQuery = locations.Select(l => Url.Encode(l.GetAddress())).ToStringList(",");
 
                     <div class="margin-t-20">
                         <div class="row padding-h-30">
@@ -369,6 +369,17 @@
                                    class="icon-xlarge margin-h-30"
                                    style="text-decoration: none;">
                                     <i class="ion-social-facebook-outline"></i>
+                                </a>
+                            </div>
+                        }
+                        @if (accountProfile.YouTube.IsNotEmpty())
+                        {
+                            <div class="footer-social-icon">
+                                <a href="@accountProfile.YouTube"
+                                   target="_blank"
+                                   class="icon-xlarge margin-h-30"
+                                   style="text-decoration: none;">
+                                    <i class="ion-social-youtube-outline"></i>
                                 </a>
                             </div>
                         }

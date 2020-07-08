@@ -126,14 +126,16 @@ property: IsDefault, bool, Bit
 property: Details, string, NVarChar "4000"
 property: LocationTypeId, LocationType, Int
 property: IsTest, bool, Bit
-baseproperty: Name, required
-baseproperty: Address1, required
-baseproperty: City, required
+property: GooglePlaceId, string, NVarChar "100"
+property: StreetNumber, string, NVarChar "50"
+property: StreetName, string, NVarChar "50"
+property: Neighborhood, string, NVarChar "50"
+property: County, string, NVarChar "100"
 baseproperty: State, required
-baseproperty: PostalCode, required
 loadmethod: HostAccountId, List<>
 loadmethod: HostAccountId|IsDefault
 loadmethod: LocationTypeId, List<>
+loadmethod: GooglePlaceId
 [end]
 
 [begin]
@@ -368,8 +370,10 @@ name: AccountProfile
 description: holds all the profile and style information for the account
 inherits: BasicObjectWithModified
 property: AccountId, int?, Int
+property: LocationId, int?, Int
 property: Logo, string, NVarChar "400"
 property: HeaderImage, string, NVarChar "400"
+property: Title, string, NVarChar "400"
 property: Headline, string, NVarChar "400"
 property: About, string, NVarChar "4000"
 property: PrimaryColor, string, NVarChar "20"
@@ -380,7 +384,10 @@ property: Twitter, string, NVarChar "100"
 property: Facebook, string, NVarChar "100"
 property: Instagram, string, NVarChar "100"
 property: LinkedIn, string, NVarChar "100"
+property: YouTube, string, NVarChar "100"
 property: GenderRestriction, GenderRestrictionType, Int
+property: ProfileEmail, string, NVarChar "100"
+property: ProfilePhone, string, NVarChar "20"
 loadmethod: AccountId
 join: Account.ID, AccountId, InnerJoin
 joinproperty: Account.Name, string, NVarChar

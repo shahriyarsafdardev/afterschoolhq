@@ -783,10 +783,16 @@ namespace AfterSchoolLibrary.Services
             var locationdetails = values.GetValueOrDefault("locationdetails");
             var scheduledetails = values.GetValueOrDefault("scheduledetails");
             var address1 = values.GetValueOrDefault("address1");
+            var streetnumber = values.GetValueOrDefault("streetnumber");
+            var streetname = values.GetValueOrDefault("streetname");
             var address2 = values.GetValueOrDefault("address2");
+            var neighborhood = values.GetValueOrDefault("neighborhood");
             var city = values.GetValueOrDefault("city");
+            var county = values.GetValueOrDefault("county");
             var state = values.GetValueOrDefault("state");
             var postalcode = values.GetValueOrDefault("postalcode");
+            var country = values.GetValueOrDefault("country");
+            var placeid = values.GetValueOrDefault("placeid");
             var ismylocation = values.GetValueOrDefault("mylocation");
             var locationtype = values.GetValueOrDefault("locationtype");
             var activitylocationtype = values.GetValueOrDefault("activitylocationtype");
@@ -1123,19 +1129,24 @@ namespace AfterSchoolLibrary.Services
                                         location.IfEmpty(""),
                                         locationname.IfEmpty(""),
                                         address1.IfEmpty(""),
+                                        streetnumber.IfEmpty(""),
+                                        streetname.IfEmpty(""),
                                         address2.IfEmpty(""),
+                                        neighborhood.IfEmpty(""),
                                         city.IfEmpty(""),
+                                        county.IfEmpty(""),
                                         state.IfEmpty(""),
                                         postalcode.IfEmpty(""),
+                                        country.IfEmpty(""),
+                                        placeid.IfEmpty(""),
                                         locationdetails.IfEmpty(""),
                                         ismylocation.IfEmpty(""),
                                         locationtype.IfEmpty(""),
                                         loggedInUserId,
-                                        adc
-                                        ));
+                                        adc));
 
                                     if (!account.DefaultLocationId.HasValue)
-                                        msgs.AddRange(account.SetDefaultLocation(activity.LocationId.Value, loggedInUserId, dc));
+                                        account.SetDefaultLocation(activity.LocationId.Value, new WebUser() { ID = loggedInUserId }, msgs, dc);
                                 }
                             }
 
@@ -1429,85 +1440,27 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
-        private static SystemMessages SetupLocation(this Activity activity, string location, string locationname, string address1, string address2, string city, string state, string postalcode, string locationdetails, string ismylocation, string locationtype, int loggedInUserId, DatabaseConnection dc = null)
+        private static SystemMessages SetupLocation(this Activity activity, string location, string locationName, string address1, string streetNumber, string streetName, string address2, string neighborhood, string city, string county, string state, string postalCode, string country, string googlePlaceId, string locationdetails, string ismylocation, string locationtype, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
 
-            // just switching locations
-            if (location.IsNumber())
-            {
-                // make sure we setup a relationship
-                var actualLocation = Location.Load(location.ToInteger(), msgs, dc);
-
-                // don't need to ask permission for your own location
-                if (actualLocation.HostAccountId.HasValue && actualLocation.HostAccountId != activity.AccountId)
-                {
-                    var locationOwner = Account.Load(actualLocation.HostAccountId.Value, msgs, dc);
-                    var visitorAccount = activity.GetAccount(msgs, dc);
-
-                    var relationship = Services.AccountRelationshipService.GetOrCreateNew(
-                       hostAccount: locationOwner,
-                       visitorAccount: visitorAccount,
-                       approvalStatus: ApprovalStatus.Requested,
-                       hostPermissionType: HostPermissionType.ApproveOnly,
-                       loggedInUser: new WebUser { ID = loggedInUserId },
-                       msgs: msgs,
-                       dc: dc);
-
-                    var relationshipLocation = Services.AccountRelationshipLocationService.GetOrCreateNew(
-                        accountRelationship: relationship,
-                        hostAccount: locationOwner,
-                        visitorAccount: visitorAccount,
-                        location: actualLocation,
-                        loggedInUser: new WebUser { ID = loggedInUserId },
-                        msgs: msgs,
-                        dc: dc);
-                }
-
-                activity.LocationId = location.ToString().ToInteger();
-            }
-            // they entered a new location possibly? 
-            // otherwise somehow the UI allowed them to enter a location that already exists, with the exact same location name
-            else
-            {
-                if (address1.IsEmpty())
-                    msgs.Add("Address 1 is required", MessageType.UserError);
-                if (city.IsEmpty())
-                    msgs.Add("City is required", MessageType.UserError);
-                if (state.IsEmpty())
-                    msgs.Add("State is required", MessageType.UserError);
-                if (postalcode.IsEmpty())
-                    msgs.Add("Postal Code is required", MessageType.UserError);
-
-                if (msgs.HasErrors())
-                    return msgs;
-
-                var locationType = LocationType.NotSet;
-                var hostAccountId = new int?();
-
-                if (locationtype.IsNumber())
-                    locationType = (LocationType)locationtype.ToInteger();
-
-                if (ismylocation.IsBoolean() && ismylocation.ToBoolean())
-                    hostAccountId = activity.AccountId;
-
-                var activityLocation = Services.LocationService.CreateNewWithValidation(
-                        locationname,
-                        address1,
-                        address2,
-                        city,
-                        state,
-                        postalcode,
-                        "US",
-                        locationType,
-                        hostAccountId,
-                        new Account { ID = activity.AccountId },
-                        new WebUser { ID = loggedInUserId },
-                        msgs,
-                        dc);
-
-                activity.LocationId = activityLocation.ID;
-            }
+            var activityLocation = LocationService.CreateOrUpdateFromGoogle(
+                                    locationName, 
+                                    streetNumber, 
+                                    streetName, 
+                                    address2, 
+                                    neighborhood, 
+                                    city, 
+                                    county, 
+                                    state, 
+                                    postalCode, 
+                                    country, 
+                                    googlePlaceId, 
+                                    new WebUser() { ID = loggedInUserId }, 
+                                    msgs, 
+                                    dc);
+            
+            activity.LocationId = activityLocation.ID;
 
             if (locationdetails.IsNotEmpty())
                 activity.LocationDetails = locationdetails.IfBlank("").MaxChars(4000);
@@ -1515,6 +1468,82 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(activity.Save(dc));
 
             return msgs;
+
+            //// just switching locations
+            //if (location.IsNumber())
+            //{
+            //    // make sure we setup a relationship
+            //    var actualLocation = Location.Load(location.ToInteger(), msgs, dc);
+
+            //    // don't need to ask permission for your own location
+            //    if (actualLocation.HostAccountId.HasValue && actualLocation.HostAccountId != activity.AccountId)
+            //    {
+            //        var locationOwner = Account.Load(actualLocation.HostAccountId.Value, msgs, dc);
+            //        var visitorAccount = activity.GetAccount(msgs, dc);
+
+            //        var relationship = Services.AccountRelationshipService.GetOrCreateNew(
+            //           hostAccount: locationOwner,
+            //           visitorAccount: visitorAccount,
+            //           approvalStatus: ApprovalStatus.Requested,
+            //           hostPermissionType: HostPermissionType.ApproveOnly,
+            //           loggedInUser: new WebUser { ID = loggedInUserId },
+            //           msgs: msgs,
+            //           dc: dc);
+
+            //        var relationshipLocation = Services.AccountRelationshipLocationService.GetOrCreateNew(
+            //            accountRelationship: relationship,
+            //            hostAccount: locationOwner,
+            //            visitorAccount: visitorAccount,
+            //            location: actualLocation,
+            //            loggedInUser: new WebUser { ID = loggedInUserId },
+            //            msgs: msgs,
+            //            dc: dc);
+            //    }
+
+            //    activity.LocationId = location.ToString().ToInteger();
+            //}
+            //// they entered a new location possibly? 
+            //// otherwise somehow the UI allowed them to enter a location that already exists, with the exact same location name
+            //else
+            //{
+            //    if (address1.IsEmpty())
+            //        msgs.Add("Address 1 is required", MessageType.UserError);
+            //    if (city.IsEmpty())
+            //        msgs.Add("City is required", MessageType.UserError);
+            //    if (state.IsEmpty())
+            //        msgs.Add("State is required", MessageType.UserError);
+            //    if (postalcode.IsEmpty())
+            //        msgs.Add("Postal Code is required", MessageType.UserError);
+
+            //    if (msgs.HasErrors())
+            //        return msgs;
+
+            //    var locationType = LocationType.NotSet;
+            //    var hostAccountId = new int?();
+
+            //    if (locationtype.IsNumber())
+            //        locationType = (LocationType)locationtype.ToInteger();
+
+            //    if (ismylocation.IsBoolean() && ismylocation.ToBoolean())
+            //        hostAccountId = activity.AccountId;
+
+            //    var activityLocation = Services.LocationService.CreateNewWithValidation(
+            //            locationname,
+            //            address1,
+            //            address2,
+            //            city,
+            //            state,
+            //            postalcode,
+            //            "US",
+            //            locationType,
+            //            hostAccountId,
+            //            new Account { ID = activity.AccountId },
+            //            new WebUser { ID = loggedInUserId },
+            //            msgs,
+            //            dc);
+
+            //    activity.LocationId = activityLocation.ID;
+            //}
         }
 
         private static SystemMessages SetupActivityProperties(this Activity activity, string registrationthankyouemail, string applicationthankyouemail, int loggedInUserId, DatabaseConnection dc = null)

@@ -1809,6 +1809,7 @@
     <Content Include="Views\Shared\Registration\_PayButtons.cshtml" />
     <Content Include="Views\Account\PaymentThankYou.cshtml" />
     <Content Include="Views\Shared\Registration\_ProfilePhotoGallery.cshtml" />
+    <Content Include="Views\Shared\Components\_GoogleLocationEdit.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

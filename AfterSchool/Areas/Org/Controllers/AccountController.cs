@@ -93,7 +93,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Location(string id, string location, string locationname, string address1, string address2, string city, string state, string postalcode, string country, string mylocation, string locationtype)
         {
             var msgs = new SystemMessages();
-            var a = SessionVariables.CurrentAccount;
+            var account = SessionVariables.CurrentAccount;
 
             var locationType = LocationType.NotSet;
             var hostAccountId = new int?();
@@ -117,7 +117,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     msgs.AddRange(currentLocation.Save());
                 }
 
-                SessionVariables.CurrentAccount.SetDefaultLocation(location.ToInteger(), SessionVariables.CurrentUser.ID.Value);
+                account.SetDefaultLocation(currentLocation, SessionVariables.CurrentUser, msgs);
             }
             else
             {
@@ -137,14 +137,14 @@ namespace AfterSchool.Areas.Org.Controllers
                     );
 
                 if (msgs.HasNoErrors())
-                    SessionVariables.CurrentAccount.SetDefaultLocation(newLocation.ID.Value, SessionVariables.CurrentUser.ID.Value);
+                    account.SetDefaultLocation(newLocation, SessionVariables.CurrentUser, msgs);
             }            
 
             ViewBag.Messages = msgs;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.Location = SessionVariables.CurrentAccount.GetDefaultLocation();
+            ViewBag.Location = account.GetDefaultLocation();
             ViewBag.IsFullScreen = GetIsFullScreen();
-            return View(a);
+            return View(account);
         }     
 
         [HttpGet]
@@ -887,18 +887,18 @@ namespace AfterSchool.Areas.Org.Controllers
 
         private AccountProfile StyleViewBag(SystemMessages msgs)
         {
-            var profile = SessionVariables.CurrentAccount.GetOrCreateAccountProfile(SessionVariables.LoggedInUser, msgs);
-
-            var awards = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.Award, msgs);
-            var certifications = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.Certification, msgs);
-            var photos = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.Photo, msgs);
-            var classifications = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.Classifications);
-            var softSkills = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.SoftSkills);
-            var academicSubjects = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.AcademicSubjects);
-            var teachingMethods = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.TeachingMethods);
-            var servicesOffered = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.ServiceOffered);
-            var timesOffered = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.TimeOffered);
-            var pricingOptions = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.PricingOption);
+            var account = SessionVariables.CurrentAccount;
+            var profile = account.GetOrCreateAccountProfile(SessionVariables.CurrentUser, msgs);
+            var awards = account.GetAccountProperties(AccountPropertyType.Award, msgs);
+            var certifications = account.GetAccountProperties(AccountPropertyType.Certification, msgs);
+            var photos = account.GetAccountProperties(AccountPropertyType.Photo, msgs);
+            var classifications = account.GetAccountProperties(AccountPropertyType.Classifications);
+            var softSkills = account.GetAccountProperties(AccountPropertyType.SoftSkills);
+            var academicSubjects = account.GetAccountProperties(AccountPropertyType.AcademicSubjects);
+            var teachingMethods = account.GetAccountProperties(AccountPropertyType.TeachingMethods);
+            var servicesOffered = account.GetAccountProperties(AccountPropertyType.ServiceOffered);
+            var timesOffered = account.GetAccountProperties(AccountPropertyType.TimeOffered);
+            var pricingOptions = account.GetAccountProperties(AccountPropertyType.PricingOption);
 
             while (awards.Count < 5)
                 awards.Add(new AccountProperty());
@@ -919,6 +919,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
             photos.ForEach(photo => photo.Value = ah.GetFileLink(photo.Value, true, null, true));
 
+            ViewBag.Account = account;
+            ViewBag.Location = profile.GetLocation();
             ViewBag.Messages = msgs;
             ViewBag.Grades = GradeLevel.Load();
             ViewBag.Awards = awards;
@@ -945,10 +947,11 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult Style(string id, string logo, string headerimage, string about, string headline, string primaryColor, string website, string mingrade, string maxgrade, string twitter, string facebook, string instagram, string linkedin, string genderrestriction, string classifications, string softskills, string academicsubjects, string teachingmethods)
+        public ActionResult Style(string id, string logo, string headerimage, string about, string title, string headline, string primaryColor, string website, string mingrade, string maxgrade, string twitter, string facebook, string instagram, string linkedin, string youtube, string genderrestriction, string classifications, string softskills, string academicsubjects, string teachingmethods, string profileemail, string profilephone, string locationname, string streetnumber, string streetname, string address2, string neighborhood, string city, string state, string postalcode, string county, string country, string placeid)
         {
             var msgs = new SystemMessages();
-            var profile = SessionVariables.CurrentAccount.GetAccountProfile(msgs);
+            var account = SessionVariables.CurrentAccount;
+            var profile = account.GetAccountProfile(msgs);
             var allowedFiles = new string[] { ".png", ".jpg", ".jpeg" };
             var maxSizeInBytes = 1024 * 1024 * 2;
 
@@ -1018,6 +1021,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
 
                 profile.UpdateProfile(
+                    title,
                     headline,
                     about,
                     primaryColor,
@@ -1028,7 +1032,10 @@ namespace AfterSchool.Areas.Org.Controllers
                     facebook,
                     instagram,
                     linkedin,
+                    youtube,
                     genderrestriction,
+                    profileemail,
+                    profilephone,
                     Request.Params.Filter("award-id-"),
                     Request.Params.Filter("award-new-"),
                     Request.Params.Filter("certification-id-"),
@@ -1041,6 +1048,21 @@ namespace AfterSchool.Areas.Org.Controllers
                     academicsubjects,
                     teachingmethods,
                     SessionVariables.CurrentUser,
+                    msgs);
+
+                profile.AddNewLocation(
+                    locationname,
+                    streetnumber,
+                    streetname, 
+                    address2, 
+                    neighborhood, 
+                    city, 
+                    county, 
+                    state, 
+                    postalcode, 
+                    country, 
+                    placeid, 
+                    SessionVariables.CurrentUser, 
                     msgs);
             }
 

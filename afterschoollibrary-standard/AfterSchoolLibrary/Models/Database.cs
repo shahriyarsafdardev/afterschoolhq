@@ -358,6 +358,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Location_HostAccountId ON [Location] (HostAccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Location_HostAccountId_IsDefault ON [Location] (HostAccountId,IsDefault)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Location_LocationTypeId ON [Location] (LocationTypeId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Location_GooglePlaceId ON [Location] (GooglePlaceId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityDay_ActivityId ON [ActivityDay] (ActivityId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityDay_ActivityRecurrenceId ON [ActivityDay] (ActivityRecurrenceId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Tag_Name ON [Tag] (Name)"));

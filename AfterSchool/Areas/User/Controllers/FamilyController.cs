@@ -95,7 +95,7 @@ namespace AfterSchool.Areas.User.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditStudentPersonal(string id, string location, string reg, string student)
+        public ActionResult EditStudentPersonal(string id, string reg, string student, string locationname, string streetnumber, string streetname, string address2, string neighborhood, string city, string county, string state, string postalcode, string country, string placeid)
         {
             var msgs = new SystemMessages();
             Registrant registrant = null;
@@ -136,7 +136,12 @@ namespace AfterSchool.Areas.User.Controllers
                     (
                         action: (SystemMessages amsgs, DatabaseConnection adc) =>
                         {
-                            registrant.SchoolLocationId = location.IsNumber() ? location.ToInteger() : new int?();
+                            Location school = null;
+
+                            if (placeid.IsNotEmpty())
+                                school = LocationService.CreateOrUpdateFromGoogle(locationname, streetnumber, streetname, address2, neighborhood, city, county, state, postalcode, country, placeid, SessionVariables.CurrentUser, amsgs, adc);
+
+                            registrant.SchoolLocationId = school.IsNotEmpty() ? school.ID : new int?();
                             registrant.LastModifiedBy = SessionVariables.CurrentUser.ID;
                             registrant.LastModifiedDate = DateTime.UtcNow;
                             amsgs.AddRange(registrant.Save(adc));
