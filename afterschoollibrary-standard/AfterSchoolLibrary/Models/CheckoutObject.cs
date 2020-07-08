@@ -398,7 +398,7 @@ namespace AfterSchoolLibrary.Models
 
             if (PaymentTypeFeeOverrideAmount.HasValue)
                 transactionFeeAmount = PaymentTypeFeeOverrideAmount.Value;
-            else
+            else if (CreditCardPurchaseObject.IsNotEmpty())
                 transactionFeeAmount = Billing.Platform.GetCreditCardFee(amountChargedNoFees + convenienceFeeAmount, BillingAccount);
 
             return transactionFeeAmount + convenienceFeeAmount;
