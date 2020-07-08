@@ -117,47 +117,33 @@ namespace AfterSchoolLibrary.Services
             return AccountProperty.LoadByAccountIdByAccountPropertyTypeId(profile.AccountId.Value, AccountPropertyType.Photo, msgs, dc);
         }
 
-        public static void UpdateProfile(this AccountProfile profile, string headline, string about, string primaryColor, string website, string mingrade, string maxgrade, string twitter, string facebook, string instagram, string linkedin, string youtube, string genderrestriction, NameValueCollection savedAwards, NameValueCollection newAwards, NameValueCollection savedCertifications, NameValueCollection newCertifications, NameValueCollection servicesOffered, NameValueCollection timesOffered, NameValueCollection pricingOptions, string classifications, string softskills, string academicsubjects, string teachingmethods, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void UpdateProfile(this AccountProfile profile, string title, string headline, string about, string primaryColor, string website, string mingrade, string maxgrade, string twitter, string facebook, string instagram, string linkedin, string youtube, string genderrestriction, string profileemail, string profilephone, NameValueCollection savedAwards, NameValueCollection newAwards, NameValueCollection savedCertifications, NameValueCollection newCertifications, NameValueCollection servicesOffered, NameValueCollection timesOffered, NameValueCollection pricingOptions, string classifications, string softskills, string academicsubjects, string teachingmethods, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    if (headline.IsNotBlank())
-                        profile.Headline = headline.MaxChars(400);
+                    profile.PrimaryColor = primaryColor.MaxChars(20);
+                    profile.Title = title.MaxChars(400);
+                    profile.Headline = headline.MaxChars(400);
+                    profile.About = about.MaxChars(4000);
+                    profile.Website = website.MaxChars(400);
+                    profile.Twitter = twitter;
+                    profile.Instagram = instagram;
+                    profile.Facebook = facebook;
+                    profile.LinkedIn = linkedin;
+                    profile.YouTube = youtube;
+                    profile.ProfileEmail = profileemail;
+                    profile.ProfilePhone = profilephone;
 
-                    if (about.IsNotBlank())
-                        profile.About = about.MaxChars(4000);
-
-                    if (primaryColor.IsNotBlank())
-                        profile.PrimaryColor = primaryColor.MaxChars(20);
-
-                    if (website.IsNotBlank())
-                        profile.Website = website.MaxChars(400);
+                    if (genderrestriction.IsInteger())
+                        profile.GenderRestriction = (GenderRestrictionType)genderrestriction.ToInteger();
 
                     if (mingrade.IsInteger())
                         profile.GradeLevelStart = mingrade.ToInteger();
 
                     if (maxgrade.IsInteger())
                         profile.GradeLevelEnd = maxgrade.ToInteger();
-
-                    if (twitter.IsNotEmpty())
-                        profile.Twitter = twitter;
-
-                    if (instagram.IsNotEmpty())
-                        profile.Instagram = instagram;
-
-                    if (facebook.IsNotEmpty())
-                        profile.Facebook = facebook;
-
-                    if (linkedin.IsNotEmpty())
-                        profile.LinkedIn = linkedin;
-
-                    if (youtube.IsNotEmpty())
-                        profile.YouTube = youtube;
-
-                    if (genderrestriction.IsInteger())
-                        profile.GenderRestriction = (GenderRestrictionType)genderrestriction.ToInteger();
 
                     amsgs.AddRange(profile.Save(adc));
 
@@ -290,6 +276,31 @@ namespace AfterSchoolLibrary.Services
                 return GradeLevel.Load(profile.GradeLevelEnd.Value, msgs, dc);
 
             return GradeLevel.Load(msgs: msgs, dc: dc).LastOrDefault();
+        }
+
+        public static Location GetLocation(this AccountProfile profile, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (profile.LocationId.HasValue)
+                return Location.Load(profile.LocationId.Value, msgs, dc);
+
+            return null;
+        }
+
+        public static Location AddNewLocation(this AccountProfile profile, string locationName, string streetNumber, string streetName, string address2, string neighborhood, string city, string county, string state, string postalCode, string country, string googlePlaceId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var location = LocationService.CreateOrUpdateFromGoogle(locationName, streetNumber, streetName, address2, neighborhood, city, county, state, postalCode, country, googlePlaceId, loggedInUser, msgs, dc);
+
+            profile.SetLocation(location, loggedInUser, msgs, dc);
+
+            return location;
+        }
+
+        public static void SetLocation(this AccountProfile profile, Location location, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            profile.LocationId = location.ID;
+            profile.LastModifiedBy = loggedInUser?.ID;
+            profile.LastModifiedDate = DateTime.UtcNow;
+            msgs.AddRange(profile.Save(dc));
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿@model AccountProfile
 @{
-    var account = SessionVariables.CurrentAccount;
+    var account = (Account)ViewBag.Account;
+    var location = (Location)ViewBag.Location;
 
     ViewBag.Title = "Style - " + account.Name;
 
@@ -117,7 +118,7 @@
                                     Header Title
                                 </label>
                                 <div class="col-md-9">
-                                    <input type="text" class="form-control" name="headline" id="headline" value="@account.Name" />
+                                    <input type="text" class="form-control" name="title" id="title" value="@Model.Title" />
                                     <p class="text-muted">
                                         <em>Your organization or program name</em>
                                     </p>
@@ -184,17 +185,7 @@
                                     Location
                                 </label>
                                 <div class="col-md-9">
-                                    <input type="text" class="form-control" name="location" id="location" value="" placeholder="" />
-                                    <input type="hidden" id="address_number" name="address_number" value="" />
-                                    <input type="hidden" id="address_street" name="address_street" value="" />
-                                    <input type="hidden" id="address2" name="address2" value="" />
-                                    <input type="hidden" id="neighborhood" name="neighborhood" value="" />
-                                    <input type="hidden" id="city" name="city" value="" />
-                                    <input type="hidden" id="state" name="state" value="" />
-                                    <input type="hidden" id="postalcode" name="postalcode" value="" />
-                                    <input type="hidden" id="county" name="county" value="" />
-                                    <input type="hidden" id="country" name="country" value="" />
-                                    <input type="hidden" id="placeid" name="placeid" value="" />
+                                    @{ Html.RenderPartial("~/Views/Shared/Components/_GoogleLocationEdit.cshtml", location); }
                                 </div>
                             </div>
                         </div>
@@ -624,73 +615,4 @@
         });
     </script>
 
-    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBq47Ro2O69sQhVLEW4_2L0ClOBSW_Srmc&libraries=places"></script>
-
-
-    <script>
-
-        $(document).ready(function () {
-            var input = document.getElementById('location');
-
-            var options = {
-                // types: ['(regions)']
-            };
-
-            autocomplete = new google.maps.places.Autocomplete(input, options);
-
-            autocomplete.setFields(['place_id', 'name', 'address_components']);
-
-            autocomplete.addListener('place_changed', function () {
-
-                const place = autocomplete.getPlace();
-                const components = place.address_components;
-
-                $('#placeid').val(place.place_id);
-
-                for (component of components) {
-
-                    const type = component.types[0];
-                    const longName = component.long_name;
-                    const shortName = component.short_name;
-
-                    switch (type) {
-                        case 'street_number':
-                            $('#address_number').val(longName);
-                            break;
-                        case 'route':
-                            $('#address_street').val(shortName);
-                            break;
-                        case 'subpremise':
-                            $('#address2').val(longName);
-                            break;
-                        case 'neighborhood':
-                            $('#neighborhood').val(longName);
-                            break;
-                        case 'street_number':
-                            $('#address1').val(longName);
-                            break;
-                        case 'postal_code':
-                            $('#postalcode').val(longName);
-                            break;
-                        case 'locality':
-                            $('#city').val(longName);
-                            break;
-                        case 'administrative_area_level_2':
-                            $('#county').val(longName);
-                            break;
-                        case 'administrative_area_level_1':
-                            $('#state').val(longName);
-                            break;
-                        case 'country':
-                            $('#country').val(shortName);
-                            break;
-                    }
-                }
-
-            });
-
-        });
-
-
-    </script>
 }

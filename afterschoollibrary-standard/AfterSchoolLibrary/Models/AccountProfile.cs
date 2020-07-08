@@ -19,8 +19,10 @@ namespace AfterSchoolLibrary.Models
 		#region "ClassGenerator"
 
 		public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
+		public int? LocationId { get { return (int?)MDV["LocationId"].Value; } set { MDV["LocationId"].Value = value; } }
 		public string Logo { get { return (string)MDV["Logo"].Value; } set { MDV["Logo"].Value = value; } }
 		public string HeaderImage { get { return (string)MDV["HeaderImage"].Value; } set { MDV["HeaderImage"].Value = value; } }
+		public string Title { get { return (string)MDV["Title"].Value; } set { MDV["Title"].Value = value; } }
 		public string Headline { get { return (string)MDV["Headline"].Value; } set { MDV["Headline"].Value = value; } }
 		public string About { get { return (string)MDV["About"].Value; } set { MDV["About"].Value = value; } }
 		public string PrimaryColor { get { return (string)MDV["PrimaryColor"].Value; } set { MDV["PrimaryColor"].Value = value; } }
@@ -33,6 +35,8 @@ namespace AfterSchoolLibrary.Models
 		public string LinkedIn { get { return (string)MDV["LinkedIn"].Value; } set { MDV["LinkedIn"].Value = value; } }
 		public string YouTube { get { return (string)MDV["YouTube"].Value; } set { MDV["YouTube"].Value = value; } }
 		public GenderRestrictionType GenderRestriction { get { return (GenderRestrictionType)MDV["GenderRestriction"].Value; } set { MDV["GenderRestriction"].Value = value; } }
+		public string ProfileEmail { get { return (string)MDV["ProfileEmail"].Value; } set { MDV["ProfileEmail"].Value = value; } }
+		public string ProfilePhone { get { return (string)MDV["ProfilePhone"].Value; } set { MDV["ProfilePhone"].Value = value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
 		public string AccountUniqueName { get { return (string)MDV["AccountUniqueName"].Value; } }
 		public bool AccountIsTest { get { return (bool)MDV["AccountIsTest"].Value; } }
@@ -55,8 +59,10 @@ namespace AfterSchoolLibrary.Models
                 string className = typeof(AccountProfile).Name;
                 _dp = BasicObjectWithModified.get_BaseObjectMap(className);
 				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "LocationId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "Logo", System.Data.SqlDbType.NVarChar , "400");
 				_dp.Add(className, "HeaderImage", System.Data.SqlDbType.NVarChar , "400");
+				_dp.Add(className, "Title", System.Data.SqlDbType.NVarChar , "400");
 				_dp.Add(className, "Headline", System.Data.SqlDbType.NVarChar , "400");
 				_dp.Add(className, "About", System.Data.SqlDbType.NVarChar , "4000");
 				_dp.Add(className, "PrimaryColor", System.Data.SqlDbType.NVarChar , "20");
@@ -69,6 +75,8 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "LinkedIn", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "YouTube", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "GenderRestriction", System.Data.SqlDbType.Int);
+				_dp.Add(className, "ProfileEmail", System.Data.SqlDbType.NVarChar , "100");
+				_dp.Add(className, "ProfilePhone", System.Data.SqlDbType.NVarChar , "20");
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "AccountUniqueName", typeof(Account).Name, "UniqueName", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "AccountIsTest", typeof(Account).Name, "IsTest", System.Data.SqlDbType.Bit, "Account");
@@ -152,11 +160,19 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["LocationId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["Logo"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["HeaderImage"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["Title"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
@@ -205,6 +221,14 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["GenderRestriction"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ProfileEmail"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ProfilePhone"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

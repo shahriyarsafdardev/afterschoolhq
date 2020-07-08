@@ -1910,17 +1910,22 @@ namespace AfterSchoolLibrary.Services
                 msgs: msgs,
                 dc: dc);
 
-            msgs.AddRange(account.SetDefaultLocation(defaultLocation.ID.Value, 0, dc));
+            account.SetDefaultLocation(defaultLocation, new WebUser() { ID = 0 }, msgs, dc);
 
             return msgs;
         }
 
-        public static SystemMessages SetDefaultLocation(this Account account, int locationId, int loggedInUserId, DatabaseConnection dc = null)
+        public static void SetDefaultLocation(this Account account, Location location, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            account.SetDefaultLocation(location.ID.Value, loggedInUser, msgs, dc);
+        }
+
+        public static void SetDefaultLocation(this Account account, int locationId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             account.DefaultLocationId = locationId;
-            account.LastModifiedBy = loggedInUserId;
+            account.LastModifiedBy = loggedInUser?.ID;
             account.LastModifiedDate = DateTime.UtcNow;
-            return account.Save(dc);
+            msgs.AddRange(account.Save(dc));
         }
 
         public static Account GetAfterSchoolAccount(SystemMessages msgs = null, DatabaseConnection dc = null)
