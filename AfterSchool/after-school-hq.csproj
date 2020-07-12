@@ -569,6 +569,7 @@
     <Compile Include="Areas\Org\Controllers\GroupController.cs" />
     <Compile Include="Areas\Org\Controllers\HomeController.cs" />
     <Compile Include="Areas\Org\Controllers\LeagueController.cs" />
+    <Compile Include="Areas\Org\Controllers\OnboardingController.cs" />
     <Compile Include="Areas\Org\Controllers\RegistrationController.cs" />
     <Compile Include="Areas\Org\Controllers\ScheduleController.cs" />
     <Compile Include="Areas\Org\Controllers\ServicesController.cs" />
@@ -1329,6 +1330,13 @@
     <Content Include="Areas\Admin\Views\Transaction\RefundRequests.cshtml" />
     <Content Include="Areas\Admin\Views\Shared\_TransactionsHeader.cshtml" />
     <Content Include="Areas\Org\Views\Accounting\Subscriptions.cshtml" />
+    <Content Include="Areas\Org\Views\Onboarding\Index.cshtml" />
+    <Content Include="Areas\Org\Views\Onboarding\ProgramInfo.cshtml" />
+    <Content Include="Areas\Org\Views\Onboarding\Logo.cshtml" />
+    <Content Include="Areas\Org\Views\Onboarding\ServicesOffered.cshtml" />
+    <Content Include="Areas\Org\Views\Onboarding\Links.cshtml" />
+    <Content Include="Areas\Org\Views\Onboarding\ContactInfo.cshtml" />
+    <Content Include="Areas\Org\Views\Onboarding\Done.cshtml" />
     <None Include="Scripts\jquery-3.0.0-vsdoc.js" />
     <Content Include="Scripts\jquery-3.0.0.js" />
     <Content Include="Scripts\jquery-3.0.0.min.js" />

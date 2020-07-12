@@ -117,7 +117,7 @@ namespace AfterSchoolLibrary.Services
             return AccountProperty.LoadByAccountIdByAccountPropertyTypeId(profile.AccountId.Value, AccountPropertyType.Photo, msgs, dc);
         }
 
-        public static void UpdateProfile(this AccountProfile profile, string title, string headline, string about, string primaryColor, string website, string mingrade, string maxgrade, string twitter, string facebook, string instagram, string linkedin, string youtube, string genderrestriction, string profileemail, string profilephone, NameValueCollection savedAwards, NameValueCollection newAwards, NameValueCollection savedCertifications, NameValueCollection newCertifications, NameValueCollection servicesOffered, NameValueCollection timesOffered, NameValueCollection pricingOptions, string classifications, string softskills, string academicsubjects, string teachingmethods, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void UpdateProfile(this AccountProfile profile, string title = null, string headline = null, string about = null, string primaryColor = null, string website = null, string mingrade = null, string maxgrade = null, string twitter = null, string facebook = null, string instagram = null, string linkedin = null, string youtube = null, string genderrestriction = null, string profileemail = null, string profilephone = null, NameValueCollection savedAwards = null, NameValueCollection newAwards = null, NameValueCollection savedCertifications = null, NameValueCollection newCertifications = null, NameValueCollection servicesOffered = null, NameValueCollection timesOffered = null, NameValueCollection pricingOptions = null, string classifications = null, string softskills = null, string academicsubjects = null, string teachingmethods = null, WebUser loggedInUser = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
             (
@@ -147,20 +147,38 @@ namespace AfterSchoolLibrary.Services
 
                     amsgs.AddRange(profile.Save(adc));
 
-                    UpdateProperties(savedAwards, loggedInUser, amsgs, adc);
-                    UpdateProperties(savedCertifications, loggedInUser, amsgs, adc);
+                    if (savedAwards.IsNotEmpty())
+                        UpdateProperties(savedAwards, loggedInUser, amsgs, adc);
+                    
+                    if (savedCertifications.IsNotEmpty())
+                        UpdateProperties(savedCertifications, loggedInUser, amsgs, adc);
 
-                    profile.AddProperties(newAwards, AccountPropertyType.Award, loggedInUser, amsgs, adc);
-                    profile.AddProperties(newCertifications, AccountPropertyType.Certification, loggedInUser, amsgs, adc);
+                    if (newAwards.IsNotEmpty())
+                        profile.AddProperties(newAwards, AccountPropertyType.Award, loggedInUser, amsgs, adc);
+                    
+                    if (newCertifications.IsNotEmpty())
+                        profile.AddProperties(newCertifications, AccountPropertyType.Certification, loggedInUser, amsgs, adc);
 
-                    profile.ManageProperties(servicesOffered, AccountPropertyType.ServiceOffered, loggedInUser, amsgs, adc);
-                    profile.ManageProperties(timesOffered, AccountPropertyType.TimeOffered, loggedInUser, amsgs, adc);
-                    profile.ManageProperties(pricingOptions, AccountPropertyType.PricingOption, loggedInUser, amsgs, adc);
+                    if (servicesOffered.IsNotEmpty())
+                        profile.ManageProperties(servicesOffered, AccountPropertyType.ServiceOffered, loggedInUser, amsgs, adc);
 
-                    profile.ManageProperties(classifications.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.Classifications, loggedInUser, amsgs, adc);
-                    profile.ManageProperties(softskills.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.SoftSkills, loggedInUser, amsgs, adc);
-                    profile.ManageProperties(academicsubjects.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.AcademicSubjects, loggedInUser, amsgs, adc);
-                    profile.ManageProperties(teachingmethods.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.TeachingMethods, loggedInUser, amsgs, adc);
+                    if (timesOffered.IsNotEmpty())
+                        profile.ManageProperties(timesOffered, AccountPropertyType.TimeOffered, loggedInUser, amsgs, adc);
+
+                    if (pricingOptions.IsNotEmpty())
+                        profile.ManageProperties(pricingOptions, AccountPropertyType.PricingOption, loggedInUser, amsgs, adc);
+
+                    if (classifications.IsNotEmpty())
+                        profile.ManageProperties(classifications.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.Classifications, loggedInUser, amsgs, adc);
+
+                    if (softskills.IsNotEmpty())
+                        profile.ManageProperties(softskills.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.SoftSkills, loggedInUser, amsgs, adc);
+
+                    if (academicsubjects.IsNotEmpty())
+                        profile.ManageProperties(academicsubjects.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.AcademicSubjects, loggedInUser, amsgs, adc);
+
+                    if (teachingmethods.IsNotEmpty())
+                        profile.ManageProperties(teachingmethods.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.TeachingMethods, loggedInUser, amsgs, adc);
 
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),

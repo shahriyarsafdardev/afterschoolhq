@@ -1,0 +1,123 @@
+﻿@model Account
+@{
+    Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var grades = (List<GradeLevel>)ViewBag.Grades;
+    var minGradeId = (string)ViewBag.MinGradeId;
+    var maxGradeId = (string)ViewBag.MaxGradeId;
+
+}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <div class="panel panel-default">
+        <div class="panel-heading hide">
+            <i class="s7-edit"></i> Settings - Setup Payment Account
+        </div>
+        <div class="panel-body">
+            <form class="form form-horizontal" method="post" action="@Url.Action("programinfo", "onboarding")">
+                <div class="row">
+                    <div class="col-md-offset-3 col-md-6">
+                        <div class="form-group">
+                            <h1 class="text-center">Enter program info:</h1>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-md-3 control-label">
+                                Program Title
+                            </label>
+                            <div class="col-md-9">
+                                <input type="text" class="form-control" name="title" id="title" value="@Request["title"]" />
+                                <p class="text-muted">
+                                    <em>Ex. Math Club, Chess Club, Elite Track &amp; Field</em>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-md-3 control-label">
+                                Short Description
+                            </label>
+                            <div class="col-md-9">
+                                <input type="text" class="form-control" name="headline" id="headline" value="@Request["headline"]" />
+                                <p class="text-muted">
+                                    <em>Short tagline describing what you do. Max 100 characters.</em>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-md-3 control-label">
+                                Grades Served
+                            </label>
+                            <div class="col-md-9">
+                                <select id="mingrade" name="mingrade" class="form-control">
+                                    @foreach (var grade in grades)
+                                    {
+                                        <option value="@grade.ID" @(minGradeId == grade.ID.ToString() ? " selected=\"selected\" " : "")>@grade.Name</option>
+                                    }
+                                </select>
+                                <p class="margin-v-10">
+                                    To
+                                </p>
+                                <select id="maxgrade" name="maxgrade" class="form-control">
+                                    @foreach (var grade in grades)
+                                    {
+                                        var selected = "";
+
+                                        if (maxGradeId == grade.ID.ToString())
+                                        {
+                                            selected = " selected=\"selected\" ";
+                                        }
+
+                                        <option value="@grade.ID" @selected )>@grade.Name</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-md-3 control-label">My program is designed for</label>
+                            <div class="col-md-9">
+                                <div class="am-radio">
+                                    <input type="radio"
+                                           name="genderrestrictions"
+                                           id="genderrestrictions-@((int)GenderRestrictionType.None)"
+                                           value="@((int)GenderRestrictionType.None)"
+                                           checked="checked" />
+                                    <label for="genderrestrictions-@((int)GenderRestrictionType.None)">All Genders</label>
+                                </div>
+                                <div class="am-radio">
+                                    <input type="radio"
+                                           name="genderrestrictions"
+                                           id="genderrestrictions-@((int)GenderRestrictionType.MaleOnly)"
+                                           value="@((int)GenderRestrictionType.None)" />
+                                    <label for="genderrestrictions-@((int)GenderRestrictionType.MaleOnly)">Boys</label>
+                                </div>
+                                <div class="am-radio">
+                                    <input type="radio"
+                                           name="genderrestrictions"
+                                           id="genderrestrictions-@((int)GenderRestrictionType.FemaleOnly)"
+                                           value="@((int)GenderRestrictionType.None)" />
+                                    <label for="genderrestrictions-@((int)GenderRestrictionType.FemaleOnly)">Girls</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label"></label>
+                            <div class="col-sm-9">
+                                <button type="submit" class="btn btn-primary btn-lg pull-right">Save Changes &raquo;</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </form>
+        </div>
+
+    </div>
+
+</div>

@@ -973,7 +973,7 @@ namespace AfterSchoolLibrary.Services
 
             if (contactphone.IsNotEmpty())
             {
-                if (contactphone.ToString().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                if (contactphone.ToString().IsPhone())
                     activity.ContactPhone = contactphone.ToString().IfBlank("").MaxChars(50);
                 else
                     msgs.Add("Contact Phone must be a valid phone number", MessageType.UserError);

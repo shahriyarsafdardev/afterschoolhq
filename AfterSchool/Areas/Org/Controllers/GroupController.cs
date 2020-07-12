@@ -14,7 +14,7 @@ namespace AfterSchool.Areas.Org.Controllers
 {
     public class GroupController : BaseLoggedInController
     {
-        public GroupController() : base(new List<AccountType>() { AccountType.ActivityProvider, AccountType.School })
+        public GroupController() : base(new List<AccountType> { AccountType.School, AccountType.ActivityProvider, AccountType.Teacher })
         {
 
         }

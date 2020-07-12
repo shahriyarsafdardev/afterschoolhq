@@ -5,5 +5,6 @@ public enum AccountType
 	School,
 	SchoolDistrict,
 	AfterSchool,
-	Registrant
+	Registrant,
+	Teacher
 }

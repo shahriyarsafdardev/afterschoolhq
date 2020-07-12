@@ -353,6 +353,7 @@ property: StripePayoutsEnabled, bool, Bit
 property: IsTest, bool, Bit
 property: IsDeleted, bool, Bit
 property: IsClaimed, bool, Bit
+property: OnboardingStepDone, OnboardingStepType, Int
 baseproperty: Name, required
 loadmethod: OwnerId, List<>
 loadmethod: UniqueName
@@ -1825,7 +1826,13 @@ values: NotSet, Invited, Accepted, Declined
 [begin]
 type: Enum
 name: AccountType
-values: NotSet, ActivityProvider, School, SchoolDistrict, AfterSchool, Registrant
+values: NotSet, ActivityProvider, School, SchoolDistrict, AfterSchool, Registrant, Teacher
+[end]
+
+[begin]
+type: Enum
+name: OnboardingStepType
+values: NotSet, AccountType, ProgramInfo, ServicesOffered, ContactInfo, SocialLinks, LogoAndHeader
 [end]
 
 [begin]

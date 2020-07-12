@@ -12,7 +12,7 @@ namespace AfterSchool.Areas.Org.Controllers
 {
     public class ServicesController : BaseLoggedInController
     {
-        public ServicesController() : base(new List<AccountType> { AccountType.School, AccountType.ActivityProvider })
+        public ServicesController() : base(new List<AccountType> { AccountType.School, AccountType.ActivityProvider, AccountType.Teacher })
         {
 
         }

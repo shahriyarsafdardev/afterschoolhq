@@ -1,0 +1,55 @@
+﻿@model Account
+@{
+    Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
+    var msgs = (SystemMessages)ViewBag.Messages;
+
+}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <div class="panel panel-default">
+        <div class="panel-heading hide">
+            <i class="s7-edit"></i> Settings - Setup Payment Account
+        </div>
+        <div class="panel-body">
+            <form class="form form-horizontal" method="post" action="@Url.Action("logo", "onboarding")">
+                <div class="row">
+                    <div class="col-md-offset-3 col-md-6">
+                        <div class="form-group">
+                            <h1 class="text-center">Enter program info:</h1>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Profile Image</label>
+                            <div class="col-sm-9">
+                                <input type="file" class="form-control" name="logo" id="logo" />
+                                <p class="text-muted"><em>Please upload your logo or headshot. A square logo is best with a size of 400px x 400px. File size should be no larger than 2MB</em></p>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Profile Header Image</label>
+                            <div class="col-sm-9">
+                                <input type="file" class="form-control" name="headerimage" id="headerimage" />
+                                <p class="text-muted"><em>Please select a header image, no larger than 4MB</em></p>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label"></label>
+                            <div class="col-sm-9">
+                                <a href="@Url.Action("ServicesOffered", "onboarding")" class="text-muted">I'll do this Later</a>
+                                <button type="submit" class="btn btn-primary btn-lg pull-right">Save Changes &raquo;</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </form>
+        </div>
+
+    </div>
+
+</div>

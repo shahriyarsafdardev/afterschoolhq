@@ -18,7 +18,7 @@ namespace AfterSchool.Areas.Org.Controllers
 {
     public class LeagueActivityController : BaseLoggedInController
     {
-        public LeagueActivityController() : base(new List<AccountType> { AccountType.School, AccountType.ActivityProvider })
+        public LeagueActivityController() : base(new List<AccountType> { AccountType.School, AccountType.ActivityProvider, AccountType.Teacher })
         {
 
         }

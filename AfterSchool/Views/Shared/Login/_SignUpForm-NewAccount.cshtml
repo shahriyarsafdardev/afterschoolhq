@@ -1,95 +1,38 @@
 ﻿@model SignUpIndexViewModel
-@{
-    var showPhone = false;
 
-    if (ViewData["showphone"].IsNotEmpty() && ViewData["showphone"].ToString().IsBoolean())
-    {
-        showPhone = ViewData["showphone"].ToString().ToBoolean();
-    }
-}
-
-@helper RenderAccountType(AccountType accountType, bool? selected)
-{
-    var checkedString = "";
-
-    if (accountType == Model.OrgType || (selected.HasValue && selected.Value))
-    {
-        checkedString = "checked=\"checked\"";
-    }
-
-    <div class="am-radio inline">
-        <input type="radio" name="orgtype" id="accounttype-@((int)accountType)" required="required" autocomplete="off" class="form-control" value="@((int)accountType)" @checkedString />
-        <label for="accounttype-@((int)accountType)">
-            <span>@accountType.ToString().SplitByUpperCase()</span>
-        </label>
-    </div>
-}
-
-<div class="sign-up-form">
+<div class="sign-up-form">    
 
     <div class="form-group">
         <div id="nick-handler" class="input-group">
-            <span class="input-group-addon"><i class="icon s7-culture"></i></span>
-            <input type="text" name="orgname" required="required" placeholder="Organization / Program Name" autocomplete="off" class="form-control" value="@Model.OrgName" />
-        </div>
-    </div>
-
-    <div class="form-group">
-        <div id="phone-handler" class="input-group">
-            <span class="input-group-addon"><i class="icon s7-phone"></i></span>
-            <input type="text" name="orgphone" required="required" placeholder="Organization Phone" autocomplete="off" class="form-control" value="@Model.OrgPhone" />
-        </div>
-    </div>
-    
-    <div class="form-group @(Model.InviteCodeToShare.IsNotEmpty() ? "hide" : "")">
-        <div class="text-center">
-            <p class="text-medium-small">
-                Choose your organization type
-            </p>
-
-            @RenderAccountType(AccountType.ActivityProvider, Model.InviteCodeToShare.IsNotEmpty() ? true : new bool?())
-            @RenderAccountType(AccountType.School, null)
-
+            <span class="input-group-addon"><i class="icon s7-user"></i></span>
+            <input type="text" name="firstname" required="required" placeholder="First Name" autocomplete="off" class="form-control" value="@Model.FirstName" />
         </div>
     </div>
 
     <div class="form-group">
         <div id="nick-handler" class="input-group">
             <span class="input-group-addon"><i class="icon s7-user"></i></span>
-            <input type="text" name="firstname" required="required" placeholder="Your First Name" autocomplete="off" class="form-control" value="@Model.FirstName" />
-        </div>
-    </div>
-
-    <div class="form-group">
-        <div id="nick-handler" class="input-group">
-            <span class="input-group-addon"><i class="icon s7-user"></i></span>
-            <input type="text" name="lastname" required="required" placeholder="Your Last Name" autocomplete="off" class="form-control" value="@Model.LastName">
+            <input type="text" name="lastname" required="required" placeholder="Last Name" autocomplete="off" class="form-control" value="@Model.LastName">
         </div>
     </div>
     
     <div class="form-group">
         <div id="email-handler" class="input-group">
             <span class="input-group-addon"><i class="icon s7-mail"></i></span>
-            <input type="email" name="email" required="required" placeholder="Your E-mail" autocomplete="off" class="form-control" value="@Model.Email" />
+            <input type="email" name="email" required="required" placeholder="E-mail" autocomplete="off" class="form-control" value="@Model.Email" />
         </div>
     </div>
 
     <div class="form-group">
         <div id="password-handler" class="input-group">
             <span class="input-group-addon"><i class="icon s7-lock"></i></span>
-            <input name="password1" type="password" required="required" placeholder="Your Password" class="form-control" />
+            <input type="password" name="password1" required="required" placeholder="Password" class="form-control" />
         </div>
     </div>
     <div class="form-group">
         <div id="confirm-handler" class="input-group">
             <span class="input-group-addon"><i class="icon s7-lock"></i></span>
             <input type="password" name="password2" required="required" placeholder="Confirm Password" class="form-control">
-        </div>
-    </div>
-    <div class="form-group">
-        <div id="nick-handler" class="input-group">
-            <span class="input-group-addon"><i class="icon s7-clock"></i></span>
-            @{ Html.RenderPartial("~/Views/Shared/Components/_TimezoneDropdown.cshtml", Model.TimeZone.IfEmpty("")); }
         </div>
     </div>
 </div>

@@ -15,7 +15,7 @@ namespace AfterSchool.Areas.Org.Controllers
 {
     public class AccountController : BaseLoggedInController
     {
-        public AccountController() : base(new List<AccountType> { AccountType.School, AccountType.ActivityProvider })
+        public AccountController() : base(new List<AccountType> { AccountType.School, AccountType.ActivityProvider, AccountType.Teacher })
         {
 
         }
@@ -953,7 +953,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var account = SessionVariables.CurrentAccount;
             var profile = account.GetAccountProfile(msgs);
             var allowedFiles = new string[] { ".png", ".jpg", ".jpeg" };
-            var maxSizeInBytes = 1024 * 1024 * 2;
+            var maxSizeInBytes = 1024 * 1024 * 4; // 4MB
 
             if (logo.IsNotEmpty())
             {
@@ -973,6 +973,15 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (website.IsNotEmpty() && !website.IsRegExMatch(BasicLibrary.Utilities.WebsiteRegEx))
                 msgs.Add("Please enter a valid website address", MessageType.UserError);
+
+            if (facebook.IsNotEmpty() && !facebook.IsRegExMatch(BasicLibrary.Utilities.WebsiteRegEx))
+                msgs.Add("Please enter a valid Facebook profile address", MessageType.UserError);
+
+            if (linkedin.IsNotEmpty() && !linkedin.IsRegExMatch(BasicLibrary.Utilities.WebsiteRegEx))
+                msgs.Add("Please enter a valid LinkedIn profile address", MessageType.UserError);
+
+            if (youtube.IsNotEmpty() && !youtube.IsRegExMatch(BasicLibrary.Utilities.WebsiteRegEx))
+                msgs.Add("Please enter a valid YouTube profile address", MessageType.UserError);
 
             if (msgs.HasNoErrors())
             {

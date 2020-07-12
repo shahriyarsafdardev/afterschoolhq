@@ -1585,6 +1585,35 @@ namespace AfterSchoolLibrary.Services
             return account;
         }
 
+        public static Account CreateNewEmptyAccount(WebUser accountOwner, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var account = new Account()
+            {
+                Name = $"{loggedInUser.DisplayName} Account",
+                IsAfterSchool = true,
+                CreatedBy = loggedInUser.ID,
+                LastModifiedBy = loggedInUser.ID,
+                CreateDate = DateTime.UtcNow,
+                LastModifiedDate = DateTime.UtcNow,
+                OwnerId = accountOwner?.ID,
+                IsAdminAccount = false,
+                IsActive = true,
+                Email = accountOwner.Email,
+                Phone = accountOwner.Phone,
+                ConvenienceFeesPaidBy = FeesPaidByType.Parent,
+                CreditCardFeesPaidBy = FeesPaidByType.Parent,
+                IsClaimed = true,
+            };
+
+            msgs.AddRange(account.Save(dc));
+
+            //create default form for account to use for registration
+            if (msgs.HasNoErrors())
+                account.CreateDefaultForm(loggedInUser, msgs, dc);
+
+            return account;
+        }
+
         #endregion
 
         #region AccountRelationships

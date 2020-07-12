@@ -51,6 +51,7 @@ namespace AfterSchoolLibrary.Models
 		public bool IsTest { get { return (bool)MDV["IsTest"].Value; } set { MDV["IsTest"].Value = value; } }
 		public bool IsDeleted { get { return (bool)MDV["IsDeleted"].Value; } set { MDV["IsDeleted"].Value = value; } }
 		public bool IsClaimed { get { return (bool)MDV["IsClaimed"].Value; } set { MDV["IsClaimed"].Value = value; } }
+		public OnboardingStepType OnboardingStepDone { get { return (OnboardingStepType)MDV["OnboardingStepDone"].Value; } set { MDV["OnboardingStepDone"].Value = value; } }
 		
 
         public Account()
@@ -70,6 +71,7 @@ namespace AfterSchoolLibrary.Models
 			this.IsTest = false;
 			this.IsDeleted = false;
 			this.IsClaimed = false;
+			this.OnboardingStepDone = OnboardingStepType.NotSet;
 			
         }
 
@@ -107,6 +109,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "IsTest", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "IsDeleted", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "IsClaimed", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "OnboardingStepDone", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
@@ -290,6 +293,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["IsClaimed"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["OnboardingStepDone"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

@@ -10,7 +10,7 @@ namespace AfterSchool.Areas.Org.Controllers
 {
     public class HomeController : BaseLoggedInController
     {
-        public HomeController() : base(new List<AccountType> { AccountType.School, AccountType.ActivityProvider })
+        public HomeController() : base(new List<AccountType> { AccountType.School, AccountType.ActivityProvider, AccountType.Teacher })
         {
 
         }
