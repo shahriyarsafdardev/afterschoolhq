@@ -1001,7 +1001,6 @@ namespace AfterSchool.Areas.Org.Controllers
                         SessionVariables.CurrentUser,
                         msgs);
 
-                
                 foreach (var key in Request.Files.AllKeys.Where(key => key.Contains("photo-")))
                 {
                     var file = Request.Files[key];
@@ -1033,7 +1032,6 @@ namespace AfterSchool.Areas.Org.Controllers
                     title,
                     headline,
                     about,
-                    primaryColor,
                     website,
                     mingrade,
                     maxgrade,

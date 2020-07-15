@@ -126,7 +126,7 @@ property: IsDefault, bool, Bit
 property: Details, string, NVarChar "4000"
 property: LocationTypeId, LocationType, Int
 property: IsTest, bool, Bit
-property: GooglePlaceId, string, NVarChar "100"
+property: GooglePlaceId, string, NVarChar "400"
 property: StreetNumber, string, NVarChar "50"
 property: StreetName, string, NVarChar "50"
 property: Neighborhood, string, NVarChar "50"

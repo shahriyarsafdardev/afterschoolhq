@@ -15,7 +15,7 @@
     var takeActivities = 3;
     var locations = (List<Location>)ViewBag.Locations;
     var accountProperties = (List<AccountProperty>)ViewBag.AccountProperties;
-    var isInEditMode = SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentUser.HasAccessTo(Model);
+    var isInEditMode = SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentUser.HasAccessTo(Model) && Request["edit"] == "1";
 
     var skillAndMethodTypes = new AccountPropertyType[] { AccountPropertyType.SoftSkills, AccountPropertyType.TeachingMethods, AccountPropertyType.AcademicSubjects, AccountPropertyType.Classifications };
     var skillsAndMethods = accountProperties.Where(item => item.AccountPropertyTypeId.In(skillAndMethodTypes));
@@ -37,14 +37,14 @@
 
 @{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", new RegistrationHeaderViewModel(Model, (AccountProfile)ViewBag.AccountProfile)); }
 
-@helper renderEditButtion(string anchor)
+@helper renderEditButtion(string anchor, string buttonText = "Edit")
 {
     if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentUser.HasAccessTo(Model) && Request["edit"] == "1")
     {
         <span>
             <a href="@Url.Action("style", "account", new { area = "org", isfullscreen = 1, returnurl = Request.Url })#@anchor"
                class="btn btn-alt7 btn-sm">
-                Edit &raquo;
+                @buttonText &raquo;
             </a>
         </span>
     }
@@ -120,23 +120,27 @@
             </div>
             <div class="panel-body">
 
-                @if (participationObjects.Any())
+                @if (participationObjects.Any() || isInEditMode)
                 {
                     <div>
-                        <div class="row">
-                            <div class="col-md-12 col-lg-8">
-                                <div class="activity-detail-block">
-                                    <h2>Now Registering</h2>
+
+                        @if (participationObjects.Any())
+                        {
+                            <div class="row">
+                                <div class="col-md-12 col-lg-8">
+                                    <div class="activity-detail-block">
+                                        <h2>Now Registering</h2>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 col-lg-4">
+                                    <div class="padding-v-20 pull-right">
+                                        <a href="@Model.BrowseUrl">
+                                            View All Activities
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md-12 col-lg-4">
-                                <div class="padding-v-20 pull-right">
-                                    <a href="@Model.BrowseUrl">
-                                        View All Activities
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
+                        }
 
                         <div class="row">
                             <div style="position: relative; margin-left: -20px; margin-right: -20px;">
@@ -160,13 +164,12 @@
                     </div>
                 }
 
-                @if (photos.Any())
+                @if (photos.Any() || isInEditMode)
                 {
-
                     <div class="margin-t-20">
                         <div class="row">
                             <div style="position: relative; margin-left: -5px; margin-right: -5px;">
-                                @renderEditButtion("photos")
+                                @renderEditButtion("photos", "Edit Photo Gallery")
                             </div>
                         </div>
                         <div class="row">
@@ -177,12 +180,12 @@
                     </div>
                 }
 
-                @if (servicesOffered.Any())
+                @if (servicesOffered.Any() || isInEditMode)
                 {
                     <div class="margin-t-20">
                         <div class="row padding-h-30">
                             <div class="activity-detail-block">
-                                <h2>Services Offered @renderEditButtion("services")</h2>
+                                <h2>Services Offered @renderEditButtion("services", "Edit")</h2>
                             </div>
 
                             @renderAccountProperties(servicesOffered, Math.Ceiling(servicesOffered.Count() / 3.0).ToInteger())
@@ -195,7 +198,7 @@
                     </div>
                 }
                 
-                @if (skillsAndMethods.Any())
+                @if (skillsAndMethods.Any() || isInEditMode)
                 {
                     <div class="margin-t-20">
                         <div class="row padding-h-30">
@@ -213,7 +216,7 @@
                     </div>
                 }
 
-                @if (awards.Any())
+                @if (awards.Any() || isInEditMode)
                 {
                     <div class="margin-t-20">
                         <div class="row padding-h-30">
@@ -233,7 +236,7 @@
 
                 }
 
-                @if (certifications.Any())
+                @if (certifications.Any() || isInEditMode)
                 {
                     <div class="margin-t-20">
                         <div class="row padding-h-30">
@@ -273,7 +276,7 @@
                                 <div class="activity-detail-block">
                                     <div class="row">
                                         <div>
-                                            <h2>Location</h2>
+                                            <h2>Location @renderEditButtion("contactinfo")</h2>
                                         </div>
                                         <div>
                                             <p>

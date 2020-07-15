@@ -88,7 +88,7 @@
                             <div class="form-group">
                                 <label class="col-sm-3 control-label">Logo</label>
                                 <div class="col-sm-6">
-                                    <input type="file" class="form-control" name="logo" id="logo" />
+                                    <input type="file" class="form-control" name="logo" id="logo" accept=".jpg,.jpeg,.png" />
                                     <p class="text-muted"><em>Please upload your logo. A square logo is best with a size of 400px x 400px. File size should be no larger than 1MB</em></p>
                                 </div>
                                 <div class="col-sm-3">
@@ -102,7 +102,7 @@
                             <div class="form-group">
                                 <label class="col-sm-3 control-label">Profile Header Image</label>
                                 <div class="col-sm-6">
-                                    <input type="file" class="form-control" name="headerimage" id="headerimage" />
+                                    <input type="file" class="form-control" name="headerimage" id="headerimage" accept=".jpg,.jpeg,.png" />
                                     <p class="text-muted"><em>Please select a header image, no larger than 2MB</em></p>
                                 </div>
                                 <div class="col-sm-3">
@@ -270,6 +270,25 @@
                             <div class="form-group">
                                 <label class="col-sm-3 control-label">Photos</label>
                                 <div class="col-sm-9">
+
+                                    @*
+                                    <span><input type="file" class="form-control photo-add hide" name="photos" id="photos" multiple accept=".jpg,.jpeg,.png" /></span>
+
+                                    <div>
+                                        @for (var i = 0; i < photos.Count; i++)
+                                        {
+                                            if (photos[i].ID.HasValue)
+                                            {
+                                                <div class="photo-view-@i">
+                                                    <img src="@photos[i].Value" width="50" />
+                                                    <i class="s7-close icon-large pointer" onclick="removePhoto('@i')"></i>
+                                                </div>
+                                            }
+                                        }
+                                    </div>
+                                    *@
+
+                                    
                                     @for (var i = 0; i < photos.Count; i++)
                                     {
                                         var id = $"new-{i}";
@@ -291,9 +310,10 @@
                                             }
 
                                             <span class="input-group-addon photo-add-@i @hide">@(i + 1)</span>
-                                            <span><input type="file" class="form-control photo-add-@i @hide" name="photo-@id" id="photo-@id" /></span>
+                                            <span><input type="file" class="form-control photo-add-@i @hide" name="photo-@id" id="photo-@id" accept=".jpg,.jpeg,.png" /></span>
                                         </div>
                                     }
+                                    
                                 </div>
                             </div>
 

@@ -6,23 +6,23 @@
 
 <div class="main-content">
 
-    <div class="panel panel-default">
-        <div class="panel-heading hide">
-            <i class="s7-edit"></i> Settings - Setup Payment Account
-        </div>
-        <div class="panel-body">
-            <div class="col-md-offset-3 col-md-6 col-lg-offset-4 col-lg-4">
-                <h1>Great Job!</h1>
-                <div class="text-medium-small">
-                    <p class="padding-v-10">
-                        You have setup your @AfterSchoolLibrary.Helpers.Utilities.AppName() profile. You have completed the first step to enabling education for children everywhere.
-                    </p>
-                </div>
+    <div class="row">    
+        <div class="col-md-offset-3 col-md-6 col-lg-offset-4 col-lg-4">
+            <h1>Great Job!</h1>
+            <div class="text-medium-small">
+                <p class="padding-v-10">
+                    You have setup your @AfterSchoolLibrary.Helpers.Utilities.AppName() profile. You have completed the first step to enabling education for children everywhere.
+                </p>
+            </div>
 
-                <div class="form-group">
-                    <label class="col-sm-3 control-label"></label>
-                    <div class="col-sm-9">
-                        <a href="@Model.HomePageUrl" class="btn btn-primary btn-lg pull-right">View Your Profile &raquo;</a>
+            <div class="form-group">
+                <label class="col-lg-3 control-label"></label>
+                <div class="col-lg-9">
+                    <div class="visible-sm visible-xs">
+                        <a href="@Model.HomePageUrl?edit=1" class="btn btn-primary btn-lg btn-block">View Your Profile &raquo;</a>
+                    </div>
+                    <div class="visible-md visible-lg">
+                        <a href="@Model.HomePageUrl?edit=1" class="btn btn-primary btn-lg pull-right">View Your Profile &raquo;</a>
                     </div>
                 </div>
             </div>
