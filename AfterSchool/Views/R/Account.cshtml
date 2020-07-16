@@ -122,46 +122,66 @@
 
                 @if (participationObjects.Any() || isInEditMode)
                 {
-                    <div>
+                <div>
 
-                        @if (participationObjects.Any())
-                        {
-                            <div class="row">
-                                <div class="col-md-12 col-lg-8">
-                                    <div class="activity-detail-block">
-                                        <h2>Now Registering</h2>
-                                    </div>
-                                </div>
-                                <div class="col-md-12 col-lg-4">
-                                    <div class="padding-v-20 pull-right">
-                                        <a href="@Model.BrowseUrl">
-                                            View All Activities
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        }
-
+                    @if (participationObjects.Any())
+                    {
                         <div class="row">
-                            <div style="position: relative; margin-left: -20px; margin-right: -20px;">
-                                @foreach (var item in participationObjects.Take(takeActivities))
-                                {
-                                    Html.RenderPartial("~/Views/Shared/Registration/_BrowseParticipationObjectWide.cshtml", item);
-                                }
+                            <div class="col-md-12 col-lg-8">
+                                <div class="activity-detail-block">
+                                    <h2>Now Registering</h2>
+                                </div>
                             </div>
-                        </div>
-
-                        @if (participationObjects.Count > takeActivities)
-                        {
-                            <div class="row">
-                                <div class="col-md-4 col-md-offset-4">
-                                    <a href="@Model.BrowseUrl" class="btn btn-register">
-                                        View More Activities &raquo;
+                            <div class="col-md-12 col-lg-4">
+                                <div class="padding-v-20 pull-right">
+                                    <a href="@Model.BrowseUrl">
+                                        View All Activities
                                     </a>
                                 </div>
                             </div>
-                        }
+                        </div>
+                    }
+
+                    @if (isInEditMode)
+                    {
+                        <div class="col-sm-12 participation-object-wide searchable-object">
+
+                            <div class="panel" style="overflow: hidden;">
+
+                                <div class="panel-body">
+
+                                    <div class="col-md-12">
+                                        <a href="@Url.Action("editsetup", "activity", new { area = "org", isnew = 1, type = (int)ActivityType.Activity, returnurl = Model.HomePageUrl })" 
+                                           class="btn btn-header-action-callout btn-block">
+                                            Add New Activity
+                                        </a>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="row">
+                        <div style="position: relative; margin-left: -20px; margin-right: -20px;">
+                            @foreach (var item in participationObjects.Take(takeActivities))
+                            {
+                                Html.RenderPartial("~/Views/Shared/Registration/_BrowseParticipationObjectWide.cshtml", item);
+                            }
+                        </div>
                     </div>
+
+                    @if (participationObjects.Count > takeActivities)
+                    {
+                        <div class="row">
+                            <div class="col-md-4 col-md-offset-4">
+                                <a href="@Model.BrowseUrl" class="btn btn-register">
+                                    View More Activities &raquo;
+                                </a>
+                            </div>
+                        </div>
+                    }
+                </div>
                 }
 
                 @if (photos.Any() || isInEditMode)

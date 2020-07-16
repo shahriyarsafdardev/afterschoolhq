@@ -28,7 +28,7 @@
             
             @if (isFullScreen)
             {
-                Html.RenderPartial("_ExitFullScreen", "");
+                Html.RenderPartial("_ExitFullScreen", Request["returnurl"]);
             }
         </div>
         <div class="panel-body">
