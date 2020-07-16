@@ -93,7 +93,7 @@
 
             <li class="@homeactive"><a href="@Url.Action("index", "home")"><i class="icon s7-home"></i><span>Home</span></a></li>
 
-            @if (SessionVariables.CurrentAccount.AccountTypeId == AccountType.ActivityProvider)
+            @if (SessionVariables.CurrentAccount.AccountTypeId.In(AccountService.ProviderAccountTypes))
             {
                 if (CanView(FeatureType.Activities, SessionVariables.AccountUserType, PermissionType.ActivitiesView))
                 {

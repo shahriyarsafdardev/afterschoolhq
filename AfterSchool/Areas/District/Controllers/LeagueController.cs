@@ -245,7 +245,7 @@ namespace AfterSchool.Areas.District.Controllers
         {
             var league = ActivityGroup.LoadByUid(id.ToGuid());
             LoadEditScheduleViewBag(league, league.ActivityScheduleId.ToString());
-            ViewBag.Teams = league.GetLeagueTeams(SessionVariables.CurrentAccount, AccountType.School);
+            ViewBag.Teams = league.GetLeagueTeams(SessionVariables.CurrentAccount, AccountType.School.AsList());
             ViewBag.Messages = new SystemMessages();
             
             return View(league);
@@ -270,7 +270,7 @@ namespace AfterSchool.Areas.District.Controllers
 
             int userCount = SessionVariables.CurrentAccount.GetMemberCount();
             var activityGroup = ActivityGroup.LoadByUid(id.ToGuid());
-            var teams = activityGroup.GetLeagueTeams(SessionVariables.CurrentAccount, AccountType.School);
+            var teams = activityGroup.GetLeagueTeams(SessionVariables.CurrentAccount, AccountType.School.AsList());
     
             var totalPages = Math.Ceiling(userCount.ToDouble() / recordsPerPage).ToInteger();
 
@@ -306,7 +306,7 @@ namespace AfterSchool.Areas.District.Controllers
         {
             var msgs = new SystemMessages();
             var league = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
-            var teams = league.GetLeagueTeams(SessionVariables.CurrentAccount, AccountType.School)
+            var teams = league.GetLeagueTeams(SessionVariables.CurrentAccount, AccountType.School.AsList())
                             .Where(t => t.DateSubmittedToActivityGroup.IsNotEmpty() && !t.IsDeleted)
                             .ToList();
             var members = new List<RegistrantActivity>();
@@ -421,14 +421,14 @@ namespace AfterSchool.Areas.District.Controllers
             ViewBag.Forms = SessionVariables.CurrentAccount.GetForms();
             ViewBag.Grades = GradeLevel.Load();
             LoadEditScheduleViewBag(league, league.ActivityScheduleId.ToString());
-            ViewBag.Teams = league.GetLeagueTeams(SessionVariables.CurrentAccount, AccountType.School);
+            ViewBag.Teams = league.GetLeagueTeams(SessionVariables.CurrentAccount, AccountType.School.AsList());
 
             return View(league);
         }
 
         private List<Account> LoadInviteSchoolViewBag(ActivityGroup activityGroup, SystemMessages msgs)
         {
-            var schools = SessionVariables.CurrentAccount.GetVisitorAccounts(AccountType.School, msgs);
+            var schools = SessionVariables.CurrentAccount.GetVisitorAccounts(AccountType.School.AsList(), msgs);
             var accountActivityGroups = AccountActivityGroup.LoadByActivityGroupId(activityGroup.ID.Value, msgs);
             var accountIds = accountActivityGroups.Select(a => a.AccountId.Value);
             
@@ -535,7 +535,7 @@ namespace AfterSchool.Areas.District.Controllers
             ViewBag.Location = location;
             ViewBag.StartDateTime = startDateTime;
             ViewBag.EndDateTime = endDateTime;
-            ViewBag.Teams = activityGroup.GetLeagueTeams(SessionVariables.CurrentAccount, AccountType.School).Where(t => t.DateSubmittedToActivityGroup.IsNotEmpty()).ToList();
+            ViewBag.Teams = activityGroup.GetLeagueTeams(SessionVariables.CurrentAccount, AccountType.School.AsList()).Where(t => t.DateSubmittedToActivityGroup.IsNotEmpty()).ToList();
             ViewBag.CurrentTeams = currentTeams;
             ViewBag.CurrentAccount = SessionVariables.CurrentAccount;
             ViewBag.Messages = msgs;
@@ -746,7 +746,7 @@ namespace AfterSchool.Areas.District.Controllers
               );
 
             LoadEditScheduleViewBag(activityGroup, activityGroup.ActivityScheduleId.ToString());
-            ViewBag.Teams = activityGroup.GetLeagueTeams(SessionVariables.CurrentAccount, AccountType.School);
+            ViewBag.Teams = activityGroup.GetLeagueTeams(SessionVariables.CurrentAccount, AccountType.School.AsList());
             ViewBag.Messages = msgs;
             return View("schedule", activityGroup);
         }

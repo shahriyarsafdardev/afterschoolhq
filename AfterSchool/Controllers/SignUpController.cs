@@ -431,7 +431,7 @@ namespace AfterSchool.Controllers
             if (invitingAccount.IsEmpty())
                 msgs.Add("Invalid invite code", MessageType.UserError);
 
-            var accountTypesToAccept = new List<AccountType>() { AccountType.ActivityProvider, AccountType.School };           
+            var accountTypesToAccept = AccountService.ProviderAccountTypes;
 
             // auto accept invite of already logged in
             if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentAccount.AccountTypeId.In(accountTypesToAccept) && SessionVariables.CurrentAccount.ID != invitingAccount.ID)

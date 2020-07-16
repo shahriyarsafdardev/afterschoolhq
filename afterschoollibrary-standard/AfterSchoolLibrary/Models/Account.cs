@@ -572,7 +572,7 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static List<Account> FullTextSearch(string query, AccountType accountType, int? start, int? length, SystemMessages msgs, DatabaseConnection dc = null)
+        public static List<Account> FullTextSearch(string query, List<AccountType> accountTypes, int? start, int? length, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var searchTerms = query.Split(' ').Where(term =>
                 term.IsNotBlank() &&
@@ -587,7 +587,7 @@ namespace AfterSchoolLibrary.Models
                     select * from Account
                     where 
                         Contains(name, '{"\""}{searchTerms.ToStringList("*\" AND \"")}{"*\""}') and
-                        IsTest = 0 and OwnerId is not NULL and AccountTypeId = {(int)accountType}
+                        IsTest = 0 and OwnerId is not NULL and AccountTypeId in {accountTypes.Select(x => (int)x).ToList().ToStrings().ToStringList(",")}
                 ";
 
                 dq.SelectRange.Start = start;

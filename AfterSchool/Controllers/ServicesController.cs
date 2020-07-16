@@ -386,7 +386,7 @@ namespace AfterSchool.Controllers
                 return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
 
             var msgs = new SystemMessages();
-            var accounts = Account.FullTextSearch(search.Trim(), AccountType.ActivityProvider, 0, 10, msgs);
+            var accounts = Account.FullTextSearch(search.Trim(), AccountService.ProviderAccountTypes.ToList(), 0, 10, msgs);
 
             return Json(new
             {
@@ -483,7 +483,7 @@ namespace AfterSchool.Controllers
             if (district.IsEmpty())
                 return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
 
-            var schools = district.GetVisitorAccounts(AccountType.School, msgs).Where(school => !school.IsTest && school.IsActive).OrderBy(x => x.Name);
+            var schools = district.GetVisitorAccounts(AccountType.School.AsList(), msgs).Where(school => !school.IsTest && school.IsActive).OrderBy(x => x.Name);
             var status = msgs.HasNoErrors() ? "ok" : "error";
             var schoolList = schools.Select(school => 
                                     new 

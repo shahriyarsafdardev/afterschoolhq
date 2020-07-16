@@ -4,12 +4,13 @@ using BasicLibrary;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using AfterSchool.Models;
+using System.Linq;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
     public class ScheduleController : BaseLoggedInController
     {
-        public ScheduleController() : base(new List<AccountType> { AccountType.School, AccountType.ActivityProvider, AccountType.Teacher })
+        public ScheduleController() : base(AccountService.ProviderAccountTypes.ToList())
         {
 
         }

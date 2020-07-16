@@ -1826,7 +1826,7 @@ values: NotSet, Invited, Accepted, Declined
 [begin]
 type: Enum
 name: AccountType
-values: NotSet, ActivityProvider, School, SchoolDistrict, AfterSchool, Registrant, Teacher
+values: NotSet, ActivityProvider, School, SchoolDistrict, AfterSchool, Registrant, Teacher, CommunityCenter, Business, Church
 [end]
 
 [begin]

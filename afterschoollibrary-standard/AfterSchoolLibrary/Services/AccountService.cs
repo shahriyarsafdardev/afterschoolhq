@@ -201,6 +201,46 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
+        public static AccountType[] ProviderAccountTypes
+        {
+            get
+            {
+                return new AccountType[] { AccountType.Teacher, AccountType.ActivityProvider, AccountType.Business, AccountType.CommunityCenter, AccountType.School, AccountType.Church };
+            }
+        }
+
+        public static AccountType[] ProviderAccountTypesAndNotSet
+        {
+            get
+            {
+                return new AccountType[] { AccountType.NotSet, AccountType.Teacher, AccountType.ActivityProvider, AccountType.Business, AccountType.CommunityCenter, AccountType.School, AccountType.Church };
+            }
+        }
+
+        public static AccountType[] IndividualProviderAccountTypes
+        {
+            get
+            {
+                return new AccountType[] { AccountType.Teacher, AccountType.ActivityProvider, AccountType.Business };
+            }
+        }
+
+        public static AccountType[] LocationProviderAccountTypes
+        {
+            get
+            {
+                return new AccountType[] { AccountType.CommunityCenter, AccountType.School, AccountType.Church };
+            }
+        }
+
+        public static AccountType[] CustomerAccountTypes
+        {
+            get
+            {
+                return new AccountType[] { AccountType.Teacher, AccountType.ActivityProvider, AccountType.Business, AccountType.CommunityCenter, AccountType.School, AccountType.Church };
+            }
+        }
+
         #endregion
 
         #region Contacts
@@ -1618,23 +1658,23 @@ namespace AfterSchoolLibrary.Services
 
         #region AccountRelationships
 
-        public static List<Account> GetVisitorAccounts(this Account hostAccount, AccountType accountType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Account> GetVisitorAccounts(this Account hostAccount, List<AccountType> accountTypes, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountRelationship.LoadByHostAccountIdByAccountType(hostAccount.ID.Value, accountType, msgs, dc)
+            return AccountRelationship.LoadByHostAccountIdByAccountTypes(hostAccount.ID.Value, accountTypes, msgs, dc)
                 .Select(accountRelationship => accountRelationship.GetVisitorAccount(msgs, dc))
                 .ToList();
         }
 
-        public static List<Account> GetVisitorAccounts(this Account hostAccount, AccountType accountType, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Account> GetVisitorAccounts(this Account hostAccount, List<AccountType> accountTypes, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountRelationship.LoadByHostAccountIdByAccountType(hostAccount.ID.Value, accountType, msgs, dc)
+            return AccountRelationship.LoadByHostAccountIdByAccountTypes(hostAccount.ID.Value, accountTypes, msgs, dc)
                 .Select(accountRelationship => accountRelationship.GetVisitorAccount(msgs, dc))
                 .ToList();
         }
 
-        public static int GetVisitorAccountsCount(this Account hostAccount, AccountType accountType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetVisitorAccountsCount(this Account hostAccount, List<AccountType> accountTypes, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountRelationship.GetCount(new Hashtable() { { "HostAccountId", hostAccount.ID.Value }, { "AccountAccountTypeId", (int)accountType } }, msgs, dc);
+            return AccountRelationship.GetCount(hostAccount.ID.Value, accountTypes, msgs, dc);
         }
 
         public static List<Account> GetHostAccounts(this Account account, DatabaseConnection dc = null)

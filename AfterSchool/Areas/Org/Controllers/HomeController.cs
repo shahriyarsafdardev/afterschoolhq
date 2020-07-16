@@ -5,12 +5,13 @@ using AfterSchoolLibrary.Services;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
 using System;
+using System.Linq;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
     public class HomeController : BaseLoggedInController
     {
-        public HomeController() : base(new List<AccountType> { AccountType.School, AccountType.ActivityProvider, AccountType.Teacher })
+        public HomeController() : base(AccountService.ProviderAccountTypes.ToList())
         {
 
         }

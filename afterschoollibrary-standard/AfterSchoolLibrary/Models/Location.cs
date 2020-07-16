@@ -52,7 +52,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "Details", System.Data.SqlDbType.NVarChar , "4000");
 				_dp.Add(className, "LocationTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "IsTest", System.Data.SqlDbType.Bit);
-				_dp.Add(className, "GooglePlaceId", System.Data.SqlDbType.NVarChar , "100");
+				_dp.Add(className, "GooglePlaceId", System.Data.SqlDbType.NVarChar , "400");
 				_dp.Add(className, "StreetNumber", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "StreetName", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "Neighborhood", System.Data.SqlDbType.NVarChar , "50");

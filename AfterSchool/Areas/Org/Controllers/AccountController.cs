@@ -15,7 +15,7 @@ namespace AfterSchool.Areas.Org.Controllers
 {
     public class AccountController : BaseLoggedInController
     {
-        public AccountController() : base(new List<AccountType> { AccountType.School, AccountType.ActivityProvider, AccountType.Teacher })
+        public AccountController() : base(AccountService.ProviderAccountTypes.ToList())
         {
 
         }

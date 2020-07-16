@@ -34,13 +34,7 @@ namespace AfterSchool.Areas.Admin.Controllers
 
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
-            var accountTypes = new List<AccountType>()
-            {
-                AccountType.ActivityProvider,
-                AccountType.Registrant,
-                AccountType.School,
-                AccountType.SchoolDistrict
-            };
+            var accountTypes = AccountService.CustomerAccountTypes.ToList();
 
             if (type != AccountType.NotSet)
                 accountTypes = type.AsList();

@@ -35,8 +35,8 @@ namespace AfterSchool.Areas.District.Controllers
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
 
-            int count = SessionVariables.CurrentAccount.GetVisitorAccountsCount(AccountType.School);
-            var visitorAccounts = SessionVariables.CurrentAccount.GetVisitorAccounts(AccountType.School, start, length);
+            int count = SessionVariables.CurrentAccount.GetVisitorAccountsCount(AccountType.School.AsList());
+            var visitorAccounts = SessionVariables.CurrentAccount.GetVisitorAccounts(AccountType.School.AsList(), start, length);
             var totalPages = Math.Ceiling(count.ToDouble() / recordsPerPage).ToInteger();
 
             ViewBag.Messages = new SystemMessages();

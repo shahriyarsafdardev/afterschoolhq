@@ -6,5 +6,8 @@ public enum AccountType
 	SchoolDistrict,
 	AfterSchool,
 	Registrant,
-	Teacher
+	Teacher,
+	CommunityCenter,
+	Business,
+	Church
 }

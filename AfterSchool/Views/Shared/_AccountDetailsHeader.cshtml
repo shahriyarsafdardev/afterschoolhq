@@ -23,7 +23,7 @@
             <a href="@Url.Action("style", "account")" class="btn btn-alt6@(actionName == "style" ? "-active" : "")">Profile Setup</a>
             <a href="@Url.Action("integrations", "account")" class="hide btn btn-alt6@(actionName == "integrations" ? "-active" : "")">Integrations</a>
             <a href="@Url.Action(defaultPaymentsAction, "account")" class="btn btn-alt6@(actionName == defaultPaymentsAction ? "-active" : "")">Accept Payments</a>
-            @if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.ActivityProvider)
+            @if (SessionVariables.CurrentAccount.AccountTypeId.In(AccountService.LocationProviderAccountTypes))
             {
                 <a href="@Url.Action("visitors", "account")" class="btn btn-alt6@(actionName == "visitors" ? "-active" : "")">Providers</a>
             }
@@ -46,7 +46,7 @@
                 <option value="@Url.Action("forms", "account")">Forms</option>
                 <option value="@Url.Action("style", "account")">Profile Setup</option>
                 <option value="@Url.Action(defaultPaymentsAction, "account")">Accept Payments</option>
-                @if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.ActivityProvider)
+                @if (SessionVariables.CurrentAccount.AccountTypeId.In(AccountService.LocationProviderAccountTypes))
                 {
                     <option value="@Url.Action("visitors", "account")">Providers</option>
                 }

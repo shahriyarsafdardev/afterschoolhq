@@ -36,8 +36,8 @@ namespace AfterSchool.Areas.District.Controllers
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
 
-            int count = SessionVariables.CurrentAccount.GetVisitorAccountsCount(AccountType.ActivityProvider);
-            var visitorAccounts = SessionVariables.CurrentAccount.GetVisitorAccounts(AccountType.ActivityProvider,start, length);
+            int count = SessionVariables.CurrentAccount.GetVisitorAccountsCount(AccountService.ProviderAccountTypes.ToList());
+            var visitorAccounts = SessionVariables.CurrentAccount.GetVisitorAccounts(AccountService.ProviderAccountTypes.ToList(), start, length);
             var totalPages = Math.Ceiling(count.ToDouble() / recordsPerPage).ToInteger();
 
             ViewBag.Messages = new SystemMessages();
@@ -96,7 +96,7 @@ namespace AfterSchool.Areas.District.Controllers
                             orgName: orgname,
                             phone: null,
                             isActive: true,
-                            accountType: AccountType.ActivityProvider,
+                            accountType: AccountType.School,
                             packageId: null,
                             packageBillingPeriod: null,
                             timeZone: null,
