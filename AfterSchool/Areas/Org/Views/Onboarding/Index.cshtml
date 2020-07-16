@@ -12,7 +12,7 @@
     <div class="row">
         <div class="col-md-offset-3 col-md-6 col-lg-offset-4 col-lg-4">
             <div class="form-group text-center">
-                <h1>I am creating an account for:</h1>
+                <h1>I am creating an account for</h1>
             </div>
             <div class="form-group myself">
                 <button type="button" class="btn btn-primary btn-xl btn-block" onclick="location.href='@Url.Action("setaccounttype", "onboarding", new { type = AccountType.Teacher })'">Myself</button>
@@ -24,22 +24,22 @@
             </div>
             <div class="my-organization-type hide">
                 <div class="form-group">
-                    <button type="button" class="btn btn-primary btn-xl btn-block" onclick="@Url.Action("setaccounttype", "onboarding", new { type = AccountType.School })">
+                    <button type="button" class="btn btn-primary btn-xl btn-block" onclick="location.href='@Url.Action("setaccounttype", "onboarding", new { type = AccountType.School })'">
                         School
                     </button>
                 </div>
                 <div class="form-group">
-                    <button type="button" class="btn btn-primary btn-xl btn-block" onclick="@Url.Action("setaccounttype", "onboarding", new { type = AccountType.CommunityCenter })">
+                    <button type="button" class="btn btn-primary btn-xl btn-block" onclick="location.href='@Url.Action("setaccounttype", "onboarding", new { type = AccountType.CommunityCenter })'">
                         Community Center
                     </button>
                 </div>
                 <div class="form-group">
-                    <button type="button" class="btn btn-primary btn-xl btn-block" onclick="@Url.Action("setaccounttype", "onboarding", new { type = AccountType.Business })">
+                    <button type="button" class="btn btn-primary btn-xl btn-block" onclick="location.href='@Url.Action("setaccounttype", "onboarding", new { type = AccountType.Business })'">
                         Business
                     </button>
                 </div>
                 <div class="form-group">
-                    <button type="button" class="btn btn-primary btn-xl btn-block" onclick="@Url.Action("setaccounttype", "onboarding", new { type = AccountType.ActivityProvider })">
+                    <button type="button" class="btn btn-primary btn-xl btn-block" onclick="location.href='@Url.Action("setaccounttype", "onboarding", new { type = AccountType.ActivityProvider })'">
                         Other Non-profit
                     </button>
                 </div>

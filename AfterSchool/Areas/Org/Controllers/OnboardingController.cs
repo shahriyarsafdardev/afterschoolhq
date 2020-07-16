@@ -42,18 +42,13 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult SetAccountType(AccountType type)
         {
             var msgs = new SystemMessages();
+            var account = SessionVariables.CurrentAccount;
 
-            if (type == AccountType.Teacher)
-            {
-                var account = SessionVariables.CurrentAccount;
-                account.AccountTypeId = type;
-                account.OnboardingStepDone = OnboardingStepType.AccountType;
-                msgs.AddRange(account.Save());
+            account.AccountTypeId = type;
+            account.OnboardingStepDone = OnboardingStepType.AccountType;
+            msgs.AddRange(account.Save());
 
-                return RedirectToAction("ProgramInfo");
-            }
-
-            return View();
+            return RedirectToAction("ProgramInfo");
         }
 
         [HttpGet]
