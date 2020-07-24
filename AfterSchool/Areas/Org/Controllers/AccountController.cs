@@ -1289,7 +1289,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
 
             if (Request["error"].IsEmpty())
-                SessionVariables.CurrentAccount.CompleteStripeConnect(Request["code"], msgs);
+                SessionVariables.CurrentAccount.CompleteStripeConnect(Request["code"], SessionVariables.CurrentUser, msgs);
             else
                 msgs.Add("It appears you have canceled your request to connect your Stripe account.", MessageType.Notice);
 
@@ -1307,7 +1307,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
 
-            SessionVariables.CurrentAccount.DisconnectStripeConnect(msgs);
+            SessionVariables.CurrentAccount.DisconnectStripeConnect(SessionVariables.CurrentUser, msgs);
 
             return RedirectToAction("PaymentsOptions");
         }

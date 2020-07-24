@@ -82,24 +82,22 @@
                                     </tr>
                                     <tr>
                                         <td>
-                                            @if (!account.CanReceiveACHDeposits())
+                                            @if (!account.HasStripeConnectedAccount)
                                             {
                                                 var redirectUri = Server.UrlEncode($"{AfterSchoolLibrary.Helpers.Utilities.BaseUrl()}/org/account/oauthstripe/");
                                                 var email = Server.UrlEncode(account.Email);
                                                 var website = Server.UrlEncode(account.ShortHomePageUrl);
-
-                                                <a href="https://connect.stripe.com/express/oauth/authorize?redirect_uri=@redirectUri&state=@Request["source"]&client_id=@AfterSchoolLibrary.Billing.StripeHelper.PlatformClientId&stripe_user[email]=@email&stripe_user[url]=@website"
-                                                    class="btn btn-alt5 btn-xl btn-block">
-                                                    Choose Direct Deposits &raquo;
-                                                </a>
-                                                <a href="@Url.Action("banksetup", "account", new { isnew = 1 })" class="btn btn-alt5 btn-xl btn-block hide">
-                                                    Choose Direct Deposits &raquo;
-                                                </a>
-                                            }
-                                            else if (!account.HasStripeConnectedAccount)
-                                            {
-                                                <a href="@Url.Action("banksetup", "account")" class="btn btn-alt5 btn-xl btn-block">
-                                                    Update Direct Deposits &raquo;
+                                                var linkUrl = $"https://connect.stripe.com/express/oauth/authorize?redirect_uri=@redirectUri&state={Request["source"]}&client_id={AfterSchoolLibrary.Billing.StripeHelper.PlatformClientId}&stripe_user[email]={email}&stripe_user[url]={website}";
+                                                
+                                                <a href="@linkUrl" class="btn btn-alt5 btn-xl btn-block">
+                                                    @if (account.CanReceiveACHDeposits())
+                                                    {
+                                                        @:Upgrade to Automated Deposits
+                                                    }
+                                                    else
+                                                    {
+                                                        @:Choose Direct Deposits &raquo;
+                                                    }
                                                 </a>
                                             }
                                             else
@@ -139,7 +137,7 @@
                                     </tr>
                                     <tr>
                                         <td>
-                                            @if (account.AccountTypeId == AccountType.School)
+                                            @if (account.AccountTypeId.In(AccountService.LocationProviderAccountTypes))
                                             {
                                                 if (account.GetCheckPaymentAccount().IsEmpty())
                                                 {

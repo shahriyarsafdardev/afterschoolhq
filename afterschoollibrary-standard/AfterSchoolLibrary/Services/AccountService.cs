@@ -456,6 +456,11 @@ namespace AfterSchoolLibrary.Services
             return false;
         }
 
+        public static AccountPackageFeature AddOrUpdatePackageFeature(this Account account, FeatureType featureTypeId, decimal maxValue, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return account.GetActiveAccountPackage(msgs, dc).AddOrUpdatePackageFeature(featureTypeId, maxValue, loggedInUser, msgs, dc);
+        }
+
         #endregion
 
         #region Users
@@ -749,7 +754,7 @@ namespace AfterSchoolLibrary.Services
 
         #region Stripe
 
-        public static void CompleteStripeConnect(this Account account, string code, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void CompleteStripeConnect(this Account account, string code, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var token = StripeHelper.CompleteOAuthConnection(code, msgs);
 
@@ -759,15 +764,19 @@ namespace AfterSchoolLibrary.Services
             account.StripeUserId = token.StripeUserId;
             account.StripeChargesEnabled = true;
             account.StripePayoutsEnabled = true;
+            account.LastModifiedBy = loggedInUser.ID;
+            account.LastModifiedDate = DateTime.UtcNow;
             msgs.AddRange(account.Save(dc));
+
+            account.AddOrUpdatePackageFeature(FeatureType.UseStripeConnectedAccount, 1, loggedInUser, msgs, dc);
 
             if (msgs.HasNoErrors())
                 msgs.Add("Your account has been connected to Stripe", MessageType.Success);
             else
-                account.DisconnectStripeConnect(msgs);
+                account.DisconnectStripeConnect(loggedInUser, msgs, dc);
         }
 
-        public static void DisconnectStripeConnect(this Account account, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void DisconnectStripeConnect(this Account account, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             account.StripeUserId = null;
             account.StripePublishableKey = null;
@@ -776,7 +785,8 @@ namespace AfterSchoolLibrary.Services
             account.StripeSecretKey = null;
             account.StripeChargesEnabled = false;
             account.StripePayoutsEnabled = false;
-
+            account.LastModifiedBy = loggedInUser.ID;
+            account.LastModifiedDate = DateTime.UtcNow;
             msgs.AddRange(account.Save(dc));
 
             if (account.StripeUserId.IsNotEmpty())
