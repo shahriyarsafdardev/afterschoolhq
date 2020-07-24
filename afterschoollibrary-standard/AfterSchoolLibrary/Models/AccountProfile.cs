@@ -255,6 +255,40 @@ namespace AfterSchoolLibrary.Models
 
 		#region "UserDefined"
 
+		public string TwitterUrl
+		{
+			get
+			{
+				if (Twitter.IsNotEmpty())
+				{
+					if (!Twitter.Contains("http"))
+						return $"https://twitter.com/{Twitter.TrimStart('@')}";
+					
+					if (Twitter.Contains("twitter.com"))
+						return Twitter;
+				}
+
+				return "";
+			}
+		}
+
+		public string InstagramUrl
+		{
+			get
+			{
+				if (Instagram.IsNotEmpty())
+				{
+					if (!Instagram.Contains("http"))
+						return $"https://instagram.com/{Instagram.TrimStart('@')}";
+
+					if (Instagram.Contains("instagram.com"))
+						return Instagram;
+				}
+
+				return "";
+			}
+		}
+
 		public static AccountProfile GetLastUpdatedProfile(SystemMessages msgs, DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;

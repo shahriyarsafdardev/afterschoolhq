@@ -93,7 +93,7 @@
 
             <li class="@homeactive"><a href="@Url.Action("index", "home")"><i class="icon s7-home"></i><span>Home</span></a></li>
 
-            @if (SessionVariables.CurrentAccount.AccountTypeId.In(AccountService.ProviderAccountTypes))
+            @if (SessionVariables.CurrentAccount.AccountTypeId.In(AccountService.IndividualProviderAccountTypes))
             {
                 if (CanView(FeatureType.Activities, SessionVariables.AccountUserType, PermissionType.ActivitiesView))
                 {
@@ -161,6 +161,10 @@
             {
                 <li class="@accountingactive"><a href="@Url.Action("index", "accounting")"><i class="icon s7-cash"></i> Accounting</a></li>
             }
+            @if (CanView(FeatureType.Activities, SessionVariables.AccountUserType, PermissionType.AccountSettingsView))
+            {
+                <li class="@accountactive"><a href="@SessionVariables.CurrentAccount.HomePageUrl?edit=1"><i class="icon s7-browser"></i> Edit Profile</a></li>
+            }
 
             <li class="parent @accountsubmenuactive">
                 <a href="#"><i class="icon s7-settings"></i> <span>Account &amp; Settings</span></a>
@@ -174,7 +178,7 @@
                     {
                         <li class="@accountactive"><a href="@Url.Action("edit", "account")"><i class="icon s7-edit"></i> Settings</a></li>
                     }
-                    <li class="@profileactive"><a href="@Url.Action("edit", "user")"><i class="icon s7-user"></i> <span>Profile</span></a></li>
+                    <li class="@profileactive"><a href="@Url.Action("edit", "user")"><i class="icon s7-user"></i> <span>User Profile</span></a></li>
                     @if (SessionVariables.CurrentUser.HasMultipleAccounts())
                     {
                         <li class=""><a href="@Url.Action("switch", "logout", new { area = "" })"><i class="icon s7-shuffle"></i> Switch Accounts</a></li>

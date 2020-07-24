@@ -29,12 +29,6 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             ViewBag.CurrentUser = SessionVariables.CurrentUser;
 
-            switch(account.OnboardingStepDone)
-            {
-                case OnboardingStepType.AccountType:
-                    return RedirectToAction("ProgramInfo");
-            }
-
             return View(account);
         }
 
@@ -125,6 +119,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Email = currentUser.Email;
             ViewBag.Phone = currentUser.Phone;
+            ViewBag.Location = new Location();
             ViewBag.Messages = msgs;
             return View(account);
         }
@@ -189,8 +184,12 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
                 return RedirectToAction("Logo");
 
+            var location = profile.GetLocation(msgs);
 
-            ViewBag.Location = profile.GetLocation(msgs) ?? new Location();
+            if (location.IsEmpty())
+                location = new Location() { GooglePlaceId = placeid, StreetNumber = streetnumber, StreetName = streetname, Address2 = address2, City = city, State = state, PostalCode = postalcode, Country = country, County = county, Neighborhood = neighborhood, Name = locationname };
+
+            ViewBag.Location = location;
             ViewBag.Email = Request["email"] ?? currentUser.Email;
             ViewBag.Phone = Request["phone"] ?? currentUser.Phone;
 
@@ -215,22 +214,21 @@ namespace AfterSchool.Areas.Org.Controllers
             var account = SessionVariables.CurrentAccount;
             var profile = account.GetOrCreateAccountProfile(SessionVariables.CurrentUser, msgs);
             var allowedFiles = new string[] { ".png", ".jpg", ".jpeg" };
-            var maxSizeInBytes = 1024 * 1024 * 4; // 4MB
 
             if (logo.IsNotEmpty())
             {
                 if (Request.Files["logo"].ContentLength == 0 ||
                     !Request.Files["logo"].FileName.ToLower().Contains(allowedFiles) ||
-                    Request.Files["logo"].ContentLength > maxSizeInBytes)
-                    msgs.Add("Please upload a valid jpg or png file", MessageType.UserError);
+                    Request.Files["logo"].ContentLength > AfterSchoolLibrary.Helpers.Utilities.ImageUploadMaxBytes)
+                    msgs.Add("Please upload a valid jpg or png file, must be less than 4MB", MessageType.UserError);
             }
 
             if (headerimage.IsNotEmpty())
             {
                 if (Request.Files["headerimage"].ContentLength == 0 ||
                     !Request.Files["headerimage"].FileName.ToLower().Contains(allowedFiles) ||
-                    Request.Files["headerimage"].ContentLength > maxSizeInBytes)
-                    msgs.Add("Please upload a valid jpg or png file", MessageType.UserError);
+                    Request.Files["headerimage"].ContentLength > AfterSchoolLibrary.Helpers.Utilities.ImageUploadMaxBytes)
+                    msgs.Add("Please upload a valid jpg or png file, must be less than 4MB", MessageType.UserError);
             }
 
             if (msgs.HasNoErrors())

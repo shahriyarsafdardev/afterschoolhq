@@ -30,7 +30,7 @@
         <div class="panel-body">
 
             <div class="col-md-8 col-lg-9">
-                <form id="form1" method="post" action="@Url.Action("editrestrictions", "activity", new { id = Model.Uid, isnew = Request["isnew"] })" class="form-horizontal">
+                <form id="form1" method="post" action="@Url.Action("editrestrictions", "activity", new { id = Model.Uid, isnew = Request["isnew"], source = Request["source"] })" class="form-horizontal">
 
                     @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editrestrictions", "next", true, true, Request))
                     @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(true, false))

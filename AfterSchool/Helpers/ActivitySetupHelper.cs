@@ -76,12 +76,12 @@ namespace AfterSchool.Helpers
         private static string GenerateUrl(Activity activity, string action, string model, string cmd, HttpRequestBase request)
         {
             var x = new UrlHelper(request.RequestContext);
-            return x.Action(action, model, new { id = activity.Uid, cmd = cmd, isnew = request["isnew"] });
+            return x.Action(action, model, new { id = activity.Uid, cmd = cmd, isnew = request["isnew"], source = request["source"] });
         }
         private static string GenerateUrl(ActivityGroup activity, string action, string model, string cmd, HttpRequestBase request)
         {
             var x = new UrlHelper(request.RequestContext);
-            return x.Action(action, model, new { id = activity.Uid, cmd = cmd, isnew = request["isnew"] });
+            return x.Action(action, model, new { id = activity.Uid, cmd = cmd, isnew = request["isnew"], source = request["source"] });
         }
 
         private static string ButtonStyle(bool isTop, bool isPrimary)

@@ -41,7 +41,7 @@
                         Profile Phone Number
                     </label>
                     <div class="col-md-9">
-                        <input type="text" class="form-control" name="phone" id="phone" value="@phone" placeholder="" />
+                        <input type="text" class="form-control" name="phone" id="phone" value="@phone" placeholder="ex. 317-483-3489" />
                         <div class="am-checkbox">
                             <input type="checkbox"
                                    name="publicphone"
@@ -58,7 +58,7 @@
                         Location
                     </label>
                     <div class="col-md-9">
-                        @{ Html.RenderPartial("~/Views/Shared/Components/_GoogleLocationEdit.cshtml", location ?? new Location()); }
+                        @{ Html.RenderPartial("~/Views/Shared/Components/_GoogleLocationEdit.cshtml", location); }
                     </div>
                 </div>
 

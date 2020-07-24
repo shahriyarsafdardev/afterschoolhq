@@ -9,6 +9,7 @@ using AfterSchoolLibrary.Services;
 using BasicLibrary.DataAccess;
 using Hangfire;
 using System.Collections.Generic;
+using AfterSchool.Helpers;
 
 namespace AfterSchool.Controllers
 {
@@ -52,6 +53,8 @@ namespace AfterSchool.Controllers
                 msgs.Add("Passwords are required and must match", MessageType.UserError);
             else if (model.Password1.Length < 8)
                 msgs.Add("Password must be at least 8 characters", MessageType.UserError);
+            
+            msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
 
             if (model.InviteCodeToShare.IsNotEmpty())
             {

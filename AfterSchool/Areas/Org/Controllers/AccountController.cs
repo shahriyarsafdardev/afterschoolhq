@@ -953,21 +953,20 @@ namespace AfterSchool.Areas.Org.Controllers
             var account = SessionVariables.CurrentAccount;
             var profile = account.GetAccountProfile(msgs);
             var allowedFiles = new string[] { ".png", ".jpg", ".jpeg" };
-            var maxSizeInBytes = 1024 * 1024 * 4; // 4MB
 
             if (logo.IsNotEmpty())
             {
                 if (Request.Files["logo"].ContentLength == 0 || 
                     !Request.Files["logo"].FileName.ToLower().Contains(allowedFiles) ||
-                    Request.Files["logo"].ContentLength > maxSizeInBytes)
-                    msgs.Add("Please upload a valid jpg or png file", MessageType.UserError);
+                    Request.Files["logo"].ContentLength > AfterSchoolLibrary.Helpers.Utilities.ImageUploadMaxBytes)
+                    msgs.Add("Please upload a valid jpg or png file, must be less than 4MB", MessageType.UserError);
             }
 
             if (headerimage.IsNotEmpty())
             {
                 if (Request.Files["headerimage"].ContentLength == 0 || 
                     !Request.Files["headerimage"].FileName.ToLower().Contains(allowedFiles) ||
-                    Request.Files["headerimage"].ContentLength > maxSizeInBytes)
+                    Request.Files["headerimage"].ContentLength > AfterSchoolLibrary.Helpers.Utilities.ImageUploadMaxBytes)
                     msgs.Add("Please upload a valid jpg or png file", MessageType.UserError);
             }
 
@@ -1006,7 +1005,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     var file = Request.Files[key];
                     if (file.IsNotEmpty() && file.FileName.IsNotBlank())
                     {
-                        if (file.FileName.Contains(allowedFiles) && file.ContentLength <= maxSizeInBytes)
+                        if (file.FileName.ToLower().Contains(allowedFiles) && file.ContentLength <= AfterSchoolLibrary.Helpers.Utilities.ImageUploadMaxBytes)
                         {
                             var photoId = "";
 
@@ -1023,7 +1022,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         }
                         else
                         {
-                            msgs.Add("Please upload a valid jpg or png file", MessageType.UserError);
+                            msgs.Add("Please upload a valid jpg or png file that is less than 4MB", MessageType.UserError);
                         }
                     }
                 }

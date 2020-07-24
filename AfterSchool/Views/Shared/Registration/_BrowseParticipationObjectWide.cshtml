@@ -80,7 +80,7 @@
                                 {
                                     @:@Model.SeatsRemaining.ToString() Seats @(Model.RegistrationMode == RegistrationMode.Register ? "Left" : "")
                                 }
-                                else
+                                else if (!Model.RegistrationPeriod.WillOpen(Model.OwnerAccount))
                                 {
                                     @:Closed
                                 }

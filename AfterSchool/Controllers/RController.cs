@@ -71,7 +71,9 @@ namespace AfterSchool.Controllers
             ViewBag.GradeLevelStart = profile.GetGradeLevelStart(msgs);
             ViewBag.GradeLevelEnd = profile.GetGradeLevelEnd(msgs);
             ViewBag.Messages = msgs;
-            ViewBag.ParticipationObjects = GetParticipationObjects(account, msgs).Where(po => po.RegistrationPeriod.IsOpen(account, msgs)).ToList();
+            ViewBag.ParticipationObjects = GetParticipationObjects(account, msgs)
+                                            .Where(po => po.RegistrationPeriod.IsOpen(account, msgs) || po.RegistrationPeriod.WillOpen(account, msgs))
+                                            .ToList();
             ViewBag.Locations = account.GetAllAvailableLocations(msgs);
             ViewBag.AccountProperties = account.GetAccountProperties(
                                             new List<AccountPropertyType>() 

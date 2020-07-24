@@ -876,7 +876,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     case "done":
                         return RedirectToAction("activities", "group", new { id = activity.ActivityGroupUid });
                     case "publish":
-                        return RedirectToAction("publish", "activity", new { id = activity.Uid, isnew = Request["isnew"] });
+                        return RedirectToAction("publish", "activity", new { id = activity.Uid, isnew = Request["isnew"], source = Request["source"] });
                 }
             }
 
@@ -947,9 +947,9 @@ namespace AfterSchool.Areas.Org.Controllers
                         }
                     case "publish":
                         if (!MustRequestToPublish(activity))
-                            return RedirectToAction("publish", new { id = activity.Uid, isnew = Request["isnew"] });
+                            return RedirectToAction("publish", new { id = activity.Uid, isnew = Request["isnew"], source = Request["source"] });
 
-                        return RedirectToAction("requesttopublish", new { id = activity.Uid, isnew = Request["isnew"] });
+                        return RedirectToAction("requesttopublish", new { id = activity.Uid, isnew = Request["isnew"], source = Request["source"] });
                 }
             }
 
@@ -972,7 +972,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
 
             if (msgs.HasNoErrors())
-                return RedirectToAction("editsetup", new { id = activity.Uid, isnew = 1 });
+                return RedirectToAction("editsetup", new { id = activity.Uid, isnew = 1, source = Request["source"] });
 
             return RedirectToAction("index", "activity", new { copyerror = true });
         }

@@ -14,6 +14,14 @@ namespace AfterSchoolLibrary.Helpers
 {
     public class Utilities
     {
+        public static int ImageUploadMaxBytes
+        {
+            get
+            {
+                return 1024 * 1024 * 4;
+            }
+        }
+
         public static string ConnectionString
         {
             get
