@@ -273,7 +273,7 @@
 
                 }
 
-                @if (accountProfile.About.IsNotBlank())
+                @if (accountProfile.About.IsNotBlank() || isInEditMode)
                 {
                     <div class="margin-t-20">
                         <div class="row padding-h-30">
