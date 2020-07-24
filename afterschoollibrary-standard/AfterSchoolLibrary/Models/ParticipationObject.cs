@@ -305,6 +305,11 @@ namespace AfterSchoolLibrary.Models
             return $"{GetHomePageUrl(isAfterSchool)}/register";
         }
 
+        public string GetInterestedPageUrl(bool isAfterSchool = true)
+        {
+            return $"{GetHomePageUrl(isAfterSchool)}/interested";
+        }
+
         public bool IsSport()
         {
             if (this.ObjectType == ParticipationObjectType.Activity)

@@ -56,7 +56,7 @@
     }
     else if (logoUrl.IsBlank())
     {
-        midColSpan = 9;
+        midColSpan = 8;
     }
 }
 
@@ -156,7 +156,7 @@
                     followButtonAttrs = $"onclick=\"follow()\" class=\"btn btn-header-action {(isFollowing ? "hide" : "")}\" id=\"btn-follow\"";
                 }
 
-                <div class="col-lg-3 col-md-6 col-sm-12">
+                <div class="col-lg-4 col-md-6 col-sm-12">
                     <div class="padding-v-20 text-center">
 
                         <div>
@@ -256,10 +256,10 @@
                         }
                         else
                         {
-                            <button onclick="interested()" class="btn btn-header-action hide">
+                            <a href="@Model.ParticipationObject.GetInterestedPageUrl()" class="btn btn-header-action">
                                 <i class="icon icon-left s7-bell"></i>
                                 <span class="">I'm Interested</span>
-                            </button>
+                            </a>
                         }
                     </div>
                     <div class="clearfix"></div>

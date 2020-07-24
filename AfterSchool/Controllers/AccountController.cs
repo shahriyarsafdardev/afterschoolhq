@@ -12,6 +12,256 @@ namespace AfterSchool.Controllers
 {
     public class AccountController : BaseController
     {
+        #region Interested
+
+        private List<FormQuestionViewModel> InterestedViewBag(ParticipationObject participationObject, SystemMessages msgs)
+        {
+            var form = GetAdministratorAccountForm(msgs);
+            var personalContactGroup = form.GetQuestionGroups(msgs)
+                .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
+            var questions = personalContactGroup.GetAllQuestions(msgs);
+            var nonIncludedQuestions = new List<QuestionDataType>()
+            {
+                QuestionDataType.RegistrantOrganization,
+                QuestionDataType.RegistrantGrade,
+                QuestionDataType.RegistrantGender,
+                QuestionDataType.RegistrantDateOfBirth,
+                QuestionDataType.RegistrantEthnicity,
+                QuestionDataType.RegistrantTShirtSize,
+                QuestionDataType.RegistrantHomePhone,
+                QuestionDataType.RegistrantWorkPhone,
+            };
+
+            var nonIncludedQuestionsExistingUser = new List<QuestionDataType>()
+            {
+                QuestionDataType.RegistrantFirstName,
+                QuestionDataType.RegistrantLastName,
+                QuestionDataType.RegistrantEmail
+            };
+
+            questions = questions.Where(question => question.QuestionDataTypeId.NotIn(nonIncludedQuestions)).ToList();
+
+            questions.ForEach(question =>
+            {
+                switch (question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.RegistrantFirstName:
+                    case QuestionDataType.RegistrantLastName:
+                    case QuestionDataType.RegistrantEmail:
+                        question.IsRequired = true;
+                        break;
+                    case QuestionDataType.RegistrantMobilePhone:
+                        question.IsRequired = false;
+                        break;
+                }
+            });
+
+            ViewBag.ParticipationObject = participationObject;
+
+            var qvms = questions.Select(question => new FormQuestionViewModel(question, Request.Params)).ToList();
+
+            if (!SessionVariables.CurrentUser.IsEmpty())
+            {
+                qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).Value = SessionVariables.CurrentUser.FirstName;
+                qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).Value = SessionVariables.CurrentUser.LastName;
+                qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail).Value = SessionVariables.CurrentUser.Email;
+
+                qvms.ForEach(qvm =>
+                {
+                    if (qvm.Question.QuestionDataTypeId.In(nonIncludedQuestionsExistingUser))
+                    {
+                        qvm.Hide = true;
+                        qvm.Question.IsRequired = false;
+                    }
+                });
+            }
+
+            return qvms;
+        }
+
+        [HttpGet]
+        public ActionResult Interested(string regaccount)
+        {
+            var msgs = new SystemMessages();
+
+            // handles admin accounts that have or need parent accounts
+            var redirectResult = HandleGetStartedAccountRedirect(msgs);
+            if (redirectResult.IsNotEmpty())
+                return redirectResult;
+
+            var participationObject = GetParticipationObjectFromCart();
+            var qvms = InterestedViewBag(participationObject, msgs);
+            Account registrationAccount = null;
+
+            if (regaccount.IsGuid())
+                registrationAccount = Account.LoadByUid(regaccount.ToGuid(), msgs);
+
+            // no activity is selected
+            if (participationObject.IsEmpty())
+            {
+                if (SessionVariables.RegistrationStartPageAccount.IsNotEmpty() || registrationAccount.IsNotEmpty())
+                    return Redirect(SessionVariables.RegistrationStartPageAccount?.HomePageUrl ?? registrationAccount?.HomePageUrl);
+
+                return HttpNotFound();
+            }
+
+            // pre-load phone number
+            if (SessionVariables.CurrentUser.IsNotEmpty())
+                qvms.Find(item => item.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone).Value = SessionVariables.CurrentUser.Phone;
+
+            ViewBag.RegistrationAccount = registrationAccount;
+            ViewBag.AccountProfile = participationObject.OwnerAccount.GetAccountProfile(msgs);
+            ViewBag.Messages = msgs;
+
+            return View(qvms);
+        }
+
+        [HttpPost]
+        public ActionResult Interested(string regaccount, string password1, string password2, string agree, string textnotifications)
+        {
+            var msgs = new SystemMessages();
+            var participationObject = GetParticipationObjectFromCart();
+            var qvms = GetStartedParentViewBag(participationObject, msgs);
+
+            qvms.ForEach(qvm =>
+            {
+                if (qvm.Question.IsRequired && qvm.Value.IsEmpty())
+                    msgs.Add($"{qvm.Question.Text} is required", MessageType.UserError);
+
+                switch (qvm.Question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.RegistrantMobilePhone:
+                        if (qvm.Value.IsNotEmpty() && !qvm.Value.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                            msgs.Add($"{qvm.Question.Text} must be a valid phone number", MessageType.UserError);
+                        break;
+
+                }
+            });
+
+            if (SessionVariables.CurrentUser.IsEmpty())
+            {
+                if (password1.IsEmpty())
+                    msgs.Add("Password 1 is required", MessageType.UserError);
+                if (password1.Length < 8)
+                    msgs.Add("Password needs to have at least 8 characters", MessageType.UserError);
+                if (password2.IsEmpty())
+                    msgs.Add("Password 2 is required", MessageType.UserError);
+                if (password1 != password2)
+                    msgs.Add("Passwords must match", MessageType.UserError);
+            }
+
+            if (!agree.IsBoolean())
+                msgs.Add("You must agree to the terms of service", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                var firstName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName);
+                var lastName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName);
+                var email = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail);
+                var phone = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone);
+
+                WebUser user = null;
+                Account account = null;
+                var currentUser = SessionVariables.CurrentUser;
+
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        if (SessionVariables.CurrentUser.IsEmpty())
+                        {
+                            // create user
+                            user = WebUserService.CreateNew(
+                                firstName: firstName.Value,
+                                lastName: lastName.Value,
+                                email: email.Value.Trim(),
+                                phone: phone.Value.Trim(),
+                                password: password1,
+                                isActive: true,
+                                isRegistered: true,
+                                isVerified: false,
+                                allowTextMessages: textnotifications.IfBlank("0").ToBoolean(),
+                                loggedInUser: null,
+                                msgs: amsgs,
+                                dc: adc);
+                        }
+                        else
+                        {
+                            user = currentUser;
+                            user.Phone = phone.Value.Trim();
+                            user.AllowTextMessages = textnotifications.IfBlank("0").ToBoolean();
+                            user.LastModifiedBy = currentUser.ID;
+                            user.LastModifiedDate = System.DateTime.UtcNow;
+                            amsgs.AddRange(user.Save(adc));
+                        }
+
+                        if (amsgs.HasNoErrors())
+                        {
+                            account = user.GetRegistrantAccount(amsgs, adc);
+
+                            // create account
+                            if (account.IsEmpty())
+                                account = user.AddNewRegistrantAccount(
+                                    userType: UserType.Owner,
+                                    isActive: true,
+                                    isAfterSchool: true,
+                                    loggedInUser: user,
+                                    msgs: amsgs,
+                                    dc: adc);
+                        }
+
+                        if (amsgs.HasNoErrors())
+                        {
+                            var registrant = account.GetFirstParentOrGuardianRegistrant(amsgs, adc);
+
+                            if (registrant.IsEmpty())
+                                // create parent registrant record
+                                registrant = account.CreateRegistrant(
+                                    registrantOwner: user,
+                                    canBeAccessedBy: user.AsList(),
+                                    registrantType: RegistrantType.Individual,
+                                    isMaster: true,
+                                    isParentOrGuardian: true,
+                                    allowTextMessages: textnotifications.IfBlank("0").ToBoolean(),
+                                    schoolLocationId: null,
+                                    profileStatus: RegistrantProfileStatus.Started,
+                                    loggedInUser: user,
+                                    msgs: amsgs,
+                                    dc: adc);
+
+                            if (amsgs.HasNoErrors())
+                                // add answers to parent registrant record
+                                // will be used later to copy information over to student records
+                                qvms.ForEach(qvm =>
+                                {
+                                    registrant.AddOrUpdateAnswer(
+                                        answerText: qvm.Value.IfEmpty("").Trim(),
+                                        question: qvm.Question,
+                                        loggedInUser: user,
+                                        msgs: amsgs,
+                                        dc: adc);
+                                });
+                        }
+                    },
+                    onSuccess: (SystemMessages smsgs) =>
+                    {
+                        msgs.AddRange(smsgs);
+                        LoadSessionInfo(user, account);
+                    },
+                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                    onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                );
+            }
+
+            if (msgs.HasNoErrors())
+                return RedirectToAction("interestedthankyou");
+
+            ViewBag.Messages = msgs;
+
+            return View(qvms);
+        }
+
+        #endregion
 
         #region GetStartedParent
 

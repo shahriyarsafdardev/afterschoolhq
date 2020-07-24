@@ -222,6 +222,18 @@ namespace AfterSchool
                 });
 
             routes.MapRoute(
+                "ActivityInterested",
+                "{accountname}/activity/{activityname}/interested",
+                new
+                {
+                    controller = "r",
+                    action = "interested",
+                    accountname = UrlParameter.Optional,
+                    activitytype = UrlParameter.Optional,
+                    activityname = UrlParameter.Optional
+                });
+
+            routes.MapRoute(
                 "AccountHome",
                 "{accountname}",
                 new { controller = "r", action = "account", accountname = UrlParameter.Optional });
