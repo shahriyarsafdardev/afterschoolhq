@@ -1832,7 +1832,7 @@ values: NotSet, ActivityProvider, School, SchoolDistrict, AfterSchool, Registran
 [begin]
 type: Enum
 name: OnboardingStepType
-values: NotSet, AccountType, ProgramInfo, ServicesOffered, ContactInfo, SocialLinks, LogoAndHeader
+values: NotSet, AccountType, ProgramInfo, ServicesOffered, ContactInfo, SocialLinks, LogoAndHeader, All
 [end]
 
 [begin]

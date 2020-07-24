@@ -1579,7 +1579,12 @@ namespace AfterSchoolLibrary.Services
         public static Account CreateNew(string orgName, string email, string phone, bool isActive, AccountType accountType, WebUser accountOwner, int? packageId, BillingPeriodType? packageBillingPeriod, string timeZone, WebUser loggedInUser, bool isAfterSchool, bool createWithStripe, bool isClaimed, SystemMessages msgs, DatabaseConnection dc)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
-            var uniqueName = AccountService.GenerateUniqueName(orgName, null, dc: dc);
+            var uniqueName = AccountService.GenerateUniqueName(orgName, null, msgs, dc);
+
+            var onboardingStepDone = OnboardingStepType.NotSet;
+
+            if (accountType != AccountType.NotSet)
+                onboardingStepDone = OnboardingStepType.AccountType;
 
             var account = new Account
             {
@@ -1600,6 +1605,7 @@ namespace AfterSchoolLibrary.Services
                 CreditCardFeesPaidBy = FeesPaidByType.Parent,
                 TimeZone = timeZone,
                 IsClaimed = isClaimed,
+                OnboardingStepDone = onboardingStepDone,
             };
 
             if (createWithStripe)

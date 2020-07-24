@@ -23,11 +23,18 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Index()
         {
+            return RedirectToAction("AccountType");
+        }
+
+        [HttpGet]
+        public ActionResult AccountType()
+        {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
 
             ViewBag.Messages = msgs;
-            ViewBag.CurrentUser = SessionVariables.CurrentUser;
+            ViewBag.CurrentUser = currentUser;
 
             return View(account);
         }
@@ -56,6 +63,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.MinGradeId = grades.First().ID.ToString();
             ViewBag.MaxGradeId = grades.Last().ID.ToString();
             ViewBag.Messages = msgs;
+            ViewBag.Title = account.Name;
 
             return View(account);
         }
@@ -106,6 +114,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.MinGradeId = Request["mingrade"] ?? grades.First().ID.ToString();
             ViewBag.MaxGradeId = Request["maxgrade"] ?? grades.Last().ID.ToString();
             ViewBag.Messages = msgs;
+            ViewBag.Title = Request["title"] ?? account.Name;
 
             return View(account);
         }
@@ -377,7 +386,15 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Done()
         {
-            return View(SessionVariables.CurrentAccount);
+            var msgs = new SystemMessages();
+            var account = SessionVariables.CurrentAccount;
+
+            account.OnboardingStepDone = OnboardingStepType.All;
+            msgs.AddRange(account.Save());
+
+            ViewBag.Messages = msgs;
+
+            return View(account);
         }
     }
 }

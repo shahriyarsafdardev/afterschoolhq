@@ -185,7 +185,7 @@
                                     Location
                                 </label>
                                 <div class="col-md-9">
-                                    @{ Html.RenderPartial("~/Views/Shared/Components/_GoogleLocationEdit.cshtml", location); }
+                                    @{ Html.RenderPartial("~/Views/Shared/Components/_GoogleLocationEdit.cshtml", location ?? new Location()) ; }
                                 </div>
                             </div>
                         </div>

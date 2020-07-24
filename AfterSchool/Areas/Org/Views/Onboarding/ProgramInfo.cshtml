@@ -5,14 +5,16 @@
     var grades = (List<GradeLevel>)ViewBag.Grades;
     var minGradeId = (string)ViewBag.MinGradeId;
     var maxGradeId = (string)ViewBag.MaxGradeId;
+    var title = (string)ViewBag.Title;
     var isProgram = Model.AccountTypeId == AccountType.Teacher;
 
-    var organizationLabel = "Organization";
+    var organizationLabel = Model.AccountTypeId.ToString().SplitByUpperCase();
     var organizationExampleNames = "";
-    var headerText = $"Enter info about your {Model.AccountTypeId.ToString().SplitByUpperCase()}";
+    var headerText = $"Enter info about your organization";
 
     if (Model.AccountTypeId == AccountType.ActivityProvider)
     {
+        organizationLabel = "Organization";
         headerText = $"Enter info about your organization";
     }
 
@@ -40,7 +42,7 @@
                         @organizationLabel.ToProperCase() Name
                     </label>
                     <div class="col-lg-9">
-                        <input type="text" class="form-control" name="title" id="title" value="@Request["title"]" />
+                        <input type="text" class="form-control" name="title" id="title" value="@title" />
                         <p class="text-muted">
                             <em>@Html.Raw(organizationExampleNames)</em>
                         </p>

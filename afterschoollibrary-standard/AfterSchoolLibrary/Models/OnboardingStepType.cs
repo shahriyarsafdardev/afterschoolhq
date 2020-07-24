@@ -6,5 +6,6 @@ public enum OnboardingStepType
 	ServicesOffered,
 	ContactInfo,
 	SocialLinks,
-	LogoAndHeader
+	LogoAndHeader,
+	All
 }

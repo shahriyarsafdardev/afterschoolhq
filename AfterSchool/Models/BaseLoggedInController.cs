@@ -6,6 +6,7 @@ using BasicLibrary;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using System.Web.Mvc;
+using Microsoft.EntityFrameworkCore.Update;
 
 namespace AfterSchool.Models
 {
@@ -122,6 +123,29 @@ namespace AfterSchool.Models
             }
 
             return msgs;
+        }
+
+        protected ActionResult HandleOnboardingRedirect()
+        {
+            var account = SessionVariables.CurrentAccount;
+
+            switch(account.OnboardingStepDone)
+            {
+                case OnboardingStepType.AccountType:
+                    return RedirectToAction("programinfo", "onboarding");
+                case OnboardingStepType.ProgramInfo:
+                    return RedirectToAction("contactinfo", "onboarding");
+                case OnboardingStepType.ContactInfo:
+                    return RedirectToAction("logo", "onboarding");
+                case OnboardingStepType.LogoAndHeader:
+                    return RedirectToAction("servicesoffered", "onboarding");
+                case OnboardingStepType.ServicesOffered:
+                    return RedirectToAction("links", "onboarding");
+                case OnboardingStepType.SocialLinks:
+                    return RedirectToAction("done", "onboarding");
+            }
+
+            return RedirectToAction("index", "onboarding");
         }
     }
 }
