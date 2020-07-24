@@ -230,42 +230,47 @@
                     </div>
                 }
 
-                @if (awards.Any() || isInEditMode)
+                @if (awards.Any() || certifications.Any() || isInEditMode)
                 {
                     <div class="margin-t-20">
-                        <div class="row padding-h-30">
+                        <div class="row padding-h-20">
 
-                            <h2>Awards @renderEditButtion("awards")</h2>
-
-                            @foreach (var award in awards.Where(x => x.Value.IsNotEmpty()))
+                            @if (awards.Any() || isInEditMode)
                             {
-                                <p class="activity-detail-block">
-                                    <i class="s7-medal text-warning icon-large"></i>
-                                    <span class="text-medium-small">@award.Value</span>
-                                </p>
+                                <div class="col-md-6 col-sm-12">
+
+                                    <h2>Awards @renderEditButtion("awards")</h2>
+
+                                    @foreach (var award in awards.Where(x => x.Value.IsNotEmpty()))
+                                    {
+                                        <p class="activity-detail-block">
+                                            <i class="s7-medal text-warning icon-large"></i>
+                                            <span class="text-medium-small">@award.Value</span>
+                                        </p>
+                                    }
+
+                                </div>
+                            }
+
+                            @if (certifications.Any() || isInEditMode)
+                            {
+                                <div class="col-md-6 col-sm-12">
+                                    <h2>Certifications @renderEditButtion("certifications")</h2>
+
+                                    @foreach (var certification in certifications.Where(x => x.Value.IsNotEmpty()))
+                                    {
+                                        <p class="activity-detail-block">
+                                            <i class="s7-star text-warning icon-large" style="padding-top: 20px;"></i>
+                                            <span class="text-medium-small" style="margin-top: -30px;">@certification.Value</span>
+                                        </p>
+                                    }
+
+                                </div>
                             }
 
                         </div>
                     </div>
 
-                }
-
-                @if (certifications.Any() || isInEditMode)
-                {
-                    <div class="margin-t-20">
-                        <div class="row padding-h-30">
-                            <h2>Certifications @renderEditButtion("certifications")</h2>
-
-                            @foreach (var certification in certifications.Where(x => x.Value.IsNotEmpty()))
-                            {
-                                <p class="activity-detail-block">
-                                    <i class="s7-star text-warning icon-large" style="padding-top: 20px;"></i>
-                                    <span class="text-medium-small" style="margin-top: -30px;">@certification.Value</span>
-                                </p>
-                            }
-
-                        </div>
-                    </div>
                 }
 
                 @if (accountProfile.About.IsNotBlank())
