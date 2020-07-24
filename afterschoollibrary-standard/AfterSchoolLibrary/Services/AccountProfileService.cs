@@ -19,7 +19,8 @@ namespace AfterSchoolLibrary.Services
                 CreateDate = DateTime.UtcNow,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
                 LastModifiedDate = DateTime.UtcNow,
-                LastModifiedBy = loggedInUser?.ID.IfEmpty(0),                  
+                LastModifiedBy = loggedInUser?.ID.IfEmpty(0),   
+                Title = account.Name,
             };
 
             msgs.AddRange(profile.Save(dc));
