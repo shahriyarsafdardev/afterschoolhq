@@ -3478,7 +3478,7 @@ namespace AfterSchoolLibrary.Services
 
         public static int GetSubscriberCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Subscriber.GetCountByAccountIdByStatus(account.ID.Value, SubscriberStatus.Subscribed, msgs, dc);
+            return Subscriber.GetCountByObjectByStatus(account.ID.Value, AHQObjectType.Account, SubscriberStatus.Subscribed, msgs, dc);
         }
 
         #endregion
