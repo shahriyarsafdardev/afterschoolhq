@@ -132,6 +132,32 @@ namespace AfterSchoolLibrary.Services
             return RegistrationAssignmentType.WaitingList;
         }
 
+        public static void ProcessInterestAssignment(Registration registration, ParticipationObject participationObject, Registrant registrant, RegistrationPeriod period, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            // NOTE: getting only one activity per registration at the moment, 
+            // but could be problem in the future
+            var ra = registration.GetRegistrantActivities(msgs, dc)
+                        .Where(x => x.ParticipationObjectId == participationObject.ObjectID &&
+                                    x.ParticipationObjectTypeId == participationObject.ObjectType)
+                        .FirstOrDefault();
+
+            var assignmentType = RegistrationAssignmentType.Interested;
+
+            // add or update the registrant for the activity
+            ra = registrant.AddOrUpdateParticipationObject(
+                    registrationId: registration.ID.Value,
+                    participationObjectId: participationObject.ObjectID.Value,
+                    participationObjectType: participationObject.ObjectType,
+                    assignmentType: assignmentType,
+                    preferenceNumber: 1,
+                    registrationPeriodId: period.ID,
+                    activityGroupId: participationObject.GetAnyRelatedActivityGroupId(),
+                    amountCharged: 0,
+                    loggedInUserId: loggedInUser.ID.IfEmpty(0),
+                    msgs: msgs,
+                    dc: dc);
+        }
+
         public static void ProcessRegistrationAssignment(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             ProcessRegistrationAssignment(
@@ -140,7 +166,7 @@ namespace AfterSchoolLibrary.Services
                 checkoutObject.MasterRegistrant,
                 checkoutObject.Registration.GetRegistrant(msgs, dc),
                 checkoutObject.NumberOfSeats,
-                checkoutObject.ParticipationObject.IsActivity() ? checkoutObject.ParticipationObject.GetActivityGroupId() : new int?(),
+                checkoutObject.ParticipationObject.IsActivity() ? checkoutObject.ParticipationObject.GetAnyRelatedActivityGroupId() : new int?(),
                 checkoutObject.ParticipationObject.GetCurrentRegistrationPeriod(msgs, dc)?.ID,
                 checkoutObject.GetTotalCost(),
                 loggedInUser,
@@ -174,13 +200,13 @@ namespace AfterSchoolLibrary.Services
                         .FirstOrDefault();
 
             var assignmentType = GetRegistrationAssignmentType(
-                participationObject,
-                masterRegistrant,
-                seatsRequested,
-                ra,
-                loggedInUser,
-                msgs,
-                dc);
+                                    participationObject,
+                                    masterRegistrant,
+                                    seatsRequested,
+                                    ra,
+                                    loggedInUser,
+                                    msgs,
+                                    dc);
 
             if (assignmentType == RegistrationAssignmentType.NotSet)
             {
@@ -192,17 +218,17 @@ namespace AfterSchoolLibrary.Services
 
             // add or update the registrant for the activity
             ra = registrant.AddOrUpdateParticipationObject(
-                registrationId: registration.ID.Value,
-                participationObjectId: participationObject.ObjectID.Value,
-                participationObjectType: participationObject.ObjectType,
-                assignmentType: assignmentType,
-                preferenceNumber: preferenceNumber,
-                registrationPeriodId: periodId,
-                activityGroupId: activityGroupId,
-                amountCharged: amountCharged,
-                loggedInUserId: loggedInUser.ID.Value,
-                msgs: msgs,
-                dc: dc);
+                    registrationId: registration.ID.Value,
+                    participationObjectId: participationObject.ObjectID.Value,
+                    participationObjectType: participationObject.ObjectType,
+                    assignmentType: assignmentType,
+                    preferenceNumber: preferenceNumber,
+                    registrationPeriodId: periodId,
+                    activityGroupId: activityGroupId,
+                    amountCharged: amountCharged,
+                    loggedInUserId: loggedInUser.ID.Value,
+                    msgs: msgs,
+                    dc: dc);
         }
 
         public static void AddESignature(this Registration registration, string esignature, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
@@ -890,7 +916,19 @@ namespace AfterSchoolLibrary.Services
             registration.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
             msgs.AddRange(registration.Save(dc));
 
-            registration.FindAndSetFirstRegistration(registration.RegistrantFirstName, registration.RegistrantLastName, registration.RegistrantEmail, msgs, dc);
+            var firstName = registration.RegistrantFirstName;
+            var lastName = registration.RegistrantLastName;
+            var email = registration.RegistrantEmail;
+
+            if (firstName == null || lastName == null || email == null)
+            {
+                var registrant = registration.GetRegistrant(msgs, dc);
+                firstName = registrant.FirstName;
+                lastName = registrant.LastName;
+                email = registrant.Email;
+            }
+
+            registration.FindAndSetFirstRegistration(firstName, lastName, email, msgs, dc);
         }
 
         public static bool IsPaid(this Registration registration, SystemMessages msgs, DatabaseConnection dc = null)

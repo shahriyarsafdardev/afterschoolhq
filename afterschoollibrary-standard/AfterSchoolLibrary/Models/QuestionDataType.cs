@@ -75,5 +75,7 @@ public enum QuestionDataType
 	Parent2MobilePhone,
 	Parent2WorkPhone,
 	Parent2HomePhone,
-	RegistrantMedications
+	RegistrantMedications,
+	RegistrantNumberOfChildren,
+	RegistrantChildrensGrades
 }

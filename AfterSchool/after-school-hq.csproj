@@ -1820,6 +1820,7 @@
     <Content Include="Views\Shared\Registration\_ProfilePhotoGallery.cshtml" />
     <Content Include="Views\Shared\Components\_GoogleLocationEdit.cshtml" />
     <Content Include="Views\Account\Interested.cshtml" />
+    <Content Include="Views\Account\InterestedThankYou.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

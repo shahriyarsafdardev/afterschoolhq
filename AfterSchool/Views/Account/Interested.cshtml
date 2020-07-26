@@ -44,16 +44,13 @@
 
                 @if (SessionVariables.CurrentUser.IsEmpty())
                 {
-                    <div class="text-center reg-login new-account">
+                    <div class="text-center reg-login new-account margin-v-20">                        
                         <p>
-                            If this is your first time signing up, we'll keep it quick. <br />Even better: you'll only have to input parent information once.
-                        </p>
-                        <br />
-                        <p>
-                            Already have an account?
+                            Already have an account with @UILabel.ProductName()?<br />
                             <a href="#" class="md-trigger" data-modal="modal-login">
                                 Login
                             </a>
+                            to prefill your information.
                         </p>
                         <p class="hide">
                             Are you a student?
@@ -65,48 +62,12 @@
                 }
 
                 <div>
-                    <form class="form-horizontal" id="signup-form" method="post" action="@Url.Action("getstarted", "account")">
+                    <form class="form-horizontal" id="signup-form" method="post" action="@Url.Action("interested", "account")">
                         @foreach (var qvm in Model.Where(qvm => !qvm.Hide))
                         {
                             Html.RenderPartial(
                                 "~/Views/Shared/Form/_Question.cshtml",
                                 qvm);
-
-                            if (qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone)
-                            {
-                                <div class="row">
-                                    <div class="col-md-6 col-md-offset-3">
-                                        <div class="am-checkbox text-center">
-                                            <input type="checkbox" id="textnotifications" name="textnotifications" value="1" @(Request["textnotifications"] == "1" || System.Web.HttpContext.Current.Request.HttpMethod.ToString() == "GET" ? " checked=\"checked\" " : "") />
-                                            <label for="textnotifications">
-                                                I would like to receive text messages about my student&#39;s activities&#46;
-                                                Notifications may include information about attendance&#44; reminders&#44; and important information&#46;
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            }
-                        }
-
-                        @if (SessionVariables.CurrentUser.IsEmpty())
-                        {
-                            <div class="form-group new-account">
-                                <label for="password1" class="control-label col-md-3">
-                                    Password <span class="text-danger">*</span>
-                                </label>
-                                <div class="col-md-6">
-                                    <input type="password" class="form-control" id="password1" name="password1" />
-                                </div>
-                            </div>
-
-                            <div class="form-group new-account">
-                                <label for="password1" class="control-label col-md-3">
-                                    Verify Password <span class="text-danger">*</span>
-                                </label>
-                                <div class="col-md-6">
-                                    <input type="password" class="form-control" id="password2" name="password2" />
-                                </div>
-                            </div>
                         }
 
                         <div class="row padding-v-20">
@@ -121,7 +82,7 @@
                         </div>
 
                         <div class="padding-v-20">
-                            <button type="submit" id="btn-create-account" class="btn btn-register-primary btn-lg">Save &amp; Continue &raquo;</button>
+                            <button type="submit" id="btn-create-account" class="btn btn-register-primary btn-lg">Save &raquo;</button>
                         </div>
 
                         <div class="row">

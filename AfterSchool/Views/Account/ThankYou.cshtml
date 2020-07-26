@@ -33,7 +33,7 @@
                             <span><strong>@registrant.FirstName</strong> has</span>
                         }
 
-                        @if(assignmentType == RegistrationAssignmentType.Applied)
+                        @if (assignmentType == RegistrationAssignmentType.Applied)
                         {
                             <span><strong>applied</strong></span>
                         }
@@ -41,19 +41,35 @@
                         {
                             <span>been placed on the <strong>waiting list</strong></span>
                         }
+                        else if (assignmentType == RegistrationAssignmentType.Interested)
+                        {
+                            <span>registered your interest</span>
+                        }
                         else
                         {
                             <span>been <strong>registered</strong></span>
                         }
                         for <strong>@participationObject.Name</strong>
                     </p>
-                    <p>
-                        <a href="@Url.Action("index", "home", new { area = "user" })">View your account</a>
-                    </p>
+                    @if (SessionVariables.CurrentUser.IsRegistered)
+                    {
+                        <p>
+                            <a href="@Url.Action("index", "home", new { area = "user" })">View your account</a>
+                        </p>
+                    }
                 </div>
 
                 <div>
-                    <a href="@account.HomePageUrl" class="btn btn-xl btn-register-primary btn-register-xl">Register for another activity</a>
+                    @if (!SessionVariables.CurrentUser.IsRegistered)
+                    {
+                        <a href="@Url.Action("confirm", "signup", new { id = SessionVariables.CurrentUser.Uid, returnurl = Request.Url.ToString() })" class="btn btn-xl btn-register-primary btn-register-xl">
+                            Complete Account Sign Up &raquo;
+                        </a>
+                    }
+                    else
+                    {
+                        <a href="@account.HomePageUrl" class="btn btn-xl btn-register-primary btn-register-xl">Register for another activity</a>
+                    }
                 </div>
 
             </div>
