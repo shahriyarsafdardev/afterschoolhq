@@ -95,6 +95,7 @@ namespace AfterSchool.Models
             if (IsDuringRegistration)
                 Headline = "Registration";
 
+
             IsDemo = !Account.ID.HasValue;
         }
 

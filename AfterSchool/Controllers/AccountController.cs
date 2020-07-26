@@ -38,10 +38,13 @@ namespace AfterSchool.Controllers
                     case QuestionDataType.RegistrantFirstName:
                     case QuestionDataType.RegistrantLastName:
                     case QuestionDataType.RegistrantEmail:
-                    case QuestionDataType.RegistrantNumberOfChildren:
-                    case QuestionDataType.RegistrantChildrensGrades:
+                    case QuestionDataType.RegistrantChild1Grade:
                         question.IsRequired = true;
                         break;
+                    case QuestionDataType.RegistrantChild2Grade:
+                    case QuestionDataType.RegistrantChild3Grade:
+                    case QuestionDataType.RegistrantChild4Grade:
+                    case QuestionDataType.RegistrantChild5Grade:
                     case QuestionDataType.RegistrantMobilePhone:
                         question.IsRequired = false;
                         break;

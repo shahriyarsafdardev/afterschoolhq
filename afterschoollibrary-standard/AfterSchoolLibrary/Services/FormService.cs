@@ -522,14 +522,52 @@ namespace AfterSchoolLibrary.Services
             qhs.Add(new QuestionHolder() { Text = "Email", IsActive = true, QuestionTypeId = QuestionType.Email, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantEmail });
 
             qhs.Add(new QuestionHolder() { Text = "Mobile Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantMobilePhone });
-            qhs.Add(new QuestionHolder() { Text = "Number of Children to Enroll", QuestionTypeId = QuestionType.Number, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantNumberOfChildren });
-            qhs.Add(new QuestionHolder() { 
-                Text = "Your Children's Grades", 
-                QuestionTypeId = QuestionType.CheckboxList, 
-                GroupName = groupLabel, 
-                QuestionGroupDataTypeId = groupType, 
-                QuestionDataTypeId = QuestionDataType.RegistrantChildrensGrades,
-                Options = "Pre-K,K,1st,2nd,3rd,4th,5th,6th,7th,8th,9th,10th,11th,12th",
+
+            var commonGradeOptions = "Pre-K,K,1st,2nd,3rd,4th,5th,6th,7th,8th,9th,10th,11th,12th";
+            qhs.Add(new QuestionHolder()
+            {
+                Text = "Child 1 Grade",
+                QuestionTypeId = QuestionType.DropDownList,
+                GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType,
+                QuestionDataTypeId = QuestionDataType.RegistrantChild1Grade,
+                Options = commonGradeOptions,
+            });
+            qhs.Add(new QuestionHolder()
+            {
+                Text = "Child 2 Grade",
+                QuestionTypeId = QuestionType.DropDownList,
+                GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType,
+                QuestionDataTypeId = QuestionDataType.RegistrantChild2Grade,
+                Options = commonGradeOptions,
+            });
+            qhs.Add(new QuestionHolder()
+            {
+                Text = "Child 3 Grade",
+                QuestionTypeId = QuestionType.DropDownList,
+                GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType,
+                QuestionDataTypeId = QuestionDataType.RegistrantChild3Grade,
+                Options = commonGradeOptions,
+            });
+            qhs.Add(new QuestionHolder()
+            {
+                Text = "Child 4 Grade",
+                QuestionTypeId = QuestionType.DropDownList,
+                GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType,
+                QuestionDataTypeId = QuestionDataType.RegistrantChild4Grade,
+                Options = commonGradeOptions,
+            });
+            qhs.Add(new QuestionHolder()
+            {
+                Text = "Child 5 Grade",
+                QuestionTypeId = QuestionType.DropDownList,
+                GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType,
+                QuestionDataTypeId = QuestionDataType.RegistrantChild5Grade,
+                Options = commonGradeOptions,
             });
 
             return qhs;

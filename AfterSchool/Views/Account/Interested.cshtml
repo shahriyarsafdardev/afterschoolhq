@@ -25,7 +25,7 @@
     Html.RenderPartial
     (
         "~/Views/Shared/Registration/_RegistrationHeader.cshtml",
-        new RegistrationHeaderViewModel(participationObject, true),
+        new RegistrationHeaderViewModel(participationObject, false),
         new ViewDataDictionary()
         {
             { "hidebuttons", true }

@@ -18,9 +18,12 @@ namespace AfterSchoolLibrary.Migrations
                     var subscribers = Subscriber.Load(msgs: amsgs, dc: adc);
 
                     subscribers.ForEach(subscriber => {
-                        subscriber.ObjectId = subscriber.AccountId;
-                        subscriber.ObjectTypeId = AHQObjectType.Account;
-                        amsgs.AddRange(subscriber.Save(adc));
+                        if (subscriber.AccountId.HasValue)
+                        {
+                            subscriber.ObjectId = subscriber.AccountId;
+                            subscriber.ObjectTypeId = AHQObjectType.Account;
+                            amsgs.AddRange(subscriber.Save(adc));
+                        }
                     });
                 },
                 uniqueIdenfier: "SubscriberToPolymorphicRelationship_20200726",

@@ -28,8 +28,7 @@ namespace AfterSchoolLibrary.Models
 		/// </summary>
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
 		/// <summary>
-		/// Required.
-		/// The account the user is subscribed to
+		/// deprecated
 		/// </summary>
 		public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
 		/// <summary>
@@ -123,8 +122,6 @@ namespace AfterSchoolLibrary.Models
 				msgs.Add("WebUserId is required on Subscriber object", MessageType.Error);
 			if (this.Uid.IsEmpty())
 				msgs.Add("Uid is required on Subscriber object", MessageType.Error);
-			if (this.AccountId.IsEmpty())
-				msgs.Add("AccountId is required on Subscriber object", MessageType.Error);
 			if (this.ObjectId.IsEmpty())
 				msgs.Add("ObjectId is required on Subscriber object", MessageType.Error);
 			if (this.ObjectTypeId.IsEmpty())
