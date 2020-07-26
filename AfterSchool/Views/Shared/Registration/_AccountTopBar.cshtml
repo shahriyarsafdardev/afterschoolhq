@@ -1,6 +1,8 @@
 ﻿@model Account
 
 @{ 
+    var currentUser = SessionVariables.CurrentUser;
+    var currentAccount = SessionVariables.CurrentAccount;
     var accountOrDashboard = "Account";
     var canPublishActivity = ViewData["CanPublishActivity"].IsNotEmpty() ? ViewData["CanPublishActivity"].ToString().ToBoolean() : false;
     var participationObject = (ParticipationObject)ViewData["ParticipationObject"];
@@ -9,7 +11,7 @@
     var isDuringProfileSetup = false;
     var returnUrl = SessionVariables.RegistrationStartPageAccount?.HomePageUrl;
 
-    if (SessionVariables.CurrentAccount.IsNotEmpty() && SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant)
+    if (currentAccount.IsNotEmpty() && currentAccount.AccountTypeId != AccountType.Registrant)
     {
         accountOrDashboard = "Dashboard";
         dashboardUrl = Url.Action("index", "home", new { area = "org" });
@@ -48,15 +50,15 @@
         <div class="row">
             <div class="col-md-6 col-sm-6 col-xs-12">
 
-                @if (SessionVariables.CurrentUser.IsNotEmpty())
+                @if (currentUser.IsNotEmpty())
                 {
-                    if (SessionVariables.CurrentAccount.IsNotEmpty())
+                    if (currentAccount.IsNotEmpty())
                     {
-                        <span class="reg-login-bar-title">@SessionVariables.CurrentAccount.Name</span>
+                        <span class="reg-login-bar-title">@currentAccount.Name</span>
                     }
                     else
                     {
-                        <span class="reg-login-bar-title">@SessionVariables.CurrentUser.DisplayName</span>
+                        <span class="reg-login-bar-title">@currentUser.DisplayName</span>
                     }
                 }
             </div>
@@ -69,7 +71,7 @@
 
                             @RenderReturnToHomeUrl(session)
 
-                            @if (SessionVariables.CurrentUser.IsNotEmpty())
+                            @if (currentUser.IsNotEmpty())
                             {
                                 if (canPublishActivity && participationObject.IsNotEmpty())
                                 {
@@ -79,16 +81,16 @@
                                     </a>
                                 }
 
-                                if (SessionVariables.CurrentUser.IsActive)
+                                if (currentUser.IsActive)
                                 {
                                     <a href="@dashboardUrl" class="btn btn-link">View @accountOrDashboard</a>
                                 }
-                                else if (!SessionVariables.CurrentUser.IsRegistered)
+                                else if (!currentUser.IsRegistered)
                                 {
-                                    <a href="@Url.Action("confirm", "signup", new { id = SessionVariables.CurrentUser.Uid, returnurl = Request.Url.ToString() })" class="btn btn-link">Complete account setup &raquo;</a>
+                                    <a href="@AfterSchoolLibrary.Helpers.Utilities.CompleteSignUpUrl(currentUser.Uid, Request.Url.ToString())" class="btn btn-link">Complete account setup &raquo;</a>
                                 }
 
-                                if (Model.HasAccountProfile() && SessionVariables.CurrentUser.HasAccessTo(Model))
+                                if (Model.HasAccountProfile() && currentUser.HasAccessTo(Model))
                                 {
                                     var editModeUrl = Model.HomePageUrl;
                                     var isInEditMode = Request["edit"] == "1";
@@ -108,7 +110,7 @@
                                     <a href="@(editModeUrl)@(!isInEditMode ? "edit=1" : "")" class="btn btn-link">Toggle Edit Mode</a>
                                 }
 
-                                if (SessionVariables.CurrentUser.HasMultipleAccounts())
+                                if (currentUser.HasMultipleAccounts())
                                 {
                                     <a href="@Url.Action("switch", "logout", new { returnurl = returnUrl })" class="btn btn-link">Switch Accounts</a>
                                 }
