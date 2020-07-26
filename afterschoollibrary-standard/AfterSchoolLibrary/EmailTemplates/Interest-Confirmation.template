@@ -4,11 +4,11 @@
   <p>@Model.CustomMessage</p>
 
   <p>
-    <a href="@Model.ActionLink">@Model.RegistrationDetails</a>
+    If you have any questions or concerns please contact @Model.ActivityContactName either by phone (@Model.ActivityContactPhone) or email (<a href="mailto:@Model.ActivityContactEmail">@Model.ActivityContactEmail</a>).
   </p>
   
   <p>
-    If you have any questions or concerns please contact @Model.ActivityContactName either by phone (@Model.ActivityContactPhone) or email (<a href="mailto:@Model.ActivityContactEmail">@Model.ActivityContactEmail</a>).
+    <a href="@Model.ActionLink">We've helped thousands of parents find activities for their children and we'd love to do the same for you. @Model.RegistrationDetails</a>
   </p>
 
   <p>
