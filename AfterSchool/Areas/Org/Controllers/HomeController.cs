@@ -5,12 +5,13 @@ using AfterSchoolLibrary.Services;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
 using System;
+using System.Linq;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
     public class HomeController : BaseLoggedInController
     {
-        public HomeController() : base(new List<AccountType> { AccountType.School, AccountType.ActivityProvider })
+        public HomeController() : base(AccountService.ProviderAccountTypes.ToList())
         {
 
         }
@@ -19,17 +20,22 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Index()
         {
-            if (!SessionVariables.CurrentAccount.CanReceivePaymentDeposits() && SessionVariables.AccountUserType == UserType.Treasurer)
+            var account = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+
+            if (account.OnboardingStepDone != OnboardingStepType.All)
+                return HandleOnboardingRedirect();
+
+            if (!account.CanReceivePaymentDeposits() && SessionVariables.AccountUserType == UserType.Treasurer)
                 return RedirectToAction("getstartedpayments", "account");
 
-            if (SessionVariables.CurrentAccount.IsNewProviderForOtherAccounts())
+            if (account.IsNewProviderForOtherAccounts())
                 return RedirectToAction("getstartedpayments", "account");
 
-            if (SessionVariables.CurrentAccount.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.CurrentUser, null, null, null, null) == 0)
+            if (account.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.CurrentUser, null, null, null, null) == 0)
                 return RedirectToAction("getstarted");
 
             var msgs = new SystemMessages();
-            var account = SessionVariables.CurrentAccount;
             var actions = SessionAction.LoadByAccountId(
                 account.ID.Value, 
                 new List<SessionActionType>() {
@@ -50,20 +56,20 @@ namespace AfterSchool.Areas.Org.Controllers
             
             var activityCount = account.GetActivityCount(
                 SessionVariables.AccountUserType, 
-                SessionVariables.CurrentUser, 
+                currentUser, 
                 ActivityType.Activity, 
                 null, 
                 false,
                 null,
                 msgs);
 
-            var totalPaid = SessionVariables.CurrentAccount.GetTotalAmountBilledOut(search: null, paymentSourceType: PaymentSourceType.AfterSchoolPlatform, msgs: msgs) +                     
-                            SessionVariables.CurrentAccount.GetTotalAmountBilledOut(search: null, paymentSourceType: PaymentSourceType.ManualProvider, msgs: msgs);
+            var totalPaid = account.GetTotalAmountBilledOut(search: null, paymentSourceType: PaymentSourceType.AfterSchoolPlatform, msgs: msgs) +
+                            account.GetTotalAmountBilledOut(search: null, paymentSourceType: PaymentSourceType.ManualProvider, msgs: msgs);
 
             ViewBag.Messages = msgs;
             ViewBag.Actions = actions;
-            ViewBag.HasVisitorAccountsToApprove = SessionVariables.CurrentAccount.GetRequestedVisitorAccountsCount(msgs) > 0;
-            ViewBag.HasOutstandingLeagueInvites = SessionVariables.CurrentAccount.GetExternalLeagueInviteCount(msgs) > 0;
+            ViewBag.HasVisitorAccountsToApprove = account.GetRequestedVisitorAccountsCount(msgs) > 0;
+            ViewBag.HasOutstandingLeagueInvites = account.GetExternalLeagueInviteCount(msgs) > 0;
             ViewBag.TotalPaid = totalPaid;
             ViewBag.ActivityCount = activityCount;
             ViewBag.CurrentRegistrations = account.GetRegistrationsByDate(DateTime.UtcNow.AddDays(-30), DateTime.UtcNow, msgs);

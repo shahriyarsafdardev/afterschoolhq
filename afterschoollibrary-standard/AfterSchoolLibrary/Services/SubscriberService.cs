@@ -13,7 +13,46 @@ namespace AfterSchoolLibrary.Services
         {
             var subscriber = new Subscriber()
             {
-                AccountId = accountToFollow.ID,
+                ObjectId = accountToFollow.ID,
+                ObjectTypeId = AHQObjectType.Account,
+                WebUserId = user.ID,
+                CreateDate = DateTime.UtcNow,
+                CreatedBy = loggedInUser.ID,
+                LastModifiedBy = loggedInUser.ID,
+                LastModifiedDate = DateTime.UtcNow,
+                SubscriberStatusId = status,
+            };
+
+            msgs.AddRange(subscriber.Save(dc));
+
+            return subscriber;
+        }
+
+        public static Subscriber CreateNew(Activity activityToFollow, WebUser user, SubscriberStatus status, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var subscriber = new Subscriber()
+            {
+                ObjectId = activityToFollow.ID,
+                ObjectTypeId = AHQObjectType.Activity,
+                WebUserId = user.ID,
+                CreateDate = DateTime.UtcNow,
+                CreatedBy = loggedInUser.ID,
+                LastModifiedBy = loggedInUser.ID,
+                LastModifiedDate = DateTime.UtcNow,
+                SubscriberStatusId = status,
+            };
+
+            msgs.AddRange(subscriber.Save(dc));
+
+            return subscriber;
+        }
+
+        public static Subscriber CreateNew(ParticipationObject participationObjectToFollow, WebUser user, SubscriberStatus status, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var subscriber = new Subscriber()
+            {
+                ObjectId = participationObjectToFollow.ObjectID,
+                ObjectTypeId = participationObjectToFollow.ObjectType.ToAHQObjectType(),
                 WebUserId = user.ID,
                 CreateDate = DateTime.UtcNow,
                 CreatedBy = loggedInUser.ID,

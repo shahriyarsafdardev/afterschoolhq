@@ -117,20 +117,20 @@ namespace AfterSchoolLibraryTests.Tests
                 var newAccount = AccountFactory.Create(newUser, msgs, dc);
 
                 var location = LocationService.CreateNew(
-                  locationName: name,
-                  address1: address1,
-                  address2: address2,
-                  city: city,
-                  state: state,
-                  postalCode: postalCode,
-                  country: country,
-                  locationType: LocationType.NotSet,
-                  hostAccountId: LocationOwnerAccount.ID.Value,
-                  loggedInUser: LoggedInUser,
-                  msgs: msgs,
-                  dc: dc);
+                                  locationName: name,
+                                  address1: address1,
+                                  address2: address2,
+                                  city: city,
+                                  state: state,
+                                  postalCode: postalCode,
+                                  country: country,
+                                  locationType: LocationType.NotSet,
+                                  hostAccountId: LocationOwnerAccount.ID.Value,
+                                  loggedInUser: LoggedInUser,
+                                  msgs: msgs,
+                                  dc: dc);
                 
-                msgs.AddRange(newAccount.SetDefaultLocation(location.ID.Value, LoggedInUser.ID.Value, dc));
+                newAccount.SetDefaultLocation(location, LoggedInUser, msgs, dc);
 
                 locations.Add(location);
             }

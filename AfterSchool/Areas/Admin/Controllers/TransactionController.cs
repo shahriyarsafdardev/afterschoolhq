@@ -166,6 +166,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                         note,
                         transactionTypeId,
                         PaymentSourceType.ManualAfterSchoolHQ,
+                        false,
                         SessionVariables.CurrentUser,
                         msgs);
 

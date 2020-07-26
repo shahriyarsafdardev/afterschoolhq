@@ -34,13 +34,7 @@ namespace AfterSchool.Areas.Admin.Controllers
 
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
-            var accountTypes = new List<AccountType>()
-            {
-                AccountType.ActivityProvider,
-                AccountType.Registrant,
-                AccountType.School,
-                AccountType.SchoolDistrict
-            };
+            var accountTypes = AccountService.CustomerAccountTypes.ToList();
 
             if (type != AccountType.NotSet)
                 accountTypes = type.AsList();
@@ -147,14 +141,19 @@ namespace AfterSchool.Areas.Admin.Controllers
                             );
 
                             if (sendInvite)
+                            {
+                                account.IsClaimed = true;
+                                amsgs.AddRange(account.Save(adc));
+
                                 user = account.AddUser(
-                                    firstname, 
-                                    lastname, 
-                                    email, 
-                                    UserType.Owner, 
-                                    SessionVariables.CurrentUser, 
-                                    amsgs, 
+                                    firstname,
+                                    lastname,
+                                    email,
+                                    UserType.Owner,
+                                    SessionVariables.CurrentUser,
+                                    amsgs,
                                     adc);
+                            }
                         }
                         else
                         {
@@ -176,7 +175,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                                     packageId: package.ToInteger(),
                                     packageBillingPeriod: (BillingPeriodType)billingperiod.ToInteger(),
                                     timeZone: timezone,
-                                    isAfterSchool: SessionVariables.IsAfterSchool.Value,
+                                    isAfterSchool: true,
                                     loggedInUser: SessionVariables.CurrentUser,
                                     msgs: amsgs,
                                     dc: adc);
@@ -194,7 +193,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                                             packageBillingPeriod: (BillingPeriodType)billingperiod.ToInteger(),
                                             timeZone: timezone,
                                             loggedInUser: SessionVariables.CurrentUser,
-                                            isAfterSchool: false,
+                                            isAfterSchool: true,
                                             createWithStripe: false,
                                             msgs: amsgs, 
                                             dc: adc);

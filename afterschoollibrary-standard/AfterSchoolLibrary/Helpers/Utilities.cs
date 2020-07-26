@@ -14,6 +14,14 @@ namespace AfterSchoolLibrary.Helpers
 {
     public class Utilities
     {
+        public static int ImageUploadMaxBytes
+        {
+            get
+            {
+                return 1024 * 1024 * 4;
+            }
+        }
+
         public static string ConnectionString
         {
             get
@@ -223,8 +231,13 @@ namespace AfterSchoolLibrary.Helpers
         }
 
         public static string LoginUrl(string redirectUrl = null)
-        {            
+        {
             return $"{BaseUrl()}/login{(redirectUrl.IsNotEmpty() ? $"?returnurl={HttpUtility.UrlEncode(redirectUrl)}" : "")}";
+        }
+
+        public static string CompleteSignUpUrl(Guid currentUserUid, string redirectUrl = null)
+        {
+            return $"{BaseUrl()}/signup/confirm/{currentUserUid.ToString()}{(redirectUrl.IsNotEmpty() ? $"?returnurl={HttpUtility.UrlEncode(redirectUrl)}" : "")}";
         }
 
         public static bool UseSSL()
@@ -333,6 +346,9 @@ namespace AfterSchoolLibrary.Helpers
                     Migrations.UpdateFollowers_20200331.Do(amsgs, adc);
                     Migrations.AddFeesRefundedToTransactions_20200507.Do(amsgs, adc);
                     Migrations.UpdateIsClaimedOnAccounts_20200622.Do(amsgs, adc);
+                    Migrations.AddUsedStripeConnectToTransactions_20200705.Do(amsgs, adc);
+                    Migrations.SetExistingAccountsToOnboarded_20200724.Do(amsgs, adc);
+                    Migrations.SubscriberToPolymorphicRelationship_20200726.Do(amsgs, adc);
 
                     // amsgs.Add("rollback please", MessageType.Error);
 
@@ -772,8 +788,8 @@ namespace AfterSchoolLibrary.Helpers
                 var toAccount = Account.Load(transaction.BillerAccountId.Value, msgs, dc);
                 if (toAccount.IsNotEmpty())
                 {
-                    transaction.PlatformPercentFee = toAccount.GetPlatformPercentFee(msgs, dc);
-                    transaction.PlatformFlatFee = toAccount.GetPlatformFlatFee(msgs, dc);
+                    transaction.PlatformPercentFee = toAccount.GetPlatformConveniencePercentFee(msgs, dc);
+                    transaction.PlatformFlatFee = toAccount.GetPlatformConvenienceFlatFee(msgs, dc);
                     msgs.AddRange(transaction.Save(dc));
                 }
             });

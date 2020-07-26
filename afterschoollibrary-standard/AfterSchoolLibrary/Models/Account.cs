@@ -18,6 +18,10 @@ namespace AfterSchoolLibrary.Models
     {
 		#region "ClassGenerator"
 
+		public string StripeAccessToken { get { return (string)MDV["StripeAccessToken"].Value; } set { MDV["StripeAccessToken"].Value = value; } }
+		public string StripePublishableKey { get { return (string)MDV["StripePublishableKey"].Value; } set { MDV["StripePublishableKey"].Value = value; } }
+		public string StripeSecretKey { get { return (string)MDV["StripeSecretKey"].Value; } set { MDV["StripeSecretKey"].Value = value; } }
+		public string StripeRefreshToken { get { return (string)MDV["StripeRefreshToken"].Value; } set { MDV["StripeRefreshToken"].Value = value; } }
 		/// <summary>
 		/// Required.
 		/// </summary>
@@ -32,6 +36,7 @@ namespace AfterSchoolLibrary.Models
 		public bool IsAfterSchool { get { return (bool)MDV["IsAfterSchool"].Value; } set { MDV["IsAfterSchool"].Value = value; } }
 		public string StripeCustomerId { get { return (string)MDV["StripeCustomerId"].Value; } set { MDV["StripeCustomerId"].Value = value; } }
 		public int? DefaultFormId { get { return (int?)MDV["DefaultFormId"].Value; } set { MDV["DefaultFormId"].Value = value; } }
+		public int? InterestFormId { get { return (int?)MDV["InterestFormId"].Value; } set { MDV["InterestFormId"].Value = value; } }
 		public string StripeUserId { get { return (string)MDV["StripeUserId"].Value; } set { MDV["StripeUserId"].Value = value; } }
 		public string TimeZone { get { return (string)MDV["TimeZone"].Value; } set { MDV["TimeZone"].Value = value; } }
 		public string LogoUrl { get { return (string)MDV["LogoUrl"].Value; } set { MDV["LogoUrl"].Value = value; } }
@@ -47,6 +52,7 @@ namespace AfterSchoolLibrary.Models
 		public bool IsTest { get { return (bool)MDV["IsTest"].Value; } set { MDV["IsTest"].Value = value; } }
 		public bool IsDeleted { get { return (bool)MDV["IsDeleted"].Value; } set { MDV["IsDeleted"].Value = value; } }
 		public bool IsClaimed { get { return (bool)MDV["IsClaimed"].Value; } set { MDV["IsClaimed"].Value = value; } }
+		public OnboardingStepType OnboardingStepDone { get { return (OnboardingStepType)MDV["OnboardingStepDone"].Value; } set { MDV["OnboardingStepDone"].Value = value; } }
 		
 
         public Account()
@@ -66,6 +72,7 @@ namespace AfterSchoolLibrary.Models
 			this.IsTest = false;
 			this.IsDeleted = false;
 			this.IsClaimed = false;
+			this.OnboardingStepDone = OnboardingStepType.NotSet;
 			
         }
 
@@ -76,6 +83,10 @@ namespace AfterSchoolLibrary.Models
                 BasicLibrary.DataAccess.DatabaseParameters _dp = new BasicLibrary.DataAccess.DatabaseParameters();
                 string className = typeof(Account).Name;
                 _dp = BaseCompany.get_BaseObjectMap(className);
+				_dp.Add(className, "StripeAccessToken", System.Data.SqlDbType.NVarChar , "400");
+				_dp.Add(className, "StripePublishableKey", System.Data.SqlDbType.NVarChar , "400");
+				_dp.Add(className, "StripeSecretKey", System.Data.SqlDbType.NVarChar , "400");
+				_dp.Add(className, "StripeRefreshToken", System.Data.SqlDbType.NVarChar , "400");
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
 				_dp.Add(className, "UniqueName", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "OwnerId", System.Data.SqlDbType.Int);
@@ -84,6 +95,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "IsAfterSchool", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "StripeCustomerId", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "DefaultFormId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "InterestFormId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "StripeUserId", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "TimeZone", System.Data.SqlDbType.NVarChar , "30");
 				_dp.Add(className, "LogoUrl", System.Data.SqlDbType.NVarChar , "400");
@@ -99,6 +111,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "IsTest", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "IsDeleted", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "IsClaimed", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "OnboardingStepDone", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
@@ -177,6 +190,22 @@ namespace AfterSchoolLibrary.Models
             BasicLibrary.DataAccess.DatabaseParameters dps;
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["StripeAccessToken"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["StripePublishableKey"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["StripeSecretKey"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["StripeRefreshToken"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["Uid"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
@@ -206,6 +235,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["DefaultFormId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["InterestFormId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
@@ -266,6 +299,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["IsClaimed"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["OnboardingStepDone"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
@@ -541,7 +578,7 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static List<Account> FullTextSearch(string query, AccountType accountType, int? start, int? length, SystemMessages msgs, DatabaseConnection dc = null)
+        public static List<Account> FullTextSearch(string query, List<AccountType> accountTypes, int? start, int? length, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var searchTerms = query.Split(' ').Where(term =>
                 term.IsNotBlank() &&
@@ -556,7 +593,7 @@ namespace AfterSchoolLibrary.Models
                     select * from Account
                     where 
                         Contains(name, '{"\""}{searchTerms.ToStringList("*\" AND \"")}{"*\""}') and
-                        IsTest = 0 and OwnerId is not NULL and AccountTypeId = {(int)accountType}
+                        IsTest = 0 and OwnerId is not NULL and AccountTypeId in {accountTypes.Select(x => (int)x).ToList().ToStrings().ToStringList(",")}
                 ";
 
                 dq.SelectRange.Start = start;

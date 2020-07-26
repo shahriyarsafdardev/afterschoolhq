@@ -631,6 +631,22 @@ namespace AfterSchoolLibrary.Services
             return account;
         }
 
+        public static Account AddNewEmptyAccount(this WebUser accountOwner, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+
+            var account = AccountService.CreateNewEmptyAccount(
+                accountOwner: accountOwner,
+                loggedInUser: loggedInUser,
+                msgs: msgs,
+                dc: dc);
+
+            AccountService.SetDefaultAccountPackage(account, loggedInUser, msgs, dc);
+
+            accountOwner.AddAccount(account, UserType.Owner, loggedInUser, msgs, dc);
+
+            return account;
+        }
+
         /// <summary>
         /// Give a user permissions to an existing account
         /// </summary>
@@ -737,7 +753,13 @@ namespace AfterSchoolLibrary.Services
 
         public static bool IsSubscribedTo(this WebUser user, Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Subscriber.GetCountByAccountIdByWebUserIdByStatus(account.ID.Value, user.ID.Value, SubscriberStatus.Subscribed, msgs, dc) > 0;
+            return Subscriber.GetCountByObjectByWebUserIdByStatus(
+                    account.ID.Value, 
+                    AHQObjectType.Account, 
+                    user.ID.Value, 
+                    SubscriberStatus.Subscribed, 
+                    msgs, 
+                    dc) > 0;
         }
     }
 }

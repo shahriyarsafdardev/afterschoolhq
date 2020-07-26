@@ -9,6 +9,7 @@ using AfterSchoolLibrary.Services;
 using BasicLibrary.DataAccess;
 using Hangfire;
 using System.Collections.Generic;
+using AfterSchool.Helpers;
 
 namespace AfterSchool.Controllers
 {
@@ -17,14 +18,14 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult Index(string invite)
         {
-            return Redirect("https://myahq.com/transform/");
+            //return Redirect("https://myahq.com/transform/");
 
             var signupIndexVM = new SignUpIndexViewModel()
             {
                 FirstName = CookieVariables.DemoFirstName,
                 Email = CookieVariables.DemoEmailAddress,
-                OrgName = CookieVariables.DemoOrgName,
-                InviteCodeToShare = invite
+                // OrgName = CookieVariables.DemoOrgName,
+                // InviteCodeToShare = invite
             };
 
             ViewBag.Messages = new SystemMessages();
@@ -36,15 +37,6 @@ namespace AfterSchool.Controllers
         {
             var msgs = new SystemMessages();
             Account invitingAccount = null;
-
-            if (model.OrgName.IsEmpty())
-                msgs.Add("Organization / Program Name is required", MessageType.UserError);
-
-            if (!model.OrgType.HasValue)
-                msgs.Add("Organization Type is required", MessageType.UserError);
-
-            if (!model.OrgPhone.IsPhone())
-                msgs.Add("Organization Phone is required", MessageType.UserError);
 
             if (model.FirstName.IsEmpty())
                 msgs.Add("First Name is required", MessageType.UserError);
@@ -61,6 +53,8 @@ namespace AfterSchool.Controllers
                 msgs.Add("Passwords are required and must match", MessageType.UserError);
             else if (model.Password1.Length < 8)
                 msgs.Add("Password must be at least 8 characters", MessageType.UserError);
+            
+            msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
 
             if (model.InviteCodeToShare.IsNotEmpty())
             {
@@ -93,18 +87,7 @@ namespace AfterSchool.Controllers
                             msgs: amsgs,
                             dc: adc);
 
-                        if (user.IsNotEmpty())
-                            account = user.AddNewAccount(
-                                orgName: model.OrgName,
-                                phone: model.OrgPhone,
-                                isActive: true,
-                                accountType: model.OrgType.Value,
-                                addDefaultPackage: true,
-                                timeZone: model.TimeZone,
-                                isAfterSchool: true,
-                                loggedInUser: user,
-                                msgs: amsgs,
-                                dc: adc);
+                        account = user.AddNewEmptyAccount(user, amsgs, adc);
 
                         if (invitingAccount.IsNotEmpty() && account.IsNotEmpty())
                             invitingAccount.ApproveAccessToAccount(account, user, amsgs, adc);
@@ -118,8 +101,8 @@ namespace AfterSchool.Controllers
                         var userId = user.ID.Value;
                         var accountId = account.ID.Value;
 
-                        BackgroundJob.Enqueue(() => AccountService.SendWelcomeEmailPurchase(accountId));
                         BackgroundJob.Enqueue(() => WebUserService.SendVerificationEmail(userId));
+                        BackgroundJob.Enqueue(() => AccountService.SendWelcomeEmailPurchase(accountId));
                     },
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                     onException: (SystemMessages emsgs) => msgs.AddRange(emsgs)
@@ -127,7 +110,7 @@ namespace AfterSchool.Controllers
             }
 
             if (msgs.HasNoErrors())
-                return LoginRedirect();
+                return RedirectToAction("index", "onboarding", new { area = "org" });
 
             ViewBag.Messages = msgs;
 
@@ -451,7 +434,7 @@ namespace AfterSchool.Controllers
             if (invitingAccount.IsEmpty())
                 msgs.Add("Invalid invite code", MessageType.UserError);
 
-            var accountTypesToAccept = new List<AccountType>() { AccountType.ActivityProvider, AccountType.School };           
+            var accountTypesToAccept = AccountService.ProviderAccountTypes;
 
             // auto accept invite of already logged in
             if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentAccount.AccountTypeId.In(accountTypesToAccept) && SessionVariables.CurrentAccount.ID != invitingAccount.ID)
@@ -655,7 +638,7 @@ namespace AfterSchool.Controllers
                         user = WebUserService.StartUserAccount(firstname, lastname, email, amsgs, adc);
 
                         if (user.IsNotEmpty())
-                            account = user.AddNewRegistrantAccount(UserType.Parent, true, true, user, amsgs, adc);
+                            account = user.AddNewRegistrantAccount(UserType.Owner, true, true, user, amsgs, adc);
                     },
                     onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),

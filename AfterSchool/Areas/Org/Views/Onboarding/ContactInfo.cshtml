@@ -1,0 +1,81 @@
+﻿@model Account
+@{
+    Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
+    var msgs = (SystemMessages)ViewBag.Messages;
+
+    string email = (string)ViewBag.Email;
+    string phone = (string)ViewBag.Phone;
+    var location = (Location)ViewBag.Location;
+}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <form class="form form-horizontal" method="post" action="@Url.Action("contactinfo", "onboarding")">
+        <div class="row">
+            <div class="col-md-offset-3 col-md-6">
+                <div class="form-group">
+                    <h1 class="text-center">Enter Contact Info</h1>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-3 control-label">
+                        Profile Email Address
+                    </label>
+                    <div class="col-md-9">
+                        <input type="text" class="form-control" name="email" id="email" value="@email" placeholder="" />
+                        <div class="am-checkbox">
+                            <input type="checkbox"
+                                   name="publicemail"
+                                   id="publicemail"
+                                   value="1"
+                                   checked="checked" />
+                            <label for="publicemail">Show email on public profile page</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-3 control-label">
+                        Profile Phone Number
+                    </label>
+                    <div class="col-md-9">
+                        <input type="text" class="form-control" name="phone" id="phone" value="@phone" placeholder="ex. 317-483-3489" />
+                        <div class="am-checkbox">
+                            <input type="checkbox"
+                                   name="publicphone"
+                                   id="publicphone"
+                                   value="1"
+                                   checked="checked" />
+                            <label for="publicphone">Show phone number on public profile page</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-3 control-label">
+                        Location
+                    </label>
+                    <div class="col-md-9">
+                        @{ Html.RenderPartial("~/Views/Shared/Components/_GoogleLocationEdit.cshtml", location); }
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-lg-3 control-label"></label>
+                    <div class="col-lg-9">
+                        <div class="visible-sm visible-xs">
+                            <button type="submit" class="btn btn-primary btn-lg btn-block">Save Changes &raquo;</button>
+                        </div>
+                        <div class="visible-md visible-lg">
+                            <button type="submit" class="btn btn-primary btn-lg pull-right">Save Changes &raquo;</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </form>
+
+</div>

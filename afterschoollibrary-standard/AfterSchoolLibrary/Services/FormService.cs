@@ -64,8 +64,8 @@ namespace AfterSchoolLibrary.Services
                 var group = FormQuestionGroup.Load(
                     criterias: new Hashtable()
                     {
-                            { "Name", question.GroupName },
-                            { "FormId", f.ID.Value }
+                        { "Name", question.GroupName },
+                        { "FormId", f.ID.Value }
                     },
                     msgs: msgs,
                     dc: dc)
@@ -112,6 +112,107 @@ namespace AfterSchoolLibrary.Services
                     displayOrder++;
                 }
             }
+
+            return f;
+        }
+
+        /// <summary>
+        /// get template from default afterschool account with ID = 1
+        /// </summary>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
+        /// <returns></returns>
+        public static Form GetOrCreateAfterSchoolAccountInterestForm(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var afterSchoolAccount = AccountService.GetAfterSchoolAccount(msgs, dc);
+
+            if (afterSchoolAccount.InterestFormId.HasValue)
+                return Form.Load(afterSchoolAccount.InterestFormId.Value, msgs, dc);
+                                        
+            return AddNewAfterSchoolInterestForm(msgs, dc);
+        }
+
+        public static Form AddNewAfterSchoolInterestForm(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var account = AccountService.GetAfterSchoolAccount(msgs, dc);
+            var formCount = Form.GetCount(new Hashtable() { { "AccountId", account.ID } }, msgs, dc);
+
+            var f = new Form
+            {
+                AccountId = account.ID,
+                LastModifiedDate = DateTime.UtcNow,
+                CreateDate = DateTime.UtcNow,
+                LastModifiedBy = 0,
+                CreatedBy = 0,
+                Name = $"Interest Form {(formCount + 1)}",
+                IsActive = true
+            };
+            msgs.AddRange(f.Save(dc));
+            msgs.AddRange(account.SetInterestForm(f, null, dc));
+
+            var questions = CreateParent1InterestGroup();
+            int displayOrder = 0;
+            int groupDisplayOrder = 0;
+
+            questions.ForEach(question =>
+            {
+                var group = FormQuestionGroup.Load(
+                    criterias: new Hashtable()
+                    {
+                        { "Name", question.GroupName },
+                        { "FormId", f.ID.Value }
+                    },
+                    msgs: msgs,
+                    dc: dc)
+                    .FirstOrDefault();
+
+                if (group.IsEmpty())
+                {
+                    group = new FormQuestionGroup
+                    {
+                        Name = question.GroupName,
+                        FormId = f.ID,
+                        QuestionGroupDataTypeId = question.QuestionGroupDataTypeId,
+                        DisplayOrder = groupDisplayOrder,
+                        RegistrantTypeId = question.RegistrantTypeId,
+                        LastModifiedDate = DateTime.UtcNow,
+                        CreateDate = DateTime.UtcNow,
+                        LastModifiedBy = 0,
+                        CreatedBy = 0
+                    };
+                    msgs.AddRange(group.Save(dc));
+
+                    groupDisplayOrder++;
+                }
+
+                var q = FormQuestion.LoadByFormQuestionGroupIdByQuestionDataTypeId(group.ID.Value, question.QuestionDataTypeId, msgs, dc);
+                if (q.IsEmpty())
+                {
+                    q = new FormQuestion
+                    {
+                        Text = question.Text,
+                        IsActive = question.IsActive,
+                        IsRequired = question.IsRequired,
+                        FormId = f.ID,
+                        FormQuestionGroupId = group.ID,
+                        IsTemplate = true,
+                        IsLocked = question.IsLocked,
+                        DisplayOrder = group.GetQuestionCount(msgs, dc) + 1,
+                        QuestionTypeId = question.QuestionTypeId,
+                        QuestionDataTypeId = question.QuestionDataTypeId,
+                        Options = question.Options,
+                        LastModifiedDate = DateTime.UtcNow,
+                        CreateDate = DateTime.UtcNow,
+                        LastModifiedBy = 0,
+                        CreatedBy = 0
+                    };
+                    msgs.AddRange(q.Save(dc));
+
+                    displayOrder++;
+                }
+            });
 
             return f;
         }
@@ -408,6 +509,68 @@ namespace AfterSchoolLibrary.Services
                 new QuestionHolder() { Text = "Phone", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = "Organization Contact", QuestionGroupDataTypeId = QuestionGroupDataType.ContactInformation, QuestionDataTypeId = QuestionDataType.OrganizationContactPhone, RegistrantTypeId = RegistrantType.Organization },
                 new QuestionHolder() { Text = "Phone Type", IsActive = true, QuestionTypeId = QuestionType.RadioList, GroupName = "Organization Contact", QuestionGroupDataTypeId = QuestionGroupDataType.ContactInformation, QuestionDataTypeId = QuestionDataType.OrganizationContactPhoneType, Options = "Mobile, Home, Work", RegistrantTypeId = RegistrantType.Organization },
                 };
+        }
+
+        private static List<QuestionHolder> CreateParent1InterestGroup()
+        {
+            var qhs = new List<QuestionHolder>();
+            var groupType = QuestionGroupDataType.RegistrantInterestInformation;
+            var groupLabel = "Parent/Guardian Information";
+
+            qhs.Add(new QuestionHolder() { Text = "First Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantFirstName });
+            qhs.Add(new QuestionHolder() { Text = "Last Name", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantLastName });
+            qhs.Add(new QuestionHolder() { Text = "Email", IsActive = true, QuestionTypeId = QuestionType.Email, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantEmail });
+
+            qhs.Add(new QuestionHolder() { Text = "Mobile Phone", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantMobilePhone });
+
+            var commonGradeOptions = "Pre-K,K,1st,2nd,3rd,4th,5th,6th,7th,8th,9th,10th,11th,12th";
+            qhs.Add(new QuestionHolder()
+            {
+                Text = "Child 1 Grade",
+                QuestionTypeId = QuestionType.DropDownList,
+                GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType,
+                QuestionDataTypeId = QuestionDataType.RegistrantChild1Grade,
+                Options = commonGradeOptions,
+            });
+            qhs.Add(new QuestionHolder()
+            {
+                Text = "Child 2 Grade",
+                QuestionTypeId = QuestionType.DropDownList,
+                GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType,
+                QuestionDataTypeId = QuestionDataType.RegistrantChild2Grade,
+                Options = commonGradeOptions,
+            });
+            qhs.Add(new QuestionHolder()
+            {
+                Text = "Child 3 Grade",
+                QuestionTypeId = QuestionType.DropDownList,
+                GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType,
+                QuestionDataTypeId = QuestionDataType.RegistrantChild3Grade,
+                Options = commonGradeOptions,
+            });
+            qhs.Add(new QuestionHolder()
+            {
+                Text = "Child 4 Grade",
+                QuestionTypeId = QuestionType.DropDownList,
+                GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType,
+                QuestionDataTypeId = QuestionDataType.RegistrantChild4Grade,
+                Options = commonGradeOptions,
+            });
+            qhs.Add(new QuestionHolder()
+            {
+                Text = "Child 5 Grade",
+                QuestionTypeId = QuestionType.DropDownList,
+                GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType,
+                QuestionDataTypeId = QuestionDataType.RegistrantChild5Grade,
+                Options = commonGradeOptions,
+            });
+
+            return qhs;
         }
 
         private class QuestionHolder

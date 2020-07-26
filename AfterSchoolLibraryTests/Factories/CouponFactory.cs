@@ -16,7 +16,7 @@ namespace AfterSchoolLibraryTests.Factories
                 ExpirationDate = DateTime.UtcNow.AddMonths(1),
                 CouponCode = CouponService.GenerateCouponCode(account.ID.Value, msgs, dc),
                 Amount = 50,
-                AppliesTo = CouponApplyType.TuitionFee,
+                AppliesTo = CouponApplyType.RegistrationFee,
                 AmountTypeId = CouponAmountType.Percentage,
                 MaxNumberOfUsesAll = 1,
                 MaxNumberOfUsesPerPerson = 1,

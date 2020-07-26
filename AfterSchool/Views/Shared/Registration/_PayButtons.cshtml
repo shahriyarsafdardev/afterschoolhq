@@ -519,7 +519,7 @@
                     if (coupon.AmountTypeId === @((int)CouponAmountType.Percentage)) { // percentage coupon type
                         if (coupon.AppliesTo === @((int)CouponApplyType.SubscriptionPlan)) { // subscription plan
                             totalDueToday = amount + (spAmount * (1 - coupon.Amount));
-                        } else if (coupon.AppliesTo === @((int)CouponApplyType.TuitionFee)) { // Registration Fee
+                        } else if (coupon.AppliesTo === @((int)CouponApplyType.RegistrationFee)) { // Registration Fee
                             totalDueToday = amount * (1 - coupon.Amount) + spAmount;
                         }
                     } else { // flat amount coupon type

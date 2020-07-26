@@ -6,6 +6,7 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Billing;
+using Lob.Models;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -198,6 +199,46 @@ namespace AfterSchoolLibrary.Services
             get
             {
                 return new UserType[] { UserType.Administrator, UserType.Owner, UserType.SuperAdmin, UserType.Treasurer, UserType.TechSupport };
+            }
+        }
+
+        public static AccountType[] ProviderAccountTypes
+        {
+            get
+            {
+                return new AccountType[] { AccountType.Teacher, AccountType.ActivityProvider, AccountType.Business, AccountType.CommunityCenter, AccountType.School, AccountType.Church };
+            }
+        }
+
+        public static AccountType[] ProviderAccountTypesAndNotSet
+        {
+            get
+            {
+                return new AccountType[] { AccountType.NotSet, AccountType.Teacher, AccountType.ActivityProvider, AccountType.Business, AccountType.CommunityCenter, AccountType.School, AccountType.Church };
+            }
+        }
+
+        public static AccountType[] IndividualProviderAccountTypes
+        {
+            get
+            {
+                return new AccountType[] { AccountType.Teacher, AccountType.ActivityProvider, AccountType.Business };
+            }
+        }
+
+        public static AccountType[] LocationProviderAccountTypes
+        {
+            get
+            {
+                return new AccountType[] { AccountType.CommunityCenter, AccountType.School, AccountType.Church };
+            }
+        }
+
+        public static AccountType[] CustomerAccountTypes
+        {
+            get
+            {
+                return new AccountType[] { AccountType.Teacher, AccountType.ActivityProvider, AccountType.Business, AccountType.CommunityCenter, AccountType.School, AccountType.Church };
             }
         }
 
@@ -414,6 +455,11 @@ namespace AfterSchoolLibrary.Services
                 return AccountPackageFeature.HasAccountPackageIdByFeatureTypeIds(accountPackage.ID.Value, featureTypes, msgs, dc);
 
             return false;
+        }
+
+        public static AccountPackageFeature AddOrUpdatePackageFeature(this Account account, FeatureType featureTypeId, decimal maxValue, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return account.GetActiveAccountPackage(msgs, dc).AddOrUpdatePackageFeature(featureTypeId, maxValue, loggedInUser, msgs, dc);
         }
 
         #endregion
@@ -708,6 +754,45 @@ namespace AfterSchoolLibrary.Services
         #endregion
 
         #region Stripe
+
+        public static void CompleteStripeConnect(this Account account, string code, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var token = StripeHelper.CompleteOAuthConnection(code, msgs);
+
+            account.StripePublishableKey = token.StripePublishableKey;
+            account.StripeAccessToken = token.AccessToken;
+            account.StripeRefreshToken = token.RefreshToken;
+            account.StripeUserId = token.StripeUserId;
+            account.StripeChargesEnabled = true;
+            account.StripePayoutsEnabled = true;
+            account.LastModifiedBy = loggedInUser.ID;
+            account.LastModifiedDate = DateTime.UtcNow;
+            msgs.AddRange(account.Save(dc));
+
+            account.AddOrUpdatePackageFeature(FeatureType.UseStripeConnectedAccount, 1, loggedInUser, msgs, dc);
+
+            if (msgs.HasNoErrors())
+                msgs.Add("Your account has been connected to Stripe", MessageType.Success);
+            else
+                account.DisconnectStripeConnect(loggedInUser, msgs, dc);
+        }
+
+        public static void DisconnectStripeConnect(this Account account, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            account.StripeUserId = null;
+            account.StripePublishableKey = null;
+            account.StripeAccessToken = null;
+            account.StripeRefreshToken = null;
+            account.StripeSecretKey = null;
+            account.StripeChargesEnabled = false;
+            account.StripePayoutsEnabled = false;
+            account.LastModifiedBy = loggedInUser.ID;
+            account.LastModifiedDate = DateTime.UtcNow;
+            msgs.AddRange(account.Save(dc));
+
+            if (account.StripeUserId.IsNotEmpty())
+                StripeHelper.DeauthorizeOAuthConnection(account.StripeUserId, msgs);
+        }
 
         public static SystemMessages SaveWithStripe(this Account account, DatabaseConnection dc = null)
         {
@@ -1192,6 +1277,36 @@ namespace AfterSchoolLibrary.Services
             return account.DefaultFormId.HasValue ? Form.Load(account.DefaultFormId.Value, msgs, dc) : null;
         }
 
+        public static SystemMessages SetInterestForm(this Account account, Form form, WebUser loggedInUser, DatabaseConnection dc = null)
+        {
+            account.InterestFormId = form.ID;
+            account.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+            account.LastModifiedDate = DateTime.UtcNow;
+            return account.Save(dc);
+        }
+
+        public static Form CreateInterestForm(this Account formOwner, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var form = FormService.GetOrCreateAfterSchoolAccountInterestForm(msgs, dc);
+
+            if (form.AccountId != formOwner.ID)
+                form = form.Copy(loggedInUser.ID.Value, formOwner.ID.Value, "Interest Form", msgs, dc);
+
+            msgs.AddRange(formOwner.SetInterestForm(form, loggedInUser, dc));
+
+            return form;
+        }
+
+        public static Form GetOrCreateInterestForm(this Account account, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.GetInterestForm(msgs, dc) ?? CreateInterestForm(account, loggedInUser, msgs, dc);
+        }
+
+        public static Form GetInterestForm(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.InterestFormId.HasValue ? Form.Load(account.InterestFormId.Value, msgs, dc) : null;
+        }
+
         public static ActivityForm GetDefaultActivityForm(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return new ActivityForm()
@@ -1276,7 +1391,7 @@ namespace AfterSchoolLibrary.Services
             if (p.IsFree(billingPeriodType) || (activePackage.IsNotEmpty() && activePackage.IsFree))
             {
                 // new sign up
-                if (activePackage.IsEmpty())
+                if (activePackage.IsEmpty() || !account.IsClaimed)
                     signupType = SignUpType.NewAccountSignUp;
 
                 // could be downgrading to a free account
@@ -1505,7 +1620,12 @@ namespace AfterSchoolLibrary.Services
         public static Account CreateNew(string orgName, string email, string phone, bool isActive, AccountType accountType, WebUser accountOwner, int? packageId, BillingPeriodType? packageBillingPeriod, string timeZone, WebUser loggedInUser, bool isAfterSchool, bool createWithStripe, bool isClaimed, SystemMessages msgs, DatabaseConnection dc)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
-            var uniqueName = AccountService.GenerateUniqueName(orgName, null, dc: dc);
+            var uniqueName = AccountService.GenerateUniqueName(orgName, null, msgs, dc);
+
+            var onboardingStepDone = OnboardingStepType.NotSet;
+
+            if (accountType != AccountType.NotSet)
+                onboardingStepDone = OnboardingStepType.AccountType;
 
             var account = new Account
             {
@@ -1526,6 +1646,7 @@ namespace AfterSchoolLibrary.Services
                 CreditCardFeesPaidBy = FeesPaidByType.Parent,
                 TimeZone = timeZone,
                 IsClaimed = isClaimed,
+                OnboardingStepDone = onboardingStepDone,
             };
 
             if (createWithStripe)
@@ -1551,27 +1672,56 @@ namespace AfterSchoolLibrary.Services
             return account;
         }
 
+        public static Account CreateNewEmptyAccount(WebUser accountOwner, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var account = new Account()
+            {
+                Name = $"{loggedInUser.DisplayName} Account",
+                IsAfterSchool = true,
+                CreatedBy = loggedInUser.ID,
+                LastModifiedBy = loggedInUser.ID,
+                CreateDate = DateTime.UtcNow,
+                LastModifiedDate = DateTime.UtcNow,
+                OwnerId = accountOwner?.ID,
+                IsAdminAccount = false,
+                IsActive = true,
+                Email = accountOwner.Email,
+                Phone = accountOwner.Phone,
+                ConvenienceFeesPaidBy = FeesPaidByType.Parent,
+                CreditCardFeesPaidBy = FeesPaidByType.Parent,
+                IsClaimed = true,
+            };
+
+            msgs.AddRange(account.Save(dc));
+
+            //create default form for account to use for registration
+            if (msgs.HasNoErrors())
+                account.CreateDefaultForm(loggedInUser, msgs, dc);
+
+            return account;
+        }
+
         #endregion
 
         #region AccountRelationships
 
-        public static List<Account> GetVisitorAccounts(this Account hostAccount, AccountType accountType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Account> GetVisitorAccounts(this Account hostAccount, List<AccountType> accountTypes, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountRelationship.LoadByHostAccountIdByAccountType(hostAccount.ID.Value, accountType, msgs, dc)
+            return AccountRelationship.LoadByHostAccountIdByAccountTypes(hostAccount.ID.Value, accountTypes, msgs, dc)
                 .Select(accountRelationship => accountRelationship.GetVisitorAccount(msgs, dc))
                 .ToList();
         }
 
-        public static List<Account> GetVisitorAccounts(this Account hostAccount, AccountType accountType, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Account> GetVisitorAccounts(this Account hostAccount, List<AccountType> accountTypes, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountRelationship.LoadByHostAccountIdByAccountType(hostAccount.ID.Value, accountType, msgs, dc)
+            return AccountRelationship.LoadByHostAccountIdByAccountTypes(hostAccount.ID.Value, accountTypes, msgs, dc)
                 .Select(accountRelationship => accountRelationship.GetVisitorAccount(msgs, dc))
                 .ToList();
         }
 
-        public static int GetVisitorAccountsCount(this Account hostAccount, AccountType accountType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetVisitorAccountsCount(this Account hostAccount, List<AccountType> accountTypes, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountRelationship.GetCount(new Hashtable() { { "HostAccountId", hostAccount.ID.Value }, { "AccountAccountTypeId", (int)accountType } }, msgs, dc);
+            return AccountRelationship.GetCount(hostAccount.ID.Value, accountTypes, msgs, dc);
         }
 
         public static List<Account> GetHostAccounts(this Account account, DatabaseConnection dc = null)
@@ -1876,17 +2026,22 @@ namespace AfterSchoolLibrary.Services
                 msgs: msgs,
                 dc: dc);
 
-            msgs.AddRange(account.SetDefaultLocation(defaultLocation.ID.Value, 0, dc));
+            account.SetDefaultLocation(defaultLocation, new WebUser() { ID = 0 }, msgs, dc);
 
             return msgs;
         }
 
-        public static SystemMessages SetDefaultLocation(this Account account, int locationId, int loggedInUserId, DatabaseConnection dc = null)
+        public static void SetDefaultLocation(this Account account, Location location, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            account.SetDefaultLocation(location.ID.Value, loggedInUser, msgs, dc);
+        }
+
+        public static void SetDefaultLocation(this Account account, int locationId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             account.DefaultLocationId = locationId;
-            account.LastModifiedBy = loggedInUserId;
+            account.LastModifiedBy = loggedInUser?.ID;
             account.LastModifiedDate = DateTime.UtcNow;
-            return account.Save(dc);
+            msgs.AddRange(account.Save(dc));
         }
 
         public static Account GetAfterSchoolAccount(SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -2185,19 +2340,21 @@ namespace AfterSchoolLibrary.Services
             return Transaction.GetCountByAccountId(account.ID.Value, search, startDate, endDate, participationObjects, isDeleted, msgs, dc);
         }
 
-        public static decimal CalculatePlatformFeeAmount(this Account billingAccount, decimal totalAmountToCharge, SystemMessages msgs, DatabaseConnection dc = null)
+        public static decimal CalculatePlatformConvenienceFeeAmount(this Account billingAccount, decimal totalAmountToCharge, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
             {
                 var percentageFee = billingAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue();
                 var flatFee = billingAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFlatFee, msgs, dc).GetMaxValue();
-                return (totalAmountToCharge * percentageFee) + flatFee;
+
+                if (percentageFee != 0 || flatFee != 0)
+                    return (totalAmountToCharge * percentageFee) + flatFee;
             }
 
             return Platform.GetConvenienceFee(totalAmountToCharge);
         }
 
-        public static decimal GetPlatformPercentFee(this Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetPlatformConveniencePercentFee(this Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
                 return billingAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue();
@@ -2205,7 +2362,7 @@ namespace AfterSchoolLibrary.Services
             return Platform.ConveniencePercentFee;
         }
 
-        public static decimal GetPlatformFlatFee(this Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetPlatformConvenienceFlatFee(this Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
                 return billingAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFlatFee, msgs, dc).GetMaxValue();
@@ -2213,10 +2370,10 @@ namespace AfterSchoolLibrary.Services
             return Platform.ConvenienceFlatFee;
         }
 
-        internal static string GetStripeSourceFromToken(this Account fromAccount, string stripeToken, SystemMessages msgs = null)
+        internal static string GetStripeSourceFromToken(this Account payingAccount, Account billingAccount, string stripeToken, SystemMessages msgs = null)
         {
             var source = StripeHelper.CreateCreditCardSource(stripeToken, msgs);
-            StripeHelper.AddNewCardToCustomer(fromAccount.StripeCustomerId, source, null, msgs);
+            StripeHelper.AddNewCardToCustomer(payingAccount.StripeCustomerId, source, null, msgs);
             return source.Id;
         }
 
@@ -2245,7 +2402,7 @@ namespace AfterSchoolLibrary.Services
 
             // if can charge fees we bill it directly from our AHQ account
             var useStripeConnectedAccount = checkoutObject.BillingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
-            var platformFeeAmount = checkoutObject.BillingAccount.CalculatePlatformFeeAmount(checkoutObject.TuitionCostNoFees, msgs, dc);
+            var platformFeeAmount = checkoutObject.CalculatePlatformFeeAmount(msgs, dc);
 
             // only charge tuition during checkout, because subscriptions are billed through stripe
             var charge = StripeHelper.CreateCharge(
@@ -2479,7 +2636,7 @@ namespace AfterSchoolLibrary.Services
 
         public static void ProcessRegistrationFee(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            if (checkoutObject.TuitionCostNoFees > 0)
+            if (checkoutObject.RegistrationCostNoFees > 0)
                 AccountService.ProcessPaymentWithStripe(checkoutObject, msgs, dc);
 
             // must wait until after charges happen to know what card id is charged for sure
@@ -2515,6 +2672,47 @@ namespace AfterSchoolLibrary.Services
 
                     if (sendConfirmationEmail)
                         checkoutObject.Registration.SendConfirmation(checkoutObject, null, loggedInUser, true, msgs, dc);
+
+                },
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
+                dc: dc
+            );
+        }
+
+        public static void ProcessInterestRegistration(CheckoutObject checkoutObject, bool sendConfirmationEmail, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    // mark as completed
+                    checkoutObject.Registration.SetRegistrationStatus(
+                        completionStatus: RegistrationCompletionStatus.Completed,
+                        loggedInUser: loggedInUser,
+                        msgs: amsgs,
+                        dc: adc);
+
+                    // TODO: Allow user to register for multiple activities in one session at once MAYBE
+                    RegistrationService.ProcessInterestAssignment(
+                        registration: checkoutObject.Registration,
+                        participationObject: checkoutObject.ParticipationObject,
+                        registrant: checkoutObject.Registration.GetRegistrant(amsgs, adc),
+                        period: checkoutObject.ParticipationObject.GetCurrentRegistrationPeriod(amsgs, adc),
+                        loggedInUser: loggedInUser,
+                        msgs: amsgs,
+                        dc: adc);
+
+                    // subscribe to the account
+                    checkoutObject.BillingAccount.AddOrUpdateSubscriber(loggedInUser, SubscriberStatus.Subscribed, loggedInUser, amsgs, adc);
+                    checkoutObject.ParticipationObject.AddOrUpdateSubscriber(loggedInUser, SubscriberStatus.Subscribed, loggedInUser, amsgs, adc);
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
+
+                    if (sendConfirmationEmail)
+                        checkoutObject.Registration.SendInterestConfirmation(checkoutObject, null, loggedInUser, true, msgs, dc);
 
                 },
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
@@ -2574,7 +2772,7 @@ namespace AfterSchoolLibrary.Services
                         dc: adc);
 
                     // process payment by to account, includes registration fee
-                    if (!checkoutObject.ParticipationObject.IsTuitionFree && checkoutObject.PaymentPlan.IsEmpty())
+                    if (!checkoutObject.ParticipationObject.IsRegistrationFree && checkoutObject.PaymentPlan.IsEmpty())
                         AccountService.ProcessRegistrationFee(checkoutObject, loggedInUser, amsgs, adc);
 
                     // Process Subscriptions separately, don't charge all at once for the registration Fee
@@ -2597,7 +2795,7 @@ namespace AfterSchoolLibrary.Services
                     {
                         // create a stripe coupon if needed
                         var coupon = checkoutObject.Coupon;
-                        if (coupon.IsNotEmpty() && coupon.DoesApplyToTuitionFee())
+                        if (coupon.IsNotEmpty() && coupon.DoesApplyToRegistrationFee())
                         {
                             var discountValue = coupon.Amount;
                             if (coupon.AmountTypeId == CouponAmountType.FlatAmount) // calculate the new discount amount for the coupon
@@ -2774,7 +2972,8 @@ namespace AfterSchoolLibrary.Services
 
         public static bool CanReceivePaymentDeposits(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.CanReceiveACHDeposits(msgs, dc) || account.GetCheckPaymentAccount(msgs, dc).IsNotEmpty();
+            return account.CanReceiveACHDeposits(msgs, dc) || 
+                account.GetCheckPaymentAccount(msgs, dc).IsNotEmpty();
         }
 
         public static bool CanReceiveACHDeposits(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -2898,28 +3097,14 @@ namespace AfterSchoolLibrary.Services
 
             decimal feeAmount = 0;
             decimal billedCostPerPeriod = plan.CostPerPeriod.Value;
+            
+            feeAmount = Platform.GetTotalFees(plan.CostPerPeriod.Value, billingAccount);
 
-            if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
-            {
-                var platformFeeAmount = billingAccount.CalculatePlatformFeeAmount(plan.CostPerPeriod.Value, msgs, dc);
-                var stripeFeeAmount = plan.GetStripeFeeAmountWithConnectedAccount();
+            if (!billingAccount.IsConvenienceFeeTakenOutOfCost)
+                billedCostPerPeriod += Platform.GetConvenienceFee(billedCostPerPeriod);
 
-                if (platformFeeAmount > stripeFeeAmount)
-                    feeAmount = platformFeeAmount - stripeFeeAmount;
-                else
-                    feeAmount = 0;
-            }
-            else
-            {
-                feeAmount = Platform.GetTotalFees(plan.CostPerPeriod.Value, billingAccount);
-
-                if (!billingAccount.IsConvenienceFeeTakenOutOfCost)
-                    billedCostPerPeriod += Platform.GetConvenienceFee(billedCostPerPeriod);
-
-                if (!billingAccount.IsCreditCardFeeTakenOutOfCost)
-                    billedCostPerPeriod += Platform.GetCreditCardFee(billedCostPerPeriod, billingAccount);
-
-            }
+            if (!billingAccount.IsCreditCardFeeTakenOutOfCost)
+                billedCostPerPeriod += Platform.GetCreditCardFee(billedCostPerPeriod, billingAccount);
 
             return Math.Round(feeAmount / billedCostPerPeriod, 4);
         }
@@ -3276,7 +3461,12 @@ namespace AfterSchoolLibrary.Services
 
         public static Subscriber AddOrUpdateSubscriber(this Account account, WebUser user, SubscriberStatus status, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var subscriber = Subscriber.LoadByAccountIdByWebUserId(account.ID.Value, user.ID.Value, msgs, dc);
+            var subscriber = Subscriber.LoadByObjectIdByObjectTypeIdByWebUserId(
+                                account.ID.Value, 
+                                AHQObjectType.Account,
+                                user.ID.Value, 
+                                msgs, 
+                                dc);
 
             if (subscriber.IsEmpty())
                 return SubscriberService.CreateNew(account, user, status, loggedInUser, msgs, dc);
@@ -3288,7 +3478,7 @@ namespace AfterSchoolLibrary.Services
 
         public static int GetSubscriberCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Subscriber.GetCountByAccountIdByStatus(account.ID.Value, SubscriberStatus.Subscribed, msgs, dc);
+            return Subscriber.GetCountByObjectByStatus(account.ID.Value, AHQObjectType.Account, SubscriberStatus.Subscribed, msgs, dc);
         }
 
         #endregion

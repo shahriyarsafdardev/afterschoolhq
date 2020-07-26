@@ -12,7 +12,7 @@ namespace AfterSchool.Areas.Org.Controllers
 {
     public class ServicesController : BaseLoggedInController
     {
-        public ServicesController() : base(new List<AccountType> { AccountType.School, AccountType.ActivityProvider })
+        public ServicesController() : base(AccountService.ProviderAccountTypes.ToList())
         {
 
         }
@@ -49,10 +49,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                var finalPrice = cost.ToDecimal();
-
-                if (!SessionVariables.CurrentAccount.HasFeature(FeatureType.UseStripeConnectedAccount))
-                    finalPrice = AfterSchoolLibrary.Billing.Platform.GetCostWithConvenienceFee(cost.ToDecimal(), SessionVariables.CurrentAccount);
+               var finalPrice = AfterSchoolLibrary.Billing.Platform.GetCostWithConvenienceFee(cost.ToDecimal(), SessionVariables.CurrentAccount);
 
                 return Json(new
                 {

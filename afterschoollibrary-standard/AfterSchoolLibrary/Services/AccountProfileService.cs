@@ -19,7 +19,8 @@ namespace AfterSchoolLibrary.Services
                 CreateDate = DateTime.UtcNow,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
                 LastModifiedDate = DateTime.UtcNow,
-                LastModifiedBy = loggedInUser?.ID.IfEmpty(0),                  
+                LastModifiedBy = loggedInUser?.ID.IfEmpty(0),   
+                Title = account.Name,
             };
 
             msgs.AddRange(profile.Save(dc));
@@ -117,23 +118,50 @@ namespace AfterSchoolLibrary.Services
             return AccountProperty.LoadByAccountIdByAccountPropertyTypeId(profile.AccountId.Value, AccountPropertyType.Photo, msgs, dc);
         }
 
-        public static void UpdateProfile(this AccountProfile profile, string headline, string about, string primaryColor, string website, string mingrade, string maxgrade, string twitter, string facebook, string instagram, string linkedin, string genderrestriction, NameValueCollection savedAwards, NameValueCollection newAwards, NameValueCollection savedCertifications, NameValueCollection newCertifications, NameValueCollection servicesOffered, NameValueCollection timesOffered, NameValueCollection pricingOptions, string classifications, string softskills, string academicsubjects, string teachingmethods, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void UpdateProfile(this AccountProfile profile, string title = null, string headline = null, string about = null, string website = null, string mingrade = null, string maxgrade = null, string twitter = null, string facebook = null, string instagram = null, string linkedin = null, string youtube = null, string calendar = null, string genderrestriction = null, string profileemail = null, string profilephone = null, NameValueCollection savedAwards = null, NameValueCollection newAwards = null, NameValueCollection savedCertifications = null, NameValueCollection newCertifications = null, NameValueCollection servicesOffered = null, NameValueCollection timesOffered = null, NameValueCollection pricingOptions = null, string classifications = null, string softskills = null, string academicsubjects = null, string teachingmethods = null, WebUser loggedInUser = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                {
-                    if (headline.IsNotBlank())
+                {                   
+                    if (title != null)
+                        profile.Title = title.MaxChars(400);
+                    
+                    if (headline != null)
                         profile.Headline = headline.MaxChars(400);
 
-                    if (about.IsNotBlank())
+                    if (about != null)
                         profile.About = about.MaxChars(4000);
 
-                    if (primaryColor.IsNotBlank())
-                        profile.PrimaryColor = primaryColor.MaxChars(20);
-
-                    if (website.IsNotBlank())
+                    if (website != null)
                         profile.Website = website.MaxChars(400);
+
+                    if (twitter != null)
+                        profile.Twitter = twitter;
+
+                    if (instagram != null)
+                        profile.Instagram = instagram;
+
+                    if (facebook != null)
+                        profile.Facebook = facebook;
+
+                    if (linkedin != null)
+                        profile.LinkedIn = linkedin;
+
+                    if (youtube != null)
+                        profile.YouTube = youtube;
+
+                    if (calendar != null)
+                        profile.CalendarBookingLink = calendar;
+
+                    if (profileemail != null)
+                        profile.ProfileEmail = profileemail;
+
+                    if (profilephone != null)
+                        profile.ProfilePhone = profilephone;
+
+                    if (genderrestriction.IsInteger())
+                        profile.GenderRestriction = (GenderRestrictionType)genderrestriction.ToInteger();
 
                     if (mingrade.IsInteger())
                         profile.GradeLevelStart = mingrade.ToInteger();
@@ -141,37 +169,40 @@ namespace AfterSchoolLibrary.Services
                     if (maxgrade.IsInteger())
                         profile.GradeLevelEnd = maxgrade.ToInteger();
 
-                    if (twitter.IsNotEmpty())
-                        profile.Twitter = twitter;
-
-                    if (instagram.IsNotEmpty())
-                        profile.Instagram = instagram;
-
-                    if (facebook.IsNotEmpty())
-                        profile.Facebook = facebook;
-
-                    if (instagram.IsNotEmpty())
-                        profile.LinkedIn = linkedin;
-
-                    if (genderrestriction.IsInteger())
-                        profile.GenderRestriction = (GenderRestrictionType)genderrestriction.ToInteger();
-
                     amsgs.AddRange(profile.Save(adc));
 
-                    UpdateProperties(savedAwards, loggedInUser, amsgs, adc);
-                    UpdateProperties(savedCertifications, loggedInUser, amsgs, adc);
+                    if (savedAwards.IsNotEmpty())
+                        UpdateProperties(savedAwards, loggedInUser, amsgs, adc);
+                    
+                    if (savedCertifications.IsNotEmpty())
+                        UpdateProperties(savedCertifications, loggedInUser, amsgs, adc);
 
-                    profile.AddProperties(newAwards, AccountPropertyType.Award, loggedInUser, amsgs, adc);
-                    profile.AddProperties(newCertifications, AccountPropertyType.Certification, loggedInUser, amsgs, adc);
+                    if (newAwards.IsNotEmpty())
+                        profile.AddProperties(newAwards, AccountPropertyType.Award, loggedInUser, amsgs, adc);
+                    
+                    if (newCertifications.IsNotEmpty())
+                        profile.AddProperties(newCertifications, AccountPropertyType.Certification, loggedInUser, amsgs, adc);
 
-                    profile.ManageProperties(servicesOffered, AccountPropertyType.ServiceOffered, loggedInUser, amsgs, adc);
-                    profile.ManageProperties(timesOffered, AccountPropertyType.TimeOffered, loggedInUser, amsgs, adc);
-                    profile.ManageProperties(pricingOptions, AccountPropertyType.PricingOption, loggedInUser, amsgs, adc);
+                    if (servicesOffered.IsNotEmpty())
+                        profile.ManageProperties(servicesOffered, AccountPropertyType.ServiceOffered, loggedInUser, amsgs, adc);
 
-                    profile.ManageProperties(classifications.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.Classifications, loggedInUser, amsgs, adc);
-                    profile.ManageProperties(softskills.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.SoftSkills, loggedInUser, amsgs, adc);
-                    profile.ManageProperties(academicsubjects.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.AcademicSubjects, loggedInUser, amsgs, adc);
-                    profile.ManageProperties(teachingmethods.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.TeachingMethods, loggedInUser, amsgs, adc);
+                    if (timesOffered.IsNotEmpty())
+                        profile.ManageProperties(timesOffered, AccountPropertyType.TimeOffered, loggedInUser, amsgs, adc);
+
+                    if (pricingOptions.IsNotEmpty())
+                        profile.ManageProperties(pricingOptions, AccountPropertyType.PricingOption, loggedInUser, amsgs, adc);
+
+                    if (classifications.IsNotEmpty())
+                        profile.ManageProperties(classifications.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.Classifications, loggedInUser, amsgs, adc);
+
+                    if (softskills.IsNotEmpty())
+                        profile.ManageProperties(softskills.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.SoftSkills, loggedInUser, amsgs, adc);
+
+                    if (academicsubjects.IsNotEmpty())
+                        profile.ManageProperties(academicsubjects.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.AcademicSubjects, loggedInUser, amsgs, adc);
+
+                    if (teachingmethods.IsNotEmpty())
+                        profile.ManageProperties(teachingmethods.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.TeachingMethods, loggedInUser, amsgs, adc);
 
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
@@ -287,6 +318,31 @@ namespace AfterSchoolLibrary.Services
                 return GradeLevel.Load(profile.GradeLevelEnd.Value, msgs, dc);
 
             return GradeLevel.Load(msgs: msgs, dc: dc).LastOrDefault();
+        }
+
+        public static Location GetLocation(this AccountProfile profile, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (profile.LocationId.HasValue)
+                return Location.Load(profile.LocationId.Value, msgs, dc);
+
+            return null;
+        }
+
+        public static Location AddNewLocation(this AccountProfile profile, string locationName, string streetNumber, string streetName, string address2, string neighborhood, string city, string county, string state, string postalCode, string country, string googlePlaceId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var location = LocationService.CreateOrUpdateFromGoogle(locationName, streetNumber, streetName, address2, neighborhood, city, county, state, postalCode, country, googlePlaceId, loggedInUser, msgs, dc);
+
+            profile.SetLocation(location, loggedInUser, msgs, dc);
+
+            return location;
+        }
+
+        public static void SetLocation(this AccountProfile profile, Location location, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            profile.LocationId = location.ID;
+            profile.LastModifiedBy = loggedInUser?.ID;
+            profile.LastModifiedDate = DateTime.UtcNow;
+            msgs.AddRange(profile.Save(dc));
         }
     }
 }

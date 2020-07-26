@@ -6,12 +6,14 @@ using System.IO;
 using System.Web.Script.Serialization;
 using BasicLibrary;
 using AfterSchool.Models;
+using AfterSchoolLibrary.Services;
+using System.Linq;
 
 namespace AfterSchool.Controllers
 {
     public class OAuthController : BaseLoggedInController
     {
-        public OAuthController() : base(new List<AccountType> { AccountType.SchoolDistrict, AccountType.School, AccountType.ActivityProvider })
+        public OAuthController() : base(AccountService.CustomerAccountTypes.ToList())
         {
 
         }

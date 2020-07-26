@@ -23,6 +23,11 @@ namespace AfterSchoolLibrary.Models
 		public string Details { get { return (string)MDV["Details"].Value; } set { MDV["Details"].Value = value; } }
 		public LocationType LocationTypeId { get { return (LocationType)MDV["LocationTypeId"].Value; } set { MDV["LocationTypeId"].Value = value; } }
 		public bool IsTest { get { return (bool)MDV["IsTest"].Value; } set { MDV["IsTest"].Value = value; } }
+		public string GooglePlaceId { get { return (string)MDV["GooglePlaceId"].Value; } set { MDV["GooglePlaceId"].Value = value; } }
+		public string StreetNumber { get { return (string)MDV["StreetNumber"].Value; } set { MDV["StreetNumber"].Value = value; } }
+		public string StreetName { get { return (string)MDV["StreetName"].Value; } set { MDV["StreetName"].Value = value; } }
+		public string Neighborhood { get { return (string)MDV["Neighborhood"].Value; } set { MDV["Neighborhood"].Value = value; } }
+		public string County { get { return (string)MDV["County"].Value; } set { MDV["County"].Value = value; } }
 		
 
         public Location()
@@ -47,6 +52,11 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "Details", System.Data.SqlDbType.NVarChar , "4000");
 				_dp.Add(className, "LocationTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "IsTest", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "GooglePlaceId", System.Data.SqlDbType.NVarChar , "400");
+				_dp.Add(className, "StreetNumber", System.Data.SqlDbType.NVarChar , "50");
+				_dp.Add(className, "StreetName", System.Data.SqlDbType.NVarChar , "50");
+				_dp.Add(className, "Neighborhood", System.Data.SqlDbType.NVarChar , "50");
+				_dp.Add(className, "County", System.Data.SqlDbType.NVarChar , "100");
 				
                 return _dp;
             }
@@ -98,16 +108,8 @@ namespace AfterSchoolLibrary.Models
         {
 			var msgs = new SystemMessages();
 
-			if (this.Name.IsEmpty())
-				msgs.Add("Name is required on Location object", MessageType.Error);
-			if (this.Address1.IsEmpty())
-				msgs.Add("Address1 is required on Location object", MessageType.Error);
-			if (this.City.IsEmpty())
-				msgs.Add("City is required on Location object", MessageType.Error);
 			if (this.State.IsEmpty())
 				msgs.Add("State is required on Location object", MessageType.Error);
-			if (this.PostalCode.IsEmpty())
-				msgs.Add("PostalCode is required on Location object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(Location).Name));
@@ -150,6 +152,26 @@ namespace AfterSchoolLibrary.Models
 			dps.Add(ObjectMap["IsTest"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["GooglePlaceId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["StreetNumber"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["StreetName"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["Neighborhood"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["County"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -183,6 +205,14 @@ namespace AfterSchoolLibrary.Models
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["LocationTypeId"], LocationTypeId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static Location LoadByGooglePlaceId(string GooglePlaceId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["GooglePlaceId"], GooglePlaceId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
 		

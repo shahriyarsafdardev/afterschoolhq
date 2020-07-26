@@ -13,5 +13,6 @@ public enum QuestionGroupDataType
 	EmergencyContact2,
 	HealthInformation,
 	OrganizationInformation,
-	OrganizationContact
+	OrganizationContact,
+	RegistrantInterestInformation
 }

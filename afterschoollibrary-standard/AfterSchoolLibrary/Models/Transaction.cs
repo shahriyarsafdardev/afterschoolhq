@@ -62,6 +62,7 @@ namespace AfterSchoolLibrary.Models
 		/// </summary>
 		public int? PayoutId { get { return (int?)MDV["PayoutId"].Value; } set { MDV["PayoutId"].Value = value; } }
 		public bool IsDeleted { get { return (bool)MDV["IsDeleted"].Value; } set { MDV["IsDeleted"].Value = value; } }
+		public bool UsedStripeConnect { get { return (bool)MDV["UsedStripeConnect"].Value; } set { MDV["UsedStripeConnect"].Value = value; } }
 		public decimal? PlatformPercentFee { get { return (decimal?)MDV["PlatformPercentFee"].Value; } set { MDV["PlatformPercentFee"].Value = value; } }
 		public decimal? PlatformFlatFee { get { return (decimal?)MDV["PlatformFlatFee"].Value; } set { MDV["PlatformFlatFee"].Value = value; } }
 		
@@ -75,6 +76,7 @@ namespace AfterSchoolLibrary.Models
 			this.TransactionTypeId = TransactionType.NotSet;
 			this.PaymentSourceTypeId = PaymentSourceType.NotSet;
 			this.IsDeleted = false;
+			this.UsedStripeConnect = false;
 			
         }
 
@@ -102,6 +104,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "OriginalTransactionId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "PayoutId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "IsDeleted", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "UsedStripeConnect", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "PlatformPercentFee", System.Data.SqlDbType.Decimal , "10,2");
 				_dp.Add(className, "PlatformFlatFee", System.Data.SqlDbType.Decimal , "10,2");
 				
@@ -255,6 +258,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["IsDeleted"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["UsedStripeConnect"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();

@@ -503,18 +503,13 @@ namespace AfterSchoolLibrary.Billing
             return product;
         }
 
-        public static SystemMessages DeleteProduct(string productId, string stripeAccountId)
+        public static SystemMessages DeleteProduct(string productId)
         {
             var msgs = new SystemMessages();
 
-            var requestOptions = new RequestOptions();
-
-            if (stripeAccountId.IsNotEmpty())
-                requestOptions.StripeAccount = stripeAccountId;
-
             try
             {
-                var result = GetProductService().Delete(productId, requestOptions);
+                var result = GetProductService().Delete(productId);
 
                 if (result.Deleted.HasValue && !result.Deleted.Value)
                     msgs.Add($"Product ({productId}) was not deleted", MessageType.UserError);
@@ -644,14 +639,10 @@ namespace AfterSchoolLibrary.Billing
         public static SystemMessages DeletePlan(string planId, string stripeAccountId)
         {
             var msgs = new SystemMessages();
-            var requestOptions = new Stripe.RequestOptions();
-
-            if (stripeAccountId.IsNotEmpty())
-                requestOptions.StripeAccount = stripeAccountId;
 
             try
             {
-                var result = GetPlanService().Delete(planId, requestOptions);
+                var result = GetPlanService().Delete(planId);
 
                 if (result.Deleted.HasValue && !result.Deleted.Value)
                     msgs.Add($"Plan ({planId}) was not deleted", MessageType.UserError);
@@ -817,13 +808,9 @@ namespace AfterSchoolLibrary.Billing
         {
             var msgs = new SystemMessages();
 
-            var requestOptions = new Stripe.RequestOptions();
-            if (stripeAccountId.IsNotEmpty())
-                requestOptions.StripeAccount = stripeAccountId;
-
             try
             {
-                var result = GetCustomerService().Delete(customerId, requestOptions);
+                var result = GetCustomerService().Delete(customerId);
 
                 if (result.Deleted.HasValue && !result.Deleted.Value)
                     msgs.Add($"Customer ({customerId}) was not deleted", MessageType.UserError);
@@ -990,22 +977,22 @@ namespace AfterSchoolLibrary.Billing
                 Coupon = stripeCouponId,
                 Items = new List<SubscriptionItemOptions>() { new SubscriptionItemOptions() { Plan = planId, Quantity = 1 } },
                 Metadata = metaData,
-                Prorate = false,               
+                Prorate = false,
             };
 
             if (startDate.Value.AddDays(-1).IsAfter(DateTime.UtcNow))
                 options.TrialEnd = startDate.Value.AddDays(-1);
 
-            var requestOptions = new Stripe.RequestOptions();
             if (stripeAccountId.IsNotEmpty())
-            {
-                requestOptions.StripeAccount = stripeAccountId;
-                options.ApplicationFeePercent = platformFeePercent * 100;
-            }
+                options.TransferData = new SubscriptionTransferDataOptions()
+                {
+                    Destination = stripeAccountId,
+                    AmountPercent = 100 - (platformFeePercent * 100) 
+                };
 
             try
             {
-                subscription = GetSubscriptionService().Create(options, requestOptions);
+                subscription = GetSubscriptionService().Create(options);
             }
             catch (StripeException ex)
             {
@@ -1425,7 +1412,7 @@ namespace AfterSchoolLibrary.Billing
                 Source = tokenOrSourceId,
                 StatementDescriptorSuffix = statementDescriptor.Replace("'", "").MaxChars(22),
                 Customer = fromCustomerId,
-                Metadata = metaData
+                Metadata = metaData,             
             };
 
             if (platformFee.HasValue)
@@ -1699,6 +1686,75 @@ namespace AfterSchoolLibrary.Billing
 
             return invoice;
         }
+
+        #endregion
+
+        #region StripeOAuth
+
+        private static Stripe.OAuthTokenService GetOAuthTokenService()
+        {
+            return new Stripe.OAuthTokenService(StripeClient);
+        }
+
+        public static Stripe.OAuthToken CompleteOAuthConnection(string code, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var options = new OAuthTokenCreateOptions
+            {
+                GrantType = "authorization_code",
+                Code = code,
+            };
+
+            OAuthToken token = null;
+
+            try
+            {
+                token = GetOAuthTokenService().Create(options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.Error, ex);
+                msgs.Add($"Error connecting stripe account - {ex.Message}", MessageType.UserError);
+            }
+            catch(Exception ex)
+            {
+                msgs.Add($"Error connecting stripe account - {ex.Message}", MessageType.UserError);
+            }
+
+            return token;
+        }
+
+        public static Stripe.OAuthDeauthorize DeauthorizeOAuthConnection(string stripeAccountId, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var options = new OAuthDeauthorizeOptions
+            {
+                ClientId = PlatformClientId,
+                StripeUserId = stripeAccountId,
+            };
+
+            OAuthDeauthorize oAuthDeauthorize = null;
+
+            try
+            {
+                oAuthDeauthorize = GetOAuthTokenService().Deauthorize(options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.Error, ex);
+                msgs.Add($"Error deauthorizing account - {ex.Message}", MessageType.UserError);
+            }
+            catch (Exception ex)
+            {
+                msgs.Add($"Error deauthorizing account - {ex.Message}", MessageType.UserError);
+            }
+
+            return oAuthDeauthorize;
+        }
+
+
 
         #endregion
     }

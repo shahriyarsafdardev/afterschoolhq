@@ -32,7 +32,7 @@ namespace AfterSchoolLibrary.Models
         public Account OwnerAccount { get; set; }
         public bool AllowToPayLater { get; set; }
         public bool IsFree { get; set; }
-        public bool IsTuitionFree { get; set; }
+        public bool IsRegistrationFree { get; set; }
         public Guid Uid { get; set; }
         public int? SeatsRemaining { get; set; }
         public int? WaitingListSeatsRemaining { get; set; }
@@ -106,7 +106,7 @@ namespace AfterSchoolLibrary.Models
             Cost = activity.CostPerRegistrant;
             CostUnitType = global::CostUnitType.PerRegistrant;
             AllowToPayLater = activity.AllowToPayLater;
-            IsTuitionFree = (!activity.CostPerRegistrant.HasValue || activity.CostPerRegistrant.Value == 0.ToDecimal());
+            IsRegistrationFree = (!activity.CostPerRegistrant.HasValue || activity.CostPerRegistrant.Value == 0.ToDecimal());
             RequiresParentalConsent = activity.RequiresParentalConsent;
             IsInviteOnly = activity.IsInviteOnly;
             ActivityLocationType = activity.ActivityLocationTypeId;
@@ -136,7 +136,7 @@ namespace AfterSchoolLibrary.Models
                 UseStripeConnectedAccount = PaymentAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
                 PaymentPlans = activity.GetActivePaymentPlans(msgs, dc);
                 SubscriptionPlans = activity.GetActiveSubscriptionPlans(msgs, dc);
-                IsFree = IsTuitionFree && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0;
+                IsFree = IsRegistrationFree && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0;
                 StartDate = activity.GetFirstDate(msgs, dc);
                 EndDate = activity.GetLastDate(msgs, dc);
             }
@@ -161,7 +161,7 @@ namespace AfterSchoolLibrary.Models
             ContactEmail = activityGroup.ContactEmail;
             ContactName = activityGroup.ContactName;
             ContactPhone = activityGroup.ContactPhone;
-            IsTuitionFree = (!activityGroup.Cost.HasValue || activityGroup.Cost.Value == 0.ToDecimal());
+            IsRegistrationFree = (!activityGroup.Cost.HasValue || activityGroup.Cost.Value == 0.ToDecimal());
             IsInviteOnly = activityGroup.IsInviteOnly;
             AllowToPayLater = activityGroup.AllowToPayLater;
             RequiresParentalConsent = activityGroup.RequiresParentalConsent;
@@ -181,7 +181,7 @@ namespace AfterSchoolLibrary.Models
                 UseStripeConnectedAccount = PaymentAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
                 PaymentPlans = activityGroup.GetPaymentPlans(msgs, dc);
                 SubscriptionPlans = activityGroup.GetSubscriptionPlans(msgs, dc);
-                IsFree = IsTuitionFree && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0;
+                IsFree = IsRegistrationFree && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0;
                 StartDate = activityGroup.GetFirstDate(msgs, dc);
                 EndDate = activityGroup.GetLastDate(msgs, dc);
             }
@@ -209,7 +209,7 @@ namespace AfterSchoolLibrary.Models
             ContactPhone = aag.ContactPhone;
             // Description = activityGroup.Description;
             RegistrationMode = RegistrationMode.Apply; // aag.RegistrationModeId;
-            IsTuitionFree = (!aag.Cost.HasValue || aag.Cost.Value == 0.ToDecimal());
+            IsRegistrationFree = (!aag.Cost.HasValue || aag.Cost.Value == 0.ToDecimal());
             LastModifiedDate = activityGroup.LastModifiedDate;
 
             if (loadAllDetails)
@@ -222,7 +222,7 @@ namespace AfterSchoolLibrary.Models
                 UseStripeConnectedAccount = PaymentAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
                 PaymentPlans = activityGroup.GetPaymentPlans(msgs, dc);
                 SubscriptionPlans = activityGroup.GetSubscriptionPlans(msgs, dc);
-                IsFree = IsTuitionFree && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0;
+                IsFree = IsRegistrationFree && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0;
             }
         }
 
@@ -305,6 +305,11 @@ namespace AfterSchoolLibrary.Models
             return $"{GetHomePageUrl(isAfterSchool)}/register";
         }
 
+        public string GetInterestedPageUrl(bool isAfterSchool = true)
+        {
+            return $"{GetHomePageUrl(isAfterSchool)}/interested";
+        }
+
         public bool IsSport()
         {
             if (this.ObjectType == ParticipationObjectType.Activity)
@@ -368,6 +373,18 @@ namespace AfterSchoolLibrary.Models
                     return this.GetAccountActivityGroup()
                         .GetActivityGroup(msgs, dc)
                         .GetGroupProperty(AccountPropertyType.ApplicationThankYouEmail, msgs, dc)?
+                        .Value;
+            }
+            else if (registrantActivity.AssignmentTypeId == RegistrationAssignmentType.Interested)
+            {
+                if (IsActivity())
+                    return this.GetActivity().GetActivityProperty(AccountPropertyType.InterestThankYouEmail, msgs, dc)?.Value;
+                else if (IsActivityGroup())
+                    return this.GetActivityGroup().GetGroupProperty(AccountPropertyType.InterestThankYouEmail, msgs, dc)?.Value;
+                else if (IsAccountActivityGroup())
+                    return this.GetAccountActivityGroup()
+                        .GetActivityGroup(msgs, dc)
+                        .GetGroupProperty(AccountPropertyType.InterestThankYouEmail, msgs, dc)?
                         .Value;
             }
             else
@@ -592,6 +609,23 @@ namespace AfterSchoolLibrary.Models
             return GetActivityId() ?? GetActivityGroupId() ?? GetAccountActivityGroupId();
         }
 
+        public Subscriber AddOrUpdateSubscriber(WebUser user, SubscriberStatus status, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var subscriber = Subscriber.LoadByObjectIdByObjectTypeIdByWebUserId(
+                                this.ObjectID.Value,
+                                this.ObjectType.ToAHQObjectType(),
+                                user.ID.Value, 
+                                msgs, 
+                                dc);
+
+            if (subscriber.IsEmpty())
+                return SubscriberService.CreateNew(this, user, status, loggedInUser, msgs, dc);
+
+            subscriber.UpdateSubscriber(status, loggedInUser, msgs, dc);
+
+            return subscriber;
+        }
+
         #endregion
 
         #region Financial
@@ -658,7 +692,7 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetCreditCardFee(FeesPaidByType feesPaidByType)
         {
-            if (Cost.HasValue && PaymentAccount.CreditCardFeesPaidBy == feesPaidByType && !UseStripeConnectedAccount)
+            if (Cost.HasValue && PaymentAccount.CreditCardFeesPaidBy == feesPaidByType)
                 return Billing.Platform.GetCreditCardFee(Cost.Value, PaymentAccount);
 
             return 0;
@@ -666,7 +700,7 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetConvenienceFee(FeesPaidByType feesPaidByType)
         {
-            if (Cost.HasValue && PaymentAccount.ConvenienceFeesPaidBy == feesPaidByType && !UseStripeConnectedAccount)
+            if (Cost.HasValue && PaymentAccount.ConvenienceFeesPaidBy == feesPaidByType)
                 return Billing.Platform.GetConvenienceFee(Cost.Value);
 
             return 0;
@@ -760,7 +794,7 @@ namespace AfterSchoolLibrary.Models
                 participationObject.RegistrationPeriod = registrationPeriod;
                 participationObject.Uid = Guid.NewGuid();
                 participationObject.IsFree = participationObject.Cost == 0;
-                participationObject.IsTuitionFree = participationObject.Cost == 0;
+                participationObject.IsRegistrationFree = participationObject.Cost == 0;
                 participationObject.ObjectType = ParticipationObjectType.Activity;
             });
         }

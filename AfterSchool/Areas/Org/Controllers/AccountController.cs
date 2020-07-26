@@ -15,7 +15,7 @@ namespace AfterSchool.Areas.Org.Controllers
 {
     public class AccountController : BaseLoggedInController
     {
-        public AccountController() : base(new List<AccountType> { AccountType.School, AccountType.ActivityProvider })
+        public AccountController() : base(AccountService.ProviderAccountTypes.ToList())
         {
 
         }
@@ -93,7 +93,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Location(string id, string location, string locationname, string address1, string address2, string city, string state, string postalcode, string country, string mylocation, string locationtype)
         {
             var msgs = new SystemMessages();
-            var a = SessionVariables.CurrentAccount;
+            var account = SessionVariables.CurrentAccount;
 
             var locationType = LocationType.NotSet;
             var hostAccountId = new int?();
@@ -117,7 +117,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     msgs.AddRange(currentLocation.Save());
                 }
 
-                SessionVariables.CurrentAccount.SetDefaultLocation(location.ToInteger(), SessionVariables.CurrentUser.ID.Value);
+                account.SetDefaultLocation(currentLocation, SessionVariables.CurrentUser, msgs);
             }
             else
             {
@@ -137,14 +137,14 @@ namespace AfterSchool.Areas.Org.Controllers
                     );
 
                 if (msgs.HasNoErrors())
-                    SessionVariables.CurrentAccount.SetDefaultLocation(newLocation.ID.Value, SessionVariables.CurrentUser.ID.Value);
+                    account.SetDefaultLocation(newLocation, SessionVariables.CurrentUser, msgs);
             }            
 
             ViewBag.Messages = msgs;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.Location = SessionVariables.CurrentAccount.GetDefaultLocation();
+            ViewBag.Location = account.GetDefaultLocation();
             ViewBag.IsFullScreen = GetIsFullScreen();
-            return View(a);
+            return View(account);
         }     
 
         [HttpGet]
@@ -152,11 +152,12 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var account = SessionVariables.CurrentAccount;
 
-            if (account.HasStripeConnectedAccount && account.StripePayoutsEnabled)
-                return RedirectToAction("paymentsentity");
+            // if (account.HasStripeConnectedAccount && account.StripePayoutsEnabled)
+            //     return RedirectToAction("paymentsentity");
 
             ViewBag.Account = account;
             ViewBag.IsFullScreen = GetIsFullScreen();
+            ViewBag.Messages = new SystemMessages();
             return View();
         }
 
@@ -886,18 +887,18 @@ namespace AfterSchool.Areas.Org.Controllers
 
         private AccountProfile StyleViewBag(SystemMessages msgs)
         {
-            var profile = SessionVariables.CurrentAccount.GetOrCreateAccountProfile(SessionVariables.LoggedInUser, msgs);
-
-            var awards = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.Award, msgs);
-            var certifications = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.Certification, msgs);
-            var photos = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.Photo, msgs);
-            var classifications = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.Classifications);
-            var softSkills = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.SoftSkills);
-            var academicSubjects = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.AcademicSubjects);
-            var teachingMethods = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.TeachingMethods);
-            var servicesOffered = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.ServiceOffered);
-            var timesOffered = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.TimeOffered);
-            var pricingOptions = SessionVariables.CurrentAccount.GetAccountProperties(AccountPropertyType.PricingOption);
+            var account = SessionVariables.CurrentAccount;
+            var profile = account.GetOrCreateAccountProfile(SessionVariables.CurrentUser, msgs);
+            var awards = account.GetAccountProperties(AccountPropertyType.Award, msgs);
+            var certifications = account.GetAccountProperties(AccountPropertyType.Certification, msgs);
+            var photos = account.GetAccountProperties(AccountPropertyType.Photo, msgs);
+            var classifications = account.GetAccountProperties(AccountPropertyType.Classifications);
+            var softSkills = account.GetAccountProperties(AccountPropertyType.SoftSkills);
+            var academicSubjects = account.GetAccountProperties(AccountPropertyType.AcademicSubjects);
+            var teachingMethods = account.GetAccountProperties(AccountPropertyType.TeachingMethods);
+            var servicesOffered = account.GetAccountProperties(AccountPropertyType.ServiceOffered);
+            var timesOffered = account.GetAccountProperties(AccountPropertyType.TimeOffered);
+            var pricingOptions = account.GetAccountProperties(AccountPropertyType.PricingOption);
 
             while (awards.Count < 5)
                 awards.Add(new AccountProperty());
@@ -918,6 +919,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
             photos.ForEach(photo => photo.Value = ah.GetFileLink(photo.Value, true, null, true));
 
+            ViewBag.Account = account;
+            ViewBag.Location = profile.GetLocation();
             ViewBag.Messages = msgs;
             ViewBag.Grades = GradeLevel.Load();
             ViewBag.Awards = awards;
@@ -944,31 +947,43 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult Style(string id, string logo, string headerimage, string about, string headline, string primaryColor, string website, string mingrade, string maxgrade, string twitter, string facebook, string instagram, string linkedin, string genderrestriction, string classifications, string softskills, string academicsubjects, string teachingmethods)
+        public ActionResult Style(string id, string logo, string headerimage, string about, string title, string headline, string primaryColor, string website, string mingrade, string maxgrade, string twitter, string facebook, string instagram, string linkedin, string youtube, string calendar, string genderrestriction, string classifications, string softskills, string academicsubjects, string teachingmethods, string profileemail, string profilephone, string locationname, string streetnumber, string streetname, string address2, string neighborhood, string city, string state, string postalcode, string county, string country, string placeid)
         {
             var msgs = new SystemMessages();
-            var profile = SessionVariables.CurrentAccount.GetAccountProfile(msgs);
+            var account = SessionVariables.CurrentAccount;
+            var profile = account.GetAccountProfile(msgs);
             var allowedFiles = new string[] { ".png", ".jpg", ".jpeg" };
-            var maxSizeInBytes = 1024 * 1024 * 2;
 
             if (logo.IsNotEmpty())
             {
                 if (Request.Files["logo"].ContentLength == 0 || 
                     !Request.Files["logo"].FileName.ToLower().Contains(allowedFiles) ||
-                    Request.Files["logo"].ContentLength > maxSizeInBytes)
-                    msgs.Add("Please upload a valid jpg or png file", MessageType.UserError);
+                    Request.Files["logo"].ContentLength > AfterSchoolLibrary.Helpers.Utilities.ImageUploadMaxBytes)
+                    msgs.Add("Please upload a valid jpg or png file, must be less than 4MB", MessageType.UserError);
             }
 
             if (headerimage.IsNotEmpty())
             {
                 if (Request.Files["headerimage"].ContentLength == 0 || 
                     !Request.Files["headerimage"].FileName.ToLower().Contains(allowedFiles) ||
-                    Request.Files["headerimage"].ContentLength > maxSizeInBytes)
+                    Request.Files["headerimage"].ContentLength > AfterSchoolLibrary.Helpers.Utilities.ImageUploadMaxBytes)
                     msgs.Add("Please upload a valid jpg or png file", MessageType.UserError);
             }
 
             if (website.IsNotEmpty() && !website.IsRegExMatch(BasicLibrary.Utilities.WebsiteRegEx))
                 msgs.Add("Please enter a valid website address", MessageType.UserError);
+
+            if (facebook.IsNotEmpty() && !facebook.IsRegExMatch(BasicLibrary.Utilities.WebsiteRegEx))
+                msgs.Add("Please enter a valid Facebook profile address", MessageType.UserError);
+
+            if (linkedin.IsNotEmpty() && !linkedin.IsRegExMatch(BasicLibrary.Utilities.WebsiteRegEx))
+                msgs.Add("Please enter a valid LinkedIn profile address", MessageType.UserError);
+
+            if (youtube.IsNotEmpty() && !youtube.IsRegExMatch(BasicLibrary.Utilities.WebsiteRegEx))
+                msgs.Add("Please enter a valid YouTube URL", MessageType.UserError);
+
+            if (calendar.IsNotEmpty() && !calendar.IsRegExMatch(BasicLibrary.Utilities.WebsiteRegEx))
+                msgs.Add("Please enter a valid calendar URL", MessageType.UserError);
 
             if (msgs.HasNoErrors())
             {
@@ -988,13 +1003,12 @@ namespace AfterSchool.Areas.Org.Controllers
                         SessionVariables.CurrentUser,
                         msgs);
 
-                
                 foreach (var key in Request.Files.AllKeys.Where(key => key.Contains("photo-")))
                 {
                     var file = Request.Files[key];
                     if (file.IsNotEmpty() && file.FileName.IsNotBlank())
                     {
-                        if (file.FileName.Contains(allowedFiles) && file.ContentLength <= maxSizeInBytes)
+                        if (file.FileName.ToLower().Contains(allowedFiles) && file.ContentLength <= AfterSchoolLibrary.Helpers.Utilities.ImageUploadMaxBytes)
                         {
                             var photoId = "";
 
@@ -1011,15 +1025,15 @@ namespace AfterSchool.Areas.Org.Controllers
                         }
                         else
                         {
-                            msgs.Add("Please upload a valid jpg or png file", MessageType.UserError);
+                            msgs.Add("Please upload a valid jpg or png file that is less than 4MB", MessageType.UserError);
                         }
                     }
                 }
 
                 profile.UpdateProfile(
+                    title,
                     headline,
                     about,
-                    primaryColor,
                     website,
                     mingrade,
                     maxgrade,
@@ -1027,7 +1041,11 @@ namespace AfterSchool.Areas.Org.Controllers
                     facebook,
                     instagram,
                     linkedin,
+                    youtube,
+                    calendar,
                     genderrestriction,
+                    profileemail,
+                    profilephone,
                     Request.Params.Filter("award-id-"),
                     Request.Params.Filter("award-new-"),
                     Request.Params.Filter("certification-id-"),
@@ -1040,6 +1058,21 @@ namespace AfterSchool.Areas.Org.Controllers
                     academicsubjects,
                     teachingmethods,
                     SessionVariables.CurrentUser,
+                    msgs);
+
+                profile.AddNewLocation(
+                    locationname,
+                    streetnumber,
+                    streetname, 
+                    address2, 
+                    neighborhood, 
+                    city, 
+                    county, 
+                    state, 
+                    postalcode, 
+                    country, 
+                    placeid, 
+                    SessionVariables.CurrentUser, 
                     msgs);
             }
 
@@ -1255,69 +1288,32 @@ namespace AfterSchool.Areas.Org.Controllers
         //    return View("Packages", a);
         //}
 
-        //public ActionResult OAuthStripe()
-        //{
-        //    var msgs = new SystemMessages();
+        public ActionResult OAuthStripe()
+        {
+            var msgs = new SystemMessages();
 
-        //    if (Request["error"].IsEmpty())
-        //    {
-        //        try
-        //        {
-        //            string scope = Request["scope"];
-        //            string code = Request["code"];
-        //            string state = Request["state"];
+            if (Request["error"].IsEmpty())
+                SessionVariables.CurrentAccount.CompleteStripeConnect(Request["code"], SessionVariables.CurrentUser, msgs);
+            else
+                msgs.Add("It appears you have canceled your request to connect your Stripe account.", MessageType.Notice);
 
-        //            RestClient rc = new RestClient("https://connect.stripe.com/oauth/token");
-        //            rc.RequestMethod = RestClientRequestMethod.POST;
-        //            rc.Parameters.Add("client_secret", AfterSchoolLibrary.Billing.StripeHelper.SecretKey);
-        //            rc.Parameters.Add("code", code);
-        //            rc.Parameters.Add("grant_type", "authorization_code");
-        //            rc.Parameters.Add("client_id", AfterSchoolLibrary.Billing.StripeHelper.PlatformClientId);
-        //            rc.ContentType = RestClientContentTypeEnum.URLEncoded;
-        //            string responseFromServer = rc.DoRequest();
+            if (msgs.HasNoErrors())
+                return RedirectToAction("paymentsdone", new { source = Request["state"], isfullscreen = Request["isfullscreen"] });
 
-        //            dynamic results = responseFromServer.FromJSON();
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.IsFullScreen = GetIsFullScreen();
+            ViewBag.Messages = msgs;
 
-        //            string token_type = results["token_type"];
-        //            string stripe_publishable_key = results["stripe_publishable_key"];
-        //            bool livemode = results["livemode"];
-        //            string stripe_user_id = results["stripe_user_id"];
-        //            string refresh_token = results["refresh_token"];
-        //            string access_token = results["access_token"];
-        //            scope = results["scope"];
+            return View("PaymentsOptions");
+        }
 
-        //            SessionVariables.CurrentAccount.StripePublishableKey = stripe_publishable_key;
-        //            SessionVariables.CurrentAccount.StripeAccessToken = access_token;
-        //            SessionVariables.CurrentAccount.StripeRefreshToken = refresh_token;
-        //            SessionVariables.CurrentAccount.StripeUserId = stripe_user_id;
-        //            msgs.AddRange(SessionVariables.CurrentAccount.Save());
+        public ActionResult DisconnectStripe()
+        {
+            var msgs = new SystemMessages();
 
-        //            if(msgs.HasNoErrors())
-        //            {
-        //                msgs.Add("Your account has been connected to Stripe", MessageType.Success);
-        //            }
-        //            else
-        //            {
-        //                SessionVariables.CurrentAccount.StripePublishableKey = "";
-        //                SessionVariables.CurrentAccount.StripeAccessToken = "";
-        //                SessionVariables.CurrentAccount.StripeRefreshToken = "";
-        //                SessionVariables.CurrentAccount.StripeUserId = "";
-        //            }
+            SessionVariables.CurrentAccount.DisconnectStripeConnect(SessionVariables.CurrentUser, msgs);
 
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            msgs.Add("An error occurred while connecting your Stripe account.", MessageType.Error, ex);
-        //        }
-        //    }
-        //    else
-        //    {
-        //        msgs.Add("It appears you have canceled your request to connect your Stripe account.", MessageType.Notice);
-        //    }
-
-        //    ViewBag.Messages = msgs;
-
-        //    return View("Payments", SessionVariables.CurrentAccount);
-        //}
+            return RedirectToAction("PaymentsOptions");
+        }
     }
 }

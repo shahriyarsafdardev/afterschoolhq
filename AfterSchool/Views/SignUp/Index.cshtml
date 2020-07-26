@@ -14,10 +14,10 @@
             <div class="sign-up" style="margin: 80px auto;">
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <a href="/"><img src="@UILabel.ProductLogoInverse()" alt="logo" width="350px" class="logo-img"></a>
+                        <a href="/"><img src="@UILabel.ProductLogoInverse()" alt="logo" style="max-width: 100%; width: 350px;" class="logo-img"></a>
                     </div>
                     <div class="panel-body">
-                        <p class="text-medium-small">We just need a little information to get started. Please fill-in the form below.</p>
+                        <p class="text-medium-small text-center">We just need a little information to get started.</p>
 
                         <form action="@Url.Action("index", "signup")" method="post" class="form-horizontal" id="sign-up-form">
                             @{ Html.RenderPartial("~/Views/Shared/Login/_SignUpForm-NewAccount.cshtml", Model); }
@@ -41,3 +41,8 @@
         });
     });
 </script>
+
+@section head
+{
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+}
