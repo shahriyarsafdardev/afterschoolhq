@@ -9,6 +9,8 @@
     var isSelfRegistered = (bool)ViewBag.IsSelfRegistered;
     var assignmentType = (RegistrationAssignmentType)ViewBag.AssignmentType;
     var participationObject = (ParticipationObject)ViewBag.ParticipationObject;
+    var profile = (AccountProfile)ViewBag.Profile;
+    var currentUser = (WebUser)ViewBag.CurrentUser;
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -51,7 +53,7 @@
                         }
                         for <strong>@participationObject.Name</strong>
                     </p>
-                    @if (SessionVariables.CurrentUser.IsRegistered)
+                    @if (currentUser.IsRegistered)
                     {
                         <p>
                             <a href="@Url.Action("index", "home", new { area = "user" })">View your account</a>
@@ -59,16 +61,42 @@
                     }
                 </div>
 
+                @if (profile.IsNotEmpty() && profile.CalendarBookingLink.IsNotEmpty())
+                {
+                    <hr />
+                    <div>
+                        <p class="text-medium-small margin-v-20">
+                            Would you like to book an appointment to learn more about @participationObject.Name and/or @account.Name?
+                        </p>
+                        <p>
+                            <a href="@profile.CalendarBookingLink" class="btn btn-xl btn-register-primary btn-register-xl">
+                                Book Appointment &raquo;
+                            </a>
+                        </p>
+                    </div>
+                }
+
                 <div>
-                    @if (!SessionVariables.CurrentUser.IsRegistered)
+                    @if (!currentUser.IsRegistered)
                     {
-                        <a href="@Url.Action("confirm", "signup", new { id = SessionVariables.CurrentUser.Uid, returnurl = Request.Url.ToString() })" class="btn btn-xl btn-register-primary btn-register-xl">
-                            Complete Account Sign Up &raquo;
-                        </a>
+                        <hr />
+                        <p>
+                            You now started an @UILabel.ProductName() account. Please click the link below to complete your account.
+                        </p>
+                        <p>
+                            <a href="@Url.Action("confirm", "signup", new { id = currentUser.Uid, returnurl = Request.Url.ToString() })">
+                                Complete Account Sign Up &raquo;
+                            </a>
+                        </p>
                     }
                     else
                     {
-                        <a href="@account.HomePageUrl" class="btn btn-xl btn-register-primary btn-register-xl">Register for another activity</a>
+                        <hr />
+                        <div class="margin-v-20">
+                            <p>
+                                <a href="@account.HomePageUrl">Register for another activity</a>
+                            </p>
+                        </div>
                     }
                 </div>
 

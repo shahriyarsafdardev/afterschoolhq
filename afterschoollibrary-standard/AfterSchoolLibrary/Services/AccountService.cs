@@ -2711,7 +2711,7 @@ namespace AfterSchoolLibrary.Services
                     msgs.AddRange(smsgs);
 
                     if (sendConfirmationEmail)
-                        checkoutObject.Registration.SendConfirmation(checkoutObject, null, loggedInUser, true, msgs, dc);
+                        checkoutObject.Registration.SendInterestConfirmation(checkoutObject, null, loggedInUser, true, msgs, dc);
 
                 },
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),

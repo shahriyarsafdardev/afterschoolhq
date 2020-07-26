@@ -331,7 +331,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult Links(string website, string twitter, string facebook, string instagram, string linkedin, string youtube)
+        public ActionResult Links(string website, string twitter, string facebook, string instagram, string linkedin, string youtube, string calendar)
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
@@ -347,7 +347,10 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add("Please enter a valid LinkedIn profile address", MessageType.UserError);
 
             if (youtube.IsNotEmpty() && !youtube.IsRegExMatch(BasicLibrary.Utilities.WebsiteRegEx))
-                msgs.Add("Please enter a valid YouTube profile address", MessageType.UserError);
+                msgs.Add("Please enter a valid YouTube Url", MessageType.UserError);
+
+            if (calendar.IsNotEmpty() && !calendar.IsRegExMatch(BasicLibrary.Utilities.WebsiteRegEx))
+                msgs.Add("Please enter a valid calendar URL", MessageType.UserError);
 
             if (msgs.HasNoErrors())
             {
@@ -366,6 +369,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             instagram: instagram,
                             linkedin: linkedin,
                             youtube: youtube,
+                            calendar: calendar,
                             loggedInUser: SessionVariables.CurrentUser,
                             msgs: amsgs,
                             dc: adc);

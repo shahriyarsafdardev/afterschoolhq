@@ -387,6 +387,7 @@ property: Facebook, string, NVarChar "100"
 property: Instagram, string, NVarChar "100"
 property: LinkedIn, string, NVarChar "100"
 property: YouTube, string, NVarChar "100"
+property: CalendarBookingLink, string, NVarChar "100"
 property: GenderRestriction, GenderRestrictionType, Int
 property: ProfileEmail, string, NVarChar "100"
 property: ProfilePhone, string, NVarChar "20"
@@ -1761,7 +1762,7 @@ values: None, MaleOnly, FemaleOnly
 [begin]
 type: Enum
 name: AccountPropertyType
-values: NotSet, LandingPageText, RegistrationThankYouEmail, ApplicationThankYouEmail, NoActivitiesText, FacebookAdPixel, Award, Certification, Photo, ServiceOffered, TimeOffered, PricingOption, Classifications, SoftSkills, AcademicSubjects, TeachingMethods
+values: NotSet, LandingPageText, RegistrationThankYouEmail, ApplicationThankYouEmail, NoActivitiesText, FacebookAdPixel, Award, Certification, Photo, ServiceOffered, TimeOffered, PricingOption, Classifications, SoftSkills, AcademicSubjects, TeachingMethods, InterestThankYouEmail
 [end]
 
 [begin]

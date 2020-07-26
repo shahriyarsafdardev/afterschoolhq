@@ -215,6 +215,61 @@ namespace AfterSchoolLibrary.Helpers
             msgs.AddRange(mailMsgs);
         }
 
+        public static void SendInterestConfirmation(CheckoutObject checkoutObject, string customMessage, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var registration = checkoutObject.Registration;
+            var participationObject = checkoutObject.ParticipationObject;
+            var registrantActivities = registration.GetRegistrantActivities(msgs, dc);
+            var mainRA = registrantActivities.First(ra => 
+                            ra.ParticipationObjectId == participationObject.ObjectID && 
+                            ra.ParticipationObjectTypeId == participationObject.ObjectType);
+            var interestFormThankYou = participationObject.GetRegistrationThankYou(mainRA, msgs, dc);
+            var masterRegistrant = checkoutObject.MasterRegistrant;
+            var billingAccount = checkoutObject.BillingAccount;
+            var registrationDetails = "Login to your account to view more details.";
+            var loginLink = Utilities.LoginUrl();
+
+            if (customMessage.IsEmpty())
+            {
+                customMessage = interestFormThankYou;
+
+                if (loggedInUser.HasAccessTo(billingAccount))
+                    customMessage = $"{masterRegistrant.FirstName} has registered interest for the following activity:";
+            }
+
+            var model = new NameValueCollection()
+            {
+                { "FirstName", loggedInUser.FirstName },
+                { "ProductName", Utilities.AppName(true) },
+                { "SupportEmail", Email.AppSupportEmailAddress },
+                { "CustomMessage", customMessage },
+                { "LoginLink", loginLink },
+                { "ActivityContactEmail", participationObject.ContactEmail.IfBlank(billingAccount.Email)},
+                { "ActivityContactPhone", participationObject.ContactPhone.IfBlank(billingAccount.Phone)},
+                { "ActivityContactName", participationObject.ContactName.IfBlank(billingAccount.Name)},
+                { "RegistrationDetails", registrationDetails},
+                { "BillerAccountName", billingAccount.Name },
+                { "BillerAccountLink", billingAccount.HomePageUrl },
+            };
+
+            var body = ProcessTemplate(
+                EmailTemplates.Interest_Confirmation,
+                model,
+                "interest-confirmation-1.0.1",
+                msgs);
+
+            var subject = $"Thanks for sharing your interest in {participationObject.Name}";
+
+            var mailMsgs = SendGridHelper.SendMail(
+                fromEmail: Email.SendGridNoReplyEmailAddress(true),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(loggedInUser.Email),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(true));
+
+            msgs.AddRange(mailMsgs);
+        }
+
         public static SystemMessages SendRegistrationConfirmed(CheckoutObject checkoutObject, string customMessage, WebUser loggedInUser, bool isParentCopy, bool sendBcc, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();

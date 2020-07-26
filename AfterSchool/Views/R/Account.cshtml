@@ -416,6 +416,17 @@
                                 </a>
                             </div>
                         }
+                        @if (accountProfile.CalendarBookingLink.IsNotEmpty())
+                        {
+                            <div class="footer-social-icon">
+                                <a href="@accountProfile.CalendarBookingLink"
+                                   target="_blank"
+                                   class="icon-xlarge margin-h-30"
+                                   style="text-decoration: none;">
+                                    <i class="ion-ios-calendar-outline"></i>
+                                </a>
+                            </div>
+                        }
                     </div>
                 </div>
             </div>

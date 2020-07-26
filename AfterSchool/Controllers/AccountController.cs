@@ -1793,14 +1793,18 @@ namespace AfterSchool.Controllers
             var registrant = registration.GetRegistrant(msgs);
             var masterRegistrant = registrant.GetMasterRegistrant(msgs);
             var (participationObject, assignmentType) = GetParticipationObjectFromRegistration(registration, msgs);
+            var account = SessionVariables.RegistrationStartPageAccount ?? participationObject.OwnerAccount;
+            var currentUser = SessionVariables.CurrentUser;
 
             ViewBag.Registration = registration;
-            ViewBag.Account = SessionVariables.RegistrationStartPageAccount ?? participationObject.OwnerAccount;
-            ViewBag.IsSelfRegistered = masterRegistrant.WebUserId == SessionVariables.CurrentUser.ID;
+            ViewBag.Account = account;
+            ViewBag.IsSelfRegistered = masterRegistrant.WebUserId == currentUser.ID;
             ViewBag.Registrant = masterRegistrant;
             ViewBag.Messages = msgs;
             ViewBag.ParticipationObject = participationObject;
             ViewBag.AssignmentType = assignmentType;
+            ViewBag.Profile = account.GetAccountProfile();
+            ViewBag.CurrentUser = currentUser;
         }
 
         private ActionResult ThankYouActionGet(string registrationUid)

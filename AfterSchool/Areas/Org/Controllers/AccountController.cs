@@ -947,7 +947,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult Style(string id, string logo, string headerimage, string about, string title, string headline, string primaryColor, string website, string mingrade, string maxgrade, string twitter, string facebook, string instagram, string linkedin, string youtube, string genderrestriction, string classifications, string softskills, string academicsubjects, string teachingmethods, string profileemail, string profilephone, string locationname, string streetnumber, string streetname, string address2, string neighborhood, string city, string state, string postalcode, string county, string country, string placeid)
+        public ActionResult Style(string id, string logo, string headerimage, string about, string title, string headline, string primaryColor, string website, string mingrade, string maxgrade, string twitter, string facebook, string instagram, string linkedin, string youtube, string calendar, string genderrestriction, string classifications, string softskills, string academicsubjects, string teachingmethods, string profileemail, string profilephone, string locationname, string streetnumber, string streetname, string address2, string neighborhood, string city, string state, string postalcode, string county, string country, string placeid)
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
@@ -980,7 +980,10 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add("Please enter a valid LinkedIn profile address", MessageType.UserError);
 
             if (youtube.IsNotEmpty() && !youtube.IsRegExMatch(BasicLibrary.Utilities.WebsiteRegEx))
-                msgs.Add("Please enter a valid YouTube profile address", MessageType.UserError);
+                msgs.Add("Please enter a valid YouTube URL", MessageType.UserError);
+
+            if (calendar.IsNotEmpty() && !calendar.IsRegExMatch(BasicLibrary.Utilities.WebsiteRegEx))
+                msgs.Add("Please enter a valid calendar URL", MessageType.UserError);
 
             if (msgs.HasNoErrors())
             {
@@ -1039,6 +1042,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     instagram,
                     linkedin,
                     youtube,
+                    calendar,
                     genderrestriction,
                     profileemail,
                     profilephone,

@@ -16,7 +16,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static void SendConfirmation(this Registration registration, CheckoutObject checkoutObject, string customMessage, WebUser loggedInUser, bool sendBcc, SystemMessages msgs, DatabaseConnection dc = null)
-        {
+        {            
             msgs.AddRange(Helpers.EmailHelper.SendRegistrationConfirmed(checkoutObject, customMessage, loggedInUser, false, sendBcc, dc));
 
             // if the person registering is the student
@@ -25,6 +25,11 @@ namespace AfterSchoolLibrary.Services
 
             if (masterRegistrant.IsNotEmpty() && !masterRegistrant.IsParentOrGuardian)
                 msgs.AddRange(Helpers.EmailHelper.SendRegistrationConfirmed(checkoutObject, customMessage, loggedInUser, true, false, dc));
+        }
+
+        public static void SendInterestConfirmation(this Registration registration, CheckoutObject checkoutObject, string customMessage, WebUser loggedInUser, bool sendBcc, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            Helpers.EmailHelper.SendInterestConfirmation(checkoutObject, customMessage, loggedInUser, msgs, dc);
         }
 
         public static void DeleteWithRelatedRecords(this Registration registration, SystemMessages msgs = null, DatabaseConnection dc = null)

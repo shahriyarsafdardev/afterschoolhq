@@ -815,6 +815,7 @@ namespace AfterSchoolLibrary.Services
             var group = values.GetValueOrDefault("group");
             var registrationthankyouemail = values.GetValueOrDefault("registrationthankyouemail");
             var applicationthankyouemail = values.GetValueOrDefault("applicationthankyouemail");
+            var interestthankyouemail = values.GetValueOrDefault("interestthankyouemail");
             var daysoftheweek = values.GetValueOrDefault("daysoftheweek");
             var repeatsweekly = values.GetValueOrDefault("repeatsweekly");
             var isongoing = values.GetValueOrDefault("isongoing");
@@ -1098,6 +1099,7 @@ namespace AfterSchoolLibrary.Services
                             amsgs.AddRange(activity.SetupActivityProperties(
                                 registrationthankyouemail.IfEmpty(null),
                                 applicationthankyouemail.IfEmpty(null),
+                                interestthankyouemail.IfEmpty(null),
                                 loggedInUserId,
                                 adc));
 
@@ -1546,7 +1548,7 @@ namespace AfterSchoolLibrary.Services
             //}
         }
 
-        private static SystemMessages SetupActivityProperties(this Activity activity, string registrationthankyouemail, string applicationthankyouemail, int loggedInUserId, DatabaseConnection dc = null)
+        private static SystemMessages SetupActivityProperties(this Activity activity, string registrationthankyouemail, string applicationthankyouemail, string interestthankyouemail, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
 
@@ -1562,6 +1564,14 @@ namespace AfterSchoolLibrary.Services
                 activity.AddOrUpdateActivityProperty(
                     AccountPropertyType.RegistrationThankYouEmail,
                     registrationthankyouemail,
+                    loggedInUserId,
+                    msgs,
+                    dc: dc);
+
+            if (interestthankyouemail != null)
+                activity.AddOrUpdateActivityProperty(
+                    AccountPropertyType.InterestThankYouEmail,
+                    interestthankyouemail,
                     loggedInUserId,
                     msgs,
                     dc: dc);

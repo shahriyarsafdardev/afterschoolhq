@@ -375,6 +375,18 @@ namespace AfterSchoolLibrary.Models
                         .GetGroupProperty(AccountPropertyType.ApplicationThankYouEmail, msgs, dc)?
                         .Value;
             }
+            else if (registrantActivity.AssignmentTypeId == RegistrationAssignmentType.Interested)
+            {
+                if (IsActivity())
+                    return this.GetActivity().GetActivityProperty(AccountPropertyType.InterestThankYouEmail, msgs, dc)?.Value;
+                else if (IsActivityGroup())
+                    return this.GetActivityGroup().GetGroupProperty(AccountPropertyType.InterestThankYouEmail, msgs, dc)?.Value;
+                else if (IsAccountActivityGroup())
+                    return this.GetAccountActivityGroup()
+                        .GetActivityGroup(msgs, dc)
+                        .GetGroupProperty(AccountPropertyType.InterestThankYouEmail, msgs, dc)?
+                        .Value;
+            }
             else
             {
                 if (ObjectType == ParticipationObjectType.Activity)
