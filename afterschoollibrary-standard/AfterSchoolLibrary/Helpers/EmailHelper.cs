@@ -276,6 +276,20 @@ namespace AfterSchoolLibrary.Helpers
                 body: body,
                 emailTemplateId: SendGridHelper.GetGenericTemplateId(true));
 
+            // Send BCC
+            var emails = new List<string>();
+
+            if (participationObject.ContactEmail.IsEmail() && participationObject.ContactEmail.ToLower().NotIn(emails))
+                emails.Add(participationObject.ContactEmail.ToLower());
+
+            emails.ForEach(email =>
+                SendGridHelper.SendMail(
+                    fromEmail: Email.SendGridNoReplyEmailAddress(true),
+                    toEmail: new SendGrid.Helpers.Mail.EmailAddress(email),
+                    subject: $"Interest Form CC: {subject}",
+                    body: body,
+                    emailTemplateId: SendGridHelper.GetGenericTemplateId(true)));
+
             msgs.AddRange(mailMsgs);
         }
 
