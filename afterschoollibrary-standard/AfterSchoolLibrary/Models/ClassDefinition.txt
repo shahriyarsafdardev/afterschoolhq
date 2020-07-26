@@ -1659,14 +1659,24 @@ name: Subscriber
 inherits: BasicObjectWithModified
 property: WebUserId, int?, Int, Required, The user who is subscribed
 property: Uid, Guid, UniqueIdentifier, Required
-property: AccountId, int?, Int, Required, The account the user is subscribed to
+property: AccountId, int?, Int, Required, The account the user is subscribed to, deprecated
+property: ObjectId, int?, Int, Required, The object id that the user is subscribed to
+property: ObjectTypeId, AHQObjectType, Int, Required, The object type the user is subscribed to
 property: SubscriberStatusId, SubscriberStatus, Int
 loadmethod: Uid
 loadmethod: AccountId|WebUserId
+loadmethod: ObjectId|ObjectTypeId|WebUserId
 loadmethod: WebUserId, List<>
 loadmethod: AccountId, List<>
+loadmethod: ObjectId|ObjectTypeId, List<>
 loadmethod: WebUserId|SubscriberStatusId, List<>
-loadmethod: AccountId|SubscriberStatusId, List<>
+loadmethod: ObjectId|ObjectTypeId|SubscriberStatusId, List<>
+[end]
+
+[begin]
+type: Enum
+name: AHQObjectType
+values: NotSet, Account, Activity, ActivityGroup, AccountActivityGroup
 [end]
 
 [begin]

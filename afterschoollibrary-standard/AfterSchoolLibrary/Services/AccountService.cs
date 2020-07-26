@@ -2705,6 +2705,7 @@ namespace AfterSchoolLibrary.Services
 
                     // subscribe to the account
                     checkoutObject.BillingAccount.AddOrUpdateSubscriber(loggedInUser, SubscriberStatus.Subscribed, loggedInUser, amsgs, adc);
+                    checkoutObject.ParticipationObject.AddOrUpdateSubscriber(loggedInUser, SubscriberStatus.Subscribed, loggedInUser, amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {
@@ -3460,7 +3461,12 @@ namespace AfterSchoolLibrary.Services
 
         public static Subscriber AddOrUpdateSubscriber(this Account account, WebUser user, SubscriberStatus status, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var subscriber = Subscriber.LoadByAccountIdByWebUserId(account.ID.Value, user.ID.Value, msgs, dc);
+            var subscriber = Subscriber.LoadByObjectIdByObjectTypeIdByWebUserId(
+                                account.ID.Value, 
+                                AHQObjectType.Account,
+                                user.ID.Value, 
+                                msgs, 
+                                dc);
 
             if (subscriber.IsEmpty())
                 return SubscriberService.CreateNew(account, user, status, loggedInUser, msgs, dc);

@@ -330,6 +330,7 @@ namespace AfterSchoolLibrary.Models
 			RefundRequest.Update(new Hashtable(){{"RefundRequestStatusId",0}}, new Hashtable(){{"RefundRequestStatusId", DBNull.Value}}, RefundRequest.ObjectMap, dc);
 			RefundRequest.Update(new Hashtable(){{"RequestedRefundTypeId",0}}, new Hashtable(){{"RequestedRefundTypeId", DBNull.Value}}, RefundRequest.ObjectMap, dc);
 			RefundRequest.Update(new Hashtable(){{"ApprovedRefundTypeId",0}}, new Hashtable(){{"ApprovedRefundTypeId", DBNull.Value}}, RefundRequest.ObjectMap, dc);
+			Subscriber.Update(new Hashtable(){{"ObjectTypeId",0}}, new Hashtable(){{"ObjectTypeId", DBNull.Value}}, Subscriber.ObjectMap, dc);
 			Subscriber.Update(new Hashtable(){{"SubscriberStatusId",0}}, new Hashtable(){{"SubscriberStatusId", DBNull.Value}}, Subscriber.ObjectMap, dc);
 			
 			//**ENDUPDATES**//
@@ -620,10 +621,12 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RefundRequest_RefundRequestStatusId ON [RefundRequest] (RefundRequestStatusId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Subscriber_Uid ON [Subscriber] (Uid)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Subscriber_AccountId_WebUserId ON [Subscriber] (AccountId,WebUserId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Subscriber_ObjectId_ObjectTypeId_WebUserId ON [Subscriber] (ObjectId,ObjectTypeId,WebUserId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Subscriber_WebUserId ON [Subscriber] (WebUserId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Subscriber_AccountId ON [Subscriber] (AccountId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Subscriber_ObjectId_ObjectTypeId ON [Subscriber] (ObjectId,ObjectTypeId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Subscriber_SubscriberStatusId_WebUserId ON [Subscriber] (WebUserId,SubscriberStatusId)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Subscriber_AccountId_SubscriberStatusId ON [Subscriber] (AccountId,SubscriberStatusId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Subscriber_ObjectId_ObjectTypeId_SubscriberStatusId ON [Subscriber] (ObjectId,ObjectTypeId,SubscriberStatusId)"));
 			
 
 			return msgs;

@@ -609,6 +609,23 @@ namespace AfterSchoolLibrary.Models
             return GetActivityId() ?? GetActivityGroupId() ?? GetAccountActivityGroupId();
         }
 
+        public Subscriber AddOrUpdateSubscriber(WebUser user, SubscriberStatus status, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var subscriber = Subscriber.LoadByObjectIdByObjectTypeIdByWebUserId(
+                                this.ObjectID.Value,
+                                this.ObjectType.ToAHQObjectType(),
+                                user.ID.Value, 
+                                msgs, 
+                                dc);
+
+            if (subscriber.IsEmpty())
+                return SubscriberService.CreateNew(this, user, status, loggedInUser, msgs, dc);
+
+            subscriber.UpdateSubscriber(status, loggedInUser, msgs, dc);
+
+            return subscriber;
+        }
+
         #endregion
 
         #region Financial
