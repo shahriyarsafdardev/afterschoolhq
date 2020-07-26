@@ -78,9 +78,11 @@ namespace AfterSchool.Controllers
         public ActionResult Interested(string regaccount)
         {
             var msgs = new SystemMessages();
+            var currentUser = SessionVariables.CurrentUser;
+            var registrationStartPageAccount = SessionVariables.RegistrationStartPageAccount;
 
             // handles admin accounts that have or need parent accounts
-            var redirectResult = HandleGetStartedAccountRedirect(msgs);
+            var redirectResult = HandleGetStartedAccountRedirect(true, msgs);
             if (redirectResult.IsNotEmpty())
                 return redirectResult;
 
@@ -94,15 +96,15 @@ namespace AfterSchool.Controllers
             // no activity is selected
             if (participationObject.IsEmpty())
             {
-                if (SessionVariables.RegistrationStartPageAccount.IsNotEmpty() || registrationAccount.IsNotEmpty())
-                    return Redirect(SessionVariables.RegistrationStartPageAccount?.HomePageUrl ?? registrationAccount?.HomePageUrl);
+                if (registrationStartPageAccount.IsNotEmpty() || registrationAccount.IsNotEmpty())
+                    return Redirect(registrationStartPageAccount?.HomePageUrl ?? registrationAccount?.HomePageUrl);
 
                 return HttpNotFound();
             }
 
             // pre-load phone number
-            if (SessionVariables.CurrentUser.IsNotEmpty())
-                qvms.Find(item => item.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone).Value = SessionVariables.CurrentUser.Phone;
+            if (currentUser.IsNotEmpty())
+                qvms.Find(item => item.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone).Value = currentUser.Phone;
 
             ViewBag.RegistrationAccount = registrationAccount;
             ViewBag.AccountProfile = participationObject.OwnerAccount.GetAccountProfile(msgs);
@@ -283,7 +285,7 @@ namespace AfterSchool.Controllers
             return qvms;
         }
 
-        private ActionResult HandleGetStartedAccountRedirect(SystemMessages msgs)
+        private ActionResult HandleGetStartedAccountRedirect(bool isInterestForm, SystemMessages msgs)
         {
             var currentUser = SessionVariables.CurrentUser;
             var currentAccount = SessionVariables.CurrentAccount;
@@ -315,7 +317,7 @@ namespace AfterSchool.Controllers
                         msgs);
 
                 // if you have a completed parent profile
-                if (masterRegistrant.IsNotEmpty() && masterRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed)
+                if (masterRegistrant.IsNotEmpty() && masterRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed && !isInterestForm)
                     return RedirectToAction("select");
             }
 
@@ -328,7 +330,7 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
 
             // handles admin accounts that have or need parent accounts
-            var redirectResult = HandleGetStartedAccountRedirect(msgs);
+            var redirectResult = HandleGetStartedAccountRedirect(false, msgs);
             if (redirectResult.IsNotEmpty())
                 return redirectResult;
 
