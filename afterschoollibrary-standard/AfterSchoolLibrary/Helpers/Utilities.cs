@@ -231,8 +231,13 @@ namespace AfterSchoolLibrary.Helpers
         }
 
         public static string LoginUrl(string redirectUrl = null)
-        {            
+        {
             return $"{BaseUrl()}/login{(redirectUrl.IsNotEmpty() ? $"?returnurl={HttpUtility.UrlEncode(redirectUrl)}" : "")}";
+        }
+
+        public static string CompleteSignUpUrl(Guid currentUserUid, string redirectUrl = null)
+        {
+            return $"{BaseUrl()}/signup/confirm/{currentUserUid.ToString()}{(redirectUrl.IsNotEmpty() ? $"?returnurl={HttpUtility.UrlEncode(redirectUrl)}" : "")}";
         }
 
         public static bool UseSSL()

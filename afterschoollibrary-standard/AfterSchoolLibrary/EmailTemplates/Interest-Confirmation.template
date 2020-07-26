@@ -4,10 +4,10 @@
   <p>@Model.CustomMessage</p>
 
   <p>
-    <a href="@Model.LoginLink">@Model.RegistrationDetails</a>
+    <a href="@Model.ActionLink">@Model.RegistrationDetails</a>
   </p>
   
-  <p>
+  <p>ActionLink
     If you have any questions or concerns please contact @Model.ActivityContactName either by phone (@Model.ActivityContactPhone) or email (<a href="mailto:@Model.ActivityContactEmail">@Model.ActivityContactEmail</a>).
   </p>
 

@@ -226,15 +226,24 @@ namespace AfterSchoolLibrary.Helpers
             var interestFormThankYou = participationObject.GetRegistrationThankYou(mainRA, msgs, dc);
             var masterRegistrant = checkoutObject.MasterRegistrant;
             var billingAccount = checkoutObject.BillingAccount;
+            var actionLink = Utilities.LoginUrl();
             var registrationDetails = "Login to your account to view more details.";
-            var loginLink = Utilities.LoginUrl();
 
             if (customMessage.IsEmpty())
             {
                 customMessage = interestFormThankYou;
 
+                if (interestFormThankYou.IsNotEmpty())
+                    customMessage = "Thank you for your interest. We will be in touch with you soon to follow up.";
+
                 if (loggedInUser.HasAccessTo(billingAccount))
-                    customMessage = $"{masterRegistrant.FirstName} has registered interest for the following activity:";
+                    customMessage = $"{masterRegistrant.FirstName} has registered interest for the following activity. Please reach out to them or add them to your mailing list";
+            }
+
+            if (!loggedInUser.IsRegistered)
+            {
+                actionLink = Utilities.CompleteSignUpUrl(loggedInUser.Uid);
+                registrationDetails = "Click here to complete your account sign up";
             }
 
             var model = new NameValueCollection()
@@ -243,7 +252,7 @@ namespace AfterSchoolLibrary.Helpers
                 { "ProductName", Utilities.AppName(true) },
                 { "SupportEmail", Email.AppSupportEmailAddress },
                 { "CustomMessage", customMessage },
-                { "LoginLink", loginLink },
+                { "ActionLink", actionLink },
                 { "ActivityContactEmail", participationObject.ContactEmail.IfBlank(billingAccount.Email)},
                 { "ActivityContactPhone", participationObject.ContactPhone.IfBlank(billingAccount.Phone)},
                 { "ActivityContactName", participationObject.ContactName.IfBlank(billingAccount.Name)},
