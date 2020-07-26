@@ -3,15 +3,224 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using Newtonsoft.Json.Converters;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Management;
 using System.Web.Mvc;
 
 namespace AfterSchool.Controllers
 {
     public class AccountController : BaseController
     {
+        #region Interested
+
+        private List<FormQuestionViewModel> InterestedViewBag(ParticipationObject participationObject, SystemMessages msgs)
+        {
+            var currentUser = SessionVariables.CurrentUser;
+            var form = GetInterestForm(msgs);
+            var intererestGroup = form.GetQuestionGroups(msgs)
+                                    .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.RegistrantInterestInformation);
+            var questions = intererestGroup.GetAllQuestions(msgs);
+
+            var nonIncludedQuestionsExistingUser = new List<QuestionDataType>()
+            {
+                QuestionDataType.RegistrantFirstName,
+                QuestionDataType.RegistrantLastName,
+                QuestionDataType.RegistrantEmail
+            };
+
+            questions.ForEach(question =>
+            {
+                switch (question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.RegistrantFirstName:
+                    case QuestionDataType.RegistrantLastName:
+                    case QuestionDataType.RegistrantEmail:
+                    case QuestionDataType.RegistrantChild1Grade:
+                        question.IsRequired = true;
+                        break;
+                    case QuestionDataType.RegistrantChild2Grade:
+                    case QuestionDataType.RegistrantChild3Grade:
+                    case QuestionDataType.RegistrantChild4Grade:
+                    case QuestionDataType.RegistrantChild5Grade:
+                    case QuestionDataType.RegistrantMobilePhone:
+                        question.IsRequired = false;
+                        break;
+                }
+            });
+
+            ViewBag.ParticipationObject = participationObject;
+
+            var qvms = questions.Select(question => new FormQuestionViewModel(question, Request.Params)).ToList();
+
+            if (!currentUser.IsEmpty())
+            {
+                qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).Value = currentUser.FirstName;
+                qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).Value = currentUser.LastName;
+                qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail).Value = currentUser.Email;
+
+                qvms.ForEach(qvm =>
+                {
+                    if (qvm.Question.QuestionDataTypeId.In(nonIncludedQuestionsExistingUser))
+                    {
+                        qvm.Hide = true;
+                        qvm.Question.IsRequired = false;
+                    }
+                });
+            }
+
+            return qvms;
+        }
+
+        [HttpGet]
+        public ActionResult Interested(string regaccount)
+        {
+            var msgs = new SystemMessages();
+            var currentUser = SessionVariables.CurrentUser;
+            var registrationStartPageAccount = SessionVariables.RegistrationStartPageAccount;
+
+            // handles admin accounts that have or need parent accounts
+            var redirectResult = HandleGetStartedAccountRedirect(true, msgs);
+            if (redirectResult.IsNotEmpty())
+                return redirectResult;
+
+            var participationObject = GetParticipationObjectFromCart();
+            var qvms = InterestedViewBag(participationObject, msgs);
+            Account registrationAccount = null;
+
+            if (regaccount.IsGuid())
+                registrationAccount = Account.LoadByUid(regaccount.ToGuid(), msgs);
+
+            // no activity is selected
+            if (participationObject.IsEmpty())
+            {
+                if (registrationStartPageAccount.IsNotEmpty() || registrationAccount.IsNotEmpty())
+                    return Redirect(registrationStartPageAccount?.HomePageUrl ?? registrationAccount?.HomePageUrl);
+
+                return HttpNotFound();
+            }
+
+            // pre-load phone number
+            if (currentUser.IsNotEmpty())
+                qvms.Find(item => item.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone).Value = currentUser.Phone;
+
+            ViewBag.RegistrationAccount = registrationAccount;
+            ViewBag.AccountProfile = participationObject.OwnerAccount.GetAccountProfile(msgs);
+            ViewBag.Messages = msgs;
+
+            return View(qvms);
+        }
+
+        [HttpPost]
+        public ActionResult Interested(string regaccount, string agree)
+        {
+            var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();
+            var participationObject = GetParticipationObjectFromCart();
+            var qvms = InterestedViewBag(participationObject, msgs);
+
+            WebUser user = null;
+            Account account = null;
+            Registrant registrant = null;
+            Registration registration = null;
+            Registrant submittedRecord = null;
+            RegistrationPeriod period = null;
+
+            qvms.ForEach(qvm =>
+            {
+                if (qvm.Question.IsRequired && qvm.Value.IsEmpty())
+                    msgs.Add($"{qvm.Question.Text} is required", MessageType.UserError);
+
+                switch (qvm.Question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.RegistrantMobilePhone:
+                        if (qvm.Value.IsNotEmpty() && !qvm.Value.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                            msgs.Add($"{qvm.Question.Text} must be a valid phone number", MessageType.UserError);
+                        break;
+
+                }
+            });
+
+            if (!agree.IsBoolean())
+                msgs.Add("You must agree to the terms of service", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                var firstName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName);
+                var lastName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName);
+                var email = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail);
+                var phone = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone);
+
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        user = CreateOrUpdateInterestedUser(
+                            currentUser,
+                            firstName.Value,
+                            lastName.Value,
+                            email.Value,
+                            phone.Value,
+                            amsgs,
+                            adc);
+                        
+                        if (amsgs.HasNoErrors())
+                            account = CreateOrUpdateAccount(user, amsgs, adc);
+
+                        if (amsgs.HasNoErrors())
+                        {
+                            registrant = CreateOrUpdateRegistrant(account, user, amsgs, adc);
+
+                            if (amsgs.HasNoErrors())
+                                AddOrUpdateStandardAnswers(qvms, registrant, user, amsgs, adc);
+                        }
+
+                        if (amsgs.HasNoErrors())
+                        {
+                            (submittedRecord, registration) = registrant.GetSubmittedRecord(participationObject, amsgs, adc);
+                            period = participationObject.GetCurrentRegistrationPeriod(amsgs, adc);
+
+                            SubmitRecord(ref registration, submittedRecord, registrant, participationObject, user, period, null, amsgs, adc);
+                        }
+
+                        if (msgs.HasNoErrors())
+                            AccountService.ProcessInterestRegistration(
+                                checkoutObject: new CheckoutObject()
+                                {
+                                    BillingAccount = participationObject.OwnerAccount,
+                                    PayingAccount = account,
+                                    NumberOfSeats = 1,
+                                    ParticipationObject = participationObject,
+                                    Registration = registration,
+                                    MasterRegistrant = registrant,
+                                },
+                                sendConfirmationEmail: true,
+                                loggedInUser: user,
+                                msgs: amsgs,
+                                dc: adc);
+
+                    },
+                    onSuccess: (SystemMessages smsgs) =>
+                    {
+                        msgs.AddRange(smsgs);
+                        LoadSessionInfo(user, account);
+                    },
+                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                    onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                );
+            }
+
+            if (msgs.HasNoErrors())
+                return RedirectToAction("thankyou", new { id = registration.Uid });
+
+            ViewBag.Messages = msgs;
+
+            return View(qvms);
+        }
+
+        #endregion
 
         #region GetStartedParent
 
@@ -76,23 +285,23 @@ namespace AfterSchool.Controllers
             return qvms;
         }
 
-        private ActionResult HandleGetStartedAccountRedirect(SystemMessages msgs)
+        private ActionResult HandleGetStartedAccountRedirect(bool isInterestForm, SystemMessages msgs)
         {
-            if (SessionVariables.CurrentUser.IsNotEmpty())
-            {
-                var registrantAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var currentAccount = SessionVariables.CurrentAccount;
 
-                if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant)
+            if (currentUser.IsNotEmpty())
+            {
+                var registrantAccount = currentAccount;
+
+                if (currentAccount.AccountTypeId != AccountType.Registrant)
                 {
                     //check if the user has a parent account
-                    registrantAccount = SessionVariables.CurrentUser.GetRegistrantAccount(msgs);
+                    registrantAccount = currentUser.GetRegistrantAccount(msgs);
 
                     // if no parent account, then create one real quick
                     if (registrantAccount.IsEmpty())
-                    {
-                        var user = SessionVariables.CurrentUser;
-                        registrantAccount = user.AddNewRegistrantAccount(UserType.Owner, true, true, user, msgs);
-                    }
+                        registrantAccount = currentUser.AddNewRegistrantAccount(UserType.Owner, true, true, currentUser, msgs);
                 }
 
                 var masterRegistrant = SessionVariables.CurrentUser.GetMasterRegistrant(msgs);
@@ -100,15 +309,15 @@ namespace AfterSchool.Controllers
                 if (masterRegistrant.IsNotEmpty())
                     registrantAccount = masterRegistrant.GetAccount(msgs);
 
-                if (registrantAccount.ID != SessionVariables.CurrentAccount.ID)
+                if (registrantAccount.ID != currentAccount.ID)
                     LoadSessionInfo(
-                        SessionVariables.CurrentUser,
+                        currentUser,
                         registrantAccount,
                         false,
                         msgs);
 
                 // if you have a completed parent profile
-                if (masterRegistrant.IsNotEmpty() && masterRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed)
+                if (masterRegistrant.IsNotEmpty() && masterRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed && !isInterestForm)
                     return RedirectToAction("select");
             }
 
@@ -121,7 +330,7 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
 
             // handles admin accounts that have or need parent accounts
-            var redirectResult = HandleGetStartedAccountRedirect(msgs);
+            var redirectResult = HandleGetStartedAccountRedirect(false, msgs);
             if (redirectResult.IsNotEmpty())
                 return redirectResult;
 
@@ -158,6 +367,7 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             var participationObject = GetParticipationObjectFromCart();
             var qvms = GetStartedParentViewBag(participationObject, msgs);
+            var currentUser = SessionVariables.CurrentUser;
 
             qvms.ForEach(qvm =>
             {
@@ -176,7 +386,7 @@ namespace AfterSchool.Controllers
                 }
             });
 
-            if (SessionVariables.CurrentUser.IsEmpty())
+            if (currentUser.IsEmpty())
             {
                 if (password1.IsEmpty())
                     msgs.Add("Password 1 is required", MessageType.UserError);
@@ -200,83 +410,31 @@ namespace AfterSchool.Controllers
 
                 WebUser user = null;
                 Account account = null;
+                Registrant registrant = null;
 
                 Database.ExecuteTransaction
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        if (SessionVariables.CurrentUser.IsEmpty())
-                            // create user
-                            user = WebUserService.CreateNew(
-                                firstName: firstName.Value,
-                                lastName: lastName.Value,
-                                email: email.Value.Trim(),
-                                phone: phone.Value.Trim(),
-                                password: password1,
-                                isActive: true,
-                                isRegistered: true,
-                                isVerified: false,
-                                allowTextMessages: textnotifications.IfBlank("0").ToBoolean(),
-                                loggedInUser: null,
-                                msgs: amsgs,
-                                dc: adc);
-                        else
-                        {
-                            user = SessionVariables.CurrentUser;
-                            user.Phone = phone.Value.Trim();
-                            user.AllowTextMessages = textnotifications.IfBlank("0").ToBoolean();
-                            user.LastModifiedBy = SessionVariables.CurrentUser.ID;
-                            user.LastModifiedDate = System.DateTime.UtcNow;
-                            amsgs.AddRange(user.Save(adc));
-                        }
+                        user = CreateOrUpdateUser(
+                            currentUser,
+                            firstName.Value,
+                            lastName.Value,
+                            email.Value,
+                            phone.Value,
+                            password1,
+                            textnotifications.IfBlank("0").ToBoolean(),
+                            amsgs,
+                            adc);
 
                         if (amsgs.HasNoErrors())
-                        {
-                            account = user.GetRegistrantAccount(amsgs, adc);
-
-                            // create account
-                            if (account.IsEmpty())
-                                account = user.AddNewRegistrantAccount(
-                                    userType: UserType.Owner,
-                                    isActive: true,
-                                    isAfterSchool: SessionVariables.IsAfterSchool.Value,
-                                    loggedInUser: user,
-                                    msgs: amsgs,
-                                    dc: adc);
-                        }
+                            account = CreateOrUpdateAccount(user, amsgs, adc);
 
                         if (amsgs.HasNoErrors())
-                        {
-                            var registrant = account.GetFirstParentOrGuardianRegistrant(amsgs, adc);
+                            registrant = CreateOrUpdateRegistrant(account, user, amsgs, adc);
 
-                            if (registrant.IsEmpty())
-                                // create parent registrant record
-                                registrant = account.CreateRegistrant(
-                                    registrantOwner: user,
-                                    canBeAccessedBy: user.AsList(),
-                                    registrantType: RegistrantType.Individual,
-                                    isMaster: true,
-                                    isParentOrGuardian: true,
-                                    allowTextMessages: textnotifications.IfBlank("0").ToBoolean(),
-                                    schoolLocationId: null,
-                                    profileStatus: RegistrantProfileStatus.Started,
-                                    loggedInUser: user,
-                                    msgs: amsgs,
-                                    dc: adc);
-
-                            if (amsgs.HasNoErrors())
-                                // add answers to parent registrant record
-                                // will be used later to copy information over to student records
-                                qvms.ForEach(qvm =>
-                                {
-                                    registrant.AddOrUpdateAnswer(
-                                        answerText: qvm.Value.IfEmpty("").Trim(),
-                                        question: qvm.Question,
-                                        loggedInUser: user,
-                                        msgs: amsgs,
-                                        dc: adc);
-                                });
-                        }
+                        if (amsgs.HasNoErrors())
+                            AddOrUpdateStandardAnswers(qvms, registrant, user, amsgs, adc);
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
@@ -1245,99 +1403,40 @@ namespace AfterSchool.Controllers
             var currentRegistrant = SessionVariables.CurrentRegistrant;
             var currentUser = SessionVariables.CurrentUser;
 
-            (submittedRecord, registration) = SessionVariables.CurrentRegistrant.GetSubmittedRecord(participationObject, msgs);
+            (submittedRecord, registration) = currentRegistrant.GetSubmittedRecord(participationObject, msgs);
 
             if (msgs.HasNoErrors())
-            {
                 Database.ExecuteTransaction
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
                         period = participationObject.GetCurrentRegistrationPeriod(amsgs, adc);
 
-                        qvms.Where(qvm => qvm.Question.QuestionDataTypeId != QuestionDataType.NotSet)
-                        .ToList()
-                        .ForEach(qvm =>
-                        {
-                            currentRegistrant.AddOrUpdateAnswer(
-                                answerText: qvm.Value,
-                                question: qvm.Question,
-                                loggedInUser: currentUser,
-                                msgs: amsgs,
-                                dc: adc);
-                        });
+                        AddOrUpdateStandardAnswers(
+                            qvms, 
+                            currentRegistrant,
+                            currentUser,
+                            amsgs,
+                            adc);
 
-                        // account gets copy / snapshot of master registrant record
-                        // required in order to make sure registration data doesn't change as registrant changes information in master record.
-                        if (submittedRecord.IsEmpty())
-                        {
-                            submittedRecord = currentRegistrant.SubmitRecordToAccount(
-                                ownerAccount: participationObject.OwnerAccount,
-                                loggedInUser: currentUser,
-                                msgs: amsgs,
-                                dc: adc
-                                );
+                        SubmitRecord(
+                            ref registration,
+                            submittedRecord,
+                            currentRegistrant,
+                            participationObject,
+                            currentUser,
+                            period,
+                            signature,
+                            amsgs, 
+                            adc);
 
-                            // create or update registration
-                            registration = submittedRecord.AddRegistrationWithESignature(
-                                ownerAccountId: participationObject.OwnerAccount.ID.Value,
-                                activityGroupId: participationObject.GetAnyRelatedActivityGroupId(),
-                                accountActivityGroupId: participationObject.GetAccountActivityGroupId(),
-                                periodId: period?.ID,
-                                esignature: signature,
-                                loggedInUserId: currentUser.ID.Value,
-                                msgs: amsgs,
-                                dc: adc);
-                        }
-                        else
-                            registration.AddESignature(
-                                esignature: signature,
-                                loggedInUser: currentUser,
-                                msgs: amsgs,
-                                dc: adc);
-
-                        //copy all answers from the main account to the registrant & registration :)
-                        currentRegistrant.CopyAnswersTo(
-                            copyToRegistrant: submittedRecord,
-                            registration: registration,
-                            loggedInUser: currentUser,
-                            msgs: amsgs,
-                            dc: adc);
-
-                        // add custom answers to questions directly to this registration
-                        qvms.Where(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.NotSet)
-                        .ToList()
-                        .ForEach(qvm =>
-                        {
-                            if (qvm.Question.QuestionTypeId == QuestionType.FileUpload)
-                            {
-                                if (Request.Files[qvm.Name].IsNotEmpty() && Request.Files[qvm.Name].ContentLength > 0)
-                                {
-                                    var currentFileSizeInBytes = Request.Files[qvm.Name].ContentLength;
-                                    //5 MB = 5242880 Bytes
-                                    //File uploaded here should be less than of 5MB
-                                    if (currentFileSizeInBytes <= 5242880)
-                                        submittedRecord.AddOrUpdateAnswer(
-                                            file: Request.Files[qvm.Name].InputStream,
-                                            filename: Request.Files[qvm.Name].FileName,
-                                            question: qvm.Question,
-                                            registrationId: registration.ID,
-                                            loggedInUser: currentUser,
-                                            msgs: amsgs,
-                                            dc: adc);
-                                    else
-                                        msgs.Add("Upload a file less than or equal to 5 megabytes", MessageType.UserError);
-                                }
-                            }
-                            else
-                                submittedRecord.AddOrUpdateAnswer(
-                                    answerText: qvm.Value,
-                                    question: qvm.Question,
-                                    registrationId: registration.ID,
-                                    loggedInUser: currentUser,
-                                    msgs: amsgs,
-                                    dc: adc);
-                        });
+                        AddCustomQuestionsToRegistration(
+                            qvms,
+                            submittedRecord,
+                            registration,
+                            currentUser,
+                            amsgs,
+                            adc);
 
                         if (amsgs.HasNoErrors())
                             AddSessionActivitiesToRegistration(
@@ -1353,7 +1452,6 @@ namespace AfterSchool.Controllers
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                     onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
                 );
-            }
 
             if (msgs.HasNoErrors())
             {
@@ -1700,14 +1798,18 @@ namespace AfterSchool.Controllers
             var registrant = registration.GetRegistrant(msgs);
             var masterRegistrant = registrant.GetMasterRegistrant(msgs);
             var (participationObject, assignmentType) = GetParticipationObjectFromRegistration(registration, msgs);
+            var account = SessionVariables.RegistrationStartPageAccount ?? participationObject.OwnerAccount;
+            var currentUser = SessionVariables.CurrentUser;
 
             ViewBag.Registration = registration;
-            ViewBag.Account = SessionVariables.RegistrationStartPageAccount ?? participationObject.OwnerAccount;
-            ViewBag.IsSelfRegistered = masterRegistrant.WebUserId == SessionVariables.CurrentUser.ID;
+            ViewBag.Account = account;
+            ViewBag.IsSelfRegistered = masterRegistrant.WebUserId == currentUser.ID;
             ViewBag.Registrant = masterRegistrant;
             ViewBag.Messages = msgs;
             ViewBag.ParticipationObject = participationObject;
             ViewBag.AssignmentType = assignmentType;
+            ViewBag.Profile = account.GetAccountProfile();
+            ViewBag.CurrentUser = currentUser;
         }
 
         private ActionResult ThankYouActionGet(string registrationUid)
@@ -2198,6 +2300,189 @@ namespace AfterSchool.Controllers
             return null;
         }
 
+        private WebUser CreateOrUpdateUser(WebUser currentUser, string firstName, string lastName, string email, string phone, string password, bool allowTextMessages, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            WebUser user = null;
+
+            if (currentUser.IsEmpty())
+                // create user
+                user = WebUserService.CreateNew(
+                    firstName: firstName,
+                    lastName: lastName,
+                    email: email.Trim(),
+                    phone: phone.Trim(),
+                    password: password,
+                    isActive: true,
+                    isRegistered: true,
+                    isVerified: false,
+                    allowTextMessages: allowTextMessages,
+                    loggedInUser: null,
+                    msgs: msgs,
+                    dc: dc);
+            else
+            {
+                user = SessionVariables.CurrentUser;
+                user.Phone = phone.Trim();
+                user.AllowTextMessages = allowTextMessages;
+                user.LastModifiedBy = currentUser.ID;
+                user.LastModifiedDate = System.DateTime.UtcNow;
+                msgs.AddRange(user.Save(dc));
+            }
+
+            return user;
+        }
+
+        private WebUser CreateOrUpdateInterestedUser(WebUser currentUser, string firstName, string lastName, string email, string phone, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            WebUser user;
+
+            if (currentUser.IsEmpty())
+            {
+                user = WebUserService.StartUserAccount(firstName, lastName, email, msgs, dc);
+            }
+            else
+            {
+                user = currentUser;
+                user.Phone = phone.Trim();
+                user.LastModifiedBy = currentUser.ID;
+                user.LastModifiedDate = System.DateTime.UtcNow;
+                msgs.AddRange(user.Save(dc));
+            }
+
+            return user;
+        }
+
+        private Account CreateOrUpdateAccount(WebUser user, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var account = user.GetRegistrantAccount(msgs, dc);
+
+            // create account
+            if (account.IsEmpty())
+                account = user.AddNewRegistrantAccount(
+                    userType: UserType.Owner,
+                    isActive: true,
+                    isAfterSchool: true,
+                    loggedInUser: user,
+                    msgs: msgs,
+                    dc: dc);
+
+            return account;
+        }
+
+        private Registrant CreateOrUpdateRegistrant(Account account, WebUser user, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var registrant = account.GetFirstParentOrGuardianRegistrant(msgs, dc);
+
+            if (registrant.IsEmpty())
+                // create parent registrant record
+                registrant = account.CreateRegistrant(
+                    registrantOwner: user,
+                    canBeAccessedBy: user.AsList(),
+                    registrantType: RegistrantType.Individual,
+                    isMaster: true,
+                    isParentOrGuardian: true,
+                    allowTextMessages: false,
+                    schoolLocationId: null,
+                    profileStatus: RegistrantProfileStatus.Started,
+                    loggedInUser: user,
+                    msgs: msgs,
+                    dc: dc);
+
+            return registrant;
+        }
+
+        private void SubmitRecord(ref Registration registration, Registrant submittedRecord, Registrant currentRegistrant, ParticipationObject participationObject, WebUser currentUser, RegistrationPeriod period, string signature, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            // account gets copy / snapshot of master registrant record
+            // required in order to make sure registration data doesn't change as registrant changes information in master record.
+            if (submittedRecord.IsEmpty())
+            {
+                submittedRecord = currentRegistrant.SubmitRecordToAccount(
+                    ownerAccount: participationObject.OwnerAccount,
+                    loggedInUser: currentUser,
+                    msgs: msgs,
+                    dc: dc);
+
+                // create or update registration
+                registration = submittedRecord.AddRegistrationWithESignature(
+                    ownerAccountId: participationObject.OwnerAccount.ID.Value,
+                    activityGroupId: participationObject.GetAnyRelatedActivityGroupId(),
+                    accountActivityGroupId: participationObject.GetAccountActivityGroupId(),
+                    periodId: period?.ID,
+                    esignature: signature,
+                    loggedInUserId: currentUser.ID.Value,
+                    msgs: msgs,
+                    dc: dc);
+            }
+            else
+                registration.AddESignature(
+                    esignature: signature,
+                    loggedInUser: currentUser,
+                    msgs: msgs,
+                    dc: dc);
+
+            //copy all answers from the main account to the registrant & registration :)
+            currentRegistrant.CopyAnswersTo(
+                copyToRegistrant: submittedRecord,
+                registration: registration,
+                loggedInUser: currentUser,
+                msgs: msgs,
+                dc: dc);
+        }
+
+        private void AddOrUpdateStandardAnswers(List<FormQuestionViewModel> qvms, Registrant currentRegistrant, WebUser currentUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            qvms.Where(qvm => qvm.Question.QuestionDataTypeId != QuestionDataType.NotSet)
+                .ToList()
+                .ForEach(qvm =>
+                {
+                    currentRegistrant.AddOrUpdateAnswer(
+                        answerText: qvm.Value,
+                        question: qvm.Question,
+                        loggedInUser: currentUser,
+                        msgs: msgs,
+                        dc: dc);
+                });
+        }
+
+        private void AddCustomQuestionsToRegistration(List<FormQuestionViewModel> qvms, Registrant submittedRecord, Registration registration, WebUser currentUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            // add custom answers to questions directly to this registration
+            qvms.Where(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.NotSet)
+            .ToList()
+            .ForEach(qvm =>
+            {
+                if (qvm.Question.QuestionTypeId == QuestionType.FileUpload)
+                {
+                    if (Request.Files[qvm.Name].IsNotEmpty() && Request.Files[qvm.Name].ContentLength > 0)
+                    {
+                        var currentFileSizeInBytes = Request.Files[qvm.Name].ContentLength;
+                                    //5 MB = 5242880 Bytes
+                                    //File uploaded here should be less than of 5MB
+                        if (currentFileSizeInBytes <= 5242880)
+                            submittedRecord.AddOrUpdateAnswer(
+                                file: Request.Files[qvm.Name].InputStream,
+                                filename: Request.Files[qvm.Name].FileName,
+                                question: qvm.Question,
+                                registrationId: registration.ID,
+                                loggedInUser: currentUser,
+                                msgs: msgs,
+                                dc: dc);
+                        else
+                            msgs.Add("Upload a file less than or equal to 5 megabytes", MessageType.UserError);
+                    }
+                }
+                else
+                    submittedRecord.AddOrUpdateAnswer(
+                        answerText: qvm.Value,
+                        question: qvm.Question,
+                        registrationId: registration.ID,
+                        loggedInUser: currentUser,
+                        msgs: msgs,
+                        dc: dc);
+            });
+        }
+
         private (ParticipationObject, RegistrationAssignmentType) GetParticipationObjectFromRegistration(Registration registration, SystemMessages msgs)
         {
             var registrantActivities = registration.GetRegistrantActivities(msgs);
@@ -2249,6 +2534,12 @@ namespace AfterSchool.Controllers
         {
             var administratorAccount = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs).First();
             return administratorAccount.GetDefaultForm(msgs);
+        }
+
+        private Form GetInterestForm(SystemMessages msgs)
+        {
+            var administratorAccount = Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs).First();
+            return administratorAccount.GetOrCreateInterestForm(SessionVariables.CurrentUser, msgs);
         }
 
         private void AddSessionActivitiesToRegistration(ParticipationObject participationObject, Registration registration, Registrant submittedRecord, RegistrationPeriod period, SystemMessages msgs, DatabaseConnection dc = null)

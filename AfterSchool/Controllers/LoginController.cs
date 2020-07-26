@@ -16,10 +16,15 @@ namespace AfterSchool.Controllers
         public ActionResult Index(string regaccount)
         {
             var msgs = new SystemMessages();
-            var loggedInWithAnAccount = SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentAccount.IsNotEmpty();
+            var currentUser = SessionVariables.CurrentUser;
+            var currentAccount = SessionVariables.CurrentAccount;
+            var loggedInWithAnAccount = currentUser.IsNotEmpty() && currentAccount.IsNotEmpty();
 
-            if (loggedInWithAnAccount && (regaccount.IsEmpty() || SessionVariables.CurrentAccount.AccountTypeId == AccountType.Registrant))
+            if (loggedInWithAnAccount && (regaccount.IsEmpty() || currentAccount.AccountTypeId == AccountType.Registrant))
             {
+                if (!currentUser.IsRegistered)
+                    return Redirect(AfterSchoolLibrary.Helpers.Utilities.CompleteSignUpUrl(currentUser.Uid, Request["returnurl"]));
+
                 if (Request["returnurl"].IsNotEmpty())
                     return HandleRedirectAfterLogin(Request["returnurl"]);
 

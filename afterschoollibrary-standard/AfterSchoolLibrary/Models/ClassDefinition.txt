@@ -338,6 +338,7 @@ property: IsActive, bool, Bit
 property: IsAfterSchool, bool, Bit
 property: StripeCustomerId, string, NVarChar "50"
 property: DefaultFormId, int?, Int
+property: InterestFormId, int?, Int
 property: StripeUserId, string, NVarChar "100"
 property: TimeZone, string, NVarChar "30"
 property: LogoUrl, string, NVarChar "400"
@@ -386,6 +387,7 @@ property: Facebook, string, NVarChar "100"
 property: Instagram, string, NVarChar "100"
 property: LinkedIn, string, NVarChar "100"
 property: YouTube, string, NVarChar "100"
+property: CalendarBookingLink, string, NVarChar "100"
 property: GenderRestriction, GenderRestrictionType, Int
 property: ProfileEmail, string, NVarChar "100"
 property: ProfilePhone, string, NVarChar "20"
@@ -1657,14 +1659,24 @@ name: Subscriber
 inherits: BasicObjectWithModified
 property: WebUserId, int?, Int, Required, The user who is subscribed
 property: Uid, Guid, UniqueIdentifier, Required
-property: AccountId, int?, Int, Required, The account the user is subscribed to
+property: AccountId, int?, Int, , deprecated
+property: ObjectId, int?, Int, Required, The object id that the user is subscribed to
+property: ObjectTypeId, AHQObjectType, Int, Required, The object type the user is subscribed to
 property: SubscriberStatusId, SubscriberStatus, Int
 loadmethod: Uid
 loadmethod: AccountId|WebUserId
+loadmethod: ObjectId|ObjectTypeId|WebUserId
 loadmethod: WebUserId, List<>
 loadmethod: AccountId, List<>
+loadmethod: ObjectId|ObjectTypeId, List<>
 loadmethod: WebUserId|SubscriberStatusId, List<>
-loadmethod: AccountId|SubscriberStatusId, List<>
+loadmethod: ObjectId|ObjectTypeId|SubscriberStatusId, List<>
+[end]
+
+[begin]
+type: Enum
+name: AHQObjectType
+values: NotSet, Account, Activity, ActivityGroup, AccountActivityGroup
 [end]
 
 [begin]
@@ -1712,13 +1724,13 @@ values: NotSet, TextBox, TextArea, RadioList, CheckboxList, Checkbox, DropDownLi
 [begin]
 type: Enum
 name: QuestionGroupDataType
-values: NotSet, Custom, PersonalInformation, ContactInformation, HomeAddress, Parent1Information, Parent1Address, Parent2Information, Parent2Address, EmergencyContact1, EmergencyContact2, HealthInformation, OrganizationInformation, OrganizationContact
+values: NotSet, Custom, PersonalInformation, ContactInformation, HomeAddress, Parent1Information, Parent1Address, Parent2Information, Parent2Address, EmergencyContact1, EmergencyContact2, HealthInformation, OrganizationInformation, OrganizationContact, RegistrantInterestInformation
 [end]
 
 [begin]
 type: Enum
 name: QuestionDataType
-values: NotSet, RegistrantFirstName, RegistrantLastName, RegistrantEmail, RegistrantDateOfBirth, RegistrantPhone1, RegistrantPhoneType1, RegistrantPhone2, RegistrantPhoneType2, RegistrantAddress1, RegistrantAddress2, RegistrantCity, RegistrantState, RegistrantPostalCode, Parent1FirstName, Parent1LastName, Parent1Email, Parent1Phone1, Parent1PhoneType1, Parent1Phone2, Parent1PhoneType2, Parent1Address1, Parent1Address2, Parent1City, Parent1State, Parent1PostalCode, Parent2FirstName, Parent2LastName, Parent2Email, Parent2Phone1, Parent2PhoneType1, Parent2Phone2, Parent2PhoneType2, Parent2Address1, Parent2Address2, Parent2City, Parent2State, Parent2PostalCode, EmergencyContact1FirstName, EmergencyContact1LastName, EmergencyContact1Phone, EmergencyContact2FirstName, EmergencyContact2LastName, EmergencyContact2Phone, RegistrantGrade, RegistrantGender, RegistrantEthnicity, RegistrantOrganization, RegistrantDoctorName, RegistrantDoctorPhone, RegistrantAllergies, RegistrantMedicalConditions, RegistrantImmunizations, RegistrantPreferredHospital, OrganizationName, OrganizationAddress1, OrganizationAddress2, OrganizationCity, OrganizationState, OrganizationPostalCode, OrganizationContactFirstName, OrganizationContactLastName, OrganizationContactEmail, OrganizationContactPhone, OrganizationContactPhoneType, RegistrantTShirtSize, RegistrantMobilePhone, RegistrantWorkPhone, RegistrantHomePhone, Parent1MobilePhone, Parent1WorkPhone, Parent1HomePhone, Parent2MobilePhone, Parent2WorkPhone, Parent2HomePhone, RegistrantMedications
+values: NotSet, RegistrantFirstName, RegistrantLastName, RegistrantEmail, RegistrantDateOfBirth, RegistrantPhone1, RegistrantPhoneType1, RegistrantPhone2, RegistrantPhoneType2, RegistrantAddress1, RegistrantAddress2, RegistrantCity, RegistrantState, RegistrantPostalCode, Parent1FirstName, Parent1LastName, Parent1Email, Parent1Phone1, Parent1PhoneType1, Parent1Phone2, Parent1PhoneType2, Parent1Address1, Parent1Address2, Parent1City, Parent1State, Parent1PostalCode, Parent2FirstName, Parent2LastName, Parent2Email, Parent2Phone1, Parent2PhoneType1, Parent2Phone2, Parent2PhoneType2, Parent2Address1, Parent2Address2, Parent2City, Parent2State, Parent2PostalCode, EmergencyContact1FirstName, EmergencyContact1LastName, EmergencyContact1Phone, EmergencyContact2FirstName, EmergencyContact2LastName, EmergencyContact2Phone, RegistrantGrade, RegistrantGender, RegistrantEthnicity, RegistrantOrganization, RegistrantDoctorName, RegistrantDoctorPhone, RegistrantAllergies, RegistrantMedicalConditions, RegistrantImmunizations, RegistrantPreferredHospital, OrganizationName, OrganizationAddress1, OrganizationAddress2, OrganizationCity, OrganizationState, OrganizationPostalCode, OrganizationContactFirstName, OrganizationContactLastName, OrganizationContactEmail, OrganizationContactPhone, OrganizationContactPhoneType, RegistrantTShirtSize, RegistrantMobilePhone, RegistrantWorkPhone, RegistrantHomePhone, Parent1MobilePhone, Parent1WorkPhone, Parent1HomePhone, Parent2MobilePhone, Parent2WorkPhone, Parent2HomePhone, RegistrantMedications, RegistrantChild1Grade, RegistrantChild2Grade, RegistrantChild3Grade, RegistrantChild4Grade, RegistrantChild5Grade
 [end]
 
 [begin]
@@ -1760,7 +1772,7 @@ values: None, MaleOnly, FemaleOnly
 [begin]
 type: Enum
 name: AccountPropertyType
-values: NotSet, LandingPageText, RegistrationThankYouEmail, ApplicationThankYouEmail, NoActivitiesText, FacebookAdPixel, Award, Certification, Photo, ServiceOffered, TimeOffered, PricingOption, Classifications, SoftSkills, AcademicSubjects, TeachingMethods
+values: NotSet, LandingPageText, RegistrationThankYouEmail, ApplicationThankYouEmail, NoActivitiesText, FacebookAdPixel, Award, Certification, Photo, ServiceOffered, TimeOffered, PricingOption, Classifications, SoftSkills, AcademicSubjects, TeachingMethods, InterestThankYouEmail
 [end]
 
 [begin]
@@ -1778,7 +1790,7 @@ values: NotSet, Register, Apply
 [begin]
 type: Enum
 name: RegistrationAssignmentType
-values: NotSet, Reserved, WaitingList, Applied, Invited, Declined, ReservedPendingPayment, ReservedPendingParentalConsent, Withdrawn
+values: NotSet, Reserved, WaitingList, Applied, Invited, Declined, ReservedPendingPayment, ReservedPendingParentalConsent, Withdrawn, Interested
 [end]
 
 [begin]

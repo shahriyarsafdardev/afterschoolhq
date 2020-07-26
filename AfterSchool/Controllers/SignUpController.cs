@@ -638,7 +638,7 @@ namespace AfterSchool.Controllers
                         user = WebUserService.StartUserAccount(firstname, lastname, email, amsgs, adc);
 
                         if (user.IsNotEmpty())
-                            account = user.AddNewRegistrantAccount(UserType.Parent, true, true, user, amsgs, adc);
+                            account = user.AddNewRegistrantAccount(UserType.Owner, true, true, user, amsgs, adc);
                     },
                     onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),

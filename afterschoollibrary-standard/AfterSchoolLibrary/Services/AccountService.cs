@@ -6,6 +6,7 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Billing;
+using Lob.Models;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -1274,6 +1275,36 @@ namespace AfterSchoolLibrary.Services
         public static Form GetDefaultForm(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return account.DefaultFormId.HasValue ? Form.Load(account.DefaultFormId.Value, msgs, dc) : null;
+        }
+
+        public static SystemMessages SetInterestForm(this Account account, Form form, WebUser loggedInUser, DatabaseConnection dc = null)
+        {
+            account.InterestFormId = form.ID;
+            account.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+            account.LastModifiedDate = DateTime.UtcNow;
+            return account.Save(dc);
+        }
+
+        public static Form CreateInterestForm(this Account formOwner, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var form = FormService.GetOrCreateAfterSchoolAccountInterestForm(msgs, dc);
+
+            if (form.AccountId != formOwner.ID)
+                form = form.Copy(loggedInUser.ID.Value, formOwner.ID.Value, "Interest Form", msgs, dc);
+
+            msgs.AddRange(formOwner.SetInterestForm(form, loggedInUser, dc));
+
+            return form;
+        }
+
+        public static Form GetOrCreateInterestForm(this Account account, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.GetInterestForm(msgs, dc) ?? CreateInterestForm(account, loggedInUser, msgs, dc);
+        }
+
+        public static Form GetInterestForm(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.InterestFormId.HasValue ? Form.Load(account.InterestFormId.Value, msgs, dc) : null;
         }
 
         public static ActivityForm GetDefaultActivityForm(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -2649,6 +2680,47 @@ namespace AfterSchoolLibrary.Services
             );
         }
 
+        public static void ProcessInterestRegistration(CheckoutObject checkoutObject, bool sendConfirmationEmail, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    // mark as completed
+                    checkoutObject.Registration.SetRegistrationStatus(
+                        completionStatus: RegistrationCompletionStatus.Completed,
+                        loggedInUser: loggedInUser,
+                        msgs: amsgs,
+                        dc: adc);
+
+                    // TODO: Allow user to register for multiple activities in one session at once MAYBE
+                    RegistrationService.ProcessInterestAssignment(
+                        registration: checkoutObject.Registration,
+                        participationObject: checkoutObject.ParticipationObject,
+                        registrant: checkoutObject.Registration.GetRegistrant(amsgs, adc),
+                        period: checkoutObject.ParticipationObject.GetCurrentRegistrationPeriod(amsgs, adc),
+                        loggedInUser: loggedInUser,
+                        msgs: amsgs,
+                        dc: adc);
+
+                    // subscribe to the account
+                    checkoutObject.BillingAccount.AddOrUpdateSubscriber(loggedInUser, SubscriberStatus.Subscribed, loggedInUser, amsgs, adc);
+                    checkoutObject.ParticipationObject.AddOrUpdateSubscriber(loggedInUser, SubscriberStatus.Subscribed, loggedInUser, amsgs, adc);
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
+
+                    if (sendConfirmationEmail)
+                        checkoutObject.Registration.SendInterestConfirmation(checkoutObject, null, loggedInUser, true, msgs, dc);
+
+                },
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
+                dc: dc
+            );
+        }
+
         public static void ProcessRegistrationWithoutPayment(CheckoutObject checkoutObject, bool sendConfirmationEmail, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
@@ -3389,7 +3461,12 @@ namespace AfterSchoolLibrary.Services
 
         public static Subscriber AddOrUpdateSubscriber(this Account account, WebUser user, SubscriberStatus status, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var subscriber = Subscriber.LoadByAccountIdByWebUserId(account.ID.Value, user.ID.Value, msgs, dc);
+            var subscriber = Subscriber.LoadByObjectIdByObjectTypeIdByWebUserId(
+                                account.ID.Value, 
+                                AHQObjectType.Account,
+                                user.ID.Value, 
+                                msgs, 
+                                dc);
 
             if (subscriber.IsEmpty())
                 return SubscriberService.CreateNew(account, user, status, loggedInUser, msgs, dc);
@@ -3401,7 +3478,7 @@ namespace AfterSchoolLibrary.Services
 
         public static int GetSubscriberCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Subscriber.GetCountByAccountIdByStatus(account.ID.Value, SubscriberStatus.Subscribed, msgs, dc);
+            return Subscriber.GetCountByObjectByStatus(account.ID.Value, AHQObjectType.Account, SubscriberStatus.Subscribed, msgs, dc);
         }
 
         #endregion

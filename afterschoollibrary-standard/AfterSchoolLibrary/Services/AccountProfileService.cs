@@ -118,7 +118,7 @@ namespace AfterSchoolLibrary.Services
             return AccountProperty.LoadByAccountIdByAccountPropertyTypeId(profile.AccountId.Value, AccountPropertyType.Photo, msgs, dc);
         }
 
-        public static void UpdateProfile(this AccountProfile profile, string title = null, string headline = null, string about = null, string website = null, string mingrade = null, string maxgrade = null, string twitter = null, string facebook = null, string instagram = null, string linkedin = null, string youtube = null, string genderrestriction = null, string profileemail = null, string profilephone = null, NameValueCollection savedAwards = null, NameValueCollection newAwards = null, NameValueCollection savedCertifications = null, NameValueCollection newCertifications = null, NameValueCollection servicesOffered = null, NameValueCollection timesOffered = null, NameValueCollection pricingOptions = null, string classifications = null, string softskills = null, string academicsubjects = null, string teachingmethods = null, WebUser loggedInUser = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void UpdateProfile(this AccountProfile profile, string title = null, string headline = null, string about = null, string website = null, string mingrade = null, string maxgrade = null, string twitter = null, string facebook = null, string instagram = null, string linkedin = null, string youtube = null, string calendar = null, string genderrestriction = null, string profileemail = null, string profilephone = null, NameValueCollection savedAwards = null, NameValueCollection newAwards = null, NameValueCollection savedCertifications = null, NameValueCollection newCertifications = null, NameValueCollection servicesOffered = null, NameValueCollection timesOffered = null, NameValueCollection pricingOptions = null, string classifications = null, string softskills = null, string academicsubjects = null, string teachingmethods = null, WebUser loggedInUser = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
             (
@@ -150,6 +150,9 @@ namespace AfterSchoolLibrary.Services
 
                     if (youtube != null)
                         profile.YouTube = youtube;
+
+                    if (calendar != null)
+                        profile.CalendarBookingLink = calendar;
 
                     if (profileemail != null)
                         profile.ProfileEmail = profileemail;

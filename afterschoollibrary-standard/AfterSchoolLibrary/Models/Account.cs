@@ -36,6 +36,7 @@ namespace AfterSchoolLibrary.Models
 		public bool IsAfterSchool { get { return (bool)MDV["IsAfterSchool"].Value; } set { MDV["IsAfterSchool"].Value = value; } }
 		public string StripeCustomerId { get { return (string)MDV["StripeCustomerId"].Value; } set { MDV["StripeCustomerId"].Value = value; } }
 		public int? DefaultFormId { get { return (int?)MDV["DefaultFormId"].Value; } set { MDV["DefaultFormId"].Value = value; } }
+		public int? InterestFormId { get { return (int?)MDV["InterestFormId"].Value; } set { MDV["InterestFormId"].Value = value; } }
 		public string StripeUserId { get { return (string)MDV["StripeUserId"].Value; } set { MDV["StripeUserId"].Value = value; } }
 		public string TimeZone { get { return (string)MDV["TimeZone"].Value; } set { MDV["TimeZone"].Value = value; } }
 		public string LogoUrl { get { return (string)MDV["LogoUrl"].Value; } set { MDV["LogoUrl"].Value = value; } }
@@ -94,6 +95,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "IsAfterSchool", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "StripeCustomerId", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "DefaultFormId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "InterestFormId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "StripeUserId", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "TimeZone", System.Data.SqlDbType.NVarChar , "30");
 				_dp.Add(className, "LogoUrl", System.Data.SqlDbType.NVarChar , "400");
@@ -233,6 +235,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["DefaultFormId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["InterestFormId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();

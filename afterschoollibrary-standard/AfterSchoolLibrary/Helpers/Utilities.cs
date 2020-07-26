@@ -231,8 +231,13 @@ namespace AfterSchoolLibrary.Helpers
         }
 
         public static string LoginUrl(string redirectUrl = null)
-        {            
+        {
             return $"{BaseUrl()}/login{(redirectUrl.IsNotEmpty() ? $"?returnurl={HttpUtility.UrlEncode(redirectUrl)}" : "")}";
+        }
+
+        public static string CompleteSignUpUrl(Guid currentUserUid, string redirectUrl = null)
+        {
+            return $"{BaseUrl()}/signup/confirm/{currentUserUid.ToString()}{(redirectUrl.IsNotEmpty() ? $"?returnurl={HttpUtility.UrlEncode(redirectUrl)}" : "")}";
         }
 
         public static bool UseSSL()
@@ -343,6 +348,7 @@ namespace AfterSchoolLibrary.Helpers
                     Migrations.UpdateIsClaimedOnAccounts_20200622.Do(amsgs, adc);
                     Migrations.AddUsedStripeConnectToTransactions_20200705.Do(amsgs, adc);
                     Migrations.SetExistingAccountsToOnboarded_20200724.Do(amsgs, adc);
+                    Migrations.SubscriberToPolymorphicRelationship_20200726.Do(amsgs, adc);
 
                     // amsgs.Add("rollback please", MessageType.Error);
 

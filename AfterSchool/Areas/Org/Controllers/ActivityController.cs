@@ -191,6 +191,8 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd, string type)
         {
             var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
             Activity activity;
             ActivityGroup activityGroup = null;
 
@@ -215,8 +217,8 @@ namespace AfterSchool.Areas.Org.Controllers
             if (activity.IsNotEmpty())
             {
                 activity = ActivityService.EditExisting(
-                    loggedInUserId: SessionVariables.CurrentUser.ID.Value,
-                    account: SessionVariables.CurrentAccount,
+                    loggedInUserId: currentUser.ID.Value,
+                    account: currentAccount,
                     activityId: activity.ID.Value.ToString(),
                     values: values,
                     msgs: msgs
@@ -228,24 +230,25 @@ namespace AfterSchool.Areas.Org.Controllers
                 //create initial form for account
                 if (msgs.HasNoErrors() && !SessionVariables.AccountPackage.HasFeature(FeatureType.ManageForms))
                 {
-                    var defaultForm = SessionVariables.CurrentAccount.GetDefaultForm();
-                    var newForm = defaultForm.Copy(SessionVariables.CurrentUser.ID.Value, SessionVariables.CurrentAccount.ID.Value, (name + " form").MaxChars(100, "..."), msgs);
+                    var defaultForm = currentAccount.GetDefaultForm();
+                    var newForm = defaultForm.Copy(currentUser.ID.Value, currentAccount.ID.Value, (name + " form").MaxChars(100, "..."), msgs);
                     if (msgs.HasNoErrors())
                         values.Add("form", newForm.ID.Value.ToString());
                 }
 
                 values.Add("registrationthankyouemail", "Thank you for registering");
                 values.Add("applicationthankyouemail", "Thank you for applying");
+                values.Add("interestthankyouemail", "Thank you for your interest. We will be in touch with you soon to follow up.");
 
                 activity = ActivityService.CreateNew(
-                    loggedInUserId: SessionVariables.CurrentUser.ID.Value,
-                    account: SessionVariables.CurrentAccount,
+                    loggedInUserId: currentUser.ID.Value,
+                    account: currentAccount,
                     values: values,
                     msgs: msgs
                 );
 
                 if (msgs.HasNoErrors())
-                    UpdateSession(SessionActionType.ActivityCreate, SessionVariables.CurrentAccount.ID, activity.ID);
+                    UpdateSession(SessionActionType.ActivityCreate, currentAccount.ID, activity.ID);
             }
 
             if (group.IsGuid())
@@ -287,17 +290,18 @@ namespace AfterSchool.Areas.Org.Controllers
 
         private void LoadEditSetupViewBag(Activity activity, ActivityGroup activityGroup, SystemMessages msgs)
         {
-            var activeForm = activity.GetActiveActivityForm(msgs) ?? activityGroup?.GetDefaultActivityForm(msgs) ?? SessionVariables.CurrentAccount.GetDefaultActivityForm(msgs);
-            var periods = SessionVariables.CurrentAccount.GetOpenAndUpcomingRegistrationPeriods(msgs);
-            var activePeriod = activity.GetActiveRegistrationPeriod(msgs) ?? SessionVariables.CurrentAccount.GetDefaultNewRegistrationPeriod();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var activeForm = activity.GetActiveActivityForm(msgs) ?? activityGroup?.GetDefaultActivityForm(msgs) ?? currentAccount.GetDefaultActivityForm(msgs);
+            var periods = currentAccount.GetOpenAndUpcomingRegistrationPeriods(msgs);
+            var activePeriod = activity.GetActiveRegistrationPeriod(msgs) ?? currentAccount.GetDefaultNewRegistrationPeriod();
 
             periods.Add(activePeriod);
             periods = periods.OrderBy(period => period.StartDateTime.Value).ToList();
 
             ViewBag.Messages = msgs;
-            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.Account = currentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.Forms = SessionVariables.CurrentAccount.GetForms(msgs).OrderBy(x => x.Name).ToList();
+            ViewBag.Forms = currentAccount.GetForms(msgs).OrderBy(x => x.Name).ToList();
             ViewBag.Periods = periods;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.ActivePeriod = activePeriod;
@@ -900,7 +904,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult EditConfirmation(string id, string registrationthankyouemail, string applicationthankyouemail, string cmd)
+        public ActionResult EditConfirmation(string id, string registrationthankyouemail, string applicationthankyouemail, string interestthankyouemail, string cmd)
         {
             var msgs = new SystemMessages();
             Activity activity = Activity.LoadByUid(id.ToGuid());
@@ -910,6 +914,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 var values = new Dictionary<string, object>()
                 {
                     { "registrationthankyouemail", registrationthankyouemail },
+                    { "interestthankyouemail", interestthankyouemail },
                     { "applicationthankyouemail", applicationthankyouemail }
                 };
 

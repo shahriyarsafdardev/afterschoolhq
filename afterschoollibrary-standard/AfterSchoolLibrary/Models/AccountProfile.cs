@@ -34,6 +34,7 @@ namespace AfterSchoolLibrary.Models
 		public string Instagram { get { return (string)MDV["Instagram"].Value; } set { MDV["Instagram"].Value = value; } }
 		public string LinkedIn { get { return (string)MDV["LinkedIn"].Value; } set { MDV["LinkedIn"].Value = value; } }
 		public string YouTube { get { return (string)MDV["YouTube"].Value; } set { MDV["YouTube"].Value = value; } }
+		public string CalendarBookingLink { get { return (string)MDV["CalendarBookingLink"].Value; } set { MDV["CalendarBookingLink"].Value = value; } }
 		public GenderRestrictionType GenderRestriction { get { return (GenderRestrictionType)MDV["GenderRestriction"].Value; } set { MDV["GenderRestriction"].Value = value; } }
 		public string ProfileEmail { get { return (string)MDV["ProfileEmail"].Value; } set { MDV["ProfileEmail"].Value = value; } }
 		public string ProfilePhone { get { return (string)MDV["ProfilePhone"].Value; } set { MDV["ProfilePhone"].Value = value; } }
@@ -74,6 +75,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "Instagram", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "LinkedIn", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "YouTube", System.Data.SqlDbType.NVarChar , "100");
+				_dp.Add(className, "CalendarBookingLink", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "GenderRestriction", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ProfileEmail", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "ProfilePhone", System.Data.SqlDbType.NVarChar , "20");
@@ -217,6 +219,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["YouTube"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["CalendarBookingLink"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();

@@ -28,10 +28,19 @@ namespace AfterSchoolLibrary.Models
 		/// </summary>
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
 		/// <summary>
-		/// Required.
-		/// The account the user is subscribed to
+		/// deprecated
 		/// </summary>
 		public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
+		/// <summary>
+		/// Required.
+		/// The object id that the user is subscribed to
+		/// </summary>
+		public int? ObjectId { get { return (int?)MDV["ObjectId"].Value; } set { MDV["ObjectId"].Value = value; } }
+		/// <summary>
+		/// Required.
+		/// The object type the user is subscribed to
+		/// </summary>
+		public AHQObjectType ObjectTypeId { get { return (AHQObjectType)MDV["ObjectTypeId"].Value; } set { MDV["ObjectTypeId"].Value = value; } }
 		public SubscriberStatus SubscriberStatusId { get { return (SubscriberStatus)MDV["SubscriberStatusId"].Value; } set { MDV["SubscriberStatusId"].Value = value; } }
 		
 
@@ -40,6 +49,7 @@ namespace AfterSchoolLibrary.Models
             this.Config(ObjectMap, DatabaseQuery, typeof(Subscriber).Name, "ID");
             this.LoadObjectValues(ObjectMap);
 			this.Uid = Guid.NewGuid();
+			this.ObjectTypeId = AHQObjectType.NotSet;
 			this.SubscriberStatusId = SubscriberStatus.NotSet;
 			
         }
@@ -54,6 +64,8 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "WebUserId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
 				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "ObjectId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "ObjectTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "SubscriberStatusId", System.Data.SqlDbType.Int);
 				
                 return _dp;
@@ -110,8 +122,10 @@ namespace AfterSchoolLibrary.Models
 				msgs.Add("WebUserId is required on Subscriber object", MessageType.Error);
 			if (this.Uid.IsEmpty())
 				msgs.Add("Uid is required on Subscriber object", MessageType.Error);
-			if (this.AccountId.IsEmpty())
-				msgs.Add("AccountId is required on Subscriber object", MessageType.Error);
+			if (this.ObjectId.IsEmpty())
+				msgs.Add("ObjectId is required on Subscriber object", MessageType.Error);
+			if (this.ObjectTypeId.IsEmpty())
+				msgs.Add("ObjectTypeId is required on Subscriber object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(Subscriber).Name));
@@ -147,6 +161,14 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ObjectId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ObjectTypeId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["SubscriberStatusId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
@@ -177,6 +199,16 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
+		public static Subscriber LoadByObjectIdByObjectTypeIdByWebUserId(int ObjectId, AHQObjectType ObjectTypeId, int WebUserId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["ObjectId"], ObjectId);
+			dq.Criterias.Add(ObjectMap["ObjectTypeId"], ObjectTypeId);
+			dq.Criterias.Add(ObjectMap["WebUserId"], WebUserId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
+
 		public static List<Subscriber> LoadByWebUserId(int WebUserId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
@@ -193,6 +225,15 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
+		public static List<Subscriber> LoadByObjectIdByObjectTypeId(int ObjectId, AHQObjectType ObjectTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["ObjectId"], ObjectId);
+			dq.Criterias.Add(ObjectMap["ObjectTypeId"], ObjectTypeId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
 		public static List<Subscriber> LoadByWebUserIdBySubscriberStatusId(int WebUserId, SubscriberStatus SubscriberStatusId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
@@ -202,11 +243,12 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<Subscriber> LoadByAccountIdBySubscriberStatusId(int AccountId, SubscriberStatus SubscriberStatusId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Subscriber> LoadByObjectIdByObjectTypeIdBySubscriberStatusId(int ObjectId, AHQObjectType ObjectTypeId, SubscriberStatus SubscriberStatusId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
-			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+			dq.Criterias.Add(ObjectMap["ObjectId"], ObjectId);
+			dq.Criterias.Add(ObjectMap["ObjectTypeId"], ObjectTypeId);
 			dq.Criterias.Add(ObjectMap["SubscriberStatusId"], SubscriberStatusId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
@@ -232,6 +274,27 @@ namespace AfterSchoolLibrary.Models
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+			dq.Criterias.Add(ObjectMap["SubscriberStatusId"], (int)status);
+			return dq.GetCount(msgs);
+		}
+
+		public static int GetCountByObjectByWebUserIdByStatus(int ObjectId, AHQObjectType ObjectTypeId, int WebUserId, SubscriberStatus status, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["ObjectId"], ObjectId);
+			dq.Criterias.Add(ObjectMap["ObjectTypeId"], (int)ObjectTypeId);
+			dq.Criterias.Add(ObjectMap["WebUserId"], WebUserId);
+			dq.Criterias.Add(ObjectMap["SubscriberStatusId"], (int)status);
+			return dq.GetCount(msgs);
+		}
+
+		public static int GetCountByObjectByStatus(int ObjectId, AHQObjectType ObjectTypeId, SubscriberStatus status, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["ObjectId"], ObjectId);
+			dq.Criterias.Add(ObjectMap["ObjectTypeId"], (int)ObjectTypeId);
 			dq.Criterias.Add(ObjectMap["SubscriberStatusId"], (int)status);
 			return dq.GetCount(msgs);
 		}
