@@ -32,16 +32,16 @@
         </label>
         <div class="col-md-9">
             @{ Html.RenderPartial(
-                "~/Views/Shared/_TextEditor.cshtml",
-                properties.FirstOrDefault(x => x.AccountPropertyTypeId == item)?.Value,
-                new ViewDataDictionary()
-                {
+                 "~/Views/Shared/_TextEditor.cshtml",
+                 properties.FirstOrDefault(x => x.AccountPropertyTypeId == item)?.Value,
+                 new ViewDataDictionary()
+                 {
                     { "id",  @item.ToString().ToLower() },
                     { "name",  @item.ToString().ToLower() },
                     { "required",  true }
-                }
-            ); }   
-            
+                 }
+             ); }
+
             @if (item != AccountPropertyType.InterestThankYouEmail)
             {
                 <p class="text-muted">
@@ -50,6 +50,16 @@
                             This thank you message is sent when the @UILabel.ActivityLabel(Model.ActivityTypeId).ToLower() is set to
                             '@(item == AccountPropertyType.ApplicationThankYouEmail ? "Apply" : "Register")'
                             Mode.
+                        </span>
+                    </em>
+                </p>
+            }
+            else
+            {
+                <p class="text-muted">
+                    <em>
+                        <span>
+                            This thank you message is sent when the a parent clicks on "I'm Interested" to learn more about your @UILabel.ActivityLabel(ActivityType.Activity).ToLower()
                         </span>
                     </em>
                 </p>

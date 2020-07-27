@@ -33,9 +33,9 @@ namespace AfterSchool.Controllers
             return Logout(returnurl);
         }
 
-        public ActionResult Switch()
+        public ActionResult Switch(string id, string redirectUrl)
         {
-            return SwitchAccount();
+            return SwitchAccount(redirectUrl, id);
         }
 
     }

@@ -30,25 +30,6 @@ namespace AfterSchool.Models
                 WebUser user = null;
                 Account Account = null;
 
-                // Check cookies
-                if (!Request.Cookies["sessionuser"].IsEmpty() && !Request.Cookies["sessionAccount"].IsEmpty())
-                {
-                    try
-                    {
-                        var userGuid = Guid.Parse(BasicLibrary.Encryption.DecryptToString(
-                            Convert.FromBase64String(Request.Cookies["sessionuser"].Value),
-                            AfterSchoolLibrary.Helpers.Utilities.AppAESKey, AfterSchoolLibrary.Helpers.Utilities.AppIV));
-                        user = WebUser.LoadByUid(userGuid);
-
-                        var AccountUniqueName = BasicLibrary.Encryption.DecryptToString(
-                            Convert.FromBase64String(Request.Cookies["sessionAccount"].Value),
-                            AfterSchoolLibrary.Helpers.Utilities.AppAESKey, AfterSchoolLibrary.Helpers.Utilities.AppIV);
-                        Account = Account.LoadByUniqueName(AccountUniqueName);
-                    }
-                    catch
-                    { }
-                }
-
                 // Auto login
                 if (!user.IsEmpty() && !Account.IsEmpty())
                 {
@@ -75,7 +56,12 @@ namespace AfterSchool.Models
             if (AllowedAccountTypes.IsNotEmpty() &&
                     AllowedAccountTypes.Any() &&
                     SessionVariables.CurrentAccount.AccountTypeId.NotIn(AllowedAccountTypes))
-                return false;
+            {
+                if (!SessionVariables.CurrentUser.HasAccessTo(SessionVariables.CurrentAccount))
+                    return false;
+
+                LoadSessionInfo(SessionVariables.CurrentUser, SessionVariables.CurrentAccount);
+            }
 
             return true;
         }
