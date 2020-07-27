@@ -4,5 +4,5 @@ public enum CouponApplyType
 	All,
 	Any,
 	SubscriptionPlan,
-	TuitionFee
+	RegistrationFee
 }

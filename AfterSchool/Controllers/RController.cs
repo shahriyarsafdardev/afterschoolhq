@@ -64,14 +64,16 @@ namespace AfterSchool.Controllers
             photos.ForEach(photo => photo.Value = ah.GetFileLink(photo.Value, true, null, true));
 
             ViewBag.AccountProfile = profile;
-            ViewBag.Location = account.GetDefaultLocation(msgs);
+            ViewBag.Location = profile.GetLocation(msgs) ?? account.GetDefaultLocation(msgs);
             ViewBag.Awards = profile.GetAwards(msgs);
             ViewBag.Certifications = profile.GetCertifications(msgs);
             ViewBag.Photos = photos;
             ViewBag.GradeLevelStart = profile.GetGradeLevelStart(msgs);
             ViewBag.GradeLevelEnd = profile.GetGradeLevelEnd(msgs);
             ViewBag.Messages = msgs;
-            ViewBag.ParticipationObjects = GetParticipationObjects(account, msgs).Where(po => po.RegistrationPeriod.IsOpen(account, msgs)).ToList();
+            ViewBag.ParticipationObjects = GetParticipationObjects(account, msgs)
+                                            .Where(po => po.RegistrationPeriod.IsOpen(account, msgs) || po.RegistrationPeriod.WillOpen(account, msgs))
+                                            .ToList();
             ViewBag.Locations = account.GetAllAvailableLocations(msgs);
             ViewBag.AccountProperties = account.GetAccountProperties(
                                             new List<AccountPropertyType>() 
@@ -362,6 +364,28 @@ namespace AfterSchool.Controllers
         }
 
         [HttpGet]
+        public ActionResult Interested(string accountname, string activitytype, string activityname, string reg)
+        {
+            if (isUnsupportedBrowser())
+                return RedirectUnsupportedBrowser();
+
+            var msgs = new SystemMessages();
+            var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
+
+            if (account.IsEmpty())
+                return HttpNotFound();
+
+            var activity = AfterSchoolLibrary.Models.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
+
+            if (activity.IsEmpty())
+                return HttpNotFound();
+
+            var participationObject = activity.GetParticipationObject(msgs);
+
+            return RedirectToInterested(account, participationObject, msgs);
+        }
+
+        [HttpGet]
         public ActionResult RegisterSession(string accountname, string sessionname, string reg)
         {
             if (isUnsupportedBrowser())
@@ -510,6 +534,23 @@ namespace AfterSchool.Controllers
                 return RedirectToAction("register", "account", new { area = "", regaccount = account.Uid });
 
             return RedirectToAction("registerstudent", "account", new { area = "", regaccount = account.Uid });
+        }
+        private ActionResult RedirectToInterested(Account account, ParticipationObject participationObject, SystemMessages msgs)
+        {
+            SetRegistrationStartPage(account);
+
+            if (participationObject.IsEmpty())
+                return HttpNotFound();
+
+            if (!participationObject.IsSession())
+                SessionVariables.Cart = Cart.GetNewCart(loggedInUser: SessionVariables.CurrentUser, msgs: msgs);
+
+            if (SessionVariables.Cart.IsEmpty())
+                return Redirect(participationObject.GetHomePageUrl());
+
+            SessionVariables.Cart.AddCartItem(participationObject, msgs);
+
+            return RedirectToAction("interested", "account", new { area = "", regaccount = account.Uid });
         }
 
         private void LoadSessionInvite(ActivityGroup session, string invite, string decline, SystemMessages msgs)

@@ -11,6 +11,7 @@ using AfterSchoolLibrary;
 using AfterSchoolLibrary.Services;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
+using Amazon.DynamoDBv2;
 
 namespace AfterSchool.Models
 {
@@ -224,12 +225,32 @@ namespace AfterSchool.Models
             }
         }
 
-        internal ActionResult SwitchAccount()
+        internal ActionResult SwitchAccount(string redirectUrl = null, string newAccountUid = null)
         {
             SessionVariables.CurrentAccount = null;
             SessionVariables.CurrentRegistrant = null;
 
-            return RedirectToAction("select", "login");
+            if (!newAccountUid.IsGuid())
+            {
+                if (redirectUrl.IsNotEmpty())
+                    return Redirect(redirectUrl);
+
+                return RedirectToAction("select", "login");
+            }
+
+            var account = Account.LoadByUid(newAccountUid.ToGuid());
+
+            if (SessionVariables.LoggedInUser.HasAccessTo(account))
+            {
+                LoadSessionInfo(SessionVariables.CurrentUser, account);
+
+                if (redirectUrl.IsNotEmpty())
+                    return Redirect(redirectUrl);
+
+                return LoginRedirect();
+            }
+
+            return Logout();
         }
 
         internal void ClearOriginalLoggedInUser()
@@ -260,18 +281,14 @@ namespace AfterSchool.Models
         internal ActionResult HandleRedirectAfterLogin(string returnUrl)
         {
             ActionResult actionResult = LoginRedirect();
+            var account = SessionVariables.CurrentAccount;
             const string adminPath = "/admin/";
             const string registrantPath = "/user/";
             const string districtPath = "/district/";
             const string orgPath = "/org/";
 
-            switch (SessionVariables.CurrentAccount.AccountTypeId)
+            switch (account.AccountTypeId)
             {
-                case AccountType.ActivityProvider:
-                case AccountType.School:
-                    if (!returnUrl.ToLower().Contains(new string[] { adminPath, registrantPath, districtPath }))
-                        actionResult = Redirect(returnUrl);
-                    break;
                 case AccountType.AfterSchool:
                     if (!returnUrl.ToLower().Contains(new string[] { orgPath, registrantPath, districtPath }))
                         actionResult = Redirect(returnUrl);
@@ -284,6 +301,11 @@ namespace AfterSchool.Models
                     if (!returnUrl.ToLower().Contains(new string[] { orgPath, adminPath, registrantPath }))
                         actionResult = Redirect(returnUrl);
                     break;
+                default:
+                    if (account.AccountTypeId.In(AccountService.ProviderAccountTypes) && !returnUrl.ToLower().Contains(new string[] { adminPath, registrantPath, districtPath }))
+                        actionResult = Redirect(returnUrl);
+                    break;
+
             }
 
             return actionResult;

@@ -14,12 +14,12 @@
                 <h1>Great Job!</h1>
                 <div class="text-medium-small">
                     <p class="padding-v-10">
-                        You've setup your payments account on the best platform for afterschool @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower(). We will notify you when you receive a payment into your account. You can <a href="@Url.Action("payouts", "accounting")">request payouts</a> as soon as funds are available.
+                        You've setup your payments account on the best platform for afterschool @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower(). We will notify you when you receive a payment into your account. 
                     </p>
 
-                    @if (!hasActivities)
+                    @if (!hasActivities && false)
                     {
-                         <p class="padding-v-10">
+                        <p class="padding-v-10">
                             <strong>@SessionVariables.CurrentUser.FirstName, did you know you can use @UILabel.ProductName() totally free?</strong><br /><br /> We help you promote your @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower() to parents to get more seats filled, quicker.
                         </p>
                         <p class="padding-v-10">
@@ -37,9 +37,16 @@
                     }
                     else
                     {
-                         <p class="padding-v-10">
+                        <p class="padding-v-10">
                             <div class="pull-right padding-v-10">
-                                <a href="@Url.Action("index", "home")" class="btn btn-primary btn-lg">Continue to Dashboard &raquo;</a>
+                                @if (Request["source"].IsNotEmpty())
+                                {
+                                    <a href="@SessionVariables.CurrentAccount.HomePageUrl" class="btn btn-primary btn-lg">Continue &raquo;</a>
+                                }
+                                else
+                                {
+                                    <a href="@Url.Action("index", "home")" class="btn btn-primary btn-lg">Continue to Dashboard &raquo;</a>
+                                }
                             </div>
                         </p>
                     }

@@ -1,16 +1,18 @@
 ﻿@model RegistrationHeaderViewModel
 
 @{
+    var currentUser = SessionVariables.CurrentUser;
+    var currentAccount = SessionVariables.CurrentAccount;
     var regHeaderStyle = "";
     var logoUrl = "";
     var isFollowing = false;
-    var midColSpan = 7;
+    var midColSpan = 6;
     var showFollow = false;
     var showUnfollow = true;
     var hideButtons = false;
     var shareUrl = Model.Account.ShortHomePageUrl;
     var shareObject = Model.Account.Name;
-    var isInEditMode = SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentUser.HasAccessTo(Model.Account);
+    var isInEditMode = currentUser.IsNotEmpty() && currentUser.HasAccessTo(Model.Account) && Request["edit"] == "1";
 
     if (Model.ParticipationObject.IsNotEmpty())
     {
@@ -28,9 +30,9 @@
         logoUrl = Model.LogoUrl;
     }
 
-    if (SessionVariables.CurrentUser.IsNotEmpty())
+    if (currentUser.IsNotEmpty())
     {
-        isFollowing = SessionVariables.CurrentUser.IsSubscribedTo(Model.Account);
+        isFollowing = currentUser.IsSubscribedTo(Model.Account);
 
         showFollow = !isFollowing;
         showUnfollow = isFollowing;
@@ -54,13 +56,13 @@
     }
     else if (logoUrl.IsBlank())
     {
-        midColSpan = 9;
+        midColSpan = 8;
     }
 }
 
-@helper renderEditButtion(string anchor)
+@helper renderEditButtion(string anchor, WebUser currentUser)
 {
-    if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentUser.HasAccessTo(Model.Account) && Request["edit"] == "1")
+    if (currentUser.IsNotEmpty() && currentUser.HasAccessTo(Model.Account) && Request["edit"] == "1")
     {
         <span>
             <a href="@Url.Action("style", "account", new { area = "org", isfullscreen = 1, returnurl = Request.Url })#@anchor"
@@ -73,7 +75,7 @@
 
 <div class="row">
 
-    @if (!Model.Account.HasAccountProfile() && SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentUser.HasAccessTo(Model.Account))
+    @if (!Model.Account.HasAccountProfile() && currentUser.IsNotEmpty() && currentUser.HasAccessTo(Model.Account))
     {
         <div class="profile-edit-bar text-center">
             <a href="@Url.Action("style", "account", new { area = "org", isfullscreen = 1, returnurl = Request.Url })"
@@ -84,10 +86,10 @@
     }
 
     <div class="reg-header" style="@regHeaderStyle">
-        <div class="reg-header-overlay col-md-8 col-md-offset-2">
+        <div class="reg-header-overlay col-lg-10 col-lg-offset-1 col-md-12">
 
             <div>
-                @renderEditButtion("header")
+                @renderEditButtion("header", currentUser)
             </div>
 
             @if (logoUrl.IsNotBlank())
@@ -99,7 +101,7 @@
                 </div>
             }
 
-            <div class="col-lg-@midColSpan col-md-12">
+            <div class="col-lg-@midColSpan col-md-6 col-sm-12">
                 <h1 class="activity-title">
                     <span>@Html.Raw(Model.Title)</span>
                     @if (Model.SessionName.IsNotEmpty())
@@ -149,12 +151,12 @@
             {
                 var followButtonAttrs = $"class=\"btn btn-header-action {(isFollowing ? "hide" : "")} md-trigger\" data-modal=\"modal-login\" onclick=\"setLoginAction(function (callback) {{ follow(callback); }}, true)\" id=\"btn-follow\"";
 
-                if (SessionVariables.CurrentUser.IsNotEmpty())
+                if (currentUser.IsNotEmpty())
                 {
                     followButtonAttrs = $"onclick=\"follow()\" class=\"btn btn-header-action {(isFollowing ? "hide" : "")}\" id=\"btn-follow\"";
                 }
 
-                <div class="col-lg-3 col-md-12">
+                <div class="col-lg-4 col-md-6 col-sm-12">
                     <div class="padding-v-20 text-center">
 
                         <div>
@@ -191,38 +193,64 @@
 
                         @if (Model.ParticipationObject.IsEmpty())
                         {
-                            <button onclick="location.href='@Model.Account.BrowseUrl'" class="btn btn-header-action">
-                                <i class="icon icon-left s7-gleam"></i>
-                                <span class="">View @UILabel.ActivityLabel(ActivityType.Activity, true)</span>
-                            </button>
+                            if (!isInEditMode || Model.Account.HasActivities())
+                            {
+                                <button onclick="location.href='@Model.Account.BrowseUrl'" class="btn btn-header-action">
+                                    <i class="icon icon-left s7-gleam"></i>
+                                    <span class="">
+                                        View @UILabel.ActivityLabel(ActivityType.Activity, true)
+                                    </span>
+                                </button>
+                            }
+                            else
+                            {
+                                <a href="@Url.Action("editsetup", "activity", new { area = "org", isnew = 1, source = "profile", type = (int)ActivityType.Activity })"
+                                   class="btn btn-header-action-callout">
+                                    <i class="s7-gleam"></i>
+                                    Add Activity
+                                </a>
+                            }
 
                             if (Model.Account.IsClaimed)
                             {
-                                if (SessionVariables.CurrentUser.IsNotEmpty())
+                                if (Model.Account.CanProcessPayments())
                                 {
-                                    var payUrl = Model.Account.PayUrl;
-
-                                    if (!SessionVariables.CurrentUser.IsActive)
+                                    if (currentUser.IsNotEmpty())
                                     {
-                                        payUrl = Url.Action("confirm", "signup", new { id = SessionVariables.CurrentUser.Uid, returnurl = payUrl });
-                                    }
+                                        var payUrl = Model.Account.PayUrl;
 
-                                    <button onclick="location.href='@payUrl'" class="btn btn-header-action">
-                                        <i class="icon icon-left s7-credit"></i>
-                                        <span class="">Make A Payment</span>
-                                    </button>
+                                        if (!currentUser.IsActive)
+                                        {
+                                            payUrl = Url.Action("confirm", "signup", new { id = currentUser.Uid, returnurl = payUrl });
+                                        }
+
+                                        <button onclick="location.href='@payUrl'" class="btn btn-header-action">
+                                            <i class="icon icon-left s7-credit"></i>
+                                            <span class="">Make A Payment</span>
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="btn btn-header-action md-trigger" data-modal="modal-login" onclick="setLoginRedirect('@Model.Account.PayUrl', true)">
+                                            <i class="icon icon-left s7-credit"></i>
+                                            <span class="">Make A Payment</span>
+                                        </button>
+                                    }
                                 }
-                                else
+                                else if (currentUser.IsNotEmpty() && Model.Account.OwnerId == currentUser.ID)
                                 {
-                                    <button type="button" class="btn btn-header-action md-trigger" data-modal="modal-login" onclick="setLoginRedirect('@Model.Account.PayUrl', true)">
+                                    var redirectUrl = Url.Action("paymentsoptions", "account", new { area = "org", isfullscreen = 1, source = "profile" });
+
+                                    <a href="@Url.Action("switch", "logout", new { id = Model.Account.Uid, redirectUrl = redirectUrl })"
+                                       class="btn btn-header-action-callout">
                                         <i class="icon icon-left s7-credit"></i>
-                                        <span class="">Make A Payment</span>
-                                    </button>
+                                        Enable Payments
+                                    </a>
                                 }
                             }
                             else
                             {
-                                <button class="btn btn-header-action md-trigger" data-modal="modal-claim-profile" onclick="resetClaimForm()">
+                                <button class="btn btn-header-action md-trigger btn-danger" data-modal="modal-claim-profile" onclick="resetClaimForm()">
                                     <i class="icon icon-left s7-door-lock"></i>
                                     <span class="">Claim Profile</span>
                                 </button>
@@ -230,10 +258,10 @@
                         }
                         else
                         {
-                            <button onclick="interested()" class="btn btn-header-action hide">
+                            <a href="@Model.ParticipationObject.GetInterestedPageUrl()" class="btn btn-header-action">
                                 <i class="icon icon-left s7-bell"></i>
                                 <span class="">I'm Interested</span>
-                            </button>
+                            </a>
                         }
                     </div>
                     <div class="clearfix"></div>

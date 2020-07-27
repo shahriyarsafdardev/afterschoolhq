@@ -6,6 +6,7 @@ using BasicLibrary;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using System.Web.Mvc;
+using Microsoft.EntityFrameworkCore.Update;
 
 namespace AfterSchool.Models
 {
@@ -28,25 +29,6 @@ namespace AfterSchool.Models
             {
                 WebUser user = null;
                 Account Account = null;
-
-                // Check cookies
-                if (!Request.Cookies["sessionuser"].IsEmpty() && !Request.Cookies["sessionAccount"].IsEmpty())
-                {
-                    try
-                    {
-                        var userGuid = Guid.Parse(BasicLibrary.Encryption.DecryptToString(
-                            Convert.FromBase64String(Request.Cookies["sessionuser"].Value),
-                            AfterSchoolLibrary.Helpers.Utilities.AppAESKey, AfterSchoolLibrary.Helpers.Utilities.AppIV));
-                        user = WebUser.LoadByUid(userGuid);
-
-                        var AccountUniqueName = BasicLibrary.Encryption.DecryptToString(
-                            Convert.FromBase64String(Request.Cookies["sessionAccount"].Value),
-                            AfterSchoolLibrary.Helpers.Utilities.AppAESKey, AfterSchoolLibrary.Helpers.Utilities.AppIV);
-                        Account = Account.LoadByUniqueName(AccountUniqueName);
-                    }
-                    catch
-                    { }
-                }
 
                 // Auto login
                 if (!user.IsEmpty() && !Account.IsEmpty())
@@ -74,7 +56,12 @@ namespace AfterSchool.Models
             if (AllowedAccountTypes.IsNotEmpty() &&
                     AllowedAccountTypes.Any() &&
                     SessionVariables.CurrentAccount.AccountTypeId.NotIn(AllowedAccountTypes))
-                return false;
+            {
+                if (!SessionVariables.CurrentUser.HasAccessTo(SessionVariables.CurrentAccount))
+                    return false;
+
+                LoadSessionInfo(SessionVariables.CurrentUser, SessionVariables.CurrentAccount);
+            }
 
             return true;
         }
@@ -122,6 +109,29 @@ namespace AfterSchool.Models
             }
 
             return msgs;
+        }
+
+        protected ActionResult HandleOnboardingRedirect()
+        {
+            var account = SessionVariables.CurrentAccount;
+
+            switch(account.OnboardingStepDone)
+            {
+                case OnboardingStepType.AccountType:
+                    return RedirectToAction("programinfo", "onboarding");
+                case OnboardingStepType.ProgramInfo:
+                    return RedirectToAction("contactinfo", "onboarding");
+                case OnboardingStepType.ContactInfo:
+                    return RedirectToAction("logo", "onboarding");
+                case OnboardingStepType.LogoAndHeader:
+                    return RedirectToAction("servicesoffered", "onboarding");
+                case OnboardingStepType.ServicesOffered:
+                    return RedirectToAction("links", "onboarding");
+                case OnboardingStepType.SocialLinks:
+                    return RedirectToAction("done", "onboarding");
+            }
+
+            return RedirectToAction("index", "onboarding");
         }
     }
 }

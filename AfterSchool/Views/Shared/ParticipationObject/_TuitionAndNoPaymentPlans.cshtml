@@ -10,12 +10,12 @@
 }
 
 <p>
-    @if (!Model.IsTuitionFree)
+    @if (!Model.IsRegistrationFree)
     {
         <span>
             The registration fee is
             <strong>
-                @ParticipationObjectUI.PrintTuitionFee(Model, displayCheckoutPrice)
+                @ParticipationObjectUI.PrintRegistrationFee(Model, displayCheckoutPrice)
             </strong>
         </span>
     }    

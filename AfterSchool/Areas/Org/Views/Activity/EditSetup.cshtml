@@ -4,7 +4,6 @@
     var msgs = (SystemMessages)ViewBag.Messages;
     var accountPackage = (AccountPackage)ViewBag.AccountPackage;
     var group = (ActivityGroup)ViewBag.Group;
-    var saveBtnWidth = 7;
     var isFullScreen = (bool)ViewBag.IsFullScreen;
     var title = $"{(Model.ActivityGroupName.IsNotEmpty() ? $"{Model.ActivityGroupName} - " : "")}{Model.Name.IfBlank("New " + UILabel.ActivityLabel(Model.ActivityTypeId))}";
 
@@ -28,13 +27,13 @@
             
             @if (isFullScreen)
             {
-                Html.RenderPartial("_ExitFullScreen", "");
+                Html.RenderPartial("_ExitFullScreen", Request["returnurl"] ?? "");
             }
         </div>
         <div class="panel-body">
 
-            <div class="col-md-8 col-lg-9">
-                <form id="form1" method="post" action="@Url.Action("editsetup", "activity", new { id = Model.Uid, isnew = Request["isnew"] })" class="form-horizontal">
+            <div class="col-md-10 col-lg-9">
+                <form id="form1" method="post" action="@Url.Action("editsetup", "activity", new { id = Model.Uid, isnew = Request["isnew"], source = Request["source"] })" class="form-horizontal">
 
                     @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editsetup", "next", true, true, Request))
                     @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(true, false))
@@ -43,11 +42,11 @@
 
                     <div class="form-group">
 
-                        <div class="col-sm-@saveBtnWidth col-sm-offset-3">
+                        <div class="col-sm-6 col-sm-offset-3">
                             @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(false, false))
                         </div>
 
-                        <div class="col-sm-2">
+                        <div class="col-sm-3">
                             @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editsetup", "next", false, true, Request))
                         </div>
 
@@ -56,7 +55,7 @@
                 </form>
             </div>
 
-            <div class="col-md-4 col-lg-3">
+            <div class="col-md-2 col-lg-3">
                 @{Html.RenderPartial("~/Views/Shared/_ActivityEditNav.cshtml", Model); }
             </div>
 

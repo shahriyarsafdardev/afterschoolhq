@@ -886,7 +886,7 @@ Public MustInherit Class BaseAddress
                 If useLineBreaks Then
                     address &= vbCrLf
                 Else
-                    address &= " "
+                    address &= ", "
                 End If
             End If
 

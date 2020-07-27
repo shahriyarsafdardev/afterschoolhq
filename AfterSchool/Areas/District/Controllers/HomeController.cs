@@ -25,7 +25,7 @@ namespace AfterSchool.Areas.District.Controllers
             var activties = new List<Activity>();
 
             activityGroups.ForEach(activityGroup => 
-                activties.AddRange(activityGroup.GetLeagueTeams(SessionVariables.CurrentAccount, AccountType.School))
+                activties.AddRange(activityGroup.GetLeagueTeams(SessionVariables.CurrentAccount, AccountType.School.AsList()))
             );
 
             ViewBag.SubmittedActivities = activties.Where(sa => sa.DateSubmittedToActivityGroup.IsNotEmpty())

@@ -215,6 +215,84 @@ namespace AfterSchoolLibrary.Helpers
             msgs.AddRange(mailMsgs);
         }
 
+        public static void SendInterestConfirmation(CheckoutObject checkoutObject, string customMessage, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var registration = checkoutObject.Registration;
+            var participationObject = checkoutObject.ParticipationObject;
+            var registrantActivities = registration.GetRegistrantActivities(msgs, dc);
+            var mainRA = registrantActivities.First(ra => 
+                            ra.ParticipationObjectId == participationObject.ObjectID && 
+                            ra.ParticipationObjectTypeId == participationObject.ObjectType);
+            var interestFormThankYou = participationObject.GetRegistrationThankYou(mainRA, msgs, dc);
+            var masterRegistrant = checkoutObject.MasterRegistrant;
+            var billingAccount = checkoutObject.BillingAccount;
+            var actionLink = Utilities.LoginUrl();
+            var registrationDetails = "Login to your account to view more details.";
+
+            if (customMessage.IsEmpty())
+            {
+                customMessage = interestFormThankYou;
+
+                if (interestFormThankYou.IsNotEmpty())
+                    customMessage = "Thank you for your interest. We will be in touch with you soon to follow up.";
+
+                if (loggedInUser.HasAccessTo(billingAccount))
+                    customMessage = $"{masterRegistrant.FirstName} has registered interest for the following activity. Please reach out to them or add them to your mailing list";
+            }
+
+            if (!loggedInUser.IsRegistered)
+            {
+                actionLink = Utilities.CompleteSignUpUrl(loggedInUser.Uid);
+                registrationDetails = "Click here to complete your account sign up";
+            }
+
+            var model = new NameValueCollection()
+            {
+                { "FirstName", loggedInUser.FirstName },
+                { "ProductName", Utilities.AppName(true) },
+                { "SupportEmail", Email.AppSupportEmailAddress },
+                { "CustomMessage", customMessage },
+                { "ActionLink", actionLink },
+                { "ActivityContactEmail", participationObject.ContactEmail.IfBlank(billingAccount.Email)},
+                { "ActivityContactPhone", participationObject.ContactPhone.IfBlank(billingAccount.Phone)},
+                { "ActivityContactName", participationObject.ContactName.IfBlank(billingAccount.Name)},
+                { "RegistrationDetails", registrationDetails},
+                { "BillerAccountName", billingAccount.Name },
+                { "BillerAccountLink", billingAccount.HomePageUrl },
+            };
+
+            var body = ProcessTemplate(
+                EmailTemplates.Interest_Confirmation,
+                model,
+                "interest-confirmation-1.0.1",
+                msgs);
+
+            var subject = $"Thanks for sharing your interest in {participationObject.Name}";
+
+            var mailMsgs = SendGridHelper.SendMail(
+                fromEmail: Email.SendGridNoReplyEmailAddress(true),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(loggedInUser.Email),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(true));
+
+            // Send BCC
+            var emails = new List<string>();
+
+            if (participationObject.ContactEmail.IsEmail() && participationObject.ContactEmail.ToLower().NotIn(emails))
+                emails.Add(participationObject.ContactEmail.ToLower());
+
+            emails.ForEach(email =>
+                SendGridHelper.SendMail(
+                    fromEmail: Email.SendGridNoReplyEmailAddress(true),
+                    toEmail: new SendGrid.Helpers.Mail.EmailAddress(email),
+                    subject: $"Interest Form CC: {subject}",
+                    body: body,
+                    emailTemplateId: SendGridHelper.GetGenericTemplateId(true)));
+
+            msgs.AddRange(mailMsgs);
+        }
+
         public static SystemMessages SendRegistrationConfirmed(CheckoutObject checkoutObject, string customMessage, WebUser loggedInUser, bool isParentCopy, bool sendBcc, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
@@ -304,14 +382,14 @@ namespace AfterSchoolLibrary.Helpers
                 }
                 else
                 {
-                    cost = (checkoutObject.TuitionCostNoFees + checkoutObject.GetTuitionConvenienceFee(msgs, dc)).ToCurrency();
-                    ccFee = checkoutObject.GetTuitionCreditCardFee(msgs, dc).ToCurrency();
+                    cost = (checkoutObject.RegistrationCostNoFees + checkoutObject.GetRegistrationConvenienceFee(msgs, dc)).ToCurrency();
+                    ccFee = checkoutObject.GetRegistrationCreditCardFee(msgs, dc).ToCurrency();
 
                     additionalDetails = "registration fee";
                 }
 
                 // add registration fee row
-                var tuitionFeeModel = new NameValueCollection()
+                var registrationFeeModel = new NameValueCollection()
                 {
                     { "Description", description },
                     { "Quantity",  "1"},
@@ -321,7 +399,7 @@ namespace AfterSchoolLibrary.Helpers
 
                 receiptRows += ProcessTemplate(
                     EmailTemplates.Registration_Confirmation_Rows,
-                    tuitionFeeModel,
+                    registrationFeeModel,
                     "Registration_Confirmation_Rows",
                     msgs);
             }
@@ -992,7 +1070,7 @@ namespace AfterSchoolLibrary.Helpers
             var model = new NameValueCollection()
             {
                 { "FirstName", invitedUser.FirstName },
-                { "ProductName", Utilities.AppName(invitedAccount.IsAfterSchool) },
+                { "ProductName", Utilities.AppName() },
                 { "SupportEmail", Email.AppSupportEmailAddress },
                 { "InviteUrl", invitedUser.GetInviteUrl(invitedAccount) },
                 { "CustomMessage", customMessage }

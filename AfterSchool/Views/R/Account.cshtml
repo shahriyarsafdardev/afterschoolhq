@@ -15,7 +15,7 @@
     var takeActivities = 3;
     var locations = (List<Location>)ViewBag.Locations;
     var accountProperties = (List<AccountProperty>)ViewBag.AccountProperties;
-    var isInEditMode = SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentUser.HasAccessTo(Model);
+    var isInEditMode = SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentUser.HasAccessTo(Model) && Request["edit"] == "1";
 
     var skillAndMethodTypes = new AccountPropertyType[] { AccountPropertyType.SoftSkills, AccountPropertyType.TeachingMethods, AccountPropertyType.AcademicSubjects, AccountPropertyType.Classifications };
     var skillsAndMethods = accountProperties.Where(item => item.AccountPropertyTypeId.In(skillAndMethodTypes));
@@ -37,14 +37,16 @@
 
 @{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", new RegistrationHeaderViewModel(Model, (AccountProfile)ViewBag.AccountProfile)); }
 
-@helper renderEditButtion(string anchor)
+@helper renderEditButtion(Account account, string anchor, string buttonText = "Edit")
 {
     if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentUser.HasAccessTo(Model) && Request["edit"] == "1")
     {
+        var redirectUrl = $"{Url.Action("style", "account", new { area = "org", isfullscreen = 1, returnurl = Request.Url, type = (int)ActivityType.Activity })}#{anchor}";
+
         <span>
-            <a href="@Url.Action("style", "account", new { area = "org", isfullscreen = 1, returnurl = Request.Url })#@anchor"
+            <a href="@Url.Action("switch", "logout", new { id = account.Uid, redirectUrl = redirectUrl })#@anchor"
                class="btn btn-alt7 btn-sm">
-                Edit &raquo;
+                @buttonText &raquo;
             </a>
         </span>
     }
@@ -102,7 +104,7 @@
 }
 
 <div>
-    <div class="col-md-12 col-lg-8 col-lg-offset-2 participation-object participation-object-detail">
+    <div class="col-md-12 col-lg-10 col-lg-offset-1 participation-object participation-object-detail">
 
         <div class="panel panel-alt6">
             <div class="panel-heading" style="width: 100%;">
@@ -112,7 +114,7 @@
                             @if (gradeLevelStart.IsNotEmpty() && gradeLevelEnd.IsNotEmpty())
                             {
                                 <span>Serving @gradeLevelStart.Name - @gradeLevelEnd.Name Grade</span>
-                                @renderEditButtion("grades")
+                                @renderEditButtion(Model, "grades")
                             }
                         </h3>
                     </div>
@@ -120,23 +122,43 @@
             </div>
             <div class="panel-body">
 
-                @if (participationObjects.Any())
+                @if (participationObjects.Any() || isInEditMode)
                 {
                     <div>
-                        <div class="row">
-                            <div class="col-md-12 col-lg-8">
-                                <div class="activity-detail-block">
-                                    <h2>Now Registering</h2>
+
+                        @if (participationObjects.Any())
+                        {
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="activity-detail-block">
+                                        <div class="pull-left">
+                                            <h2>@UILabel.ActivityLabel(ActivityType.Activity, true)</h2>
+                                        </div>
+                                        <div class="pull-right padding-v-20">
+                                            <a href="@Model.BrowseUrl">
+                                                View All &raquo;
+                                            </a>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md-12 col-lg-4">
-                                <div class="padding-v-20 pull-right">
-                                    <a href="@Model.BrowseUrl">
-                                        View All Activities
-                                    </a>
+                        }
+
+                        @if (isInEditMode)
+                        {
+                            var redirectUrl = Url.Action("editsetup", "activity", new { area = "org", isnew = 1, source = "profile", type = (int)ActivityType.Activity });
+
+                            <div class="row">
+                                <div style="position: relative; margin-left: -5px; margin-right: -5px;">
+                                    <span>
+                                        <a href="@Url.Action("switch", "logout", new { id = Model.Uid, redirectUrl = redirectUrl })"
+                                           class="btn btn-alt7 btn-sm">
+                                            Add New Activity &raquo;
+                                        </a>
+                                    </span>
                                 </div>
                             </div>
-                        </div>
+                        }
 
                         <div class="row">
                             <div style="position: relative; margin-left: -20px; margin-right: -20px;">
@@ -160,13 +182,12 @@
                     </div>
                 }
 
-                @if (photos.Any())
+                @if (photos.Any() || isInEditMode)
                 {
-
                     <div class="margin-t-20">
                         <div class="row">
                             <div style="position: relative; margin-left: -5px; margin-right: -5px;">
-                                @renderEditButtion("photos")
+                                @renderEditButtion(Model, "photos", "Edit Photo Gallery")
                             </div>
                         </div>
                         <div class="row">
@@ -177,12 +198,12 @@
                     </div>
                 }
 
-                @if (servicesOffered.Any())
+                @if (servicesOffered.Any() || isInEditMode)
                 {
                     <div class="margin-t-20">
                         <div class="row padding-h-30">
                             <div class="activity-detail-block">
-                                <h2>Services Offered @renderEditButtion("services")</h2>
+                                <h2>Services Offered @renderEditButtion(Model, "services", "Edit")</h2>
                             </div>
 
                             @renderAccountProperties(servicesOffered, Math.Ceiling(servicesOffered.Count() / 3.0).ToInteger())
@@ -195,12 +216,12 @@
                     </div>
                 }
                 
-                @if (skillsAndMethods.Any())
+                @if (skillsAndMethods.Any() || isInEditMode)
                 {
                     <div class="margin-t-20">
                         <div class="row padding-h-30">
                             <div class="activity-detail-block">
-                                <h2>Skills &amp; Teaching Methods @renderEditButtion("services")</h2>
+                                <h2>Skills &amp; Teaching Methods @renderEditButtion(Model, "services")</h2>
                             </div>
 
                             @renderAccountProperties(skillsAndMethods, Math.Ceiling(skillsAndMethods.Count() / 3.0).ToInteger())
@@ -213,19 +234,42 @@
                     </div>
                 }
 
-                @if (awards.Any())
+                @if (awards.Any() || certifications.Any() || isInEditMode)
                 {
                     <div class="margin-t-20">
-                        <div class="row padding-h-30">
+                        <div class="row padding-h-20">
 
-                            <h2>Awards @renderEditButtion("awards")</h2>
-
-                            @foreach (var award in awards.Where(x => x.Value.IsNotEmpty()))
+                            @if (awards.Any() || isInEditMode)
                             {
-                                <p class="activity-detail-block">
-                                    <i class="s7-medal text-warning icon-large"></i>
-                                    <span class="text-medium-small">@award.Value</span>
-                                </p>
+                                <div class="col-md-6 col-sm-12">
+
+                                    <h2>Awards @renderEditButtion(Model, "awards")</h2>
+
+                                    @foreach (var award in awards.Where(x => x.Value.IsNotEmpty()))
+                                    {
+                                        <p class="activity-detail-block">
+                                            <i class="s7-medal text-warning icon-large"></i>
+                                            <span class="text-medium-small">@award.Value</span>
+                                        </p>
+                                    }
+
+                                </div>
+                            }
+
+                            @if (certifications.Any() || isInEditMode)
+                            {
+                                <div class="col-md-6 col-sm-12">
+                                    <h2>Certifications @renderEditButtion(Model, "certifications")</h2>
+
+                                    @foreach (var certification in certifications.Where(x => x.Value.IsNotEmpty()))
+                                    {
+                                        <p class="activity-detail-block">
+                                            <i class="s7-star text-warning icon-large" style="padding-top: 20px;"></i>
+                                            <span class="text-medium-small" style="margin-top: -30px;">@certification.Value</span>
+                                        </p>
+                                    }
+
+                                </div>
                             }
 
                         </div>
@@ -233,29 +277,11 @@
 
                 }
 
-                @if (certifications.Any())
+                @if (accountProfile.About.IsNotBlank() || isInEditMode)
                 {
                     <div class="margin-t-20">
                         <div class="row padding-h-30">
-                            <h2>Certifications @renderEditButtion("certifications")</h2>
-
-                            @foreach (var certification in certifications.Where(x => x.Value.IsNotEmpty()))
-                            {
-                                <p class="activity-detail-block">
-                                    <i class="s7-star text-warning icon-large" style="padding-top: 20px;"></i>
-                                    <span class="text-medium-small" style="margin-top: -30px;">@certification.Value</span>
-                                </p>
-                            }
-
-                        </div>
-                    </div>
-                }
-
-                @if (accountProfile.About.IsNotBlank())
-                {
-                    <div class="margin-t-20">
-                        <div class="row padding-h-30">
-                            <h2>About @renderEditButtion("profileabout")</h2>
+                            <h2>About @renderEditButtion(Model, "profileabout")</h2>
                             <div class="activity-detail-block">
                                 @Html.Raw(accountProfile.About)
                             </div>
@@ -263,9 +289,9 @@
                     </div>
                 }
 
-                @if (locations.Any())
+                @if (location.IsNotEmpty())
                 {
-                    var locationsQuery = locations.Select(l => Url.Encode(l.GetAddress())).ToStringList(",");
+                    // var locationsQuery = locations.Select(l => Url.Encode(l.GetAddress())).ToStringList(",");
 
                     <div class="margin-t-20">
                         <div class="row padding-h-30">
@@ -273,7 +299,7 @@
                                 <div class="activity-detail-block">
                                     <div class="row">
                                         <div>
-                                            <h2>Location</h2>
+                                            <h2>Location @renderEditButtion(Model, "contactinfo")</h2>
                                         </div>
                                         <div>
                                             <p>
@@ -304,7 +330,7 @@
                 <div class="col-md-12 text-center">
                     <div class="padding-v-20 padding-h-30">
 
-                        @renderEditButtion("links")
+                        @renderEditButtion(Model, "links")
 
                         @if (Model.Phone.IsNotBlank())
                         {
@@ -342,7 +368,7 @@
                         @if (accountProfile.Twitter.IsNotEmpty())
                         {
                             <div class="footer-social-icon">
-                                <a href="https://twitter.com/@(accountProfile.Twitter.TrimStart('@'))"
+                                <a href="@accountProfile.TwitterUrl"
                                    target="_blank"
                                    class="icon-xlarge margin-h-30"
                                    style="text-decoration: none;">
@@ -353,7 +379,7 @@
                         @if (accountProfile.Instagram.IsNotEmpty())
                         {
                             <div class="footer-social-icon">
-                                <a href="https://instagram.com/@(accountProfile.Instagram.TrimStart('@'))"
+                                <a href="@accountProfile.InstagramUrl"
                                    target="_blank"
                                    class="icon-xlarge margin-h-30"
                                    style="text-decoration: none;">
@@ -372,6 +398,17 @@
                                 </a>
                             </div>
                         }
+                        @if (accountProfile.YouTube.IsNotEmpty())
+                        {
+                            <div class="footer-social-icon">
+                                <a href="@accountProfile.YouTube"
+                                   target="_blank"
+                                   class="icon-xlarge margin-h-30"
+                                   style="text-decoration: none;">
+                                    <i class="ion-social-youtube-outline"></i>
+                                </a>
+                            </div>
+                        }
                         @if (accountProfile.LinkedIn.IsNotEmpty())
                         {
                             <div class="footer-social-icon">
@@ -383,47 +420,20 @@
                                 </a>
                             </div>
                         }
+                        @if (accountProfile.CalendarBookingLink.IsNotEmpty())
+                        {
+                            <div class="footer-social-icon">
+                                <a href="@accountProfile.CalendarBookingLink"
+                                   target="_blank"
+                                   class="icon-xlarge margin-h-30"
+                                   style="text-decoration: none;">
+                                    <i class="ion-ios-calendar-outline"></i>
+                                </a>
+                            </div>
+                        }
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-@*
-    <script>
-
-        function codeAddress() {
-        var address = document.getElementById('address').value;
-        geocoder.geocode( { 'address': address}, function(results, status) {
-          if (status == 'OK') {
-            map.setCenter(results[0].geometry.location);
-            var marker = new google.maps.Marker({
-                map: map,
-                position: results[0].geometry.location
-            });
-          } else {
-            alert('Geocode was not successful for the following reason: ' + status);
-          }
-        });
-      }
-
-    // Initialize and add the map
-    function initMap() {
-        var bounds = new google.maps.LatLngBounds();
-        var position = new google.maps.LatLng(markers[i][1], markers[i][2]);
-        var map = new google.maps.Map(document.getElementById('map'), {zoom: 4, mapTypeId: 'roadmap'});
-        // The marker, positioned at Uluru
-        var marker = new google.maps.Marker({position: uluru, map: map});
-    }
-    </script>
-    <!--Load the API from the specified URL
-    * The async attribute allows the browser to render the page while the API loads
-    * The key parameter will contain your own API key (which is not needed for this tutorial)
-    * The callback parameter executes the initMap() function
-    -->
-    <script async defer
-            src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap">
-    </script>
-
-*@

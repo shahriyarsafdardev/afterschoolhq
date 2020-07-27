@@ -95,6 +95,7 @@ namespace AfterSchool.Models
             if (IsDuringRegistration)
                 Headline = "Registration";
 
+
             IsDemo = !Account.ID.HasValue;
         }
 
@@ -122,7 +123,7 @@ namespace AfterSchool.Models
 
             HeaderUrl = profile?.GetHeaderImageUrl();
             LogoUrl = profile?.GetLogoUrl();
-            Title = account.Name;
+            Title = profile.Title.IfBlank(account.Name);
             Headline = profile?.Headline;
             IsDemo = !account.ID.HasValue;
             PrimaryColor = profile?.PrimaryColor;
@@ -139,7 +140,7 @@ namespace AfterSchool.Models
 
             HeaderUrl = profile?.GetHeaderImageUrl();
             LogoUrl = profile?.GetLogoUrl();
-            Title = account.Name;
+            Title = profile.Title.IfBlank(account.Name);
             Headline = profile?.Headline;
             IsDemo = !account.ID.HasValue;
             PrimaryColor = profile?.PrimaryColor;

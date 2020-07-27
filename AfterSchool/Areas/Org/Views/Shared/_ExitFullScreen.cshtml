@@ -8,6 +8,16 @@
         fullscreenExitUrl = (string)ViewBag.FullScreenExitUrl;
     }
 
+    if (Request["source"].IsNotEmpty())
+    {
+        switch(Request["source"])
+        {
+            case "profile":
+                fullscreenExitUrl = $"{SessionVariables.CurrentAccount.HomePageUrl}?edit=1";
+                break;
+        }
+    }
+
     if (fullscreenExitText.IsBlank())
     {
         fullscreenExitText = "X";
