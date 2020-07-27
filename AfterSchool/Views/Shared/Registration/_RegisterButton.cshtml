@@ -5,6 +5,7 @@
     var accountOwner = Model.OwnerAccount.ID.HasValue ? Model.OwnerAccount.GetAccountOwner() : null;
     var canRegiserFor = true;
     var session = (ParticipationObject)ViewData["session"];
+    var currentUser = SessionVariables.CurrentUser;
 
     if (ViewData["condensed"].IsNotEmpty() && ViewData["condensed"].ToString().ToBoolean())
     {
@@ -37,7 +38,7 @@
 }
 else if (accountOwner.IsNotEmpty() && !accountOwner.VerifiedAccount)
 {
-    if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentUser.HasAccessTo(Model.OwnerAccount))
+    if (currentUser.IsNotEmpty() && currentUser.HasAccessTo(Model.OwnerAccount))
     {
         <button class="btn btn-header-action-callout btn-block" onclick="AccountSetup.sendVerificationEmail()">
             @if (condensed)
@@ -58,6 +59,47 @@ else if (accountOwner.IsNotEmpty() && !accountOwner.VerifiedAccount)
     else
     {
         <button class="btn btn-register btn-block" disabled title="The account owner has not verified their account">
+            @if (condensed)
+            {
+                @: Registration Disabled
+            }
+            else
+            {
+                <div class="hidden-xs">
+                    Registration Not Enabled &raquo;
+                </div>
+                <div class="hidden-sm hidden-md hidden-lg">
+                    Registration Disabled &raquo;
+                </div>
+            }
+        </button>
+    }
+}
+else if (!Model.OwnerAccount.CanProcessPayments())
+{
+    if (currentUser.IsNotEmpty() && currentUser.HasAccessTo(Model.OwnerAccount))
+    {
+        var redirectUrl = Url.Action("paymentsoptions", "account", new { area = "org", isfullscreen = 1, source = "profile" });
+
+        <a class="btn btn-header-action-callout btn-block" href="@Url.Action("switch", "logout", new { id = Model.OwnerAccount.Uid, redirectUrl = redirectUrl })">
+            @if (condensed)
+            {
+                @: Enable Payments 
+            }
+            else
+            {
+                <div class="hidden-xs">
+                    Registration Not Enabled &raquo; Enable Payments
+                </div>
+                <div class="hidden-sm hidden-md hidden-lg">
+                    Enable Payments &raquo;
+                </div>
+            }
+        </a>
+    }
+    else
+    {
+        <button class="btn btn-register btn-block" disabled title="The account owner has not setup their payment account">
             @if (condensed)
             {
                 @: Registration Disabled

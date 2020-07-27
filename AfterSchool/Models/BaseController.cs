@@ -11,6 +11,7 @@ using AfterSchoolLibrary;
 using AfterSchoolLibrary.Services;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
+using Amazon.DynamoDBv2;
 
 namespace AfterSchool.Models
 {
@@ -224,12 +225,32 @@ namespace AfterSchool.Models
             }
         }
 
-        internal ActionResult SwitchAccount()
+        internal ActionResult SwitchAccount(string redirectUrl = null, string newAccountUid = null)
         {
             SessionVariables.CurrentAccount = null;
             SessionVariables.CurrentRegistrant = null;
 
-            return RedirectToAction("select", "login");
+            if (!newAccountUid.IsGuid())
+            {
+                if (redirectUrl.IsNotEmpty())
+                    return Redirect(redirectUrl);
+
+                return RedirectToAction("select", "login");
+            }
+
+            var account = Account.LoadByUid(newAccountUid.ToGuid());
+
+            if (SessionVariables.LoggedInUser.HasAccessTo(account))
+            {
+                LoadSessionInfo(SessionVariables.CurrentUser, account);
+
+                if (redirectUrl.IsNotEmpty())
+                    return Redirect(redirectUrl);
+
+                return LoginRedirect();
+            }
+
+            return Logout();
         }
 
         internal void ClearOriginalLoggedInUser()

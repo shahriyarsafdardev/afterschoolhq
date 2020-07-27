@@ -239,7 +239,9 @@
                                 }
                                 else if (currentUser.IsNotEmpty() && Model.Account.OwnerId == currentUser.ID)
                                 {
-                                    <a href="@Url.Action("paymentsoptions", "account", new { area = "org", isfullscreen = 1, source = "profile" })"
+                                    var redirectUrl = Url.Action("paymentsoptions", "account", new { area = "org", isfullscreen = 1, source = "profile" });
+
+                                    <a href="@Url.Action("switch", "logout", new { id = Model.Account.Uid, redirectUrl = redirectUrl })"
                                        class="btn btn-header-action-callout">
                                         <i class="icon icon-left s7-credit"></i>
                                         Enable Payments
