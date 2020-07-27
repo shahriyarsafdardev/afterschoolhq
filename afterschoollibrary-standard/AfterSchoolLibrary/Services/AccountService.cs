@@ -2962,10 +2962,13 @@ namespace AfterSchoolLibrary.Services
 
         public static bool CanProcessPayments(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var oldPaymentFeatures = new List<FeatureType>() { FeatureType.UseStripeConnectedAccount, FeatureType.AcceptPayments };
+            if (!account.GetAccountOwner(msgs, dc).VerifiedAccount)
+                return false;
 
-            if (account.HasAccountPackageFeatures(oldPaymentFeatures, msgs, dc))
-                return account.StripeChargesEnabled;
+            var paymentFeatures = new List<FeatureType>() { FeatureType.UseStripeConnectedAccount, FeatureType.AcceptPayments };
+
+            if (account.HasAccountPackageFeatures(paymentFeatures, msgs, dc))
+                return account.CanReceiveStripeDeposits(msgs, dc);
 
             return true;
         }

@@ -26,6 +26,11 @@
     <div class="panel panel-default">
         <div class="panel-heading">
             <i class="s7-edit"></i> Settings - Setup Payment Account
+
+            @if (isFullScreen)
+            {
+                Html.RenderPartial("_ExitFullScreen", "");
+            }
         </div>
         <div class="panel-body">
 
