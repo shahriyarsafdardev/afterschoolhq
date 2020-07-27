@@ -1676,7 +1676,7 @@ namespace AfterSchoolLibrary.Services
         {
             var account = new Account()
             {
-                Name = $"{loggedInUser.DisplayName} Account",
+                Name = $"{loggedInUser.FirstName}'s Enrichment Club",
                 IsAfterSchool = true,
                 CreatedBy = loggedInUser.ID,
                 LastModifiedBy = loggedInUser.ID,
