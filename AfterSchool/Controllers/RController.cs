@@ -172,15 +172,39 @@ namespace AfterSchool.Controllers
 
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
+            var currentUser = SessionVariables.CurrentUser;
+            var currentAccount = SessionVariables.CurrentAccount;
 
             if (account.IsEmpty())
                 return HttpNotFound();
 
-            if (SessionVariables.CurrentUser.IsEmpty())
+            if (currentUser.IsEmpty())
                 return Redirect(account.HomePageUrl);
 
-            if (!SessionVariables.CurrentUser.IsActive)
-                return Redirect(Url.Action("confirm", "signup", new { id = SessionVariables.CurrentUser.Uid, returnurl = account.PayUrl }));
+            if (!currentUser.IsRegistered)
+                return Redirect(Url.Action("confirm", "signup", new { id = currentUser.Uid, returnurl = account.PayUrl }));
+
+            if (currentAccount.AccountTypeId != AccountType.Registrant)
+            {
+                //check if the user has a parent account
+                var registrantAccount = currentUser.GetRegistrantAccount(msgs);
+
+                // if no parent account, then create one real quick
+                if (registrantAccount.IsEmpty())
+                    registrantAccount = currentUser.AddNewRegistrantAccount(UserType.Owner, true, true, currentUser, msgs);
+
+                var masterRegistrant = currentUser.GetMasterRegistrant(msgs);
+
+                if (masterRegistrant.IsNotEmpty())
+                    registrantAccount = masterRegistrant.GetAccount(msgs);
+
+                if (registrantAccount.ID != currentAccount.ID)
+                    LoadSessionInfo(
+                        currentUser,
+                        registrantAccount,
+                        false,
+                        msgs);
+            }
 
             ViewBag.Sources = SessionVariables.CurrentAccount.GetStripeSources(msgs);
             ViewBag.BankAccounts = SessionVariables.CurrentAccount.GetStripeBankAccounts(msgs);

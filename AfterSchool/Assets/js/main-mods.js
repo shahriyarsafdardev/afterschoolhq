@@ -259,17 +259,32 @@ var WebPage = {
         var url = window.location.href.split('?');
         return url[0];
     },
-    copySelection: function (id, successText, callback) {
-        var copyText = document.getElementById(id);
-        copyText.select();
-        copyText.setSelectionRange(0, 99999);
-        document.execCommand("copy");
+    copySelection: function (url, successText, callback) {
 
-        Notifications.showMessage("Copied", successText, true);
+        var textArea = document.createElement("textarea");
+        textArea.value = url;
 
-        if (callback) {
-            callback();
+        // Avoid scrolling to bottom
+        textArea.style.top = "0";
+        textArea.style.left = "0";
+        textArea.style.position = "fixed";
+
+        document.body.appendChild(textArea);
+
+        textArea.focus();
+        textArea.select();
+
+        var successful = document.execCommand('copy');
+        var msg = successful ? 'successful' : 'unsuccessful';
+
+        if (successful) {
+            Notifications.showMessage("Copied", successText, true);
+
+            if (callback) {
+                callback();
+            }
         }
+
     }
 }
 

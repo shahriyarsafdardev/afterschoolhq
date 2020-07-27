@@ -297,10 +297,9 @@
                             </div>
 
                             <div class="footer-social-icon text-center">
-                                <input type="text" value="@shareUrl" id="account-reg-url" onclick="this.select()" class="form-control inline hidden" />
                                 <span class="icon-xlarge pointer"
                                       style="text-decoration: none;"
-                                      onclick="copyUrlToShare()"
+                                      onclick="copyUrlToShare('@shareUrl')"
                                       title="Copy Url">
                                     <i class="ion-ios-world-outline"></i>
                                 </span>
@@ -485,8 +484,8 @@
 
     }
 
-    function copyUrlToShare() {
-        WebPage.copySelection('account-reg-url', 'URL has been copied', function () {
+    function copyUrlToShare(url) {
+        WebPage.copySelection(url, 'URL has been copied', function () {
             $('#copy-url-text').html('Copied!');
 
             setTimeout(function () {
