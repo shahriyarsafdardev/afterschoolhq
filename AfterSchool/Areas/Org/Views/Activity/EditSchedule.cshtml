@@ -31,7 +31,7 @@
         </div>
         <div class="panel-body">
 
-            <div class="col-md-8 col-lg-9">
+            <div class="col-md-10 col-lg-9">
                 <form id="form1" method="post" action="@Url.Action("editschedule", "activity", new { id = Model.Uid, isnew = Request["isnew"], source = Request["source"] })" class="form-horizontal">
 
                     @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editschedule", "next", true, true, Request))
@@ -56,7 +56,7 @@
                 </form>
             </div>
 
-            <div class="col-md-4 col-lg-3">
+            <div class="col-md-2 col-lg-3">
                 @{Html.RenderPartial("~/Views/Shared/_ActivityEditNav.cshtml", Model); }
             </div>
 
