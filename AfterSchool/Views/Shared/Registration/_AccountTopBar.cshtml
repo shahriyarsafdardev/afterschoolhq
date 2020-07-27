@@ -39,7 +39,7 @@
     else if (Model.IsNotEmpty() && !(Model.HomePageUrl.ToLower().Contains(Request.Url.AbsolutePath.ToLower())))
     {
         <a href="@Model.HomePageUrl" class="btn btn-link">
-            &laquo; Return to @Model.Name Home
+            &laquo; Return Home
         </a>
     }
 }
@@ -83,7 +83,7 @@
 
                                 if (currentUser.IsActive)
                                 {
-                                    <a href="@dashboardUrl" class="btn btn-link">View @accountOrDashboard</a>
+                                    <a href="@dashboardUrl" class="btn btn-link">@accountOrDashboard</a>
                                 }
                                 else if (!currentUser.IsRegistered)
                                 {
