@@ -172,7 +172,7 @@
                                                 <input type="text" value="@SessionVariables.CurrentAccount.ShortHomePageUrl" id="account-reg-url" onclick="this.select()" class="form-control inline" />
                                             </td>
                                             <td>
-                                                <span onclick="WebPage.copySelection('account-reg-url', 'URL has been copied')" title="Copy Url">
+                                                <span onclick="WebPage.copySelection('@SessionVariables.CurrentAccount.ShortHomePageUrl', 'URL has been copied')" title="Copy Url">
                                                     <i class="s7-copy-file icon-large text-success pointer"></i>
                                                 </span>
                                                 <a href="@SessionVariables.CurrentAccount.ShortHomePageUrl" target="_blank" title="View Page"><i class="s7-link icon-large"></i></a>
@@ -189,7 +189,7 @@
                                                     <input type="text" value="@group.ShortHomePageUrl" id="group-reg-url" onclick="this.select()" class="form-control" />
                                                 </td>
                                                 <td>
-                                                    <span onclick="WebPage.copySelection('group-reg-url', 'URL has been copied')" title="Copy Url" class="pointer">
+                                                    <span onclick="WebPage.copySelection('@group.ShortHomePageUrl', 'URL has been copied')" title="Copy Url" class="pointer">
                                                         <i class="s7-copy-file icon-large text-success pointer"></i>
                                                     </span>
                                                     <a href="@group.ShortHomePageUrl" target="_blank" title="View Page"><i class="s7-link icon-large"></i></a>
@@ -204,7 +204,7 @@
                                                     <input type="text" value="@Model.ShortHomePageUrl" id="activity-reg-url" onclick="this.select()" class="form-control" />
                                                 </td>
                                                 <td>
-                                                    <span onclick="WebPage.copySelection('activity-reg-url', 'URL has been copied')" title="Copy Url">
+                                                    <span onclick="WebPage.copySelection('@Model.ShortHomePageUrl', 'URL has been copied')" title="Copy Url">
                                                         <i class="s7-copy-file icon-large text-success pointer"></i>
                                                     </span>
                                                     <a href="@Model.ShortHomePageUrl" target="_blank" title="View Page"><i class="s7-link icon-large"></i></a>
