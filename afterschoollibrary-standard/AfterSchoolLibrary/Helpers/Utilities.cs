@@ -349,7 +349,7 @@ namespace AfterSchoolLibrary.Helpers
                     Migrations.AddUsedStripeConnectToTransactions_20200705.Do(amsgs, adc);
                     Migrations.SetExistingAccountsToOnboarded_20200724.Do(amsgs, adc);
                     Migrations.SubscriberToPolymorphicRelationship_20200726.Do(amsgs, adc);
-                    Migrations.AddProfilesToAllAccounts_20200727.Do(amsgs, adc);
+                    // Migrations.AddProfilesToAllAccounts_20200727.Do(amsgs, adc);
 
                     // amsgs.Add("rollback please", MessageType.Error);
 

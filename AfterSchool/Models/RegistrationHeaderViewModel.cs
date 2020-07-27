@@ -123,7 +123,7 @@ namespace AfterSchool.Models
 
             HeaderUrl = profile?.GetHeaderImageUrl();
             LogoUrl = profile?.GetLogoUrl();
-            Title = profile?.Title.IfBlank(account.Name);
+            Title = profile?.Title ?? account.Name;
             Headline = profile?.Headline;
             IsDemo = !account.ID.HasValue;
             PrimaryColor = profile?.PrimaryColor;
@@ -140,7 +140,7 @@ namespace AfterSchool.Models
 
             HeaderUrl = profile?.GetHeaderImageUrl();
             LogoUrl = profile?.GetLogoUrl();
-            Title = profile?.Title.IfBlank(account.Name);
+            Title = profile?.Title ?? account.Name;
             Headline = profile?.Headline;
             IsDemo = !account.ID.HasValue;
             PrimaryColor = profile?.PrimaryColor;
