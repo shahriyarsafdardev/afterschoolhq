@@ -276,7 +276,6 @@ var WebPage = {
 
         var successful = document.execCommand('copy');
         var msg = successful ? 'successful' : 'unsuccessful';
-        console.log(msg);
 
         if (successful) {
             Notifications.showMessage("Copied", successText, true);
