@@ -68,6 +68,24 @@
                 </div>
 
                 <div class="form-group">
+                    <label class="col-lg-3 control-label">Special Needs Offerings</label>
+                    <div class="col-lg-9">
+                        @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.SpecialNeedsOfferings)
+                        {
+                            <div class="am-checkbox">
+                                <input type="checkbox"
+                                       name="special-needs-@item.ToLower()"
+                                       id="special-needs-@item.ToLower()"
+                                       value="@item"
+                                       @(Request[$"special-needs-{item.ToLower()}"].IsBoolean() ? "checked=\"checked\"" : "") />
+                                <label for="special-needs-@item.ToLower()">@item</label>
+                            </div>
+                        }
+
+                    </div>
+                </div>
+
+                <div class="form-group">
                     <label class="col-lg-3 control-label">Program Classifications (up to 3)</label>
                     <div class="col-lg-9">
                         <input type="text" name="classifications" id="classifications" class="form-control" data-role="tagsinput" value="@Request["classifications"]" />

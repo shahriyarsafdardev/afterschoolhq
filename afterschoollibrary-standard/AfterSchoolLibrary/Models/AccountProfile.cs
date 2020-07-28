@@ -38,6 +38,7 @@ namespace AfterSchoolLibrary.Models
 		public GenderRestrictionType GenderRestriction { get { return (GenderRestrictionType)MDV["GenderRestriction"].Value; } set { MDV["GenderRestriction"].Value = value; } }
 		public string ProfileEmail { get { return (string)MDV["ProfileEmail"].Value; } set { MDV["ProfileEmail"].Value = value; } }
 		public string ProfilePhone { get { return (string)MDV["ProfilePhone"].Value; } set { MDV["ProfilePhone"].Value = value; } }
+		public bool IsOpenDuringCovid { get { return (bool)MDV["IsOpenDuringCovid"].Value; } set { MDV["IsOpenDuringCovid"].Value = value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
 		public string AccountUniqueName { get { return (string)MDV["AccountUniqueName"].Value; } }
 		public bool AccountIsTest { get { return (bool)MDV["AccountIsTest"].Value; } }
@@ -49,6 +50,7 @@ namespace AfterSchoolLibrary.Models
             this.Config(ObjectMap, DatabaseQuery, typeof(AccountProfile).Name, "ID");
             this.LoadObjectValues(ObjectMap);
 			this.GenderRestriction = GenderRestrictionType.None;
+			this.IsOpenDuringCovid = false;
 			
         }
 
@@ -79,6 +81,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "GenderRestriction", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ProfileEmail", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "ProfilePhone", System.Data.SqlDbType.NVarChar , "20");
+				_dp.Add(className, "IsOpenDuringCovid", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "AccountUniqueName", typeof(Account).Name, "UniqueName", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "AccountIsTest", typeof(Account).Name, "IsTest", System.Data.SqlDbType.Bit, "Account");
@@ -235,6 +238,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["ProfilePhone"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsOpenDuringCovid"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

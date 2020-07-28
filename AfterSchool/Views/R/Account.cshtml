@@ -18,19 +18,23 @@
     var isInEditMode = SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentUser.HasAccessTo(Model) && Request["edit"] == "1";
 
     var skillAndMethodTypes = new AccountPropertyType[] { AccountPropertyType.SoftSkills, AccountPropertyType.TeachingMethods, AccountPropertyType.AcademicSubjects, AccountPropertyType.Classifications };
+    var serviceTypes = new AccountPropertyType[] { AccountPropertyType.ServiceOffered, AccountPropertyType.TimeOffered, AccountPropertyType.PricingOption };
+    var specialNeedsTypes = new AccountPropertyType[] { AccountPropertyType.SpecialNeedsOffering };
+
     var skillsAndMethods = accountProperties.Where(item => item.AccountPropertyTypeId.In(skillAndMethodTypes));
-    var servicesOffered = accountProperties.Where(item => item.AccountPropertyTypeId.NotIn(skillAndMethodTypes));
+    var servicesOffered = accountProperties.Where(item => item.AccountPropertyTypeId.In(serviceTypes));
+    var specialNeedsOffered = accountProperties.Where(item => item.AccountPropertyTypeId.In(specialNeedsTypes));
 }
 
 @{
     Html.RenderPartial(
-        "~/Views/Shared/Registration/_AccountTopBar.cshtml",
-        Model,
-        new ViewDataDictionary()
-        {
+"~/Views/Shared/Registration/_AccountTopBar.cshtml",
+Model,
+new ViewDataDictionary()
+{
             { "LoginReturnUrl", Model.HomePageUrl }
-        }
-    );
+}
+);
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -73,7 +77,7 @@
                         iconTitle = "Academic Subject";
                         break;
                     case AccountPropertyType.PricingOption:
-                        icon = "s7-cash";
+                        icon = "s7-credit";
                         iconTitle = "Pricing Option";
                         break;
                     case AccountPropertyType.ServiceOffered:
@@ -91,6 +95,10 @@
                     case AccountPropertyType.TimeOffered:
                         icon = "s7-clock";
                         iconTitle = "Time Offered";
+                        break;
+                    case AccountPropertyType.SpecialNeedsOffering:
+                        icon = "s7-user";
+                        iconTitle = "Special Needs Offerings";
                         break;
                 }
 
@@ -215,7 +223,7 @@
                         <hr style="border-color: #efefef;" />
                     </div>
                 }
-                
+
                 @if (skillsAndMethods.Any() || isInEditMode)
                 {
                     <div class="margin-t-20">
@@ -225,6 +233,24 @@
                             </div>
 
                             @renderAccountProperties(skillsAndMethods, Math.Ceiling(skillsAndMethods.Count() / 3.0).ToInteger())
+
+                        </div>
+                    </div>
+
+                    <div class="margin-v-40">
+                        <hr style="border-color: #efefef;" />
+                    </div>
+                }
+
+                @if (specialNeedsOffered.Any() || isInEditMode)
+                {
+                    <div class="margin-t-20">
+                        <div class="row padding-h-30">
+                            <div class="activity-detail-block">
+                                <h2>Special Needs Offerings @renderEditButtion(Model, "services")</h2>
+                            </div>
+
+                            @renderAccountProperties(specialNeedsOffered, Math.Ceiling(specialNeedsOffered.Count() / 3.0).ToInteger())
 
                         </div>
                     </div>

@@ -391,6 +391,7 @@ property: CalendarBookingLink, string, NVarChar "100"
 property: GenderRestriction, GenderRestrictionType, Int
 property: ProfileEmail, string, NVarChar "100"
 property: ProfilePhone, string, NVarChar "20"
+property: IsOpenDuringCovid, bool, Bit
 loadmethod: AccountId
 join: Account.ID, AccountId, InnerJoin
 joinproperty: Account.Name, string, NVarChar
@@ -1772,7 +1773,7 @@ values: None, MaleOnly, FemaleOnly
 [begin]
 type: Enum
 name: AccountPropertyType
-values: NotSet, LandingPageText, RegistrationThankYouEmail, ApplicationThankYouEmail, NoActivitiesText, FacebookAdPixel, Award, Certification, Photo, ServiceOffered, TimeOffered, PricingOption, Classifications, SoftSkills, AcademicSubjects, TeachingMethods, InterestThankYouEmail
+values: NotSet, LandingPageText, RegistrationThankYouEmail, ApplicationThankYouEmail, NoActivitiesText, FacebookAdPixel, Award, Certification, Photo, ServiceOffered, TimeOffered, PricingOption, Classifications, SoftSkills, AcademicSubjects, TeachingMethods, InterestThankYouEmail, SpecialNeedsOffering
 [end]
 
 [begin]

@@ -64,16 +64,18 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.MaxGradeId = grades.Last().ID.ToString();
             ViewBag.Messages = msgs;
             ViewBag.Title = account.Name;
+            ViewBag.OpenCovid = true;
 
             return View(account);
         }
 
         [HttpPost]
-        public ActionResult ProgramInfo(string title, string headline, string mingrade, string maxgrade, string genderrestriction)
+        public ActionResult ProgramInfo(string title, string headline, string mingrade, string maxgrade, string genderrestriction, string opencovid)
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
-            var profile = account.GetOrCreateAccountProfile(SessionVariables.CurrentUser, msgs);
+            var currentUser = SessionVariables.CurrentUser;
+            var profile = account.GetOrCreateAccountProfile(currentUser, msgs);
 
             if (title.IsEmpty())
                 msgs.Add("Program Name is required", MessageType.UserError);
@@ -95,7 +97,8 @@ namespace AfterSchool.Areas.Org.Controllers
                             mingrade: mingrade,
                             maxgrade: maxgrade,
                             genderrestriction: genderrestriction,
-                            loggedInUser: SessionVariables.CurrentUser,
+                            opencovid: opencovid,
+                            loggedInUser: currentUser,
                             msgs: amsgs, 
                             dc: adc);
                     },
@@ -115,6 +118,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.MaxGradeId = Request["maxgrade"] ?? grades.Last().ID.ToString();
             ViewBag.Messages = msgs;
             ViewBag.Title = Request["title"] ?? account.Name;
+            ViewBag.OpenCovid = opencovid.IsNumber();
 
             return View(account);
         }
@@ -299,6 +303,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             servicesOffered: Request.Params.Filter("services-offered-"),
                             timesOffered: Request.Params.Filter("times-offered-"),
                             pricingOptions: Request.Params.Filter("pricing-options-"),
+                            specialNeedsOfferings: Request.Params.Filter("special-needs-"),
                             classifications: classifications,
                             softskills: softskills,
                             academicsubjects: academicsubjects,
