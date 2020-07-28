@@ -360,7 +360,7 @@ namespace AfterSchoolLibrary.Services
                     CreatedBy = 0,
                     LastModifiedDate = DateTime.UtcNow,
                     LastModifiedBy = 0, 
-                    Username = WebUserService.GenerateUsername(firstName, lastName)
+                    Username = WebUserService.GenerateUsername(firstName, lastName, msgs, dc)
                 };
 
                 msgs.AddRange(user.Save(dc));
