@@ -71,7 +71,7 @@
                     </div>
                     <div class="form-group">
                         <label class="col-sm-3 control-label">Time Zone</label>
-                        <div class="col-sm-9">
+                        <div class="col-sm-6">
                             @{ Html.RenderPartial("~/Views/Shared/Components/_TimezoneDropdown.cshtml", Request["timezone"]); }
                         </div>
                     </div>
@@ -113,12 +113,23 @@
                 </div>
 
                 <div class="form-group">
+                    <label class="col-sm-3 control-label">Is Test Account</label>
+                    <div class="col-sm-6">
+                        @{ Html.RenderPartial(
+                             "~/Views/Shared/_SwitchButton.cshtml",
+                             false,
+                             new ViewDataDictionary() { { "checkboxname", "istest" }, { "checkboxid", "istest" } });
+                        }
+                    </div>
+                </div>
+
+                <div class="form-group">
                     <label class="col-sm-3 control-label">Is Unclaimed</label>
                     <div class="col-sm-6">
                         @{ Html.RenderPartial(
-                            "~/Views/Shared/_SwitchButton.cshtml",
-                            false,
-                            new ViewDataDictionary() { { "checkboxname", "isunclaimed" }, { "checkboxid", "isunclaimed" } });
+                             "~/Views/Shared/_SwitchButton.cshtml",
+                             false,
+                             new ViewDataDictionary() { { "checkboxname", "isunclaimed" }, { "checkboxid", "isunclaimed" } });
                         }
                     </div>
                 </div>
