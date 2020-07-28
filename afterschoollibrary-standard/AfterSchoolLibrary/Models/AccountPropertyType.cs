@@ -16,5 +16,6 @@ public enum AccountPropertyType
 	SoftSkills,
 	AcademicSubjects,
 	TeachingMethods,
-	InterestThankYouEmail
+	InterestThankYouEmail,
+	SpecialNeedsOffering
 }

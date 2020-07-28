@@ -20,6 +20,7 @@
     var servicesOffered = (List<AccountProperty>)ViewBag.ServicesOffered;
     var timesOffered = (List<AccountProperty>)ViewBag.TimesOffered;
     var pricingOptions = (List<AccountProperty>)ViewBag.PricingOptions;
+    var specialNeedsOfferings = (List<AccountProperty>)ViewBag.SpecialNeedsOfferings;
     var isFullScreen = (bool)ViewBag.IsFullScreen;
     var formAction = Url.Action("style", "account", new { isfullscreen = Request["isfullscreen"], returnurl = Request["returnurl"] });
     var exitText = "Back to My Profile &raquo;";
@@ -137,18 +138,6 @@
                                 </div>
                             </div>
 
-                            <div class="form-group hide">
-                                <label class="col-md-3 control-label">
-                                    Profile Primary Color
-                                </label>
-                                <div class="col-md-9">
-                                    <input type="text" class="form-control" name="primarycolor" id="primarycolor" value="@Model.PrimaryColor" />
-                                    <p class="text-muted">
-                                        <em>Enter your primary color for your profile</em>
-                                    </p>
-                                </div>
-                            </div>
-
                             @if (!isFullScreen)
                             {
                                 @SubmitButtons()
@@ -222,6 +211,19 @@
                                                @(Model.GenderRestriction == GenderRestrictionType.FemaleOnly ? "checked=\"checked\"" : "") />
                                         <label for="genderrestrictions-@((int)GenderRestrictionType.FemaleOnly)">Girls</label>
                                     </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-lg-3 control-label">
+                                    Providing services during COVID?
+                                </label>
+                                <div class="col-lg-9">
+                                    @{ Html.RenderPartial(
+                                           "~/Views/Shared/_SwitchButton.cshtml",
+                                           Model.IsOpenDuringCovid,
+                                           new ViewDataDictionary() { { "checkboxname", "opencovid" }, { "checkboxid", "opencovid" } });
+                                    }
                                 </div>
                             </div>
 
@@ -353,6 +355,24 @@
                                                    value="@item"
                                                    @(pricingOptions.Select(x => x.Value.ToLower()).Contains(item.ToLower()) ? "checked=\"checked\"" : "") />
                                             <label for="pricing-options-@item.ToLower()">@item</label>
+                                        </div>
+                                    }
+
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">Special Needs Offerings</label>
+                                <div class="col-md-9">
+                                    @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.SpecialNeedsOfferings)
+                                    {
+                                        <div class="am-checkbox">
+                                            <input type="checkbox"
+                                                   name="special-needs-@item.ToLower()"
+                                                   id="special-needs-@item.ToLower()"
+                                                   value="@item"
+                                                   @(specialNeedsOfferings.Select(x => x.Value.ToLower()).Contains(item.ToLower()) ? "checked=\"checked\"" : "") />
+                                            <label for="special-needs-@item.ToLower()">@item</label>
                                         </div>
                                     }
 
