@@ -5,6 +5,7 @@
     var grades = (List<GradeLevel>)ViewBag.Grades;
     var minGradeId = (string)ViewBag.MinGradeId;
     var maxGradeId = (string)ViewBag.MaxGradeId;
+    var opencovid = (bool)ViewBag.OpenCovid;
     var title = (string)ViewBag.Title;
     var isProgram = Model.AccountTypeId == AccountType.Teacher;
 
@@ -42,7 +43,7 @@
                         @organizationLabel.ToProperCase() Name
                     </label>
                     <div class="col-lg-9">
-                        <input type="text" class="form-control" name="title" id="title" value="@title" />
+                        <input type="text" class="form-control" name="title" id="title" value="@title" onclick="this.select()" />
                         <p class="text-muted">
                             <em>@Html.Raw(organizationExampleNames)</em>
                         </p>
@@ -96,26 +97,39 @@
                     <div class="col-lg-9">
                         <div class="am-radio">
                             <input type="radio"
-                                    name="genderrestrictions"
-                                    id="genderrestrictions-@((int)GenderRestrictionType.None)"
-                                    value="@((int)GenderRestrictionType.None)"
-                                    checked="checked" />
+                                   name="genderrestrictions"
+                                   id="genderrestrictions-@((int)GenderRestrictionType.None)"
+                                   value="@((int)GenderRestrictionType.None)"
+                                   checked="checked" />
                             <label for="genderrestrictions-@((int)GenderRestrictionType.None)">All Genders</label>
                         </div>
                         <div class="am-radio">
                             <input type="radio"
-                                    name="genderrestrictions"
-                                    id="genderrestrictions-@((int)GenderRestrictionType.MaleOnly)"
-                                    value="@((int)GenderRestrictionType.None)" />
+                                   name="genderrestrictions"
+                                   id="genderrestrictions-@((int)GenderRestrictionType.MaleOnly)"
+                                   value="@((int)GenderRestrictionType.None)" />
                             <label for="genderrestrictions-@((int)GenderRestrictionType.MaleOnly)">Boys</label>
                         </div>
                         <div class="am-radio">
                             <input type="radio"
-                                    name="genderrestrictions"
-                                    id="genderrestrictions-@((int)GenderRestrictionType.FemaleOnly)"
-                                    value="@((int)GenderRestrictionType.None)" />
+                                   name="genderrestrictions"
+                                   id="genderrestrictions-@((int)GenderRestrictionType.FemaleOnly)"
+                                   value="@((int)GenderRestrictionType.None)" />
                             <label for="genderrestrictions-@((int)GenderRestrictionType.FemaleOnly)">Girls</label>
                         </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-lg-3 control-label">
+                        Providing services during COVID?
+                    </label>
+                    <div class="col-lg-9">
+                        @{ Html.RenderPartial(
+                              "~/Views/Shared/_SwitchButton.cshtml",
+                              opencovid,
+                              new ViewDataDictionary() { { "checkboxname", "opencovid" }, { "checkboxid", "opencovid" } });
+                        }
                     </div>
                 </div>
 

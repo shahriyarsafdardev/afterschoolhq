@@ -10,7 +10,7 @@ namespace AfterSchoolLibrary.Helpers
         {
             get
             {
-                return new string[] { "Classes", "Events", "Camps", "Field Trips", "Workshops", "Virtual Learning", "Tutoring", "Mentoring", "Jobs", "Counseling", "Resources", "Curriculum" };
+                return new string[] { "Classes", "Events", "Camps", "Field Trips", "Workshops", "E-Learning", "Tutoring", "Mentoring", "Jobs", "Counseling", "Resources", "Curriculum" };
             }
         }
         
@@ -26,7 +26,15 @@ namespace AfterSchoolLibrary.Helpers
         {
             get
             {
-                return new string[] { "Free Activities available", "Scholarships available" };
+                return new string[] { "Free Activities available", "Scholarships available", "Payment Plans available" };
+            }
+        }
+
+        public static string[] SpecialNeedsOfferings
+        {
+            get
+            {
+                return new string[] { "ADD / ADHD", "Autism", "Blindness", "Deafness", "Down Syndrome", "Dyslexia", "Emotional Disturbance", "Hearing Impairment", "Intellectual Disability", "Multiple Disabilities", "Orthopedic Impairment", "Other Health Impaired", "Specific Learning Disability", "Speech or Language Impairment", "Traumatic Brain Injury", "Visual Impairment" };
             }
         }
     }

@@ -83,7 +83,9 @@ namespace AfterSchool.Controllers
                                                 AccountPropertyType.ServiceOffered, 
                                                 AccountPropertyType.SoftSkills, 
                                                 AccountPropertyType.TeachingMethods, 
-                                                AccountPropertyType.TimeOffered 
+                                                AccountPropertyType.TimeOffered,
+                                                AccountPropertyType.SpecialNeedsOffering,
+                                                AccountPropertyType.PricingOption,
                                             }, msgs);
 
             return View(account);

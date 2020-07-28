@@ -899,6 +899,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var servicesOffered = account.GetAccountProperties(AccountPropertyType.ServiceOffered);
             var timesOffered = account.GetAccountProperties(AccountPropertyType.TimeOffered);
             var pricingOptions = account.GetAccountProperties(AccountPropertyType.PricingOption);
+            var specialNeedsOfferings = account.GetAccountProperties(AccountPropertyType.SpecialNeedsOffering);
 
             while (awards.Count < 5)
                 awards.Add(new AccountProperty());
@@ -929,6 +930,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.ServicesOffered = servicesOffered;
             ViewBag.TimesOffered = timesOffered;
             ViewBag.PricingOptions = pricingOptions;
+            ViewBag.SpecialNeedsOfferings = specialNeedsOfferings;
             ViewBag.Classifications = classifications;
             ViewBag.SoftSkills = softSkills;
             ViewBag.AcademicSubjects = academicSubjects;
@@ -947,7 +949,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult Style(string id, string logo, string headerimage, string about, string title, string headline, string primaryColor, string website, string mingrade, string maxgrade, string twitter, string facebook, string instagram, string linkedin, string youtube, string calendar, string genderrestriction, string classifications, string softskills, string academicsubjects, string teachingmethods, string profileemail, string profilephone, string locationname, string streetnumber, string streetname, string address2, string neighborhood, string city, string state, string postalcode, string county, string country, string placeid)
+        public ActionResult Style(string id, string logo, string headerimage, string about, string title, string headline, string primaryColor, string website, string mingrade, string maxgrade, string twitter, string facebook, string instagram, string linkedin, string youtube, string calendar, string genderrestriction, string classifications, string softskills, string academicsubjects, string teachingmethods, string profileemail, string profilephone, string locationname, string streetnumber, string streetname, string address2, string neighborhood, string city, string state, string postalcode, string county, string country, string placeid, string opencovid)
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
@@ -1035,6 +1037,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     headline,
                     about,
                     website,
+                    opencovid,
                     mingrade,
                     maxgrade,
                     twitter,
@@ -1053,6 +1056,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     Request.Params.Filter("services-offered-"),
                     Request.Params.Filter("times-offered-"),
                     Request.Params.Filter("pricing-options-"),
+                    Request.Params.Filter("special-needs-"),
                     classifications,
                     softskills,
                     academicsubjects,
