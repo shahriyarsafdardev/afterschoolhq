@@ -155,7 +155,7 @@ namespace AfterSchoolLibrary.Services
                     participationObjectType: participationObject.ObjectType,
                     assignmentType: assignmentType,
                     preferenceNumber: 1,
-                    registrationPeriodId: period.ID,
+                    registrationPeriodId: period?.ID,
                     activityGroupId: participationObject.GetAnyRelatedActivityGroupId(),
                     amountCharged: 0,
                     loggedInUserId: loggedInUser.ID.IfEmpty(0),
