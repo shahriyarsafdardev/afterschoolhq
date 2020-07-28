@@ -136,8 +136,7 @@ namespace AfterSchoolLibrary.Services
                     if (website != null)
                         profile.Website = website.MaxChars(400);
 
-                    if (opencovid != null)
-                        profile.IsOpenDuringCovid = opencovid.IsNumber();
+                    profile.IsOpenDuringCovid = opencovid.IsNumber();
 
                     if (twitter != null)
                         profile.Twitter = twitter;
