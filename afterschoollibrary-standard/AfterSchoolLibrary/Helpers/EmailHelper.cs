@@ -228,6 +228,7 @@ namespace AfterSchoolLibrary.Helpers
             var billingAccount = checkoutObject.BillingAccount;
             var actionLink = Utilities.LoginUrl();
             var registrationDetails = "Login to your account to view more details.";
+            var bccPrepend = $"<p>{masterRegistrant.FirstName} has registered interest for the following activity. Please reach out to them or add them to your mailing list</p><p>------------------</p>";
 
             if (customMessage.IsEmpty())
             {
@@ -235,9 +236,6 @@ namespace AfterSchoolLibrary.Helpers
 
                 if (interestFormThankYou.IsNotEmpty())
                     customMessage = "Thank you for your interest. We will be in touch with you soon to follow up.";
-
-                if (loggedInUser.HasAccessTo(billingAccount))
-                    customMessage = $"{masterRegistrant.FirstName} has registered interest for the following activity. Please reach out to them or add them to your mailing list";
             }
 
             if (!loggedInUser.IsRegistered)
@@ -287,7 +285,7 @@ namespace AfterSchoolLibrary.Helpers
                     fromEmail: Email.SendGridNoReplyEmailAddress(true),
                     toEmail: new SendGrid.Helpers.Mail.EmailAddress(email),
                     subject: $"Interest Form CC: {subject}",
-                    body: body,
+                    body: $"{bccPrepend}{body}",
                     emailTemplateId: SendGridHelper.GetGenericTemplateId(true)));
 
             msgs.AddRange(mailMsgs);
