@@ -268,6 +268,7 @@ var WebPage = {
         textArea.style.top = "0";
         textArea.style.left = "0";
         textArea.style.position = "fixed";
+        textArea.style.display = "none";
 
         document.body.appendChild(textArea);
 
@@ -275,7 +276,6 @@ var WebPage = {
         textArea.select();
 
         var successful = document.execCommand('copy');
-        var msg = successful ? 'successful' : 'unsuccessful';
 
         if (successful) {
             Notifications.showMessage("Copied", successText, true);
