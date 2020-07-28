@@ -91,7 +91,7 @@ namespace AfterSchool.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public ActionResult Invite(string id, string orgname, string accounttype, string package, string billingperiod, string email, string firstname, string lastname, string message, string isUnclaimed, string timezone)
+        public ActionResult Invite(string id, string orgname, string accounttype, string package, string billingperiod, string email, string firstname, string lastname, string message, string isUnclaimed, string timezone, string istest)
         {
             var msgs = new SystemMessages();
             var sendInvite = !isUnclaimed.IsNumber();
@@ -160,25 +160,25 @@ namespace AfterSchool.Areas.Admin.Controllers
                             if (sendInvite)
                             {
                                 user = WebUserService.InviteNew(
-                                firstName: firstname,
-                                lastName: lastname,
-                                email: email,
-                                loggedInUser: SessionVariables.CurrentUser,
-                                msgs: amsgs,
-                                dc: adc);
+                                        firstName: firstname,
+                                        lastName: lastname,
+                                        email: email,
+                                        loggedInUser: SessionVariables.CurrentUser,
+                                        msgs: amsgs,
+                                        dc: adc);
 
                                 account = user.AddNewAccount(
-                                    orgName: orgname,
-                                    phone: null,
-                                    isActive: true,
-                                    accountType: (AccountType)accounttype.ToInteger(),
-                                    packageId: package.ToInteger(),
-                                    packageBillingPeriod: (BillingPeriodType)billingperiod.ToInteger(),
-                                    timeZone: timezone,
-                                    isAfterSchool: true,
-                                    loggedInUser: SessionVariables.CurrentUser,
-                                    msgs: amsgs,
-                                    dc: adc);
+                                            orgName: orgname,
+                                            phone: null,
+                                            isActive: true,
+                                            accountType: (AccountType)accounttype.ToInteger(),
+                                            packageId: package.ToInteger(),
+                                            packageBillingPeriod: (BillingPeriodType)billingperiod.ToInteger(),
+                                            timeZone: timezone,
+                                            isAfterSchool: true,
+                                            loggedInUser: SessionVariables.CurrentUser,
+                                            msgs: amsgs,
+                                            dc: adc);
                             }
                             else
                             {
@@ -199,6 +199,9 @@ namespace AfterSchool.Areas.Admin.Controllers
                                             dc: adc);
                             }
                         }
+
+                        account.IsTest = istest.IsNumber();
+                        amsgs.AddRange(account.Save(adc));
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
