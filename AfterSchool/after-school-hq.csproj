@@ -592,6 +592,7 @@
     <Compile Include="Controllers\DbController.cs" />
     <Compile Include="Controllers\FaqController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\IndianapolisController.cs" />
     <Compile Include="Controllers\LegalController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
     <Compile Include="Controllers\LogoutController.cs" />
@@ -1837,6 +1838,7 @@
     <Folder Include="Areas\WebHooks\Views\Shared\" />
     <Folder Include="Areas\WebHooks\Views\Stripe\" />
     <Folder Include="Areas\WebHooks\Views\Twilio\" />
+    <Folder Include="Views\Indianapolis\" />
     <Folder Include="Views\Sitemap\" />
     <Folder Include="Views\User\" />
   </ItemGroup>
