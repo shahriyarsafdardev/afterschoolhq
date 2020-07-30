@@ -65,12 +65,13 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             ViewBag.Title = account.Name;
             ViewBag.OpenCovid = true;
+            ViewBag.ELC = false;
 
             return View(account);
         }
 
         [HttpPost]
-        public ActionResult ProgramInfo(string title, string headline, string mingrade, string maxgrade, string genderrestriction, string opencovid)
+        public ActionResult ProgramInfo(string title, string headline, string mingrade, string maxgrade, string genderrestriction, string opencovid, string elearningcenter)
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
@@ -98,6 +99,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             maxgrade: maxgrade,
                             genderrestriction: genderrestriction,
                             opencovid: opencovid,
+                            elearningcenter: elearningcenter,
                             loggedInUser: currentUser,
                             msgs: amsgs, 
                             dc: adc);
@@ -119,6 +121,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             ViewBag.Title = Request["title"] ?? account.Name;
             ViewBag.OpenCovid = opencovid.IsNumber();
+            ViewBag.ELC = elearningcenter.IsNumber();
 
             return View(account);
         }

@@ -949,12 +949,13 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult Style(string id, string logo, string headerimage, string about, string title, string headline, string primaryColor, string website, string mingrade, string maxgrade, string twitter, string facebook, string instagram, string linkedin, string youtube, string calendar, string genderrestriction, string classifications, string softskills, string academicsubjects, string teachingmethods, string profileemail, string profilephone, string locationname, string streetnumber, string streetname, string address2, string neighborhood, string city, string state, string postalcode, string county, string country, string placeid, string opencovid)
+        public ActionResult Style(string id, string logo, string headerimage, string about, string title, string headline, string primaryColor, string website, string mingrade, string maxgrade, string twitter, string facebook, string instagram, string linkedin, string youtube, string calendar, string genderrestriction, string classifications, string softskills, string academicsubjects, string teachingmethods, string profileemail, string profilephone, string locationname, string streetnumber, string streetname, string address2, string neighborhood, string city, string state, string postalcode, string county, string country, string placeid, string opencovid, string elearningcenter, string ahqapproved)
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
             var profile = account.GetAccountProfile(msgs);
             var allowedFiles = new string[] { ".png", ".jpg", ".jpeg" };
+            var currentUser = SessionVariables.CurrentUser;
 
             if (logo.IsNotEmpty())
             {
@@ -991,18 +992,18 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 if (logo.IsNotEmpty())
                     profile.UploadLogo(
-                        SessionVariables.CurrentAccount,
+                        account,
                         Request.Files["logo"].InputStream,
                         Request.Files["logo"].FileName,
-                        SessionVariables.CurrentUser,
+                        currentUser,
                         msgs);
 
                 if (headerimage.IsNotEmpty())
                     profile.UploadHeaderImage(
-                        SessionVariables.CurrentAccount,
+                        account,
                         Request.Files["headerimage"].InputStream,
                         Request.Files["headerimage"].FileName,
-                        SessionVariables.CurrentUser,
+                        currentUser,
                         msgs);
 
                 foreach (var key in Request.Files.AllKeys.Where(key => key.Contains("photo-")))
@@ -1018,11 +1019,11 @@ namespace AfterSchool.Areas.Org.Controllers
                                 photoId = key.Split('-')[2];
 
                             profile.UploadGalleryPhoto(
-                                    SessionVariables.CurrentAccount,
+                                    account,
                                     Request.Files[key].InputStream,
                                     Request.Files[key].FileName,
                                     photoId,
-                                    SessionVariables.CurrentUser,
+                                    currentUser,
                                     msgs);
                         }
                         else
@@ -1038,6 +1039,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     about,
                     website,
                     opencovid,
+                    elearningcenter,
                     mingrade,
                     maxgrade,
                     twitter,
@@ -1061,7 +1063,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     softskills,
                     academicsubjects,
                     teachingmethods,
-                    SessionVariables.CurrentUser,
+                    ahqapproved,
+                    currentUser,
                     msgs);
 
                 profile.AddNewLocation(
@@ -1076,7 +1079,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     postalcode, 
                     country, 
                     placeid, 
-                    SessionVariables.CurrentUser, 
+                    currentUser, 
                     msgs);
             }
 

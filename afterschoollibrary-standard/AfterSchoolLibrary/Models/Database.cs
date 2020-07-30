@@ -226,6 +226,8 @@ namespace AfterSchoolLibrary.Models
 			Account.Update(new Hashtable(){{"OnboardingStepDone",0}}, new Hashtable(){{"OnboardingStepDone", DBNull.Value}}, Account.ObjectMap, dc);
 			AccountProfile.Update(new Hashtable(){{"GenderRestriction",0}}, new Hashtable(){{"GenderRestriction", DBNull.Value}}, AccountProfile.ObjectMap, dc);
 			AccountProfile.Update(new Hashtable(){{"IsOpenDuringCovid",false}}, new Hashtable(){{"IsOpenDuringCovid", DBNull.Value}}, AccountProfile.ObjectMap, dc);
+			AccountProfile.Update(new Hashtable(){{"IsELearningCenter",false}}, new Hashtable(){{"IsELearningCenter", DBNull.Value}}, AccountProfile.ObjectMap, dc);
+			AccountProfile.Update(new Hashtable(){{"IsAHQApproved",false}}, new Hashtable(){{"IsAHQApproved", DBNull.Value}}, AccountProfile.ObjectMap, dc);
 			CheckPaymentAccount.Update(new Hashtable(){{"IsVerified",false}}, new Hashtable(){{"IsVerified", DBNull.Value}}, CheckPaymentAccount.ObjectMap, dc);
 			CheckPaymentAccount.Update(new Hashtable(){{"LegalEntityTypeId",0}}, new Hashtable(){{"LegalEntityTypeId", DBNull.Value}}, CheckPaymentAccount.ObjectMap, dc);
 			BankPaymentAccount.Update(new Hashtable(){{"IsVerified",false}}, new Hashtable(){{"IsVerified", DBNull.Value}}, BankPaymentAccount.ObjectMap, dc);
