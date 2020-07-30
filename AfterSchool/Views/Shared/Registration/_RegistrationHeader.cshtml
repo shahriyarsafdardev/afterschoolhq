@@ -122,14 +122,14 @@
                 }
 
                 <div>
-                    @if (Model.AccountProfile.IsOpenDuringCovid)
+                    @if (Model.AccountProfile.IsNotEmpty() && Model.AccountProfile.IsOpenDuringCovid)
                     {
                         <span class="badge badge-success profile-badge text-small">
                             <icon class="s7-clock"></icon>
                             Open During COVID
                         </span>
                     }
-                    @if (Model.AccountProfile.IsELearningCenter)
+                    @if (Model.AccountProfile.IsNotEmpty() && Model.AccountProfile.IsELearningCenter)
                     {
                         <span class="badge badge-success profile-badge text-small">
                             <icon class="s7-clock"></icon>
