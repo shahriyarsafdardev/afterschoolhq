@@ -957,6 +957,9 @@ namespace AfterSchool.Areas.Org.Controllers
             var allowedFiles = new string[] { ".png", ".jpg", ".jpeg" };
             var currentUser = SessionVariables.CurrentUser;
 
+            if (SessionVariables.AccountUserType != UserType.TechSupport)
+                ahqapproved = profile.IsAHQApproved ? "1" : "";
+
             if (logo.IsNotEmpty())
             {
                 if (Request.Files["logo"].ContentLength == 0 || 
