@@ -169,9 +169,14 @@ namespace AfterSchoolLibrary.Services
                     if (maxgrade.IsInteger())
                         profile.GradeLevelEnd = maxgrade.ToInteger();
 
-                    profile.IsOpenDuringCovid = opencovid.IsNumber();
-                    profile.IsELearningCenter = elearningcenter.IsNumber();
-                    profile.IsAHQApproved = ahqapproved.IsNumber();
+                    if (opencovid.IsNumber())
+                        profile.IsOpenDuringCovid = opencovid.ToBoolean();
+
+                    if (elearningcenter.IsNumber())
+                        profile.IsELearningCenter = elearningcenter.ToBoolean();
+
+                    if (ahqapproved.IsNumber())
+                        profile.IsAHQApproved = ahqapproved.ToBoolean();
 
                     amsgs.AddRange(profile.Save(adc));
 

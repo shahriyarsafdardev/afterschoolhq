@@ -98,8 +98,8 @@ namespace AfterSchool.Areas.Org.Controllers
                             mingrade: mingrade,
                             maxgrade: maxgrade,
                             genderrestriction: genderrestriction,
-                            opencovid: opencovid,
-                            elearningcenter: elearningcenter,
+                            opencovid: opencovid.IsNumber() ? opencovid : "0",
+                            elearningcenter: elearningcenter.IsNumber() ? opencovid : "0",
                             loggedInUser: currentUser,
                             msgs: amsgs, 
                             dc: adc);
