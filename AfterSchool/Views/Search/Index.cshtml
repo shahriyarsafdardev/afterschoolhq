@@ -12,12 +12,6 @@
     headerUrl = $"https://maps.googleapis.com/maps/api/staticmap?center={city},{state}&zoom=13&size=1500x600&maptype=roadmap&key=AIzaSyAdjn8QBBStTz9TDAjZOyijAato7uzvjjk";
 }
 
-@{
-    Html.RenderPartial(
-        "~/Views/Shared/Registration/_AccountTopBar.cshtml",
-        new Account());
-}
-
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
 <div class="row">
@@ -27,12 +21,12 @@
 
             <div class="col-lg-offset-4 col-lg-4 col-md-6 col-md-offset-3" style="margin-top: -75px; margin-bottom: 25px;">
                 <div class="reg-header-logo">
-                    <img src="@UILabel.ProductLogo()" />
+                    <img src="@UILabel.ProductLogo()" style="max-width: 100%;" />
                 </div>
             </div>
 
             <div class="col-lg-12">
-                <h1 class="activity-title padding-v-10" style="border-top: solid 1px #ccc;">
+                <h1 class="activity-title padding-v-10" style="border-top: solid 1px #ccc; border-bottom: solid 1px #ccc;">
                     <span>@city.ToProperCase(), @state.ToProperCase()</span>
                 </h1>
 
@@ -40,8 +34,11 @@
                     <input type="text" class="form-control" placeholder="Search by Program or Organization Name" />
                 </div>
 
-                <div class="">
+                <div class="row">
                     <div class="col-md-12">
+                        <h3>Filters</h3>
+                    </div>
+                    <div class="col-xs-6 col-sm-4 col-md-3 col-lg-3">
                         <div class="am-checkbox">
                             <input type="checkbox"
                                    class="covid"
@@ -53,13 +50,35 @@
                             <label for="covid">Open During Covid</label>
                         </div>
                     </div>
+                    <div class="col-xs-6 col-sm-4 col-md-3 col-lg-3">
+                        <div class="am-checkbox">
+                            <input type="checkbox"
+                                   class="elc"
+                                   name="elc"
+                                   id="elc"
+                                   value="1"
+                                   @(Request[$"elc"] == "1" ? "checked=\"checked\"" : "")
+                                   onclick="loadELC()" />
+                            <label for="elc">E-Learning Center</label>
+                        </div>
+                    </div>
                 </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <h3>Neighborhoods</h3>
+                    </div>
 
-                <div class="margin-v-20">
                     @foreach (var item in neighborhoods)
                     {
                         var requestNeighborhoods = Request["neighborhoods"];
                         var isChecked = requestNeighborhoods.IsNotEmpty() && requestNeighborhoods.Contains(item);
+
+                        var text = item;
+
+                        if (item == "Brightwood")
+                        {
+                            text = "Martindale/Brightwood";
+                        }
 
                         <div class="col-xs-6 col-sm-4 col-md-3 col-lg-3">
                             <div class="am-checkbox">
@@ -70,7 +89,7 @@
                                        value="@item"
                                        @(isChecked ? "checked=\"checked\"" : "")
                                        onclick="loadNeighborhoods()" />
-                                <label for="neighborhood-@item.ToLower()">@item</label>
+                                <label for="neighborhood-@item.ToLower()">@text</label>
                             </div>
                         </div>
                     }
@@ -122,7 +141,7 @@
                 items += $(this).val();
             });
 
-            search(null, null, items, null);
+            doCitySearch(null, null, items, null, null);
         }
 
         function loadCovid() {
@@ -132,10 +151,20 @@
                 covid = 1;
             }
 
-            search(null, null, null, covid);
+            doCitySearch(null, null, null, covid, null);
         }
 
-        function search(city, state, neighborhoods, covid) {
+        function loadELC() {
+            var elc = '';
+
+            if ($('#elc').is(':checked')) {
+                elc = 1;
+            }
+
+            doCitySearch(null, null, null, null, elc);
+        }
+
+        function doCitySearch(city, state, neighborhoods, covid, elc) {
 
             if (city === null) {
                 city = '@Request["city"]';
@@ -153,7 +182,11 @@
                 covid = '@Request["covid"]';
             }
 
-            location.href = '/search?city=' + city + '&state=' + state + '&neighborhoods=' + neighborhoods + '&covid=' + covid;
+            if (elc === null) {
+                elc = '@Request["elc"]';
+            }
+
+            location.href = '/search?city=' + city + '&state=' + state + '&neighborhoods=' + neighborhoods + '&covid=' + covid + '&elc=' + elc;
         }
     </script>
 

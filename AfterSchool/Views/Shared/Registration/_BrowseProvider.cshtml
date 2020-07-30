@@ -25,14 +25,24 @@
      name="@account.Name">
 
     <div class="panel" style="overflow: hidden;">
-        <div class="reg-header" style="background-image: url(@profileHeaderImageUrl); min-height: 150px; height: 200px; position: relative;">
+        <div class="reg-header" style="background-image: url(@profileHeaderImageUrl); min-height: 150px; height: 200px; padding: 5px 5px;">
 
             @if (Model.IsOpenDuringCovid)
             {
-                <div style="top: 10px; right: 10px; position:absolute;">
-                    <span class="badge badge-danger profile-badge text-small">
+                <div class="pull-right margin-l-10">
+                    <span class="badge badge-success profile-badge text-small">
                         <icon class="s7-clock"></icon>
                         Open During COVID
+                    </span>
+                </div>
+            }
+
+            @if (Model.IsELearningCenter)
+            {
+                <div class="pull-right margin-l-10">
+                    <span class="badge badge-success profile-badge text-small">
+                        <icon class="s7-clock"></icon>
+                        E-Learning Center
                     </span>
                 </div>
             }
@@ -52,7 +62,7 @@
                 </p>
             </div>
 
-            <div class="margin-t-20">
+            <div class="margin-t-10" style="min-height: 45px;">
                 <p class="text-medium-small">
                     <span>
                         @location.FormatAddressWithoutName(false)

@@ -39,6 +39,8 @@ namespace AfterSchoolLibrary.Models
 		public string ProfileEmail { get { return (string)MDV["ProfileEmail"].Value; } set { MDV["ProfileEmail"].Value = value; } }
 		public string ProfilePhone { get { return (string)MDV["ProfilePhone"].Value; } set { MDV["ProfilePhone"].Value = value; } }
 		public bool IsOpenDuringCovid { get { return (bool)MDV["IsOpenDuringCovid"].Value; } set { MDV["IsOpenDuringCovid"].Value = value; } }
+		public bool IsELearningCenter { get { return (bool)MDV["IsELearningCenter"].Value; } set { MDV["IsELearningCenter"].Value = value; } }
+		public bool IsAHQApproved { get { return (bool)MDV["IsAHQApproved"].Value; } set { MDV["IsAHQApproved"].Value = value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
 		public string AccountUniqueName { get { return (string)MDV["AccountUniqueName"].Value; } }
 		public bool AccountIsTest { get { return (bool)MDV["AccountIsTest"].Value; } }
@@ -53,6 +55,8 @@ namespace AfterSchoolLibrary.Models
             this.LoadObjectValues(ObjectMap);
 			this.GenderRestriction = GenderRestrictionType.None;
 			this.IsOpenDuringCovid = false;
+			this.IsELearningCenter = false;
+			this.IsAHQApproved = false;
 			
         }
 
@@ -84,6 +88,8 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "ProfileEmail", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "ProfilePhone", System.Data.SqlDbType.NVarChar , "20");
 				_dp.Add(className, "IsOpenDuringCovid", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "IsELearningCenter", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "IsAHQApproved", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "AccountUniqueName", typeof(Account).Name, "UniqueName", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "AccountIsTest", typeof(Account).Name, "IsTest", System.Data.SqlDbType.Bit, "Account");
@@ -248,6 +254,14 @@ namespace AfterSchoolLibrary.Models
 			dps.Add(ObjectMap["IsOpenDuringCovid"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsELearningCenter"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsAHQApproved"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -324,7 +338,7 @@ namespace AfterSchoolLibrary.Models
 			return dq.GetCount(msgs);
 		}
 
-		public static List<AccountProfile> Search(IEnumerable<AccountType> accountTypes, bool? isOpenDuringCovid = null, IEnumerable<string> neighborhoods = null, IEnumerable<string> cities = null, IEnumerable<string> states = null, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<AccountProfile> Search(IEnumerable<AccountType> accountTypes, bool? isOpenDuringCovid = null, bool? isELearningCenter = null, IEnumerable<string> neighborhoods = null, IEnumerable<string> cities = null, IEnumerable<string> states = null, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
 			dq.Connection = dc;
@@ -336,6 +350,7 @@ namespace AfterSchoolLibrary.Models
 			dq.Criterias.Add(ObjectMap["AccountIsDeleted"], false);
 			dq.Criterias.Add(ObjectMap["AccountIsActive"], true);
 			dq.Criterias.Add(ObjectMap["AccountIsTest"], false);
+			dq.Criterias.Add(ObjectMap["IsAHQApproved"], true);
 
 			dq.Criterias.Add(ObjectMap["LocationId"], DBNull.Value, DatabaseCriteriaOperatorEnum.IsNot);
 			dq.Criterias.Add(ObjectMap["GradeLevelStart"], DBNull.Value, DatabaseCriteriaOperatorEnum.IsNot);
@@ -343,6 +358,9 @@ namespace AfterSchoolLibrary.Models
 
 			if (isOpenDuringCovid.HasValue)
 				dq.Criterias.Add(ObjectMap["isOpenDuringCovid"], isOpenDuringCovid.Value);
+
+			if (isELearningCenter.HasValue)
+				dq.Criterias.Add(ObjectMap["isELearningCenter"], isELearningCenter.Value);
 
 			if (neighborhoods.IsNotEmpty())
 				dq.Criterias.Add(Location.ObjectMap["neighborhood"], neighborhoods.ToList(), DatabaseCriteriaOperatorEnum.In);

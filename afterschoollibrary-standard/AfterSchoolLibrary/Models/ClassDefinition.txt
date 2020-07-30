@@ -396,6 +396,8 @@ property: GenderRestriction, GenderRestrictionType, Int
 property: ProfileEmail, string, NVarChar "100"
 property: ProfilePhone, string, NVarChar "20"
 property: IsOpenDuringCovid, bool, Bit
+property: IsELearningCenter, bool, Bit
+property: IsAHQApproved, bool, Bit
 loadmethod: AccountId
 join: Account.ID, AccountId, InnerJoin
 joinproperty: Account.Name, string, NVarChar
