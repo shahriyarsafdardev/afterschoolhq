@@ -12,7 +12,7 @@ namespace AfterSchool.Controllers
     public class SearchController : Controller
     {
         // GET: Search
-        public ActionResult Index(string city, string state, string neighborhoods, string covid)
+        public ActionResult Index(string city, string state, string neighborhoods, string covid, string elc)
         {
             var msgs = new SystemMessages();
 
@@ -30,6 +30,7 @@ namespace AfterSchool.Controllers
             var providers = AccountProfile.Search(
                                 accountTypes: AccountService.CustomerAccountTypes,
                                 isOpenDuringCovid: covid.IsEmpty() ? new bool?() : covid.ToBoolean(),
+                                isELearningCenter: elc.IsEmpty() ? new bool?() : elc.ToBoolean(),
                                 neighborhoods: neighborhoodSearch,
                                 cities: city.AsList(),
                                 states: state.AsList(),

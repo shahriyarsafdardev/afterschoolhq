@@ -198,6 +198,7 @@ namespace AfterSchool.Models
             if (account.IsNotEmpty())
             {
                 SessionVariables.CurrentAccount = account;
+                SessionVariables.AccountUserType = user.GetUserType(account);
             }
             else
             {
@@ -214,6 +215,8 @@ namespace AfterSchool.Models
                     if (awu.IsNotEmpty())
                         SessionVariables.CurrentAccount = awu.ToAccount(true);
                 }
+
+                SessionVariables.AccountUserType = user.GetUserType(SessionVariables.CurrentAccount);
             }
 
             //set login cookies

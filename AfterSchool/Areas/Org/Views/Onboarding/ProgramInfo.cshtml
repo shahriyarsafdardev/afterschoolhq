@@ -6,6 +6,7 @@
     var minGradeId = (string)ViewBag.MinGradeId;
     var maxGradeId = (string)ViewBag.MaxGradeId;
     var opencovid = (bool)ViewBag.OpenCovid;
+    var elc = (bool)ViewBag.ELC;
     var title = (string)ViewBag.Title;
     var isProgram = Model.AccountTypeId == AccountType.Teacher;
 
@@ -126,10 +127,24 @@
                     </label>
                     <div class="col-lg-9">
                         @{ Html.RenderPartial(
-                              "~/Views/Shared/_SwitchButton.cshtml",
-                              opencovid,
-                              new ViewDataDictionary() { { "checkboxname", "opencovid" }, { "checkboxid", "opencovid" } });
+                               "~/Views/Shared/_SwitchButton.cshtml",
+                               opencovid,
+                               new ViewDataDictionary() { { "checkboxname", "opencovid" }, { "checkboxid", "opencovid" } });
                         }
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-lg-3 control-label">
+                        Are you an E-Learning Center?
+                    </label>
+                    <div class="col-lg-9">
+                        @{ Html.RenderPartial(
+                               "~/Views/Shared/_SwitchButton.cshtml",
+                               elc,
+                               new ViewDataDictionary() { { "checkboxname", "elearningcenter" }, { "checkboxid", "elearningcenter" } });
+                        }
+                        <p class="text-muted">You will host/care for students to assist e-learning during the school day</p>
                     </div>
                 </div>
 
