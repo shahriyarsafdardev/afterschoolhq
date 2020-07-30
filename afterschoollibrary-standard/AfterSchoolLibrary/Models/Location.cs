@@ -215,6 +215,43 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
+		public static List<Location> LoadByCityByStateByCountry(string City, string State, string Country, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["City"], City);
+			dq.Criterias.Add(ObjectMap["State"], State);
+			dq.Criterias.Add(ObjectMap["Country"], Country);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<Location> LoadByCountyByStateByCountry(string County, string State, string Country, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["County"], County);
+			dq.Criterias.Add(ObjectMap["State"], State);
+			dq.Criterias.Add(ObjectMap["Country"], Country);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<Location> LoadByStateByCountry(string State, string Country, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["State"], State);
+			dq.Criterias.Add(ObjectMap["Country"], Country);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<Location> LoadByCountry(string Country, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["Country"], Country);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
 		
 
         #endregion
@@ -262,6 +299,51 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["City"], city);
             dq.Criterias.Add(ObjectMap["State"], state);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+		public static List<string> LoadAllCities(string county = null, string state = null, string country = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseDistinct = true;
+
+            dq.SelectParameters.Clear();
+            dq.SelectParameters.Add(ObjectMap["City"]);
+
+            if (county.IsNotEmpty())
+                dq.Criterias.Add(ObjectMap["county"], county);
+
+            if (state.IsNotEmpty())
+                dq.Criterias.Add(ObjectMap["state"], state);
+
+            if (country.IsNotEmpty())
+                dq.Criterias.Add(ObjectMap["country"], country);
+
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(row => { return row[0].ToString(); });
+        }
+
+        public static List<string> LoadAllNeighborhoods(string city, string county = null, string state = null, string country = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseDistinct = true;
+
+            dq.SelectParameters.Clear();
+            dq.SelectParameters.Add(ObjectMap["Neighborhood"]);
+
+            if (city.IsNotEmpty())
+                dq.Criterias.Add(ObjectMap["city"], city);
+
+            if (county.IsNotEmpty())
+                dq.Criterias.Add(ObjectMap["county"], county);
+
+            if (state.IsNotEmpty())
+                dq.Criterias.Add(ObjectMap["state"], state);
+
+            if (country.IsNotEmpty())
+                dq.Criterias.Add(ObjectMap["country"], country);
+
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(row => { return row[0].ToString(); });
         }
 
         #endregion

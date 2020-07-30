@@ -43,6 +43,8 @@ namespace AfterSchoolLibrary.Models
 		public string AccountUniqueName { get { return (string)MDV["AccountUniqueName"].Value; } }
 		public bool AccountIsTest { get { return (bool)MDV["AccountIsTest"].Value; } }
 		public bool AccountIsDeleted { get { return (bool)MDV["AccountIsDeleted"].Value; } }
+		public bool AccountIsActive { get { return (bool)MDV["AccountIsActive"].Value; } }
+		public AccountType AccountAccountTypeId { get { return (AccountType)MDV["AccountAccountTypeId"].Value; } }
 		
 
         public AccountProfile()
@@ -86,6 +88,8 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "AccountUniqueName", typeof(Account).Name, "UniqueName", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "AccountIsTest", typeof(Account).Name, "IsTest", System.Data.SqlDbType.Bit, "Account");
 				_dp.Add(className, "AccountIsDeleted", typeof(Account).Name, "IsDeleted", System.Data.SqlDbType.Bit, "Account");
+				_dp.Add(className, "AccountIsActive", typeof(Account).Name, "IsActive", System.Data.SqlDbType.Bit, "Account");
+				_dp.Add(className, "AccountAccountTypeId", typeof(Account).Name, "AccountTypeId", System.Data.SqlDbType.Int, "Account");
 				
                 return _dp;
             }
@@ -318,6 +322,41 @@ namespace AfterSchoolLibrary.Models
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountId"], accountId);
 			return dq.GetCount(msgs);
+		}
+
+		public static List<AccountProfile> Search(IEnumerable<AccountType> accountTypes, bool? isOpenDuringCovid = null, IEnumerable<string> neighborhoods = null, IEnumerable<string> cities = null, IEnumerable<string> states = null, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.UseParameterizedQuery = false;
+
+			dq.Joins.Add(Location.ObjectMap["ID"], ObjectMap["LocationId"], DatabaseJoinTypeEnum.InnerJoin);
+
+			dq.Criterias.Add(ObjectMap["AccountAccountTypeId"], accountTypes.Select(x => (int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
+			dq.Criterias.Add(ObjectMap["AccountIsDeleted"], false);
+			dq.Criterias.Add(ObjectMap["AccountIsActive"], true);
+			dq.Criterias.Add(ObjectMap["AccountIsTest"], false);
+
+			dq.Criterias.Add(ObjectMap["LocationId"], DBNull.Value, DatabaseCriteriaOperatorEnum.IsNot);
+			dq.Criterias.Add(ObjectMap["GradeLevelStart"], DBNull.Value, DatabaseCriteriaOperatorEnum.IsNot);
+			dq.Criterias.Add(ObjectMap["GradeLevelEnd"], DBNull.Value, DatabaseCriteriaOperatorEnum.IsNot);
+
+			if (isOpenDuringCovid.HasValue)
+				dq.Criterias.Add(ObjectMap["isOpenDuringCovid"], isOpenDuringCovid.Value);
+
+			if (neighborhoods.IsNotEmpty())
+				dq.Criterias.Add(Location.ObjectMap["neighborhood"], neighborhoods.ToList(), DatabaseCriteriaOperatorEnum.In);
+
+			if (cities.IsNotEmpty())
+				dq.Criterias.Add(Location.ObjectMap["city"], cities.ToList(), DatabaseCriteriaOperatorEnum.In);
+
+			if (states.IsNotEmpty())
+				dq.Criterias.Add(Location.ObjectMap["state"], states.ToList(), DatabaseCriteriaOperatorEnum.In);
+
+			dq.SelectRange.Start = start;
+			dq.SelectRange.Length = length;
+
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
 		#endregion

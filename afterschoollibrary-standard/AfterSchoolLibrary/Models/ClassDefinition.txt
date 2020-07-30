@@ -136,6 +136,10 @@ loadmethod: HostAccountId, List<>
 loadmethod: HostAccountId|IsDefault
 loadmethod: LocationTypeId, List<>
 loadmethod: GooglePlaceId
+loadmethod: City|State|Country, List<>
+loadmethod: County|State|Country, List<>
+loadmethod: State|Country, List<>
+loadmethod: Country, List<>
 [end]
 
 [begin]
@@ -398,6 +402,8 @@ joinproperty: Account.Name, string, NVarChar
 joinproperty: Account.UniqueName, string, NVarChar
 joinproperty: Account.IsTest, bool, Bit
 joinproperty: Account.IsDeleted, bool, Bit
+joinproperty: Account.IsActive, bool, Bit
+joinproperty: Account.AccountTypeId, AccountType, Int
 [end]
 
 [begin]

@@ -48,6 +48,11 @@ namespace AfterSchool
                 new { controller = "login", action = "index", id = UrlParameter.Optional });
 
             routes.MapRoute(
+                "Search",
+                "search/{action}/{id}",
+                new { controller = "search", action = "index", id = UrlParameter.Optional });
+
+            routes.MapRoute(
                 "Logout",
                 "logout/{action}/{id}",
                 new { controller = "logout", action = "index", id = UrlParameter.Optional });

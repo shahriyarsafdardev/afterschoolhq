@@ -599,6 +599,7 @@
     <Compile Include="Controllers\OAuthController.cs" />
     <Compile Include="Controllers\RController.cs" />
     <Compile Include="Controllers\RegController.cs" />
+    <Compile Include="Controllers\SearchController.cs" />
     <Compile Include="Controllers\ServicesController.cs" />
     <Compile Include="Controllers\SignUpController.cs" />
     <Compile Include="Controllers\SitemapController.cs" />
@@ -1820,6 +1821,8 @@
     <Content Include="Views\Shared\Registration\_ProfilePhotoGallery.cshtml" />
     <Content Include="Views\Shared\Components\_GoogleLocationEdit.cshtml" />
     <Content Include="Views\Account\Interested.cshtml" />
+    <Content Include="Views\Search\Index.cshtml" />
+    <Content Include="Views\Shared\Registration\_BrowseProvider.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
