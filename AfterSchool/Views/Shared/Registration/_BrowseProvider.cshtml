@@ -8,7 +8,7 @@
     var gradeLevelEnd = Model.GetGradeLevelEnd();
     var photos = Model.GetPhotos();
 
-    if (photos.Any())
+    if (photos.Any() && profileHeaderImageUrl.IsBlank())
     {
         var ah = AfterSchoolLibrary.Helpers.Utilities.GetNewAmazonHelper();
         profileHeaderImageUrl = ah.GetFileLink(photos.First().Value, true, null, true);
