@@ -25,7 +25,7 @@ namespace AfterSchool.Controllers
                 FirstName = CookieVariables.DemoFirstName,
                 Email = CookieVariables.DemoEmailAddress,
                 // OrgName = CookieVariables.DemoOrgName,
-                // InviteCodeToShare = invite
+                InviteCodeToShare = invite
             };
 
             ViewBag.Messages = new SystemMessages();
@@ -607,6 +607,100 @@ namespace AfterSchool.Controllers
             return View(newAccount);
         }
 
+        [HttpGet]
+        public ActionResult User(string invite)
+        {
+            var msgs = new SystemMessages();
+
+            if (!invite.IsGuid())
+                msgs.Add("Invalid invitation code", MessageType.UserError);
+
+            var invitingAccount = Account.LoadByInviteCodeToShare(invite.ToGuid());
+
+            var signupIndexVM = new SignUpIndexViewModel()
+            {
+                InviteCodeToShare = invite,
+                Account = invitingAccount,
+            };
+
+            ViewBag.Messages = new SystemMessages();
+            return View(signupIndexVM);
+        }
+
+        [HttpPost]
+        public ActionResult User(SignUpIndexViewModel model)
+        {
+            var msgs = new SystemMessages();
+            Account invitingAccount = null;
+
+            if (model.FirstName.IsEmpty())
+                msgs.Add("First Name is required", MessageType.UserError);
+
+            if (model.LastName.IsEmpty())
+                msgs.Add("Last Name is required", MessageType.UserError);
+
+            if (!model.Email.IsEmail())
+                msgs.Add("Please enter a valid email address", MessageType.UserError);
+            else if (WebUser.ExistsByEmail(model.Email, msgs))
+                msgs.Add("This email has already been registered", MessageType.UserError);
+
+            if (model.Password1.IsEmpty() || model.Password2.IsEmpty() || (model.Password1 != model.Password2))
+                msgs.Add("Passwords are required and must match", MessageType.UserError);
+            else if (model.Password1.Length < 8)
+                msgs.Add("Password must be at least 8 characters", MessageType.UserError);
+
+            if (!model.InviteCodeToShare.IsGuid())
+                msgs.Add("Invalid invitation code", MessageType.UserError);
+
+            // msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
+
+            invitingAccount = Account.LoadByInviteCodeToShare(model.InviteCodeToShare.ToGuid());
+            if (invitingAccount.IsEmpty())
+                msgs.Add("Invalid invitation code", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                WebUser user = null;
+
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        user = WebUserService.CreateNewWithNoPhone(
+                            firstName: model.FirstName,
+                            lastName: model.LastName,
+                            email: model.Email,
+                            password: model.Password2,
+                            isActive: true,
+                            isRegistered: true,
+                            isVerified: false,
+                            loggedInUser: new WebUser { ID = 0 },
+                            msgs: amsgs,
+                            dc: adc);
+
+                        invitingAccount.AddUser(user, UserType.Administrator, new WebUser { ID = 0 }, amsgs, adc);
+                    },
+                    onSuccess: (SystemMessages smsgs) =>
+                    {
+                        msgs.AddRange(smsgs);
+                        LoadSessionInfo(user, invitingAccount, msgs: msgs);
+
+                        var userId = user.ID.Value;
+
+                        BackgroundJob.Enqueue(() => WebUserService.SendVerificationEmail(userId));                        
+                    },
+                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                    onException: (SystemMessages emsgs) => msgs.AddRange(emsgs)
+                );
+            }
+
+            if (msgs.HasNoErrors())
+                return RedirectToAction("index", "home", new { area = "org" });
+
+            ViewBag.Messages = msgs;
+
+            return View(model);
+        }
 
         /* APIS */
         [HttpPost]

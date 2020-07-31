@@ -568,7 +568,10 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpPost]
         public ActionResult TeamInvite(string usertype, string emails, string message)
         {
-            SystemMessages msgs = new SystemMessages();
+            var msgs = new SystemMessages();
+            var account = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var accountPackage = SessionVariables.AccountPackage;
 
             if (usertype.IsEmpty())
                 msgs.Add("Account type is required", MessageType.UserError);
@@ -586,39 +589,39 @@ namespace AfterSchool.Areas.Org.Controllers
                 emails.Split(',')
                     .Select(x => x.Trim())
                     .ToList()
-                    .ForEach(email => 
-                        SessionVariables.CurrentAccount.InviteUser(
+                    .ForEach(email =>
+                        account.InviteUser(
                             "", 
                             "", 
                             email, 
                             "",
                             Request.Params["message"], 
                             (UserType)usertype.ToInteger(), 
-                            SessionVariables.CurrentUser,
-                            msgs)
-                     );
+                            currentUser,
+                            msgs));
 
             if (msgs.HasNoErrors())
                 msgs.Add("All invites have been sent", MessageType.Success);
 
-            var members = SessionVariables.CurrentAccount.GetUsers(msgs: msgs);
+            var members = account.GetUsers(msgs: msgs);
             ViewBag.Messages = msgs;
-            ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.AccountPackage = accountPackage;
             ViewBag.Members = members;
-            ViewBag.NeedToUpgrade = members.Count >= SessionVariables.AccountPackage.GetFeature(FeatureType.TeamAccounts).GetMaxValue();
-            return View("Team", SessionVariables.CurrentAccount);
+            ViewBag.NeedToUpgrade = members.Count >= accountPackage.GetFeature(FeatureType.TeamAccounts).GetMaxValue();
+            return View("Team", account);
         }
 
         [HttpGet]
         public ActionResult Visitors()
         {
             var msgs = new SystemMessages();
+            var account = SessionVariables.CurrentAccount;
 
-            ViewBag.RequestingVisitors = SessionVariables.CurrentAccount.GetRequestedVisitorAccounts(null, msgs);
-            ViewBag.ApprovedVisitors = SessionVariables.CurrentAccount.GetApprovedVisitorAccounts(msgs);
+            ViewBag.RequestingVisitors = account.GetRequestedVisitorAccounts(null, msgs);
+            ViewBag.ApprovedVisitors = account.GetApprovedVisitorAccounts(msgs);
             ViewBag.Messages = msgs;
 
-            return View(SessionVariables.CurrentAccount);
+            return View(account);
         }
 
         [HttpGet]

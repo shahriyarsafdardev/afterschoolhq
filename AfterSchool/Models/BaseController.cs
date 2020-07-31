@@ -199,6 +199,7 @@ namespace AfterSchool.Models
             {
                 SessionVariables.CurrentAccount = account;
                 SessionVariables.AccountUserType = user.GetUserType(account);
+                SessionVariables.AccountPackage = account.GetActiveAccountPackage();
             }
             else
             {
@@ -216,7 +217,11 @@ namespace AfterSchool.Models
                         SessionVariables.CurrentAccount = awu.ToAccount(true);
                 }
 
-                SessionVariables.AccountUserType = user.GetUserType(SessionVariables.CurrentAccount);
+                if (SessionVariables.CurrentAccount.IsNotEmpty())
+                {
+                    SessionVariables.AccountUserType = user.GetUserType(SessionVariables.CurrentAccount);
+                    SessionVariables.AccountPackage = SessionVariables.CurrentAccount.GetActiveAccountPackage();
+                }
             }
 
             //set login cookies
