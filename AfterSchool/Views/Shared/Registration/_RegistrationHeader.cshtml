@@ -251,7 +251,7 @@
                                         </button>
                                     }
                                 }
-                                else if (currentUser.IsNotEmpty() && Model.Account.OwnerId == currentUser.ID)
+                                else if (currentUser.IsNotEmpty() && Model.Account.OwnerId == currentUser.ID && !Model.Account.CanProcessPayments())
                                 {
                                     var redirectUrl = Url.Action("paymentsoptions", "account", new { area = "org", isfullscreen = 1, source = "profile" });
 
