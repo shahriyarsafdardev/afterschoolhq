@@ -1,0 +1,49 @@
+﻿@model SignUpIndexViewModel
+
+@{
+    Layout = "~/Views/Shared/layouts/_fullscreen.cshtml";
+    ViewBag.Title = "Sign Up";
+    var msgs = (SystemMessages)ViewBag.Messages;
+}
+
+@{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+<div class="">
+    <div class="am-content">
+        <div class="">
+            <div class="sign-up" style="margin: 80px auto;">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <a href="/"><img src="@UILabel.ProductLogoInverse()" alt="logo" style="max-width: 100%; width: 350px;" class="logo-img"></a>
+                    </div>
+                    <div class="panel-body">
+                        <p class="text-medium-small text-center">You've been invited to join the @Model.Account.Name team.</p>
+                        <p class="text-medium-small text-center">Please enter your information to create your account.</p>
+
+                        <form action="@Url.Action("user", "signup")" method="post" class="form-horizontal" id="sign-up-form">
+                            @{ Html.RenderPartial("~/Views/Shared/Login/_SignUpForm.cshtml", Model.ToWebUser()); }
+
+                            <input type="hidden" name="invitecodetoshare" value="@Model.InviteCodeToShare" />
+                        </form>
+
+                    </div>
+                </div>
+                <div class="text-center out-links"><a href="/">&copy; @DateTime.UtcNow.Year @UILabel.ProductName()</a></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('#sign-up-form').submit(function () {
+            $('button[type="submit"]').html('Creating Account...');
+            $('button[type="submit"]').prop('disabled', true);
+        });
+    });
+</script>
+
+@section head
+{
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+}

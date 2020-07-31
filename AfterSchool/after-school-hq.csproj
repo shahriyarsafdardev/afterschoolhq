@@ -1824,6 +1824,7 @@
     <Content Include="Views\Account\Interested.cshtml" />
     <Content Include="Views\Search\Index.cshtml" />
     <Content Include="Views\Shared\Registration\_BrowseProvider.cshtml" />
+    <Content Include="Views\SignUp\User.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
