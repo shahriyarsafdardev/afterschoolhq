@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AfterSchoolLibrary.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -17,6 +18,7 @@ namespace AfterSchool.Models
         public string Password2 { get; set; }
         public string TimeZone { get; set; }
         public string InviteCodeToShare { get; set; }
+        public Account Account { get; set; }
 
     }
 }

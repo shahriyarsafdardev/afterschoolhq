@@ -500,6 +500,22 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
+        public string UserInviteUrl
+        {
+            get
+            {
+                return $"{Helpers.Utilities.BaseUrl()}/signup/user?invite={this.InviteCodeToShare}";
+            }
+        }
+
+        public string ShortUserInviteUrl
+        {
+            get
+            {
+                return $"{Helpers.Utilities.ShortBaseUrl()}/signup/user?invite={this.InviteCodeToShare}";
+            }
+        }
+
         public bool HasPaymentCard
         {
             get

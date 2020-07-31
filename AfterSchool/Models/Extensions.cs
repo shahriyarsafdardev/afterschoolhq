@@ -98,6 +98,16 @@ namespace AfterSchool.Models
             return text;
         }
 
+        public static WebUser ToWebUser(this SignUpIndexViewModel signUpIndexViewModel)
+        {
+            return new WebUser()
+            {
+                FirstName = signUpIndexViewModel.FirstName,
+                LastName = signUpIndexViewModel.LastName,
+                Email = signUpIndexViewModel.Email,
+            };
+        }
+
         public static string ToString(this ActivitySchedule schedule)
         {
             return "";
