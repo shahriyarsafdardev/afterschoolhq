@@ -94,7 +94,7 @@ namespace AfterSchoolLibrary.Models
 		/// <summary>
 		/// Link for virtual class
 		/// </summary>
-		public string VirtualLocationUrl { get { return (string)MDV["VirtualLocationUrl"].Value; } set { MDV["VirtualLocationUrl"].Value = value; } }
+		public string VirtualLocationInfo { get { return (string)MDV["VirtualLocationInfo"].Value; } set { MDV["VirtualLocationInfo"].Value = value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
 		public string AccountTimeZone { get { return (string)MDV["AccountTimeZone"].Value; } }
 		public bool? ActivityGroupIsArchived { get { return (bool?)MDV["ActivityGroupIsArchived"].Value; } }
@@ -165,7 +165,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "LeaderTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RequiresParentalConsent", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "ActivityLocationTypeId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "VirtualLocationUrl", System.Data.SqlDbType.NVarChar , "400");
+				_dp.Add(className, "VirtualLocationInfo", System.Data.SqlDbType.NVarChar , "1000");
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "AccountTimeZone", typeof(Account).Name, "TimeZone", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "ActivityGroupIsArchived", typeof(ActivityGroup).Name, "IsArchived", System.Data.SqlDbType.Bit, "ActivityGroup");
@@ -403,7 +403,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["VirtualLocationUrl"]);
+			dps.Add(ObjectMap["VirtualLocationInfo"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

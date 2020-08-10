@@ -1019,10 +1019,7 @@ namespace AfterSchoolLibrary.Services
             }
 
             if (accountactivitygroup.IsNotEmpty())
-                activity.AccountActivityGroupId = accountactivitygroup.ToString().ToInteger();
-
-            if (virtuallocation != null && !virtuallocation.ToString().IsRegExMatch(BasicLibrary.Utilities.WebsiteRegEx))
-                msgs.Add("Virtual Meeting Link must be a valid URL", MessageType.UserError);
+                activity.AccountActivityGroupId = accountactivitygroup.ToString().ToInteger();            
                 
 
             if (msgs.HasNoErrors())
@@ -1126,39 +1123,42 @@ namespace AfterSchoolLibrary.Services
                         {
                             activity.ActivityLocationTypeId = activitylocationtype.ToString().ToInteger().ToEnum<ActivityLocationType>();
 
-                            if (virtuallocation != null)
-                                activity.VirtualLocationUrl = virtuallocation.ToString();
+                            if (activity.ActivityLocationTypeId == ActivityLocationType.Virtual)
+                                activity.VirtualLocationInfo = virtuallocation.ToString();
 
-                            amsgs.AddRange(activity.Save(adc));
-
-                            if (activity.ActivityLocationTypeId == ActivityLocationType.Physical)
+                            if (amsgs.HasNoErrors())
                             {
-                                if (amsgs.HasNoErrors() && (location.IsNotEmpty() || locationname.IsNotEmpty()))
+                                amsgs.AddRange(activity.Save(adc));
+
+                                if (activity.ActivityLocationTypeId == ActivityLocationType.Physical)
                                 {
-                                    var hostAccountId = ismylocation.IfEmpty("").ToBoolean() ? account.ID : new int?();
+                                    if (amsgs.HasNoErrors() && (location.IsNotEmpty() || locationname.IsNotEmpty()))
+                                    {
+                                        var hostAccountId = ismylocation.IfEmpty("").ToBoolean() ? account.ID : new int?();
 
-                                    amsgs.AddRange(activity.SetupLocation(
-                                        location.IfEmpty(""),
-                                        locationname.IfEmpty(""),
-                                        address1.IfEmpty(""),
-                                        streetnumber.IfEmpty(""),
-                                        streetname.IfEmpty(""),
-                                        address2.IfEmpty(""),
-                                        neighborhood.IfEmpty(""),
-                                        city.IfEmpty(""),
-                                        county.IfEmpty(""),
-                                        state.IfEmpty(""),
-                                        postalcode.IfEmpty(""),
-                                        country.IfEmpty(""),
-                                        placeid.IfEmpty(""),
-                                        locationdetails.IfEmpty(""),
-                                        ismylocation.IfEmpty(""),
-                                        locationtype.IfEmpty(""),
-                                        loggedInUserId,
-                                        adc));
+                                        amsgs.AddRange(activity.SetupLocation(
+                                            location.IfEmpty(""),
+                                            locationname.IfEmpty(""),
+                                            address1.IfEmpty(""),
+                                            streetnumber.IfEmpty(""),
+                                            streetname.IfEmpty(""),
+                                            address2.IfEmpty(""),
+                                            neighborhood.IfEmpty(""),
+                                            city.IfEmpty(""),
+                                            county.IfEmpty(""),
+                                            state.IfEmpty(""),
+                                            postalcode.IfEmpty(""),
+                                            country.IfEmpty(""),
+                                            placeid.IfEmpty(""),
+                                            locationdetails.IfEmpty(""),
+                                            ismylocation.IfEmpty(""),
+                                            locationtype.IfEmpty(""),
+                                            loggedInUserId,
+                                            adc));
 
-                                    if (!account.DefaultLocationId.HasValue)
-                                        account.SetDefaultLocation(activity.LocationId.Value, new WebUser() { ID = loggedInUserId }, msgs, dc);
+                                        if (!account.DefaultLocationId.HasValue)
+                                            account.SetDefaultLocation(activity.LocationId.Value, new WebUser() { ID = loggedInUserId }, amsgs, dc);
+                                    }
                                 }
                             }
 
