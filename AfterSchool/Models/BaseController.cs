@@ -24,14 +24,18 @@ namespace AfterSchool.Models
 
         protected bool IsRequestFromApp()
         {
-            var origin = (Request.Headers["Origin"] ?? Request.Headers["Referer"]).ToLower();
-            if (origin.StartsWith("https://afterschoolhq.com") ||
-                origin.StartsWith("https://qa.afterschoolhq.com") ||
-                origin.StartsWith("https://ci.afterschoolhq.com") ||
-                origin.StartsWith("https://staging.afterschoolhq.com") ||
-                origin.StartsWith("http://localhost:54849"))
+            if (Request.Headers["Origin"].IsNotEmpty() || Request.Headers["Referer"].IsNotEmpty())
             {
-                return true;
+                var origin = (Request.Headers["Origin"] ?? Request.Headers["Referer"]).ToLower();
+
+                if (origin.StartsWith("https://afterschoolhq.com") ||
+                    origin.StartsWith("https://qa.afterschoolhq.com") ||
+                    origin.StartsWith("https://ci.afterschoolhq.com") ||
+                    origin.StartsWith("https://staging.afterschoolhq.com") ||
+                    origin.StartsWith("http://localhost:54849"))
+                {
+                    return true;
+                }
             }
 
             return false;
