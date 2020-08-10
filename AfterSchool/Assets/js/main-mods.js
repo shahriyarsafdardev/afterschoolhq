@@ -268,7 +268,7 @@ var WebPage = {
         textArea.style.top = "0";
         textArea.style.left = "0";
         textArea.style.position = "fixed";
-        textArea.style.display = "none";
+        // textArea.style.visibility = "hidden";
 
         document.body.appendChild(textArea);
 
@@ -276,6 +276,7 @@ var WebPage = {
         textArea.select();
 
         var successful = document.execCommand('copy');
+        textArea.remove();
 
         if (successful) {
             Notifications.showMessage("Copied", successText, true);

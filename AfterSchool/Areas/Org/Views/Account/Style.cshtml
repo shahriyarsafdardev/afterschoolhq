@@ -119,7 +119,7 @@
                                     Header Title
                                 </label>
                                 <div class="col-md-9">
-                                    <input type="text" class="form-control" name="title" id="title" value="@Model.Title" />
+                                    <input type="text" class="form-control" name="title" id="title" value="@Model.Title.IfEmpty(account.Name)" />
                                     <p class="text-muted">
                                         <em>Your organization or program name</em>
                                     </p>

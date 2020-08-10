@@ -48,10 +48,10 @@ namespace AfterSchoolLibrary.Models
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public DateTime? LastModifiedDate { get; set; }
-
         public ActivityType? ActivityType { get; set; }
         public ActivityGroupType? ActivityGroupType { get; set; }
         public ActivityLocationType ActivityLocationType { get; set; }
+        public string VirtualLocationUrl { get; set; }
 
         public ParticipationObject(int participationObjectId, ParticipationObjectType participationObjectType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -111,6 +111,7 @@ namespace AfterSchoolLibrary.Models
             IsInviteOnly = activity.IsInviteOnly;
             ActivityLocationType = activity.ActivityLocationTypeId;
             LastModifiedDate = activity.LastModifiedDate;
+            VirtualLocationUrl = activity.VirtualLocationUrl;
 
             if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
             {
