@@ -64,8 +64,10 @@
 {
     if (currentUser.IsNotEmpty() && currentUser.HasAccessTo(Model.Account) && Request["edit"] == "1")
     {
+        var redirectUrl = $"{Url.Action("style", "account", new { area = "org", isfullscreen = 1, returnurl = Request.Url })}#{anchor}";
+
         <span>
-            <a href="@Url.Action("style", "account", new { area = "org", isfullscreen = 1, returnurl = Request.Url })#@anchor"
+            <a href="@Url.Action("switch", "logout", new { id = Model.Account.Uid, redirectUrl = redirectUrl })#@anchor"
                class="btn btn-alt7 btn-sm">
                 Edit &raquo;
             </a>
@@ -207,22 +209,25 @@
 
                         @if (Model.ParticipationObject.IsEmpty())
                         {
-                            if (!isInEditMode || Model.Account.HasActivities())
+                            if (!Request.Url.ToString().IsSameAs(Model.Account.BrowseUrl))
                             {
-                                <button onclick="location.href='@Model.Account.BrowseUrl'" class="btn btn-header-action">
-                                    <i class="icon icon-left s7-gleam"></i>
-                                    <span class="">
-                                        View @UILabel.ActivityLabel(ActivityType.Activity, true)
-                                    </span>
-                                </button>
-                            }
-                            else
-                            {
-                                <a href="@Url.Action("editsetup", "activity", new { area = "org", isnew = 1, source = "profile", type = (int)ActivityType.Activity })"
-                                   class="btn btn-header-action-callout">
-                                    <i class="s7-gleam"></i>
-                                    Add Activity
-                                </a>
+                                if (!isInEditMode || Model.Account.HasActivities())
+                                {
+                                    <button onclick="location.href='@Model.Account.BrowseUrl'" class="btn btn-header-action">
+                                        <i class="icon icon-left s7-gleam"></i>
+                                        <span class="">
+                                            View @UILabel.ActivityLabel(ActivityType.Activity, true)
+                                        </span>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <a href="@Url.Action("editsetup", "activity", new { area = "org", isnew = 1, source = "profile", type = (int)ActivityType.Activity })"
+                                       class="btn btn-header-action-callout">
+                                        <i class="s7-gleam"></i>
+                                        Add Activity
+                                    </a>
+                                }
                             }
 
                             if (Model.Account.IsClaimed)
@@ -292,76 +297,23 @@
 
     <div class="md-content">
         <div class="modal-body">
-            
+
             <div class="row">
                 <button type="button" data-dismiss="modal" id="modal-share-close" aria-hidden="true" class="close md-close">
                     <i class="icon s7-close"></i>
                 </button>
             </div>
-            
+
             <div class="row">
                 <div class="col-md-12">
                     <div>
-                        <div class="form-group text-center">
-
-                            <div>
-                                <p>
-                                    Share <strong>@shareObject</strong> with your friends and family via Web Link, Twitter, or Facebook
-                                </p>
-                            </div>
-
-                            <div class="footer-social-icon text-center">
-                                <span class="icon-xlarge pointer"
-                                      style="text-decoration: none;"
-                                      onclick="copyUrlToShare('@shareUrl')"
-                                      title="Copy Url">
-                                    <i class="ion-ios-world-outline"></i>
-                                </span>
-                                <span style="font-size: 12px;" id="copy-url-text">Copy Url</span>
-                            </div>
-
-                            <div class="footer-social-icon text-center hide">
-                                <span class="icon-xlarge"
-                                      style="text-decoration: none;">
-                                    <i class="ion-ios-email-outline"></i>
-                                </span>
-                                <span style="font-size: 12px;">Email</span>
-                            </div>
-
-                            <div class="footer-social-icon">
-                                <a href="http://twitter.com/share?text=@Url.Encode($"Check out {shareObject} on {AfterSchoolLibrary.Helpers.Utilities.AppName()}")&url=@Url.Encode(shareUrl)&hashtags=Education,AfterschoolActivities,AfterSchoolHQ"
-                                   class="icon-xlarge"
-                                   style="text-decoration: none;"
-                                   target="_blank"
-                                   title="Share to Twitter">
-                                    <i class="ion-social-twitter-outline"></i>
-                                </a>
-                                <span style="font-size: 12px;">Twitter</span>
-                            </div>
-
-                            <div class="footer-social-icon text-center">
-                                <a href="https://www.facebook.com/sharer/sharer.php?u=@Url.Encode(shareUrl)"
-                                   class="icon-xlarge margin-h-30"
-                                   style="text-decoration: none;"
-                                   target="_blank"
-                                   title="Share to Facebook">
-                                    <i class="ion-social-facebook-outline"></i>
-                                </a>
-                                <span style="font-size: 12px;">Facebook</span>
-                            </div>
-
-                            <div class="footer-social-icon text-center hide">
-                                <span id="share-more"
-                                      class="icon-xlarge margin-h-30"
-                                      style="text-decoration: none; cursor: pointer;"
-                                      target="_blank"
-                                      title="More...">
-                                    <i class="ion-ios-more"></i>
-                                </span>
-                                <span style="font-size: 12px; text-align: center;">More</span>
-                            </div>
-
-                        </div>
+                        @{ Html.RenderPartial(
+                                "~/Views/Shared/Registration/_ShareLinks.cshtml",
+                                new ViewDataDictionary() {
+                                   { "ShareObject", shareObject },
+                                   { "ShareUrl", shareUrl }
+                }
+                         ); }
                     </div>
                 </div>
             </div>
@@ -421,30 +373,6 @@
 
 <script>
 
-    PageEvent.add(PageEvent.AFTER_INIT, function () {
-
-        if (navigator.share) {
-            $('#share-more').parent().removeClass('hide');
-            $('#share-more').click(function () {
-                navigator.share({
-                    title: '@shareObject',
-                    url: '@shareUrl',
-                    text: 'Check out @shareObject on @AfterSchoolLibrary.Helpers.Utilities.AppName()'
-                }).then(() => {
-                    console.log('Thanks for sharing!');
-                }).catch(console.error);
-            });
-
-        }
-
-        $('.btn-share').click(function () {
-            $('#modal-share').addClass('md-show');
-            $('#modal-share-close').click(function () {
-                $('#modal-share').removeClass('md-show');
-            });
-        });
-
-    });
 
     function follow(callback) {
         $('#btn-follow').val('...');
@@ -498,16 +426,6 @@
 
     }
 
-    function copyUrlToShare(url) {
-        WebPage.copySelection(url, 'URL has been copied', function () {
-            $('#copy-url-text').html('Copied!');
-
-            setTimeout(function () {
-                $('#copy-url-text').html('Copy Url');
-            }, 3000);
-        })
-    }
-
     function resetClaimForm() {
         $('#claim-profile-form').removeClass('hide');
         $('#claim-profile-done').addClass('hide');
@@ -538,4 +456,5 @@
             }
         )
     }
-    </script>
+
+</script>

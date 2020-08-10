@@ -444,10 +444,13 @@ namespace AfterSchoolLibrary.Helpers
             {
                 customMessage = registrationThankYou;
 
+                if (participationObject.ActivityLocationType == ActivityLocationType.Virtual && participationObject.VirtualLocationUrl.IsNotEmpty())
+                    customMessage += $"<br /><br />Join this activity virtually with this link: <a href=\"{participationObject.VirtualLocationUrl}\">{participationObject.VirtualLocationUrl}</a>.<br /><br />";
+
                 if (isParentCopy)
-                    customMessage = $"{masterRegistrant.FirstName} has registered for the following activity:";
+                    customMessage += $"{masterRegistrant.FirstName} has registered for the following:";
                 else if (loggedInUser.HasAccessTo(billingAccount))
-                    customMessage = $"{masterRegistrant.FirstName} has been registered by {loggedInUser.DisplayName} at {billingAccount.Name} for the following activity:";
+                    customMessage += $"{masterRegistrant.FirstName} has been registered by {loggedInUser.DisplayName} at {billingAccount.Name} for the following:";
             }
 
             var model = new NameValueCollection()

@@ -1,5 +1,4 @@
-﻿@model List<Registrant>
-@{
+﻿@{
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
     ViewBag.Title = "Thank you";
     var msgs = (SystemMessages)ViewBag.Messages;
@@ -61,7 +60,7 @@
                     }
                 </div>
 
-                @if (profile.IsNotEmpty() && profile.CalendarBookingLink.IsNotEmpty())
+                @if (assignmentType == RegistrationAssignmentType.Interested && profile.IsNotEmpty() && profile.CalendarBookingLink.IsNotEmpty())
                 {
                     <hr />
                     <div>
@@ -94,7 +93,7 @@
                         <hr />
                         <div class="margin-v-20">
                             <p>
-                                <a href="@account.HomePageUrl">Register for another activity</a>
+                                <a href="@account.HomePageUrl" class="@(assignmentType != RegistrationAssignmentType.Interested ? "btn btn-xl btn-register-primary btn-register-xl" : "")">Find another activity</a>
                             </p>
                         </div>
                     }
@@ -102,5 +101,23 @@
 
             </div>
         </div>
+
+        <div class="panel">
+            <div class="panel-body">
+                
+                <div>
+                    @{ Html.RenderPartial(
+                           "~/Views/Shared/Registration/_ShareLinks.cshtml", 
+                           new ViewDataDictionary() { 
+                               { "ShareObject", participationObject.Name }, 
+                               { "ShareUrl", participationObject.GetHomePageUrl() } 
+                           }
+                        ); 
+                    }
+                </div>
+
+            </div>
+        </div>
+
     </div>
 </div>

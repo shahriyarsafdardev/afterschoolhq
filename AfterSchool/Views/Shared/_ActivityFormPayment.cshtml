@@ -46,7 +46,7 @@
                         <input type="number" class="form-control" id="cost" name="cost" onfocus="this.select()" value="@(Model.CostPerRegistrant.HasValue ? Model.CostPerRegistrant.Value.ToString("0.00") : "0.00")" required min="0.00" step=".01" @paymentdisabled />
                     </div>
                     <p class="text-muted">
-                        <em>The total cost will be $<span id="finaltuitioncost">0.00</span> at checkout</em>
+                        <em>The total cost will be <span class="text-bold text-alt3">$<span id="finaltuitioncost">0.00</span></span> at checkout</em>
                     </p>
                 </div>
             </div>

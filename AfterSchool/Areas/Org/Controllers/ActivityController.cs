@@ -727,7 +727,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult EditLocation(string id, string location, string locationname, string locationdetails, string address1, string streetnumber, string streetname, string address2, string neighborhood, string city, string county, string state, string postalcode, string country, string placeid, string mylocation, string locationtype, string cmd, string activitylocationtype)
+        public ActionResult EditLocation(string id, string location, string locationname, string locationdetails, string address1, string streetnumber, string streetname, string address2, string neighborhood, string city, string county, string state, string postalcode, string country, string placeid, string mylocation, string locationtype, string cmd, string activitylocationtype, string virtuallocation)
         {
             var msgs = new SystemMessages();
             Activity activity = Activity.LoadByUid(id.ToGuid());
@@ -752,7 +752,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "placeid", placeid},
                     { "mylocation", mylocation },
                     { "locationtype", locationtype },
-                    { "activitylocationtype", activitylocationtype }
+                    { "activitylocationtype", activitylocationtype },
+                    { "virtuallocation", virtuallocation }
                 };
 
                 activity = ActivityService.EditExisting(
