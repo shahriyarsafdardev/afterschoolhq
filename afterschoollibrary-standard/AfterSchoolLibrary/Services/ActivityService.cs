@@ -692,6 +692,7 @@ namespace AfterSchoolLibrary.Services
                 RequiresParentalConsent = activity.RequiresParentalConsent,
                 InstructorId = activity.InstructorId,
                 IsInviteOnly = activity.IsInviteOnly,
+                ActivityLocationTypeId = activity.ActivityLocationTypeId,
             };
         }
 
