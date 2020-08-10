@@ -444,13 +444,17 @@ namespace AfterSchoolLibrary.Helpers
             {
                 customMessage = registrationThankYou;
 
-                if (participationObject.ActivityLocationType == ActivityLocationType.Virtual && participationObject.VirtualLocationUrl.IsNotEmpty())
-                    customMessage += $"<br /><br />Join this activity virtually with this link: <a href=\"{participationObject.VirtualLocationUrl}\">{participationObject.VirtualLocationUrl}</a>.<br /><br />";
-
                 if (isParentCopy)
                     customMessage += $"{masterRegistrant.FirstName} has registered for the following:";
                 else if (loggedInUser.HasAccessTo(billingAccount))
                     customMessage += $"{masterRegistrant.FirstName} has been registered by {loggedInUser.DisplayName} at {billingAccount.Name} for the following:";
+            }
+
+            var virtualInfo = "";
+
+            if (participationObject.ActivityLocationType == ActivityLocationType.Virtual && participationObject.VirtualLocationInfo.IsNotEmpty())
+            {
+                virtualInfo += $"<p>Join this activity virtually with the following info: <br /><br />{participationObject.VirtualLocationInfo}</a>.<br /></p>";
             }
 
             var model = new NameValueCollection()
@@ -468,14 +472,15 @@ namespace AfterSchoolLibrary.Helpers
                 { "BodyRows", receiptRows },
                 { "CustomMessage", customMessage },
                 { "CreditCardFee", ccFee },
-                { "RegistrationDetails", registrationDetails}
+                { "RegistrationDetails", registrationDetails},
+                { "VirtualInfo", virtualInfo }
             };
             
             var subject = $"{participationObject.Name} registration for {masterRegistrant.FirstName}";
             var body = ProcessTemplate(
                 EmailTemplates.Registration_Confirmation,
                 model,
-                "Registration_Confirmation",
+                "Registration_Confirmation-1.1",
                 msgs);
 
             // SEND EMAILS
