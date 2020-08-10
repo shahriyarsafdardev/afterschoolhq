@@ -444,10 +444,13 @@ namespace AfterSchoolLibrary.Helpers
             {
                 customMessage = registrationThankYou;
 
+                if (customMessage == "Thank you for registering")
+                    customMessage += ".";
+
                 if (isParentCopy)
-                    customMessage += $"{masterRegistrant.FirstName} has registered for the following:";
+                    customMessage += $"{(customMessage.IsNotBlank() ? "<br /><br />" : "")}{masterRegistrant.FirstName} has registered for the following:";
                 else if (loggedInUser.HasAccessTo(billingAccount))
-                    customMessage += $"{masterRegistrant.FirstName} has been registered by {loggedInUser.DisplayName} at {billingAccount.Name} for the following:";
+                    customMessage += $"{(customMessage.IsNotBlank() ? "<br /><br />" : "")}{masterRegistrant.FirstName} has been registered by {loggedInUser.DisplayName} at {billingAccount.Name} for the following:";
             }
 
             var virtualInfo = "";
