@@ -28,13 +28,13 @@
 
 @{
     Html.RenderPartial(
-"~/Views/Shared/Registration/_AccountTopBar.cshtml",
-Model,
-new ViewDataDictionary()
-{
+        "~/Views/Shared/Registration/_AccountTopBar.cshtml",
+        Model,
+        new ViewDataDictionary()
+        {
             { "LoginReturnUrl", Model.HomePageUrl }
-}
-);
+        }
+        );
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -358,7 +358,7 @@ new ViewDataDictionary()
 
                         @renderEditButtion(Model, "links")
 
-                        @if (Model.Phone.IsNotBlank())
+                        @if (accountProfile.ProfilePhone.IsNotBlank())
                         {
                             <div class="footer-social-icon">
                                 <a href="tel:@Model.Phone"
@@ -380,7 +380,7 @@ new ViewDataDictionary()
                                 </a>
                             </div>
                         }
-                        @if (Model.Email.IsNotBlank())
+                        @if (accountProfile.ProfileEmail.IsNotBlank())
                         {
                             <div class="footer-social-icon">
                                 <a href="mailto:@Model.Email"
