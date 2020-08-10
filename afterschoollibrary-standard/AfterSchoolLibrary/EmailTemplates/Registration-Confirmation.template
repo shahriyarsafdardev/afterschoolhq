@@ -45,6 +45,8 @@
     </table>
   </div>
 
+  @Model.VirtualInfo
+
   <p>
     <a href="@Model.LoginLink">@Model.RegistrationDetails</a>
   </p>
