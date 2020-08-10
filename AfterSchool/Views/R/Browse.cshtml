@@ -11,6 +11,7 @@
     var registrationWillOpen = (List<ParticipationObject>)ViewBag.RegistrationWillOpen;
     var session = (ParticipationObject)ViewBag.Session;
     var msgs = (SystemMessages)ViewBag.Messages;
+    var accountProfile = (AccountProfile)ViewBag.AccountProfile;
 }
 
 @{ Html.RenderPartial(
@@ -43,7 +44,12 @@
             <div class="row">
                 <div class="col-md-12 text-center">
                     <h3>No activities currently open for registration</h3>
-                    <p>Have questions? Please contact @Model.Name @@ @Html.Raw(Model.Phone.IsNotBlank() ? Model.Phone : $"<a href=\"mailto:{Model.Email}\">{Model.Email}</a>")</p>
+                    @if (accountProfile.IsNotEmpty() && (accountProfile.ProfileEmail.IsNotEmpty() || accountProfile.ProfilePhone.IsNotEmpty()))
+                    {
+                        <p>
+                            Have questions? Please contact @Model.Name @@ @Html.Raw(accountProfile.ProfilePhone.IsNotBlank() ? accountProfile.ProfilePhone : $"<a href=\"mailto:{accountProfile.ProfileEmail}\">{accountProfile.ProfileEmail}</a>")
+                        </p>
+                    }
                 </div>
             </div>
         }
