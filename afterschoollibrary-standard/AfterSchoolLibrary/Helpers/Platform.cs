@@ -40,7 +40,7 @@ namespace AfterSchoolLibrary.Billing
             if (cost > 50)
                 finalFee = Math.Ceiling(fee);
 
-            return (finalFee - .01M).KeepInRange(0.49M, 9.99M) + (Math.Ceiling(cost) - cost);
+            return Math.Max(finalFee - .01M, 0.49M) + (Math.Ceiling(cost) - cost); // .KeepInRange(0.49M, 9.99M)
         }
 
         public static decimal GetTotalFees(decimal cost, Account billingAccount)

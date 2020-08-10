@@ -226,7 +226,7 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);  
             var canPublishActivity = false;
-            var accountProfile = account.GetAccountProfile(msgs);
+            var accountProfile = account?.GetAccountProfile(msgs);
             ParticipationObject session = null;
 
             if (account.IsNotEmpty())
@@ -276,7 +276,7 @@ namespace AfterSchool.Controllers
             ViewBag.CanPublishActivity = canPublishActivity;
             ViewBag.CanRegisterFor = true;
             ViewBag.Session = session;
-            ViewBag.AccountProfile = account.GetAccountProfile();
+            ViewBag.AccountProfile = accountProfile;
 
             return View(participationObject);
         }

@@ -692,6 +692,7 @@ namespace AfterSchoolLibrary.Services
                 RequiresParentalConsent = activity.RequiresParentalConsent,
                 InstructorId = activity.InstructorId,
                 IsInviteOnly = activity.IsInviteOnly,
+                ActivityLocationTypeId = activity.ActivityLocationTypeId,
             };
         }
 
@@ -843,6 +844,7 @@ namespace AfterSchoolLibrary.Services
             var provideremail = values.GetValueOrDefault("provideremail");
             var providerphone = values.GetValueOrDefault("providerphone");
             var type = values.GetValueOrDefault("type");
+            var virtuallocation = values.GetValueOrDefault("virtuallocation");
 
             var activityType = ActivityType.NotSet;
 
@@ -1019,6 +1021,10 @@ namespace AfterSchoolLibrary.Services
             if (accountactivitygroup.IsNotEmpty())
                 activity.AccountActivityGroupId = accountactivitygroup.ToString().ToInteger();
 
+            if (virtuallocation != null && !virtuallocation.ToString().IsRegExMatch(BasicLibrary.Utilities.WebsiteRegEx))
+                msgs.Add("Virtual Meeting Link must be a valid URL", MessageType.UserError);
+                
+
             if (msgs.HasNoErrors())
             {
                 Database.ExecuteTransaction(
@@ -1119,6 +1125,10 @@ namespace AfterSchoolLibrary.Services
                         if (activitylocationtype.IsNotEmpty() && activitylocationtype.IsNumber())
                         {
                             activity.ActivityLocationTypeId = activitylocationtype.ToString().ToInteger().ToEnum<ActivityLocationType>();
+
+                            if (virtuallocation != null)
+                                activity.VirtualLocationUrl = virtuallocation.ToString();
+
                             amsgs.AddRange(activity.Save(adc));
 
                             if (activity.ActivityLocationTypeId == ActivityLocationType.Physical)
