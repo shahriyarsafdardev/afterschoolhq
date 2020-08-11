@@ -53,14 +53,17 @@ namespace AfterSchool.Models
             if (!IsLoggedIn())
                 return false;
 
+            var account = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+
             if (AllowedAccountTypes.IsNotEmpty() &&
                     AllowedAccountTypes.Any() &&
-                    SessionVariables.CurrentAccount.AccountTypeId.NotIn(AllowedAccountTypes))
+                    account.AccountTypeId.NotIn(AllowedAccountTypes))
             {
-                if (!SessionVariables.CurrentUser.HasAccessTo(SessionVariables.CurrentAccount))
+                if (!currentUser.HasAccessTo(account))
                     return false;
 
-                LoadSessionInfo(SessionVariables.CurrentUser, SessionVariables.CurrentAccount);
+                LoadSessionInfo(currentUser, account);
             }
 
             return true;

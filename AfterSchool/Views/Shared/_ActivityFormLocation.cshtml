@@ -1,5 +1,7 @@
 ﻿@model Activity
-
+@{ 
+    var location = Model.GetLocation() ?? Model.GetAccount().GetAccountProfile()?.GetLocation() ?? new Location();
+}
 <div class="panel panel-default panel-small-padding">
     <div class="panel-heading">
         Your Activity Location Information
@@ -53,7 +55,7 @@
                     Activity Location
                 </label>
                 <div class="col-sm-9">
-                    @{ Html.RenderPartial("~/Views/Shared/Components/_GoogleLocationEdit.cshtml", Model.GetLocation() ?? new Location() { }); }
+                    @{ Html.RenderPartial("~/Views/Shared/Components/_GoogleLocationEdit.cshtml", location); }
                 </div>
             </div>
 
