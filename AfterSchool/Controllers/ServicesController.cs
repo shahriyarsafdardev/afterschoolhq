@@ -249,6 +249,55 @@ namespace AfterSchool.Controllers
             return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
         }
 
+        [HttpPost]
+        public ActionResult ContactProvider(string profile, string firstname, string lastname, string email, string phone, string g_recaptcha_response)
+        {
+            if (!IsRequestFromApp())
+                return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
+
+            var msgs = new SystemMessages();
+
+            if (!profile.IsGuid())
+                msgs.Add("Invalid request", MessageType.UserError);
+
+            if (firstname.IsEmpty())
+                msgs.Add("First Name is required", MessageType.UserError);
+
+            if (lastname.IsEmpty())
+                msgs.Add("Last Name is required", MessageType.UserError);
+
+            if (!email.IsEmail())
+                msgs.Add("Email is required", MessageType.UserError);
+
+            if (phone.IsNotEmpty() && !phone.IsPhone())
+                msgs.Add("Valid phone is required", MessageType.UserError);
+
+            msgs.AddRange(RecaptchaHelper.Validate(g_recaptcha_response));
+
+            Account account = null;
+
+            if (msgs.HasNoErrors())
+                account = Account.LoadByUid(profile.ToGuid(), msgs);
+
+            if (msgs.HasNoErrors() && account.IsNotEmpty())
+            {
+                var contact = account.AddContact(
+                    firstname,
+                    lastname,
+                    email,
+                    phone,
+                    SessionVariables.CurrentUser,
+                    msgs);
+
+                if (msgs.HasNoErrors())
+                    EmailHelper.SendContactProviderEmail(account, contact, msgs);
+
+                return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+        }
+
         [HttpGet]
         public ActionResult Follow(string id)
         {

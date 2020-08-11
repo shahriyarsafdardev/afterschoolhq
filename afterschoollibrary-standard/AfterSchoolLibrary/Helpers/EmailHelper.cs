@@ -7,6 +7,8 @@ using AfterSchoolLibrary.Services;
 using System.Linq;
 using System.Collections.Generic;
 using BasicLibrary.DataAccess;
+using System.Security.Claims;
+using Microsoft.EntityFrameworkCore.Update;
 
 namespace AfterSchoolLibrary.Helpers
 {
@@ -108,6 +110,41 @@ namespace AfterSchoolLibrary.Helpers
             mailMsgs.AddRange(SendGridHelper.SendMail(
                 fromEmail: Email.SendGridNoReplyEmailAddress(),
                 toEmail: new SendGrid.Helpers.Mail.EmailAddress(participationObject.ContactEmail),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId()));
+        }
+
+        public static void SendContactProviderEmail(Account account, Registrant contact, SystemMessages msgs)
+        {
+            var claimProfileDetails = "";
+
+            if (!account.IsClaimed)
+                claimProfileDetails = $"<p><a href=\"{Utilities.BaseUrl()}\">{Utilities.AppName()}</a> is promoting your program in our online marketplace to enable thousands of parents to quickly find programs for their children. You can view your profile profile here: <a href=\"{account.ShortHomePageUrl}\">{account.ShortHomePageUrl}</a>. <br /><br />Ready to claim your profile? Click the following link: {account.UserInviteUrl}</p>";
+
+            var model = new NameValueCollection()
+            {
+                { "ContactName", contact.Name },
+                { "ContactEmail",  contact.Email},
+                { "ContactPhone", contact.Phone },
+                { "ClaimProfileDetails", claimProfileDetails },
+                { "ProductName", Utilities.AppName() }
+            };
+
+            var subject = $"{contact.Name} has submitted a contact form from {Utilities.AppName()}";
+            var body = ProcessTemplate(
+                EmailTemplates.ContactForm_Submitted,
+                model,
+                "ContactForm_Submitted",
+                msgs);
+
+            // SEND EMAILS
+            var mailMsgs = new SystemMessages();
+
+            // Send email to activity contact
+            mailMsgs.AddRange(SendGridHelper.SendMail(
+                fromEmail: Email.SendGridNoReplyEmailAddress(),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(account.Email),
                 subject: subject,
                 body: body,
                 emailTemplateId: SendGridHelper.GetGenericTemplateId()));

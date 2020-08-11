@@ -548,13 +548,15 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Team()
         {
             var msgs = new SystemMessages();
-            var members = SessionVariables.CurrentAccount.GetUsers(msgs: msgs);
+            var currentAccount = SessionVariables.CurrentAccount;
+            var accountPackage = SessionVariables.AccountPackage;
+            var members = currentAccount.GetUsers(msgs: msgs);
 
-            ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.AccountPackage = accountPackage;
             ViewBag.Members = members;
-            ViewBag.NeedToUpgrade = members.Count >= SessionVariables.AccountPackage.GetFeature(FeatureType.TeamAccounts, msgs).GetMaxValue();
+            ViewBag.NeedToUpgrade = members.Count >= accountPackage.GetFeature(FeatureType.TeamAccounts, msgs).GetMaxValue();
             ViewBag.Messages = msgs;
-            return View(SessionVariables.CurrentAccount);
+            return View(currentAccount);
         }
 
         [HttpGet]

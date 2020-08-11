@@ -276,6 +276,19 @@ namespace AfterSchoolLibrary.Services
             return ContactList.GetCount(criterias: new Hashtable() { { "AccountId", account.ID.Value } }, dc: dc);
         }
 
+        public static Registrant AddContact(this Account account, string firstName, string lastName, string email, string phone, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return RegistrantService.CreateNewContact(
+                account,
+                firstName,
+                lastName,
+                email,
+                phone,
+                loggedInUser,
+                msgs,
+                dc);
+        }
+
         #endregion
 
         #region Sessions

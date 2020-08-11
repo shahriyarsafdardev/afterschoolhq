@@ -1271,5 +1271,27 @@ namespace AfterSchoolLibrary.Services
             registrant.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
             msgs.AddRange(registrant.Save(dc));
         }
+
+        public static Registrant CreateNewContact(Account account, string firstName, string lastName, string email, string phone, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var contact = new Registrant
+            {
+                AccountId = account.ID,
+                CreateDate = DateTime.UtcNow,
+                LastModifiedDate = DateTime.UtcNow,
+                CreatedBy = loggedInUser.ID,
+                LastModifiedBy = loggedInUser.ID,
+                IsContactOnly = true,
+                RegistrantTypeId = RegistrantType.Individual,
+                Email = email,
+                FirstName = firstName,
+                LastName = lastName,
+                Phone = phone
+            };
+
+            msgs.AddRange(contact.Save(dc));
+
+            return contact;
+        }
     }
 }
