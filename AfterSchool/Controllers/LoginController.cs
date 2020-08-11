@@ -70,7 +70,7 @@ namespace AfterSchool.Controllers
                 if (user.IsEmpty())
                     msgs.Add("Invalid username and/or password", MessageType.UserError);
                 else
-                    LoadSessionInfo(user, null, remember.ToBoolean(), msgs);
+                    LoadSessionInfo(user, null, remember.IsBoolean(), msgs);
             }
 
             ViewBag.Messages = msgs;
