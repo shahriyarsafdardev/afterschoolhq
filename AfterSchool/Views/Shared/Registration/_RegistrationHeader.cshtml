@@ -208,30 +208,30 @@
                         </button>
 
                         @if (Model.ParticipationObject.IsEmpty())
-                        {
-                            if (!Request.Url.ToString().IsSameAs(Model.Account.BrowseUrl))
-                            {
-                                if (!isInEditMode || Model.Account.HasActivities())
-                                {
-                                    <button onclick="location.href='@Model.Account.BrowseUrl'" class="btn btn-header-action">
-                                        <i class="icon icon-left s7-gleam"></i>
-                                        <span class="">
-                                            View @UILabel.ActivityLabel(ActivityType.Activity, true)
-                                        </span>
-                                    </button>
-                                }
-                                else
-                                {
-                                    <a href="@Url.Action("editsetup", "activity", new { area = "org", isnew = 1, source = "profile", type = (int)ActivityType.Activity })"
-                                       class="btn btn-header-action-callout">
-                                        <i class="s7-gleam"></i>
-                                        Add Activity
-                                    </a>
-                                }
-                            }
-
+                        {   
                             if (Model.Account.IsClaimed)
                             {
+                                if (!Request.Url.ToString().IsSameAs(Model.Account.BrowseUrl))
+                                {
+                                    if (!isInEditMode || Model.Account.HasActivities())
+                                    {
+                                        <button onclick="location.href='@Model.Account.BrowseUrl'" class="btn btn-header-action">
+                                            <i class="icon icon-left s7-gleam"></i>
+                                            <span class="">
+                                                View @UILabel.ActivityLabel(ActivityType.Activity, true)
+                                            </span>
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <a href="@Url.Action("editsetup", "activity", new { area = "org", isnew = 1, source = "profile", type = (int)ActivityType.Activity })"
+                                           class="btn btn-header-action-callout">
+                                            <i class="s7-gleam"></i>
+                                            Add Activity
+                                        </a>
+                                    }
+                                }
+
                                 if (Model.Account.CanProcessPayments())
                                 {
                                     if (currentUser.IsNotEmpty())
