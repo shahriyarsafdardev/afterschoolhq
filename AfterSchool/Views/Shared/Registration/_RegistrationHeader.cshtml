@@ -126,35 +126,35 @@
                 <div>
                     @if (Model.AccountProfile.IsNotEmpty() && Model.AccountProfile.IsOpenDuringCovid)
                     {
-                        <span class="badge badge-success profile-badge text-small">
+                        <span class="profile-badge badge badge-success profile-badge text-small">
                             <icon class="s7-clock"></icon>
                             Open During COVID
                         </span>
                     }
                     @if (Model.AccountProfile.IsNotEmpty() && Model.AccountProfile.IsELearningCenter)
                     {
-                        <span class="badge badge-success profile-badge text-small">
+                        <span class="profile-badge badge badge-success profile-badge text-small">
                             <icon class="s7-clock"></icon>
                             E-Learning Center
                         </span>
                     }
                     @if (Model.Followers > 0)
                     {
-                        <span class="badge badge-darkgray profile-badge text-small">
+                        <span class="profile-badge badge badge-darkgray profile-badge text-small">
                             <icon class="s7-user"></icon>
                             @Model.FollowersFormatted follower@(Model.Followers == 1 ? "" : "s")
                         </span>
                     }
                     @if (Model.NumberOfHoursEnrolled > 0)
                     {
-                        <span class="badge badge-darkgray profile-badge text-small">
+                        <span class="profile-badge badge badge-darkgray profile-badge text-small">
                             <icon class="s7-clock"></icon>
                             @Model.NumberOfHoursEnrolledFormatted hrs of education provided
                         </span>
                     }
                     @if (Model.NumberOfStudentsServed > 0)
                     {
-                        <span class="badge badge-darkgray profile-badge text-small">
+                        <span class="profile-badge badge badge-darkgray profile-badge text-small">
                             <icon class="s7-study"></icon>
                             @Model.NumberOfStudentsServedFormatted students served
                         </span>
@@ -485,6 +485,11 @@
     function resetClaimForm() {
         $('#claim-profile-form').removeClass('hide');
         $('#claim-profile-done').addClass('hide');
+
+        $('#claim-firstname').val('');
+        $('#claim-lastname').val('');
+        $('#claim-email').val('');
+        $('#claim-phone').val('');
     }
 
     function claimProfile() {
@@ -514,8 +519,13 @@
     }
 
     function resetContactProviderForm() {
-        $('#claim-provider-form').removeClass('hide');
-        $('#claim-provider-done').addClass('hide');
+        $('#contact-provider-form').removeClass('hide');
+        $('#contact-provider-done').addClass('hide');
+
+        $('#contact-firstname').val('');
+        $('#contact-lastname').val('');
+        $('#contact-email').val('');
+        $('#contact-phone').val('');
     }
 
     function contactProvider() {
