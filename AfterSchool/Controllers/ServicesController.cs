@@ -208,7 +208,7 @@ namespace AfterSchool.Controllers
         #region Profile
 
         [HttpPost]
-        public ActionResult ClaimProfile(string profile, string firstname, string lastname, string email, string phone)
+        public ActionResult ClaimProfile(string profile, string firstname, string lastname, string email, string phone, string g_recaptcha_response)
         {
             if (!IsRequestFromApp())
                 return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
@@ -229,6 +229,8 @@ namespace AfterSchool.Controllers
 
             if (!phone.IsPhone())
                 msgs.Add("Valid phone is required", MessageType.UserError);
+
+            msgs.AddRange(RecaptchaHelper.Validate(g_recaptcha_response));
 
             Account account = null;
 
@@ -281,16 +283,24 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors() && account.IsNotEmpty())
             {
-                var contact = account.AddContact(
-                    firstname,
-                    lastname,
-                    email,
-                    phone,
-                    SessionVariables.CurrentUser,
-                    msgs);
+                var contactExists = account.DoesContactExist(
+                                        firstname.Trim(),
+                                        lastname.Trim(),
+                                        email.Trim(),
+                                        msgs);
+                if (!contactExists)
+                {
+                    var contact = account.AddContact(
+                        firstname,
+                        lastname,
+                        email,
+                        phone,
+                        SessionVariables.CurrentUser,
+                        msgs);
 
-                if (msgs.HasNoErrors())
-                    EmailHelper.SendContactProviderEmail(account, contact, msgs);
+                    if (msgs.HasNoErrors())
+                        EmailHelper.SendContactProviderEmail(account, contact, msgs);
+                }
 
                 return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
             }

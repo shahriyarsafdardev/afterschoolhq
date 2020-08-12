@@ -177,12 +177,14 @@
 
                         <div>
                             <div class="btn-group @(!isFollowing ? "hide" : "")" style="width:100%;" id="btn-unfollow">
-                                <button class="btn btn-register dropdown-toggle" data-toggle="dropdown">
+                                <button class="btn btn-header-action dropdown-toggle" data-toggle="dropdown">
                                     Following
                                     <span class="caret"></span>
                                 </button>
                                 <div class="dropdown-menu pointer" style="width:100%;">
-                                    <a class="dropdown-item text-center" href="#" onclick="unfollow()" style="display: inline">Unfollow</a>
+                                    <button class="btn btn-header-action" onclick="unfollow()">
+                                        <span class="">Unfollow</span>
+                                    </button>
                                 </div>
                             </div>
                             <button @Html.Raw(followButtonAttrs)>
@@ -209,65 +211,7 @@
 
                         @if (Model.ParticipationObject.IsEmpty())
                         {
-                            if (Model.Account.IsClaimed)
-                            {
-                                if (!Request.Url.ToString().IsSameAs(Model.Account.BrowseUrl))
-                                {
-                                    if (!isInEditMode || Model.Account.HasActivities())
-                                    {
-                                        <button onclick="location.href='@Model.Account.BrowseUrl'" class="btn btn-header-action">
-                                            <i class="icon icon-left s7-gleam"></i>
-                                            <span class="">
-                                                View @UILabel.ActivityLabel(ActivityType.Activity, true)
-                                            </span>
-                                        </button>
-                                    }
-                                    else
-                                    {
-                                        <a href="@Url.Action("editsetup", "activity", new { area = "org", isnew = 1, source = "profile", type = (int)ActivityType.Activity })"
-                                           class="btn btn-header-action-callout">
-                                            <i class="s7-gleam"></i>
-                                            Add Activity
-                                        </a>
-                                    }
-                                }
-
-                                if (Model.Account.CanProcessPayments())
-                                {
-                                    if (currentUser.IsNotEmpty())
-                                    {
-                                        var payUrl = Model.Account.PayUrl;
-
-                                        if (!currentUser.IsActive)
-                                        {
-                                            payUrl = Url.Action("confirm", "signup", new { id = currentUser.Uid, returnurl = payUrl });
-                                        }
-
-                                        <button onclick="location.href='@payUrl'" class="btn btn-header-action">
-                                            <i class="icon icon-left s7-credit"></i>
-                                            <span class="">Make A Payment</span>
-                                        </button>
-                                    }
-                                    else
-                                    {
-                                        <button type="button" class="btn btn-header-action md-trigger" data-modal="modal-login" onclick="setLoginRedirect('@Model.Account.PayUrl', true)">
-                                            <i class="icon icon-left s7-credit"></i>
-                                            <span class="">Make A Payment</span>
-                                        </button>
-                                    }
-                                }
-                                else if (currentUser.IsNotEmpty() && Model.Account.OwnerId == currentUser.ID && !Model.Account.CanProcessPayments())
-                                {
-                                    var redirectUrl = Url.Action("paymentsoptions", "account", new { area = "org", isfullscreen = 1, source = "profile" });
-
-                                    <a href="@Url.Action("switch", "logout", new { id = Model.Account.Uid, redirectUrl = redirectUrl })"
-                                       class="btn btn-header-action-callout">
-                                        <i class="icon icon-left s7-credit"></i>
-                                        Enable Payments
-                                    </a>
-                                }
-                            }
-                            else
+                            if (!Model.Account.IsClaimed)
                             {
                                 <button class="btn btn-header-action md-trigger btn-danger" data-modal="modal-claim-profile" onclick="resetClaimForm()">
                                     <i class="icon icon-left s7-door-lock"></i>
@@ -279,6 +223,24 @@
                                 <i class="icon icon-left s7-mail"></i>
                                 <span class="">Contact Us</span>
                             </button>
+
+                            if (Model.Account.IsClaimed)
+                            {
+                                <div>
+                                    <div class="btn-group" style="width:100%;">
+                                        <button class="btn btn-header-action dropdown-toggle" data-toggle="dropdown">
+                                            <i class="s7-more"></i>
+                                            More
+                                            <span class="caret"></span>
+                                            <span class="sr-only">Toggle Dropdown</span>
+                                        </button>
+                                        <div class="dropdown-menu pointer" style="width:100%;">
+                                            @RenderViewActivitiesButton(isInEditMode)
+                                            @RenderMakeAPaymentButton(currentUser)
+                                        </div>
+                                    </div>
+                                </div>
+                            }
                         }
                         else
                         {
@@ -287,6 +249,7 @@
                                 <span class="">I'm Interested</span>
                             </a>
                         }
+
                     </div>
                     <div class="clearfix"></div>
                 </div>
@@ -313,12 +276,12 @@
                 <div class="col-md-12">
                     <div>
                         @{ Html.RenderPartial(
-                                 "~/Views/Shared/Registration/_ShareLinks.cshtml",
-                                 new ViewDataDictionary() {
+                                  "~/Views/Shared/Registration/_ShareLinks.cshtml",
+                                  new ViewDataDictionary() {
                                    { "ShareObject", shareObject },
                                    { "ShareUrl", shareUrl }
- }
-                          ); }
+}
+                           ); }
                     </div>
                 </div>
             </div>
@@ -357,6 +320,9 @@
                             <label>Phone</label>
                             <input id="claim-phone" type="text" autocomplete="off" class="form-control" required>
                         </div>
+                        <div class="form-group">
+                            @{ Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", "claim-form-recaptcha"); }
+                        </div>
                         <div class="form-group claim-profile-submit text-center">
                             <button type="button" id="btn-claim-profile" class="btn btn-primary btn-lg btn-block" onclick="claimProfile()">Claim Profile</button>
                         </div>
@@ -388,7 +354,7 @@
                 <div class="col-md-12">
                     <div id="contact-provider-form">
                         <div class="form-group">
-                            <p>Please enter your information to contact @Model.Account.Name</p>
+                            <p class="text-medium-small">Please enter your information to contact @Model.Account.Name</p>
                         </div>
                         <div class="form-group">
                             <label>First Name</label>
@@ -407,10 +373,10 @@
                             <input id="contact-phone" type="text" autocomplete="off" class="form-control">
                         </div>
                         <div class="form-group">
-                            @{ Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml"); }
+                            @{ Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", "contact-form-recaptcha"); }
                         </div>
                         <div class="form-group contact-provider-submit text-center">
-                            <button type="button" id="btn-contact-provider" class="btn btn-primary btn-lg btn-block" onclick="contactProvider()">Contact &raquo;</button>
+                            <button type="button" id="btn-contact-provider" class="btn btn-primary btn-lg btn-block" onclick="contactProvider()">Submit &raquo;</button>
                         </div>
                     </div>
                     <div id="contact-provider-done" class="hide">
@@ -490,11 +456,13 @@
         $('#claim-lastname').val('');
         $('#claim-email').val('');
         $('#claim-phone').val('');
+
+        AHQRecaptcha.reset('claim-form-recaptcha');
     }
 
     function claimProfile() {
 
-        params = 'profile=@Model.Account.Uid&firstname=' + encodeURIComponent($('#claim-firstname').val()) + '&lastname=' + encodeURIComponent($('#claim-lastname').val()) + '&email=' + encodeURIComponent($('#claim-email').val()) + '&phone=' + encodeURIComponent($('#claim-phone').val());
+        params = 'profile=@Model.Account.Uid&firstname=' + encodeURIComponent($('#claim-firstname').val()) + '&lastname=' + encodeURIComponent($('#claim-lastname').val()) + '&email=' + encodeURIComponent($('#claim-email').val()) + '&phone=' + encodeURIComponent($('#claim-phone').val()) + '&g_recaptcha_response=' + AHQRecaptcha.getToken('claim-form-recaptcha');
 
         $('#btn-claim-profile').html('Submitting...');
         $('#btn-claim-profile').prop('disabled', true);
@@ -526,11 +494,13 @@
         $('#contact-lastname').val('');
         $('#contact-email').val('');
         $('#contact-phone').val('');
+
+        AHQRecaptcha.reset('contact-form-recaptcha');
     }
 
     function contactProvider() {
 
-        params = 'profile=@Model.Account.Uid&firstname=' + encodeURIComponent($('#contact-firstname').val()) + '&lastname=' + encodeURIComponent($('#contact-lastname').val()) + '&email=' + encodeURIComponent($('#contact-email').val()) + '&phone=' + encodeURIComponent($('#contact-phone').val()) + '&g_recaptcha_response=' + $('#g-recaptcha-response').val();
+        params = 'profile=@Model.Account.Uid&firstname=' + encodeURIComponent($('#contact-firstname').val()) + '&lastname=' + encodeURIComponent($('#contact-lastname').val()) + '&email=' + encodeURIComponent($('#contact-email').val()) + '&phone=' + encodeURIComponent($('#contact-phone').val()) + '&g_recaptcha_response=' + AHQRecaptcha.getToken('contact-form-recaptcha');
 
         $('#btn-contact-provider').html('Submitting...');
         $('#btn-contact-provider').prop('disabled', true);
@@ -555,3 +525,57 @@
     }
 
 </script>
+
+@helper RenderViewActivitiesButton(bool isInEditMode)
+{
+    if (!Request.Url.ToString().IsSameAs(Model.Account.BrowseUrl))
+    {
+        if (!isInEditMode || Model.Account.HasActivities())
+        {
+            <button onclick="location.href='@Model.Account.BrowseUrl'" class="btn btn-header-action">
+                <i class="icon icon-left s7-gleam"></i>
+                <span class="">
+                    View @UILabel.ActivityLabel(ActivityType.Activity, true)
+                </span>
+            </button>
+        }
+    }
+}
+
+@helper RenderMakeAPaymentButton(WebUser currentUser)
+{
+    if (Model.Account.CanProcessPayments())
+    {
+        if (currentUser.IsNotEmpty())
+        {
+            var payUrl = Model.Account.PayUrl;
+
+            if (!currentUser.IsActive)
+            {
+                payUrl = Url.Action("confirm", "signup", new { id = currentUser.Uid, returnurl = payUrl });
+            }
+
+            <button onclick="location.href='@payUrl'" class="btn btn-header-action">
+                <i class="icon icon-left s7-credit"></i>
+                <span class="">Make A Payment</span>
+            </button>
+        }
+        else
+        {
+            <button type="button" class="btn btn-header-action md-trigger" data-modal="modal-login" onclick="setLoginRedirect('@Model.Account.PayUrl', true)">
+                <i class="icon icon-left s7-credit"></i>
+                <span class="">Make A Payment</span>
+            </button>
+        }
+    }
+    else if (currentUser.IsNotEmpty() && Model.Account.OwnerId == currentUser.ID && !Model.Account.CanProcessPayments())
+    {
+        var redirectUrl = Url.Action("paymentsoptions", "account", new { area = "org", isfullscreen = 1, source = "profile" });
+
+        <a href="@Url.Action("switch", "logout", new { id = Model.Account.Uid, redirectUrl = redirectUrl })"
+           class="btn btn-header-action-callout">
+            <i class="icon icon-left s7-credit"></i>
+            Enable Payments
+        </a>
+    }
+}
