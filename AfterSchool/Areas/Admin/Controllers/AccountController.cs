@@ -98,6 +98,7 @@ namespace AfterSchool.Areas.Admin.Controllers
 
             WebUser user = null;
             Account account = null;
+            WebUser currentUser = SessionVariables.CurrentUser;
 
             if (!id.IsGuid())
             {
@@ -135,7 +136,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                             account.AddPackage(
                                 package.ToInteger(), 
                                 (BillingPeriodType)billingperiod.ToInteger(), 
-                                SessionVariables.CurrentUser, 
+                                currentUser, 
                                 amsgs, 
                                 adc
                             );
@@ -150,7 +151,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                                     lastname,
                                     email,
                                     UserType.Owner,
-                                    SessionVariables.CurrentUser,
+                                    currentUser,
                                     amsgs,
                                     adc);
                             }
@@ -163,7 +164,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                                         firstName: firstname,
                                         lastName: lastname,
                                         email: email,
-                                        loggedInUser: SessionVariables.CurrentUser,
+                                        loggedInUser: currentUser,
                                         msgs: amsgs,
                                         dc: adc);
 
@@ -176,7 +177,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                                             packageBillingPeriod: (BillingPeriodType)billingperiod.ToInteger(),
                                             timeZone: timezone,
                                             isAfterSchool: true,
-                                            loggedInUser: SessionVariables.CurrentUser,
+                                            loggedInUser: currentUser,
                                             msgs: amsgs,
                                             dc: adc);
                             }
@@ -188,11 +189,11 @@ namespace AfterSchool.Areas.Admin.Controllers
                                             phone: null,
                                             isActive: true,
                                             accountType:(AccountType)accounttype.ToInteger(),
-                                            accountOwner: SessionVariables.CurrentUser,
+                                            accountOwner: currentUser,
                                             packageId: package.ToInteger(),
                                             packageBillingPeriod: (BillingPeriodType)billingperiod.ToInteger(),
                                             timeZone: timezone,
-                                            loggedInUser: SessionVariables.CurrentUser,
+                                            loggedInUser: currentUser,
                                             isAfterSchool: true,
                                             createWithStripe: false,
                                             msgs: amsgs, 

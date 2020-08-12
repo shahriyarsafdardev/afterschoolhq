@@ -455,6 +455,11 @@ a.white:hover{
     background-color: #00c5a3;
 }
 
+.profile-badge {
+    display: inline-block;
+    margin-bottom: 5px;
+}
+
 div.filter-gray {
     background-color: #bcbcbc;
 }
