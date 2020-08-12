@@ -18,13 +18,8 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult Index(string invite)
         {
-            //return Redirect("https://myahq.com/transform/");
-
             var signupIndexVM = new SignUpIndexViewModel()
             {
-                FirstName = CookieVariables.DemoFirstName,
-                Email = CookieVariables.DemoEmailAddress,
-                // OrgName = CookieVariables.DemoOrgName,
                 InviteCodeToShare = invite
             };
 

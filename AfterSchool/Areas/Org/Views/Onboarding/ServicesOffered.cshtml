@@ -10,7 +10,15 @@
         <div class="row">
             <div class="col-md-offset-3 col-md-6">
                 <div class="form-group">
-                    <h1 class="text-center">Enter Services and Teaching Methods</h1>
+                    <h1 class="text-center">Enter More Details</h1>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-lg-3 control-label">Classifications (up to 3)</label>
+                    <div class="col-lg-9">
+                        <input type="text" name="classifications" id="classifications" class="form-control" data-role="tagsinput" value="@Request["classifications"]" />
+                        <p class="text-small text-muted">ex: Karate, Sports, Arts, Pottery, Dance, Football</p>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -85,15 +93,7 @@
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label class="col-lg-3 control-label">Program Classifications (up to 3)</label>
-                    <div class="col-lg-9">
-                        <input type="text" name="classifications" id="classifications" class="form-control" data-role="tagsinput" value="@Request["classifications"]" />
-                        <p class="text-small text-muted">ex: Karate, Sports, Arts, Pottery, Dance, Football</p>
-                    </div>
-                </div>
-
-                <div class="form-group">
+                <div class="form-group hide">
                     <label class="col-lg-3 control-label">Soft Skills (up to 10)</label>
                     <div class="col-lg-9">
                         <input type="text" name="softskills" id="softskills" class="form-control" data-role="tagsinput" value="@Request["softskills"]" />
@@ -101,7 +101,7 @@
                     </div>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group hide">
                     <label class="col-lg-3 control-label">Academic Subjects (up to 5)</label>
                     <div class="col-lg-9">
                         <input type="text" name="academicsubjects" id="academicsubjects" class="form-control" data-role="tagsinput" value="@Request["academicsubjects"]" />
@@ -109,7 +109,7 @@
                     </div>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group hide">
                     <label class="col-lg-3 control-label">Teaching Methods (up to 3)</label>
                     <div class="col-lg-9">
                         <input type="text" name="teachingmethods" id="teachingmethods" class="form-control" data-role="tagsinput" value="@Request["teachingmethods"]" />
