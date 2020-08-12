@@ -36,7 +36,7 @@
         </div>
     </div>
     <div class="form-group">
-        <div class="g-recaptcha" data-sitekey="6Lfg2BEUAAAAADCXTFVlYUywSoqvMUgLd-tERDxO"></div>
+        @{ Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", ""); }
     </div>
 </div>
 <p class="conditions">By creating an account, you agree with the <a href="/tos" target="_blank">Terms and Conditions</a>.</p>

@@ -79,7 +79,6 @@
     return hasErrors;
 }
 
-
 $(document).ready(function () {
     try{
         if (PageEvent) {

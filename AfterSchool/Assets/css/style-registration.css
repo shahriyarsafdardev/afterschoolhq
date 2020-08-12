@@ -505,6 +505,24 @@ body.registration {
     overflow: hidden;
 }
 
+@media screen and (max-width: 375px) {
+    .participation-object-detail {
+        padding: 0px;
+    }
+
+    .participation-object-detail > .panel {
+        margin: 0px;
+        border-radius: 0px;
+    }
+
+    .panel:first-of-type {
+        margin-left: -15px;
+        margin-right: -15px;
+        margin-top: 0px;
+        margin-bottom: 0px;
+    }
+}
+
 .participation-object-detail > .panel > .panel-body{
     padding-bottom: 150px;
 }
