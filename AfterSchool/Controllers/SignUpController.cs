@@ -603,6 +603,27 @@ namespace AfterSchool.Controllers
         }
 
         [HttpGet]
+        public ActionResult Claim(string invite)
+        {
+            var msgs = new SystemMessages();
+
+            if (!invite.IsGuid())
+                msgs.Add("Invalid invitation code", MessageType.UserError);
+
+            var invitingAccount = Account.LoadByInviteCodeToShare(invite.ToGuid());
+
+            var signupIndexVM = new SignUpIndexViewModel()
+            {
+                InviteCodeToShare = invite,
+                Account = invitingAccount,
+                IsClaimProcess = true,
+            };
+
+            ViewBag.Messages = new SystemMessages();
+            return View("User", signupIndexVM);
+        }
+
+        [HttpGet]
         public ActionResult User(string invite)
         {
             var msgs = new SystemMessages();
@@ -690,7 +711,12 @@ namespace AfterSchool.Controllers
             }
 
             if (msgs.HasNoErrors())
+            {
+                if (model.IsClaimProcess)
+                    return Redirect($"{invitingAccount.HomePageUrl}?edit=1");
+
                 return RedirectToAction("index", "home", new { area = "org" });
+            }
 
             ViewBag.Messages = msgs;
 
