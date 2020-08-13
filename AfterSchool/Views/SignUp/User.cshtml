@@ -24,6 +24,7 @@
                             @{ Html.RenderPartial("~/Views/Shared/Login/_SignUpForm.cshtml", Model.ToWebUser()); }
 
                             <input type="hidden" name="invitecodetoshare" value="@Model.InviteCodeToShare" />
+                            <input type="hidden" name="isclaimprocess" value="@Model.IsClaimProcess.ToString()" />
                         </form>
 
                     </div>

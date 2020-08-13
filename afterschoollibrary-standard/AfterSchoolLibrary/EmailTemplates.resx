@@ -124,6 +124,9 @@
   <data name="Activity_Invite" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>emailtemplates\activity-invite.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="ClaimForm_Submitted" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>emailtemplates\claimform-submitted.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="ContactForm_Submitted" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>emailtemplates\contactform-submitted.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

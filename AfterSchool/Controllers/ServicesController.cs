@@ -245,6 +245,8 @@ namespace AfterSchool.Controllers
                     $"<p>Organization: {account.Name}<br />Name: {firstname} {lastname}<br />Email: {email}<br />Phone: {phone}<br /></p>",
                     true);
 
+                EmailHelper.SendClaimEmail(account, msgs);
+
                 return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
             }
 
