@@ -998,9 +998,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add("Please enter a valid Video(YouTube) URL", MessageType.UserError);
                 
             //server side validation for photos count, which should not be more then 6
-            List<AccountProperty> properties = profile.GetProperties(AccountPropertyType.Photo, msgs);
-            int savedPhotos = properties != null ? properties.Count : 0;
-            int incomingPhotos = photos != null ? photos.Count() : 0;
+            var properties = profile.GetProperties(AccountPropertyType.Photo, msgs);
+            var savedPhotos = properties != null ? properties.Count : 0;
+            var incomingPhotos = photos != null ? photos.Count() : 0;
 
             if (savedPhotos + incomingPhotos > 6)
                 msgs.Add("Only 6 photos allowed to store in gallery.", MessageType.UserError);

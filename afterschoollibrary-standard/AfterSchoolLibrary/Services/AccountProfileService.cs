@@ -321,7 +321,7 @@ namespace AfterSchoolLibrary.Services
 
         public static void RemoveProperty(this AccountProfile profile, int id, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            AccountProperty property = AccountProperty.Load(id, msgs, dc);
+            var property = AccountProperty.Load(id, msgs, dc);
             if (property != null)
                 msgs.AddRange(property.Delete(dc: dc));
         }
