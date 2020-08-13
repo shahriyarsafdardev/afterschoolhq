@@ -616,6 +616,7 @@ namespace AfterSchool.Controllers
             {
                 InviteCodeToShare = invite,
                 Account = invitingAccount,
+                IsClaimProcess = true,
             };
 
             ViewBag.Messages = new SystemMessages();
@@ -710,7 +711,12 @@ namespace AfterSchool.Controllers
             }
 
             if (msgs.HasNoErrors())
+            {
+                if (model.IsClaimProcess)
+                    return Redirect($"{invitingAccount.HomePageUrl}?edit=1");
+
                 return RedirectToAction("index", "home", new { area = "org" });
+            }
 
             ViewBag.Messages = msgs;
 
