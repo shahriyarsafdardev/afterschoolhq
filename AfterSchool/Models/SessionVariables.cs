@@ -70,7 +70,10 @@ namespace AfterSchool.Models
                 if (value.IsNotEmpty())
                     SessionHelper.AddToSession("CurrentAccount", value.ID.Value.ToString());
                 else
+                {
                     SessionHelper.RemoveFromSession("CurrentAccount");
+                    CookieVariables.CurrentAccount = null;
+                }
             }
         }
 

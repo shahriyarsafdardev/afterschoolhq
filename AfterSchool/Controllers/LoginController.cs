@@ -102,7 +102,10 @@ namespace AfterSchool.Controllers
             if (account.IsNotEmpty())
             {
                 var remember = CookieVariables.CurrentUser.IsGuid();
-                
+
+                if (account.AccountTypeId == AccountType.AfterSchool)
+                    remember = false;
+
                 ClearCookies();
                 LoadSessionInfo(SessionVariables.CurrentUser, account, remember);
 
