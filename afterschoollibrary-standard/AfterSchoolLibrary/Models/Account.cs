@@ -508,11 +508,11 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        public string ShortUserInviteUrl
+        public string ClaimAccountUrl
         {
             get
             {
-                return $"{Helpers.Utilities.ShortBaseUrl()}/signup/user?invite={this.InviteCodeToShare}";
+                return $"{Helpers.Utilities.BaseUrl()}/signup/claim?invite={this.InviteCodeToShare}";
             }
         }
 

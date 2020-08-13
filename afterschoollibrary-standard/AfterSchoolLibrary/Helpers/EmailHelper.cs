@@ -120,7 +120,7 @@ namespace AfterSchoolLibrary.Helpers
             var claimProfileDetails = "";
 
             if (!account.IsClaimed)
-                claimProfileDetails = $"<p><a href=\"{Utilities.BaseUrl()}\">{Utilities.AppName()}</a> is promoting your program in our online marketplace to enable thousands of parents to quickly find programs for their children. You can view your profile profile here: <a href=\"{account.ShortHomePageUrl}\">{account.ShortHomePageUrl}</a>. <br /><br />Ready to claim your profile? Click the following link: {account.UserInviteUrl}</p>";
+                claimProfileDetails = $"<p><a href=\"{Utilities.BaseUrl()}\">{Utilities.AppName()}</a> is promoting your program in our online marketplace to enable thousands of parents to quickly find programs for their children. You can view your profile profile here: <a href=\"{account.ShortHomePageUrl}\">{account.ShortHomePageUrl}</a>. <br /><br />Ready to claim your profile? Click the following link: {account.ClaimAccountUrl}</p>";
 
             var model = new NameValueCollection()
             {
@@ -136,6 +136,35 @@ namespace AfterSchoolLibrary.Helpers
                 EmailTemplates.ContactForm_Submitted,
                 model,
                 "ContactForm_Submitted",
+                msgs);
+
+            // SEND EMAILS
+            var mailMsgs = new SystemMessages();
+
+            // Send email to activity contact
+            mailMsgs.AddRange(SendGridHelper.SendMail(
+                fromEmail: Email.SendGridNoReplyEmailAddress(),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(account.Email),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId()));
+        }
+
+        public static void SendClaimEmail(Account account, SystemMessages msgs)
+        {
+            var claimProfileDetails = $"<p><a href=\"{Utilities.BaseUrl()}\">{Utilities.AppName()}</a> is promoting your program in our online marketplace to enable thousands of parents to quickly find programs for their children. You can view your profile profile here: <a href=\"{account.ShortHomePageUrl}\">{account.ShortHomePageUrl}</a>. <br /><br />Ready to claim your profile? Click the following link: {account.ClaimAccountUrl} or forward this email to a team member to claim your <em>free</em> profile</p>";
+
+            var model = new NameValueCollection()
+            {
+                { "ClaimProfileDetails", claimProfileDetails },
+                { "ProductName", Utilities.AppName() }
+            };
+
+            var subject = $"Someone has requested to claim your free profile on {Utilities.AppName()}";
+            var body = ProcessTemplate(
+                EmailTemplates.ClaimForm_Submitted,
+                model,
+                "ClaimForm_Submitted",
                 msgs);
 
             // SEND EMAILS
@@ -713,7 +742,7 @@ namespace AfterSchoolLibrary.Helpers
             mailMsgs.AddRange(SendGridHelper.SendMail(
                 fromEmail: Email.SendGridNoReplyEmailAddress(true),
                 toEmail: Email.SendGridSupportEmailAddress,
-                subject: $"CC: {subject}",
+                subject: $"BCC: {subject}",
                 body: body,
                 emailTemplateId: SendGridHelper.GetGenericTemplateId(true)
                 ));

@@ -603,6 +603,26 @@ namespace AfterSchool.Controllers
         }
 
         [HttpGet]
+        public ActionResult Claim(string invite)
+        {
+            var msgs = new SystemMessages();
+
+            if (!invite.IsGuid())
+                msgs.Add("Invalid invitation code", MessageType.UserError);
+
+            var invitingAccount = Account.LoadByInviteCodeToShare(invite.ToGuid());
+
+            var signupIndexVM = new SignUpIndexViewModel()
+            {
+                InviteCodeToShare = invite,
+                Account = invitingAccount,
+            };
+
+            ViewBag.Messages = new SystemMessages();
+            return View("User", signupIndexVM);
+        }
+
+        [HttpGet]
         public ActionResult User(string invite)
         {
             var msgs = new SystemMessages();
