@@ -319,6 +319,13 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
+        public static void RemoveProperty(this AccountProfile profile, int id, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            AccountProperty property = AccountProperty.Load(id, msgs, dc);
+            if (property != null)
+                msgs.AddRange(property.Delete(dc: dc));
+        }
+
         public static GradeLevel GetGradeLevelStart(this AccountProfile profile, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (profile.GradeLevelStart.HasValue)

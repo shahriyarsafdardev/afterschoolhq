@@ -10,6 +10,7 @@ using AfterSchoolLibrary.Services;
 using Hangfire;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Billing;
+using System.Web;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -47,7 +48,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Edit(string id, string name, string email, string phone, string uniquename, string isactive, string timezone)
         {
             var msgs = new SystemMessages();
-            var a = SessionVariables.CurrentAccount;                                
+            var a = SessionVariables.CurrentAccount;
 
             if (name.IsEmpty())
                 msgs.Add("Organization Name is required", MessageType.UserError);
@@ -138,14 +139,14 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 if (msgs.HasNoErrors())
                     account.SetDefaultLocation(newLocation, SessionVariables.CurrentUser, msgs);
-            }            
+            }
 
             ViewBag.Messages = msgs;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Location = account.GetDefaultLocation();
             ViewBag.IsFullScreen = GetIsFullScreen();
             return View(account);
-        }     
+        }
 
         [HttpGet]
         public ActionResult PaymentsOptions()
@@ -217,7 +218,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [HttpGet]
         public ActionResult BankSetup()
-        {            
+        {
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.IsFullScreen = GetIsFullScreen();
             ViewBag.Messages = new SystemMessages();
@@ -336,7 +337,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add("Date of Birth is required and must be a valid date", MessageType.UserError);
 
             if (paymentsEntityVM.SSNLast4.IsEmpty() || !paymentsEntityVM.SSNLast4.IsNumber())
-                msgs.Add("SSN(last 4) is required", MessageType.UserError);            
+                msgs.Add("SSN(last 4) is required", MessageType.UserError);
 
             if (paymentsEntityVM.PersonalEmail.IsEmpty())
                 msgs.Add("Email is required", MessageType.UserError);
@@ -421,7 +422,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 if (paymentsEntityVM.BusinessType == LegalEntityType.Company && stripeAccount.ChargesEnabled)
                     return RedirectToAction("paymentsbank", "account", new { isnew = Request["isnew"] });
             }
-           
+
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.IsFullScreen = GetIsFullScreen();
@@ -444,7 +445,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult PaymentsBank(PaymentsEntityViewModel paymentsEntityVM)
         {
             var msgs = new SystemMessages();
-            
+
             if (paymentsEntityVM.BankRoutingNumber1.IsEmpty())
                 msgs.Add("Routing Number is required", MessageType.UserError);
             if (paymentsEntityVM.BankRoutingNumber2.IsEmpty())
@@ -536,7 +537,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 onFailure: (SystemMessages fmsgs) => {
                     msgs.AddRange(fmsgs);
                 }
-            );            
+            );
 
             ViewBag.Messages = msgs;
             ViewBag.Features = a.GetAccountPackageFeatures();
@@ -593,12 +594,12 @@ namespace AfterSchool.Areas.Org.Controllers
                     .ToList()
                     .ForEach(email =>
                         account.InviteUser(
-                            "", 
-                            "", 
-                            email, 
                             "",
-                            Request.Params["message"], 
-                            (UserType)usertype.ToInteger(), 
+                            "",
+                            email,
+                            "",
+                            Request.Params["message"],
+                            (UserType)usertype.ToInteger(),
                             currentUser,
                             msgs));
 
@@ -756,7 +757,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                     LastModifiedBy = SessionVariables.CurrentUser.ID,
                                     DisplayOrder = form.GetQuestionGroupCount(amsgs, adc) + 1,
                                     FormId = form.ID,
-                                    QuestionGroupDataTypeId = QuestionGroupDataType.NotSet,                                   
+                                    QuestionGroupDataTypeId = QuestionGroupDataType.NotSet,
                                     RegistrantTypeId = RegistrantType.Individual,
                                     Name = Request.Params["name-0"]
                                 };
@@ -954,17 +955,17 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult Style(string id, string logo, string headerimage, string about, string title, string headline, string primaryColor, string website, string mingrade, string maxgrade, string twitter, string facebook, string instagram, string linkedin, string youtube, string calendar, string genderrestriction, string classifications, string softskills, string academicsubjects, string teachingmethods, string profileemail, string profilephone, string locationname, string streetnumber, string streetname, string address2, string neighborhood, string city, string state, string postalcode, string county, string country, string placeid, string opencovid, string elearningcenter, string ahqapproved, string videoUrl)
+        public ActionResult Style(string id, string logo, string headerimage, string about, string title, string headline, string primaryColor, string website, string mingrade, string maxgrade, string twitter, string facebook, string instagram, string linkedin, string youtube, string calendar, string genderrestriction, string classifications, string softskills, string academicsubjects, string teachingmethods, string profileemail, string profilephone, string locationname, string streetnumber, string streetname, string address2, string neighborhood, string city, string state, string postalcode, string county, string country, string placeid, string opencovid, string elearningcenter, string ahqapproved, string videoUrl, IEnumerable<HttpPostedFileBase> photos)
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
             var profile = account.GetAccountProfile(msgs);
             var allowedFiles = new string[] { ".png", ".jpg", ".jpeg" };
-            var currentUser = SessionVariables.CurrentUser;            
+            var currentUser = SessionVariables.CurrentUser;
 
             if (logo.IsNotEmpty())
             {
-                if (Request.Files["logo"].ContentLength == 0 || 
+                if (Request.Files["logo"].ContentLength == 0 ||
                     !Request.Files["logo"].FileName.ToLower().Contains(allowedFiles) ||
                     Request.Files["logo"].ContentLength > AfterSchoolLibrary.Helpers.Utilities.ImageUploadMaxBytes)
                     msgs.Add("Please upload a valid jpg or png file, must be less than 4MB", MessageType.UserError);
@@ -972,7 +973,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (headerimage.IsNotEmpty())
             {
-                if (Request.Files["headerimage"].ContentLength == 0 || 
+                if (Request.Files["headerimage"].ContentLength == 0 ||
                     !Request.Files["headerimage"].FileName.ToLower().Contains(allowedFiles) ||
                     Request.Files["headerimage"].ContentLength > AfterSchoolLibrary.Helpers.Utilities.ImageUploadMaxBytes)
                     msgs.Add("Please upload a valid jpg or png file", MessageType.UserError);
@@ -995,6 +996,14 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (videoUrl.IsNotEmpty() && !videoUrl.IsRegExMatch(BasicLibrary.Utilities.YoutubeSpecificUrlRegEx))
                 msgs.Add("Please enter a valid Video(YouTube) URL", MessageType.UserError);
+                
+            //server side validation for photos count, which should not be more then 6
+            List<AccountProperty> properties = profile.GetProperties(AccountPropertyType.Photo, msgs);
+            int savedPhotos = properties != null ? properties.Count : 0;
+            int incomingPhotos = photos != null ? photos.Count() : 0;
+
+            if (savedPhotos + incomingPhotos > 6)
+                msgs.Add("Only 6 photos allowed to store in gallery.", MessageType.UserError);
 
             if (msgs.HasNoErrors())
             {
@@ -1014,29 +1023,26 @@ namespace AfterSchool.Areas.Org.Controllers
                         currentUser,
                         msgs);
 
-                foreach (var key in Request.Files.AllKeys.Where(key => key.Contains("photo-")))
+                if (photos != null)
                 {
-                    var file = Request.Files[key];
-                    if (file.IsNotEmpty() && file.FileName.IsNotBlank())
+                    foreach (var photo in photos)
                     {
-                        if (file.FileName.ToLower().Contains(allowedFiles) && file.ContentLength <= AfterSchoolLibrary.Helpers.Utilities.ImageUploadMaxBytes)
+                        if (photo.IsNotEmpty() && photo.FileName.IsNotBlank())
                         {
-                            var photoId = "";
-
-                            if (!key.Contains("new"))
-                                photoId = key.Split('-')[2];
-
-                            profile.UploadGalleryPhoto(
-                                    account,
-                                    Request.Files[key].InputStream,
-                                    Request.Files[key].FileName,
-                                    photoId,
-                                    currentUser,
-                                    msgs);
-                        }
-                        else
-                        {
-                            msgs.Add("Please upload a valid jpg or png file that is less than 4MB", MessageType.UserError);
+                            if (photo.FileName.ToLower().Contains(allowedFiles) && photo.ContentLength <= AfterSchoolLibrary.Helpers.Utilities.ImageUploadMaxBytes)
+                            {
+                                profile.UploadGalleryPhoto(
+                                        account,
+                                        photo.InputStream,
+                                        photo.FileName,
+                                        photoId: "",
+                                        currentUser,
+                                        msgs);
+                            }
+                            else
+                            {
+                                msgs.Add("Please upload a valid jpg or png file that is less than 4MB", MessageType.UserError);
+                            }
                         }
                     }
                 }
@@ -1082,16 +1088,16 @@ namespace AfterSchool.Areas.Org.Controllers
                 profile.AddNewLocation(
                     locationname,
                     streetnumber,
-                    streetname, 
-                    address2, 
-                    neighborhood, 
-                    city, 
-                    county, 
-                    state, 
-                    postalcode, 
-                    country, 
-                    placeid, 
-                    currentUser, 
+                    streetname,
+                    address2,
+                    neighborhood,
+                    city,
+                    county,
+                    state,
+                    postalcode,
+                    country,
+                    placeid,
+                    currentUser,
                     msgs);
             }
 
@@ -1099,6 +1105,29 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add("Saved Successfully", MessageType.Success);
 
             return View(StyleViewBag(msgs));
+        }
+
+        [HttpPost]
+        public virtual JsonResult RemoveAccountProperty(int id)
+        {
+            try
+            {
+                if (id > 0)
+                {
+                    var msgs = new SystemMessages();
+                    var account = SessionVariables.CurrentAccount;
+                    var profile = account.GetAccountProfile(msgs);
+                    profile.RemoveProperty(id, msgs);
+                    return Json(new { IsSuccess = true });
+                }
+
+                //if we reach here, something gone wrong. 
+                return Json(new { IsSuccess = false });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { IsSuccess = false });
+            }
         }
 
         //[HttpGet]
