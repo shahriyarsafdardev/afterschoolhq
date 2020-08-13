@@ -399,6 +399,7 @@ property: ProfilePhone, string, NVarChar "20"
 property: IsOpenDuringCovid, bool, Bit
 property: IsELearningCenter, bool, Bit
 property: IsAHQApproved, bool, Bit
+property: VideoUrl, string, NVarChar "200"
 loadmethod: AccountId
 join: Account.ID, AccountId, InnerJoin
 joinproperty: Account.Name, string, NVarChar
