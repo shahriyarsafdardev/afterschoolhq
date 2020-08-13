@@ -92,10 +92,10 @@ namespace AfterSchool.Models
         {
             if (HttpContext.Current.Request.Cookies[key].IsNotEmpty() && value == null)
             {
-                var cookie = new HttpCookie(key)
+                var cookie = new HttpCookie(key, "")
                 {
                     Expires = DateTime.UtcNow.AddDays(-1),
-                    HttpOnly = true
+                    HttpOnly = true                   
                 };
                 HttpContext.Current.Response.Cookies.Add(cookie);
             }
