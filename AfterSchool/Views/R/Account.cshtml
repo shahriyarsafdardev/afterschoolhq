@@ -493,12 +493,14 @@
     (function () {
         var url = '@accountProfile.VideoUrl';
         if (url) {
-            url = url.split('v=')[1];
-            var player = document.getElementById("frameVideoUrl");
-            player.src = "//www.youtube.com/embed/" + url;
+            var splitedUrl = url.split('v=');
+            if (splitedUrl && splitedUrl.length > 1) {
+                var player = document.getElementById("frameVideoUrl");
+                player.src = "//www.youtube.com/embed/" + splitedUrl[1];
 
-            var container = document.getElementById("frameContainer");
-            container.style.display = 'block';
+                var container = document.getElementById("frameContainer");
+                container.style.display = 'block';
+            }           
         }        
     })();
 </script>
