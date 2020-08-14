@@ -26,6 +26,26 @@
     var specialNeedsOffered = accountProperties.Where(item => item.AccountPropertyTypeId.In(specialNeedsTypes));
 }
 
+<style>
+    .iframe-container {
+        position: relative;
+        padding-bottom: 56.25%;
+        padding-top: 25px;
+        height: 0;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        display: none;
+    }
+
+        .iframe-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+</style>
+
 @{
     Html.RenderPartial(
         "~/Views/Shared/Registration/_AccountTopBar.cshtml",
@@ -33,7 +53,7 @@
         new ViewDataDictionary()
         {
             { "LoginReturnUrl", Model.HomePageUrl }
-        }
+                }
         );
 }
 
@@ -198,6 +218,11 @@
                                 @renderEditButtion(Model, "photos", "Edit Photo Gallery")
                             </div>
                         </div>
+
+                        <div id="frameContainer" class="row iframe-container">
+                            <iframe id="frameVideoUrl" width="420" height="315" frameborder="0" allowfullscreen></iframe>
+                        </div>
+
                         <div class="row">
                             <div style="position: relative; margin-left: -20px; margin-right: -20px;">
                                 @{ Html.RenderPartial("~/Views/Shared/Registration/_ProfilePhotoGallery.cshtml", photos); };
@@ -463,3 +488,17 @@
         </div>
     </div>
 </div>
+
+<script type="text/javascript">
+    (function () {
+        var url = '@accountProfile.VideoUrl';
+        if (url) {
+            url = url.split('v=')[1];
+            var player = document.getElementById("frameVideoUrl");
+            player.src = "//www.youtube.com/embed/" + url;
+
+            var container = document.getElementById("frameContainer");
+            container.style.display = 'block';
+        }        
+    })();
+</script>
