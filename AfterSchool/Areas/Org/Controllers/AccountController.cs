@@ -993,7 +993,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (calendar.IsNotEmpty() && !calendar.IsRegExMatch(BasicLibrary.Utilities.WebsiteRegEx))
                 msgs.Add("Please enter a valid calendar URL", MessageType.UserError);
 
-            if (videoUrl.IsNotEmpty() && !videoUrl.IsRegExMatch(BasicLibrary.Utilities.WebsiteRegEx))
+            if (videoUrl.IsNotEmpty() && !videoUrl.IsRegExMatch(BasicLibrary.Utilities.YoutubeSpecificUrlRegEx))
                 msgs.Add("Please enter a valid Video(YouTube) URL", MessageType.UserError);
 
             if (msgs.HasNoErrors())
