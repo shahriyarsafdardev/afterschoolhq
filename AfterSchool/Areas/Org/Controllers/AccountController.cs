@@ -1000,7 +1000,7 @@ namespace AfterSchool.Areas.Org.Controllers
             //server side validation for photos count, which should not be more then 6
             var properties = profile.GetProperties(AccountPropertyType.Photo, msgs);
             var savedPhotos = properties != null ? properties.Count : 0;
-            var incomingPhotos = photos != null ? photos.Count() : 0;
+            var incomingPhotos = photos != null ? photos.Count(m => m != null) : 0;
 
             if (savedPhotos + incomingPhotos > 6)
                 msgs.Add("Only 6 photos allowed to store in gallery.", MessageType.UserError);
