@@ -42,6 +42,10 @@ namespace AfterSchoolLibrary.Models
 		public SubscriptionPlanType PlanTypeId { get { return (SubscriptionPlanType)MDV["PlanTypeId"].Value; } set { MDV["PlanTypeId"].Value = value; } }
 		public int? StartDayOfMonth { get { return (int?)MDV["StartDayOfMonth"].Value; } set { MDV["StartDayOfMonth"].Value = value; } }
 		public PlanPaymentStartType PaymentStartTypeId { get { return (PlanPaymentStartType)MDV["PaymentStartTypeId"].Value; } set { MDV["PaymentStartTypeId"].Value = value; } }
+		/// <summary>
+		/// Split cost evenly amongst all parents signed up
+		/// </summary>
+		public bool SplitCostEvenly { get { return (bool)MDV["SplitCostEvenly"].Value; } set { MDV["SplitCostEvenly"].Value = value; } }
 		
 
         public SubscriptionPlan()
@@ -54,6 +58,7 @@ namespace AfterSchoolLibrary.Models
 			this.IsActive = false;
 			this.PlanTypeId = SubscriptionPlanType.NotSet;
 			this.PaymentStartTypeId = PlanPaymentStartType.NotSet;
+			this.SplitCostEvenly = false;
 			
         }
 
@@ -76,6 +81,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "PlanTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "StartDayOfMonth", System.Data.SqlDbType.Int);
 				_dp.Add(className, "PaymentStartTypeId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "SplitCostEvenly", System.Data.SqlDbType.Bit);
 				
                 return _dp;
             }
@@ -203,6 +209,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["PaymentStartTypeId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["SplitCostEvenly"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

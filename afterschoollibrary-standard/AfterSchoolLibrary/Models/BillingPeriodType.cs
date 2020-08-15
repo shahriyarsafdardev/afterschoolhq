@@ -6,4 +6,5 @@ public enum BillingPeriodType
 	Week,
 	Day,
 	TwoWeeks,
+	FirstAndFifteenthOfEachMonth
 }
