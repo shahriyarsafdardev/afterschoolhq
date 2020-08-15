@@ -846,6 +846,8 @@ namespace AfterSchoolLibrary.Services
             var type = values.GetValueOrDefault("type");
             var virtuallocation = values.GetValueOrDefault("virtuallocation");
             var inviteonly = values.GetValueOrDefault("inviteonly");
+            var minseatsrequired = values.GetValueOrDefault("minseatsrequired");
+            var splitcostevenly = values.GetValueOrDefault("splitcostevenly");
 
             var activityType = ActivityType.NotSet;
 
@@ -965,6 +967,9 @@ namespace AfterSchoolLibrary.Services
                 else
                     activity.GradeLevelEnd = null;
             }
+
+            if (minseatsrequired.IsNumber())
+                activity.MinSeatsRequired = minseatsrequired.ToString().ToInteger();
 
             if (genderrestrictions.IsNumber())
                 activity.GenderRestriction = (GenderRestrictionType)genderrestrictions.ToString().ToInteger();
@@ -1187,6 +1192,7 @@ namespace AfterSchoolLibrary.Services
                                 hassubscriptionplan.IfEmpty(""),
                                 subscriptionplancost.IfEmpty(""),
                                 subscriptionplanperiod.IfEmpty(""),
+                                splitcostevenly.IfEmpty(""),
                                 loggedInUserId,
                                 adc
                             ));
@@ -1301,7 +1307,7 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
-        private static SystemMessages SetupSubscriptionPlan(this Activity activity, Account account, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, int loggedInUserId, DatabaseConnection dc = null)
+        private static SystemMessages SetupSubscriptionPlan(this Activity activity, Account account, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string splitcostevenly, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
             var hasChanges = true;
@@ -1321,16 +1327,16 @@ namespace AfterSchoolLibrary.Services
             // if the subscription plan option(UI) is activated
             if (hassubscriptionplan.ToBoolean() && hasChanges)
                 SubscriptionPlanService.CreateNewSubscriptionPlan(
-                    account,
-                    ParticipationObjectType.Activity,
-                    activity.ID.Value,
-                    subscriptionplancost.ToDecimal(),
-                    (BillingPeriodType)subscriptionplanperiod.ToInteger(),
-                    true,
-                    loggedInUserId,
-                    msgs,
-                    dc
-                );
+                    planOwner: account,
+                    participationObjectType: ParticipationObjectType.Activity,
+                    participationObjectId: activity.ID.Value,
+                    costPerPeriod: subscriptionplancost.ToDecimal(),
+                    billingPeriodType: (BillingPeriodType)subscriptionplanperiod.ToInteger(),
+                    doesAutoRenew: true,
+                    splitCostEvenly: splitcostevenly.ToBoolean(),
+                    loggedInUserId: loggedInUserId,
+                    msgs: msgs,
+                    dc: dc);
 
             return msgs;
         }

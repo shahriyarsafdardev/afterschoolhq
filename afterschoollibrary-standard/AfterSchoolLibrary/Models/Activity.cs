@@ -99,6 +99,10 @@ namespace AfterSchoolLibrary.Models
 		/// If true then don't want to add a pin for the exact location
 		/// </summary>
 		public bool HidePreciseLocation { get { return (bool)MDV["HidePreciseLocation"].Value; } set { MDV["HidePreciseLocation"].Value = value; } }
+		/// <summary>
+		/// Minimum seats required to have the activity
+		/// </summary>
+		public int? MinSeatsRequired { get { return (int?)MDV["MinSeatsRequired"].Value; } set { MDV["MinSeatsRequired"].Value = value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
 		public string AccountTimeZone { get { return (string)MDV["AccountTimeZone"].Value; } }
 		public bool? ActivityGroupIsArchived { get { return (bool?)MDV["ActivityGroupIsArchived"].Value; } }
@@ -172,6 +176,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "ActivityLocationTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "VirtualLocationInfo", System.Data.SqlDbType.NVarChar , "1000");
 				_dp.Add(className, "HidePreciseLocation", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "MinSeatsRequired", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "AccountTimeZone", typeof(Account).Name, "TimeZone", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "ActivityGroupIsArchived", typeof(ActivityGroup).Name, "IsArchived", System.Data.SqlDbType.Bit, "ActivityGroup");
@@ -414,6 +419,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["HidePreciseLocation"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["MinSeatsRequired"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

@@ -188,7 +188,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd, string type, string inviteonly)
+        public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd, string type, string inviteonly, string minseatsrequired)
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
@@ -211,7 +211,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 { "regmode", regmode },
                 { "group", group },
                 { "type", type },
-                { "inviteonly", inviteonly.IsBoolean().ToString() }
+                { "inviteonly", inviteonly.IsBoolean().ToString() },
+                { "minseatsrequired", minseatsrequired },
             };
 
             activity = Activity.LoadByUid(id.ToGuid());
@@ -829,7 +830,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditCost(string id, string cost, string costdescription, string acceptpaypal, string acceptcreditcard, string allowtopaylater, string cmd, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, string paymentplanpaymentstarttype)
+        public ActionResult EditCost(string id, string cost, string costdescription, string acceptpaypal, string acceptcreditcard, string allowtopaylater, string cmd, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, string paymentplanpaymentstarttype, string splitcostevenly)
         {
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid());
@@ -850,7 +851,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "paymentplancost", paymentplancost },
                     { "paymentplanperiod", paymentplanperiod },
                     { "paymentplanperiodnumber", paymentplanperiodnumber },
-                    { "paymentplanpaymentstarttype", paymentplanpaymentstarttype }
+                    { "paymentplanpaymentstarttype", paymentplanpaymentstarttype },
+                    { "splitcostevenly", splitcostevenly.IsBoolean().ToString() },
                 };
 
                 activity = ActivityService.EditExisting(

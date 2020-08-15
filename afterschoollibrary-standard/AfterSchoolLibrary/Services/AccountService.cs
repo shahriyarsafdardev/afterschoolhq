@@ -1597,6 +1597,7 @@ namespace AfterSchoolLibrary.Services
                 AccountId = account.ID,
                 RegistrationModeId = RegistrationMode.Register,
                 AllowToPayLater = true,
+                MinSeatsRequired = 0,
             };
         }
 
