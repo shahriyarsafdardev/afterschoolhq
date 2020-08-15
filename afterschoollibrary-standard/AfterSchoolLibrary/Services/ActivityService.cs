@@ -197,32 +197,6 @@ namespace AfterSchoolLibrary.Services
                 .FirstOrDefault();
         }
 
-        public static SubscriptionPlan AddPaymentPlan(this Activity activity, decimal costPerPeriod, BillingPeriodType billingPeriodType, int totalPeriods, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            return SubscriptionPlanService.CreateNewPaymentPlan(
-                activity.GetAccount(msgs, dc),
-                activity,
-                costPerPeriod, 
-                billingPeriodType, 
-                totalPeriods, 
-                loggedInUser, 
-                msgs, 
-                dc);
-        }
-
-        public static SubscriptionPlan AddSubscriptionPlan(this Activity activity, decimal costPerPeriod, BillingPeriodType billingPeriodType, bool doesAutoRenew, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            return SubscriptionPlanService.CreateNewSubscriptionPlan(
-                activity.GetAccount(msgs, dc), 
-                activity,
-                costPerPeriod, 
-                billingPeriodType,
-                doesAutoRenew, 
-                loggedInUser, 
-                msgs, 
-                dc);
-        }
-
         public static List<SubscriptionPlan> GetActivePaymentPlans(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return SubscriptionPlan.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, SubscriptionPlanType.PaymentPlan, msgs, dc)

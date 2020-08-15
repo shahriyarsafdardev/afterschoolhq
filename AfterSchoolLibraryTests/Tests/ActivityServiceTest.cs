@@ -20,14 +20,14 @@ namespace AfterSchoolLibraryTests.Tests
             ActivityOwnerAccount = AccountFactory.Create(AccountOwner, msgs, dc);
         }
 
-        [Fact(DisplayName = "Payment plan is saved as an option on an activity")]
-        public void AddPaymentPlanActivityObjectTest()
-        {
-            var activity = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
-            var plan = activity.AddPaymentPlan(35, BillingPeriodType.Month, 12, LoggedInUser, msgs, dc);
+        //[Fact(DisplayName = "Payment plan is saved as an option on an activity")]
+        //public void AddPaymentPlanActivityObjectTest()
+        //{
+        //    var activity = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
+        //    var plan = activity.AddPaymentPlan(35, BillingPeriodType.Month, 12, LoggedInUser, msgs, dc);
 
-            Assert.Single(SubscriptionPlan.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, SubscriptionPlanType.PaymentPlan, msgs, dc));
-        }
+        //    Assert.Single(SubscriptionPlan.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, SubscriptionPlanType.PaymentPlan, msgs, dc));
+        //}
 
         [Fact(DisplayName = "Payment plan is saved as an option on an activity group")]
         public void AddPaymentPlanActivityGroupObjectTest()
