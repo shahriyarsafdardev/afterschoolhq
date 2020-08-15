@@ -193,14 +193,14 @@ namespace AfterSchoolLibrary.Services
             var purchase = checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc);
 
             checkoutObject.RegistrantSubscriptionPlan = plan.AddRegistrant(
-                submittedRecord,
-                startDateTime,
-                purchase,
-                subscription.Id,
-                GetFeeObject(checkoutObject, billingAccount, plan, msgs, dc),
-                loggedInUser,
-                msgs,
-                dc);
+                                                            submittedRecord,
+                                                            startDateTime,
+                                                            purchase,
+                                                            subscription.Id,
+                                                            GetFeeObject(checkoutObject, billingAccount, plan, msgs, dc),
+                                                            loggedInUser,
+                                                            msgs,
+                                                            dc);
         }
 
         /// <summary>
@@ -287,6 +287,8 @@ namespace AfterSchoolLibrary.Services
 
             if (plan.PlanTypeId == SubscriptionPlanType.Subscription || plan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts)
             {
+                // find existing cancelled plans and make new plan start the day after it ends.
+                // for a person restarting a plan after cancellation
                 if (plan.PlanTypeId == SubscriptionPlanType.Subscription)
                 {
                     var rsps = registrant.GetUnexpiredCancelledRegistrantSubscriptionPlans(participationObject, msgs, dc);
@@ -322,6 +324,34 @@ namespace AfterSchoolLibrary.Services
                 convenienceFee = checkoutObject.GetSubscriptionCostTodayConvenienceFee(msgs, dc);
                 paymentTypeFee = checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc);
                 amount = checkoutObject.SubscriptionPlan.CostPerPeriod;
+
+                var po = checkoutObject.ParticipationObject;
+
+                if (po.Schedule.IsNotEmpty() && !po.Schedule.IsOngoing && po.Schedule.EndDate.HasValue)
+                {
+                    var endDate = po.Schedule.EndDate.Value;
+                    var submittedRecord = checkoutObject.Registration.GetRegistrant(msgs, dc);
+                    var startDate = submittedRecord.GetPlanStartDate(plan, po, msgs, dc);
+
+                    switch (plan.BillingPeriodTypeId)
+                    {
+                        case BillingPeriodType.Day:
+                            totalPeriods = Math.Ceiling(startDate.DateDiff(endDate, "d", true)).ToInteger();
+                            break;
+                        case BillingPeriodType.Month:
+                            totalPeriods = Math.Ceiling(startDate.DateDiff(endDate, "m", true)).ToInteger();
+                            break;
+                        case BillingPeriodType.TwoWeeks:
+                            totalPeriods = Math.Ceiling(startDate.DateDiff(endDate, "w", true) / 2).ToInteger();
+                            break;
+                        case BillingPeriodType.Week:
+                            totalPeriods = Math.Ceiling(startDate.DateDiff(endDate, "w", true)).ToInteger();
+                            break;
+                        case BillingPeriodType.Year:
+                            totalPeriods = Math.Ceiling(startDate.DateDiff(endDate, "y", true)).ToInteger();
+                            break;
+                    }
+                }
             }
 
             return new PlanFeeObject()

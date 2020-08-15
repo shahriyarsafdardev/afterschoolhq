@@ -82,7 +82,7 @@ namespace AfterSchoolLibraryTests.Tests
             for (var i = 0; i < totalPayments; i++)
                 ActivityPaymentFactory.Create(PlanOwner, activity, registrantSubscriptionPlan, transaction, msgs, dc);
 
-            Assert.Equal(expectedResult, paymentPlan.CheckAndCancelPaymentPlan(registrantSubscriptionPlan, PlanOwner, msgs, dc));
+            Assert.Equal(expectedResult, paymentPlan.CheckAndCancelPlan(registrantSubscriptionPlan, PlanOwner, msgs, dc));
         }
     }
 }
