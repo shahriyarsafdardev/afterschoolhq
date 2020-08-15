@@ -2596,7 +2596,7 @@ namespace AfterSchoolLibrary.Services
                     );
 
                     // cancel stripe subscription at end of term
-                    plan.CheckAndCancelPaymentPlan(registrantSubscriptionPlan, billingAccount, amsgs, adc);
+                    plan.CheckAndCancelPlan(registrantSubscriptionPlan, billingAccount, amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),

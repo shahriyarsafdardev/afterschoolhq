@@ -273,26 +273,21 @@ namespace AfterSchoolLibrary.Services
             return false;
         }
 
-        public static bool CheckAndCancelPaymentPlan(this SubscriptionPlan plan, RegistrantSubscriptionPlan rsp, Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {            
-            if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan)
+        public static bool CheckAndCancelPlan(this SubscriptionPlan plan, RegistrantSubscriptionPlan rsp, Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (rsp.TotalPeriods.HasValue || plan.TotalPeriods.HasValue)
             {
                 var totalPayments = rsp.GetPaymentCount(msgs, dc);
-                var totalPeriods = rsp.TotalPeriods.HasValue ? rsp.TotalPeriods.Value : plan.TotalPeriods.Value;
+                var totalPeriods = rsp.TotalPeriods ?? plan.TotalPeriods.Value;
 
                 if (totalPayments >= totalPeriods)
                 {
-                    string stripeUserId = null;
-                    
-                    //if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
-                    //    stripeUserId = billingAccount.StripeUserId;
-
-                    var stripeSubscription = Billing.StripeHelper.GetSubscription(rsp.StripeSubscriptionId, stripeUserId, msgs);
+                    var stripeSubscription = Billing.StripeHelper.GetSubscription(rsp.StripeSubscriptionId, null, msgs);
 
                     if (stripeSubscription.IsNotEmpty() && !stripeSubscription.CanceledAt.HasValue)
                         msgs.AddRange(Billing.StripeHelper.CancelSubscription(
                             rsp.StripeSubscriptionId,
-                            stripeUserId
+                            null
                         ));
 
                     if (msgs.HasNoErrors())
@@ -366,15 +361,15 @@ namespace AfterSchoolLibrary.Services
         public static RegistrantSubscriptionPlan AddRegistrant(this SubscriptionPlan plan, Registrant registrant, DateTime? startDateTime, Purchase purchase, string stripeSubscriptionId, PlanFeeObject feeObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return RegistrantSubscriptionPlanService.CreateNew(
-                registrant,
-                plan,
-                startDateTime.IfEmpty(DateTime.UtcNow),
-                purchase.ID,
-                stripeSubscriptionId,
-                feeObject,
-                loggedInUser,
-                msgs,
-                dc);
+                    registrant,
+                    plan,
+                    startDateTime.IfEmpty(DateTime.UtcNow),
+                    purchase.ID,
+                    stripeSubscriptionId,
+                    feeObject,
+                    loggedInUser,
+                    msgs,
+                    dc);
         }
 
         public static List<RegistrantSubscriptionPlan> GetRegistrantSubscriptionPlans(this SubscriptionPlan plan, SystemMessages msgs, DatabaseConnection dc = null)
