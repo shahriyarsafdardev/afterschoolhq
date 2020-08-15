@@ -19,7 +19,9 @@
         }
         @if (subscriptionPlan.SplitCostEvenly)
         {
-            <span>Between <strong>@ParticipationObjectUI.PrintMinPlanFee(subscriptionPlan, Model.OwnerAccount, displayCheckoutPrice)</strong> and <strong>@ParticipationObjectUI.PrintMaxPlanFee(subscriptionPlan, Model.OwnerAccount, displayCheckoutPrice)</strong></span>
+            <span>
+                Between <strong>@ParticipationObjectUI.PrintMinPlanFee(subscriptionPlan, Model.OwnerAccount, displayCheckoutPrice)</strong> and <strong>@ParticipationObjectUI.PrintMaxPlanFee(subscriptionPlan, Model.OwnerAccount, displayCheckoutPrice)</strong> with between @(Model.MinSeatsRequired ?? 1) and @Model.SeatsAvailable students attending
+            </span>
         }
         else
         {
