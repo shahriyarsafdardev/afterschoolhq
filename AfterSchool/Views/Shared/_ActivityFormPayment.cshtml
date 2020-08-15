@@ -46,7 +46,7 @@
                         <input type="number" class="form-control" id="cost" name="cost" onfocus="this.select()" value="@(Model.CostPerRegistrant.HasValue ? Model.CostPerRegistrant.Value.ToString("0.00") : "0.00")" required min="0.00" step=".01" @paymentdisabled />
                     </div>
                     <p class="text-muted">
-                        <em>The total cost will be <span class="text-bold text-alt3">$<span id="finaltuitioncost">0.00</span></span> at checkout</em>
+                        <em>The total cost will be <span class="text-bold">$<span id="finaltuitioncost">0.00</span></span> at checkout</em>
                     </p>
                 </div>
             </div>
@@ -135,7 +135,7 @@
                                    required min="0.00" step=".01" @paymentdisabled />
                         </div>
                         <p class="text-muted">
-                            <em>The parent will be charged $<span id="finalpaymentplancost">0.00</span> upon checkout</em>
+                            <em>The parent will be charged <span class="text-bold">$<span id="finalpaymentplancost">0.00</span></span> upon checkout</em>
                         </p>
                     </div>
                     <div class="col-md-3"></div>
@@ -194,23 +194,25 @@
         <div class="panel-body">
 
             <div class="form-group">
+
                 <div class="row">
                     <label class="col-sm-3 control-label">Subscription</label>
                     <div class="col-sm-1">
                         @{Html.RenderPartial
-                            (
-                                "~/Views/Shared/_SwitchButton.cshtml",
-                                Model.HasSubscriptionPlan(),
-                                new ViewDataDictionary()
-                                {
+                              (
+                                  "~/Views/Shared/_SwitchButton.cshtml",
+                                  Model.HasSubscriptionPlan(),
+                                  new ViewDataDictionary()
+                                  {
                                     { "checkboxname", "hassubscriptionplan" },
                                     { "checkboxid", "hassubscriptionplan" }
                                 }
-                            );
+                              );
                         }
                     </div>
                 </div>
-                <div id="subscriptionplansection" class="row">
+
+                <div id="" class="row subscriptionplansection">
                     <div class="col-md-3"></div>
                     <div class="col-sm-6 col-md-9">
                         <div class="input-group input-group-lg xs-mb-15">
@@ -220,9 +222,6 @@
                                    value="@(subscriptionPlan.IsNotEmpty() && subscriptionPlan.CostPerPeriod.HasValue ? subscriptionPlan.CostPerPeriod.Value.ToString("0.00") : "0.00")"
                                    required min="0.00" step=".01" @paymentdisabled />
                         </div>
-                        <p class="text-muted">
-                            <em>The parent will be charged $<span id="finalsubscriptionplancost">0.00</span> upon checkout</em>
-                        </p>
                     </div>
                     <div class="col-md-3"></div>
                     <div class="col-sm-6 col-md-9">
@@ -232,9 +231,35 @@
                                 @BillingPeriodOptions(subscriptionPlan)
                             </select>
                         </div>
-
+                        <p class="text-muted">
+                            <em>The parent will be charged <span class="subscription-range">between</span> <span class="text-bold">$<span id="finalsubscriptionplancost">0.00</span></span> <span class="subscription-range"> and <span class="text-bold">$<span id="finalsubscriptionplancost-2" class="text-bold">0.00</span></span></span> every <span id="subscription-period-text" class="text-bold"></span></em>
+                        </p>
                     </div>
+
                 </div>
+
+
+                @if (Model.ActivityTypeId == ActivityType.LearningPod)
+                {
+                    <div class="row subscriptionplansection">
+                        <label class="col-sm-3 control-label">Parents split cost evenly</label>
+                        <div class="col-sm-6 col-sm-9">
+                            @{Html.RenderPartial
+                                  (
+                                      "~/Views/Shared/_SwitchButton.cshtml",
+                                      subscriptionPlan?.SplitCostEvenly ?? false,
+                                      new ViewDataDictionary()
+                                      {
+                                        { "checkboxname", "splitcostevenly" },
+                                        { "checkboxid", "splitcostevenly" },
+                                        { "disabled", false }
+                      }
+                                  );
+                            }
+                        </div>
+                    </div>
+                }
+                
 
                 <div class="row">
                     <div class="col-sm-3"></div>
@@ -242,28 +267,6 @@
                         <p class="text-muted padding-v-10">Subscriptions are used to bill users at specified intervals for ongoing participation.</p>
                     </div>
                 </div>
-
-                @if (Model.ActivityTypeId == ActivityType.LearningPod)
-                {
-                    <div class="row">
-                        <div class="col-sm-3">Parents split cost evenly</div>
-                        <div class="col-sm-6 col-sm-9">
-                            @{Html.RenderPartial
-                                (
-                                    "~/Views/Shared/_SwitchButton.cshtml",
-                                    subscriptionPlan?.SplitCostEvenly ?? false,
-                                    new ViewDataDictionary()
-                                    {
-                                        { "checkboxname", "splitcostevenly" },
-                                        { "checkboxid", "splitcostevenly" },
-                                        { "disabled", false }
-                                    }
-                                );
-                            }
-                        </div>
-                    </div>
-                }
-
             </div>
         </div>
 
@@ -305,7 +308,7 @@
                 ActivitySetup.showAdvancedSettings();
             }
         }
-       
+
         $('#cost').keyup(function () {
             costTimeOut = null;
             costTimeOut = setTimeout(function () {
@@ -323,14 +326,40 @@
         $('#subscriptionplancost').keyup(function () {
             subscriptionTimeOut = null;
             subscriptionTimeOut = setTimeout(function () {
-                calculateFinalPrice($('#subscriptionplancost').val(), $('#finalsubscriptionplancost'));
-            }, 200);
+                getSubscriptionFinalPrice();
+            }, 500);
         });
 
         calculateFinalPrice($('#cost').val(), $('#finaltuitioncost'));
         calculateFinalPrice($('#paymentplancost').val(), $('#finalpaymentplancost'));
-        calculateFinalPrice($('#subscriptionplancost').val(), $('#finalsubscriptionplancost'));
+        getSubscriptionFinalPrice();
+
+        updateSubscriptionPeriodText();
+
+        $('#subscriptionplanperiod').change(function () {
+            updateSubscriptionPeriodText();
+        });
+
     });
+
+    function updateSubscriptionPeriodText() {
+        $('#subscription-period-text').html($('#subscriptionplanperiod option:selected').text().toLowerCase());
+    }
+
+    function getSubscriptionFinalPrice() {
+
+        $('.subscription-range').addClass('hide');
+
+        if ($('#splitcostevenly').is(':checked')) {
+            var totalAmt = $('#subscriptionplancost').val();
+
+            $('.subscription-range').removeClass('hide');
+            calculateFinalPrice(totalAmt / @Model.SeatsAvailable, $('#finalsubscriptionplancost'));
+            calculateFinalPrice(totalAmt / @(Model.MinSeatsRequired ?? 0), $('#finalsubscriptionplancost-2'));
+        } else {
+            calculateFinalPrice($('#subscriptionplancost').val(), $('#finalsubscriptionplancost'));
+        }
+    }
 
     function calculateFinalPrice(cost, span) {
 
@@ -363,10 +392,10 @@
 
     function setSubscriptionPlanSection() {
         if ($('#hassubscriptionplan').is(':checked')) {
-            $('#subscriptionplansection').show();
+            $('.subscriptionplansection').show();
             $('#subscriptionplanperiod').prop('required', true)
         } else {
-            $('#subscriptionplansection').hide();
+            $('.subscriptionplansection').hide();
             $('#subscriptionplanperiod').prop('required', false)
         }
     }
@@ -403,6 +432,6 @@
             selected = " selected=\"selected\" ";
         }
 
-        <option value="@((int)billingPeriodType)" @selected>@billingPeriodType.ToString()</option>
+        <option value="@((int)billingPeriodType)" @selected>@billingPeriodType.ToString().SplitByUpperCase()</option>
     }
 }
