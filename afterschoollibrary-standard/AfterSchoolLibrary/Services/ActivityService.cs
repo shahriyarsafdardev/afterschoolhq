@@ -667,6 +667,7 @@ namespace AfterSchoolLibrary.Services
                 InstructorId = activity.InstructorId,
                 IsInviteOnly = activity.IsInviteOnly,
                 ActivityLocationTypeId = activity.ActivityLocationTypeId,
+                MinSeatsRequired = activity.MinSeatsRequired,
             };
         }
 

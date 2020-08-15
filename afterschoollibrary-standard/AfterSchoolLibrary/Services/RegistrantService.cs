@@ -6,6 +6,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Collections;
 using Twilio.Rest.Api.V2010.Account;
+using System.Net;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -1137,7 +1138,7 @@ namespace AfterSchoolLibrary.Services
             return reg.Reload(msgs, dc);
         }
 
-        public static Registration AddRegistrationWithESignature(this Registrant registrant, int ownerAccountId, int? activityGroupId, int? accountActivityGroupId, int? periodId, string esignature, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Registration AddRegistrationWithESignature(this Registrant registrant, int ownerAccountId, int? activityGroupId, int? accountActivityGroupId, int? periodId, string esignature, string userAgent, string ipAddress, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -1154,7 +1155,9 @@ namespace AfterSchoolLibrary.Services
                 LastModifiedDate = DateTime.UtcNow,
                 CreatedBy = loggedInUserId,
                 LastModifiedBy = loggedInUserId,
-                LastUpdated = DateTime.UtcNow
+                LastUpdated = DateTime.UtcNow,
+                ESignatureUserAgent = userAgent,
+                ESignatureIPAddress = ipAddress,
             };
             msgs.AddRange(reg.Save(dc));
 

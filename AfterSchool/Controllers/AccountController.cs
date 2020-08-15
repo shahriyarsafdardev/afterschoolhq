@@ -2409,7 +2409,9 @@ namespace AfterSchool.Controllers
                     activityGroupId: participationObject.GetAnyRelatedActivityGroupId(),
                     accountActivityGroupId: participationObject.GetAccountActivityGroupId(),
                     periodId: period?.ID,
-                    esignature: signature,
+                    esignature: signature,      
+                    userAgent: Request.UserAgent.ToString(),
+                    ipAddress: Request.ServerVariables["HTTP_X_FORWARDED_FOR"].IfEmpty(Request.ServerVariables["REMOTE_ADDR"]),
                     loggedInUserId: currentUser.ID.Value,
                     msgs: msgs,
                     dc: dc);

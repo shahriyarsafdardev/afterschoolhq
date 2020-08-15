@@ -54,6 +54,22 @@ namespace AfterSchool.Models
             return plan.CostPerPeriod.ToCurrency();
         }
 
+        public static string PrintMinPlanFee(SubscriptionPlan plan, Account ownerAccount, bool displayCheckoutPrice)
+        {
+            if (displayCheckoutPrice)
+                return plan.GetMinCostWithConvenienceFee(ownerAccount).ToCurrency();
+
+            return (plan.CostPerPeriod.Value / plan.GetParticipationObject().SeatsAvailable.Value).ToCurrency();
+        }
+
+        public static string PrintMaxPlanFee(SubscriptionPlan plan, Account ownerAccount, bool displayCheckoutPrice)
+        {
+            if (displayCheckoutPrice)
+                return plan.GetMaxCostWithConvenienceFee(ownerAccount).ToCurrency();
+
+            return (plan.CostPerPeriod.Value / (plan.GetParticipationObject().MinSeatsRequired ?? 1)).ToCurrency();
+        }
+
         public static List<string> PrintSubscriptions(ParticipationObject participationObject)
         {
             if (participationObject.SubscriptionPlans.Any())

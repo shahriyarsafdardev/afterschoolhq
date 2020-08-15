@@ -52,6 +52,8 @@ namespace AfterSchoolLibrary.Models
         public ActivityGroupType? ActivityGroupType { get; set; }
         public ActivityLocationType ActivityLocationType { get; set; }
         public string VirtualLocationInfo { get; set; }
+        public int? MinSeatsRequired { get; set; }
+        public int? SeatsAvailable { get; set; }
 
         public ParticipationObject(int participationObjectId, ParticipationObjectType participationObjectType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -112,6 +114,8 @@ namespace AfterSchoolLibrary.Models
             ActivityLocationType = activity.ActivityLocationTypeId;
             LastModifiedDate = activity.LastModifiedDate;
             VirtualLocationInfo = activity.VirtualLocationInfo;
+            MinSeatsRequired = activity.MinSeatsRequired;
+            SeatsAvailable = activity.SeatsAvailable;
 
             if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
             {
