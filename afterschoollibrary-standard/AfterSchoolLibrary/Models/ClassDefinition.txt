@@ -87,6 +87,7 @@ property: LeaderTypeId, ActivityLeaderType, Int, , Track what kind of leader it 
 property: RequiresParentalConsent, bool, Bit, , let us know whether the parent needs to consent
 property: ActivityLocationTypeId, ActivityLocationType, Int, , Physical or Virtual
 property: VirtualLocationInfo, string, NVarChar "1000", , Link for virtual class
+property: HidePreciseLocation, bool, Bit, , If true then don't want to add a pin for the exact location
 -property: AllowPreRegistration, bool, Bit
 -property: RegistrationTimeZone, string, NVarChar "30"
 -property: AcceptPayPal, bool, Bit
@@ -1771,7 +1772,7 @@ values: NotSet, Individual, Organization
 [begin]
 type: Enum
 name: FeatureType
-values: NotSet, Attendance, AcceptPayments, Messaging, CustomUrl, TeamAccounts, WaitingList, ManageForms, ManageLocations, ManageActivityGroups, Activities, Participants, AllowApplications, Lottery, TrialDays, ManageContacts, ViewInsights, PaymentsPercentageFee, PaymentsPercentageFlatFee, ManageExternalLeagues, UseStripeConnectedAccount, AcceptACH, ManageLeagues, ManageFieldTrips, ManagePermissionSlips
+values: NotSet, Attendance, AcceptPayments, Messaging, CustomUrl, TeamAccounts, WaitingList, ManageForms, ManageLocations, ManageActivityGroups, Activities, Participants, AllowApplications, Lottery, TrialDays, ManageContacts, ViewInsights, PaymentsPercentageFee, PaymentsPercentageFlatFee, ManageExternalLeagues, UseStripeConnectedAccount, AcceptACH, ManageLeagues, ManageFieldTrips, ManagePermissionSlips, ManageLearningPods
 [end]
 
 [begin]
@@ -1813,7 +1814,7 @@ values: NotSet, Basic, Detailed, SingleActivity, Dismissal
 [begin]
 type: Enum
 name: BillingPeriodType
-values: NotSet, Month, Year, Week, Day
+values: NotSet, Month, Year, Week, Day, TwoWeeks, FirstAndFifteenthOfEachMonth
 [end]
 
 [begin]
@@ -1867,7 +1868,7 @@ values: NotSet, Session, League
 [begin]
 type: Enum
 name: ActivityType
-values: NotSet, Activity, Team, FieldTrip, PermissionSlip
+values: NotSet, Activity, Team, FieldTrip, PermissionSlip, LearningPod
 [end]
 
 [begin]
@@ -1951,7 +1952,7 @@ values: NotSet, Subscription, PaymentPlan
 [begin]
 type: Enum
 name: PermissionType
-values: NotSet, AccountingView, AccountingEdit, AccountingManage, TeamView, TeamEdit, TeamManage, AccountSettingsView, AccountSettingsEdit, AccountSettingsManage, ContactsView, ContactsEdit, ContactsManage, FormsView, FormsEdit, FormsManage, StudentsView, StudentsEdit, StudentsManage, ActivitiesView, ActivitiesEdit, ActivitiesManage, SessionsView, SessionsEdit, SessionsManage, LeaguesView, LeaguesEdit, LeaguesManage, FieldTripsView, FieldTripsEdit, FieldTripsManage, PermissionSlipsView, PermissionSlipsEdit, PermissionSlipsManage
+values: NotSet, AccountingView, AccountingEdit, AccountingManage, TeamView, TeamEdit, TeamManage, AccountSettingsView, AccountSettingsEdit, AccountSettingsManage, ContactsView, ContactsEdit, ContactsManage, FormsView, FormsEdit, FormsManage, StudentsView, StudentsEdit, StudentsManage, ActivitiesView, ActivitiesEdit, ActivitiesManage, SessionsView, SessionsEdit, SessionsManage, LeaguesView, LeaguesEdit, LeaguesManage, FieldTripsView, FieldTripsEdit, FieldTripsManage, PermissionSlipsView, PermissionSlipsEdit, PermissionSlipsManage, LearningPodsView, LearningPodsEdit, LearningPodsManage
 [end]
 
 [begin]

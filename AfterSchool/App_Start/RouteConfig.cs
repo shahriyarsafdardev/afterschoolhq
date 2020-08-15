@@ -219,6 +219,18 @@ namespace AfterSchool
                 });
 
             routes.MapRoute(
+                "LearningPodRegister",
+                "{accountname}/learningpod/{activityname}/register",
+                new
+                {
+                    controller = "r",
+                    action = "register",
+                    accountname = UrlParameter.Optional,
+                    activitytype = UrlParameter.Optional,
+                    activityname = UrlParameter.Optional
+                });
+
+            routes.MapRoute(
                 "LeagueRegister2",
                 "{accountname}/{activitygrouptype}/{externalaccountname}/{group}/register",
                 new
@@ -234,6 +246,42 @@ namespace AfterSchool
             routes.MapRoute(
                 "ActivityInterested",
                 "{accountname}/activity/{activityname}/interested",
+                new
+                {
+                    controller = "r",
+                    action = "interested",
+                    accountname = UrlParameter.Optional,
+                    activitytype = UrlParameter.Optional,
+                    activityname = UrlParameter.Optional
+                });
+
+            routes.MapRoute(
+                "FieldTripInterested",
+                "{accountname}/fieldtrip/{activityname}/interested",
+                new
+                {
+                    controller = "r",
+                    action = "interested",
+                    accountname = UrlParameter.Optional,
+                    activitytype = UrlParameter.Optional,
+                    activityname = UrlParameter.Optional
+                });
+
+            routes.MapRoute(
+                "PermissionSlipInterested",
+                "{accountname}/permissionslip/{activityname}/interested",
+                new
+                {
+                    controller = "r",
+                    action = "interested",
+                    accountname = UrlParameter.Optional,
+                    activitytype = UrlParameter.Optional,
+                    activityname = UrlParameter.Optional
+                });
+
+            routes.MapRoute(
+                "LearningPodInterested",
+                "{accountname}/learningpod/{activityname}/interested",
                 new
                 {
                     controller = "r",

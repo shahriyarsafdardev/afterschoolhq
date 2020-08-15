@@ -845,6 +845,7 @@ namespace AfterSchoolLibrary.Services
             var providerphone = values.GetValueOrDefault("providerphone");
             var type = values.GetValueOrDefault("type");
             var virtuallocation = values.GetValueOrDefault("virtuallocation");
+            var inviteonly = values.GetValueOrDefault("inviteonly");
 
             var activityType = ActivityType.NotSet;
 
@@ -1019,8 +1020,10 @@ namespace AfterSchoolLibrary.Services
             }
 
             if (accountactivitygroup.IsNotEmpty())
-                activity.AccountActivityGroupId = accountactivitygroup.ToString().ToInteger();            
-                
+                activity.AccountActivityGroupId = accountactivitygroup.ToString().ToInteger();
+
+            if (inviteonly != null)
+                activity.IsInviteOnly = inviteonly.ToString().ToBoolean();                
 
             if (msgs.HasNoErrors())
             {

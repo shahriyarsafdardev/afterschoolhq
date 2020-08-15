@@ -50,6 +50,37 @@
             <input type="hidden" name="seatsavailable" value="1000" />
         }
 
+        @if (group.IsEmpty() && Model.ActivityTypeId.In(new ActivityType[] { ActivityType.Activity, ActivityType.LearningPod }))
+        {
+            <div class="form-group">
+                <label class="col-md-3 control-label">
+                    Invite Only?
+                </label>
+                <div class="col-md-1">
+                    @{Html.RenderPartial
+                      (
+                          "~/Views/Shared/_SwitchButton.cshtml",
+                          Model.IsInviteOnly,
+                          new ViewDataDictionary()
+                          {
+                        { "checkboxname", "inviteonly" },
+                        { "checkboxid", "inviteonly" },
+                        { "disabled", false }
+                  }
+                      );
+                    }
+                </div>
+            </div>
+        }
+        else if (Model.ActivityTypeId.In(new ActivityType[] { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
+        {   
+            <input type="hidden" name="inviteonly" id="inviteonly" value="1" />
+        }
+        else
+        {
+            <input type="hidden" name="inviteonly" id="inviteonly" value="0" />
+        }
+
         <input type="hidden" name="type" value="@((int)Model.ActivityTypeId)" />
 
         @if (group.IsEmpty())
@@ -96,15 +127,15 @@
                 <div class="col-sm-4">
 
                     @{Html.RenderPartial(
-                              "~/Views/Shared/_TimeSelect.cshtml",
-                              activePeriod.StartDateTime.Value,
-                              new ViewDataDictionary()
-                              {
+                                "~/Views/Shared/_TimeSelect.cshtml",
+                                activePeriod.StartDateTime.Value,
+                                new ViewDataDictionary()
+                                {
                                 { "name", "registrationopentime" },
                                 { "id", "registrationopentime" },
                                 { "required", true }
-                      }
-                          );
+                }
+                            );
                     }
 
                 </div>
@@ -121,15 +152,15 @@
                 <div class="col-sm-4">
 
                     @{Html.RenderPartial(
-                                "~/Views/Shared/_TimeSelect.cshtml",
-                                activePeriod.EndDateTime.Value,
-                                new ViewDataDictionary()
-                                {
+                                  "~/Views/Shared/_TimeSelect.cshtml",
+                                  activePeriod.EndDateTime.Value,
+                                  new ViewDataDictionary()
+                                  {
                                 { "name", "registrationclosetime" },
                                 { "id", "registrationclosetime" },
                                 { "required", true }
-                        }
-                            );
+                  }
+                              );
                     }
 
                 </div>

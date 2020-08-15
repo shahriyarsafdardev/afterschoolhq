@@ -20,7 +20,7 @@
                 <a href="@Url.Action("editsetup", "activity", new { id = Model.ID.HasValue && Model.ID > 0 ? Model.Uid.ToString() : "", isnew = Request["isnew"] })">Settings</a>
             </div>
         </li>
-        @if (Model.ActivityTypeId == ActivityType.Activity)
+        @if (Model.ActivityTypeId.In(new ActivityType[] { ActivityType.Activity, ActivityType.LearningPod }))
         {
             <li data-id="4" class="dd-item">
                 <div class="dd-handle @editrestrictionsactive">

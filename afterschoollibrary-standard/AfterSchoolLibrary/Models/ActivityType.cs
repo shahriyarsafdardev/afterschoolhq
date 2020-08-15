@@ -4,5 +4,6 @@ public enum ActivityType
 	Activity,
 	Team,
 	FieldTrip,
-	PermissionSlip
+	PermissionSlip,
+	LearningPod
 }
