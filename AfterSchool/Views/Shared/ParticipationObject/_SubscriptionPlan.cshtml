@@ -11,15 +11,31 @@
 
 @if (Model.SubscriptionPlans.Any())
 {
+    var subscriptionPlan = Model.SubscriptionPlans.First();
     <span>
         @if (!Model.IsRegistrationFree)
         {
             <span>plus</span>
         }
-        <strong>
-            @ParticipationObjectUI.PrintPlanFee(Model.SubscriptionPlans.First(), Model.OwnerAccount, displayCheckoutPrice)
-        </strong>
-        subscription each
-        @Model.SubscriptionPlans.First().BillingPeriodTypeId.ToString().ToLower()
+        @if (subscriptionPlan.SplitCostEvenly)
+        {
+            <span>Between <strong>@ParticipationObjectUI.PrintMinPlanFee(subscriptionPlan, Model.OwnerAccount, displayCheckoutPrice)</strong> and <strong>@ParticipationObjectUI.PrintMaxPlanFee(subscriptionPlan, Model.OwnerAccount, displayCheckoutPrice)</strong></span>
+        }
+        else
+        {
+            <strong>@ParticipationObjectUI.PrintPlanFee(subscriptionPlan, Model.OwnerAccount, displayCheckoutPrice)</strong>
+        }
+        every
+        <strong>@Model.SubscriptionPlans.First().BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong>
     </span>
+}
+
+@helper PrintPlanFee(SubscriptionPlan plan, Account ownerAccount, bool displayCheckoutPrice)
+{
+    if (displayCheckoutPrice)
+    {
+        @plan.GetTotalCostWithConvenienceFee(ownerAccount).ToCurrency();
+    }
+
+    @plan.CostPerPeriod.ToCurrency();
 }

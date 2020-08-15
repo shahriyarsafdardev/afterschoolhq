@@ -1028,6 +1028,8 @@ property: ActivityGroupId, int?, Int
 property: AccountActivityGroupId, int?, Int
 property: FirstRegistrationId, int?, Int
 property: ESignature, string, NVarChar "50"
+property: ESignatureUserAgent, string, NVarChar "400"
+property: ESignatureIPAddress, string, NVarChar "50"
 property: CompletionStatusId, RegistrationCompletionStatus, Int
 property: PurchaseId, int?, Int
 loadmethod: Uid
@@ -1816,7 +1818,7 @@ values: NotSet, Basic, Detailed, SingleActivity, Dismissal
 [begin]
 type: Enum
 name: BillingPeriodType
-values: NotSet, Month, Year, Week, Day, TwoWeeks, FirstAndFifteenthOfEachMonth
+values: NotSet, Month, Year, Week, Day, TwoWeeks
 [end]
 
 [begin]
