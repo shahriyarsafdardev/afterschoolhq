@@ -43,6 +43,9 @@
                         case PermissionType.FieldTripsEdit:
                         case PermissionType.FieldTripsManage:
                         case PermissionType.FieldTripsView:
+                        case PermissionType.LearningPodsEdit:
+                        case PermissionType.LearningPodsManage:
+                        case PermissionType.LearningPodsView:
                             return true;
                             
                     }
@@ -80,6 +83,9 @@
                         case PermissionType.FieldTripsEdit:
                         case PermissionType.FieldTripsManage:
                         case PermissionType.FieldTripsView:
+                        case PermissionType.LearningPodsEdit:
+                        case PermissionType.LearningPodsManage:
+                        case PermissionType.LearningPodsView:
                             return true;
                     }
                     return false;

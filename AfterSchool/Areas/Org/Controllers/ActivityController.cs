@@ -188,7 +188,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd, string type)
+        public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd, string type, string inviteonly)
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
@@ -210,7 +210,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 { "form", form },
                 { "regmode", regmode },
                 { "group", group },
-                { "type", type }
+                { "type", type },
+                { "inviteonly", inviteonly.IsBoolean().ToString() }
             };
 
             activity = Activity.LoadByUid(id.ToGuid());
@@ -267,6 +268,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     case "next":
                         switch(activity.ActivityTypeId)
                         {
+                            case ActivityType.LearningPod:
                             case ActivityType.Activity:
                                 ViewBag.ActiveMenu = "EditRestrictions";
                                 return View("EditRestrictions", activity);
@@ -475,7 +477,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         ViewBag.ActiveMenu = "EditDetails";
                         return View("EditDetails", activity);
                     case "next":
-                        if (activity.ActivityTypeId == ActivityType.Activity)
+                        if (activity.ActivityTypeId.In(new ActivityType[] { ActivityType.Activity, ActivityType.LearningPod }))
                         {
                             ViewBag.ActiveMenu = "EditLocation";
                             return View("EditLocation", activity);

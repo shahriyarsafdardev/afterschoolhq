@@ -570,13 +570,22 @@ namespace AfterSchoolLibrary.Billing
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
+            var intervalCount = 1;
+            var interval = billingPeriodType.ToString().ToLower();
+
+            if (billingPeriodType == BillingPeriodType.TwoWeeks)
+            {
+                intervalCount = 2;
+                interval = BillingPeriodType.Week.ToString().ToLower();
+            }
+
             Stripe.Plan plan = null;
             var options = new Stripe.PlanCreateOptions
             {
                 Amount = Convert.ToInt32(price * 100),
                 Currency = "usd",
-                IntervalCount = 1,
-                Interval = billingPeriodType.ToString().ToLower(),
+                IntervalCount = intervalCount,
+                Interval = interval,
                 Nickname = planNickName,
                 Product = stripeProduct.Id
             };

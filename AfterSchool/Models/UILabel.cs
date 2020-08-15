@@ -26,6 +26,8 @@ namespace AfterSchool.Models
                     return GetLabelConfigParam("FieldTrip", plural);
                 case ActivityType.PermissionSlip:
                     return GetLabelConfigParam("PermissionSlip", plural);
+                case ActivityType.LearningPod:
+                    return GetLabelConfigParam("LearningPod", plural);
                 default:
                     return GetLabelConfigParam("Activity", plural);
             }

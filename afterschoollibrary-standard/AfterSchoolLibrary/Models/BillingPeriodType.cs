@@ -4,5 +4,6 @@ public enum BillingPeriodType
 	Month,
 	Year,
 	Week,
-	Day
+	Day,
+	TwoWeeks,
 }

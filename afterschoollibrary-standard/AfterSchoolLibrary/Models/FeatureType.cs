@@ -24,5 +24,6 @@ public enum FeatureType
 	AcceptACH,
 	ManageLeagues,
 	ManageFieldTrips,
-	ManagePermissionSlips
+	ManagePermissionSlips,
+	ManageLearningPods
 }
