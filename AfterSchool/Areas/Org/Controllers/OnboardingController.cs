@@ -151,7 +151,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (email.IsEmpty())
                 msgs.Add("Program Email is required", MessageType.UserError);
 
-            if (phone.IsNotEmpty() && !phone.IsPhone())
+            if (phone.IsNotEmpty() && !phone.IsFormattedPhone())
                 msgs.Add("Program Phone is not in a valid format", MessageType.UserError);
 
             if (placeid.IsEmpty())

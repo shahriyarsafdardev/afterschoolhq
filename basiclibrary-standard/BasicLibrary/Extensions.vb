@@ -31,6 +31,11 @@ Public Module Extensions
     End Function
 
     <Extension>
+    Public Function IsFormattedPhone(ByVal aString As String) As Boolean
+        Return aString.IsNotEmpty() AndAlso aString.IsRegExMatch(Utilities.FormattedPhoneRegEx)
+    End Function
+
+    <Extension>
     Public Function IsEmail(ByVal aString As String) As Boolean
         Return aString.IsNotEmpty() AndAlso aString.IsRegExMatch(Utilities.EmailRegEx)
     End Function
