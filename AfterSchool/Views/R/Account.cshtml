@@ -497,14 +497,25 @@
     (function () {
         var url = '@accountProfile.VideoUrl';
         if (url) {
-            var splitedUrl = url.split('v=');
-            if (splitedUrl && splitedUrl.length > 1) {
+            var id = validateYouTubeVideoUrl(url);
+            if (id) {
                 var player = document.getElementById("frameVideoUrl");
-                player.src = "//www.youtube.com/embed/" + splitedUrl[1];
+                player.src = "//www.youtube.com/embed/" + id;
 
                 var container = document.getElementById("frameContainer");
                 container.style.display = 'block';
             }
         }
     })();
+
+    function validateYouTubeVideoUrl(url) {
+        var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        var match = url.match(regExp);
+
+        if (match && match[2].length == 11) {
+            return match[2];
+        } else {
+            return false;
+        }
+    }
 </script>

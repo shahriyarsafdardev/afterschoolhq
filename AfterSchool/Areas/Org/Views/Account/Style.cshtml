@@ -707,6 +707,32 @@
         $('#teachingmethods').tagsinput({
             maxTags: 3
         });
+
+
+        $('#txtVideoUrl').blur(function () {
+            var url = $('#txtVideoUrl').val();
+            if (!validateYouTubeVideoUrl(url)) {
+                Notifications.showBar({
+                    title: 'Error',
+                    message: 'URL is not in correct format. Follow this <a target="_blank" style="color: yellow;" href="https://support.google.com/youtube/answer/57741?co=GENIE.Platform%3DDesktop&hl=en">Thread</a> to get proper URL of your video.',
+                    success: false
+                });
+
+                $('#txtVideoUrl').val('');
+                return false;
+            }            
+        });
+
+        function validateYouTubeVideoUrl(url) {
+            var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            var match = url.match(regExp);
+
+            if (match && match[2].length == 11) {
+                return true;
+            } else {                
+                return false;
+            }
+        }
     </script>
 
 }
