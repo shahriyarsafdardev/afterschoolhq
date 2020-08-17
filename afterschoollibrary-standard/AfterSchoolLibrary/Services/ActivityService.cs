@@ -2336,21 +2336,6 @@ namespace AfterSchoolLibrary.Services
 
         public static void FinalizeRegistrations(this Activity activity, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            //var account = activity.GetAccount(msgs, dc);
-            //var seatsTaken = activity.GetSeatsTaken(msgs, dc);
-            //var plan = activity.GetSubscriptionPlan(msgs, dc);
-            //var costPerPeriod = plan.CostPerPeriod.Value / seatsTaken;
-
-            //var plan = SubscriptionPlanService.CreateNewSubscriptionPlan(
-            //    planOwner: account,
-            //    activityGroup: null,
-            //    costPerPeriod: costPerPeriod,
-            //    billingPeriodType: plan.BillingPeriodTypeId,
-            //    doesAutoRenew: true,
-            //    loggedInUser: loggedInUser,
-            //    msgs: msgs,
-            //    dc: dc);
-
             activity.RegistrationFinalized = true;
             activity.LastModifiedBy = loggedInUser?.ID;
             activity.LastModifiedDate = DateTime.UtcNow;
@@ -2359,7 +2344,8 @@ namespace AfterSchoolLibrary.Services
             var ras = activity.GetRegistrantActivities(msgs, dc);
 
             ras.ForEach(ra => {
-                msgs.AddRange(ra.SendPaymentReminder());
+                if (ra.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment)
+                    msgs.AddRange(ra.SendPaymentReminder());
             });
 
         }

@@ -471,11 +471,14 @@ namespace AfterSchoolLibrary.Helpers
                     msgs);
             }
 
+
+            var totalCost = checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs, dc).ToCurrency();
+
             // if has subscription
             // and is not finalized if it is split evenly
 
             // add subscription row
-            if (subscription.IsNotEmpty() && (!subscription.SplitCostEvenly || participationObject.RegistrationFinalized))
+            if (subscription.IsNotEmpty() && (!subscription.SplitCostEvenly || participationObject.RegistrationFinalized || participationObject.IsRegistrationFree))
             {
                 var startDate = submittedRecord.GetPlanStartDate(subscription, participationObject, msgs, dc);
                 description = $"Subscription for {participationObject.Name} - Starting on {startDate.ToShortDateString()}";
@@ -484,6 +487,7 @@ namespace AfterSchoolLibrary.Helpers
                 if (subscription.SplitCostEvenly && !participationObject.RegistrationFinalized)
                 {
                     cost = $"{subscription.GetMinCostWithConvenienceFee(billingAccount, msgs, dc).ToCurrency()} - {subscription.GetMaxCostWithConvenienceFee(billingAccount, msgs, dc).ToCurrency()}";
+                    totalCost = cost;
                     // ccFee = 0.ToCurrency();
                 }
                 else
@@ -547,8 +551,6 @@ namespace AfterSchoolLibrary.Helpers
             {
                 splitPaymentSubscriptionInfo = $"<p>Once all students are registered and registration is finalized for {participationObject.Name}, you will receive an email with the final amount to pay.</p>";
             }
-
-            var totalCost = checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs, dc).ToCurrency();
 
             var model = new NameValueCollection()
             {
