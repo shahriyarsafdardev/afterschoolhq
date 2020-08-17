@@ -896,7 +896,8 @@ End Class
 Public Class Utilities
 
     Public Const EmailRegEx As String = "^([a-zA-Z0-9_\-\.\+]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$"
-    Public Const PhoneRegEx As String = "^(?:(?:\+?1\s*(?:[.-]\s*)?)?(?:(\s*(\(?[2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9])\)?\s*)|([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9]))\s*(?:[.-]\s*)?)([2-9]1[02-9]|[2-9][02-9]1|[2-9][02-9]{2})\s*(?:[.-]\s*)?([0-9]{4})$"
+    Public Const PhoneRegEx As String = "^(?:(?:\+?1\s*(?:[.-]\s*)?)?(?:(\s*(\(?([2-9]{1})([0-9]{2}))\)?\s*)|([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9]))\s*(?:[.-]\s*)?)([2-9]1[02-9]|[2-9][02-9]1|[2-9][02-9]{2})\s*(?:[.-]\s*)?([0-9]{4})$"
+    Public Const FormattedPhoneRegEx As String = "^(\(?\d{3}\)?)([ .-])(\d{3})([ .-])(\d{4})$"
     Public Const DomainRegEx As String = "^((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$"
     Public Const SpecialCharsRegEx As String = "[^\w-\.]+"
     Public Const SpecialCharsRegExAllowWhiteSpace As String = "[^\w^\s-\.]+"
@@ -905,6 +906,7 @@ Public Class Utilities
     Public Const QuestionsRegEx As String = "((?<=\.|\?|\!)|^)[\s]?[\w\s\d\,\-\$#@%&\*\(\)\+\=\{\}\[\]\|:;\<\>~`/\^'""]*\?"
     Public Const NonNumericCharsRegEx As String = "[$,A-Za-z\(\)]"
     Public Const WebsiteRegEx As String = "^(http(s)?\://)?[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,15}(/\S*)?$"
+    Public Const YoutubeSpecificUrlRegEx As String = "^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|\?v=)([^#\&\?]*).*"
 
     Private Shared _connectionString As String
     Public Shared Property ConnectionString() As String

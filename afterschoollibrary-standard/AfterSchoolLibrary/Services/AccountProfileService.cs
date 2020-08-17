@@ -118,7 +118,7 @@ namespace AfterSchoolLibrary.Services
             return AccountProperty.LoadByAccountIdByAccountPropertyTypeId(profile.AccountId.Value, AccountPropertyType.Photo, msgs, dc);
         }
 
-        public static void UpdateProfile(this AccountProfile profile, string title = null, string headline = null, string about = null, string website = null, string opencovid = null, string elearningcenter = null, string mingrade = null, string maxgrade = null, string twitter = null, string facebook = null, string instagram = null, string linkedin = null, string youtube = null, string calendar = null, string genderrestriction = null, string profileemail = null, string profilephone = null, NameValueCollection savedAwards = null, NameValueCollection newAwards = null, NameValueCollection savedCertifications = null, NameValueCollection newCertifications = null, NameValueCollection servicesOffered = null, NameValueCollection timesOffered = null, NameValueCollection pricingOptions = null, NameValueCollection specialNeedsOfferings = null, string classifications = null, string softskills = null, string academicsubjects = null, string teachingmethods = null, string ahqapproved = null, WebUser loggedInUser = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void UpdateProfile(this AccountProfile profile, string title = null, string headline = null, string about = null, string website = null, string opencovid = null, string elearningcenter = null, string mingrade = null, string maxgrade = null, string twitter = null, string facebook = null, string instagram = null, string linkedin = null, string youtube = null, string calendar = null, string genderrestriction = null, string profileemail = null, string profilephone = null, NameValueCollection savedAwards = null, NameValueCollection newAwards = null, NameValueCollection savedCertifications = null, NameValueCollection newCertifications = null, NameValueCollection servicesOffered = null, NameValueCollection timesOffered = null, NameValueCollection pricingOptions = null, NameValueCollection specialNeedsOfferings = null, string classifications = null, string softskills = null, string academicsubjects = null, string teachingmethods = null, string ahqapproved = null, string videoUrl = null, WebUser loggedInUser = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
             (
@@ -177,6 +177,9 @@ namespace AfterSchoolLibrary.Services
 
                     if (ahqapproved.IsNumber())
                         profile.IsAHQApproved = ahqapproved.ToBoolean();
+
+                    if (videoUrl != null)
+                        profile.VideoUrl = videoUrl;
 
                     amsgs.AddRange(profile.Save(adc));
 
@@ -314,6 +317,13 @@ namespace AfterSchoolLibrary.Services
             {
                 msgs.AddRange(property.Delete(dc));
             }
+        }
+
+        public static void RemoveProperty(this AccountProfile profile, int id, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var property = AccountProperty.Load(id, msgs, dc);
+            if (property != null)
+                msgs.AddRange(property.Delete(dc: dc));
         }
 
         public static GradeLevel GetGradeLevelStart(this AccountProfile profile, SystemMessages msgs = null, DatabaseConnection dc = null)
