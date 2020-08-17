@@ -151,7 +151,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (email.IsEmpty())
                 msgs.Add("Program Email is required", MessageType.UserError);
 
-            if (phone.IsNotEmpty() && !phone.IsPhone())
+            if (phone.IsNotEmpty() && !phone.IsFormattedPhone())
                 msgs.Add("Program Phone is not in a valid format", MessageType.UserError);
 
             if (placeid.IsEmpty())
@@ -159,18 +159,20 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
+                var extractedPhoneNumber = new String(phone.Where(Char.IsDigit).ToArray()); //we will store plain phone number in database
+
                 Database.ExecuteTransaction
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
                         account.Email = email;
-                        account.Phone = phone;
+                        account.Phone = extractedPhoneNumber;
                         account.OnboardingStepDone = OnboardingStepType.ContactInfo;
                         amsgs.AddRange(account.Save(adc));
 
                         profile.UpdateProfile(
                             profileemail: publicemail.ToBoolean() ? email : null,
-                            profilephone: publicphone.ToBoolean() ? phone : null,
+                            profilephone: publicphone.ToBoolean() ? extractedPhoneNumber : null,
                             loggedInUser: currentUser,
                             msgs: amsgs,
                             dc: adc);
