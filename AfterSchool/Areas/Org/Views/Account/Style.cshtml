@@ -220,9 +220,9 @@
                                 </label>
                                 <div class="col-md-9">
                                     @{ Html.RenderPartial(
-                                           "~/Views/Shared/_SwitchButton.cshtml",
-                                           Model.IsOpenDuringCovid,
-                                           new ViewDataDictionary() { { "checkboxname", "opencovid" }, { "checkboxid", "opencovid" } });
+                                            "~/Views/Shared/_SwitchButton.cshtml",
+                                            Model.IsOpenDuringCovid,
+                                            new ViewDataDictionary() { { "checkboxname", "opencovid" }, { "checkboxid", "opencovid" } });
                                     }
                                 </div>
                             </div>
@@ -233,9 +233,9 @@
                                 </label>
                                 <div class="col-md-9">
                                     @{ Html.RenderPartial(
-                                           "~/Views/Shared/_SwitchButton.cshtml",
-                                           Model.IsELearningCenter,
-                                           new ViewDataDictionary() { { "checkboxname", "elearningcenter" }, { "checkboxid", "elearningcenter" } });
+                                            "~/Views/Shared/_SwitchButton.cshtml",
+                                            Model.IsELearningCenter,
+                                            new ViewDataDictionary() { { "checkboxname", "elearningcenter" }, { "checkboxid", "elearningcenter" } });
                                     }
                                     <p class="text-muted">You host/care for students to assist e-learning during the school day</p>
                                 </div>
@@ -253,28 +253,36 @@
                     <a name="photos"></a>
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <h3>Photo Gallery</h3>
+                            <h3>Video & Photo Gallery</h3>
                         </div>
                         <div class="panel-body">
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">
+                                    YouTube Video Url
+                                </label>
+                                <div class="col-md-9">
+                                    <input id="txtVideoUrl" name="videoUrl" class="form-control" type="text" value="@Model.VideoUrl" placeholder="https://youtube.com/your-video-url" />
+                                </div>
+                            </div>
                             <div class="form-group">
                                 <label class="col-sm-3 control-label">Photos</label>
                                 <div class="col-sm-9">
 
                                     @*
-                        <span><input type="file" class="form-control photo-add hide" name="photos" id="photos" multiple accept=".jpg,.jpeg,.png" /></span>
+                                        <span><input type="file" class="form-control photo-add hide" name="photos" id="photos" multiple accept=".jpg,.jpeg,.png" /></span>
 
-                        <div>
-                            @for (var i = 0; i < photos.Count; i++)
-                            {
-                                if (photos[i].ID.HasValue)
-                                {
-                                    <div class="photo-view-@i">
-                                        <img src="@photos[i].Value" width="50" />
-                                        <i class="s7-close icon-large pointer" onclick="removePhoto('@i')"></i>
-                                    </div>
-                                }
-                            }
-                        </div>
+                                        <div>
+                                            @for (var i = 0; i < photos.Count; i++)
+                                            {
+                                                if (photos[i].ID.HasValue)
+                                                {
+                                                    <div class="photo-view-@i">
+                                                        <img src="@photos[i].Value" width="50" />
+                                                        <i class="s7-close icon-large pointer" onclick="removePhoto('@i')"></i>
+                                                    </div>
+                                                }
+                                            }
+                                        </div>
                                     *@
 
 
@@ -447,14 +455,14 @@
                                 </label>
                                 <div class="col-md-9">
                                     @{ Html.RenderPartial(
-                                           "~/Views/Shared/_TextEditor.cshtml",
-                                           Model.About,
-                                           new ViewDataDictionary() {
+                                            "~/Views/Shared/_TextEditor.cshtml",
+                                            Model.About,
+                                            new ViewDataDictionary() {
                                             { "required", false },
                                             { "name", "about" },
                                             { "id", "about" }
 }
-                                       ); }
+                                        ); }
 
                                     <p class="text-muted">
                                         <em>Tell us what is special about what you do. Max of 4000 characters</em>
@@ -637,9 +645,9 @@
                                     </label>
                                     <div class="col-md-9">
                                         @{ Html.RenderPartial(
-                                                "~/Views/Shared/_SwitchButton.cshtml",
-                                                Model.IsAHQApproved,
-                                                new ViewDataDictionary() { { "checkboxname", "ahqapproved" }, { "checkboxid", "ahqapproved" } });
+                                                 "~/Views/Shared/_SwitchButton.cshtml",
+                                                 Model.IsAHQApproved,
+                                                 new ViewDataDictionary() { { "checkboxname", "ahqapproved" }, { "checkboxid", "ahqapproved" } });
                                         }
                                     </div>
                                 </div>

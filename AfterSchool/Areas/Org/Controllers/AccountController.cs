@@ -954,7 +954,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult Style(string id, string logo, string headerimage, string about, string title, string headline, string primaryColor, string website, string mingrade, string maxgrade, string twitter, string facebook, string instagram, string linkedin, string youtube, string calendar, string genderrestriction, string classifications, string softskills, string academicsubjects, string teachingmethods, string profileemail, string profilephone, string locationname, string streetnumber, string streetname, string address2, string neighborhood, string city, string state, string postalcode, string county, string country, string placeid, string opencovid, string elearningcenter, string ahqapproved)
+        public ActionResult Style(string id, string logo, string headerimage, string about, string title, string headline, string primaryColor, string website, string mingrade, string maxgrade, string twitter, string facebook, string instagram, string linkedin, string youtube, string calendar, string genderrestriction, string classifications, string softskills, string academicsubjects, string teachingmethods, string profileemail, string profilephone, string locationname, string streetnumber, string streetname, string address2, string neighborhood, string city, string state, string postalcode, string county, string country, string placeid, string opencovid, string elearningcenter, string ahqapproved, string videoUrl)
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
@@ -992,6 +992,9 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (calendar.IsNotEmpty() && !calendar.IsRegExMatch(BasicLibrary.Utilities.WebsiteRegEx))
                 msgs.Add("Please enter a valid calendar URL", MessageType.UserError);
+
+            if (videoUrl.IsNotEmpty() && !videoUrl.IsRegExMatch(BasicLibrary.Utilities.YoutubeSpecificUrlRegEx))
+                msgs.Add("Please enter a valid Video(YouTube) URL", MessageType.UserError);
 
             if (msgs.HasNoErrors())
             {
@@ -1072,6 +1075,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     academicsubjects,
                     teachingmethods,
                     ahqapproved,
+                    videoUrl,
                     currentUser,
                     msgs);
 
