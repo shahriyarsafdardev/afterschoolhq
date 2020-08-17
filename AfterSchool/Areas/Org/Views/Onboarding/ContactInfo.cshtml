@@ -100,7 +100,7 @@
             )
     };
 
-    const enforceFormat = (event) => {
+    const enforceFormat = (event) => {        
         // Input must be of a valid number format or a modifier key, and not longer than ten digits
         if (!isNumericInput(event) && !isModifierKey(event)) {
             event.preventDefault();
@@ -108,7 +108,7 @@
     };
 
     const formatToPhone = (event) => {
-        if (isModifierKey(event)) { return; }
+        // if (isModifierKey(event)) { return; }
         const target = event.target;
         const input = event.target.value.replace(/\D/g, '').substring(0, 10); // First ten digits of input only
         const zip = input.substring(0, 3);
