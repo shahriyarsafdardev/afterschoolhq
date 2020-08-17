@@ -267,6 +267,20 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
+        public static bool HasActiveSubscription(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return registrant.GetActiveSubscription(participationObject, msgs, dc).IsNotEmpty();
+        }
+
+        public static RegistrantSubscriptionPlan GetActiveSubscription(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return registrant
+                    .GetRegistrantSubscriptionPlans(msgs, dc)
+                    .Where(rsp => !rsp.DateCancelled.HasValue && rsp.IsForParticipationObject(participationObject, msgs, dc))
+                    .ToList()
+                    .FirstOrDefault();
+        }
+
         public static bool HasCancelledSubscription(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return registrant

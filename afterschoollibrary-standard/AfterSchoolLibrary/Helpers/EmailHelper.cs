@@ -471,8 +471,11 @@ namespace AfterSchoolLibrary.Helpers
                     msgs);
             }
 
+            // if has subscription
+            // and is not finalized if it is split evenly
+
             // add subscription row
-            if (subscription.IsNotEmpty())
+            if (subscription.IsNotEmpty() && (!subscription.SplitCostEvenly || participationObject.RegistrationFinalized))
             {
                 var startDate = submittedRecord.GetPlanStartDate(subscription, participationObject, msgs, dc);
                 description = $"Subscription for {participationObject.Name} - Starting on {startDate.ToShortDateString()}";
@@ -538,6 +541,13 @@ namespace AfterSchoolLibrary.Helpers
                 virtualInfo += $"<p>Join this activity virtually with the following info: <br /><br />{participationObject.VirtualLocationInfo}</a>.<br /></p>";
             }
 
+            var splitPaymentSubscriptionInfo = "";
+
+            if (subscription.IsNotEmpty() && subscription.SplitCostEvenly && !participationObject.RegistrationFinalized)
+            {
+                splitPaymentSubscriptionInfo = $"<p>Once all students are registered and registration is finalized for {participationObject.Name}, you will receive an email with the final amount to pay.</p>";
+            }
+
             var totalCost = checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs, dc).ToCurrency();
 
             var model = new NameValueCollection()
@@ -556,14 +566,15 @@ namespace AfterSchoolLibrary.Helpers
                 { "CustomMessage", customMessage },
                 { "CreditCardFee", ccFee },
                 { "RegistrationDetails", registrationDetails},
-                { "VirtualInfo", virtualInfo }
+                { "VirtualInfo", virtualInfo },
+                { "SplitPaymentSubscriptionInfo", splitPaymentSubscriptionInfo }
             };
             
             var subject = $"{participationObject.Name} registration for {masterRegistrant.FirstName}";
             var body = ProcessTemplate(
                 EmailTemplates.Registration_Confirmation,
                 model,
-                "Registration_Confirmation-1.1",
+                "Registration_Confirmation-1.2",
                 msgs);
 
             // SEND EMAILS

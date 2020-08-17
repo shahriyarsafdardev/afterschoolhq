@@ -75,7 +75,7 @@ else if (accountOwner.IsNotEmpty() && !accountOwner.VerifiedAccount)
         </button>
     }
 }
-else if (!Model.OwnerAccount.CanProcessPayments())
+else if (!Model.OwnerAccount.CanProcessPayments() && !Model.IsFree)
 {
     if (currentUser.IsNotEmpty() && currentUser.HasAccessTo(Model.OwnerAccount))
     {
@@ -84,7 +84,7 @@ else if (!Model.OwnerAccount.CanProcessPayments())
         <a class="btn btn-header-action-callout btn-block" href="@Url.Action("switch", "logout", new { id = Model.OwnerAccount.Uid, redirectUrl = redirectUrl })">
             @if (condensed)
             {
-                @: Enable Payments 
+                @: Enable Payments
             }
             else
             {
@@ -115,6 +115,19 @@ else if (!Model.OwnerAccount.CanProcessPayments())
             }
         </button>
     }
+}
+else if (Model.RegistrationFinalized)
+{
+    <button type="button" class="btn btn-register btn-block">
+        @if (condensed)
+        {
+            @:Registration Closed
+        }
+        else
+        {
+            @:Registration is now closed
+        }
+    </button>
 }
 else
 {

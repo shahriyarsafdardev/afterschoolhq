@@ -944,16 +944,17 @@ namespace AfterSchoolLibrary.Services
 
             if (registrantActivities.Any())
             {
+                var registrant = registration.GetRegistrant(msgs, dc);
                 // this only works now because we're doing on registration at a time
+                var participationObject = registration.GetFirstParticipationObject(msgs, dc);
                 var registrantActivity = registrantActivities.First();
+              
+                var paidFees = registrantActivity.GetAmountPaid(msgs, dc) > 0;
+                var registrationFeeRequired = !participationObject.IsRegistrationFree;
+                var requiresSubscription = participationObject.SubscriptionPlans.Any();
+                var hasActiveSubscription = registrant.HasActiveSubscription(participationObject, msgs, dc);
 
-                return ActivityPayment.GetTotalPaidByParticipationObjectByRegistrant(
-                    registrantActivity.ParticipationObjectId.Value,
-                    registrantActivity.ParticipationObjectTypeId,
-                    registration.RegistrantId.Value,
-                    false,
-                    msgs,
-                    dc) > 0;
+                return (!registrationFeeRequired || paidFees) && (!requiresSubscription || hasActiveSubscription);
             }
 
             msgs.Add("Incomplete registration", MessageType.UserError);
