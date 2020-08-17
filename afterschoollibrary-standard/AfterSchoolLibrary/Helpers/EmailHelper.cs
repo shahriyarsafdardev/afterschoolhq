@@ -481,12 +481,12 @@ namespace AfterSchoolLibrary.Helpers
                 if (subscription.SplitCostEvenly && !participationObject.RegistrationFinalized)
                 {
                     cost = $"{subscription.GetMinCostWithConvenienceFee(billingAccount, msgs, dc).ToCurrency()} - {subscription.GetMaxCostWithConvenienceFee(billingAccount, msgs, dc).ToCurrency()}";
-                    ccFee += 0.ToCurrency();
+                    // ccFee = 0.ToCurrency();
                 }
                 else
                 {
                     cost = checkoutObject.GetSubscriptionCostTodayWithConvenienceFee(msgs, dc).ToCurrency();
-                    ccFee += checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc).ToCurrency();
+                    ccFee = checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc).ToCurrency();
                 }
 
                 // add registration fee row

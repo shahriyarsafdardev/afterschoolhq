@@ -19,7 +19,7 @@
 
 @helper PrintSubscriptionCost(SubscriptionPlan plan, ParticipationObject participationObject, bool includePlus = true)
 {
-    if (plan.IsNotEmpty())
+    if (plan.IsNotEmpty() && (!plan.SplitCostEvenly || participationObject.RegistrationFinalized))
     {
         var planStartDate = SessionVariables.CurrentRegistrant.GetPlanStartDate(plan, participationObject);
         var startDateText = "today";
@@ -192,12 +192,21 @@
                                     @if (participationObject.SubscriptionPlans.Any())
                                     {
                                         var plan = participationObject.SubscriptionPlans.First();
+                                        var subpricetoday = plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount);
+                                        var subtransfeetoday = plan.GetCreditCardFee(paymentAccount);
+
+                                        if (plan.SplitCostEvenly && !participationObject.RegistrationFinalized)
+                                        {
+                                            subpricetoday = 0;
+                                            subtransfeetoday = 0;
+                                        }
+
                                         <tr>
                                             <td>Ongoing Subscription</td>
                                             <td class="text-right">
-                                                <span id="subscription-total-value" class="hide">@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount)</span>
+                                                <span id="subscription-total-value" class="hide">@subpricetoday</span>
                                                 <span id="subscription-asf-value" class="hide">0</span>
-                                                <span id="subscription-ccf-value" class="hide">@plan.GetCreditCardFee(paymentAccount)</span>
+                                                <span id="subscription-ccf-value" class="hide">@subtransfeetoday</span>
                                                 @plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()*
                                             </td>
                                             <td>
