@@ -82,7 +82,7 @@
             </div>
         </li>
 
-        @if (Model.ActivityTypeId == ActivityType.Activity)
+        @if (Model.ActivityTypeId.In(new ActivityType[] { ActivityType.Activity, ActivityType.LearningPod }))
         {
             <li data-id="4" class="dd-item">
                 <div class="dd-handle @editlocationactive">

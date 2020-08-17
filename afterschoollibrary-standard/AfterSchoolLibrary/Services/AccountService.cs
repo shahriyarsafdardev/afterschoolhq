@@ -2627,7 +2627,7 @@ namespace AfterSchoolLibrary.Services
             // var amountPaid = checkoutObject.TuitionCostNoFees;
 
             // -- should be fixed now
-            var amountPaid = checkoutObject.TotalCostToPurchaseTodayNoFees;
+            var amountPaid = checkoutObject.GetTotalCostToPurchaseTodayNoFees(msgs, dc);
 
             if (checkoutObject.OverrideAmount.HasValue)
                 amountPaid = checkoutObject.OverrideAmount.Value;
@@ -3025,19 +3025,19 @@ namespace AfterSchoolLibrary.Services
                  msgs: msgs);
         }
 
-        public static Stripe.Subscription CreateStripeSubscription(this Account billingAccount, string stripeCustomerId, SubscriptionPlan plan, string stripeBillToSourceId, string stripeCouponId, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return StripeHelper.CreateSubscription(
-                customerId: stripeCustomerId,
-                planId: plan.StripePlanId,
-                sourceId: stripeBillToSourceId,
-                platformFeePercent: billingAccount.GetSubscriptionPlatformFeePercent(plan, msgs, dc),
-                startDate: DateTime.UtcNow,
-                stripeAccountId: billingAccount.StripeUserId,
-                stripeCouponId: stripeCouponId,
-                metaData: null,
-                msgs: msgs);
-        }
+        //public static Stripe.Subscription CreateStripeSubscription(this Account billingAccount, string stripeCustomerId, SubscriptionPlan plan, string stripeBillToSourceId, string stripeCouponId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        //{
+        //    return StripeHelper.CreateSubscription(
+        //                customerId: stripeCustomerId,
+        //                planId: plan.StripePlanId,
+        //                sourceId: stripeBillToSourceId,
+        //                platformFeePercent: billingAccount.GetSubscriptionPlatformFeePercent(plan, msgs, dc),
+        //                startDate: DateTime.UtcNow,
+        //                stripeAccountId: billingAccount.StripeUserId,
+        //                stripeCouponId: stripeCouponId,
+        //                metaData: null,
+        //                msgs: msgs);
+        //}
 
         public static decimal GetTotalPayoutAmount(this Account account, string search, PayoutStatus? payoutStatus, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -3118,21 +3118,23 @@ namespace AfterSchoolLibrary.Services
             return RefundRequest.LoadByAccountId(account.ID.Value, msgs, dc);
         }
 
-        public static decimal GetSubscriptionPlatformFeePercent(this Account billingAccount, SubscriptionPlan plan, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetSubscriptionPlatformFeePercent(this Account billingAccount, SubscriptionPlan plan, PaymentType paymentType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (plan.CostPerPeriod <= 0)
                 return 0;
 
-            decimal feeAmount = 0;
-            decimal billedCostPerPeriod = plan.CostPerPeriod.Value;
-            
-            feeAmount = Platform.GetTotalFees(plan.CostPerPeriod.Value, billingAccount);
+            var costPerPeriod = plan.GetCostPerPeriodPerPerson(msgs, dc);
+            var feeAmount = Platform.GetConvenienceFee(costPerPeriod);
+            var billedCostPerPeriod = costPerPeriod;
+
+            if (paymentType == PaymentType.CreditCard)
+                feeAmount += Platform.GetCreditCardFee(costPerPeriod, billingAccount);
 
             if (!billingAccount.IsConvenienceFeeTakenOutOfCost)
                 billedCostPerPeriod += Platform.GetConvenienceFee(billedCostPerPeriod);
 
-            if (!billingAccount.IsCreditCardFeeTakenOutOfCost)
-                billedCostPerPeriod += Platform.GetCreditCardFee(billedCostPerPeriod, billingAccount);
+            if (!billingAccount.IsCreditCardFeeTakenOutOfCost && paymentType == PaymentType.CreditCard)
+                billedCostPerPeriod += Platform.GetCreditCardFee(costPerPeriod, billingAccount);
 
             return Math.Round(feeAmount / billedCostPerPeriod, 4);
         }

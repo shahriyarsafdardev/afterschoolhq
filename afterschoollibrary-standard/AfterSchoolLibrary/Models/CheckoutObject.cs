@@ -115,15 +115,12 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        public decimal TotalCostToPurchaseTodayNoFees
+        public decimal GetTotalCostToPurchaseTodayNoFees(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            get
-            {
-                if (PaymentPlan.IsNotEmpty())
-                    return PaymentPlanCostTodayNoFees + SubscriptionCostTodayNoFees;
+            if (PaymentPlan.IsNotEmpty())
+                return PaymentPlanCostTodayNoFees + GetSubscriptionCostTodayNoFees(msgs, dc);
 
-                return RegistrationCostNoFees + SubscriptionCostTodayNoFees;
-            }
+            return RegistrationCostNoFees + GetSubscriptionCostTodayNoFees(msgs, dc);
         }
 
         public decimal GetTotalCostWithFees(SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -230,38 +227,38 @@ namespace AfterSchoolLibrary.Models
             return GetRegistrationConvenienceFee(msgs, dc) + GetRegistrationCreditCardFee(msgs, dc);
         }
 
-        public decimal SubscriptionCostTodayNoFees
+        public decimal GetSubscriptionCostTodayNoFees(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            get
-            {
-                return SubscriptionPlan.IsNotEmpty() ? SubscriptionPlan.CostPerPeriod.Value * NumberOfSeats : 0;
-            }
+            if (SubscriptionPlan.IsNotEmpty() && (!SubscriptionPlan.SplitCostEvenly || ParticipationObject.RegistrationFinalized))
+                return SubscriptionPlan.GetCostPerPeriodPerPerson(msgs, dc) * NumberOfSeats;
+
+            return 0;
         }
 
         public decimal GetSubscriptionCostTodayWithFees(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return SubscriptionCostTodayNoFees +
+            return GetSubscriptionCostTodayNoFees(msgs, dc) +
                     GetSubscriptionCostTodayCreditCardFee(msgs, dc) +
                     GetSubscriptionCostTodayConvenienceFee(msgs, dc);
         }
 
         public decimal GetSubscriptionCostTodayWithConvenienceFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return SubscriptionCostTodayNoFees +
+            return GetSubscriptionCostTodayNoFees(msgs, dc) +
                     GetSubscriptionCostTodayConvenienceFee(msgs, dc);
         }
 
         public decimal GetSubscriptionCostTodayCreditCardFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (CreditCardPurchaseObject.IsNotEmpty())
-                return Billing.Platform.GetCreditCardFee(SubscriptionCostTodayNoFees, BillingAccount);
+                return Billing.Platform.GetCreditCardFee(GetSubscriptionCostTodayNoFees(msgs, dc), BillingAccount);
 
             return 0;
         }
 
         public decimal GetSubscriptionCostTodayConvenienceFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Billing.Platform.GetConvenienceFee(SubscriptionCostTodayNoFees);
+            return Billing.Platform.GetConvenienceFee(GetSubscriptionCostTodayNoFees(msgs, dc));
         }
 
         public decimal GetSubscriptionTotalFeesToday(SystemMessages msgs = null, DatabaseConnection dc = null)

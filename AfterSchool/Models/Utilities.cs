@@ -7,6 +7,7 @@ using System.IO;
 using System.Collections;
 using BasicLibrary;
 using AfterSchoolLibrary;
+using Amazon.DynamoDBv2.Model;
 
 namespace AfterSchool.Models
 {

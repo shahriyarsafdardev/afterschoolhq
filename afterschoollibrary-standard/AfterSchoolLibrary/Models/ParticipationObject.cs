@@ -54,6 +54,8 @@ namespace AfterSchoolLibrary.Models
         public string VirtualLocationInfo { get; set; }
         public int? MinSeatsRequired { get; set; }
         public int? SeatsAvailable { get; set; }
+        public bool RegistrationFinalized { get; set; }
+        public int? SeatsTaken { get; set; }
 
         public ParticipationObject(int participationObjectId, ParticipationObjectType participationObjectType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -116,6 +118,7 @@ namespace AfterSchoolLibrary.Models
             VirtualLocationInfo = activity.VirtualLocationInfo;
             MinSeatsRequired = activity.MinSeatsRequired;
             SeatsAvailable = activity.SeatsAvailable;
+            RegistrationFinalized = activity.RegistrationFinalized;
 
             if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
             {
@@ -130,6 +133,7 @@ namespace AfterSchoolLibrary.Models
 
             if (loadAllDetails)
             {
+                SeatsTaken = activity.GetSeatsTaken(msgs, dc);
                 Schedule = activity.GetSchedule(msgs, dc);
                 Location = activity.GetLocation(msgs, dc);
                 SeatsRemaining = activity.GetSeatsRemaining(msgs, dc);
@@ -640,7 +644,8 @@ namespace AfterSchoolLibrary.Models
             // OwnerAccount.CanProcessPayments(msgs, dc) &&
             return !this.IsFree && 
                 this.RegistrationMode == RegistrationMode.Register && 
-                this.SeatsRemaining > 0;
+                this.SeatsRemaining > 0 &&
+                (!this.SubscriptionPlans.Any() || !this.SubscriptionPlans.First().SplitCostEvenly);
         }
 
         public decimal GetAmountPaidByRegistrant(int registrantId, SystemMessages msgs, DatabaseConnection dc = null)

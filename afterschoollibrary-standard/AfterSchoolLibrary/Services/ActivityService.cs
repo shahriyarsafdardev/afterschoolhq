@@ -823,6 +823,7 @@ namespace AfterSchoolLibrary.Services
             var inviteonly = values.GetValueOrDefault("inviteonly");
             var minseatsrequired = values.GetValueOrDefault("minseatsrequired");
             var splitcostevenly = values.GetValueOrDefault("splitcostevenly");
+            var regfeedownpayment = values.GetValueOrDefault("regfeedownpayment");
 
             var activityType = ActivityType.NotSet;
 
@@ -1168,6 +1169,7 @@ namespace AfterSchoolLibrary.Services
                                 subscriptionplancost.IfEmpty(""),
                                 subscriptionplanperiod.IfEmpty(""),
                                 splitcostevenly.IfEmpty(""),
+                                regfeedownpayment.IfEmpty(""),
                                 loggedInUserId,
                                 adc
                             ));
@@ -1282,25 +1284,32 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
-        private static SystemMessages SetupSubscriptionPlan(this Activity activity, Account account, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string splitcostevenly, int loggedInUserId, DatabaseConnection dc = null)
+        private static SystemMessages SetupSubscriptionPlan(this Activity activity, Account account, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string splitcostevenly, string regfeedownpayment, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            var hasChanges = true;
+            var hasStripeChanges = true;
 
             // first: desactivate the current plan if there are any changes
             if (activity.HasSubscriptionPlan(msgs, dc))
             {
                 var plan = activity.GetSubscriptionPlan(msgs, dc);
 
-                hasChanges = plan.CostPerPeriod.Value != subscriptionplancost.ToDecimal() || 
-                            plan.BillingPeriodTypeId != (BillingPeriodType)subscriptionplanperiod.ToInteger();
+                hasStripeChanges = plan.CostPerPeriod.Value != subscriptionplancost.ToDecimal() || 
+                                    plan.BillingPeriodTypeId != (BillingPeriodType)subscriptionplanperiod.ToInteger();
 
-                if (hasChanges || !hassubscriptionplan.ToBoolean())
+                // if has stripe changes or subscription option has been turned off
+                if (hasStripeChanges || !hassubscriptionplan.ToBoolean())
                     msgs.AddRange(plan.Deactivate(loggedInUserId, dc));
+                else
+                {
+                    plan.RegFeeAsDownPayment = regfeedownpayment.ToBoolean();
+                    plan.SplitCostEvenly = splitcostevenly.ToBoolean();
+                    msgs.AddRange(plan.Save(dc));
+                }    
             }
 
             // if the subscription plan option(UI) is activated
-            if (hassubscriptionplan.ToBoolean() && hasChanges)
+            if (hassubscriptionplan.ToBoolean() && hasStripeChanges)
                 SubscriptionPlanService.CreateNewSubscriptionPlan(
                     planOwner: account,
                     participationObjectType: ParticipationObjectType.Activity,
@@ -1309,6 +1318,7 @@ namespace AfterSchoolLibrary.Services
                     billingPeriodType: (BillingPeriodType)subscriptionplanperiod.ToInteger(),
                     doesAutoRenew: true,
                     splitCostEvenly: splitcostevenly.ToBoolean(),
+                    regFeeAsDownPayment: regfeedownpayment.ToBoolean(),
                     loggedInUserId: loggedInUserId,
                     msgs: msgs,
                     dc: dc);
@@ -2322,6 +2332,27 @@ namespace AfterSchoolLibrary.Services
                         emailmessage,
                         msgs);
                 });
+        }
+
+        public static void FinalizeRegistrations(this Activity activity, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            //var account = activity.GetAccount(msgs, dc);
+            //var seatsTaken = activity.GetSeatsTaken(msgs, dc);
+            //var plan = activity.GetSubscriptionPlan(msgs, dc);
+            //var costPerPeriod = plan.CostPerPeriod.Value / seatsTaken;
+
+            //var plan = SubscriptionPlanService.CreateNewSubscriptionPlan(
+            //    planOwner: account,
+            //    activityGroup: null,
+            //    costPerPeriod: costPerPeriod,
+            //    billingPeriodType: plan.BillingPeriodTypeId,
+            //    doesAutoRenew: true,
+            //    loggedInUser: loggedInUser,
+            //    msgs: msgs,
+            //    dc: dc);
+
+            //var submittedRecords = activity.GetRegistrants(msgs, dc);
+
         }
     }
 }

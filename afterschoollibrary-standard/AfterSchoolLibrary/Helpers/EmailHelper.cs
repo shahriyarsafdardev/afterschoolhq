@@ -372,6 +372,7 @@ namespace AfterSchoolLibrary.Helpers
             var parentOrGuardian = masterRegistrant.GetParentOrGuardian(msgs, dc);
             var canAccountAcceptPayments = billingAccount.CanProcessPayments(msgs, dc);
             var registration = checkoutObject.Registration;
+            var submittedRecord = registration.GetRegistrant(msgs, dc);
 
             var receiptRows = "";
             var regStatus = "";
@@ -423,6 +424,7 @@ namespace AfterSchoolLibrary.Helpers
                 description += $"<br />&nbsp;&bull;&nbsp;{ra.GetParticipationObject(msgs, dc).Name} - {ra.AssignmentTypeId.ToString().SplitByUpperCase()}";
             });
 
+            
             // show this if no subscription plan, if there's a reg fee or there's a payment plan
             if (checkoutObject.IsFree || participationObject.Cost > 0.ToDecimal() || paymentPlan.IsNotEmpty())
             {
@@ -432,7 +434,7 @@ namespace AfterSchoolLibrary.Helpers
                     ccFee = "$0";
                 }
                 else if (checkoutObject.PaymentPlan.IsNotEmpty())
-                {                    
+                {
                     cost = checkoutObject.GetPaymentPlanCostTodayWithConvenienceFee(msgs, dc).ToCurrency();
                     ccFee = checkoutObject.GetPaymentPlanCostTodayCreditCardFee(msgs, dc).ToCurrency();
 
@@ -454,12 +456,12 @@ namespace AfterSchoolLibrary.Helpers
 
                 // add registration fee row
                 var registrationFeeModel = new NameValueCollection()
-                {
-                    { "Description", description },
-                    { "Quantity",  "1"},
-                    { "Cost", cost },
-                    { "AdditionalDetails", additionalDetails }
-                };
+                                            {
+                                                { "Description", description },
+                                                { "Quantity",  "1"},
+                                                { "Cost", cost },
+                                                { "AdditionalDetails", additionalDetails }
+                                            };
 
                 receiptRows += ProcessTemplate(
                     EmailTemplates.Registration_Confirmation_Rows,
@@ -471,11 +473,20 @@ namespace AfterSchoolLibrary.Helpers
             // add subscription row
             if (subscription.IsNotEmpty())
             {
-                description = $"Subscription for {participationObject.Name}";
-                additionalDetails = $"per {subscription.BillingPeriodTypeId.ToString().ToLower()}";
+                var startDate = submittedRecord.GetPlanStartDate(subscription, participationObject, msgs, dc);
+                description = $"Subscription for {participationObject.Name} - Starting on {startDate.ToShortDateString()}";
+                additionalDetails = $"every {subscription.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()}";
 
-                cost = checkoutObject.GetSubscriptionCostTodayWithConvenienceFee(msgs, dc).ToCurrency();
-                ccFee = checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc).ToCurrency();
+                if (subscription.SplitCostEvenly && !participationObject.RegistrationFinalized)
+                {
+                    cost = $"{subscription.GetMinCostWithConvenienceFee(billingAccount, msgs, dc).ToCurrency()} - {subscription.GetMaxCostWithConvenienceFee(billingAccount, msgs, dc).ToCurrency()}";
+                    ccFee += 0.ToCurrency();
+                }
+                else
+                {
+                    cost = checkoutObject.GetSubscriptionCostTodayWithConvenienceFee(msgs, dc).ToCurrency();
+                    ccFee += checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc).ToCurrency();
+                }
 
                 // add registration fee row
                 var subscriptionFeeModel = new NameValueCollection()
@@ -526,6 +537,8 @@ namespace AfterSchoolLibrary.Helpers
                 virtualInfo += $"<p>Join this activity virtually with the following info: <br /><br />{participationObject.VirtualLocationInfo}</a>.<br /></p>";
             }
 
+            var totalCost = checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs, dc).ToCurrency();
+
             var model = new NameValueCollection()
             {
                 { "FirstName", isParentCopy ? purchaser.FirstName : loggedInUser.FirstName },
@@ -537,7 +550,7 @@ namespace AfterSchoolLibrary.Helpers
                 { "BillerAccountName", billingAccount.Name },
                 { "BillerAccountLink", billingAccount.HomePageUrl },
                 { "AmountDueOrPaid", amountDueOrPaid },
-                { "TotalCost", checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs, dc).ToCurrency() },
+                { "TotalCost", totalCost },
                 { "BodyRows", receiptRows },
                 { "CustomMessage", customMessage },
                 { "CreditCardFee", ccFee },

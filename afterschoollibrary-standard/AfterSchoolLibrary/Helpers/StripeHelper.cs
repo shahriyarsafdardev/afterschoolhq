@@ -996,7 +996,7 @@ namespace AfterSchoolLibrary.Billing
                 options.TransferData = new SubscriptionTransferDataOptions()
                 {
                     Destination = stripeAccountId,
-                    AmountPercent = 100 - (platformFeePercent * 100) 
+                    AmountPercent = 100 - (platformFeePercent * 100)                
                 };
 
             try

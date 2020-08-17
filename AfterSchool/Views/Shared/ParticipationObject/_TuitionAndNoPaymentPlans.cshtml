@@ -10,13 +10,42 @@
 }
 
 <p>
+    @if (Model.SubscriptionPlans.Any())
+    {
+        if (displayCheckoutPrice)
+        {
+            <span>The cost is</span>
+        }
+        else
+        {
+            <span>You will receive</span>
+        }
+    }
+
     @if (!Model.IsRegistrationFree)
     {
         <span>
-            The registration fee is
+            @if (!Model.SubscriptionPlans.Any())
+            { 
+                if (displayCheckoutPrice)
+                {
+                    <span>The fee is</span>
+                }
+                else
+                {
+                    <span>You will receive</span>
+                }
+            }
+
             <strong>
                 @ParticipationObjectUI.PrintRegistrationFee(Model, displayCheckoutPrice)
             </strong>
+            
+            @if (!Model.SubscriptionPlans.Any())
+            {
+                <span>per registration</span>
+            }
+
         </span>
     }    
 

@@ -30,7 +30,7 @@
     Html.RenderPartial
     (
         "~/Views/Shared/Registration/_RegistrationHeader.cshtml",
-        new RegistrationHeaderViewModel(Model, $"Registering <u>{SessionVariables.CurrentRegistrant.FirstName}</u> for <u>{Model.Name}</u>", ""),
+        new RegistrationHeaderViewModel(Model, $"Registering <strong>{SessionVariables.CurrentRegistrant.FirstName}</strong> for <strong>{Model.Name}</strong>", ""),
         new ViewDataDictionary()
         {
             { "hidebuttons", true }
