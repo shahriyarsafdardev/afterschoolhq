@@ -824,6 +824,7 @@ namespace AfterSchoolLibrary.Services
             var minseatsrequired = values.GetValueOrDefault("minseatsrequired");
             var splitcostevenly = values.GetValueOrDefault("splitcostevenly");
             var regfeedownpayment = values.GetValueOrDefault("regfeedownpayment");
+            var hidepreciselocation = values.GetValueOrDefault("hidepreciselocation");
 
             var activityType = ActivityType.NotSet;
 
@@ -1004,7 +1005,10 @@ namespace AfterSchoolLibrary.Services
                 activity.AccountActivityGroupId = accountactivitygroup.ToString().ToInteger();
 
             if (inviteonly != null)
-                activity.IsInviteOnly = inviteonly.ToString().ToBoolean();                
+                activity.IsInviteOnly = inviteonly.ToString().ToBoolean();
+
+            if (hidepreciselocation.IsNotEmpty() && !string.IsNullOrEmpty(hidepreciselocation.ToString()))
+                activity.HidePreciseLocation = Convert.ToBoolean(Convert.ToInt16(hidepreciselocation));
 
             if (msgs.HasNoErrors())
             {
@@ -1145,7 +1149,6 @@ namespace AfterSchoolLibrary.Services
                                     }
                                 }
                             }
-
                         }
 
                         //setup provider
