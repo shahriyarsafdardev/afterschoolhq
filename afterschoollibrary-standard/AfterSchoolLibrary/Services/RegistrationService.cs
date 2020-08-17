@@ -236,9 +236,11 @@ namespace AfterSchoolLibrary.Services
                     dc: dc);
         }
 
-        public static void AddESignature(this Registration registration, string esignature, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void AddESignature(this Registration registration, string esignature, string userAgent, string ipAddress, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             registration.ESignature = esignature;
+            registration.ESignatureUserAgent = userAgent;
+            registration.ESignatureIPAddress = ipAddress;
             registration.CompletionStatusId = RegistrationCompletionStatus.Signed;
             registration.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
             registration.LastModifiedDate = DateTime.UtcNow;

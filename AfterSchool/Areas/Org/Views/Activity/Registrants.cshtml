@@ -129,7 +129,10 @@
 
                         @if (ViewBag.IsActivityLeader)
                         {
-                            <a href="@Url.Action("addregistration", "activity", new { id = Model.Uid })" class="btn btn-primary btn-space">
+                            <a href="@Url.Action("finalizeregistration", "activity", new { id = Model.Uid })" class="btn btn-space">
+                                Finalize Registration
+                            </a>
+                            <a href="@Url.Action("addregistration", "activity", new { id = Model.Uid })" class="btn btn-space">
                                 Add Student
                             </a>
                         }

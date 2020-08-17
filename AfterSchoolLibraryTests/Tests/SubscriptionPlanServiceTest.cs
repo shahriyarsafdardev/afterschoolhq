@@ -26,16 +26,17 @@ namespace AfterSchoolLibraryTests.Tests
             var activity = ActivityFactory.Create(PlanOwner, msgs, dc);
 
             var plan = SubscriptionPlanService.CreateNewSubscriptionPlan(
-                PlanOwner,
-                ParticipationObjectType.Activity,
-                activity.ID.Value,
-                35.ToDecimal(),
-                BillingPeriodType.Month,
-                true,
-                false,
-                LoggedInUser.ID.Value,
-                msgs,
-                dc);
+                        PlanOwner,
+                        ParticipationObjectType.Activity,
+                        activity.ID.Value,
+                        35.ToDecimal(),
+                        BillingPeriodType.Month,
+                        true,
+                        false,
+                        false,
+                        LoggedInUser.ID.Value,
+                        msgs,
+                        dc);
 
             Assert.True(plan.ID.HasValue);
         }
@@ -46,16 +47,17 @@ namespace AfterSchoolLibraryTests.Tests
             var activityGroup = ActivityGroupFactory.Create(PlanOwner, ActivityGroupType.Session, msgs, dc);
 
             var plan = SubscriptionPlanService.CreateNewSubscriptionPlan(
-                PlanOwner,
-                ParticipationObjectType.ActivityGroup,
-                activityGroup.ID.Value,
-                35.ToDecimal(),
-                BillingPeriodType.Month,
-                true,
-                false,
-                LoggedInUser.ID.Value,
-                msgs,
-                dc);
+                        PlanOwner,
+                        ParticipationObjectType.ActivityGroup,
+                        activityGroup.ID.Value,
+                        35.ToDecimal(),
+                        BillingPeriodType.Month,
+                        true,
+                        false,
+                        false,
+                        LoggedInUser.ID.Value,
+                        msgs,
+                        dc);
 
             Assert.True(plan.ID.HasValue);
         }
@@ -70,12 +72,12 @@ namespace AfterSchoolLibraryTests.Tests
             var payerAccount = AccountFactory.Create(payerUser, msgs, dc);
             var activity = ActivityFactory.Create(PlanOwner, msgs, dc);
             var paymentPlan = SubscriptionPlanFactory.CreatePaymentPlan(
-                PlanOwner, 
-                activity, 
-                100, 
-                totalPeriods, 
-                msgs, 
-                dc);
+                                PlanOwner, 
+                                activity, 
+                                100, 
+                                totalPeriods, 
+                                msgs, 
+                                dc);
             var purchase = PurchaseFactory.Create(payerAccount, 100, msgs, dc);
             var registrant = RegistrantFactory.Create(msgs, dc);
             var registrantSubscriptionPlan = RegistrantSubscriptionPlanFactory.Create(registrant, paymentPlan, purchase, msgs, dc);

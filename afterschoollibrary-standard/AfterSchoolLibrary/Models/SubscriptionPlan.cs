@@ -7,6 +7,7 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
+using AfterSchoolLibrary.Services;
 
 namespace AfterSchoolLibrary.Models
 {
@@ -46,6 +47,10 @@ namespace AfterSchoolLibrary.Models
 		/// Split cost evenly amongst all parents signed up
 		/// </summary>
 		public bool SplitCostEvenly { get { return (bool)MDV["SplitCostEvenly"].Value; } set { MDV["SplitCostEvenly"].Value = value; } }
+		/// <summary>
+		/// Count the registration fee as a down payment
+		/// </summary>
+		public bool RegFeeAsDownPayment { get { return (bool)MDV["RegFeeAsDownPayment"].Value; } set { MDV["RegFeeAsDownPayment"].Value = value; } }
 		
 
         public SubscriptionPlan()
@@ -59,6 +64,7 @@ namespace AfterSchoolLibrary.Models
 			this.PlanTypeId = SubscriptionPlanType.NotSet;
 			this.PaymentStartTypeId = PlanPaymentStartType.NotSet;
 			this.SplitCostEvenly = false;
+			this.RegFeeAsDownPayment = false;
 			
         }
 
@@ -82,6 +88,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "StartDayOfMonth", System.Data.SqlDbType.Int);
 				_dp.Add(className, "PaymentStartTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "SplitCostEvenly", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "RegFeeAsDownPayment", System.Data.SqlDbType.Bit);
 				
                 return _dp;
             }
@@ -215,6 +222,10 @@ namespace AfterSchoolLibrary.Models
 			dps.Add(ObjectMap["SplitCostEvenly"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["RegFeeAsDownPayment"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -248,6 +259,14 @@ namespace AfterSchoolLibrary.Models
         #endregion
 
 		#region "UserDefined"
+
+		public decimal GetCostPerPeriodPerPerson(SystemMessages msgs = null, DatabaseConnection dc = null)
+		{
+			if (this.SplitCostEvenly)
+				return this.CostPerPeriod.Value / (this.GetParticipationObject(msgs, dc).SeatsTaken ?? 1);
+
+			return this.CostPerPeriod.Value;
+		}
 
         public bool IsPurchased(SystemMessages msgs = null, DatabaseConnection dc = null)
         {

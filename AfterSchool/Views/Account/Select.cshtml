@@ -33,7 +33,7 @@
     Html.RenderPartial
     (
         "~/Views/Shared/Registration/_RegistrationHeader.cshtml",
-        new RegistrationHeaderViewModel(participationObject, $"Complete registration for <u>{participationObject.Name}</u>", "Please select which student you'd like to register below."),
+        new RegistrationHeaderViewModel(participationObject, $"Complete registration for <strong>{participationObject.Name}</strong>", "Please select which student you'd like to register below."),
         new ViewDataDictionary()
         {
             { "hidebuttons", true }

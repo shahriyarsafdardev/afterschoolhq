@@ -30,7 +30,7 @@
         }
 
         <span>
-            @(includePlus ? "plus a" : "") subscription of <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong> each <strong>@plan.BillingPeriodTypeId.ToString().ToLower()</strong> starting <strong>@startDateText</strong>
+            @(includePlus ? "plus a" : "") subscription of <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong> every <strong>@plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong> starting <strong>@startDateText</strong>
         </span>
     }
 }

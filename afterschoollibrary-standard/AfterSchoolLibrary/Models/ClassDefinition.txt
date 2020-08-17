@@ -89,6 +89,7 @@ property: ActivityLocationTypeId, ActivityLocationType, Int, , Physical or Virtu
 property: VirtualLocationInfo, string, NVarChar "1000", , Link for virtual class
 property: HidePreciseLocation, bool, Bit, , If true then don't want to add a pin for the exact location
 property: MinSeatsRequired, int?, Int, , Minimum seats required to have the activity
+property: RegistrationFinalized, bool, Bit, , Used to close registration and send notifications
 -property: AllowPreRegistration, bool, Bit
 -property: RegistrationTimeZone, string, NVarChar "30"
 -property: AcceptPayPal, bool, Bit
@@ -1392,6 +1393,7 @@ property: PlanTypeId, SubscriptionPlanType, Int
 property: StartDayOfMonth, int?, Int
 property: PaymentStartTypeId, PlanPaymentStartType, Int
 property: SplitCostEvenly, bool, Bit, , Split cost evenly amongst all parents signed up
+property: RegFeeAsDownPayment, bool, Bit, , Count the registration fee as a down payment
 loadmethod: ParticipationObjectId|ParticipationObjectTypeId|PlanTypeId, List<>, LoadByParticipationObject
 loadmethod: PlanOwnerAccountId, List<>
 [end]

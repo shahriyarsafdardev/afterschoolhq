@@ -289,7 +289,7 @@ namespace AfterSchoolLibraryTests.Tests
                 msgs, 
                 dc);
             
-            Assert.Equal(expectedPlatformPercentage, account.GetSubscriptionPlatformFeePercent(subscriptionPlan, msgs, dc));
+            Assert.Equal(expectedPlatformPercentage, account.GetSubscriptionPlatformFeePercent(subscriptionPlan, PaymentType.CreditCard, msgs, dc));
         }
 
         [Theory]

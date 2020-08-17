@@ -149,44 +149,69 @@ namespace AfterSchoolLibrary.Services
         public static void StartPlan(this Registrant submittedRecord, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
-
+            var participationObject = checkoutObject.ParticipationObject;
             var billingAccount = checkoutObject.BillingAccount;
-            var purchasingAccount = checkoutObject.PayingAccount;            
+            var purchasingAccount = checkoutObject.PayingAccount;
             var useStripeConnectedAccount = billingAccount.HasAccountPackageFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
             var (customer, sourceId) = GetCustomerAndSourceForSubscription(checkoutObject, msgs);
             var plan = subscriptionPlanType == SubscriptionPlanType.PaymentPlan ? checkoutObject.PaymentPlan : checkoutObject.SubscriptionPlan;
-            var stripeCouponId = plan.DoesCouponApply(checkoutObject.Coupon) ? checkoutObject.Coupon.StripeCouponId : null;
+            // var stripeCouponId = plan.DoesCouponApply(checkoutObject.Coupon) ? checkoutObject.Coupon.StripeCouponId : null;
             var startDateTime = submittedRecord.GetPlanStartDate(plan, checkoutObject.ParticipationObject, msgs, dc);
             var platformFeePercent = new decimal?();
             string stripeAccountId = null;
+            string stripeCouponId = null;
 
             if (useStripeConnectedAccount)
             {
-                platformFeePercent = billingAccount.GetSubscriptionPlatformFeePercent(plan, msgs, dc);
+                platformFeePercent = billingAccount.GetSubscriptionPlatformFeePercent(plan, checkoutObject.PaymentType, msgs, dc);
                 stripeAccountId = billingAccount.StripeUserId;
             }
 
-            stripeCouponId = GetACHCoupon(checkoutObject, billingAccount, plan, stripeAccountId, msgs, dc);
+            if (plan.SplitCostEvenly)
+            {
+                // what's the value of the subscription plan with convenience fees and credit card fees
+                var costWithAllFees = Billing.Platform.GetFinalTotalCost(plan.CostPerPeriod.Value, billingAccount);
+                var individualCostWithFees = checkoutObject.GetSubscriptionCostTodayWithConvenienceFee(msgs, dc);
+
+                if (checkoutObject.PaymentType == PaymentType.CreditCard)
+                    individualCostWithFees += checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc);
+
+                var couponValue = costWithAllFees - individualCostWithFees;
+                var coupon = Billing.StripeHelper.CreateCoupon(
+                                couponName: $"{plan.StripePlanId}/{costWithAllFees.ToCurrency()}-{individualCostWithFees.ToCurrency()}/SplitFee",
+                                discountValue: couponValue,
+                                couponDuration: Billing.StripeCouponDuration.Forever,
+                                durationInMonths: null,
+                                couponAmountType: CouponAmountType.FlatAmount,
+                                stripeAccountId: null,
+                                msgs: msgs);
+
+                stripeCouponId = coupon.Id;
+            }
+            else
+            {
+                stripeCouponId = GetACHCoupon(checkoutObject, billingAccount, plan, null, msgs, dc);
+            }
 
             // create the subscription on the stripe account (could be added to main account or connected account)
             var subscription = Billing.StripeHelper.CreateSubscription(
-                customerId: customer.Id,
-                planId: plan.StripePlanId,
-                sourceId: sourceId,
-                platformFeePercent: platformFeePercent,
-                stripeAccountId: stripeAccountId,
-                startDate: startDateTime,
-                stripeCouponId: stripeCouponId,
-                metaData: new Dictionary<string, string>()
-                {
-                    { "BillingAccountUid", billingAccount.Uid.ToString() },
-                    { "BillingAccountName", billingAccount.Name.ToString() },
-                    { "PayingAccountUid", purchasingAccount.Uid.ToString() },
-                    { "PayingAccountName", purchasingAccount.Name.ToString() },
-                    { "ParticipationObjectType", checkoutObject.ParticipationObject.ObjectType.ToString() },
-                    { "ParticipationObjectName", checkoutObject.ParticipationObject.Name },
-                },
-                msgs: msgs);
+                                customerId: customer.Id,
+                                planId: plan.StripePlanId,
+                                sourceId: sourceId,
+                                platformFeePercent: platformFeePercent,
+                                stripeAccountId: stripeAccountId,
+                                startDate: startDateTime,
+                                stripeCouponId: stripeCouponId,
+                                metaData: new Dictionary<string, string>()
+                                {
+                                    { "BillingAccountUid", billingAccount.Uid.ToString() },
+                                    { "BillingAccountName", billingAccount.Name.ToString() },
+                                    { "PayingAccountUid", purchasingAccount.Uid.ToString() },
+                                    { "PayingAccountName", purchasingAccount.Name.ToString() },
+                                    { "ParticipationObjectType", checkoutObject.ParticipationObject.ObjectType.ToString() },
+                                    { "ParticipationObjectName", checkoutObject.ParticipationObject.Name },
+                                },
+                                msgs: msgs);
 
             if (msgs.HasErrors())
                 return;
@@ -224,13 +249,13 @@ namespace AfterSchoolLibrary.Services
 
                 //need to add a coupon to subtract the credit card amount that is stored in the payment plan
                 var coupon = Billing.StripeHelper.CreateCoupon(
-                    couponName: $"{plan.StripePlanId}/{totalCost.ToCurrency()}-{ccFee.ToCurrency()}/ACH",
-                    discountValue: plan.GetCreditCardFee(billingAccount, msgs, dc),
-                    couponDuration: Billing.StripeCouponDuration.Forever,
-                    durationInMonths: null,
-                    couponAmountType: CouponAmountType.FlatAmount,
-                    stripeAccountId: stripeAccountId,
-                    msgs: msgs);
+                                couponName: $"{plan.StripePlanId}/{totalCost.ToCurrency()}-{ccFee.ToCurrency()}/ACH",
+                                discountValue: plan.GetCreditCardFee(billingAccount, msgs, dc),
+                                couponDuration: Billing.StripeCouponDuration.Forever,
+                                durationInMonths: null,
+                                couponAmountType: CouponAmountType.FlatAmount,
+                                stripeAccountId: stripeAccountId,
+                                msgs: msgs);
 
                 return coupon.Id;
             }

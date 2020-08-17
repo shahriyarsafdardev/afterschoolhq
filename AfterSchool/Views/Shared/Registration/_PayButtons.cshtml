@@ -368,7 +368,7 @@
         }
 
         $('.existing-payment-form').submit(function () {
-            $('.btn-pay').html('Processing Payment...');
+            $('.btn-pay').html('Processing...');
 
             disableButtons();
         });
@@ -390,7 +390,7 @@
 
         $('#btn-paywithnewcard').click(function () {
 
-            $('#btn-paywithnewcard').html('Processing Payment...');
+            $('#btn-paywithnewcard').html('Processing...');
 
             disableButtons();
 
@@ -465,7 +465,7 @@
             selectAccount: true,
             onSuccess: function (public_token, metadata) {
                 // Send the public_token and account ID to your app server
-                $('#plaid-button').html('Processing Payment...');
+                $('#plaid-button').html('Processing...');
 
                 disableButtons();
 
