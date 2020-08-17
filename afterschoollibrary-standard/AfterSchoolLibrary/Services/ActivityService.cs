@@ -667,7 +667,7 @@ namespace AfterSchoolLibrary.Services
                 InstructorId = activity.InstructorId,
                 IsInviteOnly = activity.IsInviteOnly,
                 ActivityLocationTypeId = activity.ActivityLocationTypeId,
-                MinSeatsRequired = activity.MinSeatsRequired,
+                MinSeatsRequired = activity.MinSeatsRequired,                
             };
         }
 
@@ -2351,7 +2351,16 @@ namespace AfterSchoolLibrary.Services
             //    msgs: msgs,
             //    dc: dc);
 
-            //var submittedRecords = activity.GetRegistrants(msgs, dc);
+            activity.RegistrationFinalized = true;
+            activity.LastModifiedBy = loggedInUser?.ID;
+            activity.LastModifiedDate = DateTime.UtcNow;
+            msgs.AddRange(activity.Save(dc));
+
+            var ras = activity.GetRegistrantActivities(msgs, dc);
+
+            ras.ForEach(ra => {
+                msgs.AddRange(ra.SendPaymentReminder());
+            });
 
         }
     }

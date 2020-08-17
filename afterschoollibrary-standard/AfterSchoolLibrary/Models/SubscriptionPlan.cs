@@ -263,7 +263,12 @@ namespace AfterSchoolLibrary.Models
 		public decimal GetCostPerPeriodPerPerson(SystemMessages msgs = null, DatabaseConnection dc = null)
 		{
 			if (this.SplitCostEvenly)
-				return this.CostPerPeriod.Value / (this.GetParticipationObject(msgs, dc).SeatsTaken ?? 1);
+			{
+				var po = this.GetParticipationObject(msgs, dc);
+				var seats = po.SeatsTaken ?? 1;				
+
+				return this.CostPerPeriod.Value / (seats == 0 ? 1 : seats);
+			}
 
 			return this.CostPerPeriod.Value;
 		}

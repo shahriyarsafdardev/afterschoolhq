@@ -130,7 +130,7 @@ namespace AfterSchoolLibrary.Services
                 plan = Billing.StripeHelper.CreatePlan(
                     product,
                     null,
-                    subscriptionPlan.GetTotalCostWithFees(account),
+                    subscriptionPlan.GetTotalCostWithFees(account, msgs, dc),
                     subscriptionPlan.BillingPeriodTypeId,
                     subscriptionPlan.GetNickName(name),
                     stripeUserId,

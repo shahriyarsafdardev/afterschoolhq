@@ -160,29 +160,36 @@ namespace AfterSchool.Areas.Org.Controllers
                     ParticipationObjectType.Activity, 
                     registrant.ToInteger(), msgs);
                 var assignmentType = ra.AssignmentTypeId;
-
-                if (ra.AssignmentTypeId != RegistrationAssignmentType.Reserved)
-                {
-                    var reg = ra.ToRegistrant();
-
-                    assignmentType = RegistrationAssignmentType.ReservedPendingPayment;
-
-                    reg.AddOrUpdateParticipationObject(
-                        ra.RegistrationId.Value,
-                        activity.ID.Value,
-                        ParticipationObjectType.Activity,
-                        assignmentType,
-                        ra.RegistrationPeriodId,
-                        ra.ActivityGroupId,
-                        null,
-                        SessionVariables.CurrentUser.ID.Value,
-                        msgs);
-                }
+                var reservedTypes = new RegistrationAssignmentType[] { RegistrationAssignmentType.Reserved, RegistrationAssignmentType.ReservedPendingPayment };
 
                 if (ra.IsNotEmpty())
+                {
+                    if (ra.AssignmentTypeId.NotIn(reservedTypes))
+                    {
+                        var reg = ra.ToRegistrant();
+
+                        assignmentType = RegistrationAssignmentType.ReservedPendingPayment;
+
+                        reg.AddOrUpdateParticipationObject(
+                            ra.RegistrationId.Value,
+                            activity.ID.Value,
+                            ParticipationObjectType.Activity,
+                            assignmentType,
+                            ra.RegistrationPeriodId,
+                            ra.ActivityGroupId,
+                            null,
+                            SessionVariables.CurrentUser.ID.Value,
+                            msgs);
+                    }
+
                     msgs.AddRange(ra.SendPaymentReminder());
 
-                WriteOutput(new { status = "ok", AssignmentType = (int)assignmentType }, ResponseType.JSON);
+                    WriteOutput(new { status = "ok", AssignmentType = (int)assignmentType }, ResponseType.JSON);
+                }
+                else
+                {
+                    msgs.Add("Invalid data", MessageType.UserError);
+                }
             }
             else
             {
@@ -190,9 +197,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             if (msgs.HasErrors())
-            {
                 HandleErrors(msgs, ResponseType.JSON);
-            }
 
             Response.End();
 
