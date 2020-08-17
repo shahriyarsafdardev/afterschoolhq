@@ -34,8 +34,9 @@ namespace AfterSchoolLibrary.Helpers
         {
             var msgs = new SystemMessages();
             var registration = ra.GetRegistration();
+            var participationObject = ra.GetParticipationObject(msgs);
 
-            msgs.AddRange(SendPaymentReminder(ra.GetParticipationObject(msgs), registration));
+            msgs.AddRange(SendPaymentReminder(participationObject, registration));
 
             return msgs;
         }
@@ -46,7 +47,6 @@ namespace AfterSchoolLibrary.Helpers
             var registrant = registration.GetRegistrant(msgs);
             var masterRegistrant = registrant.GetMasterRegistrant(msgs);
             var parentOrGuardian = masterRegistrant.GetParentOrGuardian(msgs);
-            var isAfterSchool = participationObject.OwnerAccount.IsAfterSchool;
             var registering = "registering";      
 
             if (participationObject.RegistrationMode == RegistrationMode.Apply)
@@ -62,22 +62,23 @@ namespace AfterSchoolLibrary.Helpers
                 { "ActivityContactName", participationObject.ContactName },
                 { "ActivityContactEmail", participationObject.ContactEmail },
                 { "ActivityContactPhone", participationObject.ContactPhone },
-                { "ProductName", Utilities.AppName(participationObject.OwnerAccount.IsAfterSchool) }
+                { "ProductName", Utilities.AppName() },
+                { "StudentName", registrant.FirstName }
             };
 
-            var subject = $"You have a payment due for {participationObject.Name}";
+            var subject = $"It's time to finalize your registration for {registrant.FirstName}";
             var body = ProcessTemplate(
-                EmailTemplates.Payment_Reminder,
-                model,
-                "Payment_Reminder-1.02",
-                msgs);
+                        EmailTemplates.Payment_Reminder,
+                        model,
+                        "Payment_Reminder-1.03",
+                        msgs);
 
             var mailMsgs = SendGridHelper.SendMail(
-                fromEmail: Email.SendGridNoReplyEmailAddress(participationObject.OwnerAccount.IsAfterSchool),
-                toEmail: new SendGrid.Helpers.Mail.EmailAddress(parentOrGuardian.Email),
-                subject: subject,
-                body: body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(participationObject.OwnerAccount.IsAfterSchool));
+                            fromEmail: Email.SendGridNoReplyEmailAddress(),
+                            toEmail: new SendGrid.Helpers.Mail.EmailAddress(parentOrGuardian.Email),
+                            subject: subject,
+                            body: body,
+                            emailTemplateId: SendGridHelper.GetGenericTemplateId());
 
             msgs.AddRange(mailMsgs);
 

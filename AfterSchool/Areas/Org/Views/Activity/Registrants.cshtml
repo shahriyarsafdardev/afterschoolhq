@@ -128,11 +128,22 @@
                     <div class="btn-group pull-right">
 
                         @if (ViewBag.IsActivityLeader)
-                        {
-                            <a href="@Url.Action("finalizeregistration", "activity", new { id = Model.Uid })" class="btn btn-space">
+                        {                           
+                            <button type="button" class="btn btn-default btn-space md-trigger" data-modal="modal-confirm-finalize" @(Model.RegistrationFinalized ? "disabled=\"disabled\"" : "")>
                                 Finalize Registration
-                            </a>
-                            <a href="@Url.Action("addregistration", "activity", new { id = Model.Uid })" class="btn btn-space">
+                            </button>
+
+                            Html.RenderPartial("~/Views/Shared/_Modal.cshtml", new ModalViewModel() { ActionButtonHtml = "Finalize Registration &raquo;", ActionButtonId = "btn-confirm-finalize", HtmlBody = "<p>Are you sure you want to finalize registration? This will close registration and send emails to existing parents with payment information.</p><p><strong>This action cannot be undone</strong></p>", ID = "modal-confirm-finalize", Title = "Finalize Registration" });
+
+                            <script>
+                                PageEvent.add(PageEvent.AFTER_INIT, function () {
+                                    $('#btn-confirm-finalize').click(function () {
+                                        location.href = '@Url.Action("finalizeregistration", "activity", new { id = Model.Uid })';
+                                    });
+                                });
+                            </script>
+
+                            <a href="@Url.Action("addregistration", "activity", new { id = Model.Uid })" class="btn btn-default btn-space">
                                 Add Student
                             </a>
                         }

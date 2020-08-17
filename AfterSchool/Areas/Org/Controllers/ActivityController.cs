@@ -969,7 +969,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult Copy(string id, string activitynamecopy, string usesameformcopy, string copywithregistrants)
+        public ActionResult Copy(string id, string activitynamecopy, string usesameformcopy, string copywithregistrants, string type)
         {
             var msgs = new SystemMessages();
             var activityToCopy = Activity.LoadByUid(id.ToGuid());
@@ -985,7 +985,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
                 return RedirectToAction("editsetup", new { id = activity.Uid, isnew = 1, source = Request["source"] });
 
-            return RedirectToAction("index", "activity", new { copyerror = true });
+            return RedirectToAction("index", "activity", new { copyerror = true, type });
         }
 
         [HttpGet]
@@ -1104,9 +1104,21 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Registrants(string id, string atype)
+        public ActionResult FinalizeRegistration(string id, string atype)
         {
-            var activity = Activity.LoadByUid(id.ToGuid());
+            var msgs = new SystemMessages();
+            var activity = Activity.LoadByUid(id.ToGuid(), msgs);
+
+            activity.FinalizeRegistrations(SessionVariables.CurrentUser, msgs);
+
+            var msg = msgs.HasErrors() ? "Error Finalizing Registration" : "Registration Finalized";
+
+            return RedirectToAction("registrants", new { id, atype, msg });
+        }
+
+        private void RegistrantsViewBag(Activity activity, string atype, string msg)
+        {
+            var msgs = new SystemMessages();
             var rat = RegistrationAssignmentType.NotSet;
 
             List<RegistrantActivity> ras = null;
@@ -1124,10 +1136,20 @@ namespace AfterSchool.Areas.Org.Controllers
             if (rat != RegistrationAssignmentType.NotSet)
                 ras = ras.Where(x => x.AssignmentTypeId == rat).OrderBy(x => x.SeatIndex).ToList();
 
-            ViewBag.Messages = new SystemMessages();
+            if (msg.IsNotEmpty())
+                msgs.Add(msg, msg.ToLower().Contains("error") ? MessageType.UserError : MessageType.Success);
+
+            ViewBag.Messages = msgs;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.Registrants = ras;
             ViewBag.AssignmentType = rat;
+        }
+
+        [HttpGet]
+        public ActionResult Registrants(string id, string atype, string msg)
+        {
+            var activity = Activity.LoadByUid(id.ToGuid());
+            RegistrantsViewBag(activity, atype, msg);
             return View(activity);
         }
 

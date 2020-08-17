@@ -641,11 +641,12 @@ namespace AfterSchoolLibrary.Models
 
         public bool ShouldParentPay()
         {
-            // OwnerAccount.CanProcessPayments(msgs, dc) &&
+            var subscriptionCheck = (!this.SubscriptionPlans.Any() || !this.SubscriptionPlans.First().SplitCostEvenly || !this.IsRegistrationFree);
+
             return !this.IsFree && 
                 this.RegistrationMode == RegistrationMode.Register && 
                 this.SeatsRemaining > 0 &&
-                (!this.SubscriptionPlans.Any() || !this.SubscriptionPlans.First().SplitCostEvenly);
+                subscriptionCheck;
         }
 
         public decimal GetAmountPaidByRegistrant(int registrantId, SystemMessages msgs, DatabaseConnection dc = null)
