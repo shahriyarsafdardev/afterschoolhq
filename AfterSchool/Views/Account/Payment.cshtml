@@ -69,7 +69,14 @@
 
                 <span id="payment-plan-cost-0" class="hide">@participationObject.GetCheckoutCostWithConvenienceFee()</span>
                 <span id="payment-plan-asf-0" class="hide">0</span>
-                <span id="payment-plan-ccf-0" class="hide">@participationObject.GetCreditCardFee(FeesPaidByType.Parent)</span>
+                @if (subscriptionPlan.IsEmpty() || !subscriptionPlan.SplitCostEvenly || !participationObject.RegistrationFinalized)
+                {
+                    <span id="payment-plan-ccf-0" class="hide">@participationObject.GetCreditCardFee(FeesPaidByType.Parent)</span>
+                }
+                else
+                {
+                    <span id="payment-plan-ccf-0" class="hide">0.00</span>
+                }
 
                 <div class="">
                     @if (participationObject.PaymentPlans.Any())
@@ -205,7 +212,7 @@
                                     }
 
                                     @if (participationObject.SubscriptionPlans.Any())
-                                    {                                        
+                                    {
                                         var subpricetoday = subscriptionPlan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount);
                                         var subtransfeetoday = subscriptionPlan.GetCreditCardFee(paymentAccount);
 
@@ -254,14 +261,14 @@
                                     </tr>
 
                                     @*<tr>
-                                            <td>
-                                                Coupon
-                                            </td>
-                                            <td>
-                                                <input type="text" id="coupon-code" class="form-control" value="" />
-                                                <button type="button" class="btn btn-sm btn-default" onclick="applyCoupon()">Apply</button>
-                                            </td>
-                                        </tr>*@
+                                <td>
+                                    Coupon
+                                </td>
+                                <td>
+                                    <input type="text" id="coupon-code" class="form-control" value="" />
+                                    <button type="button" class="btn btn-sm btn-default" onclick="applyCoupon()">Apply</button>
+                                </td>
+                            </tr>*@
                                 </tbody>
                                 <tfoot>
                                     <tr>
@@ -287,7 +294,7 @@
                     </div>
                 </div>
 
-                @{ 
+                @{
                     Html.RenderPartial(
                         "~/Views/Shared/Registration/_PayButtons.cshtml",
                         new ViewDataDictionary()
@@ -297,7 +304,7 @@
                             { "formActionUrl", Url.Action("payment", "account", new { id = registration.Uid }) },
                             { "acceptACH", true },
                             { "participationObject", participationObject }
-                        }
+                }
                     );
                 }
 

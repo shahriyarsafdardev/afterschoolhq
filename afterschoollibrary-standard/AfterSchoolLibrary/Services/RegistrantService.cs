@@ -392,7 +392,7 @@ namespace AfterSchoolLibrary.Services
             {
                 convenienceFee = checkoutObject.GetSubscriptionCostTodayConvenienceFee(msgs, dc);
                 paymentTypeFee = checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc);
-                amount = checkoutObject.SubscriptionPlan.CostPerPeriod;
+                amount = checkoutObject.SubscriptionPlan.GetCostPerPeriodPerPerson(msgs, dc); ;
 
                 var po = checkoutObject.ParticipationObject;
 
@@ -405,19 +405,19 @@ namespace AfterSchoolLibrary.Services
                     switch (plan.BillingPeriodTypeId)
                     {
                         case BillingPeriodType.Day:
-                            totalPeriods = Math.Ceiling(startDate.DateDiff(endDate, "d", true)).ToInteger();
+                            totalPeriods = Math.Abs(Math.Ceiling(startDate.DateDiff(endDate, "d", true))).ToInteger();
                             break;
                         case BillingPeriodType.Month:
-                            totalPeriods = Math.Ceiling(startDate.DateDiff(endDate, "m", true)).ToInteger();
+                            totalPeriods = Math.Abs(Math.Ceiling(startDate.DateDiff(endDate, "m", true))).ToInteger();
                             break;
                         case BillingPeriodType.TwoWeeks:
-                            totalPeriods = Math.Ceiling(startDate.DateDiff(endDate, "w", true) / 2).ToInteger();
+                            totalPeriods = Math.Abs(Math.Ceiling(startDate.DateDiff(endDate, "w", true) / 2)).ToInteger();
                             break;
                         case BillingPeriodType.Week:
-                            totalPeriods = Math.Ceiling(startDate.DateDiff(endDate, "w", true)).ToInteger();
+                            totalPeriods = Math.Abs(Math.Ceiling(startDate.DateDiff(endDate, "w", true))).ToInteger();
                             break;
                         case BillingPeriodType.Year:
-                            totalPeriods = Math.Ceiling(startDate.DateDiff(endDate, "y", true)).ToInteger();
+                            totalPeriods = Math.Abs(Math.Ceiling(startDate.DateDiff(endDate, "y", true))).ToInteger();
                             break;
                     }
                 }
