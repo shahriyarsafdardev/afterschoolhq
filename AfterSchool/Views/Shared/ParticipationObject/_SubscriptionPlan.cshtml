@@ -20,23 +20,30 @@
 
         @if (subscriptionPlan.SplitCostEvenly)
         {
+            @*<span>
+                between <strong>@ParticipationObjectUI.PrintMinPlanFee(subscriptionPlan, Model.OwnerAccount, displayCheckoutPrice)</strong> and <strong>@ParticipationObjectUI.PrintMaxPlanFee(subscriptionPlan, Model.OwnerAccount, displayCheckoutPrice)</strong>
+            </span>*@
             <span>
-                between <strong>@ParticipationObjectUI.PrintMinPlanFee(subscriptionPlan, Model.OwnerAccount, displayCheckoutPrice)</strong> and <strong>@ParticipationObjectUI.PrintMaxPlanFee(subscriptionPlan, Model.OwnerAccount, displayCheckoutPrice)</strong> 
+                a fee to be determined after all students are registered
             </span>
         }
         else
         {
-            <strong>@ParticipationObjectUI.PrintPlanFee(subscriptionPlan, Model.OwnerAccount, displayCheckoutPrice)</strong>
+            <span>
+                <strong>@ParticipationObjectUI.PrintPlanFee(subscriptionPlan, Model.OwnerAccount, displayCheckoutPrice)</strong>
+                every
+                <strong>@Model.SubscriptionPlans.First().BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong>
+            </span>
         }
 
-        every
-        <strong>@Model.SubscriptionPlans.First().BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong>
 
+        @*
         @if (subscriptionPlan.SplitCostEvenly)
         {
             <span>with <strong>@(Model.MinSeatsRequired ?? 1)</strong> to <strong>@Model.SeatsAvailable</strong> students attending</span>
             <span><br /><br />Final cost will be determined once all students are registered</span>
         }
+        *@
 
         @if (subscriptionPlan.RegFeeAsDownPayment && !Model.IsRegistrationFree)
         {

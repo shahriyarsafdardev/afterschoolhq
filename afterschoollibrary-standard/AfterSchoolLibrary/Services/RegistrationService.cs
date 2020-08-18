@@ -715,14 +715,14 @@ namespace AfterSchoolLibrary.Services
                     .ToList();
         }
 
-        public static bool IsAlreadyPaidFor(this Registration registration, SystemMessages msgs = null)
+        public static bool IsAlreadyPaidFor(this Registration registration, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var purchase = registration.GetPurchase(msgs);
-
-            if (purchase.IsNotEmpty())
-                return Transaction.GetCountByPurchaseId(purchase.ID.Value, false) > 0;
-
-            return false;
+            var participationObject = registration.GetFirstParticipationObject(msgs, dc);
+            var submittedRecord = registration.GetRegistrant(msgs, dc);
+            var paidFee = submittedRecord.GetAmountPaid(msgs, dc) > 0;
+            var hasSubscription = submittedRecord.GetActiveSubscription(participationObject, msgs, dc).IsNotEmpty();
+          
+            return paidFee && hasSubscription;
         }
 
         public static List<Registration> GetCurrentRelatedRegistrations(this Registration registration, SystemMessages msgs, DatabaseConnection dc = null)

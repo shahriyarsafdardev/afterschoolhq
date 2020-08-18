@@ -171,30 +171,9 @@ namespace AfterSchoolLibrary.Services
                 }
 
                 if (plan.SplitCostEvenly)
-                {
-                    // what's the value of the subscription plan with convenience fees and credit card fees
-                    var costWithAllFees = Billing.Platform.GetFinalTotalCost(plan.CostPerPeriod.Value, billingAccount);
-                    var individualCostWithFees = checkoutObject.GetSubscriptionCostTodayWithConvenienceFee(msgs, dc);
-
-                    if (checkoutObject.PaymentType == PaymentType.CreditCard)
-                        individualCostWithFees += checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc);
-
-                    var couponValue = costWithAllFees - individualCostWithFees;
-                    var coupon = Billing.StripeHelper.CreateCoupon(
-                                    couponName: $"{plan.StripePlanId}/{costWithAllFees.ToCurrency()}-{individualCostWithFees.ToCurrency()}/SplitFee",
-                                    discountValue: couponValue,
-                                    couponDuration: Billing.StripeCouponDuration.Forever,
-                                    durationInMonths: null,
-                                    couponAmountType: CouponAmountType.FlatAmount,
-                                    stripeAccountId: null,
-                                    msgs: msgs);
-
-                    stripeCouponId = coupon.Id;
-                }
+                    stripeCouponId = GetSplitEvenlyCoupon(plan, checkoutObject, billingAccount, msgs, dc);
                 else
-                {
                     stripeCouponId = GetACHCoupon(checkoutObject, billingAccount, plan, null, msgs, dc);
-                }
 
                 // create the subscription on the stripe account (could be added to main account or connected account)
                 var subscription = Billing.StripeHelper.CreateSubscription(
@@ -207,30 +186,71 @@ namespace AfterSchoolLibrary.Services
                                     stripeCouponId: stripeCouponId,
                                     metaData: new Dictionary<string, string>()
                                     {
-                                    { "BillingAccountUid", billingAccount.Uid.ToString() },
-                                    { "BillingAccountName", billingAccount.Name.ToString() },
-                                    { "PayingAccountUid", purchasingAccount.Uid.ToString() },
-                                    { "PayingAccountName", purchasingAccount.Name.ToString() },
-                                    { "ParticipationObjectType", checkoutObject.ParticipationObject.ObjectType.ToString() },
-                                    { "ParticipationObjectName", checkoutObject.ParticipationObject.Name },
+                                        { "BillingAccountUid", billingAccount.Uid.ToString() },
+                                        { "BillingAccountName", billingAccount.Name.ToString() },
+                                        { "PayingAccountUid", purchasingAccount.Uid.ToString() },
+                                        { "PayingAccountName", purchasingAccount.Name.ToString() },
+                                        { "ParticipationObjectType", checkoutObject.ParticipationObject.ObjectType.ToString() },
+                                        { "ParticipationObjectName", checkoutObject.ParticipationObject.Name },
                                     },
                                     msgs: msgs);
 
                 if (msgs.HasErrors())
                     return;
 
+                if (plan.RegFeeAsDownPayment && submittedRecord.GetAmountPaid(msgs, dc) > 0)
+                    Billing.StripeHelper.CreateCustomerBalanceTransaction(
+                        subscription.CustomerId,
+                        participationObject.GetCheckoutCostWithConvenienceFee() * -1,
+                        "Credit for registration fee payment",
+                        new Dictionary<string, string>()
+                        {
+                            { "Subscription Id", subscription.Id },
+                            { "Plan Id", subscription.Plan.Id },
+                            { "BillingAccountUid", billingAccount.Uid.ToString() },
+                            { "BillingAccountName", billingAccount.Name.ToString() },
+                            { "PayingAccountUid", purchasingAccount.Uid.ToString() },
+                            { "PayingAccountName", purchasingAccount.Name.ToString() },
+                            { "ParticipationObjectType", checkoutObject.ParticipationObject.ObjectType.ToString() },
+                            { "ParticipationObjectName", checkoutObject.ParticipationObject.Name },
+                        },
+                        msgs);
+
                 var purchase = checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc);
+                var feeObject = GetFeeObject(checkoutObject, billingAccount, plan, msgs, dc);
 
                 checkoutObject.RegistrantSubscriptionPlan = plan.AddRegistrant(
                                                                 submittedRecord,
                                                                 startDateTime,
                                                                 purchase,
                                                                 subscription.Id,
-                                                                GetFeeObject(checkoutObject, billingAccount, plan, msgs, dc),
+                                                                feeObject,
                                                                 loggedInUser,
                                                                 msgs,
                                                                 dc);
             }
+        }
+
+        private static string GetSplitEvenlyCoupon(SubscriptionPlan plan, CheckoutObject checkoutObject, Account billingAccount, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            // what's the value of the subscription plan with convenience fees and credit card fees
+            var costWithAllFees = Billing.Platform.GetFinalTotalCost(plan.CostPerPeriod.Value, billingAccount);
+            var individualCostWithFees = checkoutObject.GetSubscriptionCostTodayWithConvenienceFee(msgs, dc);
+
+            if (checkoutObject.PaymentType == PaymentType.CreditCard)
+                individualCostWithFees += checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc);
+
+            var couponValue = costWithAllFees - individualCostWithFees;
+            var coupon = Billing.StripeHelper.CreateCoupon(
+                            couponName: $"{plan.StripePlanId}/{costWithAllFees.ToCurrency()}-{individualCostWithFees.ToCurrency()}/SplitFee",
+                            discountValue: couponValue,
+                            couponDuration: Billing.StripeCouponDuration.Forever,
+                            durationInMonths: null,
+                            couponAmountType: CouponAmountType.FlatAmount,
+                            stripeAccountId: null,
+                            msgs: msgs);
+
+            return coupon.Id;
         }
 
         /// <summary>

@@ -2789,6 +2789,10 @@ namespace AfterSchoolLibrary.Services
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
+                    // TODO: Decide if master account registrant should be added to plans or the account copy
+                    // get the registrant record that was created just for the account
+                    var submittedRecord = checkoutObject.Registration.GetRegistrant(amsgs, adc);
+
                     AccountService.ProcessRegistrationWithoutPayment(
                         checkoutObject: checkoutObject,
                         sendConfirmationEmail: false,
@@ -2797,18 +2801,18 @@ namespace AfterSchoolLibrary.Services
                         dc: adc);
 
                     // process payment by to account, includes registration fee
-                    if (!checkoutObject.ParticipationObject.IsRegistrationFree && checkoutObject.PaymentPlan.IsEmpty())
+                    var isRegFree = checkoutObject.ParticipationObject.IsRegistrationFree;
+                    var hasPaymentPlan = checkoutObject.PaymentPlan.IsNotEmpty();
+                    var hasSubscription = checkoutObject.SubscriptionPlan.IsNotEmpty();
+                    var alreadyPaidRegFee = submittedRecord.GetAmountPaid(msgs, dc) > 0;
+
+                    if (!isRegFree && !hasPaymentPlan && !alreadyPaidRegFee)
                         AccountService.ProcessRegistrationFee(checkoutObject, loggedInUser, amsgs, adc);
 
                     // Process Subscriptions separately, don't charge all at once for the registration Fee
-
-                    // TODO: Decide if master account registrant should be added to plans or the account copy
-                    // get the registrant record that was created just for the account
-                    var submittedRecord = checkoutObject.Registration.GetRegistrant(amsgs, adc);
-
                     // if they have a subscription plan
                     // will also process registration fees
-                    if (checkoutObject.SubscriptionPlan.IsNotEmpty())
+                    if (hasSubscription)
                         submittedRecord.StartSubscriptionPlan(
                             checkoutObject: checkoutObject,
                             loggedInUser: loggedInUser,
@@ -2816,7 +2820,7 @@ namespace AfterSchoolLibrary.Services
                             dc: adc);
 
                     // if they have a payment plan
-                    if (checkoutObject.PaymentPlan.IsNotEmpty())
+                    if (hasPaymentPlan)
                     {
                         // create a stripe coupon if needed
                         var coupon = checkoutObject.Coupon;

@@ -11,6 +11,7 @@
     var accountCanAcceptPayments = (bool)ViewBag.AccountCanAcceptPayments;
     var paymentAccount = participationObject.PaymentAccount;
     var subscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault();
+    var registrant = registration.GetRegistrant();    
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -19,19 +20,26 @@
 
 @helper PrintSubscriptionCost(SubscriptionPlan plan, ParticipationObject participationObject, bool includePlus = true)
 {
-    if (plan.IsNotEmpty() && (!plan.SplitCostEvenly || participationObject.RegistrationFinalized))
+    if (plan.IsNotEmpty())
     {
-        var planStartDate = SessionVariables.CurrentRegistrant.GetPlanStartDate(plan, participationObject);
-        var startDateText = "today";
-
-        if (planStartDate.Date != DateTime.UtcNow.Date)
+        if (!plan.SplitCostEvenly || participationObject.RegistrationFinalized)
         {
-            startDateText = planStartDate.ToLongDateString();
-        }
+            var planStartDate = SessionVariables.CurrentRegistrant.GetPlanStartDate(plan, participationObject);
+            var startDateText = "today";
 
-        <span>
-            @(includePlus ? "plus a" : "") subscription of <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong> every <strong>@plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong> starting <strong>@startDateText</strong>
-        </span>
+            if (planStartDate.Date != DateTime.UtcNow.Date)
+            {
+                startDateText = planStartDate.ToLongDateString();
+            }
+
+            <span>
+                @(includePlus ? "plus a" : "") subscription of <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong> every <strong>@plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong> starting <strong>@startDateText</strong>
+            </span>
+        }
+        else if (plan.RegFeeAsDownPayment)
+        {
+            <span>which will count towards your first subscription payment</span>
+        }
     }
 }
 
@@ -130,7 +138,7 @@
                     {
                         <div class="row">
                             <div class="col-md-6 col-md-offset-3 col-sm-12 text-center text-medium-small">
-                                @if (!participationObject.IsRegistrationFree)
+                                @if (!participationObject.IsRegistrationFree && (!subscriptionPlan.SplitCostEvenly || registrant.GetAmountPaid() == 0))
                                 {
                                     <p>
                                         Pay <strong>@participationObject.GetCheckoutCostWithConvenienceFee().ToCurrency()</strong> today @PrintSubscriptionCost(subscriptionPlan, participationObject)
@@ -160,10 +168,17 @@
                                 <tbody>
                                     @if (!participationObject.IsRegistrationFree)
                                     {
+                                        var regFeeToday = participationObject.GetCheckoutCostWithConvenienceFee().ToString("0.00");
+
+                                        if (subscriptionPlan.IsNotEmpty() && subscriptionPlan.SplitCostEvenly && participationObject.RegistrationFinalized)
+                                        {
+                                            regFeeToday = "0.00";
+                                        }
+
                                         <tr id="registration-fee-row">
                                             <td>Registration Fee</td>
                                             <td class="text-right">
-                                                <span id="fee-total-value" class="hide">@participationObject.GetCheckoutCostWithConvenienceFee().ToString("0.00")</span>
+                                                <span id="fee-total-value" class="hide">@regFeeToday</span>
                                                 <span>@participationObject.GetCheckoutCostWithConvenienceFee().ToCurrency()*</span>
                                             </td>
                                             <td></td>
@@ -190,12 +205,11 @@
                                     }
 
                                     @if (participationObject.SubscriptionPlans.Any())
-                                    {
-                                        var plan = participationObject.SubscriptionPlans.First();
-                                        var subpricetoday = plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount);
-                                        var subtransfeetoday = plan.GetCreditCardFee(paymentAccount);
+                                    {                                        
+                                        var subpricetoday = subscriptionPlan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount);
+                                        var subtransfeetoday = subscriptionPlan.GetCreditCardFee(paymentAccount);
 
-                                        if (plan.SplitCostEvenly && !participationObject.RegistrationFinalized)
+                                        if (subscriptionPlan.SplitCostEvenly && !participationObject.RegistrationFinalized)
                                         {
                                             subpricetoday = 0;
                                             subtransfeetoday = 0;
@@ -207,11 +221,11 @@
                                                 <span id="subscription-total-value" class="hide">@subpricetoday</span>
                                                 <span id="subscription-asf-value" class="hide">0</span>
                                                 <span id="subscription-ccf-value" class="hide">@subtransfeetoday</span>
-                                                @plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()*
+                                                @subscriptionPlan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()*
                                             </td>
                                             <td>
                                                 per
-                                                <strong>@plan.BillingPeriodTypeId.ToString().ToLower()</strong>
+                                                <strong>@subscriptionPlan.BillingPeriodTypeId.ToString().ToLower()</strong>
                                             </td>
                                         </tr>
                                     }
