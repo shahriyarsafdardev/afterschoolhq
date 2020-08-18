@@ -494,7 +494,7 @@ namespace AfterSchoolLibrary.Helpers
 
                 cost = checkoutObject.GetSubscriptionCostTodayWithConvenienceFee(msgs, dc).ToCurrency();
 
-                if (isRegFree)
+                if (isRegFree || (splitCostEvenly && regFinalized))
                     ccFee = checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc).ToCurrency();
                 else
                     ccFee = checkoutObject.GetTotalCreditCardFeesToday(msgs, dc).ToCurrency();
