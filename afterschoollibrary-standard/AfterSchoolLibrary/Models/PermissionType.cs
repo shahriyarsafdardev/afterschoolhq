@@ -33,5 +33,8 @@ public enum PermissionType
 	FieldTripsManage,
 	PermissionSlipsView,
 	PermissionSlipsEdit,
-	PermissionSlipsManage
+	PermissionSlipsManage,
+	LearningPodsView,
+	LearningPodsEdit,
+	LearningPodsManage
 }

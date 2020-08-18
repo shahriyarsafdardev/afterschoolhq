@@ -28,6 +28,7 @@
             {
                 btnText = $"Withdrawn";
                 disabledText = " disabled=\"disabled\" ";
+                btnUrl = "#";
             }
         }
         else if (!Model.HasConsentFor(participationObject))
@@ -38,11 +39,24 @@
         {
             btnText = $"On Waiting List";
             disabledText = " disabled=\"disabled\" ";
+            btnUrl = "#";
         }
         else if (!Model.IsReservedAndPaidFor(participationObject, null) && !Model.IsAppliedFor(participationObject, null) && !Model.MasterRegistrantHasPlan(participationObject))
         {
-            btnText = "Pay Now";
-            btnUrl = Url.Action("makepayment", "account", new { id = Model.GetRegistrationWithParticipationObject(participationObject).Uid });
+            var subscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault();
+
+            if (subscriptionPlan.IsNotEmpty() && subscriptionPlan.SplitCostEvenly && !participationObject.RegistrationFinalized)
+            {
+                btnText = "Awaiting Finalization";
+                disabledText = " disabled=\"disabled\" ";
+                btnUrl = "#";
+            }
+            else
+            {
+                btnText = "Pay Now";
+                btnUrl = Url.Action("makepayment", "account", new { id = Model.GetRegistrationWithParticipationObject(participationObject).Uid });
+            }
+
         }
         else if (participationObject.IsSession())
         {
@@ -52,6 +66,7 @@
         {
             btnText = $"Already {registered}";
             disabledText = " disabled=\"disabled\" ";
+            btnUrl = "#";
         }
     }
     else
@@ -60,6 +75,7 @@
         {
             btnText = "Ineligible - Grade";
             disabledText = " disabled=\"disabled\" ";
+            btnUrl = "#";
         }
         else
         {

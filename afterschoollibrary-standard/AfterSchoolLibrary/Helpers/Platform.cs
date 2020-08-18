@@ -21,9 +21,9 @@ namespace AfterSchoolLibrary.Billing
             // always round up to nearest dollar or .5
             // result should always be 3.50 or 4.00 or 2.50 or 3.00, etc.
             if (cost <= 50)
-                return (Math.Ceiling(stripeFee * 2) / 2) - .01M;
+                return (Math.Ceiling(stripeFee * 2) / 2); //  - .01M;
 
-            return Math.Ceiling(stripeFee) - .01M;
+            return Math.Ceiling(stripeFee); // - .01M;
         }
 
         public static decimal GetConvenienceFee(decimal cost)
@@ -40,7 +40,7 @@ namespace AfterSchoolLibrary.Billing
             if (cost > 50)
                 finalFee = Math.Ceiling(fee);
 
-            return Math.Max(finalFee - .01M, 0.49M) + (Math.Ceiling(cost) - cost); // .KeepInRange(0.49M, 9.99M)
+            return Math.Max(finalFee, 0.50M) + (Math.Ceiling(cost) - cost); // Math.Max(finalFee - .01M, 0.59M) + (Math.Ceiling(cost) - cost); // .KeepInRange(0.49M, 9.99M)
         }
 
         public static decimal GetTotalFees(decimal cost, Account billingAccount)

@@ -197,32 +197,6 @@ namespace AfterSchoolLibrary.Services
                 .FirstOrDefault();
         }
 
-        public static SubscriptionPlan AddPaymentPlan(this Activity activity, decimal costPerPeriod, BillingPeriodType billingPeriodType, int totalPeriods, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            return SubscriptionPlanService.CreateNewPaymentPlan(
-                activity.GetAccount(msgs, dc),
-                activity,
-                costPerPeriod, 
-                billingPeriodType, 
-                totalPeriods, 
-                loggedInUser, 
-                msgs, 
-                dc);
-        }
-
-        public static SubscriptionPlan AddSubscriptionPlan(this Activity activity, decimal costPerPeriod, BillingPeriodType billingPeriodType, bool doesAutoRenew, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            return SubscriptionPlanService.CreateNewSubscriptionPlan(
-                activity.GetAccount(msgs, dc), 
-                activity,
-                costPerPeriod, 
-                billingPeriodType,
-                doesAutoRenew, 
-                loggedInUser, 
-                msgs, 
-                dc);
-        }
-
         public static List<SubscriptionPlan> GetActivePaymentPlans(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return SubscriptionPlan.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, SubscriptionPlanType.PaymentPlan, msgs, dc)
@@ -693,6 +667,7 @@ namespace AfterSchoolLibrary.Services
                 InstructorId = activity.InstructorId,
                 IsInviteOnly = activity.IsInviteOnly,
                 ActivityLocationTypeId = activity.ActivityLocationTypeId,
+                MinSeatsRequired = activity.MinSeatsRequired,                
             };
         }
 
@@ -845,6 +820,10 @@ namespace AfterSchoolLibrary.Services
             var providerphone = values.GetValueOrDefault("providerphone");
             var type = values.GetValueOrDefault("type");
             var virtuallocation = values.GetValueOrDefault("virtuallocation");
+            var inviteonly = values.GetValueOrDefault("inviteonly");
+            var minseatsrequired = values.GetValueOrDefault("minseatsrequired");
+            var splitcostevenly = values.GetValueOrDefault("splitcostevenly");
+            var regfeedownpayment = values.GetValueOrDefault("regfeedownpayment");
 
             var activityType = ActivityType.NotSet;
 
@@ -965,6 +944,9 @@ namespace AfterSchoolLibrary.Services
                     activity.GradeLevelEnd = null;
             }
 
+            if (minseatsrequired.IsNumber())
+                activity.MinSeatsRequired = minseatsrequired.ToString().ToInteger();
+
             if (genderrestrictions.IsNumber())
                 activity.GenderRestriction = (GenderRestrictionType)genderrestrictions.ToString().ToInteger();
 
@@ -1019,8 +1001,10 @@ namespace AfterSchoolLibrary.Services
             }
 
             if (accountactivitygroup.IsNotEmpty())
-                activity.AccountActivityGroupId = accountactivitygroup.ToString().ToInteger();            
-                
+                activity.AccountActivityGroupId = accountactivitygroup.ToString().ToInteger();
+
+            if (inviteonly != null)
+                activity.IsInviteOnly = inviteonly.ToString().ToBoolean();                
 
             if (msgs.HasNoErrors())
             {
@@ -1184,6 +1168,8 @@ namespace AfterSchoolLibrary.Services
                                 hassubscriptionplan.IfEmpty(""),
                                 subscriptionplancost.IfEmpty(""),
                                 subscriptionplanperiod.IfEmpty(""),
+                                splitcostevenly.IfEmpty(""),
+                                regfeedownpayment.IfEmpty(""),
                                 loggedInUserId,
                                 adc
                             ));
@@ -1298,36 +1284,44 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
-        private static SystemMessages SetupSubscriptionPlan(this Activity activity, Account account, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, int loggedInUserId, DatabaseConnection dc = null)
+        private static SystemMessages SetupSubscriptionPlan(this Activity activity, Account account, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string splitcostevenly, string regfeedownpayment, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            var hasChanges = true;
+            var hasStripeChanges = true;
 
             // first: desactivate the current plan if there are any changes
             if (activity.HasSubscriptionPlan(msgs, dc))
             {
                 var plan = activity.GetSubscriptionPlan(msgs, dc);
 
-                hasChanges = plan.CostPerPeriod.Value != subscriptionplancost.ToDecimal() || 
-                            plan.BillingPeriodTypeId != (BillingPeriodType)subscriptionplanperiod.ToInteger();
+                hasStripeChanges = plan.CostPerPeriod.Value != subscriptionplancost.ToDecimal() || 
+                                    plan.BillingPeriodTypeId != (BillingPeriodType)subscriptionplanperiod.ToInteger();
 
-                if (hasChanges || !hassubscriptionplan.ToBoolean())
+                // if has stripe changes or subscription option has been turned off
+                if (hasStripeChanges || !hassubscriptionplan.ToBoolean())
                     msgs.AddRange(plan.Deactivate(loggedInUserId, dc));
+                else
+                {
+                    plan.RegFeeAsDownPayment = regfeedownpayment.ToBoolean();
+                    plan.SplitCostEvenly = splitcostevenly.ToBoolean();
+                    msgs.AddRange(plan.Save(dc));
+                }    
             }
 
             // if the subscription plan option(UI) is activated
-            if (hassubscriptionplan.ToBoolean() && hasChanges)
+            if (hassubscriptionplan.ToBoolean() && hasStripeChanges)
                 SubscriptionPlanService.CreateNewSubscriptionPlan(
-                    account,
-                    ParticipationObjectType.Activity,
-                    activity.ID.Value,
-                    subscriptionplancost.ToDecimal(),
-                    (BillingPeriodType)subscriptionplanperiod.ToInteger(),
-                    true,
-                    loggedInUserId,
-                    msgs,
-                    dc
-                );
+                    planOwner: account,
+                    participationObjectType: ParticipationObjectType.Activity,
+                    participationObjectId: activity.ID.Value,
+                    costPerPeriod: subscriptionplancost.ToDecimal(),
+                    billingPeriodType: (BillingPeriodType)subscriptionplanperiod.ToInteger(),
+                    doesAutoRenew: true,
+                    splitCostEvenly: splitcostevenly.ToBoolean(),
+                    regFeeAsDownPayment: regfeedownpayment.ToBoolean(),
+                    loggedInUserId: loggedInUserId,
+                    msgs: msgs,
+                    dc: dc);
 
             return msgs;
         }
@@ -2338,6 +2332,22 @@ namespace AfterSchoolLibrary.Services
                         emailmessage,
                         msgs);
                 });
+        }
+
+        public static void FinalizeRegistrations(this Activity activity, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            activity.RegistrationFinalized = true;
+            activity.LastModifiedBy = loggedInUser?.ID;
+            activity.LastModifiedDate = DateTime.UtcNow;
+            msgs.AddRange(activity.Save(dc));
+
+            var ras = activity.GetRegistrantActivities(msgs, dc);
+
+            ras.ForEach(ra => {
+                if (ra.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment)
+                    msgs.AddRange(ra.SendPaymentReminder());
+            });
+
         }
     }
 }

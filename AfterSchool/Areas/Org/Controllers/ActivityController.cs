@@ -188,7 +188,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd, string type)
+        public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd, string type, string inviteonly, string minseatsrequired)
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
@@ -210,7 +210,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 { "form", form },
                 { "regmode", regmode },
                 { "group", group },
-                { "type", type }
+                { "type", type },
+                { "inviteonly", inviteonly.IsBoolean().ToString() },
+                { "minseatsrequired", minseatsrequired },
             };
 
             activity = Activity.LoadByUid(id.ToGuid());
@@ -267,6 +269,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     case "next":
                         switch(activity.ActivityTypeId)
                         {
+                            case ActivityType.LearningPod:
                             case ActivityType.Activity:
                                 ViewBag.ActiveMenu = "EditRestrictions";
                                 return View("EditRestrictions", activity);
@@ -475,7 +478,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         ViewBag.ActiveMenu = "EditDetails";
                         return View("EditDetails", activity);
                     case "next":
-                        if (activity.ActivityTypeId == ActivityType.Activity)
+                        if (activity.ActivityTypeId.In(new ActivityType[] { ActivityType.Activity, ActivityType.LearningPod }))
                         {
                             ViewBag.ActiveMenu = "EditLocation";
                             return View("EditLocation", activity);
@@ -827,7 +830,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditCost(string id, string cost, string costdescription, string acceptpaypal, string acceptcreditcard, string allowtopaylater, string cmd, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, string paymentplanpaymentstarttype)
+        public ActionResult EditCost(string id, string cost, string costdescription, string acceptpaypal, string acceptcreditcard, string allowtopaylater, string cmd, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, string paymentplanpaymentstarttype, string splitcostevenly, string regfeedownpayment)
         {
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid());
@@ -848,7 +851,9 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "paymentplancost", paymentplancost },
                     { "paymentplanperiod", paymentplanperiod },
                     { "paymentplanperiodnumber", paymentplanperiodnumber },
-                    { "paymentplanpaymentstarttype", paymentplanpaymentstarttype }
+                    { "paymentplanpaymentstarttype", paymentplanpaymentstarttype },
+                    { "splitcostevenly", splitcostevenly.IsBoolean().ToString() },
+                    { "regfeedownpayment", regfeedownpayment.IsBoolean().ToString() },
                 };
 
                 activity = ActivityService.EditExisting(
@@ -964,7 +969,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult Copy(string id, string activitynamecopy, string usesameformcopy, string copywithregistrants)
+        public ActionResult Copy(string id, string activitynamecopy, string usesameformcopy, string copywithregistrants, string type)
         {
             var msgs = new SystemMessages();
             var activityToCopy = Activity.LoadByUid(id.ToGuid());
@@ -980,7 +985,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
                 return RedirectToAction("editsetup", new { id = activity.Uid, isnew = 1, source = Request["source"] });
 
-            return RedirectToAction("index", "activity", new { copyerror = true });
+            return RedirectToAction("index", "activity", new { copyerror = true, type });
         }
 
         [HttpGet]
@@ -1099,9 +1104,21 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Registrants(string id, string atype)
+        public ActionResult FinalizeRegistration(string id, string atype)
         {
-            var activity = Activity.LoadByUid(id.ToGuid());
+            var msgs = new SystemMessages();
+            var activity = Activity.LoadByUid(id.ToGuid(), msgs);
+
+            activity.FinalizeRegistrations(SessionVariables.CurrentUser, msgs);
+
+            var msg = msgs.HasErrors() ? "Error Finalizing Registration" : "Registration Finalized";
+
+            return RedirectToAction("registrants", new { id, atype, msg });
+        }
+
+        private void RegistrantsViewBag(Activity activity, string atype, string msg)
+        {
+            var msgs = new SystemMessages();
             var rat = RegistrationAssignmentType.NotSet;
 
             List<RegistrantActivity> ras = null;
@@ -1119,10 +1136,20 @@ namespace AfterSchool.Areas.Org.Controllers
             if (rat != RegistrationAssignmentType.NotSet)
                 ras = ras.Where(x => x.AssignmentTypeId == rat).OrderBy(x => x.SeatIndex).ToList();
 
-            ViewBag.Messages = new SystemMessages();
+            if (msg.IsNotEmpty())
+                msgs.Add(msg, msg.ToLower().Contains("error") ? MessageType.UserError : MessageType.Success);
+
+            ViewBag.Messages = msgs;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.Registrants = ras;
             ViewBag.AssignmentType = rat;
+        }
+
+        [HttpGet]
+        public ActionResult Registrants(string id, string atype, string msg)
+        {
+            var activity = Activity.LoadByUid(id.ToGuid());
+            RegistrantsViewBag(activity, atype, msg);
             return View(activity);
         }
 
