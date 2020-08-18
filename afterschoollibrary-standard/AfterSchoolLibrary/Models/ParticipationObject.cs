@@ -703,7 +703,7 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetCreditCardFee(FeesPaidByType feesPaidByType)
         {
-            if (Cost.HasValue && PaymentAccount.CreditCardFeesPaidBy == feesPaidByType))
+            if (Cost.HasValue && PaymentAccount.CreditCardFeesPaidBy == feesPaidByType)
                 return Billing.Platform.GetCreditCardFee(Cost.Value, PaymentAccount);
 
             return 0;
