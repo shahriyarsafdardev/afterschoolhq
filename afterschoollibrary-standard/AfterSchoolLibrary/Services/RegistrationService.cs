@@ -117,8 +117,10 @@ namespace AfterSchoolLibrary.Services
                     return RegistrationAssignmentType.ReservedPendingParentalConsent;
 
                 // if the person didn't pay yet
-                if (!participationObject.IsFree &&
-                    (ra.IsEmpty() || participationObject.GetAmountPaidByRegistrant(ra.RegistrantId.Value, msgs, dc) == 0.ToDecimal()))
+                var isCompletelyFree = participationObject.IsFree;
+                var noPayments = ra.IsEmpty() || participationObject.GetAmountPaidByRegistrant(ra.RegistrantId.Value, msgs, dc) == 0.ToDecimal();
+
+                if (!isCompletelyFree && noPayments)
                     return RegistrationAssignmentType.ReservedPendingPayment;
 
                 return RegistrationAssignmentType.Reserved;
@@ -199,10 +201,7 @@ namespace AfterSchoolLibrary.Services
         {
             // NOTE: getting only one activity per registration at the moment, 
             // but could be problem in the future
-            var ra = registration.GetRegistrantActivities(msgs, dc)
-                        .Where(x => x.ParticipationObjectId == participationObject.ObjectID && 
-                                    x.ParticipationObjectTypeId == participationObject.ObjectType)
-                        .FirstOrDefault();
+            var ra = registration.GetRegistrantActivity(participationObject, msgs, dc);
 
             var assignmentType = GetRegistrationAssignmentType(
                                     participationObject,
@@ -769,6 +768,14 @@ namespace AfterSchoolLibrary.Services
                 return registrant.GetMasterRegistrant(msgs, dc);
 
             return null;
+        }
+
+        public static RegistrantActivity GetRegistrantActivity(this Registration registration, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return registration.GetRegistrantActivities(msgs, dc)
+                        .Where(x => x.ParticipationObjectId == participationObject.ObjectID &&
+                                    x.ParticipationObjectTypeId == participationObject.ObjectType)
+                        .FirstOrDefault();
         }
 
         public static List<RegistrantActivity> GetRegistrantActivities(this Registration registration, SystemMessages msgs = null, DatabaseConnection dc = null)

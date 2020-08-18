@@ -229,6 +229,11 @@ namespace AfterSchoolLibrary.Services
                                                                 msgs,
                                                                 dc);
             }
+            else
+            {
+                var ra = checkoutObject.Registration.GetRegistrantActivity(participationObject, msgs, dc);
+                ra.ChangeSeatAssignment(RegistrationAssignmentType.ReservedPendingPayment, loggedInUser, msgs, dc);
+            }
         }
 
         private static string GetSplitEvenlyCoupon(SubscriptionPlan plan, CheckoutObject checkoutObject, Account billingAccount, SystemMessages msgs, DatabaseConnection dc = null)
