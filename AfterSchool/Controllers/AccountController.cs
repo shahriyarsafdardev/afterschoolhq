@@ -2418,7 +2418,7 @@ namespace AfterSchool.Controllers
                                 accountActivityGroupId: participationObject.GetAccountActivityGroupId(),
                                 periodId: period?.ID,
                                 esignature: signature,      
-                                userAgent: Request.UserAgent.ToString(),
+                                userAgent: Request.UserAgent.ToString().MaxChars(400),
                                 ipAddress: GetUserHostAddress(),
                                 loggedInUserId: currentUser.ID.Value,
                                 msgs: msgs,
@@ -2427,7 +2427,7 @@ namespace AfterSchool.Controllers
             else
                 registration.AddESignature(
                     esignature: signature,
-                    userAgent: Request.UserAgent.ToString(),
+                    userAgent: Request.UserAgent.ToString().MaxChars(400),
                     ipAddress: GetUserHostAddress(),
                     loggedInUser: currentUser,
                     msgs: msgs,

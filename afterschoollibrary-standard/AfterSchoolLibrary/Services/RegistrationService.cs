@@ -117,8 +117,10 @@ namespace AfterSchoolLibrary.Services
                     return RegistrationAssignmentType.ReservedPendingParentalConsent;
 
                 // if the person didn't pay yet
-                if (!participationObject.IsFree &&
-                    (ra.IsEmpty() || participationObject.GetAmountPaidByRegistrant(ra.RegistrantId.Value, msgs, dc) == 0.ToDecimal()))
+                var isCompletelyFree = participationObject.IsFree;
+                var noPayments = ra.IsEmpty() || participationObject.GetAmountPaidByRegistrant(ra.RegistrantId.Value, msgs, dc) == 0.ToDecimal();
+
+                if (!isCompletelyFree && noPayments)
                     return RegistrationAssignmentType.ReservedPendingPayment;
 
                 return RegistrationAssignmentType.Reserved;
@@ -199,10 +201,7 @@ namespace AfterSchoolLibrary.Services
         {
             // NOTE: getting only one activity per registration at the moment, 
             // but could be problem in the future
-            var ra = registration.GetRegistrantActivities(msgs, dc)
-                        .Where(x => x.ParticipationObjectId == participationObject.ObjectID && 
-                                    x.ParticipationObjectTypeId == participationObject.ObjectType)
-                        .FirstOrDefault();
+            var ra = registration.GetRegistrantActivity(participationObject, msgs, dc);
 
             var assignmentType = GetRegistrationAssignmentType(
                                     participationObject,
@@ -715,14 +714,14 @@ namespace AfterSchoolLibrary.Services
                     .ToList();
         }
 
-        public static bool IsAlreadyPaidFor(this Registration registration, SystemMessages msgs = null)
+        public static bool IsAlreadyPaidFor(this Registration registration, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var purchase = registration.GetPurchase(msgs);
-
-            if (purchase.IsNotEmpty())
-                return Transaction.GetCountByPurchaseId(purchase.ID.Value, false) > 0;
-
-            return false;
+            var participationObject = registration.GetFirstParticipationObject(msgs, dc);
+            var submittedRecord = registration.GetRegistrant(msgs, dc);
+            var paidFee = submittedRecord.GetAmountPaid(msgs, dc) > 0;
+            var hasSubscription = submittedRecord.GetActiveSubscription(participationObject, msgs, dc).IsNotEmpty();
+          
+            return paidFee && hasSubscription;
         }
 
         public static List<Registration> GetCurrentRelatedRegistrations(this Registration registration, SystemMessages msgs, DatabaseConnection dc = null)
@@ -769,6 +768,14 @@ namespace AfterSchoolLibrary.Services
                 return registrant.GetMasterRegistrant(msgs, dc);
 
             return null;
+        }
+
+        public static RegistrantActivity GetRegistrantActivity(this Registration registration, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return registration.GetRegistrantActivities(msgs, dc)
+                        .Where(x => x.ParticipationObjectId == participationObject.ObjectID &&
+                                    x.ParticipationObjectTypeId == participationObject.ObjectType)
+                        .FirstOrDefault();
         }
 
         public static List<RegistrantActivity> GetRegistrantActivities(this Registration registration, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -944,16 +951,17 @@ namespace AfterSchoolLibrary.Services
 
             if (registrantActivities.Any())
             {
+                var registrant = registration.GetRegistrant(msgs, dc);
                 // this only works now because we're doing on registration at a time
+                var participationObject = registration.GetFirstParticipationObject(msgs, dc);
                 var registrantActivity = registrantActivities.First();
+              
+                var paidFees = registrantActivity.GetAmountPaid(msgs, dc) > 0;
+                var registrationFeeRequired = !participationObject.IsRegistrationFree;
+                var requiresSubscription = participationObject.SubscriptionPlans.Any();
+                var hasActiveSubscription = registrant.HasActiveSubscription(participationObject, msgs, dc);
 
-                return ActivityPayment.GetTotalPaidByParticipationObjectByRegistrant(
-                    registrantActivity.ParticipationObjectId.Value,
-                    registrantActivity.ParticipationObjectTypeId,
-                    registration.RegistrantId.Value,
-                    false,
-                    msgs,
-                    dc) > 0;
+                return (!registrationFeeRequired || paidFees) && (!requiresSubscription || hasActiveSubscription);
             }
 
             msgs.Add("Incomplete registration", MessageType.UserError);

@@ -220,9 +220,9 @@
                                 </label>
                                 <div class="col-md-9">
                                     @{ Html.RenderPartial(
-                                           "~/Views/Shared/_SwitchButton.cshtml",
-                                           Model.IsOpenDuringCovid,
-                                           new ViewDataDictionary() { { "checkboxname", "opencovid" }, { "checkboxid", "opencovid" } });
+                                            "~/Views/Shared/_SwitchButton.cshtml",
+                                            Model.IsOpenDuringCovid,
+                                            new ViewDataDictionary() { { "checkboxname", "opencovid" }, { "checkboxid", "opencovid" } });
                                     }
                                 </div>
                             </div>
@@ -233,9 +233,9 @@
                                 </label>
                                 <div class="col-md-9">
                                     @{ Html.RenderPartial(
-                                           "~/Views/Shared/_SwitchButton.cshtml",
-                                           Model.IsELearningCenter,
-                                           new ViewDataDictionary() { { "checkboxname", "elearningcenter" }, { "checkboxid", "elearningcenter" } });
+                                            "~/Views/Shared/_SwitchButton.cshtml",
+                                            Model.IsELearningCenter,
+                                            new ViewDataDictionary() { { "checkboxname", "elearningcenter" }, { "checkboxid", "elearningcenter" } });
                                     }
                                     <p class="text-muted">You host/care for students to assist e-learning during the school day</p>
                                 </div>
@@ -256,52 +256,34 @@
                             <h3>Photo Gallery</h3>
                         </div>
                         <div class="panel-body">
+                            <div class="form-group hide">
+                                <label class="col-md-3 control-label">
+                                    YouTube Video Url
+                                </label>
+                                <div class="col-md-9">
+                                    <input id="txtVideoUrl" name="videoUrl" class="form-control" type="text" value="@Model.VideoUrl" placeholder="https://youtube.com/your-video-url" />
+                                </div>
+                            </div>
                             <div class="form-group">
                                 <label class="col-sm-3 control-label">Photos</label>
                                 <div class="col-sm-9">
-
-                                    @*
-                        <span><input type="file" class="form-control photo-add hide" name="photos" id="photos" multiple accept=".jpg,.jpeg,.png" /></span>
-
-                        <div>
-                            @for (var i = 0; i < photos.Count; i++)
-                            {
-                                if (photos[i].ID.HasValue)
-                                {
-                                    <div class="photo-view-@i">
-                                        <img src="@photos[i].Value" width="50" />
-                                        <i class="s7-close icon-large pointer" onclick="removePhoto('@i')"></i>
-                                    </div>
-                                }
-                            }
-                        </div>
-                                    *@
-
-
-                                    @for (var i = 0; i < photos.Count; i++)
-                                    {
-                                        var id = $"new-{i}";
-                                        var hide = "";
-
-                                        if (photos[i].ID.HasValue)
+                                    <div class="input-group input-group-md xs-mb-15">
+                                        @if (photos != null)
                                         {
-                                            id = $"id-{photos[i].ID}";
-                                            hide = "hide";
+                                            foreach (var photo in photos)
+                                            {
+                                                if (photo.ID.HasValue)
+                                                {
+                                                    <div class="photo-view-@photo.ID">
+                                                        <img src="@photo.Value" width="50" />
+                                                        <i class="s7-close icon-large pointer" onclick="removePhoto('@photo.ID')"></i>
+                                                    </div>
+                                                }
+                                            }
                                         }
 
-                                        <div class="input-group input-group-md xs-mb-15">
-                                            @if (photos[i].ID.HasValue)
-                                            {
-                                                <div class="photo-view-@i">
-                                                    <img src="@photos[i].Value" width="50" />
-                                                    <i class="s7-close icon-large pointer" onclick="removePhoto('@i')"></i>
-                                                </div>
-                                            }
-
-                                            <span class="input-group-addon photo-add-@i @hide">@(i + 1)</span>
-                                            <span><input type="file" class="form-control photo-add-@i @hide" name="photo-@id" id="photo-@id" accept=".jpg,.jpeg,.png" /></span>
-                                        </div>
-                                    }
+                                        <input type="file" class="form-control" name="photos" multiple accept=".jpg,.jpeg,.png" onchange="countPhotos(this)" />
+                                    </div>
 
                                 </div>
                             </div>
@@ -447,14 +429,14 @@
                                 </label>
                                 <div class="col-md-9">
                                     @{ Html.RenderPartial(
-                                           "~/Views/Shared/_TextEditor.cshtml",
-                                           Model.About,
-                                           new ViewDataDictionary() {
+                                            "~/Views/Shared/_TextEditor.cshtml",
+                                            Model.About,
+                                            new ViewDataDictionary() {
                                             { "required", false },
                                             { "name", "about" },
                                             { "id", "about" }
-}
-                                       ); }
+                                        }
+                                        ); }
 
                                     <p class="text-muted">
                                         <em>Tell us what is special about what you do. Max of 4000 characters</em>
@@ -637,9 +619,9 @@
                                     </label>
                                     <div class="col-md-9">
                                         @{ Html.RenderPartial(
-                                                "~/Views/Shared/_SwitchButton.cshtml",
-                                                Model.IsAHQApproved,
-                                                new ViewDataDictionary() { { "checkboxname", "ahqapproved" }, { "checkboxid", "ahqapproved" } });
+                                                 "~/Views/Shared/_SwitchButton.cshtml",
+                                                 Model.IsAHQApproved,
+                                                 new ViewDataDictionary() { { "checkboxname", "ahqapproved" }, { "checkboxid", "ahqapproved" } });
                                         }
                                     </div>
                                 </div>
@@ -667,8 +649,46 @@
 
 <script>
     function removePhoto(id) {
-        $('.photo-view-' + id).addClass('hide');
-        $('.photo-add-' + id).removeClass('hide');
+        if (id) {
+            var url = '@Url.Action("RemoveAccountProperty", "Account", new { Area = "Org" })';
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: { id: id },
+                success: function (data) {
+                    if (data && data.IsSuccess == true) {
+                        $('.photo-view-' + id).addClass('hide');
+                        $('.photo-add-' + id).removeClass('hide');
+
+                        Notifications.showBar({
+                            title: 'Success',
+                            message: 'Photo removed successfully.',
+                            success: true
+                        });
+                    }
+                    else {
+                        Notifications.showBar({
+                            title: 'Error',
+                            message: 'Something went wrong, try again after sometime.',
+                            success: false
+                        });
+                        return false;
+                    }
+                }
+            });
+        }
+    }
+
+    function countPhotos(input) {
+        if (input.files.length > 6) {
+            Notifications.showBar({
+                title: 'Error',
+                message: 'Only 6 photos allowed to store in gallery.',
+                success: false
+            });
+            input.value = "";
+            return false;
+        }
     }
 </script>
 
@@ -699,6 +719,32 @@
         $('#teachingmethods').tagsinput({
             maxTags: 3
         });
+
+
+        $('#txtVideoUrl').blur(function () {
+            var url = $('#txtVideoUrl').val();
+            if (!validateYouTubeVideoUrl(url)) {
+                Notifications.showBar({
+                    title: 'Error',
+                    message: 'URL is not in correct format. Follow this <a target="_blank" style="color: yellow;" href="https://support.google.com/youtube/answer/57741?co=GENIE.Platform%3DDesktop&hl=en">Thread</a> to get proper URL of your video.',
+                    success: false
+                });
+
+                $('#txtVideoUrl').val('');
+                return false;
+            }            
+        });
+
+        function validateYouTubeVideoUrl(url) {
+            var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            var match = url.match(regExp);
+
+            if (match && match[2].length == 11) {
+                return true;
+            } else {                
+                return false;
+            }
+        }
     </script>
 
 }

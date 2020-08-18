@@ -965,6 +965,87 @@ namespace AfterSchoolLibrary.Billing
 
         #endregion
 
+        #region StripeCreditNotes
+
+        private static Stripe.CreditNoteService GetCreditNoteService()
+        {
+            return new Stripe.CreditNoteService(StripeClient);
+        }
+
+        public static Stripe.CreditNote CreateCreditNote(string invoiceId, decimal amount, string memo, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            CreditNote creditNote = null;
+
+            var options = new CreditNoteCreateOptions
+            {
+                Invoice = invoiceId,
+                CreditAmount = Convert.ToInt64(amount * 100),
+                Memo = memo,
+                Lines = new List<CreditNoteLineOptions>()
+                {
+                    new CreditNoteLineOptions()
+                    {
+                        Type = "custom_line_item",
+                        UnitAmount = Convert.ToInt64(amount * 100),
+                        Quantity = 1,
+                        Description = memo,
+                    }
+                }
+            };
+
+            try
+            {
+                creditNote = GetCreditNoteService().Create(options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Subscription was not created", MessageType.UserError);
+            }
+
+            return creditNote;
+        }
+
+        #endregion
+
+        #region CustomerBalanceTransaction
+
+        private static Stripe.CustomerBalanceTransactionService GetCustomerBalanceTransactionService()
+        {
+            return new Stripe.CustomerBalanceTransactionService(StripeClient);
+        }
+
+        public static Stripe.CustomerBalanceTransaction CreateCustomerBalanceTransaction(string customerId, decimal amount, string description, Dictionary<string, string> metaData, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            CustomerBalanceTransaction transaction = null;
+
+            var options = new CustomerBalanceTransactionCreateOptions
+            {
+                Amount = Convert.ToInt64(amount * 100),
+                Currency = "usd",
+                Description = description,
+                Metadata = metaData
+            };
+
+            try
+            {
+                transaction = GetCustomerBalanceTransactionService().Create(customerId, options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Balance transaction was not created", MessageType.UserError);
+            }
+
+            return transaction;
+        }
+
+        #endregion
+
         #region StripeSubscriptions
 
         private static Stripe.SubscriptionService GetSubscriptionService()
