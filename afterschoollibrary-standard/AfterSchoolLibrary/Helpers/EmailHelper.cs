@@ -34,8 +34,9 @@ namespace AfterSchoolLibrary.Helpers
         {
             var msgs = new SystemMessages();
             var registration = ra.GetRegistration();
+            var participationObject = ra.GetParticipationObject(msgs);
 
-            msgs.AddRange(SendPaymentReminder(ra.GetParticipationObject(msgs), registration));
+            msgs.AddRange(SendPaymentReminder(participationObject, registration));
 
             return msgs;
         }
@@ -46,7 +47,6 @@ namespace AfterSchoolLibrary.Helpers
             var registrant = registration.GetRegistrant(msgs);
             var masterRegistrant = registrant.GetMasterRegistrant(msgs);
             var parentOrGuardian = masterRegistrant.GetParentOrGuardian(msgs);
-            var isAfterSchool = participationObject.OwnerAccount.IsAfterSchool;
             var registering = "registering";      
 
             if (participationObject.RegistrationMode == RegistrationMode.Apply)
@@ -62,22 +62,23 @@ namespace AfterSchoolLibrary.Helpers
                 { "ActivityContactName", participationObject.ContactName },
                 { "ActivityContactEmail", participationObject.ContactEmail },
                 { "ActivityContactPhone", participationObject.ContactPhone },
-                { "ProductName", Utilities.AppName(participationObject.OwnerAccount.IsAfterSchool) }
+                { "ProductName", Utilities.AppName() },
+                { "StudentName", registrant.FirstName }
             };
 
-            var subject = $"You have a payment due for {participationObject.Name}";
+            var subject = $"It's time to finalize your registration for {registrant.FirstName}";
             var body = ProcessTemplate(
-                EmailTemplates.Payment_Reminder,
-                model,
-                "Payment_Reminder-1.02",
-                msgs);
+                        EmailTemplates.Payment_Reminder,
+                        model,
+                        "Payment_Reminder-1.03",
+                        msgs);
 
             var mailMsgs = SendGridHelper.SendMail(
-                fromEmail: Email.SendGridNoReplyEmailAddress(participationObject.OwnerAccount.IsAfterSchool),
-                toEmail: new SendGrid.Helpers.Mail.EmailAddress(parentOrGuardian.Email),
-                subject: subject,
-                body: body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(participationObject.OwnerAccount.IsAfterSchool));
+                            fromEmail: Email.SendGridNoReplyEmailAddress(),
+                            toEmail: new SendGrid.Helpers.Mail.EmailAddress(parentOrGuardian.Email),
+                            subject: subject,
+                            body: body,
+                            emailTemplateId: SendGridHelper.GetGenericTemplateId());
 
             msgs.AddRange(mailMsgs);
 
@@ -372,6 +373,7 @@ namespace AfterSchoolLibrary.Helpers
             var parentOrGuardian = masterRegistrant.GetParentOrGuardian(msgs, dc);
             var canAccountAcceptPayments = billingAccount.CanProcessPayments(msgs, dc);
             var registration = checkoutObject.Registration;
+            var submittedRecord = registration.GetRegistrant(msgs, dc);
 
             var receiptRows = "";
             var regStatus = "";
@@ -423,8 +425,21 @@ namespace AfterSchoolLibrary.Helpers
                 description += $"<br />&nbsp;&bull;&nbsp;{ra.GetParticipationObject(msgs, dc).Name} - {ra.AssignmentTypeId.ToString().SplitByUpperCase()}";
             });
 
+            var isCompletelyFree = checkoutObject.IsFree;
+            var isRegFree = participationObject.IsRegistrationFree;
+            var hasPaymentPlan = paymentPlan.IsNotEmpty();
+            var hasSubscriptionPlan = subscription.IsNotEmpty();
+            var splitCostEvenly = subscription?.SplitCostEvenly ?? false;
+            var regFinalized = participationObject.RegistrationFinalized;
+            string registrationTable = "";
+            var totalCost = checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs, dc);
+            var showTable = false;
+
+            if (splitCostEvenly && regFinalized)
+                totalCost = checkoutObject.GetSubscriptionCostTodayWithFees(msgs, dc);
+
             // show this if no subscription plan, if there's a reg fee or there's a payment plan
-            if (checkoutObject.IsFree || participationObject.Cost > 0.ToDecimal() || paymentPlan.IsNotEmpty())
+            if ((isCompletelyFree || !isRegFree || hasPaymentPlan) && (!splitCostEvenly || !regFinalized))
             {
                 if (checkoutObject.IsFree)
                 {
@@ -432,7 +447,7 @@ namespace AfterSchoolLibrary.Helpers
                     ccFee = "$0";
                 }
                 else if (checkoutObject.PaymentPlan.IsNotEmpty())
-                {                    
+                {
                     cost = checkoutObject.GetPaymentPlanCostTodayWithConvenienceFee(msgs, dc).ToCurrency();
                     ccFee = checkoutObject.GetPaymentPlanCostTodayCreditCardFee(msgs, dc).ToCurrency();
 
@@ -454,28 +469,38 @@ namespace AfterSchoolLibrary.Helpers
 
                 // add registration fee row
                 var registrationFeeModel = new NameValueCollection()
-                {
-                    { "Description", description },
-                    { "Quantity",  "1"},
-                    { "Cost", cost },
-                    { "AdditionalDetails", additionalDetails }
-                };
+                                            {
+                                                { "Description", description },
+                                                { "Quantity",  "1"},
+                                                { "Cost", cost },
+                                                { "AdditionalDetails", additionalDetails }
+                                            };
 
                 receiptRows += ProcessTemplate(
-                    EmailTemplates.Registration_Confirmation_Rows,
-                    registrationFeeModel,
-                    "Registration_Confirmation_Rows",
-                    msgs);
+                                EmailTemplates.Registration_Confirmation_Rows,
+                                registrationFeeModel,
+                                "Registration_Confirmation_Rows",
+                                msgs);
+
+                showTable = true;
             }
 
+            // if has subscription
+            // and is not finalized if it is split evenly
+
             // add subscription row
-            if (subscription.IsNotEmpty())
+            if (hasSubscriptionPlan && (!splitCostEvenly || regFinalized))
             {
-                description = $"Subscription for {participationObject.Name}";
-                additionalDetails = $"per {subscription.BillingPeriodTypeId.ToString().ToLower()}";
+                var startDate = submittedRecord.GetPlanStartDate(subscription, participationObject, msgs, dc);
+                description = $"Subscription for {participationObject.Name} - Starting on {startDate.ToShortDateString()}";
+                additionalDetails = $"every {subscription.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()}";
 
                 cost = checkoutObject.GetSubscriptionCostTodayWithConvenienceFee(msgs, dc).ToCurrency();
-                ccFee = checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc).ToCurrency();
+
+                if (isRegFree || (splitCostEvenly && regFinalized))
+                    ccFee = checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc).ToCurrency();
+                else
+                    ccFee = checkoutObject.GetTotalCreditCardFeesToday(msgs, dc).ToCurrency();
 
                 // add registration fee row
                 var subscriptionFeeModel = new NameValueCollection()
@@ -491,7 +516,41 @@ namespace AfterSchoolLibrary.Helpers
                     subscriptionFeeModel,
                     "Registration_Confirmation_Rows",
                     msgs);
+
+                if (subscription.RegFeeAsDownPayment)
+                {
+                    var credit = participationObject.GetCheckoutCostWithConvenienceFee() * -1;
+
+                    totalCost += credit;
+
+                    receiptRows += ProcessTemplate(
+                                    EmailTemplates.Registration_Confirmation_Rows,
+                                    new NameValueCollection()
+                                    {
+                                        { "Description", "One time registration fee credit" },
+                                        { "Quantity",  "1"},
+                                        { "Cost", credit.ToCurrency() },
+                                        { "AdditionalDetails", "" }
+                                    },
+                                    "Registration_Confirmation_Rows",
+                                    msgs);
+                }
+
+                showTable = true;
             };
+
+            if (showTable)
+                registrationTable = ProcessTemplate(
+                                     EmailTemplates.Registration_Confirmation_Table,
+                                     new NameValueCollection()
+                                        {
+                                            { "AmountDueOrPaid", amountDueOrPaid },
+                                            { "TotalCost", totalCost.ToCurrency() },
+                                            { "BodyRows", receiptRows },
+                                            { "CreditCardFee", ccFee },
+                                        },
+                                     "Registration_Confirmation_Table-1.0",
+                                     msgs);
 
             var registrationDetails = "Login to your account to view more details about this registration.";
             var loginLink = Utilities.LoginUrl();
@@ -526,6 +585,13 @@ namespace AfterSchoolLibrary.Helpers
                 virtualInfo += $"<p>Join this activity virtually with the following info: <br /><br />{participationObject.VirtualLocationInfo}</a>.<br /></p>";
             }
 
+            var splitPaymentSubscriptionInfo = "";
+
+            if (subscription.IsNotEmpty() && subscription.SplitCostEvenly && !participationObject.RegistrationFinalized)
+            {
+                splitPaymentSubscriptionInfo = $"<p>Once all students are registered and registration is finalized for {participationObject.Name}, you will receive an email with the final amount to pay.</p>";
+            }
+
             var model = new NameValueCollection()
             {
                 { "FirstName", isParentCopy ? purchaser.FirstName : loggedInUser.FirstName },
@@ -536,20 +602,18 @@ namespace AfterSchoolLibrary.Helpers
                 { "ActivityContactName", participationObject.ContactName.IfBlank(billingAccount.Name)},
                 { "BillerAccountName", billingAccount.Name },
                 { "BillerAccountLink", billingAccount.HomePageUrl },
-                { "AmountDueOrPaid", amountDueOrPaid },
-                { "TotalCost", checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs, dc).ToCurrency() },
-                { "BodyRows", receiptRows },
                 { "CustomMessage", customMessage },
-                { "CreditCardFee", ccFee },
                 { "RegistrationDetails", registrationDetails},
-                { "VirtualInfo", virtualInfo }
+                { "VirtualInfo", virtualInfo },
+                { "SplitPaymentSubscriptionInfo", splitPaymentSubscriptionInfo },
+                { "RegistrationTable", registrationTable }
             };
             
             var subject = $"{participationObject.Name} registration for {masterRegistrant.FirstName}";
             var body = ProcessTemplate(
                 EmailTemplates.Registration_Confirmation,
                 model,
-                "Registration_Confirmation-1.1",
+                "Registration_Confirmation-1.2",
                 msgs);
 
             // SEND EMAILS

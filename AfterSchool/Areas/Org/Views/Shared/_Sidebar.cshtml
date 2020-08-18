@@ -125,6 +125,12 @@
                                 <a href="@Url.Action("index", "activity", new { type = (int)ActivityType.PermissionSlip })"><i class="icon s7-file"></i> @UILabel.ActivityLabel(ActivityType.PermissionSlip, true)</a>
                             </li>
                         }
+                        @if (CanView(FeatureType.ManageLearningPods, SessionVariables.AccountUserType, PermissionType.LearningPodsView))
+                        {
+                            <li>
+                                <a href="@Url.Action("index", "activity", new { type = (int)ActivityType.LearningPod })"><i class="icon s7-box2"></i> @UILabel.ActivityLabel(ActivityType.LearningPod, true)</a>
+                            </li>
+                        }
                         @if (CanView(FeatureType.ManageActivityGroups, SessionVariables.AccountUserType, PermissionType.SessionsView))
                         {
                             <li class=""><a href="@Url.Action("index", "group")"><i class="icon s7-date"></i> @UILabel.ActivityGroupLabel(ActivityGroupType.Session, true)</a></li>

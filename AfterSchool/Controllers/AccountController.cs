@@ -4,6 +4,7 @@ using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using Newtonsoft.Json.Converters;
+using Rollbar.DTOs;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
@@ -182,7 +183,7 @@ namespace AfterSchool.Controllers
                             (submittedRecord, registration) = registrant.GetSubmittedRecord(participationObject, amsgs, adc);
                             period = participationObject.GetCurrentRegistrationPeriod(amsgs, adc);
 
-                            SubmitRecord(ref registration, submittedRecord, registrant, participationObject, user, period, null, amsgs, adc);
+                            SubmitRecord(ref registration, ref submittedRecord, registrant, participationObject, user, period, null, amsgs, adc);
                         }
 
                         if (msgs.HasNoErrors())
@@ -1421,7 +1422,7 @@ namespace AfterSchool.Controllers
 
                         SubmitRecord(
                             ref registration,
-                            submittedRecord,
+                            ref submittedRecord,
                             currentRegistrant,
                             participationObject,
                             currentUser,
@@ -2390,33 +2391,44 @@ namespace AfterSchool.Controllers
 
             return registrant;
         }
+        public string GetUserHostAddress()
+        {
+            if (Request.ServerVariables["HTTP_X_FORWARDED_FOR"].IsNotEmpty())
+                return Request.ServerVariables["HTTP_X_FORWARDED_FOR"].Split(',')[0];
 
-        private void SubmitRecord(ref Registration registration, Registrant submittedRecord, Registrant currentRegistrant, ParticipationObject participationObject, WebUser currentUser, RegistrationPeriod period, string signature, SystemMessages msgs, DatabaseConnection dc = null)
+            return Request.ServerVariables["REMOTE_ADDR"];
+        }
+
+        private void SubmitRecord(ref Registration registration, ref Registrant submittedRecord, Registrant currentRegistrant, ParticipationObject participationObject, WebUser currentUser, RegistrationPeriod period, string signature, SystemMessages msgs, DatabaseConnection dc = null)
         {
             // account gets copy / snapshot of master registrant record
             // required in order to make sure registration data doesn't change as registrant changes information in master record.
             if (submittedRecord.IsEmpty())
             {
                 submittedRecord = currentRegistrant.SubmitRecordToAccount(
-                    ownerAccount: participationObject.OwnerAccount,
-                    loggedInUser: currentUser,
-                    msgs: msgs,
-                    dc: dc);
+                                    ownerAccount: participationObject.OwnerAccount,
+                                    loggedInUser: currentUser,
+                                    msgs: msgs,
+                                    dc: dc);
 
                 // create or update registration
                 registration = submittedRecord.AddRegistrationWithESignature(
-                    ownerAccountId: participationObject.OwnerAccount.ID.Value,
-                    activityGroupId: participationObject.GetAnyRelatedActivityGroupId(),
-                    accountActivityGroupId: participationObject.GetAccountActivityGroupId(),
-                    periodId: period?.ID,
-                    esignature: signature,
-                    loggedInUserId: currentUser.ID.Value,
-                    msgs: msgs,
-                    dc: dc);
+                                ownerAccountId: participationObject.OwnerAccount.ID.Value,
+                                activityGroupId: participationObject.GetAnyRelatedActivityGroupId(),
+                                accountActivityGroupId: participationObject.GetAccountActivityGroupId(),
+                                periodId: period?.ID,
+                                esignature: signature,      
+                                userAgent: Request.UserAgent.ToString().MaxChars(400),
+                                ipAddress: GetUserHostAddress(),
+                                loggedInUserId: currentUser.ID.Value,
+                                msgs: msgs,
+                                dc: dc);
             }
             else
                 registration.AddESignature(
                     esignature: signature,
+                    userAgent: Request.UserAgent.ToString().MaxChars(400),
+                    ipAddress: GetUserHostAddress(),
                     loggedInUser: currentUser,
                     msgs: msgs,
                     dc: dc);

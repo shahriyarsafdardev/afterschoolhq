@@ -202,6 +202,8 @@ namespace AfterSchoolLibrary.Models
 			Activity.Update(new Hashtable(){{"LeaderTypeId",0}}, new Hashtable(){{"LeaderTypeId", DBNull.Value}}, Activity.ObjectMap, dc);
 			Activity.Update(new Hashtable(){{"RequiresParentalConsent",false}}, new Hashtable(){{"RequiresParentalConsent", DBNull.Value}}, Activity.ObjectMap, dc);
 			Activity.Update(new Hashtable(){{"ActivityLocationTypeId",0}}, new Hashtable(){{"ActivityLocationTypeId", DBNull.Value}}, Activity.ObjectMap, dc);
+			Activity.Update(new Hashtable(){{"HidePreciseLocation",false}}, new Hashtable(){{"HidePreciseLocation", DBNull.Value}}, Activity.ObjectMap, dc);
+			Activity.Update(new Hashtable(){{"RegistrationFinalized",false}}, new Hashtable(){{"RegistrationFinalized", DBNull.Value}}, Activity.ObjectMap, dc);
 			Location.Update(new Hashtable(){{"IsDefault",false}}, new Hashtable(){{"IsDefault", DBNull.Value}}, Location.ObjectMap, dc);
 			Location.Update(new Hashtable(){{"LocationTypeId",0}}, new Hashtable(){{"LocationTypeId", DBNull.Value}}, Location.ObjectMap, dc);
 			Location.Update(new Hashtable(){{"IsTest",false}}, new Hashtable(){{"IsTest", DBNull.Value}}, Location.ObjectMap, dc);
@@ -311,6 +313,8 @@ namespace AfterSchoolLibrary.Models
 			SubscriptionPlan.Update(new Hashtable(){{"IsActive",false}}, new Hashtable(){{"IsActive", DBNull.Value}}, SubscriptionPlan.ObjectMap, dc);
 			SubscriptionPlan.Update(new Hashtable(){{"PlanTypeId",0}}, new Hashtable(){{"PlanTypeId", DBNull.Value}}, SubscriptionPlan.ObjectMap, dc);
 			SubscriptionPlan.Update(new Hashtable(){{"PaymentStartTypeId",0}}, new Hashtable(){{"PaymentStartTypeId", DBNull.Value}}, SubscriptionPlan.ObjectMap, dc);
+			SubscriptionPlan.Update(new Hashtable(){{"SplitCostEvenly",false}}, new Hashtable(){{"SplitCostEvenly", DBNull.Value}}, SubscriptionPlan.ObjectMap, dc);
+			SubscriptionPlan.Update(new Hashtable(){{"RegFeeAsDownPayment",false}}, new Hashtable(){{"RegFeeAsDownPayment", DBNull.Value}}, SubscriptionPlan.ObjectMap, dc);
 			RegistrantSubscriptionPlan.Update(new Hashtable(){{"PaymentTypeFeesPaidBy",0}}, new Hashtable(){{"PaymentTypeFeesPaidBy", DBNull.Value}}, RegistrantSubscriptionPlan.ObjectMap, dc);
 			RegistrantSubscriptionPlan.Update(new Hashtable(){{"ConvenienceFeesPaidBy",0}}, new Hashtable(){{"ConvenienceFeesPaidBy", DBNull.Value}}, RegistrantSubscriptionPlan.ObjectMap, dc);
 			RegistrantSubscriptionPlan.Update(new Hashtable(){{"PaymentTypeId",0}}, new Hashtable(){{"PaymentTypeId", DBNull.Value}}, RegistrantSubscriptionPlan.ObjectMap, dc);

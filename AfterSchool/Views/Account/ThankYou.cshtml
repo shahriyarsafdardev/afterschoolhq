@@ -88,6 +88,15 @@
                             </a>
                         </p>
                     }
+                    else if (participationObject.IsInviteOnly)
+                    {                        
+                        <hr />
+                        <div class="margin-v-20">
+                            <p>
+                                <a href="@participationObject.GetHomePageUrl()" class="@(assignmentType != RegistrationAssignmentType.Interested ? "btn btn-xl btn-register-primary btn-register-xl" : "")">Register another child</a>
+                            </p>
+                        </div>
+                    }
                     else
                     {
                         <hr />
