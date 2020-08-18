@@ -235,7 +235,7 @@
                             <em>The parent will be charged <span class="subscription-range">between</span> <span class="text-bold">$<span id="finalsubscriptionplancost-1">0.00</span></span> <span class="subscription-range"> and <span class="text-bold">$<span id="finalsubscriptionplancost-2" class="text-bold">0.00</span></span></span> every <span class="subscription-period-text text-bold"></span></em>
                         </p>
                         <p class="text-muted subscription-plan-cost-split">
-                            <em>If registration was closed now the parent would be charged <span class="text-bold">$<span id="finalsubscriptionplancost">0.00</span></span> every <span class="subscription-period-text text-bold"></span></em>
+                            <em>If registration was closed now the parent would be charged <span class="text-bold">$<span id="finalsubscriptionplancost-3">0.00</span></span> every <span class="subscription-period-text text-bold"></span></em>
                         </p>
                         <p class="text-muted subscription-plan-cost-nosplit">
                             <em>The parent will be charged <span class="text-bold">$<span id="finalsubscriptionplancost">0.00</span></span> upon checkout</em>
@@ -389,12 +389,13 @@
 
             calculateFinalPrice(totalAmt / @Model.SeatsAvailable, $('#finalsubscriptionplancost-1'));
             calculateFinalPrice(totalAmt / @(Model.MinSeatsRequired ?? 1), $('#finalsubscriptionplancost-2'));
-            calculateFinalPrice(totalAmt / @(Model.GetSeatsTaken() == 0 ? 1 : Model.GetSeatsTaken()), $('#finalsubscriptionplancost'));
+            calculateFinalPrice(totalAmt / @(Model.GetSeatsTaken() == 0 ? 1 : Model.GetSeatsTaken()), $('#finalsubscriptionplancost-3'));
 
         } else {
-            $('.subscription-plan-cost-nosplit').removeClass('hide');
 
-            calculateFinalPrice($('#subscriptionplancost').val(), $('#finalsubscriptionplancost'));
+            $('.subscription-plan-cost-nosplit').removeClass('hide');
+            var totalAmt = $('#subscriptionplancost').val();
+            calculateFinalPrice(totalAmt, $('#finalsubscriptionplancost'));
         }
     }
 

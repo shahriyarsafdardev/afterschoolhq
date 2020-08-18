@@ -3,7 +3,7 @@
 <label for="@Model.Id">
     @if (Model.Question.Link.IsNotBlank())
     {
-        <a href="@UI.MakeLink(Model.Question.Link)" target="_blank">@Model.Question.Text.Trim()</a>
+        <a href="@UI.MakeLink(Model.Question.Link)" target="_blank">@Model.Question.Text.Trim() <i class="s7-link"></i></a>
     }
     else
     {

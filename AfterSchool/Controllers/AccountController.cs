@@ -183,7 +183,7 @@ namespace AfterSchool.Controllers
                             (submittedRecord, registration) = registrant.GetSubmittedRecord(participationObject, amsgs, adc);
                             period = participationObject.GetCurrentRegistrationPeriod(amsgs, adc);
 
-                            SubmitRecord(ref registration, submittedRecord, registrant, participationObject, user, period, null, amsgs, adc);
+                            SubmitRecord(ref registration, ref submittedRecord, registrant, participationObject, user, period, null, amsgs, adc);
                         }
 
                         if (msgs.HasNoErrors())
@@ -1422,7 +1422,7 @@ namespace AfterSchool.Controllers
 
                         SubmitRecord(
                             ref registration,
-                            submittedRecord,
+                            ref submittedRecord,
                             currentRegistrant,
                             participationObject,
                             currentUser,
@@ -2399,7 +2399,7 @@ namespace AfterSchool.Controllers
             return Request.ServerVariables["REMOTE_ADDR"];
         }
 
-        private void SubmitRecord(ref Registration registration, Registrant submittedRecord, Registrant currentRegistrant, ParticipationObject participationObject, WebUser currentUser, RegistrationPeriod period, string signature, SystemMessages msgs, DatabaseConnection dc = null)
+        private void SubmitRecord(ref Registration registration, ref Registrant submittedRecord, Registrant currentRegistrant, ParticipationObject participationObject, WebUser currentUser, RegistrationPeriod period, string signature, SystemMessages msgs, DatabaseConnection dc = null)
         {
             // account gets copy / snapshot of master registrant record
             // required in order to make sure registration data doesn't change as registrant changes information in master record.
