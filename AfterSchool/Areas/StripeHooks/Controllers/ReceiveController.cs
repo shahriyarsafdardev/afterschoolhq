@@ -178,9 +178,12 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                 transactionFeePayer = billingAccount;
 
             var overrideAmount = rsp.TotalPaidWithFees;
+
+            /*
             var credit = stripeInvoice.StartingBalance;
 
             overrideAmount = overrideAmount + credit;
+            */
 
             // save transaction info and track payment to the activity as well.
             var checkoutObject = new CheckoutObject()
