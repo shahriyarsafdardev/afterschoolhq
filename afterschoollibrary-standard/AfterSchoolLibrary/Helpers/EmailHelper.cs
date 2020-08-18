@@ -431,8 +431,9 @@ namespace AfterSchoolLibrary.Helpers
             var hasSubscriptionPlan = subscription.IsNotEmpty();
             var splitCostEvenly = subscription?.SplitCostEvenly ?? false;
             var regFinalized = participationObject.RegistrationFinalized;
-
+            string registrationTable = "";
             var totalCost = checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs, dc);
+            var showTable = false;
 
             if (splitCostEvenly && regFinalized)
                 totalCost = checkoutObject.GetSubscriptionCostTodayWithFees(msgs, dc);
@@ -480,6 +481,8 @@ namespace AfterSchoolLibrary.Helpers
                                 registrationFeeModel,
                                 "Registration_Confirmation_Rows",
                                 msgs);
+
+                showTable = true;
             }
 
             // if has subscription
@@ -532,7 +535,22 @@ namespace AfterSchoolLibrary.Helpers
                                     "Registration_Confirmation_Rows",
                                     msgs);
                 }
+
+                showTable = true;
             };
+
+            if (showTable)
+                registrationTable = ProcessTemplate(
+                                     EmailTemplates.Registration_Confirmation_Table,
+                                     new NameValueCollection()
+                                        {
+                                            { "AmountDueOrPaid", amountDueOrPaid },
+                                            { "TotalCost", totalCost.ToCurrency() },
+                                            { "BodyRows", receiptRows },
+                                            { "CreditCardFee", ccFee },
+                                        },
+                                     "Registration_Confirmation_Table-1.0",
+                                     msgs);
 
             var registrationDetails = "Login to your account to view more details about this registration.";
             var loginLink = Utilities.LoginUrl();
@@ -584,14 +602,11 @@ namespace AfterSchoolLibrary.Helpers
                 { "ActivityContactName", participationObject.ContactName.IfBlank(billingAccount.Name)},
                 { "BillerAccountName", billingAccount.Name },
                 { "BillerAccountLink", billingAccount.HomePageUrl },
-                { "AmountDueOrPaid", amountDueOrPaid },
-                { "TotalCost", totalCost.ToCurrency() },
-                { "BodyRows", receiptRows },
                 { "CustomMessage", customMessage },
-                { "CreditCardFee", ccFee },
                 { "RegistrationDetails", registrationDetails},
                 { "VirtualInfo", virtualInfo },
-                { "SplitPaymentSubscriptionInfo", splitPaymentSubscriptionInfo }
+                { "SplitPaymentSubscriptionInfo", splitPaymentSubscriptionInfo },
+                { "RegistrationTable", registrationTable }
             };
             
             var subject = $"{participationObject.Name} registration for {masterRegistrant.FirstName}";
