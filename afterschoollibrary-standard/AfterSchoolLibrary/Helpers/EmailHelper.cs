@@ -429,7 +429,7 @@ namespace AfterSchoolLibrary.Helpers
             var isRegFree = participationObject.IsRegistrationFree;
             var hasPaymentPlan = paymentPlan.IsNotEmpty();
             var hasSubscriptionPlan = subscription.IsNotEmpty();
-            var splitCostEvenly = subscription.SplitCostEvenly;
+            var splitCostEvenly = subscription?.SplitCostEvenly ?? false;
             var regFinalized = participationObject.RegistrationFinalized;
 
             var totalCost = checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs, dc);
@@ -493,7 +493,11 @@ namespace AfterSchoolLibrary.Helpers
                 additionalDetails = $"every {subscription.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()}";
 
                 cost = checkoutObject.GetSubscriptionCostTodayWithConvenienceFee(msgs, dc).ToCurrency();
-                ccFee = checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc).ToCurrency();
+
+                if (isRegFree)
+                    ccFee = checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc).ToCurrency();
+                else
+                    ccFee = checkoutObject.GetTotalCreditCardFeesToday(msgs, dc).ToCurrency();
 
                 // add registration fee row
                 var subscriptionFeeModel = new NameValueCollection()

@@ -44,15 +44,19 @@
                     <input type="number" class="form-control" id="seatsavailable" name="seatsavailable" value="@Model.SeatsAvailable" onfocus="this.select()" required step="1" min="1" max="@accountPackage.GetFeature(FeatureType.Participants).Max.Value" />
                 </div>
             </div>
-            <div class="form-group">
-                <label class="col-sm-3 control-label">
-                    Minimum Students Required
-                    <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="If you have a mimimum amount of students to hold class, please set this value." data-placement="top"></i>
-                </label>
-                <div class="col-sm-9">
-                    <input type="number" class="form-control" id="minseatsrequired" name="minseatsrequired" value="@Model.MinSeatsRequired" onfocus="this.select()" step="1" min="1" />
+
+            if (Model.ActivityTypeId == ActivityType.LearningPod)
+            { 
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">
+                        Minimum Students Required
+                        <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="If you have a mimimum amount of students to hold class, please set this value." data-placement="top"></i>
+                    </label>
+                    <div class="col-sm-9">
+                        <input type="number" class="form-control" id="minseatsrequired" name="minseatsrequired" value="@Model.MinSeatsRequired" onfocus="this.select()" step="1" min="1" />
+                    </div>
                 </div>
-            </div>
+            }
         }
         else
         {
