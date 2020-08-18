@@ -231,8 +231,14 @@
                                 @BillingPeriodOptions(subscriptionPlan)
                             </select>
                         </div>
-                        <p class="text-muted">
-                            <em>The parent will be charged <span class="subscription-range">between</span> <span class="text-bold">$<span id="finalsubscriptionplancost">0.00</span></span> <span class="subscription-range"> and <span class="text-bold">$<span id="finalsubscriptionplancost-2" class="text-bold">0.00</span></span></span> every <span id="subscription-period-text" class="text-bold"></span></em>
+                        <p class="text-muted subscription-plan-cost-split">
+                            <em>The parent will be charged <span class="subscription-range">between</span> <span class="text-bold">$<span id="finalsubscriptionplancost-1">0.00</span></span> <span class="subscription-range"> and <span class="text-bold">$<span id="finalsubscriptionplancost-2" class="text-bold">0.00</span></span></span> every <span class="subscription-period-text text-bold"></span></em>
+                        </p>
+                        <p class="text-muted subscription-plan-cost-split">
+                            <em>If registration was closed now the parent would be charged <span class="text-bold">$<span id="finalsubscriptionplancost">0.00</span></span> every <span class="subscription-period-text text-bold"></span></em>
+                        </p>
+                        <p class="text-muted subscription-plan-cost-nosplit">
+                            <em>The parent will be charged <span class="text-bold">$<span id="finalsubscriptionplancost">0.00</span></span> upon checkout</em>
                         </p>
                     </div>
 
@@ -366,20 +372,28 @@
     });
 
     function updateSubscriptionPeriodText() {
-        $('#subscription-period-text').html($('#subscriptionplanperiod option:selected').text().toLowerCase());
+        $('.subscription-period-text').html($('#subscriptionplanperiod option:selected').text().toLowerCase());
     }
 
     function getSubscriptionFinalPrice() {
 
         $('.subscription-range').addClass('hide');
+        $('.subscription-plan-cost-nosplit').addClass('hide');
+        $('.subscription-plan-cost-split').addClass('hide');
 
         if ($('#splitcostevenly').is(':checked')) {
             var totalAmt = $('#subscriptionplancost').val();
 
             $('.subscription-range').removeClass('hide');
-            calculateFinalPrice(totalAmt / @Model.SeatsAvailable, $('#finalsubscriptionplancost'));
-            calculateFinalPrice(totalAmt / @(Model.MinSeatsRequired ?? 0), $('#finalsubscriptionplancost-2'));
+            $('.subscription-plan-cost-split').removeClass('hide');
+
+            calculateFinalPrice(totalAmt / @Model.SeatsAvailable, $('#finalsubscriptionplancost-1'));
+            calculateFinalPrice(totalAmt / @(Model.MinSeatsRequired ?? 1), $('#finalsubscriptionplancost-2'));
+            calculateFinalPrice(totalAmt / @(Model.GetSeatsTaken() == 0 ? 1 : Model.GetSeatsTaken()), $('#finalsubscriptionplancost'));
+
         } else {
+            $('.subscription-plan-cost-nosplit').removeClass('hide');
+
             calculateFinalPrice($('#subscriptionplancost').val(), $('#finalsubscriptionplancost'));
         }
     }
