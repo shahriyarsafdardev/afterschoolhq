@@ -172,6 +172,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 if (type.IsNotEmpty() && type.IsNumber())
                     activity.ActivityTypeId = type.ToInteger().ToEnum<ActivityType>();
 
+                if (activity.ActivityTypeId == ActivityType.LearningPod)
+                    activity.IsInviteOnly = true;
+
                 //this means a new activity is  being added to an existing enrollment group
                 if (group.IsGuid())
                 {
