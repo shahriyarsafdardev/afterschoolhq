@@ -126,10 +126,32 @@ namespace AfterSchool.Controllers
             else
             {
                 wu = WebUser.LoadByUid(id.ToGuid(), null);
-                if(wu.IsEmpty())
+                if (wu.IsEmpty())
                     msgs.Add("Invalid invitation code", MessageType.UserError);
-                else if(wu.IsActive)
-                    msgs.Add("Account has already been created. Please proceed to the login page", MessageType.UserError);
+                else if (wu.IsActive)
+                {
+                    var account = Account.LoadByUid(a.ToGuid(), msgs);
+                    AccountWebUser awu = null;
+
+                    if (account.IsEmpty())
+                        msgs.Add("Invalid invitation code", MessageType.UserError);
+
+                    if (msgs.HasNoErrors())
+                    {
+                        awu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, wu.ID.Value, msgs);
+
+                        if (awu.IsEmpty())
+                            msgs.Add("Invalid invitation code", MessageType.UserError);
+                    }
+
+                    if (msgs.HasNoErrors())
+                        awu.Activate(wu, msgs);
+
+                    if (msgs.HasNoErrors())
+                        return Redirect(AfterSchoolLibrary.Helpers.Utilities.LoginUrl());
+
+                    msgs.Add("An error occurred. Please contact support", MessageType.UserError);
+                }
             }
             
             ViewBag.Messages = msgs;

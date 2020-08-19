@@ -614,6 +614,21 @@ namespace AfterSchool.Areas.Org.Controllers
             return View("Team", account);
         }
 
+        public ActionResult TeamRemoveMember(string id)
+        {
+            var msgs = new SystemMessages();
+            var currentUser = SessionVariables.CurrentUser;
+            var currentAccount = SessionVariables.CurrentAccount;
+            var accountUserType = SessionVariables.AccountUserType;
+            var user = WebUser.LoadByUid(id.ToGuid());
+            var awu = AccountWebUser.LoadByAccountIdByWebUserId(currentAccount.ID.Value, user.ID.Value, msgs);
+
+            if (awu.IsNotEmpty() && currentUser.HasAccessTo(currentAccount, msgs) && accountUserType.In(AccountService.AdminUserTypes))
+                awu.MarkAsDeleted(currentUser, msgs);
+
+            return RedirectToAction("Team");
+        }
+
         [HttpGet]
         public ActionResult Visitors()
         {
