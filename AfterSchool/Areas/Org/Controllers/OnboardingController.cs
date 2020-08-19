@@ -172,7 +172,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         profile.UpdateProfile(
                             profileemail: publicemail.ToBoolean() ? email : null,
-                            profilephone: publicphone.ToBoolean() ? extractedPhoneNumber : null,
+                            profilephone: !string.IsNullOrEmpty(publicphone) && publicphone.ToBoolean() ? extractedPhoneNumber : null,
                             loggedInUser: currentUser,
                             msgs: amsgs,
                             dc: adc);
