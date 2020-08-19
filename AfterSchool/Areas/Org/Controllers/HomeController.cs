@@ -57,7 +57,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var activityCount = account.GetActivityCount(
                 SessionVariables.AccountUserType, 
                 currentUser, 
-                ActivityType.Activity, 
+                null, 
                 null, 
                 false,
                 null,

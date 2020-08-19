@@ -8,6 +8,7 @@
     var showPaymentForm = (bool)ViewData["ShowPaymentForm"];
     var activity = Model.GetActivity();
     var attachedCoupons = (List<AttachedCoupon>)ViewData["AttachedCoupons"];
+    var registration = Model.GetRegistration();
 
     if (showPaymentForm)
     {
@@ -19,7 +20,7 @@
         <div class="div-group pull-right">
             @if (activity.BelongsTo(account))
             {
-                <a href="@Url.Action("edit", "registration", new { id = Model.GetRegistration().Uid.ToString(), returnUrl = Request.Url.ToString() })" class="btn btn-primary">
+                <a href="@Url.Action("edit", "registration", new { id = registration.Uid.ToString(), returnUrl = Request.Url.ToString() })" class="btn btn-primary">
                     View Full Registration
                 </a>
             }
@@ -44,6 +45,24 @@
                             <td width="33%" class="text-right">Status</td>
                             <td>@Model.AssignmentTypeId.ToString().SplitByUpperCase()</td>
                         </tr>
+                        <tr>
+                            <td width="33%" class="text-right">E-Signature</td>
+                            <td>@registration.ESignature</td>
+                        </tr>
+                        @if (registration.ESignatureIPAddress.IsNotEmpty())
+                        {
+                            <tr>
+                                <td width="33%" class="text-right">E-Signature</td>
+                                <td>@registration.ESignatureIPAddress</td>
+                            </tr>
+                        }
+                        @if (registration.ESignatureUserAgent.IsNotEmpty())
+                        {
+                            <tr>
+                                <td width="33%" class="text-right">Browser Info</td>
+                                <td>@registration.ESignatureUserAgent</td>
+                            </tr>
+                        }
                     </table>
                 </div>
 
@@ -61,7 +80,33 @@
                                 {
                                     <tr>
                                         <td width="33%" class="text-right">@answer.FormQuestionText</td>
-                                        <td>@answer.Text.IfBlank("-")</td>
+                                        <td>
+                                            @if (answer.FormQuestionQuestionTypeId == QuestionType.Checkbox)
+                                            {
+                                                @answer.Text.IfBlank("0").ToBoolean().ToYesNo();
+                                            }
+                                            else if (answer.FormQuestionQuestionTypeId == QuestionType.RadioMatrix)
+                                            {
+                                                foreach (var item in answer.Text.Split(';'))
+                                                {
+                                                    <span>@item.Split('=')[0]: @item.Split('=')[1]</span><br />
+                                                }
+                                            }
+                                            else if (answer.FormQuestionQuestionTypeId == QuestionType.FileUpload && answer.Text.IsNotBlank())
+                                            {
+                                                <span>
+                                                    <a href="@Url.Action("downloadfile", "registration", new { id = Model.Uid, r = registration.Uid, file = answer.ID, returnUrl = Request["returnurl"] })"
+                                                       target="_blank">
+                                                        Download File
+                                                    </a>
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                @answer.Text.IfBlank("-")
+                                            }
+
+                                        </td>
                                     </tr>
                                 }
                             </tbody>

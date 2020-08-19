@@ -564,7 +564,10 @@ namespace AfterSchoolLibrary.Services
                             IsGhostAccount = isGhostAccount,
                         };
                     else
+                    {
                         awu.IsActive = true;
+                        awu.IsDeleted = false;
+                    }
 
                     awu.LastModifiedDate = DateTime.UtcNow;
                     awu.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
