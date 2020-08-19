@@ -57,6 +57,24 @@
                                             <td class="text-right" width="33%">Registration Date/Time</td>
                                             <td>@account.ConvertToAccountTimeZone(selectedRegistration.CreateDate.Value).ToLongDateTimeString()</td>
                                         </tr>
+                                        <tr>
+                                            <td width="33%" class="text-right">E-Signature</td>
+                                            <td>@selectedRegistration.ESignature</td>
+                                        </tr>
+                                        @if (selectedRegistration.ESignatureIPAddress.IsNotEmpty())
+                                        {
+                                            <tr>
+                                                <td width="33%" class="text-right">E-Signature</td>
+                                                <td>@selectedRegistration.ESignatureIPAddress</td>
+                                            </tr>
+                                        }
+                                        @if (selectedRegistration.ESignatureUserAgent.IsNotEmpty())
+                                        {
+                                            <tr>
+                                                <td width="33%" class="text-right">Browser Info</td>
+                                                <td>@selectedRegistration.ESignatureUserAgent</td>
+                                            </tr>
+                                        }
                                     </table>
                                 </div>
 
