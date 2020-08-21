@@ -171,8 +171,8 @@ namespace AfterSchool.Areas.Org.Controllers
                         amsgs.AddRange(account.Save(adc));
 
                         profile.UpdateProfile(
-                            profileemail: !string.IsNullOrEmpty(publicemail) && publicemail.ToBoolean() ? email : null,
-                            profilephone: !string.IsNullOrEmpty(publicphone) && publicphone.ToBoolean() ? extractedPhoneNumber : null,
+                            profileemail: publicemail.IsBoolean() ? email : null,
+                            profilephone: publicphone.IsBoolean() ? extractedPhoneNumber : null,
                             loggedInUser: currentUser,
                             msgs: amsgs,
                             dc: adc);
