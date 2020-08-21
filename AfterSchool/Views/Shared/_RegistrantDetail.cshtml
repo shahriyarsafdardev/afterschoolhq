@@ -45,14 +45,17 @@
                             <td width="33%" class="text-right">Status</td>
                             <td>@Model.AssignmentTypeId.ToString().SplitByUpperCase()</td>
                         </tr>
-                        <tr>
-                            <td width="33%" class="text-right">E-Signature</td>
-                            <td>@registration.ESignature</td>
-                        </tr>
-                        @if (registration.ESignatureIPAddress.IsNotEmpty())
+                        @if (registration.ESignature.IsNotEmpty())
                         {
                             <tr>
                                 <td width="33%" class="text-right">E-Signature</td>
+                                <td>@registration.ESignature</td>
+                            </tr>
+                        }
+                        @if (registration.ESignatureIPAddress.IsNotEmpty())
+                        {
+                            <tr>
+                                <td width="33%" class="text-right">IP Address</td>
                                 <td>@registration.ESignatureIPAddress</td>
                             </tr>
                         }

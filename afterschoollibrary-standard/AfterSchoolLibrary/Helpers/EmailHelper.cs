@@ -572,10 +572,18 @@ namespace AfterSchoolLibrary.Helpers
                 if (customMessage == "Thank you for registering")
                     customMessage += ".";
 
-                if (isParentCopy)
-                    customMessage += $"{(customMessage.IsNotBlank() ? "<br /><br />" : "")}{masterRegistrant.FirstName} has registered for the following:";
-                else if (loggedInUser.HasAccessTo(billingAccount))
-                    customMessage += $"{(customMessage.IsNotBlank() ? "<br /><br />" : "")}{masterRegistrant.FirstName} has been registered by {loggedInUser.DisplayName} at {billingAccount.Name} for the following:";
+                if (isParentCopy || loggedInUser.HasAccessTo(billingAccount))
+                {
+                    if (isParentCopy)
+                        customMessage += $"{(customMessage.IsNotBlank() ? "<br /><br />" : "")}{masterRegistrant.FirstName} has registered";
+                    else if (loggedInUser.HasAccessTo(billingAccount))
+                        customMessage += $"{(customMessage.IsNotBlank() ? "<br /><br />" : "")}{masterRegistrant.FirstName} has been registered by {loggedInUser.DisplayName} at {billingAccount.Name}";
+
+                    if (showTable)
+                        customMessage += " for the following:";
+                    else
+                        customMessage += ".";
+                }
             }
 
             var virtualInfo = "";
