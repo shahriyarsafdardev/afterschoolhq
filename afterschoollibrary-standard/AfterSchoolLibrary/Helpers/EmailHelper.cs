@@ -581,6 +581,8 @@ namespace AfterSchoolLibrary.Helpers
 
                     if (showTable)
                         customMessage += " for the following:";
+                    else
+                        customMessage += ".";
                 }
             }
 
