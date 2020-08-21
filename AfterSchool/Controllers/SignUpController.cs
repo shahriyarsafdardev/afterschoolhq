@@ -44,8 +44,8 @@ namespace AfterSchool.Controllers
             else if (WebUser.ExistsByEmail(model.Email, msgs))
                 msgs.Add("This email has already been registered", MessageType.UserError);
 
-            if (model.Password1.IsEmpty() || model.Password2.IsEmpty() || (model.Password1 != model.Password2))
-                msgs.Add("Passwords are required and must match", MessageType.UserError);
+            if (model.Password1.IsEmpty())
+                msgs.Add("Password is required", MessageType.UserError);
             else if (model.Password1.Length < 8)
                 msgs.Add("Password must be at least 8 characters", MessageType.UserError);
             
@@ -74,7 +74,7 @@ namespace AfterSchool.Controllers
                             firstName: model.FirstName,
                             lastName: model.LastName,
                             email: model.Email,
-                            password: model.Password2,
+                            password: model.Password1,
                             isActive: true,
                             isRegistered: true,
                             isVerified: false,
@@ -747,7 +747,7 @@ namespace AfterSchool.Controllers
 
         /* APIS */
         [HttpPost]
-        public ActionResult Personal(string firstname, string lastname, string email, string remember)
+        public ActionResult Personal(string firstname, string lastname, string email, string password, string remember)
         {
             if (!IsRequestFromApp())
                 return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
@@ -763,6 +763,11 @@ namespace AfterSchool.Controllers
             if (email.IsBlank() || !email.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
                 msgs.Add("Email is required and must be a valid email address", MessageType.UserError);
 
+            if (password.IsEmpty())
+                msgs.Add("Password is required", MessageType.UserError);
+            else if (password.Length < 8)
+                msgs.Add("Password must be at least 8 characters", MessageType.UserError);
+
             WebUser user = null;
             Account account = null;
 
@@ -772,25 +777,41 @@ namespace AfterSchool.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        user = WebUserService.StartUserAccount(firstname, lastname, email, amsgs, adc);
+                        user = WebUserService.CreateNewWithNoPhone(
+                            firstName: firstname,
+                            lastName: lastname,
+                            email: email,
+                            password: password,
+                            isActive: true,
+                            isRegistered: true,
+                            isVerified: false,
+                            loggedInUser: null,
+                            msgs: amsgs,
+                            dc: adc);
 
-                        if (user.IsNotEmpty())
-                            account = user.AddNewRegistrantAccount(UserType.Owner, true, true, user, amsgs, adc);
+                        account = user.AddNewEmptyAccount(user, amsgs, adc);
                     },
-                    onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                    onSuccess: (SystemMessages smsgs) =>
+                    {
+                        msgs.AddRange(smsgs);
+                        LoadSessionInfo(user: user, account: account, doRememberMe: remember.ToBoolean(), msgs: msgs);
+
+                        var userId = user.ID.Value;
+                        var accountId = account.ID.Value;
+
+                        BackgroundJob.Enqueue(() => WebUserService.SendVerificationEmail(userId));
+                        BackgroundJob.Enqueue(() => AccountService.SendWelcomeEmailPurchase(accountId));
+                    },
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                     onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
                 );
 
                 if (msgs.HasNoErrors())
-                {
-                    LoadSessionInfo(user, account, remember.ToBoolean(), msgs);
                     return Json(new { status = "ok", isNewAccount = true }, JsonRequestBehavior.AllowGet);
-                }
             }
 
             return Json(new { status = "error", messages = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
-
         }
+
     }
 }
