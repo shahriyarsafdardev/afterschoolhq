@@ -789,18 +789,22 @@ namespace AfterSchool.Controllers
                             msgs: amsgs,
                             dc: adc);
 
-                        account = user.AddNewEmptyAccount(user, amsgs, adc);
+                        if (user.IsNotEmpty())
+                            account = user.AddNewRegistrantAccount(UserType.Owner, true, true, user, amsgs, adc);
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
                         msgs.AddRange(smsgs);
-                        LoadSessionInfo(user: user, account: account, doRememberMe: remember.ToBoolean(), msgs: msgs);
 
-                        var userId = user.ID.Value;
-                        var accountId = account.ID.Value;
+                        if (user.IsNotEmpty())
+                        {
+                            if (account.IsNotEmpty())
+                                LoadSessionInfo(user: user, account: account, doRememberMe: remember.ToBoolean(), msgs: msgs);
 
-                        BackgroundJob.Enqueue(() => WebUserService.SendVerificationEmail(userId));
-                        BackgroundJob.Enqueue(() => AccountService.SendWelcomeEmailPurchase(accountId));
+                            var userId = user.ID.Value;
+                            BackgroundJob.Enqueue(() => WebUserService.SendVerificationEmail(userId));
+                        }
+                        
                     },
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                     onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
