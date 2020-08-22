@@ -1007,8 +1007,8 @@ namespace AfterSchoolLibrary.Services
             if (inviteonly != null)
                 activity.IsInviteOnly = inviteonly.ToString().ToBoolean();
 
-            if (hidepreciselocation.IsNotEmpty() && !string.IsNullOrEmpty(hidepreciselocation.ToString()))
-                activity.HidePreciseLocation = Convert.ToBoolean(Convert.ToInt16(hidepreciselocation));
+            if (hidepreciselocation.IsNotEmpty() && hidepreciselocation.ToString().IsBoolean())
+                activity.HidePreciseLocation = hidepreciselocation.ToString().ToBoolean();
 
             if (msgs.HasNoErrors())
             {
