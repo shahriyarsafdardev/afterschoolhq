@@ -2,12 +2,14 @@
 @{
     ViewBag.Title = "Accounts";
     var paging = (PagingModel)ViewBag.PagingModel;
-
+    var msgs = (SystemMessages)ViewBag.Messages;
 }
 
 @{ Html.RenderPartial("AdminHeader"); }
 
 <div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
     <div class="panel panel-default">
 
@@ -48,6 +50,8 @@
                         <th>Account Name</th>
                         <th>Account #</th>
                         <th>Account Type</th>
+                        <th>Is Test</th>
+                        <th>Is Claimed</th>
                         <th>Is Active</th>
                         <th>Member Since</th>
                         <th></th>
@@ -66,21 +70,47 @@
                                 <td>@account.Name</td>
                                 <td>@account.AccountNumber</td>
                                 <td>@account.AccountTypeId.ToString().SplitByUpperCase()</td>
+                                <td>@account.IsTest.ToYesNo()</td>
+                                <td>@account.IsClaimed.ToYesNo()</td>
                                 <td>@account.IsActive.ToYesNo()</td>
                                 <td>@account.CreateDate.Value.ToLongDateString()</td>
                                 <td>
                                     @if (account.GetMemberCount() == 0)
                                     {
-                                        <a href="@Url.Action("invite", "account", new { id = account.Uid })" class="btn btn-default btn-sm">
+                                        <a href="@Url.Action("invite", "account", new { id = account.Uid })" class="btn btn-default btn-xs">
                                             Invite To Account
                                         </a>
                                     }
                                     else if (account.GetActiveMemberCount() == 0)
                                     {
-                                        <a href="@Url.Action("resendinvite", "account", new { id = account.Uid })" class="btn btn-default btn-sm">
+                                        <a href="@Url.Action("resendinvite", "account", new { id = account.Uid })" class="btn btn-default btn-xs">
                                             Resend Invite
                                         </a>
+                                    }                                   
+
+                                    @if (account.IsActive)
+                                    {
+                                        <a href="@Url.Action("deactivate", "account", new { id = account.Uid })" class="btn btn-warning btn-xs">
+                                            Deactivate
+                                        </a>
                                     }
+                                    else
+                                    {
+                                        <a href="@Url.Action("invite", "account", new { id = account.Uid })" class="btn btn-info btn-xs">
+                                            Activate
+                                        </a>
+                                    }
+
+                                    @if (!account.IsClaimed)
+                                    {
+                                        <a href="@Url.Action("invite", "account", new { id = account.Uid })" class="btn btn-default btn-xs">
+                                            Mark as Claimed
+                                        </a>
+                                    }
+
+                                    <a href="@Url.Action("invite", "account", new { id = account.Uid })" class="btn btn-danger btn-xs">
+                                        Delete
+                                    </a>
                                 </td>
                             </tr>
                         }

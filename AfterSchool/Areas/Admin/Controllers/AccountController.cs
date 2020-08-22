@@ -23,6 +23,11 @@ namespace AfterSchool.Areas.Admin.Controllers
         private List<Account> IndexViewBag(string pn, string rpp, string search, AccountType type, SystemMessages msgs = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var tempMsgs = TempData["Messages"] as SystemMessages;
+            if (tempMsgs.IsNotEmpty())
+                msgs.AddRange(tempMsgs);
+
             var pageNumber = 1;
             var recordsPerPage = 10;
 
@@ -61,7 +66,7 @@ namespace AfterSchool.Areas.Admin.Controllers
         {
             return View(IndexViewBag(pn, rpp, search, type));
         }
-        
+
         [HttpGet]
         public ActionResult ResendInvite(string id, string pn, string rpp, string search, AccountType type = AccountType.NotSet)
         {
@@ -134,10 +139,10 @@ namespace AfterSchool.Areas.Admin.Controllers
                         if (account.IsNotEmpty())
                         {
                             account.AddPackage(
-                                package.ToInteger(), 
-                                (BillingPeriodType)billingperiod.ToInteger(), 
-                                currentUser, 
-                                amsgs, 
+                                package.ToInteger(),
+                                (BillingPeriodType)billingperiod.ToInteger(),
+                                currentUser,
+                                amsgs,
                                 adc
                             );
 
@@ -184,11 +189,11 @@ namespace AfterSchool.Areas.Admin.Controllers
                             else
                             {
                                 account = AccountService.CreateNewUnclaimedAccount(
-                                            orgName: orgname, 
+                                            orgName: orgname,
                                             email: null,
                                             phone: null,
                                             isActive: true,
-                                            accountType:(AccountType)accounttype.ToInteger(),
+                                            accountType: (AccountType)accounttype.ToInteger(),
                                             accountOwner: currentUser,
                                             packageId: package.ToInteger(),
                                             packageBillingPeriod: (BillingPeriodType)billingperiod.ToInteger(),
@@ -196,7 +201,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                                             loggedInUser: currentUser,
                                             isAfterSchool: true,
                                             createWithStripe: false,
-                                            msgs: amsgs, 
+                                            msgs: amsgs,
                                             dc: adc);
                             }
                         }
@@ -213,7 +218,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                     },
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                     onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
-                );             
+                );
             }
 
             ViewBag.Messages = msgs;
@@ -244,6 +249,31 @@ namespace AfterSchool.Areas.Admin.Controllers
             }
 
             return RedirectToAction("index");
+        }
+
+        [HttpGet]
+        public ActionResult Deactivate(string id)
+        {
+            var msgs = new SystemMessages();
+            var currentUser = SessionVariables.CurrentUser;
+            var account = id.IsGuid() ? Account.LoadByUid(id.ToGuid(), msgs) : null;
+
+            if (account.IsNotEmpty() && SessionVariables.CurrentUser.HasAccessTo(account, msgs))
+            {
+                Database.ExecuteTransaction(
+                   action: (SystemMessages amsgs, DatabaseConnection adc) => AccountService.MarkAccountAsInActive(account: account, loggedInUser: currentUser, msgs: msgs),
+                   onSuccess: (SystemMessages smsgs) =>
+                   {
+                       msgs.AddRange(smsgs);
+                       msgs.Add(new SystemMessage { MessageType = MessageType.Success, Text = "Account deactivated successfully." });                       
+                   },
+                   onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                   onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                );
+            }
+
+            TempData["Messages"] = msgs; //used to pass msgs between inter-controllers and once page gets refreshed, temp data becomes empty so it's more usefull
+            return RedirectToAction("Index");
         }
     }
 }
