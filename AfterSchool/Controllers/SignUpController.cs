@@ -44,8 +44,8 @@ namespace AfterSchool.Controllers
             else if (WebUser.ExistsByEmail(model.Email, msgs))
                 msgs.Add("This email has already been registered", MessageType.UserError);
 
-            if (model.Password1.IsEmpty())
-                msgs.Add("Password is required", MessageType.UserError);
+            if (model.Password1.IsEmpty() || model.Password2.IsEmpty() || (model.Password1 != model.Password2))
+                msgs.Add("Passwords are required and must match", MessageType.UserError);
             else if (model.Password1.Length < 8)
                 msgs.Add("Password must be at least 8 characters", MessageType.UserError);
             
@@ -74,7 +74,7 @@ namespace AfterSchool.Controllers
                             firstName: model.FirstName,
                             lastName: model.LastName,
                             email: model.Email,
-                            password: model.Password1,
+                            password: model.Password2,
                             isActive: true,
                             isRegistered: true,
                             isVerified: false,
