@@ -790,7 +790,7 @@ namespace AfterSchool.Controllers
                             dc: adc);
 
                         if (user.IsNotEmpty())
-                            account = user.AddNewRegistrantAccount(UserType.Owner, true, true, user, amsgs, adc);
+                            account = user.AddNewRegistrantAccount(userType: UserType.Owner, isActive: true, isAfterSchool: true, loggedInUser: user, msgs: amsgs, dc: adc);
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
