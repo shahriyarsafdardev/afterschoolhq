@@ -252,27 +252,95 @@ namespace AfterSchool.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        public ActionResult Deactivate(string id)
+        public ActionResult UpdateAccountStatus(string id)
         {
             var msgs = new SystemMessages();
             var currentUser = SessionVariables.CurrentUser;
             var account = id.IsGuid() ? Account.LoadByUid(id.ToGuid(), msgs) : null;
 
-            if (account.IsNotEmpty() && SessionVariables.CurrentUser.HasAccessTo(account, msgs))
+            if (!SessionVariables.CurrentUser.HasPermission(permissionType: PermissionType.AccountingEdit, account: account, msgs: msgs)) // TODO: need to discuss
+                msgs.Add("You don't have enough access to update this account.", MessageType.UserError);
+
+            if (account.IsEmpty())
+                msgs.Add("Not able to find suitable account.", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
             {
                 Database.ExecuteTransaction(
-                   action: (SystemMessages amsgs, DatabaseConnection adc) => AccountService.MarkAccountAsInActive(account: account, loggedInUser: currentUser, msgs: msgs),
+                   action: (SystemMessages amsgs, DatabaseConnection adc) => AccountService.UpdateAccountStatus(account: account, loggedInUser: currentUser, msgs: msgs),
                    onSuccess: (SystemMessages smsgs) =>
                    {
                        msgs.AddRange(smsgs);
-                       msgs.Add(new SystemMessage { MessageType = MessageType.Success, Text = "Account deactivated successfully." });                       
+                       msgs.Add(new SystemMessage { MessageType = MessageType.Success, Text = $"Account {(account.IsActive ? "activated" : "deactivated")} successfully." });                       
                    },
                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                    onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
                 );
             }
 
-            TempData["Messages"] = msgs; //used to pass msgs between inter-controllers and once page gets refreshed, temp data becomes empty so it's more usefull
+            TempData["Messages"] = msgs; //TODO: used to pass msgs between inter-controllers and once page gets refreshed, temp data becomes empty so that's what we need in this schenario.
+            return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public ActionResult UpdateAccountClaims(string id)
+        {
+            var msgs = new SystemMessages();
+            var currentUser = SessionVariables.CurrentUser;
+            var account = id.IsGuid() ? Account.LoadByUid(id.ToGuid(), msgs) : null;
+
+            if (!SessionVariables.CurrentUser.HasPermission(permissionType: PermissionType.AccountingEdit, account: account, msgs: msgs)) // TODO: need to discuss
+                msgs.Add("You don't have enough access to update this account.", MessageType.UserError);
+
+            if (account.IsEmpty())
+                msgs.Add("Not able to find suitable account.", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                Database.ExecuteTransaction(
+                   action: (SystemMessages amsgs, DatabaseConnection adc) => AccountService.MarkAsClaimed(account: account, loggedInUser: currentUser, msgs: msgs),
+                   onSuccess: (SystemMessages smsgs) =>
+                   {
+                       msgs.AddRange(smsgs);
+                       msgs.Add(new SystemMessage { MessageType = MessageType.Success, Text = $"Account claims changed successfully." });
+                   },
+                   onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                   onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                );
+            }
+
+            TempData["Messages"] = msgs;
+            return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public ActionResult DeleteAccount(string id)
+        {
+            var msgs = new SystemMessages();
+            var currentUser = SessionVariables.CurrentUser;
+            var account = id.IsGuid() ? Account.LoadByUid(id.ToGuid(), msgs) : null;
+
+            if (!SessionVariables.CurrentUser.HasAccessTo(account, msgs)) // TODO: need to discuss
+                msgs.Add("You don't have enough access to remove this account.", MessageType.UserError);
+
+            if (account.IsEmpty())
+                msgs.Add("Not able to find suitable account.", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                Database.ExecuteTransaction(
+                   action: (SystemMessages amsgs, DatabaseConnection adc) => AccountService.MarkAsDeleted(account: account, loggedInUser: currentUser, msgs: msgs),
+                   onSuccess: (SystemMessages smsgs) =>
+                   {
+                       msgs.AddRange(smsgs);
+                       msgs.Add(new SystemMessage { MessageType = MessageType.Success, Text = $"Account removed successfully." });
+                   },
+                   onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                   onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                );
+            }
+
+            TempData["Messages"] = msgs;
             return RedirectToAction("Index");
         }
     }

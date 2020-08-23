@@ -88,27 +88,18 @@
                                         </a>
                                     }                                   
 
-                                    @if (account.IsActive)
-                                    {
-                                        <a href="@Url.Action("deactivate", "account", new { id = account.Uid })" class="btn btn-warning btn-xs">
-                                            Deactivate
-                                        </a>
-                                    }
-                                    else
-                                    {
-                                        <a href="@Url.Action("invite", "account", new { id = account.Uid })" class="btn btn-info btn-xs">
-                                            Activate
-                                        </a>
-                                    }
+                                    <a href="@Url.Action("updateaccountstatus", "account", new { id = account.Uid })" class="btn btn-xs @($"{(account.IsActive ? "btn-warning" : "btn-info" )}")">
+                                        @($"{(account.IsActive ? "Deactivate" : "Activate" )}")
+                                    </a>                                    
 
                                     @if (!account.IsClaimed)
                                     {
-                                        <a href="@Url.Action("invite", "account", new { id = account.Uid })" class="btn btn-default btn-xs">
+                                        <a href="@Url.Action("updateaccountclaims", "account", new { id = account.Uid })" class="btn btn-default btn-xs">
                                             Mark as Claimed
                                         </a>
                                     }
 
-                                    <a href="@Url.Action("invite", "account", new { id = account.Uid })" class="btn btn-danger btn-xs">
+                                    <a href="@Url.Action("deleteaccount", "account", new { id = account.Uid })" class="btn btn-danger btn-xs">
                                         Delete
                                     </a>
                                 </td>
