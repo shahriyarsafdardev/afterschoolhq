@@ -1,0 +1,92 @@
+﻿@model List<FormQuestionViewModel>
+@{
+    Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
+    ViewBag.Title = "Contact Us";
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var registrationAccount = (Account)ViewBag.RegistrationAccount;
+    var contactForm = (Form)ViewBag.ContactForm;
+    var profile = (AccountProfile)ViewBag.AccountProfile;
+    var groups = Model.Select(qvm => qvm.Question.ToFormQuestionGroup())
+        .OrderBy(group => group.DisplayOrder)
+        .DistinctBy(group => group.ID)
+        .ToList();
+}
+
+@{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+@{
+    Html.RenderPartial(
+        "~/Views/Shared/Registration/_AccountTopBar.cshtml",
+        registrationAccount,
+        new ViewDataDictionary()
+        {
+            { "LoginReturnUrl", registrationAccount.HomePageUrl }
+        }
+    );
+}
+
+@{
+    Html.RenderPartial
+    (
+        "~/Views/Shared/Registration/_RegistrationHeader.cshtml",
+        new RegistrationHeaderViewModel(registrationAccount, profile),
+        new ViewDataDictionary()
+        {
+            { "hidebuttons", true }
+        }
+    );
+}
+
+<div>
+    <div class="col-md-12 col-lg-10 col-lg-offset-1 col-lg-offset-2 participation-object participation-object-detail">
+
+        <div class="panel panel-alt6">
+            <div class="panel-heading" style="width: 100%;">
+                <div class="row">
+                    <div class="col-md-12">
+                        <h3 class="text-center">
+                            @contactForm.Name
+                        </h3>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+
+                <div>
+                    <form class="form-horizontal" id="contact-form" method="post" action="@Url.Action("contact", "account", new { regaccount = registrationAccount.Uid })">
+
+                        @foreach (var group in groups)
+                        {
+                            Html.RenderPartial(
+                                "~/Views/Shared/Form/_Group.cshtml",
+                                group,
+                                new ViewDataDictionary() { { "QuestionViewModels", Model.Where(qvm => qvm.Question.FormQuestionGroupId == group.ID).OrderBy(x => x.Question.DisplayOrder).ToList() } });
+                        }
+
+                        <div class="padding-v-20">
+                            <button type="submit" id="btn-submit-contact-form" class="btn btn-register-primary btn-lg">Submit &raquo;</button>
+                        </div>
+
+                    </form>
+                </div>
+
+            </div>
+            <div class="panel-footer">
+                <div class="col-md-12 text-center">
+                    <p class="padding-v-20 padding-h-30">
+
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('#contact-form').submit(function () {
+            $('#btn-submit-contact-form').html('Submitting...');
+            $('#btn-submit-contact-form').prop('disabled', true);
+        });
+    });
+</script>

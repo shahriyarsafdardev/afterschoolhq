@@ -38,6 +38,14 @@ namespace AfterSchoolLibrary.Services
             return Form.LoadByAccountId(account.ID.Value, msgs, dc);
         }
 
+        public static Form GetContactForm(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (account.ContactFormId.HasValue)
+                return Form.Load(account.ContactFormId.Value, msgs, dc);
+
+            return null;
+        }
+
         public static List<ActivitySchedule> GetActivitySchedules(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return ActivitySchedule.LoadByAccountId(account.ID.Value, msgs, dc);
@@ -289,12 +297,18 @@ namespace AfterSchoolLibrary.Services
 
         public static Registrant AddContact(this Account account, string firstName, string lastName, string email, string phone, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
+            return account.AddContact(firstName, lastName, email, phone, false, loggedInUser, msgs, dc);
+        }
+
+        public static Registrant AddContact(this Account account, string firstName, string lastName, string email, string phone, bool allowDuplicates, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
             return RegistrantService.CreateNewContact(
                 account,
                 firstName,
                 lastName,
                 email,
                 phone,
+                allowDuplicates,
                 loggedInUser,
                 msgs,
                 dc);

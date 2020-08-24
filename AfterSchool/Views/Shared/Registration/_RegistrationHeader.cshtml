@@ -213,15 +213,16 @@
                             <i class="icon icon-left ion-share hide"></i>
                             <i class="icon icon-left s7-share"></i>
                             Share
-
-                            @if (Model.ParticipationObject.IsNotEmpty())
-                            {
-                                @UILabel.ActivityLabel(ActivityType.Activity, false)
-                            }
-                            else
-                            {
-                                @:Profile
-                            }
+                            @*
+                                @if (Model.ParticipationObject.IsNotEmpty())
+                                {
+                                    @UILabel.ActivityLabel(ActivityType.Activity, false)
+                                }
+                                else
+                                {
+                                    @:Profile
+                                }
+                            *@
 
                         </button>
 
@@ -235,10 +236,20 @@
                                 </button>
                             }
 
-                            <button class="btn btn-header-action md-trigger" data-modal="modal-contact-provider" onclick="resetContactProviderForm()">
-                                <i class="icon icon-left s7-mail"></i>
-                                <span class="">Contact Us</span>
-                            </button>
+                            if (Model.Account.ContactFormId.HasValue)
+                            {
+                                <a href="@Model.Account.ContactUrl" class="btn btn-header-action">
+                                    <i class="icon icon-left s7-mail"></i>
+                                    <span class="">Contact Us</span>
+                                </a>
+                            }
+                            else
+                            {
+                                <button class="btn btn-header-action md-trigger" data-modal="modal-contact-provider" onclick="resetContactProviderForm()">
+                                    <i class="icon icon-left s7-mail"></i>
+                                    <span class="">Contact Us</span>
+                                </button>
+                            }
 
                             if (Model.Account.IsClaimed)
                             {
@@ -259,7 +270,7 @@
                             }
                         }
                         else
-                        {
+                        {                            
                             <a href="@Model.ParticipationObject.GetInterestedPageUrl()" class="btn btn-header-action">
                                 <i class="icon icon-left s7-bell"></i>
                                 <span class="">I'm Interested</span>

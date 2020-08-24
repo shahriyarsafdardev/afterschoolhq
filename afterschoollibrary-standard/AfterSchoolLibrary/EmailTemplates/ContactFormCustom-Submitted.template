@@ -1,0 +1,13 @@
+﻿<div>
+  <p>
+    @Model.ContactName has submitted a contact form from your profile on @Model.ProductName. 
+  </p>
+  <p>
+    @Model.QuestionsAndAnswers
+  </p>
+  <p>
+    Thanks, <br />
+    @Model.ProductName
+  </p>
+  
+</div>

@@ -999,7 +999,15 @@ namespace AfterSchoolLibrary.Services
         public static FormQuestionAnswer AddOrUpdateAnswer(this Registrant registrant, string answerText, FormQuestion question, int? registrationId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (question.IsNotEmpty())
-                return registrant.AddOrUpdateAnswer(answerText, question.ID, question.QuestionDataTypeId, question.Text, registrationId, loggedInUser, msgs, dc);
+                return registrant.AddOrUpdateAnswer(
+                        answerText, 
+                        question.ID, 
+                        question.QuestionDataTypeId, 
+                        question.Text, 
+                        registrationId, 
+                        loggedInUser, 
+                        msgs, 
+                        dc);
 
             return null;
         }
@@ -1012,12 +1020,15 @@ namespace AfterSchoolLibrary.Services
             FormQuestionAnswer answer = null;
 
             if (questionDataType == QuestionDataType.NotSet)
-                answer = FormQuestionAnswer.LoadByRegistrantIdByFormQuestionIdByRegistrationId(
-                    RegistrantId: registrant.ID.Value,
-                    FormQuestionId: questionId.Value,
-                    RegistrationId: registrationId.Value,
-                    msgs: msgs,
-                    dc: dc);
+            {
+                if (registrationId.HasValue && questionId.HasValue && registrant.ID.HasValue)
+                    answer = FormQuestionAnswer.LoadByRegistrantIdByFormQuestionIdByRegistrationId(
+                                RegistrantId: registrant.ID.Value,
+                                FormQuestionId: questionId.Value,
+                                RegistrationId: registrationId.Value,
+                                msgs: msgs,
+                                dc: dc);
+            }
             else
                 answer = FormQuestionAnswer.LoadByRegistrantIdByQuestionDataTypeId(registrant.ID.Value, questionDataType, msgs, dc);
 
@@ -1029,13 +1040,13 @@ namespace AfterSchoolLibrary.Services
                     QuestionDataTypeId = questionDataType,
                     QuestionText = questionText,
                     CreateDate = DateTime.UtcNow,
-                    CreatedBy = loggedInUser?.ID.IfEmpty(0)
+                    CreatedBy = loggedInUser?.ID
                 };
 
             answer.RegistrationId = registrationId;
             answer.Text = answerText;
             answer.LastModifiedDate = DateTime.UtcNow;
-            answer.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+            answer.LastModifiedBy = loggedInUser?.ID;
             msgs.AddRange(answer.Save(dc));
 
             answer.UpdateRegistrantInfo(registrant, msgs, dc);
@@ -1375,6 +1386,11 @@ namespace AfterSchoolLibrary.Services
 
         public static Registrant CreateNewContact(Account account, string firstName, string lastName, string email, string phone, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
+            return CreateNewContact(account, firstName, lastName, email, phone, false, loggedInUser, msgs, dc);
+        }
+
+        public static Registrant CreateNewContact(Account account, string firstName, string lastName, string email, string phone, bool allowDuplicates, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
             Registrant contact = null;
             var doesContactExist = account.DoesContactExist(
                                     firstName.IfEmpty("").Trim(),
@@ -1383,15 +1399,15 @@ namespace AfterSchoolLibrary.Services
                                     msgs,
                                     dc);
 
-            if (!doesContactExist)
+            if (!doesContactExist || allowDuplicates)
             {
                 contact = new Registrant
                 {
                     AccountId = account.ID,
                     CreateDate = DateTime.UtcNow,
                     LastModifiedDate = DateTime.UtcNow,
-                    CreatedBy = loggedInUser.ID,
-                    LastModifiedBy = loggedInUser.ID,
+                    CreatedBy = loggedInUser?.ID,
+                    LastModifiedBy = loggedInUser?.ID,
                     IsContactOnly = true,
                     RegistrantTypeId = RegistrantType.Individual,
                     Email = email.IfEmpty("").Trim(),
