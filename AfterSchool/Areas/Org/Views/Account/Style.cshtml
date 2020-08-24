@@ -723,10 +723,13 @@
 
         $('#txtVideoUrl').blur(function () {
             var url = $('#txtVideoUrl').val();
-            if (!validateYouTubeVideoUrl(url)) {
+            var isValidYoutubeURL = validateYouTubeVideoUrl(url);
+            var isValidVimeoUrl = validateVimeoUrl(url);
+
+            if (!isValidYoutubeURL && !isValidVimeoUrl) {
                 Notifications.showBar({
                     title: 'Error',
-                    message: 'URL is not in correct format. Follow this <a target="_blank" style="color: yellow;" href="https://support.google.com/youtube/answer/57741?co=GENIE.Platform%3DDesktop&hl=en">Thread</a> to get proper URL of your video.',
+                    message: 'URL is not in correct format. Follow this <a target="_blank" style="color: yellow;" href="https://support.google.com/youtube/answer/57741?co=GENIE.Platform%3DDesktop&hl=en">Thread </a> to get proper URL of your youtube video or this for <a target="_blank" style="color: yellow;" href="https://vimeo.zendesk.com/hc/en-us/articles/229326167-Share-features">Thread </a> for vimeo.',
                     success: false
                 });
 
@@ -739,12 +742,52 @@
             var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
             var match = url.match(regExp);
 
-            if (match && match[2].length == 11) {
+            if (match && match[2] && match[2].length == 11) {
                 return true;
             } else {                
                 return false;
             }
         }
+
+        function validateVimeoUrl(url) {
+            var regExp = /(http|https)?:\/\/(www\.)?vimeo.com\/(?:channels\/(?:\w+\/)?|groups\/([^\/]*)\/videos\/|)(\d+)(?:|\/\?)/;
+            var match = url.match(regExp);
+
+            if (match && match[4] && match[4].length >= 6) {
+                return true;
+            } else {
+                return false;
+            }
+
+            //var VIMEO_BASE_URL = "https://vimeo.com/api/oembed.json?url=";
+            //return callVimeoToValidate(VIMEO_BASE_URL + url).then(response => {
+            //    if (response != null && response.video_id > 0)
+            //        return true;
+            //    else
+            //        return false;
+            //});
+
+            //return $.ajax({
+            //    url: VIMEO_BASE_URL + url,
+            //    type: 'GET',
+            //    async: false,
+            //    success: function(data) {
+            //        if (data != null && data.video_id > 0)
+            //            return true;
+            //        else
+            //            return false;
+            //    },
+            //    error: function(data) {
+            //        return false;
+            //    }
+            //});
+        }
+
+        //function callVimeoToValidate(url) {
+        //    return $.ajax({
+        //        url: url
+        //    });
+        //}
     </script>
 
 }
