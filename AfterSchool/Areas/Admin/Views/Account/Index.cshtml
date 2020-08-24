@@ -79,18 +79,18 @@
                                     {
                                         <a href="@Url.Action("invite", "account", new { id = account.Uid })" class="btn btn-default btn-xs">
                                             Invite To Account
-                                        </a>
-                                    }
-                                    else if (account.GetActiveMemberCount() == 0)
+                                        </a> 
+                                    } 
+                                    else if (account.GetActiveMemberCount() == 0) 
                                     {
                                         <a href="@Url.Action("resendinvite", "account", new { id = account.Uid })" class="btn btn-default btn-xs">
                                             Resend Invite
                                         </a>
-                                    }                                   
+                                    }
 
                                     <a href="@Url.Action("updateaccountstatus", "account", new { id = account.Uid })" class="btn btn-xs @($"{(account.IsActive ? "btn-warning" : "btn-info" )}")">
                                         @($"{(account.IsActive ? "Deactivate" : "Activate" )}")
-                                    </a>                                    
+                                    </a>
 
                                     @if (!account.IsClaimed)
                                     {
@@ -99,9 +99,28 @@
                                         </a>
                                     }
 
-                                    <a href="@Url.Action("deleteaccount", "account", new { id = account.Uid })" class="btn btn-danger btn-xs">
+                                    <a href="#" class="btn btn-danger btn-xs md-trigger" data-modal="modal-confirm-account-deletion-@account.Uid">
                                         Delete
                                     </a>
+
+                                    @{
+                                        Html.RenderPartial("~/Views/Shared/_Modal.cshtml", new ModalViewModel()
+                                        {
+                                            ActionButtonHtml = "Delete &raquo;",
+                                            ActionButtonId = $"btn-confirm-account-deletion-{account.Uid}",
+                                            HtmlBody = "<p>Are you sure you want to delete this account? </p>",
+                                            ID = $"modal-confirm-account-deletion-{account.Uid}",
+                                            Title = "Are you sure?",
+                                        });
+                                    }
+
+                                <script>
+                                    PageEvent.add(PageEvent.AFTER_INIT, function () {
+                                            $('#btn-confirm-account-deletion-@account.Uid').click(function () {
+                                                location.href = '@Url.Action("deleteaccount", "account", new { id = account.Uid })';
+                                            });
+                                        });
+                                </script>   
                                 </td>
                             </tr>
                         }

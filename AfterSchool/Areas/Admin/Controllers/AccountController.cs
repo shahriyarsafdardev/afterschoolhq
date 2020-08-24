@@ -258,8 +258,8 @@ namespace AfterSchool.Areas.Admin.Controllers
             var currentUser = SessionVariables.CurrentUser;
             var account = id.IsGuid() ? Account.LoadByUid(id.ToGuid(), msgs) : null;
 
-            if (!SessionVariables.CurrentUser.HasPermission(permissionType: PermissionType.AccountingEdit, account: account, msgs: msgs)) // TODO: need to discuss
-                msgs.Add("You don't have enough access to update this account.", MessageType.UserError);
+            //if (!SessionVariables.CurrentUser.HasPermission(permissionType: PermissionType.AccountingEdit, account: account, msgs: msgs)) // TODO: need to discuss
+            //    msgs.Add("You don't have enough access to update this account.", MessageType.UserError);
 
             if (account.IsEmpty())
                 msgs.Add("Not able to find suitable account.", MessageType.UserError);
@@ -289,8 +289,8 @@ namespace AfterSchool.Areas.Admin.Controllers
             var currentUser = SessionVariables.CurrentUser;
             var account = id.IsGuid() ? Account.LoadByUid(id.ToGuid(), msgs) : null;
 
-            if (!SessionVariables.CurrentUser.HasPermission(permissionType: PermissionType.AccountingEdit, account: account, msgs: msgs)) // TODO: need to discuss
-                msgs.Add("You don't have enough access to update this account.", MessageType.UserError);
+            //if (!SessionVariables.CurrentUser.HasPermission(permissionType: PermissionType.AccountingEdit, account: account, msgs: msgs)) // TODO: need to discuss
+            //    msgs.Add("You don't have enough access to update this account.", MessageType.UserError);
 
             if (account.IsEmpty())
                 msgs.Add("Not able to find suitable account.", MessageType.UserError);
@@ -320,8 +320,8 @@ namespace AfterSchool.Areas.Admin.Controllers
             var currentUser = SessionVariables.CurrentUser;
             var account = id.IsGuid() ? Account.LoadByUid(id.ToGuid(), msgs) : null;
 
-            if (!SessionVariables.CurrentUser.HasAccessTo(account, msgs)) // TODO: need to discuss
-                msgs.Add("You don't have enough access to remove this account.", MessageType.UserError);
+            //if (!SessionVariables.CurrentUser.HasAccessTo(account, msgs)) // TODO: need to discuss
+            //    msgs.Add("You don't have enough access to remove this account.", MessageType.UserError);
 
             if (account.IsEmpty())
                 msgs.Add("Not able to find suitable account.", MessageType.UserError);
