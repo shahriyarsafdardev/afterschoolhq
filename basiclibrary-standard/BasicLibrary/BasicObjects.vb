@@ -792,6 +792,14 @@ Public MustInherit Class BaseAddress
             MDV("Address2").Value = value
         End Set
     End Property
+    Public Property Neighborhood() As String
+        Get
+            Return MDV("Neighborhood").Value
+        End Get
+        Set(ByVal value As String)
+            MDV("Neighborhood").Value = value
+        End Set
+    End Property
     Public Property City() As String
         Get
             Return MDV("City").Value
@@ -929,6 +937,69 @@ Public MustInherit Class BaseAddress
 
     End Function
 
+    Public Shared Function FormatImpreciseAddress(ByVal neighborhood As String, ByVal city As String, ByVal state As String, ByVal postalCode As String, ByVal country As String, Optional ByVal useLineBreaks As Boolean = True) As String
+
+        Dim address As String = ""
+
+        If neighborhood.IsEmpty() = False Then
+            If address.IsEmpty() = False Then
+                If useLineBreaks Then
+                    address &= vbCrLf
+                Else
+                    address &= ", "
+                End If
+            End If
+            address &= neighborhood
+        End If
+
+        If city.IsEmpty() = False Or state.IsEmpty() = False Or postalCode.IsEmpty = False Then
+            If address.IsEmpty() = False Then
+                If useLineBreaks Then
+                    address &= vbCrLf
+                Else
+                    address &= ", "
+                End If
+            End If
+
+            Dim cityLine As String = ""
+
+            If city.IsEmpty() = False Then
+                cityLine &= city
+            End If
+            If city.IsEmpty() = False Then
+                If cityLine.IsEmpty() = False Then
+                    cityLine &= ", "
+                End If
+                cityLine &= state
+            End If
+            If city.IsEmpty() = False Then
+                If cityLine.IsEmpty() = False Then
+                    cityLine &= " "
+                End If
+                cityLine &= postalCode
+            End If
+
+            If cityLine.IsEmpty() = False Then
+                address &= cityLine
+            End If
+
+        End If
+
+        If country.IsEmpty = False Then
+            If address.IsEmpty = False Then
+                If useLineBreaks Then
+                    address &= vbCrLf
+                Else
+                    address &= " "
+                End If
+            End If
+            address &= country
+        End If
+
+        Return address
+
+    End Function
+
     Public Overrides Function ToString() As String
         Return FormatAddress(False)
     End Function
@@ -989,6 +1060,10 @@ Public MustInherit Class BaseLocation
 
     Public Function FormatAddressWithoutName(Optional ByVal useLineBreaks As Boolean = True) As String
         Return MyBase.FormatAddress(useLineBreaks)
+    End Function
+
+    Public Overloads Function FormatImpreciseAddress(Optional ByVal useLineBreaks As Boolean = True) As String
+        Return BaseAddress.FormatImpreciseAddress(Neighborhood, City, State, PostalCode, Country, useLineBreaks)
     End Function
 
     Public Overrides Function ToString() As String
