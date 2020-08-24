@@ -5,6 +5,7 @@
     var account = (Account)ViewBag.Account;
     var profile = (AccountProfile)ViewBag.AccountProfile;
     var currentUser = SessionVariables.CurrentUser;
+    var currentAccount = SessionVariables.CurrentAccount;
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -22,7 +23,7 @@
                     <p>
                         Thanks for reaching out. Your information has been submitted and someone from @account.Name will be in touch soon.
                     </p>
-                    @if (currentUser.IsRegistered)
+                    @if (currentUser.IsRegistered && currentAccount.AccountTypeId == AccountType.Registrant)
                     {
                         <p>
                             <a href="@Url.Action("index", "home", new { area = "user" })">View your account</a>
