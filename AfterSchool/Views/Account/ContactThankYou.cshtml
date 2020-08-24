@@ -1,0 +1,97 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
+    ViewBag.Title = "Thank you";
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var account = (Account)ViewBag.Account;
+    var profile = (AccountProfile)ViewBag.AccountProfile;
+    var currentUser = SessionVariables.CurrentUser;
+    var currentAccount = SessionVariables.CurrentAccount;
+}
+
+@{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+@{ Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", SessionVariables.RegistrationStartPageAccount); }
+
+<div>
+    <div class="col-md-6 col-md-offset-3 text-center">
+        <div class="panel">
+            <div class="panel-body">
+
+                <h1>Thank You</h1>
+
+                <div class="reg-ul">
+                    <p>
+                        Thanks for reaching out. Your information has been submitted and someone from @account.Name will be in touch soon.
+                    </p>
+                    @if (currentUser.IsRegistered && currentAccount.AccountTypeId == AccountType.Registrant)
+                    {
+                        <p>
+                            <a href="@Url.Action("index", "home", new { area = "user" })">View your account</a>
+                        </p>
+                    }
+                </div>
+
+                <div>
+                    @if (!currentUser.IsRegistered)
+                    {
+                        <hr />
+                        <p>
+                            Thank you for your interest! We've helped thousands of parents find activities for their children and we'd love to do the same for you.  Click the link below to join the @UILabel.ProductName() family.
+                        </p>
+                        <p>
+                            <a href="@AfterSchoolLibrary.Helpers.Utilities.CompleteSignUpUrl(currentUser.Uid)">
+                                Complete Account Sign Up &raquo;
+                            </a>
+                        </p>
+                    }
+                    else
+                    {
+                        <hr />
+                        <div class="margin-v-20">
+                            <p>
+                                <a href="@account.HomePageUrl" class="btn btn-xl btn-register-primary btn-register-xl">Return to @account.Name's profile</a>
+                            </p>
+                        </div>
+                    }
+                </div>
+
+            </div>
+        </div>
+
+        @if (profile.IsNotEmpty() && profile.CalendarBookingLink.IsNotEmpty())
+        {
+            <div class="panel">
+                <div class="panel-body">
+                    <div>
+                        <p class="text-medium-small margin-v-20">
+                            Would you like to book an appointment to learn more?
+                        </p>
+                        <p>
+                            <a href="@profile.CalendarBookingLink" class="btn btn-xl btn-register-primary btn-register-xl" target="_blank">
+                                Book Appointment &raquo;
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="panel">
+            <div class="panel-body">
+
+                <div>
+                    @{ Html.RenderPartial(
+                            "~/Views/Shared/Registration/_ShareLinks.cshtml",
+                            new ViewDataDictionary() {
+                               { "ShareObject", account.Name },
+                               { "ShareUrl", account.ShortHomePageUrl }
+                            }
+                         );
+                    }
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>

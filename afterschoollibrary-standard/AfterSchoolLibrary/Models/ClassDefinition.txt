@@ -90,6 +90,7 @@ property: VirtualLocationInfo, string, NVarChar "1000", , Link for virtual class
 property: HidePreciseLocation, bool, Bit, , If true then don't want to add a pin for the exact location
 property: MinSeatsRequired, int?, Int, , Minimum seats required to have the activity
 property: RegistrationFinalized, bool, Bit, , Used to close registration and send notifications
+property: InterestFormId, int?, Int, , Used to set the interest form used on the activity page
 -property: AllowPreRegistration, bool, Bit
 -property: RegistrationTimeZone, string, NVarChar "30"
 -property: AcceptPayPal, bool, Bit
@@ -363,6 +364,7 @@ property: IsTest, bool, Bit
 property: IsDeleted, bool, Bit
 property: IsClaimed, bool, Bit
 property: OnboardingStepDone, OnboardingStepType, Int
+property: ContactFormId, int?, Int, , Enables account to set contact form to be used on main page
 baseproperty: Name, required
 loadmethod: OwnerId, List<>
 loadmethod: UniqueName

@@ -167,6 +167,24 @@ namespace AfterSchool.Controllers
             return View(account);
         }
 
+        [HttpGet]
+        public ActionResult Contact(string accountname)
+        {
+            if (isUnsupportedBrowser())
+                return RedirectUnsupportedBrowser();
+
+            var msgs = new SystemMessages();
+            var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
+
+            if (account.IsEmpty())
+                return HttpNotFound();
+
+            if (!account.ContactFormId.HasValue)
+                return Redirect(account.HomePageUrl);
+
+            return RedirectToAction("contact", "account", new { area = "", regaccount = account.Uid });
+        }
+
         public ActionResult Pay(string accountname)
         {
             if (isUnsupportedBrowser())
@@ -208,8 +226,8 @@ namespace AfterSchool.Controllers
                         msgs);
             }
 
-            ViewBag.Sources = SessionVariables.CurrentAccount.GetStripeSources(msgs);
-            ViewBag.BankAccounts = SessionVariables.CurrentAccount.GetStripeBankAccounts(msgs);
+            ViewBag.Sources = currentAccount.GetStripeSources(msgs);
+            ViewBag.BankAccounts = currentAccount.GetStripeBankAccounts(msgs);
             ViewBag.AccountProfile = account.GetAccountProfile(msgs);
             ViewBag.Messages = msgs;
 

@@ -46,14 +46,14 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult GenerateProfileSitemap()
         {
-            var profiles = AccountProfile.Load(criterias: new Hashtable() { { "AccountIsDeleted", false }, { "AccountIsTest", false } });
+            var profiles = AccountProfile.Load(criterias: new Hashtable() { { "AccountIsDeleted", false }, { "AccountIsTest", false }, { "IsAHQApproved", true } });
             var xml = new StringBuilder();
             xml.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
             xml.Append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">");
 
             profiles.ForEach(profile =>
             {
-                if (!profile.AccountIsDeleted && !profile.AccountIsTest)
+                if (!profile.AccountIsDeleted && !profile.AccountIsTest && profile.IsAHQApproved)
                 {
                     var account = profile.GetAccount();
                     var participationObjects = account.GetPublishedParticipationObjects().Where(x => !x.IsInviteOnly).ToList();
@@ -62,14 +62,14 @@ namespace AfterSchool.Controllers
                     xml.Append($"<loc>{account.HomePageUrl}</loc>");
                     xml.Append($"<lastmod>{profile.LastModifiedDate.Value.ToRfc3339String()}</lastmod>");
                     xml.Append("<changefreq>monthly</changefreq>");
-                    xml.Append("<priority>.9</priority>");
+                    xml.Append("<priority>.8</priority>");
                     xml.Append("</url>");
 
                     xml.Append("<url>");
                     xml.Append($"<loc>{account.BrowseUrl}</loc>");
                     xml.Append($"<lastmod>{profile.LastModifiedDate.Value.ToRfc3339String()}</lastmod>");
                     xml.Append("<changefreq>weekly</changefreq>");
-                    xml.Append("<priority>.8</priority>");
+                    xml.Append("<priority>.7</priority>");
                     xml.Append("</url>");
 
                     participationObjects.ForEach(participationObject =>
@@ -78,7 +78,7 @@ namespace AfterSchool.Controllers
                         xml.Append($"<loc>{participationObject.GetBrowseUrl()}</loc>");
                         xml.Append($"<lastmod>{participationObject.LastModifiedDate.Value.ToRfc3339String()}</lastmod>");
                         xml.Append("<changefreq>monthly</changefreq>");
-                        xml.Append("<priority>.7</priority>");
+                        xml.Append("<priority>.6</priority>");
                         xml.Append("</url>");
                     });
                 }

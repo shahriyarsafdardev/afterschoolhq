@@ -358,6 +358,55 @@ namespace AfterSchoolLibrary.Helpers
             msgs.AddRange(mailMsgs);
         }
 
+        public static void SendContactFormConfirmation(Account account, Registrant contact, SystemMessages msgs)
+        {
+            var accountOwner = account.GetAccountOwner(msgs);
+            var questionsAndAnswers = "";
+            var answers = contact.GetAnswers(msgs).OrderBy(answer => answer.FormQuestionDisplayOrder).ToList();
+            var groups = answers.Select(answer => answer.ToFormQuestionGroup()).DistinctBy(group => group.ID.Value).OrderBy(group => group.DisplayOrder).ToList();
+
+            questionsAndAnswers = "<p><table border=\"0\" cellpadding=\"5\">";
+
+            groups.ForEach(group => {
+
+                questionsAndAnswers += $"<tr><td colspan=\"{group.Name}\"></td></tr>";
+
+                var groupAnswers = answers.Where(answer => answer.FormQuestionFormQuestionGroupId == group.ID.Value).ToList();
+
+                groupAnswers.ForEach(answer => {
+                    questionsAndAnswers += $"<tr><td>{answer.QuestionText}</td><td>{answer.Text}</td></tr>";
+                });
+            });
+
+            questionsAndAnswers += "</table></p>";
+
+            var model = new NameValueCollection()
+            {
+                { "ContactName", contact.Name },
+                { "QuestionsAndAnswers", questionsAndAnswers },
+                { "ProductName", Utilities.AppName(true) },
+            };
+
+            var body = ProcessTemplate(
+                        EmailTemplates.ContactFormCustom_Submitted,
+                        model,
+                        "contact-submitted-custom-1.0.0",
+                        msgs);
+
+            var emails = account.Email.AsList();
+
+            if (accountOwner.Email.IsEmail() && accountOwner.Email.ToLower().NotIn(emails))
+                emails.Add(accountOwner.Email.ToLower());
+
+            emails.ForEach(email =>
+                msgs.AddRange(SendGridHelper.SendMail(
+                    fromEmail: Email.SendGridNoReplyEmailAddress(true),
+                    toEmail: new SendGrid.Helpers.Mail.EmailAddress(email),
+                    subject: $"Contact Form Submitted by {contact.Name}",
+                    body: $"{body}",
+                    emailTemplateId: SendGridHelper.GetGenericTemplateId(true))));
+        }
+
         public static SystemMessages SendRegistrationConfirmed(CheckoutObject checkoutObject, string customMessage, WebUser loggedInUser, bool isParentCopy, bool sendBcc, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();

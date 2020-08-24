@@ -53,6 +53,10 @@ namespace AfterSchoolLibrary.Models
 		public bool IsDeleted { get { return (bool)MDV["IsDeleted"].Value; } set { MDV["IsDeleted"].Value = value; } }
 		public bool IsClaimed { get { return (bool)MDV["IsClaimed"].Value; } set { MDV["IsClaimed"].Value = value; } }
 		public OnboardingStepType OnboardingStepDone { get { return (OnboardingStepType)MDV["OnboardingStepDone"].Value; } set { MDV["OnboardingStepDone"].Value = value; } }
+		/// <summary>
+		/// Enables account to set contact form to be used on main page
+		/// </summary>
+		public int? ContactFormId { get { return (int?)MDV["ContactFormId"].Value; } set { MDV["ContactFormId"].Value = value; } }
 		
 
         public Account()
@@ -112,6 +116,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "IsDeleted", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "IsClaimed", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "OnboardingStepDone", System.Data.SqlDbType.Int);
+				_dp.Add(className, "ContactFormId", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
@@ -305,6 +310,10 @@ namespace AfterSchoolLibrary.Models
 			dps.Add(ObjectMap["OnboardingStepDone"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ContactFormId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -462,6 +471,15 @@ namespace AfterSchoolLibrary.Models
             get
             {
                 return $"{HomePageUrl}/browse";
+            }
+
+        }
+
+        public string ContactUrl
+        {
+            get
+            {
+                return $"{HomePageUrl}/contact";
             }
 
         }
