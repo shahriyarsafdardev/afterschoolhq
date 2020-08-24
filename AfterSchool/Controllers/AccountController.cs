@@ -223,6 +223,148 @@ namespace AfterSchool.Controllers
 
         #endregion
 
+        #region Contact
+
+        private List<FormQuestionViewModel> ContactViewBag(Account account, SystemMessages msgs)
+        {
+            var contactForm = account.GetContactForm(msgs);
+            var questions = contactForm.GetActiveQuestions(msgs);
+            var qvms = questions.Select(question => new FormQuestionViewModel(question, Request.Params)).ToList();
+
+            ViewBag.AccountProfile = account.GetAccountProfile(msgs);
+            ViewBag.ContactForm = contactForm;
+            ViewBag.Qvms = qvms;
+            ViewBag.RegistrationAccount = account;
+
+            return qvms;
+        }
+
+        [HttpGet]
+        public ActionResult Contact(string regaccount)
+        {
+            if (!regaccount.IsGuid())
+                return HttpNotFound();
+
+            var msgs = new SystemMessages();
+            var registrationAccount = Account.LoadByUid(regaccount.ToGuid(), msgs);
+
+            if (registrationAccount.IsEmpty())
+                return HttpNotFound();
+
+            if (!registrationAccount.ContactFormId.HasValue)
+                return Redirect(registrationAccount.HomePageUrl);
+
+            var qvms = ContactViewBag(registrationAccount, msgs);
+
+            ViewBag.Messages = msgs;
+
+            return View(qvms);
+        }
+
+        [HttpPost]
+        public ActionResult Contact(string regaccount, string agree)
+        {
+            if (!regaccount.IsGuid())
+                return HttpNotFound();
+
+            var msgs = new SystemMessages();
+            var registrationAccount = Account.LoadByUid(regaccount.ToGuid(), msgs);
+
+            if (registrationAccount.IsEmpty())
+                return HttpNotFound();
+
+            if (!registrationAccount.ContactFormId.HasValue)
+                return Redirect(registrationAccount.HomePageUrl);
+
+            var qvms = ContactViewBag(registrationAccount, msgs);
+
+            qvms.ForEach(qvm =>
+            {
+                if (qvm.Question.IsRequired && qvm.Value.IsEmpty())
+                    msgs.Add($"{qvm.Question.Text} is required", MessageType.UserError);
+
+                if (qvm.Question.QuestionDataTypeId.ToString().ToLower().Contains("phone"))
+                {
+                    if (qvm.Value.IsNotEmpty() && !qvm.Value.IsPhone())
+                        msgs.Add($"{qvm.Question.Text} must be a valid phone number", MessageType.UserError);
+
+                }
+            });
+
+            if (msgs.HasNoErrors())
+            {
+                var firstName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName);
+                var lastName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName);
+                var email = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail);
+                Registrant submittedContact = null;
+
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        submittedContact = registrationAccount.AddContact(
+                                            firstName.Value, 
+                                            lastName.Value, 
+                                            email.Value, 
+                                            null, 
+                                            true,
+                                            null, 
+                                            amsgs, 
+                                            adc);
+
+                        if (amsgs.HasNoErrors())
+                            AddOrUpdateStandardAnswers(qvms, submittedContact, null, amsgs, adc);
+
+                        if (amsgs.HasNoErrors())
+                            AddCustomQuestions(
+                                qvms,
+                                submittedContact,
+                                null,
+                                null,
+                                amsgs,
+                                adc);                        
+                    },
+                    onSuccess: (SystemMessages smsgs) => 
+                    {
+                        msgs.AddRange(smsgs);
+                        AfterSchoolLibrary.Helpers.EmailHelper.SendContactFormConfirmation(registrationAccount, submittedContact, msgs);
+                    },
+                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                    onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                );
+            }
+
+            if (msgs.HasNoErrors())
+                return RedirectToAction("contactthankyou", new { id = registrationAccount.Uid });
+
+            ViewBag.Messages = msgs;
+
+            return View(qvms);
+        }
+
+        public ActionResult ContactThankYou(string id)
+        {
+            if (!id.IsGuid())
+                return HttpNotFound();
+
+            var msgs = new SystemMessages();
+            var registrationAccount = Account.LoadByUid(id.ToGuid(), msgs);
+
+            if (registrationAccount.IsEmpty())
+                return HttpNotFound();
+
+            if (!registrationAccount.ContactFormId.HasValue)
+                return Redirect(registrationAccount.HomePageUrl);
+
+            ViewBag.Account = registrationAccount;
+            ViewBag.AccountProfile = registrationAccount?.GetAccountProfile(msgs);
+            ViewBag.Messages = msgs;
+
+            return View();
+        }
+
+        #endregion
+
         #region GetStartedParent
 
         private List<FormQuestionViewModel> GetStartedParentViewBag(ParticipationObject participationObject, SystemMessages msgs)
@@ -1431,7 +1573,7 @@ namespace AfterSchool.Controllers
                             amsgs, 
                             adc);
 
-                        AddCustomQuestionsToRegistration(
+                        AddCustomQuestions(
                             qvms,
                             submittedRecord,
                             registration,
@@ -2457,7 +2599,7 @@ namespace AfterSchool.Controllers
                 });
         }
 
-        private void AddCustomQuestionsToRegistration(List<FormQuestionViewModel> qvms, Registrant submittedRecord, Registration registration, WebUser currentUser, SystemMessages msgs, DatabaseConnection dc = null)
+        private void AddCustomQuestions(List<FormQuestionViewModel> qvms, Registrant submittedRecord, Registration registration, WebUser currentUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             // add custom answers to questions directly to this registration
             qvms.Where(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.NotSet)
@@ -2488,7 +2630,7 @@ namespace AfterSchool.Controllers
                     submittedRecord.AddOrUpdateAnswer(
                         answerText: qvm.Value,
                         question: qvm.Question,
-                        registrationId: registration.ID,
+                        registrationId: registration?.ID,
                         loggedInUser: currentUser,
                         msgs: msgs,
                         dc: dc);

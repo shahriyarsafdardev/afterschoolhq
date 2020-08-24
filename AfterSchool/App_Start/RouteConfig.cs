@@ -302,6 +302,11 @@ namespace AfterSchool
                 new { controller = "r", action = "browse", accountname = UrlParameter.Optional });
 
             routes.MapRoute(
+                "AccountContact",
+                "{accountname}/contact",
+                new { controller = "r", action = "contact", accountname = UrlParameter.Optional });
+
+            routes.MapRoute(
                 "ActivityHome",
                 "{accountname}/{activitytype}/{activityname}",
                 new

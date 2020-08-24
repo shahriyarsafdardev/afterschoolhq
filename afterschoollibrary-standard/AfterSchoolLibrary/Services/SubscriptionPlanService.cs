@@ -428,5 +428,18 @@ namespace AfterSchoolLibrary.Services
         {
             return RegistrantSubscriptionPlan.LoadBySubscriptionPlanId(plan.ID.Value, msgs, dc);
         }
+
+        public static decimal GetCostPerPeriodPerPerson(this SubscriptionPlan plan, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (plan.SplitCostEvenly)
+            {
+                var po = plan.GetParticipationObject(msgs, dc);
+                var seats = po.SeatsTaken ?? 1;
+
+                return plan.CostPerPeriod.Value / (seats == 0 ? 1 : seats);
+            }
+
+            return plan.CostPerPeriod.Value;
+        }
     }
 }

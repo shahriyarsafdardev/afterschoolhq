@@ -107,6 +107,10 @@ namespace AfterSchoolLibrary.Models
 		/// Used to close registration and send notifications
 		/// </summary>
 		public bool RegistrationFinalized { get { return (bool)MDV["RegistrationFinalized"].Value; } set { MDV["RegistrationFinalized"].Value = value; } }
+		/// <summary>
+		/// Used to set the interest form used on the activity page
+		/// </summary>
+		public int? InterestFormId { get { return (int?)MDV["InterestFormId"].Value; } set { MDV["InterestFormId"].Value = value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
 		public string AccountTimeZone { get { return (string)MDV["AccountTimeZone"].Value; } }
 		public bool? ActivityGroupIsArchived { get { return (bool?)MDV["ActivityGroupIsArchived"].Value; } }
@@ -183,6 +187,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "HidePreciseLocation", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "MinSeatsRequired", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrationFinalized", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "InterestFormId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "AccountTimeZone", typeof(Account).Name, "TimeZone", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "ActivityGroupIsArchived", typeof(ActivityGroup).Name, "IsArchived", System.Data.SqlDbType.Bit, "ActivityGroup");
@@ -433,6 +438,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["RegistrationFinalized"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["InterestFormId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

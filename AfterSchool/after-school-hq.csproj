@@ -1830,6 +1830,8 @@
     <Content Include="Views\SignUp\User.cshtml" />
     <Content Include="Views\Shared\Registration\_ShareLinks.cshtml" />
     <Content Include="Views\Shared\Form\_Recaptcha.cshtml" />
+    <Content Include="Views\Account\Contact.cshtml" />
+    <Content Include="Views\Account\ContactThankYou.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
