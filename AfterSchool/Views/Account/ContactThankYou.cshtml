@@ -6,7 +6,7 @@
     var profile = (AccountProfile)ViewBag.AccountProfile;
     var currentUser = SessionVariables.CurrentUser;
     var currentAccount = SessionVariables.CurrentAccount;
-    var isLoggedIn = currentUser.IsNotEmpty();
+    var isLoggedIn = currentUser.IsNotEmpty() && currentAccount.IsNotEmpty();
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
