@@ -32,6 +32,8 @@
 
 <script>
 
+    var selected = false;
+
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         var input = document.getElementById('location');
 
@@ -48,10 +50,9 @@
 
         autocomplete.addListener('place_changed', function () {
 
+            selected = true
             const place = autocomplete.getPlace();
             const components = place.address_components;
-
-            // console.log(components);
 
             $('#placeid').val(place.place_id);
             $('#locationname').val(place.name);
@@ -98,5 +99,27 @@
 
         });
 
+        $(input).on('focus', function () {
+            selected = false;
+        }).on('blur', function () {
+            if (!selected) {
+                clearHiddenInputs();
+            }
+        });
+
+        function clearHiddenInputs() {            
+            $('#location').val('');
+            $('#streetnumber').val('');
+            $('#streetname').val('');
+            $('#address2').val('');
+            $('#neighborhood').val('');
+            $('#city').val('');
+            $('#state').val('');
+            $('#postalcode').val('');
+            $('#county').val('');
+            $('#country').val('');
+            $('#placeid').val('');
+            $('#locationname').val('');
+        }
     });
 </script>
