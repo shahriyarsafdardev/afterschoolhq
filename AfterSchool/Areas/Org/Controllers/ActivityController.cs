@@ -733,7 +733,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult EditLocation(string id, string location, string locationname, string locationdetails, string address1, string streetnumber, string streetname, string address2, string neighborhood, string city, string county, string state, string postalcode, string country, string placeid, string mylocation, string locationtype, string cmd, string activitylocationtype, string virtuallocation)
+        public ActionResult EditLocation(string id, string location, string locationname, string locationdetails,string address1, string streetnumber, string streetname, string address2, string neighborhood, string city, string county, string state, string postalcode, string country, string placeid, string mylocation, string locationtype, string cmd, string activitylocationtype, string virtuallocation, string hidepreciselocation = "0")
         {
             var msgs = new SystemMessages();
             Activity activity = Activity.LoadByUid(id.ToGuid());
@@ -759,7 +759,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "mylocation", mylocation },
                     { "locationtype", locationtype },
                     { "activitylocationtype", activitylocationtype },
-                    { "virtuallocation", virtuallocation }
+                    { "virtuallocation", virtuallocation },
+                    { "hidepreciselocation", hidepreciselocation }
                 };
 
                 activity = ActivityService.EditExisting(
