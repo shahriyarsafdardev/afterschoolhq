@@ -258,27 +258,16 @@ namespace AfterSchool.Areas.Admin.Controllers
             var currentUser = SessionVariables.CurrentUser;
             var account = id.IsGuid() ? Account.LoadByUid(id.ToGuid(), msgs) : null;
 
-            //if (!SessionVariables.CurrentUser.HasPermission(permissionType: PermissionType.AccountingEdit, account: account, msgs: msgs)) // TODO: need to discuss
-            //    msgs.Add("You don't have enough access to update this account.", MessageType.UserError);
-
             if (account.IsEmpty())
-                msgs.Add("Not able to find suitable account.", MessageType.UserError);
+                msgs.Add(message: "Invalid Account.", messageType: MessageType.UserError);
 
             if (msgs.HasNoErrors())
             {
-                Database.ExecuteTransaction(
-                   action: (SystemMessages amsgs, DatabaseConnection adc) => AccountService.UpdateAccountStatus(account: account, loggedInUser: currentUser, msgs: msgs),
-                   onSuccess: (SystemMessages smsgs) =>
-                   {
-                       msgs.AddRange(smsgs);
-                       msgs.Add(new SystemMessage { MessageType = MessageType.Success, Text = $"Account {(account.IsActive ? "activated" : "deactivated")} successfully." });                       
-                   },
-                   onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                   onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
-                );
+                msgs.AddRange(AccountService.UpdateAccountStatus(account: account, loggedInUser: currentUser, msgs: msgs));
+                msgs.Add(message: $"Account {(account.IsActive ? "activated" : "deactivated")} successfully.", messageType: MessageType.Success);
             }
 
-            TempData["Messages"] = msgs; //TODO: used to pass msgs between inter-controllers and once page gets refreshed, temp data becomes empty so that's what we need in this schenario.
+            TempData["Messages"] = msgs;
             return RedirectToAction("Index");
         }
 
@@ -289,24 +278,13 @@ namespace AfterSchool.Areas.Admin.Controllers
             var currentUser = SessionVariables.CurrentUser;
             var account = id.IsGuid() ? Account.LoadByUid(id.ToGuid(), msgs) : null;
 
-            //if (!SessionVariables.CurrentUser.HasPermission(permissionType: PermissionType.AccountingEdit, account: account, msgs: msgs)) // TODO: need to discuss
-            //    msgs.Add("You don't have enough access to update this account.", MessageType.UserError);
-
             if (account.IsEmpty())
-                msgs.Add("Not able to find suitable account.", MessageType.UserError);
+                msgs.Add(message: "Invalid Account.", messageType: MessageType.UserError);
 
             if (msgs.HasNoErrors())
             {
-                Database.ExecuteTransaction(
-                   action: (SystemMessages amsgs, DatabaseConnection adc) => AccountService.MarkAsClaimed(account: account, loggedInUser: currentUser, msgs: msgs),
-                   onSuccess: (SystemMessages smsgs) =>
-                   {
-                       msgs.AddRange(smsgs);
-                       msgs.Add(new SystemMessage { MessageType = MessageType.Success, Text = $"Account claims changed successfully." });
-                   },
-                   onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                   onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
-                );
+                msgs.AddRange(AccountService.MarkAsClaimed(account: account, loggedInUser: currentUser, msgs: msgs));
+                msgs.Add(message: "Account claims changed successfully.", messageType: MessageType.Success);
             }
 
             TempData["Messages"] = msgs;
@@ -320,24 +298,13 @@ namespace AfterSchool.Areas.Admin.Controllers
             var currentUser = SessionVariables.CurrentUser;
             var account = id.IsGuid() ? Account.LoadByUid(id.ToGuid(), msgs) : null;
 
-            //if (!SessionVariables.CurrentUser.HasAccessTo(account, msgs)) // TODO: need to discuss
-            //    msgs.Add("You don't have enough access to remove this account.", MessageType.UserError);
-
             if (account.IsEmpty())
-                msgs.Add("Not able to find suitable account.", MessageType.UserError);
+                msgs.Add(message: "Invalid Account.", messageType: MessageType.UserError);
 
             if (msgs.HasNoErrors())
             {
-                Database.ExecuteTransaction(
-                   action: (SystemMessages amsgs, DatabaseConnection adc) => AccountService.MarkAsDeleted(account: account, loggedInUser: currentUser, msgs: msgs),
-                   onSuccess: (SystemMessages smsgs) =>
-                   {
-                       msgs.AddRange(smsgs);
-                       msgs.Add(new SystemMessage { MessageType = MessageType.Success, Text = $"Account removed successfully." });
-                   },
-                   onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                   onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
-                );
+                msgs.AddRange(AccountService.MarkAsDeleted(account: account, loggedInUser: currentUser, msgs: msgs));
+                msgs.Add(message: "Account removed successfully.", messageType: MessageType.Success);
             }
 
             TempData["Messages"] = msgs;

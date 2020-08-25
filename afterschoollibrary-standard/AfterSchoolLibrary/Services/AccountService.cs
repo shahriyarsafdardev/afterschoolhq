@@ -43,28 +43,31 @@ namespace AfterSchoolLibrary.Services
             return ActivitySchedule.LoadByAccountId(account.ID.Value, msgs, dc);
         }
 
-        public static void MarkAsDeleted(this Account account, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static SystemMessages MarkAsDeleted(this Account account, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             account.IsDeleted = true;
             account.LastModifiedDate = DateTime.UtcNow;
             account.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
             msgs.AddRange(account.Save(dc));
+            return msgs;
         }
 
-        public static void MarkAsClaimed(this Account account, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static SystemMessages MarkAsClaimed(this Account account, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             account.IsClaimed = true;
             account.LastModifiedDate = DateTime.UtcNow;
             account.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
             msgs.AddRange(account.Save(dc));
+            return msgs;
         }
 
-        public static void UpdateAccountStatus(this Account account, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static SystemMessages UpdateAccountStatus(this Account account, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             account.IsActive = !account.IsActive;
             account.LastModifiedDate = DateTime.UtcNow;
             account.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
             msgs.AddRange(account.Save(dc));
+            return msgs;
         }
 
         #region ActivityMessages
