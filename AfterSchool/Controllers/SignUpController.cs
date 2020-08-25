@@ -747,7 +747,7 @@ namespace AfterSchool.Controllers
 
         /* APIS */
         [HttpPost]
-        public ActionResult Personal(string firstname, string lastname, string email, string remember)
+        public ActionResult Personal(string firstname, string lastname, string email, string password, string remember)
         {
             if (!IsRequestFromApp())
                 return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
@@ -763,6 +763,11 @@ namespace AfterSchool.Controllers
             if (email.IsBlank() || !email.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
                 msgs.Add("Email is required and must be a valid email address", MessageType.UserError);
 
+            if (password.IsEmpty())
+                msgs.Add("Password is required", MessageType.UserError);
+            else if (password.Length < 8)
+                msgs.Add("Password must be at least 8 characters", MessageType.UserError);
+
             WebUser user = null;
             Account account = null;
 
@@ -772,25 +777,45 @@ namespace AfterSchool.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        user = WebUserService.StartUserAccount(firstname, lastname, email, amsgs, adc);
+                        user = WebUserService.CreateNewWithNoPhone(
+                            firstName: firstname,
+                            lastName: lastname,
+                            email: email,
+                            password: password,
+                            isActive: true,
+                            isRegistered: true,
+                            isVerified: false,
+                            loggedInUser: null,
+                            msgs: amsgs,
+                            dc: adc);
 
                         if (user.IsNotEmpty())
-                            account = user.AddNewRegistrantAccount(UserType.Owner, true, true, user, amsgs, adc);
+                            account = user.AddNewRegistrantAccount(userType: UserType.Owner, isActive: true, isAfterSchool: true, loggedInUser: user, msgs: amsgs, dc: adc);
                     },
-                    onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                    onSuccess: (SystemMessages smsgs) =>
+                    {
+                        msgs.AddRange(smsgs);
+
+                        if (user.IsNotEmpty())
+                        {
+                            if (account.IsNotEmpty())
+                                LoadSessionInfo(user: user, account: account, doRememberMe: remember.ToBoolean(), msgs: msgs);
+
+                            var userId = user.ID.Value;
+                            BackgroundJob.Enqueue(() => WebUserService.SendVerificationEmail(userId));
+                        }
+                        
+                    },
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                     onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
                 );
 
                 if (msgs.HasNoErrors())
-                {
-                    LoadSessionInfo(user, account, remember.ToBoolean(), msgs);
                     return Json(new { status = "ok", isNewAccount = true }, JsonRequestBehavior.AllowGet);
-                }
             }
 
             return Json(new { status = "error", messages = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
-
         }
+
     }
 }

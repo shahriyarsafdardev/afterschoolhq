@@ -60,12 +60,12 @@
             </div>
 
             @*
-            @{
-                Html.RenderPartial(
-                    "~/Views/Shared/Components/_LocationAddOrEdit.cshtml",
-                    null,
-                    new ViewDataDictionary() { { "LocationId", Model.LocationId }, { "AccountId", Model.AccountId } });
-            }
+        @{
+            Html.RenderPartial(
+                "~/Views/Shared/Components/_LocationAddOrEdit.cshtml",
+                null,
+                new ViewDataDictionary() { { "LocationId", Model.LocationId }, { "AccountId", Model.AccountId } });
+        }
             *@
 
             <div class="form-group">
@@ -73,18 +73,29 @@
                     Room Number / Specific Instructions
                 </label>
                 <div class="col-sm-9">
-                    @{
-                        Html.RenderPartial(
-                         "~/Views/Shared/_TextEditor.cshtml",
-                         Model.LocationDetails,
-                         new ViewDataDictionary() {
+                    @{ Html.RenderPartial(
+                                     "~/Views/Shared/_TextEditor.cshtml",
+                                     Model.LocationDetails,
+                                     new ViewDataDictionary() {
                             //{ "required", true },
                             { "name", "locationdetails" },
                             { "id", "locationdetails" }
-                }
-                         );
-                    }
+    }
+                                     ); }
                     <p class="text-muted"><em>Enter your room number or any special instructions or information about the location? Such as pick up or drop off locations?</em></p>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-3 control-label">
+                    Hide Exact Location
+                </label>
+                <div class="col-sm-9">
+                    @{ Html.RenderPartial(
+                        "~/Views/Shared/_SwitchButton.cshtml",
+                        Model.HidePreciseLocation,
+                        new ViewDataDictionary() { { "checkboxname", "hidepreciselocation" }, { "checkboxid", "chkHidePreciseLocation" } });
+                    }
                 </div>
             </div>
 

@@ -6,6 +6,12 @@
     var msgs = (SystemMessages)ViewBag.Messages;
     var session = (ParticipationObject)ViewBag.Session;
     var showLocation = false;
+    var hidePreciseLocation = false;
+
+    if (Model.HidePreciseLocation)
+    {
+        hidePreciseLocation = Model.HidePreciseLocation;
+    }
 
     if (Model.Location.IsNotEmpty())
     {
@@ -33,7 +39,7 @@
             { "CanPublishActivity", ViewBag.CanPublishActivity },
             { "ParticipationObject", Model },
             { "Session", session }
-        }
+                        }
     );
 }
 
@@ -88,7 +94,7 @@
                                    { "canRegisterFor", ViewBag.CanRegisterFor },
                                    { "session", session },
                                    { "accountprofile", ViewBag.AccountProfile }
-                                }
+}
                             );
                         }
                     </div>
@@ -185,12 +191,19 @@
                                         <h3>Location</h3>
                                     </div>
                                     <div>
-                                        <p>
-                                            @ParticipationObjectUI.PrintLocation(Model)
-                                        </p>
-                                        @if (Model.LocationDetails.IsNotEmpty())
+                                        @if (hidePreciseLocation)
                                         {
-                                            @:@Html.Raw(Model.LocationDetails)
+                                            <p> @Model.Location.City, @Model.Location.State @Model.Location.PostalCode @Model.Location.Country </p>
+                                        }
+                                        else
+                                        {
+                                            <p>
+                                                @ParticipationObjectUI.PrintLocation(Model)
+                                            </p>
+                                            if (Model.LocationDetails.IsNotEmpty())
+                                            {
+                                                @:@Html.Raw(Model.LocationDetails)
+                                            }
                                         }
                                     </div>
                                 </div>
@@ -198,7 +211,7 @@
                         </div>
                         <div style="position: relative; margin-left: -20px; margin-right: -20px">
                             <iframe width="100%" height="300" frameborder="0" style="border:0"
-                                    src="https://www.google.com/maps/embed/v1/place?q=@Url.Encode($"{Model.Location.FormatAddressWithoutName()}")&key=AIzaSyAdjn8QBBStTz9TDAjZOyijAato7uzvjjk" allowfullscreen></iframe>
+                                    src="https://www.google.com/maps/embed/v1/place?q=@Url.Encode(hidePreciseLocation ? $"{Model.Location.FormatImpreciseAddress()}" : $"{Model.Location.FormatAddressWithoutName()}")&key=AIzaSyAdjn8QBBStTz9TDAjZOyijAato7uzvjjk" allowfullscreen></iframe>
                         </div>
 
                     </div>

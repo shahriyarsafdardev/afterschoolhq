@@ -56,6 +56,7 @@ namespace AfterSchoolLibrary.Models
         public int? SeatsAvailable { get; set; }
         public bool RegistrationFinalized { get; set; }
         public int? SeatsTaken { get; set; }
+        public bool HidePreciseLocation { get; set; }
 
         public ParticipationObject(int participationObjectId, ParticipationObjectType participationObjectType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -119,6 +120,7 @@ namespace AfterSchoolLibrary.Models
             MinSeatsRequired = activity.MinSeatsRequired;
             SeatsAvailable = activity.SeatsAvailable;
             RegistrationFinalized = activity.RegistrationFinalized;
+            HidePreciseLocation = activity.HidePreciseLocation;
 
             if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
             {
