@@ -258,10 +258,10 @@
                         <div class="panel-body">
                             <div class="form-group">
                                 <label class="col-md-3 control-label">
-                                    YouTube Video Url
+                                    Vimeo or YouTube Video Url
                                 </label>
                                 <div class="col-md-9">
-                                    <input id="txtVideoUrl" name="videoUrl" class="form-control" type="text" value="@Model.VideoUrl" placeholder="https://youtube.com/your-video-url" />
+                                    <input id="txtVideoUrl" name="videoUrl" class="form-control" type="text" value="@Model.VideoUrl" placeholder="https://youtube.com/your-video-url or https://vimeo.com/your-video-url" />
                                 </div>
                             </div>
                             <div class="form-group">
@@ -723,19 +723,21 @@
 
         $('#txtVideoUrl').blur(function () {
             var url = $('#txtVideoUrl').val();
-            var isValidYoutubeURL = validateYouTubeVideoUrl(url);
-            var isValidVimeoUrl = validateVimeoUrl(url);
+            if (url) {
+                var isValidYoutubeURL = validateYouTubeVideoUrl(url);
+                var isValidVimeoUrl = validateVimeoUrl(url);
 
-            if (!isValidYoutubeURL && !isValidVimeoUrl) {
-                Notifications.showBar({
-                    title: 'Error',
-                    message: 'URL is not in correct format. Follow this <a target="_blank" style="color: yellow;" href="https://support.google.com/youtube/answer/57741?co=GENIE.Platform%3DDesktop&hl=en">Thread </a> to get proper URL of your youtube video or this for <a target="_blank" style="color: yellow;" href="https://vimeo.zendesk.com/hc/en-us/articles/229326167-Share-features">Thread </a> for vimeo.',
-                    success: false
-                });
+                if (!isValidYoutubeURL && !isValidVimeoUrl) {
+                    Notifications.showBar({
+                        title: 'Error',
+                        message: 'URL is not in correct format. Follow this <a target="_blank" style="color: yellow;" href="https://support.google.com/youtube/answer/57741?co=GENIE.Platform%3DDesktop&hl=en">Thread </a> to get proper URL of your youtube video or this for <a target="_blank" style="color: yellow;" href="https://vimeo.zendesk.com/hc/en-us/articles/229326167-Share-features">Thread </a> for vimeo.',
+                        success: false
+                    });
 
-                $('#txtVideoUrl').val('');
-                return false;
-            }            
+                    $('#txtVideoUrl').val('');
+                    return false;
+                }
+            }         
         });
 
         function validateYouTubeVideoUrl(url) {
