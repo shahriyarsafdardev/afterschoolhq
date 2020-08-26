@@ -199,7 +199,7 @@ namespace AfterSchool.Models
             SessionVariables.CurrentAccount = null;
             SessionVariables.CurrentUser = user;
 
-            if (account.IsNotEmpty() && !account.IsDeleted)
+            if (account.IsNotEmpty())
             {
                 SessionVariables.CurrentAccount = account;
                 SessionVariables.AccountUserType = user.GetUserType(account);

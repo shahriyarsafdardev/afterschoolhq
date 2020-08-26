@@ -60,6 +60,10 @@ namespace AfterSchool.Areas.Org.Controllers
             int recordsPerPage = 10;
             bool isArchived = false;
             var activityType = ActivityType.Activity;
+            var account = SessionVariables.CurrentAccount;
+
+            if (account.IsEmpty() || account.IsDeleted)
+                return HttpNotFound();
 
             if (pn.IsNumber() && pn.ToInteger() > 0)
                 pageNumber = pn.ToInteger();

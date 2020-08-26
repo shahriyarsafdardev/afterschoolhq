@@ -239,6 +239,9 @@ namespace AfterSchool.Areas.Admin.Controllers
             {
                 var account = Account.LoadByUid(id.ToGuid(), msgs);
 
+                if (account.IsEmpty() || account.IsDeleted)
+                    return HttpNotFound();
+
                 if (!SessionVariables.CurrentUser.HasAccessTo(account, msgs))
                     account.AddGhostUser(SessionVariables.CurrentUser, UserType.TechSupport, SessionVariables.CurrentUser, msgs);
 
