@@ -114,6 +114,10 @@
                                         });
                                     }
 
+                                     <a href="@Url.Action("UpdateAccountTestStatus", "account", new { id = account.Uid })" class="btn btn-xs @($"{(account.IsTest ? "btn-default" : "btn-info" )}")">
+                                        @($"{(account.IsTest ? "Unset as Test" : "Set as Test")}")
+                                    </a>
+
                                 <script>
                                     PageEvent.add(PageEvent.AFTER_INIT, function () {
                                             $('#btn-confirm-account-deletion-@account.Uid').click(function () {

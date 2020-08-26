@@ -259,12 +259,12 @@ namespace AfterSchool.Areas.Admin.Controllers
             var account = id.IsGuid() ? Account.LoadByUid(id.ToGuid(), msgs) : null;
 
             if (account.IsEmpty())
-                msgs.Add(message: "Invalid Account.", messageType: MessageType.UserError);
+                msgs.Add("Invalid Account.", MessageType.UserError);
 
             if (msgs.HasNoErrors())
             {
-                msgs.AddRange(AccountService.UpdateAccountStatus(account: account, loggedInUser: currentUser, msgs: msgs));
-                msgs.Add(message: $"Account {(account.IsActive ? "activated" : "deactivated")} successfully.", messageType: MessageType.Success);
+                AccountService.UpdateAccountStatus(account: account, loggedInUser: currentUser, msgs: msgs);
+                msgs.Add($"Account {(account.IsActive ? "activated" : "deactivated")} successfully.", MessageType.Success);
             }
 
             TempData["Messages"] = msgs;
@@ -279,12 +279,12 @@ namespace AfterSchool.Areas.Admin.Controllers
             var account = id.IsGuid() ? Account.LoadByUid(id.ToGuid(), msgs) : null;
 
             if (account.IsEmpty())
-                msgs.Add(message: "Invalid Account.", messageType: MessageType.UserError);
+                msgs.Add("Invalid Account.", MessageType.UserError);
 
             if (msgs.HasNoErrors())
             {
-                msgs.AddRange(AccountService.MarkAsClaimed(account: account, loggedInUser: currentUser, msgs: msgs));
-                msgs.Add(message: "Account claims changed successfully.", messageType: MessageType.Success);
+                AccountService.MarkAsClaimed(account: account, loggedInUser: currentUser, msgs: msgs);
+                msgs.Add("Account claims changed successfully.", MessageType.Success);
             }
 
             TempData["Messages"] = msgs;
@@ -299,12 +299,32 @@ namespace AfterSchool.Areas.Admin.Controllers
             var account = id.IsGuid() ? Account.LoadByUid(id.ToGuid(), msgs) : null;
 
             if (account.IsEmpty())
-                msgs.Add(message: "Invalid Account.", messageType: MessageType.UserError);
+                msgs.Add("Invalid Account.", MessageType.UserError);
 
             if (msgs.HasNoErrors())
             {
-                msgs.AddRange(AccountService.MarkAsDeleted(account: account, loggedInUser: currentUser, msgs: msgs));
-                msgs.Add(message: "Account removed successfully.", messageType: MessageType.Success);
+                AccountService.MarkAsDeleted(account: account, loggedInUser: currentUser, msgs: msgs);
+                msgs.Add("Account removed successfully.", MessageType.Success);
+            }
+
+            TempData["Messages"] = msgs;
+            return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public ActionResult UpdateAccountTestStatus(string id)
+        {
+            var msgs = new SystemMessages();
+            var currentUser = SessionVariables.CurrentUser;
+            var account = id.IsGuid() ? Account.LoadByUid(id.ToGuid(), msgs) : null;
+
+            if (account.IsEmpty())
+                msgs.Add("Invalid Account.", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                AccountService.MarkAsTest(account: account, loggedInUser: currentUser, msgs: msgs);
+                msgs.Add($"Account is {(account.IsTest ? "in" : "not in")} test mode  {(account.IsTest ? "now" : "anymore")}.", MessageType.Success);
             }
 
             TempData["Messages"] = msgs;
