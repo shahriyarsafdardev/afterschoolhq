@@ -47,7 +47,7 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
 
-            if (account.IsEmpty())
+            if (account.IsEmpty() || account.IsDeleted)
                 return HttpNotFound();
 
             RestartRegistrationSession();
