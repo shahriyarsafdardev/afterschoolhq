@@ -738,6 +738,9 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             Activity activity = Activity.LoadByUid(id.ToGuid());
 
+            if (location.IsEmpty())
+                msgs.Add("Location is required", MessageType.UserError);
+
             if (activity.IsNotEmpty() && msgs.HasNoErrors())
             {
                 var values = new Dictionary<string, object>()
