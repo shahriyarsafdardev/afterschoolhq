@@ -730,7 +730,7 @@
                 if (!isValidYoutubeURL && !isValidVimeoUrl) {
                     Notifications.showBar({
                         title: 'Error',
-                        message: 'URL is not in correct format. Follow this <a target="_blank" style="color: yellow;" href="https://support.google.com/youtube/answer/57741?co=GENIE.Platform%3DDesktop&hl=en">Thread </a> to get proper URL of your youtube video or this for <a target="_blank" style="color: yellow;" href="https://vimeo.zendesk.com/hc/en-us/articles/229326167-Share-features">Thread </a> for vimeo.',
+                        message: 'URL is not in correct format. Follow this <a target="_blank" style="color: yellow;" href="https://support.google.com/youtube/answer/57741?co=GENIE.Platform%3DDesktop&hl=en">Thread </a> for youtube link share or this <a target="_blank" style="color: yellow;" href="https://vimeo.zendesk.com/hc/en-us/articles/229326167-Share-features">Thread </a> for vimeo link share.',
                         success: false
                     });
 
@@ -740,15 +740,15 @@
             }         
         });
 
-        function validateYouTubeVideoUrl(url) {
+        function validateYouTubeVideoUrl(url) {            
             var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
             var match = url.match(regExp);
 
             if (match && match[2] && match[2].length == 11) {
                 return true;
-            } else {                
-                return false;
             }
+
+            return false;
         }
 
         function validateVimeoUrl(url) {
@@ -757,9 +757,9 @@
 
             if (match && match[4] && match[4].length >= 6) {
                 return true;
-            } else {
-                return false;
             }
+
+            return false;
         }
     </script>
 
