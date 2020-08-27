@@ -1968,7 +1968,7 @@ namespace AfterSchoolLibrary.Helpers
         {
             get
             {
-                return $"support@{ReplyHostName}";
+                return $"{(Utilities.IsProduction ? "support" : "dev")}@{ReplyHostName}";
             }
         }
 
