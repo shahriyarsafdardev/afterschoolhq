@@ -14,9 +14,9 @@
         profileHeaderImageUrl = ah.GetFileLink(photos.First().Value, true, null, true);
     }
 
-    if (profileHeaderImageUrl.IsBlank())
+    if (profileHeaderImageUrl.IsBlank() && location.IsNotEmpty())
     {
-        profileHeaderImageUrl = $"https://maps.googleapis.com/maps/api/staticmap?center={location.FormatAddressWithoutName(false).Replace(" ", "")}&zoom=13&size=1500x600&maptype=roadmap&markers=color:{Server.UrlEncode("0x00AE83")}|{Server.UrlEncode(location.FormatAddressWithoutName(false))}&key=AIzaSyAdjn8QBBStTz9TDAjZOyijAato7uzvjjk";
+        profileHeaderImageUrl = LocationService.GetGoogleMapsImageUrl(location, 1500, 600);
     }
 }
 

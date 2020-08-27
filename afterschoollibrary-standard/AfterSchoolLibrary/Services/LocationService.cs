@@ -6,6 +6,7 @@ using System.Text;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
+using System.Web;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -324,6 +325,11 @@ namespace AfterSchoolLibrary.Services
                 });
             });
             
+        }
+
+        public static string GetGoogleMapsImageUrl(this Location location, int width, int height)
+        {
+            return $"https://maps.googleapis.com/maps/api/staticmap?center={HttpUtility.UrlEncode(location.FormatAddressWithoutName(false))}&zoom=13&size={width}x{height}&maptype=roadmap&markers=color:{HttpUtility.UrlEncode("0x00AE83")}|{HttpUtility.UrlEncode(location.FormatAddressWithoutName(false))}&key={Helpers.GoogleHelper.Maps.ApiKey}";
         }
     }
 }
