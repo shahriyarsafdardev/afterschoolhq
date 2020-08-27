@@ -1,7 +1,5 @@
 ﻿@model Activity
-@{ 
-    var location = Model.GetLocation() ?? Model.GetAccount().GetAccountProfile()?.GetLocation() ?? new Location();
-}
+@{ var location = Model.GetLocation() ?? Model.GetAccount().GetAccountProfile()?.GetLocation() ?? new Location(); }
 <div class="panel panel-default panel-small-padding">
     <div class="panel-heading">
         Your Activity Location Information
@@ -59,29 +57,14 @@
                 </div>
             </div>
 
-            @*
-        @{
-            Html.RenderPartial(
-                "~/Views/Shared/Components/_LocationAddOrEdit.cshtml",
-                null,
-                new ViewDataDictionary() { { "LocationId", Model.LocationId }, { "AccountId", Model.AccountId } });
-        }
-            *@
-
             <div class="form-group">
                 <label class="col-sm-3 control-label">
                     Room Number / Specific Instructions
                 </label>
                 <div class="col-sm-9">
-                    @{ Html.RenderPartial(
-                                     "~/Views/Shared/_TextEditor.cshtml",
-                                     Model.LocationDetails,
-                                     new ViewDataDictionary() {
-                            //{ "required", true },
-                            { "name", "locationdetails" },
-                            { "id", "locationdetails" }
-    }
-                                     ); }
+                    @{ Html.RenderPartial("~/Views/Shared/_TextEditor.cshtml",
+                             Model.LocationDetails,
+                             new ViewDataDictionary() { { "name", "locationdetails" }, { "id", "locationdetails" } }); }
                     <p class="text-muted"><em>Enter your room number or any special instructions or information about the location? Such as pick up or drop off locations?</em></p>
                 </div>
             </div>
@@ -92,10 +75,9 @@
                 </label>
                 <div class="col-sm-9">
                     @{ Html.RenderPartial(
-                        "~/Views/Shared/_SwitchButton.cshtml",
-                        Model.HidePreciseLocation,
-                        new ViewDataDictionary() { { "checkboxname", "hidepreciselocation" }, { "checkboxid", "chkHidePreciseLocation" } });
-                    }
+                           "~/Views/Shared/_SwitchButton.cshtml",
+                           Model.HidePreciseLocation,
+                           new ViewDataDictionary() { { "checkboxname", "hidepreciselocation" }, { "checkboxid", "chkHidePreciseLocation" } }); }
                 </div>
             </div>
 
@@ -105,7 +87,7 @@
             <div class="form-group">
                 <label class="col-sm-3 control-label">Virtual Meeting Info</label>
                 <div class="col-sm-9">
-                    <textarea class="form-control" id="virtuallocation" name="virtuallocation" onfocus="this.select()" placeholder="">@Model.VirtualLocationInfo</textarea>     
+                    <textarea class="form-control" id="virtuallocation" name="virtuallocation" onfocus="this.select()" placeholder="">@Model.VirtualLocationInfo</textarea>
                     <p class="text-muted">
                         <em>This information only be shared with the parent once registration has been confirmed</em>
                     </p>
