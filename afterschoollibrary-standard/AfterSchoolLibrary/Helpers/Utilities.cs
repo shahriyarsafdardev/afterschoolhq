@@ -1968,7 +1968,11 @@ namespace AfterSchoolLibrary.Helpers
         {
             get
             {
-                return $"support@{ReplyHostName}";
+                var emailUserName = "dev";
+                if (Utilities.IsProduction)
+                    emailUserName = "support";
+                
+                return $"{emailUserName}@{ReplyHostName}";
             }
         }
 
