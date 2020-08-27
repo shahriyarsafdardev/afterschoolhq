@@ -36,16 +36,19 @@
     <div class="panel panel-default">
         <div class="panel-heading">
 
-            <div role="alert" class="alert alert-success alert-icon">
-                <div class="icon">
-                    <span class="s7-check-circle"></span>
+            @if (SessionVariables.AccountUserType == UserType.TechSupport)
+            {
+                <div role="alert" class="alert alert-success alert-icon">
+                    <div class="icon">
+                        <span class="s7-check-circle"></span>
+                    </div>
+                    <div class="message">
+                        <p class="text-center text-small">
+                            Invite Link to Share with Administrators: <a href="@Model.UserInviteUrl" target="_blank">@Model.UserInviteUrl</a>
+                        </p>
+                    </div>
                 </div>
-                <div class="message">
-                    <p class="text-center text-small">
-                        Invite Link to Share with Administrators: <a href="@Model.UserInviteUrl" target="_blank">@Model.UserInviteUrl</a>
-                    </p>
-                </div>
-            </div>
+            }
 
             <div class="pull-right">
 

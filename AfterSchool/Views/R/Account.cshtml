@@ -373,7 +373,7 @@
                                     height="300"
                                     frameborder="0"
                                     style="border:0"
-                                    src="https://www.google.com/maps/embed/v1/place?q=@Url.Encode(location.FormatAddressWithoutName())&key=AIzaSyAdjn8QBBStTz9TDAjZOyijAato7uzvjjk"
+                                    src="https://www.google.com/maps/embed/v1/place?q=@Url.Encode(location.FormatAddressWithoutName())&key=@AfterSchoolLibrary.Helpers.GoogleHelper.Maps.ApiKey"
                                     allowfullscreen>
                             </iframe>
                         </div>
@@ -501,25 +501,58 @@
     (function () {
         var url = '@accountProfile.VideoUrl';
         if (url) {
-            var id = validateYouTubeVideoUrl(url);
-            if (id) {
-                var player = document.getElementById("frameVideoUrl");
-                player.src = "//www.youtube.com/embed/" + id;
+            var isVimeoVideo = checkVideoPlatform(url);
+            if (isVimeoVideo) {
+                var id = validateVimeoUrl(url);
+                if (id) {
+                    var player = document.getElementById("frameVideoUrl");
+                    player.src = "https://player.vimeo.com/video/" + id;                    
 
-                var container = document.getElementById("frameContainer");
-                container.style.display = 'block';
+                    var container = document.getElementById("frameContainer");
+                    container.style.display = 'block';
+                }
             }
+            else {
+                var id = validateYouTubeVideoUrl(url);
+                if (id) {
+                    var player = document.getElementById("frameVideoUrl");                    
+                    player.src = "https://www.youtube.com/embed/" + id;
+
+                    var container = document.getElementById("frameContainer");
+                    container.style.display = 'block';
+                }
+            }            
         }
     })();
+
+    function checkVideoPlatform(url) {
+        if (url && url.toLowerCase().includes('vimeo')) {
+            return true;
+        }
+
+        return false;
+        
+    }
 
     function validateYouTubeVideoUrl(url) {
         var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
         var match = url.match(regExp);
 
-        if (match && match[2].length == 11) {
+        if (match && match[2] && match[2].length == 11) {
             return match[2];
-        } else {
-            return false;
         }
+
+        return false;
+    }
+
+    function validateVimeoUrl(url) {
+        var regExp = /(http|https)?:\/\/(www\.)?vimeo.com\/(?:channels\/(?:\w+\/)?|groups\/([^\/]*)\/videos\/|)(\d+)(?:|\/\?)/;
+        var match = url.match(regExp);
+
+        if (match && match[4] && match[4].length >= 6) {
+            return match[4];
+        }
+
+        return false;
     }
 </script>

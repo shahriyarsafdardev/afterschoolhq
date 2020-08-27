@@ -62,6 +62,10 @@
                     {
                         var participationObject = ra.GetParticipationObject();
                         var registration = ra.GetRegistration();
+                        var isPendingPayment = ra.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment;
+                        var isNotFree = participationObject.IsNotFreeAndCanAcceptPayments;
+                        var subscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault();
+                        var readyToPay = subscriptionPlan.IsEmpty() || !subscriptionPlan.SplitCostEvenly || participationObject.RegistrationFinalized;
 
                         <tr>
                             <td>@participationObject.Name</td>
@@ -80,7 +84,7 @@
                                         </span> &raquo;
                                     </a>
                                 }
-                                else if (ra.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment && participationObject.IsNotFreeAndCanAcceptPayments)
+                                else if (isPendingPayment && isNotFree && readyToPay)
                                 {
                                     <a href="@registration.GetPaymentUrl" class="btn btn-primary">
                                         <span>Pay Online</span> &raquo;
