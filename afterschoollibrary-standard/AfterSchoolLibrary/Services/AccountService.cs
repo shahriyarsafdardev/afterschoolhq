@@ -51,9 +51,9 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(account.Save(dc));
         }
 
-        public static void MarkAsClaimed(this Account account, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void UpdateAccountClaims(this Account account, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            account.IsClaimed = true;
+            account.IsClaimed = !account.IsClaimed;
             account.LastModifiedDate = DateTime.UtcNow;
             account.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
             msgs.AddRange(account.Save(dc));

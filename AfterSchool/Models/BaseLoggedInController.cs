@@ -56,7 +56,7 @@ namespace AfterSchool.Models
             var account = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
 
-            if (account.IsEmpty())
+            if (account.IsEmpty() || account.IsDeleted)
                 return false;
 
             if (AllowedAccountTypes.IsNotEmpty() &&

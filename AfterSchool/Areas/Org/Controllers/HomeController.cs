@@ -85,11 +85,6 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult GetStarted()
         {
-            var account = SessionVariables.CurrentAccount;
-
-            if (account.IsEmpty() || account.IsDeleted)
-                return HttpNotFound();
-
             return View();
         }
     }
