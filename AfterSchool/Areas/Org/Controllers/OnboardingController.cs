@@ -411,7 +411,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors() && account.IsNotEmpty() && currentUser.IsNotEmpty())
             {
                 EmailHelper.SendEmail(
-                    "support@afterschoolhq.com",
+                    AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress,
                     $"AHQ Profile Completed - {account.Name}",
                     $"<p>Organization: {account.Name}<br />Name: {currentUser.FirstName} {currentUser.LastName}<br />Email: {currentUser.Email}<br />Profile Link: {account.HomePageUrl}</p>",
                     true);
