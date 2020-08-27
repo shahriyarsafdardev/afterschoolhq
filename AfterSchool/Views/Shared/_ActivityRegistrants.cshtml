@@ -92,12 +92,27 @@
                         <td>
                             @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView) && participationObject.IsNotFreeAndCanAcceptPayments && ra.GetAmountPaid() == 0 && ra.GetRegistrant().ParentRegistrantId.HasValue)
                             {
-                                <button class="btn btn-default btn-sm" 
-                                        data-modal="modal-waitinglist" 
-                                        id="btnsendinvoice-@ra.ID"
-                                        onclick="sendPaymentReminder(this, @ra.RegistrantId, '@UI.JavascriptSafeString(ra.RegistrantName)')">
-                                    Send Invoice
-                                </button>
+                                var showButton = true;
+
+                                if (activity.HasSubscriptionPlan())
+                                {
+                                    var subscriptionPlan = activity.GetSubscriptionPlan();
+
+                                    if (subscriptionPlan.SplitCostEvenly && !activity.RegistrationFinalized)
+                                    {
+                                        showButton = false;
+                                    }
+                                }
+
+                                if (showButton)
+                                { 
+                                    <button class="btn btn-default btn-sm" 
+                                            data-modal="modal-waitinglist" 
+                                            id="btnsendinvoice-@ra.ID"
+                                            onclick="sendPaymentReminder(this, @ra.RegistrantId, '@UI.JavascriptSafeString(ra.RegistrantName)')">
+                                        Send Invoice
+                                    </button>
+                                }
                             }
                         </td>
                     </tr>
