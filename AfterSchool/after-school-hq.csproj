@@ -1615,7 +1615,6 @@
     <Content Include="Views\Shared\_ActivityFormRestrictions.cshtml" />
     <Content Include="Views\Shared\_TimeSelect.cshtml" />
     <Content Include="Views\Shared\_TextEditor.cshtml" />
-    <Content Include="Views\Shared\_RegForm.cshtml" />
     <Content Include="Views\Shared\_RegFormQuestions.cshtml" />
     <Content Include="Views\Services\CartItemAdd.cshtml" />
     <Content Include="Views\Services\CartItemRemove.cshtml" />
