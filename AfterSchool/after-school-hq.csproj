@@ -1577,9 +1577,7 @@
     <Content Include="Views\Reg\New.cshtml" />
     <Content Include="Views\Shared\_LayoutRegistration.cshtml" />
     <Content Include="Views\Reg\Thanks.cshtml" />
-    <Content Include="Views\Pricing\Index.cshtml" />
     <Content Include="Views\Shared\_BooleanToHtml.cshtml" />
-    <Content Include="Views\Pricing\SelectPackage.cshtml" />
     <Content Include="Views\Shared\_ActivityRegistrants.cshtml" />
     <Content Include="Views\Shared\_RegistrantDetail.cshtml" />
     <Content Include="Views\Shared\_RegistrantAttendance.cshtml" />
