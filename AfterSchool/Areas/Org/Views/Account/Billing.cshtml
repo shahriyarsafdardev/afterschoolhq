@@ -1,7 +1,7 @@
 ﻿@model Account
 @{
     ViewBag.Title = Model.Name;
-    List<Stripe.StripeCard> cards = (List<Stripe.StripeCard>)ViewBag.Cards;
+    var cards = (List<Stripe.Card>)ViewBag.Cards;
     SystemMessages msgs = (SystemMessages)ViewBag.Messages;
 }
 
