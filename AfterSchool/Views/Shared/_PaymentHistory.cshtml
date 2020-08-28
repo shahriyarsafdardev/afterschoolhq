@@ -1,7 +1,7 @@
 ﻿@model Account
 
 @{
-    var charges = (List<Stripe.StripeCharge>)ViewBag.BillingHistory;
+    var charges = (List<Stripe.Charge>)ViewBag.BillingHistory;
 }
 
 @if (charges.Count > 0)
@@ -16,10 +16,12 @@
             </tr>
             @foreach (var charge in charges)
             {
+                var card = (Stripe.Card)charge.Source;
+
                 <tr>
                     <td>@Model.ConvertToAccountTimeZone(charge.Created).ToShortDateTimeString()</td>
-                    <td>@((charge.Amount.ToDecimal() / 100).ToCurrency())</td>
-                    <td><span class="badge badge-success">@charge.Source.Brand</span> **** **** **** @charge.Source.Last4</td>
+                    <td>@((charge.Amount / 100M).ToCurrency())</td>
+                    <td><span class="badge badge-success">@card.Brand</span> **** **** **** @card.Last4</td>
                 </tr>
             }
         </table>

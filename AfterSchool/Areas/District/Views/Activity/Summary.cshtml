@@ -5,12 +5,6 @@
     var registrants = Model.GetRegistrantActivities();
     decimal totalPaid = 0;
     int registrantCount = registrants.Sum(x => x.TotalSeats);
-    int waitingListCount = registrants.Sum(x => x.NumberOfWaitingListSeats.Value);
-
-    if (registrants.Where(x => x.DatePaid.HasValue).Count() > 0)
-    {
-        totalPaid = registrants.Where(x => x.DatePaid.HasValue).Sum(x => x.AmountPaid.Value);
-    }
 
     var dates = registrants.Select(x => SessionVariables.CurrentAccount.ConvertToAccountTimeZone(x.CreateDate.Value).ToShortDateString()).Distinct();
 
@@ -61,16 +55,6 @@
                                     <div class="desc">Total Paid</div>
                                 </div>
                                 <div class="icon"><span class="s7-cash"></span></div>
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="widget widget-tile widget-bordered">
-                                <div class="data-info">
-                                    <div data-toggle="counter" data-end="@waitingListCount" data-decimals="0" data-suffix="" class="value">@waitingListCount</div>
-                                    <div class="desc">On Waiting List</div>
-                                </div>
-                                <div class="icon"><span class="s7-users"></span></div>
                             </div>
                         }
 

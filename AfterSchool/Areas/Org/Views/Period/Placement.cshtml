@@ -1,316 +1,318 @@
-﻿@model RegistrationPeriod
-@{
-    var msgs = (SystemMessages)ViewBag.Messages;   
-}
+﻿@*
+    @model RegistrationPeriod
+    @{
+        var msgs = (SystemMessages)ViewBag.Messages;
+    }
 
-@{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
+    @{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
 
-<div class="main-content">
+    <div class="main-content">
 
-    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+        @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-    @{Html.RenderPartial("_RegistrationPeriodHeader");}
+        @{Html.RenderPartial("_RegistrationPeriodHeader");}
 
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            @{Html.RenderPartial("_RegistrationPeriodTitle", Model.Name); }
-        </div>
-        <div class="panel-body">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                @{Html.RenderPartial("_RegistrationPeriodTitle", Model.Name); }
+            </div>
+            <div class="panel-body">
 
-            @if (ViewBag.Step == 1)
-            {
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        Step 1 - Get Started
-                    </div>
-                    <div class="panel-body">
-                        <button type="button" onclick="startLottery()" class="btn btn-primary btn-lg md-trigger" data-modal="modal-loading">Start Lottery...</button>
-                        <button type="button" class="btn btn-default btn-lg md-trigger pull-right" data-modal="modal-confirmation" onclick="resetLottery()">Reset Lottery</button>
-                    </div>
-                </div>
-
-            }
-            else if (ViewBag.Step == 2)
-            {
-                var assignments = (List<RegistrantAssignment>)ViewBag.RegistrantAssignments;
-                var activities = (List<Activity>)ViewBag.Activities;
-                var registrantActivities = (List<RegistrantActivity>)ViewBag.RegistrantActivities;
-                var assignedRegistrantActivities = (List<RegistrantActivity>)ViewBag.AssignedRegistrantActivities;
-                var waitingListActivities = (List<RegistrantActivity>)ViewBag.WaitingListActivities;
-
-                var registrants = registrantActivities.Select(x => x.ToRegistrant()).DistinctBy(x => x.ID).OrderBy(x => x.Name).ToList();
-                var reservedRegistrants = assignments.Where(x => x.Assignments.Count > 0).Count();
-                var waitingListRegistrants = assignments.Where(x => x.WaitingListAssignments.Count > 0).Count();
-                var onlyWaitingListRegistrants = assignments.Where(x => x.WaitingListAssignments.Count > 0 && x.Assignments.Count == 0).Count();
-                var noSeatRegistrants = assignments.Where(x => x.Assignments.Count == 0 && x.WaitingListAssignments.Count == 0).Count();
-
-                var totalSeats = 0;
-                var totalLeft = 0;
-                var totalWL = 0;
-
-                <form id="form-applylottery" action="@Url.Action("placement", "period", new { id = Model.ID, step = 3 })" method="post">
-
+                @if (ViewBag.Step == 1)
+                {
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <div class="btn-group pull-right">
-                                <button type="button" onclick="startLottery()"  class="btn btn-default md-trigger" data-modal="modal-loading">Re-run Lottery...</button>
-                                <button type="button" onclick="applyLottery()" class="btn btn-primary md-trigger" data-modal="modal-loading">Apply Lottery</button>
-                            </div>
-
-                            Step 2 - Review
+                            Step 1 - Get Started
                         </div>
                         <div class="panel-body">
-
-                            <div class="row">
-                                <div class="col-lg-3 col-md-6">
-                                    <div class="widget widget-tile widget-bordered">
-                                        <div class="data-info">
-                                            <div data-toggle="counter" data-end="@reservedRegistrants" data-decimals="0" data-suffix="" class="value">@reservedRegistrants</div>
-                                            <div class="desc">with Reserved Seats</div>
-                                        </div>
-                                        <div class="icon"><span class="s7-users"></span></div>
-                                    </div>
-                                </div>
-
-                                <div class="col-lg-3 col-md-6">
-                                    <div class="widget widget-tile widget-bordered">
-                                        <div class="data-info">
-                                            <div data-toggle="counter" data-end="@waitingListRegistrants" data-decimals="0" data-suffix="" class="value">@waitingListRegistrants</div>
-                                            <div class="desc">with Waiting List Seats</div>
-                                        </div>
-                                        <div class="icon"><span class="s7-users"></span></div>
-                                    </div>
-                                </div>
-
-                                <div class="col-lg-3 col-md-6">
-                                    <div class="widget widget-tile widget-bordered">
-                                        <div class="data-info">
-                                            <div data-toggle="counter" data-end="@onlyWaitingListRegistrants" data-decimals="0" data-suffix="" class="value">@onlyWaitingListRegistrants</div>
-                                            <div class="desc">with only Waiting List Seats</div>
-                                        </div>
-                                        <div class="icon"><span class="s7-users"></span></div>
-                                    </div>
-                                </div>
-
-                                <div class="col-lg-3 col-md-6">
-                                    <div class="widget widget-tile widget-bordered">
-                                        <div class="data-info">
-                                            <div data-end="@noSeatRegistrants" data-decimals="2" data-suffix="" class="value">@noSeatRegistrants</div>
-                                            <div class="desc">with no Assigned/WL Seats</div>
-                                        </div>
-                                        <div class="icon"><span class="s7-users"></span></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>@UILabel.ActivityLabel(true)</th>
-                                            <th class="text-center">Total Seats</th>
-                                            <th class="text-center">Seats Left</th>
-                                            <th class="text-center">Number on Waiting List</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach (var activity in activities)
-                                        {
-                                            var assignedCount = assignedRegistrantActivities.Where(x => x.ActivityId == activity.ID).Sum(x => x.NumberOfApplicationSeats.Value);
-                                            var waitingListCount = waitingListActivities.Where(x => x.ActivityId == activity.ID).Sum(x => x.NumberOfApplicationSeats.Value);
-
-                                            totalSeats += activity.SeatsAvailable.Value;
-                                            totalLeft += (activity.SeatsAvailable.Value - assignedCount);
-                                            totalWL += waitingListCount;
-
-                                            <tr>
-                                                <td>
-                                                    @activity.Name
-                                                    @if(activity.GetDaysOfTheWeek().Count > 0)
-                                                    {
-                                                        @: - @activity.GetDaysOfTheWeek().Select(x=>x.ToString().MaxChars(2)).ToStringList(", ")
-                                                    }
-
-                                                    @if (activity.GetGradeLevels().Count > 0)
-                                                    {
-                                                        @: - @activity.GetGradeLevels().Select(x => x.Abbreviation).ToStringList(", ")
-                                                    }
-
-                                                    @if (activity.AgeStart.HasValue && activity.AgeEnd.HasValue)
-                                                    {
-                                                        @: - Ages @activity.AgeStart to @activity.AgeEnd
-                                                    }
-
-                                                </td>
-                                                <td class="text-center">@activity.SeatsAvailable</td>
-                                                <td class="text-center">@(activity.SeatsAvailable - assignedCount)</td>
-                                                <td class="text-center">@waitingListCount</td>
-                                            </tr>
-                                        }
-                                    </tbody>
-                                    <tfoot>
-                                        <tr>
-                                            <td class="text-center">Totals</td>
-                                            <td class="text-center">@totalSeats</td>
-                                            <td class="text-center">@totalLeft</td>
-                                            <td class="text-center">@totalWL</td>
-                                        </tr>
-                                    </tfoot>
-                                </table>
-                            </div>
-
-                            <div class="table-responsive hide">
-                                <table class="table table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>@UILabel.RegistrantLabel(true)</th>
-                                            <th>Reserved Seats</th>
-                                            <th>Waiting List</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach (var registrant in registrants)
-                                        {
-                                            var assignedRas = assignedRegistrantActivities.Where(x => x.RegistrantId == registrant.ID);
-                                            var waitingListRas = waitingListActivities.Where(x => x.RegistrantId == registrant.ID);
-
-                                            <tr>
-                                                <td class="text-nowrap">@registrant.Name</td>
-                                                <td>
-                                                    @Html.Raw(assignedRas.OrderBy(x => x.Day).Select(x => (x.Day != DayOfWeekASL.NotSet ? "<strong>" + x.Day.ToString().MaxChars(2) + "</strong>: " : "") + x.ActivityName).ToStringList(", "))
-                                                </td>
-                                                <td>
-                                                    @Html.Raw(waitingListRas.OrderBy(x => x.Day).Select(x => (x.Day != DayOfWeekASL.NotSet ? "<strong>" + x.Day.ToString().MaxChars(2) + "</strong>: " : "") + x.ActivityName).ToStringList(", "))
-                                                </td>
-                                            </tr>
-                                        }
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <textarea name="assignmentsJSON" id="assignmentsJSON" class="hide">@assignments.ToJSON()</textarea>
+                            <button type="button" onclick="startLottery()" class="btn btn-primary btn-lg md-trigger" data-modal="modal-loading">Start Lottery...</button>
+                            <button type="button" class="btn btn-default btn-lg md-trigger pull-right" data-modal="modal-confirmation" onclick="resetLottery()">Reset Lottery</button>
                         </div>
                     </div>
 
-                </form>
+                }
+                else if (ViewBag.Step == 2)
+                {
+                    var assignments = (List<RegistrantAssignment>)ViewBag.RegistrantAssignments;
+                    var activities = (List<Activity>)ViewBag.Activities;
+                    var registrantActivities = (List<RegistrantActivity>)ViewBag.RegistrantActivities;
+                    var assignedRegistrantActivities = (List<RegistrantActivity>)ViewBag.AssignedRegistrantActivities;
+                    var waitingListActivities = (List<RegistrantActivity>)ViewBag.WaitingListActivities;
 
-            }
-            else if (ViewBag.Step == 3)
-            {
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <button type="button" onclick="notifyAll()" class="btn btn-primary btn-space md-trigger pull-right" data-modal="modal-confirmation">Notify All @UILabel.RegistrantLabel(true)</button>
-                        Step 3 - Results
-                    </div>
-                    <div class="panel-body">
-                        @if (msgs.HasNoErrors())
-                        {
-                            var assignments = (List<RegistrantAssignment>)ViewBag.RegistrantAssignments;
-                            var activities = (List<Activity>)ViewBag.Activities;
-                            var registrantActivities = (List<RegistrantActivity>)ViewBag.RegistrantActivities;
-                            var assignedRegistrantActivities = (List<RegistrantActivity>)ViewBag.AssignedRegistrantActivities;
-                            var waitingListActivities = (List<RegistrantActivity>)ViewBag.WaitingListActivities;
+                    var registrants = registrantActivities.Select(x => x.ToRegistrant()).DistinctBy(x => x.ID).OrderBy(x => x.Name).ToList();
+                    var reservedRegistrants = assignments.Where(x => x.Assignments.Count > 0).Count();
+                    var waitingListRegistrants = assignments.Where(x => x.WaitingListAssignments.Count > 0).Count();
+                    var onlyWaitingListRegistrants = assignments.Where(x => x.WaitingListAssignments.Count > 0 && x.Assignments.Count == 0).Count();
+                    var noSeatRegistrants = assignments.Where(x => x.Assignments.Count == 0 && x.WaitingListAssignments.Count == 0).Count();
 
-                            var registrants = registrantActivities.Select(x => x.ToRegistrant()).DistinctBy(x => x.ID).OrderBy(x => x.Name).ToList();
-                            var reservedRegistrants = assignments.Where(x => x.Assignments.Count > 0).Count();
-                            var waitingListRegistrants = assignments.Where(x => x.WaitingListAssignments.Count > 0).Count();
-                            var onlyWaitingListRegistrants = assignments.Where(x => x.WaitingListAssignments.Count > 0 && x.Assignments.Count == 0).Count();
-                            var noSeatRegistrants = assignments.Where(x => x.Assignments.Count == 0 && x.WaitingListAssignments.Count == 0).Count();
+                    var totalSeats = 0;
+                    var totalLeft = 0;
+                    var totalWL = 0;
 
-                            var totalSeats = 0;
-                            var totalLeft = 0;
-                            var totalWL = 0;
+                    <form id="form-applylottery" action="@Url.Action("placement", "period", new { id = Model.ID, step = 3 })" method="post">
 
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <div class="btn-group pull-right">
+                                    <button type="button" onclick="startLottery()"  class="btn btn-default md-trigger" data-modal="modal-loading">Re-run Lottery...</button>
+                                    <button type="button" onclick="applyLottery()" class="btn btn-primary md-trigger" data-modal="modal-loading">Apply Lottery</button>
+                                </div>
 
-                            <div class="table-responsive">
-                                <table class="table table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>@UILabel.RegistrantLabel(true)</th>
-                                            <th>Reserved Seats</th>
-                                            <th>Waiting List</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach (var registrant in registrants)
-                                        {
-                                            var assignedRas = assignedRegistrantActivities.Where(x => x.RegistrantId == registrant.ID);
-                                            var waitingListRas = waitingListActivities.Where(x => x.RegistrantId == registrant.ID);
-
-                                            <tr>
-                                                <td class="text-nowrap">@registrant.Name</td>
-                                                <td>
-                                                    @Html.Raw(assignedRas.OrderBy(x => x.Day).Select(x => (x.Day != DayOfWeekASL.NotSet ? "<strong>" + x.Day.ToString().MaxChars(2) + "</strong>: " : "") + x.ActivityName).ToStringList(", "))
-                                                </td>
-                                                <td>
-                                                    @Html.Raw(waitingListRas.OrderBy(x => x.Day).Select(x => (x.Day != DayOfWeekASL.NotSet ? "<strong>" + x.Day.ToString().MaxChars(2) + "</strong>: " : "") + x.ActivityName).ToStringList(", "))
-                                                </td>
-                                            </tr>
-                                        }
-                                    </tbody>
-                                </table>
+                                Step 2 - Review
                             </div>
-                            
-                        }
-                        else
-                        {
-                            <p>An error occurred. We'll try to figure out what is going on :-(</p>
-                        }
+                            <div class="panel-body">
+
+                                <div class="row">
+                                    <div class="col-lg-3 col-md-6">
+                                        <div class="widget widget-tile widget-bordered">
+                                            <div class="data-info">
+                                                <div data-toggle="counter" data-end="@reservedRegistrants" data-decimals="0" data-suffix="" class="value">@reservedRegistrants</div>
+                                                <div class="desc">with Reserved Seats</div>
+                                            </div>
+                                            <div class="icon"><span class="s7-users"></span></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-3 col-md-6">
+                                        <div class="widget widget-tile widget-bordered">
+                                            <div class="data-info">
+                                                <div data-toggle="counter" data-end="@waitingListRegistrants" data-decimals="0" data-suffix="" class="value">@waitingListRegistrants</div>
+                                                <div class="desc">with Waiting List Seats</div>
+                                            </div>
+                                            <div class="icon"><span class="s7-users"></span></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-3 col-md-6">
+                                        <div class="widget widget-tile widget-bordered">
+                                            <div class="data-info">
+                                                <div data-toggle="counter" data-end="@onlyWaitingListRegistrants" data-decimals="0" data-suffix="" class="value">@onlyWaitingListRegistrants</div>
+                                                <div class="desc">with only Waiting List Seats</div>
+                                            </div>
+                                            <div class="icon"><span class="s7-users"></span></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-3 col-md-6">
+                                        <div class="widget widget-tile widget-bordered">
+                                            <div class="data-info">
+                                                <div data-end="@noSeatRegistrants" data-decimals="2" data-suffix="" class="value">@noSeatRegistrants</div>
+                                                <div class="desc">with no Assigned/WL Seats</div>
+                                            </div>
+                                            <div class="icon"><span class="s7-users"></span></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>@UILabel.ActivityLabel(true)</th>
+                                                <th class="text-center">Total Seats</th>
+                                                <th class="text-center">Seats Left</th>
+                                                <th class="text-center">Number on Waiting List</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var activity in activities)
+                                            {
+                                                var assignedCount = assignedRegistrantActivities.Where(x => x.ActivityId == activity.ID).Sum(x => x.NumberOfApplicationSeats.Value);
+                                                var waitingListCount = waitingListActivities.Where(x => x.ActivityId == activity.ID).Sum(x => x.NumberOfApplicationSeats.Value);
+
+                                                totalSeats += activity.SeatsAvailable.Value;
+                                                totalLeft += (activity.SeatsAvailable.Value - assignedCount);
+                                                totalWL += waitingListCount;
+
+                                                <tr>
+                                                    <td>
+                                                        @activity.Name
+                                                        @if(activity.GetDaysOfTheWeek().Count > 0)
+                                                        {
+                                                            @: - @activity.GetDaysOfTheWeek().Select(x=>x.ToString().MaxChars(2)).ToStringList(", ")
+                                                        }
+
+                                                        @if (activity.GetGradeLevels().Count > 0)
+                                                        {
+                                                            @: - @activity.GetGradeLevels().Select(x => x.Abbreviation).ToStringList(", ")
+                                                        }
+
+                                                        @if (activity.AgeStart.HasValue && activity.AgeEnd.HasValue)
+                                                        {
+                                                            @: - Ages @activity.AgeStart to @activity.AgeEnd
+                                                        }
+
+                                                    </td>
+                                                    <td class="text-center">@activity.SeatsAvailable</td>
+                                                    <td class="text-center">@(activity.SeatsAvailable - assignedCount)</td>
+                                                    <td class="text-center">@waitingListCount</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <td class="text-center">Totals</td>
+                                                <td class="text-center">@totalSeats</td>
+                                                <td class="text-center">@totalLeft</td>
+                                                <td class="text-center">@totalWL</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+
+                                <div class="table-responsive hide">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>@UILabel.RegistrantLabel(true)</th>
+                                                <th>Reserved Seats</th>
+                                                <th>Waiting List</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var registrant in registrants)
+                                            {
+                                                var assignedRas = assignedRegistrantActivities.Where(x => x.RegistrantId == registrant.ID);
+                                                var waitingListRas = waitingListActivities.Where(x => x.RegistrantId == registrant.ID);
+
+                                                <tr>
+                                                    <td class="text-nowrap">@registrant.Name</td>
+                                                    <td>
+                                                        @Html.Raw(assignedRas.OrderBy(x => x.Day).Select(x => (x.Day != DayOfWeekASL.NotSet ? "<strong>" + x.Day.ToString().MaxChars(2) + "</strong>: " : "") + x.ActivityName).ToStringList(", "))
+                                                    </td>
+                                                    <td>
+                                                        @Html.Raw(waitingListRas.OrderBy(x => x.Day).Select(x => (x.Day != DayOfWeekASL.NotSet ? "<strong>" + x.Day.ToString().MaxChars(2) + "</strong>: " : "") + x.ActivityName).ToStringList(", "))
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <textarea name="assignmentsJSON" id="assignmentsJSON" class="hide">@assignments.ToJSON()</textarea>
+                            </div>
+                        </div>
+
+                    </form>
+
+                }
+                else if (ViewBag.Step == 3)
+                {
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <button type="button" onclick="notifyAll()" class="btn btn-primary btn-space md-trigger pull-right" data-modal="modal-confirmation">Notify All @UILabel.RegistrantLabel(true)</button>
+                            Step 3 - Results
+                        </div>
+                        <div class="panel-body">
+                            @if (msgs.HasNoErrors())
+                            {
+                                var assignments = (List<RegistrantAssignment>)ViewBag.RegistrantAssignments;
+                                var activities = (List<Activity>)ViewBag.Activities;
+                                var registrantActivities = (List<RegistrantActivity>)ViewBag.RegistrantActivities;
+                                var assignedRegistrantActivities = (List<RegistrantActivity>)ViewBag.AssignedRegistrantActivities;
+                                var waitingListActivities = (List<RegistrantActivity>)ViewBag.WaitingListActivities;
+
+                                var registrants = registrantActivities.Select(x => x.ToRegistrant()).DistinctBy(x => x.ID).OrderBy(x => x.Name).ToList();
+                                var reservedRegistrants = assignments.Where(x => x.Assignments.Count > 0).Count();
+                                var waitingListRegistrants = assignments.Where(x => x.WaitingListAssignments.Count > 0).Count();
+                                var onlyWaitingListRegistrants = assignments.Where(x => x.WaitingListAssignments.Count > 0 && x.Assignments.Count == 0).Count();
+                                var noSeatRegistrants = assignments.Where(x => x.Assignments.Count == 0 && x.WaitingListAssignments.Count == 0).Count();
+
+                                var totalSeats = 0;
+                                var totalLeft = 0;
+                                var totalWL = 0;
+
+
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>@UILabel.RegistrantLabel(true)</th>
+                                                <th>Reserved Seats</th>
+                                                <th>Waiting List</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var registrant in registrants)
+                                            {
+                                                var assignedRas = assignedRegistrantActivities.Where(x => x.RegistrantId == registrant.ID);
+                                                var waitingListRas = waitingListActivities.Where(x => x.RegistrantId == registrant.ID);
+
+                                                <tr>
+                                                    <td class="text-nowrap">@registrant.Name</td>
+                                                    <td>
+                                                        @Html.Raw(assignedRas.OrderBy(x => x.Day).Select(x => (x.Day != DayOfWeekASL.NotSet ? "<strong>" + x.Day.ToString().MaxChars(2) + "</strong>: " : "") + x.ActivityName).ToStringList(", "))
+                                                    </td>
+                                                    <td>
+                                                        @Html.Raw(waitingListRas.OrderBy(x => x.Day).Select(x => (x.Day != DayOfWeekASL.NotSet ? "<strong>" + x.Day.ToString().MaxChars(2) + "</strong>: " : "") + x.ActivityName).ToStringList(", "))
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            }
+                            else
+                            {
+                                <p>An error occurred. We'll try to figure out what is going on :-(</p>
+                            }
+                        </div>
                     </div>
+                }
+
+            </div>
+        </div>
+    </div>
+
+
+    <div id="modal-loading" class="md-modal colored-header custom-width md-effect-9">
+        <div class="md-content padding-30">
+            <h1 class="text-center">Loading...</h1>
+        </div>
+    </div>
+
+    <div id="modal-confirmation" class="md-modal colored-header custom-width md-effect-9">
+        <form id="form-offer" action="" method="post">
+            <div class="md-content">
+                <div class="modal-header">
+                    <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+                    <h3 class="modal-title"><i class="s7-attention"></i> Confirmation</h3>
                 </div>
-            }
+                <div class="modal-body form">
 
-        </div>
+                    <p>Are you sure you want to <span id="confirmation-action"></span>?</p>
+                    <p id="confirmation-additional-text"></p>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" data-dismiss="modal" class="btn btn-default md-close">No</button>
+                    <a href="#" class="btn btn-primary" id="btnconfirm">Yes</a>
+                </div>
+            </div>
+        </form>
     </div>
-</div>
 
+    <script>
+        function notifyAll() {
+            $('#confirmation-action').html('<strong>notify all @UILabel.RegistrantLabel(true)</strong>');
+            $('#btnconfirm').attr('href', '@Url.Action("notifyall", "period", new { id = Model.ID.ToString() })');
+        }
 
-<div id="modal-loading" class="md-modal colored-header custom-width md-effect-9">
-    <div class="md-content padding-30">
-        <h1 class="text-center">Loading...</h1>
-    </div>
-</div>
-
-<div id="modal-confirmation" class="md-modal colored-header custom-width md-effect-9">
-    <form id="form-offer" action="" method="post">
-        <div class="md-content">
-            <div class="modal-header">
-                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
-                <h3 class="modal-title"><i class="s7-attention"></i> Confirmation</h3>
-            </div>
-            <div class="modal-body form">
-
-                <p>Are you sure you want to <span id="confirmation-action"></span>?</p>
-                <p id="confirmation-additional-text"></p>
-
-            </div>
-            <div class="modal-footer">
-                <button type="button" data-dismiss="modal" class="btn btn-default md-close">No</button>
-                <a href="#" class="btn btn-primary" id="btnconfirm">Yes</a>
-            </div>
-        </div>
-    </form>
-</div>
-
-<script>
-    function notifyAll() {
-        $('#confirmation-action').html('<strong>notify all @UILabel.RegistrantLabel(true)</strong>');
-        $('#btnconfirm').attr('href', '@Url.Action("notifyall", "period", new { id = Model.ID.ToString() })');
-    }
-
-    function resetLottery() {
-        $('#confirmation-action').html('<strong>reset the lottery</strong>');
-        $('#confirmation-additional-text').html('<strong>This action is permanent and cannot be undone');
-        $('#btnconfirm').attr('href', '@Url.Action("resetplacement", "period", new { id = Model.ID })');
-    }
-    function startLottery() {
-        setTimeout(function () {
-            location.href = '@Url.Action("placement", "period", new { id = Model.ID, step = 2 })';
-        }, 500);
-    }
-    function applyLottery() {
-        setTimeout(function () {
-            $('#form-applylottery').submit();
-        }, 500)
-    }
-</script>
+        function resetLottery() {
+            $('#confirmation-action').html('<strong>reset the lottery</strong>');
+            $('#confirmation-additional-text').html('<strong>This action is permanent and cannot be undone');
+            $('#btnconfirm').attr('href', '@Url.Action("resetplacement", "period", new { id = Model.ID })');
+        }
+        function startLottery() {
+            setTimeout(function () {
+                location.href = '@Url.Action("placement", "period", new { id = Model.ID, step = 2 })';
+            }, 500);
+        }
+        function applyLottery() {
+            setTimeout(function () {
+                $('#form-applylottery').submit();
+            }, 500)
+        }
+    </script>
+*@
