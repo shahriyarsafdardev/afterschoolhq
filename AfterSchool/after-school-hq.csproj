@@ -599,7 +599,6 @@
     <Compile Include="Controllers\MsgController.cs" />
     <Compile Include="Controllers\OAuthController.cs" />
     <Compile Include="Controllers\RController.cs" />
-    <Compile Include="Controllers\RegController.cs" />
     <Compile Include="Controllers\SearchController.cs" />
     <Compile Include="Controllers\ServicesController.cs" />
     <Compile Include="Controllers\SignUpController.cs" />
@@ -1574,9 +1573,7 @@
     <Content Include="Views\Shared\_LayoutLogin.cshtml" />
     <Content Include="Areas\Admin\Views\User\Index.cshtml" />
     <Content Include="Areas\Admin\Views\User\Edit.cshtml" />
-    <Content Include="Views\Reg\New.cshtml" />
     <Content Include="Views\Shared\_LayoutRegistration.cshtml" />
-    <Content Include="Views\Reg\Thanks.cshtml" />
     <Content Include="Views\Shared\_BooleanToHtml.cshtml" />
     <Content Include="Views\Shared\_ActivityRegistrants.cshtml" />
     <Content Include="Views\Shared\_RegistrantDetail.cshtml" />
@@ -1604,7 +1601,6 @@
     <Content Include="Views\Shared\_SwitchButton.cshtml" />
     <Content Include="Views\Shared\_CreditCardPaymentForm.cshtml" />
     <Content Include="Views\Shared\_PayPalPaymentForm.cshtml" />
-    <Content Include="Views\Reg\PayPal.cshtml" />
     <Content Include="Views\Shared\_RegistrationTitle.cshtml" />
     <Content Include="Views\Shared\_ActivityFormConfirmation.cshtml" />
     <Content Include="Views\SignUp\New.cshtml" />
@@ -1615,7 +1611,6 @@
     <Content Include="Views\Shared\_ActivityEditNav.cshtml" />
     <Content Include="Views\Shared\_ActiveLink.cshtml" />
     <Content Include="Views\Shared\_RenderMessages.cshtml" />
-    <Content Include="Views\Reg\Org.cshtml" />
     <Content Include="Views\Shared\_AccountEditNav.cshtml" />
     <Content Include="Views\Shared\_ActivityFormSchedule.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
@@ -1623,10 +1618,8 @@
     <Content Include="Views\Shared\_ActivityFormRestrictions.cshtml" />
     <Content Include="Views\Shared\_TimeSelect.cshtml" />
     <Content Include="Views\Shared\_TextEditor.cshtml" />
-    <Content Include="Views\Reg\Multiple.cshtml" />
     <Content Include="Views\Shared\_RegForm.cshtml" />
     <Content Include="Views\Shared\_RegFormQuestions.cshtml" />
-    <Content Include="Views\Reg\ThankYou.cshtml" />
     <Content Include="Views\Services\CartItemAdd.cshtml" />
     <Content Include="Views\Services\CartItemRemove.cshtml" />
     <Content Include="Views\Services\CartItemsGet.cshtml" />
@@ -1660,13 +1653,11 @@
     <Content Include="Views\Shared\_LoginReg.cshtml" />
     <Content Include="Views\Shared\_RegCreateAccount.cshtml" />
     <Content Include="Views\Shared\_RegLoginBlock.cshtml" />
-    <Content Include="Views\Reg\DeclineInvite.cshtml" />
     <Content Include="Views\Shared\_OrgTitle.cshtml" />
     <Content Include="Views\Shared\_FullStory.cshtml" />
     <Content Include="Views\Services\SetGender.cshtml" />
     <Content Include="Views\Services\SetGrade.cshtml" />
     <Content Include="Views\Services\SetAge.cshtml" />
-    <Content Include="Views\Reg\ModifyActivities.cshtml" />
     <Content Include="Views\Shared\_IFrame.cshtml" />
     <Content Include="Views\Shared\_LayoutIFrame.cshtml" />
     <Content Include="Views\Faq\Index.cshtml" />
