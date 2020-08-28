@@ -149,7 +149,7 @@ else
                             </td>
                             <td>
                                 @activity.Name @(activity.ActivityGroupId.HasValue ? "- " + activity.ActivityGroupName : "")
-                                @if (activity.LocationId.HasValue)
+                                @if (activity.LocationId.HasValue && activity.ActivityLocationTypeId == ActivityLocationType.Physical)
                                 {
                                     if (showLink)
                                     {
