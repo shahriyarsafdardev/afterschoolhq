@@ -1,6 +1,7 @@
 ﻿@model RegistrantActivity
 @{
-    ViewBag.Title = Model.AccountName;
+    var participationObject = Model.GetParticipationObject();
+    ViewBag.Title = participationObject.Name;
     var msgs = (SystemMessages)ViewBag.Messages;
 }
 
@@ -10,11 +11,11 @@
 
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-    @{Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model.ToActivity(true));}
+    @{Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", participationObject.GetActivity());}
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.ActivityName + " - " + UILabel.RegistrantLabel() +  " Detail"); }
+            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", participationObject.Name + " - " + UILabel.RegistrantLabel() +  " Detail"); }
         </div>
         <div class="panel-body">
 
