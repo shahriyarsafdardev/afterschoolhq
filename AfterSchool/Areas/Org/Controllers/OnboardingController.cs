@@ -1,4 +1,5 @@
 ﻿using AfterSchool.Models;
+using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
@@ -402,9 +403,19 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
 
             account.OnboardingStepDone = OnboardingStepType.All;
             msgs.AddRange(account.Save());
+
+            if (msgs.HasNoErrors() && account.IsNotEmpty() && currentUser.IsNotEmpty())
+            {
+                EmailHelper.SendEmail(
+                    AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress,
+                    $"AHQ Profile Completed - {account.Name}",
+                    $"<p>Organization: {account.Name}<br />Name: {currentUser.FirstName} {currentUser.LastName}<br />Email: {currentUser.Email}<br />Profile Link: {account.HomePageUrl}</p>",
+                    true);
+            }
 
             ViewBag.Messages = msgs;
 
