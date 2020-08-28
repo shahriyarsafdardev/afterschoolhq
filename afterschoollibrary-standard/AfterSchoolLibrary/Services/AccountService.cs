@@ -59,6 +59,30 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(account.Save(dc));
         }
 
+        public static void SetIsClaimed(this Account account, bool isClaimed, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            account.IsClaimed = isClaimed;
+            account.LastModifiedDate = DateTime.UtcNow;
+            account.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+            msgs.AddRange(account.Save(dc));
+        }
+
+        public static void SetIsTest(this Account account, bool isTest, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            account.IsTest = isTest;
+            account.LastModifiedDate = DateTime.UtcNow;
+            account.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+            msgs.AddRange(account.Save(dc));
+        }
+
+        public static void SetIsActive(this Account account, bool isActive, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            account.IsActive = isActive;
+            account.LastModifiedDate = DateTime.UtcNow;
+            account.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+            msgs.AddRange(account.Save(dc));
+        }
+
         #region ActivityMessages
 
         public static List<ActivityMessage> GetActivityMessages(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
