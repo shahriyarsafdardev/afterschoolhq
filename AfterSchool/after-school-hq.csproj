@@ -1579,7 +1579,6 @@
     <Content Include="Views\Shared\_RegistrantDetail.cshtml" />
     <Content Include="Views\Shared\_RegistrantAttendance.cshtml" />
     <Content Include="Views\Shared\_AttendanceList.cshtml" />
-    <Content Include="Views\Shared\_RegistrationFormBuilder.cshtml" />
     <Content Include="Views\Shared\_AccountEdit.cshtml" />
     <Content Include="Views\Shared\_Packages.cshtml" />
     <Content Include="Views\Shared\_PaymentCards.cshtml" />
@@ -1588,7 +1587,6 @@
     <Content Include="Views\Shared\_ActivityFormContactInfo.cshtml" />
     <Content Include="Views\Shared\_ActivityFormDetails.cshtml" />
     <Content Include="Views\Shared\_ActivityFormLocation.cshtml" />
-    <Content Include="Views\Shared\_RegistrationFormFields.cshtml" />
     <Content Include="Views\Shared\_StateDropDown.cshtml" />
     <Content Include="Views\Shared\_PaymentHistory.cshtml" />
     <Content Include="Views\Shared\_PaymentDetails.cshtml" />
@@ -1646,7 +1644,6 @@
     <Content Include="Views\Shared\_Login.cshtml" />
     <Content Include="Views\Shared\_LoginReg.cshtml" />
     <Content Include="Views\Shared\_RegCreateAccount.cshtml" />
-    <Content Include="Views\Shared\_RegLoginBlock.cshtml" />
     <Content Include="Views\Shared\_OrgTitle.cshtml" />
     <Content Include="Views\Shared\_FullStory.cshtml" />
     <Content Include="Views\Services\SetGender.cshtml" />
