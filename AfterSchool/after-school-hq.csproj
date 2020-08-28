@@ -1584,7 +1584,6 @@
     <Content Include="Views\Shared\_Packages.cshtml" />
     <Content Include="Views\Shared\_PaymentCards.cshtml" />
     <Content Include="Views\Shared\_PaymentCardAdd.cshtml" />
-    <Content Include="Views\Shared\_ActivityWizard.cshtml" />
     <Content Include="Views\Shared\_ActivityFormSetup.cshtml" />
     <Content Include="Views\Shared\_ActivityFormContactInfo.cshtml" />
     <Content Include="Views\Shared\_ActivityFormDetails.cshtml" />
@@ -1623,7 +1622,6 @@
     <Content Include="Views\Services\CartItemAdd.cshtml" />
     <Content Include="Views\Services\CartItemRemove.cshtml" />
     <Content Include="Views\Services\CartItemsGet.cshtml" />
-    <Content Include="Views\Shared\_ActivityPreference.cshtml" />
     <Content Include="Views\Shared\_ActivityPayment.cshtml" />
     <Content Include="Views\Shared\_Address.cshtml" />
     <Content Include="Views\Shared\_LayoutPublicInternal.cshtml" />
@@ -1635,10 +1633,7 @@
     <Content Include="Views\Login\ResetPassword.cshtml" />
     <Content Include="Views\Shared\_GoogleTagManager.cshtml" />
     <Content Include="Views\Shared\_HotJar.cshtml" />
-    <Content Include="Views\Shared\_RegActivityGrid.cshtml" />
-    <Content Include="Views\Shared\_RegActivityFilters.cshtml" />
     <Content Include="Views\Shared\_RegGroupGrid.cshtml" />
-    <Content Include="Views\Shared\_RegNoActivities.cshtml" />
     <Content Include="Views\Shared\_RegCart.cshtml" />
     <Content Include="Views\Shared\_Rollbar.cshtml" />
     <Content Include="Views\Shared\_RegActivitySchedule.cshtml" />
@@ -1646,7 +1641,6 @@
     <Content Include="Views\AfterSchool\Index.cshtml" />
     <Content Include="Views\Shared\_LayoutPublic-AfterSchool.cshtml" />
     <Content Include="Views\Home\ASHQ.cshtml" />
-    <Content Include="Views\Shared\_RegForm2.cshtml" />
     <Content Include="Views\Shared\_Modal.cshtml" />
     <Content Include="Views\SignUp\Confirm.cshtml" />
     <Content Include="Views\Shared\_Login.cshtml" />
