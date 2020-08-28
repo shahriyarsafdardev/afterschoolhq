@@ -51,25 +51,25 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(account.Save(dc));
         }
 
-        public static void UpdateAccountClaims(this Account account, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void SetIsClaimed(this Account account, bool isClaimed, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            account.IsClaimed = !account.IsClaimed;
+            account.IsClaimed = isClaimed;
             account.LastModifiedDate = DateTime.UtcNow;
             account.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
             msgs.AddRange(account.Save(dc));
         }
 
-        public static void MarkAsTest(this Account account, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void SetIsTest(this Account account, bool isTest, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            account.IsTest = !account.IsTest;
+            account.IsTest = isTest;
             account.LastModifiedDate = DateTime.UtcNow;
             account.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
             msgs.AddRange(account.Save(dc));
         }
 
-        public static void UpdateAccountStatus(this Account account, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void SetIsActive(this Account account, bool isActive, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            account.IsActive = !account.IsActive;
+            account.IsActive = isActive;
             account.LastModifiedDate = DateTime.UtcNow;
             account.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
             msgs.AddRange(account.Save(dc));

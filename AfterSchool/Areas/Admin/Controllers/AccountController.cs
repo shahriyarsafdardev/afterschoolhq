@@ -263,7 +263,7 @@ namespace AfterSchool.Areas.Admin.Controllers
 
             if (msgs.HasNoErrors())
             {
-                AccountService.UpdateAccountStatus(account: account, loggedInUser: currentUser, msgs: msgs);
+                AccountService.SetIsActive(account, !account.IsActive, currentUser, msgs);
                 msgs.Add($"Account {(account.IsActive ? "activated" : "deactivated")} successfully.", MessageType.Success);
             }
 
@@ -283,7 +283,7 @@ namespace AfterSchool.Areas.Admin.Controllers
 
             if (msgs.HasNoErrors())
             {
-                AccountService.UpdateAccountClaims(account: account, loggedInUser: currentUser, msgs: msgs);
+                AccountService.SetIsClaimed(account, !account.IsClaimed, currentUser, msgs);
                 msgs.Add("Account claims changed successfully.", MessageType.Success);
             }
 
@@ -303,7 +303,7 @@ namespace AfterSchool.Areas.Admin.Controllers
 
             if (msgs.HasNoErrors())
             {
-                AccountService.MarkAsDeleted(account: account, loggedInUser: currentUser, msgs: msgs);
+                AccountService.MarkAsDeleted(account, currentUser, msgs);
                 msgs.Add("Account removed successfully.", MessageType.Success);
             }
 
@@ -323,7 +323,7 @@ namespace AfterSchool.Areas.Admin.Controllers
 
             if (msgs.HasNoErrors())
             {
-                AccountService.MarkAsTest(account: account, loggedInUser: currentUser, msgs: msgs);
+                AccountService.SetIsTest(account, !account.IsTest, currentUser, msgs);
                 msgs.Add($"Account is {(account.IsTest ? "in" : "not in")} test mode  {(account.IsTest ? "now" : "anymore")}.", MessageType.Success);
             }
 

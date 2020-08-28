@@ -92,7 +92,7 @@
                                         @($"{(account.IsActive ? "Deactivate" : "Activate" )}")
                                     </a>
 
-                                    <a href="@Url.Action("updateaccountclaims", "account", new { id = account.Uid })" class="btn @($"{(account.IsClaimed ? "btn-default" : "btn-primary" )}") btn-xs">
+                                    <a href="@Url.Action("updateaccountclaims", "account", new { id = account.Uid })" class="btn @($"{(account.IsClaimed ? "btn-default" : "btn-info" )}") btn-xs">
                                         @($"{(!account.IsClaimed ? "Mark as Claimed" : "Mark as UnClaimed")}")
                                     </a>
                                     
@@ -111,7 +111,7 @@
                                         });
                                     }
 
-                                     <a href="@Url.Action("UpdateAccountTestFlagStatus", "account", new { id = account.Uid })" class="btn btn-xs @($"{(account.IsTest ? "btn-default" : "btn-info" )}")">
+                                     <a href="@Url.Action("UpdateAccountTestFlagStatus", "account", new { id = account.Uid })" class="btn btn-xs @($"{(account.IsTest ? "btn-success" : "btn-info" )}")">
                                         @($"{(account.IsTest ? "Unset as Test" : "Set as Test")}")
                                     </a>
 
