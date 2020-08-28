@@ -5,6 +5,7 @@
     var cart = (Cart)ViewBag.Cart;
     var locations = (List<Location>)ViewBag.Locations;
     var showSeatsRemaining = true;
+    var showLocation = false;
 
     if (Model.SeatsRemaining.HasValue)
     {
@@ -20,6 +21,21 @@
     else
     {
         showSeatsRemaining = false;
+    }
+
+    if (Model.Location.IsNotEmpty())
+    {
+        if (Model.IsActivity())
+        {
+            if (Model.ActivityLocationType == ActivityLocationType.Physical)
+            {
+                showLocation = true;
+            }
+        }
+        else
+        {
+            showLocation = true;
+        }
     }
 }
 
@@ -57,7 +73,7 @@
 
                 <div class="margin-t-20">
                     <p class="text-medium-small">
-                        @if (Model.Location.IsNotEmpty() && Model.Location.ID != Model.OwnerAccount.DefaultLocationId)
+                        @if (showLocation && Model.Location.ID != Model.OwnerAccount.DefaultLocationId)
                         {
                             <span>
                                 @@
