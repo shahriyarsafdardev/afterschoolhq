@@ -47,7 +47,7 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
 
-            if (account.IsEmpty())
+            if (account.IsEmpty() || account.IsDeleted)
                 return HttpNotFound();
 
             RestartRegistrationSession();
@@ -113,7 +113,7 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname);
 
-            if (account.IsEmpty())
+            if (account.IsEmpty() || account.IsDeleted)
                 return HttpNotFound();
 
             RestartRegistrationSession();
@@ -195,7 +195,7 @@ namespace AfterSchool.Controllers
             var currentUser = SessionVariables.CurrentUser;
             var currentAccount = SessionVariables.CurrentAccount;
 
-            if (account.IsEmpty())
+            if (account.IsEmpty() || account.IsDeleted)
                 return HttpNotFound();
 
             if (currentUser.IsEmpty())
@@ -247,7 +247,7 @@ namespace AfterSchool.Controllers
             var accountProfile = account?.GetAccountProfile(msgs);
             ParticipationObject session = null;
 
-            if (account.IsNotEmpty())
+            if (account.IsEmpty() || account.IsDeleted)
             {
                 var activity = AfterSchoolLibrary.Models.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
 
@@ -309,9 +309,8 @@ namespace AfterSchool.Controllers
 
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
-            var accountProfile = account.GetAccountProfile(msgs);
 
-            if (account.IsEmpty())
+            if (account.IsEmpty() || account.IsDeleted)
                 return HttpNotFound();
 
             var session = ActivityGroup.LoadByAccountIdByUniqueName(account.ID.Value, sessionname, msgs);
@@ -348,7 +347,7 @@ namespace AfterSchool.Controllers
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
             ParticipationObject participationObject = null;
 
-            if (account.IsEmpty())
+            if (account.IsEmpty() || account.IsDeleted)
                 return HttpNotFound();
 
             if (districtname.IsNotEmpty())
@@ -394,7 +393,7 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
 
-            if (account.IsEmpty())
+            if (account.IsEmpty() || account.IsDeleted)
                 return HttpNotFound();
 
             var activity = AfterSchoolLibrary.Models.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
@@ -416,7 +415,7 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
 
-            if (account.IsEmpty())
+            if (account.IsEmpty() || account.IsDeleted)
                 return HttpNotFound();
 
             var activity = AfterSchoolLibrary.Models.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
@@ -438,7 +437,7 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
 
-            if (account.IsEmpty())
+            if (account.IsEmpty() || account.IsDeleted)
                 return HttpNotFound();
 
             var session = ActivityGroup.LoadByAccountIdByUniqueName(account.ID.Value, sessionname, msgs);
@@ -460,7 +459,7 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
 
-            if (account.IsEmpty())
+            if (account.IsEmpty() || account.IsDeleted)
                 return HttpNotFound();
 
             var session = ActivityGroup.LoadByAccountIdByUniqueName(account.ID.Value, sessionname, msgs);
@@ -520,7 +519,7 @@ namespace AfterSchool.Controllers
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
             ParticipationObject participationObject = null;
 
-            if (account.IsEmpty())
+            if (account.IsEmpty() || account.IsDeleted)
                 return HttpNotFound();
 
             if (externalaccountname.IsNotEmpty())

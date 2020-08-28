@@ -37,7 +37,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var msgs = new SystemMessages();
             var actions = SessionAction.LoadByAccountId(
-                account.ID.Value, 
+                account.ID.Value,
                 new List<SessionActionType>() {
                     SessionActionType.RegistrationCompletedView,
                     SessionActionType.RegistrationUpdated,
@@ -49,16 +49,16 @@ namespace AfterSchool.Areas.Org.Controllers
                     SessionActionType.ActivityMoveToApplication,
                     SessionActionType.ActivityMoveToReserved,
                     SessionActionType.ActivityMoveToWaitingList,
-                }, 
-                0, 
+                },
+                0,
                 10,
-                msgs);       
-            
+                msgs);
+
             var activityCount = account.GetActivityCount(
-                SessionVariables.AccountUserType, 
-                currentUser, 
-                null, 
-                null, 
+                SessionVariables.AccountUserType,
+                currentUser,
+                null,
+                null,
                 false,
                 null,
                 msgs);
