@@ -106,7 +106,14 @@
                                     @foreach (var plan in participationObject.PaymentPlans)
                                     {
                                         var today = participationObject.OwnerAccount.ConvertToAccountTimeZone(DateTime.UtcNow).Date;
-                                        var planStartDate = participationObject.StartDate.Value.Date.IsBefore(today) ? today : participationObject.StartDate.Value.Date;
+                                        DateTime planStartDate = today;
+                                        var poStartDate = participationObject.StartDate;
+
+                                        if (poStartDate.HasValue && poStartDate.Value.Date.IsOnOrAfter(today))
+                                        {
+                                            planStartDate = poStartDate.Value.Date;
+                                        }
+
                                         var startToday = plan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout || planStartDate.IsOnOrBefore(today);
 
                                         <div class="am-radio">

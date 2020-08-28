@@ -247,8 +247,11 @@ namespace AfterSchool.Controllers
             var accountProfile = account?.GetAccountProfile(msgs);
             ParticipationObject session = null;
 
-            if (account.IsEmpty() || account.IsDeleted)
+            if (!account.IsEmpty())
             {
+                if (account.IsDeleted)
+                    return HttpNotFound();
+
                 var activity = AfterSchoolLibrary.Models.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
 
                 if (activity.IsEmpty())
@@ -272,6 +275,8 @@ namespace AfterSchool.Controllers
             }
             else
             {
+                return HttpNotFound();
+
                 var participationObjects = new List<ParticipationObject>();
                 var locations = new List<Location>();
                 var grades = GradeLevel.Load(msgs: msgs);

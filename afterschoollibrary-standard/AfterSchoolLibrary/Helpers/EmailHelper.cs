@@ -502,9 +502,10 @@ namespace AfterSchoolLibrary.Helpers
 
                     var todayOrLater = "today";
                     var today = participationObject.OwnerAccount.ConvertToAccountTimeZone(DateTime.UtcNow);
+                    var startDate = submittedRecord.GetPlanStartDate(paymentPlan, participationObject, msgs, dc);
 
-                    if (checkoutObject.PaymentPlan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts && participationObject.StartDate.Value.IsOnOrAfter(today))
-                        todayOrLater = $"on {participationObject.StartDate.ToShortDateString()}";
+                    if (startDate.IsOnOrAfter(today))
+                        todayOrLater = $"on {startDate.ToShortDateString()}";
 
                     additionalDetails = $"{todayOrLater} plus {paymentPlan.GetTotalCostWithConvenienceFee(billingAccount, msgs, dc).ToCurrency()} for {(paymentPlan.TotalPeriods.Value - 1)} {paymentPlan.BillingPeriodTypeId.ToString().ToLower()}(s)";
                 }
