@@ -1579,7 +1579,6 @@
     <Content Include="Views\Shared\_RegistrantDetail.cshtml" />
     <Content Include="Views\Shared\_RegistrantAttendance.cshtml" />
     <Content Include="Views\Shared\_AttendanceList.cshtml" />
-    <Content Include="Views\Shared\_AccountEdit.cshtml" />
     <Content Include="Views\Shared\_Packages.cshtml" />
     <Content Include="Views\Shared\_PaymentCards.cshtml" />
     <Content Include="Views\Shared\_PaymentCardAdd.cshtml" />
