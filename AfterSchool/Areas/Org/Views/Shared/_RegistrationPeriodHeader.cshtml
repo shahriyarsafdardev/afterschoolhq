@@ -6,7 +6,7 @@
         <div class="btn-group">
             <a href="@Url.Action("summary", "period", new { id = Model.ID })" class="btn btn-alt6"><i class="s7-graph2"></i> Summary</a>
             <a href="@Url.Action("edit", "period", new {id = Model.ID})" class="btn btn-alt6"><i class="s7-edit"></i> Edit</a>
-            <a href="@Url.Action("activities", "period", new {id = Model.ID})" class="btn btn-alt6"><i class="s7-gleam"></i> @UILabel.ActivityLabel(true)</a>
+            <a href="@Url.Action("activities", "period", new {id = Model.ID})" class="btn btn-alt6"><i class="s7-gleam"></i> @UILabel.ActivityLabel(ActivityType.Activity, true)</a>
             <a href="@Url.Action("registrations", "period", new {id = Model.ID})" class="btn btn-alt6"><i class="s7-user"></i> @UILabel.RegistrantLabel(true)</a>
             @if (Model.RegistrationModeId == RegistrationMode.Apply)
             {
