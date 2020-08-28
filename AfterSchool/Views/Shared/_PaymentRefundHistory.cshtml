@@ -1,7 +1,7 @@
 ﻿@model Account
 
 @{
-    var refunds = (List<Stripe.StripeRefund>)ViewBag.RefundHistory;
+    var refunds = (List<Stripe.Refund>)ViewBag.RefundHistory;
 }
 @if (refunds.Count > 0)
 {
@@ -15,10 +15,12 @@
             </tr>        
             @foreach (var refund in refunds)
             {
+                var card = (Stripe.Card)refund.Charge.Source;
+
                 <tr>
                     <td>@refund.Created.ToShortDateTimeString()</td>
-                    <td>@((refund.Amount.ToDecimal() / 100).ToCurrency())</td>
-                    <td><span class="badge badge-success">@refund.Charge.Source.Brand</span> **** **** **** @refund.Charge.Source.Last4</td>
+                    <td>@((refund.Amount / 100M).ToCurrency())</td>
+                    <td><span class="badge badge-success">@card.Brand</span> **** **** **** @card.Last4</td>
                 </tr>
             }
         </table>

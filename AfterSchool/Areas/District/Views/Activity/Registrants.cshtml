@@ -110,7 +110,7 @@
                         <option value="">View All Assignments</option>
                         @foreach (var x in Enum.GetValues(typeof(RegistrationAssignmentType)).Cast<RegistrationAssignmentType>().Where(x => x != RegistrationAssignmentType.NotSet))
                         {
-                            if (account.HasFeature(FeatureType.AllowApplications) || x != RegistrationAssignmentType.Application)
+                            if (account.HasFeature(FeatureType.AllowApplications) || x != RegistrationAssignmentType.Applied)
                             {
                                 var selected = "";
                                 if (assignmentType == x)
