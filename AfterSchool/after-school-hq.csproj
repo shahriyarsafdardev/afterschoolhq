@@ -655,6 +655,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="about.html" />
+    <Content Include="Assets\js\ahq-profiles.js" />
     <Content Include="case-study-cfi70.html" />
     <Content Include="contact.html" />
     <Content Include="copyright.html" />
@@ -716,6 +717,7 @@
     <Content Include="img\Provider.png" />
     <Content Include="img\smiling-group.png" />
     <Content Include="img\texture-fabric.png" />
+    <Content Include="index-profiles.html" />
     <Content Include="index.html" />
     <Content Include="ips.html" />
     <Content Include="js\blocs.min.js" />
