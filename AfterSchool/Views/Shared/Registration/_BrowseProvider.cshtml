@@ -7,6 +7,7 @@
     var gradeLevelStart = Model.GetGradeLevelStart();
     var gradeLevelEnd = Model.GetGradeLevelEnd();
     var photos = Model.GetPhotos();
+    var properties = Model.GetProperties(AccountPropertyType.Classifications);
 
     if (photos.Any() && profileHeaderImageUrl.IsBlank())
     {
@@ -20,12 +21,12 @@
     }
 }
 
-<div class="col-sm-12 col-md-6 col-lg-4 col-xl-3 participation-object searchable-object"
+<div class="col-sm-12 col-md-6 col-lg-4 col-xl-3 participation-object searchable-object pointer" onclick="location.href='@account.HomePageUrl';"
      id="@account.Uid"     
      name="@account.Name">
 
     <div class="panel" style="overflow: hidden;">
-        <div class="reg-header" style="background-image: url(@profileHeaderImageUrl); min-height: 150px; height: 200px; padding: 5px 5px;">
+        <div class="reg-header" style="background-image: url(@profileHeaderImageUrl); min-height: 100px; height: 150px; padding: 5px 5px;">
 
             @if (Model.IsOpenDuringCovid)
             {
@@ -48,31 +49,43 @@
             }
 
         </div>
-        <div class="panel-body">
+        <div class="panel-body" style="position: relative;">
+
+            <div class="" style="position: absolute; top: 10px; left: 15px; overflow: hidden; height: 20px;">
+
+                <div class="pull-left margin-l-5">
+                    <span class="badge badge-default profile-badge text-small">
+                        @gradeLevelStart.Name - @gradeLevelEnd.Name Grade
+                    </span>
+                </div>
+
+                @foreach (var property in properties)
+                {
+                    <div class="pull-left margin-l-5">
+                        <span class="badge badge-default profile-badge text-small">
+                            @property.Value
+                        </span>
+                    </div>
+                }
+            </div>
 
             <h3>
                 <strong title="@account.Name">@account.Name</strong>
             </h3>
 
             <div class="">
-                <p class="text-medium-small">
+                <span class="text-small">
                     <span>
-                        <span>@gradeLevelStart.Name - @gradeLevelEnd.Name Grade</span>
+                        @location.FormatCityStateZipCode(false)
                     </span>
-                </p>
+                </span>
             </div>
 
-            <div class="margin-t-10" style="min-height: 45px;">
+            <div class="margin-t-10" style="height: 40px;">
                 <p class="text-medium-small">
-                    <span>
-                        @location.FormatAddressWithoutName(false)
-                    </span>
+                    @Model.Headline.MaxChars(75, "... (more)")
                 </p>
             </div>
-
-            <p class="activity-description text-muted hide">
-                Description
-            </p>
 
             <div class="margin-t-20">
                 <a href="@account.HomePageUrl" class="btn btn-register btn-block">

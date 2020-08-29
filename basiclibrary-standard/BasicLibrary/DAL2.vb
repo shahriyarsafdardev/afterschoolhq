@@ -168,6 +168,16 @@ Namespace DataAccess
             End Set
         End Property
 
+        Private _tableSample As TableSample
+        Public Property TableSample() As TableSample
+            Get
+                Return _tableSample
+            End Get
+            Set(ByVal value As TableSample)
+                _tableSample = value
+            End Set
+        End Property
+
         Private hasSelectRange As Boolean
         Private isSelfCreatedConnection As Boolean
 
@@ -466,7 +476,11 @@ Namespace DataAccess
                         sql.Append(",")
                     End If
                     If SelectParameters(i).Function.IsEmpty() = False Then
-                        sql.Append(SelectParameters(i).Function.ToLower.Replace(FunctionReplaceValue, SelectParameters(i).Parameter.ParameterFullName))
+                        If SelectParameters(i).Parameter Is Nothing And SelectParameters(i).Function.IsNotEmpty() Then
+                            sql.Append(SelectParameters(i).Function)
+                        Else
+                            sql.Append(SelectParameters(i).Function.ToLower.Replace(FunctionReplaceValue, SelectParameters(i).Parameter.ParameterFullName))
+                        End If
                     ElseIf SelectParameters(i).Parameter.Function.IsEmpty() = False Then
                         sql.Append(SelectParameters(i).Parameter.Function.ToLower.Replace(FunctionReplaceValue, SelectParameters(i).Parameter.ParameterFullName))
                     Else
@@ -543,6 +557,12 @@ Namespace DataAccess
                     BuildGroupBys(sql)
                 End If
                 BuildOrderBys(sql)
+            End If
+
+            If TableSample.IsNotEmpty() Then
+                sql.Append(" ")
+                sql.Append(TableSample.ToString())
+                sql.Append(" ")
             End If
 
             If SelectRange.Length.HasValue Then
@@ -1454,13 +1474,22 @@ Namespace DataAccess
         Public Function Add(ByVal parameter As DatabaseParameter, ByVal [alias] As String, ByVal [function] As String) As Integer
             Return Add(New SelectParameter(parameter, [alias], [function]))
         End Function
+        Public Function Add(ByVal [alias] As String, ByVal [function] As String) As Integer
+            Return Add(New SelectParameter([alias], [function]))
+        End Function
 
         Public Function Add(ByVal item As SelectParameter) As Integer
-            If item.Parameter.ParameterType = SqlDbType.Text Or item.Parameter.ParameterType = SqlDbType.NText Then
+            If item.Parameter IsNot Nothing AndAlso (item.Parameter.ParameterType = SqlDbType.Text Or item.Parameter.ParameterType = SqlDbType.NText) Then
                 _hasBinaryTextField = True
             End If
+
             _items.Add(item)
-            _keys.Add(item.Parameter.PropertyName)
+
+            If item.Parameter IsNot Nothing Then
+                _keys.Add(item.Parameter.PropertyName)
+            Else
+                _keys.Add(item.Alias)
+            End If
             Return _items.Count - 1
         End Function
 
@@ -1566,6 +1595,11 @@ Namespace DataAccess
         End Sub
         Public Sub New(ByVal parameter As DatabaseParameter, ByVal [alias] As String, ByVal [function] As String)
             Me.New(parameter, [alias])
+            Me.Function = [function]
+        End Sub
+        Public Sub New(ByVal [alias] As String, ByVal [function] As String)
+            Me.Parameter = Nothing
+            Me.Alias = [alias]
             Me.Function = [function]
         End Sub
         'Public Sub New(ByVal parameter As String, ByVal [alias] As String, ByVal [function] As String)
@@ -3282,7 +3316,7 @@ Namespace DataAccess
 
     End Class
 
-    <Serializable()> _
+    <Serializable()>
     Public Class StartAndLength
 
         Private _start As Integer?
@@ -3312,6 +3346,53 @@ Namespace DataAccess
             Me.Start = start
             Me.Length = length
         End Sub
+
+    End Class
+
+    <Serializable()>
+    Public Class TableSample
+        Private _RowsDesired As Integer?
+        Public ReadOnly Property RowsDesired() As Integer?
+            Get
+                Return _RowsDesired
+            End Get
+        End Property
+
+        Private _PercentDesired As Integer?
+        Public ReadOnly Property PercentDesired() As Integer?
+            Get
+                Return _PercentDesired
+            End Get
+        End Property
+
+        Public Sub New()
+
+        End Sub
+        Public Sub New(ByVal amountDesired As Integer, ByVal usePercentage As Boolean)
+            Me.New()
+            If usePercentage Then
+                Me._PercentDesired = amountDesired
+            Else
+                Me._RowsDesired = amountDesired
+            End If
+        End Sub
+
+        Public Overrides Function ToString() As String
+
+            Dim str As String = ""
+
+            If RowsDesired.HasValue Then
+                str = RowsDesired.Value.ToString() & " ROWS "
+            ElseIf PercentDesired.HasValue Then
+                str = RowsDesired.Value.ToString() & " PERCENT "
+            End If
+
+            If str.IsNotEmpty() Then
+                Return "TABLESAMPLE (" & str & ")"
+            End If
+
+            Return str
+        End Function
 
     End Class
 

@@ -344,7 +344,7 @@ namespace AfterSchoolLibrary.Models
 			return dq.GetCount(msgs);
 		}
 
-		public static List<AccountProfile> Search(IEnumerable<AccountType> accountTypes, bool? isOpenDuringCovid = null, bool? isELearningCenter = null, IEnumerable<string> neighborhoods = null, IEnumerable<string> cities = null, IEnumerable<string> states = null, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<AccountProfile> Search(IEnumerable<AccountType> accountTypes, bool? isOpenDuringCovid = null, bool? isELearningCenter = null, IEnumerable<string> neighborhoods = null, IEnumerable<string> cities = null, IEnumerable<string> states = null, int? start = null, int? length = null, bool getRandomSample = false, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
 			dq.Connection = dc;
@@ -379,6 +379,12 @@ namespace AfterSchoolLibrary.Models
 
 			dq.SelectRange.Start = start;
 			dq.SelectRange.Length = length;
+
+			if (getRandomSample)
+			{
+				dq.SelectParameters.Add("RandomSort", "NEWID()");
+				dq.OrderBys.Add("RandomSort", OrderByDirectionEnum.Ascending);
+			}
 
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}

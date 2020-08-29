@@ -1,7 +1,7 @@
 ﻿@model List<AccountProfile>
 @{
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
-    ViewBag.Title = $"Search - {UILabel.ProductName()}";
+    ViewBag.Title = "Search";
 
     var msgs = (SystemMessages)ViewBag.Messages;
     var neighborhoods = (List<string>)ViewBag.Neighborhoods;
@@ -106,9 +106,8 @@
 <div>
 
     @if (Model.Any())
-    {
+    {       
         <div>
-
             <div class="row">
                 <div>
                     @foreach (var item in Model)

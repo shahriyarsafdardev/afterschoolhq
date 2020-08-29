@@ -999,6 +999,46 @@ Public MustInherit Class BaseAddress
         Return address
 
     End Function
+    Public Shared Function FormatCityStateZipCode(ByVal city As String, ByVal state As String, ByVal postalCode As String, Optional ByVal useLineBreaks As Boolean = True) As String
+
+        Dim address As String = ""
+
+        If city.IsEmpty() = False Or state.IsEmpty() = False Or postalCode.IsEmpty = False Then
+            If address.IsEmpty() = False Then
+                If useLineBreaks Then
+                    address &= vbCrLf
+                Else
+                    address &= ", "
+                End If
+            End If
+
+            Dim cityLine As String = ""
+
+            If city.IsEmpty() = False Then
+                cityLine &= city
+            End If
+            If city.IsEmpty() = False Then
+                If cityLine.IsEmpty() = False Then
+                    cityLine &= ", "
+                End If
+                cityLine &= state
+            End If
+            If city.IsEmpty() = False Then
+                If cityLine.IsEmpty() = False Then
+                    cityLine &= " "
+                End If
+                cityLine &= postalCode
+            End If
+
+            If cityLine.IsEmpty() = False Then
+                address &= cityLine
+            End If
+
+        End If
+
+        Return address
+
+    End Function
 
     Public Overrides Function ToString() As String
         Return FormatAddress(False)
@@ -1064,6 +1104,10 @@ Public MustInherit Class BaseLocation
 
     Public Overloads Function FormatImpreciseAddress(Optional ByVal useLineBreaks As Boolean = True) As String
         Return BaseAddress.FormatImpreciseAddress(Neighborhood, City, State, PostalCode, Country, useLineBreaks)
+    End Function
+
+    Public Overloads Function FormatCityStateZipcode(Optional ByVal useLineBreaks As Boolean = True) As String
+        Return BaseAddress.FormatCityStateZipCode(City, State, PostalCode, useLineBreaks)
     End Function
 
     Public Overrides Function ToString() As String
