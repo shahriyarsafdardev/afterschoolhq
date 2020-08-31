@@ -17,6 +17,10 @@
             <i class="s7-user"></i> @Model.DisplayName
         </div>
         <div class="panel-body">
+            
+            @{ Html.RenderPartial("~/Views/Shared/Registrant/_Answers.cshtml", Model.GetAnswers()); }
+
+            @*
             <form method="post" action="@Url.Action("edit", "contact", new { id = Model.Uid.ToString() })" class="form-horizontal">
                 <div class="form-group">
                     <label class="col-sm-3 control-label">First Name</label>
@@ -44,6 +48,7 @@
                     </div>
                 </div>
             </form>
+            *@
         </div>
     </div>
 </div>

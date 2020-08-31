@@ -69,53 +69,7 @@
                     </table>
                 </div>
 
-                @foreach (var group in answers.Select(x => x.ToFormQuestionGroup()).DistinctBy(x => x.ID).OrderBy(x => x.DisplayOrder))
-                {
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th colspan="2">@group.Name</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var answer in answers.Where(x => x.FormQuestionFormQuestionGroupId == group.ID))
-                                {
-                                    <tr>
-                                        <td width="33%" class="text-right">@answer.FormQuestionText</td>
-                                        <td>
-                                            @if (answer.FormQuestionQuestionTypeId == QuestionType.Checkbox)
-                                            {
-                                                @answer.Text.IfBlank("0").ToBoolean().ToYesNo();
-                                            }
-                                            else if (answer.FormQuestionQuestionTypeId == QuestionType.RadioMatrix)
-                                            {
-                                                foreach (var item in answer.Text.Split(';'))
-                                                {
-                                                    <span>@item.Split('=')[0]: @item.Split('=')[1]</span><br />
-                                                }
-                                            }
-                                            else if (answer.FormQuestionQuestionTypeId == QuestionType.FileUpload && answer.Text.IsNotBlank())
-                                            {
-                                                <span>
-                                                    <a href="@Url.Action("downloadfile", "registration", new { id = Model.Uid, r = registration.Uid, file = answer.ID, returnUrl = Request["returnurl"] })"
-                                                       target="_blank">
-                                                        Download File
-                                                    </a>
-                                                </span>
-                                            }
-                                            else
-                                            {
-                                                @answer.Text.IfBlank("-")
-                                            }
-
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                }
+                @{ Html.RenderPartial("~/Views/Shared/Registrant/_Answers.cshtml", answers); }
 
             </div>
         </div>
