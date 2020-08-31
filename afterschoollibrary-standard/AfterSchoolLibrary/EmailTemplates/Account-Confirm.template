@@ -1,0 +1,10 @@
+﻿<div>
+  <p>Hey @Model.FirstName,</p>
+
+  <p>
+    Thanks for signing up to use @Model.ProductName. In order to complete your registration you will need to confirm your account by creating a password. Please click the following link to create your password: <a href="@Model.ConfirmLink">@Model.ConfirmLink</a>
+  </p>
+  <p>
+      Your @Model.ProductName Team
+  </p>
+</div>
