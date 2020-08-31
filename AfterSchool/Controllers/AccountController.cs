@@ -1458,21 +1458,25 @@ namespace AfterSchool.Controllers
 
             var msgs = new SystemMessages();
             var participationObject = GetParticipationObjectFromCart();
-            var parentOrGuardian = SessionVariables.CurrentRegistrant.GetParentOrGuardian(msgs);
-            var (submittedRecord, registration) = SessionVariables.CurrentRegistrant.GetSubmittedRecord(participationObject, msgs);
+            var currentRegistrant = SessionVariables.CurrentRegistrant;
+            var parentOrGuardian = currentRegistrant.GetParentOrGuardian(msgs);
+            var (submittedRecord, registration) = currentRegistrant.GetSubmittedRecord(participationObject, msgs);
 
             if (!parentOrGuardian.IsProfileCompleted && parentOrGuardian.GetOwner(msgs).ID == SessionVariables.CurrentUser.ID)
                 return RedirectToAction(
                     "editpersonal",
                     "family",
-                    new { Area = "user", id = parentOrGuardian.Uid, reg = registration?.Uid, student = SessionVariables.CurrentRegistrant?.Uid });
+                    new { Area = "user", id = parentOrGuardian.Uid, reg = registration?.Uid, student = currentRegistrant?.Uid });
 
-            if (!SessionVariables.CurrentRegistrant.IsProfileCompleted)
+            if (!currentRegistrant.IsProfileCompleted)
                 return RedirectToAction(
                     "editstudentpersonal",
                     "family",
-                    new { Area = "user", id = SessionVariables.CurrentRegistrant.Uid, reg = registration?.Uid, student = SessionVariables.CurrentRegistrant?.Uid });
+                    new { Area = "user", id = currentRegistrant.Uid, reg = registration?.Uid, student = currentRegistrant?.Uid });
 
+            // check grade eligibility (extra check)
+            if (!participationObject.IsStudentGradeInRange(currentRegistrant, msgs))
+                return RedirectToAction("select");
 
             var needsToRegister = submittedRecord.NeedsToRegister(registration, participationObject, msgs);
 
