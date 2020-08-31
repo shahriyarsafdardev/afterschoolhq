@@ -2,9 +2,9 @@
 
 namespace AfterSchool.Models.ActionFilters
 {
-    public class EnvironmentRestrictionAttribute : FilterAttribute, IAuthorizationFilter
+    public class EnvironmentRestrictionAttribute : ActionFilterAttribute
     {
-        public void OnAuthorization(AuthorizationContext filterContext)
+        public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
             if (!AfterSchoolLibrary.Helpers.Utilities.IsLocalHost && !AfterSchoolLibrary.Helpers.Utilities.IsProduction)
                 filterContext.Result = new RedirectResult("/");
