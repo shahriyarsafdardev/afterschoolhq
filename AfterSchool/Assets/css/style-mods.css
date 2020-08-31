@@ -221,7 +221,11 @@ div.border-light-gray {
     padding-left: 60px;
     padding-right: 60px;
 }
-.padding-v-10{
+.padding-v-5 {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+.padding-v-10 {
     padding-top: 10px;
     padding-bottom: 10px;
 }
