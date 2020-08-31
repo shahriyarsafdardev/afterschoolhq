@@ -1,17 +1,16 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
 using System.Linq;
 using System.Text;
-using System.Web;
 using System.Web.Mvc;
 using AfterSchool.Models;
+using AfterSchool.Models.ActionFilters;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 
 namespace AfterSchool.Controllers
 {
+    [EnvironmentRestrictionAttribute]
     public class SitemapController : BaseController
     {
         // GET: Sitemap
