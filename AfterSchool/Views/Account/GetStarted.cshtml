@@ -5,6 +5,7 @@
     var msgs = (SystemMessages)ViewBag.Messages;
     var participationObject = (ParticipationObject)ViewBag.ParticipationObject;
     var registrationAccount = (Account)ViewBag.RegistrationAccount;
+    var currentUser = SessionVariables.CurrentUser;
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -16,7 +17,7 @@
         new ViewDataDictionary()
         {
             { "ParticipationObject", participationObject },
-            { "isDuringProfileSetup", SessionVariables.CurrentUser.IsNotEmpty() }
+            { "isDuringProfileSetup", currentUser.IsNotEmpty() }
         }
     );
 }
@@ -39,89 +40,140 @@
             <div class="panel-body">
 
                 <div class="text-center reg-instructions">
-                    <p><strong>Step 1 of 6: Parent / Guardian Information</strong></p>
+                    <p><strong>Step 1 of 6: <u>Parent</u> Sign Up / Sign in <!--Parent / Guardian Information--></strong></p>
                 </div>
-
-                @if (SessionVariables.CurrentUser.IsEmpty())
-                {
-                    <div class="text-center reg-login new-account">
-                        <p>
-                            If this is your first time signing up, we'll keep it quick. <br />Even better: you'll only have to input parent information once.
-                        </p>
-                        <br />
-                        <p>
-                            Already have an account?
-                            <a href="#" class="md-trigger" data-modal="modal-login">
-                                Login
-                            </a>
-                        </p>
-                        <p class="hide">
-                            Are you a student?
-                            <a href="@Url.Action("getstartedstudent", "account", new { regaccount = Request["regaccount"] })">
-                                Register Here
-                            </a>
-                        </p>
-                    </div>
-                }
 
                 <div>
                     <form class="form-horizontal" id="signup-form" method="post" action="@Url.Action("getstarted", "account")">
-                        @foreach (var qvm in Model.Where(qvm => !qvm.Hide))
-                        {
-                            Html.RenderPartial(
-                                "~/Views/Shared/Form/_Question.cshtml",
-                                qvm);
-
-                            if (qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone)
-                            {
-                                <div class="row">
-                                    <div class="col-md-6 col-md-offset-3">
-                                        <div class="am-checkbox text-center">
-                                            <input type="checkbox" id="textnotifications" name="textnotifications" value="1" @(Request["textnotifications"] == "1" || System.Web.HttpContext.Current.Request.HttpMethod.ToString() == "GET" ? " checked=\"checked\" " : "") />
-                                            <label for="textnotifications">
-                                                I would like to receive text messages about my student&#39;s activities&#46;
-                                                Notifications may include information about attendance&#44; reminders&#44; and important information&#46;
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            }
-                        }
 
                         @if (SessionVariables.CurrentUser.IsEmpty())
                         {
-                            <div class="form-group new-account">
-                                <label for="password1" class="control-label col-md-3">
-                                    Password <span class="text-danger">*</span>
-                                </label>
-                                <div class="col-md-6">
-                                    <input type="password" class="form-control" id="password1" name="password1" />
+                            <div class="row" id="email-check-container">
+                                
+                                <div>
+                                    <p class="text-center reg-login new-account">
+                                        Please enter your email to get started.
+                                    </p>
                                 </div>
-                            </div>
 
-                            <div class="form-group new-account">
-                                <label for="password1" class="control-label col-md-3">
-                                    Verify Password <span class="text-danger">*</span>
-                                </label>
-                                <div class="col-md-6">
-                                    <input type="password" class="form-control" id="password2" name="password2" />
+                                <div class="form-group">
+                                    <div class="col-md-3 control-label">
+                                        <label for="email-check">
+                                            Email <span class='text-danger'>*</span>
+                                        </label>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <input type="email"
+                                               id="email-check"
+                                               name="email-check"
+                                               class="form-control"
+                                               onfocus="this.select()"
+                                               required="required"
+                                               value="" />
+                                    </div>
                                 </div>
-                            </div>
+                                <div class="col-md-6 col-md-offset-3">
+                                    <div class="padding-v-20">
+                                        <button type="button" id="btn-check-email" class="btn btn-register-primary btn-lg">Next &raquo;</button>
+                                    </div>
+                                </div>
+
+                                <div class="clearfix"></div>
+
+                                <div class="col-md-6 col-md-offset-3 hide" id="account-confirmation-text">
+                                    <div role="alert" class="alert alert-success alert-icon">
+                                        <div class="icon">
+                                            <span class="s7-check-circle"></span>
+                                        </div>
+                                        <div class="message">
+                                            <p class="text-center text-medium-small">
+                                                We have sent you an email in order to complete your account and register. <br />
+                                                If you do not receive an email check your spam box. If you still cannot find it please contact us at <a href="@AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress">@AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress</a>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="clearfix"></div>
+                            </div>                            
                         }
 
-                        <div class="row padding-v-20">
-                            <div class="col-md-6 col-md-offset-3">
-                                <div class="am-checkbox text-center">
-                                    <input type="checkbox" id="agree" name="agree" value="1" @(Request["agree"] == "1" ? " checked=\"checked\" " : "") />
-                                    <label for="agree">
-                                        I agree to the <a href="@Url.Action("tos", "legal")" target="_blank">terms and conditions</a> of using @UILabel.ProductName()
-                                    </label>
+                        <div id="account-registration" class="@(currentUser.IsEmpty() ? "hide" : "")">
+                            
+                            <div class="row">
+                                <div class="col-md-6 col-md-offset-3">
+                                    <div role="alert" class="alert alert-success alert-icon">
+                                        <div class="icon">
+                                            <span class="s7-check-circle"></span>
+                                        </div>
+                                        <div class="message">
+                                            <p class="text-center reg-login new-account">
+                                                Please enter your info below to begin registation.
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="padding-v-20">
-                            <button type="submit" id="btn-create-account" class="btn btn-register-primary btn-lg">Save &amp; Continue &raquo;</button>
+                            @foreach (var qvm in Model.Where(qvm => !qvm.Hide))
+                            {
+                                Html.RenderPartial(
+                                    "~/Views/Shared/Form/_Question.cshtml",
+                                    qvm);
+
+                                if (qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone)
+                                {
+                                    <div class="row">
+                                        <div class="col-md-6 col-md-offset-3">
+                                            <div class="am-checkbox text-center">
+                                                <input type="checkbox" id="textnotifications" name="textnotifications" value="1" @(Request["textnotifications"] == "1" || System.Web.HttpContext.Current.Request.HttpMethod.ToString() == "GET" ? " checked=\"checked\" " : "") />
+                                                <label for="textnotifications">
+                                                    I would like to receive text messages about my student&#39;s activities&#46;
+                                                    Notifications may include information about attendance&#44; reminders&#44; and important information&#46;
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+
+                            @if (currentUser.IsEmpty())
+                            {
+                                <div class="form-group new-account">
+                                    <label for="password1" class="control-label col-md-3">
+                                        Password <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="col-md-6">
+                                        <input type="password" class="form-control" id="password1" name="password1" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group new-account">
+                                    <label for="password1" class="control-label col-md-3">
+                                        Verify Password <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="col-md-6">
+                                        <input type="password" class="form-control" id="password2" name="password2" />
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="row padding-v-20">
+                                <div class="col-md-6 col-md-offset-3">
+                                    <div class="am-checkbox text-center">
+                                        <input type="checkbox" id="agree" name="agree" value="1" @(Request["agree"] == "1" ? " checked=\"checked\" " : "") />
+                                        <label for="agree">
+                                            I agree to the <a href="@Url.Action("tos", "legal")" target="_blank">terms and conditions</a> of using @UILabel.ProductName()
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row padding-v-20">
+                                <div class="col-md-6 col-md-offset-3">
+                                    <button type="submit" id="btn-create-account" class="btn btn-register-primary btn-lg">Save &amp; Continue &raquo;</button>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="row">
@@ -138,10 +190,72 @@
 </div>
 
 <script>
+
+    function sendAccountConfirmation(email) {
+
+        $.get(
+            '/services/sendaccountconfirmationemail?email=' + encodeURIComponent(email) + '&redirecturl=@(Server.UrlEncode(participationObject.GetRegistrationPageUrl()))',
+            function (data) {
+                if (data && data.status == 'ok') {
+                    $('#account-confirmation-text').removeClass('hide');
+                    $('#btn-check-email').addClass('hide');
+                } else {
+                    Notifications.showErrors(data.messages);
+                }
+            }
+        );
+
+    }
+
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         $('#signup-form').submit(function () {
             $('#btn-create-account').html('Saving...');
             $('#btn-create-account').prop('disabled', true);
+        });
+
+        $('#btn-check-email').click(function () {
+            var email = $('#email-check').val();
+            var originalBtnText = $('#btn-check-email').html();
+
+            $('#btn-check-email').html('Checking...');
+
+            $.get(
+                '/services/checkaccountstatus?email=' + encodeURIComponent(email),
+                function (data) {
+                    if (data && data.status == 'ok') {
+
+                        if (data.isRegistered) {
+                            // show login form
+
+                            $('#btn-check-email').html('Logging In...');
+
+                            setTimeout(function () {
+                                $('#modal-login').addClass('md-show');
+                                $('#lm-login-username').val(email);
+
+                                setTimeout(function () {
+                                    $('#lm-login-password').focus();
+                                }, 500);
+                            }, 1000);
+
+                        } else if (data.isInUse) {
+                            // send email
+                            sendAccountConfirmation(email);
+                        } else {
+                            // show sign up form
+                            setTimeout(function () {
+                                $('#account-registration').removeClass('hide');
+                                $('#email-check-container').addClass('hide');
+                                $('#@Model.Find(qvm => qvm.Question.QuestionTypeId == QuestionType.Email).Id').val(email);
+                            }, 500);
+                        }
+
+                    } else {
+                        $('#btn-check-email').html(originalBtnText);
+                        Notifications.showErrors(data.messages);
+                    }
+                }
+            );
         });
     });
 </script>

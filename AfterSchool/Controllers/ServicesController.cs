@@ -50,6 +50,68 @@ namespace AfterSchool.Controllers
             return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
         }
 
+        public ActionResult CheckAccountStatus(string email)
+        {
+            if (!IsRequestFromApp())
+                return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
+
+            var msgs = new SystemMessages();
+
+            if (!email.IsEmail())
+                msgs.Add("Please enter a valid email address", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                var isInUse = WebUser.ExistsByEmail(email, msgs);
+                var isRegistered = false;
+
+                if (isInUse)
+                    isRegistered = WebUser.LoadByEmail(email, msgs).IsRegistered;
+
+                return Json(new
+                {
+                    status = "ok",
+                    isInUse,
+                    isRegistered
+                }, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult SendAccountConfirmationEmail(string email, string redirectUrl)
+        {
+            if (!IsRequestFromApp())
+                return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
+
+            var msgs = new SystemMessages();
+            WebUser user = null;
+
+            if (!email.IsEmail())
+                msgs.Add("Invalid Request", MessageType.UserError);
+
+            if (!WebUser.ExistsByEmail(email, msgs))
+                msgs.Add("Invalid Request", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                user = WebUser.LoadByEmail(email, msgs);
+
+                if (user.IsRegistered)
+                    msgs.Add("Invalid Request", MessageType.UserError);
+            }
+
+            if (msgs.HasNoErrors())
+            {
+                EmailHelper.SendAccountConfirmationEmail(user, redirectUrl, msgs);
+
+                if (msgs.HasNoErrors())
+                    return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+        }
+
         [HttpGet]
         public ActionResult GetCreditCardFees(string id, string amount)
         {
