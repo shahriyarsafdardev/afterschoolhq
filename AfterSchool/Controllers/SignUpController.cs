@@ -429,10 +429,9 @@ namespace AfterSchool.Controllers
                 user.ConfirmAccount(password1, msgs);
                 SessionVariables.CurrentUser = user;
 
-                if (returnurl.IsNotEmpty())
-                    return Redirect(returnurl);
+                LoadSessionInfo(user, msgs);
 
-                return RedirectToAction("index", "home", new { area = "user" });
+                return HandleRedirectAfterLogin(returnurl);
             }
 
             return View(user);

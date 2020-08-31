@@ -85,6 +85,50 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
+        public static SystemMessages SendAccountConfirmationEmail(ParticipationObject participationObject, Registration registration)
+        {
+            var msgs = new SystemMessages();
+            var registrant = registration.GetRegistrant(msgs);
+            var masterRegistrant = registrant.GetMasterRegistrant(msgs);
+            var parentOrGuardian = masterRegistrant.GetParentOrGuardian(msgs);
+            var registering = "registering";
+
+            if (participationObject.RegistrationMode == RegistrationMode.Apply)
+                registering = "applying";
+
+            var model = new NameValueCollection()
+            {
+                { "FirstName", parentOrGuardian.FirstName },
+                { "Registering", registering },
+                { "ActivityName",  participationObject.Name },
+                { "PaymentLink", registration.GetPaymentUrl },
+                { "BillerAccountName", participationObject.OwnerAccount.Name },
+                { "ActivityContactName", participationObject.ContactName },
+                { "ActivityContactEmail", participationObject.ContactEmail },
+                { "ActivityContactPhone", participationObject.ContactPhone },
+                { "ProductName", Utilities.AppName() },
+                { "StudentName", registrant.FirstName }
+            };
+
+            var subject = $"It's time to finalize your registration for {registrant.FirstName}";
+            var body = ProcessTemplate(
+                        EmailTemplates.Payment_Reminder,
+                        model,
+                        "Payment_Reminder-1.03",
+                        msgs);
+
+            var mailMsgs = SendGridHelper.SendMail(
+                            fromEmail: Email.SendGridNoReplyEmailAddress(),
+                            toEmail: new SendGrid.Helpers.Mail.EmailAddress(parentOrGuardian.Email),
+                            subject: subject,
+                            body: body,
+                            emailTemplateId: SendGridHelper.GetGenericTemplateId());
+
+            msgs.AddRange(mailMsgs);
+
+            return msgs;
+        }
+
         public static void SendRegistrationWithdrawal(Registrant registrant, ParticipationObject participationObject, WebUser loggedInUser, SystemMessages msgs)
         {
             var model = new NameValueCollection()
@@ -1056,6 +1100,34 @@ namespace AfterSchoolLibrary.Helpers
                 body: body,
                 emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)
                 );
+
+            msgs.AddRange(mailMsgs);
+            return msgs;
+        }
+
+        public static SystemMessages SendAccountConfirmationEmail(WebUser user, string redirectUrl, SystemMessages msgs)
+        {
+            var model = new NameValueCollection()
+            {
+                { "FirstName", user.FirstName },
+                { "ProductName", Utilities.AppName(true) },
+                { "ConfirmLink", Utilities.CompleteSignUpUrl(user.Uid, redirectUrl) }
+            };
+
+            var body = ProcessTemplate(
+                        EmailTemplates.Account_Confirm,
+                        model,
+                        "account_confirm-1.0.1",
+                        msgs);
+
+            var subject = $"Finalize your account on {Utilities.AppName(true)}";
+
+            var mailMsgs = SendGridHelper.SendMail(
+                            fromEmail: Email.SendGridNoReplyEmailAddress(true),
+                            toEmail: new SendGrid.Helpers.Mail.EmailAddress(user.Email),
+                            subject: subject,
+                            body: body,
+                            emailTemplateId: SendGridHelper.GetGenericTemplateId(true));
 
             msgs.AddRange(mailMsgs);
             return msgs;

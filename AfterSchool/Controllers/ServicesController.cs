@@ -50,6 +50,68 @@ namespace AfterSchool.Controllers
             return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
         }
 
+        public ActionResult CheckAccountStatus(string email)
+        {
+            if (!IsRequestFromApp())
+                return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
+
+            var msgs = new SystemMessages();
+
+            if (!email.IsEmail())
+                msgs.Add("Please enter a valid email address", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                var isInUse = WebUser.ExistsByEmail(email, msgs);
+                var isRegistered = false;
+
+                if (isInUse)
+                    isRegistered = WebUser.LoadByEmail(email, msgs).IsRegistered;
+
+                return Json(new
+                {
+                    status = "ok",
+                    isInUse,
+                    isRegistered
+                }, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult SendAccountConfirmationEmail(string email, string redirectUrl)
+        {
+            if (!IsRequestFromApp())
+                return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
+
+            var msgs = new SystemMessages();
+            WebUser user = null;
+
+            if (!email.IsEmail())
+                msgs.Add("Invalid Request", MessageType.UserError);
+
+            if (!WebUser.ExistsByEmail(email, msgs))
+                msgs.Add("Invalid Request", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                user = WebUser.LoadByEmail(email, msgs);
+
+                if (user.IsRegistered)
+                    msgs.Add("Invalid Request", MessageType.UserError);
+            }
+
+            if (msgs.HasNoErrors())
+            {
+                EmailHelper.SendAccountConfirmationEmail(user, redirectUrl, msgs);
+
+                if (msgs.HasNoErrors())
+                    return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+        }
+
         [HttpGet]
         public ActionResult GetCreditCardFees(string id, string amount)
         {
@@ -206,6 +268,78 @@ namespace AfterSchool.Controllers
         #endregion
 
         #region Profile
+
+        [HttpGet]
+        public ActionResult GetProfiles(int count)
+        {
+            if (!IsRequestFromApp())
+                return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
+
+            var msgs = new SystemMessages();
+
+            if (count > 10)
+                count = 10;
+
+            var profiles = AccountProfile.Search(
+                            accountTypes: AccountService.CustomerAccountTypes,
+                            isOpenDuringCovid: null,
+                            isELearningCenter: null,
+                            neighborhoods: null,
+                            cities: null,
+                            states: null,
+                            start: 0,
+                            length: count,
+                            getRandomSample: true,
+                            msgs: msgs);
+
+            var profilesObj = new List<object>();
+
+            profiles.ForEach(profile => {
+                var account = profile.GetAccount(msgs);
+                var photos = profile.GetPhotos(msgs);
+                var classifications = profile.GetProperties(AccountPropertyType.Classifications, msgs);
+                var gradeLevelStart = profile.GetGradeLevelStart(msgs).Name;
+                var gradeLevelEnd = profile.GetGradeLevelEnd(msgs).Name;
+                var location = profile.GetLocation(msgs);
+                var locationString = location?.FormatCityStateZipCode(false);
+                var followerCount = account.GetSubscriberCount(msgs);
+                var headerImageUrl = profile.GetHeaderImageUrl();
+
+                if (photos.Any() && headerImageUrl.IsBlank())
+                {
+                    var ah = AfterSchoolLibrary.Helpers.Utilities.GetNewAmazonHelper();
+                    headerImageUrl = ah.GetFileLink(photos.First().Value, true, null, true);
+                }
+
+                if (headerImageUrl.IsBlank() && location.IsNotEmpty())
+                    headerImageUrl = LocationService.GetGoogleMapsImageUrl(location, 1500, 600);
+
+                var classificationsObj = new List<object>();
+                classifications.ForEach(classification => {
+                    classificationsObj.Add(new
+                    {
+                        Label = classification.Value,
+                    });
+                });
+
+                profilesObj.Add(new {
+                    HomePageUrl = account.ShortHomePageUrl,
+                    AccountName = account.Name,
+                    Title = profile.Title,
+                    Headline = profile.Headline,
+                    IsOpenDuringCovid = profile.IsOpenDuringCovid,
+                    IsELearningCenter = profile.IsELearningCenter,
+                    HeaderImageUrl = headerImageUrl,
+                    Followers = followerCount,
+                    Location = locationString,
+                    GradeLevelStart = gradeLevelStart,
+                    GradeLevelEnd = gradeLevelEnd,
+                    Classifications = classificationsObj,
+                });
+            });
+
+            return Json(new { status = "ok", profiles = profilesObj }, JsonRequestBehavior.AllowGet);
+        }
 
         [HttpPost]
         public ActionResult ClaimProfile(string profile, string firstname, string lastname, string email, string phone, string g_recaptcha_response)

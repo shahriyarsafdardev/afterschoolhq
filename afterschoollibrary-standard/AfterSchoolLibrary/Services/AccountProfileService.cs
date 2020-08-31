@@ -255,7 +255,7 @@ namespace AfterSchoolLibrary.Services
             profile.AddProperties(properties, propertyType, loggedInUser, msgs, dc);
         }
 
-        public static List<AccountProperty> GetProperties(this AccountProfile profile, AccountPropertyType propertyType, SystemMessages msgs, DatabaseConnection dc = null)
+        public static List<AccountProperty> GetProperties(this AccountProfile profile, AccountPropertyType propertyType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return AccountProperty.LoadByAccountIdByAccountPropertyTypeId(profile.AccountId.Value, propertyType, msgs, dc);
         }

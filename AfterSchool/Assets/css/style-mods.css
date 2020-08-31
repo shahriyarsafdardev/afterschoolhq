@@ -179,7 +179,11 @@ div.border-light-gray {
     margin-right: 20px;
 }
 
-.margin-l-10{
+.margin-l-5 {
+    margin-left: 5px;
+}
+
+.margin-l-10 {
     margin-left: 10px;
 }
 
