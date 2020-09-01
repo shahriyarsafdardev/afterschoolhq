@@ -19365,28 +19365,25 @@ div.dataTables_wrapper div.dataTables_length label select {
   }
 }
 
-
-
-
-/* Extra small devices (phones, 600px and down) */
-@media only screen and (max-width: 600px) {
+/* Extra small devices (phones) */
+@media screen and (max-width: 479px) {
+    .sm-new-mt-10 {
+        margin-top: 10px;
+    }   
 }
 
-/* Small devices (portrait tablets and large phones, 600px and up) */
-@media only screen and (min-width: 600px) {
+/* Small devices (portrait tablets and large phones, 480px to 767px) */
+@media (min-width: 480px) and (max-width: 767px) {
     .sm-new-mt-10 {
         margin-top: 10px;
     }
 }
 
-/* Medium devices (landscape tablets, 768px and up) */
-@media only screen and (min-width: 768px) {
+/* Medium devices (landscape tablets, 768px to 1199px) */
+@media(min-width: 768px) and (max-width: 1199px) {
 }
 
-/* Large devices (laptops/desktops, 992px and up) */
-@media only screen and (min-width: 992px) {
-}
-
-/* Extra large devices (large laptops and desktops, 1200px and up) */
-@media only screen and (min-width: 1200px) {
+/* Large devices (laptops/desktops, 1200px and up) */
+@media(min-width: 1200px) {
+    
 }
