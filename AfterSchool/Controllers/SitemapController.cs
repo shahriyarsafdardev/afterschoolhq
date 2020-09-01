@@ -93,5 +93,11 @@ namespace AfterSchool.Controllers
 
             return View();
         }
+
+        [HttpGet]
+        public ActionResult GetHomeSitemap()
+        {
+            return File(Server.MapPath("~/sitemap-home.xml"), "text/xml");
+        }
     }
 }
