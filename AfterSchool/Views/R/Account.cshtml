@@ -54,7 +54,7 @@
         new ViewDataDictionary()
         {
             { "LoginReturnUrl", Model.HomePageUrl }
-                                        }
+                                                                                                        }
         );
 }
 
@@ -506,7 +506,7 @@
                 var id = validateVimeoUrl(url);
                 if (id) {
                     var player = document.getElementById("frameVideoUrl");
-                    player.src = "https://player.vimeo.com/video/" + id;                    
+                    player.src = "https://player.vimeo.com/video/" + id;
 
                     var container = document.getElementById("frameContainer");
                     container.style.display = 'block';
@@ -515,13 +515,13 @@
             else {
                 var id = validateYouTubeVideoUrl(url);
                 if (id) {
-                    var player = document.getElementById("frameVideoUrl");                    
+                    var player = document.getElementById("frameVideoUrl");
                     player.src = "https://www.youtube.com/embed/" + id;
 
                     var container = document.getElementById("frameContainer");
                     container.style.display = 'block';
                 }
-            }            
+            }
         }
     })();
 
@@ -531,7 +531,7 @@
         }
 
         return false;
-        
+
     }
 
     function validateYouTubeVideoUrl(url) {
@@ -556,3 +556,29 @@
         return false;
     }
 </script>
+
+@section header
+{
+    @{
+        var previewImage = accountProfile?.GetLogoUrl();
+
+        if (previewImage.IsBlank())
+        {
+            previewImage = accountProfile?.GetHeaderImageUrl();
+        }
+    }
+
+    <meta property="og:title" content="@accountProfile.Title">
+    <meta property="og:description" content="@accountProfile.Headline">
+    <meta property="og:image" content="@previewImage" />
+    <meta property="og:url" content="@Model.ShortHomePageUrl">
+    <meta property="og:site_name" content="@UILabel.ProductName()">
+
+    <meta name="twitter:title" content="@accountProfile.Title">
+    <meta name="twitter:description" content="@accountProfile.Headline">
+    <meta name="twitter:image" content="@previewImage">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@("@")afterschoolhq">
+    <meta name="twitter:image:alt" content="@accountProfile.Title">
+
+}
