@@ -1,0 +1,56 @@
+﻿@{ Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
+    var msgs = (SystemMessages)ViewBag.Messages; }
+
+<style>
+    .welcome-content {
+        margin-top: 35px;
+    }
+
+    .welcome-content-description {
+        word-spacing: 4px;
+        line-height: 1.8;
+        letter-spacing: 1px;
+    }
+
+    .welcome-content-name {
+        font-size: 16px;
+        word-spacing: 8px;
+        font-weight: bold;
+        margin-top: 20px;
+    }
+
+    .btn-green {
+        background-color: #07AE83;
+        border-color: #07AE83;
+        font-size: 18px;
+    }
+</style>
+
+<div class="main-content">
+
+    <h2 class="text-center">
+        Welcome
+    </h2>
+
+    <div class="clearfix"></div>
+
+    <div class="welcome-content col-md-offset-3">
+
+        <div class="pull-left col-md-2">
+            <img src="https://afterschoolhq-qa.s3.us-east-2.amazonaws.com/MathsClub/logo/nyc-5323170_640.jpg" alt="Allison" class="img-thumbnail">
+        </div>
+
+        <div class="p-description pull-left col-md-8 sm-new-mt-10">
+            <p class="welcome-content-description">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</p>
+            <div class="welcome-content-name"> Name | Role </div>
+        </div>
+
+    </div>
+
+    <div class="clearfix"></div>
+
+    <div class="text-center" style="margin-top: 40px;">
+        <button type="submit" class="btn btn-lg btn-rounded btn-primary btn-green">Get Started</button>
+    </div>
+    <div class="clearfix"></div>
+</div>

@@ -816,5 +816,11 @@ namespace AfterSchool.Controllers
             return Json(new { status = "error", messages = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
         }
 
+        [HttpGet]
+        public ActionResult Welcome()
+        {
+            return View();
+        }
+
     }
 }
