@@ -54,7 +54,7 @@
         new ViewDataDictionary()
         {
             { "LoginReturnUrl", Model.HomePageUrl }
-                                        }
+                                                                                                                                }
         );
 }
 
@@ -506,7 +506,7 @@
                 var id = validateVimeoUrl(url);
                 if (id) {
                     var player = document.getElementById("frameVideoUrl");
-                    player.src = "https://player.vimeo.com/video/" + id;                    
+                    player.src = "https://player.vimeo.com/video/" + id;
 
                     var container = document.getElementById("frameContainer");
                     container.style.display = 'block';
@@ -515,13 +515,13 @@
             else {
                 var id = validateYouTubeVideoUrl(url);
                 if (id) {
-                    var player = document.getElementById("frameVideoUrl");                    
+                    var player = document.getElementById("frameVideoUrl");
                     player.src = "https://www.youtube.com/embed/" + id;
 
                     var container = document.getElementById("frameContainer");
                     container.style.display = 'block';
                 }
-            }            
+            }
         }
     })();
 
@@ -531,7 +531,7 @@
         }
 
         return false;
-        
+
     }
 
     function validateYouTubeVideoUrl(url) {
@@ -556,3 +556,9 @@
         return false;
     }
 </script>
+
+@section header
+{
+    @{ Html.RenderPartial("~/Views/Shared/Registration/_ShareMetaTags.cshtml", new RegistrationHeaderViewModel(Model, accountProfile)); }
+
+}
