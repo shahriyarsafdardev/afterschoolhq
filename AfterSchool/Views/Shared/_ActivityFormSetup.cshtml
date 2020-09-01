@@ -66,10 +66,10 @@
         @if (group.IsEmpty() && Model.ActivityTypeId.In(new ActivityType[] { ActivityType.Activity, ActivityType.LearningPod }))
         {
             <div class="form-group">
-                <label class="col-md-3 control-label">
+                <label class="col-sm-3 control-label">
                     Invite Only?
                 </label>
-                <div class="col-md-1">
+                <div class="col-md-9">
                     @{Html.RenderPartial
                         (
                             "~/Views/Shared/_SwitchButton.cshtml",
