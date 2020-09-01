@@ -7,6 +7,7 @@
     var session = (ParticipationObject)ViewBag.Session;
     var showLocation = false;
     var hidePreciseLocation = false;
+    var accountProfile = (AccountProfile)ViewBag.AccountProfile;
 
     if (Model.HidePreciseLocation)
     {
@@ -39,13 +40,13 @@
             { "CanPublishActivity", ViewBag.CanPublishActivity },
             { "ParticipationObject", Model },
             { "Session", session }
-                        }
+                                }
     );
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-@{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", new RegistrationHeaderViewModel(Model, (AccountProfile)ViewBag.AccountProfile)); }
+@{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", new RegistrationHeaderViewModel(Model, accountProfile)); }
 
 <div>
     <div class="col-lg-10 col-lg-offset-1 col-md-12 participation-object participation-object-detail"
@@ -240,3 +241,9 @@
 }
 
 @{Html.RenderPartial("~/Views/Shared/Modals/_LeadForm.cshtml", Model.OwnerAccount);}
+
+
+@section header
+{
+    @{ Html.RenderPartial("~/Views/Shared/Registration/_ShareMetaTags.cshtml", new RegistrationHeaderViewModel(Model, accountProfile)); }
+}

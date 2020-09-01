@@ -15,18 +15,18 @@
 }
 
 @{ Html.RenderPartial(
-          "~/Views/Shared/Registration/_AccountTopBar.cshtml",
-          Model,
-          new ViewDataDictionary() { { "LoginReturnUrl", Model.HomePageUrl }, { "session", session } }); }
+           "~/Views/Shared/Registration/_AccountTopBar.cshtml",
+           Model,
+           new ViewDataDictionary() { { "LoginReturnUrl", Model.HomePageUrl }, { "session", session } }); }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
 @{ Html.RenderPartial(
-        "~/Views/Shared/Registration/_RegistrationHeader.cshtml",
-        new RegistrationHeaderViewModel(
-            Model,
-            (AccountProfile)ViewBag.AccountProfile,
-            (ParticipationObject)ViewBag.Session)); }
+         "~/Views/Shared/Registration/_RegistrationHeader.cshtml",
+         new RegistrationHeaderViewModel(
+             Model,
+             (AccountProfile)ViewBag.AccountProfile,
+             (ParticipationObject)ViewBag.Session)); }
 
 @{ Html.RenderPartial("~/Views/Shared/Registration/_FirstTimeInformation.cshtml", Model); }
 
@@ -116,33 +116,6 @@
 
 @section header
 {
-    @{
-        var previewImage = accountProfile?.GetLogoUrl();
-
-        if (previewImage.IsBlank())
-        {
-            previewImage = accountProfile?.GetHeaderImageUrl();
-        }
-
-        if (previewImage.IsBlank())
-        {
-            previewImage = $"{AfterSchoolLibrary.Helpers.Utilities.BaseUrl()}/assets/img/student-hands.png";
-        }
-
-        var title = accountProfile?.Title ?? Model.Name;
-    }
-
-    <meta property="og:title" content="@title">
-    <meta property="og:description" content="@(accountProfile?.Headline)">
-    <meta property="og:image" content="@previewImage" />
-    <meta property="og:url" content="@Model.ShortHomePageUrl">
-    <meta property="og:site_name" content="@UILabel.ProductName()">
-
-    <meta name="twitter:title" content="@title">
-    <meta name="twitter:description" content="@(accountProfile?.Headline)">
-    <meta name="twitter:image" content="@previewImage">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:site" content="@("@")afterschoolhq">
-    <meta name="twitter:image:alt" content="@title">
+    @{ Html.RenderPartial("~/Views/Shared/Registration/_ShareMetaTags.cshtml", new RegistrationHeaderViewModel(Model, accountProfile)); }
 
 }
