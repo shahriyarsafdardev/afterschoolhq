@@ -28,7 +28,7 @@ namespace AfterSchool.Models
         public static string PrintLocation(Location location)
         {
             if (location.IsNotEmpty())
-                return location.FormatAddressWithoutName();
+                return location.FormatAddress();
 
             return "No Location Available";
         }

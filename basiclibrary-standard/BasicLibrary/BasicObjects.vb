@@ -1073,11 +1073,11 @@ Public MustInherit Class BaseLocation
     End Function
 
     Public Overloads Function FormatImpreciseAddress(Optional ByVal useLineBreaks As Boolean = True) As String
-        Return BaseAddress.FormatImpreciseAddress(Neighborhood, City, State, PostalCode, Country, useLineBreaks)
+        Return BaseAddress.FormatImpreciseAddress(Neighborhood, City, County, State, PostalCode, Country, useLineBreaks)
     End Function
 
     Public Overloads Function FormatCityStateZipcode(Optional ByVal useLineBreaks As Boolean = True) As String
-        Return BaseAddress.FormatCityStateZipCode(City, State, PostalCode, useLineBreaks)
+        Return BaseAddress.FormatCityStateZipCode(City, County, State, PostalCode, useLineBreaks)
     End Function
 
     Public Overrides Function ToString() As String
