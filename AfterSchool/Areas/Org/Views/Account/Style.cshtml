@@ -13,7 +13,7 @@
     var headerImageUrl = (string)ViewBag.HeaderImageUrl;
     var grades = (List<GradeLevel>)ViewBag.Grades;
 
-    var classifications = (List<AccountProperty>)ViewBag.Classifications;
+    var programCategories = (List<AccountProperty>)ViewBag.Classifications;
     var softSkills = (List<AccountProperty>)ViewBag.SoftSkills;
     var academicSubjects = (List<AccountProperty>)ViewBag.AcademicSubjects;
     var teachingMethods = (List<AccountProperty>)ViewBag.TeachingMethods;
@@ -299,7 +299,7 @@
                     <a name="services"></a>
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            Services &amp; Classifications
+                            Services &amp; Categories
                         </div>
                         <div class="panel-body">
 
@@ -376,9 +376,9 @@
                             </div>
 
                             <div class="form-group">
-                                <label class="col-md-3 control-label">Program Classifications (up to 3)</label>
+                                <label class="col-md-3 control-label">Program Categories (up to 3)</label>
                                 <div class="col-md-9">
-                                    <input type="text" name="classifications" id="classifications" class="form-control" data-role="tagsinput" value="@classifications.Select(x => x.Value).ToStringList(",")" />
+                                    <input type="text" name="programCategories" id="programCategories" class="form-control" data-role="tagsinput" value="@programCategories.Select(x => x.Value).ToStringList(",")" />
                                     <p class="text-small text-muted">ex: Karate, Sports, Arts, Pottery, Dance, Football</p>
                                 </div>
                             </div>
@@ -707,7 +707,7 @@
 {
     <script src="~/Assets/tagsinput/tagsinput.js"></script>
     <script>
-        $('#classifications').tagsinput({
+        $('#programCategories').tagsinput({
             maxTags: 3
         });
         $('#softskills').tagsinput({
