@@ -378,7 +378,7 @@
                             <div class="form-group">
                                 <label class="col-md-3 control-label">Program Categories (up to 3)</label>
                                 <div class="col-md-9">
-                                    <input type="text" name="programCategories" id="programCategories" class="form-control" data-role="tagsinput" value="@programCategories.Select(x => x.Value).ToStringList(",")" />
+                                    <input type="text" name="programCategories" id="txtProgramCategories" class="form-control" data-role="tagsinput" value="@programCategories.Select(x => x.Value).ToStringList(",")" />
                                     <p class="text-small text-muted">ex: Karate, Sports, Arts, Pottery, Dance, Football</p>
                                 </div>
                             </div>
@@ -707,7 +707,7 @@
 {
     <script src="~/Assets/tagsinput/tagsinput.js"></script>
     <script>
-        $('#programCategories').tagsinput({
+        $('#txtProgramCategories').tagsinput({
             maxTags: 3
         });
         $('#softskills').tagsinput({
