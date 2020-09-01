@@ -7,6 +7,7 @@ using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary.DataAccess;
+using System.Web;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -516,6 +517,42 @@ namespace AfterSchool.Areas.Org.Controllers
             Response.End();
 
             return View();
+        }
+
+        [HttpPost]
+        public ActionResult UploadFile(HttpPostedFileBase file)
+        {
+            var msgs = new SystemMessages();
+            var allowedFiles = new string[] { ".png", ".jpg", ".jpeg" };
+
+            if (file.IsEmpty() || file.ContentLength == 0 ||
+                    !file.FileName.ToLower().Contains(allowedFiles) ||
+                    file.ContentLength > AfterSchoolLibrary.Helpers.Utilities.ImageUploadMaxBytes)
+                msgs.Add("Please upload a valid jpg or png file, must be less than 4MB", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                var account = SessionVariables.CurrentAccount;
+                var filename = file.FileName;
+                var stream = file.InputStream;
+                var ah = AfterSchoolLibrary.Helpers.Utilities.GetNewAmazonHelper();
+                var amazonLocation = $"{account.UniqueName}/files/{filename}";
+
+                msgs.AddRange(ah.AddFile(stream, amazonLocation, true));
+
+                if (msgs.HasNoErrors())
+                {
+                    var url = ah.GetFileLink(amazonLocation, !AfterSchoolLibrary.Helpers.Utilities.IsLocalHost, null, true);
+
+                    return Json(new
+                    {
+                        status = "ok",
+                        url
+                    }, JsonRequestBehavior.AllowGet);
+                }
+            }
+
+            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
         }
     }
 }

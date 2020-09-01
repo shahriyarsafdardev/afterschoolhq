@@ -178,6 +178,10 @@ body.registration {
     font-weight: 500;
 }
 
+.activity-detail-block img{
+    max-width: 100%;
+}
+
 .seats-remaining {
     color: #d0021b;
     font-size: 14px;

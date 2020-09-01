@@ -32,7 +32,6 @@
             {
                 <div class="pull-right margin-l-10">
                     <span class="badge badge-success profile-badge text-small">
-                        <icon class="s7-clock"></icon>
                         Open During COVID
                     </span>
                 </div>
@@ -42,8 +41,16 @@
             {
                 <div class="pull-right margin-l-10">
                     <span class="badge badge-success profile-badge text-small">
-                        <icon class="s7-clock"></icon>
                         E-Learning Center
+                    </span>
+                </div>
+            }
+
+            @if (account.IsNowEnrolling())
+            {
+                <div class="pull-right margin-l-10">
+                    <span class="badge badge-danger profile-badge text-small">
+                        Now Enrolling
                     </span>
                 </div>
             }
@@ -54,15 +61,15 @@
             <div class="" style="position: absolute; top: 10px; left: 15px; overflow: hidden; height: 20px;">
 
                 <div class="pull-left margin-l-5">
-                    <span class="badge badge-default profile-badge text-small">
-                        @gradeLevelStart.Name - @gradeLevelEnd.Name Grade
+                    <span class="badge badge-gray profile-badge text-small">
+                        @gradeLevelStart.Abbreviation - @gradeLevelEnd.Abbreviation Grade
                     </span>
                 </div>
 
                 @foreach (var property in properties)
                 {
                     <div class="pull-left margin-l-5">
-                        <span class="badge badge-default profile-badge text-small">
+                        <span class="badge badge-gray profile-badge text-small">
                             @property.Value
                         </span>
                     </div>

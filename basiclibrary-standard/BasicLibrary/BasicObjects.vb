@@ -808,6 +808,15 @@ Public MustInherit Class BaseAddress
             MDV("City").Value = value
         End Set
     End Property
+    Public Property County() As String
+        Get
+            Return MDV("County").Value
+        End Get
+        Set(ByVal value As String)
+            MDV("County").Value = value
+        End Set
+    End Property
+
     Public Property State() As String
         Get
             Return MDV("State").Value
@@ -852,13 +861,13 @@ Public MustInherit Class BaseAddress
         End Get
     End Property
 
-    Public Shared Function GetGoogleMapsLink(ByVal address1 As String, ByVal address2 As String, ByVal city As String, ByVal state As String, ByVal postalCode As String, ByVal country As String) As String
-        Dim address As String = FormatAddress(address1, address2, city, state, postalCode, country).Replace(vbCrLf, " ").Replace(" ", "+")
+    Public Shared Function GetGoogleMapsLink(ByVal address1 As String, ByVal address2 As String, ByVal city As String, ByVal county As String, ByVal state As String, ByVal postalCode As String, ByVal country As String) As String
+        Dim address As String = FormatAddress(address1, address2, city, county, state, postalCode, country).Replace(vbCrLf, " ").Replace(" ", "+")
         Return "https://www.google.com/maps/place/" + address
     End Function
 
     Public Overridable Function GetGoogleMapsLink() As String
-        Return GetGoogleMapsLink(Address1, Address2, City, State, PostalCode, Country)
+        Return GetGoogleMapsLink(Address1, Address2, City, County, State, PostalCode, Country)
     End Function
 
     Public Overridable Function GetAddress() As String
@@ -866,10 +875,10 @@ Public MustInherit Class BaseAddress
     End Function
 
     Public Overridable Function FormatAddress(Optional ByVal useLineBreaks As Boolean = True) As String
-        Return BaseAddress.FormatAddress(Address1, Address2, City, State, PostalCode, Country, useLineBreaks)
+        Return BaseAddress.FormatAddress(Address1, Address2, City, County, State, PostalCode, Country, useLineBreaks)
     End Function
 
-    Public Shared Function FormatAddress(ByVal address1 As String, ByVal address2 As String, ByVal city As String, ByVal state As String, ByVal postalCode As String, ByVal country As String, Optional ByVal useLineBreaks As Boolean = True) As String
+    Public Shared Function FormatAddress(ByVal address1 As String, ByVal address2 As String, ByVal city As String, ByVal county As String, ByVal state As String, ByVal postalCode As String, ByVal country As String, Optional ByVal useLineBreaks As Boolean = True) As String
 
         Dim address As String = ""
 
@@ -888,8 +897,10 @@ Public MustInherit Class BaseAddress
             address &= address2
         End If
 
+        Dim cityLine = FormatCityLine(city, county, state, postalCode, useLineBreaks)
 
-        If city.IsEmpty() = False Or state.IsEmpty() = False Or postalCode.IsEmpty = False Then
+        If cityLine.IsNotEmpty() Then
+
             If address.IsEmpty() = False Then
                 If useLineBreaks Then
                     address &= vbCrLf
@@ -898,28 +909,7 @@ Public MustInherit Class BaseAddress
                 End If
             End If
 
-            Dim cityLine As String = ""
-
-            If city.IsEmpty() = False Then
-                cityLine &= city
-            End If
-            If city.IsEmpty() = False Then
-                If cityLine.IsEmpty() = False Then
-                    cityLine &= ", "
-                End If
-                cityLine &= state
-            End If
-            If city.IsEmpty() = False Then
-                If cityLine.IsEmpty() = False Then
-                    cityLine &= " "
-                End If
-                cityLine &= postalCode
-            End If
-
-            If cityLine.IsEmpty() = False Then
-                address &= cityLine
-            End If
-
+            address &= cityLine
         End If
 
         If country.IsEmpty = False Then
@@ -937,7 +927,7 @@ Public MustInherit Class BaseAddress
 
     End Function
 
-    Public Shared Function FormatImpreciseAddress(ByVal neighborhood As String, ByVal city As String, ByVal state As String, ByVal postalCode As String, ByVal country As String, Optional ByVal useLineBreaks As Boolean = True) As String
+    Public Shared Function FormatImpreciseAddress(ByVal neighborhood As String, ByVal city As String, ByVal county As String, ByVal state As String, ByVal postalCode As String, ByVal country As String, Optional ByVal useLineBreaks As Boolean = True) As String
 
         Dim address As String = ""
 
@@ -952,7 +942,10 @@ Public MustInherit Class BaseAddress
             address &= neighborhood
         End If
 
-        If city.IsEmpty() = False Or state.IsEmpty() = False Or postalCode.IsEmpty = False Then
+        Dim cityLine = FormatCityLine(city, county, state, postalCode, useLineBreaks)
+
+        If cityLine.IsNotEmpty() Then
+
             If address.IsEmpty() = False Then
                 If useLineBreaks Then
                     address &= vbCrLf
@@ -961,28 +954,7 @@ Public MustInherit Class BaseAddress
                 End If
             End If
 
-            Dim cityLine As String = ""
-
-            If city.IsEmpty() = False Then
-                cityLine &= city
-            End If
-            If city.IsEmpty() = False Then
-                If cityLine.IsEmpty() = False Then
-                    cityLine &= ", "
-                End If
-                cityLine &= state
-            End If
-            If city.IsEmpty() = False Then
-                If cityLine.IsEmpty() = False Then
-                    cityLine &= " "
-                End If
-                cityLine &= postalCode
-            End If
-
-            If cityLine.IsEmpty() = False Then
-                address &= cityLine
-            End If
-
+            address &= cityLine
         End If
 
         If country.IsEmpty = False Then
@@ -999,44 +971,43 @@ Public MustInherit Class BaseAddress
         Return address
 
     End Function
-    Public Shared Function FormatCityStateZipCode(ByVal city As String, ByVal state As String, ByVal postalCode As String, Optional ByVal useLineBreaks As Boolean = True) As String
+    Private Shared Function FormatCityLine(ByVal city As String, ByVal county As String, ByVal state As String, ByVal postalCode As String, Optional ByVal useLineBreaks As Boolean = True) As String
 
-        Dim address As String = ""
+        Dim cityLine As String = ""
 
-        If city.IsEmpty() = False Or state.IsEmpty() = False Or postalCode.IsEmpty = False Then
-            If address.IsEmpty() = False Then
-                If useLineBreaks Then
-                    address &= vbCrLf
-                Else
-                    address &= ", "
-                End If
-            End If
-
-            Dim cityLine As String = ""
+        If city.IsEmpty() = False Or county.IsEmpty() = False Or state.IsEmpty() = False Or postalCode.IsEmpty = False Then
 
             If city.IsEmpty() = False Then
                 cityLine &= city
             End If
-            If city.IsEmpty() = False Then
+
+            If city.IsEmpty() And county.IsNotEmpty() Then
+                cityLine &= county
+            End If
+
+            If city.IsNotEmpty() Or county.IsNotEmpty() Then
                 If cityLine.IsEmpty() = False Then
                     cityLine &= ", "
                 End If
                 cityLine &= state
             End If
-            If city.IsEmpty() = False Then
+
+            If city.IsNotEmpty() Or county.IsNotEmpty() Then
                 If cityLine.IsEmpty() = False Then
                     cityLine &= " "
                 End If
                 cityLine &= postalCode
             End If
 
-            If cityLine.IsEmpty() = False Then
-                address &= cityLine
-            End If
-
         End If
 
-        Return address
+        Return cityLine
+
+    End Function
+
+    Public Shared Function FormatCityStateZipCode(ByVal city As String, ByVal county As String, ByVal state As String, ByVal postalCode As String, Optional ByVal useLineBreaks As Boolean = True) As String
+
+        Return FormatCityLine(city, county, state, postalCode, useLineBreaks)
 
     End Function
 
@@ -1048,7 +1019,6 @@ End Class
 <Serializable()> _
 Public MustInherit Class BaseLocation
     Inherits BaseAddress
-
 
     Public Property Name() As String
         Get
@@ -1086,7 +1056,7 @@ Public MustInherit Class BaseLocation
 
         Dim rtn As String = ""
 
-        If Name.IsEmpty = False Then
+        If Name.IsEmpty = False And Name <> City And Name <> County Then
             rtn &= Name
             If useLineBreaks Then
                 rtn &= vbCrLf
@@ -1103,11 +1073,11 @@ Public MustInherit Class BaseLocation
     End Function
 
     Public Overloads Function FormatImpreciseAddress(Optional ByVal useLineBreaks As Boolean = True) As String
-        Return BaseAddress.FormatImpreciseAddress(Neighborhood, City, State, PostalCode, Country, useLineBreaks)
+        Return BaseAddress.FormatImpreciseAddress(Neighborhood, City, County, State, PostalCode, Country, useLineBreaks)
     End Function
 
     Public Overloads Function FormatCityStateZipcode(Optional ByVal useLineBreaks As Boolean = True) As String
-        Return BaseAddress.FormatCityStateZipCode(City, State, PostalCode, useLineBreaks)
+        Return BaseAddress.FormatCityStateZipCode(City, County, State, PostalCode, useLineBreaks)
     End Function
 
     Public Overrides Function ToString() As String
@@ -1562,6 +1532,14 @@ Public MustInherit Class BaseContactWithAddress
             MDV("City").Value = value
         End Set
     End Property
+    Public Property County() As String
+        Get
+            Return MDV("County").Value
+        End Get
+        Set(ByVal value As String)
+            MDV("County").Value = value
+        End Set
+    End Property
     Public Property State() As String
         Get
             Return MDV("State").Value
@@ -1606,13 +1584,13 @@ Public MustInherit Class BaseContactWithAddress
         End Get
     End Property
 
-    Public Shared Function GetGoogleMapsLink(ByVal address1 As String, ByVal address2 As String, ByVal city As String, ByVal state As String, ByVal postalCode As String, ByVal country As String) As String
-        Dim address As String = BaseAddress.FormatAddress(address1, address2, city, state, postalCode, country).Replace(vbCrLf, " ").Replace(" ", "+")
+    Public Shared Function GetGoogleMapsLink(ByVal address1 As String, ByVal address2 As String, ByVal city As String, ByVal county As String, ByVal state As String, ByVal postalCode As String, ByVal country As String) As String
+        Dim address As String = BaseAddress.FormatAddress(address1, address2, city, county, state, postalCode, country).Replace(vbCrLf, " ").Replace(" ", "+")
         Return "https://www.google.com/maps/place/" + address
     End Function
 
     Public Overridable Function GetGoogleMapsLink() As String
-        Return GetGoogleMapsLink(Address1, Address2, City, State, PostalCode, Country)
+        Return GetGoogleMapsLink(Address1, Address2, City, County, State, PostalCode, Country)
     End Function
 
     Public Overridable Function GetAddress() As String
@@ -1620,7 +1598,7 @@ Public MustInherit Class BaseContactWithAddress
     End Function
 
     Public Overridable Function FormatAddress() As String
-        Return BaseAddress.FormatAddress(Address1, Address2, City, State, PostalCode, Country)
+        Return BaseAddress.FormatAddress(Address1, Address2, City, County, State, PostalCode, Country)
     End Function
 End Class
 

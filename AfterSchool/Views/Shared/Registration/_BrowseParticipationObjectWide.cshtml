@@ -7,7 +7,7 @@
     var showSeatsRemaining = true;
     var showLocation = false;
 
-    if (Model.SeatsRemaining.HasValue)
+    if (Model.SeatsRemaining.HasValue && Model.SeatsAvailable.Value <= 20)
     {
         if (Model.IsActivityGroup() && Model.ActivityGroupType.Value != ActivityGroupType.League)
         {
