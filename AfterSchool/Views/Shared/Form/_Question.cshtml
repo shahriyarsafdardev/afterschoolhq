@@ -16,6 +16,10 @@
                 @{ Html.RenderPartial("~/Views/Shared/Form/_Label.cshtml", Model, new ViewDataDictionary() { { "AdditionalClass", ViewData["AdditionalClass"] } }); }
             </div>
         }
+        else
+        {
+            <div class="col-md-3">&nbsp;</div>
+        }
 
         <div class="col-md-6">
             @switch (Model.Question.QuestionTypeId)
