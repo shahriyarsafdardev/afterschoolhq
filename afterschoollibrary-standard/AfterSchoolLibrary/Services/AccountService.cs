@@ -399,6 +399,12 @@ namespace AfterSchoolLibrary.Services
             return RegistrationPeriod.LoadByAccountId(account.ID.Value, msgs, dc);
         }
 
+        public static bool IsNowEnrolling(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.GetPublishedParticipationObjects(msgs, dc)
+                    .Any(participationObject => participationObject.GetCurrentRegistrationPeriod(msgs, dc).IsNotEmpty());
+        }
+
         public static List<RegistrationPeriod> GetRegistrationPeriods(this Account account, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return RegistrationPeriod.LoadByAccountId(account.ID.Value, start, length, msgs, dc);

@@ -10,7 +10,8 @@
             .ToList();
     }
 
-    var showGroup = qvms.Any(qvm => qvm.Question.QuestionTypeId != QuestionType.TextBlock);
+    // var showGroup = qvms.Any(qvm => qvm.Question.QuestionTypeId != QuestionType.TextBlock);
+    var showGroup = qvms.Any(qvm => qvm.Question.IsActive);
 }
 
 @if (showGroup)

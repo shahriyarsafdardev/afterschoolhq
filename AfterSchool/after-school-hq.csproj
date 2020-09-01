@@ -1770,6 +1770,7 @@
     <Content Include="Views\Account\Contact.cshtml" />
     <Content Include="Views\Account\ContactThankYou.cshtml" />
     <Content Include="Views\Shared\Registrant\_Answers.cshtml" />
+    <Content Include="Views\Shared\JavascriptIncludes\_QuillEditorScripts.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
