@@ -1422,21 +1422,18 @@ namespace AfterSchool.Controllers
 
         private List<FormQuestion> RegisterViewBag(ParticipationObject participationObject, SystemMessages msgs)
         {
-            var currentRegistrant = SessionVariables.CurrentRegistrant;
-
             var allQuestions = participationObject.Form
                 .GetActiveQuestions(msgs)
                 .ToList();
-            var required = allQuestions
-                .Where(question => 
-                    question.IsRequired && 
+            var requiredQuestions = allQuestions
+                .Where(question => question.IsRequired &&
                     question.FormQuestionGroupRegistrantTypeId == RegistrantType.Individual &&
                     question.QuestionDataTypeId != QuestionDataType.NotSet)
                 .ToList();
 
-            var answers = currentRegistrant.GetAnswers(msgs);
+            var answers = SessionVariables.CurrentRegistrant.GetAnswers(msgs);
 
-            var questions = required.Where(question => 
+            var questions = requiredQuestions.Where(question => 
                     answers.FirstOrDefault(answer => answer.QuestionDataTypeId == question.QuestionDataTypeId).IsEmpty() ||
                     answers.FirstOrDefault(answer => answer.QuestionDataTypeId == question.QuestionDataTypeId).Text.IsBlank()
                 )
@@ -1448,8 +1445,8 @@ namespace AfterSchool.Controllers
                         .Where(question => question.QuestionDataTypeId == QuestionDataType.NotSet)
                         .Where(question => answers.Find(answer => answer.FormQuestionId == question.ID).IsEmpty())
                 );
-
-            ViewBag.Registrant = currentRegistrant;
+            
+            ViewBag.Registrant = SessionVariables.CurrentRegistrant;
 
             return questions;
         }
