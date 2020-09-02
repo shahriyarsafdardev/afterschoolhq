@@ -1011,7 +1011,10 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (videoUrl.IsNotEmpty() && !videoUrl.IsRegExMatch(BasicLibrary.Utilities.ProfileVideoSpecificUrlRegEx))
                 msgs.Add("Please enter a valid Video(YouTube) URL", MessageType.UserError);
-                
+
+            if (locationname.IsEmpty())
+                msgs.Add("Location is required field.", MessageType.UserError);
+            
             //server side validation for photos count, which should not be more then 6
             var properties = profile.GetProperties(AccountPropertyType.Photo, msgs);
             var savedPhotos = properties != null ? properties.Count : 0;
