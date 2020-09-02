@@ -14,9 +14,9 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="col-lg-3 control-label">Classifications (up to 3)</label>
+                    <label class="col-lg-3 control-label">Program Categories (up to 3)</label>
                     <div class="col-lg-9">
-                        <input type="text" name="classifications" id="classifications" class="form-control" data-role="tagsinput" value="@Request["classifications"]" />
+                        <input type="text" name="programCategories" id="txtProgramCategories" class="form-control" data-role="tagsinput" value="@Request["programCategories"]" />
                         <p class="text-small text-muted">ex: Karate, Sports, Arts, Pottery, Dance, Football</p>
                     </div>
                 </div>
@@ -159,7 +159,7 @@
 {
     <script src="~/Assets/tagsinput/tagsinput.js"></script>
     <script>
-        $('#classifications').tagsinput({
+        $('#txtProgramCategories').tagsinput({
             maxTags: 3
         });
         $('#softskills').tagsinput({
