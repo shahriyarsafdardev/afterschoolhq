@@ -9,6 +9,9 @@ using AfterSchool.Helpers;
 using AfterSchoolLibrary.Services;
 using AfterSchoolLibrary;
 using System.Collections.Generic;
+using System.Text;
+using System.IO;
+using System.Web.UI;
 
 namespace AfterSchool.Controllers
 {
@@ -294,51 +297,74 @@ namespace AfterSchool.Controllers
 
             var profilesObj = new List<object>();
 
+            var html = "";
+
             profiles.ForEach(profile => {
-                var account = profile.GetAccount(msgs);
-                var photos = profile.GetPhotos(msgs);
-                var classifications = profile.GetProperties(AccountPropertyType.Classifications, msgs);
-                var gradeLevelStart = profile.GetGradeLevelStart(msgs).Name;
-                var gradeLevelEnd = profile.GetGradeLevelEnd(msgs).Name;
-                var location = profile.GetLocation(msgs);
-                var locationString = location?.FormatCityStateZipCode(false);
-                var followerCount = account.GetSubscriberCount(msgs);
-                var headerImageUrl = profile.GetHeaderImageUrl();
+                var result = ViewEngines.Engines.FindPartialView(this.ControllerContext, "~/Views/Shared/Registration/_BrowseProvider.cshtml");
 
-                if (photos.Any() && headerImageUrl.IsBlank())
+                if (result.View != null)
                 {
-                    var ah = AfterSchoolLibrary.Helpers.Utilities.GetNewAmazonHelper();
-                    headerImageUrl = ah.GetFileLink(photos.First().Value, true, null, true);
-                }
-
-                if (headerImageUrl.IsBlank() && location.IsNotEmpty())
-                    headerImageUrl = LocationService.GetGoogleMapsImageUrl(location, 1500, 600);
-
-                var classificationsObj = new List<object>();
-                classifications.ForEach(classification => {
-                    classificationsObj.Add(new
+                    this.ViewData.Model = profile;
+                    var sb = new StringBuilder();
+                    using (StringWriter sw = new StringWriter(sb))
                     {
-                        Label = classification.Value,
-                    });
-                });
+                        using (HtmlTextWriter output = new HtmlTextWriter(sw))
+                        {
+                            var viewContext = new ViewContext(this.ControllerContext, result.View, this.ViewData, new TempDataDictionary(), output);
+                            result.View.Render(viewContext, output);
+                        }
+                    }
 
-                profilesObj.Add(new {
-                    HomePageUrl = account.ShortHomePageUrl,
-                    AccountName = account.Name,
-                    Title = profile.Title,
-                    Headline = profile.Headline,
-                    IsOpenDuringCovid = profile.IsOpenDuringCovid,
-                    IsELearningCenter = profile.IsELearningCenter,
-                    HeaderImageUrl = headerImageUrl,
-                    Followers = followerCount,
-                    Location = locationString,
-                    GradeLevelStart = gradeLevelStart,
-                    GradeLevelEnd = gradeLevelEnd,
-                    Classifications = classificationsObj,
-                });
+                    html += sb.ToString();
+                }
             });
+           
 
-            return Json(new { status = "ok", profiles = profilesObj }, JsonRequestBehavior.AllowGet);
+            //profiles.ForEach(profile => {
+            //    var account = profile.GetAccount(msgs);
+            //    var photos = profile.GetPhotos(msgs);
+            //    var classifications = profile.GetProperties(AccountPropertyType.Classifications, msgs);
+            //    var gradeLevelStart = profile.GetGradeLevelStart(msgs).Name;
+            //    var gradeLevelEnd = profile.GetGradeLevelEnd(msgs).Name;
+            //    var location = profile.GetLocation(msgs);
+            //    var locationString = location?.FormatCityStateZipCode(false);
+            //    var followerCount = account.GetSubscriberCount(msgs);
+            //    var headerImageUrl = profile.GetHeaderImageUrl();
+
+            //    if (photos.Any() && headerImageUrl.IsBlank())
+            //    {
+            //        var ah = AfterSchoolLibrary.Helpers.Utilities.GetNewAmazonHelper();
+            //        headerImageUrl = ah.GetFileLink(photos.First().Value, true, null, true);
+            //    }
+
+            //    if (headerImageUrl.IsBlank() && location.IsNotEmpty())
+            //        headerImageUrl = LocationService.GetGoogleMapsImageUrl(location, 1500, 600);
+
+            //    var classificationsObj = new List<object>();
+            //    classifications.ForEach(classification => {
+            //        classificationsObj.Add(new
+            //        {
+            //            Label = classification.Value,
+            //        });
+            //    });
+
+            //    profilesObj.Add(new {
+            //        HomePageUrl = account.ShortHomePageUrl,
+            //        AccountName = account.Name,
+            //        Title = profile.Title,
+            //        Headline = profile.Headline,
+            //        IsOpenDuringCovid = profile.IsOpenDuringCovid,
+            //        IsELearningCenter = profile.IsELearningCenter,
+            //        HeaderImageUrl = headerImageUrl,
+            //        Followers = followerCount,
+            //        Location = locationString,
+            //        GradeLevelStart = gradeLevelStart,
+            //        GradeLevelEnd = gradeLevelEnd,
+            //        Classifications = classificationsObj,
+            //    });
+            //});
+
+            return Json(new { status = "ok", profiles = profilesObj, html }, JsonRequestBehavior.AllowGet);
         }
 
         [HttpPost]

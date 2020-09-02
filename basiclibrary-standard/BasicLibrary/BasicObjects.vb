@@ -1079,6 +1079,9 @@ Public MustInherit Class BaseLocation
     Public Overloads Function FormatCityStateZipcode(Optional ByVal useLineBreaks As Boolean = True) As String
         Return BaseAddress.FormatCityStateZipCode(City, County, State, PostalCode, useLineBreaks)
     End Function
+    Public Overloads Function FormatCityState(Optional ByVal useLineBreaks As Boolean = True) As String
+        Return BaseAddress.FormatCityStateZipCode(City, County, State, "", useLineBreaks)
+    End Function
 
     Public Overrides Function ToString() As String
         Return FormatAddress(False)
