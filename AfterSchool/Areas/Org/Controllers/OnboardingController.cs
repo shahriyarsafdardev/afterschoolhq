@@ -290,7 +290,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult ServicesOffered(string classifications, string softskills, string academicsubjects, string teachingmethods)
+        public ActionResult ServicesOffered(string programCategories, string softskills, string academicsubjects, string teachingmethods)
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
@@ -310,7 +310,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             timesOffered: Request.Params.Filter("times-offered-"),
                             pricingOptions: Request.Params.Filter("pricing-options-"),
                             specialNeedsOfferings: Request.Params.Filter("special-needs-"),
-                            classifications: classifications,
+                            classifications: programCategories,
                             softskills: softskills,
                             academicsubjects: academicsubjects,
                             teachingmethods: teachingmethods,
