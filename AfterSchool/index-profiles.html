@@ -91,9 +91,10 @@
         });
     </script>
 
-    <script src="/assets/js/main-mods.js?v=1.0.13" type="text/javascript"></script>
+    <script src="/assets/js/main-mods.js?v=1.0.14" type="text/javascript"></script>
 
     <script>
+        console.log('getprofiles');
         $(document).ready(function () {
 
             var count = WebPage.getUrlParamValue('count');
@@ -101,102 +102,102 @@
             $.get(
                 '/services/getprofiles?count=' + count,
                 function (data) {
+                    console.log(data);
                     if (data && data.status == 'ok') {
-
-                        var html = '';
-
-                        for (profile of data.profiles) {
-                            html += '<div class="col-sm-12 col-md-6 col-lg-4 col-xl-3 participation-object searchable-object pointer" onclick="parent.location.href=\'' + profile.HomePageUrl + '\'">';
-                            html += '<div class="panel" style="overflow: hidden;">';
-
-                            // BEGIN PROFILE HEADER
-                            html += '<div class="reg-header" style="background-image: url(' + profile.HeaderImageUrl + '); min-height: 100px; height: 150px; padding: 5px 5px;">';
-
-                            if (profile.IsOpenDuringCovid) {
-                                html += '<div class="pull-right margin-l-10">';
-                                html += '<span class="badge badge-success profile-badge text-small">';
-                                html += '<icon class="s7-clock"></icon>';
-                                html += 'Open During COVID';
-                                html += '</span>';
-                                html += '</div>';
-                            }
-
-                            if (profile.IsELearningCenter) {
-                                html += '<div class="pull-right margin-l-10">';
-                                html += '<span class="badge badge-success profile-badge text-small">';
-                                html += '<icon class="s7-clock"></icon>';
-                                html += 'E-Learning Center';
-                                html += '</span>';
-                                html += '</div>';
-                            }
-
-                            html += '</div>';
-                            // END PROFILE HEADER
-
-                            //BEGIN PROFILE BODY
-                            html += '<div class="panel-body" style="position: relative;">';
-
-                            //BEGIN BADGES
-                            html += '<div class="" style="position: absolute; top: 10px; left: 15px; overflow: hidden; height: 20px;">';
-                            html += '<div class="pull-left margin-l-5">';
-                            html += '<span class="badge badge-gray profile-badge text-small">';
-                            html += profile.GradeLevelStart + ' - ' + profile.GradeLevelEnd + ' Grade';
-                            html += '</span>';
-                            html += '</div>';
-
-                            for (classification of profile.Classifications) {
-                                html += '<div class="pull-left margin-l-5">';
-                                html += '<span class="badge badge-gray profile-badge text-small">';
-                                html += classification.Label;
-                                html += '</span>';
-                                html += '</div>';
-                            }
-
-                            html += '</div>';
-                            //END BADGES
-
-                            html += '<h3>';
-                            html += '<strong title="' + profile.Title + '">' + profile.Title + '</strong>';
-                            html += '</h3>';
-
-                            html += '<div class="">';
-                            html += '<span class="text-small">';
-                            html += '<span>';
-                            html += profile.Location;
-                            html += '</span>';
-                            html += '</span>';
-                            html += '</div>';
-
-                            var headline = profile.Headline;
-
-                            if (headline.length > 70) {
-                                headline = headline.substring(0, 70) + '...';
-                            }
-
-                            html += '<div class="margin-t-10" style="height: 40px;">';
-                            html += '<p class="text-medium-small">';
-                            html += headline;
-                            html += '</p>';
-                            html += '</div>';
-
-                            html += '<div class="margin-t-20">';
-                            html += '<a href="' + profile.HomePageUrl + '" class="btn btn-register btn-block">';
-                            html += 'Learn More &raquo;';
-                            html += '</a>';
-                            html += '</div>';
-
-                            html += '</div>';
-                            //END PROFILE BODY
-
-                            html += '</div>';
-                            html += '</div>';
-                        }
-
-                        $('#ahq-profiles').html(html);
+                        $('#ahq-profiles').html(data.html);
                     }
                 }
             );
         });
+
+        function loadProfiles(data) {
+            for (profile of data.profiles) {
+                html += '<div class="col-sm-12 col-md-6 col-lg-4 col-xl-3 participation-object searchable-object pointer" onclick="parent.location.href=\'' + profile.HomePageUrl + '\'">';
+                html += '<div class="panel" style="overflow: hidden;">';
+
+                // BEGIN PROFILE HEADER
+                html += '<div class="reg-header" style="background-image: url(' + profile.HeaderImageUrl + '); min-height: 100px; height: 150px; padding: 5px 5px;">';
+
+                if (profile.IsOpenDuringCovid) {
+                    html += '<div class="pull-right margin-l-10">';
+                    html += '<span class="badge badge-success profile-badge text-small">';
+                    html += '<icon class="s7-clock"></icon>';
+                    html += 'Open During COVID';
+                    html += '</span>';
+                    html += '</div>';
+                }
+
+                if (profile.IsELearningCenter) {
+                    html += '<div class="pull-right margin-l-10">';
+                    html += '<span class="badge badge-success profile-badge text-small">';
+                    html += '<icon class="s7-clock"></icon>';
+                    html += 'E-Learning Center';
+                    html += '</span>';
+                    html += '</div>';
+                }
+
+                html += '</div>';
+                // END PROFILE HEADER
+
+                //BEGIN PROFILE BODY
+                html += '<div class="panel-body" style="position: relative;">';
+
+                //BEGIN BADGES
+                html += '<div class="" style="position: absolute; top: 10px; left: 15px; overflow: hidden; height: 20px;">';
+                html += '<div class="pull-left margin-l-5">';
+                html += '<span class="badge badge-gray profile-badge text-small">';
+                html += profile.GradeLevelStart + ' - ' + profile.GradeLevelEnd + ' Grade';
+                html += '</span>';
+                html += '</div>';
+
+                for (classification of profile.Classifications) {
+                    html += '<div class="pull-left margin-l-5">';
+                    html += '<span class="badge badge-gray profile-badge text-small">';
+                    html += classification.Label;
+                    html += '</span>';
+                    html += '</div>';
+                }
+
+                html += '</div>';
+                //END BADGES
+
+                html += '<h3>';
+                html += '<strong title="' + profile.Title + '">' + profile.Title + '</strong>';
+                html += '</h3>';
+
+                html += '<div class="">';
+                html += '<span class="text-small">';
+                html += '<span>';
+                html += profile.Location;
+                html += '</span>';
+                html += '</span>';
+                html += '</div>';
+
+                var headline = profile.Headline;
+
+                if (headline.length > 70) {
+                    headline = headline.substring(0, 70) + '...';
+                }
+
+                html += '<div class="margin-t-10" style="height: 40px;">';
+                html += '<p class="text-medium-small">';
+                html += headline;
+                html += '</p>';
+                html += '</div>';
+
+                html += '<div class="margin-t-20">';
+                html += '<a href="' + profile.HomePageUrl + '" class="btn btn-register btn-block">';
+                html += 'Learn More &raquo;';
+                html += '</a>';
+                html += '</div>';
+
+                html += '</div>';
+                //END PROFILE BODY
+
+                html += '</div>';
+                html += '</div>';
+            }
+        }
 
     </script>
 

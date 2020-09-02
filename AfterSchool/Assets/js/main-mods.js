@@ -285,6 +285,9 @@ var WebPage = {
             }
         }
 
+    },
+    navigateIframe: function(url) {
+        window.location !== window.parent.location ? parent.location.href = url : location.href = url;
     }
 }
 
