@@ -1,5 +1,13 @@
 ﻿@{ Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
-    var msgs = (SystemMessages)ViewBag.Messages; }
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var EnumSignupPages = new
+    {
+        WelCome = 0,
+        SelectUserType = 1,
+        SelectIndividualType = 2,
+        SelectOrgType = 3
+    };
+}
 
 <style>
     .mt-30 {
@@ -14,47 +22,119 @@
         margin-top: 40px;
         margin-bottom: 40px;
     }
+
+    .btn-center {
+        display: block;
+        margin: 0 auto;
+        float: none;
+    }
 </style>
 
 <div class="row main-content">
 
-    <h2 class="text-center">
-        Welcome
-    </h2>
+    <div id="signup-welcome">
+        <h2 class="text-center">Welcome</h2>
+        <div class="clearfix"></div>
 
-    <div class="clearfix"></div>
-
-    <div class="row col-md-offset-1 mt-35">
-        <div class="visible-lg visible-md">
-            <div class="pull-left">
-                <img src="https://afterschoolhq-qa.s3.us-east-2.amazonaws.com/MathsClub/logo/nyc-5323170_640.jpg" alt="Allison" class="img-thumbnail" style="max-width: 230px;">
+        <div class="row col-md-offset-1 mt-35">
+            <div class="visible-lg visible-md">
+                <div class="pull-left">
+                    <img src="https://afterschoolhq-qa.s3.us-east-2.amazonaws.com/MathsClub/logo/nyc-5323170_640.jpg" alt="Allison" class="img-thumbnail" style="max-width: 230px;">
+                </div>
+                <div class="p-description col-md-8">
+                    <p class="text-medium-small">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</p>
+                    <div class="text-medium text-sm-center"> Name | Role </div>
+                </div>
+                <div class="clearfix"></div>
             </div>
-            <div class="p-description col-md-8">
-                <p class="text-medium-small">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</p>
-                <div class="text-medium text-sm-center"> Name | Role </div>
+
+            <div class="visible-xs visible-sm">
+                <div class="p-description col-sm-12 col-xs-12 text-center">
+                    <p class="text-medium-small">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</p>
+                    <div class="text-medium text-sm-center"> Name | Role </div>
+                </div>
+                <div class="clearfix"></div>
+                <div class="text-center col-sm-12 col-xs-12 mt-30">
+                    <img src="https://afterschoolhq-qa.s3.us-east-2.amazonaws.com/MathsClub/logo/nyc-5323170_640.jpg" alt="Allison" class="img-thumbnail" style="max-width: 350px;">
+                </div>
+                <div class="clearfix"></div>
             </div>
             <div class="clearfix"></div>
         </div>
 
-        <div class="visible-xs visible-sm">
-            <div class="p-description col-sm-12 col-xs-12 text-center">
-                <p class="text-medium-small">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</p>
-                <div class="text-medium text-sm-center"> Name | Role </div>
-            </div>
-            <div class="clearfix"></div>
-            <div class="text-center col-sm-12 col-xs-12 mt-30">
-                <img src="https://afterschoolhq-qa.s3.us-east-2.amazonaws.com/MathsClub/logo/nyc-5323170_640.jpg" alt="Allison" class="img-thumbnail" style="max-width: 350px;">
-            </div>
+        <div class="clearfix"></div>
+
+        <div class="text-center mtb-40">
+            <button id="btn-GetStarted" type="button" class="col-md-offset-5 col-md-2 col-sm-12 col-xs-12 btn btn-lg btn-primary" onclick="return proceedFurther('@EnumSignupPages.WelCome')">Get Started</button>
             <div class="clearfix"></div>
         </div>
-        <div class="clearfix"></div>    
-    </div>
-
-    <div class="clearfix"></div>
-
-    <div class="text-center mtb-40">
-        <button type="submit" class="col-md-offset-5 col-md-2 col-sm-12 col-xs-12 btn btn-lg btn-primary">Get Started</button>
         <div class="clearfix"></div>
     </div>
-    <div class="clearfix"></div>
+
+    <div id="signup-select-usertype" style="display: none;">
+        <h2 class="text-center">What would you like to do?</h2>
+        <div class="clearfix"></div>
+
+        <div class="row mt-35">
+            <button id="btn-CreateIndividualAccount" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SelectIndividualType')">Create an Individual Account</button>
+            <div class="clearfix"></div><br />
+            <button id="btn-CreateOrgAccount" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SelectOrgType')">Create an Organization Account</button>
+        </div>
+    </div>
+
+    <div id="signup-individualtype" style="display: none;">
+        <h2 class="text-center">What would you like to do?</h2>
+        <div class="clearfix"></div>
+
+        <div class="row mt-35">
+            <button id="btn-ProgramForStudents" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther(1)">Provide programs for students</button>
+            <div class="clearfix"></div><br />
+            <button id="btn-EnrollChild" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther(2)">Enroll my child in a program</button>
+        </div>
+    </div>
+
+    <div id="signup-orgtype" style="display: none;">
+        <h2 class="text-center">What kind of organization?</h2>
+        <div class="clearfix"></div>
+
+        <div class="row mt-35">
+            <button id="btn-Business" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther(1)">Business</button>
+            <div class="clearfix"></div><br />
+            <button id="btn-School" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther(1)">School</button>
+            <div class="clearfix"></div><br />
+            <button id="btn-CommunityCenter" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther(1)">Community Center</button>
+            <div class="clearfix"></div><br />
+            <button id="btn-Church" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther(1)">Church</button>
+            <div class="clearfix"></div><br />
+            <button id="btn-NonProfit" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther(1)">Non Profit</button>
+        </div>
+    </div>
+
 </div>
+
+@section Scripts
+{   
+    <script type="text/javascript">
+        var signupWelcome = $('#signup-welcome');
+        var signupSelectUsertype = $('#signup-select-usertype');
+        var signupIndividualType = $('#signup-individualtype');
+        var signupOrgType = $('#signup-orgtype');
+
+        function proceedFurther(page) {
+            if (page === '@EnumSignupPages.WelCome') {
+                // we are at welcome page and moving further to select user type
+                $(signupWelcome).hide();
+                $(signupSelectUsertype).show();
+            } else if (page === '@EnumSignupPages.SelectIndividualType') {
+                // user clicked btn-CreateIndividualAccount, and going for signup-IndividualType
+                $(signupSelectUsertype).hide();
+                $(signupIndividualType).show();
+            } else if (page === '@EnumSignupPages.SelectOrgType') {
+                // user clicked btn-CreateOrgAccount, and going for signup-OrgType
+                $(signupSelectUsertype).hide();
+                $(signupOrgType).show();
+            }
+
+        }
+    </script>
+}
