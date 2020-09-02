@@ -1013,7 +1013,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add("Please enter a valid Video(YouTube) URL", MessageType.UserError);
 
             if (locationname.IsEmpty())
-                msgs.Add("Location is required field.", MessageType.UserError);
+                msgs.Add("Location is a required field.", MessageType.UserError);
             
             //server side validation for photos count, which should not be more then 6
             var properties = profile.GetProperties(AccountPropertyType.Photo, msgs);
