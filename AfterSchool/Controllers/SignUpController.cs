@@ -822,5 +822,25 @@ namespace AfterSchool.Controllers
             return View();
         }
 
+        //TODO: we have ths method in service controller but since it wasn't working properly, I created new one.
+        [HttpPost]
+        public virtual JsonResult GetData(string search)
+        {
+            if (!IsRequestFromApp())
+                return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
+
+            var msgs = new SystemMessages();
+            var accounts = Account.FullTextSearchForTest(search.Trim(), AccountService.ProviderAccountTypes.ToList(), 0, 10, msgs);
+
+            return Json(new
+            {
+                data = accounts.Select(account => new OrgDropDown()
+                {
+                    Id = account.ID.Value,
+                    Text = account.Name,
+                    Slug = account.Name
+                })
+            }, JsonRequestBehavior.AllowGet);
+        }
     }
 }

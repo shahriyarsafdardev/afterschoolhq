@@ -614,6 +614,7 @@
     <Compile Include="Models\LeagueHelper.cs" />
     <Compile Include="Models\ModalViewModel.cs" />
     <Compile Include="Models\FormInputViewModel.cs" />
+    <Compile Include="Models\OrgDropDown.cs" />
     <Compile Include="Models\PagingModel.cs" />
     <Compile Include="Areas\Org\OrgAreaRegistration.cs" />
     <Compile Include="Areas\Admin\Controllers\UserController.cs" />

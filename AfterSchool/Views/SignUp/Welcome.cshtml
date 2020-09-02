@@ -5,7 +5,11 @@
         WelCome = 0,
         SelectUserType = 1,
         SelectIndividualType = 2,
-        SelectOrgType = 3
+        SelectOrgType = 3,
+        SearchProgramName = 4,
+        SearchOrgName = 5,
+        ClaimProfile = 6,
+        ThankYou = 7
     };
 }
 
@@ -87,9 +91,9 @@
         <div class="clearfix"></div>
 
         <div class="row mt-35">
-            <button id="btn-ProgramForStudents" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther(1)">Provide programs for students</button>
+            <button id="btn-ProgramForStudents" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SearchProgramName')">Provide programs for students</button>
             <div class="clearfix"></div><br />
-            <button id="btn-EnrollChild" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther(2)">Enroll my child in a program</button>
+            <button id="btn-EnrollChild" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center">Enroll my child in a program</button> @*TODO: move user to /parent*@
         </div>
     </div>
 
@@ -98,27 +102,132 @@
         <div class="clearfix"></div>
 
         <div class="row mt-35">
-            <button id="btn-Business" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther(1)">Business</button>
+            <button id="btn-Business" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SearchOrgName')">Business</button>
             <div class="clearfix"></div><br />
-            <button id="btn-School" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther(1)">School</button>
+            <button id="btn-School" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SearchOrgName')">School</button>
             <div class="clearfix"></div><br />
-            <button id="btn-CommunityCenter" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther(1)">Community Center</button>
+            <button id="btn-CommunityCenter" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SearchOrgName')">Community Center</button>
             <div class="clearfix"></div><br />
-            <button id="btn-Church" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther(1)">Church</button>
+            <button id="btn-Church" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SearchOrgName')">Church</button>
             <div class="clearfix"></div><br />
-            <button id="btn-NonProfit" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther(1)">Non Profit</button>
+            <button id="btn-NonProfit" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SearchOrgName')">Non Profit</button>
         </div>
     </div>
+
+    <div id="signup-search-name" style="display: none;">
+        <h2 id="lbl-org-search-title" class="text-center"></h2>
+        <div class="clearfix"></div>
+
+        <div class="row mt-35">
+            <div class="col-md-8 col-md-offset-2">
+                <select id="select2-search-organizations" style="width: 100%;"></select>
+            </div>
+            <div class="clearfix"></div><br />
+
+            <button id="btn-SearchContinue" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.ClaimProfile')">Continue</button>
+            <div class="clearfix"></div><br />
+        </div>
+    </div>
+
+    <div id="signup-claim-profile" style="display: none;">
+        <h2 class="text-center">Claim Profile</h2>
+        <div class="clearfix"></div><br />
+        <h5 class="text-center">This profile already exists on AfterSchool HQ. Please start the claim process below.</h5>
+        <div class="clearfix"></div><br />
+
+        <div class="row mt-35">
+            <div class="form-group row">
+                <div class="col-md-6 col-md-offset-3">
+                    <input class="form-control" type="text" placeholder="First Name">
+                </div>
+            </div>
+            <div class="clearfix"></div>
+
+            <div class="form-group row">
+                <div class="col-md-6 col-md-offset-3">
+                    <input class="form-control" type="text" placeholder="Last Name">
+                </div>
+            </div>
+            <div class="clearfix"></div>
+
+            <div class="form-group row">
+                <div class="col-md-6 col-md-offset-3">
+                    <input class="form-control" type="text" placeholder="Email">
+                </div>
+            </div>
+            <div class="clearfix"></div>
+
+            <div class="form-group row">
+                <div class="col-md-6 col-md-offset-3">
+                    <input class="form-control" type="text" placeholder="Phone">
+                </div>
+            </div>
+            <div class="clearfix"></div>
+
+            <button id="btn-StartClaimProcess" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.ThankYou')">Start the claim process</button>
+            <div class="clearfix"></div><br />
+        </div>
+    </div>
+
+    <div id="signup-thank-you" style="display: none;">
+        <h2 class="text-center">Thank You!</h2>
+        <div class="clearfix"></div><br />
+        <h5 class="text-center">We see that you have email from same domain. We have sent you instruction to claim to claim your account.</h5>
+        <div class="clearfix"></div><br />
 
 </div>
 
 @section Scripts
-{   
+{
     <script type="text/javascript">
         var signupWelcome = $('#signup-welcome');
         var signupSelectUsertype = $('#signup-select-usertype');
         var signupIndividualType = $('#signup-individualtype');
         var signupOrgType = $('#signup-orgtype');
+        var signupSearchName = $('#signup-search-name');
+        var signupClaimProfile = $('#signup-claim-profile');
+        var signupThankYou = $('#signup-thank-you');
+        var lblOrgSearchTitle = $('#lbl-org-search-title');
+
+        $(document).ready(function () {
+            // $('#select2-search-organizations').val();
+            var select2SearchOrganizations = $('#select2-search-organizations');
+
+            select2SearchOrganizations.select2({
+                placeholder: "Program name",
+                allowClear: true,
+                minimumInputLength: 2,
+                tags: [],
+                ajax: {
+                    url: 'GetData',
+                    type: "POST",
+                    dataType: "json",
+                    quietMillis: 50,
+                    data: function (term) {
+                        return {
+                            search: term.term
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: $.map(data.data, function (item) {
+                                return {
+                                    text: item.Text,
+                                    slug: item.Slug,
+                                    id: item.Id
+                                }
+                            })
+                        };
+                    }
+                }
+            });
+
+            select2SearchOrganizations.on('select2:select', function (e) {
+                // Do something
+                var data = e.params.data;
+                console.log(data);
+            });
+        });
 
         function proceedFurther(page) {
             if (page === '@EnumSignupPages.WelCome') {
@@ -133,8 +242,23 @@
                 // user clicked btn-CreateOrgAccount, and going for signup-OrgType
                 $(signupSelectUsertype).hide();
                 $(signupOrgType).show();
+            } else if (page === '@EnumSignupPages.SearchProgramName') {
+                // user clicked btn-ProgramForStudents, and going for name search for his/her program
+                $(lblOrgSearchTitle).text('Whats the name of your Program?');
+                $(signupIndividualType).hide();
+                $(signupSearchName).show();
+            } else if (page === '@EnumSignupPages.SearchOrgName') {
+                // user is from the organization, and going for name search for his/her organization
+                $(lblOrgSearchTitle).text('Whats the name of your Organization?');
+                $(signupOrgType).hide();
+                $(signupSearchName).show();
+            } else if (page === '@EnumSignupPages.ClaimProfile') {
+                $(signupSearchName).hide();
+                $(signupClaimProfile).show();
+            } else if (page === '@EnumSignupPages.ThankYou') {
+                $(signupClaimProfile).hide();
+                $(signupThankYou).show();
             }
-
         }
     </script>
 }
