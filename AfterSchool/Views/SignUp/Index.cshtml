@@ -23,6 +23,7 @@
                         <form action="@Url.Action("index", "signup")" method="post" class="form-horizontal" id="sign-up-form">
                             @{ Html.RenderPartial("~/Views/Shared/Login/_SignUpForm-NewAccount.cshtml", Model); }
 
+                            <button type="submit" class="btn btn-block btn-primary btn-lg">Get Started &raquo;</button>
                             <input type="hidden" name="invitecodetoshare" value="@Model.InviteCodeToShare" />
                         </form>
 

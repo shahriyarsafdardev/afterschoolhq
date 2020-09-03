@@ -627,7 +627,7 @@ namespace AfterSchoolLibrary.Models
                     select * from Account
                     where 
                         Contains(name, '{"\""}{searchTerms.ToStringList("*\" AND \"")}{"*\""}') and
-                        IsTest = 0 and OwnerId is not NULL and AccountTypeId in {accountTypes.Select(x => (int)x).ToList().ToStrings().ToStringList(",")}
+                        IsTest = 0 and OwnerId is not NULL and AccountTypeId in ({accountTypes.Select(x => (int)x).ToList().ToStrings().ToStringList(",")})
                 ";
 
                 dq.SelectRange.Start = start;
