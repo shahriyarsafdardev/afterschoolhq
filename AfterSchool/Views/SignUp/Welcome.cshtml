@@ -151,9 +151,11 @@
                 <p class="text-medium-small text-center">Thanks for joining our platform to provide learning opportunities for students everywhere.</p>
                 <p class="text-medium-small text-center">We just need a little information to get started.</p>
 
-                <form id="form-signup-personal-details" method="post" class="form-horizontal">
+                <form id="form-signup-personal-details" class="form-horizontal" method="post" action="@Url.Action("index", "signup")">
                     @{ Html.RenderPartial("~/Views/Shared/Login/_SignUpForm-NewAccount.cshtml", Model); }
-                    <button id="btn-ContinuePersonalDetails" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return showThankYou(1)">Continue</button>
+
+                    @* TODO *@
+                    <input id="hidden-signup-accountname" type="hidden" name="accountName" />
                 </form>
 
             </div>
@@ -168,7 +170,11 @@
         <div class="clearfix"></div><br />
 
         <div class="row mt-35">
-            <form id="form-signup-claim-form" method="post" class="form-horizontal">
+            <form id="form-signup-claim-form" class="form-horizontal">
+                @Html.AntiForgeryToken()
+
+                <input id="hidden-claim-accountId" type="hidden" name="accountId" />
+
                 <div class="form-group row">
                     <div class="col-md-6 col-md-offset-3">
                         <input class="form-control" type="text" required="required" name="firstName" placeholder="First Name">
@@ -197,7 +203,7 @@
                 </div>
                 <div class="clearfix"></div>
 
-                <button id="btn-StartClaimProcess" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return showThankYou(2)">Start the claim process</button>
+                <button id="btn-StartClaimProcess" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return saveClaims()">Start the claim process</button>
                 <div class="clearfix"></div><br />
             </form>
         </div>
@@ -237,12 +243,14 @@
         var signupThankYou = $('#signup-thank-you');
         var lblOrgSearchTitle = $('#lbl-org-search-title');
         var btnContinue = $('#btn-SearchContinue');
+        var btnClaimProcess = $('#btn-StartClaimProcess');
         var select2SearchOrganizations = $('#select2-search-organizations');
         var formClaimProfile = $('#form-signup-claim-form');
         var headerRecognisedThankYou = $('#header-thankyou-recognized');
         var headerThankYouNR1 = $('#header-thankyou-not-recognized');
         var headerThankYouNR2 = $('#header2-thankyou-not-recognized');
         var headerThankYouNR3 = $('#header3-thankyou-not-recognized');
+        var hiddenClaimAccountId = $('#hidden-claim-accountId');
 
         $(document).ready(function () {
             select2SearchOrganizations.select2({
@@ -278,6 +286,9 @@
                 //grab the selected account and set it to global object, so we can further decide on cliams profile or register
                 var data = e.params.data;
                 selectedAccount = data;
+                if (data && data.id) {
+                    hiddenClaimAccountId.val(data.id);
+                }
                 btnContinue.removeClass('disabled');
             });
         });
@@ -333,24 +344,97 @@
             }
         }
 
-        function showThankYou(toggle) {
-            if (toggle == 1) { // we are here from personal details
-                headerThankYouNR1.show();
-                headerThankYouNR3.show();
-                signupRegister.hide();
-                signupThankYou.show();
-            } else if (toggle == 2) { // we are here from claim profiles, check for email domain and go to thank you
-                //headerThankYouNR1.show();
-                //headerThankYouNR2.show();
+        function saveClaims() {
+            if (formClaimProfile.valid()) {
+                var formData = formClaimProfile.serialize();
+                var url = "SaveClaims";
 
-                if (formClaimProfile.valid()) {
-                    // formClaimProfile.submit();
-                    headerRecognisedThankYou.show();
-
-                    signupClaimProfile.hide();
-                    signupThankYou.show();
-                }
+                $.ajax({
+                    url: url,
+                    data: formData,
+                    type: "POST",
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.IsSuccess == false) {
+                            var errors = ''
+                            data.data.forEach(function (error) {
+                                if (error && error.Text) {
+                                    errors += '<li style="color: white;">' + error.Text + '</li>';
+                                }
+                                else {
+                                    errors += '<li style="color: white;">' + error + '</li>';
+                                }
+                            });
+                            Notifications.showBar({
+                                title: 'Error',
+                                message: errors,
+                                success: false
+                            });
+                            return false;
+                        }
+                        else {
+                            headerRecognisedThankYou.show();
+                            signupClaimProfile.hide();
+                            signupThankYou.show();
+                        }
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.log(errorThrown);
+                        Notifications.showBar({
+                            title: 'Error',
+                            message: 'Something went wrong. Please contact customer support.',
+                            success: false
+                        });
+                        return;
+                    }
+                });
             }
         }
+
+        //function showThankYou(toggle) {
+        //    if (formClaimProfile.valid()) {
+        //        var formData = formClaimProfile.serialize();
+        //        var url = "SaveClaims";
+
+        //        $.ajax({
+        //            type: "POST",
+        //            url: url,
+        //            data: formData,
+        //            success: function (data) {
+        //                if (data.IsSuccess == false) {
+        //                    return false;
+        //                }
+        //                else {
+        //                    headerRecognisedThankYou.show();
+        //                    signupClaimProfile.hide();
+        //                    signupThankYou.show();
+        //                }
+        //            },
+        //            error: function (jqXHR, textStatus, errorThrown) {
+        //            }
+        //        });
+
+        //        //formClaimProfile.submit();
+
+        //    }
+
+        //    //if (toggle == 1) { // we are here from personal details
+        //    //    headerThankYouNR1.show();
+        //    //    headerThankYouNR3.show();
+        //    //    signupRegister.hide();
+        //    //    signupThankYou.show();
+        //    //} else if (toggle == 2) { // we are here from claim profiles, check for email domain and go to thank you
+        //    //    //headerThankYouNR1.show();
+        //    //    //headerThankYouNR2.show();
+
+        //    //    if (formClaimProfile.valid()) {
+        //    //        // formClaimProfile.submit();
+        //    //        headerRecognisedThankYou.show();
+
+        //    //        signupClaimProfile.hide();
+        //    //        signupThankYou.show();
+        //    //    }
+        //    //}
+        //}
     </script>
 }

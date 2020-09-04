@@ -1,0 +1,11 @@
+﻿<div>
+  <p>Hello,</p>
+  
+  @Model.ClaimProfileDetails
+
+  <p>
+    Thanks, <br />
+    @Model.ProductName
+  </p>
+  
+</div>

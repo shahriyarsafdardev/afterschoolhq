@@ -224,6 +224,35 @@ namespace AfterSchoolLibrary.Helpers
                 emailTemplateId: SendGridHelper.GetGenericTemplateId()));
         }
 
+        public static void SendClaimProfileEmail(Account account, string email, SystemMessages msgs)
+        {
+            var claimProfileDetails = $"<p><a href=\"{Utilities.BaseUrl()}\">{Utilities.AppName()}</a> is promoting your program in our online marketplace to enable thousands of parents to quickly find programs for their children. You can view your profile profile here: <a href=\"{account.ShortHomePageUrl}\">{account.ShortHomePageUrl}</a>. <br /><br />Ready to claim your profile? Click the following link: {account.ClaimAccountUrl} or forward this email to a team member to claim your <em>free</em> profile</p>";
+
+            var model = new NameValueCollection()
+            {
+                { "ClaimProfileDetails", claimProfileDetails },
+                { "ProductName", Utilities.AppName() }
+            };
+
+            var subject = $"Someone has requested to claim your free profile on {Utilities.AppName()}";
+            var body = ProcessTemplate(
+                EmailTemplates.ClaimProfile_Send,
+                model,
+                "ClaimProfile_Send",
+                msgs);
+
+            // SEND EMAILS
+            var mailMsgs = new SystemMessages();
+
+            // Send email to activity contact
+            mailMsgs.AddRange(SendGridHelper.SendMail(
+                fromEmail: Email.SendGridNoReplyEmailAddress(),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(email),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId()));
+        }
+
         private static string AddLotteryTable(List<RegistrantActivity> ras, Registrant registrant, string action, SystemMessages msgs, DatabaseConnection dc)
         {
             if (!ras.Any())

@@ -10,6 +10,8 @@ using BasicLibrary.DataAccess;
 using Hangfire;
 using System.Collections.Generic;
 using AfterSchool.Helpers;
+using System.Net.Mail;
+using AfterSchoolLibrary.Helpers;
 
 namespace AfterSchool.Controllers
 {
@@ -48,7 +50,7 @@ namespace AfterSchool.Controllers
                 msgs.Add("Passwords are required and must match", MessageType.UserError);
             else if (model.Password1.Length < 8)
                 msgs.Add("Password must be at least 8 characters", MessageType.UserError);
-            
+
             msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
 
             if (model.InviteCodeToShare.IsNotEmpty())
@@ -121,7 +123,7 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             WebUser wu = null;
 
-            if(!id.IsGuid() || !a.IsGuid())
+            if (!id.IsGuid() || !a.IsGuid())
                 msgs.Add("Invalid invitation code", MessageType.UserError);
             else
             {
@@ -153,7 +155,7 @@ namespace AfterSchool.Controllers
                     msgs.Add("An error occurred. Please contact support", MessageType.UserError);
                 }
             }
-            
+
             ViewBag.Messages = msgs;
             ViewBag.Uid = id;
             ViewBag.AccountUid = a;
@@ -167,7 +169,7 @@ namespace AfterSchool.Controllers
             WebUser user = null;
             Account account = null;
 
-            if(!id.IsGuid())
+            if (!id.IsGuid())
                 msgs.Add("Invalid invitation code", MessageType.UserError);
             else
             {
@@ -195,11 +197,11 @@ namespace AfterSchool.Controllers
             if (lastname.IsEmpty())
                 msgs.Add("Last Name is required", MessageType.UserError);
 
-            if(email.IsEmpty())
+            if (email.IsEmpty())
                 msgs.Add("Email is required", MessageType.UserError);
-            else if(!email.IsMatch(BasicLibrary.Utilities.EmailRegEx))
+            else if (!email.IsMatch(BasicLibrary.Utilities.EmailRegEx))
                 msgs.Add("Please enter a valid email address", MessageType.UserError);
-            else if(!user.CanEmailBeUsed(email, msgs))
+            else if (!user.CanEmailBeUsed(email, msgs))
                 msgs.Add("This email has already been registered", MessageType.UserError);
 
             if (password1.IsEmpty() || password2.IsEmpty() || (password1 != password2))
@@ -238,20 +240,20 @@ namespace AfterSchool.Controllers
                 msgs.Add("Invalid verification code", MessageType.UserError);
             }
             else if (!WebUser.ExistsByUid(id.ToGuid(), msgs))
-            { 
+            {
                 msgs.Add("Invalid verification code", MessageType.UserError);
             }
 
-            if(msgs.HasNoErrors())
+            if (msgs.HasNoErrors())
             {
                 msgs.AddRange(WebUser.LoadByUid(id.ToGuid()).MarkAsVerified());
 
-                if(msgs.HasNoErrors())
+                if (msgs.HasNoErrors())
                 {
                     msgs.Add("Your account has been verified", MessageType.Success);
 
                     // if logged in reload with new verified value
-                    if(SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentUser.Uid == id.ToGuid())
+                    if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentUser.Uid == id.ToGuid())
                     {
                         SessionVariables.CurrentUser = WebUser.Load(SessionVariables.CurrentUser.ID.Value);
                     }
@@ -280,7 +282,7 @@ namespace AfterSchool.Controllers
 
             if (Request.Form["username"].IsEmpty())
                 msgs.Add("Username is required", MessageType.UserError);
-            else if(!Request.QueryString["i"].IsGuid())
+            else if (!Request.QueryString["i"].IsGuid())
             {
                 wu = WebUser.LoadByUsername(Request.Form["username"], null);
                 if (wu.IsNotEmpty())
@@ -375,7 +377,7 @@ namespace AfterSchool.Controllers
             if (id.IsGuid())
             {
                 user = WebUser.LoadByUid(id.ToGuid());
-                if(user.IsRegistered)
+                if (user.IsRegistered)
                     user = null;
             }
 
@@ -478,7 +480,7 @@ namespace AfterSchool.Controllers
                 Phone = phone
             };
 
-            if (!id.IsGuid())           
+            if (!id.IsGuid())
                 msgs.Add("Invalid invitation code", MessageType.UserError);
 
             var invitingAccount = Account.LoadByInviteCodeToShare(id.ToGuid());
@@ -508,7 +510,7 @@ namespace AfterSchool.Controllers
             if (password1.IsEmpty() || password2.IsEmpty() || (password1 != password2))
                 msgs.Add("Passwords are required and must match", MessageType.UserError);
             else if (password1.Length < 8)
-                msgs.Add("Password must be at least 8 characters", MessageType.UserError);            
+                msgs.Add("Password must be at least 8 characters", MessageType.UserError);
 
             if (msgs.HasNoErrors())
             {
@@ -528,7 +530,7 @@ namespace AfterSchool.Controllers
             ViewBag.Messages = msgs;
             ViewBag.User = user;
 
-            return View(invitingAccount);            
+            return View(invitingAccount);
         }
 
         [HttpGet]
@@ -572,7 +574,7 @@ namespace AfterSchool.Controllers
                 msgs.Add("Phone must be a valid phone number", MessageType.UserError);
 
             if (msgs.HasNoErrors())
-            {                
+            {
                 Database.ExecuteTransaction
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
@@ -590,7 +592,7 @@ namespace AfterSchool.Controllers
                             loggedInUser: SessionVariables.CurrentUser,
                             isAfterSchool: true,
                             createWithStripe: true,
-                            msgs: amsgs, 
+                            msgs: amsgs,
                             dc: adc);
 
                         newAccount.AddUser(SessionVariables.CurrentUser, UserType.Owner, SessionVariables.CurrentUser, amsgs, adc);
@@ -599,7 +601,7 @@ namespace AfterSchool.Controllers
                         {
                             invitingAccount = Account.LoadByInviteCodeToShare(invitecode.ToGuid(), amsgs, adc);
                             invitingAccount.ApproveAccessToAccount(newAccount, SessionVariables.CurrentUser, amsgs, adc);
-                        }   
+                        }
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
@@ -724,7 +726,7 @@ namespace AfterSchool.Controllers
 
                         var userId = user.ID.Value;
 
-                        BackgroundJob.Enqueue(() => WebUserService.SendVerificationEmail(userId));                        
+                        BackgroundJob.Enqueue(() => WebUserService.SendVerificationEmail(userId));
                     },
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                     onException: (SystemMessages emsgs) => msgs.AddRange(emsgs)
@@ -803,7 +805,7 @@ namespace AfterSchool.Controllers
                             var userId = user.ID.Value;
                             BackgroundJob.Enqueue(() => WebUserService.SendVerificationEmail(userId));
                         }
-                        
+
                     },
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                     onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
@@ -823,7 +825,11 @@ namespace AfterSchool.Controllers
             return View(model);
         }
 
-        //TODO: we have ths method in service controller but since it wasn't working properly, I created new one.
+        /// <summary>
+        /// we already have this method in service controller, but I created a serate one so if needed, we can change it
+        /// </summary>
+        /// <param name="search"></param>
+        /// <returns></returns>
         [HttpPost]
         public virtual JsonResult GetData(string search)
         {
@@ -837,11 +843,54 @@ namespace AfterSchool.Controllers
             {
                 data = accounts.Select(account => new OrgDropDown()
                 {
-                    Id = account.ID.Value,
+                    Id = account.Uid,
                     Text = account.Name,
                     Slug = account.Name
                 })
             }, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public virtual JsonResult SaveClaims(string firstName, string lastName, string email, string phone, string accountId)
+        {
+            var msgs = new SystemMessages();
+
+            if (!accountId.IsGuid())
+                msgs.Add("Organization not found.", MessageType.UserError);
+
+            if (firstName.IsBlank())
+                msgs.Add("First Name is required", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                try
+                {
+                    // get organization/account here
+                    var account = Account.LoadByUid(accountId.ToGuid(), msgs);
+
+                    // match thier email domains, 
+                    MailAddress accountEmailObject = new MailAddress(account.Email);
+                    string accountEmail = accountEmailObject.Host;
+
+                    MailAddress userEmailObject = new MailAddress(email);
+                    string userEmail = userEmailObject.Host;
+
+                    // if matches, send email with instructions on how to login 
+                    if (accountEmail.IsNotBlank() && userEmail.IsNotBlank() && accountEmail.ToLower() == userEmail.ToLower())
+                    {
+                        // After instructions are follow the account will be claimed and an account will be created for the individual that signed up
+                        EmailHelper.SendClaimProfileEmail(account, email, msgs);                        
+                    }
+                    return Json(new { IsSuccess = true, data = true }, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception ex)
+                {
+                    return Json(new { IsSuccess = false, data = ex.Message }, JsonRequestBehavior.AllowGet);
+                }                
+            }
+
+            return Json(new { IsSuccess = false, data = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
         }
     }
 }
