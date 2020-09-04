@@ -162,7 +162,7 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
 
             if (stripeInvoice.AmountPaid <= 0 && status.NotIn(new string[] { "processing", "succeeded" }))
             {
-                msgs.Add($"Ignoring - $0 was paid", MessageType.Notice);
+                msgs.Add($"Ignoring - $0 was paid with no processing payment intent", MessageType.Notice);
                 return ReturnOK(msgs);
             }
 
