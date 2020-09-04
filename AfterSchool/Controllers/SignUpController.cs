@@ -901,5 +901,13 @@ namespace AfterSchool.Controllers
 
             return Json(new { IsSuccess = false, data = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
         }
+
+        [HttpPost]
+        public virtual JsonResult ContactSupport()
+        {
+            //TODO: send email to AHQ.
+
+            return Json(new { IsSuccess = true }, JsonRequestBehavior.AllowGet);
+        }
     }
 }

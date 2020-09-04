@@ -213,7 +213,7 @@
         <h2 class="text-center">Thank You!</h2>
         <div class="clearfix"></div><br />
         <h5 id="header-thankyou-not-recognized" class="text-center" style="display: none;">We have sent an email with instructions to <strong id="lbl-org-member-email"></strong>.</h5>
-        <h5 id="header2-thankyou-not-recognized" class="text-center" style="display: none;">No longer have access to this email? Incorrect email? Click <a href="#">Here</a> to automatically submit a request to our support team.</h5>
+        <h5 id="header2-thankyou-not-recognized" class="text-center" style="display: none;">No longer have access to this email? Incorrect email? Click <a href="#" onclick="return contactSupport()">Here</a> to automatically submit a request to our support team.</h5>
 
         <div id="header3-thankyou-not-recognized" class="col-md-offset-3 alert alert-info alert-icon alert-border-color alert-dismissible" role="alert" style="display: none; width: 50%; margin-top: 40px; text-align: center;">
             <div class="icon"><span class="s7-info"></span></div>
@@ -395,6 +395,36 @@
                     }
                 });
             }
+        }
+
+        function contactSupport() {
+            $.ajax({
+                url: "ContactSupport",
+                type: "POST",
+                dataType: "json",
+                success: function (data) {
+                    if (data && data.IsSuccess == false) {                        
+                        Notifications.showBar({
+                            title: 'Error',
+                            message: 'Something went wrong. Please contact customer support.',
+                            success: false
+                        });
+                        return false;
+                    } else { // contact support email sent
+                        headerThankYouNR2.hide();
+                        headerThankYouNR3.show();
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log(errorThrown);
+                    Notifications.showBar({
+                        title: 'Error',
+                        message: 'Something went wrong. Please contact customer support.',
+                        success: false
+                    });
+                    return;
+                }
+            });
         }
 
         //function showThankYou(toggle) {
