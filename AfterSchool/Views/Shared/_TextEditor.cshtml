@@ -6,16 +6,20 @@
     {
         required = " required=\"required\" ";
     }
+
+    var javascriptVarName = $"quill_{ViewData["name"]}";
+    var javascriptAppendName = $"_{ViewData["name"]}";
 }
 
 <div class="">
     <div class="editable" id="@ViewData["id"]-div">@Html.Raw(Model)</div>
-    <textarea name="@ViewData["name"]" id="@ViewData["id"]" class="hide" @required></textarea>
+    <textarea name="@ViewData["name"]" id="@ViewData["id"]" class="hide"></textarea>
+    <textarea name="@(ViewData["name"])_data" id="@(ViewData["id"])_data" class="hide"></textarea>
 </div>
 
 <script>
 
-    var quill = new Quill('#@ViewData["id"]-div', {
+    var @javascriptVarName = new Quill('#@ViewData["id"]-div', {
         modules: {
             toolbar: [
                 [{ header: [1, 2, 3, false] }, { 'align': [] }],
@@ -30,15 +34,28 @@
 
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         $('form').submit(function () {
-            $('#@ViewData["id"]').val(quill.root.innerHTML);
+
+            var text = @(javascriptVarName).getText().trim();
+
+            if (text.length == 0) {
+                $('#@ViewData["id"]').val('');
+            } else {
+                $('#@ViewData["id"]').val(@(javascriptVarName).root.innerHTML);
+            }
+
         });
 
-        quill.getModule('toolbar').addHandler('image', () => {
-            selectLocalImage();
+        @(javascriptVarName).getModule('toolbar').addHandler('image', () => {
+            selectLocalImage@(javascriptAppendName)();
         });
     });
 
-    function selectLocalImage() {
+    @(javascriptVarName).on('text-change', function () {
+        $('#@ViewData["id"]').val(@(javascriptVarName).root.innerHTML);
+        $('#@ViewData["id"]').attr('data', @(javascriptVarName).getText());
+    });
+
+    function selectLocalImage@(javascriptAppendName)() {
         const input = document.createElement('input');
         input.setAttribute('type', 'file');
         input.setAttribute('accept', '.jpg,.jpeg,.png');
@@ -50,14 +67,14 @@
 
             // file type is only image.
             if (/^image\//.test(file.type)) {
-                saveToServer(file);
+                saveToServer@(javascriptAppendName)(file);
             } else {
                 console.warn('You can only upload images.');
             }
         };
     }
 
-    function saveToServer(file) {
+    function saveToServer@(javascriptAppendName)(file) {
         const fd = new FormData();
         fd.append('file', file);
 
@@ -70,7 +87,7 @@
 
                 if (data && data.status == 'ok') {
                     const url = data.url;
-                    insertToEditor(url);
+                    insertToEditor@(javascriptAppendName)(url);
                 } else {
                     Notifications.showErrors(data.messages);
                 }
@@ -79,13 +96,10 @@
         xhr.send(fd);
     }
 
-    function insertToEditor(url) {
+    function insertToEditor@(javascriptAppendName)(url) {
         // push image url to rich editor.
-        const range = quill.getSelection();
-        quill.insertEmbed(range.index, 'image', url);
+        const range = @(javascriptVarName).getSelection();
+        @(javascriptVarName).insertEmbed(range.index, 'image', url);
     }
-
-
-
 
 </script>

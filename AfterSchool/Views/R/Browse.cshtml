@@ -15,18 +15,18 @@
 }
 
 @{ Html.RenderPartial(
-         "~/Views/Shared/Registration/_AccountTopBar.cshtml",
-         Model,
-         new ViewDataDictionary() { { "LoginReturnUrl", Model.HomePageUrl }, { "session", session } }); }
+           "~/Views/Shared/Registration/_AccountTopBar.cshtml",
+           Model,
+           new ViewDataDictionary() { { "LoginReturnUrl", Model.HomePageUrl }, { "session", session } }); }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
 @{ Html.RenderPartial(
-       "~/Views/Shared/Registration/_RegistrationHeader.cshtml", 
-       new RegistrationHeaderViewModel(
-           Model, 
-           (AccountProfile)ViewBag.AccountProfile, 
-           (ParticipationObject)ViewBag.Session)); }
+         "~/Views/Shared/Registration/_RegistrationHeader.cshtml",
+         new RegistrationHeaderViewModel(
+             Model,
+             (AccountProfile)ViewBag.AccountProfile,
+             (ParticipationObject)ViewBag.Session)); }
 
 @{ Html.RenderPartial("~/Views/Shared/Registration/_FirstTimeInformation.cshtml", Model); }
 
@@ -100,7 +100,7 @@
         }
     </div>
 
-    
+
 
 </div>
 
@@ -112,3 +112,10 @@
 @{Html.RenderPartial("~/Views/Shared/Modals/_LeadForm.cshtml", Model);}
 
 @{Html.RenderPartial("~/Views/Shared/Modals/_FirstTimeDemoOrgName.cshtml", Model);}
+
+
+@section header
+{
+    @{ Html.RenderPartial("~/Views/Shared/Registration/_ShareMetaTags.cshtml", new RegistrationHeaderViewModel(Model, accountProfile)); }
+
+}
