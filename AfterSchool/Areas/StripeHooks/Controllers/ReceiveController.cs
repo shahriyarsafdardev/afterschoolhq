@@ -49,6 +49,8 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                         return InvoicePaymentSucceeded(stripeEvent, msgs);
                     case "invoice.payment_failed":
                         return InvoicePaymentFailed(stripeEvent, msgs);
+                    case "payment_intent.processing":
+                        return PaymentIntentProcessing(stripeEvent, msgs);
                     default:
                         return ReturnOK(msgs);
                 }
@@ -71,7 +73,6 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
 
         private IHttpActionResult ReturnOK(SystemMessages msgs)
         {
-            // SendLogEmail(msgs);
             return Ok(msgs.ToJSON());
         }
 
@@ -118,9 +119,29 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
             return ReturnOK(msgs);
         }
 
+        private IHttpActionResult PaymentIntentProcessing(Stripe.Event stripeEvent, SystemMessages msgs)
+        {
+            var paymentIntent = (Stripe.PaymentIntent)stripeEvent.Data.Object;
+            var stripeInvoice = paymentIntent.Invoice;
+
+            if (stripeInvoice.IsNotEmpty())
+                return ProcessInvoiceDetails(stripeInvoice, msgs);
+
+            return ReturnOK(msgs);
+        }
+
         private IHttpActionResult InvoicePaymentSucceeded(Stripe.Event stripeEvent, SystemMessages msgs)
         {
             var stripeInvoice = (Stripe.Invoice)stripeEvent.Data.Object;
+
+            if (stripeInvoice.IsNotEmpty())
+                return ProcessInvoiceDetails(stripeInvoice, msgs);
+
+            return Return500(msgs);
+        }
+
+        private IHttpActionResult ProcessInvoiceDetails(Stripe.Invoice stripeInvoice, SystemMessages msgs)
+        {
             var stripeSubscriptionId = stripeInvoice.SubscriptionId;
             var chargeId = stripeInvoice.ChargeId;
             var rsp = RegistrantSubscriptionPlan.LoadByStripeSubscriptionId(stripeSubscriptionId, msgs);
@@ -131,9 +152,17 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                 return ReturnOK(msgs);
             }
 
-            if (stripeInvoice.AmountPaid <= 0)
+            var status = "succeeded";
+
+            if (stripeInvoice.PaymentIntent.IsNotEmpty())
             {
-                msgs.Add($"Ignoring - $0 was paid", MessageType.Notice);
+                msgs.Add($"Checking Payment Intent Status {stripeInvoice.PaymentIntent.Status} - Stripe Sub ID {stripeSubscriptionId}", MessageType.Notice);
+                status = stripeInvoice.PaymentIntent.Status;
+            }
+
+            if (stripeInvoice.AmountPaid <= 0 && status.NotIn(new string[] { "processing", "succeeded" }))
+            {
+                msgs.Add($"Ignoring - $0 was paid with no processing payment intent", MessageType.Notice);
                 return ReturnOK(msgs);
             }
 
@@ -144,14 +173,14 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
             var billingAccount = plan.GetAccount(msgs);
             var participationObject = plan.GetParticipationObject(msgs);
             var registrantActivity = RegistrantActivity.LoadByParticipationObjectByRegistrant(
-                participationObject.ObjectID.Value, 
-                participationObject.ObjectType, 
+                participationObject.ObjectID.Value,
+                participationObject.ObjectType,
                 registrant.ID.Value, msgs);
             var registration = registrantActivity.GetRegistration(msgs);
 
             if (msgs.HasErrors())
                 return Return500(msgs);
-           
+
             // check if this same charge has been posted already and tracked.
             var transaction = Transaction.LoadByStripeChargeOrRefundId(chargeId, msgs);
 
@@ -179,19 +208,13 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
 
             var overrideAmount = rsp.TotalPaidWithFees;
 
-            /*
-            var credit = stripeInvoice.StartingBalance;
-
-            overrideAmount = overrideAmount + credit;
-            */
-
             // save transaction info and track payment to the activity as well.
             var checkoutObject = new CheckoutObject()
             {
                 PayingAccount = purchasingAccount,
                 BillingAccount = billingAccount,
                 OverrideAmount = overrideAmount,
-                ConvenienceFeeOverrideAmount =  rsp.ConvenienceFee,
+                ConvenienceFeeOverrideAmount = rsp.ConvenienceFee,
                 PaymentTypeFeeOverrideAmount = rsp.PaymentTypeFee,
                 ParticipationObject = participationObject,
                 PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
