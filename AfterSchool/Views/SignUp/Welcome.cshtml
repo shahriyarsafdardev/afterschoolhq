@@ -212,7 +212,7 @@
     <div id="signup-thank-you" style="display: none;">
         <h2 class="text-center">Thank You!</h2>
         <div class="clearfix"></div><br />
-        <h5 id="header-thankyou-not-recognized" class="text-center" style="display: none;">We have sent an email with instructions to n****ly@ednamartincc.org.</h5>
+        <h5 id="header-thankyou-not-recognized" class="text-center" style="display: none;">We have sent an email with instructions to <strong id="lbl-org-member-email"></strong>.</h5>
         <h5 id="header2-thankyou-not-recognized" class="text-center" style="display: none;">No longer have access to this email? Incorrect email? Click <a href="#">Here</a> to automatically submit a request to our support team.</h5>
 
         <div id="header3-thankyou-not-recognized" class="col-md-offset-3 alert alert-info alert-icon alert-border-color alert-dismissible" role="alert" style="display: none; width: 50%; margin-top: 40px; text-align: center;">
@@ -242,6 +242,7 @@
         var signupClaimProfile = $('#signup-claim-profile');
         var signupThankYou = $('#signup-thank-you');
         var lblOrgSearchTitle = $('#lbl-org-search-title');
+        var lblOrgMemberEmail = $('#lbl-org-member-email');
         var btnContinue = $('#btn-SearchContinue');
         var btnClaimProcess = $('#btn-StartClaimProcess');
         var select2SearchOrganizations = $('#select2-search-organizations');
@@ -259,7 +260,7 @@
                 minimumInputLength: 2,
                 tags: [],
                 ajax: {
-                    url: 'GetData',
+                    url: 'GetData', //TODO: proper url with routing
                     type: "POST",
                     dataType: "json",
                     quietMillis: 50,
@@ -347,7 +348,7 @@
         function saveClaims() {
             if (formClaimProfile.valid()) {
                 var formData = formClaimProfile.serialize();
-                var url = "SaveClaims";
+                var url = "SaveClaims"; //TODO: Proper url with routing
 
                 $.ajax({
                     url: url,
@@ -355,7 +356,7 @@
                     type: "POST",
                     dataType: "json",
                     success: function (data) {
-                        if (data.IsSuccess == false) {
+                        if (data && data.IsSuccess == false) {
                             var errors = ''
                             data.data.forEach(function (error) {
                                 if (error && error.Text) {
@@ -371,8 +372,13 @@
                                 success: false
                             });
                             return false;
-                        }
-                        else {
+                        } else if (data && data.data) { // email not recognised
+                            lblOrgMemberEmail.text(data.data);
+                            headerThankYouNR1.show();
+                            headerThankYouNR2.show();
+                            signupClaimProfile.hide();
+                            signupThankYou.show();
+                        } else { // email recognised
                             headerRecognisedThankYou.show();
                             signupClaimProfile.hide();
                             signupThankYou.show();

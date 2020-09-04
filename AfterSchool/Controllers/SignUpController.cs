@@ -880,14 +880,23 @@ namespace AfterSchool.Controllers
                     if (accountEmail.IsNotBlank() && userEmail.IsNotBlank() && accountEmail.ToLower() == userEmail.ToLower())
                     {
                         // After instructions are follow the account will be claimed and an account will be created for the individual that signed up
-                        EmailHelper.SendClaimProfileEmail(account, email, msgs);                        
+                        EmailHelper.SendClaimProfileEmail(account, email, msgs);
+                        return Json(new { IsSuccess = true }, JsonRequestBehavior.AllowGet);
                     }
-                    return Json(new { IsSuccess = true, data = true }, JsonRequestBehavior.AllowGet);
+                    else
+                    {
+                        // email domain is not recognized, send email with instructions to organizations member email so that user can gain accss
+                        EmailHelper.SendClaimProfileEmail(account, account.Email, msgs);
+
+                        //Note: masking the email with a fixed number of characters will make it difficult to guess the email and is slightly more secure.
+                        var maskedEmail = string.Format("{0}****{1}", account.Email[0], account.Email.Substring(account.Email.IndexOf('@') - 2));
+                        return Json(new { IsSuccess = true, data = maskedEmail }, JsonRequestBehavior.AllowGet);
+                    }
                 }
                 catch (Exception ex)
                 {
                     return Json(new { IsSuccess = false, data = ex.Message }, JsonRequestBehavior.AllowGet);
-                }                
+                }
             }
 
             return Json(new { IsSuccess = false, data = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
