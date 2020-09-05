@@ -16,44 +16,13 @@
     var model = new SignUpIndexViewModel();
 }
 
-<style>
-    .mt-30 {
-        margin-top: 30px;
-    }
-
-    .mt-35 {
-        margin-top: 35px;
-    }
-
-    .mtb-40 {
-        margin-top: 40px;
-        margin-bottom: 40px;
-    }
-
-    .mlr-auto {
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    .btn-center {
-        display: block;
-        margin: 0 auto;
-        float: none;
-    }
-
-    /*this one is for validations*/
-    .error {
-        color: red;
-    }
-</style>
-
 <div class="row main-content">
 
-    <div id="signup-welcome" style="display: none;">
+    <div id="signup-welcome">
         <h2 class="text-center">Welcome</h2>
         <div class="clearfix"></div>
 
-        <div class="row col-md-offset-1 mt-35">
+        <div class="row col-md-offset-1 margin-t-35">
             <div class="visible-lg visible-md">
                 <div class="pull-left">
                     <img src="https://afterschoolhq-qa.s3.us-east-2.amazonaws.com/MathsClub/logo/nyc-5323170_640.jpg" alt="Allison" class="img-thumbnail" style="max-width: 230px;">
@@ -71,7 +40,7 @@
                     <div class="text-medium text-sm-center"> Name | Role </div>
                 </div>
                 <div class="clearfix"></div>
-                <div class="text-center col-sm-12 col-xs-12 mt-30">
+                <div class="text-center col-sm-12 col-xs-12 margin-t-30">
                     <img src="https://afterschoolhq-qa.s3.us-east-2.amazonaws.com/MathsClub/logo/nyc-5323170_640.jpg" alt="Allison" class="img-thumbnail" style="max-width: 350px;">
                 </div>
                 <div class="clearfix"></div>
@@ -81,7 +50,7 @@
 
         <div class="clearfix"></div>
 
-        <div class="text-center mtb-40">
+        <div class="text-center margin-v-40">
             <button id="btn-GetStarted" type="button" class="col-md-offset-5 col-md-2 col-sm-12 col-xs-12 btn btn-lg btn-primary" onclick="return proceedFurther('@EnumSignupPages.WelCome')">Get Started</button>
             <div class="clearfix"></div>
         </div>
@@ -92,7 +61,7 @@
         <h2 class="text-center">What would you like to do?</h2>
         <div class="clearfix"></div>
 
-        <div class="row mt-35">
+        <div class="row margin-t-35">
             <button id="btn-CreateIndividualAccount" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SelectIndividualType')">Create an Individual Account</button>
             <div class="clearfix"></div><br />
             <button id="btn-CreateOrgAccount" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SelectOrgType')">Create an Organization Account</button>
@@ -103,7 +72,7 @@
         <h2 class="text-center">What would you like to do?</h2>
         <div class="clearfix"></div>
 
-        <div class="row mt-35">
+        <div class="row margin-t-35">
             <button id="btn-ProgramForStudents" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SearchProgramName')">Provide programs for students</button>
             <div class="clearfix"></div><br />
             <button id="btn-EnrollChild" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center">Enroll my child in a program</button> @*TODO: move user to /parent*@
@@ -114,7 +83,7 @@
         <h2 class="text-center">What kind of organization?</h2>
         <div class="clearfix"></div>
 
-        <div class="row mt-35">
+        <div class="row margin-t-35">
             <button id="btn-Business" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SearchOrgName')">Business</button>
             <div class="clearfix"></div><br />
             <button id="btn-School" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SearchOrgName')">School</button>
@@ -127,11 +96,11 @@
         </div>
     </div>
 
-    <div id="signup-search-name">
+    <div id="signup-search-name" style="display: none;">
         <h2 id="lbl-org-search-title" class="text-center"></h2>
         <div class="clearfix"></div>
 
-        <div class="row mt-35">
+        <div class="row margin-t-35">
             <div class="col-md-8 col-md-offset-2">
                 <select id="select2-search-organizations" style="width: 100%;"></select>
             </div>
@@ -142,7 +111,7 @@
         </div>
     </div>
 
-    <div id="signup-register" class="sign-up mlr-auto" style="display: none;">
+    <div id="signup-register" class="sign-up margin-h-auto" style="display: none;">
         <div class="panel panel-default">
             <div class="panel-heading">
                 <a href="/"><img src="@UILabel.ProductLogoInverse()" alt="logo" style="max-width: 100%; width: 350px;" class="logo-img"></a>
@@ -169,7 +138,7 @@
         <h5 class="text-center">This profile already exists on AfterSchool HQ. Please start the claim process below.</h5>
         <div class="clearfix"></div><br />
 
-        <div class="row mt-35">
+        <div class="row margin-t-35">
             <form id="form-signup-claim-form" class="form-horizontal">
                 @Html.AntiForgeryToken()
 
@@ -426,51 +395,5 @@
                 }
             });
         }
-
-        //function showThankYou(toggle) {
-        //    if (formClaimProfile.valid()) {
-        //        var formData = formClaimProfile.serialize();
-        //        var url = "SaveClaims";
-
-        //        $.ajax({
-        //            type: "POST",
-        //            url: url,
-        //            data: formData,
-        //            success: function (data) {
-        //                if (data.IsSuccess == false) {
-        //                    return false;
-        //                }
-        //                else {
-        //                    headerRecognisedThankYou.show();
-        //                    signupClaimProfile.hide();
-        //                    signupThankYou.show();
-        //                }
-        //            },
-        //            error: function (jqXHR, textStatus, errorThrown) {
-        //            }
-        //        });
-
-        //        //formClaimProfile.submit();
-
-        //    }
-
-        //    //if (toggle == 1) { // we are here from personal details
-        //    //    headerThankYouNR1.show();
-        //    //    headerThankYouNR3.show();
-        //    //    signupRegister.hide();
-        //    //    signupThankYou.show();
-        //    //} else if (toggle == 2) { // we are here from claim profiles, check for email domain and go to thank you
-        //    //    //headerThankYouNR1.show();
-        //    //    //headerThankYouNR2.show();
-
-        //    //    if (formClaimProfile.valid()) {
-        //    //        // formClaimProfile.submit();
-        //    //        headerRecognisedThankYou.show();
-
-        //    //        signupClaimProfile.hide();
-        //    //        signupThankYou.show();
-        //    //    }
-        //    //}
-        //}
     </script>
 }
