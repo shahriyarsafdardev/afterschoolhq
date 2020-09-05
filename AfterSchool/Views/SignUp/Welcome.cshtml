@@ -229,7 +229,7 @@
                 minimumInputLength: 2,
                 tags: [],
                 ajax: {
-                    url: 'GetData', //TODO: proper url with routing
+                    url: '@Url.Action("GetData", "SignUp", new { Area = "" })',
                     type: "POST",
                     dataType: "json",
                     quietMillis: 50,
@@ -317,7 +317,7 @@
         function saveClaims() {
             if (formClaimProfile.valid()) {
                 var formData = formClaimProfile.serialize();
-                var url = "SaveClaims"; //TODO: Proper url with routing
+                var url = '@Url.Action("SaveClaims", "SignUp", new { Area = "" })';
 
                 $.ajax({
                     url: url,
@@ -325,7 +325,7 @@
                     type: "POST",
                     dataType: "json",
                     success: function (data) {
-                        if (data && data.IsSuccess == false) {
+                        if (data && data.status && data.status == 'error') {
                             var errors = ''
                             data.data.forEach(function (error) {
                                 if (error && error.Text) {
@@ -368,11 +368,11 @@
 
         function contactSupport() {
             $.ajax({
-                url: "ContactSupport",
+                url: '@Url.Action("ContactSupport", "SignUp", new { Area = "" })',
                 type: "POST",
                 dataType: "json",
                 success: function (data) {
-                    if (data && data.IsSuccess == false) {                        
+                    if (data && data.status && data.status == 'error') {
                         Notifications.showBar({
                             title: 'Error',
                             message: 'Something went wrong. Please contact customer support.',

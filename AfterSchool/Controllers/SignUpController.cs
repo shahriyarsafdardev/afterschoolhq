@@ -862,6 +862,11 @@ namespace AfterSchool.Controllers
             if (firstName.IsBlank())
                 msgs.Add("First Name is required", MessageType.UserError);
 
+            if (email.IsBlank())
+                msgs.Add("Email is required", MessageType.UserError);
+            else if (!email.IsEmail())
+                msgs.Add("Please enter a valid email address", MessageType.UserError);
+
             if (msgs.HasNoErrors())
             {
                 try
@@ -870,36 +875,36 @@ namespace AfterSchool.Controllers
                     var account = Account.LoadByUid(accountId.ToGuid(), msgs);
 
                     // match thier email domains, 
-                    MailAddress accountEmailObject = new MailAddress(account.Email);
-                    string accountEmail = accountEmailObject.Host;
+                    var accountEmailObject = new MailAddress(account.Email);
+                    string accountEmailHost = accountEmailObject.Host;
 
-                    MailAddress userEmailObject = new MailAddress(email);
-                    string userEmail = userEmailObject.Host;
+                    var userEmailObject = new MailAddress(email);
+                    string userEmailHost = userEmailObject.Host;
 
                     // if matches, send email with instructions on how to login 
-                    if (accountEmail.IsNotBlank() && userEmail.IsNotBlank() && accountEmail.ToLower() == userEmail.ToLower())
+                    if (accountEmailHost.IsNotBlank() && userEmailHost.IsNotBlank() && accountEmailHost.IsSameAs(userEmailHost))
                     {
                         // After instructions are follow the account will be claimed and an account will be created for the individual that signed up
                         EmailHelper.SendClaimProfileEmail(account, email, msgs);
-                        return Json(new { IsSuccess = true }, JsonRequestBehavior.AllowGet);
+                        return Json(new { status = "ok", }, JsonRequestBehavior.AllowGet);
                     }
                     else
                     {
-                        // email domain is not recognized, send email with instructions to organizations member email so that user can gain accss
+                        // email domain is not recognized, send email with instructions to organization member's email so that user can gain accss
                         EmailHelper.SendClaimProfileEmail(account, account.Email, msgs);
 
                         //Note: masking the email with a fixed number of characters will make it difficult to guess the email and is slightly more secure.
-                        var maskedEmail = string.Format("{0}****{1}", account.Email[0], account.Email.Substring(account.Email.IndexOf('@') - 2));
-                        return Json(new { IsSuccess = true, data = maskedEmail }, JsonRequestBehavior.AllowGet);
+                        var maskedEmail = $"{account.Email[0]}****{account.Email.Substring(account.Email.IndexOf('@') - 2)}";
+                        return Json(new { status = "ok", data = maskedEmail }, JsonRequestBehavior.AllowGet);
                     }
                 }
                 catch (Exception ex)
                 {
-                    return Json(new { IsSuccess = false, data = ex.Message }, JsonRequestBehavior.AllowGet);
+                    return Json(new { status = "error", data = ex.Message }, JsonRequestBehavior.AllowGet);
                 }
             }
 
-            return Json(new { IsSuccess = false, data = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
+            return Json(new { status = "error", data = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
         }
 
         [HttpPost]
@@ -907,7 +912,7 @@ namespace AfterSchool.Controllers
         {
             //TODO: send email to AHQ.
 
-            return Json(new { IsSuccess = true }, JsonRequestBehavior.AllowGet);
+            return Json(new { status = "error" }, JsonRequestBehavior.AllowGet);
         }
     }
 }
