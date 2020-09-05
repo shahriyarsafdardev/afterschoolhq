@@ -225,14 +225,14 @@
         $(document).ready(function () {
             select2SearchOrganizations.select2({
                 placeholder: "Program name",
-                allowClear: true,
-                minimumInputLength: 2,
-                tags: [],
+                allowClear: false, // Provides support for clearable selections. 
+                minimumInputLength: 2, // Minimum number of characters required to start a search.
+                tags: true, //boolean or array of objects, Used to enable free text responses.
                 ajax: {
                     url: '@Url.Action("GetData", "SignUp", new { Area = "" })',
                     type: "POST",
                     dataType: "json",
-                    quietMillis: 50,
+                    delay: 500,
                     data: function (term) {
                         return {
                             search: term.term
@@ -395,5 +395,6 @@
                 }
             });
         }
+
     </script>
 }
