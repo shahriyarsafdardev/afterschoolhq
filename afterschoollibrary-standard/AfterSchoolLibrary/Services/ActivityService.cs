@@ -1405,6 +1405,7 @@ namespace AfterSchoolLibrary.Services
                     providerAccount = AccountService.CreateNew(
                          orgName: providername,
                          email: provideremail,
+                         claimemaildomain: null,
                          phone: providerphone,
                          isActive: false,
                          accountType: AccountType.ActivityProvider,

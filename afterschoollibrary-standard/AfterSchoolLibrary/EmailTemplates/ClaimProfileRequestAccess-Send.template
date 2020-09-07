@@ -1,0 +1,15 @@
+﻿<div>
+  <p> Hey @Model.OwnerFirstName, </p>
+
+  <p> @Model.RequestorFirstName @Model.RequestorEmail is requesting access to your account. </p>
+
+  <p> You can invite @Model.RequestorFirstName by going to your <a href="@Model.TeamPage">team page </a> </p>
+
+  <p> @Model.RequestorFirstName will not have access unless you send them an invite from your account. </p>
+  
+  <p>
+    Thanks, <br />
+    @Model.ProductName
+  </p>
+  
+</div>

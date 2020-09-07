@@ -553,6 +553,7 @@ namespace AfterSchoolLibrary.Services
                     account = AccountService.CreateNew(
                                     orgName: $"{user.LastName} Family",
                                     email: user.Email,
+                                    claimemaildomain: null,
                                     phone: user.Phone,
                                     isActive: isActive,
                                     accountType: AccountType.Registrant,
@@ -598,9 +599,9 @@ namespace AfterSchoolLibrary.Services
             return AddNewRegistrantAccount(accountOwner, userType, isActive, null, null, isAfterSchool, loggedInUser, msgs, dc);
         }
 
-        public static Account AddNewAccount(this WebUser accountOwner, string orgName, string phone, bool isActive, AccountType accountType, bool addDefaultPackage, string timeZone, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Account AddNewAccount(this WebUser accountOwner, string orgName, string claimemaildomain, string phone, bool isActive, AccountType accountType, bool addDefaultPackage, string timeZone, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var account = AddNewAccount(accountOwner, orgName, phone, isActive, accountType, null, null, timeZone, true, loggedInUser, msgs, dc);
+            var account = AddNewAccount(accountOwner, orgName, claimemaildomain, phone, isActive, accountType, null, null, timeZone, true, loggedInUser, msgs, dc);
 
             if (account.IsNotEmpty())
                 account.SetDefaultAccountPackage(loggedInUser, msgs, dc);
@@ -608,11 +609,12 @@ namespace AfterSchoolLibrary.Services
             return account;
         }
 
-        public static Account AddNewAccount(this WebUser accountOwner, string orgName, string phone, bool isActive, AccountType accountType, int? packageId, BillingPeriodType? packageBillingPeriod, string timeZone, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Account AddNewAccount(this WebUser accountOwner, string orgName, string claimemaildomain, string phone, bool isActive, AccountType accountType, int? packageId, BillingPeriodType? packageBillingPeriod, string timeZone, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var account = AccountService.CreateNew(
                 orgName: orgName, 
                 email: accountOwner.Email, 
+                claimemaildomain: claimemaildomain,
                 phone: phone, 
                 isActive: isActive, 
                 accountType: accountType, 

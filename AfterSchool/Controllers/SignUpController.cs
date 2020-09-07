@@ -588,6 +588,7 @@ namespace AfterSchool.Controllers
                         newAccount = AccountService.CreateNew(
                             orgName: orgname,
                             email: email,
+                            claimemaildomain: null,
                             phone: phone,
                             isActive: true,
                             accountType: (AccountType)accounttype.ToInteger(),
@@ -851,7 +852,8 @@ namespace AfterSchool.Controllers
                 {
                     Id = account.Uid,
                     Text = account.Name,
-                    Slug = account.Name
+                    Slug = account.Name,
+                    IsClaimed = account.IsClaimed,
                 })
             }, JsonRequestBehavior.AllowGet);
         }
@@ -873,35 +875,47 @@ namespace AfterSchool.Controllers
             else if (!email.IsEmail())
                 msgs.Add("Please enter a valid email address", MessageType.UserError);
 
+            // get organization/account here
+            var account = Account.LoadByUid(accountId.ToGuid(), msgs);
+
+            if (account.IsEmpty())
+                msgs.Add("Organization not found.", MessageType.UserError);
+
             if (msgs.HasNoErrors())
             {
                 try
                 {
-                    // get organization/account here
-                    var account = Account.LoadByUid(accountId.ToGuid(), msgs);
-
-                    // match thier email domains, 
-                    var accountEmail = new MailAddress(account.Email);
-                    var accountEmailHost = accountEmail.Host;
-
-                    var userEmail = new MailAddress(email);
-                    var userEmailHost = userEmail.Host;
-
-                    // if matches, send email with instructions on how to login 
-                    if (accountEmailHost.IsNotBlank() && userEmailHost.IsNotBlank() && accountEmailHost.IsSameAs(userEmailHost))
+                    // account is claimed, send the owner of the profile an email with the details of the request
+                    if (account.IsClaimed)
                     {
-                        // After instructions are follow the account will be claimed and an account will be created for the individual that signed up
-                        EmailHelper.SendClaimProfileEmail(account, email, msgs);
-                        return Json(new { success = true, status = "ok", }, JsonRequestBehavior.AllowGet);
+                        EmailHelper.SendProfileClaimedEmail(account, firstName, lastName, email, msgs);
+                        return Json(new { success = true, status = "ok", data = true }, JsonRequestBehavior.AllowGet);
                     }
                     else
                     {
-                        // email domain is not recognized, send email with instructions to organization member's email so that user can gain accss
-                        EmailHelper.SendClaimProfileEmail(account, account.Email, msgs);
+                        var userEmail = new MailAddress(email);
+                        var userEmailDomain = userEmail.Host;
 
-                        //Note: masking the email with a fixed number of characters will make it difficult to guess the email and is slightly more secure.
-                        var maskedEmail = $"{account.Email[0]}****{account.Email.Substring(account.Email.IndexOf('@') - 2)}";
-                        return Json(new { success = true, status = "ok", data = maskedEmail }, JsonRequestBehavior.AllowGet);
+                        // if the email is the exact match of what the Account.Email is, OR
+                        // if account has ClaimEmailDomain and user email's domain matches with that, send email with instructions on how to login 
+                        // else if email is not recognized, send email to team member
+                        if (email.IsSameAs(account.Email) ||
+                            (account.ClaimEmailDomain.IsNotBlank() && userEmailDomain.IsNotBlank() && account.ClaimEmailDomain.IsSameAs(userEmailDomain)))
+                        {
+                            var user = WebUserService.StartUserAccount(firstName, lastName, email, msgs);
+
+                            EmailHelper.SendClaimProfileEmail(account, user.Uid, email, msgs);
+                            return Json(new { success = true, status = "ok", }, JsonRequestBehavior.AllowGet);
+                        }
+                        else
+                        {
+                            // email domain is not recognized, send email with instructions to organization member's email so that user can gain accss
+                            EmailHelper.SendClaimProfileEmail(account, SessionVariables.CurrentUser.Uid, account.Email, msgs);
+
+                            //Note: masking the email with a fixed number of characters will make it difficult to guess the email and is slightly more secure.
+                            var maskedEmail = $"{account.Email[0]}****{account.Email.Substring(account.Email.IndexOf('@') - 2)}";
+                            return Json(new { success = true, status = "ok", data = maskedEmail }, JsonRequestBehavior.AllowGet);
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -935,7 +949,7 @@ namespace AfterSchool.Controllers
                 {
                     var account = Account.LoadByUid(accountId.ToGuid(), msgs);
 
-                    EmailHelper.SendEmail("support@afterschoolhq.com", 
+                    EmailHelper.SendEmail("support@afterschoolhq.com",
                         $"AHQ Profile Claim Form - {account.Name}",
                         $"<p>Organization: {account.Name}<br />Name: {firstName} {lastName}<br />Email: {email}<br />Phone: {phone}<br /></p>",
                         true);

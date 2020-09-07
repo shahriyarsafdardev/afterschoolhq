@@ -391,6 +391,7 @@ namespace AfterSchool.Areas.Admin.Controllers
 
                                    account = user.AddNewAccount(
                                         orgName: schoolName,
+                                        claimemaildomain: null,
                                         phone: schoolPhone,
                                         isActive: true,
                                         accountType: AccountType.School,

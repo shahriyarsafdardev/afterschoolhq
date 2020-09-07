@@ -96,7 +96,7 @@ namespace AfterSchool.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public ActionResult Invite(string id, string orgname, string accounttype, string package, string billingperiod, string email, string firstname, string lastname, string message, string isUnclaimed, string timezone, string istest)
+        public ActionResult Invite(string id, string orgname, string accounttype, string package, string billingperiod, string email, string claimemaildomain, string firstname, string lastname, string message, string isUnclaimed, string timezone, string istest)
         {
             var msgs = new SystemMessages();
             var sendInvite = !isUnclaimed.IsNumber();
@@ -149,6 +149,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                             if (sendInvite)
                             {
                                 account.IsClaimed = true;
+                                account.ClaimEmailDomain = claimemaildomain;
                                 amsgs.AddRange(account.Save(adc));
 
                                 user = account.AddUser(
@@ -175,6 +176,7 @@ namespace AfterSchool.Areas.Admin.Controllers
 
                                 account = user.AddNewAccount(
                                             orgName: orgname,
+                                            claimemaildomain: claimemaildomain,
                                             phone: null,
                                             isActive: true,
                                             accountType: (AccountType)accounttype.ToInteger(),
@@ -190,6 +192,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                             {
                                 account = AccountService.CreateNewUnclaimedAccount(
                                             orgName: orgname,
+                                            claimemaildomain: claimemaildomain, //TODO: Not sure, need to review with darye
                                             email: null,
                                             phone: null,
                                             isActive: true,

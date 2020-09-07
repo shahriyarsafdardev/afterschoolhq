@@ -132,7 +132,8 @@
     <div id="signup-claim-profile" style="display: none;">
         <h2 class="text-center">Claim Profile</h2>
         <div class="clearfix"></div><br />
-        <h5 class="text-center">This profile already exists on AfterSchool HQ. Please start the claim process below.</h5>
+        <h5 id="header-account-exist" class="text-center" style="display: none;">This profile already exists on AfterSchool HQ. Please start the claim process below.</h5>
+        <h5 id="header-account-claimed" class="text-center" style="display: none;">This profile already claimed on AfterSchool HQ. You can request access by entering your information below.</h5>
         <div class="clearfix"></div><br />
 
         <div class="row margin-t-35">
@@ -169,7 +170,9 @@
                 </div>
                 <div class="clearfix"></div>
 
-                <button id="btn-StartClaimProcess" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return saveClaims()">Start the claim process</button>
+                <button id="btn-StartClaimProcess" type="button" style="display: none;" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return saveClaims()">Start the claim process</button>
+                <button id="btn-RequestAccess" type="button" style="display: none;" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return saveClaims()">Request Access</button>
+
                 <div class="clearfix"></div><br />
             </form>
         </div>
@@ -189,6 +192,7 @@
         </div>
 
         <h5 id="header-thankyou-recognized" class="text-center" style="display: none;">We see that you have email from same domain. We have sent you instruction to claim your account.</h5>
+        <h5 id="header-thankyou-request-access" class="text-center" style="display: none;">Your access request has been sent to the owner of this profile.</h5>
         <div class="clearfix"></div><br />
     </div>
 
@@ -211,9 +215,13 @@
         var lblOrgMemberEmail = $('#lbl-org-member-email');
         var btnContinue = $('#btn-SearchContinue');
         var btnClaimProcess = $('#btn-StartClaimProcess');
+        var btnRequestAccess = $('#btn-RequestAccess');
         var select2SearchOrganizations = $('#select2-search-organizations');
         var formClaimProfile = $('#form-signup-claim-form');
+        var headerAccountExist = $('#header-account-exist');
+        var headerAccountClaimed = $('#header-account-claimed');
         var headerRecognisedThankYou = $('#header-thankyou-recognized');
+        var headerThankYouRequestAccess = $('#header-thankyou-request-access');
         var headerThankYouNR1 = $('#header-thankyou-not-recognized');
         var headerThankYouNR2 = $('#header2-thankyou-not-recognized');
         var headerThankYouNR3 = $('#header3-thankyou-not-recognized');
@@ -241,9 +249,10 @@
                         return {
                             results: $.map(data.data, function (item) {
                                 return {
+                                    id: item.Id,
                                     text: item.Text,
                                     slug: item.Slug,
-                                    id: item.Id
+                                    isClaimed: item.IsClaimed
                                 }
                             })
                         };
@@ -311,7 +320,16 @@
             }
             console.log(selectedAccount);
             if (selectedAccount && selectedAccount.slug) {
-                proceedFurther('@EnumSignupPages.ClaimProfile');
+                if (selectedAccount.isClaimed) {
+                    headerAccountClaimed.show();
+                    btnRequestAccess.show();
+                    proceedFurther('@EnumSignupPages.ClaimProfile');
+                } else {
+                    headerAccountExist.show();
+                    btnClaimProcess.show();
+                    proceedFurther('@EnumSignupPages.ClaimProfile');
+                }
+
             } else {
                 proceedFurther('@EnumSignupPages.Register');
             }
@@ -351,12 +369,19 @@
                                 success: false
                             });
                             return false;
-                        } else if (data && data.data) { // email not recognised
-                            lblOrgMemberEmail.text(data.data);
-                            headerThankYouNR1.show();
-                            headerThankYouNR2.show();
-                            signupClaimProfile.hide();
-                            signupThankYou.show();
+                        } else if (data && data.data) {
+                            if (selectedAccount.isClaimed) {
+                                headerThankYouRequestAccess.show();
+                                signupClaimProfile.hide();
+                                signupThankYou.show();
+                            } else {
+                                // email not recognised
+                                lblOrgMemberEmail.text(data.data);
+                                headerThankYouNR1.show();
+                                headerThankYouNR2.show();
+                                signupClaimProfile.hide();
+                                signupThankYou.show();
+                            }
                         } else { // email recognised
                             headerRecognisedThankYou.show();
                             signupClaimProfile.hide();
