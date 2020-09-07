@@ -226,6 +226,7 @@ namespace AfterSchoolLibrary.Helpers
 
         public static void SendClaimProfileEmail(Account account, string email, SystemMessages msgs)
         {
+            //TODO: need to update this email and templeate with proper text
             var claimProfileDetails = $"<p><a href=\"{Utilities.BaseUrl()}\">{Utilities.AppName()}</a> is promoting your program in our online marketplace to enable thousands of parents to quickly find programs for their children. You can view your profile profile here: <a href=\"{account.ShortHomePageUrl}\">{account.ShortHomePageUrl}</a>. <br /><br />Ready to claim your profile? Click the following link: {account.ClaimAccountUrl} or forward this email to a team member to claim your <em>free</em> profile</p>";
 
             var model = new NameValueCollection()

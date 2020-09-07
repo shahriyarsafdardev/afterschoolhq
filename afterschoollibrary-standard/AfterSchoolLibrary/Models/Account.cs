@@ -639,34 +639,6 @@ namespace AfterSchoolLibrary.Models
             return new List<Account>();
         }
 
-        //TODO: issues with full text search on my system, so created a new one for testing purpose of autoselect
-        public static List<Account> FullTextSearchForTest(string query, List<AccountType> accountTypes, int? start, int? length, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            var searchTerms = query.Split(' ').Where(term =>
-                term.IsNotBlank() &&
-                term.ToLower().NotIn(Helpers.Utilities.FullTextSearchWordsToIgnore));
-
-            if (searchTerms.Any())
-            {
-                var dq = DatabaseQuery;
-                dq.Connection = dc;
-
-                var sql = $@"
-                    select * from Account
-                    where 
-                        name like '%{searchTerms.ToStringList("*\" AND \"")}%' and
-                        IsTest = 0 and OwnerId is not NULL and AccountTypeId in ({accountTypes.Select(x => (int)x).ToList().ToStrings().ToStringList(",")})
-                ";
-
-                dq.SelectRange.Start = start;
-                dq.SelectRange.Length = length;
-
-                return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-            }
-
-            return new List<Account>();
-        }
-
         public static int LoadTotalMinutesEnrolled(int? accountId, DateTime? startDateTime, DateTime? endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;

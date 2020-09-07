@@ -199,7 +199,7 @@ namespace AfterSchool.Controllers
 
             if (email.IsEmpty())
                 msgs.Add("Email is required", MessageType.UserError);
-            else if (!email.IsMatch(BasicLibrary.Utilities.EmailRegEx))
+            else if (!email.IsEmail())
                 msgs.Add("Please enter a valid email address", MessageType.UserError);
             else if (!user.CanEmailBeUsed(email, msgs))
                 msgs.Add("This email has already been registered", MessageType.UserError);
@@ -251,11 +251,12 @@ namespace AfterSchool.Controllers
                 if (msgs.HasNoErrors())
                 {
                     msgs.Add("Your account has been verified", MessageType.Success);
+                    var currentUser = SessionVariables.CurrentUser;
 
                     // if logged in reload with new verified value
-                    if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentUser.Uid == id.ToGuid())
+                    if (currentUser.IsNotEmpty() && currentUser.Uid == id.ToGuid())
                     {
-                        SessionVariables.CurrentUser = WebUser.Load(SessionVariables.CurrentUser.ID.Value);
+                        SessionVariables.CurrentUser = WebUser.Load(currentUser.ID.Value);
                     }
                 }
             }
@@ -875,11 +876,11 @@ namespace AfterSchool.Controllers
                     var account = Account.LoadByUid(accountId.ToGuid(), msgs);
 
                     // match thier email domains, 
-                    var accountEmailObject = new MailAddress(account.Email);
-                    string accountEmailHost = accountEmailObject.Host;
+                    var accountEmail = new MailAddress(account.Email);
+                    var accountEmailHost = accountEmail.Host;
 
-                    var userEmailObject = new MailAddress(email);
-                    string userEmailHost = userEmailObject.Host;
+                    var userEmail = new MailAddress(email);
+                    var userEmailHost = userEmail.Host;
 
                     // if matches, send email with instructions on how to login 
                     if (accountEmailHost.IsNotBlank() && userEmailHost.IsNotBlank() && accountEmailHost.IsSameAs(userEmailHost))
