@@ -631,11 +631,13 @@ namespace AfterSchoolLibrary.Services
             return account;
         }
 
-        public static Account AddNewEmptyAccount(this WebUser accountOwner, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Account AddNewEmptyAccount(this WebUser accountOwner, string accountName, AccountType accountType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
 
             var account = AccountService.CreateNewEmptyAccount(
                 accountOwner: accountOwner,
+                accountName: accountName,
+                accountType: accountType,
                 loggedInUser: loggedInUser,
                 msgs: msgs,
                 dc: dc);

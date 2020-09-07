@@ -1744,17 +1744,18 @@ namespace AfterSchoolLibrary.Services
             return account;
         }
 
-        public static Account CreateNewEmptyAccount(WebUser accountOwner, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc)
+        public static Account CreateNewEmptyAccount(WebUser accountOwner, string accountName, AccountType accountType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc)
         {
             var account = new Account()
             {
-                Name = $"{loggedInUser.FirstName}'s Enrichment Club",
+                Name = accountName.IsNotBlank() ? accountName : $"{loggedInUser.FirstName}'s Enrichment Club",
                 IsAfterSchool = true,
                 CreatedBy = loggedInUser.ID,
                 LastModifiedBy = loggedInUser.ID,
                 CreateDate = DateTime.UtcNow,
                 LastModifiedDate = DateTime.UtcNow,
                 OwnerId = accountOwner?.ID,
+                AccountTypeId = accountType,
                 IsAdminAccount = false,
                 IsActive = true,
                 Email = accountOwner.Email,

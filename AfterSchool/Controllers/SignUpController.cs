@@ -30,6 +30,7 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public ActionResult Index(SignUpIndexViewModel model)
         {
             var msgs = new SystemMessages();
@@ -84,7 +85,11 @@ namespace AfterSchool.Controllers
                             msgs: amsgs,
                             dc: adc);
 
-                        account = user.AddNewEmptyAccount(user, amsgs, adc);
+
+#pragma warning disable S1135 // Track uses of "TODO" tags
+                        // I guess we can use AddNewAccount, confirm with darye once
+                        account = user.AddNewEmptyAccount(model.OrgName, model.OrgType.Value, user, amsgs, adc);
+#pragma warning restore S1135 // Track uses of "TODO" tags
 
                         if (invitingAccount.IsNotEmpty() && account.IsNotEmpty())
                             invitingAccount.ApproveAccessToAccount(account, user, amsgs, adc);
@@ -107,7 +112,7 @@ namespace AfterSchool.Controllers
             }
 
             if (msgs.HasNoErrors())
-                return RedirectToAction("index", "onboarding", new { area = "org" });
+                return RedirectToAction("programinfo", "onboarding", new { area = "org" });
 
             ViewBag.Messages = msgs;
 
@@ -887,7 +892,7 @@ namespace AfterSchool.Controllers
                     {
                         // After instructions are follow the account will be claimed and an account will be created for the individual that signed up
                         EmailHelper.SendClaimProfileEmail(account, email, msgs);
-                        return Json(new { status = "ok", }, JsonRequestBehavior.AllowGet);
+                        return Json(new { success = true, status = "ok", }, JsonRequestBehavior.AllowGet);
                     }
                     else
                     {
@@ -896,24 +901,54 @@ namespace AfterSchool.Controllers
 
                         //Note: masking the email with a fixed number of characters will make it difficult to guess the email and is slightly more secure.
                         var maskedEmail = $"{account.Email[0]}****{account.Email.Substring(account.Email.IndexOf('@') - 2)}";
-                        return Json(new { status = "ok", data = maskedEmail }, JsonRequestBehavior.AllowGet);
+                        return Json(new { success = true, status = "ok", data = maskedEmail }, JsonRequestBehavior.AllowGet);
                     }
                 }
                 catch (Exception ex)
                 {
-                    return Json(new { status = "error", data = ex.Message }, JsonRequestBehavior.AllowGet);
+                    return Json(new { success = false, status = "error", data = ex.Message }, JsonRequestBehavior.AllowGet);
                 }
             }
 
-            return Json(new { status = "error", data = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
+            return Json(new { success = false, status = "error", data = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
         }
 
         [HttpPost]
-        public virtual JsonResult ContactSupport()
+        public virtual JsonResult ContactSupport(string firstName, string lastName, string email, string phone, string accountId)
         {
-            //TODO: send email to AHQ.
+            var msgs = new SystemMessages();
 
-            return Json(new { status = "error" }, JsonRequestBehavior.AllowGet);
+            if (!accountId.IsGuid())
+                msgs.Add("Organization not found.", MessageType.UserError);
+
+            if (firstName.IsBlank())
+                msgs.Add("First Name is required", MessageType.UserError);
+
+            if (email.IsBlank())
+                msgs.Add("Email is required", MessageType.UserError);
+            else if (!email.IsEmail())
+                msgs.Add("Please enter a valid email address", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                try
+                {
+                    var account = Account.LoadByUid(accountId.ToGuid(), msgs);
+
+                    EmailHelper.SendEmail("support@afterschoolhq.com", 
+                        $"AHQ Profile Claim Form - {account.Name}",
+                        $"<p>Organization: {account.Name}<br />Name: {firstName} {lastName}<br />Email: {email}<br />Phone: {phone}<br /></p>",
+                        true);
+
+                    return Json(new { success = true, status = "ok" }, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception ex)
+                {
+                    return Json(new { success = false, status = "error", data = ex.Message }, JsonRequestBehavior.AllowGet);
+                }
+            }
+
+            return Json(new { success = false, status = "error", data = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
         }
     }
 }

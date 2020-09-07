@@ -84,15 +84,15 @@
         <div class="clearfix"></div>
 
         <div class="row margin-t-35">
-            <button id="btn-Business" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SearchOrgName')">Business</button>
+            <button id="btn-Business" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.Business')">Business</button>
             <div class="clearfix"></div><br />
-            <button id="btn-School" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SearchOrgName')">School</button>
+            <button id="btn-School" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.School')">School</button>
             <div class="clearfix"></div><br />
-            <button id="btn-CommunityCenter" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SearchOrgName')">Community Center</button>
+            <button id="btn-CommunityCenter" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.CommunityCenter')">Community Center</button>
             <div class="clearfix"></div><br />
-            <button id="btn-Church" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SearchOrgName')">Church</button>
+            <button id="btn-Church" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.Church')">Church</button>
             <div class="clearfix"></div><br />
-            <button id="btn-NonProfit" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SearchOrgName')">Non Profit</button>
+            <button id="btn-NonProfit" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.ActivityProvider')">Non Profit</button> @*TODO: Find proper type*@
         </div>
     </div>
 
@@ -122,9 +122,6 @@
 
                 <form id="form-signup-personal-details" class="form-horizontal" method="post" action="@Url.Action("index", "signup")">
                     @{ Html.RenderPartial("~/Views/Shared/Login/_SignUpForm-NewAccount.cshtml", Model); }
-
-                    @* TODO *@
-                    <input id="hidden-signup-accountname" type="hidden" name="accountName" />
                 </form>
 
             </div>
@@ -220,19 +217,21 @@
         var headerThankYouNR1 = $('#header-thankyou-not-recognized');
         var headerThankYouNR2 = $('#header2-thankyou-not-recognized');
         var headerThankYouNR3 = $('#header3-thankyou-not-recognized');
-        var hiddenClaimAccountId = $('#hidden-claim-accountId');
+        var hiddenClaimAccountId = $('#hidden-claim-accountId'); // this one is for existing accounts
+        var hiddenAccountName = $('#hidden-signup-accountName'); // this one is for creating new account flow
+        var hiddeAccountType = $('#hidden-signup-accountType')
 
         $(document).ready(function () {
             select2SearchOrganizations.select2({
                 placeholder: "Program name",
-                allowClear: false, // Provides support for clearable selections. 
+                allowClear: false, // Provides support for clearable selections.
                 minimumInputLength: 2, // Minimum number of characters required to start a search.
                 tags: true, //boolean or array of objects, Used to enable free text responses.
                 ajax: {
                     url: '@Url.Action("GetData", "SignUp", new { Area = "" })',
                     type: "POST",
                     dataType: "json",
-                    delay: 500,
+                    delay: 1000,
                     data: function (term) {
                         return {
                             search: term.term
@@ -256,9 +255,13 @@
                 //grab the selected account and set it to global object, so we can further decide on cliams profile or register
                 var data = e.params.data;
                 selectedAccount = data;
-                if (data && data.id) {
+                if (data && data.id && data.slug) {
                     hiddenClaimAccountId.val(data.id);
                 }
+                else if (data && data.id && data.text) {
+                    hiddenAccountName.val(data.text);
+                }
+
                 btnContinue.removeClass('disabled');
             });
         });
@@ -314,6 +317,13 @@
             }
         }
 
+        function setOrgTypeAndProceedFurther(input) {
+            if (input) {
+                hiddeAccountType.val(input);
+                proceedFurther('@EnumSignupPages.SearchOrgName');
+            }
+        }
+
         function saveClaims() {
             if (formClaimProfile.valid()) {
                 var formData = formClaimProfile.serialize();
@@ -325,7 +335,7 @@
                     type: "POST",
                     dataType: "json",
                     success: function (data) {
-                        if (data && data.status && data.status == 'error') {
+                        if (data && data.success == false) {
                             var errors = ''
                             data.data.forEach(function (error) {
                                 if (error && error.Text) {
@@ -367,33 +377,37 @@
         }
 
         function contactSupport() {
-            $.ajax({
-                url: '@Url.Action("ContactSupport", "SignUp", new { Area = "" })',
-                type: "POST",
-                dataType: "json",
-                success: function (data) {
-                    if (data && data.status && data.status == 'error') {
+            if (formClaimProfile.valid()) {
+                var formData = formClaimProfile.serialize();
+                $.ajax({
+                    url: '@Url.Action("ContactSupport", "SignUp", new { Area = "" })',
+                    data: formData,
+                    type: "POST",
+                    dataType: "json",
+                    success: function (data) {
+                        if (data && data.success == false) {
+                            Notifications.showBar({
+                                title: 'Error',
+                                message: 'Something went wrong. Please contact customer support.',
+                                success: false
+                            });
+                            return false;
+                        } else { // contact support email sent
+                            headerThankYouNR2.hide();
+                            headerThankYouNR3.show();
+                        }
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.log(errorThrown);
                         Notifications.showBar({
                             title: 'Error',
                             message: 'Something went wrong. Please contact customer support.',
                             success: false
                         });
-                        return false;
-                    } else { // contact support email sent
-                        headerThankYouNR2.hide();
-                        headerThankYouNR3.show();
+                        return;
                     }
-                },
-                error: function (jqXHR, textStatus, errorThrown) {
-                    console.log(errorThrown);
-                    Notifications.showBar({
-                        title: 'Error',
-                        message: 'Something went wrong. Please contact customer support.',
-                        success: false
-                    });
-                    return;
-                }
-            });
+                });
+            }
         }
 
     </script>
