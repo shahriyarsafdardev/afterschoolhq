@@ -1056,7 +1056,7 @@ Public MustInherit Class BaseLocation
 
         Dim rtn As String = ""
 
-        If Name.IsEmpty = False And Name <> City And Name <> County Then
+        If Name.IsEmpty = False And Name <> City And Name <> County And Name <> Address1 Then
             rtn &= Name
             If useLineBreaks Then
                 rtn &= vbCrLf

@@ -605,6 +605,7 @@
     <Compile Include="Controllers\SitemapController.cs" />
     <Compile Include="Helpers\ActivitySetupHelper.cs" />
     <Compile Include="Helpers\RecaptchaHelper.cs" />
+    <Compile Include="Models\ActionFilters\EnvironmentRestrictionAttribute.cs" />
     <Compile Include="Models\ActivityScheduleUI.cs" />
     <Compile Include="Models\AddressViewModel.cs" />
     <Compile Include="Models\BankInfoViewModel.cs" />
@@ -659,6 +660,8 @@
     <Content Include="Assets\js\ahq-profiles.js" />
     <Content Include="case-study-cfi70.html" />
     <Content Include="contact.html" />
+    <Content Include="Content\quill.bubble.css" />
+    <Content Include="Content\quill.snow.css" />
     <Content Include="copyright.html" />
     <Content Include="css\animate.min.css" />
     <Content Include="css\bootstrap.min.css" />
@@ -731,6 +734,7 @@
     <Content Include="privacy.html" />
     <Content Include="provider-faq.html" />
     <Content Include="providers.html" />
+    <Content Include="Scripts\quill.min.js" />
     <Content Include="sitemap-home.xml" />
     <Content Include="style.css" />
     <Content Include="teachers.html" />
