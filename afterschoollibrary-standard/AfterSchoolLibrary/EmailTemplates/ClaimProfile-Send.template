@@ -1,10 +1,14 @@
-﻿<div>
+﻿<div style="font-family: calibri; font-size: 14px;">
   <p>Hello,</p>
-  
-  @Model.ClaimProfileDetails
+  <br />
+  <br />
+
+  <p> @Model.ClaimProfileDetails </p>  
+  <br />
+  <br />
 
   <p>
-    Thanks, <br />
+    Thanks, <br /><br />
     @Model.ProductName
   </p>
   

@@ -227,6 +227,7 @@ namespace AfterSchoolLibrary.Helpers
         public static void SendClaimProfileEmail(Account account, Guid userGuid, string email, SystemMessages msgs)
         {
             //TODO: need to update this email and templeate with proper text
+            var subject = $"AHQ Profile Claim for - {account.Name}";
             var claimProfileDetails = $"<p>Click following <a href=\"{Utilities.CompleteSignUpUrl(userGuid)}\">Link</a> to claim your profile.<p>";
 
             var model = new NameValueCollection()
@@ -234,8 +235,7 @@ namespace AfterSchoolLibrary.Helpers
                 { "ClaimProfileDetails", claimProfileDetails },
                 { "ProductName", Utilities.AppName() }
             };
-
-            var subject = $"AHQ Profile Claim Form - {account.Name}";
+            
             var body = ProcessTemplate(
                 EmailTemplates.ClaimProfile_Send,
                 model,
@@ -249,6 +249,38 @@ namespace AfterSchoolLibrary.Helpers
             mailMsgs.AddRange(SendGridHelper.SendMail(
                 fromEmail: Email.SendGridNoReplyEmailAddress(),
                 toEmail: new SendGrid.Helpers.Mail.EmailAddress(email),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId()));
+        }
+
+        public static void SendNonRecognizedProfileClaimEmail(Account account, WebUser requester, SystemMessages msgs)
+        {
+            var subject = $"{requester.FirstName} {requester.LastName} is requesting to claim your profile on AfterSchool HQ.";
+            var profileClaimLink = Utilities.CompleteSignUpUrl(requester.Uid);
+
+            var model = new NameValueCollection()
+            {
+                { "OwnerFirstName", account.GetAccountOwner()?.FirstName },
+                { "RequestorFirstName", requester.FirstName },
+                { "RequestorEmail", requester.Email },
+                { "ProfileClaimLink", profileClaimLink },
+                { "ProductName", Utilities.AppName() }
+            };
+
+            var body = ProcessTemplate(
+                EmailTemplates.ClaimProfileNonRecognized_Send,
+                model,
+                "ClaimProfileNonRecognized_Send",
+                msgs);
+
+            // SEND EMAILS
+            var mailMsgs = new SystemMessages();
+
+            // Send email to activity contact
+            mailMsgs.AddRange(SendGridHelper.SendMail(
+                fromEmail: Email.SendGridNoReplyEmailAddress(),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(account.Email),
                 subject: subject,
                 body: body,
                 emailTemplateId: SendGridHelper.GetGenericTemplateId()));

@@ -895,6 +895,7 @@ namespace AfterSchool.Controllers
                     {
                         var userEmail = new MailAddress(email);
                         var userEmailDomain = userEmail.Host;
+                        var user = WebUserService.StartUserAccount(firstName, lastName, email, msgs);
 
                         // if the email is the exact match of what the Account.Email is, OR
                         // if account has ClaimEmailDomain and user email's domain matches with that, send email with instructions on how to login 
@@ -902,15 +903,14 @@ namespace AfterSchool.Controllers
                         if (email.IsSameAs(account.Email) ||
                             (account.ClaimEmailDomain.IsNotBlank() && userEmailDomain.IsNotBlank() && account.ClaimEmailDomain.IsSameAs(userEmailDomain)))
                         {
-                            var user = WebUserService.StartUserAccount(firstName, lastName, email, msgs);
-
                             EmailHelper.SendClaimProfileEmail(account, user.Uid, email, msgs);
                             return Json(new { success = true, status = "ok", }, JsonRequestBehavior.AllowGet);
                         }
                         else
                         {
-                            // email domain is not recognized, send email with instructions to organization member's email so that user can gain accss
-                            EmailHelper.SendClaimProfileEmail(account, SessionVariables.CurrentUser.Uid, account.Email, msgs);
+                            // email domain is not recognized, send email with instructions to organization member's email so that user can gain accss.
+                            // the user will need to start at the sign up page, it should already have the account preset so that the user starts with the account already associated.
+                            EmailHelper.SendNonRecognizedProfileClaimEmail(account, user, msgs);
 
                             //Note: masking the email with a fixed number of characters will make it difficult to guess the email and is slightly more secure.
                             var maskedEmail = $"{account.Email[0]}****{account.Email.Substring(account.Email.IndexOf('@') - 2)}";

@@ -92,7 +92,7 @@
             <div class="clearfix"></div><br />
             <button id="btn-Church" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.Church')">Church</button>
             <div class="clearfix"></div><br />
-            <button id="btn-NonProfit" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.ActivityProvider')">Non Profit</button> @*TODO: Find proper type*@
+            <button id="btn-NonProfit" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.ActivityProvider')">Non Profit</button>
         </div>
     </div>
 
@@ -170,6 +170,13 @@
                 </div>
                 <div class="clearfix"></div>
 
+                <div class="form-group row">
+                    <div class="col-md-3 col-md-offset-4 btn-center">
+                        @{ Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", "signup-claim-form-recaptcha"); }
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+
                 <button id="btn-StartClaimProcess" type="button" style="display: none;" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return saveClaims()">Start the claim process</button>
                 <button id="btn-RequestAccess" type="button" style="display: none;" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return saveClaims()">Request Access</button>
 
@@ -239,7 +246,7 @@
                     url: '@Url.Action("GetData", "SignUp", new { Area = "" })',
                     type: "POST",
                     dataType: "json",
-                    delay: 1000,
+                    delay: 500,
                     data: function (term) {
                         return {
                             search: term.term
@@ -290,6 +297,7 @@
                 signupOrgType.show();
             } else if (page === '@EnumSignupPages.SearchProgramName') {
                 // user clicked btn-ProgramForStudents, and going for name search for his/her program
+                hiddeAccountType.val('@AccountType.Teacher');
                 lblOrgSearchTitle.text('Whats the name of your Program?');
                 signupIndividualType.hide();
                 signupSearchName.show();
