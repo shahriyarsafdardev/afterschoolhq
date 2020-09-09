@@ -75,7 +75,7 @@
         <div class="row margin-t-35">
             <button id="btn-ProgramForStudents" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SearchProgramName')">Provide programs for students</button>
             <div class="clearfix"></div><br />
-            <button id="btn-EnrollChild" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center">Enroll my child in a program</button> @*TODO: move user to /parent*@
+            <a id="btn-EnrollChild" href="~/parents.html" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center">Enroll my child in a program</a>
         </div>
     </div>
 
@@ -236,11 +236,16 @@
         var hiddenAccountName = $('#hidden-signup-accountName'); // this one is for creating new account flow
         var hiddeAccountType = $('#hidden-signup-accountType')
 
-        $(document).ready(function () {
+        function loadSearch(placeholder) {
             select2SearchOrganizations.select2({
-                placeholder: "Program name",
+                placeholder: `${placeholder} name`,
                 allowClear: false, // Provides support for clearable selections.
                 minimumInputLength: 2, // Minimum number of characters required to start a search.
+                language: {
+                    inputTooShort: function () {
+                        return `Type the name of your ${placeholder}`;
+                    }
+                },
                 tags: true, //boolean or array of objects, Used to enable free text responses.
                 ajax: {
                     url: '@Url.Action("GetData", "SignUp", new { Area = "" })',
@@ -280,7 +285,7 @@
 
                 btnContinue.removeClass('disabled');
             });
-        });
+        };
 
         function proceedFurther(page) {
             if (page === '@EnumSignupPages.WelCome') {
@@ -299,11 +304,13 @@
                 // user clicked btn-ProgramForStudents, and going for name search for his/her program
                 hiddeAccountType.val('@AccountType.Teacher');
                 lblOrgSearchTitle.text('Whats the name of your Program?');
+                loadSearch("Program");
                 signupIndividualType.hide();
                 signupSearchName.show();
             } else if (page === '@EnumSignupPages.SearchOrgName') {
                 // user is from the organization, and going for name search for his/her organization
                 lblOrgSearchTitle.text('Whats the name of your Organization?');
+                loadSearch("Organization");
                 signupOrgType.hide();
                 signupSearchName.show();
             } else if (page === '@EnumSignupPages.Register') {
