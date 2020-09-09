@@ -88,7 +88,7 @@ namespace AfterSchool.Controllers
                         account = user.AddNewAccount(
                             orgName: model.OrgName,
                             accountType: model.OrgType.Value,
-                            loggedInUser: SessionVariables.CurrentUser,
+                            loggedInUser: user,
                             msgs: amsgs,
                             dc: adc);
 
