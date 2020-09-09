@@ -85,11 +85,12 @@ namespace AfterSchool.Controllers
                             msgs: amsgs,
                             dc: adc);
 
-
-#pragma warning disable S1135 // Track uses of "TODO" tags
-                        // I guess we can use AddNewAccount, confirm with darye once
-                        account = user.AddNewEmptyAccount(model.OrgName, model.OrgType.Value, user, amsgs, adc);
-#pragma warning restore S1135 // Track uses of "TODO" tags
+                        account = user.AddNewAccount(
+                            orgName: model.OrgName,
+                            accountType: model.OrgType.Value,
+                            loggedInUser: SessionVariables.CurrentUser,
+                            msgs: amsgs,
+                            dc: adc);
 
                         if (invitingAccount.IsNotEmpty() && account.IsNotEmpty())
                             invitingAccount.ApproveAccessToAccount(account, user, amsgs, adc);
@@ -112,7 +113,7 @@ namespace AfterSchool.Controllers
             }
 
             if (msgs.HasNoErrors())
-                return RedirectToAction("programinfo", "onboarding", new { area = "org" });
+                return RedirectToAction("index", "onboarding", new { area = "org" });
 
             ViewBag.Messages = msgs;
 
@@ -588,7 +589,6 @@ namespace AfterSchool.Controllers
                         newAccount = AccountService.CreateNew(
                             orgName: orgname,
                             email: email,
-                            claimemaildomain: null,
                             phone: phone,
                             isActive: true,
                             accountType: (AccountType)accounttype.ToInteger(),
@@ -848,6 +848,8 @@ namespace AfterSchool.Controllers
 
             return Json(new
             {
+                success = true,
+                status = "ok",
                 data = accounts.Select(account => new OrgDropDown()
                 {
                     Id = account.Uid,
@@ -949,7 +951,7 @@ namespace AfterSchool.Controllers
                 {
                     var account = Account.LoadByUid(accountId.ToGuid(), msgs);
 
-                    EmailHelper.SendEmail("support@afterschoolhq.com",
+                    EmailHelper.SendEmail(AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress,
                         $"AHQ Profile Claim Form - {account.Name}",
                         $"<p>Organization: {account.Name}<br />Name: {firstName} {lastName}<br />Email: {email}<br />Phone: {phone}<br /></p>",
                         true);

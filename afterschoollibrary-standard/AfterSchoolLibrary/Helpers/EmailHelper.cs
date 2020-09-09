@@ -226,8 +226,7 @@ namespace AfterSchoolLibrary.Helpers
 
         public static void SendClaimProfileEmail(Account account, Guid userGuid, string email, SystemMessages msgs)
         {
-            //TODO: need to update this email and templeate with proper text
-            var subject = $"AHQ Profile Claim for - {account.Name}";
+            var subject = $"Thanks for claiming your profile on {Utilities.AppName()}";
             var claimProfileDetails = $"<p>Click following <a href=\"{Utilities.CompleteSignUpUrl(userGuid)}\">Link</a> to claim your profile.<p>";
 
             var model = new NameValueCollection()

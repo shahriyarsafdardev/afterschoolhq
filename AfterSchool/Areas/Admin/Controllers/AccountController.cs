@@ -192,7 +192,6 @@ namespace AfterSchool.Areas.Admin.Controllers
                             {
                                 account = AccountService.CreateNewUnclaimedAccount(
                                             orgName: orgname,
-                                            claimemaildomain: claimemaildomain, //TODO: Not sure, need to review with darye
                                             email: null,
                                             phone: null,
                                             isActive: true,

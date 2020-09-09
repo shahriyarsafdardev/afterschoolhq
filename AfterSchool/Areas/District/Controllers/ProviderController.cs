@@ -94,7 +94,6 @@ namespace AfterSchool.Areas.District.Controllers
 
                         account = user.AddNewAccount(
                             orgName: orgname,
-                            claimemaildomain: null,
                             phone: null,
                             isActive: true,
                             accountType: AccountType.School,

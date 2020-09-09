@@ -25,7 +25,6 @@ namespace AfterSchoolLibraryTests.Tests
             var account = AccountService.CreateNew(
                 orgName: "test org",
                 email: accountOwner.Email,
-                claimemaildomain: "test.com",
                 phone: "123-123-1234",
                 isActive: false,
                 accountType: AccountType.School,

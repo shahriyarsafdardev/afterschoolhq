@@ -373,7 +373,6 @@ namespace AfterSchoolLibraryTests.Tests
 
             var account = accountOwner.AddNewAccount(
                             orgName: "Test Org",
-                            claimemaildomain: "test.com",
                             phone: null,
                             isActive: true,
                             accountType: AccountType.School,
@@ -396,7 +395,6 @@ namespace AfterSchoolLibraryTests.Tests
 
             var account = accountOwner.AddNewAccount(
                             orgName: "Test Org",
-                            claimemaildomain: "test.com",
                             phone: null,
                             isActive: true,
                             accountType: AccountType.School,
