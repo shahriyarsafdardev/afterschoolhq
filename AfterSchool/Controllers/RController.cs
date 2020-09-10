@@ -224,6 +224,8 @@ namespace AfterSchool.Controllers
                         registrantAccount,
                         false,
                         msgs);
+
+                return Redirect(account.PayUrl);
             }
 
             ViewBag.Sources = currentAccount.GetStripeSources(msgs);

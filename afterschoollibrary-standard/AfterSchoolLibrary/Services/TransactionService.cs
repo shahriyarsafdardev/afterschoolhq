@@ -165,7 +165,7 @@ namespace AfterSchoolLibrary.Services
 
         public static Transaction CreateNew(CheckoutObject checkoutObject, TransactionType transactionType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var useConnectedAccount = checkoutObject.BillingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
+            var useConnectedAccount = checkoutObject.BillingAccount.UseStripeConnectDuringCheckout(msgs, dc);
             var usePlatformFees = useConnectedAccount && !checkoutObject.OverrideAmount.HasValue;
 
             return CreateNew(
