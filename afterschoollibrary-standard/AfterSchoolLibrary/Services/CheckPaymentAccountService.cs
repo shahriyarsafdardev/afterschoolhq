@@ -62,41 +62,67 @@ namespace AfterSchoolLibrary.Services
                msgs);
         }
 
+        private class CheckBottomTransactionModel
+        {
+            public string Uid { get; set; }
+            public decimal Value { get; set; }
+            public string Name { get; set; }
+        }
+
         private static string GetCheckBottomBody(Payout payout, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var transactions = payout.GetTransactions(msgs, dc);
             var groupedTransactions = new Dictionary<string, decimal>();
+            var checkBottomTransactions = new List<CheckBottomTransactionModel>();
             var participationObjects = new List<ParticipationObject>();
             var body = "";
 
             transactions.ForEach(transaction => {
 
-                var participationObject = transaction.GetParticipationObjects(msgs, dc).First();
+                var participationObject = transaction.GetParticipationObjects(msgs, dc).FirstOrDefault();
 
-                if (groupedTransactions.ContainsKey(participationObject.Uid.ToString()))
-                    groupedTransactions[participationObject.Uid.ToString()] += transaction.GetBillerPayout();
+                if (participationObject.IsNotEmpty())
+                {
+                    if (checkBottomTransactions.Any(cbt => cbt.Uid == participationObject.Uid.ToString()))
+                    {
+                        var index = checkBottomTransactions.FindIndex(cbt => cbt.Uid == participationObject.Uid.ToString());
+                        checkBottomTransactions[index].Value += transaction.GetBillerPayout();
+                    }
+                    else
+                    {
+                        checkBottomTransactions.Add(new CheckBottomTransactionModel()
+                        {
+                            Uid = participationObject.Uid.ToString(),
+                            Value = transaction.GetBillerPayout(),
+                            Name = participationObject.Name,
+                        });
+                    }
+                }
                 else
                 {
-                    groupedTransactions.Add(participationObject.Uid.ToString(), transaction.GetBillerPayout());
-                    participationObjects.Add(participationObject);
+                    var payerAccount = transaction.GetPayerAccount(msgs, dc);
+                    var payerAccountOwner = payerAccount.GetAccountOwner(msgs, dc);
+
+                    checkBottomTransactions.Add(new CheckBottomTransactionModel()
+                    {
+                        Value = transaction.GetBillerPayout(),
+                        Name = $"{payerAccountOwner.DisplayName} - {transaction.Description}",
+                    });
                 }
 
             });
 
-            foreach (var key in groupedTransactions.Keys)
+            checkBottomTransactions.ForEach(checkBottomTransaction =>
             {
-                var name = participationObjects.First(po => po.Uid.ToString() == key).Name;
-                var totalAmount = groupedTransactions[key];
-
                 body += $@"<tr>
                             <td>
-                                {name}
+                                {checkBottomTransaction.Name}
                             </td>
                             <td class=""text-right"">
-                                {totalAmount.ToCurrency()}
+                                {checkBottomTransaction.Value.ToCurrency()}
                             </td>
                         </tr>";
-            }
+            });
 
             return body;
         }
