@@ -1004,6 +1004,28 @@ Public MustInherit Class BaseAddress
         Return cityLine
 
     End Function
+    Public Shared Function GetCityState(ByVal city As String, ByVal state As String) As String
+
+        Dim cityLine As String = ""
+
+        If city.IsEmpty() = False Or state.IsEmpty() = False Then
+
+            If city.IsEmpty() = False Then
+                cityLine &= city
+            End If
+
+            If city.IsNotEmpty() Then
+                If cityLine.IsEmpty() = False Then
+                    cityLine &= ", "
+                End If
+                cityLine &= state
+            End If
+
+        End If
+
+        Return cityLine
+
+    End Function
 
     Public Shared Function FormatCityStateZipCode(ByVal city As String, ByVal county As String, ByVal state As String, ByVal postalCode As String, Optional ByVal useLineBreaks As Boolean = True) As String
 
@@ -1081,6 +1103,10 @@ Public MustInherit Class BaseLocation
     End Function
     Public Overloads Function FormatCityState(Optional ByVal useLineBreaks As Boolean = True) As String
         Return BaseAddress.FormatCityStateZipCode(City, County, State, "", useLineBreaks)
+    End Function
+
+    Public Overloads Function GetCityState() As String
+        Return BaseAddress.GetCityState(City, State)
     End Function
 
     Public Overrides Function ToString() As String

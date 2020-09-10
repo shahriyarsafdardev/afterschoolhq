@@ -87,7 +87,7 @@ namespace AfterSchool.Controllers
 
                         account = user.AddNewAccount(
                             orgName: model.OrgName,
-                            accountType: model.OrgType.Value,
+                            accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
                             loggedInUser: user,
                             msgs: amsgs,
                             dc: adc);
@@ -837,27 +837,40 @@ namespace AfterSchool.Controllers
         /// </summary>
         /// <param name="search"></param>
         /// <returns></returns>
-        [HttpPost]
+        [HttpGet]
         public virtual JsonResult GetData(string search)
         {
             if (!IsRequestFromApp())
                 return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
 
             var msgs = new SystemMessages();
-            var accounts = Account.FullTextSearch(search.Trim(), AccountService.ProviderAccountTypes.ToList(), 0, 10, msgs);
+            var accounts = Account.FullTextSearch(search.Trim(), AccountService.ProviderAccountTypes.ToList(), 0, 10, msgs);            
 
             return Json(new
             {
                 success = true,
                 status = "ok",
-                data = accounts.Select(account => new OrgDropDown()
+                accounts = accounts.Select(account => new OrgDropDown()
                 {
                     Id = account.Uid,
-                    Text = account.Name,
-                    Slug = account.Name,
+                    Text = GetAccountName(account),
                     IsClaimed = account.IsClaimed,
                 })
             }, JsonRequestBehavior.AllowGet);
+        }
+
+        public static string GetAccountName(Account account)
+        {
+            var cityState = account.GetDefaultLocation()?.GetCityState();
+            if (cityState.IsNotBlank())
+            {
+                //ex.Darye's Enrichment Club - Indianapolis, IN
+                return $"{account.Name} - {cityState}";
+            }
+            else
+            {
+                return account.Name;
+            }
         }
 
         [HttpPost]

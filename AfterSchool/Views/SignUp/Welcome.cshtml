@@ -66,6 +66,11 @@
             <div class="clearfix"></div><br />
             <button id="btn-CreateOrgAccount" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SelectOrgType')">Create an Organization Account</button>
         </div>
+        <div class="clearfix"></div>
+
+        <div class="text-center margin-v-30">
+            <a href="#" class="text-muted">&laquo; Back</a>
+        </div>
     </div>
 
     <div id="signup-individualtype" style="display: none;">
@@ -76,6 +81,11 @@
             <button id="btn-ProgramForStudents" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SearchProgramName')">Provide programs for students</button>
             <div class="clearfix"></div><br />
             <a id="btn-EnrollChild" href="~/parents.html" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center">Enroll my child in a program</a>
+        </div>
+        <div class="clearfix"></div>
+
+        <div class="text-center margin-v-30">
+            <a href="#" class="text-muted">&laquo; Back</a>
         </div>
     </div>
 
@@ -94,6 +104,11 @@
             <div class="clearfix"></div><br />
             <button id="btn-NonProfit" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.ActivityProvider')">Non Profit</button>
         </div>
+        <div class="clearfix"></div>
+
+        <div class="text-center margin-v-30">
+            <a href="#" class="text-muted">&laquo; Back</a>
+        </div>
     </div>
 
     <div id="signup-search-name" style="display: none;">
@@ -102,11 +117,24 @@
 
         <div class="row margin-t-35">
             <div class="col-md-8 col-md-offset-2">
-                <select id="select2-search-organizations" style="width: 100%;"></select>
+                <input type="text" class="form-control" id="signup-account-search" placeholder="placeholder" autocomplete="off" />
+                <div id="signup-account-search-list" class="border-light-gray pointer hide" style="position:absolute; width:100%; z-index:1000; background-color: white; border-width: 2px;"></div>
             </div>
             <div class="clearfix"></div><br />
 
-            <button id="btn-SearchContinue" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center disabled" onclick="return decideToProceedFurther(this)">Continue</button>
+            <div class="visible-sm visible-xs">
+                <button type="button" class="btn-SearchContinue btn btn-primary btn-lg pull-right col-xs-12 disabled" onclick="return decideToProceedFurther(this)">Continue &raquo;</button>
+
+                <div class="clearfix"></div>
+                <div class="text-center margin-v-30">
+                    <a href="#" class="text-muted">&laquo; Back</a>
+                </div>
+            </div>
+
+            <div class="col-md-8 col-md-offset-2 visible-md visible-lg margin-v-30">
+                <a href="#" class="text-muted">&laquo; Back</a>
+                <button type="button" class="btn-SearchContinue col-md-3 btn btn-primary btn-lg pull-right disabled" onclick="return decideToProceedFurther(this)">Continue &raquo;</button>
+            </div>
             <div class="clearfix"></div><br />
         </div>
     </div>
@@ -177,8 +205,19 @@
                 </div>
                 <div class="clearfix"></div>
 
-                <button id="btn-StartClaimProcess" type="button" style="display: none;" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return saveClaims()">Start the claim process</button>
-                <button id="btn-RequestAccess" type="button" style="display: none;" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return saveClaims()">Request Access</button>
+                <div class="visible-sm visible-xs margin-v-30">
+                    <button type="button" class="btn-save-claims btn btn-primary btn-lg pull-right col-xs-12" onclick="return saveClaims(this)"></button>
+
+                    <div class="clearfix"></div>
+                    <div class="text-center margin-v-30">
+                        <a href="#" class="text-muted">&laquo; Back</a>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-md-offset-3 visible-md visible-lg margin-v-30">
+                    <a href="#" class="pull-left text-muted">&laquo; Back</a>
+                    <button type="button" class="btn-save-claims btn btn-primary btn-lg pull-right" onclick="return saveClaims()"></button>
+                </div>
 
                 <div class="clearfix"></div><br />
             </form>
@@ -209,6 +248,10 @@
 {
     <script src="~/Scripts/jquery.validate.js"></script>
     <script type="text/javascript">
+
+        var searchTimeout = null;
+        var isSearching = false;
+        var isOrganization = false;
         var selectedAccount = '';
         var signupWelcome = $('#signup-welcome');
         var signupSelectUsertype = $('#signup-select-usertype');
@@ -220,10 +263,8 @@
         var signupThankYou = $('#signup-thank-you');
         var lblOrgSearchTitle = $('#lbl-org-search-title');
         var lblOrgMemberEmail = $('#lbl-org-member-email');
-        var btnContinue = $('#btn-SearchContinue');
-        var btnClaimProcess = $('#btn-StartClaimProcess');
-        var btnRequestAccess = $('#btn-RequestAccess');
-        var select2SearchOrganizations = $('#select2-search-organizations');
+        var btnContinue = $('.btn-SearchContinue'); //class based identification due to responsiveness issues        
+        var btnSaveClaims = $('.btn-save-claims'); //class based identification due to responsiveness issues     
         var formClaimProfile = $('#form-signup-claim-form');
         var headerAccountExist = $('#header-account-exist');
         var headerAccountClaimed = $('#header-account-claimed');
@@ -233,59 +274,138 @@
         var headerThankYouNR2 = $('#header2-thankyou-not-recognized');
         var headerThankYouNR3 = $('#header3-thankyou-not-recognized');
         var hiddenClaimAccountId = $('#hidden-claim-accountId'); // this one is for existing accounts
-        var hiddenAccountName = $('#hidden-signup-accountName'); // this one is for creating new account flow
-        var hiddeAccountType = $('#hidden-signup-accountType')
+        var hiddenAccountName = $('#hidden-signup-accountName'); // this one is for creating new account flow and placed inside partial view
+        var hiddeAccountType = $('#hidden-signup-accountType');
+        var signupAccountSearchList = $('#signup-account-search-list');
+        var signupAccountSearch = $('#signup-account-search');
+        var signupListItemClass = "text-small padding-10";
+        var signupListItemStyle = "background-color: #f0f0f0;";
+        var signupListItemStyleHover = "background-color: #fcfcfc;";
+        var signupListOnMouseOver = "signupListMouseOver";
+        var signupListOnMouseOut = "signupListMouseOut";
+        var signupListOnClick = "signupListMouseClick";
 
-        function loadSearch(placeholder) {
-            select2SearchOrganizations.select2({
-                placeholder: `${placeholder} name`,
-                allowClear: false, // Provides support for clearable selections.
-                minimumInputLength: 2, // Minimum number of characters required to start a search.
-                language: {
-                    inputTooShort: function () {
-                        return `Type the name of your ${placeholder}`;
-                    }
-                },
-                tags: true, //boolean or array of objects, Used to enable free text responses.
-                ajax: {
-                    url: '@Url.Action("GetData", "SignUp", new { Area = "" })',
-                    type: "POST",
-                    dataType: "json",
-                    delay: 500,
-                    data: function (term) {
-                        return {
-                            search: term.term
-                        };
-                    },
-                    processResults: function (data) {
-                        return {
-                            results: $.map(data.data, function (item) {
-                                return {
-                                    id: item.Id,
-                                    text: item.Text,
-                                    slug: item.Slug,
-                                    isClaimed: item.IsClaimed
+        PageEvent.add(PageEvent.AFTER_INIT, function () {
+            signupAccountSearch.keyup(function () {
+
+                if (signupAccountSearch.val().length <= 2) {
+                    signupAccountSearchList.html('');
+                    signupAccountSearchList.addClass('hide');
+                    return false;
+                }
+
+                signupAccountSearchList.removeClass('hide');
+                signupAccountSearchList.html('');
+                signupAccountSearchList.append(`
+                <div class="${signupListItemClass}"
+                    style="${signupListItemStyle}"
+                    id="signup-search-listItem">
+                    <strong>Searching... Type the account name</strong>
+                </div>`);
+
+                if (!isSearching) {
+                    clearTimeout(searchTimeout);
+                }
+
+                searchTimeout = setTimeout(function () {
+                    doAccountSearch(signupAccountSearch, signupAccountSearchList)
+                }, 250);
+
+            });
+        });
+
+        function signupListMouseOver(id) {
+            $(`#signup-search-listItem-${id}`).attr('style', signupListItemStyleHover);
+        }
+
+        function signupListMouseOut(id) {
+            $(`#signup-search-listItem-${id}`).attr('style', signupListItemStyle);
+        }
+
+        function signupListMouseClick(id, text, isClaimed) {
+            console.log(id);
+            if (id && isGuid(id)) {
+                hiddenClaimAccountId.val(id);
+                selectedAccount = {
+                    id,
+                    text,
+                    isClaimed
+                };
+
+                signupAccountSearch.val(text);
+            } else {
+                console.log(signupAccountSearch.val());
+                hiddenAccountName.val(signupAccountSearch.val())
+            }
+
+            signupAccountSearchList.addClass('hide');
+            btnContinue.removeClass('disabled');
+        }
+
+        function doAccountSearch(search, list) {
+            if (search.val().length > 0 && !isSearching) {
+                isSearching = true;
+
+                $.get(
+                    `@Url.Action("GetData", "SignUp", new { Area = "" })?search=${search.val()}`,
+                    function (data) {
+
+                        isSearching = false;
+
+                        if (data && data.success == true) {
+
+                            list.html('');
+
+                            for (let account of data.accounts) {
+                                var name = `${account.Text.replace("'", '')}`;
+                                var isClaimed = false;
+                                if (typeof account.IsClaimed === "boolean") {
+                                    isClaimed = Boolean(account.IsClaimed);
                                 }
-                            })
-                        };
+
+                                list.append(`
+                                    <div class="${signupListItemClass}"
+                                        style="${signupListItemStyle}"
+                                        id="signup-search-listItem-${account.Id}"
+                                        onmouseover="${signupListOnMouseOver}('${account.Id}')"
+                                        onmouseout="${signupListOnMouseOut}('${account.Id}')"
+                                        onclick="${signupListOnClick}('${account.Id}', '${name}', ${isClaimed})">
+                                        <strong>${account.Text}</strong>
+                                    </div>`);
+                            }
+
+                            if (search.val().length > 3) {
+                                list.append(`
+                                <div class="${signupListItemClass}"
+                                    style="${signupListItemStyle}"
+                                    id="signup-search-listItem-0"
+                                    onmouseover="${signupListOnMouseOver}(0)"
+                                    onmouseout="${signupListOnMouseOut}(0)"
+                                    onclick="${signupListOnClick}('0')">
+                                    <strong>Can't find your ${isOrganization ? 'organization' : 'program'}? <span class="text-success">Click here to continue </span></strong>
+                                </div>`);
+                            } else if (data.accounts.length == 0) {
+                                list.append(`
+                                <div class="${signupListItemClass}"
+                                    style="${signupListItemStyle}"
+                                    id="signup-search-listItem-0">
+                                    <strong>Searching... Type the account name</strong>
+                                </div>`);
+                            }
+
+                            list.removeClass('hide');
+
+                        } else {
+                            Notifications.showBar({
+                                title: 'Error',
+                                message: 'Error loading accounts',
+                                success: false
+                            });
+                        }
                     }
-                }
-            });
-
-            select2SearchOrganizations.on('select2:select', function (e) {
-                //grab the selected account and set it to global object, so we can further decide on cliams profile or register
-                var data = e.params.data;
-                selectedAccount = data;
-                if (data && data.id && data.slug) {
-                    hiddenClaimAccountId.val(data.id);
-                }
-                else if (data && data.id && data.text) {
-                    hiddenAccountName.val(data.text);
-                }
-
-                btnContinue.removeClass('disabled');
-            });
-        };
+                );
+            }
+        }
 
         function proceedFurther(page) {
             if (page === '@EnumSignupPages.WelCome') {
@@ -302,15 +422,17 @@
                 signupOrgType.show();
             } else if (page === '@EnumSignupPages.SearchProgramName') {
                 // user clicked btn-ProgramForStudents, and going for name search for his/her program
+                isOrganization = false;
                 hiddeAccountType.val('@AccountType.Teacher');
                 lblOrgSearchTitle.text('Whats the name of your Program?');
-                loadSearch("Program");
+                signupAccountSearch.attr('placeholder', 'Type in your program name');
                 signupIndividualType.hide();
                 signupSearchName.show();
             } else if (page === '@EnumSignupPages.SearchOrgName') {
                 // user is from the organization, and going for name search for his/her organization
+                isOrganization = true;
                 lblOrgSearchTitle.text('Whats the name of your Organization?');
-                loadSearch("Organization");
+                signupAccountSearch.attr('placeholder', 'Type in your organization name');
                 signupOrgType.hide();
                 signupSearchName.show();
             } else if (page === '@EnumSignupPages.Register') {
@@ -334,15 +456,15 @@
                 return;
             }
             console.log(selectedAccount);
-            if (selectedAccount && selectedAccount.slug) {
+            if (selectedAccount) {
                 if (selectedAccount.isClaimed) {
                     headerAccountClaimed.show();
-                    btnRequestAccess.show();
                     proceedFurther('@EnumSignupPages.ClaimProfile');
+                    btnSaveClaims.html('Request Access &raquo;');
                 } else {
                     headerAccountExist.show();
-                    btnClaimProcess.show();
                     proceedFurther('@EnumSignupPages.ClaimProfile');
+                    btnSaveClaims.html('Start the claim process &raquo;');
                 }
 
             } else {
@@ -448,6 +570,12 @@
                     }
                 });
             }
+        }
+
+        function isGuid(value) {
+            var regex = /[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}/i;
+            var match = regex.exec(value);
+            return match != null;
         }
 
     </script>
