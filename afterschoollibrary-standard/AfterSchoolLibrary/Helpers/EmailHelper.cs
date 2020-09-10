@@ -766,23 +766,36 @@ namespace AfterSchoolLibrary.Helpers
             var registration = checkoutObject.Registration;
             var totalCostWithFees = checkoutObject.GetStripeAmount(msgs, dc);
             var totalCost = totalCostWithFees - checkoutObject.PaymentTypeFeeOverrideAmount.Value;
+            var totalFees = checkoutObject.PaymentTypeFeeOverrideAmount.Value;
 
             var receiptRows = "";
 
             // add registration fee row
-            var subscriptionFeeModel = new NameValueCollection()
-                {
-                    { "Description", $"Payment to {billingAccount.Name}" },
-                    { "Quantity",  "1"},
-                    { "Cost", totalCost.ToCurrency() },
-                    { "AdditionalDetails", "" }
-                };
+            var paymentModel = new NameValueCollection()
+                                {
+                                    { "Description", $"Payment to {billingAccount.Name}" },
+                                    { "Quantity",  "1"},
+                                    { "Cost", totalCost.ToCurrency() },
+                                    { "AdditionalDetails", "" }
+                                };
 
             receiptRows += ProcessTemplate(
                     EmailTemplates.Registration_Confirmation_Rows,
-                    subscriptionFeeModel,
+                    paymentModel,
                     "Registration_Confirmation_Rows",
                     msgs);
+
+            var registrationTable = ProcessTemplate(
+                                     EmailTemplates.Registration_Confirmation_Table,
+                                     new NameValueCollection()
+                                        {
+                                            { "AmountDueOrPaid", "Amount Paid" },
+                                            { "TotalCost", totalCostWithFees.ToCurrency() },
+                                            { "BodyRows", receiptRows },
+                                            { "CreditCardFee", totalFees.ToCurrency() },
+                                        },
+                                     "Registration_Confirmation_Table-1.0",
+                                     msgs);
 
             var model = new NameValueCollection()
             {
@@ -796,17 +809,19 @@ namespace AfterSchoolLibrary.Helpers
                 { "BillerAccountLink", billingAccount.HomePageUrl },
                 { "AmountDueOrPaid", "Amount Paid" },
                 { "TotalCost", totalCostWithFees.ToCurrency() },
-                { "BodyRows", receiptRows },
+                { "RegistrationTable", registrationTable },
                 { "CustomMessage", customMessage },
                 { "CreditCardFee", checkoutObject.PaymentTypeFeeOverrideAmount.ToCurrency() },
-                { "RegistrationDetails", "Login to your account to view more details about this payment."}
+                { "RegistrationDetails", "Login to your account to view more details about this payment."},
+                { "VirtualInfo", "" },
+                { "SplitPaymentSubscriptionInfo", "" }
             };
 
             var subject = $"Payment receipt for {billingAccount.Name}";
             var body = ProcessTemplate(
                 EmailTemplates.Registration_Confirmation,
                 model,
-                "Registration_Confirmation",
+                "Registration_Confirmation-1.0",
                 msgs);
 
             // SEND EMAILS
