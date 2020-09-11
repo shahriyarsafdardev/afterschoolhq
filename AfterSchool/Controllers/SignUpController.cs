@@ -861,7 +861,7 @@ namespace AfterSchool.Controllers
 
         public static string GetAccountName(Account account)
         {
-            var cityState = account.GetDefaultLocation()?.GetCityState();
+            var cityState = account.GetDefaultLocation()?.FormatCityStateZipCode();
             if (cityState.IsNotBlank())
             {
                 //ex.Darye's Enrichment Club - Indianapolis, IN

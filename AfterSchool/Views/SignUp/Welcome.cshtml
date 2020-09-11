@@ -69,7 +69,7 @@
         <div class="clearfix"></div>
 
         <div class="text-center margin-v-30">
-            <a href="#" class="text-muted">&laquo; Back</a>
+            <a href="#" class="text-muted" onclick="return proceedBack('@EnumSignupPages.WelCome')">&laquo; Back</a>
         </div>
     </div>
 
@@ -85,7 +85,7 @@
         <div class="clearfix"></div>
 
         <div class="text-center margin-v-30">
-            <a href="#" class="text-muted">&laquo; Back</a>
+            <a href="#" class="text-muted" onclick="return proceedBack('@EnumSignupPages.SelectUserType')">&laquo; Back</a>
         </div>
     </div>
 
@@ -107,7 +107,7 @@
         <div class="clearfix"></div>
 
         <div class="text-center margin-v-30">
-            <a href="#" class="text-muted">&laquo; Back</a>
+            <a href="#" class="text-muted" onclick="return proceedBack('@EnumSignupPages.SelectUserType')">&laquo; Back</a>
         </div>
     </div>
 
@@ -127,12 +127,12 @@
 
                 <div class="clearfix"></div>
                 <div class="text-center margin-v-30">
-                    <a href="#" class="text-muted">&laquo; Back</a>
+                    <a href="#" class="text-muted" onclick="return proceedBack('@EnumSignupPages.SearchProgramName')">&laquo; Back</a>
                 </div>
             </div>
 
             <div class="col-md-8 col-md-offset-2 visible-md visible-lg margin-v-30">
-                <a href="#" class="text-muted">&laquo; Back</a>
+                <a href="#" class="text-muted" onclick="return proceedBack('@EnumSignupPages.SearchProgramName')">&laquo; Back</a>
                 <button type="button" class="btn-SearchContinue col-md-3 btn btn-primary btn-lg pull-right disabled" onclick="return decideToProceedFurther(this)">Continue &raquo;</button>
             </div>
             <div class="clearfix"></div><br />
@@ -210,12 +210,12 @@
 
                     <div class="clearfix"></div>
                     <div class="text-center margin-v-30">
-                        <a href="#" class="text-muted">&laquo; Back</a>
+                        <a href="#" class="text-muted" onclick="return proceedBack('@EnumSignupPages.ClaimProfile')">&laquo; Back</a>
                     </div>
                 </div>
 
                 <div class="col-md-6 col-md-offset-3 visible-md visible-lg margin-v-30">
-                    <a href="#" class="pull-left text-muted">&laquo; Back</a>
+                    <a href="#" class="pull-left text-muted" onclick="return proceedBack('@EnumSignupPages.ClaimProfile')">&laquo; Back</a>
                     <button type="button" class="btn-save-claims btn btn-primary btn-lg pull-right" onclick="return saveClaims()"></button>
                 </div>
 
@@ -263,8 +263,8 @@
         var signupThankYou = $('#signup-thank-you');
         var lblOrgSearchTitle = $('#lbl-org-search-title');
         var lblOrgMemberEmail = $('#lbl-org-member-email');
-        var btnContinue = $('.btn-SearchContinue'); //class based identification due to responsiveness issues        
-        var btnSaveClaims = $('.btn-save-claims'); //class based identification due to responsiveness issues     
+        var btnContinue = $('.btn-SearchContinue'); //class based identification due to responsiveness issues
+        var btnSaveClaims = $('.btn-save-claims'); //class based identification due to responsiveness issues
         var formClaimProfile = $('#form-signup-claim-form');
         var headerAccountExist = $('#header-account-exist');
         var headerAccountClaimed = $('#header-account-claimed');
@@ -335,6 +335,7 @@
                 signupAccountSearch.val(text);
             } else {
                 console.log(signupAccountSearch.val());
+                selectedAccount = null; //support for back click
                 hiddenAccountName.val(signupAccountSearch.val())
             }
 
@@ -374,7 +375,7 @@
                                     </div>`);
                             }
 
-                            if (search.val().length > 3) {
+                            if (search.val().length > 3 || data.accounts.length == 0) {
                                 list.append(`
                                 <div class="${signupListItemClass}"
                                     style="${signupListItemStyle}"
@@ -383,13 +384,6 @@
                                     onmouseout="${signupListOnMouseOut}(0)"
                                     onclick="${signupListOnClick}('0')">
                                     <strong>Can't find your ${isOrganization ? 'organization' : 'program'}? <span class="text-success">Click here to continue </span></strong>
-                                </div>`);
-                            } else if (data.accounts.length == 0) {
-                                list.append(`
-                                <div class="${signupListItemClass}"
-                                    style="${signupListItemStyle}"
-                                    id="signup-search-listItem-0">
-                                    <strong>Searching... Type the account name</strong>
                                 </div>`);
                             }
 
@@ -576,6 +570,29 @@
             var regex = /[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}/i;
             var match = regex.exec(value);
             return match != null;
+        }
+
+        function proceedBack(page) {
+            if (page === '@EnumSignupPages.WelCome') {
+                signupWelcome.show();
+                signupSelectUsertype.hide();
+            } else if (page === '@EnumSignupPages.SelectUserType') {
+                signupOrgType.hide();
+                signupIndividualType.hide();
+                signupSelectUsertype.show();
+            } else if (page === '@EnumSignupPages.SearchProgramName') {
+                if (isOrganization) {
+                    signupOrgType.show();
+                }
+                else {
+                    signupIndividualType.show();
+                }
+                signupSearchName.hide();
+            } else if (page === '@EnumSignupPages.ClaimProfile') {
+                signupSearchName.show();
+                signupRegister.hide();
+                signupClaimProfile.hide();
+            }
         }
 
     </script>
