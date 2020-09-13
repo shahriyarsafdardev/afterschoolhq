@@ -2311,6 +2311,11 @@ namespace AfterSchoolLibrary.Services
 
         #region Finance
 
+        public static bool UseStripeConnectDuringCheckout(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc) && !account.CanReceiveCheckPayouts(msgs, dc);
+        }
+
         public static Payout RequestNewPayout(this Account account, List<Transaction> transactions, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var paymentType = PaymentType.NotSet;
@@ -2529,12 +2534,13 @@ namespace AfterSchoolLibrary.Services
         {
             // if stripe token then don't send customer id
             string customerId = null;
+            var billingAccount = checkoutObject.BillingAccount;
 
             if (checkoutObject.SavePaymentInfo || checkoutObject.HasStripeSourceId)
                 customerId = checkoutObject.PayingAccount.StripeCustomerId;
 
             // if can charge fees we bill it directly from our AHQ account
-            var useStripeConnectedAccount = checkoutObject.BillingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
+            var useStripeConnectedAccount = billingAccount.UseStripeConnectDuringCheckout(msgs, dc);
             var platformFeeAmount = checkoutObject.CalculatePlatformFeeAmount(msgs, dc);
 
             // only charge tuition during checkout, because subscriptions are billed through stripe
@@ -3105,15 +3111,19 @@ namespace AfterSchoolLibrary.Services
             var paymentFeatures = new List<FeatureType>() { FeatureType.UseStripeConnectedAccount, FeatureType.AcceptPayments };
 
             if (account.HasAccountPackageFeatures(paymentFeatures, msgs, dc))
-                return account.CanReceiveStripeDeposits(msgs, dc);
+                return account.CanReceiveStripeDeposits(msgs, dc) || account.CanReceiveCheckPayouts(msgs, dc);
 
             return true;
         }
 
         public static bool CanReceivePaymentDeposits(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.CanReceiveACHDeposits(msgs, dc) || 
-                account.GetCheckPaymentAccount(msgs, dc).IsNotEmpty();
+            return account.CanReceiveACHDeposits(msgs, dc) || account.CanReceiveCheckPayouts(msgs, dc);
+        }
+
+        public static bool CanReceiveCheckPayouts(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.GetCheckPaymentAccount(msgs, dc).IsNotEmpty();
         }
 
         public static bool CanReceiveACHDeposits(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)

@@ -288,7 +288,10 @@ namespace AfterSchool.Areas.User.Controllers
             }
 
             if (student.IsGuid())
+            {
+                SessionVariables.CurrentRegistrant = registrant;
                 return Redirect("/account/register");
+            }
 
             if (reg.IsGuid())
                 return Redirect(Registration.LoadByUid(reg.ToGuid()).GetParentalConsentUrl);
