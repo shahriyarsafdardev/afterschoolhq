@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace AfterSchoolLibrary
 {
@@ -67,6 +68,56 @@ namespace AfterSchoolLibrary
                     first_name = firstName,
                     org_name = orgname,
                     email,
+                    web_demo = 1
+                }
+            };
+
+            var task = Task.Run(async () =>
+            {
+                return await sg.RequestAsync(
+                    method: SendGridClient.Method.POST,
+                    urlPath: "contactdb/recipients",
+                    requestBody: contact.ToJSON());
+            });
+            task.Wait();
+
+            dynamic response = task.Result;
+            if (response.StatusCode != System.Net.HttpStatusCode.Accepted)
+            {
+                msgs.Add(response.Body.ReadAsStringAsync().Result, MessageType.Error);
+            }
+        }
+
+        public static void AddOrUpdateContact(string firstName, string lastName, string email, string userId, string accountId, string accountEmail, string accountName, string accountPhone,
+            string accountHomePageUrl, string accountCreateDate, string accountCreationDays, string lastActivityDate, string lastActivityCreationDays, string activityCount, string isAccountProfileExist,
+            string isAccountProfileStarted, string isAccountProfileCompleted, string stripeConnected, string emailVerified, SystemMessages msgs)
+        {
+            var sg = new SendGridClient(SendGridApiKey);
+
+            var contact = new List<object>()
+            {
+                new
+                {
+                    first_name = firstName.ReturnNullIfEmpty(),
+                    last_name = lastName.ReturnNullIfEmpty(),
+                    email = email.ReturnNullIfEmpty(),
+                    owner_id = userId.ReturnNullIfEmpty(),
+                    program_id = accountId.ReturnNullIfEmpty(),
+                    program_email = accountEmail.ReturnNullIfEmpty(),
+                    program_name = accountName.ReturnNullIfEmpty(),
+                    program_phone_number = accountPhone.ReturnNullIfEmpty(),
+                    program_profile = accountHomePageUrl.ReturnNullIfEmpty(),
+                    program_profile_edit_link = accountHomePageUrl.IsBlank() ? null : $"{Helpers.Utilities.BaseUrl()}/login?returnurl={HttpUtility.UrlEncode($"{accountHomePageUrl}?edit=1")}",
+                    program_create_date = accountCreateDate.ReturnNullIfEmpty(),
+                    days_since_program_created = accountCreationDays.ReturnNullIfEmpty(),
+                    last_activity_creation_date = lastActivityDate.ReturnNullIfEmpty(),
+                    days_since_last_activity_created = lastActivityCreationDays.ReturnNullIfEmpty(),
+                    activities_created = activityCount.ReturnNullIfEmpty(),
+                    profile_exists = isAccountProfileExist.ReturnNullIfEmpty(),
+                    profile_started = isAccountProfileStarted.ReturnNullIfEmpty(),
+                    profile_completed = isAccountProfileCompleted.ReturnNullIfEmpty(),
+                    stripe_connected = stripeConnected.ReturnNullIfEmpty(),
+                    email_verified = emailVerified.ReturnNullIfEmpty(),
                     web_demo = 1
                 }
             };

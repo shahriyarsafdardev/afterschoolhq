@@ -96,6 +96,8 @@ namespace AfterSchool.Controllers
                         var userId = user.ID.Value;
                         var accountId = account.ID.Value;
 
+                        // SendGridHelper.AddOrUpdateContact(user.FirstName, msgs);
+
                         BackgroundJob.Enqueue(() => WebUserService.SendVerificationEmail(userId));
                         BackgroundJob.Enqueue(() => AccountService.SendWelcomeEmailPurchase(accountId));
                     },
