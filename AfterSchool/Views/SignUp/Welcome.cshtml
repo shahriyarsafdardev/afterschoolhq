@@ -77,7 +77,7 @@
                 </div>
                 <div class="clearfix"></div>
             </div>
-            
+
             <div class="clearfix"></div>
             <div class="text-center margin-v-40">
                 <button id="btn-GetStarted" type="button" class="col-md-3 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.WelCome')">Get Started</button>
@@ -87,189 +87,194 @@
         </div>
     </div>
 
-    <div id="signup-select-usertype" style="display: none;">
-        <h2 class="text-center">What would you like to do?</h2>
-        <div class="clearfix"></div>
+    <div id="signup-select-usertype" class="row" style="display: none;">
+        <div class="col-md-offset-3 col-md-6">
+            <h2 class="text-center">What would you like to do?</h2>
+            <div class="clearfix"></div>
 
-        <div class="row margin-t-35">
-            <button id="btn-CreateIndividualAccount" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SelectIndividualType')">Create an Individual Account</button>
-            <div class="clearfix"></div><br />
-            <button id="btn-CreateOrgAccount" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SelectOrgType')">Create an Organization Account</button>
-        </div>
-        <div class="clearfix"></div>
-
-        <div class="text-center margin-v-30">
-            <a href="#" class="text-muted" onclick="return proceedBack('@EnumSignupPages.WelCome')">&laquo; Back</a>
-        </div>
-    </div>
-
-    <div id="signup-individualtype" style="display: none;">
-        <h2 class="text-center">What would you like to do?</h2>
-        <div class="clearfix"></div>
-
-        <div class="row margin-t-35">
-            <button id="btn-ProgramForStudents" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SearchProgramName')">Provide programs for students</button>
-            <div class="clearfix"></div><br />
-            <a id="btn-EnrollChild" href="~/parents.html" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center">Enroll my child in a program</a>
-        </div>
-        <div class="clearfix"></div>
-
-        <div class="text-center margin-v-30">
-            <a href="#" class="text-muted" onclick="return proceedBack('@EnumSignupPages.SelectUserType')">&laquo; Back</a>
-        </div>
-    </div>
-
-    <div id="signup-orgtype" style="display: none;">
-        <h2 class="text-center">What kind of organization?</h2>
-        <div class="clearfix"></div>
-
-        <div class="row margin-t-35">
-            <button id="btn-Business" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.Business')">Business</button>
-            <div class="clearfix"></div><br />
-            <button id="btn-School" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.School')">School</button>
-            <div class="clearfix"></div><br />
-            <button id="btn-CommunityCenter" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.CommunityCenter')">Community Center</button>
-            <div class="clearfix"></div><br />
-            <button id="btn-Church" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.Church')">Church</button>
-            <div class="clearfix"></div><br />
-            <button id="btn-NonProfit" type="button" class="col-md-4 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.ActivityProvider')">Non Profit</button>
-        </div>
-        <div class="clearfix"></div>
-
-        <div class="text-center margin-v-30">
-            <a href="#" class="text-muted" onclick="return proceedBack('@EnumSignupPages.SelectUserType')">&laquo; Back</a>
-        </div>
-    </div>
-
-    <div id="signup-search-name" style="display: none;">
-        <h2 id="lbl-org-search-title" class="text-center"></h2>
-        <div class="clearfix"></div>
-
-        <div class="row margin-t-35">
-            <div class="col-md-8 col-md-offset-2">
-                <input type="text" class="form-control" id="signup-account-search" placeholder="placeholder" autocomplete="off" />
-                <div id="signup-account-search-list" class="border-light-gray pointer hide" style="position:absolute; width:100%; z-index:1000; background-color: white; border-width: 2px;"></div>
+            <div class="row margin-t-35">
+                <button id="btn-CreateIndividualAccount" type="button" class="col-lg-6 col-md-8 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SelectIndividualType')">Create an Individual Account</button>
+                <div class="clearfix"></div><br />
+                <button id="btn-CreateOrgAccount" type="button" class="col-lg-6 col-md-8 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SelectOrgType')">Create an Organization Account</button>
             </div>
-            <div class="clearfix"></div><br />
+            <div class="clearfix"></div>
 
-            <div class="visible-sm visible-xs">
-                <button type="button" class="btn-SearchContinue btn btn-primary btn-lg pull-right col-xs-12 disabled" onclick="return decideToProceedFurther(this)">Continue &raquo;</button>
+            <div class="text-center margin-v-30">
+                <a href="#" class="text-muted" onclick="return proceedBack('@EnumSignupPages.WelCome')">&laquo; Back</a>
+            </div>
+        </div>
+    </div>
 
-                <div class="clearfix"></div>
-                <div class="text-center margin-v-30">
+    <div id="signup-individualtype" class="row" style="display: none;">
+        <div class="col-md-offset-3 col-md-6">
+            <h2 class="text-center">What would you like to do?</h2>
+            <div class="clearfix"></div>
+
+            <div class="row margin-t-35">
+                <button id="btn-ProgramForStudents" type="button" class="col-lg-6 col-md-8 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SearchProgramName')">Provide programs for students</button>
+                <div class="clearfix"></div><br />
+                <a id="btn-EnrollChild" href="~/parents.html" class="col-lg-6 col-md-8 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center">Enroll my child in a program</a>
+            </div>
+            <div class="clearfix"></div>
+
+            <div class="text-center margin-v-30">
+                <a href="#" class="text-muted" onclick="return proceedBack('@EnumSignupPages.SelectUserType')">&laquo; Back</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="signup-orgtype" class="row" style="display: none;">
+        <div class="col-md-offset-3 col-md-6">
+            <h2 class="text-center">What kind of organization?</h2>
+            <div class="clearfix"></div>
+
+            <div class="row margin-t-35">
+                <button id="btn-Business" type="button" class="col-lg-6 col-md-8 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.Business')">Business</button>
+                <div class="clearfix"></div><br />
+                <button id="btn-School" type="button" class="col-lg-6 col-md-8 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.School')">School</button>
+                <div class="clearfix"></div><br />
+                <button id="btn-CommunityCenter" type="button" class="col-lg-6 col-md-8 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.CommunityCenter')">Community Center</button>
+                <div class="clearfix"></div><br />
+                <button id="btn-Church" type="button" class="col-lg-6 col-md-8 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.Church')">Church</button>
+                <div class="clearfix"></div><br />
+                <button id="btn-NonProfit" type="button" class="col-lg-6 col-md-8 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.ActivityProvider')">Non Profit</button>
+            </div>
+            <div class="clearfix"></div>
+
+            <div class="text-center margin-v-30">
+                <a href="#" class="text-muted" onclick="return proceedBack('@EnumSignupPages.SelectUserType')">&laquo; Back</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="signup-search-name" class="row" style="display: none;">
+        <div class="col-md-offset-3 col-md-6">
+            <h2 id="lbl-org-search-title" class="text-center"></h2>
+            <div class="clearfix"></div>
+
+            <div class="row margin-t-35">
+                <div class="">
+                    <input type="text" class="form-control" id="signup-account-search" placeholder="placeholder" autocomplete="off" />
+                    <div id="signup-account-search-list" class="border-light-gray pointer hide" style="position:absolute; width:100%; z-index:1000; background-color: white; border-width: 2px;"></div>
+                </div>
+                <div class="clearfix"></div><br />
+
+                <div class="visible-md visible-lg margin-v-30">
                     <a href="#" class="text-muted" onclick="return proceedBack('@EnumSignupPages.SearchProgramName')">&laquo; Back</a>
+                    <button type="button" class="btn-SearchContinue col-md-3 btn btn-primary btn-lg pull-right disabled" onclick="return decideToProceedFurther(this)">Continue &raquo;</button>
                 </div>
-            </div>
+                <div class="clearfix"></div><br />
 
-            <div class="col-md-8 col-md-offset-2 visible-md visible-lg margin-v-30">
-                <a href="#" class="text-muted" onclick="return proceedBack('@EnumSignupPages.SearchProgramName')">&laquo; Back</a>
-                <button type="button" class="btn-SearchContinue col-md-3 btn btn-primary btn-lg pull-right disabled" onclick="return decideToProceedFurther(this)">Continue &raquo;</button>
-            </div>
-            <div class="clearfix"></div><br />
-        </div>
-    </div>
-
-    <div id="signup-register" class="sign-up margin-h-auto" style="display: none;">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <a href="/"><img src="@UILabel.ProductLogoInverse()" alt="logo" style="max-width: 100%; width: 350px;" class="logo-img"></a>
-            </div>
-            <div class="panel-body">
-                <p class="text-medium-small text-center">Thanks for joining our platform to provide learning opportunities for students everywhere.</p>
-                <p class="text-medium-small text-center">We just need a little information to get started.</p>
-
-                <form id="form-signup-personal-details" class="form-horizontal" method="post" action="@Url.Action("index", "signup")">
-                    @{ Html.RenderPartial("~/Views/Shared/Login/_SignUpForm-NewAccount.cshtml", Model); }
-                </form>
-
-            </div>
-        </div>
-        <div class="text-center out-links"><a href="/">&copy; @DateTime.UtcNow.Year @UILabel.ProductName()</a></div>
-    </div>
-
-    <div id="signup-claim-profile" style="display: none;">
-        <h2 class="text-center">Claim Profile</h2>
-        <div class="clearfix"></div><br />
-        <h5 id="header-account-exist" class="text-center" style="display: none;">This profile already exists on AfterSchool HQ. Please start the claim process below.</h5>
-        <h5 id="header-account-claimed" class="text-center" style="display: none;">This profile already claimed on AfterSchool HQ. You can request access by entering your information below.</h5>
-        <div class="clearfix"></div><br />
-
-        <div class="row margin-t-35">
-            <form id="form-signup-claim-form" class="form-horizontal">
-                @Html.AntiForgeryToken()
-
-                <input id="hidden-claim-accountId" type="hidden" name="accountId" />
-
-                <div class="form-group row">
-                    <div class="col-md-6 col-md-offset-3">
-                        <input class="form-control" type="text" required="required" name="firstName" placeholder="First Name">
-                    </div>
-                </div>
-                <div class="clearfix"></div>
-
-                <div class="form-group row">
-                    <div class="col-md-6 col-md-offset-3">
-                        <input class="form-control" type="text" required="required" name="lastName" placeholder="Last Name">
-                    </div>
-                </div>
-                <div class="clearfix"></div>
-
-                <div class="form-group row">
-                    <div class="col-md-6 col-md-offset-3">
-                        <input class="form-control" type="email" required="required" name="email" placeholder="Email">
-                    </div>
-                </div>
-                <div class="clearfix"></div>
-
-                <div class="form-group row">
-                    <div class="col-md-6 col-md-offset-3">
-                        <input class="form-control" type="number" required="required" name="phone" placeholder="Phone">
-                    </div>
-                </div>
-                <div class="clearfix"></div>
-
-                <div class="form-group row">
-                    <div class="col-md-3 col-md-offset-4 btn-center">
-                        @{ Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", "signup-claim-form-recaptcha"); }
-                    </div>
-                </div>
-                <div class="clearfix"></div>
-
-                <div class="visible-sm visible-xs margin-v-30">
-                    <button type="button" class="btn-save-claims btn btn-primary btn-lg pull-right col-xs-12" onclick="return saveClaims(this)"></button>
+                <div class="visible-sm visible-xs">
+                    <button type="button" class="btn-SearchContinue btn btn-primary btn-lg pull-right col-xs-12 disabled" onclick="return decideToProceedFurther(this)">Continue &raquo;</button>
 
                     <div class="clearfix"></div>
                     <div class="text-center margin-v-30">
-                        <a href="#" class="text-muted" onclick="return proceedBack('@EnumSignupPages.ClaimProfile')">&laquo; Back</a>
+                        <a href="#" class="text-muted" onclick="return proceedBack('@EnumSignupPages.SearchProgramName')">&laquo; Back</a>
                     </div>
                 </div>
-
-                <div class="col-md-6 col-md-offset-3 visible-md visible-lg margin-v-30">
-                    <a href="#" class="pull-left text-muted" onclick="return proceedBack('@EnumSignupPages.ClaimProfile')">&laquo; Back</a>
-                    <button type="button" class="btn-save-claims btn btn-primary btn-lg pull-right" onclick="return saveClaims()"></button>
-                </div>
-
                 <div class="clearfix"></div><br />
-            </form>
+            </div>
         </div>
     </div>
 
-    <div id="signup-thank-you" style="display: none;">
-        <h2 class="text-center">Thank You!</h2>
-        <div class="clearfix"></div><br />
-        <h5 id="header-thankyou-not-recognized" class="text-center" style="display: none;">We have sent an email with instructions to <strong id="lbl-org-member-email"></strong>.</h5>
-        <h5 id="header2-thankyou-not-recognized" class="text-center" style="display: none;">No longer have access to this email? Incorrect email? Click <a href="#" onclick="return contactSupport()">Here</a> to automatically submit a request to our support team.</h5>
+    <div id="signup-register" class="row" style="display: none;">
+        <div class="col-md-offset-3 col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <a href="/"><img src="@UILabel.ProductLogoInverse()" alt="logo" style="max-width: 100%; width: 350px;" class="logo-img"></a>
+                </div>
+                <div class="panel-body">
+                    <p class="text-medium-small text-center">Thanks for joining our platform to provide learning opportunities for students everywhere.</p>
+                    <p class="text-medium-small text-center">We just need a little information to get started.</p>
 
-        <div id="header3-thankyou-not-recognized" class="col-md-offset-3 alert alert-info alert-icon alert-border-color alert-dismissible" role="alert" style="display: none; width: 50%; margin-top: 40px; text-align: center;">
-            <div class="icon"><span class="s7-info"></span></div>
-            <div class="message">
-                <button class="close" data-dismiss="alert" aria-label="Close"><span class="s7-close" aria-hidden="true"></span></button><strong>We have sent your request!</strong> You should hear back from us in the next 24-48 hours.
+                    <form id="form-signup-personal-details" class="form-horizontal" method="post" action="@Url.Action("index", "signup")">
+                        @{ Html.RenderPartial("~/Views/Shared/Login/_SignUpForm-NewAccount.cshtml", Model); }
+                    </form>
+
+                </div>
+            </div>
+            <div class="text-center out-links"><a href="/">&copy; @DateTime.UtcNow.Year @UILabel.ProductName()</a></div>
+        </div>
+    </div>
+
+    <div id="signup-claim-profile" style="display: none;">
+        <div class="col-md-offset-3 col-md-6">
+            <h2 class="text-center">Claim Profile</h2>
+            <div class="clearfix"></div><br />
+            <h5 id="header-account-exist" class="text-center" style="display: none;">This profile already exists on AfterSchool HQ. Please start the claim process below.</h5>
+            <h5 id="header-account-claimed" class="text-center" style="display: none;">This profile already claimed on AfterSchool HQ. You can request access by entering your information below.</h5>
+            <div class="clearfix"></div><br />
+
+            <div class="row margin-t-35">
+                <form id="form-signup-claim-form" class="form-horizontal">
+                    @Html.AntiForgeryToken()
+
+                    <input id="hidden-claim-accountId" type="hidden" name="accountId" />
+
+                    <div class="form-group row">
+                        <input class="form-control" type="text" required="required" name="firstName" placeholder="First Name">
+                    </div>
+                    <div class="clearfix"></div>
+
+                    <div class="form-group row">
+                        <input class="form-control" type="text" required="required" name="lastName" placeholder="Last Name">
+                    </div>
+                    <div class="clearfix"></div>
+
+                    <div class="form-group row">
+                        <input class="form-control" type="email" required="required" name="email" placeholder="Email">
+                    </div>
+                    <div class="clearfix"></div>
+
+                    <div class="form-group row">
+                        <input class="form-control" type="number" required="required" name="phone" placeholder="Phone">
+                    </div>
+                    <div class="clearfix"></div>
+
+                    <div class="form-group row">
+                        @{ Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", "signup-claim-form-recaptcha"); }
+                    </div>
+                    <div class="clearfix"></div>
+
+                    <div class="visible-sm visible-xs margin-v-30">
+                        <button type="button" class="btn-save-claims btn btn-primary btn-lg pull-right col-xs-12" onclick="return saveClaims(this)"></button>
+
+                        <div class="clearfix"></div>
+                        <div class="text-center margin-v-30">
+                            <a href="#" class="text-muted" onclick="return proceedBack('@EnumSignupPages.ClaimProfile')">&laquo; Back</a>
+                        </div>
+                    </div>
+
+                    <div class="visible-md visible-lg margin-v-30">
+                        <a href="#" class="pull-left text-muted" onclick="return proceedBack('@EnumSignupPages.ClaimProfile')">&laquo; Back</a>
+                        <button type="button" class="btn-save-claims btn btn-primary btn-lg pull-right" onclick="return saveClaims()"></button>
+                    </div>
+
+                    <div class="clearfix"></div><br />
+                </form>
             </div>
         </div>
+    </div>
 
-        <h5 id="header-thankyou-recognized" class="text-center" style="display: none;">We see that you have email from same domain. We have sent you instruction to claim your account.</h5>
-        <h5 id="header-thankyou-request-access" class="text-center" style="display: none;">Your access request has been sent to the owner of this profile.</h5>
-        <div class="clearfix"></div><br />
+    <div id="signup-thank-you" class="row" style="display: none;">
+        <div class="col-md-offset-3 col-md-6">
+            <h2 class="text-center">Thank You!</h2>
+            <div class="clearfix"></div><br />
+            <h5 id="header-thankyou-not-recognized" class="text-center" style="display: none;">We have sent an email with instructions to <strong id="lbl-org-member-email"></strong>.</h5>
+            <h5 id="header2-thankyou-not-recognized" class="text-center" style="display: none;">No longer have access to this email? Incorrect email? Click <a href="#" onclick="return contactSupport()">Here</a> to automatically submit a request to our support team.</h5>
+
+            <div id="header3-thankyou-not-recognized" class="col-md-offset-3 alert alert-info alert-icon alert-border-color alert-dismissible" role="alert" style="display: none; width: 50%; margin-top: 40px; text-align: center;">
+                <div class="icon"><span class="s7-info"></span></div>
+                <div class="message">
+                    <button class="close" data-dismiss="alert" aria-label="Close"><span class="s7-close" aria-hidden="true"></span></button><strong>We have sent your request!</strong> You should hear back from us in the next 24-48 hours.
+                </div>
+            </div>
+
+            <h5 id="header-thankyou-recognized" class="text-center" style="display: none;">We see that you have email from same domain. We have sent you instruction to claim your account.</h5>
+            <h5 id="header-thankyou-request-access" class="text-center" style="display: none;">Your access request has been sent to the owner of this profile.</h5>
+            <div class="clearfix"></div><br />
+        </div>
     </div>
 
 </div>
