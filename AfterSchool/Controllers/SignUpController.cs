@@ -10,6 +10,7 @@ using BasicLibrary.DataAccess;
 using Hangfire;
 using System.Collections.Generic;
 using AfterSchool.Helpers;
+using AfterSchoolLibrary;
 
 namespace AfterSchool.Controllers
 {
@@ -95,8 +96,37 @@ namespace AfterSchool.Controllers
 
                         var userId = user.ID.Value;
                         var accountId = account.ID.Value;
+                        
+                        // TODO: need to ask darye, I think user here will be owner, so no need for this check below
+                        // var owner = account.GetAccountOwner(smsgs); 
 
-                        // SendGridHelper.AddOrUpdateContact(user.FirstName, msgs);
+                        if (user.IsNotEmpty() && account.IsNotEmpty())
+                        {
+                            var lastestActivity = account.GetLatestActivity(user, smsgs);
+                            var accountProfile = account.GetAccountProfile();
+
+                            SendGridHelper.AddOrUpdateContact(firstName: user.FirstName,
+                            lastName: user.LastName,
+                            email: user.Email,
+                            userId: user.ID.IsNotEmpty() ? user.ID.Value.ToString() : "",
+                            accountId: account.ID.IsNotEmpty() ? account.ID.Value.ToString() : "",
+                            accountEmail: account.Email,
+                            accountName: account.Name,
+                            accountPhone: account.Phone,
+                            accountHomePageUrl: account.HomePageUrl,
+                            accountCreateDate: account.CreateDate.Value.ToRfc3339String(),
+                            accountCreationDays: Convert.ToString(DateTime.UtcNow - account.CreateDate),
+                            lastActivityDate: Convert.ToString(lastestActivity?.CreateDate),
+                            lastActivityCreationDays: Convert.ToString(DateTime.UtcNow - lastestActivity?.CreateDate),
+                            activityCount: account.GetActivityCount().ToString(),
+                            isAccountProfileExist: accountProfile.IsNotEmpty() ? "1" : "0",
+                            isAccountProfileStarted: account.OnboardingStepDone != OnboardingStepType.NotSet ? "1" : "0",
+                            isAccountProfileCompleted: account.OnboardingStepDone == OnboardingStepType.All ? "1" : "0",
+                            stripeConnected: account.StripeChargesEnabled ? "1" : "0",
+                            emailVerified: user.VerifiedAccount ? "1" : "0",
+                            msgs: msgs);
+                        }
+                        
 
                         BackgroundJob.Enqueue(() => WebUserService.SendVerificationEmail(userId));
                         BackgroundJob.Enqueue(() => AccountService.SendWelcomeEmailPurchase(accountId));
