@@ -11,7 +11,8 @@
         SearchProgramName = 4,
         SearchOrgName = 5,
         Register = 6,
-        ClaimProfile = 7
+        ClaimProfile = 7,
+        SearchSchool = 8,
     };
     var model = new SignUpIndexViewModel();
 }
@@ -113,7 +114,7 @@
             <div class="row margin-t-35">
                 <button id="btn-ProgramForStudents" type="button" class="col-lg-6 col-md-8 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SearchProgramName')">Provide programs for students</button>
                 <div class="clearfix"></div><br />
-                <a id="btn-EnrollChild" href="~/parents.html" class="col-lg-6 col-md-8 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center">Enroll my child in a program</a>
+                <button id="btn-EnrollChild" type="button" class="col-lg-6 col-md-8 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SearchSchool')">Enroll my child in a program</button>
             </div>
             <div class="clearfix"></div>
 
@@ -181,7 +182,7 @@
     <div id="signup-register" class="row" style="display: none;">
         <div class="col-md-offset-3 col-md-6">
             <div class="panel panel-default">
-                <div class="panel-heading">
+                <div class="panel-heading text-center">
                     <a href="/"><img src="@UILabel.ProductLogoInverse()" alt="logo" style="max-width: 100%; width: 350px;" class="logo-img"></a>
                 </div>
                 <div class="panel-body">
@@ -232,8 +233,8 @@
                     </div>
                     <div class="clearfix"></div>
 
-                    <div class="form-group row">
-                        @{ Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", "signup-claim-form-recaptcha"); }
+                    <div class="form-group row text-center">
+                        @{ Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", ""); }
                     </div>
                     <div class="clearfix"></div>
 
@@ -287,6 +288,7 @@
         var searchTimeout = null;
         var isSearching = false;
         var isOrganization = false;
+        var isSchool = false;
         var selectedAccount = '';
         var signupWelcome = $('#signup-welcome');
         var signupSelectUsertype = $('#signup-select-usertype');
@@ -357,7 +359,7 @@
             $(`#signup-search-listItem-${id}`).attr('style', signupListItemStyle);
         }
 
-        function signupListMouseClick(id, text, isClaimed) {
+        function signupListMouseClick(id, text, slug, isClaimed) {
             console.log(id);
             if (id && isGuid(id)) {
                 hiddenClaimAccountId.val(id);
@@ -368,10 +370,20 @@
                 };
 
                 signupAccountSearch.val(text);
+
+                if (isSchool) {
+                    window.location = `${slug}`; //move to profile page
+                    return;
+                }
             } else {
                 console.log(signupAccountSearch.val());
                 selectedAccount = null; //support for back click
                 hiddenAccountName.val(signupAccountSearch.val())
+
+                if (isSchool) {
+                    window.location = `@Url.Content("~/parents.html")`;
+                    return;
+                }
             }
 
             signupAccountSearchList.addClass('hide');
@@ -393,7 +405,7 @@
                             list.html('');
 
                             for (let account of data.accounts) {
-                                var name = `${account.Text.replace("'", '')}`;
+                                var name = `${account.Text.replace(/'/g, "\\'")}`;
                                 var isClaimed = false;
                                 if (typeof account.IsClaimed === "boolean") {
                                     isClaimed = Boolean(account.IsClaimed);
@@ -405,20 +417,30 @@
                                         id="signup-search-listItem-${account.Id}"
                                         onmouseover="${signupListOnMouseOver}('${account.Id}')"
                                         onmouseout="${signupListOnMouseOut}('${account.Id}')"
-                                        onclick="${signupListOnClick}('${account.Id}', '${name}', ${isClaimed})">
+                                        onclick="${signupListOnClick}('${account.Id}', '${name}', '${account.Slug}', ${isClaimed})">
                                         <strong>${account.Text}</strong>
                                     </div>`);
                             }
 
-                            if (search.val().length > 3 || data.accounts.length == 0) {
+                            if (search.val().length >= 3) {
+                                var borderStyle = '';
+                                if (data.accounts.length > 0) {
+                                    borderStyle = 'border-top: 1px solid;'
+                                }
+
+                                var placeholder = '';
+                                if (isSchool) {
+                                    placeholder = `Can't find your school, organization, or program ? Click here`;
+                                } else {
+                                    placeholder = `Can't find your ${isOrganization ? 'organization' : 'program'}? Type in the full name of your organization then click continue below.`;
+                                }
+
                                 list.append(`
                                 <div class="${signupListItemClass}"
-                                    style="${signupListItemStyle}"
+                                    style="${signupListItemStyle} ${borderStyle}"
                                     id="signup-search-listItem-0"
-                                    onmouseover="${signupListOnMouseOver}(0)"
-                                    onmouseout="${signupListOnMouseOut}(0)"
                                     onclick="${signupListOnClick}('0')">
-                                    <strong>Can't find your ${isOrganization ? 'organization' : 'program'}? <span class="text-success">Click here to continue </span></strong>
+                                    <strong> ${placeholder} </strong>
                                 </div>`);
                             }
 
@@ -452,17 +474,29 @@
             } else if (page === '@EnumSignupPages.SearchProgramName') {
                 // user clicked btn-ProgramForStudents, and going for name search for his/her program
                 isOrganization = false;
+                isSchool = false;
                 hiddeAccountType.val('@AccountType.Teacher');
                 lblOrgSearchTitle.text('Whats the name of your Program?');
                 signupAccountSearch.attr('placeholder', 'Type in your program name');
-                signupIndividualType.hide();
+                clearSearch();
+                signupIndividualType.hide();                
                 signupSearchName.show();
             } else if (page === '@EnumSignupPages.SearchOrgName') {
                 // user is from the organization, and going for name search for his/her organization
                 isOrganization = true;
+                isSchool = false;
                 lblOrgSearchTitle.text('Whats the name of your Organization?');
                 signupAccountSearch.attr('placeholder', 'Type in your organization name');
+                clearSearch();
                 signupOrgType.hide();
+                signupSearchName.show();
+            } else if (page === '@EnumSignupPages.SearchSchool') {
+                isSchool = true;
+                isOrganization = false;
+                lblOrgSearchTitle.text('Find your school, organization or program');
+                signupAccountSearch.attr('placeholder', 'School, Organization or Proram name');
+                clearSearch();
+                signupIndividualType.hide();
                 signupSearchName.show();
             } else if (page === '@EnumSignupPages.Register') {
                 // user hasn't selected the system account and added a free text, so direct him to register screen
@@ -628,6 +662,14 @@
                 signupRegister.hide();
                 signupClaimProfile.hide();
             }
+        }
+
+        function clearSearch() {
+            selectedAccount = null;
+            hiddenClaimAccountId.val('');
+            hiddenAccountName.val('');
+            signupAccountSearch.val('');
+            btnContinue.addClass('disabled');
         }
 
     </script>

@@ -42,13 +42,15 @@
         </div>
     </div>
 
-    <div class="form-group">
+    <div class="form-group text-center">
         @{ Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", ""); }
     </div>
 
 </div>
 
-<p class="conditions">By creating an account, you agree with the <a href="/tos" target="_blank">Terms and Conditions</a>.</p>
+<div class="clearfix"></div>
+<br />
+<p class="conditions text-center">By creating an account, you agree with the <a href="/tos" target="_blank">Terms and Conditions</a>.</p>
 <button type="submit" class="btn btn-block btn-primary btn-lg">Get Started &raquo;</button>
 <div class="text-center margin-v-30">
     <a href="#" class="text-muted" onclick="return proceedBack('7')">&laquo; Back</a>

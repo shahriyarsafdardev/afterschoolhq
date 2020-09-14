@@ -635,8 +635,13 @@ namespace AfterSchoolLibrary.Models
                 var sql = $@"
                     select * from Account
                     where 
-                        Contains(name, '{"\""}{searchTerms.ToStringList("*\" AND \"")}{"*\""}') and
-                        IsTest = 0 and OwnerId is not NULL and AccountTypeId in ({accountTypes.Select(x => (int)x).ToList().ToStrings().ToStringList(",")})
+                        Contains(name, '{"\""}{searchTerms.ToStringList("*\" AND \"")}{"*\""}') 
+                        AND IsActive = 1 
+                        AND IsDeleted = 0 
+                        AND IsTest = 0 
+                        AND OwnerId is not NULL 
+                        AND AccountTypeId in ({accountTypes.Select(x => (int)x).ToList().ToStrings().ToStringList(",")})
+                    Order by Name asc
                 ";
 
                 dq.SelectRange.Start = start;

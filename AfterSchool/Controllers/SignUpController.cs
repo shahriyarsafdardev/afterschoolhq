@@ -853,6 +853,7 @@ namespace AfterSchool.Controllers
                 accounts = accounts.Select(account => new OrgDropDown()
                 {
                     Id = account.Uid,
+                    Slug = account.HomePageUrl,
                     Text = GetAccountName(account),
                     IsClaimed = account.IsClaimed,
                 })
