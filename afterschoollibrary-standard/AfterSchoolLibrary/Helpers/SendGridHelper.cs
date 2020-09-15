@@ -102,22 +102,22 @@ namespace AfterSchoolLibrary
                     last_name = lastName.ReturnNullIfEmpty(),
                     email = email.ReturnNullIfEmpty(),
                     owner_id = userId.ReturnNullIfEmpty(),
-                    program_id = accountId.ReturnNullIfEmpty(),
+                    account_id = accountId.ReturnNullIfEmpty(),
                     program_email = accountEmail.ReturnNullIfEmpty(),
                     program_name = accountName.ReturnNullIfEmpty(),
-                    program_phone_number = accountPhone.ReturnNullIfEmpty(),
-                    program_profile = accountHomePageUrl.ReturnNullIfEmpty(),
-                    program_profile_edit_link = accountHomePageUrl.IsBlank() ? null : $"{Helpers.Utilities.BaseUrl()}/login?returnurl={HttpUtility.UrlEncode($"{accountHomePageUrl}?edit=1")}",
+                    program_phone = accountPhone.ReturnNullIfEmpty(),
+                    activity_home_page_url = accountHomePageUrl.ReturnNullIfEmpty(), //program_profile is not available, instead we have activity_home_page_url
+                    activity_home_page_url_2 = accountHomePageUrl.IsBlank() ? null : $"{Helpers.Utilities.BaseUrl()}/login?returnurl={HttpUtility.UrlEncode($"{accountHomePageUrl}?edit=1")}",//program_profile_edit_link
                     program_create_date = accountCreateDate.ReturnNullIfEmpty(),
-                    days_since_program_created = accountCreationDays.ReturnNullIfEmpty(),
-                    last_activity_creation_date = lastActivityDate.ReturnNullIfEmpty(),
+                    days_since_account_created = accountCreationDays.ReturnNullIfEmpty(),
+                    last_activity_create_date = lastActivityDate.ReturnNullIfEmpty(),
                     days_since_last_activity_created = lastActivityCreationDays.ReturnNullIfEmpty(),
                     activities_created = activityCount.ReturnNullIfEmpty(),
                     profile_exists = isAccountProfileExist.ReturnNullIfEmpty(),
                     profile_started = isAccountProfileStarted.ReturnNullIfEmpty(),
                     profile_completed = isAccountProfileCompleted.ReturnNullIfEmpty(),
-                    stripe_connected = stripeConnected.ReturnNullIfEmpty(),
-                    email_verified = emailVerified.ReturnNullIfEmpty(),
+                    //stripe_connected = stripeConnected.ReturnNullIfEmpty(), // not present in current custom_fields
+                    //email_verified = emailVerified.ReturnNullIfEmpty(), // not present in current custom_fields
                     web_demo = 1
                 }
             };
@@ -129,10 +129,11 @@ namespace AfterSchoolLibrary
                     urlPath: "contactdb/recipients",
                     requestBody: contact.ToJSON());
             });
+            
             task.Wait();
-
             dynamic response = task.Result;
-            if (response.StatusCode != System.Net.HttpStatusCode.Accepted)
+
+            if (response.StatusCode != System.Net.HttpStatusCode.Accepted) // we are getting status code as Created
             {
                 msgs.Add(response.Body.ReadAsStringAsync().Result, MessageType.Error);
             }
