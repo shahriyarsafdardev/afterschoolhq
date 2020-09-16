@@ -36,7 +36,7 @@ namespace AfterSchoolLibrary
         public static SystemMessages SendMail(EmailAddress fromEmail, EmailAddress toEmail, string subject, string body, EmailAddress replyTo = null, string emailTemplateId = null)
         {
             var msgs = new SystemMessages();
-            
+
             var sg = new SendGridClient(SendGridApiKey);
             // var content = new Content("text/html", body);
 
@@ -46,7 +46,7 @@ namespace AfterSchoolLibrary
             var mail = MailHelper.CreateSingleEmail(fromEmail, toEmail, subject, null, body);
             mail.ReplyTo = replyTo;
             mail.TemplateId = emailTemplateId ?? EnrollHQGenericTemplateId;
-            
+
             var task = Task.Run(async () => { return await sg.SendEmailAsync(mail); });
             task.Wait();
 
@@ -129,7 +129,7 @@ namespace AfterSchoolLibrary
                     urlPath: "contactdb/recipients",
                     requestBody: contact.ToJSON());
             });
-            
+
             task.Wait();
             dynamic response = task.Result;
 
@@ -137,6 +137,28 @@ namespace AfterSchoolLibrary
             {
                 msgs.Add(response.Body.ReadAsStringAsync().Result, MessageType.Error);
             }
+
+
+            //TODO: not working properly at the moment
+            //var additonalData = new List<object>()
+            //{
+            //    new
+            //    {
+            //        stripe_connected = "1",
+            //    }
+            //};
+
+            //var id = "YmcxMkBhZnRlcnNjaG9vbGhxLmNvbQ==";
+            //var task2 = Task.Run(async () =>
+            //{
+            //    return await sg.RequestAsync(
+            //        method: SendGridClient.Method.PATCH,
+            //        urlPath: $"contactdb/recipients/{id}",
+            //        requestBody: additonalData.ToJSON());
+            //});
+
+            //task2.Wait();
+            //dynamic response2 = task2.Result;
         }
     }
 }

@@ -113,7 +113,7 @@ namespace AfterSchool.Controllers
                                 accountEmail: account.Email,
                                 accountName: account.Name,
                                 accountPhone: account.Phone,
-                                accountHomePageUrl: account.HomePageUrl,
+                                accountHomePageUrl: null,
                                 accountCreateDate: account.CreateDate.Value.ToRfc3339String(),
                                 accountCreationDays: (DateTime.UtcNow - account.CreateDate)?.Days.ToString(),
                                 lastActivityDate: lastestActivity?.CreateDate.Value.ToRfc3339String(),
@@ -122,8 +122,8 @@ namespace AfterSchool.Controllers
                                 isAccountProfileExist: accountProfile.IsNotEmpty() ? "1" : "0",
                                 isAccountProfileStarted: account.OnboardingStepDone != OnboardingStepType.NotSet ? "1" : "0",
                                 isAccountProfileCompleted: account.OnboardingStepDone == OnboardingStepType.All ? "1" : "0",
-                                stripeConnected: account.StripeChargesEnabled ? "1" : "0",
-                                emailVerified: user.VerifiedAccount ? "1" : "0",
+                                stripeConnected: null,
+                                emailVerified: null,
                                 msgs: msgs);
                         }
                         
@@ -287,6 +287,32 @@ namespace AfterSchool.Controllers
                     {
                         SessionVariables.CurrentUser = WebUser.Load(SessionVariables.CurrentUser.ID.Value);
                     }
+
+                    var account = SessionVariables.CurrentAccount;
+                    var user = account.GetAccountOwner(msgs);
+                    var lastestActivity = account.GetLatestActivity(user, msgs);
+                    var accountProfile = account.GetAccountProfile();
+
+                    SendGridHelper.AddOrUpdateContact(firstName: user.FirstName,
+                            lastName: user.LastName,
+                            email: user.Email,
+                            userId: user.ID.IsNotEmpty() ? user.ID.Value.ToString() : "",
+                            accountId: account.ID.IsNotEmpty() ? account.ID.Value.ToString() : "",
+                            accountEmail: account.Email,
+                            accountName: account.Name,
+                            accountPhone: account.Phone,
+                            accountHomePageUrl: null, //will be sent when activity gets published
+                            accountCreateDate: account.CreateDate.Value.ToRfc3339String(),
+                            accountCreationDays: (DateTime.UtcNow - account.CreateDate)?.Days.ToString(),
+                            lastActivityDate: lastestActivity?.CreateDate.Value.ToRfc3339String(),
+                            lastActivityCreationDays: (DateTime.UtcNow - lastestActivity?.CreateDate)?.Days.ToString(),
+                            activityCount: account.GetActivityCount().ToString(),
+                            isAccountProfileExist: accountProfile.IsNotEmpty() ? "1" : "0",
+                            isAccountProfileStarted: account.OnboardingStepDone == OnboardingStepType.NotSet ? "1" : "0",
+                            isAccountProfileCompleted: account.OnboardingStepDone == OnboardingStepType.All ? "1" : "0",
+                            stripeConnected: account.StripeChargesEnabled ? "1" : "0",
+                            emailVerified: "1",
+                            msgs: msgs);
                 }
             }
 

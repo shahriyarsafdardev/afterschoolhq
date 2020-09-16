@@ -84,7 +84,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     accountEmail: account.Email,
                     accountName: account.Name,
                     accountPhone: account.Phone,
-                    accountHomePageUrl: account.HomePageUrl,
+                    accountHomePageUrl: null,
                     accountCreateDate: account.CreateDate.Value.ToRfc3339String(),
                     accountCreationDays: (DateTime.UtcNow - account.CreateDate)?.Days.ToString(),
                     lastActivityDate: lastestActivity?.CreateDate.Value.ToRfc3339String(),
@@ -444,6 +444,32 @@ namespace AfterSchool.Areas.Org.Controllers
                     $"AHQ Profile Completed - {account.Name}",
                     $"<p>Organization: {account.Name}<br />Name: {currentUser.FirstName} {currentUser.LastName}<br />Email: {currentUser.Email}<br />Profile Link: {account.HomePageUrl}</p>",
                     true);
+
+                //user has completed all the profile steps, send the contact to send grid.
+                var user = account.GetAccountOwner(msgs);
+                var lastestActivity = account.GetLatestActivity(user, msgs);
+                var accountProfile = account.GetAccountProfile();
+
+                SendGridHelper.AddOrUpdateContact(firstName: user.FirstName,
+                        lastName: user.LastName,
+                        email: user.Email,
+                        userId: user.ID.IsNotEmpty() ? user.ID.Value.ToString() : "",
+                        accountId: account.ID.IsNotEmpty() ? account.ID.Value.ToString() : "",
+                        accountEmail: account.Email,
+                        accountName: account.Name,
+                        accountPhone: account.Phone,
+                        accountHomePageUrl: null,
+                        accountCreateDate: account.CreateDate.Value.ToRfc3339String(),
+                        accountCreationDays: (DateTime.UtcNow - account.CreateDate)?.Days.ToString(),
+                        lastActivityDate: lastestActivity?.CreateDate.Value.ToRfc3339String(),
+                        lastActivityCreationDays: (DateTime.UtcNow - lastestActivity?.CreateDate)?.Days.ToString(),
+                        activityCount: account.GetActivityCount().ToString(),
+                        isAccountProfileExist: accountProfile.IsNotEmpty() ? "1" : "0",
+                        isAccountProfileStarted: account.OnboardingStepDone == OnboardingStepType.NotSet ? "1" : "0",
+                        isAccountProfileCompleted: account.OnboardingStepDone == OnboardingStepType.All ? "1" : "0",
+                        stripeConnected: account.StripeChargesEnabled ? "1" : "0",
+                        emailVerified: user.VerifiedAccount ? "1" : "0",
+                        msgs: msgs);
             }
 
             ViewBag.Messages = msgs;

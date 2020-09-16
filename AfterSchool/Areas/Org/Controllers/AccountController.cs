@@ -483,6 +483,33 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.Messages = msgs;
             ViewBag.IsFullScreen = GetIsFullScreen();
+
+            //send data to sendgrid that stripe is connected
+            var account = SessionVariables.CurrentAccount;
+            var user = account.GetAccountOwner(msgs);
+            var lastestActivity = account.GetLatestActivity(user, msgs);
+            var accountProfile = account.GetAccountProfile();
+
+            SendGridHelper.AddOrUpdateContact(firstName: user.FirstName,
+                    lastName: user.LastName,
+                    email: user.Email,
+                    userId: user.ID.IsNotEmpty() ? user.ID.Value.ToString() : "",
+                    accountId: account.ID.IsNotEmpty() ? account.ID.Value.ToString() : "",
+                    accountEmail: account.Email,
+                    accountName: account.Name,
+                    accountPhone: account.Phone,
+                    accountHomePageUrl: null,
+                    accountCreateDate: account.CreateDate.Value.ToRfc3339String(),
+                    accountCreationDays: (DateTime.UtcNow - account.CreateDate)?.Days.ToString(),
+                    lastActivityDate: lastestActivity?.CreateDate.Value.ToRfc3339String(),
+                    lastActivityCreationDays: (DateTime.UtcNow - lastestActivity?.CreateDate)?.Days.ToString(),
+                    activityCount: account.GetActivityCount().ToString(),
+                    isAccountProfileExist: accountProfile.IsNotEmpty() ? "1" : "0",
+                    isAccountProfileStarted: account.OnboardingStepDone == OnboardingStepType.NotSet ? "1" : "0",
+                    isAccountProfileCompleted: account.OnboardingStepDone == OnboardingStepType.All ? "1" : "0",
+                    stripeConnected: "1",
+                    emailVerified: user.VerifiedAccount ? "1" : "0",
+                    msgs: msgs);
             return View();
         }
 
