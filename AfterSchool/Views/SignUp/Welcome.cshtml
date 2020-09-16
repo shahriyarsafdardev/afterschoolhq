@@ -162,12 +162,12 @@
 
                 <div class="visible-md visible-lg margin-v-30">
                     <a href="#" class="text-muted" onclick="return proceedBack('@EnumSignupPages.SearchProgramName')">&laquo; Back</a>
-                    <button type="button" class="btn-SearchContinue col-md-3 btn btn-primary btn-lg pull-right disabled" onclick="return decideToProceedFurther(this)">Continue &raquo;</button>
+                    <button type="button" class="btn-SearchContinue col-md-3 btn btn-primary btn-lg pull-right" disabled="disabled" onclick="return decideToProceedFurther(this)">Continue &raquo;</button>
                 </div>
                 <div class="clearfix"></div><br />
 
                 <div class="visible-sm visible-xs">
-                    <button type="button" class="btn-SearchContinue btn btn-primary btn-lg pull-right col-xs-12 disabled" onclick="return decideToProceedFurther(this)">Continue &raquo;</button>
+                    <button type="button" class="btn-SearchContinue btn btn-primary btn-lg pull-right col-xs-12" disabled="disabled" onclick="return decideToProceedFurther(this)">Continue &raquo;</button>
 
                     <div class="clearfix"></div>
                     <div class="text-center margin-v-30">
@@ -328,6 +328,7 @@
                 if (signupAccountSearch.val().length <= 2) {
                     signupAccountSearchList.html('');
                     signupAccountSearchList.addClass('hide');
+                    btnContinue.attr('disabled', 'disabled');
                     return false;
                 }
 
@@ -387,7 +388,7 @@
             }
 
             signupAccountSearchList.addClass('hide');
-            btnContinue.removeClass('disabled');
+            btnContinue.removeAttr("disabled");
         }
 
         function doAccountSearch(search, list) {
@@ -669,7 +670,7 @@
             hiddenClaimAccountId.val('');
             hiddenAccountName.val('');
             signupAccountSearch.val('');
-            btnContinue.addClass('disabled');
+            btnContinue.attr('disabled', 'disabled');
         }
 
     </script>
