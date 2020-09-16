@@ -133,7 +133,7 @@ namespace AfterSchoolLibrary
             task.Wait();
             dynamic response = task.Result;
 
-            if (response.StatusCode != System.Net.HttpStatusCode.Accepted) // we are getting status code as Created
+            if (response.StatusCode != System.Net.HttpStatusCode.Created) // we are getting status code as Created, Accepted not working
             {
                 msgs.Add(response.Body.ReadAsStringAsync().Result, MessageType.Error);
             }
