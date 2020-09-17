@@ -20,6 +20,11 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult Index(string invite)
         {
+            if (invite.IsBlank())
+            {
+                return RedirectToAction("Welcome");
+            }
+
             var signupIndexVM = new SignUpIndexViewModel()
             {
                 InviteCodeToShare = invite
@@ -844,7 +849,7 @@ namespace AfterSchool.Controllers
                 return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
 
             var msgs = new SystemMessages();
-            var accounts = Account.FullTextSearch(search.Trim(), AccountService.ProviderAccountTypes.ToList(), 0, 10, msgs);            
+            var accounts = Account.FullTextSearch(search.Trim(), AccountService.ProviderAccountTypes.ToList(), 0, 10, msgs);
 
             return Json(new
             {

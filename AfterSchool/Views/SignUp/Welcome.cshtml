@@ -229,7 +229,7 @@
                     <div class="clearfix"></div>
 
                     <div class="form-group row">
-                        <input class="form-control" type="number" required="required" name="phone" placeholder="Phone">
+                        <input id="signup-claim-profile-phone" class="form-control" type="text" required="required" name="phone" placeholder="ex. (317) 483 3489">
                     </div>
                     <div class="clearfix"></div>
 
@@ -361,7 +361,6 @@
         }
 
         function signupListMouseClick(id, text, slug, isClaimed) {
-            console.log(id);
             if (id && isGuid(id)) {
                 hiddenClaimAccountId.val(id);
                 selectedAccount = {
@@ -377,7 +376,6 @@
                     return;
                 }
             } else {
-                console.log(signupAccountSearch.val());
                 selectedAccount = null; //support for back click
                 hiddenAccountName.val(signupAccountSearch.val())
 
@@ -480,7 +478,7 @@
                 lblOrgSearchTitle.text('Whats the name of your Program?');
                 signupAccountSearch.attr('placeholder', 'Type in your program name');
                 clearSearch();
-                signupIndividualType.hide();                
+                signupIndividualType.hide();
                 signupSearchName.show();
             } else if (page === '@EnumSignupPages.SearchOrgName') {
                 // user is from the organization, and going for name search for his/her organization
@@ -514,12 +512,11 @@
             if (input && $(input).hasClass('disabled')) {
                 Notifications.showBar({
                     title: 'Error',
-                    message: 'Program name is required field.',
+                    message: ' Program name is required',
                     success: false
                 });
                 return;
             }
-            console.log(selectedAccount);
             if (selectedAccount) {
                 if (selectedAccount.isClaimed) {
                     headerAccountClaimed.show();
@@ -672,6 +669,14 @@
             signupAccountSearch.val('');
             btnContinue.attr('disabled', 'disabled');
         }
+
+    // #region: phone number validation
+
+        const inputElement = document.getElementById('signup-claim-profile-phone');
+        inputElement.addEventListener('keydown', enforceFormat);
+        inputElement.addEventListener('keyup', formatToPhone);
+       
+    // #endregion: phone number validation
 
     </script>
 }
