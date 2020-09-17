@@ -447,6 +447,8 @@ Public Module Extensions
     Public Function ReturnNullIfEmpty(ByVal aString As String)
         If aString.IsEmpty Then
             Return Nothing
+        ElseIf aString = "0" Then
+            Return Nothing
         Else
             Return aString
         End If

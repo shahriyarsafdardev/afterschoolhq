@@ -498,7 +498,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     accountEmail: account.Email,
                     accountName: account.Name,
                     accountPhone: account.Phone,
-                    accountHomePageUrl: null,
+                    accountHomePageUrl: account.HomePageUrl,
                     accountCreateDate: account.CreateDate.Value.ToRfc3339String(),
                     accountCreationDays: (DateTime.UtcNow - account.CreateDate)?.Days.ToString(),
                     lastActivityDate: lastestActivity?.CreateDate.Value.ToRfc3339String(),

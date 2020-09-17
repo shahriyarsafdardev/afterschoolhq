@@ -69,7 +69,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.OpenCovid = true;
             ViewBag.ELC = false;
 
-            //TODO: need to review that is this the right place, I mean the get call
+            //TODO: need to review that is this the right place, I mean the get call of ProgramInfo
             //need to review the change in fields if any.
 
             var user = account.GetAccountOwner(msgs);
@@ -84,7 +84,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     accountEmail: account.Email,
                     accountName: account.Name,
                     accountPhone: account.Phone,
-                    accountHomePageUrl: null,
+                    accountHomePageUrl: account.HomePageUrl,
                     accountCreateDate: account.CreateDate.Value.ToRfc3339String(),
                     accountCreationDays: (DateTime.UtcNow - account.CreateDate)?.Days.ToString(),
                     lastActivityDate: lastestActivity?.CreateDate.Value.ToRfc3339String(),
@@ -458,7 +458,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         accountEmail: account.Email,
                         accountName: account.Name,
                         accountPhone: account.Phone,
-                        accountHomePageUrl: null,
+                        accountHomePageUrl: account.HomePageUrl,
                         accountCreateDate: account.CreateDate.Value.ToRfc3339String(),
                         accountCreationDays: (DateTime.UtcNow - account.CreateDate)?.Days.ToString(),
                         lastActivityDate: lastestActivity?.CreateDate.Value.ToRfc3339String(),

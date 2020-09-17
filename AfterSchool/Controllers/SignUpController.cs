@@ -113,7 +113,7 @@ namespace AfterSchool.Controllers
                                 accountEmail: account.Email,
                                 accountName: account.Name,
                                 accountPhone: account.Phone,
-                                accountHomePageUrl: null,
+                                accountHomePageUrl: account.HomePageUrl,
                                 accountCreateDate: account.CreateDate.Value.ToRfc3339String(),
                                 accountCreationDays: (DateTime.UtcNow - account.CreateDate)?.Days.ToString(),
                                 lastActivityDate: lastestActivity?.CreateDate.Value.ToRfc3339String(),
@@ -301,7 +301,7 @@ namespace AfterSchool.Controllers
                             accountEmail: account.Email,
                             accountName: account.Name,
                             accountPhone: account.Phone,
-                            accountHomePageUrl: null, //will be sent when activity gets published
+                            accountHomePageUrl: account.HomePageUrl,
                             accountCreateDate: account.CreateDate.Value.ToRfc3339String(),
                             accountCreationDays: (DateTime.UtcNow - account.CreateDate)?.Days.ToString(),
                             lastActivityDate: lastestActivity?.CreateDate.Value.ToRfc3339String(),
@@ -311,7 +311,7 @@ namespace AfterSchool.Controllers
                             isAccountProfileStarted: account.OnboardingStepDone == OnboardingStepType.NotSet ? "1" : "0",
                             isAccountProfileCompleted: account.OnboardingStepDone == OnboardingStepType.All ? "1" : "0",
                             stripeConnected: account.StripeChargesEnabled ? "1" : "0",
-                            emailVerified: "1",
+                            emailVerified: user.VerifiedAccount ? "1" : "0",
                             msgs: msgs);
                 }
             }

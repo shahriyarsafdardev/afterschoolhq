@@ -116,8 +116,8 @@ namespace AfterSchoolLibrary
                     profile_exists = isAccountProfileExist.ReturnNullIfEmpty(),
                     profile_started = isAccountProfileStarted.ReturnNullIfEmpty(),
                     profile_completed = isAccountProfileCompleted.ReturnNullIfEmpty(),
-                    //stripe_connected = stripeConnected.ReturnNullIfEmpty(), // not present in current custom_fields
-                    //email_verified = emailVerified.ReturnNullIfEmpty(), // not present in current custom_fields
+                    stripe_connected = stripeConnected.ReturnNullIfEmpty(), // ADDED THIS NEW custom_fields
+                    email_verified = emailVerified.ReturnNullIfEmpty(), // ADDED THIS NEW custom_field
                     web_demo = 1
                 }
             };
@@ -138,27 +138,7 @@ namespace AfterSchoolLibrary
                 msgs.Add(response.Body.ReadAsStringAsync().Result, MessageType.Error);
             }
 
-
-            //TODO: not working properly at the moment
-            //var additonalData = new List<object>()
-            //{
-            //    new
-            //    {
-            //        stripe_connected = "1",
-            //    }
-            //};
-
-            //var id = "YmcxMkBhZnRlcnNjaG9vbGhxLmNvbQ==";
-            //var task2 = Task.Run(async () =>
-            //{
-            //    return await sg.RequestAsync(
-            //        method: SendGridClient.Method.PATCH,
-            //        urlPath: $"contactdb/recipients/{id}",
-            //        requestBody: additonalData.ToJSON());
-            //});
-
-            //task2.Wait();
-            //dynamic response2 = task2.Result;
+            //TODO: retrive id for newly created record else give error
         }
     }
 }
