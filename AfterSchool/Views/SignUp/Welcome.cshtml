@@ -38,7 +38,8 @@
                 </div>
                 <div class="col-md-9">
                     <p class="text-medium">Thank you for joining us at AfterSchool HQ! </p>
-                    <p class="text-medium-small">Boisterous cheers and applause for taking the first step towards streamlining the promotion and management of your enrichment program. To get your program up and running on our platform, we just need a few bits of information from you. I will walk you through a series of questions and prompts, and we'll compose a compelling description of your program together. I promise it will be quick, painless, and well worth a few minutes of your time. So let's get started!</p>
+                    <p class="text-medium-small">Boisterous cheers and applause for taking the first step towards streamlining the promotion and management of your enrichment program. To get your program up and running on our platform, we just need a few bits of information from you. </p>
+                    <p class="text-medium-small">I promise it will be quick, painless, and well worth a few minutes of your time.</p>
                 </div>
                 <div class="clearfix"></div>
             </div>
@@ -55,7 +56,8 @@
                 </div>
                 <div class="col-md-8" style="padding: 0;">
                     <p class="text-medium">Thank you for joining us at AfterSchool HQ! </p>
-                    <p class="text-medium-small">Boisterous cheers and applause for taking the first step towards streamlining the promotion and management of your enrichment program. To get your program up and running on our platform, we just need a few bits of information from you. I will walk you through a series of questions and prompts, and we'll compose a compelling description of your program together. I promise it will be quick, painless, and well worth a few minutes of your time. So let's get started!</p>
+                    <p class="text-medium-small">Boisterous cheers and applause for taking the first step towards streamlining the promotion and management of your enrichment program. To get your program up and running on our platform, we just need a few bits of information from you. </p>
+                    <p class="text-medium-small">I promise it will be quick, painless, and well worth a few minutes of your time.</p>
                 </div>
                 <div class="clearfix"></div>
             </div>
@@ -64,7 +66,8 @@
                 <div class="col-sm-12 col-xs-12 text-center">
                     <p class="text-medium">Thank you for joining us at AfterSchool HQ! </p>
                     <br />
-                    <p class="text-medium-small">Boisterous cheers and applause for taking the first step towards streamlining the promotion and management of your enrichment program. To get your program up and running on our platform, we just need a few bits of information from you. I will walk you through a series of questions and prompts, and we'll compose a compelling description of your program together. I promise it will be quick, painless, and well worth a few minutes of your time. So let's get started!</p>
+                    <p class="text-medium-small">Boisterous cheers and applause for taking the first step towards streamlining the promotion and management of your enrichment program. To get your program up and running on our platform, we just need a few bits of information from you. </p>
+                    <p class="text-medium-small">I promise it will be quick, painless, and well worth a few minutes of your time.</p>
                 </div>
                 <div class="clearfix"></div>
                 <div class="col-sm-12 col-xs-12 margin-t-30">
@@ -201,7 +204,7 @@
 
     <div id="signup-claim-profile" style="display: none;">
         <div class="col-md-offset-3 col-md-6">
-            <h2 class="text-center">Claim Profile</h2>
+            <h2 id="header-claim-profile-main" class="text-center"></h2>
             <div class="clearfix"></div><br />
             <h5 id="header-account-exist" class="text-center" style="display: none;">This profile already exists on AfterSchool HQ. Please start the claim process below.</h5>
             <h5 id="header-account-claimed" class="text-center" style="display: none;">This profile already claimed on AfterSchool HQ. You can request access by entering your information below.</h5>
@@ -303,6 +306,7 @@
         var btnContinue = $('.btn-SearchContinue'); //class based identification due to responsiveness issues
         var btnSaveClaims = $('.btn-save-claims'); //class based identification due to responsiveness issues
         var formClaimProfile = $('#form-signup-claim-form');
+        var headerClaimProfileMain = $('#header-claim-profile-main');
         var headerAccountExist = $('#header-account-exist');
         var headerAccountClaimed = $('#header-account-claimed');
         var headerRecognisedThankYou = $('#header-thankyou-recognized');
@@ -519,10 +523,14 @@
             }
             if (selectedAccount) {
                 if (selectedAccount.isClaimed) {
-                    headerAccountClaimed.show();
+                    headerClaimProfileMain.text('Request Access');
+                    headerAccountExist.hide();
+                    headerAccountClaimed.show();                    
                     proceedFurther('@EnumSignupPages.ClaimProfile');
                     btnSaveClaims.html('Request Access &raquo;');
                 } else {
+                    headerClaimProfileMain.text('Claim Profile');
+                    headerAccountClaimed.hide();
                     headerAccountExist.show();
                     proceedFurther('@EnumSignupPages.ClaimProfile');
                     btnSaveClaims.html('Start the claim process &raquo;');
