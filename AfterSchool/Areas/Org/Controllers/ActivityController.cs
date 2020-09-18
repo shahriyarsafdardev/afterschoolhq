@@ -1523,31 +1523,15 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var account = SessionVariables.CurrentAccount;
             var user = account.GetAccountOwner(msgs);
-            var accountProfile = account.GetAccountProfile();
 
             //TODO: need to review with darye once, the data that we sent to the HomePageUrl is correct or not.
             // my confusion here is with account-activity relation
             // activity can be multiple or not? if so, how we will handle it in sendgrid
-            SendGridHelper.AddOrUpdateContact(firstName: user.FirstName,
-                    lastName: user.LastName,
-                    email: user.Email,
-                    userId: user.ID.IsNotEmpty() ? user.ID.Value.ToString() : "",
-                    accountId: account.ID.IsNotEmpty() ? account.ID.Value.ToString() : "",
-                    accountEmail: account.Email,
-                    accountName: account.Name,
-                    accountPhone: account.Phone,
-                    accountHomePageUrl: account.HomePageUrl,
-                    accountCreateDate: account.CreateDate.Value.ToRfc3339String(),
-                    accountCreationDays: (DateTime.UtcNow - account.CreateDate)?.Days.ToString(),
-                    lastActivityDate: activity?.CreateDate.Value.ToRfc3339String(),
-                    lastActivityCreationDays: (DateTime.UtcNow - activity?.CreateDate)?.Days.ToString(),
-                    activityCount: account.GetActivityCount().ToString(),
-                    isAccountProfileExist: accountProfile.IsNotEmpty() ? "1" : "0",
-                    isAccountProfileStarted: account.OnboardingStepDone == OnboardingStepType.NotSet ? "1" : "0",
-                    isAccountProfileCompleted: account.OnboardingStepDone == OnboardingStepType.All ? "1" : "0",
-                    stripeConnected: account.StripeChargesEnabled ? "1" : "0",
-                    emailVerified: "1",
-                    msgs: msgs);
+            // test emailVerified and activities here
+            if (user.IsNotEmpty() && account.IsNotEmpty())
+            {
+                SendGridHelper.AddOrUpdateContact(account, user, msgs);
+            }
 
             return View("publishdetail", activity);
         }

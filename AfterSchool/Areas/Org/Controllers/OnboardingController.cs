@@ -71,31 +71,12 @@ namespace AfterSchool.Areas.Org.Controllers
 
             //TODO: need to review that is this the right place, I mean the get call of ProgramInfo
             //need to review the change in fields if any.
-
             var user = account.GetAccountOwner(msgs);
-            var lastestActivity = account.GetLatestActivity(user, msgs);
-            var accountProfile = account.GetAccountProfile();
 
-            SendGridHelper.AddOrUpdateContact(firstName: user.FirstName,
-                    lastName: user.LastName,
-                    email: user.Email,
-                    userId: user.ID.IsNotEmpty() ? user.ID.Value.ToString() : "",
-                    accountId: account.ID.IsNotEmpty() ? account.ID.Value.ToString() : "",
-                    accountEmail: account.Email,
-                    accountName: account.Name,
-                    accountPhone: account.Phone,
-                    accountHomePageUrl: account.HomePageUrl,
-                    accountCreateDate: account.CreateDate.Value.ToRfc3339String(),
-                    accountCreationDays: (DateTime.UtcNow - account.CreateDate)?.Days.ToString(),
-                    lastActivityDate: lastestActivity?.CreateDate.Value.ToRfc3339String(),
-                    lastActivityCreationDays: (DateTime.UtcNow - lastestActivity?.CreateDate)?.Days.ToString(),
-                    activityCount: account.GetActivityCount().ToString(),
-                    isAccountProfileExist: accountProfile.IsNotEmpty() ? "1" : "0",
-                    isAccountProfileStarted: account.OnboardingStepDone == OnboardingStepType.NotSet ? "1" : "0",
-                    isAccountProfileCompleted: account.OnboardingStepDone == OnboardingStepType.All ? "1" : "0",
-                    stripeConnected: account.StripeChargesEnabled ? "1" : "0",
-                    emailVerified: user.VerifiedAccount ? "1" : "0",
-                    msgs: msgs);
+            if (user.IsNotEmpty() && account.IsNotEmpty())
+            {
+                SendGridHelper.AddOrUpdateContact(account, user, msgs);
+            }
 
             return View(account);
         }
@@ -447,29 +428,11 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 //user has completed all the profile steps, send the contact to send grid.
                 var user = account.GetAccountOwner(msgs);
-                var lastestActivity = account.GetLatestActivity(user, msgs);
-                var accountProfile = account.GetAccountProfile();
 
-                SendGridHelper.AddOrUpdateContact(firstName: user.FirstName,
-                        lastName: user.LastName,
-                        email: user.Email,
-                        userId: user.ID.IsNotEmpty() ? user.ID.Value.ToString() : "",
-                        accountId: account.ID.IsNotEmpty() ? account.ID.Value.ToString() : "",
-                        accountEmail: account.Email,
-                        accountName: account.Name,
-                        accountPhone: account.Phone,
-                        accountHomePageUrl: account.HomePageUrl,
-                        accountCreateDate: account.CreateDate.Value.ToRfc3339String(),
-                        accountCreationDays: (DateTime.UtcNow - account.CreateDate)?.Days.ToString(),
-                        lastActivityDate: lastestActivity?.CreateDate.Value.ToRfc3339String(),
-                        lastActivityCreationDays: (DateTime.UtcNow - lastestActivity?.CreateDate)?.Days.ToString(),
-                        activityCount: account.GetActivityCount().ToString(),
-                        isAccountProfileExist: accountProfile.IsNotEmpty() ? "1" : "0",
-                        isAccountProfileStarted: account.OnboardingStepDone == OnboardingStepType.NotSet ? "1" : "0",
-                        isAccountProfileCompleted: account.OnboardingStepDone == OnboardingStepType.All ? "1" : "0",
-                        stripeConnected: account.StripeChargesEnabled ? "1" : "0",
-                        emailVerified: user.VerifiedAccount ? "1" : "0",
-                        msgs: msgs);
+                if (user.IsNotEmpty() && account.IsNotEmpty())
+                {
+                    SendGridHelper.AddOrUpdateContact(account, user, msgs);
+                }
             }
 
             ViewBag.Messages = msgs;
