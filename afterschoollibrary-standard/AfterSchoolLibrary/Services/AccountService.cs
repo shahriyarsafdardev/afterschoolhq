@@ -208,14 +208,6 @@ namespace AfterSchoolLibrary.Services
                     .ToList();
         }
 
-        public static Activity GetLatestActivity(this Account account, WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return Activity.LoadByAccountId(account.ID.Value, msgs, dc)
-                   .Where(activity => user.HasAccessToActivity(activity, msgs, dc))
-                   .OrderByDescending(m => m.CreateDate)
-                   .FirstOrDefault();
-        }
-
         public static int GetActivityCount(this Account account, UserType userType, WebUser user, ActivityType? activityType, bool? isArchived, bool? isDeleted, bool? ungroupedOnly, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (user.IsEmpty() || userType.In(AccountService.AdminUserTypes))
