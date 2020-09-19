@@ -2,12 +2,12 @@
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using Newtonsoft.Json;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 
@@ -147,8 +147,8 @@ namespace AfterSchoolLibrary
                     profile_exists = isAccountProfileExist.ReturnNullIfEmpty(),
                     profile_started = isAccountProfileStarted.ReturnNullIfEmpty(),
                     profile_completed = isAccountProfileCompleted.ReturnNullIfEmpty(),
-                    stripe_connected = stripeConnected.ReturnNullIfEmpty(), // ADDED THIS NEW custom_fields
-                    email_verified = emailVerified.ReturnNullIfEmpty(), // ADDED THIS NEW custom_field
+                    stripe_connected = stripeConnected.ReturnNullIfEmpty(),
+                    email_verified = emailVerified.ReturnNullIfEmpty(),
                     web_demo = 1
                 }
             };
@@ -162,14 +162,23 @@ namespace AfterSchoolLibrary
             });
 
             task.Wait();
-            dynamic response = task.Result;
-
-            if (response.StatusCode != System.Net.HttpStatusCode.Created) // we are getting status code as Created, Accepted not working
+            var response = task.Result;
+            if (response.IsNotEmpty() && response.StatusCode == System.Net.HttpStatusCode.Created)
             {
+                var responseResult = response.Body.ReadAsStringAsync().Result;
+                var responseModel = JsonConvert.DeserializeObject<SendGridResponse>(responseResult);
+                
+                if (responseModel.IsNotEmpty() && responseModel.PersistedRecipients.Any())
+                {
+                    //TODO: call success, need to ask darye if anything special needed here.
+                } else
+                {
+                    msgs.Add(responseResult, MessageType.Error);
+                }
+            } 
+            else {
                 msgs.Add(response.Body.ReadAsStringAsync().Result, MessageType.Error);
             }
-
-            //TODO: retrive id for newly created record else give error
         }
     }
 }

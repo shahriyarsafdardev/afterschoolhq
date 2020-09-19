@@ -484,11 +484,9 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             ViewBag.IsFullScreen = GetIsFullScreen();
 
-            //send data to sendgrid that stripe is connected
             var account = SessionVariables.CurrentAccount;
             var user = account.GetAccountOwner(msgs);
             
-            //TODO: test stripeConnected here
             if (user.IsNotEmpty() && account.IsNotEmpty())
             {
                 SendGridHelper.AddOrUpdateContact(account, user, msgs);

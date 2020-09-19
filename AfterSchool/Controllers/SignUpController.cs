@@ -96,9 +96,6 @@ namespace AfterSchool.Controllers
 
                         var userId = user.ID.Value;
                         var accountId = account.ID.Value;
-                        
-                        // TODO: need to ask darye, I think user here will be owner, so no need for this check below
-                        // var owner = account.GetAccountOwner(smsgs); 
 
                         if (user.IsNotEmpty() && account.IsNotEmpty())
                         {
@@ -268,7 +265,6 @@ namespace AfterSchool.Controllers
                     var account = SessionVariables.CurrentAccount;
                     var user = account.GetAccountOwner(msgs);
                     
-                    //TODO: email verification here
                     if (user.IsNotEmpty() && account.IsNotEmpty())
                     {
                         SendGridHelper.AddOrUpdateContact(account, user, msgs);

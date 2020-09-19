@@ -1524,10 +1524,6 @@ namespace AfterSchool.Areas.Org.Controllers
             var account = SessionVariables.CurrentAccount;
             var user = account.GetAccountOwner(msgs);
 
-            //TODO: need to review with darye once, the data that we sent to the HomePageUrl is correct or not.
-            // my confusion here is with account-activity relation
-            // activity can be multiple or not? if so, how we will handle it in sendgrid
-            // test emailVerified and activities here
             if (user.IsNotEmpty() && account.IsNotEmpty())
             {
                 SendGridHelper.AddOrUpdateContact(account, user, msgs);

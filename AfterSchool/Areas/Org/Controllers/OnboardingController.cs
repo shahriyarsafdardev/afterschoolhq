@@ -69,8 +69,6 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.OpenCovid = true;
             ViewBag.ELC = false;
 
-            //TODO: need to review that is this the right place, I mean the get call of ProgramInfo
-            //need to review the change in fields if any.
             var user = account.GetAccountOwner(msgs);
 
             if (user.IsNotEmpty() && account.IsNotEmpty())
@@ -426,7 +424,6 @@ namespace AfterSchool.Areas.Org.Controllers
                     $"<p>Organization: {account.Name}<br />Name: {currentUser.FirstName} {currentUser.LastName}<br />Email: {currentUser.Email}<br />Profile Link: {account.HomePageUrl}</p>",
                     true);
 
-                //user has completed all the profile steps, send the contact to send grid.
                 var user = account.GetAccountOwner(msgs);
 
                 if (user.IsNotEmpty() && account.IsNotEmpty())
