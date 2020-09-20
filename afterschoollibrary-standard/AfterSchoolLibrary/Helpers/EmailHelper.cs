@@ -687,6 +687,14 @@ namespace AfterSchoolLibrary.Helpers
                 virtualInfo += $"<p>Join this activity virtually with the following info: <br /><br />{participationObject.VirtualLocationInfo}</a>.<br /></p>";
             }
 
+            var physicalInfo = "";
+            if (participationObject.ActivityLocationType == ActivityLocationType.Physical && 
+                participationObject.Location.IsNotEmpty() && 
+                mainRA.AssignmentTypeId.In(Registration.ReservedStatuses))
+            {
+                physicalInfo += $"<p>The location of {participationObject.GetActivity()?.Name} is at: {participationObject.Location.FormatAddress()}<br /></p>";
+            }
+
             var splitPaymentSubscriptionInfo = "";
 
             if (subscription.IsNotEmpty() && subscription.SplitCostEvenly && !participationObject.RegistrationFinalized)
