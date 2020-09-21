@@ -19364,21 +19364,3 @@ div.dataTables_wrapper div.dataTables_length label select {
     margin-bottom: 0px;
   }
 }
-
-/*NEW POC*/
-/* Extra small devices (phones) */
-@media screen and (max-width: 479px) {
-}
-
-/* Small devices (portrait tablets and large phones, 480px to 767px) */
-@media (min-width: 480px) and (max-width: 767px) {
-}
-
-/* Medium devices (landscape tablets, 768px to 1199px) */
-@media(min-width: 768px) and (max-width: 1199px) {
-}
-
-/* Large devices (laptops/desktops, 1200px and up) */
-@media(min-width: 1200px) {
-    
-}
