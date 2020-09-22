@@ -185,7 +185,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
             LoadEditSetupViewBag(activity, activityGroup, msgs);
             ViewBag.ActiveMenu = "EditSetup";
-            ViewBag.Group = activityGroup;
             
             return View(activity);
         }
@@ -196,37 +195,43 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
-            Activity activity = Activity.LoadByUid(id.ToGuid());
+            Activity activity;
             ActivityGroup activityGroup = null;
+
+            if (id.IsEmpty() || !id.IsGuid())
+                return HttpNotFound();
+
+            activity = Activity.LoadByUid(id.ToGuid());
+
+            if (activity.IsEmpty())
+                return HttpNotFound();
 
             if (name.IsEmpty())
                 msgs.Add("Activity name is required.", MessageType.UserError);
             else if (name.Length > 75)
                 msgs.Add("Activity name must not be greater then 75 chanracters.", MessageType.UserError);
 
-
             if (msgs.HasNoErrors())
             {
                 var values = new Dictionary<string, object>()
-            {
-                { "name", name.MaxChars(75) },
-                { "seatsavailable", seatsavailable },
-                { "waitinglistseats", waitinglistseats },
-                { "registrationperiod", registrationperiod },
-                { "registrationopendate", registrationopendate },
-                { "registrationopentime", registrationopentime },
-                { "registrationclosedate", registrationclosedate },
-                { "registrationclosetime", registrationclosetime },
-                { "timezone", timezone },
-                { "form", form },
-                { "regmode", regmode },
-                { "group", group },
-                { "type", type },
-                { "inviteonly", inviteonly.IsBoolean().ToString() },
-                { "minseatsrequired", minseatsrequired },
-            };
+                {
+                    { "name", name.MaxChars(75) },
+                    { "seatsavailable", seatsavailable },
+                    { "waitinglistseats", waitinglistseats },
+                    { "registrationperiod", registrationperiod },
+                    { "registrationopendate", registrationopendate },
+                    { "registrationopentime", registrationopentime },
+                    { "registrationclosedate", registrationclosedate },
+                    { "registrationclosetime", registrationclosetime },
+                    { "timezone", timezone },
+                    { "form", form },
+                    { "regmode", regmode },
+                    { "group", group },
+                    { "type", type },
+                    { "inviteonly", inviteonly.IsBoolean().ToString() },
+                    { "minseatsrequired", minseatsrequired },
+                };
 
-                activity = Activity.LoadByUid(id.ToGuid());
                 if (activity.IsNotEmpty())
                 {
                     activity = ActivityService.EditExisting(
@@ -265,10 +270,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
 
                 if (group.IsGuid())
-                    activityGroup = ActivityGroup.LoadByUid(group.ToGuid());
-
-                LoadEditSetupViewBag(activity, activityGroup, msgs);
-                ViewBag.Group = activityGroup;
+                    activityGroup = ActivityGroup.LoadByUid(group.ToGuid());                
 
                 if (msgs.HasNoErrors())
                     msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
@@ -280,25 +282,27 @@ namespace AfterSchool.Areas.Org.Controllers
                         {
                             case ActivityType.LearningPod:
                             case ActivityType.Activity:
+                                LoadEditSetupViewBag(activity, activityGroup, msgs);
                                 ViewBag.ActiveMenu = "EditRestrictions";
                                 return View("EditRestrictions", activity);
+
                             case ActivityType.FieldTrip:
                             case ActivityType.Team:
                                 LoadEditScheduleViewBag(activity, activity.ActivityScheduleId?.ToString());
                                 ViewBag.ActiveMenu = "EditSchedule";
                                 return View("editschedule", activity);
+
                             case ActivityType.PermissionSlip:
+                                LoadEditSetupViewBag(activity, activityGroup, msgs);
                                 ViewBag.ActiveMenu = "EditDetails";
                                 return View("EditDetails", activity);
-
                         }
                         break;
                 }
             }
 
             LoadEditSetupViewBag(activity, activityGroup, msgs);
-            ViewBag.ActiveMenu = "EditSetup";
-            ViewBag.Group = activityGroup;
+            ViewBag.ActiveMenu = "EditSetup";            
             return View(activity);
         }
 
@@ -313,6 +317,7 @@ namespace AfterSchool.Areas.Org.Controllers
             periods = periods.OrderBy(period => period.StartDateTime.Value).ToList();
 
             ViewBag.Messages = msgs;
+            ViewBag.Group = activityGroup;
             ViewBag.Account = currentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Forms = currentAccount.GetForms(msgs).OrderBy(x => x.Name).ToList();

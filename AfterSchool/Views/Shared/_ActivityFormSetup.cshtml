@@ -29,7 +29,7 @@
         <div class="form-group">
             <label class="col-sm-3 control-label">@UILabel.ActivityLabel(Model.ActivityTypeId) Name <span class="text-danger">*</span></label>
             <div class="col-sm-9">
-                <input type="text" class="form-control" id="name" name="name" value="@Model.Name" onfocus="this.select()" required placeholder="Your @UILabel.ActivityLabel(Model.ActivityTypeId) Name(75 Characters)" />
+                <input id="name" class="form-control" type="text" name="name" value="@Model.Name" maxlength="75" required onfocus="this.select()" placeholder="Your @UILabel.ActivityLabel(Model.ActivityTypeId) Name (75 Characters)" />
             </div>
         </div>
 
