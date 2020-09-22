@@ -203,9 +203,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
             activity = Activity.LoadByUid(id.ToGuid());
 
-            if (activity.IsEmpty())
-                return HttpNotFound();
-
             if (name.IsEmpty())
                 msgs.Add("Activity name is required.", MessageType.UserError);
             else if (name.Length > 75)
