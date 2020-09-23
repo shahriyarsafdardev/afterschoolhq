@@ -1,0 +1,22 @@
+﻿<div style="font-family: calibri; font-size: 14px;">
+  <p> Hello @Model.OwnerFirstName, </p>
+  <br />
+  <br />
+  
+  <p>
+    <strong> @Model.RequestorFirstName (@Model.RequestorEmail) </strong> is requesting to claim your account on Afterschool HQ. </p>
+  <br />
+  
+  <p> If this is you please click this <a href="@Model.ProfileClaimLink">Link</a> to claim your profile. </p>
+  <br />
+  
+  <p>If @Model.RequestorFirstName  is someone you know, you can forward this email to them to complete the claim process. </p>
+  <br />  
+  <br />
+  
+  <p>
+    Thanks, <br />
+    @Model.ProductName
+  </p>
+
+</div>

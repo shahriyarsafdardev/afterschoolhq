@@ -1004,7 +1004,6 @@ Public MustInherit Class BaseAddress
         Return cityLine
 
     End Function
-
     Public Shared Function FormatCityStateZipCode(ByVal city As String, ByVal county As String, ByVal state As String, ByVal postalCode As String, Optional ByVal useLineBreaks As Boolean = True) As String
 
         Return FormatCityLine(city, county, state, postalCode, useLineBreaks)

@@ -615,6 +615,7 @@
     <Compile Include="Models\LeagueHelper.cs" />
     <Compile Include="Models\ModalViewModel.cs" />
     <Compile Include="Models\FormInputViewModel.cs" />
+    <Compile Include="Models\OrgDropDown.cs" />
     <Compile Include="Models\PagingModel.cs" />
     <Compile Include="Areas\Org\OrgAreaRegistration.cs" />
     <Compile Include="Areas\Admin\Controllers\UserController.cs" />
@@ -1779,6 +1780,7 @@
     <Content Include="Views\Account\ContactThankYou.cshtml" />
     <Content Include="Views\Shared\Registrant\_Answers.cshtml" />
     <Content Include="Views\Shared\JavascriptIncludes\_QuillEditorScripts.cshtml" />
+    <Content Include="Views\SignUp\Welcome.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
