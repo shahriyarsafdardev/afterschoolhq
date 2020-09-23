@@ -50,20 +50,32 @@
     @helper SubmitButtons(bool showDiscard = true)
     {
         <div class="form-group">
-            <label class="col-sm-3 control-label"></label>
-            <div class="col-sm-9">
+            <div class="col-sm-12 padding-zero">
                 <hr />
             </div>
         </div>
 
         <div class="form-group">
-            <label class="col-sm-3 control-label"></label>
-            <div class="col-sm-9">
+            <div class="visible-md visible-lg">
+                <div class="col-sm-9 col-md-offset-3">
+                    @if (showDiscard)
+                    {
+                        <a href="@Url.Action("style", "account")" class="text-muted">Discard Changes</a>
+                    }
+                    <button type="submit" class="btn btn-primary btn-lg pull-right">Save Changes &raquo;</button>
+                </div>
+            </div>
+
+            <div class="visible-xs visible-sm">
+                <button type="submit" class="btn btn-primary btn-block btn-lg pull-right">Save Changes &raquo;</button>
                 @if (showDiscard)
                 {
-                    <a href="@Url.Action("style", "account")" class="text-muted">Discard Changes</a>
+                    <div class="clearfix"></div>
+                    <br />
+                    <div class="text-center">
+                        <a href="@Url.Action("style", "account")" class="text-muted">Discard Changes</a>
+                    </div>
                 }
-                <button type="submit" class="btn btn-primary btn-lg pull-right">Save Changes &raquo;</button>
             </div>
         </div>
     }
@@ -76,15 +88,15 @@
                 <button type="submit" class="btn btn-primary pull-right hide">Save Changes &raquo;</button>
             </div>
             <div class="panel-body">
-                <div class="col-md-8 col-lg-9">
+                <div class="col-md-8 col-lg-9 padding-zero">
 
                     <!-- Design -->
                     <a name="design"></a>
                     <div class="panel panel-default">
-                        <div class="panel-heading">
+                        <div class="panel-heading text-center-sm">
                             Header Design
                         </div>
-                        <div class="panel-body">
+                        <div class="panel-body padding-zero">
 
                             <div class="form-group">
                                 <label class="col-sm-3 control-label">Logo</label>
@@ -150,10 +162,10 @@
                     <a name="details"></a>
                     <a name="grades"></a>
                     <div class="panel panel-default">
-                        <div class="panel-heading">
+                        <div class="panel-heading text-center-sm">
                             Additional Details
                         </div>
-                        <div class="panel-body">
+                        <div class="panel-body padding-zero">
                             <div class="form-group">
                                 <label class="col-md-3 control-label">
                                     Grades Served
@@ -220,9 +232,9 @@
                                 </label>
                                 <div class="col-md-9">
                                     @{ Html.RenderPartial(
-                                            "~/Views/Shared/_SwitchButton.cshtml",
-                                            Model.IsOpenDuringCovid,
-                                            new ViewDataDictionary() { { "checkboxname", "opencovid" }, { "checkboxid", "opencovid" } });
+                                             "~/Views/Shared/_SwitchButton.cshtml",
+                                             Model.IsOpenDuringCovid,
+                                             new ViewDataDictionary() { { "checkboxname", "opencovid" }, { "checkboxid", "opencovid" } });
                                     }
                                 </div>
                             </div>
@@ -233,9 +245,9 @@
                                 </label>
                                 <div class="col-md-9">
                                     @{ Html.RenderPartial(
-                                            "~/Views/Shared/_SwitchButton.cshtml",
-                                            Model.IsELearningCenter,
-                                            new ViewDataDictionary() { { "checkboxname", "elearningcenter" }, { "checkboxid", "elearningcenter" } });
+                                             "~/Views/Shared/_SwitchButton.cshtml",
+                                             Model.IsELearningCenter,
+                                             new ViewDataDictionary() { { "checkboxname", "elearningcenter" }, { "checkboxid", "elearningcenter" } });
                                     }
                                     <p class="text-muted">You host/care for students to assist e-learning during the school day</p>
                                 </div>
@@ -252,10 +264,10 @@
                     <!-- Photos -->
                     <a name="photos"></a>
                     <div class="panel panel-default">
-                        <div class="panel-heading">
+                        <div class="panel-heading text-center-sm">
                             <h3>Video &amp; Photo Gallery</h3>
                         </div>
-                        <div class="panel-body">
+                        <div class="panel-body padding-zero">
                             <div class="form-group">
                                 <label class="col-md-3 control-label">
                                     Vimeo or YouTube Video Url
@@ -298,10 +310,10 @@
                     <!-- services -->
                     <a name="services"></a>
                     <div class="panel panel-default">
-                        <div class="panel-heading">
+                        <div class="panel-heading text-center-sm">
                             Services &amp; Categories
                         </div>
-                        <div class="panel-body">
+                        <div class="panel-body padding-zero">
 
                             <div class="form-group">
                                 <label class="col-md-3 control-label">Services Offered</label>
@@ -418,10 +430,10 @@
                     <!-- About -->
                     <a name="profileabout"></a>
                     <div class="panel panel-default">
-                        <div class="panel-heading">
+                        <div class="panel-heading text-center-sm">
                             About Your Program
                         </div>
-                        <div class="panel-body">
+                        <div class="panel-body padding-zero">
 
                             <div class="form-group">
                                 <label class="col-md-3 control-label">
@@ -429,14 +441,14 @@
                                 </label>
                                 <div class="col-md-9">
                                     @{ Html.RenderPartial(
-                                            "~/Views/Shared/_TextEditor.cshtml",
-                                            Model.About,
-                                            new ViewDataDictionary() {
+                                             "~/Views/Shared/_TextEditor.cshtml",
+                                             Model.About,
+                                             new ViewDataDictionary() {
                                             { "required", false },
                                             { "name", "about" },
                                             { "id", "about" }
-                                        }
-                                        ); }
+             }
+                                         ); }
 
                                     <p class="text-muted">
                                         <em>Tell us what is special about what you do. Max of 4000 characters</em>
@@ -459,7 +471,7 @@
 
                                         <div class="input-group input-group-md xs-mb-15">
                                             <span class="input-group-addon">@(i + 1)</span>
-                                            <span><input type="text" class="form-control" name="award-@id" id="award-@id" value="@awards[i].Value" /></span>
+                                            <span><input type="text" class="form-control" name="award-@id" id="award-@id" value="@awards[i].Value" style="z-index: 0;" /></span>
                                         </div>
                                     }
                                 </div>
@@ -496,10 +508,10 @@
                     <!-- Contact Information -->
                     <a name="contactinfo"></a>
                     <div class="panel panel-default">
-                        <div class="panel-heading">
+                        <div class="panel-heading text-center-sm">
                             Contact Info
                         </div>
-                        <div class="panel-body">
+                        <div class="panel-body padding-zero">
                             <div class="form-group">
                                 <label class="col-md-3 control-label">
                                     Profile Email Address
@@ -537,10 +549,10 @@
                     <!-- Website & Social Links -->
                     <a name="links"></a>
                     <div class="panel panel-default">
-                        <div class="panel-heading">
+                        <div class="panel-heading text-center-sm">
                             Website &amp; Social Links
                         </div>
-                        <div class="panel-body">
+                        <div class="panel-body padding-zero">
                             <div class="form-group">
                                 <label class="col-md-3 control-label">
                                     Website Url
@@ -616,19 +628,19 @@
                     @if (SessionVariables.AccountUserType == UserType.TechSupport)
                     {
                         <div class="panel panel-default">
-                            <div class="panel-heading">
+                            <div class="panel-heading text-center-sm">
                                 Admin Only
                             </div>
-                            <div class="panel-body">
+                            <div class="panel-body padding-zero">
                                 <div class="form-group">
                                     <label class="col-md-3 control-label">
                                         AHQ Approved?
                                     </label>
                                     <div class="col-md-9">
                                         @{ Html.RenderPartial(
-                                                 "~/Views/Shared/_SwitchButton.cshtml",
-                                                 Model.IsAHQApproved,
-                                                 new ViewDataDictionary() { { "checkboxname", "ahqapproved" }, { "checkboxid", "ahqapproved" } });
+                                                  "~/Views/Shared/_SwitchButton.cshtml",
+                                                  Model.IsAHQApproved,
+                                                  new ViewDataDictionary() { { "checkboxname", "ahqapproved" }, { "checkboxid", "ahqapproved" } });
                                         }
                                     </div>
                                 </div>
@@ -744,10 +756,10 @@
                     $('#txtVideoUrl').val('');
                     return false;
                 }
-            }         
+            }
         });
 
-        function validateYouTubeVideoUrl(url) {            
+        function validateYouTubeVideoUrl(url) {
             var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
             var match = url.match(regExp);
 

@@ -365,6 +365,7 @@ property: IsDeleted, bool, Bit
 property: IsClaimed, bool, Bit
 property: OnboardingStepDone, OnboardingStepType, Int
 property: ContactFormId, int?, Int, , Enables account to set contact form to be used on main page
+property: ClaimEmailDomain, string, NVarChar "50", , The main domain for the email to validate against during the claim process
 baseproperty: Name, required
 loadmethod: OwnerId, List<>
 loadmethod: UniqueName

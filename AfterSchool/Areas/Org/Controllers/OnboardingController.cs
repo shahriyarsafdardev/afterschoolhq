@@ -25,7 +25,7 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Index()
         {
-            return RedirectToAction("AccountType");
+            return RedirectToAction("ProgramInfo");
         }
 
         [HttpGet]

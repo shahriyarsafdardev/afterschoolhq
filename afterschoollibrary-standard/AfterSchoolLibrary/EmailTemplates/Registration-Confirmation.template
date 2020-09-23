@@ -7,6 +7,8 @@
 
   @Model.VirtualInfo
 
+  @Model.PhysicalInfo
+
   @Model.SplitPaymentSubscriptionInfo
 
   <p>
