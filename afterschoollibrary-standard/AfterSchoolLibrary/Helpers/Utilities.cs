@@ -279,7 +279,7 @@ namespace AfterSchoolLibrary.Helpers
             Utilities.AmazonRegionEndPoint = Amazon.RegionEndpoint.USEast2;
             
             Email.ReplyHostName = "afterschoolhq.com"; // can be modified based on live/dev/test server
-            Email.SenderHostName = "mailer.afterschoolhq.com"; // can be modified based on live/dev/test server            
+            Email.SenderHostName = "afterschoolhq.com"; // can be modified based on live/dev/test server            
 
             Utilities.AppNameAfterSchoolHQ = "AfterSchool HQ";
             Utilities.AppNameEnrollHQ = "Enroll HQ";
