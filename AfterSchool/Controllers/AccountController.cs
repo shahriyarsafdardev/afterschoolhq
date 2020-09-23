@@ -10,6 +10,7 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Management;
 using System.Web.Mvc;
+using AfterSchool.Helpers;
 
 namespace AfterSchool.Controllers
 {
@@ -543,6 +544,8 @@ namespace AfterSchool.Controllers
 
             if (!agree.IsBoolean())
                 msgs.Add("You must agree to the terms of service", MessageType.UserError);
+
+            msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
 
             if (msgs.HasNoErrors())
             {
