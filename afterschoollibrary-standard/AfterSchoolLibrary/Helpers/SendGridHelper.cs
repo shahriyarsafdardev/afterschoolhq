@@ -116,12 +116,13 @@ namespace AfterSchoolLibrary
                 isAccountProfileCompleted: account.OnboardingStepDone == OnboardingStepType.All ? "1" : "0",
                 stripeConnected: account.StripeChargesEnabled ? "1" : "0",
                 emailVerified: user.VerifiedAccount ? "1" : "0",
+                isTest: Helpers.Utilities.IsProduction ? "0" : "1",
                 msgs: messages);
         }
 
         public static void AddOrUpdateContact(string firstName, string lastName, string email, string userId, string accountId, string accountEmail, string accountName, string accountPhone,
             string accountHomePageUrl, string accountCreateDate, string accountCreationDays, string lastActivityDate, string lastActivityCreationDays, string activityCount, string isAccountProfileExist,
-            string isAccountProfileStarted, string isAccountProfileCompleted, string stripeConnected, string emailVerified, SystemMessages msgs)
+            string isAccountProfileStarted, string isAccountProfileCompleted, string stripeConnected, string emailVerified, string isTest, SystemMessages msgs)
         {
             var sg = new SendGridClient(SendGridApiKey);
 
@@ -149,6 +150,7 @@ namespace AfterSchoolLibrary
                     profile_completed = isAccountProfileCompleted.ReturnNullIfEmpty(),
                     stripe_connected = stripeConnected.ReturnNullIfEmpty(),
                     email_verified = emailVerified.ReturnNullIfEmpty(),
+                    is_test = isTest.ReturnNullIfEmpty(),
                     web_demo = 1
                 }
             };
