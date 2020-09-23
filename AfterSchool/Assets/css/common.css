@@ -1,0 +1,4 @@
+﻿/*common style for whole application*/
+.ql-container p {
+    min-height: 100px;
+}

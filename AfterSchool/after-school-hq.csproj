@@ -656,6 +656,11 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="about.html" />
+    <Content Include="Assets\css\common.css" />
+    <Content Include="Assets\css\media_lg.css" />
+    <Content Include="Assets\css\media_md.css" />
+    <Content Include="Assets\css\media_sm.css" />
+    <Content Include="Assets\css\media_xs.css" />
     <Content Include="Assets\js\ahq-profiles.js" />
     <Content Include="case-study-cfi70.html" />
     <Content Include="contact.html" />
