@@ -103,6 +103,36 @@ namespace AfterSchoolLibrary {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] ClaimProfile_Send {
+            get {
+                object obj = ResourceManager.GetObject("ClaimProfile_Send", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] ClaimProfileNonRecognized_Send {
+            get {
+                object obj = ResourceManager.GetObject("ClaimProfileNonRecognized_Send", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] ClaimProfileRequestAccess_Send {
+            get {
+                object obj = ResourceManager.GetObject("ClaimProfileRequestAccess_Send", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] ContactForm_Submitted {
             get {
                 object obj = ResourceManager.GetObject("ContactForm_Submitted", resourceCulture);
