@@ -1645,6 +1645,9 @@ namespace AfterSchoolLibrary.Services
                 RegistrationModeId = RegistrationMode.Register,
                 AllowToPayLater = true,
                 MinSeatsRequired = 1,
+                GradeLevelStart = account.GetAccountProfile().GradeLevelStart,
+                GradeLevelEnd = account.GetAccountProfile().GradeLevelEnd,
+                GenderRestriction = account.GetAccountProfile().GenderRestriction
             };
         }
 
