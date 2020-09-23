@@ -79,7 +79,7 @@
             btnText = "Update Profile &amp; Enroll";
             btnUrl = registerUrl;
         }
-        else if (!participationObject.IsStudentGradeInRange(Model))
+        else if (participationObject.IsNotEmpty() && !participationObject.IsStudentGradeInRange(Model))
         {
             btnText = "Ineligible - Grade";
             disabledText = " disabled=\"disabled\" ";
