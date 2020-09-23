@@ -224,6 +224,99 @@ namespace AfterSchoolLibrary.Helpers
                 emailTemplateId: SendGridHelper.GetGenericTemplateId()));
         }
 
+        public static void SendClaimProfileEmail(Account account, Guid userGuid, string email, SystemMessages msgs)
+        {
+            var subject = $"Thanks for claiming your profile on {Utilities.AppName()}";
+            var claimProfileDetails = $"<p>Click following <a href=\"{Utilities.CompleteSignUpUrl(userGuid)}\">Link</a> to claim your profile.<p>";
+
+            var model = new NameValueCollection()
+            {
+                { "ClaimProfileDetails", claimProfileDetails },
+                { "ProductName", Utilities.AppName() }
+            };
+            
+            var body = ProcessTemplate(
+                EmailTemplates.ClaimProfile_Send,
+                model,
+                "ClaimProfile_Send",
+                msgs);
+
+            // SEND EMAILS
+            var mailMsgs = new SystemMessages();
+
+            // Send email to activity contact
+            mailMsgs.AddRange(SendGridHelper.SendMail(
+                fromEmail: Email.SendGridNoReplyEmailAddress(),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(email),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId()));
+        }
+
+        public static void SendNonRecognizedProfileClaimEmail(Account account, WebUser requester, SystemMessages msgs)
+        {
+            var subject = $"{requester.FirstName} {requester.LastName} is requesting to claim your profile on AfterSchool HQ.";
+            var profileClaimLink = Utilities.CompleteSignUpUrl(requester.Uid);
+
+            var model = new NameValueCollection()
+            {
+                { "OwnerFirstName", account.GetAccountOwner()?.FirstName },
+                { "RequestorFirstName", requester.FirstName },
+                { "RequestorEmail", requester.Email },
+                { "ProfileClaimLink", profileClaimLink },
+                { "ProductName", Utilities.AppName() }
+            };
+
+            var body = ProcessTemplate(
+                EmailTemplates.ClaimProfileNonRecognized_Send,
+                model,
+                "ClaimProfileNonRecognized_Send",
+                msgs);
+
+            // SEND EMAILS
+            var mailMsgs = new SystemMessages();
+
+            // Send email to activity contact
+            mailMsgs.AddRange(SendGridHelper.SendMail(
+                fromEmail: Email.SendGridNoReplyEmailAddress(),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(account.Email),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId()));
+        }
+
+        public static void SendProfileClaimedEmail(Account account, string firstName, string lastName, string email, SystemMessages msgs)
+        {
+            var subject = $"{firstName} {lastName} is requesting access to your account on AfterSchool HQ.";
+            var teamPage = $"{Utilities.BaseUrl()}/org/account/team/";
+
+            var model = new NameValueCollection()
+            {
+                { "OwnerFirstName", account.GetAccountOwner()?.FirstName },
+                { "RequestorFirstName", firstName },
+                { "RequestorEmail", email },
+                { "TeamPage", teamPage },
+                { "ProductName", Utilities.AppName() }
+            };
+
+            var body = ProcessTemplate(
+                EmailTemplates.ClaimProfileRequestAccess_Send,
+                model,
+                "ClaimProfileRequestAccess_Send",
+                msgs);
+
+            // SEND EMAILS
+            var mailMsgs = new SystemMessages();
+
+            // Send email to activity contact
+            mailMsgs.AddRange(SendGridHelper.SendMail(
+                fromEmail: Email.SendGridNoReplyEmailAddress(),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(account.Email),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId()));
+        }
+
         private static string AddLotteryTable(List<RegistrantActivity> ras, Registrant registrant, string action, SystemMessages msgs, DatabaseConnection dc)
         {
             if (!ras.Any())
@@ -681,10 +774,19 @@ namespace AfterSchoolLibrary.Helpers
             }
 
             var virtualInfo = "";
-
-            if (participationObject.ActivityLocationType == ActivityLocationType.Virtual && participationObject.VirtualLocationInfo.IsNotEmpty())
+            if (participationObject.ActivityLocationType == ActivityLocationType.Virtual && 
+                participationObject.VirtualLocationInfo.IsNotEmpty() &&
+                mainRA.AssignmentTypeId.In(Registration.ReservedStatuses))
             {
                 virtualInfo += $"<p>Join this activity virtually with the following info: <br /><br />{participationObject.VirtualLocationInfo}</a>.<br /></p>";
+            }
+
+            var physicalInfo = "";
+            if (participationObject.ActivityLocationType == ActivityLocationType.Physical && 
+                participationObject.Location.IsNotEmpty() && 
+                mainRA.AssignmentTypeId.In(Registration.ReservedStatuses))
+            {
+                physicalInfo += $"<p>The location of {participationObject.Name} is at: {participationObject.Location.FormatAddress()}<br /></p>";
             }
 
             var splitPaymentSubscriptionInfo = "";
@@ -707,6 +809,7 @@ namespace AfterSchoolLibrary.Helpers
                 { "CustomMessage", customMessage },
                 { "RegistrationDetails", registrationDetails},
                 { "VirtualInfo", virtualInfo },
+                { "PhysicalInfo", physicalInfo },
                 { "SplitPaymentSubscriptionInfo", splitPaymentSubscriptionInfo },
                 { "RegistrationTable", registrationTable }
             };
