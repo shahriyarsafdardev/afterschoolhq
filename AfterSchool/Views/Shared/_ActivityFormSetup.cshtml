@@ -1,5 +1,4 @@
-﻿
-@model Activity
+﻿@model Activity
 
 @{
     var accountPackage = (AccountPackage)ViewData["AccountPackage"];
@@ -18,6 +17,7 @@
 
     var showRegistrationPeriodList = SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups);
     var showSeats = Model.ActivityTypeId.NotIn(new ActivityType[] { ActivityType.FieldTrip, ActivityType.PermissionSlip });
+    var showInviteOnly = SessionVariables.AccountPackage.HasFeature(FeatureType.AllowInvites);
 }
 
 <div class="panel panel-default panel-small-padding">
@@ -70,17 +70,15 @@
                     Invite Only?
                 </label>
                 <div class="col-md-9">
-                    @{Html.RenderPartial
-                        (
-                            "~/Views/Shared/_SwitchButton.cshtml",
-                            Model.IsInviteOnly,
-                            new ViewDataDictionary()
-                            {
-                        { "checkboxname", "inviteonly" },
-                        { "checkboxid", "inviteonly" },
-                        { "disabled", false }
-            }
-                        );
+                    @{
+                        Html.RenderPartial(
+                          "~/Views/Shared/_SwitchButton.cshtml", 
+                          Model.IsInviteOnly, 
+                          new ViewDataDictionary() { 
+                              { "checkboxname", "inviteonly" },
+                              { "checkboxid", "inviteonly" },
+                              { "disabled", !showInviteOnly } 
+                          });
                     }
                 </div>
             </div>

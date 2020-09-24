@@ -1,3 +1,4 @@
+// TOOD: darye, can we sort this by alphabatical order? it will affect existing records, so advise.
 public enum FeatureType
 {
 	NotSet = 0,
@@ -25,5 +26,12 @@ public enum FeatureType
 	ManageLeagues,
 	ManageFieldTrips,
 	ManagePermissionSlips,
-	ManageLearningPods
+	ManageLearningPods,
+	TextMessaging,
+	AllowInvites,
+	AllowStudentRegistration,
+	AllowPaymentPlans,
+	AllowSubscriptionPlans,
+	AllowPayLater,
+	StudentCRM
 }
