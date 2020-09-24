@@ -608,6 +608,16 @@ namespace AfterSchoolLibrary.Services
             return account;
         }
 
+        public static Account AddNewAccount(this WebUser accountOwner, string orgName, AccountType accountType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var account = AddNewAccount(accountOwner, orgName, null, true, accountType, null, null, null, true, loggedInUser, msgs, dc);
+
+            if (account.IsNotEmpty())
+                account.SetDefaultAccountPackage(loggedInUser, msgs, dc);
+
+            return account;
+        }
+
         public static Account AddNewAccount(this WebUser accountOwner, string orgName, string phone, bool isActive, AccountType accountType, int? packageId, BillingPeriodType? packageBillingPeriod, string timeZone, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var account = AccountService.CreateNew(
@@ -624,6 +634,30 @@ namespace AfterSchoolLibrary.Services
                 loggedInUser: loggedInUser, 
                 isAfterSchool: isAfterSchool, 
                 msgs: msgs, 
+                dc: dc);
+
+            accountOwner.AddAccount(account, UserType.Owner, loggedInUser, msgs, dc);
+
+            return account;
+        }
+
+        public static Account AddNewAccount(this WebUser accountOwner, string orgName, string claimemaildomain, string phone, bool isActive, AccountType accountType, int? packageId, BillingPeriodType? packageBillingPeriod, string timeZone, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var account = AccountService.CreateNew(
+                orgName: orgName,
+                email: accountOwner.Email,
+                claimemaildomain: claimemaildomain,
+                phone: phone,
+                isActive: isActive,
+                accountType: accountType,
+                accountOwner: accountOwner,
+                packageId: packageId,
+                packageBillingPeriod: packageBillingPeriod,
+                timeZone: timeZone,
+                createWithStripe: false,
+                loggedInUser: loggedInUser,
+                isAfterSchool: isAfterSchool,
+                msgs: msgs,
                 dc: dc);
 
             accountOwner.AddAccount(account, UserType.Owner, loggedInUser, msgs, dc);

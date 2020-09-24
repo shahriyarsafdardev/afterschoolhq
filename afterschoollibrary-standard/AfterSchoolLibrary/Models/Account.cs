@@ -57,6 +57,10 @@ namespace AfterSchoolLibrary.Models
 		/// Enables account to set contact form to be used on main page
 		/// </summary>
 		public int? ContactFormId { get { return (int?)MDV["ContactFormId"].Value; } set { MDV["ContactFormId"].Value = value; } }
+		/// <summary>
+		/// The main domain for the email to validate against during the claim process
+		/// </summary>
+		public string ClaimEmailDomain { get { return (string)MDV["ClaimEmailDomain"].Value; } set { MDV["ClaimEmailDomain"].Value = value; } }
 		
 
         public Account()
@@ -117,6 +121,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "IsClaimed", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "OnboardingStepDone", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ContactFormId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "ClaimEmailDomain", System.Data.SqlDbType.NVarChar , "50");
 				
                 return _dp;
             }
@@ -312,6 +317,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["ContactFormId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ClaimEmailDomain"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
@@ -626,8 +635,13 @@ namespace AfterSchoolLibrary.Models
                 var sql = $@"
                     select * from Account
                     where 
-                        Contains(name, '{"\""}{searchTerms.ToStringList("*\" AND \"")}{"*\""}') and
-                        IsTest = 0 and OwnerId is not NULL and AccountTypeId in {accountTypes.Select(x => (int)x).ToList().ToStrings().ToStringList(",")}
+                        Contains(name, '{"\""}{searchTerms.ToStringList("*\" AND \"")}{"*\""}') 
+                        AND IsActive = 1 
+                        AND IsDeleted = 0 
+                        AND IsTest = 0 
+                        AND OwnerId is not NULL 
+                        AND AccountTypeId in ({accountTypes.Select(x => (int)x).ToList().ToStrings().ToStringList(",")})
+                    Order by Name asc
                 ";
 
                 dq.SelectRange.Start = start;
