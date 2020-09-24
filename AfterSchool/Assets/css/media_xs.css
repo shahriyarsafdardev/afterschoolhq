@@ -12,4 +12,10 @@
     .text-center-sm {
         text-align: center !important;
     }
+
+    .text-small {
+        font-size: 10px;
+        font-family: calibri;
+        font-weight: 100 !important;
+    }
 }
