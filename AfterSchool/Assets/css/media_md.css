@@ -1,3 +1,22 @@
 ﻿/* Medium devices (landscape tablets, 768px to 1199px) */
 @media(min-width: 770px) and (max-width: 1199px) {
+
+    .btn-upgrade-plan {
+        margin-top: 40px;
+        right: 80px;
+        position: fixed;
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    #upgrade-my-plan {
+        position: fixed;
+        z-index: 999999;
+        background-color: #00c5a3;
+        width: 100%;
+        min-height: 60px;
+        bottom: 10px;
+        color: white;
+        display: none;
+    }
 }
