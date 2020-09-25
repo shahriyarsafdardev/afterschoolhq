@@ -1781,6 +1781,7 @@
     <Content Include="Views\Shared\Registrant\_Answers.cshtml" />
     <Content Include="Views\Shared\JavascriptIncludes\_QuillEditorScripts.cshtml" />
     <Content Include="Views\SignUp\Welcome.cshtml" />
+    <Content Include="Views\Shared\_UpgradePlan.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
