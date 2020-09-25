@@ -23,7 +23,7 @@
         <!-- sidebar-->
         @Html.Partial("_Sidebar")
         <!-- Main section-->
-        <div class="am-content">
+        <div id="app-body" class="am-content">
             <div class="visible-xs am-toggle-left-sidebar pointer padding-10" style="background-color: #333;">
                 <table>
                     <tr>
@@ -34,6 +34,13 @@
             </div>
             @RenderBody()
         </div>
+
+        <style>
+            .overlay {
+                width: 94%; /*only for screen with layout*/
+            }
+        </style>
+        @{Html.RenderPartial("~/Views/Shared/_UpgradePlan.cshtml");}
         @*@Html.Partial("_RightSideBar")*@
     </div>
 
