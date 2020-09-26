@@ -22,6 +22,11 @@ namespace AfterSchool.Areas.Org.Controllers
         // GET: Org/Contact
         public ActionResult Index(string pn, string rpp)
         {
+            if (!SessionVariables.AccountPackage.HasFeature(FeatureType.StudentCRM))
+            {
+                return RedirectToAction("Lists");
+            }
+
             var registrants = new List<Registrant>();
             int pageNumber = 1;
             int recordsPerPage = 10;

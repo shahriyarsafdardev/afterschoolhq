@@ -2,6 +2,7 @@
 @{
     ViewBag.Title = $"Messages - {SessionVariables.CurrentAccount.Name}";
     SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+    var showStudentCRM = SessionVariables.AccountPackage.HasFeature(FeatureType.StudentCRM);
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -54,7 +55,15 @@
 
 @section scripts
 {
-    <script>        
+    <script>
+
+        $(document).ready(function () {
+            var flag = '@showStudentCRM';
+            if (flag && flag.toLowerCase() == 'false') {
+                showUpgradeMyPlan();
+            }
+        });
+
         function sendMessages() {
             location.href = `@Url.Action("messageadd", "registration")?${getQuery()}&${getActivityOrGroup()}${getFilterQuestionQS()}&${getRegStatus()}&${getAssignmentType()}`;
         }
