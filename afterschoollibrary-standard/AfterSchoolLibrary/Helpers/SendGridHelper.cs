@@ -165,22 +165,38 @@ namespace AfterSchoolLibrary
 
             task.Wait();
             var response = task.Result;
-            if (response.IsNotEmpty() && response.StatusCode == System.Net.HttpStatusCode.Created)
+            if (response.IsNotEmpty())
             {
                 var responseResult = response.Body.ReadAsStringAsync().Result;
                 var responseModel = JsonConvert.DeserializeObject<SendGridResponse>(responseResult);
-                
-                if (responseModel.IsNotEmpty() && responseModel.PersistedRecipients.Any())
+
+                if (response.StatusCode == System.Net.HttpStatusCode.Created)
                 {
-                    //TODO: call success, need to ask darye if anything special needed here.
-                } else
+                    if (responseModel.IsNotEmpty() && responseModel.PersistedRecipients.Any())
+                    {
+                        //TODO: call success,
+                    }
+
+                    if (responseModel.IsNotEmpty() && responseModel.Errors.Any())
+                    {
+                        msgs.Add(String.Join(", ", responseModel.Errors), MessageType.Error);
+                        Helpers.Utilities.SystemErrorLog(msgs);
+                    }
+                }
+                else
                 {
-                    msgs.Add(responseResult, MessageType.Error);
+                    if (responseModel.IsNotEmpty() && responseModel.Errors.Any())
+                    {
+                        msgs.Add(String.Join(", ", responseModel.Errors), MessageType.Error);
+                        Helpers.Utilities.SystemErrorLog(msgs);
+                    }
                 }
             } 
-            else {
-                msgs.Add(response.Body.ReadAsStringAsync().Result, MessageType.Error);
-            }
+            else
+            {
+                msgs.Add("Empty response from SendGrid api for " + email, MessageType.Error);
+                Helpers.Utilities.SystemErrorLog(msgs);
+            }           
         }
     }
 }
