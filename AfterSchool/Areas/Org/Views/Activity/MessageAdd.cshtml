@@ -5,6 +5,11 @@
 
     var registrants = (List<Registrant>)ViewBag.Registrants;
     var registrantsPerColumn = Math.Ceiling(registrants.Count / 3.0).ToInteger();
+
+    var accountPackage = SessionVariables.AccountPackage;    
+    var maxMessageCount = accountPackage.HasFeature(FeatureType.TextMessaging) ? (int)accountPackage.GetFeature(FeatureType.TextMessaging).Max.Value : 0;
+    var currentMessageCount = (int)ViewData["TotalCount"];
+    var showFormFields = currentMessageCount >= maxMessageCount ? false : true;
 }
 
 @{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
@@ -54,11 +59,27 @@
 
                     <div class="form-group">
                         <label class="col-sm-3 control-label"></label>
-                        <div class="col-sm-6">
+                        <div class="col-sm-3">
                             <div class="am-checkbox">
                                 <input type="checkbox" id="sendtostaff" name="sendtostaff" value="1" checked="checked" />
                                 <label for="sendtostaff">Send Message To Staff</label>
                             </div>
+                        </div>
+                        <div class="col-sm-3">
+                            @if (showFormFields)
+                            {
+                                <div class="am-checkbox">
+                                    <input type="checkbox" id="sendtextmessages" name="sendtextmessages" value="0" />
+                                    <label for="sendtextmessages">Send Text Messages</label>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="am-checkbox" onclick="return showUpgradeMyPlan()">
+                                    <input type="checkbox" id="sendtextmessages" name="sendtextmessages" value="0" disabled="disabled" />
+                                    <label for="sendtextmessages">Send Text Messages</label>
+                                </div>
+                            }
                         </div>
                     </div>
 
