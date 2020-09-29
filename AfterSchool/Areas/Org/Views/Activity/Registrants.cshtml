@@ -23,8 +23,9 @@
         .Count();
     var assignmentType = (RegistrationAssignmentType)ViewBag.AssignmentType;
 
-    var showAllowInvites = SessionVariables.AccountPackage.HasFeature(FeatureType.AllowInvites);
-    var showStudentCRM = SessionVariables.AccountPackage.HasFeature(FeatureType.StudentCRM);
+    var accountPackage = SessionVariables.AccountPackage;
+    var showAllowInvites = accountPackage.HasFeature(FeatureType.AllowInvites);
+    var showStudentCRM = accountPackage.HasFeature(FeatureType.StudentCRM);
 }
 
 @{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}

@@ -11,10 +11,10 @@
     var showRegistrationPeriodList = SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups);
     var showSeats = Model.ActivityTypeId.NotIn(new ActivityType[] { ActivityType.FieldTrip, ActivityType.PermissionSlip });
 
-    var showInviteOnly = SessionVariables.AccountPackage.HasFeature(FeatureType.AllowInvites);
-    var showWaitingList = SessionVariables.AccountPackage.HasFeature(FeatureType.WaitingList);
-    var showManageForms = SessionVariables.AccountPackage.HasFeature(FeatureType.ManageForms);
-    var showAllowApplications = SessionVariables.AccountPackage.HasFeature(FeatureType.AllowApplications);
+    var showInviteOnly = accountPackage.HasFeature(FeatureType.AllowInvites);
+    var showWaitingList = accountPackage.HasFeature(FeatureType.WaitingList);
+    var showManageForms = accountPackage.HasFeature(FeatureType.ManageForms);
+    var showAllowApplications = accountPackage.HasFeature(FeatureType.AllowApplications);
 }
 
 <div class="panel panel-default panel-small-padding">
