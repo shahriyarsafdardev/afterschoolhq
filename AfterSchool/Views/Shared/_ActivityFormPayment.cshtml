@@ -13,9 +13,9 @@
         paymentdisabled = " disabled=\"disabled\" ";
     }
 
-    var showAllowPayLater = SessionVariables.AccountPackage.HasFeature(FeatureType.AllowPayLater);
-    var showAllowPaymentPlans = SessionVariables.AccountPackage.HasFeature(FeatureType.AllowPaymentPlans);
-    var showAllowSubscriptionPlans = SessionVariables.AccountPackage.HasFeature(FeatureType.AllowSubscriptionPlans);
+    var showAllowPayLater = accountPackage.HasFeature(FeatureType.AllowPayLater);
+    var showAllowPaymentPlans = accountPackage.HasFeature(FeatureType.AllowPaymentPlans);
+    var showAllowSubscriptionPlans = accountPackage.HasFeature(FeatureType.AllowSubscriptionPlans);
 }
 
 <div class="panel panel-default panel-small-padding">
