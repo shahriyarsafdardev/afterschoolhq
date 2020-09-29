@@ -298,7 +298,7 @@ namespace AfterSchool.Models
             const string registrantPath = "/user/";
             const string districtPath = "/district/";
             const string orgPath = "/org/";
-            if(returnUrl != null)
+            if(returnUrl.IsNotEmpty())
             {
                 switch (account.AccountTypeId)
                 {
