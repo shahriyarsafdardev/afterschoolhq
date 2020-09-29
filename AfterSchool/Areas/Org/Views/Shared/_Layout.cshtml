@@ -60,7 +60,7 @@
             });
 
             $('a').click(function () {
-                if ($(this).attr('href') != "#" && $(this).attr('href').indexOf('javascript:') == -1 && $(this).attr('target') != "_blank") {
+                if ($(this).attr('href') && $(this).attr('href') != "#" && $(this).attr('href').indexOf('javascript:') == -1 && $(this).attr('target') != "_blank") {
                     //$("#modal-saving").addClass("md-show");
                     //$('#saving-text').html('Loading...');
                     $('#modal-saving').removeClass('hide');

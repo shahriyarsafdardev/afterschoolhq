@@ -48,24 +48,59 @@
     }
 
     var paging = (PagingModel)ViewData["PagingModel"];
+    var managePermissionSlips = accountPackage.HasFeature(FeatureType.ManagePermissionSlips);
 }
 
 @if (Model.Count == 0 && group.IsEmpty() && !hasArchivedActivities)
 {
-    <div class="widget">
-        <div class="widget-head">
-            <h1>@account.Name @UILabel.ActivityLabel(activityType, true)</h1>        
+    if (activityType == ActivityType.PermissionSlip)
+    {
+         <div class="widget">
+            <div class="widget-head">
+                <h1>@account.Name @UILabel.ActivityLabel(activityType, true)</h1>        
+            </div>
+            <div class="widget-tile">
+                <hr />
+                <p>Welcome, @SessionVariables.CurrentUser.FirstName!</p>
+
+                @if (managePermissionSlips)
+                {
+                    <p>You haven't created any @UILabel.ActivityLabel(activityType, true).ToLower() yet. In order to get started, <a href="@addUrl">create your first @UILabel.ActivityLabel(activityType).ToLower()</a>.</p>
+                }
+                else
+                {
+                    <p>
+                        You haven't created any @UILabel.ActivityLabel(activityType, true).ToLower() yet. In order to get started,<a href="#" onclick="return showUpgradeMyPlan()">create your first @UILabel.ActivityLabel(activityType).ToLower()</a>.
+                    </p>
+                    }
+                <p>&nbsp;</p>
+                @if (managePermissionSlips)
+                {
+                    <a href="@addUrl" class="btn btn-primary btn-lg">Create Your First @UILabel.ActivityLabel(activityType) &raquo;</a>
+                }
+                else
+                {
+                    <a href="#" class="btn btn-primary btn-lg" onclick="return showUpgradeMyPlan()">Create Your First @UILabel.ActivityLabel(activityType) &raquo;</a>
+                }
+            </div>
         </div>
-        <div class="widget-tile">
-            <hr />
-            <p>Welcome, @SessionVariables.CurrentUser.FirstName!</p>
-            <p>You haven't created any @UILabel.ActivityLabel(activityType, true).ToLower() yet. In order to get started, <a href="@addUrl">create your first @UILabel.ActivityLabel(activityType).ToLower()</a>.</p>
-            <p>&nbsp;</p>
-            <p>
-                <a href="@addUrl" class="btn btn-primary btn-lg">Create Your First @UILabel.ActivityLabel(activityType) &raquo;</a>
-            </p>
+    } 
+    else { 
+        <div class="widget">
+            <div class="widget-head">
+                <h1>@account.Name @UILabel.ActivityLabel(activityType, true)</h1>        
+            </div>
+            <div class="widget-tile">
+                <hr />
+                <p>Welcome, @SessionVariables.CurrentUser.FirstName!</p>
+                <p>You haven't created any @UILabel.ActivityLabel(activityType, true).ToLower() yet. In order to get started, <a href="@addUrl">create your first @UILabel.ActivityLabel(activityType).ToLower()</a>.</p>
+                <p>&nbsp;</p>
+                <p>
+                    <a href="@addUrl" class="btn btn-primary btn-lg">Create Your First @UILabel.ActivityLabel(activityType) &raquo;</a>
+                </p>
+            </div>
         </div>
-    </div>
+    }
 }
 else
 {

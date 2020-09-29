@@ -66,6 +66,10 @@
                 {
                     <a href="@Url.Action("messages", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "messages" ? "-active" : "")"><i class="s7-mail"></i> Messaging</a>
                 }
+                else
+                {
+                    <a href="#" class="btn btn-alt6@(actionName == "messages" ? "-active" : "")"  onclick="return showUpgradeMyPlan()"><i class="s7-mail"></i> Messaging</a>
+                }
             }
 
             @if (isActivityLeader)
@@ -125,6 +129,10 @@
                     if (SessionVariables.AccountPackage.HasFeature(FeatureType.Messaging))
                     {
                         <option value="@Url.Action("messages", "activity", new { id = Model.Uid })">Messaging</option>
+                    }
+                    else
+                    {
+                        <option value="#">Messaging</option>
                     }
                 }
                 @if (isActivityLeader)

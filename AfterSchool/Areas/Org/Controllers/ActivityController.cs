@@ -1747,6 +1747,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Messages = new SystemMessages();
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
+            ViewBag.TotalCount = activity.GetMessagesCount();
             ViewBag.Registrants = activity.GetRegistrants()
                                     .OrderBy(x => x.FirstName)
                                     .ToList();
