@@ -15,7 +15,7 @@
     }
 
     var accountPackage = SessionVariables.AccountPackage;
-    var showMessaging = accountPackage.HasFeature(FeatureType.Messaging);
+    var showMessaging = accountPackage.HasFeature(FeatureType.EmailMessaging);
     var maxMessageCount = accountPackage.HasFeature(FeatureType.TextMessaging) ? (int)accountPackage.GetFeature(FeatureType.TextMessaging).Max.Value : 0;
     var currentMessageCount = paging.TotalCount;
     var showFormFields = currentMessageCount >= maxMessageCount ? false : true;
@@ -25,7 +25,7 @@
 {
     <div class="row">
         <div class="col-md-12">
-            @if (showFormFields)
+            @if (showFormFields || showMessaging)
             {
                 <a href="@sendNewLink" class="btn btn-primary btn-space"><i class="icon icon-left s7-paper-plane"></i> Send New Message</a>
             } else

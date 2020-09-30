@@ -3,7 +3,7 @@ public enum FeatureType
 	NotSet = 0,
 	Attendance,
 	AcceptPayments,
-	Messaging,
+	EmailMessaging,
 	CustomUrl,
 	TeamAccounts,
 	WaitingList,

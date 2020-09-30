@@ -46,7 +46,7 @@
                 {
                     <a href="@Url.Action("attendance", "leagueactivity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "attendance" ? "-active" : "")"><i class="s7-check"></i> Attendance</a>
                 }
-                if (SessionVariables.AccountPackage.HasFeature(FeatureType.Messaging))
+                if (SessionVariables.AccountPackage.HasFeature(FeatureType.EmailMessaging))
                 {
                     <a href="@Url.Action("messages", "leagueactivity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "messages" ? "-active" : "")"><i class="s7-mail"></i> Messaging</a>
                 }
@@ -92,7 +92,7 @@
                     {
                         <option value="@Url.Action("attendance", "leagueactivity", new { id = Model.Uid })">Attendance</option>
                     }
-                    if (SessionVariables.AccountPackage.HasFeature(FeatureType.Messaging))
+                    if (SessionVariables.AccountPackage.HasFeature(FeatureType.EmailMessaging))
                     {
                         <option value="@Url.Action("messages", "leagueactivity", new { id = Model.Uid })">Messaging</option>
                     }
