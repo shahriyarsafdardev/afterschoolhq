@@ -1,0 +1,15 @@
+﻿/* Extra small devices (phones) */
+@media screen and (max-width: 479px) {
+    .padding-zero {
+        padding: 0;
+    }
+
+    .btn-toolbar {
+        margin-left: -2px;
+        margin-right: -2px;
+    }
+
+    .text-center-sm {
+        text-align: center !important;
+    }
+}

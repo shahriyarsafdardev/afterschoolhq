@@ -185,7 +185,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
             LoadEditSetupViewBag(activity, activityGroup, msgs);
             ViewBag.ActiveMenu = "EditSetup";
-            ViewBag.Group = activityGroup;
             
             return View(activity);
         }
@@ -199,98 +198,108 @@ namespace AfterSchool.Areas.Org.Controllers
             Activity activity;
             ActivityGroup activityGroup = null;
 
-            var values = new Dictionary<string, object>()
-            {
-                { "name", name },
-                { "seatsavailable", seatsavailable },
-                { "waitinglistseats", waitinglistseats },
-                { "registrationperiod", registrationperiod },
-                { "registrationopendate", registrationopendate },
-                { "registrationopentime", registrationopentime },
-                { "registrationclosedate", registrationclosedate },
-                { "registrationclosetime", registrationclosetime },
-                { "timezone", timezone },
-                { "form", form },
-                { "regmode", regmode },
-                { "group", group },
-                { "type", type },
-                { "inviteonly", inviteonly.IsBoolean().ToString() },
-                { "minseatsrequired", minseatsrequired },
-            };
+            if (id.IsEmpty() || !id.IsGuid())
+                return HttpNotFound();
 
             activity = Activity.LoadByUid(id.ToGuid());
-            if (activity.IsNotEmpty())
+
+            if (name.IsEmpty())
+                msgs.Add("Activity name is required.", MessageType.UserError);
+            else if (name.Length > 75)
+                msgs.Add("Activity name must not be greater then 75 chanracters.", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
             {
-                activity = ActivityService.EditExisting(
-                    loggedInUserId: currentUser.ID.Value,
-                    account: currentAccount,
-                    activityId: activity.ID.Value.ToString(),
-                    values: values,
-                    msgs: msgs
-                );
-                activityGroup = activity.GetActivityGroup();
-            }
-            else
-            {
-                //create initial form for account
-                if (msgs.HasNoErrors() && !SessionVariables.AccountPackage.HasFeature(FeatureType.ManageForms))
+                var values = new Dictionary<string, object>()
                 {
-                    var defaultForm = currentAccount.GetDefaultForm();
-                    var newForm = defaultForm.Copy(currentUser.ID.Value, currentAccount.ID.Value, (name + " form").MaxChars(100, "..."), msgs);
+                    { "name", name.MaxChars(75) },
+                    { "seatsavailable", seatsavailable },
+                    { "waitinglistseats", waitinglistseats },
+                    { "registrationperiod", registrationperiod },
+                    { "registrationopendate", registrationopendate },
+                    { "registrationopentime", registrationopentime },
+                    { "registrationclosedate", registrationclosedate },
+                    { "registrationclosetime", registrationclosetime },
+                    { "timezone", timezone },
+                    { "form", form },
+                    { "regmode", regmode },
+                    { "group", group },
+                    { "type", type },
+                    { "inviteonly", inviteonly.IsBoolean().ToString() },
+                    { "minseatsrequired", minseatsrequired },
+                };
+
+                if (activity.IsNotEmpty())
+                {
+                    activity = ActivityService.EditExisting(
+                        loggedInUserId: currentUser.ID.Value,
+                        account: currentAccount,
+                        activityId: activity.ID.Value.ToString(),
+                        values: values,
+                        msgs: msgs
+                    );
+                    activityGroup = activity.GetActivityGroup();
+                }
+                else
+                {
+                    //create initial form for account
+                    if (msgs.HasNoErrors() && !SessionVariables.AccountPackage.HasFeature(FeatureType.ManageForms))
+                    {
+                        var defaultForm = currentAccount.GetDefaultForm();
+                        var newForm = defaultForm.Copy(currentUser.ID.Value, currentAccount.ID.Value, (name + " form").MaxChars(100, "..."), msgs);
+                        if (msgs.HasNoErrors())
+                            values.Add("form", newForm.ID.Value.ToString());
+                    }
+
+                    values.Add("registrationthankyouemail", "Thank you for registering.");
+                    values.Add("applicationthankyouemail", "Thank you for applying.");
+                    values.Add("interestthankyouemail", "Thank you for your interest. We will be in touch with you soon to follow up.");
+
+                    activity = ActivityService.CreateNew(
+                        loggedInUserId: currentUser.ID.Value,
+                        account: currentAccount,
+                        values: values,
+                        msgs: msgs
+                    );
+
                     if (msgs.HasNoErrors())
-                        values.Add("form", newForm.ID.Value.ToString());
+                        UpdateSession(SessionActionType.ActivityCreate, currentAccount.ID, activity.ID);
                 }
 
-                values.Add("registrationthankyouemail", "Thank you for registering.");
-                values.Add("applicationthankyouemail", "Thank you for applying.");
-                values.Add("interestthankyouemail", "Thank you for your interest. We will be in touch with you soon to follow up.");
-
-                activity = ActivityService.CreateNew(
-                    loggedInUserId: currentUser.ID.Value,
-                    account: currentAccount,
-                    values: values,
-                    msgs: msgs
-                );
+                if (group.IsGuid())
+                    activityGroup = ActivityGroup.LoadByUid(group.ToGuid());                
 
                 if (msgs.HasNoErrors())
-                    UpdateSession(SessionActionType.ActivityCreate, currentAccount.ID, activity.ID);
-            }
+                    msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
 
-            if (group.IsGuid())
-                activityGroup = ActivityGroup.LoadByUid(group.ToGuid());
-
-            LoadEditSetupViewBag(activity, activityGroup, msgs);
-            ViewBag.Group = activityGroup;
-
-            if (msgs.HasNoErrors())
-                msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
-
-            if (msgs.HasNoErrors())
-            {
                 switch (cmd)
                 {
                     case "next":
-                        switch(activity.ActivityTypeId)
+                        switch (activity.ActivityTypeId)
                         {
                             case ActivityType.LearningPod:
                             case ActivityType.Activity:
+                                LoadEditSetupViewBag(activity, activityGroup, msgs);
                                 ViewBag.ActiveMenu = "EditRestrictions";
                                 return View("EditRestrictions", activity);
+
                             case ActivityType.FieldTrip:
                             case ActivityType.Team:
                                 LoadEditScheduleViewBag(activity, activity.ActivityScheduleId?.ToString());
                                 ViewBag.ActiveMenu = "EditSchedule";
                                 return View("editschedule", activity);
+
                             case ActivityType.PermissionSlip:
+                                LoadEditSetupViewBag(activity, activityGroup, msgs);
                                 ViewBag.ActiveMenu = "EditDetails";
                                 return View("EditDetails", activity);
-
                         }
                         break;
                 }
             }
 
-            ViewBag.ActiveMenu = "EditSetup";
+            LoadEditSetupViewBag(activity, activityGroup, msgs);
+            ViewBag.ActiveMenu = "EditSetup";            
             return View(activity);
         }
 
@@ -305,6 +314,7 @@ namespace AfterSchool.Areas.Org.Controllers
             periods = periods.OrderBy(period => period.StartDateTime.Value).ToList();
 
             ViewBag.Messages = msgs;
+            ViewBag.Group = activityGroup;
             ViewBag.Account = currentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Forms = currentAccount.GetForms(msgs).OrderBy(x => x.Name).ToList();
