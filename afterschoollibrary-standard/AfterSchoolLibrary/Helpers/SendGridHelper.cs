@@ -111,7 +111,7 @@ namespace AfterSchoolLibrary
                 accountId: account.ID.IsNotEmpty() ? account.ID.Value.ToString() : "",
                 accountEmail: account.Email,
                 accountName: account.Name,
-                accountPhone: account.Phone,
+                accountPhone: account.Phone.IsNotEmpty() ? account.Phone : "",
                 accountHomePageUrl: account.HomePageUrl,
                 accountCreateDate: account.CreateDate.Value.ToRfc3339String(),
                 accountCreationDays: (DateTime.UtcNow - account.CreateDate)?.Days.ToString(),
@@ -139,29 +139,29 @@ namespace AfterSchoolLibrary
                     {
                         new
                         {
-                            first_name = firstName.ReturnNullIfEmpty(),
-                            last_name = lastName.ReturnNullIfEmpty(),
-                            email = email.ReturnNullIfEmpty(),
+                            first_name = firstName,
+                            last_name = lastName,
+                            email = email,
                             custom_fields = new
                             {
-                                e17_N = userId.ReturnNullIfEmpty(), // owner_id
-                                e12_N = accountId.ReturnNullIfEmpty(),  //account_id
-                                e16_T = accountEmail.ReturnNullIfEmpty(), //program_email
-                                e13_T = accountName.ReturnNullIfEmpty(),  //program_name
-                                e15_T = accountPhone.ReturnNullIfEmpty(),  //program_phone
-                                e29_T = accountHomePageUrl.ReturnNullIfEmpty(), // activity_home_page_url  (program_profile is not available, instead we have activity_home_page_url)
-                                e30_T = accountHomePageUrl.IsBlank() ? null : $"{Helpers.Utilities.BaseUrl()}/login?returnurl={HttpUtility.UrlEncode($"{accountHomePageUrl}?edit=1")}", //program_profile_edit_link
-                                e14_D = accountCreateDate.ReturnNullIfEmpty(),  // program_create_date
-                                e25_N = accountCreationDays.ReturnNullIfEmpty(),  // days_since_account_created
-                                e23_D = lastActivityDate.ReturnNullIfEmpty(),  // last_activity_create_date
-                                e24_N = lastActivityCreationDays.ReturnNullIfEmpty(),  // days_since_last_activity_created
-                                e22_N = activityCount.ReturnNullIfEmpty(),   // activities_created
-                                e19_N = isAccountProfileExist.ReturnNullIfEmpty(),  // profile_exists
-                                e20_N = isAccountProfileStarted.ReturnNullIfEmpty(),  // profile_started
-                                e21_N = isAccountProfileCompleted.ReturnNullIfEmpty(), // profile_completed
-                                e31_N = stripeConnected.ReturnNullIfEmpty(), // stripe_connected
-                                e32_N = emailVerified.ReturnNullIfEmpty(),  // email_verified
-                                e28_T = isTest.ReturnNullIfEmpty() // is_test
+                                e17_N = userId, // owner_id
+                                e12_N = accountId,  //account_id
+                                e16_T = accountEmail, //program_email
+                                e13_T = accountName,  //program_name
+                                e15_T = accountPhone, //program_phone
+                                e29_T = accountHomePageUrl, // activity_home_page_url  (program_profile is not available, instead we have activity_home_page_url)
+                                e30_T = accountHomePageUrl.IsBlank() ? "" : $"{Helpers.Utilities.BaseUrl()}/login?returnurl={HttpUtility.UrlEncode($"{accountHomePageUrl}?edit=1")}", //program_profile_edit_link
+                                e14_D = accountCreateDate,  // program_create_date
+                                e25_N = accountCreationDays,  // days_since_account_created
+                                e23_D = lastActivityDate.IsNotEmpty() ? lastActivityDate : "",  // last_activity_create_date
+                                e24_N = lastActivityCreationDays.IsNotEmpty() ? lastActivityCreationDays : "",  // days_since_last_activity_created
+                                e22_N = activityCount,   // activities_created
+                                e19_N = isAccountProfileExist,  // profile_exists
+                                e20_N = isAccountProfileStarted,  // profile_started
+                                e21_N = isAccountProfileCompleted, // profile_completed
+                                e31_N = stripeConnected, // stripe_connected
+                                e32_N = emailVerified,  // email_verified
+                                e28_T = isTest // is_test
                                 
                             }
                         }
@@ -180,21 +180,8 @@ namespace AfterSchoolLibrary
 
             task.Wait();
             var response = task.Result;
-            var responseResultCheck = response.Body.ReadAsStringAsync().Result;
-            if (response.IsNotEmpty() && response.StatusCode == System.Net.HttpStatusCode.Created)
+            if (!response.IsNotEmpty() || response.StatusCode != System.Net.HttpStatusCode.Accepted)
             {
-                var responseResult = response.Body.ReadAsStringAsync().Result;
-                var responseModel = JsonConvert.DeserializeObject<SendGridResponse>(responseResult);
-                
-                if (responseModel.IsNotEmpty() && responseModel.PersistedRecipients.Any())
-                {
-                    //TODO: call success, need to ask darye if anything special needed here.
-                } else
-                {
-                    msgs.Add(responseResult, MessageType.Error);
-                }
-            } 
-            else {
                 msgs.Add(response.Body.ReadAsStringAsync().Result, MessageType.Error);
             }
         }
