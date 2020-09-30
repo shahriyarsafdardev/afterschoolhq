@@ -47,7 +47,7 @@
                                 var masterRegistrant = registrant.GetMasterRegistrant();
                                 var regStatus = RegistrationStatus.Current;
 
-                                if (originalPlan.PlanTypeId == SubscriptionPlanType.Subscription)
+                                if (originalPlan.PlanTypeId == SubscriptionPlanType.Subscription  || originalPlan.PlanTypeId == SubscriptionPlanType.PaymentPlan)
                                 {
                                     if (plan.StartDate.Value.IsAfter(DateTime.UtcNow))
                                     {
