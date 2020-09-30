@@ -712,14 +712,11 @@
     <Content Include="img\lazyload-ph.png" />
     <Content Include="img\logo.png" />
     <Content Include="img\marketplace.png" />
-    <Content Include="img\marketplace-1.png" />
     <Content Include="img\olivia-bauso-VQLyz0CpVFM-unsplash.jpg" />
     <Content Include="img\pageload-spinner.gif" />
     <Content Include="img\Parent.png" />
-    <Content Include="img\Parent-1.png" />
     <Content Include="img\pencil-banner.jpg" />
     <Content Include="img\Provider.png" />
-    <Content Include="img\Provider-1.png" />
     <Content Include="img\smiling-group.png" />
     <Content Include="img\texture-fabric.png" />
     <Content Include="index-profiles.html" />
