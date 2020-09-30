@@ -3,6 +3,7 @@ using SendGrid;
 using SendGrid.Helpers.Mail;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,9 +12,22 @@ namespace AfterSchoolLibrary
 {
     public class SendGridHelper
     {
-        public const string SendGridApiKey = "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";
+        public static string ProductionSendGridApiKey { get { return ConfigurationManager.AppSettings["SendGrid.ProductionApiKey"]; } }
+        public static string DevelopmentSendGridApiKey { get { return ConfigurationManager.AppSettings["SendGrid.DevelopmentApiKey"]; } }
         public const string EnrollHQGenericTemplateId = "c672e668-1b54-4721-84be-50fe3cde7cb2";
         public const string AfterSchoolHQGenericTemplateId = "70362a81-6361-4140-9d5b-25b28e97ceca";
+
+        public static string SendGridApiKey
+        {
+            get
+            {
+                if (AfterSchoolLibrary.Helpers.Utilities.IsProduction)
+                    return ProductionSendGridApiKey;
+
+                return DevelopmentSendGridApiKey;
+            }
+        }
+
 
         public static string GetGenericTemplateId(bool isAfterSchool = true)
         {
