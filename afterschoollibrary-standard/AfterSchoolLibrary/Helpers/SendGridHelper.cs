@@ -69,17 +69,24 @@ namespace AfterSchoolLibrary
                 new
                 {
                     first_name = firstName,
-                    org_name = orgname,
                     email,
-                    web_demo = 1
+                    custom_fields = new List<object>
+                    {
+                        new
+                        {
+                            org_name = orgname,
+                            web_demo = 1
+                        }
+                    }
+                  
                 }
             };
 
             var task = Task.Run(async () =>
             {
                 return await sg.RequestAsync(
-                    method: SendGridClient.Method.POST,
-                    urlPath: "contactdb/recipients",
+                    method: SendGridClient.Method.PUT,
+                    urlPath: "marketing/contactss",
                     requestBody: contact.ToJSON());
             });
             task.Wait();
@@ -126,45 +133,54 @@ namespace AfterSchoolLibrary
         {
             var sg = new SendGridClient(SendGridApiKey);
 
-            var contact = new List<object>()
-            {
-                new
-                {
-                    first_name = firstName.ReturnNullIfEmpty(),
-                    last_name = lastName.ReturnNullIfEmpty(),
-                    email = email.ReturnNullIfEmpty(),
-                    owner_id = userId.ReturnNullIfEmpty(),
-                    account_id = accountId.ReturnNullIfEmpty(),
-                    program_email = accountEmail.ReturnNullIfEmpty(),
-                    program_name = accountName.ReturnNullIfEmpty(),
-                    program_phone = accountPhone.ReturnNullIfEmpty(),
-                    activity_home_page_url = accountHomePageUrl.ReturnNullIfEmpty(), //program_profile is not available, instead we have activity_home_page_url
-                    activity_home_page_url_2 = accountHomePageUrl.IsBlank() ? null : $"{Helpers.Utilities.BaseUrl()}/login?returnurl={HttpUtility.UrlEncode($"{accountHomePageUrl}?edit=1")}",//program_profile_edit_link
-                    program_create_date = accountCreateDate.ReturnNullIfEmpty(),
-                    days_since_account_created = accountCreationDays.ReturnNullIfEmpty(),
-                    last_activity_create_date = lastActivityDate.ReturnNullIfEmpty(),
-                    days_since_last_activity_created = lastActivityCreationDays.ReturnNullIfEmpty(),
-                    activities_created = activityCount.ReturnNullIfEmpty(),
-                    profile_exists = isAccountProfileExist.ReturnNullIfEmpty(),
-                    profile_started = isAccountProfileStarted.ReturnNullIfEmpty(),
-                    profile_completed = isAccountProfileCompleted.ReturnNullIfEmpty(),
-                    stripe_connected = stripeConnected.ReturnNullIfEmpty(),
-                    email_verified = emailVerified.ReturnNullIfEmpty(),
-                    is_test = isTest.ReturnNullIfEmpty(),
-                    web_demo = 1
-                }
+            var contact =  new
+               {
+                    contacts = new List<object>
+                    {
+                        new
+                        {
+                            first_name = firstName.ReturnNullIfEmpty(),
+                            last_name = lastName.ReturnNullIfEmpty(),
+                            email = email.ReturnNullIfEmpty(),
+                            custom_fields = new
+                            {
+                                e17_N = userId.ReturnNullIfEmpty(), // owner_id
+                                e12_N = accountId.ReturnNullIfEmpty(),  //account_id
+                                e16_T = accountEmail.ReturnNullIfEmpty(), //program_email
+                                e13_T = accountName.ReturnNullIfEmpty(),  //program_name
+                                e15_T = accountPhone.ReturnNullIfEmpty(),  //program_phone
+                                e29_T = accountHomePageUrl.ReturnNullIfEmpty(), // activity_home_page_url  (program_profile is not available, instead we have activity_home_page_url)
+                                e30_T = accountHomePageUrl.IsBlank() ? null : $"{Helpers.Utilities.BaseUrl()}/login?returnurl={HttpUtility.UrlEncode($"{accountHomePageUrl}?edit=1")}", //program_profile_edit_link
+                                e14_D = accountCreateDate.ReturnNullIfEmpty(),  // program_create_date
+                                e25_N = accountCreationDays.ReturnNullIfEmpty(),  // days_since_account_created
+                                e23_D = lastActivityDate.ReturnNullIfEmpty(),  // last_activity_create_date
+                                e24_N = lastActivityCreationDays.ReturnNullIfEmpty(),  // days_since_last_activity_created
+                                e22_N = activityCount.ReturnNullIfEmpty(),   // activities_created
+                                e19_N = isAccountProfileExist.ReturnNullIfEmpty(),  // profile_exists
+                                e20_N = isAccountProfileStarted.ReturnNullIfEmpty(),  // profile_started
+                                e21_N = isAccountProfileCompleted.ReturnNullIfEmpty(), // profile_completed
+                                e31_N = stripeConnected.ReturnNullIfEmpty(), // stripe_connected
+                                e32_N = emailVerified.ReturnNullIfEmpty(),  // email_verified
+                                e28_T = isTest.ReturnNullIfEmpty() // is_test
+                                
+                            }
+                        }
+                    }
+
             };
 
             var task = Task.Run(async () =>
             {
                 return await sg.RequestAsync(
-                    method: SendGridClient.Method.POST,
-                    urlPath: "contactdb/recipients",
-                    requestBody: contact.ToJSON());
+                    method: SendGridClient.Method.PUT,
+                    urlPath: "marketing/contacts",
+                    requestBody: contact.ToJSON()
+                );
             });
 
             task.Wait();
             var response = task.Result;
+            var responseResultCheck = response.Body.ReadAsStringAsync().Result;
             if (response.IsNotEmpty() && response.StatusCode == System.Net.HttpStatusCode.Created)
             {
                 var responseResult = response.Body.ReadAsStringAsync().Result;
