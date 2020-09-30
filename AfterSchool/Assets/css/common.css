@@ -21,3 +21,13 @@
     height: 100%;
     pointer-events: none;
 }
+
+.main-content-new {
+    padding-left: 35px;
+    padding-right: 35px;
+    padding-top: 35px;
+}
+
+.am-content-full {
+    padding: 40px;
+}
