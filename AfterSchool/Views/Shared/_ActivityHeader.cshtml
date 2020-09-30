@@ -62,7 +62,7 @@
                     }
                 }
 
-                if (SessionVariables.AccountPackage.HasFeature(FeatureType.Messaging))
+                if (SessionVariables.AccountPackage.HasFeature(FeatureType.EmailMessaging))
                 {
                     <a href="@Url.Action("messages", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "messages" ? "-active" : "")"><i class="s7-mail"></i> Messaging</a>
                 }
@@ -126,7 +126,7 @@
                         }
                     }
 
-                    if (SessionVariables.AccountPackage.HasFeature(FeatureType.Messaging))
+                    if (SessionVariables.AccountPackage.HasFeature(FeatureType.EmailMessaging))
                     {
                         <option value="@Url.Action("messages", "activity", new { id = Model.Uid })">Messaging</option>
                     }
