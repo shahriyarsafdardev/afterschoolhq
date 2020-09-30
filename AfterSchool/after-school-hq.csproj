@@ -676,6 +676,7 @@
     <Content Include="img\Apple-iMac.png" />
     <Content Include="img\banner-classroom.jpg" />
     <Content Include="img\BCALogo.jpg" />
+    <Content Include="img\handshake-icon.png" />
     <Content Include="img\ian-logo.png" />
     <Content Include="img\icon-attendance-1.png" />
     <Content Include="img\icon-belonging-1.png" />
@@ -711,12 +712,11 @@
     <Content Include="img\IPS.png" />
     <Content Include="img\lazyload-ph.png" />
     <Content Include="img\logo.png" />
-    <Content Include="img\marketplace.png" />
     <Content Include="img\olivia-bauso-VQLyz0CpVFM-unsplash.jpg" />
     <Content Include="img\pageload-spinner.gif" />
-    <Content Include="img\Parent.png" />
+    <Content Include="img\parent-icon.png" />
     <Content Include="img\pencil-banner.jpg" />
-    <Content Include="img\Provider.png" />
+    <Content Include="img\provider-icon.png" />
     <Content Include="img\smiling-group.png" />
     <Content Include="img\texture-fabric.png" />
     <Content Include="index-profiles.html" />
