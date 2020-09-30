@@ -298,28 +298,31 @@ namespace AfterSchool.Models
             const string registrantPath = "/user/";
             const string districtPath = "/district/";
             const string orgPath = "/org/";
-        
-            switch (account.AccountTypeId)
+            if(returnUrl.IsNotEmpty())
             {
-                case AccountType.AfterSchool:
-                    if (!returnUrl.ToLower().Contains(new string[] { orgPath, registrantPath, districtPath }))
-                        actionResult = Redirect(returnUrl);
-                    break;
-                case AccountType.Registrant:
-                    if (!returnUrl.ToLower().Contains(new string[] { orgPath, adminPath, districtPath }))
-                        actionResult = Redirect(returnUrl);
-                    break;
-                case AccountType.SchoolDistrict:
-                    if (!returnUrl.ToLower().Contains(new string[] { orgPath, adminPath, registrantPath }))
-                        actionResult = Redirect(returnUrl);
-                    break;
-                default:
-                    if (account.AccountTypeId.In(AccountService.ProviderAccountTypes) && !returnUrl.ToLower().Contains(new string[] { adminPath, registrantPath, districtPath }))
-                        actionResult = Redirect(returnUrl);
-                    break;
+                switch (account.AccountTypeId)
+                {
+                    case AccountType.AfterSchool:
+                        if (!returnUrl.ToLower().Contains(new string[] { orgPath, registrantPath, districtPath }))
+                            actionResult = Redirect(returnUrl);
+                        break;
+                    case AccountType.Registrant:
+                        if (!returnUrl.ToLower().Contains(new string[] { orgPath, adminPath, districtPath }))
+                            actionResult = Redirect(returnUrl);
+                        break;
+                    case AccountType.SchoolDistrict:
+                        if (!returnUrl.ToLower().Contains(new string[] { orgPath, adminPath, registrantPath }))
+                            actionResult = Redirect(returnUrl);
+                        break;
+                    default:
+                        if (account.AccountTypeId.In(AccountService.ProviderAccountTypes) && !returnUrl.ToLower().Contains(new string[] { adminPath, registrantPath, districtPath }))
+                            actionResult = Redirect(returnUrl);
+                        break;
 
+                }
             }
-           
+            
+
             return actionResult;
         }
 

@@ -25,30 +25,34 @@ namespace AfterSchool.Models
         public static string RenderMessagesToHtml(SystemMessages msgs)
         {
             string x = "";
-            foreach(SystemMessage msg in msgs)
+            if (msgs.IsNotEmpty())
             {
-                string alertType = "";
-                switch(msg.MessageType)
+                foreach (SystemMessage msg in msgs)
                 {
-                    case MessageType.Success:
-                        alertType = "success";
-                        break;
-                    case MessageType.Confirmation:
-                        alertType = "info";
-                        break;
-                    case MessageType.Error:
-                    case MessageType.UserError:
-                        alertType = "danger";
-                        break;
-                    case MessageType.Notice:
-                        alertType = "info";
-                        break;
-                    case MessageType.Warning:
-                        alertType = "warning";
-                        break;
+                    string alertType = "";
+                    switch (msg.MessageType)
+                    {
+                        case MessageType.Success:
+                            alertType = "success";
+                            break;
+                        case MessageType.Confirmation:
+                            alertType = "info";
+                            break;
+                        case MessageType.Error:
+                        case MessageType.UserError:
+                            alertType = "danger";
+                            break;
+                        case MessageType.Notice:
+                            alertType = "info";
+                            break;
+                        case MessageType.Warning:
+                            alertType = "warning";
+                            break;
+                    }
+                    x += string.Format("<div role=\"alert\" class=\"alert alert-{0}\">{1}</div>", alertType, msg.Text);
                 }
-                x += string.Format("<div role=\"alert\" class=\"alert alert-{0}\">{1}</div>", alertType, msg.Text);
             }
+           
             return x;
         }
     }
