@@ -1261,35 +1261,40 @@ namespace AfterSchool.Areas.Org.Controllers
         //    return View(a);
         //}
 
-        //[HttpGet]
-        //public ActionResult NewBilling(string id)
-        //{
-        //    var msgs = new SystemMessages();
+        [HttpGet]
+        public ActionResult NewBilling(string id, string ReturnUrl)
+        {
+            var msgs = new SystemMessages();
 
-        //    if (SessionVariables.AccountPackage.IsEmpty())
-        //    {
-        //        var accountPackages = SessionVariables.CurrentAccount.GetAccountPackages(msgs).Where(ap => ap.IsActive);
+            if (SessionVariables.AccountPackage.IsEmpty())
+            {
+                var accountPackages = SessionVariables.CurrentAccount.GetAccountPackages(msgs).Where(ap => ap.IsActive);
 
-        //        if (!accountPackages.Any())
-        //        {
-        //            var defaultPackage = Package.Load(msgs: msgs).First();
-        //            SessionVariables.AccountPackage = SessionVariables.CurrentAccount.AddPackage(defaultPackage.ID.Value, BillingPeriodType.Month, SessionVariables.LoggedInUser, msgs);
-        //        }
-        //        else
-        //        {
-        //            SessionVariables.AccountPackage = accountPackages.Where(ap => ap.IsActive).First();
-        //        }
+                if (!accountPackages.Any())
+                {
+                    var defaultPackage = Package.Load(msgs: msgs).First();
+                    SessionVariables.AccountPackage = SessionVariables.CurrentAccount.AddPackage(defaultPackage.ID.Value, BillingPeriodType.Month, SessionVariables.LoggedInUser, msgs);
+                }
+                else
+                {
+                    SessionVariables.AccountPackage = accountPackages.Where(ap => ap.IsActive).First();
+                }
 
-        //        return LoginRedirect();
-        //    }
+                return LoginRedirect();
+            }
 
-        //    var package = id.IsGuid() ? Package.LoadByUid(id.ToGuid()) : SessionVariables.AccountPackage?.ToPackage();
+            if (ReturnUrl.IsNotEmpty())
+            {
+                ViewBag.ReturnUrl = ReturnUrl;
+            }
 
-        //    ViewBag.Package = package;
-        //    ViewBag.Packages = Package.LoadByIsActiveByIsAfterSchool(true, SessionVariables.IsAfterSchool.Value);
-        //    ViewBag.Messages = new SystemMessages();
-        //    return View(SessionVariables.CurrentAccount);
-        //}
+            var package = id.IsGuid() ? Package.LoadByUid(id.ToGuid()) : SessionVariables.AccountPackage?.ToPackage();
+
+            ViewBag.Package = package;
+            ViewBag.Packages = Package.LoadByIsActiveByIsAfterSchool(true, SessionVariables.IsAfterSchool.Value);
+            ViewBag.Messages = new SystemMessages();
+            return View(SessionVariables.CurrentAccount);
+        }
 
         //[HttpPost]
         //public ActionResult NewPayment(string selectedpackage, string stripetoken)
@@ -1358,31 +1363,31 @@ namespace AfterSchool.Areas.Org.Controllers
         //    return View("Billing", a);
         //}
 
-        //[HttpGet]
-        //public ActionResult Packages()
-        //{
-        //    Account a = SessionVariables.CurrentAccount;
-        //    ViewBag.Packages = Package.LoadByIsActive(true);
-        //    ViewBag.AccountPackage = a.GetActiveAccountPackage();
-        //    ViewBag.Messages = new SystemMessages();
-        //    return View(a);
-        //}
+        [HttpGet]
+        public ActionResult Packages()
+        {
+            Account a = SessionVariables.CurrentAccount;
+            ViewBag.Packages = Package.LoadByIsActive(true);
+            ViewBag.AccountPackage = a.GetActiveAccountPackage();
+            ViewBag.Messages = new SystemMessages();
+            return View(a);
+        }
 
-        //[HttpGet]
-        //public ActionResult SelectPackage(string id)
-        //{
-        //    SystemMessages msgs = new SystemMessages();
+        [HttpGet]
+        public ActionResult SelectPackage(string id)
+        {
+            SystemMessages msgs = new SystemMessages();
 
-        //    Account a = SessionVariables.CurrentAccount;
-        //    a.AddPackage(id.ToInteger(), BillingPeriodType.Month, SessionVariables.LoggedInUser, msgs);
+            Account a = SessionVariables.CurrentAccount;
+            a.AddPackage(id.ToInteger(), BillingPeriodType.Month, SessionVariables.LoggedInUser, msgs);
 
-        //    SessionVariables.AccountPackage = a.GetActiveAccountPackage();
+            SessionVariables.AccountPackage = a.GetActiveAccountPackage();
 
-        //    ViewBag.Packages = Package.LoadByIsActive(true);
-        //    ViewBag.AccountPackage = SessionVariables.AccountPackage;
-        //    ViewBag.Messages = msgs;
-        //    return View("Packages", a);
-        //}
+            ViewBag.Packages = Package.LoadByIsActive(true);
+            ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.Messages = msgs;
+            return View("Packages", a);
+        }
 
         public ActionResult OAuthStripe()
         {

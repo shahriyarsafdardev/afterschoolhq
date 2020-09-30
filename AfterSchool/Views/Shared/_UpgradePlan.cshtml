@@ -6,11 +6,11 @@
         </div>
         <div class="col-md-4 col-sm-12 visible-md visible-lg">
             <span class="span-close-upgrade-my-plan" onclick="return hideUpgradeMyPlan()">X</span>
-            <button class="btn btn-danger btn-upgrade-plan">Upgrade My Plan</button>
+            <a href="#" class="btn btn-danger btn-upgrade-plan" onclick="return loadUpgradePage()">Upgrade My Plan</a>
             <div class="clearfix"></div>
         </div>
         <div class="col-sm-12 visible-xs visible-sm ">
-            <button class="btn btn-danger btn-upgrade-plan">Upgrade My Plan</button>
+            <a href="#" class="btn btn-danger btn-upgrade-plan" onclick="return loadUpgradePage()">Upgrade My Plan</a>
             <button class="btn btn-warning btn-upgrade-plan" onclick="return hideUpgradeMyPlan()">Close</button>
             <div class="clearfix"></div>
         </div>
@@ -29,4 +29,10 @@
         $('#app-body').removeClass('overlay')
         $('#upgrade-my-plan').fadeOut();
     };
+
+    function loadUpgradePage() {
+        var url = '@Url.Action("newbilling", "account", new { Area = "org", ReturnUrl = "updateThisText" })'
+        url = url.replace("updateThisText", location.pathname);
+        location.href = url;
+    }
 </script>

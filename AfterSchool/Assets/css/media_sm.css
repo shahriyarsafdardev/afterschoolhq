@@ -1,7 +1,12 @@
 ﻿/* Small devices (portrait tablets and large phones, 480px to 769px) */
 @media (min-width: 480px) and (max-width: 769px) {
     .padding-zero {
-        padding: 0;
+        padding: 0!important;
+    }
+
+    .padding-lr-zero-sm {
+        padding-left: 0!important;
+        padding-right: 0!important;
     }
 
     .text-center-sm {
@@ -22,5 +27,16 @@
     .btn-upgrade-plan {
         margin-top: 10px;
         font-size: 15px;
+    }
+
+    .main-content-new {
+        height: 100%;
+        overflow: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 0;
+    }
+
+    .am-content-full {
+        padding: 15px 10px;
     }
 }
