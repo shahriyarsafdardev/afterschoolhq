@@ -321,6 +321,7 @@
         var signupAccountSearch = $('#signup-account-search');
         var signupListItemClass = "text-small padding-10";
         var signupListItemStyle = "background-color: #f0f0f0;";
+        var signupListLastItemStyle = "background-color: #ddeae0;";
         var signupListItemStyleHover = "background-color: #fcfcfc;";
         var signupListOnMouseOver = "signupListMouseOver";
         var signupListOnMouseOut = "signupListMouseOut";
@@ -425,6 +426,10 @@
                                     </div>`);
                             }
 
+                            if (data.accounts.length == 0) {
+                                signupListMouseClick('0');
+                            }
+
                             if (search.val().length >= 3) {
                                 var borderStyle = '';
                                 if (data.accounts.length > 0) {
@@ -435,12 +440,13 @@
                                 if (isSchool) {
                                     placeholder = `Can't find your school, organization, or program ? Click here`;
                                 } else {
-                                    placeholder = `Can't find your ${isOrganization ? 'organization' : 'program'}? Type in the full name of your organization then click continue below.`;
+                                    placeholder = `Can't find your ${isOrganization ? 'organization' : 'program'}? Enter the name of your ${isOrganization ? 'organization' : 'program'} then click here &raquo;.`;
                                 }
 
                                 list.append(`
-                                <div class="${signupListItemClass}"
-                                    style="${signupListItemStyle} ${borderStyle}"
+                                <div 
+                                    style="${signupListLastItemStyle} ${borderStyle}"
+                                    class="${signupListItemClass}"
                                     id="signup-search-listItem-0"
                                     onclick="${signupListOnClick}('0')">
                                     <strong> ${placeholder} </strong>
@@ -479,7 +485,7 @@
                 isOrganization = false;
                 isSchool = false;
                 hiddeAccountType.val('@AccountType.Teacher');
-                lblOrgSearchTitle.text('Whats the name of your Program?');
+                lblOrgSearchTitle.text('What\'s the name of your program?');
                 signupAccountSearch.attr('placeholder', 'Type in your program name');
                 clearSearch();
                 signupIndividualType.hide();
@@ -488,7 +494,7 @@
                 // user is from the organization, and going for name search for his/her organization
                 isOrganization = true;
                 isSchool = false;
-                lblOrgSearchTitle.text('Whats the name of your Organization?');
+                lblOrgSearchTitle.text('What\'s the name of your organization?');
                 signupAccountSearch.attr('placeholder', 'Type in your organization name');
                 clearSearch();
                 signupOrgType.hide();
