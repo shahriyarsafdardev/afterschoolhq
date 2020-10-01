@@ -1266,6 +1266,50 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(SessionVariables.CurrentAccount);
         }
 
+        [HttpPost]
+        public ActionResult GetFeatures(string id)
+        {
+            var msgs = new SystemMessages();
+            Package package = null;
+
+            if (id.IsEmpty())
+                msgs.Add("Package not found.", MessageType.UserError);
+
+            package = Package.LoadByUid(id.ToGuid());
+
+            var features = package.GetFeatures();
+
+            // TODO: need to review this flow
+            // var features = PackageFeature.LoadByPackageId(, msgs); 
+
+            var featureTypeNotIn = new List<FeatureType>() {
+                FeatureType.NotSet,
+                FeatureType.CustomUrl,
+                FeatureType.ManageExternalLeagues,
+                FeatureType.ManageLeagues,
+                FeatureType.ManageLocations,
+                FeatureType.Participants,
+                FeatureType.PaymentsPercentageFee,
+                FeatureType.PaymentsPercentageFlatFee,
+                FeatureType.TrialDays,
+                FeatureType.UseStripeConnectedAccount,
+                FeatureType.ViewInsights
+            };
+
+            var model = features.Where(m => m.FeatureTypeId.NotIn(featureTypeNotIn)).Select(m => new
+            {
+                type = m.FeatureTypeId,
+                value = m.GetMaxValue()
+            });
+
+            if (model.Any())
+            {
+                return Json(new { success = true, status = "ok", data = model }, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(new { success = false, status = "error", data = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
+        }        
+        
         //[HttpPost]
         //public ActionResult NewPayment(string selectedpackage, string stripetoken)
         //{
