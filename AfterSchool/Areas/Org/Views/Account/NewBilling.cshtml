@@ -65,7 +65,8 @@
                                                 }
 
                                                 <td>
-                                                    <a href="@Url.Action("SelectPackage", "account", new { Area = "org", id = p.ID } )"> @p.Name </a>
+                                                    @*<a href="@Url.Action("SelectPackage", "account", new { Area = "org", id = p.ID } )"> @p.Name </a>*@
+                                                    <a href="#" onclick="return loadFeatures('@p.Uid')"> @p.Name </a>
                                                 </td>
 
                                                 <td class="text-center padding-zero">
@@ -121,6 +122,29 @@
     </div>
 </div>
 
+<div id="feature-modal"></div>
+
+<script id="script-feature-list" type="text/template">
+    <!-- Modal -->
+    <div id="myModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+                </div>
+                <div class="modal-body">
+                    ...
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+
 <script>
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         $('#new-billing-form').submit(function () {
@@ -128,4 +152,37 @@
             $('#newbilling-button').prop('disabled', true);
         });
     });
+
+    function loadFeatures(packageId) {
+         var url = '@Url.Action("GetFeatures", "Account", new { Area = "Org" })';
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: { id: packageId },
+            success: function (data) {
+                if (data && data.IsSuccess == true) {
+                    //$('.photo-view-' + id).addClass('hide');
+                    //$('.photo-add-' + id).removeClass('hide');
+
+                    //Notifications.showBar({
+                    //    title: 'Success',
+                    //    message: 'Photo removed successfully.',
+                    //    success: true
+                    //});
+                }
+                else {
+                    //Notifications.showBar({
+                    //    title: 'Error',
+                    //    message: 'Something went wrong, try again after sometime.',
+                    //    success: false
+                    //});
+                    return false;
+                }
+            }
+        });
+
+        var template = $("#script-feature-list").html();
+        $('#feature-modal').html(template);
+        $('#myModal').modal('show');
+    }
 </script>
