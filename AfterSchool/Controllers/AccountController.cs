@@ -10,6 +10,7 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Management;
 using System.Web.Mvc;
+using AfterSchool.Helpers;
 
 namespace AfterSchool.Controllers
 {
@@ -539,6 +540,8 @@ namespace AfterSchool.Controllers
                     msgs.Add("Password 2 is required", MessageType.UserError);
                 if (password1 != password2)
                     msgs.Add("Passwords must match", MessageType.UserError);
+
+                msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
             }
 
             if (!agree.IsBoolean())

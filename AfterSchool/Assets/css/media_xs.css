@@ -4,6 +4,11 @@
         padding: 0;
     }
 
+    .padding-sm-lr-5 {
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+
     .btn-toolbar {
         margin-left: -2px;
         margin-right: -2px;
@@ -11,5 +16,10 @@
 
     .text-center-sm {
         text-align: center !important;
+    }
+
+    .text-small {
+        font-size: 10px;
+        font-weight: 100 !important;
     }
 }

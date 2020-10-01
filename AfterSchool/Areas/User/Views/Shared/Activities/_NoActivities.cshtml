@@ -4,7 +4,7 @@
             <strong title="Your Activities">Your Activities</strong>
         </h3>
     </div>
-    <div class="panel-body">
+    <div class="panel-body padding-sm-lr-5">
 
         <div class="margin-t-20">
             <p class="text-medium-small text-center">
@@ -14,9 +14,15 @@
             </p>
         </div>
 
-        <div class="margin-t-20">
-            <a href="@Url.Action("index", "activity")" class="btn btn-primary btn-register btn-block">
+        <div class="margin-t-20 visible-md visible-lg">
+            <a href="@Url.Action("index", "activity")" class="btn btn-primary btn-register btn-block text-small">
                 View Your Registration History &raquo;
+            </a>
+        </div>
+
+        <div class="margin-t-20 visible-xs visible-sm">
+            <a href="@Url.Action("index", "activity")" class="btn btn-primary btn-register btn-block text-small">
+                View Your Registration History
             </a>
         </div>
 

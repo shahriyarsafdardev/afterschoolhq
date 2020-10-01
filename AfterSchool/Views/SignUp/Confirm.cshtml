@@ -27,7 +27,7 @@
 
                         @Html.Raw(UI.RenderMessagesToHtml(msgs))
 
-                        <form action="@Url.Action("confirm", "signup", new { id = Model.Uid, returnurl = Request["returnurl"] })" parsley-validate="" novalidate="" method="post" class="form-horizontal">
+                        <form id="complete-sign-up-form" action="@Url.Action("confirm", "signup", new { id = Model.Uid, returnurl = Request["returnurl"] })" parsley-validate="" novalidate="" method="post" class="form-horizontal">
                             <div class="sign-up-form">
                                 <div class="form-group">
                                     <div id="nick-handler" class="input-group">
@@ -74,8 +74,9 @@
 </div>
 
 <script>
-    updateCompleteSignUpText(){
+    function updateCompleteSignUpText() {
         $('#btn-complete-signup').html('Processing...');
         $('#btn-complete-signup').prop('disabled', true);
+        $('#complete-sign-up-form').submit();
     }
 </script>
