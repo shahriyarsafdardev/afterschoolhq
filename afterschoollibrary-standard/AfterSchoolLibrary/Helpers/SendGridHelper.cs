@@ -107,65 +107,64 @@ namespace AfterSchoolLibrary
                 firstName: user.FirstName,
                 lastName: user.LastName,
                 email: user.Email,
-                userId: user.ID.IsNotEmpty() ? user.ID.Value.ToString() : "",
-                accountId: account.ID.IsNotEmpty() ? account.ID.Value.ToString() : "",
+                userId: user.ID.IsNotEmpty() ? user.ID.Value : 0,
+                accountId: account.ID.IsNotEmpty() ? account.ID.Value : 0,
                 accountEmail: account.Email,
                 accountName: account.Name,
                 accountPhone: account.Phone.IsNotEmpty() ? account.Phone : "",
                 accountHomePageUrl: account.HomePageUrl,
                 accountCreateDate: account.CreateDate.Value.ToRfc3339String(),
-                accountCreationDays: (DateTime.UtcNow - account.CreateDate)?.Days.ToString(),
+                accountCreationDays: (DateTime.UtcNow - account.CreateDate).IsNotEmpty() ? (DateTime.UtcNow - account.CreateDate).Value.Days : 0,
                 lastActivityDate: lastestActivity?.CreateDate.Value.ToRfc3339String(),
-                lastActivityCreationDays: (DateTime.UtcNow - lastestActivity?.CreateDate)?.Days.ToString(),
-                activityCount: account.GetActivityCount().ToString(),
-                isAccountProfileExist: accountProfile.IsNotEmpty() ? "1" : "0",
-                isAccountProfileStarted: account.OnboardingStepDone != OnboardingStepType.NotSet ? "1" : "0",
-                isAccountProfileCompleted: account.OnboardingStepDone == OnboardingStepType.All ? "1" : "0",
-                stripeConnected: account.StripeChargesEnabled ? "1" : "0",
-                emailVerified: user.VerifiedAccount ? "1" : "0",
+                lastActivityCreationDays: (DateTime.UtcNow - lastestActivity?.CreateDate).IsNotEmpty() ? (DateTime.UtcNow - lastestActivity?.CreateDate).Value.Days : 0,
+                activityCount: account.GetActivityCount(),
+                isAccountProfileExist: accountProfile.IsNotEmpty() ? 1 : 0,
+                isAccountProfileStarted: account.OnboardingStepDone != OnboardingStepType.NotSet ? 1 : 0,
+                isAccountProfileCompleted: account.OnboardingStepDone == OnboardingStepType.All ? 1 : 0,
+                stripeConnected: account.StripeChargesEnabled ? 1 : 0,
+                emailVerified: user.VerifiedAccount ? 1 : 0,
                 isTest: Helpers.Utilities.IsProduction ? "0" : "1",
                 msgs: messages);
         }
 
-        public static void AddOrUpdateContact(string firstName, string lastName, string email, string userId, string accountId, string accountEmail, string accountName, string accountPhone,
-            string accountHomePageUrl, string accountCreateDate, string accountCreationDays, string lastActivityDate, string lastActivityCreationDays, string activityCount, string isAccountProfileExist,
-            string isAccountProfileStarted, string isAccountProfileCompleted, string stripeConnected, string emailVerified, string isTest, SystemMessages msgs)
+        public static void AddOrUpdateContact(string firstName, string lastName, string email, int userId, int accountId, string accountEmail, string accountName, string accountPhone,
+            string accountHomePageUrl, string accountCreateDate, int accountCreationDays, string lastActivityDate, int lastActivityCreationDays, int activityCount, int isAccountProfileExist,
+            int isAccountProfileStarted, int isAccountProfileCompleted, int stripeConnected, int emailVerified, string isTest, SystemMessages msgs)
         {
             var sg = new SendGridClient(SendGridApiKey);
 
-            var contact =  new
-               {
-                    contacts = new List<object>
+            var contact =  new 
+            {
+                contacts = new List<object>
+                {
+                    new
                     {
-                        new
+                        first_name = firstName,
+                        last_name = lastName,
+                        email = email,
+                        custom_fields = new
                         {
-                            first_name = firstName,
-                            last_name = lastName,
-                            email = email,
-                            custom_fields = new
-                            {
-                                e17_N = userId, // owner_id
-                                e12_N = accountId,  //account_id
-                                e16_T = accountEmail, //program_email
-                                e13_T = accountName,  //program_name
-                                e15_T = accountPhone, //program_phone
-                                e29_T = accountHomePageUrl, // activity_home_page_url  (program_profile is not available, instead we have activity_home_page_url)
-                                e30_T = accountHomePageUrl.IsBlank() ? "" : $"{Helpers.Utilities.BaseUrl()}/login?returnurl={HttpUtility.UrlEncode($"{accountHomePageUrl}?edit=1")}", //program_profile_edit_link
-                                e14_D = accountCreateDate,  // program_create_date
-                                e25_N = accountCreationDays,  // days_since_account_created
-                                e23_D = lastActivityDate.IsNotEmpty() ? lastActivityDate : "",  // last_activity_create_date
-                                e24_N = lastActivityCreationDays.IsNotEmpty() ? lastActivityCreationDays : "",  // days_since_last_activity_created
-                                e22_N = activityCount,   // activities_created
-                                e19_N = isAccountProfileExist,  // profile_exists
-                                e20_N = isAccountProfileStarted,  // profile_started
-                                e21_N = isAccountProfileCompleted, // profile_completed
-                                e31_N = stripeConnected, // stripe_connected
-                                e32_N = emailVerified,  // email_verified
-                                e28_T = isTest // is_test
-                                
-                            }
+                            e12_N = accountId,  //account_id
+                            e13_T = accountName,  //program_name
+                            e14_D = accountCreateDate,  // program_create_date
+                            e15_T = accountPhone, //program_phone
+                            e16_T = accountEmail, //program_email
+                            e17_N = userId, // owner_id
+                            e19_N = isAccountProfileExist,  // profile_exists
+                            e20_N = isAccountProfileStarted,  // profile_started
+                            e21_N = isAccountProfileCompleted, // profile_completed
+                            e22_N = activityCount,   // activities_created
+                            e23_D = lastActivityDate.IsNotEmpty() ? lastActivityDate : "",  // last_activity_create_date
+                            e24_N = lastActivityCreationDays.IsNotEmpty() ? lastActivityCreationDays : 0,  // days_since_last_activity_created
+                            e25_N = accountCreationDays,  // days_since_account_created
+                            e28_T = isTest, // is_test
+                            e29_T = accountHomePageUrl, // activity_home_page_url  (program_profile is not available, instead we have activity_home_page_url)
+                            e30_T = accountHomePageUrl.IsBlank() ? "" : $"{Helpers.Utilities.BaseUrl()}/login?returnurl={HttpUtility.UrlEncode($"{accountHomePageUrl}?edit=1")}", //program_profile_edit_link
+                            e31_N = stripeConnected, // stripe_connected
+                            e32_N = emailVerified,  // email_verified
                         }
                     }
+                }
 
             };
 
