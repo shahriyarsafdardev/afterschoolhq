@@ -691,6 +691,7 @@
     <Content Include="img\fee.png" />
     <Content Include="img\frank-mckenna-LhOjrOlcLx4-unsplash.jpg" />
     <Content Include="img\gabriel-baranski-vGICUyYW2CE-unsplash.jpg" />
+    <Content Include="img\handshake-icon.png" />
     <Content Include="img\helping.png" />
     <Content Include="img\ian-logo.png" />
     <Content Include="img\ian.png" />
@@ -731,12 +732,11 @@
     <Content Include="img\lazyload-ph.png" />
     <Content Include="img\logo-white.png" />
     <Content Include="img\logo.png" />
-    <Content Include="img\marketplace-1.png" />
     <Content Include="img\olivia-bauso-VQLyz0CpVFM-unsplash.jpg" />
     <Content Include="img\pageload-spinner.gif" />
-    <Content Include="img\Parent.png" />
+    <Content Include="img\parent-icon.png" />
     <Content Include="img\pencil-banner.jpg" />
-    <Content Include="img\Provider.png" />
+    <Content Include="img\provider-icon.png" />
     <Content Include="img\san.png" />
     <Content Include="img\Screen Shot 2020-08-25 at 2.36.03 PM-1.png" />
     <Content Include="img\Screen Shot 2020-08-25 at 2.36.03 PM.png" />
