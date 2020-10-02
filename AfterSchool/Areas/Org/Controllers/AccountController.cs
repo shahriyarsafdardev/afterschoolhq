@@ -1297,20 +1297,19 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult GetFeatures(string id)
+        public ActionResult GetFeatures(int id)
         {
             var msgs = new SystemMessages();
-            Package package = null;
+            //Package package = null;
 
             if (id.IsEmpty())
                 msgs.Add("Package not found.", MessageType.UserError);
 
-            package = Package.LoadByUid(id.ToGuid());
+            // package = Package.LoadByUid(id.ToGuid());
 
-            var features = package.GetFeatures();
+            // var features = package.GetFeatures();
 
-            // TODO: need to review this flow
-            // var features = PackageFeature.LoadByPackageId(, msgs); 
+            var features = PackageFeature.LoadByPackageId(id, msgs); 
 
             var featureTypeNotIn = new List<FeatureType>() {
                 FeatureType.NotSet,
@@ -1328,7 +1327,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var model = features.Where(m => m.FeatureTypeId.NotIn(featureTypeNotIn)).Select(m => new
             {
-                type = m.FeatureTypeId,
+                type = (Enum.GetName(typeof(FeatureType), m.FeatureTypeId)).ToString().SplitByUpperCase(),
                 value = m.GetMaxValue()
             });
 
@@ -1338,62 +1337,65 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             return Json(new { success = false, status = "error", data = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
-        }        
-        
-        //[HttpPost]
-        //public ActionResult NewPayment(string selectedpackage, string stripetoken)
-        //{
-        //    var msgs = new SystemMessages();
+        }
 
-        //    Package package = null;
-        //    var a = SessionVariables.CurrentAccount;
-        //    var isFromTrialAccount = SessionVariables.AccountPackage?.IsDuringTrial ?? false;
+        [HttpPost]
+        public ActionResult NewPayment(string selectedpackage, string name, string number, string cvc, string expmonth, string expyear, string stripetoken)
+        {
+            var msgs = new SystemMessages();
 
-        //    Database.ExecuteTransaction(
-        //        action: (SystemMessages amsgs, DatabaseConnection adc) => {
+            Package package = null;
+            var a = SessionVariables.CurrentAccount;
+            var isFromTrialAccount = SessionVariables.AccountPackage?.IsDuringTrial ?? false;
 
-        //            var selectedPackageArr = selectedpackage.Split('_');
-        //            var billingPeriod = (BillingPeriodType)selectedPackageArr[0].ToInteger();
+            Database.ExecuteTransaction(
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
 
-        //            package = Package.LoadByUid(selectedPackageArr[1].ToGuid(), amsgs, adc);
+                    var selectedPackageArr = selectedpackage.Split('_');
+                    var billingPeriod = (BillingPeriodType)selectedPackageArr[0].ToInteger();
 
-        //            // amsgs.AddRange(a.AddCreditCard(stripetoken, true, SessionVariables.LoggedInUser, adc));
+                    package = Package.LoadByUid(selectedPackageArr[1].ToGuid(), amsgs, adc);
 
-        //            if (amsgs.HasNoErrors())
-        //                a.AddPackage(package.ID.Value, billingPeriod, SessionVariables.LoggedInUser, amsgs, adc);
+                    // amsgs.AddRange(a.AddCreditCard(stripetoken, true, SessionVariables.LoggedInUser, adc));
 
-        //            SessionVariables.AccountPackage = a.GetActiveAccountPackage(amsgs, adc);
-        //        },
-        //        onSuccess: (SystemMessages smsgs) => {
-        //            msgs.AddRange(smsgs);
+                    if (amsgs.HasNoErrors())
+                        a.AddPackage(package.ID.Value, billingPeriod, SessionVariables.LoggedInUser, amsgs, adc);
 
-        //            msgs.Clear(MessageType.Success);
-        //            msgs.Add(string.Format("The '{0} Package' has been added to your account", package.Name), MessageType.Success);
+                    SessionVariables.AccountPackage = a.GetActiveAccountPackage(amsgs, adc);
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
 
-        //            if (isFromTrialAccount)
-        //                SessionVariables.CurrentAccount.SendWelcomeEmailPurchase();
-        //        },
-        //        onFailure: (SystemMessages fmsgs) => {
-        //            msgs.AddRange(fmsgs);
-        //        }
-        //    );
+                    msgs.Clear(MessageType.Success);
+                    msgs.Add(string.Format("The '{0} Package' has been added to your account", package.Name), MessageType.Success);
 
-        //    ViewBag.Messages = msgs;
+                    if (isFromTrialAccount)
+                        SessionVariables.CurrentAccount.SendWelcomeEmailPurchase(a.GetAccountOwner());
+                },
+                onFailure: (SystemMessages fmsgs) =>
+                {
+                    msgs.AddRange(fmsgs);
+                }
+            );
 
-        //    if (msgs.HasNoErrors())
-        //    {
-        //        ViewBag.BillingHistory = a.GetStripeBillingHistory();
-        //        ViewBag.RefundHistory = a.GetStripeRefundHistory();
-        //        // ViewBag.Cards = a.GetStripeCards();
-        //        return View("Billing", a);
-        //    }
-        //    else
-        //    {
-        //        ViewBag.Package = package;
-        //        ViewBag.Packages = Package.LoadByIsActiveByIsAfterSchool(true, SessionVariables.IsAfterSchool.Value);
-        //        return View("NewBilling", a);
-        //    }
-        //}
+            ViewBag.Messages = msgs;
+
+            if (msgs.HasNoErrors())
+            {
+                ViewBag.BillingHistory = a.GetStripeBillingHistory();
+                ViewBag.RefundHistory = a.GetStripeRefundHistory();
+                // ViewBag.Cards = a.GetStripeCards();
+                return View("Billing", a);
+            }
+            else
+            {
+                ViewBag.Package = package;
+                ViewBag.Packages = Package.LoadByIsActiveByIsAfterSchool(true, SessionVariables.IsAfterSchool.Value);
+                return View("NewBilling", a);
+            }
+        }
 
         //[HttpPost]
         //public ActionResult AddCard(string id, string stripetoken, string makeprimary)

@@ -46,7 +46,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
+                                        
                                             @foreach (var p in packages)
                                             {
                                                 var monthlySelected = "";
@@ -64,26 +64,27 @@
                                                     }
                                                 }
 
-                                                <td>
-                                                    @*<a href="@Url.Action("SelectPackage", "account", new { Area = "org", id = p.ID } )"> @p.Name </a>*@
-                                                    <a href="#" onclick="return loadFeatures('@p.Uid')"> @p.Name </a>
-                                                </td>
+                                                <tr>
+                                                    <td>
+                                                        <a href="#" onclick="return loadFeatures('@p.ID', '@p.Name')"> @p.Name </a>
+                                                    </td>
 
-                                                <td class="text-center padding-zero">
-                                                    <div class="am-radio inline">
-                                                        <input type="radio" name="selectedpackage" id="selectedpackage-@p.ID-monthly" @monthlySelected value="@((int)BillingPeriodType.Month)_@p.Uid.ToString()" />
-                                                        <label for="selectedpackage-@p.ID-monthly">@p.Price.ToCurrency()</label>
-                                                    </div>
-                                                </td>
+                                                    <td class="text-center padding-zero">
+                                                        <div class="am-radio inline">
+                                                            <input type="radio" name="selectedpackage" id="selectedpackage-@p.ID-monthly" @monthlySelected value="@((int)BillingPeriodType.Month)_@p.Uid.ToString()" />
+                                                            <label for="selectedpackage-@p.ID-monthly">@p.Price.ToCurrency()</label>
+                                                        </div>
+                                                    </td>
                                             
-                                                <td class="text-center padding-zero">
-                                                    <div class="am-radio">
-                                                        <input type="radio" name="selectedpackage" id="selectedpackage-@p.ID-yearly" @yearlySelected value="@((int)BillingPeriodType.Year)_@p.Uid.ToString()" />
-                                                        <label for="selectedpackage-@p.ID-yearly">@p.PricePerYear.ToCurrency()</label>
-                                                    </div>
-                                                </td>
+                                                    <td class="text-center padding-zero">
+                                                        <div class="am-radio">
+                                                            <input type="radio" name="selectedpackage" id="selectedpackage-@p.ID-yearly" @yearlySelected value="@((int)BillingPeriodType.Year)_@p.Uid.ToString()" />
+                                                            <label for="selectedpackage-@p.ID-yearly">@p.PricePerYear.ToCurrency()</label>
+                                                        </div>
+                                                    </td>
+                                                </tr>
                                             }
-                                        </tr>
+                                        
                                     </tbody>
                                 </table>
                             </div>
@@ -95,6 +96,7 @@
                             Add Payment Details
                         </div>
                         <div class="panel-body">
+                            <input id="hidden-stripe-token" type="hidden" name="stripetoken" />
 
                             @{
                                 Html.RenderPartial(
@@ -126,19 +128,50 @@
 
 <script id="script-feature-list" type="text/template">
     <!-- Modal -->
-    <div id="myModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div id="modal-feature-list-<%= package_id %>" class="modal fade" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+                    <h4 class="modal-title"><%= package_name %></h4>
                 </div>
-                <div class="modal-body">
-                    ...
+                <div class="modal-body" style="height: 450px; overflow-y: auto;">
+                   <table class="table table-bordered table-striped">
+                       <thead>
+                           <tr>
+                               <th>Name</th>
+                               <th>Value</th>
+                           </tr>
+                       </thead>
+                       <tbody>
+                           <% for(i = 0; i < features.length; i++) { %>
+                               <tr>
+                                   <td><%= features[i].type %></td>
+
+                                   <% if(features[i].value <= 1) { 
+                                        var isChecked = features[i].value == 1 ? 'checked' : '';
+                                   %>
+                                        <td>
+                                            <div class="am-checkbox">
+                                                <input type="checkbox"
+                                                       id="feature-type-<%= i %>"
+                                                       value="<%= features[i].value %>"
+                                                       disabled="disabled"
+                                                        {{ <%= isChecked %> }} />
+                                                <label for="feature-type-<%= i %>"></label>
+                                            </div>
+                                       </td>
+                                   <% } 
+                                   else { %>
+                                        <td><%= features[i].value %></td>
+                                   <% }%>
+                               </tr>
+                            <% } %>                               
+                       </tbody>
+                   </table>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Save changes</button>
                 </div>
             </div>
         </div>
@@ -150,25 +183,40 @@
         $('#new-billing-form').submit(function () {
             $('#newbilling-button').html('Purchasing...');
             $('#newbilling-button').prop('disabled', true);
+
+            // var stripe = Stripe('@AfterSchoolLibrary.Billing.StripeHelper.PublishableKey');
+            //var cardNumberElement = 
         });
     });
 
-    function loadFeatures(packageId) {
-         var url = '@Url.Action("GetFeatures", "Account", new { Area = "Org" })';
+    function loadFeatures(packageId, packageName) {
+        showLoader();
+
+        var url = '@Url.Action("GetFeatures", "Account", new { Area = "Org" })';
         $.ajax({
             type: "POST",
             url: url,
             data: { id: packageId },
             success: function (data) {
-                if (data && data.IsSuccess == true) {
-                    //$('.photo-view-' + id).addClass('hide');
-                    //$('.photo-add-' + id).removeClass('hide');
+                if (data && data.success == true) {
 
-                    //Notifications.showBar({
-                    //    title: 'Success',
-                    //    message: 'Photo removed successfully.',
-                    //    success: true
-                    //});
+                    //.. prepare source and template
+                    var source = $("#script-feature-list").html();
+                    var compiled = _.template(source);
+
+                    //.. format data as JSON and combine with template
+                    var compiledHtml = compiled({
+                        package_id: packageId,
+                        package_name: packageName,
+                        features: data.data,
+                    });
+
+                    //.. update html to dom
+                    $('#feature-modal').html(compiledHtml);
+                    $('#modal-feature-list-' + packageId).modal('show');
+
+                    hideLoader();
+                    return;
                 }
                 else {
                     //Notifications.showBar({
@@ -176,13 +224,10 @@
                     //    message: 'Something went wrong, try again after sometime.',
                     //    success: false
                     //});
+                    hideLoader();
                     return false;
                 }
             }
         });
-
-        var template = $("#script-feature-list").html();
-        $('#feature-modal').html(template);
-        $('#myModal').modal('show');
     }
 </script>
