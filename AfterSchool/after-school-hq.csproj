@@ -663,6 +663,7 @@
     <Content Include="Assets\css\media_sm.css" />
     <Content Include="Assets\css\media_xs.css" />
     <Content Include="Assets\js\ahq-profiles.js" />
+    <Content Include="Assets\js\underscore-min.js" />
     <Content Include="case-study-cfi70.html" />
     <Content Include="contact.html" />
     <Content Include="Content\quill.bubble.css" />
