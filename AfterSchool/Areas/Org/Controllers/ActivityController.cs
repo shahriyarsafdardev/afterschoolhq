@@ -191,7 +191,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd, string type, string inviteonly, string minseatsrequired)
+        public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd, string type, string inviteonly, string minseatsrequired, string gradestart, string gradeend, string genderrestrictions)
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
@@ -228,6 +228,9 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "type", type },
                     { "inviteonly", inviteonly.IsBoolean().ToString() },
                     { "minseatsrequired", minseatsrequired },
+                    { "gradestart", gradestart },
+                    { "gradeend", gradeend },
+                    { "genderrestrictions", (int)Enum.Parse(typeof(GenderRestrictionType), genderrestrictions) }
                 };
 
                 if (activity.IsNotEmpty())
