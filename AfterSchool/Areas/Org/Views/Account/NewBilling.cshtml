@@ -5,7 +5,8 @@
     var currentPackage = SessionVariables.AccountPackage;
     var packages = (List<Package>)ViewBag.Packages;
     var returnUrl = "";
-    if (ViewBag.ReturnUrl != null) { 
+    if (ViewBag.ReturnUrl != null)
+    {
         returnUrl = (string)ViewBag.ReturnUrl;
     }
     else
@@ -13,8 +14,13 @@
         returnUrl = Url.Action("index", "activity");
     }
 
-    Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
-}
+    Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml"; }
+
+<style>
+    .ElementsApp, .ElementsApp .InputElement {
+        border-bottom: 1px solid #31325F !important;
+    }
+</style>
 
 <div class="main-content-new">
 
@@ -46,45 +52,44 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        
-                                            @foreach (var p in packages)
+
+                                        @foreach (var p in packages)
+                                        {
+                                            var monthlySelected = "";
+                                            var yearlySelected = "";
+
+                                            if (package.IsNotEmpty() && currentPackage.IsNotEmpty() && package.ID == currentPackage.ID)
                                             {
-                                                var monthlySelected = "";
-                                                var yearlySelected = "";
-
-                                                if (package.IsNotEmpty() && currentPackage.IsNotEmpty() && package.ID == currentPackage.ID)
+                                                if (currentPackage.BillingPeriodTypeId == BillingPeriodType.Month)
                                                 {
-                                                    if (currentPackage.BillingPeriodTypeId == BillingPeriodType.Month)
-                                                    {
-                                                        monthlySelected = " checked=\"checked\" ";
-                                                    }
-                                                    else if (currentPackage.BillingPeriodTypeId == BillingPeriodType.Year)
-                                                    {
-                                                        yearlySelected = " checked=\"checked\" ";
-                                                    }
+                                                    monthlySelected = " checked=\"checked\" ";
                                                 }
-
-                                                <tr>
-                                                    <td>
-                                                        <a href="#" onclick="return loadFeatures('@p.ID', '@p.Name')"> @p.Name </a>
-                                                    </td>
-
-                                                    <td class="text-center padding-zero">
-                                                        <div class="am-radio inline">
-                                                            <input type="radio" name="selectedpackage" id="selectedpackage-@p.ID-monthly" @monthlySelected value="@((int)BillingPeriodType.Month)_@p.Uid.ToString()" />
-                                                            <label for="selectedpackage-@p.ID-monthly">@p.Price.ToCurrency()</label>
-                                                        </div>
-                                                    </td>
-                                            
-                                                    <td class="text-center padding-zero">
-                                                        <div class="am-radio">
-                                                            <input type="radio" name="selectedpackage" id="selectedpackage-@p.ID-yearly" @yearlySelected value="@((int)BillingPeriodType.Year)_@p.Uid.ToString()" />
-                                                            <label for="selectedpackage-@p.ID-yearly">@p.PricePerYear.ToCurrency()</label>
-                                                        </div>
-                                                    </td>
-                                                </tr>
+                                                else if (currentPackage.BillingPeriodTypeId == BillingPeriodType.Year)
+                                                {
+                                                    yearlySelected = " checked=\"checked\" ";
+                                                }
                                             }
-                                        
+
+                            <tr>
+                                <td>
+                                    <a href="#" onclick="return loadFeatures('@p.ID', '@p.Name')"> @p.Name </a>
+                                </td>
+
+                                <td class="text-center padding-zero">
+                                    <div class="am-radio inline">
+                                        <input type="radio" name="selectedpackage" id="selectedpackage-@p.ID-monthly" @monthlySelected value="@((int)BillingPeriodType.Month)_@p.Uid.ToString()" />
+                                        <label for="selectedpackage-@p.ID-monthly">@p.Price.ToCurrency()</label>
+                                    </div>
+                                </td>
+
+                                <td class="text-center padding-zero">
+                                    <div class="am-radio">
+                                        <input type="radio" name="selectedpackage" id="selectedpackage-@p.ID-yearly" @yearlySelected value="@((int)BillingPeriodType.Year)_@p.Uid.ToString()" />
+                                        <label for="selectedpackage-@p.ID-yearly">@p.PricePerYear.ToCurrency()</label>
+                                    </div>
+                                </td>
+                            </tr>}
+
                                     </tbody>
                                 </table>
                             </div>
@@ -98,15 +103,33 @@
                         <div class="panel-body">
                             <input id="hidden-stripe-token" type="hidden" name="stripetoken" />
 
-                            @{
-                                Html.RenderPartial(
-                                  "~/Views/Shared/_CreditCardPaymentForm.cshtml",
-                                  null,
-                                  new ViewDataDictionary() {
-                                      { "required", true },
-                                      { "prefix", "" }
-                                  });
-                            }
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label" for="new_billing_name">Name on Card</label>
+                                <div class="col-sm-6">
+                                    <input type="text" class="form-control" id="new_billing_name" name="name" value="" onfocus="this.select()" required data-tooltip-id="Name" data-toggle='popover' data-trigger='hover' data-content='Name on Card' data-placement='right' />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label" for="new_billing_number">Credit or Debit card</label>
+                                <div class="col-sm-6">
+                                    <div id="new_billing_number" class="form-control" style='height: 44px; padding-top: 3px;'>
+                                        <!-- A Stripe Element will be inserted here. -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div id="new_billing_card_errors" role="alert"></div>
+                            </div>
+
+                            @*@{ Html.RenderPartial(
+                                        "~/Views/Shared/_CreditCardPaymentForm.cshtml",
+                                        null,
+                                        new ViewDataDictionary() {
+                                { "required", true },
+                                { "prefix", "new_billing_" }
+        }); }*@
 
                             <div class="form-group">
                                 <label class="col-sm-3 control-label"></label>
@@ -136,39 +159,39 @@
                     <h4 class="modal-title"><%= package_name %></h4>
                 </div>
                 <div class="modal-body" style="height: 450px; overflow-y: auto;">
-                   <table class="table table-bordered table-striped">
-                       <thead>
-                           <tr>
-                               <th>Name</th>
-                               <th>Value</th>
-                           </tr>
-                       </thead>
-                       <tbody>
-                           <% for(i = 0; i < features.length; i++) { %>
-                               <tr>
-                                   <td><%= features[i].type %></td>
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% for(i = 0; i < features.length; i++) { %>
+                            <tr>
+                                <td><%= features[i].type %></td>
 
-                                   <% if(features[i].value <= 1) { 
-                                        var isChecked = features[i].value == 1 ? 'checked' : '';
-                                   %>
-                                        <td>
-                                            <div class="am-checkbox">
-                                                <input type="checkbox"
-                                                       id="feature-type-<%= i %>"
-                                                       value="<%= features[i].value %>"
-                                                       disabled="disabled"
-                                                        {{ <%= isChecked %> }} />
-                                                <label for="feature-type-<%= i %>"></label>
-                                            </div>
-                                       </td>
-                                   <% } 
-                                   else { %>
-                                        <td><%= features[i].value %></td>
-                                   <% }%>
-                               </tr>
-                            <% } %>                               
-                       </tbody>
-                   </table>
+                                <% if(features[i].value <= 1) {
+                                var isChecked = features[i].value == 1 ? 'checked' : '';
+                                %>
+                                <td>
+                                    <div class="am-checkbox">
+                                        <input type="checkbox"
+                                               id="feature-type-<%= i %>"
+                                               value="<%= features[i].value %>"
+                                               disabled="disabled"
+                                               {{ <%= isChecked %> }} />
+                                        <label for="feature-type-<%= i %>"></label>
+                                    </div>
+                                </td>
+                                <% }
+                                else { %>
+                                <td><%= features[i].value %></td>
+                                <% }%>
+                            </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -178,56 +201,106 @@
     </div>
 </script>
 
-<script>
-    PageEvent.add(PageEvent.AFTER_INIT, function () {
-        $('#new-billing-form').submit(function () {
-            $('#newbilling-button').html('Purchasing...');
-            $('#newbilling-button').prop('disabled', true);
+@section scripts
+{
+    <script src="https://js.stripe.com/v3/"></script>
 
-            // var stripe = Stripe('@AfterSchoolLibrary.Billing.StripeHelper.PublishableKey');
-            //var cardNumberElement = 
+    <script type="text/javascript">
+        var stripe = Stripe('@AfterSchoolLibrary.Billing.StripeHelper.PublishableKey');
+        var elements = stripe.elements();
+
+        var style = {
+            base: {
+                iconColor: '#666EE8',
+                color: '#31325F',
+                lineHeight: '40px',
+                fontWeight: 300,
+                fontSize: '16px',
+
+                '::placeholder': {
+                    color: '#CFD7E0',
+                },
+            },
+        };
+
+        // Create an instance of the card Element.
+        var card = elements.create('card', { hidePostalCode: true, style: style });
+
+        // Add an instance of the card Element into the `card-element` <div>.
+        card.mount('#new_billing_number');
+
+        PageEvent.add(PageEvent.AFTER_INIT, function () {
+
+            $('#new-billing-form').submit(function (e) {
+                e.preventDefault();
+
+                $('#newbilling-button').html('Purchasing...');
+                $('#newbilling-button').prop('disabled', true);
+
+                stripe.createToken(card).then(function (result) {
+
+                    if (result.error) {
+                        // Inform the customer that there was an error.
+                        var errorElement = document.getElementById('new_billing_card_errors');
+                        errorElement.textContent = result.error.message;
+
+                    } else {
+
+                        // TODO: Send the token to your server.
+                        //stripeTokenHandlerNewBilling(result.token);
+                    }
+                });
+            });
         });
-    });
 
-    function loadFeatures(packageId, packageName) {
-        showLoader();
+        function stripeTokenHandler(token) {
+            // Insert the token ID into the form so it gets submitted to the server
+            //var form = $('#payment-form');
+            //form.append('<input type="hidden" name="stripetoken" value="' + token.id + '" />')
+            //form.append('<textarea name="paymentdescription" class="hide">' + $('#payment-description-new-cc').val() + '</textarea>');
+            //form.submit();
+        }
 
-        var url = '@Url.Action("GetFeatures", "Account", new { Area = "Org" })';
-        $.ajax({
-            type: "POST",
-            url: url,
-            data: { id: packageId },
-            success: function (data) {
-                if (data && data.success == true) {
+        function loadFeatures(packageId, packageName) {
+            showLoader();
 
-                    //.. prepare source and template
-                    var source = $("#script-feature-list").html();
-                    var compiled = _.template(source);
+            var url = '@Url.Action("GetFeatures", "Account", new { Area = "Org" })';
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: { id: packageId },
+                success: function (data) {
+                    if (data && data.success == true) {
 
-                    //.. format data as JSON and combine with template
-                    var compiledHtml = compiled({
-                        package_id: packageId,
-                        package_name: packageName,
-                        features: data.data,
-                    });
+                        //.. prepare source and template
+                        var source = $("#script-feature-list").html();
+                        var compiled = _.template(source);
 
-                    //.. update html to dom
-                    $('#feature-modal').html(compiledHtml);
-                    $('#modal-feature-list-' + packageId).modal('show');
+                        //.. format data as JSON and combine with template
+                        var compiledHtml = compiled({
+                            package_id: packageId,
+                            package_name: packageName,
+                            features: data.data,
+                        });
 
-                    hideLoader();
-                    return;
+                        //.. update html to dom
+                        $('#feature-modal').html(compiledHtml);
+                        $('#modal-feature-list-' + packageId).modal('show');
+
+                        hideLoader();
+                        return;
+                    }
+                    else {
+                        //Notifications.showBar({
+                        //    title: 'Error',
+                        //    message: 'Something went wrong, try again after sometime.',
+                        //    success: false
+                        //});
+                        hideLoader();
+                        return false;
+                    }
                 }
-                else {
-                    //Notifications.showBar({
-                    //    title: 'Error',
-                    //    message: 'Something went wrong, try again after sometime.',
-                    //    success: false
-                    //});
-                    hideLoader();
-                    return false;
-                }
-            }
-        });
-    }
-</script>
+            });
+        }
+    </script>
+}
