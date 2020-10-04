@@ -235,22 +235,46 @@
             card.mount('#new_billing_number');
 
             $('#newbilling-button').click(function (e) {
-                $('#newbilling-button').html('Purchasing...');
-                $('#newbilling-button').prop('disabled', true);
+                var name = $('#new_billing_name').val();
+                if (name == null || name == undefined || name.length < 3) {
+                    Notifications.showBar({
+                        title: 'Error',
+                        message: 'Please enter card holder name.',
+                        success: false
+                    });
+                }
+
+                showLoader();
+                updatePurchaseButton(true);                
 
                 stripe.createToken(card).then(function (result) {
+                    hideLoader();
 
                     if (result.error) {
                         // Inform the customer that there was an error.
-                        var errorElement = document.getElementById('new_billing_card_errors');
-                        errorElement.textContent = result.error.message;
+                        Notifications.showBar({
+                            title: 'Error',
+                            message: result.error.message,
+                            success: false
+                        });
 
+                        updatePurchaseButton(false);
                     } else {
                         stripeTokenHandler_NewBilling(result.token);
                     }
                 });
             });
         });
+
+        function updatePurchaseButton(purchasing) {
+            if (purchasing) {
+                $('#newbilling-button').html('Purchasing...');
+                $('#newbilling-button').prop('disabled', true);
+            } else {
+                $('#newbilling-button').html('Purchase &raquo;');
+                $('#newbilling-button').prop('disabled', false);
+            }
+        }
 
         function stripeTokenHandler_NewBilling(token) {
             // Insert the token ID into the form so it gets submitted to the srver
