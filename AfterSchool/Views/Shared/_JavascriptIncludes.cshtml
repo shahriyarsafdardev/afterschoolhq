@@ -52,16 +52,16 @@
 }
 
 <script type="text/javascript">
-    // #region: phone number validation
+    //.. #region: phone number validation
 
-    const isNumericInput = (event) => {
+    var isNumericInput = (event) => {
         const key = event.keyCode;
         return ((key >= 48 && key <= 57) || // Allow number line
             (key >= 96 && key <= 105) // Allow number pad
         );
     };
 
-    const isModifierKey = (event) => {
+    var isModifierKey = (event) => {
         const key = event.keyCode;
         return (event.shiftKey === true || key === 35 || key === 36) || // Allow Shift, Home, End
             (key === 8 || key === 9 || key === 13 || key === 46) || // Allow Backspace, Tab, Enter, Delete
@@ -73,14 +73,14 @@
             )
     };
 
-    const enforceFormat = (event) => {
+    var enforceFormat = (event) => {
         // Input must be of a valid number format or a modifier key, and not longer than ten digits
         if (!isNumericInput(event) && !isModifierKey(event)) {
             event.preventDefault();
         }
     };
 
-    const formatToPhone = (event) => {
+    var formatToPhone = (event) => {
         // if (isModifierKey(event)) { return; }
         const target = event.target;
         const input = event.target.value.replace(/\D/g, '').substring(0, 10); // First ten digits of input only
@@ -93,5 +93,5 @@
         else if (input.length > 0) { target.value = `(${zip}`; }
     };
 
-    // #endregion: phone number validation
+//.. #endregion: phone number validation
 </script>
