@@ -88,7 +88,8 @@
                                         <label for="selectedpackage-@p.ID-yearly">@p.PricePerYear.ToCurrency()</label>
                                     </div>
                                 </td>
-                            </tr>}
+                            </tr>
+}
 
                                     </tbody>
                                 </table>
@@ -124,17 +125,17 @@
                             </div>
 
                             @*@{ Html.RenderPartial(
-                                        "~/Views/Shared/_CreditCardPaymentForm.cshtml",
-                                        null,
-                                        new ViewDataDictionary() {
-                                { "required", true },
-                                { "prefix", "new_billing_" }
-        }); }*@
+                                                                "~/Views/Shared/_CreditCardPaymentForm.cshtml",
+                                                                null,
+                                                                new ViewDataDictionary() {
+                                                        { "required", true },
+                                                        { "prefix", "new_billing_" }
+                                }); }*@
 
                             <div class="form-group">
                                 <label class="col-sm-3 control-label"></label>
                                 <div class="col-sm-6">
-                                    <button type="submit" id="newbilling-button" class="btn btn-primary btn-block btn-lg">Purchase &raquo;</button>
+                                    <button type="button" id="newbilling-button" class="btn btn-primary btn-block btn-lg">Purchase &raquo;</button>
                                     <div id="form-validation-settings" data-form-validation-submit-button="newbilling-button" data-form-validation-submit-text="Purchase &raquo;" data-form-validation-submitting-text="Purchasing..."></div>
                                 </div>
                             </div>
@@ -206,34 +207,34 @@
     <script src="https://js.stripe.com/v3/"></script>
 
     <script type="text/javascript">
-        var stripe = Stripe('@AfterSchoolLibrary.Billing.StripeHelper.PublishableKey');
-        var elements = stripe.elements();
 
-        var style = {
-            base: {
-                iconColor: '#666EE8',
-                color: '#31325F',
-                lineHeight: '40px',
-                fontWeight: 300,
-                fontSize: '16px',
-
-                '::placeholder': {
-                    color: '#CFD7E0',
-                },
-            },
-        };
-
-        // Create an instance of the card Element.
-        var card = elements.create('card', { hidePostalCode: true, style: style });
-
-        // Add an instance of the card Element into the `card-element` <div>.
-        card.mount('#new_billing_number');
 
         PageEvent.add(PageEvent.AFTER_INIT, function () {
 
-            $('#new-billing-form').submit(function (e) {
-                e.preventDefault();
+            var stripe = Stripe('@AfterSchoolLibrary.Billing.StripeHelper.PublishableKey');
+            var elements = stripe.elements();
 
+            var style = {
+                base: {
+                    iconColor: '#666EE8',
+                    color: '#31325F',
+                    lineHeight: '40px',
+                    fontWeight: 300,
+                    fontSize: '16px',
+
+                    '::placeholder': {
+                        color: '#CFD7E0',
+                    },
+                },
+            };
+
+            // Create an instance of the card Element.
+            var card = elements.create('card', { hidePostalCode: true, style: style });
+
+            // Add an instance of the card Element into the `card-element` <div>.
+            card.mount('#new_billing_number');
+
+            $('#newbilling-button').click(function (e) {
                 $('#newbilling-button').html('Purchasing...');
                 $('#newbilling-button').prop('disabled', true);
 
@@ -245,20 +246,20 @@
                         errorElement.textContent = result.error.message;
 
                     } else {
-
-                        // TODO: Send the token to your server.
-                        //stripeTokenHandlerNewBilling(result.token);
+                        stripeTokenHandler_NewBilling(result.token);
                     }
                 });
             });
         });
 
-        function stripeTokenHandler(token) {
-            // Insert the token ID into the form so it gets submitted to the server
-            //var form = $('#payment-form');
-            //form.append('<input type="hidden" name="stripetoken" value="' + token.id + '" />')
-            //form.append('<textarea name="paymentdescription" class="hide">' + $('#payment-description-new-cc').val() + '</textarea>');
-            //form.submit();
+        function stripeTokenHandler_NewBilling(token) {
+            // Insert the token ID into the form so it gets submitted to the srver
+            var form = $('#new-billing-form');
+            var hiddenStripeToken = $('#hidden-stripe-token');
+
+            hiddenStripeToken.val(token.id);
+
+            form.submit();
         }
 
         function loadFeatures(packageId, packageName) {

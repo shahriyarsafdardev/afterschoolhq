@@ -1310,7 +1310,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult NewPayment(string selectedpackage, string name, string number, string cvc, string expmonth, string expyear, string stripetoken)
+        public ActionResult NewPayment(string selectedpackage, string stripetoken)
         {
             var msgs = new SystemMessages();
 
