@@ -274,17 +274,21 @@ namespace AfterSchool.Controllers
                     if (currentUser.IsNotEmpty() && currentUser.Uid == id.ToGuid())
                     {
                         SessionVariables.CurrentUser = WebUser.Load(currentUser.ID.Value);
+                    } else
+                    {
+                        SessionVariables.CurrentUser = WebUser.LoadByUid(id.ToGuid(), null);
                     }
 
-                    var account = SessionVariables.CurrentAccount;
-                    if (account.IsNotEmpty())
+                    var account = SessionVariables.CurrentAccount;                    
+                    if (SessionVariables.CurrentUser.IsNotEmpty())
                     {
-                        var user = account.GetAccountOwner(msgs);
-
-                        if (user.IsNotEmpty() && account.IsNotEmpty())
+                        if (account.IsEmpty())
                         {
-                            SendGridHelper.AddOrUpdateContact(account, user, msgs);
+                            //TODO: need to review this flow
+                            account = Account.LoadByOwnerId(SessionVariables.CurrentUser.ID.Value).FirstOrDefault();
                         }
+                        
+                        SendGridHelper.AddOrUpdateContact(account, SessionVariables.CurrentUser, msgs);
                     }
                 }
             }
