@@ -110,7 +110,7 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
             if (msgs.HasNoErrors() && !account.StripeChargesEnabled && stripeAccount.ChargesEnabled)
             {
                 account.UpdateStripeChargesAndPayouts(stripeAccount, msgs);
-                account.SendStripeAccountVerified(null);
+                // account.SendStripeAccountVerified(null);
             }
 
             if (msgs.HasErrors())
