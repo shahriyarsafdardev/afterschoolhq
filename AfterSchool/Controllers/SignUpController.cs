@@ -277,11 +277,14 @@ namespace AfterSchool.Controllers
                     }
 
                     var account = SessionVariables.CurrentAccount;
-                    var user = account.GetAccountOwner(msgs);
-                    
-                    if (user.IsNotEmpty() && account.IsNotEmpty())
+                    if (account.IsNotEmpty())
                     {
-                        SendGridHelper.AddOrUpdateContact(account, user, msgs);
+                        var user = account.GetAccountOwner(msgs);
+
+                        if (user.IsNotEmpty() && account.IsNotEmpty())
+                        {
+                            SendGridHelper.AddOrUpdateContact(account, user, msgs);
+                        }
                     }
                 }
             }
