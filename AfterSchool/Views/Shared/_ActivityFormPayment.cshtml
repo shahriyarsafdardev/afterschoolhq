@@ -6,6 +6,7 @@
     var canProcessPayments = (bool)ViewBag.CanProcessPayments;
     var accountPackage = (AccountPackage)ViewData["AccountPackage"];
     var paymentdisabled = "";
+    var hasSchedule = (bool)ViewBag.hasSchedule;
 
     if (!accountPackage.HasFeature(FeatureType.AcceptPayments))
     {
@@ -141,7 +142,7 @@
                                    required min="0.00" step=".01" @paymentdisabled />
                         </div>
                         <p class="text-muted">
-                            <em>The parent will be charged <span class="text-bold">$<span id="finalpaymentplancost">0.00</span></span> upon checkout</em>
+                            <em>The parent will be charged <span class="text-bold">$<span id="finalpaymentplancost">0.00</span></span> <span id="paymentplanstarttypetext">on Checkout</span></em>
                         </p>
                     </div>
                     <div class="col-md-3"></div>
@@ -162,23 +163,39 @@
                                    value="@(paymentPlan.IsNotEmpty() ? paymentPlan.TotalPeriods.ToString() : "0")"
                                    required min="0" step="1" @paymentdisabled />
                         </div>
-                    </div> 
+                    </div>
+
                     <div class="row">
                         <label class="col-sm-3 control-label">When should payments start?</label>
                         <div class="col-sm-9">
                             <select name="paymentplanpaymentstarttype" id="paymentplanpaymentstarttype" class="form-control" required="required">
-                                @foreach (var item in Enum.GetValues(typeof(PlanPaymentStartType)).Cast<PlanPaymentStartType>().Except(PlanPaymentStartType.NotSet.AsList()))
+                                @if (hasSchedule)
                                 {
-                                    var selected = (PlanPaymentStartType.WhenActivityStarts == item) ? "selected=\"selected\"" : "";
-
-                                    if (paymentPlan.IsNotEmpty())
+                                    foreach (var item in Enum.GetValues(typeof(PlanPaymentStartType)).Cast<PlanPaymentStartType>().Except(PlanPaymentStartType.NotSet.AsList()))
                                     {
-                                        selected = item == paymentPlan.PaymentStartTypeId ? "selected=\"selected\"" : "";
-                                    }
+                                        var selected = (PlanPaymentStartType.WhenActivityStarts == item) ? "selected=\"selected\"" : "";
 
-                                    <option value="@((int)item)" @selected>@item.ToString().SplitByUpperCase()</option>
+                                        if (paymentPlan.IsNotEmpty())
+                                        {
+                                            selected = item == paymentPlan.PaymentStartTypeId ? "selected=\"selected\"" : "";
+                                        }
+
+                                        <option value="@((int)item)" @selected>@item.ToString().SplitByUpperCase()</option>
+                                    }
                                 }
+                                else
+                                {
+                                    var item = (PlanPaymentStartType)PlanPaymentStartType.OnCheckout;
+                                    <option value="@((int)item)" selected="selected">@item.ToString().SplitByUpperCase()</option>
+                                }
+
                             </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-3"></div>
+                        <div class="col-sm-9">
+                            <p class="text-muted padding-v-10">If an activity has no schedule, payment plans will begin upon checkout.</p>
                         </div>
                     </div>
                 </div>
@@ -187,7 +204,6 @@
                     <div class="col-sm-9">
                         <p class="text-muted padding-v-10">Payment plans are used to break up the registration fee into monthly payments.</p>
                     </div>
-
                 </div>
             </div>
 
@@ -368,6 +384,7 @@
         getSubscriptionFinalPrice();
 
         updateSubscriptionPeriodText();
+        updatePaymentPlanStartText();
 
         $('#subscriptionplanperiod').change(function () {
             updateSubscriptionPeriodText();
@@ -375,6 +392,10 @@
 
         $('#splitcostevenly').click(function () {
             getSubscriptionFinalPrice();
+        })
+
+        $('#paymentplanpaymentstarttype').change(function () {
+            updatePaymentPlanStartText();
         })
 
     });
@@ -454,6 +475,13 @@
             $('#paymentplansection').hide();
             $('#paymentplanperiod').prop('required', false);
         }
+    }
+
+    function updatePaymentPlanStartText() {
+        var e = $('#paymentplanpaymentstarttype :selected');
+        var text = e.text().toLowerCase();
+
+        $('#paymentplanstarttypetext').html(text);
     }
 </script>
 

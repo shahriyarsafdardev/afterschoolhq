@@ -20,6 +20,14 @@
         @Html.Partial("_Sidebar")
         <!-- Main section-->
         <div class="am-content">
+            <div class="visible-xs am-toggle-left-sidebar pointer padding-10" style="background-color: #333;">
+                <table>
+                    <tr>
+                        <td><i class="s7-menu icon-large text-white"></i> </td>
+                        <td><span class="text-medium-small text-white d-inline-block padding-h-10">Menu</span></td>
+                    </tr>
+                </table>
+            </div>
             @RenderBody()
         </div>
     </div>

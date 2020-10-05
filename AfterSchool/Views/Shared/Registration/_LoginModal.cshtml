@@ -21,11 +21,11 @@
                             <span class="input-group-addon"><i class="icon s7-lock"></i></span>
                             <input id="lm-login-password" name="password" type="password" placeholder="Password" class="form-control" required>
                         </div>
-                    </div>
+                    </div>                    
                     <div class="form-group">
                         <div class="remember margin-b-10">
-                            <div class="am-checkbox checkbox-inline text-center">
-                                <input type="checkbox" id="lm-login-rememberme" value="1" checked="checked" class="form-control">
+                            <div class="am-checkbox checkbox-inline text-center" onclick="toggleRememberMe('#lm-login-rememberme')">
+                                <input type="checkbox" id="lm-login-rememberme" value="1" class="form-control" checked="checked">
                                 <label for="remember-login">Remember me on this computer</label>
                             </div>
                         </div>
@@ -68,8 +68,8 @@
                     </div>
                     <div class="form-group">
                         <div class="remember margin-b-10">
-                            <div class="am-checkbox checkbox-inline text-center">
-                                <input type="checkbox" id="lm-signup-rememberme" value="1" checked="checked" class="form-control">
+                            <div class="am-checkbox checkbox-inline text-center" onclick="toggleRememberMe('#lm-signup-rememberme')">
+                                <input type="checkbox" id="lm-signup-rememberme" value="1" class="form-control" checked="checked">
                                 <label for="remember-signup">Remember me on this computer</label>
                             </div>
                         </div>
@@ -165,6 +165,11 @@
         $('.login-form').removeClass('hide');
     }
 
+    function toggleRememberMe(id) {
+        var val = !$(id).prop("checked");
+        $(id).prop("checked", val);
+    }
+   
     function createNewAccount() {
         params = 'email=' + encodeURIComponent($('#lm-signup-email').val()) +
             '&firstname=' + encodeURIComponent($('#lm-signup-firstname').val()) +

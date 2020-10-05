@@ -4,6 +4,11 @@
         padding: 0!important;
     }
 
+    .padding-sm-lr-5 {
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+
     .padding-lr-zero-sm {
         padding-left: 0!important;
         padding-right: 0!important;
