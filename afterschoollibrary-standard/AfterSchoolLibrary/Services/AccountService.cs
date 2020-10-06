@@ -1014,6 +1014,24 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
+        public static SystemMessages AddCreditCard(this Account account, Stripe.Customer customer, string stripetoken, SystemMessages msgs)
+        {
+            //TODO: refactore this code
+            //Ensure the customer id is created for the account
+            // var customer = account.CreateStripeCustomer();
+
+            // Create / Save stripe souce from token (credit card)
+            // this will create the credit card source and attach it to the current StripeCustomerId
+            string sourceId = account.CreateStripeSourceFromToken(stripetoken, customer, msgs);
+
+            return msgs;
+        }
+
+        public static List<Stripe.Card> GetStripeCards(this Account account, string customerId, SystemMessages msgs)
+        {
+            return StripeHelper.GetCards(customerId, msgs);
+        }
+
         #endregion
 
         #region Registrants

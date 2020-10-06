@@ -1143,7 +1143,12 @@ namespace AfterSchoolLibrary.Billing
 
             try
             {
-                subscription = GetSubscriptionService().Update(subscription.Id, options, requestOptions);
+                var service = GetSubscriptionService();
+                if (subscription.IsNotEmpty())
+                {
+                    subscription = service.Update(subscription.Id, options, requestOptions);
+                }
+                
             }
             catch (StripeException ex)
             {
