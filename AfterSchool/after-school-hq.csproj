@@ -692,7 +692,6 @@
     <Content Include="img\handshake-icon.png" />
     <Content Include="img\helping.png" />
     <Content Include="img\ian-logo.png" />
-    <Content Include="img\ian.png" />
     <Content Include="img\icon-attendance-1.png" />
     <Content Include="img\icon-belonging-1.png" />
     <Content Include="img\icon-calendar.png" />
@@ -725,7 +724,6 @@
     <Content Include="img\image-3-1800x900-1.png" />
     <Content Include="img\image-9.png" />
     <Content Include="img\IPS.png" />
-    <Content Include="img\IYI-logo_highres_opt.png" />
     <Content Include="img\lawrence.png" />
     <Content Include="img\lazyload-ph.png" />
     <Content Include="img\logo-white.png" />
