@@ -1,7 +1,6 @@
 ﻿@model Account
 @{ ViewBag.Title = Model.Name;
     var msgs = (SystemMessages)ViewBag.Messages;
-    var package = (Package)ViewBag.Package;
     var currentPackage = SessionVariables.AccountPackage;
     var packages = (List<Package>)ViewBag.Packages;
     var returnUrl = "";
@@ -58,7 +57,7 @@
                                             var monthlySelected = "";
                                             var yearlySelected = "";
 
-                                            if (package.IsNotEmpty() && currentPackage.IsNotEmpty() && package.ID == currentPackage.ID)
+                                            if (p.IsNotEmpty() && currentPackage.IsNotEmpty() && p.ID == currentPackage.PackageId)
                                             {
                                                 if (currentPackage.BillingPeriodTypeId == BillingPeriodType.Month)
                                                 {
@@ -70,26 +69,26 @@
                                                 }
                                             }
 
-                            <tr>
-                                <td>
-                                    <a href="#" onclick="return loadFeatures('@p.ID', '@p.Name')"> @p.Name </a>
-                                </td>
+                                            <tr>
+                                                <td>
+                                                    <a href="#" onclick="return loadFeatures('@p.ID', '@p.Name')"> @p.Name </a>
+                                                </td>
 
-                                <td class="text-center padding-zero">
-                                    <div class="am-radio inline">
-                                        <input type="radio" name="selectedpackage" id="selectedpackage-@p.ID-monthly" @monthlySelected value="@((int)BillingPeriodType.Month)_@p.Uid.ToString()" />
-                                        <label for="selectedpackage-@p.ID-monthly">@p.Price.ToCurrency()</label>
-                                    </div>
-                                </td>
+                                                <td class="text-center padding-zero">
+                                                    <div class="am-radio inline">
+                                                        <input type="radio" name="selectedpackage" id="selectedpackage-@p.ID-monthly" @monthlySelected value="@((int)BillingPeriodType.Month)_@p.Uid.ToString()" />
+                                                        <label for="selectedpackage-@p.ID-monthly">@p.Price.ToCurrency()</label>
+                                                    </div>
+                                                </td>
 
-                                <td class="text-center padding-zero">
-                                    <div class="am-radio">
-                                        <input type="radio" name="selectedpackage" id="selectedpackage-@p.ID-yearly" @yearlySelected value="@((int)BillingPeriodType.Year)_@p.Uid.ToString()" />
-                                        <label for="selectedpackage-@p.ID-yearly">@p.PricePerYear.ToCurrency()</label>
-                                    </div>
-                                </td>
-                            </tr>
-}
+                                                <td class="text-center padding-zero">
+                                                    <div class="am-radio">
+                                                        <input type="radio" name="selectedpackage" id="selectedpackage-@p.ID-yearly" @yearlySelected value="@((int)BillingPeriodType.Year)_@p.Uid.ToString()" />
+                                                        <label for="selectedpackage-@p.ID-yearly">@p.PricePerYear.ToCurrency()</label>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
 
                                     </tbody>
                                 </table>
@@ -123,14 +122,6 @@
                             <div class="form-group">
                                 <div id="new_billing_card_errors" role="alert"></div>
                             </div>
-
-                            @*@{ Html.RenderPartial(
-                                                                "~/Views/Shared/_CreditCardPaymentForm.cshtml",
-                                                                null,
-                                                                new ViewDataDictionary() {
-                                                        { "required", true },
-                                                        { "prefix", "new_billing_" }
-                                }); }*@
 
                             <div class="form-group">
                                 <label class="col-sm-3 control-label"></label>
@@ -242,6 +233,8 @@
                         message: 'Please enter card holder name.',
                         success: false
                     });
+
+                    return;
                 }
 
                 showLoader();

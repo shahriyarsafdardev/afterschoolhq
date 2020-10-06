@@ -1250,16 +1250,16 @@ namespace AfterSchool.Areas.Org.Controllers
         //    return View(SessionVariables.CurrentAccount);
         //}
 
-        //[HttpGet]
-        //public ActionResult Billing()
-        //{
-        //    Account a = SessionVariables.CurrentAccount;
-        //    ViewBag.BillingHistory = a.GetStripeBillingHistory();
-        //    ViewBag.RefundHistory = a.GetStripeRefundHistory();
-        //    // ViewBag.Cards = a.GetStripeCards();
-        //    ViewBag.Messages = new SystemMessages();
-        //    return View(a);
-        //}
+        [HttpGet]
+        public ActionResult Billing()
+        {
+            Account a = SessionVariables.CurrentAccount;
+            ViewBag.BillingHistory = a.GetStripeBillingHistory();
+            ViewBag.RefundHistory = a.GetStripeRefundHistory();
+            // ViewBag.Cards = a.GetStripeCards();
+            ViewBag.Messages = new SystemMessages();
+            return View(a);
+        }
 
         [HttpGet]
         public ActionResult NewBilling(string id, string ReturnUrl)
@@ -1345,6 +1345,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
 
             Package package = null;
+            Stripe.Customer customer = null;
             var a = SessionVariables.CurrentAccount;
             var isFromTrialAccount = SessionVariables.AccountPackage?.IsDuringTrial ?? false;
 
@@ -1356,22 +1357,12 @@ namespace AfterSchool.Areas.Org.Controllers
                     var billingPeriod = (BillingPeriodType)selectedPackageArr[0].ToInteger();
 
                     package = Package.LoadByUid(selectedPackageArr[1].ToGuid(), amsgs, adc);
+                                        
+                    customer = a.CreateStripeCustomer();
+                    amsgs.AddRange(a.AddCreditCard(customer, stripetoken, amsgs));
 
-                    //TODO: 1 Ensure the customer id is created for the account
-                    var customer = a.CreateStripeCustomer();
-
-                    //TODO: 2 Create / Save stripe souce from token (credit card)
-                    // this will create the credit card source and attach it to the current StripeCustomerId
-                    // this is internal method, might needed a wrapper for that
-                    //a.CreateStripeSourceFromToken(stripetoken, customer);
-
-                    // amsgs.AddRange(a.AddCreditCard(stripetoken, true, SessionVariables.LoggedInUser, adc));
-
-                    //TODO: 3
                     if (amsgs.HasNoErrors())
                         a.AddPackage(package.ID.Value, billingPeriod, SessionVariables.LoggedInUser, amsgs, adc);
-
-                    SessionVariables.AccountPackage = a.GetActiveAccountPackage(amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {
@@ -1379,6 +1370,9 @@ namespace AfterSchool.Areas.Org.Controllers
 
                     msgs.Clear(MessageType.Success);
                     msgs.Add(string.Format("The '{0} Package' has been added to your account", package.Name), MessageType.Success);
+
+                    //TOOD: I have moved it to success due to issues with transaction
+                    SessionVariables.AccountPackage = a.GetActiveAccountPackage(smsgs);
 
                     if (isFromTrialAccount)
                         SessionVariables.CurrentAccount.SendWelcomeEmailPurchase(a.GetAccountOwner());
@@ -1395,7 +1389,7 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 ViewBag.BillingHistory = a.GetStripeBillingHistory();
                 ViewBag.RefundHistory = a.GetStripeRefundHistory();
-                // ViewBag.Cards = a.GetStripeCards();
+                ViewBag.Cards = a.GetStripeCards(customer.Id, msgs);
                 return View("Billing", a);
             }
             else
