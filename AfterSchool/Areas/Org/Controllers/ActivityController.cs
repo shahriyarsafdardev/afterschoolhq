@@ -836,6 +836,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.SubscriptionPlan = activity.GetSubscriptionPlan();
             ViewBag.ActiveMenu = "EditCost";
             ViewBag.IsFullScreen = GetIsFullScreen(activity);
+            ViewBag.hasSchedule = activity.HasSchedule;
         }
 
         [HttpGet]
