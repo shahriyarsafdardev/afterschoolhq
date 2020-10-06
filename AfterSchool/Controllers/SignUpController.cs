@@ -263,7 +263,8 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
-                msgs.AddRange(WebUser.LoadByUid(id.ToGuid()).MarkAsVerified());
+                var user = WebUser.LoadByUid(id.ToGuid());
+                msgs.AddRange(user.MarkAsVerified());
 
                 if (msgs.HasNoErrors())
                 {
@@ -274,21 +275,19 @@ namespace AfterSchool.Controllers
                     if (currentUser.IsNotEmpty() && currentUser.Uid == id.ToGuid())
                     {
                         SessionVariables.CurrentUser = WebUser.Load(currentUser.ID.Value);
-                    } else
-                    {
-                        SessionVariables.CurrentUser = WebUser.LoadByUid(id.ToGuid(), null);
                     }
 
                     var account = SessionVariables.CurrentAccount;                    
-                    if (SessionVariables.CurrentUser.IsNotEmpty())
+                    if (user.IsNotEmpty())
                     {
                         if (account.IsEmpty())
                         {
-                            //TODO: need to review this flow
-                            account = Account.LoadByOwnerId(SessionVariables.CurrentUser.ID.Value).FirstOrDefault();
+                            // TODO:  user can be associated to multiple accounts.
+                            // For now, we will LoadByOwnerId and will grab the first account is where the AccountType is not a Registrant or AfterSchool
+                            account = Account.LoadByOwnerId(user.ID.Value).FirstOrDefault(m => m.AccountTypeId.NotIn(new List<AccountType>() { AccountType.AfterSchool, AccountType.Registrant }));
                         }
                         
-                        SendGridHelper.AddOrUpdateContact(account, SessionVariables.CurrentUser, msgs);
+                        SendGridHelper.AddOrUpdateContact(account, user, msgs);
                     }
                 }
             }

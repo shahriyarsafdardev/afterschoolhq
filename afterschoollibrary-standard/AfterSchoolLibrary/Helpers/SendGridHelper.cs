@@ -7,6 +7,7 @@ using SendGrid;
 using SendGrid.Helpers.Mail;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
@@ -15,9 +16,22 @@ namespace AfterSchoolLibrary
 {
     public class SendGridHelper
     {
-        public const string SendGridApiKey = "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";
+        public static string ProductionSendGridApiKey { get { return ConfigurationManager.AppSettings["SendGrid.ProductionApiKey"]; } }
+        public static string DevelopmentSendGridApiKey { get { return ConfigurationManager.AppSettings["SendGrid.DevelopmentApiKey"]; } }
         public const string EnrollHQGenericTemplateId = "c672e668-1b54-4721-84be-50fe3cde7cb2";
         public const string AfterSchoolHQGenericTemplateId = "70362a81-6361-4140-9d5b-25b28e97ceca";
+        public const string MarketingUrlPath = "marketing/contacts";
+
+        public static string SendGridApiKey
+        {
+            get
+            {
+                if (Helpers.Utilities.IsProduction)
+                    return ProductionSendGridApiKey;
+
+                return DevelopmentSendGridApiKey;
+            }
+        }
 
         public static string GetGenericTemplateId(bool isAfterSchool = true)
         {
@@ -86,7 +100,7 @@ namespace AfterSchoolLibrary
             {
                 return await sg.RequestAsync(
                     method: SendGridClient.Method.PUT,
-                    urlPath: "marketing/contactss",
+                    urlPath: MarketingUrlPath,
                     requestBody: contact.ToJSON());
             });
             task.Wait();
@@ -111,7 +125,7 @@ namespace AfterSchoolLibrary
                 accountId: account.ID.IsNotEmpty() ? account.ID.Value : 0,
                 accountEmail: account.Email,
                 accountName: account.Name,
-                accountPhone: account.Phone.IsNotEmpty() ? account.Phone : "",
+                accountPhone: account.Phone ?? "",
                 accountHomePageUrl: account.HomePageUrl,
                 accountCreateDate: account.CreateDate.Value.ToRfc3339String(),
                 accountCreationDays: (DateTime.UtcNow - account.CreateDate).IsNotEmpty() ? (DateTime.UtcNow - account.CreateDate).Value.Days : 0,
@@ -154,7 +168,7 @@ namespace AfterSchoolLibrary
                             e20_N = isAccountProfileStarted,  // profile_started
                             e21_N = isAccountProfileCompleted, // profile_completed
                             e22_N = activityCount,   // activities_created
-                            e23_D = lastActivityDate.IsNotEmpty() ? lastActivityDate : "",  // last_activity_create_date
+                            e23_D = lastActivityDate ?? "",  // last_activity_create_date
                             e24_N = lastActivityCreationDays.IsNotEmpty() ? lastActivityCreationDays : 0,  // days_since_last_activity_created
                             e25_N = accountCreationDays,  // days_since_account_created
                             e28_T = isTest, // is_test
@@ -172,7 +186,7 @@ namespace AfterSchoolLibrary
             {
                 return await sg.RequestAsync(
                     method: SendGridClient.Method.PUT,
-                    urlPath: "marketing/contacts",
+                    urlPath: MarketingUrlPath,
                     requestBody: contact.ToJSON()
                 );
             });
