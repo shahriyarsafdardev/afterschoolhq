@@ -1357,8 +1357,17 @@ namespace AfterSchool.Areas.Org.Controllers
 
                     package = Package.LoadByUid(selectedPackageArr[1].ToGuid(), amsgs, adc);
 
+                    //TODO: 1 Ensure the customer id is created for the account
+                    var customer = a.CreateStripeCustomer();
+
+                    //TODO: 2 Create / Save stripe souce from token (credit card)
+                    // this will create the credit card source and attach it to the current StripeCustomerId
+                    // this is internal method, might needed a wrapper for that
+                    //a.CreateStripeSourceFromToken(stripetoken, customer);
+
                     // amsgs.AddRange(a.AddCreditCard(stripetoken, true, SessionVariables.LoggedInUser, adc));
 
+                    //TODO: 3
                     if (amsgs.HasNoErrors())
                         a.AddPackage(package.ID.Value, billingPeriod, SessionVariables.LoggedInUser, amsgs, adc);
 
