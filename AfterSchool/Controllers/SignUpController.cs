@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using AfterSchool.Helpers;
 using System.Net.Mail;
 using AfterSchoolLibrary.Helpers;
+using AfterSchoolLibrary;
 
 namespace AfterSchool.Controllers
 {
@@ -108,6 +109,11 @@ namespace AfterSchool.Controllers
 
                         var userId = user.ID.Value;
                         var accountId = account.ID.Value;
+
+                        if (user.IsNotEmpty() && account.IsNotEmpty())
+                        {
+                            SendGridHelper.AddOrUpdateContact(account, user, msgs);
+                        }                        
 
                         BackgroundJob.Enqueue(() => WebUserService.SendVerificationEmail(userId));
                         BackgroundJob.Enqueue(() => AccountService.SendWelcomeEmailPurchase(accountId));
@@ -257,7 +263,8 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
-                msgs.AddRange(WebUser.LoadByUid(id.ToGuid()).MarkAsVerified());
+                var user = WebUser.LoadByUid(id.ToGuid());
+                msgs.AddRange(user.MarkAsVerified());
 
                 if (msgs.HasNoErrors())
                 {
@@ -268,6 +275,19 @@ namespace AfterSchool.Controllers
                     if (currentUser.IsNotEmpty() && currentUser.Uid == id.ToGuid())
                     {
                         SessionVariables.CurrentUser = WebUser.Load(currentUser.ID.Value);
+                    }
+
+                    var account = SessionVariables.CurrentAccount;                    
+                    if (user.IsNotEmpty())
+                    {
+                        if (account.IsEmpty())
+                        {
+                            // TODO:  user can be associated to multiple accounts.
+                            // For now, we will LoadByOwnerId and will grab the first account is where the AccountType is not a Registrant or AfterSchool
+                            account = Account.LoadByOwnerId(user.ID.Value).FirstOrDefault(m => m.AccountTypeId.NotIn(new List<AccountType>() { AccountType.AfterSchool, AccountType.Registrant }));
+                        }
+                        
+                        SendGridHelper.AddOrUpdateContact(account, user, msgs);
                     }
                 }
             }

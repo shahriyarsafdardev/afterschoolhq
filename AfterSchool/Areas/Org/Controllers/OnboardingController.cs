@@ -1,4 +1,5 @@
 ﻿using AfterSchool.Models;
+using AfterSchoolLibrary;
 using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
@@ -68,6 +69,13 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.OpenCovid = true;
             ViewBag.ELC = false;
 
+            var user = account.GetAccountOwner(msgs);
+
+            if (user.IsNotEmpty() && account.IsNotEmpty())
+            {
+                SendGridHelper.AddOrUpdateContact(account, user, msgs);
+            }
+
             return View(account);
         }
 
@@ -87,28 +95,28 @@ namespace AfterSchool.Areas.Org.Controllers
                 Database.ExecuteTransaction
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                    {                     
+                    {
                         account.Name = title;
                         account.UniqueName = AccountService.GenerateUniqueName(title, account.ID, amsgs, adc);
                         account.OnboardingStepDone = OnboardingStepType.ProgramInfo;
                         amsgs.AddRange(account.Save(adc));
 
                         profile.UpdateProfile(
-                            title: title, 
-                            headline: headline, 
+                            title: title,
+                            headline: headline,
                             mingrade: mingrade,
                             maxgrade: maxgrade,
                             genderrestriction: genderrestriction,
                             opencovid: opencovid.IsNumber() ? opencovid : "0",
                             elearningcenter: elearningcenter.IsNumber() ? opencovid : "0",
                             loggedInUser: currentUser,
-                            msgs: amsgs, 
+                            msgs: amsgs,
                             dc: adc);
                     },
                     onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                     onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
-                );                
+                );
             }
 
             if (msgs.HasNoErrors())
@@ -415,6 +423,13 @@ namespace AfterSchool.Areas.Org.Controllers
                     $"AHQ Profile Completed - {account.Name}",
                     $"<p>Organization: {account.Name}<br />Name: {currentUser.FirstName} {currentUser.LastName}<br />Email: {currentUser.Email}<br />Profile Link: {account.HomePageUrl}</p>",
                     true);
+
+                var user = account.GetAccountOwner(msgs);
+
+                if (user.IsNotEmpty() && account.IsNotEmpty())
+                {
+                    SendGridHelper.AddOrUpdateContact(account, user, msgs);
+                }
             }
 
             ViewBag.Messages = msgs;
