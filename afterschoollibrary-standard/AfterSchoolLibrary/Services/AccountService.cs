@@ -1016,13 +1016,16 @@ namespace AfterSchoolLibrary.Services
 
         public static SystemMessages AddCreditCard(this Account account, Stripe.Customer customer, string stripetoken, SystemMessages msgs)
         {
-            //TODO: refactore this code
-            //Ensure the customer id is created for the account
-            // var customer = account.CreateStripeCustomer();
+            //TODO: below we have code for both card and source, but we can only use one as both requires token and after using it ones, we can't use it for next one.
+            // I did some R&D and found that source api is more useful then card, so I kept this code for now.
+            // disuss with darye on this flow once
 
             // Create / Save stripe souce from token (credit card)
+            // StripeHelper.CreateCard(customer, stripetoken, msgs);
+
+
             // this will create the credit card source and attach it to the current StripeCustomerId
-            string sourceId = account.CreateStripeSourceFromToken(stripetoken, customer, msgs);
+            account.CreateStripeSourceFromToken(stripetoken, customer, msgs);
 
             return msgs;
         }
@@ -1453,6 +1456,7 @@ namespace AfterSchoolLibrary.Services
         {
             var signupType = SignUpType.NotSet;
 
+            //TODO: need to discuss this HasPaymentCard and StripeDefaultCardId with darye
             // has payment info
             //if (account.StripeDefaultCardId.IsNotEmpty())
             //{
@@ -1477,6 +1481,7 @@ namespace AfterSchoolLibrary.Services
             //        signupType = SignUpType.ConvertingFromTrial;
             //    }
             //}
+
             if (p.IsFree(billingPeriodType) || (activePackage.IsNotEmpty() && activePackage.IsFree))
             {
                 // new sign up
@@ -1503,6 +1508,11 @@ namespace AfterSchoolLibrary.Services
                     else
                         signupType = SignUpType.ChangePackageDuringTrial;
                 }
+
+                // TODO: darye
+                // could be changing same package with other plan, like monthly or yearly
+                if (activePackage.PackageId == p.ID && activePackage.BillingPeriodTypeId != billingPeriodType)
+                    signupType = SignUpType.ChangeBillingPeriodType;
             }
 
             return signupType;
@@ -2618,21 +2628,20 @@ namespace AfterSchoolLibrary.Services
         {
             // stripe stuff
             // create payment source if not already existent on the user
-            var sourceId = "";
-
             if (customer.IsEmpty())
                 customer = StripeHelper.GetCustomer(fromAccount.StripeCustomerId, null, msgs);
 
             if (stripeToken.IsNotEmpty())
             {
                 var source = StripeHelper.CreateCreditCardSource(stripeToken, msgs);
-                StripeHelper.AttachSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null, msgs);
-                sourceId = source.Id;
+                if (source.IsNotEmpty())
+                {
+                    StripeHelper.AttachSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null, msgs);
+                    return source.Id;
+                }                
             }
-            else
-                sourceId = customer.DefaultSourceId;
-
-            return sourceId;
+            
+            return customer.DefaultSourceId;
         }
 
         /// <summary>
