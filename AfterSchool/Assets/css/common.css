@@ -12,6 +12,16 @@
     position: fixed;
 }
 
+.span-close-upgrade-my-plan-mobile {
+    width: 20px;
+    cursor: pointer;
+    font-size: 20px;
+    font-weight: 800;
+    top: 5px;
+    right: 5px;
+    position: absolute;
+}
+
 .overlay {
     position: absolute;
     top: 0;
