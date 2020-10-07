@@ -1251,7 +1251,12 @@ namespace AfterSchoolLibrary.Billing
 
             try
             {
-                cards.AddRange(GetCardService().List(customerId).ToList());
+                var options = new Stripe.CardListOptions
+                {                    
+                    Limit = 10,
+                };
+
+                cards.AddRange(GetCardService().List(customerId, options).ToList());
             }
             catch (StripeException ex)
             {
