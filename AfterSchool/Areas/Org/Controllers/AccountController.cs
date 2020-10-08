@@ -483,6 +483,15 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.Messages = msgs;
             ViewBag.IsFullScreen = GetIsFullScreen();
+
+            var account = SessionVariables.CurrentAccount;
+            var user = account.GetAccountOwner(msgs);
+            
+            if (user.IsNotEmpty() && account.IsNotEmpty())
+            {
+                SendGridHelper.AddOrUpdateContact(account, user, msgs);
+            }
+
             return View();
         }
 

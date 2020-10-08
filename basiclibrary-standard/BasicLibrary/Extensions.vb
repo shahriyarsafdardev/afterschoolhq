@@ -444,6 +444,15 @@ Public Module Extensions
     End Function
 
     <Extension()>
+    Public Function ReturnNullIfEmpty(ByVal aString As String)
+        If aString.IsEmpty Then
+            Return Nothing
+        Else
+            Return aString
+        End If
+    End Function
+
+    <Extension()>
     Public Function IsBlank(ByVal aString As String) As Boolean
         Return aString.IsEmpty
     End Function

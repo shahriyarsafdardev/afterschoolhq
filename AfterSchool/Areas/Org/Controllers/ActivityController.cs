@@ -11,6 +11,7 @@ using AfterSchoolLibrary.Services;
 using AfterSchool.Models;
 using Hangfire;
 using AfterSchoolLibrary.Billing;
+using AfterSchoolLibrary;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -1530,6 +1531,15 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.MustRequestToPublish = mustRequestToPublish;
             ViewBag.ShowCopyButton = ShowCopyButtonOnPublishDetail(activity);
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
+
+            var account = SessionVariables.CurrentAccount;
+            var user = account.GetAccountOwner(msgs);
+
+            if (user.IsNotEmpty() && account.IsNotEmpty())
+            {
+                SendGridHelper.AddOrUpdateContact(account, user, msgs);
+            }
+
             return View("publishdetail", activity);
         }
 

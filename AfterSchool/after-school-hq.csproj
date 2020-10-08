@@ -199,11 +199,11 @@
       <HintPath>..\packages\RollbarSharp.1.0.0.0\lib\net45\RollbarSharp.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="SendGrid, Version=9.12.6.0, Culture=neutral, PublicKeyToken=4f047e93159395ca, processorArchitecture=MSIL">
-      <HintPath>..\packages\SendGrid.9.12.6\lib\net452\SendGrid.dll</HintPath>
+    <Reference Include="SendGrid, Version=9.21.0.0, Culture=neutral, PublicKeyToken=4f047e93159395ca, processorArchitecture=MSIL">
+      <HintPath>..\packages\SendGrid.9.21.0\lib\net452\SendGrid.dll</HintPath>
     </Reference>
     <Reference Include="SendGrid.CSharp.HTTP.Client, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\SendGrid.CSharp.HTTP.Client.3.4.5\lib\net45\SendGrid.CSharp.HTTP.Client.dll</HintPath>
+      <HintPath>..\packages\SendGrid.CSharp.HTTP.Client.3.4.8\lib\net45\SendGrid.CSharp.HTTP.Client.dll</HintPath>
     </Reference>
     <Reference Include="ServiceStack.Text, Version=3.9.71.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\ServiceStack.Text.3.9.71\lib\net35\ServiceStack.Text.dll</HintPath>
@@ -223,6 +223,9 @@
     </Reference>
     <Reference Include="StackExchange.Redis.StrongName, Version=1.2.6.0, Culture=neutral, PublicKeyToken=c219ff1ca8c2ce46, processorArchitecture=MSIL">
       <HintPath>..\packages\StackExchange.Redis.StrongName.1.2.6\lib\net46\StackExchange.Redis.StrongName.dll</HintPath>
+    </Reference>
+    <Reference Include="StarkbankEcdsa, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\starkbank-ecdsa.1.2.0\lib\net452\StarkbankEcdsa.dll</HintPath>
     </Reference>
     <Reference Include="Stripe.net, Version=37.15.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Stripe.net.37.15.0\lib\net461\Stripe.net.dll</HintPath>
@@ -679,11 +682,9 @@
     <Content Include="img\800_5dbbb2351943c.jpg" />
     <Content Include="img\ahq-flight-logo%400-75x.png" />
     <Content Include="img\ahq-logo.png" />
-    <Content Include="img\allison-romano.jpeg" />
     <Content Include="img\allison.png" />
     <Content Include="img\AMA-Partial-White.png" />
     <Content Include="img\Apple-iMac.png" />
-    <Content Include="img\austin-pacheco-FtL07GM9Q7Y-unsplash.jpg" />
     <Content Include="img\banner-classroom.jpg" />
     <Content Include="img\BCALogo.jpg" />
     <Content Include="img\billy2.png" />
@@ -695,7 +696,6 @@
     <Content Include="img\handshake-icon.png" />
     <Content Include="img\helping.png" />
     <Content Include="img\ian-logo.png" />
-    <Content Include="img\ian.png" />
     <Content Include="img\icon-attendance-1.png" />
     <Content Include="img\icon-belonging-1.png" />
     <Content Include="img\icon-calendar.png" />
@@ -728,7 +728,6 @@
     <Content Include="img\image-3-1800x900-1.png" />
     <Content Include="img\image-9.png" />
     <Content Include="img\IPS.png" />
-    <Content Include="img\IYI-logo_highres_opt.png" />
     <Content Include="img\lawrence.png" />
     <Content Include="img\lazyload-ph.png" />
     <Content Include="img\logo-white.png" />
@@ -741,8 +740,6 @@
     <Content Include="img\san.png" />
     <Content Include="img\Screen Shot 2020-08-25 at 2.36.03 PM-1.png" />
     <Content Include="img\Screen Shot 2020-08-25 at 2.36.03 PM.png" />
-    <Content Include="img\Screen Shot 2020-08-25 at 2.59.14 PM-1.png" />
-    <Content Include="img\Screen Shot 2020-08-25 at 2.59.14 PM.png" />
     <Content Include="img\Screen Shot 2020-08-28 at 5.14.32 PM-1.png" />
     <Content Include="img\Screen Shot 2020-08-28 at 5.14.32 PM.png" />
     <Content Include="img\Screen Shot 2020-09-23 at 4.17.41 PM.png" />
@@ -751,6 +748,7 @@
     <Content Include="img\sophie.png" />
     <Content Include="img\texture-fabric.png" />
     <Content Include="img\texture-geometry-shapes.png" />
+    <Content Include="img\tpffy-logo.png" />
     <Content Include="index-profiles.html" />
     <Content Include="index.html" />
     <Content Include="ips.html" />

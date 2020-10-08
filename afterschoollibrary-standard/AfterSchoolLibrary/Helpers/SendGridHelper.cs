@@ -1,12 +1,16 @@
-﻿using BasicLibrary;
+﻿using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Services;
+using BasicLibrary;
+using BasicLibrary.DataAccess;
+using Newtonsoft.Json;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace AfterSchoolLibrary
 {
@@ -16,18 +20,18 @@ namespace AfterSchoolLibrary
         public static string DevelopmentSendGridApiKey { get { return ConfigurationManager.AppSettings["SendGrid.DevelopmentApiKey"]; } }
         public const string EnrollHQGenericTemplateId = "c672e668-1b54-4721-84be-50fe3cde7cb2";
         public const string AfterSchoolHQGenericTemplateId = "70362a81-6361-4140-9d5b-25b28e97ceca";
+        public const string MarketingUrlPath = "marketing/contacts";
 
         public static string SendGridApiKey
         {
             get
             {
-                if (AfterSchoolLibrary.Helpers.Utilities.IsProduction)
+                if (Helpers.Utilities.IsProduction)
                     return ProductionSendGridApiKey;
 
                 return DevelopmentSendGridApiKey;
             }
         }
-
 
         public static string GetGenericTemplateId(bool isAfterSchool = true)
         {
@@ -49,7 +53,7 @@ namespace AfterSchoolLibrary
         public static SystemMessages SendMail(EmailAddress fromEmail, EmailAddress toEmail, string subject, string body, EmailAddress replyTo = null, string emailTemplateId = null)
         {
             var msgs = new SystemMessages();
-            
+
             var sg = new SendGridClient(SendGridApiKey);
             // var content = new Content("text/html", body);
 
@@ -59,7 +63,7 @@ namespace AfterSchoolLibrary
             var mail = MailHelper.CreateSingleEmail(fromEmail, toEmail, subject, null, body);
             mail.ReplyTo = replyTo;
             mail.TemplateId = emailTemplateId ?? EnrollHQGenericTemplateId;
-            
+
             var task = Task.Run(async () => { return await sg.SendEmailAsync(mail); });
             task.Wait();
 
@@ -79,23 +83,117 @@ namespace AfterSchoolLibrary
                 new
                 {
                     first_name = firstName,
-                    org_name = orgname,
                     email,
-                    web_demo = 1
+                    custom_fields = new List<object>
+                    {
+                        new
+                        {
+                            org_name = orgname,
+                            web_demo = 1
+                        }
+                    }
+                  
                 }
             };
 
             var task = Task.Run(async () =>
             {
                 return await sg.RequestAsync(
-                    method: SendGridClient.Method.POST,
-                    urlPath: "contactdb/recipients",
+                    method: SendGridClient.Method.PUT,
+                    urlPath: MarketingUrlPath,
                     requestBody: contact.ToJSON());
             });
             task.Wait();
 
             dynamic response = task.Result;
             if (response.StatusCode != System.Net.HttpStatusCode.Accepted)
+            {
+                msgs.Add(response.Body.ReadAsStringAsync().Result, MessageType.Error);
+            }
+        }
+
+        public static void AddOrUpdateContact(Account account, WebUser user, SystemMessages messages)
+        {
+            var lastestActivity = Activity.LoadActivity(AccountId: account.ID.Value, OrderByProperty: "CreateDate", orderByDirection: OrderByDirectionEnum.Descending, msgs: messages)?.FirstOrDefault();
+            var accountProfile = account.GetAccountProfile();
+
+            AddOrUpdateContact(
+                firstName: user.FirstName,
+                lastName: user.LastName,
+                email: user.Email,
+                userId: user.ID.IsNotEmpty() ? user.ID.Value : 0,
+                accountId: account.ID.IsNotEmpty() ? account.ID.Value : 0,
+                accountEmail: account.Email,
+                accountName: account.Name,
+                accountPhone: account.Phone ?? "",
+                accountHomePageUrl: account.HomePageUrl,
+                accountCreateDate: account.CreateDate.Value.ToRfc3339String(),
+                accountCreationDays: (DateTime.UtcNow - account.CreateDate).IsNotEmpty() ? (DateTime.UtcNow - account.CreateDate).Value.Days : 0,
+                lastActivityDate: lastestActivity?.CreateDate.Value.ToRfc3339String(),
+                lastActivityCreationDays: (DateTime.UtcNow - lastestActivity?.CreateDate).IsNotEmpty() ? (DateTime.UtcNow - lastestActivity?.CreateDate).Value.Days : 0,
+                activityCount: account.GetActivityCount(),
+                isAccountProfileExist: accountProfile.IsNotEmpty() ? 1 : 0,
+                isAccountProfileStarted: account.OnboardingStepDone != OnboardingStepType.NotSet ? 1 : 0,
+                isAccountProfileCompleted: account.OnboardingStepDone == OnboardingStepType.All ? 1 : 0,
+                stripeConnected: account.StripeChargesEnabled ? 1 : 0,
+                emailVerified: user.VerifiedAccount ? 1 : 0,
+                isTest: Helpers.Utilities.IsProduction ? "0" : "1",
+                msgs: messages);
+        }
+
+        public static void AddOrUpdateContact(string firstName, string lastName, string email, int userId, int accountId, string accountEmail, string accountName, string accountPhone,
+            string accountHomePageUrl, string accountCreateDate, int accountCreationDays, string lastActivityDate, int lastActivityCreationDays, int activityCount, int isAccountProfileExist,
+            int isAccountProfileStarted, int isAccountProfileCompleted, int stripeConnected, int emailVerified, string isTest, SystemMessages msgs)
+        {
+            var sg = new SendGridClient(SendGridApiKey);
+
+            var contact =  new 
+            {
+                contacts = new List<object>
+                {
+                    new
+                    {
+                        first_name = firstName,
+                        last_name = lastName,
+                        email = email,
+                        custom_fields = new
+                        {
+                            e12_N = accountId,  //account_id
+                            e13_T = accountName,  //program_name
+                            e14_D = accountCreateDate,  // program_create_date
+                            e15_T = accountPhone, //program_phone
+                            e16_T = accountEmail, //program_email
+                            e17_N = userId, // owner_id
+                            e19_N = isAccountProfileExist,  // profile_exists
+                            e20_N = isAccountProfileStarted,  // profile_started
+                            e21_N = isAccountProfileCompleted, // profile_completed
+                            e22_N = activityCount,   // activities_created
+                            e23_D = lastActivityDate ?? "",  // last_activity_create_date
+                            e24_N = lastActivityCreationDays.IsNotEmpty() ? lastActivityCreationDays : 0,  // days_since_last_activity_created
+                            e25_N = accountCreationDays,  // days_since_account_created
+                            e28_T = isTest, // is_test
+                            e29_T = accountHomePageUrl, // activity_home_page_url  (program_profile is not available, instead we have activity_home_page_url)
+                            e30_T = accountHomePageUrl.IsBlank() ? "" : $"{Helpers.Utilities.BaseUrl()}/login?returnurl={HttpUtility.UrlEncode($"{accountHomePageUrl}?edit=1")}", //program_profile_edit_link
+                            e31_N = stripeConnected, // stripe_connected
+                            e32_N = emailVerified,  // email_verified
+                        }
+                    }
+                }
+
+            };
+
+            var task = Task.Run(async () =>
+            {
+                return await sg.RequestAsync(
+                    method: SendGridClient.Method.PUT,
+                    urlPath: MarketingUrlPath,
+                    requestBody: contact.ToJSON()
+                );
+            });
+
+            task.Wait();
+            var response = task.Result;
+            if (!response.IsNotEmpty() || response.StatusCode != System.Net.HttpStatusCode.Accepted)
             {
                 msgs.Add(response.Body.ReadAsStringAsync().Result, MessageType.Error);
             }
