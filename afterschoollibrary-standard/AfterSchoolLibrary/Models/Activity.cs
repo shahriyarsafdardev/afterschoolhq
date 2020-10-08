@@ -698,16 +698,25 @@ namespace AfterSchoolLibrary.Models
             return dq.GetCount(msgs);
         }
 
-        public static List<Activity> LoadByAccountId(int AccountId, int? activityGroupId, int? accountActivityGroupId, ActivityType? activityType, bool? isArchived, bool? isDeleted, bool? ungroupedOnly, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+		public static List<Activity> LoadActivity(int AccountId, string OrderByProperty, OrderByDirectionEnum orderByDirection, int? start = 0, int? length = 1, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var dq = LoadByAccountIdQuery(AccountId, activityGroupId, accountActivityGroupId, activityType, isArchived, isDeleted, null, ungroupedOnly, dc);
-            dq.SelectRange.Start = start;
-            dq.SelectRange.Length = length;
-            dq.OrderBys.Add("Name", OrderByDirectionEnum.Ascending);
-            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+			var dq = LoadByAccountIdQuery(AccountId, null, null, null, null, null, null, null, dc);
+			dq.SelectRange.Start = start;
+			dq.SelectRange.Length = length;
+			dq.OrderBys.Add(OrderByProperty, orderByDirection);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static List<Activity> LoadByAccountIdByDate(int AccountId, DateTime? startDate = null, DateTime? endDate = null, DatabaseConnection dc = null)
+		public static List<Activity> LoadByAccountId(int AccountId, int? activityGroupId, int? accountActivityGroupId, ActivityType? activityType, bool? isArchived, bool? isDeleted, bool? ungroupedOnly, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+		{
+			var dq = LoadByAccountIdQuery(AccountId, activityGroupId, accountActivityGroupId, activityType, isArchived, isDeleted, null, ungroupedOnly, dc);
+			dq.SelectRange.Start = start;
+			dq.SelectRange.Length = length;
+			dq.OrderBys.Add("Name", OrderByDirectionEnum.Ascending);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<Activity> LoadByAccountIdByDate(int AccountId, DateTime? startDate = null, DateTime? endDate = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
