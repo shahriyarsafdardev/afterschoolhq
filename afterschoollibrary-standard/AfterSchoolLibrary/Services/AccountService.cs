@@ -1016,17 +1016,8 @@ namespace AfterSchoolLibrary.Services
 
         public static SystemMessages AddCreditCard(this Account account, Stripe.Customer customer, string stripetoken, SystemMessages msgs)
         {
-            //TODO: below we have code for both card and source, but we can only use one as both requires token and after using it ones, we can't use it for next one.
-            // I did some R&D and found that source api is more useful then card, so I kept this code for now.
-            // disuss with darye on this flow once
-
-            // Create / Save stripe souce from token (credit card)
-            // StripeHelper.CreateCard(customer, stripetoken, msgs);
-
-
             // this will create the credit card source and attach it to the current StripeCustomerId
             account.CreateStripeSourceFromToken(stripetoken, customer, msgs);
-
             return msgs;
         }
 

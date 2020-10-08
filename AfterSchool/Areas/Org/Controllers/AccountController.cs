@@ -1256,7 +1256,7 @@ namespace AfterSchool.Areas.Org.Controllers
             Account a = SessionVariables.CurrentAccount;
             ViewBag.BillingHistory = a.GetStripeBillingHistory();
             ViewBag.RefundHistory = a.GetStripeRefundHistory();
-            // ViewBag.Cards = a.GetStripeCards();
+            ViewBag.Sources = a.GetStripeSources();            
             ViewBag.Messages = new SystemMessages();
             return View(a);
         }
@@ -1371,7 +1371,6 @@ namespace AfterSchool.Areas.Org.Controllers
                     msgs.Clear(MessageType.Success);
                     msgs.Add(string.Format("The '{0} Package' has been added to your account", package.Name), MessageType.Success);
 
-                    //TOOD: I have moved it to success due to issues with transaction
                     SessionVariables.AccountPackage = a.GetActiveAccountPackage(smsgs);
 
                     if (isFromTrialAccount)
@@ -1389,6 +1388,7 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 ViewBag.BillingHistory = a.GetStripeBillingHistory();
                 ViewBag.RefundHistory = a.GetStripeRefundHistory();
+                ViewBag.Sources = a.GetStripeSources();
                 ViewBag.Cards = a.GetStripeCards(customer.Id, msgs);
                 return View("Billing", a);
             }

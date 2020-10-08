@@ -225,7 +225,7 @@
                 if (name == null || name == undefined || name.length < 3) {
                     Notifications.showBar({
                         title: 'Error',
-                        message: 'Please enter card holder name.',
+                        message: 'Please enter card holder name with atleast 3 characters.',
                         success: false
                     });
 
@@ -235,7 +235,7 @@
                 showLoader();
                 updatePurchaseButton(true);                
 
-                stripe.createToken(card).then(function (result) {
+                stripe.createToken(card, { name: name }).then(function (result) {
                     hideLoader();
 
                     if (result.error) {
