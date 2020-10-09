@@ -146,7 +146,7 @@ namespace AfterSchool.Controllers
         {
             //TODO: need to review with darye on how to fetch this code, via using key in config or db call.
             var mcCoyCodeToShare = new Guid("8BBDC665-8B16-4034-BAD4-C7FCC457BED9");
-            return RedirectToAction("Index", new { invite = mcCoyCodeToShare, isrequestonlyaccess = true });
+            return RedirectToAction("Welcome", new { invite = mcCoyCodeToShare, isrequestonlyaccess = true });
         }
 
         [HttpGet]
@@ -869,9 +869,13 @@ namespace AfterSchool.Controllers
         }
 
         [HttpGet]
-        public ActionResult Welcome()
+        public ActionResult Welcome(string invite, string isrequestonlyaccess)
         {
-            var model = new SignUpIndexViewModel();
+            var model = new SignUpIndexViewModel()
+            {
+                IsRequestOnlyAccess = isrequestonlyaccess.IsBoolean() ? isrequestonlyaccess.ToBoolean() : false,
+                InviteCodeToShare = invite.IsNotEmpty() ? invite : ""
+            };
             return View(model);
         }
 
