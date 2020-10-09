@@ -145,7 +145,7 @@ namespace AfterSchool.Controllers
         public ActionResult McCoyRegistration()
         {
             //TODO: need to review with darye on how to fetch this code, via using key in config or db call.
-            var mcCoyCodeToShare = new Guid("04896D49-0C7A-4259-9F45-00544B3FA918");
+            var mcCoyCodeToShare = new Guid("8BBDC665-8B16-4034-BAD4-C7FCC457BED9");
             return RedirectToAction("Index", new { invite = mcCoyCodeToShare, isrequestonlyaccess = true });
         }
 
