@@ -1014,18 +1014,6 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        public static SystemMessages AddCreditCard(this Account account, Stripe.Customer customer, string stripetoken, SystemMessages msgs)
-        {
-            // this will create the credit card source and attach it to the current StripeCustomerId
-            account.CreateStripeSourceFromToken(stripetoken, customer, msgs);
-            return msgs;
-        }
-
-        public static List<Stripe.Card> GetStripeCards(this Account account, string customerId, SystemMessages msgs)
-        {
-            return StripeHelper.GetCards(customerId, msgs);
-        }
-
         #endregion
 
         #region Registrants
@@ -1447,7 +1435,6 @@ namespace AfterSchoolLibrary.Services
         {
             var signupType = SignUpType.NotSet;
 
-            //TODO: need to discuss this HasPaymentCard and StripeDefaultCardId with darye
             // has payment info
             //if (account.StripeDefaultCardId.IsNotEmpty())
             //{
@@ -1500,7 +1487,6 @@ namespace AfterSchoolLibrary.Services
                         signupType = SignUpType.ChangePackageDuringTrial;
                 }
 
-                // TODO: darye
                 // could be changing same package with other plan, like monthly or yearly
                 if (activePackage.PackageId == p.ID && activePackage.BillingPeriodTypeId != billingPeriodType)
                     signupType = SignUpType.ChangeBillingPeriodType;
@@ -2623,7 +2609,7 @@ namespace AfterSchoolLibrary.Services
         /// <param name="stripeToken"></param>
         /// <param name="msgs"></param>
         /// <returns></returns>
-        internal static string CreateStripeSourceFromToken(this Account fromAccount, string stripeToken, Stripe.Customer customer, SystemMessages msgs)
+        public static string CreateStripeSourceFromToken(this Account fromAccount, string stripeToken, Stripe.Customer customer, SystemMessages msgs)
         {
             // stripe stuff
             // create payment source if not already existent on the user
