@@ -1279,14 +1279,9 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult GetFeatures(int id)
         {
             var msgs = new SystemMessages();
-            //Package package = null;
 
             if (id.IsEmpty())
                 msgs.Add("Package not found.", MessageType.UserError);
-
-            // package = Package.LoadByUid(id.ToGuid());
-
-            // var features = package.GetFeatures();
 
             var features = PackageFeature.LoadByPackageId(id, msgs); 
 
@@ -1325,7 +1320,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             Package package = null;
             Stripe.Customer customer = null;
-            var a = SessionVariables.CurrentAccount;
+            var currentAccount = SessionVariables.CurrentAccount;
             var isFromTrialAccount = SessionVariables.AccountPackage?.IsDuringTrial ?? false;
 
             Database.ExecuteTransaction(
@@ -1337,11 +1332,13 @@ namespace AfterSchool.Areas.Org.Controllers
 
                     package = Package.LoadByUid(selectedPackageArr[1].ToGuid(), amsgs, adc);
                                         
-                    customer = a.CreateStripeCustomer();
-                    amsgs.AddRange(a.AddCreditCard(customer, stripetoken, amsgs));
+                    customer = currentAccount.CreateStripeCustomer();
+
+                    // this will create the credit card source and attach it to the current StripeCustomerId
+                    currentAccount.CreateStripeSourceFromToken(stripetoken, customer, msgs);
 
                     if (amsgs.HasNoErrors())
-                        a.AddPackage(package.ID.Value, billingPeriod, SessionVariables.LoggedInUser, amsgs, adc);
+                        currentAccount.AddPackage(package.ID.Value, billingPeriod, SessionVariables.LoggedInUser, amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {
@@ -1350,10 +1347,10 @@ namespace AfterSchool.Areas.Org.Controllers
                     msgs.Clear(MessageType.Success);
                     msgs.Add(string.Format("The '{0} Package' has been added to your account", package.Name), MessageType.Success);
 
-                    SessionVariables.AccountPackage = a.GetActiveAccountPackage(smsgs);
+                    SessionVariables.AccountPackage = currentAccount.GetActiveAccountPackage(smsgs);
 
                     if (isFromTrialAccount)
-                        SessionVariables.CurrentAccount.SendWelcomeEmailPurchase(a.GetAccountOwner());
+                        SessionVariables.CurrentAccount.SendWelcomeEmailPurchase(currentAccount.GetAccountOwner());
                 },
                 onFailure: (SystemMessages fmsgs) =>
                 {
@@ -1365,17 +1362,16 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                ViewBag.BillingHistory = a.GetStripeBillingHistory();
-                ViewBag.RefundHistory = a.GetStripeRefundHistory();
-                ViewBag.Sources = a.GetStripeSources();
-                ViewBag.Cards = a.GetStripeCards(customer.Id, msgs);
-                return View("Billing", a);
+                ViewBag.BillingHistory = currentAccount.GetStripeBillingHistory();
+                ViewBag.RefundHistory = currentAccount.GetStripeRefundHistory();
+                ViewBag.Sources = currentAccount.GetStripeSources();
+                return View("Billing", currentAccount);
             }
             else
             {
                 ViewBag.Package = package;
                 ViewBag.Packages = Package.LoadByIsActiveByIsAfterSchool(true, SessionVariables.IsAfterSchool.Value);
-                return View("NewBilling", a);
+                return View("NewBilling", currentAccount);
             }
         }
 

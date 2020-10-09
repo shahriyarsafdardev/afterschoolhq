@@ -194,7 +194,6 @@
 
     <script type="text/javascript">
 
-
         PageEvent.add(PageEvent.AFTER_INIT, function () {
 
             var stripe = Stripe('@AfterSchoolLibrary.Billing.StripeHelper.PublishableKey');
@@ -304,11 +303,11 @@
                         return;
                     }
                     else {
-                        //Notifications.showBar({
-                        //    title: 'Error',
-                        //    message: 'Something went wrong, try again after sometime.',
-                        //    success: false
-                        //});
+                        Notifications.showBar({
+                            title: 'Error',
+                            message: 'Something went wrong, try again after sometime.',
+                            success: false
+                        });
                         hideLoader();
                         return false;
                     }
