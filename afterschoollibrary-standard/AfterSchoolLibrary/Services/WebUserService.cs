@@ -243,6 +243,11 @@ namespace AfterSchoolLibrary.Services
             return Helpers.EmailHelper.SendEmailVerification(user, isAfterSchool);
         }
 
+        public static SystemMessages SendWelcomePurchase(string userFirstName, string userEmail, bool isAfterSchool = true)
+        {
+            return Helpers.EmailHelper.SendWelcomePurchase(userFirstName, userEmail, isAfterSchool);
+        }
+
         public static SystemMessages MarkAsVerified(this WebUser user, DatabaseConnection dc = null)
         {
             user.VerifiedAccount = true;
