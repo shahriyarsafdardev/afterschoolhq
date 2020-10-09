@@ -92,10 +92,15 @@ namespace AfterSchool.Controllers
                             msgs: amsgs,
                             dc: adc);
 
+                        account = user.AddNewAccount(
+                               orgName: model.OrgName,
+                               accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
+                               loggedInUser: user,
+                               msgs: amsgs,
+                               dc: adc);
+
                         if (invitingAccount.IsNotEmpty())
                         {
-                            account = user.AddNewEmptyAccount(user, amsgs, adc);
-                            
                             if (model.IsRequestOnlyAccess)
                             {
                                 account.RequestAccessToAccount(invitingAccount, HostPermissionType.ApproveOnly, user, msgs, adc);
@@ -104,15 +109,6 @@ namespace AfterSchool.Controllers
                             {
                                 invitingAccount.ApproveAccessToAccount(account, user, amsgs, adc);
                             }
-                        }
-                        else
-                        {
-                            account = user.AddNewAccount(
-                                orgName: model.OrgName,
-                                accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
-                                loggedInUser: user,
-                                msgs: amsgs,
-                                dc: adc);                            
                         }
 
                     },
