@@ -1447,6 +1447,47 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
+        public static SystemMessages SendWelcomePurchase(string userFirstName, string userEmail, bool IsAccountAfterSchool)
+        {
+            var msgs = new SystemMessages();
+
+            var model = new NameValueCollection()
+            {
+                { "FirstName", userFirstName },
+                { "ProductName", Utilities.AppName(IsAccountAfterSchool) },
+                { "SupportEmail", Email.AppSupportEmailAddress }
+            };
+
+            var body = ProcessTemplate(
+                EmailTemplates.Welcome_Purchase,
+                model,
+                "welcomepurchase",
+                msgs
+                );
+
+            var subject = $"Welcome to the {Utilities.AppName(IsAccountAfterSchool)} Family!";
+
+            var mailMsgs = SendGridHelper.SendMail(
+                fromEmail: Email.SendGridNoReplyEmailAddress(IsAccountAfterSchool),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(userEmail),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(IsAccountAfterSchool)
+                );
+
+            // send copy to afterschool hq team
+            SendGridHelper.SendMail(
+                fromEmail: Email.SendGridNoReplyEmailAddress(IsAccountAfterSchool),
+                toEmail: Email.SendGridSupportEmailAddress,
+                subject: $"CC: {Utilities.AppName(IsAccountAfterSchool)} SIGNUP - {subject}",
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(IsAccountAfterSchool)
+                );
+
+            msgs.AddRange(mailMsgs);
+            return msgs;
+        }
+
         public static SystemMessages SendAccountInvitedEmail(WebUser invitedUser, Account invitedAccount, WebUser loggedInUser, string customMessage = null)
         {
             var msgs = new SystemMessages();
@@ -1669,18 +1710,21 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
-        public static SystemMessages SendAccessRequestToHost(Account visitorAccount, Account hostAccount)
+        public static SystemMessages SendAccessRequestToHost(Account visitorAccount, Account hostAccount, WebUser loggedInUser)
         {
             var msgs = new SystemMessages();
             var hostAccountOwner = hostAccount.GetAccountOwner(msgs);
-            var visitorAccountOwner = visitorAccount.GetAccountOwner(msgs);
+
+            // TODO: disucss with darye
+            // this call takes too much time to load account owner, we can remvoe this call and use logged in user
+            // var visitorAccountOwner = visitorAccount.GetAccountOwner(msgs);
 
             var model = new NameValueCollection()
             {
                 { "HostFirstName", hostAccountOwner.FirstName },
                 { "HostAccountName", hostAccount.Name},
                 { "VisitorAccountName", visitorAccount.Name },
-                { "VisitorUserDisplayName", visitorAccountOwner.DisplayName },
+                { "VisitorUserDisplayName", loggedInUser.DisplayName },
                 { "ProductName", Utilities.AppName(hostAccount.IsAfterSchool) },
                 { "LoginLink", $"{Email.BaseUrl()}login" }
             };

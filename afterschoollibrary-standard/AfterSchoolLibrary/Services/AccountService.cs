@@ -1979,7 +1979,7 @@ namespace AfterSchoolLibrary.Services
 
                 //TODO Notify Host account of request
                 if (msgs.HasNoErrors() && hostAccount.IsActive)
-                    msgs.AddRange(Helpers.EmailHelper.SendAccessRequestToHost(visitorAccount, hostAccount));
+                    msgs.AddRange(Helpers.EmailHelper.SendAccessRequestToHost(visitorAccount, hostAccount, loggedInUser));
             }
             else
             {
