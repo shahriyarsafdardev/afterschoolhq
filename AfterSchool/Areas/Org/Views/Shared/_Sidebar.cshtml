@@ -129,7 +129,7 @@
                                 <a href="@Url.Action("index", "activity", new { type = (int)ActivityType.FieldTrip })"><i class="icon s7-compass"></i> @UILabel.ActivityLabel(ActivityType.FieldTrip, true)</a>
                             </li>
                         }
-                        @if (CanView(FeatureType.ManagePermissionSlips, SessionVariables.AccountUserType, PermissionType.PermissionSlipsView))
+                        @if (CanView(SessionVariables.AccountUserType, PermissionType.PermissionSlipsView))
                         {
                             <li>
                                 <a href="@Url.Action("index", "activity", new { type = (int)ActivityType.PermissionSlip })"><i class="icon s7-file"></i> @UILabel.ActivityLabel(ActivityType.PermissionSlip, true)</a>
