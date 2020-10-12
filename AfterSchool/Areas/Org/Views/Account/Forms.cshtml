@@ -84,7 +84,7 @@
                                     <td><a href="@Url.Action("formedit", "account", new {id = form.ID})">@form.Name</a></td>
                                     <td>@form.CreateDate.Value.ToLongDateString()</td>
                                     <td>
-                                        @if (maxFormCount > 0)
+                                        @if (showFormFields)
                                         {                                            
                                             <button class="btn btn-default btn-sm md-trigger" data-modal="modal-newform" onclick="copy(@form.ID, '@form.Name')">
                                                 <i class="icon icon-left s7-copy-file"></i> Copy
