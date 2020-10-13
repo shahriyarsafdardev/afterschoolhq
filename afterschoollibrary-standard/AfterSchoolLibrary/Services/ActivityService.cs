@@ -919,30 +919,34 @@ namespace AfterSchoolLibrary.Services
 
             if (agestart.IsNumber())
             {
-                if (agestart.ToString().ToInteger() >= 0)
-                    activity.AgeStart = agestart.ToString().ToInteger();
-                else
+                if (agestart.ToString().ToInteger() < 0)
                     activity.AgeStart = null;
+                else
+                    activity.AgeStart = agestart.ToString().ToInteger();
             }
+
             if (ageend.IsNumber())
             {
-                if (ageend.ToString().ToInteger() >= 0)
-                    activity.AgeEnd = ageend.ToString().ToInteger();
-                else
+                if (ageend.ToString().ToInteger() < 0)
                     activity.AgeEnd = null;
+                else
+                    activity.AgeEnd = ageend.ToString().ToInteger();
+            }
+
+            if (gradestart.IsNumber())
+            {
+                if (gradestart.ToString().ToInteger() < 0)
+                    activity.GradeLevelStart = null;
+                else
+                    activity.GradeLevelStart = gradestart.ToString().ToInteger();
             }
 
             if (gradestart.IsNumber() && gradeend.IsNumber())
             {
-                if (gradestart.ToString().ToInteger() > -1)
-                    activity.GradeLevelStart = gradestart.ToString().ToInteger();
-                else
-                    activity.GradeLevelStart = null;
-
-                if (gradeend.ToString().ToInteger() > -1)
-                    activity.GradeLevelEnd = gradeend.ToString().ToInteger();
-                else
+                if (gradeend.ToString().ToInteger() < 0)
                     activity.GradeLevelEnd = null;
+                else
+                    activity.GradeLevelEnd = gradeend.ToString().ToInteger();  
             }
 
             if (minseatsrequired.IsNumber())
@@ -2351,6 +2355,11 @@ namespace AfterSchoolLibrary.Services
                     msgs.AddRange(ra.SendPaymentReminder());
             });
 
+        }
+
+        public static bool RestrictByGradeOrAge(this Activity activity)
+        {
+            return activity.AgeStart.IsEmpty();
         }
     }
 }

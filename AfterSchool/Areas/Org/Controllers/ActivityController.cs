@@ -191,7 +191,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd, string type, string inviteonly, string minseatsrequired, string gradestart, string gradeend, string genderrestrictions)
+        public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd, string type, string inviteonly, string minseatsrequired, string gradestart, string gradeend, string genderrestrictions, string agestart, string ageend)
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
@@ -230,7 +230,9 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "minseatsrequired", minseatsrequired },
                     { "gradestart", gradestart },
                     { "gradeend", gradeend },
-                    { "genderrestrictions", (int)Enum.Parse(typeof(GenderRestrictionType), genderrestrictions) }
+                    { "genderrestrictions", (int)Enum.Parse(typeof(GenderRestrictionType), genderrestrictions) },
+                    { "agestart", agestart },
+                    { "ageend", ageend }
                 };
 
                 if (activity.IsNotEmpty())

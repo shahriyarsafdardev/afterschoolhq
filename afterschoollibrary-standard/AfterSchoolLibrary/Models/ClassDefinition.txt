@@ -355,6 +355,8 @@ property: AccountTypeId, AccountType, Int
 property: DefaultLocationId, int?, Int
 property: MinGradeLevelOffered, int?, Int
 property: MaxGradeLevelOffered, int?, Int
+property: AgeStart, int?, Int
+property: AgeEnd, int?, Int
 property: InviteCodeToShare, Guid, UniqueIdentifier
 property: CreditCardFeesPaidBy, FeesPaidByType, Int
 property: ConvenienceFeesPaidBy, FeesPaidByType, Int
@@ -393,6 +395,8 @@ property: PrimaryColor, string, NVarChar "20"
 property: Website, string, NVarChar "400"
 property: GradeLevelStart, int?, Int
 property: GradeLevelEnd, int?, Int
+property: AgeStart, int?, Int
+property: AgeEnd, int?, Int
 property: Twitter, string, NVarChar "100"
 property: Facebook, string, NVarChar "100"
 property: Instagram, string, NVarChar "100"
@@ -648,6 +652,8 @@ property: HasLotteryRun, bool, Bit
 property: ActivityGroupTypeId, ActivityGroupType, Int
 property: MinGradeLevelId, int?, Int
 property: MaxGradeLevelId, int?, Int
+property: AgeStart, int?, Int
+property: AgeEnd, int?, Int
 property: GenderRestriction, GenderRestrictionType, Int
 property: AdministratorAccountId, int?, Int
 property: ActivityScheduleId, int?, Int
