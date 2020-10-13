@@ -2357,7 +2357,7 @@ namespace AfterSchoolLibrary.Services
 
         }
 
-        public static bool RestrictByGradeOrAge(this Activity activity)
+        public static bool RestrictByGrade(this Activity activity)
         {
             return activity.AgeStart.IsEmpty();
         }

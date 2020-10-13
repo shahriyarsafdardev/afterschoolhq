@@ -397,6 +397,7 @@ namespace AfterSchoolLibrary.Services
         {
             if (profile.AgeStart.HasValue)
                 return profile.AgeStart;
+
             return null;
         }
 
@@ -404,10 +405,11 @@ namespace AfterSchoolLibrary.Services
         {
             if (profile.AgeEnd.HasValue)
                 return profile.AgeEnd;
+
             return null;
         }
 
-        public static bool RestrictByGradeOrAge(this AccountProfile profile)
+        public static bool RestrictByGrade(this AccountProfile profile)
         {
             return profile.AgeStart.IsEmpty();
         }

@@ -190,18 +190,21 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd, string type, string inviteonly, string minseatsrequired, string gradestart, string gradeend, string genderrestrictions, string agestart, string ageend)
+        public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd, string type, string inviteonly, string minseatsrequired)
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             Activity activity;
+            Activity defaultActivity;
             ActivityGroup activityGroup = null;
 
             if (id.IsEmpty() || !id.IsGuid())
                 return HttpNotFound();
 
             activity = Activity.LoadByUid(id.ToGuid());
+            defaultActivity = currentAccount.GetDefaultNewActivity();
+
 
             if (name.IsEmpty())
                 msgs.Add("Activity name is required.", MessageType.UserError);
@@ -227,11 +230,11 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "type", type },
                     { "inviteonly", inviteonly.IsBoolean().ToString() },
                     { "minseatsrequired", minseatsrequired },
-                    { "gradestart", gradestart },
-                    { "gradeend", gradeend },
-                    { "genderrestrictions", (int)Enum.Parse(typeof(GenderRestrictionType), genderrestrictions) },
-                    { "agestart", agestart },
-                    { "ageend", ageend }
+                    { "gradestart", defaultActivity.GradeLevelStart },
+                    { "gradeend", defaultActivity.GradeLevelEnd },
+                    { "genderrestrictions", (int)defaultActivity.GenderRestriction },
+                    { "agestart", defaultActivity.AgeStart },
+                    { "ageend", defaultActivity.AgeEnd }
                 };
 
                 if (activity.IsNotEmpty())

@@ -1447,4 +1447,16 @@ Public Module Extensions
         '//file is not locked
         Return False
     End Function
+
+    <Extension()>
+    Public Function GetAgeInYears(ByVal dateOfBirth As DateTime) As Integer
+        Dim today As DateTime = DateTime.Today
+        If dateOfBirth > today Then
+            Return 0
+        End If
+        Dim a As Integer = (today.Year * 100 + today.Month) * 100 + today.Day
+        Dim b As Integer = (dateOfBirth.Year * 100 + dateOfBirth.Month) * 100 + dateOfBirth.Day
+
+        Return (a - b) / 10000
+    End Function
 End Module

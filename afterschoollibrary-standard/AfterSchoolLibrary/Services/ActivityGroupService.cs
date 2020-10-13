@@ -1011,5 +1011,10 @@ namespace AfterSchoolLibrary.Services
 
             return group.GetSchedule(msgs, dc)?.GetInstances(msgs: msgs, dc: dc).LastOrDefault()?.StartDateTime;
         }
+
+        public static bool RestrictByGrade(this ActivityGroup group)
+        {
+            return group.AgeStart.IsEmpty();
+        }
     }
 }

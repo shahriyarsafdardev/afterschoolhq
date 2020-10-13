@@ -1,5 +1,5 @@
 ﻿@{ 
-    var restrictbygradeorage = (bool)ViewData["restrictbygradeorage"];
+    var restrictbygrade = (bool)ViewData["restrictbygrade"];
     var grades = (List<GradeLevel>)ViewData["grades"];
     var minGradeLevelId = (int?)ViewData["minGradeLevelId"];
     var maxGradeLevelId = (int?)ViewData["maxGradeLevelId"];
@@ -14,11 +14,11 @@
         </label>
         <div class="col-lg-9">
             <div class="am-radio inline">
-                <input type="radio" id="restrictby-grade" name="restrictby" class="form-control" value="1" @(restrictbygradeorage ?  "checked=\"checked\"" : "")   />
+                <input type="radio" id="restrictby-grade" name="restrictby" class="form-control" value="1" @(restrictbygrade ?  "checked=\"checked\"" : "")   />
                 <label for="restrictby-grade">Grade</label>
             </div>
             <div class="am-radio inline">
-                <input type="radio" id="restrictby-age" name="restrictby" class="form-control" value="0"  @(!restrictbygradeorage ?  "checked=\"checked\"" : "")  />
+                <input type="radio" id="restrictby-age" name="restrictby" class="form-control" value="0"  @(!restrictbygrade ?  "checked=\"checked\"" : "")  />
                 <label for="restrictby-age">Age</label>
             </div>
         </div>

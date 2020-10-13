@@ -552,22 +552,32 @@ namespace AfterSchoolLibrary.Models
             if (AgeStart.IsEmpty() && AgeEnd.IsEmpty())
                 return true;
 
-            DateTime registrantDOB = DateTime.Parse(registrant.GetAnswer(QuestionDataType.RegistrantDateOfBirth, msgs, dc).ToString());
-            DateTime now = DateTime.Now;
-            int registrantAge = DateTime.Now.Year - registrantDOB.Year;
+            var registrantDOB = registrant.GetAnswer(QuestionDataType.RegistrantDateOfBirth, msgs, dc)?.Text.ToDateTime();
 
-            if (registrantDOB.Month == now.Month &&// if the start month and the end month are the same
-                now.Day < registrantDOB.Day// AND the end day is less than the start day
-                || now.Month < registrantDOB.Month)// OR if the end month is less than the start month
+            if (registrantDOB.IsEmpty())
             {
-                registrantAge--;
+                msgs.Add("Missing date of birth", MessageType.Error);
+                return false;
             }
+
+            var registrantAge = BasicLibrary.Extensions.GetAgeInYears((DateTime)registrantDOB);
 
             if (registrantAge < AgeStart)
                 return false;
 
             if (registrantAge > AgeEnd)
                 return false;
+
+            return true;
+        }
+
+        public bool RestrictByGrade()
+        {
+            if (IsActivity())
+                return GetActivity().RestrictByGrade();
+
+            if (IsActivityGroup())
+                return GetActivityGroup().RestrictByGrade();
 
             return true;
         }

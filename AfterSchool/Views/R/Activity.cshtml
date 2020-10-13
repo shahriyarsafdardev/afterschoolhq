@@ -9,9 +9,6 @@
     var hidePreciseLocation = false;
     var accountProfile = (AccountProfile)ViewBag.AccountProfile;
 
-    var agestart = ViewBag.AgeStart;
-    var ageend = ViewBag.EndStart;
-
     if (Model.HidePreciseLocation)
     {
         hidePreciseLocation = Model.HidePreciseLocation;
@@ -79,9 +76,19 @@
 
                             @if (!Model.ActivityType.HasValue || Model.ActivityType.Value.NotIn(new ActivityType[] { ActivityType.PermissionSlip, ActivityType.FieldTrip }))
                             {
-                                <span>
-                                    @ParticipationObjectUI.PrintGradeLevels(Model) &bull;
-                                </span>
+                                if (Model.RestrictByGrade())
+                                {
+                                    <span>
+                                        @ParticipationObjectUI.PrintGradeLevels(Model) &bull;
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span>
+                                        @ParticipationObjectUI.PrintAges(Model) &bull;
+                                    </span>
+                                }
+
                             }
 
                             @ParticipationObjectUI.PrintGenderRestrictions(Model)

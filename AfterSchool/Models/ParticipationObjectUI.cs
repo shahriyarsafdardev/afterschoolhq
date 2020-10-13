@@ -4,6 +4,7 @@ using System.Linq;
 using System.Collections.Generic;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
+using Twilio.AspNet.Common;
 
 namespace AfterSchool.Models
 {
@@ -11,15 +12,18 @@ namespace AfterSchool.Models
     {
         public static string PrintGradeLevels(ParticipationObject participationObject)
         {
-            if (participationObject.AgeStart.IsNotEmpty() && participationObject.AgeEnd.IsNotEmpty())
-            {
-                return $"{participationObject.AgeStart.Value} - {participationObject.AgeEnd.Value}";
-            }
-
             if (participationObject.MinGradeId.HasValue && participationObject.MaxGradeId.HasValue)
                 return $"{participationObject.GetMinGradeLevel().Name} - {participationObject.GetMaxGradeLevel().Name}";
 
-            return "All Grades";
+            return "All Grades and Ages";
+        }
+
+        public static string PrintAges(ParticipationObject participationObject)
+        {
+            if (participationObject.AgeStart.IsNotEmpty() && participationObject.AgeEnd.IsNotEmpty())
+                return $"{participationObject.AgeStart.Value} - {participationObject.AgeEnd.Value}";
+
+            return "All Grades and Ages";
         }
 
         public static string PrintLocation(ParticipationObject participationObject)

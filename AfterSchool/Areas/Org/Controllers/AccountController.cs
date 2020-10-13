@@ -1078,7 +1078,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     {
                         agestart = "-1";
                         ageend = "-1";
-                    } else
+                    } 
+                    else
                     {
                         mingrade = "-1";
                         maxgrade = "-1";

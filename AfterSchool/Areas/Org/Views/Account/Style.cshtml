@@ -170,7 +170,7 @@
                             Html.RenderPartial(
                                 "~/Views/Shared/_RestrictBySelection.cshtml",
                                 null,
-                                new ViewDataDictionary() { { "minGradeLevelId", Model.GradeLevelStart }, { "MaxGradeLevelId", Model.GradeLevelEnd }, { "grades", grades }, { "ageStart", Model.AgeStart }, { "ageEnd", Model.AgeEnd }, { "restrictbygradeorage", Model.RestrictByGradeOrAge() } }
+                                new ViewDataDictionary() { { "minGradeLevelId", Model.GradeLevelStart }, { "MaxGradeLevelId", Model.GradeLevelEnd }, { "grades", grades }, { "ageStart", Model.AgeStart }, { "ageEnd", Model.AgeEnd }, { "restrictbygrade", Model.RestrictByGrade() } }
                                 );
                         }
 

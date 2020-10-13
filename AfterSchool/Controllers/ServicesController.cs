@@ -34,12 +34,11 @@ namespace AfterSchool.Controllers
             {
                 var cartItems = SessionVariables.Cart.GetCartItems(msgs);
                 var participationObjects = cartItems.Select(item => item.GetParticipationObject(msgs)).ToList();
-                var activities = new List<string>();
+                var ineligibleActivities = new List<string>();
 
                 participationObjects.ForEach(participationObject => {
-                    // why is there a '!' for IsStudentGradeInRange? Im not sure if i should have the same thing on IsStudentAgeInRange
-                    if (!participationObject.IsStudentGradeInRange(registrant, msgs)  && participationObject.IsStudentAgeInRange(registrant, msgs))
-                        activities.Add($"{participationObject.Name}: {participationObject.GetMinGradeLevel(msgs).Abbreviation} - {participationObject.GetMaxGradeLevel(msgs).Abbreviation}");
+                    if (!participationObject.IsStudentGradeInRange(registrant, msgs)  && !participationObject.IsStudentAgeInRange(registrant, msgs))
+                        ineligibleActivities.Add($"{participationObject.Name}: {participationObject.GetMinGradeLevel(msgs).Abbreviation} - {participationObject.GetMaxGradeLevel(msgs).Abbreviation}");
                 });
 
                 if (msgs.HasNoErrors())
@@ -47,7 +46,7 @@ namespace AfterSchool.Controllers
                     {
                         status = "ok",
                         studentName = registrant.DisplayName,
-                        activities
+                        ineligibleActivities
                     }, JsonRequestBehavior.AllowGet);
             }
 
