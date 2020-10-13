@@ -20,7 +20,7 @@ namespace AfterSchool.Models
 
         public static string PrintAges(ParticipationObject participationObject)
         {
-            if (participationObject.AgeStart.IsNotEmpty() && participationObject.AgeEnd.IsNotEmpty())
+            if (participationObject.AgeStart.HasValue && participationObject.AgeEnd.HasValue)
                 return $"{participationObject.AgeStart.Value} - {participationObject.AgeEnd.Value}";
 
             return "All Grades and Ages";
