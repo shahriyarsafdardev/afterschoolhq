@@ -28,6 +28,8 @@ namespace AfterSchoolLibrary.Models
 		public int? RegistrantId { get { return (int?)MDV["RegistrantId"].Value; } set { MDV["RegistrantId"].Value = value; } }
 		public DateTime? DateSent { get { return (DateTime?)MDV["DateSent"].Value; } set { MDV["DateSent"].Value = value; } }
 		public string SendErrors { get { return (string)MDV["SendErrors"].Value; } set { MDV["SendErrors"].Value = value; } }
+		public bool SentText { get { return (bool)MDV["SentText"].Value; } set { MDV["SentText"].Value = value; } }
+		public bool SentEmail { get { return (bool)MDV["SentEmail"].Value; } set { MDV["SentEmail"].Value = value; } }
 		public string RegistrantEmail { get { return (string)MDV["RegistrantEmail"].Value; } }
 		public string RegistrantFirstName { get { return (string)MDV["RegistrantFirstName"].Value; } }
 		public string RegistrantLastName { get { return (string)MDV["RegistrantLastName"].Value; } }
@@ -40,6 +42,8 @@ namespace AfterSchoolLibrary.Models
         {
             this.Config(ObjectMap, DatabaseQuery, typeof(ActivityMessageRegistrant).Name, "ID");
             this.LoadObjectValues(ObjectMap);
+			this.SentText = false;
+			this.SentEmail = false;
 			
         }
 
@@ -54,6 +58,8 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "RegistrantId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "DateSent", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "SendErrors", System.Data.SqlDbType.NVarChar , "1000");
+				_dp.Add(className, "SentText", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "SentEmail", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "RegistrantEmail", typeof(Registrant).Name, "Email", System.Data.SqlDbType.NVarChar, "Registrant");
 				_dp.Add(className, "RegistrantFirstName", typeof(Registrant).Name, "FirstName", System.Data.SqlDbType.NVarChar, "Registrant");
 				_dp.Add(className, "RegistrantLastName", typeof(Registrant).Name, "LastName", System.Data.SqlDbType.NVarChar, "Registrant");
@@ -152,6 +158,14 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["SendErrors"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["SentText"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["SentEmail"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

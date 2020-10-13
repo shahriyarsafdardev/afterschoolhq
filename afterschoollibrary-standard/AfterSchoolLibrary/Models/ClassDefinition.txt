@@ -314,6 +314,8 @@ property: ActivityMessageId, int?, Int, required
 property: RegistrantId, int?, Int, required
 property: DateSent, DateTime?, DateTime
 property: SendErrors, string, NVarChar "1000"
+property: SentText, bool, Bit
+property: SentEmail, bool, Bit
 loadmethod: ActivityMessageId, List<>
 loadmethod: RegistrantId, List<>
 loadmethod: ActivityMessageId|RegistrantId
@@ -1781,7 +1783,7 @@ values: NotSet, Individual, Organization
 [begin]
 type: Enum
 name: FeatureType
-values: NotSet, Attendance, AcceptPayments, Messaging, CustomUrl, TeamAccounts, WaitingList, ManageForms, ManageLocations, ManageActivityGroups, Activities, Participants, AllowApplications, Lottery, TrialDays, ManageContacts, ViewInsights, PaymentsPercentageFee, PaymentsPercentageFlatFee, ManageExternalLeagues, UseStripeConnectedAccount, AcceptACH, ManageLeagues, ManageFieldTrips, ManagePermissionSlips, ManageLearningPods
+values: NotSet, Attendance, AcceptPayments, EmailMessaging, CustomUrl, TeamAccounts, WaitingList, ManageForms, ManageLocations, ManageActivityGroups, Activities, Participants, AllowApplications, Lottery, TrialDays, ManageContacts, ViewInsights, PaymentsPercentageFee, PaymentsPercentageFlatFee, ManageExternalLeagues, UseStripeConnectedAccount, AcceptACH, ManageLeagues, ManageFieldTrips, ManagePermissionSlips, ManageLearningPods,	TextMessaging, AllowInvites, AllowStudentRegistration, AllowPaymentPlans, AllowSubscriptionPlans, AllowPayLater, StudentCRM
 [end]
 
 [begin]
