@@ -72,7 +72,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult ProgramInfo(string title, string headline, string mingrade, string maxgrade, string genderrestrictions, string opencovid, string elearningcenter)
+        public ActionResult ProgramInfo(string title, string headline, string mingrade, string maxgrade, string agestart, string ageend, string genderrestrictions, string opencovid, string elearningcenter)
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
@@ -98,6 +98,8 @@ namespace AfterSchool.Areas.Org.Controllers
                             headline: headline, 
                             mingrade: mingrade,
                             maxgrade: maxgrade,
+                            agestart: agestart,
+                            ageend: ageend,
                             genderrestriction: genderrestrictions,
                             opencovid: opencovid.IsNumber() ? opencovid : "0",
                             elearningcenter: elearningcenter.IsNumber() ? opencovid : "0",

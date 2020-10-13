@@ -17,9 +17,16 @@
     {
         className = ViewData["classname"].ToString();
     }
+
+    var hidden = "";
+    if (ViewData["hidden"].IsNotEmpty())
+    {
+        hidden = ViewData["hidden"].ToString();
+    }
+
 }
 
-<div class="switch-button switch-button-yesno">
+<div class="switch-button switch-button-yesno @hidden">
     <input type="checkbox" name="@ViewData["checkboxname"]" id="@ViewData["checkboxid"]" value="1" @(Model ? " checked=\"checked\" " : "") @disabled @required class="@className" />
     <span>
         <label for="@ViewData["checkboxid"]"></label>

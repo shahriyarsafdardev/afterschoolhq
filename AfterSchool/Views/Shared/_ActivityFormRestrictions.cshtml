@@ -14,16 +14,16 @@
             </label>
             <div class="col-md-9">
                 @{Html.RenderPartial
-                  (
-                      "~/Views/Shared/_SwitchButton.cshtml",
-                      Model.RequiresParentalConsent,
-                      new ViewDataDictionary()
-                      {
+                        (
+                            "~/Views/Shared/_SwitchButton.cshtml",
+                            Model.RequiresParentalConsent,
+                            new ViewDataDictionary()
+                            {
                         { "checkboxname", "requiresparentalconsent" },
                         { "checkboxid", "requiresparentalconsent" },
                         { "disabled", false }
-                      }
-                  );
+    }
+                        );
                 }
             </div>
         </div>
@@ -36,10 +36,10 @@
                 <div class="am-radio inline">
                     @foreach (GenderRestrictionType item in System.Enum.GetValues(typeof(GenderRestrictionType)))
                     {
-                        <input type="radio" 
-                               name="genderrestrictions" 
-                               id="genderrestrictions-@((int)item)" 
-                               @(Model.GenderRestriction == item ? " checked=\"checked\" " : "") 
+                        <input type="radio"
+                               name="genderrestrictions"
+                               id="genderrestrictions-@((int)item)"
+                               @(Model.GenderRestriction == item ? " checked=\"checked\" " : "")
                                value="@((int)item)" />
                         <label for="genderrestrictions-@((int)item)" class="margin-h-10">
                             @item.ToString().SplitByUpperCase()
@@ -50,11 +50,17 @@
         </div>
 
         @{
-        Html.RenderPartial(
-            "~/Views/Shared/_GradeRestrictions.cshtml",
-            null,
-            new ViewDataDictionary() { { "minGradeLevelId", Model.GradeLevelStart }, { "MaxGradeLevelId", Model.GradeLevelEnd }, { "grades", grades } }
-            );
+            Html.RenderPartial(
+                "~/Views/Shared/_RestrictBySelection.cshtml",
+                null,
+                new ViewDataDictionary() {
+                    { "minGradeLevelId", Model.GradeLevelStart },
+                    { "MaxGradeLevelId", Model.GradeLevelEnd },
+                    { "grades", grades },
+                    { "ageStart", Model.AgeStart },
+                    { "ageEnd", Model.AgeEnd } ,
+                    { "restrictbygradeorage", Model.RestrictByGradeOrAge() } }
+                );
         }
 
     </div>
