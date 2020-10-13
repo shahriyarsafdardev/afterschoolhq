@@ -21,6 +21,20 @@ namespace AfterSchoolLibrary.Migrations
                         dc: adc));
 
                     //TODO: To see if a text message was sent for a registrant, you will need to check the TwilioSMS table to see if a record exists there and if the SMS was successful.
+                    var dq = BaseObject.get_DatabaseQuery(ActivityMessageRegistrant.ObjectMap);
+                    dq.Connection = adc;
+
+                    var sql = $@"
+                        update ActivityMessageRegistrant 
+                        set SentText = 1 
+                        where Id In (
+	                        select distinct amr.ID from ActivityMessageRegistrant as amr 
+	                        inner join TwilioSMS as tsms on tsms.ActivityMessageId = amr.ActivityMessageId and tsms.RegistrantId = amr.RegistrantId and tsms.TwilioStatus = 'delivered' --need to check this
+                        )";
+
+                    dq.ExecuteSelect(sql, amsgs);
+
+                    // Linq version of same query
                     //var twlioSms = TwilioSMS.Load(
                     //    criterias: new Hashtable() { { "IsMaster", true } },
                     //    msgs: amsgs,
