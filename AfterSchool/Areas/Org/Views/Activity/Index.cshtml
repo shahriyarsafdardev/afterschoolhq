@@ -5,7 +5,10 @@
     var needToUpgrade = (bool)ViewBag.NeedToUpgrade;
     var hasArchivedActivities = (bool)ViewBag.HasArchivedActivities;
     var activityType = (ActivityType)ViewBag.ActivityType;
-    var managePermissionSlips = SessionVariables.AccountPackage.HasFeature(FeatureType.ManagePermissionSlips);
+    var accountPackage = SessionVariables.AccountPackage;
+    var managePermissionSlips = accountPackage.HasFeature(FeatureType.ManagePermissionSlips);
+    var maxPermissionSlipCount = accountPackage.IsNotEmpty() ? (int)accountPackage.GetFeature(FeatureType.ManagePermissionSlips).Max.Value : 0;
+    var showPermissionSlipFields = ViewBag.PagingModel?.TotalCount >= maxPermissionSlipCount ? false : true;
 }
 
 @{Html.RenderPartial("OrgAccountHeader", SessionVariables.CurrentAccount.ID.ToString());}
@@ -19,7 +22,7 @@
             <div class="pull-right">
                 @if (activityType == ActivityType.PermissionSlip)
                 {
-                    if (managePermissionSlips)
+                    if (managePermissionSlips && showPermissionSlipFields)
                     {
                         <a href="@Url.Action("editsetup", "activity", new { isnew = 1, type = (int)activityType })" class="btn btn-primary">
                             <i class="icon icon-left s7-plus"></i>
