@@ -14,7 +14,7 @@ namespace AfterSchoolLibrary.Models
     public class Database
     {
 		#region "ClassGenerator"
-		public static DatabaseCredentials ProductionCredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }		
+		public static DatabaseCredentials ProductionCredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }
 		public static DatabaseCredentials LocalCredentials { get { return new DatabaseCredentials("localhost", "AfterSchool", "AfterSchoolUser", "Nj8Ed$wpLfJ"); } }
 		public static DatabaseCredentials CICredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }
 		public static DatabaseCredentials QACredentials { get { return new DatabaseCredentials(ConfigurationManager.AppSettings["DB_SERVER"], ConfigurationManager.AppSettings["DB_NAME"], ConfigurationManager.AppSettings["DB_USER"], ConfigurationManager.AppSettings["DB_PASSWORD"]); } }
@@ -214,6 +214,8 @@ namespace AfterSchoolLibrary.Models
 			ActivityInstance.Update(new Hashtable(){{"Day",0}}, new Hashtable(){{"Day", DBNull.Value}}, ActivityInstance.ObjectMap, dc);
 			ActivityInstance.Update(new Hashtable(){{"InstanceTypeId",0}}, new Hashtable(){{"InstanceTypeId", DBNull.Value}}, ActivityInstance.ObjectMap, dc);
 			ActivityMessage.Update(new Hashtable(){{"SendToStaff",false}}, new Hashtable(){{"SendToStaff", DBNull.Value}}, ActivityMessage.ObjectMap, dc);
+			ActivityMessageRegistrant.Update(new Hashtable(){{"SentText",false}}, new Hashtable(){{"SentText", DBNull.Value}}, ActivityMessageRegistrant.ObjectMap, dc);
+			ActivityMessageRegistrant.Update(new Hashtable(){{"SentEmail",false}}, new Hashtable(){{"SentEmail", DBNull.Value}}, ActivityMessageRegistrant.ObjectMap, dc);
 			Account.Update(new Hashtable(){{"IsAdminAccount",false}}, new Hashtable(){{"IsAdminAccount", DBNull.Value}}, Account.ObjectMap, dc);
 			Account.Update(new Hashtable(){{"IsActive",false}}, new Hashtable(){{"IsActive", DBNull.Value}}, Account.ObjectMap, dc);
 			Account.Update(new Hashtable(){{"IsAfterSchool",false}}, new Hashtable(){{"IsAfterSchool", DBNull.Value}}, Account.ObjectMap, dc);
