@@ -554,7 +554,7 @@ namespace AfterSchoolLibrary.Models
 
             var registrantDOB = registrant.GetAnswer(QuestionDataType.RegistrantDateOfBirth, msgs, dc)?.Text.ToDateTime();
 
-            if (registrantDOB.IsEmpty())
+            if (!registrantDOB.HasValue)
             {
                 msgs.Add("Missing registrant date of birth", MessageType.UserError);
                 return false;
