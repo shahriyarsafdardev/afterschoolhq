@@ -230,11 +230,11 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "type", type },
                     { "inviteonly", inviteonly.IsBoolean().ToString() },
                     { "minseatsrequired", minseatsrequired },
-                    { "gradestart", defaultActivity.GradeLevelStart },
-                    { "gradeend", defaultActivity.GradeLevelEnd },
-                    { "genderrestrictions", (int)defaultActivity.GenderRestriction },
-                    { "agestart", defaultActivity.AgeStart },
-                    { "ageend", defaultActivity.AgeEnd }
+                    { "gradestart", activity.IsNotEmpty() ? activity.GradeLevelStart : defaultActivity.GradeLevelStart },
+                    { "gradeend", activity.IsNotEmpty() ? activity.GradeLevelEnd :defaultActivity.GradeLevelEnd },
+                    { "genderrestrictions", activity.IsNotEmpty() ? (int)activity.GenderRestriction :(int)defaultActivity.GenderRestriction },
+                    { "agestart", activity.IsNotEmpty() ? activity.AgeStart : defaultActivity.AgeStart },
+                    { "ageend",activity.IsNotEmpty() ? activity.AgeEnd : defaultActivity.AgeEnd }
                 };
 
                 if (activity.IsNotEmpty())

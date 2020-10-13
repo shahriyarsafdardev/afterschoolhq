@@ -111,8 +111,6 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "DefaultLocationId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "MinGradeLevelOffered", System.Data.SqlDbType.Int);
 				_dp.Add(className, "MaxGradeLevelOffered", System.Data.SqlDbType.Int);
-				_dp.Add(className, "AgeStart", System.Data.SqlDbType.Int);
-				_dp.Add(className, "AgeEnd", System.Data.SqlDbType.Int);
 				_dp.Add(className, "InviteCodeToShare", System.Data.SqlDbType.UniqueIdentifier);
 				_dp.Add(className, "CreditCardFeesPaidBy", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ConvenienceFeesPaidBy", System.Data.SqlDbType.Int);
@@ -279,14 +277,6 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["MaxGradeLevelOffered"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["AgeStart"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["AgeEnd"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
