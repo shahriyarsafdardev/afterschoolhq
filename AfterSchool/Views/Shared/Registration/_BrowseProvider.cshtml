@@ -8,7 +8,7 @@
     var gradeLevelEnd = Model.GetGradeLevelEnd();
     var ageStart = Model.GetAgeStart();
     var ageEnd = Model.GetAgeEnd();
-    var restrictByGradeOrAge = Model.RestrictByGradeOrAge();
+    var restrictByGrade = Model.RestrictByGrade();
     var photos = Model.GetPhotos();
     var properties = Model.GetProperties(AccountPropertyType.Classifications);
 
@@ -73,7 +73,7 @@
             <div class="" style="position: absolute; top: 10px; left: 15px; overflow: hidden; height: 20px;">
 
                 <div class="pull-left margin-l-5">
-                    @if (restrictByGradeOrAge)
+                    @if (restrictByGrade)
                     {
                         <span class="badge badge-gray profile-badge text-small">
                             @gradeLevelStart.Abbreviation - @gradeLevelEnd.Abbreviation Grade

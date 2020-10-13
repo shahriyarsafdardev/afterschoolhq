@@ -45,8 +45,8 @@
      maxgrade="@Model.MaxGradeId"
      mingradetext="@(Model.GetMinGradeLevel()?.Name)"
      maxgradetext="@(Model.GetMaxGradeLevel()?.Name)"
-     agestart="@Model.AgeStart?"
-     ageend="@Model.AgeEnd?"
+     agestart="@Model.AgeStart"
+     ageend="@Model.AgeEnd"
      hasseatsremaining="@Model.HasSeatsAvailable().ToString().ToLower()"
      haswaitinglistremaining="@Model.HasWaitingListSeatsAvailable().ToString().ToLower()"
      days="@ParticipationObjectUI.PrintDaysOfWeekList(Model)"
@@ -125,16 +125,17 @@
                         </span>
                         <br />
                     }
-                    @if (Model.AgeStart.IsNotEmpty() && Model.AgeEnd.IsNotEmpty())
+                    @if (Model.RestrictByGrade())
                     {
                         <span>
-                            Ages: @ParticipationObjectUI.PrintGradeLevels(Model);
+                            Grades: @ParticipationObjectUI.PrintGradeLevels(Model) Grade
                         </span>
+
                     }
                     else
                     {
                         <span>
-                            Grades: @ParticipationObjectUI.PrintGradeLevels(Model) Grade
+                            Ages: @ParticipationObjectUI.PrintGradeLevels(Model);
                         </span>
                     }
 

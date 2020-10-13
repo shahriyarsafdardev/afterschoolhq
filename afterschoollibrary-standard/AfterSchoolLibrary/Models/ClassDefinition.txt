@@ -355,8 +355,6 @@ property: AccountTypeId, AccountType, Int
 property: DefaultLocationId, int?, Int
 property: MinGradeLevelOffered, int?, Int
 property: MaxGradeLevelOffered, int?, Int
-property: AgeStart, int?, Int
-property: AgeEnd, int?, Int
 property: InviteCodeToShare, Guid, UniqueIdentifier
 property: CreditCardFeesPaidBy, FeesPaidByType, Int
 property: ConvenienceFeesPaidBy, FeesPaidByType, Int
