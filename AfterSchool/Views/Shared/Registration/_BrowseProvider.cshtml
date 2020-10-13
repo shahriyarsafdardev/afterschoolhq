@@ -6,6 +6,9 @@
     var location = Model.GetLocation();
     var gradeLevelStart = Model.GetGradeLevelStart();
     var gradeLevelEnd = Model.GetGradeLevelEnd();
+    var ageStart = Model.GetAgeStart();
+    var ageEnd = Model.GetAgeEnd();
+    var restrictByGradeOrAge = Model.RestrictByGradeOrAge();
     var photos = Model.GetPhotos();
     var properties = Model.GetProperties(AccountPropertyType.Classifications);
 
@@ -70,9 +73,19 @@
             <div class="" style="position: absolute; top: 10px; left: 15px; overflow: hidden; height: 20px;">
 
                 <div class="pull-left margin-l-5">
-                    <span class="badge badge-gray profile-badge text-small">
-                        @gradeLevelStart.Abbreviation - @gradeLevelEnd.Abbreviation Grade
-                    </span>
+                    @if (restrictByGradeOrAge)
+                    {
+                        <span class="badge badge-gray profile-badge text-small">
+                            @gradeLevelStart.Abbreviation - @gradeLevelEnd.Abbreviation Grade
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-gray profile-badge text-small">
+                            Ages @ageStart.ToString() - @ageEnd.ToString()
+                        </span>
+                    }
+
                 </div>
 
                 @foreach (var property in properties)

@@ -37,7 +37,8 @@ namespace AfterSchool.Controllers
                 var activities = new List<string>();
 
                 participationObjects.ForEach(participationObject => {
-                    if (!participationObject.IsStudentGradeInRange(registrant, msgs))
+                    // why is there a '!' for IsStudentGradeInRange? Im not sure if i should have the same thing on IsStudentAgeInRange
+                    if (!participationObject.IsStudentGradeInRange(registrant, msgs)  && participationObject.IsStudentAgeInRange(registrant, msgs))
                         activities.Add($"{participationObject.Name}: {participationObject.GetMinGradeLevel(msgs).Abbreviation} - {participationObject.GetMaxGradeLevel(msgs).Abbreviation}");
                 });
 

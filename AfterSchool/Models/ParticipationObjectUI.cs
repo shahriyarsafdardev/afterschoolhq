@@ -11,6 +11,11 @@ namespace AfterSchool.Models
     {
         public static string PrintGradeLevels(ParticipationObject participationObject)
         {
+            if (participationObject.AgeStart.IsNotEmpty() && participationObject.AgeEnd.IsNotEmpty())
+            {
+                return $"{participationObject.AgeStart.Value} - {participationObject.AgeEnd.Value}";
+            }
+
             if (participationObject.MinGradeId.HasValue && participationObject.MaxGradeId.HasValue)
                 return $"{participationObject.GetMinGradeLevel().Name} - {participationObject.GetMaxGradeLevel().Name}";
 
