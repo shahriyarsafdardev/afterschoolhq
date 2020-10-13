@@ -41,6 +41,7 @@
                                     <thead>
                                         <tr>
                                             <th>Package</th>
+                                            <th></th>
                                             <th class="text-center">Monthly Plan</th>
                                             <th class="text-center">Annual Plan (2 months free)</th>
                                         </tr>
@@ -51,6 +52,7 @@
                                         {
                                             var monthlySelected = "";
                                             var yearlySelected = "";
+                                            var current = "";
 
                                             if (p.IsNotEmpty() && currentPackage.IsNotEmpty() && p.ID == currentPackage.PackageId)
                                             {
@@ -62,11 +64,17 @@
                                                 {
                                                     yearlySelected = " checked=\"checked\" ";
                                                 }
+
+                                                current = "Current Package";
                                             }
 
                                             <tr>
                                                 <td>
                                                     <a href="#" onclick="return loadFeatures('@p.ID', '@p.Name')"> @p.Name </a>
+                                                </td>
+
+                                                <td>
+                                                    <span>@current</span>
                                                 </td>
 
                                                 <td class="text-center padding-zero">
@@ -232,7 +240,7 @@
                 }
 
                 showLoader();
-                updatePurchaseButton(true);                
+                updatePurchaseButton(true);
 
                 stripe.createToken(card, { name: name }).then(function (result) {
                     hideLoader();
@@ -253,13 +261,33 @@
             });
         });
 
+        updatePurchaseButton(true);
+
         function updatePurchaseButton(purchasing) {
+            var disablePurchase = false;
+
+            $('input[id^=selectedpackage]').each(function () {
+                var firstDashIndex = this.id.indexOf('-');
+                var secondDashIndex = this.id.indexOf('-', firstDashIndex + 1);
+                var id = this.id.substring(firstDashIndex + 1, secondDashIndex);
+
+                if ( parseInt(id) === @(currentPackage.PackageId.Value) ) {
+                    disablePurchase = true;
+                    console.log(disablePurchase);
+                }
+            });
+
             if (purchasing) {
                 $('#newbilling-button').html('Purchasing...');
                 $('#newbilling-button').prop('disabled', true);
             } else {
                 $('#newbilling-button').html('Purchase &raquo;');
                 $('#newbilling-button').prop('disabled', false);
+            }
+
+            if (disablePurchase) {
+                $('#newbilling-button').html('Current Package Selected &raquo', true);
+                $('#newbilling-button').prop('disabled', true);
             }
         }
 
