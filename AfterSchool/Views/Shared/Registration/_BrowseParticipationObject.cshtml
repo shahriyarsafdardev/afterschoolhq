@@ -68,9 +68,18 @@
                     @ParticipationObjectUI.PrintDaysOfWeekOrStartDate(Model)
                 </span>
                 &bull;
-                <span class="badge badge-light-gray">
-                    @ParticipationObjectUI.PrintGradeLevels(Model) Grade
-                </span>
+                @if (Model.AgeStart.IsNotEmpty() && Model.AgeEnd.IsNotEmpty())
+                {
+                    <span>
+                        Ages: @ParticipationObjectUI.PrintGradeLevels(Model);
+                    </span>
+                }
+                else
+                {
+                    <span>
+                        Grades: @ParticipationObjectUI.PrintGradeLevels(Model)
+                    </span>
+                }
                 &bull;
                 <span class="badge badge-light-gray">
                     @ParticipationObjectUI.PrintGenderRestrictions(Model)
