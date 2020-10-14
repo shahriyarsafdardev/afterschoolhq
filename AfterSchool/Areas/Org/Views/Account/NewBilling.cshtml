@@ -202,6 +202,10 @@
 
     <script type="text/javascript">
 
+        var isCurrentPackage = true;
+        var currentPackage = '@((int)currentPackage.BillingPeriodTypeId)_@(currentPackage.PackageUid)';
+        console.log(currentPackage);
+
         PageEvent.add(PageEvent.AFTER_INIT, function () {
 
             var stripe = Stripe('@AfterSchoolLibrary.Billing.StripeHelper.PublishableKey');
@@ -264,30 +268,15 @@
         updatePurchaseButton(true);
 
         function updatePurchaseButton(purchasing) {
-            var disablePurchase = false;
-
-            $('input[id^=selectedpackage]').each(function () {
-                var firstDashIndex = this.id.indexOf('-');
-                var secondDashIndex = this.id.indexOf('-', firstDashIndex + 1);
-                var id = this.id.substring(firstDashIndex + 1, secondDashIndex);
-
-                if ( parseInt(id) === @(currentPackage.PackageId.Value) ) {
-                    disablePurchase = true;
-                    console.log(disablePurchase);
-                }
-            });
-
-            if (purchasing) {
+            if (isCurrentPackage) {
+                $('#newbilling-button').html('Current Package Selected &raquo', true);
+                $('#newbilling-button').prop('disabled', true);
+            } else if (purchasing) {
                 $('#newbilling-button').html('Purchasing...');
                 $('#newbilling-button').prop('disabled', true);
             } else {
                 $('#newbilling-button').html('Purchase &raquo;');
                 $('#newbilling-button').prop('disabled', false);
-            }
-
-            if (disablePurchase) {
-                $('#newbilling-button').html('Current Package Selected &raquo', true);
-                $('#newbilling-button').prop('disabled', true);
             }
         }
 
@@ -300,6 +289,17 @@
 
             form.submit();
         }
+
+        $('input[type=radio][name=selectedpackage]').change(function () {
+            var currentVal = $(this).val();
+
+            isCurrentPackage = true;
+            if (currentVal != currentPackage) {
+                isCurrentPackage = false;
+            }
+
+            updatePurchaseButton(false);
+        });
 
         function loadFeatures(packageId, packageName) {
             showLoader();
