@@ -24,7 +24,7 @@
         background-color: #00c5a3;
         min-height: 160px;
         width: 100%;
-        bottom: 10px;
+        bottom: 0;
         color: white;
         display: none;
     }

@@ -3,25 +3,6 @@
     min-height: 100px;
 }
 
-.span-close-upgrade-my-plan {
-    width: 20px;
-    cursor: pointer;
-    font-size: 20px;
-    font-weight: 800;
-    right: 0;
-    position: fixed;
-}
-
-.span-close-upgrade-my-plan-mobile {
-    width: 20px;
-    cursor: pointer;
-    font-size: 20px;
-    font-weight: 800;
-    top: 5px;
-    right: 5px;
-    position: absolute;
-}
-
 .overlay {
     position: absolute;
     top: 0;
@@ -30,6 +11,16 @@
     opacity: 0.5;
     height: 100%;
     pointer-events: none;
+}
+
+.span-upgrade-modal-close {
+    width: 20px;
+    cursor: pointer;
+    font-size: 16px;
+    right: 0;
+    position: absolute;
+    top: 5px;
+    color: black;
 }
 
 .main-content-new {
