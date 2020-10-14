@@ -203,8 +203,7 @@
     <script type="text/javascript">
 
         var isCurrentPackage = true;
-        var currentPackage = '@((int)currentPackage.BillingPeriodTypeId)_@(currentPackage.PackageUid)';
-        console.log(currentPackage);
+        var currentPackage = '@((int)currentPackage.BillingPeriodTypeId)_@(currentPackage.PackageUid)';        
 
         PageEvent.add(PageEvent.AFTER_INIT, function () {
 
