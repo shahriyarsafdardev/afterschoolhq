@@ -37,8 +37,11 @@ namespace AfterSchool.Controllers
                 var ineligibleActivities = new List<string>();
 
                 participationObjects.ForEach(participationObject => {
-                    if (!participationObject.IsStudentGradeInRange(registrant, msgs)  && !participationObject.IsStudentAgeInRange(registrant, msgs))
-                        ineligibleActivities.Add($"{participationObject.Name}: {participationObject.GetMinGradeLevel(msgs).Abbreviation} - {participationObject.GetMaxGradeLevel(msgs).Abbreviation}");
+                    if ( participationObject.RestrictByGrade() && !participationObject.IsStudentGradeInRange(registrant, msgs))
+                        ineligibleActivities.Add($"Grades {participationObject.Name}: {participationObject.GetMinGradeLevel(msgs).Abbreviation} - {participationObject.GetMaxGradeLevel(msgs).Abbreviation}");
+
+                    if (!participationObject.RestrictByGrade() && !participationObject.IsStudentAgeInRange(registrant, msgs))
+                        ineligibleActivities.Add($"Ages {participationObject.Name}: {participationObject.AgeStart} - {participationObject.AgeEnd}");
                 });
 
                 if (msgs.HasNoErrors())

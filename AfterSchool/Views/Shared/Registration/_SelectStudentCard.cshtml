@@ -79,9 +79,14 @@
             btnText = "Update Profile &amp; Enroll";
             btnUrl = registerUrl;
         }
-        else if (!participationObject.IsStudentGradeInRange(Model))
+        else if(participationObject.RestrictByGrade() && !participationObject.IsStudentGradeInRange(Model))
         {
             btnText = "Ineligible - Grade";
+            disabledText = " disabled=\"disabled\" ";
+            btnUrl = "#";
+        } else if(!participationObject.RestrictByGrade() && !participationObject.IsStudentAgeInRange(Model))
+        {
+            btnText = "Ineligible - Age";
             disabledText = " disabled=\"disabled\" ";
             btnUrl = "#";
         }

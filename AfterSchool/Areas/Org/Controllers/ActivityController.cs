@@ -205,7 +205,6 @@ namespace AfterSchool.Areas.Org.Controllers
             activity = Activity.LoadByUid(id.ToGuid());
             defaultActivity = currentAccount.GetDefaultNewActivity();
 
-
             if (name.IsEmpty())
                 msgs.Add("Activity name is required.", MessageType.UserError);
             else if (name.Length > 75)
@@ -230,9 +229,9 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "type", type },
                     { "inviteonly", inviteonly.IsBoolean().ToString() },
                     { "minseatsrequired", minseatsrequired },
-                    { "gradestart", activity.IsNotEmpty() ? activity.GradeLevelStart : defaultActivity.GradeLevelStart },
+                    { "gradestart", activity.IsNotEmpty()  ? activity.GradeLevelStart : defaultActivity.GradeLevelStart },
                     { "gradeend", activity.IsNotEmpty() ? activity.GradeLevelEnd :defaultActivity.GradeLevelEnd },
-                    { "genderrestrictions", activity.IsNotEmpty() ? (int)activity.GenderRestriction :(int)defaultActivity.GenderRestriction },
+                    { "genderrestrictions", activity.IsNotEmpty() && activity.GenderRestriction.IsNotEmpty() ? (int)activity.GenderRestriction :(int)defaultActivity.GenderRestriction },
                     { "agestart", activity.IsNotEmpty() ? activity.AgeStart : defaultActivity.AgeStart },
                     { "ageend",activity.IsNotEmpty() ? activity.AgeEnd : defaultActivity.AgeEnd }
                 };
@@ -367,26 +366,15 @@ namespace AfterSchool.Areas.Org.Controllers
             activity = Activity.LoadByUid(id.ToGuid());
             if (activity.IsNotEmpty())
             {
-                var gradeIds = new List<int>();
-                var grades = GradeLevel.Load();
-
-                foreach (var grade in grades)
-                {
-                    if (Request["grade-" + grade.ID.ToString()].IsNotEmpty())
-                    {
-                        gradeIds.Add(grade.ID.Value);
-                    }
-                }
 
                 var values = new Dictionary<string, object>()
                 {
                     { "alloworganization", alloworganization.IfBlank("0")},
-                    { "agestart", agerestrictions.IsNumber() ? agestart : "-1"},
-                    { "ageend", agerestrictions.IsNumber() ? ageend : "-1"},
-                    { "gradestart", graderestrictions.IsNumber() ? mingrade : "-1"},
-                    { "gradeend", graderestrictions.IsNumber() ? maxgrade : "-1"},
+                    { "agestart", agerestrictions.IsNumber() ? agestart : ""},
+                    { "ageend", agerestrictions.IsNumber() ? ageend : ""},
+                    { "gradestart", mingrade.IsNumber() ? mingrade : ""},
+                    { "gradeend", maxgrade.IsNumber() ? maxgrade : ""},
                     { "genderrestrictions", genderrestrictions},
-                    { "gradeIds", gradeIds.ToStrings().ToStringList() },
                     { "requiresparentalconsent", requiresparentalconsent.IfBlank("0") }
                 };
 
