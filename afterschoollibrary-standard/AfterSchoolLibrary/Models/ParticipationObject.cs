@@ -564,9 +564,9 @@ namespace AfterSchoolLibrary.Models
 
             if (registrantAge < AgeStart)
                 return false;
-
+                
             if (registrantAge > AgeEnd)
-                return false;
+                return false;       
 
             return true;
         }

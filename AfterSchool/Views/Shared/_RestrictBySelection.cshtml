@@ -6,6 +6,12 @@
 
     var agestart = (int?)ViewData["agestart"];
     var ageend = (int?)ViewData["ageend"];
+
+    if(!minGradeLevelId.HasValue && !minGradeLevelId.HasValue && !agestart.HasValue && !ageend.HasValue)
+    {
+        minGradeLevelId = grades.FirstOrDefault().ID.Value;
+        maxGradeLevelId = grades.FirstOrDefault().ID.Value;
+    }
 }
 
     <div class="form-group">
@@ -14,11 +20,11 @@
         </label>
         <div class="col-lg-9">
             <div class="am-radio inline">
-                <input type="radio" id="restrictby-grade" name="restrictby" class="form-control" value="1" @(restrictbygrade ?  "checked=\"checked\"" : "")   />
+                <input type="radio" id="restrictby-grade" name="restrictbygrade" class="form-control" value="1" @(restrictbygrade ?  "checked=\"checked\"" : "")   />
                 <label for="restrictby-grade">Grade</label>
             </div>
             <div class="am-radio inline">
-                <input type="radio" id="restrictby-age" name="restrictby" class="form-control" value="0"  @(!restrictbygrade ?  "checked=\"checked\"" : "")  />
+                <input type="radio" id="restrictby-age" name="restrictbygrade" class="form-control" value="0"  @(!restrictbygrade ?  "checked=\"checked\"" : "")  />
                 <label for="restrictby-age">Age</label>
             </div>
         </div>

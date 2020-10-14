@@ -122,7 +122,7 @@ else
                     {
                         <th class="text-center">Grades</th>
                     }
-                    <!--<th class="text-center">Ages</th>-->
+                    <th class="text-center">Ages</th>
                     <th class="text-center"># Reserved</th>
                     <th></th>
                 </tr>
@@ -246,6 +246,34 @@ else
                                         {
                                             <span>
                                                 @activity.GetStartingGradeLevel().Name - @activity.GetEndingGradeLevel().Name
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span>-</span>
+                                        }
+                                    }
+                                </td>
+                                 <td class="text-center">
+                                    @if (showLink)
+                                    {
+                                        if (activity.AgeStart.HasValue && activity.AgeEnd.HasValue)
+                                        {
+                                            <a href="@Url.Action("editrestrictions", "activity", new { id = activity.Uid })">
+                                                @activity.AgeStart - @activity.AgeEnd
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <a href="@Url.Action("editrestrictions", "activity", new { id = activity.Uid })">-</a>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (activity.AgeStart.HasValue && activity.AgeEnd.HasValue)
+                                        {
+                                            <span>
+                                                @activity.AgeStart - @activity.AgeEnd
                                             </span>
                                         }
                                         else
