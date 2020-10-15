@@ -234,7 +234,7 @@ namespace AfterSchoolLibrary.Services
                 msgs.Add("Error sending Messages", MessageType.Error);
         }
 
-        public static ActivityMessageRegistrant AddRegistrant(this ActivityMessage activityMessage, int registrantId, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static ActivityMessageRegistrant AddRegistrant(this ActivityMessage activityMessage, int registrantId, int loggedInUserId, bool sentText = false, bool sentEmail = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -243,7 +243,9 @@ namespace AfterSchoolLibrary.Services
                 RegistrantId = registrantId,
                 ActivityMessageId = activityMessage.ID,
                 CreateDate = DateTime.UtcNow,
-                CreatedBy = loggedInUserId
+                CreatedBy = loggedInUserId,
+                SentText = sentText,
+                SentEmail = sentEmail,
             };
 
             msgs.AddRange(amr.Save(dc));

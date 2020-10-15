@@ -1773,7 +1773,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             // If the user does have the messages feature, and the user tries to send a message, validate the user hasn't used up their quota of emails, and/or text messages, if they have exceeded their quota, show the upgrade.
             // If the user has hit or exceeded the email quota then show the upgrade modal
-            var amr = ActivityMessageRegistrant.LoadByRegistrantId(SessionVariables.CurrentUser.ID.Value).Where(m => m.CreateDate > DateTime.Now.AddMonths(-1).Date);
+            var amr = ActivityMessageRegistrant.LoadByCreatedBy(SessionVariables.CurrentUser.ID.Value).Where(m => m.CreateDate > DateTime.Now.AddMonths(-1).Date);
             ViewBag.EmailCount = amr.Count(m => m.SentEmail);
             ViewBag.TextCount = amr.Count(m => m.SentText);
 
@@ -1801,15 +1801,33 @@ namespace AfterSchool.Areas.Org.Controllers
                                         .Select(x => x.ID.Value)
                                         .ToList();
 
-                am = activity.AddMessage(
-                        subject, 
-                        body, 
-                        registrantIds, 
-                        sendtostaff.IsBoolean(), 
-                        SessionVariables.CurrentUser.ID.Value, 
-                        msgs);
+                // get current limit
+                var accountPackage = SessionVariables.AccountPackage;
+                var maxEmailCount = accountPackage.HasFeature(FeatureType.EmailMessaging) ? (int)accountPackage.GetFeature(FeatureType.EmailMessaging).Max.Value : 0;
                 
-                BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, SessionVariables.CurrentUser.ID.Value, null, null));
+                // get current quota
+                var amr = ActivityMessageRegistrant.LoadByCreatedBy(SessionVariables.CurrentUser.ID.Value).Where(m => m.CreateDate > DateTime.Now.AddMonths(-1).Date);
+                var usedEmailQuota = amr.Count(m => m.SentEmail);
+
+                //add additional registransts
+                usedEmailQuota = usedEmailQuota + registrantIds.Count;
+
+                // if exceeds, return error
+                if (usedEmailQuota >= maxEmailCount)
+                    msgs.Add("Email quota exceeded for current user.", MessageType.UserError);
+
+                if (msgs.HasNoErrors())
+                {                    
+                    am = activity.AddMessage(
+                        subject,
+                        body,
+                        registrantIds,
+                        sendtostaff.IsBoolean(),
+                        SessionVariables.CurrentUser.ID.Value,
+                        msgs);
+
+                    BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, SessionVariables.CurrentUser.ID.Value, null, null));
+                }
             }
 
             ViewBag.Messages = msgs;
