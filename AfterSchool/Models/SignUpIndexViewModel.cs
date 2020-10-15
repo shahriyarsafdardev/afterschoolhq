@@ -20,6 +20,6 @@ namespace AfterSchool.Models
         public string InviteCodeToShare { get; set; }
         public bool IsClaimProcess { get; set; }
         public Account Account { get; set; }
-
+        public bool IsRequestOnlyAccess { get; set; }
     }
 }

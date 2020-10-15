@@ -19,7 +19,7 @@ namespace AfterSchool.Controllers
     public class SignUpController : BaseController
     {
         [HttpGet]
-        public ActionResult Index(string invite)
+        public ActionResult Index(string invite, bool isrequestonlyaccess = false)
         {
             if (invite.IsBlank())
             {
@@ -28,6 +28,7 @@ namespace AfterSchool.Controllers
 
             var signupIndexVM = new SignUpIndexViewModel()
             {
+                IsRequestOnlyAccess = isrequestonlyaccess,
                 InviteCodeToShare = invite
             };
 
@@ -92,14 +93,23 @@ namespace AfterSchool.Controllers
                             dc: adc);
 
                         account = user.AddNewAccount(
-                            orgName: model.OrgName,
-                            accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
-                            loggedInUser: user,
-                            msgs: amsgs,
-                            dc: adc);
+                               orgName: model.OrgName,
+                               accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
+                               loggedInUser: user,
+                               msgs: amsgs,
+                               dc: adc);
 
-                        if (invitingAccount.IsNotEmpty() && account.IsNotEmpty())
-                            invitingAccount.ApproveAccessToAccount(account, user, amsgs, adc);
+                        if (invitingAccount.IsNotEmpty())
+                        {
+                            if (model.IsRequestOnlyAccess)
+                            {
+                                account.RequestAccessToAccount(invitingAccount, HostPermissionType.ApproveOnly, user, msgs, adc);
+                            }
+                            else
+                            {
+                                invitingAccount.ApproveAccessToAccount(account, user, amsgs, adc);
+                            }
+                        }
 
                     },
                     onSuccess: (SystemMessages smsgs) =>
@@ -107,16 +117,13 @@ namespace AfterSchool.Controllers
                         msgs.AddRange(smsgs);
                         LoadSessionInfo(user, account, msgs: msgs);
 
-                        var userId = user.ID.Value;
-                        var accountId = account.ID.Value;
-
                         if (user.IsNotEmpty() && account.IsNotEmpty())
                         {
                             SendGridHelper.AddOrUpdateContact(account, user, msgs);
                         }                        
 
-                        BackgroundJob.Enqueue(() => WebUserService.SendVerificationEmail(userId));
-                        BackgroundJob.Enqueue(() => AccountService.SendWelcomeEmailPurchase(accountId));
+                        BackgroundJob.Enqueue(() => WebUserService.SendVerificationEmail(user, account.IsAfterSchool));
+                        BackgroundJob.Enqueue(() => WebUserService.SendWelcomePurchase(user.FirstName, user.Email, account.IsAfterSchool));
                     },
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                     onException: (SystemMessages emsgs) => msgs.AddRange(emsgs)
@@ -129,6 +136,13 @@ namespace AfterSchool.Controllers
             ViewBag.Messages = msgs;
 
             return View(model);
+        }
+
+        public ActionResult McCoyRegistration()
+        {
+            //TODO: need to review with darye on how to fetch this code, via using key in config or db call.
+            var mcCoyCodeToShare = new Guid("8BBDC665-8B16-4034-BAD4-C7FCC457BED9");
+            return RedirectToAction("Welcome", new { invite = mcCoyCodeToShare, isrequestonlyaccess = true });
         }
 
         [HttpGet]
@@ -851,9 +865,13 @@ namespace AfterSchool.Controllers
         }
 
         [HttpGet]
-        public ActionResult Welcome()
+        public ActionResult Welcome(string invite, string isrequestonlyaccess)
         {
-            var model = new SignUpIndexViewModel();
+            var model = new SignUpIndexViewModel()
+            {
+                IsRequestOnlyAccess = isrequestonlyaccess.IsBoolean() ? isrequestonlyaccess.ToBoolean() : false,
+                InviteCodeToShare = invite.IsNotEmpty() ? invite : ""
+            };
             return View(model);
         }
 
