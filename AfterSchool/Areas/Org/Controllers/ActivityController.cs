@@ -256,7 +256,16 @@ namespace AfterSchool.Areas.Org.Controllers
                         var defaultForm = currentAccount.GetDefaultForm();
                         var newForm = defaultForm.Copy(currentUser.ID.Value, currentAccount.ID.Value, (name + " form").MaxChars(100, "..."), msgs);
                         if (msgs.HasNoErrors())
-                            values.Add("form", newForm.ID.Value.ToString());
+                        {
+                            if (values.Any(m => m.Key == "form"))
+                            {
+                                values["form"] = newForm.ID.Value.ToString();
+                            }
+                            else
+                            {
+                                values.Add("form", newForm.ID.Value.ToString());
+                            }
+                        }
                     }
 
                     values.Add("registrationthankyouemail", "Thank you for registering.");
