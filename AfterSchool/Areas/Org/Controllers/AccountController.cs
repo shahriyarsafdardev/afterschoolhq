@@ -1340,6 +1340,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
 
             Package package = null;
+            AccountPackage newlyAddedPackage = null;
             Stripe.Customer customer = null;
             var currentAccount = SessionVariables.CurrentAccount;
             var isFromTrialAccount = SessionVariables.AccountPackage?.IsDuringTrial ?? false;
@@ -1359,7 +1360,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     currentAccount.CreateStripeSourceFromToken(stripetoken, customer, msgs);
 
                     if (amsgs.HasNoErrors())
-                        currentAccount.AddPackage(package.ID.Value, billingPeriod, SessionVariables.LoggedInUser, amsgs, adc);
+                        newlyAddedPackage = currentAccount.AddPackage(package.ID.Value, billingPeriod, SessionVariables.LoggedInUser, amsgs, adc);                      
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {
@@ -1367,8 +1368,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
                     msgs.Clear(MessageType.Success);
                     msgs.Add(string.Format("The '{0} Package' has been added to your account", package.Name), MessageType.Success);
-
-                    SessionVariables.AccountPackage = currentAccount.GetActiveAccountPackage(smsgs);
 
                     if (isFromTrialAccount)
                         SessionVariables.CurrentAccount.SendWelcomeEmailPurchase(currentAccount.GetAccountOwner());
@@ -1380,7 +1379,10 @@ namespace AfterSchool.Areas.Org.Controllers
             );
 
             ViewBag.Messages = msgs;
-
+            
+            if (newlyAddedPackage.IsNotEmpty())
+                SessionVariables.AccountPackage = AccountPackage.LoadByUid(newlyAddedPackage.Uid);
+            
             if (msgs.HasNoErrors())
             {
                 ViewBag.BillingHistory = currentAccount.GetStripeBillingHistory();
