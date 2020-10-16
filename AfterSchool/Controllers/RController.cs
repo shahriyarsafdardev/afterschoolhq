@@ -70,6 +70,8 @@ namespace AfterSchool.Controllers
             ViewBag.Photos = photos;
             ViewBag.GradeLevelStart = profile.GetGradeLevelStart(msgs);
             ViewBag.GradeLevelEnd = profile.GetGradeLevelEnd(msgs);
+            ViewBag.AgeStart = profile.GetAgeStart();
+            ViewBag.AgeEnd = profile.GetAgeEnd();
             ViewBag.RestrictByGrade = profile.RestrictByGrade();
             ViewBag.Messages = msgs;
             ViewBag.ParticipationObjects = GetParticipationObjects(account, msgs)
