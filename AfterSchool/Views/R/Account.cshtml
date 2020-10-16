@@ -14,6 +14,7 @@
     var ageStart = (int?)ViewBag.AgeStart;
     var ageEnd = (int?)ViewBag.AgeEnd;
     var restrictByGrade = (bool)ViewBag.RestrictByGrade;
+    var genderrestriction = (string)ViewBag.GenderRestriction;
     var participationObjects = (List<ParticipationObject>)ViewBag.ParticipationObjects;
     var takeActivities = 3;
     var locations = (List<Location>)ViewBag.Locations;
@@ -147,7 +148,7 @@
                             {
                                 if (gradeLevelStart.IsNotEmpty() && gradeLevelEnd.IsNotEmpty())
                                 {
-                                    <span>Serving @gradeLevelStart.Name - @gradeLevelEnd.Name Grade</span>
+                                    <span>Serving @gradeLevelStart.Name - @gradeLevelEnd.Name Grade @genderrestriction</span>
                                     @renderEditButtion(Model, "grades")
                                 }
                             }
@@ -155,7 +156,7 @@
                             {
                                 if (ageStart.IsNotEmpty() && ageEnd.IsNotEmpty())
                                 {
-                                    <span>Serving Ages @ageStart - @ageEnd</span>
+                                    <span>Serving Ages @ageStart - @ageEnd @genderrestriction</span>
                                     @renderEditButtion(Model, "grades")
                                 }
                             }

@@ -179,27 +179,27 @@
                             <div class="col-md-9">
                                 <div class="am-radio">
                                     <input type="radio"
-                                           name="genderrestrictions"
-                                           id="genderrestrictions-@((int)GenderRestrictionType.None)"
+                                           name="genderrestriction"
+                                           id="genderrestriction-@((int)GenderRestrictionType.None)"
                                            value="@((int)GenderRestrictionType.None)"
                                            @(Model.GenderRestriction == GenderRestrictionType.None ? "checked=\"checked\"" : "") />
-                                    <label for="genderrestrictions-@((int)GenderRestrictionType.None)">All Genders</label>
+                                    <label for="genderrestriction-@((int)GenderRestrictionType.None)">All Genders</label>
                                 </div>
                                 <div class="am-radio">
                                     <input type="radio"
-                                           name="genderrestrictions"
-                                           id="genderrestrictions-@((int)GenderRestrictionType.MaleOnly)"
-                                           value="@((int)GenderRestrictionType.Male)"
+                                           name="genderrestriction"
+                                           id="genderrestriction-@((int)GenderRestrictionType.MaleOnly)"
+                                           value="@((int)GenderRestrictionType.MaleOnly)"
                                            @(Model.GenderRestriction == GenderRestrictionType.MaleOnly ? "checked=\"checked\"" : "") />
-                                    <label for="genderrestrictions-@((int)GenderRestrictionType.MaleOnly)">Boys</label>
+                                    <label for="genderrestriction-@((int)GenderRestrictionType.MaleOnly)">Boys</label>
                                 </div>
                                 <div class="am-radio">
                                     <input type="radio"
-                                           name="genderrestrictions"
-                                           id="genderrestrictions-@((int)GenderRestrictionType.FemaleOnly)"
+                                           name="genderrestriction"
+                                           id="genderrestriction-@((int)GenderRestrictionType.FemaleOnly)"
                                            value="@((int)GenderRestrictionType.FemaleOnly)"
                                            @(Model.GenderRestriction == GenderRestrictionType.FemaleOnly ? "checked=\"checked\"" : "") />
-                                    <label for="genderrestrictions-@((int)GenderRestrictionType.FemaleOnly)">Girls</label>
+                                    <label for="genderrestriction-@((int)GenderRestrictionType.FemaleOnly)">Girls</label>
                                 </div>
                             </div>
                         </div>

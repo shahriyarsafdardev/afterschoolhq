@@ -72,6 +72,7 @@ namespace AfterSchool.Controllers
             ViewBag.GradeLevelEnd = profile.GetGradeLevelEnd(msgs);
             ViewBag.AgeStart = profile.GetAgeStart();
             ViewBag.AgeEnd = profile.GetAgeEnd();
+            ViewBag.GenderRestriction = profile.PrintGenderRestrictions();
             ViewBag.RestrictByGrade = profile.RestrictByGrade();
             ViewBag.Messages = msgs;
             ViewBag.ParticipationObjects = GetParticipationObjects(account, msgs)

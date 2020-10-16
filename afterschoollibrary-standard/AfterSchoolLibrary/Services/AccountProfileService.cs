@@ -413,5 +413,17 @@ namespace AfterSchoolLibrary.Services
         {
             return profile.AgeStart.IsEmpty();
         }
+
+        public static string PrintGenderRestrictions(this AccountProfile profile)
+        {
+            switch (profile.GenderRestriction)
+            {
+                case GenderRestrictionType.FemaleOnly:
+                    return "Girls";
+                case GenderRestrictionType.MaleOnly:
+                    return "Boys";
+            }
+            return "Co-Ed";
+        }
     }
 }
