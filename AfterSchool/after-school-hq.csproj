@@ -1811,6 +1811,8 @@
     <Content Include="Views\SignUp\Welcome.cshtml" />
     <Content Include="Views\Shared\_AgeRestrictions.cshtml" />
     <Content Include="Views\Shared\_RestrictBySelection.cshtml" />
+    <Content Include="Views\Shared\_UpgradePlan.cshtml" />
+    <Content Include="Views\Shared\_PaymentSources.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

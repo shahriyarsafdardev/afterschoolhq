@@ -9,6 +9,11 @@
         padding-right: 0 !important;
     }
 
+    .padding-lr-zero-sm {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
     .btn-toolbar {
         margin-left: -2px;
         margin-right: -2px;
