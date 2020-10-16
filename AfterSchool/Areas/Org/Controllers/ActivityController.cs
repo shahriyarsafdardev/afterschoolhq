@@ -1827,7 +1827,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     usedEmailQuota = usedEmailQuota + registrantIds.Count;
 
                     // if exceeds, return error
-                    if (usedEmailQuota >= maxEmailCount)
+                    if (usedEmailQuota > maxEmailCount)
                         msgs.Add("Email quota exceeded for current user.", MessageType.UserError);
 
                     if (msgs.HasNoErrors())
