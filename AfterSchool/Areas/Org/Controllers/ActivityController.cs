@@ -1769,20 +1769,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
             // If the user does have the messages feature, and the user tries to send a message, validate the user hasn't used up their quota of emails, and/or text messages, if they have exceeded their quota, show the upgrade.
             // If the user has hit or exceeded the email quota then show the upgrade modal
-            var packagePurchaseDate = SessionVariables.AccountPackage.StartDate;
-        
-            var amr = ActivityMessageRegistrant.LoadByCreatedBy(SessionVariables.CurrentUser.ID.Value.ToString()).Where(m => 
-                m.CreateDate <= DateTime.Now 
-                && m.CreateDate > DateTime.Now.AddMonths(-2).Date
-                && 
-                ( 
-                    (m.CreateDate.Value.Month == DateTime.Now.Month && m.CreateDate.Value.Day < packagePurchaseDate.Value.Day)
-                    ||
-                    (m.CreateDate.Value.Month == DateTime.Now.AddMonths(-1).Month && m.CreateDate.Value.Day >= packagePurchaseDate.Value.Day)
-                ));
-
-            ViewBag.EmailCount = amr.Count(m => m.SentEmail);
-            ViewBag.TextCount = amr.Count(m => m.SentText);
+            ViewBag.EmailCount = SessionVariables.CurrentAccount.GetTextCountFourCurrentMessagePeriod();
+            ViewBag.TextCount = SessionVariables.CurrentAccount.GetEmailCountFourCurrentMessagePeriod();
 
             return View(activity);
         }

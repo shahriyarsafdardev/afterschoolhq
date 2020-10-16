@@ -3658,5 +3658,31 @@ namespace AfterSchoolLibrary.Services
 
         #endregion
 
+        #region MessageCount
+
+        public static List<ActivityMessageRegistrant> GetActivityMessageRegistrantsForCurrentMessagePeriod(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            List<ActivityMessage> activityMessages = account.GetActivityMessages(msgs, dc);
+            List<ActivityMessageRegistrant> activityMessageRegistrants = new List<ActivityMessageRegistrant>();
+            List<ActivityMessageRegistrant> currentMessagePeriodActivivityRegistrants = new List<ActivityMessageRegistrant>();
+            DateTime packagePurchaseDate = account.GetActiveAccountPackage().CreateDate.Value;
+            DateTime thisMonthsMessageCountReset = new DateTime(DateTime.Now.Year, DateTime.Now.Month, packagePurchaseDate.Day);
+            DateTime mostRecentMessageCountReset = DateTime.Now.IsBefore(thisMonthsMessageCountReset) ? thisMonthsMessageCountReset.AddMonths(-1) : thisMonthsMessageCountReset;
+
+            activityMessages.ForEach(am => activityMessageRegistrants.AddRange(am.GetActivityMessageRegistrants(msgs, dc)));
+
+            return activityMessageRegistrants.Where(amr => amr.CreateDate.Value.IsInRange(mostRecentMessageCountReset, DateTime.Now)).ToList();
+        }
+
+        public static List<ActivityMessageRegistrant> GetTextCountFourCurrentMessagePeriod(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.GetActivityMessageRegistrantsForCurrentMessagePeriod().Where(amr => amr.SentText).ToList();
+        }
+
+        public static List<ActivityMessageRegistrant> GetEmailCountFourCurrentMessagePeriod(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.GetActivityMessageRegistrantsForCurrentMessagePeriod().Where(amr => amr.SentEmail).ToList();
+        }
+        #endregion
     }
 }
