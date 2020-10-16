@@ -3674,7 +3674,7 @@ namespace AfterSchoolLibrary.Services
             return activityMessageRegistrants.Where(amr => amr.CreateDate.Value.IsInRange(mostRecentMessageCountReset, DateTime.Now.ToUniversalTime())).ToList();
         }
 
-        public static int GetTextCountForCurrentMessagePeriod(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetTextMessageCountForCurrentMessagePeriod(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return account.GetActivityMessageRegistrantsForCurrentMessagePeriod().Where(amr => amr.SentText).ToList().Count();
         }
