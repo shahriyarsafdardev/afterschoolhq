@@ -1488,11 +1488,11 @@ namespace AfterSchoolLibrary.Services
                 }
 
                 // could be changing same package with other plan, like monthly or yearly
-               
+                if (activePackage.PackageId == p.ID && activePackage.BillingPeriodTypeId != billingPeriodType)
+                    signupType = SignUpType.ChangeBillingPeriodType;
             }
 
-            if (activePackage.PackageId == p.ID && activePackage.BillingPeriodTypeId != billingPeriodType)
-                signupType = SignUpType.ChangeBillingPeriodType;
+
 
             return signupType;
         }
