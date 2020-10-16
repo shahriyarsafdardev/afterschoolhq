@@ -1076,13 +1076,13 @@ namespace AfterSchool.Areas.Org.Controllers
                 {
                     if(restrictby.ToBoolean())
                     {
-                        agestart = "-1";
-                        ageend = "-1";
+                        agestart = "";
+                        ageend = "";
                     } 
                     else
                     {
-                        mingrade = "-1";
-                        maxgrade = "-1";
+                        mingrade = "";
+                        maxgrade = "";
                     }
                 }
 
