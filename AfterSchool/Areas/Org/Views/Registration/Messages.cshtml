@@ -2,7 +2,7 @@
 @{
     ViewBag.Title = $"Messages - {SessionVariables.CurrentAccount.Name}";
     SystemMessages msgs = (SystemMessages)ViewBag.Messages;
-    var showStudentCRM = SessionVariables.AccountPackage.HasFeature(FeatureType.StudentCRM);
+    var showTextMessaging = SessionVariables.AccountPackage.HasFeature(FeatureType.TextMessaging);
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -19,7 +19,7 @@
         </div>
         <div class="panel-body">            
             
-            @if (showStudentCRM)
+            @if (showTextMessaging)
             {
                 <button class="btn btn-link" onclick="toggleFilter()">Send New Message</button>
             } 
@@ -38,7 +38,7 @@
 
                     <div class="row">
                         <div class="col-md-12">
-                            @if (showStudentCRM)
+                            @if (showTextMessaging)
                             {
                                 <button class="btn btn-primary btn-lg" onclick="sendMessages()">Send Messages &raquo;</button>
                             } else
@@ -72,7 +72,7 @@
     <script>
 
         $(document).ready(function () {
-            var flag = '@showStudentCRM';
+            var flag = '@showTextMessaging';
             if (flag && flag.toLowerCase() == 'false') {
                 showUpgradeMyPlan();
             }
