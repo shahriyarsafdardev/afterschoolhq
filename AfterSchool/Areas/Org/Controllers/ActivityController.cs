@@ -1770,7 +1770,7 @@ namespace AfterSchool.Areas.Org.Controllers
             // If the user does have the messages feature, and the user tries to send a message, validate the user hasn't used up their quota of emails, and/or text messages, if they have exceeded their quota, show the upgrade.
             // If the user has hit or exceeded the email quota then show the upgrade modal
             ViewBag.EmailCount = SessionVariables.CurrentAccount.GetEmailCountForCurrentMessagePeriod();
-            ViewBag.TextCount = SessionVariables.CurrentAccount.GetTextCountForCurrentMessagePeriod();
+            ViewBag.TextCount = SessionVariables.CurrentAccount.GetTextMessageCountForCurrentMessagePeriod();
 
             return View(activity);
         }
