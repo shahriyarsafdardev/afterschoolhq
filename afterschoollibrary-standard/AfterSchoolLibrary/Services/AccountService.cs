@@ -3671,17 +3671,17 @@ namespace AfterSchoolLibrary.Services
 
             activityMessages.ForEach(am => activityMessageRegistrants.AddRange(am.GetActivityMessageRegistrants(msgs, dc)));
 
-            return activityMessageRegistrants.Where(amr => amr.CreateDate.Value.IsInRange(mostRecentMessageCountReset, DateTime.Now)).ToList();
+            return activityMessageRegistrants.Where(amr => amr.CreateDate.Value.IsInRange(mostRecentMessageCountReset, DateTime.Now.ToUniversalTime())).ToList();
         }
 
-        public static List<ActivityMessageRegistrant> GetTextCountFourCurrentMessagePeriod(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetTextCountForCurrentMessagePeriod(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.GetActivityMessageRegistrantsForCurrentMessagePeriod().Where(amr => amr.SentText).ToList();
+            return account.GetActivityMessageRegistrantsForCurrentMessagePeriod().Where(amr => amr.SentText).ToList().Count();
         }
 
-        public static List<ActivityMessageRegistrant> GetEmailCountFourCurrentMessagePeriod(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetEmailCountForCurrentMessagePeriod(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.GetActivityMessageRegistrantsForCurrentMessagePeriod().Where(amr => amr.SentEmail).ToList();
+            return account.GetActivityMessageRegistrantsForCurrentMessagePeriod().Where(amr => amr.SentEmail).ToList().Count();
         }
         #endregion
     }
