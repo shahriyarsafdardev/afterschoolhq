@@ -834,7 +834,7 @@ namespace AfterSchoolLibrary.Services
                     amsgs.AddRange(am.Save(dc));
 
                     if (amsgs.HasNoErrors())
-                        registrantIds.ForEach(registrantId => am.AddRegistrant(registrantId, loggedInUserId, false, false, amsgs, adc));
+                        registrantIds.ForEach(registrantId => am.AddRegistrant(registrantId, loggedInUserId, amsgs, adc));
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),

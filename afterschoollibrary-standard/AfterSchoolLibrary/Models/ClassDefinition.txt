@@ -318,6 +318,7 @@ property: SentText, bool, Bit
 property: SentEmail, bool, Bit
 loadmethod: ActivityMessageId, List<>
 loadmethod: RegistrantId, List<>
+loadmethod: CreatedBy, List<>
 loadmethod: ActivityMessageId|RegistrantId
 join: Registrant.ID, RegistrantId, InnerJoin
 joinproperty: Registrant.Email, string, NVarChar

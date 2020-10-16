@@ -194,11 +194,11 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<ActivityMessageRegistrant> LoadByCreatedBy(int UserId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<ActivityMessageRegistrant> LoadByCreatedBy(string CreatedBy, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
-			dq.Criterias.Add(ObjectMap["CreatedBy"], UserId);
+			dq.Criterias.Add(ObjectMap["CreatedBy"], CreatedBy);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
