@@ -1835,12 +1835,6 @@ namespace AfterSchool.Areas.Org.Controllers
                     }
                 }
 
-                if (sendtextmessages.IsNotEmpty())
-                {
-                    //.. logic for send text messages
-                    // ..for now just a message
-                    msgs.Add("Text message functionality is still under construction.", MessageType.Error);
-                }
             }
 
             ViewBag.Messages = msgs;
