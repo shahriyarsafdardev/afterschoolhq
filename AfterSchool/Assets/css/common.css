@@ -2,3 +2,33 @@
 .ql-container p {
     min-height: 100px;
 }
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 111;
+    opacity: 0.5;
+    height: 100%;
+    pointer-events: none;
+}
+
+.span-upgrade-modal-close {
+    width: 20px;
+    cursor: pointer;
+    font-size: 16px;
+    right: 0;
+    position: absolute;
+    top: 5px;
+    color: black;
+}
+
+.main-content-new {
+    padding-left: 35px;
+    padding-right: 35px;
+    padding-top: 35px;
+}
+
+.am-content-full {
+    padding: 40px;
+}

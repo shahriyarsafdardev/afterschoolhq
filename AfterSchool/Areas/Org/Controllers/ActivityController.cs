@@ -256,7 +256,16 @@ namespace AfterSchool.Areas.Org.Controllers
                         var defaultForm = currentAccount.GetDefaultForm();
                         var newForm = defaultForm.Copy(currentUser.ID.Value, currentAccount.ID.Value, (name + " form").MaxChars(100, "..."), msgs);
                         if (msgs.HasNoErrors())
-                            values.Add("form", newForm.ID.Value.ToString());
+                        {
+                            if (values.Any(m => m.Key == "form"))
+                            {
+                                values["form"] = newForm.ID.Value.ToString();
+                            }
+                            else
+                            {
+                                values.Add("form", newForm.ID.Value.ToString());
+                            }
+                        }
                     }
 
                     values.Add("registrationthankyouemail", "Thank you for registering.");
@@ -1757,12 +1766,18 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Registrants = activity.GetRegistrants()
                                     .OrderBy(x => x.FirstName)
                                     .ToList();
+
+            // If the user does have the messages feature, and the user tries to send a message, validate the user hasn't used up their quota of emails, and/or text messages, if they have exceeded their quota, show the upgrade.
+            // If the user has hit or exceeded the email quota then show the upgrade modal
+            ViewBag.EmailCount = SessionVariables.CurrentAccount.GetEmailCountForCurrentMessagePeriod();
+            ViewBag.TextCount = SessionVariables.CurrentAccount.GetTextCountForCurrentMessagePeriod();
+
             return View(activity);
         }
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult MessageAdd(string id, string deliveryMethod, string subject, string body, string sendtostaff)
+        public ActionResult MessageAdd(string id, string deliveryMethod, string subject, string body, string sendtostaff, string sendtextmessages)
         {
             var msgs = new SystemMessages();
 
@@ -1781,31 +1796,49 @@ namespace AfterSchool.Areas.Org.Controllers
                                         .Select(x => x.ID.Value)
                                         .ToList();
 
-                am = activity.AddMessage(
-                        subject, 
-                        body, 
-                        registrantIds, 
-                        sendtostaff.IsBoolean(), 
-                        SessionVariables.CurrentUser.ID.Value, 
-                        msgs);
-                
-                BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, SessionVariables.CurrentUser.ID.Value, null, null));
+                //.. email messaging
+                if (sendtostaff.IsNotEmpty())
+                {
+                    // get current limit
+                    var accountPackage = SessionVariables.AccountPackage;
+                    var maxEmailCount = accountPackage.HasFeature(FeatureType.EmailMessaging) ? (int)accountPackage.GetFeature(FeatureType.EmailMessaging).Max.Value : 0;
+
+                    // get current quota
+                    var amr = ActivityMessageRegistrant.LoadByCreatedBy(SessionVariables.CurrentUser.ID.Value.ToString()).Where(m => m.CreateDate > DateTime.Now.AddMonths(-1).Date);
+                    var usedEmailQuota = SessionVariables.CurrentAccount.GetEmailCountForCurrentMessagePeriod();
+
+                    //add additional registransts
+                    usedEmailQuota = usedEmailQuota + registrantIds.Count;
+
+                    // if exceeds, return error
+                    if (usedEmailQuota > maxEmailCount)
+                        msgs.Add("Email quota exceeded for current user.", MessageType.UserError);
+
+                    if (msgs.HasNoErrors())
+                    {
+                        am = activity.AddMessage(
+                            subject,
+                            body,
+                            registrantIds,
+                            sendtostaff.IsBoolean(),
+                            SessionVariables.CurrentUser.ID.Value,
+                            msgs);
+
+                        BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, SessionVariables.CurrentUser.ID.Value, null, null));
+
+                        msgs.Add("Your message will been sent to the selected registrants", MessageType.Success);
+                        ViewBag.Registrants = am.GetActivityMessageRegistrants();
+                        ViewBag.Messages = msgs;
+                        ViewBag.IsActivityLeader = IsActivityLeader(activity);
+
+                        return View("messagedetail", am.Reload());
+                    }
+                }
+
             }
 
             ViewBag.Messages = msgs;
-            ViewBag.IsActivityLeader = IsActivityLeader(activity);
-
-            if (msgs.HasNoErrors())
-            {
-                msgs.Add("Your message will been sent to the selected registrants", MessageType.Success);
-                ViewBag.Registrants = am.GetActivityMessageRegistrants();
-                ViewBag.Messages = msgs;
-                ViewBag.IsActivityLeader = IsActivityLeader(activity);
-
-                return View("messagedetail", am.Reload());
-            }
-
-            ViewBag.Messages = msgs;
+            ViewBag.IsActivityLeader = IsActivityLeader(activity);            
             ViewBag.Registrants = activity.GetRegistrants();
             return View(activity);
         }

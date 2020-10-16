@@ -666,6 +666,7 @@
     <Content Include="Assets\css\media_sm.css" />
     <Content Include="Assets\css\media_xs.css" />
     <Content Include="Assets\js\ahq-profiles.js" />
+    <Content Include="Assets\js\underscore-min.js" />
     <Content Include="case-study-cfi70.html" />
     <Content Include="contact.html" />
     <Content Include="Content\quill.bubble.css" />
@@ -1810,6 +1811,8 @@
     <Content Include="Views\SignUp\Welcome.cshtml" />
     <Content Include="Views\Shared\_AgeRestrictions.cshtml" />
     <Content Include="Views\Shared\_RestrictBySelection.cshtml" />
+    <Content Include="Views\Shared\_UpgradePlan.cshtml" />
+    <Content Include="Views\Shared\_PaymentSources.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

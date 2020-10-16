@@ -1459,6 +1459,7 @@ namespace AfterSchoolLibrary.Services
             //        signupType = SignUpType.ConvertingFromTrial;
             //    }
             //}
+
             if (p.IsFree(billingPeriodType) || (activePackage.IsNotEmpty() && activePackage.IsFree))
             {
                 // new sign up
@@ -1485,7 +1486,13 @@ namespace AfterSchoolLibrary.Services
                     else
                         signupType = SignUpType.ChangePackageDuringTrial;
                 }
+
+                // could be changing same package with other plan, like monthly or yearly
+                if (activePackage.PackageId == p.ID && activePackage.BillingPeriodTypeId != billingPeriodType)
+                    signupType = SignUpType.ChangeBillingPeriodType;
             }
+
+
 
             return signupType;
         }
@@ -2604,25 +2611,24 @@ namespace AfterSchoolLibrary.Services
         /// <param name="stripeToken"></param>
         /// <param name="msgs"></param>
         /// <returns></returns>
-        internal static string CreateStripeSourceFromToken(this Account fromAccount, string stripeToken, Stripe.Customer customer, SystemMessages msgs)
+        public static string CreateStripeSourceFromToken(this Account fromAccount, string stripeToken, Stripe.Customer customer, SystemMessages msgs)
         {
             // stripe stuff
             // create payment source if not already existent on the user
-            var sourceId = "";
-
             if (customer.IsEmpty())
                 customer = StripeHelper.GetCustomer(fromAccount.StripeCustomerId, null, msgs);
 
             if (stripeToken.IsNotEmpty())
             {
                 var source = StripeHelper.CreateCreditCardSource(stripeToken, msgs);
-                StripeHelper.AttachSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null, msgs);
-                sourceId = source.Id;
+                if (source.IsNotEmpty())
+                {
+                    StripeHelper.AttachSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null, msgs);
+                    return source.Id;
+                }                
             }
-            else
-                sourceId = customer.DefaultSourceId;
-
-            return sourceId;
+            
+            return customer.DefaultSourceId;
         }
 
         /// <summary>
@@ -3652,5 +3658,31 @@ namespace AfterSchoolLibrary.Services
 
         #endregion
 
+        #region MessageCount
+
+        public static List<ActivityMessageRegistrant> GetActivityMessageRegistrantsForCurrentMessagePeriod(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            List<ActivityMessage> activityMessages = account.GetActivityMessages(msgs, dc);
+            List<ActivityMessageRegistrant> activityMessageRegistrants = new List<ActivityMessageRegistrant>();
+            List<ActivityMessageRegistrant> currentMessagePeriodActivivityRegistrants = new List<ActivityMessageRegistrant>();
+            DateTime packagePurchaseDate = account.GetActiveAccountPackage().CreateDate.Value;
+            DateTime thisMonthsMessageCountReset = new DateTime(DateTime.Now.Year, DateTime.Now.Month, packagePurchaseDate.Day);
+            DateTime mostRecentMessageCountReset = DateTime.Now.IsBefore(thisMonthsMessageCountReset) ? thisMonthsMessageCountReset.AddMonths(-1) : thisMonthsMessageCountReset;
+
+            activityMessages.ForEach(am => activityMessageRegistrants.AddRange(am.GetActivityMessageRegistrants(msgs, dc)));
+
+            return activityMessageRegistrants.Where(amr => amr.CreateDate.Value.IsInRange(mostRecentMessageCountReset, DateTime.Now.ToUniversalTime())).ToList();
+        }
+
+        public static int GetTextMessageCountForCurrentMessagePeriod(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.GetActivityMessageRegistrantsForCurrentMessagePeriod().Where(amr => amr.SentText).ToList().Count();
+        }
+
+        public static int GetEmailCountForCurrentMessagePeriod(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.GetActivityMessageRegistrantsForCurrentMessagePeriod().Where(amr => amr.SentEmail).ToList().Count();
+        }
+        #endregion
     }
 }

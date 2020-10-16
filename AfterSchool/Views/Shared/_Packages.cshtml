@@ -49,7 +49,7 @@
             <th class="text-right">Messaging to @UILabel.RegistrantLabel(true)</th>
             @foreach (Package package in packages)
             {
-                <td class="text-center">@{Html.RenderPartial("_BooleanToHtml", package.HasFeature(FeatureType.Messaging));}</td>
+                <td class="text-center">@{Html.RenderPartial("_BooleanToHtml", package.HasFeature(FeatureType.EmailMessaging));}</td>
             }
         </tr>
         <tr>

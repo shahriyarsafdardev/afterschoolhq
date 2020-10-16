@@ -44,9 +44,14 @@ namespace AfterSchoolLibrary.Services
         private static void UpdateSendResults(this ActivityMessageRegistrant activityMessageRegistrant, SystemMessages sendResultMessages, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (sendResultMessages.HasNoErrors())
+            {
                 activityMessageRegistrant.DateSent = DateTime.UtcNow;
+                activityMessageRegistrant.SentEmail = true;
+            }
             else
+            {
                 activityMessageRegistrant.SendErrors = sendResultMessages.RenderMessageList(MessageOutputType.Text).MaxChars(1000);
+            }
 
             msgs.AddRange(activityMessageRegistrant.Save(dc));
         }

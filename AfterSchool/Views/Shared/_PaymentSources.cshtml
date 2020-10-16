@@ -1,0 +1,28 @@
+﻿@model Account
+
+@{    
+    var sources = (List<Stripe.Source>)ViewBag.Sources;
+}
+
+@if (sources.Count > 0)
+{
+    <h4>Payment Cards</h4>
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <tr>
+                <th>Expiration</th>
+                <th>Card</th>
+            </tr>
+            @foreach (var source in sources)
+            {
+                var card = (Stripe.SourceCard)source.Card;
+
+                <tr>
+                    <td>@card.ExpMonth / @card.ExpYear</td>
+                    <td><span class="badge badge-success">@card.Brand</span> **** **** **** @card.Last4</td>                 
+                </tr>
+            }
+        </table>
+    </div>
+}
+

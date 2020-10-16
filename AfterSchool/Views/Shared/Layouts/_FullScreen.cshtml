@@ -19,9 +19,16 @@
 <body>
     <div class="am-wrapper notopmenu">
         <!-- Main section-->
-        <div class="am-content-full">
+        <div id="app-body" class="am-content-full">
             @RenderBody()
         </div>
+
+        <style>
+            .overlay {
+                width: 100%; /*only for full screen*/
+            }
+        </style>
+        @{Html.RenderPartial("~/Views/Shared/_UpgradePlan.cshtml");}
     </div>
 
     @{Html.RenderPartial("~/Views/Shared/_JavascriptIncludes.cshtml");}
@@ -33,8 +40,7 @@
 
             $('.am-content-full').css({
                 'min-height': $(window).height(),
-                'background-color': '#fff',
-                'padding': '40px'
+                'background-color': '#fff'
             });
 
             $('form').submit(function () {
@@ -44,11 +50,10 @@
             });
 
             $('a').click(function () {
-                if ($(this).attr('href') != "#" && $(this).attr('href').indexOf('javascript:') == -1 && $(this).attr('target') != "_blank") {
+                if ($(this).attr('href') && $(this).attr('href') != "#" && $(this).attr('href').indexOf('javascript:') == -1 && $(this).attr('target') != "_blank") {
                     $('#modal-saving').removeClass('hide');
                 }
             });
-
         });
     </script>
 

@@ -276,8 +276,8 @@
                                 }
                             </li>
                             <li>
-                                @if (features.Find(x => x.FeatureTypeId == FeatureType.Messaging).IsNotEmpty() &&
-                        features.Find(x => x.FeatureTypeId == FeatureType.Messaging).Max == 1)
+                                @if (features.Find(x => x.FeatureTypeId == FeatureType.EmailMessaging).IsNotEmpty() &&
+                        features.Find(x => x.FeatureTypeId == FeatureType.EmailMessaging).Max == 1)
                                 {
                                     @:Messaging
                                 }

@@ -1143,7 +1143,12 @@ namespace AfterSchoolLibrary.Billing
 
             try
             {
-                subscription = GetSubscriptionService().Update(subscription.Id, options, requestOptions);
+                var service = GetSubscriptionService();
+                if (subscription.IsNotEmpty())
+                {
+                    subscription = service.Update(subscription.Id, options, requestOptions);
+                }
+                
             }
             catch (StripeException ex)
             {
@@ -1246,7 +1251,12 @@ namespace AfterSchoolLibrary.Billing
 
             try
             {
-                cards.AddRange(GetCardService().List(customerId).ToList());
+                var options = new Stripe.CardListOptions
+                {                    
+                    Limit = 10,
+                };
+
+                cards.AddRange(GetCardService().List(customerId, options).ToList());
             }
             catch (StripeException ex)
             {

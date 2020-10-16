@@ -15,7 +15,8 @@
         accountingactive = "",
         leagueexternalactive = "",
         activitycenteractive = "",
-        accountsubmenuactive = "";
+        accountsubmenuactive = "",
+        studentcontactmenuactive = "";
 
     switch (controller)
     {
@@ -27,6 +28,10 @@
         case "account":
         case "user":
             accountsubmenuactive = "active";
+            break;
+        case "registration":
+        case "contact":
+            studentcontactmenuactive = "active";
             break;
     }
 
@@ -80,6 +85,11 @@
     {
         return SessionVariables.CurrentAccount.HasAccountPackageFeature(featureType) && Permissions.HasPermission(userType, permissionType);
     }
+
+    public bool CanView(UserType userType, PermissionType permissionType)
+    {
+        return Permissions.HasPermission(userType, permissionType);
+    }
 }
 
 <div class="am-left-sidebar">
@@ -119,7 +129,7 @@
                                 <a href="@Url.Action("index", "activity", new { type = (int)ActivityType.FieldTrip })"><i class="icon s7-compass"></i> @UILabel.ActivityLabel(ActivityType.FieldTrip, true)</a>
                             </li>
                         }
-                        @if (CanView(FeatureType.ManagePermissionSlips, SessionVariables.AccountUserType, PermissionType.PermissionSlipsView))
+                        @if (CanView(SessionVariables.AccountUserType, PermissionType.PermissionSlipsView))
                         {
                             <li>
                                 <a href="@Url.Action("index", "activity", new { type = (int)ActivityType.PermissionSlip })"><i class="icon s7-file"></i> @UILabel.ActivityLabel(ActivityType.PermissionSlip, true)</a>
@@ -148,19 +158,24 @@
                 </li>
             }
 
-            @if (CanView(FeatureType.Participants, SessionVariables.AccountUserType, PermissionType.StudentsView))
-            {
-                <li class="@registrationactive"><a href="@Url.Action("index", "registration")"><i class="icon s7-id"></i> @UILabel.RegistrantLabel(true)</a></li>
-            }
+            <li class="parent @studentcontactmenuactive">
+                <a href="#"><i class="icon s7-id"></i> <span>Students & Contacts</span></a>
+                <ul class="sub-menu">
+                    @if (CanView(SessionVariables.AccountUserType, PermissionType.StudentsView))
+                    {
+                        <li class="@registrationactive"><a href="@Url.Action("index", "registration")"><i class="icon s7-id"></i> @UILabel.RegistrantLabel(true)</a></li>
+                    }
+                    
+                    @if (CanView(SessionVariables.AccountUserType, PermissionType.ContactsView))
+                    {
+                        <li class="@contactactive"><a href="@Url.Action("index", "contact")"><i class="icon s7-notebook"></i> Contacts</a></li>
+                    }
+                </ul>
+            </li>
 
             @if (CanView(FeatureType.ManageForms, SessionVariables.AccountUserType, PermissionType.FormsView))
             {
                 <li class="@formactive hide"><a href="@Url.Action("index", "form")"><i class="icon s7-note2"></i> Forms</a></li>
-            }
-
-            @if (CanView(FeatureType.ManageContacts, SessionVariables.AccountUserType, PermissionType.ContactsView))
-            {
-                <li class="@contactactive"><a href="@Url.Action("index", "contact")"><i class="icon s7-notebook"></i> Contacts</a></li>
             }
 
             @if (CanView(FeatureType.AcceptPayments, SessionVariables.AccountUserType, PermissionType.AccountingView))

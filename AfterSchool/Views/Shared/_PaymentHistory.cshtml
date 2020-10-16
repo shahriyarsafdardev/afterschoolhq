@@ -16,7 +16,7 @@
             </tr>
             @foreach (var charge in charges)
             {
-                var card = (Stripe.Card)charge.Source;
+                var card = ((Stripe.Source)charge.Source).Card;
 
                 <tr>
                     <td>@Model.ConvertToAccountTimeZone(charge.Created).ToShortDateTimeString()</td>

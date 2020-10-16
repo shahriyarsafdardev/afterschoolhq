@@ -1,4 +1,24 @@
 ﻿/* Large devices (laptops/desktops, 1200px and up) */
 @media(min-width: 1200px) {
 
+    .btn-upgrade-plan {
+        margin-top: 12px;
+        right: 80px;
+        position: fixed;
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    #upgrade-my-plan {
+        position: fixed;
+        z-index: 999999;
+        background-color: #00c5a3;
+        width: 100%;
+        min-height: 60px;
+        bottom: 0;
+        padding: 40px;
+        height: 20%;
+        color: white;
+        display: none;
+    }
 }

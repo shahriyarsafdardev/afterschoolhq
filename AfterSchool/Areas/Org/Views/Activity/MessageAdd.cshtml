@@ -5,6 +5,15 @@
 
     var registrants = (List<Registrant>)ViewBag.Registrants;
     var registrantsPerColumn = Math.Ceiling(registrants.Count / 3.0).ToInteger();
+
+    var accountPackage = SessionVariables.AccountPackage;
+    var maxTextCount = accountPackage.HasFeature(FeatureType.TextMessaging) ? (int)accountPackage.GetFeature(FeatureType.TextMessaging).Max.Value : 0;
+    var currentTextCount = ViewBag.TextCount != null ? (int)ViewBag.TextCount : 0;
+    var textQuotaExceeded = currentTextCount >= maxTextCount ? true : false;
+
+    var maxEmailCount = accountPackage.HasFeature(FeatureType.EmailMessaging) ? (int)accountPackage.GetFeature(FeatureType.EmailMessaging).Max.Value : 0;
+    var currentEmailCount = ViewBag.EmailCount != null ? (int)ViewBag.EmailCount : 0;
+    var emailQuotaExceeded = currentEmailCount >= maxEmailCount ? true : false;
 }
 
 @{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
@@ -54,11 +63,37 @@
 
                     <div class="form-group">
                         <label class="col-sm-3 control-label"></label>
-                        <div class="col-sm-6">
-                            <div class="am-checkbox">
-                                <input type="checkbox" id="sendtostaff" name="sendtostaff" value="1" checked="checked" />
-                                <label for="sendtostaff">Send Message To Staff</label>
-                            </div>
+                        <div class="col-sm-3">
+                            @if (!emailQuotaExceeded)
+                            {
+                                <div class="am-checkbox">
+                                    <input type="checkbox" id="sendtostaff" name="sendtostaff" value="1" checked="checked" />
+                                    <label for="sendtostaff">Send Email To Staff</label>
+                                </div>
+                            } else
+                            {
+                                 <div class="am-checkbox"  onclick="return showUpgradeMyPlan()">
+                                    <input type="checkbox" id="sendtostaff" name="sendtostaff" value="1" disabled="disabled" />
+                                    <label for="sendtostaff">Send Email To Staff</label>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="col-sm-3">
+                            @if (!textQuotaExceeded)
+                            {
+                                <div class="am-checkbox">
+                                    <input type="checkbox" id="sendtextmessages" name="sendtextmessages" value="0" />
+                                    <label for="sendtextmessages">Send Text Messages</label>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="am-checkbox" onclick="return showUpgradeMyPlan()">
+                                    <input type="checkbox" id="sendtextmessages" name="sendtextmessages" value="0" disabled="disabled" />
+                                    <label for="sendtextmessages">Send Text Messages</label>
+                                </div>
+                            }
                         </div>
                     </div>
 
