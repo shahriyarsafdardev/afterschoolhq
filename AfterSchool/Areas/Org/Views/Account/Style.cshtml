@@ -165,100 +165,78 @@
                         <div class="panel-heading text-center-sm">
                             Additional Details
                         </div>
-                        <div class="panel-body padding-zero">
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">
-                                    Grades Served
-                                </label>
-                                <div class="col-md-9">
-                                    <select id="mingrade" name="mingrade" class="form-control">
-                                        @foreach (var grade in grades)
-                                        {
-                                            <option value="@grade.ID" @(Model.GradeLevelStart == grade.ID ? " selected=\"selected\" " : "")>@grade.Name</option>
-                                        }
-                                    </select>
-                                    <p class="margin-v-10">
-                                        To
-                                    </p>
-                                    <select id="maxgrade" name="maxgrade" class="form-control">
-                                        @foreach (var grade in grades)
-                                        {
-                                            var selected = "";
 
-                                            if (Model.GradeLevelEnd == grade.ID || (!Model.GradeLevelEnd.HasValue && grade.ID == grades.Last().ID))
-                                            {
-                                                selected = " selected=\"selected\" ";
-                                            }
+                        @{
+                            Html.RenderPartial(
+                                "~/Views/Shared/_RestrictBySelection.cshtml",
+                                null,
+                                new ViewDataDictionary() { { "minGradeLevelId", Model.GradeLevelStart }, { "MaxGradeLevelId", Model.GradeLevelEnd }, { "grades", grades }, { "ageStart", Model.AgeStart }, { "ageEnd", Model.AgeEnd }, { "restrictbygrade", Model.RestrictByGrade() } }
+                                );
+                        }
 
-                                            <option value="@grade.ID" @selected )>@grade.Name</option>
-                                        }
-                                    </select>
+                        <div class="form-group">
+                            <label class="col-md-3 control-label">My program is designed for</label>
+                            <div class="col-md-9">
+                                <div class="am-radio">
+                                    <input type="radio"
+                                           name="genderrestriction"
+                                           id="genderrestriction-@((int)GenderRestrictionType.None)"
+                                           value="@((int)GenderRestrictionType.None)"
+                                           @(Model.GenderRestriction == GenderRestrictionType.None ? "checked=\"checked\"" : "") />
+                                    <label for="genderrestriction-@((int)GenderRestrictionType.None)">All Genders</label>
+                                </div>
+                                <div class="am-radio">
+                                    <input type="radio"
+                                           name="genderrestriction"
+                                           id="genderrestriction-@((int)GenderRestrictionType.MaleOnly)"
+                                           value="@((int)GenderRestrictionType.MaleOnly)"
+                                           @(Model.GenderRestriction == GenderRestrictionType.MaleOnly ? "checked=\"checked\"" : "") />
+                                    <label for="genderrestriction-@((int)GenderRestrictionType.MaleOnly)">Boys</label>
+                                </div>
+                                <div class="am-radio">
+                                    <input type="radio"
+                                           name="genderrestriction"
+                                           id="genderrestriction-@((int)GenderRestrictionType.FemaleOnly)"
+                                           value="@((int)GenderRestrictionType.FemaleOnly)"
+                                           @(Model.GenderRestriction == GenderRestrictionType.FemaleOnly ? "checked=\"checked\"" : "") />
+                                    <label for="genderrestriction-@((int)GenderRestrictionType.FemaleOnly)">Girls</label>
                                 </div>
                             </div>
-
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">My program is designed for</label>
-                                <div class="col-md-9">
-                                    <div class="am-radio">
-                                        <input type="radio"
-                                               name="genderrestrictions"
-                                               id="genderrestrictions-@((int)GenderRestrictionType.None)"
-                                               value="@((int)GenderRestrictionType.None)"
-                                               @(Model.GenderRestriction == GenderRestrictionType.None ? "checked=\"checked\"" : "") />
-                                        <label for="genderrestrictions-@((int)GenderRestrictionType.None)">All Genders</label>
-                                    </div>
-                                    <div class="am-radio">
-                                        <input type="radio"
-                                               name="genderrestrictions"
-                                               id="genderrestrictions-@((int)GenderRestrictionType.MaleOnly)"
-                                               value="@((int)GenderRestrictionType.None)"
-                                               @(Model.GenderRestriction == GenderRestrictionType.MaleOnly ? "checked=\"checked\"" : "") />
-                                        <label for="genderrestrictions-@((int)GenderRestrictionType.MaleOnly)">Boys</label>
-                                    </div>
-                                    <div class="am-radio">
-                                        <input type="radio"
-                                               name="genderrestrictions"
-                                               id="genderrestrictions-@((int)GenderRestrictionType.FemaleOnly)"
-                                               value="@((int)GenderRestrictionType.None)"
-                                               @(Model.GenderRestriction == GenderRestrictionType.FemaleOnly ? "checked=\"checked\"" : "") />
-                                        <label for="genderrestrictions-@((int)GenderRestrictionType.FemaleOnly)">Girls</label>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">
-                                    Providing services during COVID?
-                                </label>
-                                <div class="col-md-9">
-                                    @{ Html.RenderPartial(
-                                             "~/Views/Shared/_SwitchButton.cshtml",
-                                             Model.IsOpenDuringCovid,
-                                             new ViewDataDictionary() { { "checkboxname", "opencovid" }, { "checkboxid", "opencovid" } });
-                                    }
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">
-                                    Are you an E-Learning Center?
-                                </label>
-                                <div class="col-md-9">
-                                    @{ Html.RenderPartial(
-                                             "~/Views/Shared/_SwitchButton.cshtml",
-                                             Model.IsELearningCenter,
-                                             new ViewDataDictionary() { { "checkboxname", "elearningcenter" }, { "checkboxid", "elearningcenter" } });
-                                    }
-                                    <p class="text-muted">You host/care for students to assist e-learning during the school day</p>
-                                </div>
-                            </div>
-
-                            @if (!isFullScreen)
-                            {
-                                @SubmitButtons()
-                            }
-
                         </div>
+
+                        <div class="form-group">
+                            <label class="col-md-3 control-label">
+                                Providing services during COVID?
+                            </label>
+                            <div class="col-md-9">
+                                @{ Html.RenderPartial(
+                                           "~/Views/Shared/_SwitchButton.cshtml",
+                                           Model.IsOpenDuringCovid,
+                                           new ViewDataDictionary() { { "checkboxname", "opencovid" }, { "checkboxid", "opencovid" } });
+                                }
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-md-3 control-label">
+                                Are you an E-Learning Center?
+                            </label>
+                            <div class="col-md-9">
+                                @{ Html.RenderPartial(
+                                           "~/Views/Shared/_SwitchButton.cshtml",
+                                           Model.IsELearningCenter,
+                                           new ViewDataDictionary() { { "checkboxname", "elearningcenter" }, { "checkboxid", "elearningcenter" } });
+                                }
+                                <p class="text-muted">You host/care for students to assist e-learning during the school day</p>
+                            </div>
+                        </div>
+
+                        @if (!isFullScreen)
+                        {
+                            @SubmitButtons()
+                        }
+
+                    </div>
                     </div>
 
                     <!-- Photos -->
@@ -709,6 +687,7 @@
             return false;
         }
     }
+
 </script>
 
 @section head

@@ -29,6 +29,8 @@ namespace AfterSchoolLibrary.Models
 		public string Website { get { return (string)MDV["Website"].Value; } set { MDV["Website"].Value = value; } }
 		public int? GradeLevelStart { get { return (int?)MDV["GradeLevelStart"].Value; } set { MDV["GradeLevelStart"].Value = value; } }
 		public int? GradeLevelEnd { get { return (int?)MDV["GradeLevelEnd"].Value; } set { MDV["GradeLevelEnd"].Value = value; } }
+		public int? AgeStart { get { return (int?)MDV["AgeStart"].Value; } set { MDV["AgeStart"].Value = value; } }
+		public int? AgeEnd { get { return (int?)MDV["AgeEnd"].Value; } set { MDV["AgeEnd"].Value = value; } }
 		public string Twitter { get { return (string)MDV["Twitter"].Value; } set { MDV["Twitter"].Value = value; } }
 		public string Facebook { get { return (string)MDV["Facebook"].Value; } set { MDV["Facebook"].Value = value; } }
 		public string Instagram { get { return (string)MDV["Instagram"].Value; } set { MDV["Instagram"].Value = value; } }
@@ -79,6 +81,8 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "Website", System.Data.SqlDbType.NVarChar , "400");
 				_dp.Add(className, "GradeLevelStart", System.Data.SqlDbType.Int);
 				_dp.Add(className, "GradeLevelEnd", System.Data.SqlDbType.Int);
+				_dp.Add(className, "AgeStart", System.Data.SqlDbType.Int);
+				_dp.Add(className, "AgeEnd", System.Data.SqlDbType.Int);
 				_dp.Add(className, "Twitter", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "Facebook", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "Instagram", System.Data.SqlDbType.NVarChar , "100");
@@ -214,6 +218,14 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["GradeLevelEnd"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["AgeStart"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["AgeEnd"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();

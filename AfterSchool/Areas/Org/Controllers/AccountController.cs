@@ -954,6 +954,10 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Location = profile.GetLocation();
             ViewBag.Messages = msgs;
             ViewBag.Grades = GradeLevel.Load();
+            ViewBag.GradeStart = profile.GetGradeLevelStart();
+            ViewBag.GradeEnd = profile.GetGradeLevelEnd();
+            ViewBag.AgeStart = profile.GetAgeStart();
+            ViewBag.AgeEnd = profile.GetAgeEnd();
             ViewBag.Awards = awards;
             ViewBag.Certifications = certifications;
             ViewBag.Photos = photos;
@@ -979,7 +983,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult Style(string id, string logo, string headerimage, string about, string title, string headline, string primaryColor, string website, string mingrade, string maxgrade, string twitter, string facebook, string instagram, string linkedin, string youtube, string calendar, string genderrestriction, string programCategories, string softskills, string academicsubjects, string teachingmethods, string profileemail, string profilephone, string locationname, string streetnumber, string streetname, string address2, string neighborhood, string city, string state, string postalcode, string county, string country, string placeid, string opencovid, string elearningcenter, string ahqapproved, string videoUrl, IEnumerable<HttpPostedFileBase> photos)
+        public ActionResult Style(string id, string logo, string headerimage, string about, string title, string headline, string primaryColor, string website, string mingrade, string maxgrade, string agestart, string ageend, string restrictby, string twitter, string facebook, string instagram, string linkedin, string youtube, string calendar, string genderrestriction, string programCategories, string softskills, string academicsubjects, string teachingmethods, string profileemail, string profilephone, string locationname, string streetnumber, string streetname, string address2, string neighborhood, string city, string state, string postalcode, string county, string country, string placeid, string opencovid, string elearningcenter, string ahqapproved, string videoUrl, IEnumerable<HttpPostedFileBase> photos)
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
@@ -1077,6 +1081,21 @@ namespace AfterSchool.Areas.Org.Controllers
                 if (SessionVariables.AccountUserType == UserType.TechSupport)
                     ahqapproved = ahqapproved.IsNumber() ? "1" : "0";
 
+                if(restrictby.IsNotEmpty() && restrictby.IsBoolean())
+                {
+                    if(restrictby.ToBoolean())
+                    {
+                        agestart = "";
+                        ageend = "";
+                    } 
+                    else
+                    {
+                        mingrade = "";
+                        maxgrade = "";
+                    }
+                }
+
+
                 profile.UpdateProfile(
                     title,
                     headline,
@@ -1086,6 +1105,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     elearningcenter,
                     mingrade,
                     maxgrade,
+                    agestart,
+                    ageend,
                     twitter,
                     facebook,
                     instagram,

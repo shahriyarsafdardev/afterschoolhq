@@ -21,6 +21,8 @@ namespace AfterSchoolLibrary.Models
         public GenderRestrictionType GenderRestriction { get; set; }
         public int? MinGradeId { get; set; }
         public int? MaxGradeId { get; set; }
+        public int? AgeStart { get; set; }
+        public int? AgeEnd { get; set; }
         public decimal? Cost { get; set; }
         public CostUnitType? CostUnitType { get; set; }
         public RegistrationPeriod RegistrationPeriod { get; set; }
@@ -121,6 +123,8 @@ namespace AfterSchoolLibrary.Models
             SeatsAvailable = activity.SeatsAvailable;
             RegistrationFinalized = activity.RegistrationFinalized;
             HidePreciseLocation = activity.HidePreciseLocation;
+            AgeStart = activity.AgeStart;
+            AgeEnd = activity.AgeEnd;
 
             if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
             {
@@ -164,6 +168,8 @@ namespace AfterSchoolLibrary.Models
             GenderRestriction = activityGroup.GenderRestriction;
             MinGradeId = activityGroup.MinGradeLevelId;
             MaxGradeId = activityGroup.MaxGradeLevelId;
+            AgeStart = activityGroup.AgeStart;
+            AgeEnd = activityGroup.AgeEnd;
             Cost = activityGroup.Cost;
             CostUnitType = activityGroup.CostUnitTypeId;
             ActivityGroupType = activityGroup.ActivityGroupTypeId;
@@ -210,6 +216,8 @@ namespace AfterSchoolLibrary.Models
             GenderRestriction = activityGroup.GenderRestriction;
             MinGradeId = activityGroup.MinGradeLevelId;
             MaxGradeId = activityGroup.MaxGradeLevelId;
+            AgeStart = activityGroup.AgeStart;
+            AgeEnd = activityGroup.AgeEnd;
             Cost = aag.Cost;
             CostUnitType = aag.CostUnitTypeId;
             // TODO: PayLater = activityGroup.AllowToPayLater;
@@ -537,6 +545,41 @@ namespace AfterSchoolLibrary.Models
                 return true;
 
             return false;
+        }
+
+        public bool IsStudentAgeInRange(Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (!AgeStart.HasValue && !AgeEnd.HasValue)
+                return true;
+
+            var registrantDOB = registrant.GetAnswer(QuestionDataType.RegistrantDateOfBirth, msgs, dc)?.Text.ToDateTime();
+
+            if (!registrantDOB.HasValue)
+            {
+                msgs.Add("Missing registrant date of birth", MessageType.UserError);
+                return false;
+            }
+
+            var registrantAge = registrantDOB.Value.GetAgeInYears();
+
+            if (registrantAge < AgeStart)
+                return false;
+                
+            if (registrantAge > AgeEnd)
+                return false;       
+
+            return true;
+        }
+
+        public bool RestrictByGrade()
+        {
+            if (IsActivity())
+                return GetActivity().RestrictByGrade();
+
+            if (IsActivityGroup())
+                return GetActivityGroup().RestrictByGrade();
+
+            return true;
         }
 
         #endregion

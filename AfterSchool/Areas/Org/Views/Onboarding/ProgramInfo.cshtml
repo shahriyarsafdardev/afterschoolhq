@@ -63,35 +63,13 @@
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label class="col-lg-3 control-label">
-                        Grades Served
-                    </label>
-                    <div class="col-lg-9">
-                        <select id="mingrade" name="mingrade" class="form-control">
-                            @foreach (var grade in grades)
-                            {
-                                <option value="@grade.ID" @(minGradeId == grade.ID.ToString() ? " selected=\"selected\" " : "")>@grade.Name</option>
-                            }
-                        </select>
-                        <p class="margin-v-10">
-                            To
-                        </p>
-                        <select id="maxgrade" name="maxgrade" class="form-control">
-                            @foreach (var grade in grades)
-                            {
-                                var selected = "";
-
-                                if (maxGradeId == grade.ID.ToString())
-                                {
-                                    selected = " selected=\"selected\" ";
-                                }
-
-                                <option value="@grade.ID" @selected )>@grade.Name</option>
-                            }
-                        </select>
-                    </div>
-                </div>
+                @{
+                    Html.RenderPartial(
+                        "~/Views/Shared/_RestrictBySelection.cshtml",
+                        null,
+                        new ViewDataDictionary() { { "minGradeLevelId", null }, { "MaxGradeLevelId", null }, { "grades", grades }, { "ageStart", null }, { "ageEnd", null }, { "restrictbygrade", true } }
+                        );
+                }
 
                 <div class="form-group">
                     <label class="col-lg-3 control-label">My program is designed for</label>
@@ -108,14 +86,14 @@
                             <input type="radio"
                                    name="genderrestrictions"
                                    id="genderrestrictions-@((int)GenderRestrictionType.MaleOnly)"
-                                   value="@((int)GenderRestrictionType.None)" />
+                                   value="@((int)GenderRestrictionType.MaleOnly)" />
                             <label for="genderrestrictions-@((int)GenderRestrictionType.MaleOnly)">Boys</label>
                         </div>
                         <div class="am-radio">
                             <input type="radio"
                                    name="genderrestrictions"
                                    id="genderrestrictions-@((int)GenderRestrictionType.FemaleOnly)"
-                                   value="@((int)GenderRestrictionType.None)" />
+                                   value="@((int)GenderRestrictionType.FemaleOnly)" />
                             <label for="genderrestrictions-@((int)GenderRestrictionType.FemaleOnly)">Girls</label>
                         </div>
                     </div>
@@ -127,9 +105,9 @@
                     </label>
                     <div class="col-lg-9">
                         @{ Html.RenderPartial(
-                               "~/Views/Shared/_SwitchButton.cshtml",
-                               opencovid,
-                               new ViewDataDictionary() { { "checkboxname", "opencovid" }, { "checkboxid", "opencovid" } });
+                                "~/Views/Shared/_SwitchButton.cshtml",
+                                opencovid,
+                                new ViewDataDictionary() { { "checkboxname", "opencovid" }, { "checkboxid", "opencovid" } });
                         }
                     </div>
                 </div>
@@ -140,9 +118,9 @@
                     </label>
                     <div class="col-lg-9">
                         @{ Html.RenderPartial(
-                               "~/Views/Shared/_SwitchButton.cshtml",
-                               elc,
-                               new ViewDataDictionary() { { "checkboxname", "elearningcenter" }, { "checkboxid", "elearningcenter" } });
+                                "~/Views/Shared/_SwitchButton.cshtml",
+                                elc,
+                                new ViewDataDictionary() { { "checkboxname", "elearningcenter" }, { "checkboxid", "elearningcenter" } });
                         }
                         <p class="text-muted">You will host/care for students to assist e-learning during the school day</p>
                     </div>

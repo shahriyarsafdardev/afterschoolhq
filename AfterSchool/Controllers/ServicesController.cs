@@ -34,11 +34,14 @@ namespace AfterSchool.Controllers
             {
                 var cartItems = SessionVariables.Cart.GetCartItems(msgs);
                 var participationObjects = cartItems.Select(item => item.GetParticipationObject(msgs)).ToList();
-                var activities = new List<string>();
+                var ineligibleActivities = new List<string>();
 
                 participationObjects.ForEach(participationObject => {
-                    if (!participationObject.IsStudentGradeInRange(registrant, msgs))
-                        activities.Add($"{participationObject.Name}: {participationObject.GetMinGradeLevel(msgs).Abbreviation} - {participationObject.GetMaxGradeLevel(msgs).Abbreviation}");
+                    if ( participationObject.RestrictByGrade() && !participationObject.IsStudentGradeInRange(registrant, msgs))
+                        ineligibleActivities.Add($"Grades {participationObject.Name}: {participationObject.GetMinGradeLevel(msgs).Abbreviation} - {participationObject.GetMaxGradeLevel(msgs).Abbreviation}");
+
+                    if (!participationObject.RestrictByGrade() && !participationObject.IsStudentAgeInRange(registrant, msgs))
+                        ineligibleActivities.Add($"Ages {participationObject.Name}: {participationObject.AgeStart} - {participationObject.AgeEnd}");
                 });
 
                 if (msgs.HasNoErrors())
@@ -46,7 +49,7 @@ namespace AfterSchool.Controllers
                     {
                         status = "ok",
                         studentName = registrant.DisplayName,
-                        activities
+                        ineligibleActivities
                     }, JsonRequestBehavior.AllowGet);
             }
 

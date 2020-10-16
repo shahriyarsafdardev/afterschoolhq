@@ -1,0 +1,98 @@
+﻿@{ 
+    var restrictbygrade = (bool)ViewData["restrictbygrade"];
+    var grades = (List<GradeLevel>)ViewData["grades"];
+    var minGradeLevelId = (int?)ViewData["minGradeLevelId"];
+    var maxGradeLevelId = (int?)ViewData["maxGradeLevelId"];
+
+    var agestart = (int?)ViewData["agestart"];
+    var ageend = (int?)ViewData["ageend"];
+
+    if(!minGradeLevelId.HasValue && !minGradeLevelId.HasValue && !agestart.HasValue && !ageend.HasValue)
+    {
+        minGradeLevelId = grades.FirstOrDefault().ID.Value;
+        maxGradeLevelId = grades.FirstOrDefault().ID.Value;
+    }
+}
+
+    <div class="form-group">
+        <label class="col-lg-3 control-label">
+            Restrict by
+        </label>
+        <div class="col-lg-9">
+            <div class="am-radio inline">
+                <input type="radio" id="restrictby-grade" name="restrictbygrade" class="form-control" value="1" @(restrictbygrade ?  "checked=\"checked\"" : "")   />
+                <label for="restrictby-grade">Grade</label>
+            </div>
+            <div class="am-radio inline">
+                <input type="radio" id="restrictby-age" name="restrictbygrade" class="form-control" value="0"  @(!restrictbygrade ?  "checked=\"checked\"" : "")  />
+                <label for="restrictby-age">Age</label>
+            </div>
+        </div>
+    </div>
+    <div id="restrictbygrade" name="restrictbygrade">
+        @{
+            Html.RenderPartial(
+                "~/Views/Shared/_GradeRestrictions.cshtml",
+                null,
+                new ViewDataDictionary() {
+                    { "minGradeLevelId", minGradeLevelId },
+                    { "MaxGradeLevelId", maxGradeLevelId },
+                    { "grades", grades }, 
+                    { "showToggle", false } }
+                );
+        }
+    </div>
+
+    <div id="restrictbyage">
+        @{
+            Html.RenderPartial(
+                "~/Views/Shared/_AgeRestrictions.cshtml",
+                null,
+                new ViewDataDictionary() {
+                    { "ageStart", agestart },
+                    { "ageEnd", ageend }, 
+                    { "showToggle", false } }
+                );
+        }
+    </div>
+
+
+<script>
+    PageEvent.add(
+        PageEvent.AFTER_INIT,
+        function () {
+            $('#restrictby-grade').click(function () {
+                gradeOrAgeCheck();
+            });
+
+            $('#restrictby-age').click(function () {
+                gradeOrAgeCheck();
+            });
+
+            gradeOrAgeCheck();
+        }
+    );
+
+    function gradeOrAgeCheck() {
+
+        if ($('#restrictby-grade').is(':checked')) {
+            $('#restrictbyage').addClass('hide');
+            $('#restrictbygrade').removeClass('hide');
+            $('#agestart').val(null);
+            $('#ageend').val(null);
+            $('#mingrade').val(@minGradeLevelId);
+            $('#maxgrade').val(@maxGradeLevelId);
+       
+        } else {
+            $('#restrictbyage').removeClass('hide');
+
+            $('#restrictbygrade').addClass('hide');
+            $('#agestart').val(@agestart);
+            $('#ageend').val(@ageend);
+            $('#mingrade').val(null);
+            $('#maxgrade').val(null);
+      
+        }
+    }
+
+</script>

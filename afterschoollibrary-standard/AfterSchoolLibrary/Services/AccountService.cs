@@ -1636,6 +1636,8 @@ namespace AfterSchoolLibrary.Services
 
         public static Activity GetDefaultNewActivity(this Account account)
         {
+            var profile = account.GetAccountProfile();
+
             return new Activity
             {
                 WaitingListSeats = 0,
@@ -1645,6 +1647,12 @@ namespace AfterSchoolLibrary.Services
                 RegistrationModeId = RegistrationMode.Register,
                 AllowToPayLater = true,
                 MinSeatsRequired = 1,
+                GradeLevelStart = profile?.GradeLevelStart,
+                GradeLevelEnd = profile?.GradeLevelEnd,
+                GenderRestriction = profile.IsNotEmpty() ?profile.GenderRestriction : GenderRestrictionType.None,
+                AgeStart = profile?.AgeStart,
+                AgeEnd = profile?.AgeEnd
+
             };
         }
 

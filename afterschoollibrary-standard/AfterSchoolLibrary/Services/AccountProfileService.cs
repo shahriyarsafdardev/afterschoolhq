@@ -118,7 +118,7 @@ namespace AfterSchoolLibrary.Services
             return AccountProperty.LoadByAccountIdByAccountPropertyTypeId(profile.AccountId.Value, AccountPropertyType.Photo, msgs, dc);
         }
 
-        public static void UpdateProfile(this AccountProfile profile, string title = null, string headline = null, string about = null, string website = null, string opencovid = null, string elearningcenter = null, string mingrade = null, string maxgrade = null, string twitter = null, string facebook = null, string instagram = null, string linkedin = null, string youtube = null, string calendar = null, string genderrestriction = null, string profileemail = null, string profilephone = null, NameValueCollection savedAwards = null, NameValueCollection newAwards = null, NameValueCollection savedCertifications = null, NameValueCollection newCertifications = null, NameValueCollection servicesOffered = null, NameValueCollection timesOffered = null, NameValueCollection pricingOptions = null, NameValueCollection specialNeedsOfferings = null, string classifications = null, string softskills = null, string academicsubjects = null, string teachingmethods = null, string ahqapproved = null, string videoUrl = null, WebUser loggedInUser = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void UpdateProfile(this AccountProfile profile, string title = null, string headline = null, string about = null, string website = null, string opencovid = null, string elearningcenter = null, string mingrade = null, string maxgrade = null, string agestart = null, string ageend = null, string twitter = null, string facebook = null, string instagram = null, string linkedin = null, string youtube = null, string calendar = null, string genderrestriction = null, string profileemail = null, string profilephone = null, NameValueCollection savedAwards = null, NameValueCollection newAwards = null, NameValueCollection savedCertifications = null, NameValueCollection newCertifications = null, NameValueCollection servicesOffered = null, NameValueCollection timesOffered = null, NameValueCollection pricingOptions = null, NameValueCollection specialNeedsOfferings = null, string classifications = null, string softskills = null, string academicsubjects = null, string teachingmethods = null, string ahqapproved = null, string videoUrl = null, WebUser loggedInUser = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
             (
@@ -164,11 +164,37 @@ namespace AfterSchoolLibrary.Services
                         profile.GenderRestriction = (GenderRestrictionType)genderrestriction.ToInteger();
 
                     if (mingrade.IsInteger())
-                        profile.GradeLevelStart = mingrade.ToInteger();
-
+                    {
+                        if(mingrade.ToInteger() < 0)
+                            profile.GradeLevelStart = null;
+                        else
+                            profile.GradeLevelStart = mingrade.ToInteger();
+                    }
+                        
                     if (maxgrade.IsInteger())
-                        profile.GradeLevelEnd = maxgrade.ToInteger();
+                    {
+                        if(maxgrade.ToInteger() < 0)
+                            profile.GradeLevelEnd = null;
+                        else
+                            profile.GradeLevelEnd = maxgrade.ToInteger();
+                    }
 
+                    if (agestart.IsInteger())
+                    {
+                        if (agestart.ToInteger() < 0)
+                            profile.AgeStart = null;
+                        else
+                            profile.AgeStart = agestart.ToInteger();
+                    }
+
+                    if (ageend.IsInteger())
+                    {
+                        if(ageend.ToInteger() < 0)
+                            profile.AgeEnd = null;
+                        else
+                            profile.AgeEnd = ageend.ToInteger();
+                    }
+                        
                     if (opencovid.IsNumber())
                         profile.IsOpenDuringCovid = opencovid.ToBoolean();
 
@@ -365,6 +391,39 @@ namespace AfterSchoolLibrary.Services
             profile.LastModifiedBy = loggedInUser?.ID;
             profile.LastModifiedDate = DateTime.UtcNow;
             msgs.AddRange(profile.Save(dc));
+        }
+
+        public static int? GetAgeStart(this AccountProfile profile)
+        {
+            if (profile.AgeStart.HasValue)
+                return profile.AgeStart;
+
+            return null;
+        }
+
+        public static int? GetAgeEnd(this AccountProfile profile)
+        {
+            if (profile.AgeEnd.HasValue)
+                return profile.AgeEnd;
+
+            return null;
+        }
+
+        public static bool RestrictByGrade(this AccountProfile profile)
+        {
+            return profile.AgeStart.IsEmpty();
+        }
+
+        public static string PrintGenderRestrictions(this AccountProfile profile)
+        {
+            switch (profile.GenderRestriction)
+            {
+                case GenderRestrictionType.FemaleOnly:
+                    return "Girls";
+                case GenderRestrictionType.MaleOnly:
+                    return "Boys";
+            }
+            return "Co-Ed";
         }
     }
 }
