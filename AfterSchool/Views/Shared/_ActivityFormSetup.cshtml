@@ -207,7 +207,7 @@
                         Registration Form <span class="text-danger">*</span>
                     </label>
                     <div class="col-md-6" @if (!showManageForms) { <text> onclick="return showUpgradeMyPlan()"</text> }>
-                        <select name="form" id="form" class="form-control" @if (!showManageForms) { <text> disabled="disabled" </text> }>
+                        <select name="form" id="form" class="form-control" @(activeForm.IsNotEmpty() && forms.Any(m => m.ID == activeForm.FormId)  ? "required" : "") @if (!showManageForms) { <text> disabled="disabled" </text> }>
                             <option value="">Select Form...</option>
                             @if (showManageFormFields)
                             {
@@ -216,7 +216,7 @@
 
                             @foreach (var form in forms)
                             {
-                                <option value="@form.ID" @(activeForm?.FormId == form.ID ? " selected=\"selected\" " : "")>@form.Name</option>
+                                <option value="@form.ID" @(activeForm?.FormId == form.ID ? "selected=\"selected\"" : "")>@form.Name</option>
                             }
                         </select>
                     </div>
@@ -285,6 +285,8 @@
 
         checkPeriodVal();
         checkFormVal();
+
+        console.log('@activeForm.FormId')
 
     });
 
