@@ -207,7 +207,7 @@
                         Registration Form <span class="text-danger">*</span>
                     </label>
                     <div class="col-md-6" @if (!showManageForms) { <text> onclick="return showUpgradeMyPlan()"</text> }>
-                        <select name="form" id="form" class="form-control" @(activeForm.IsNotEmpty() ? "required" : "") @if (!showManageForms) { <text> disabled="disabled" </text> }>
+                        <select name="form" id="form" class="form-control" @if (!showManageForms) { <text> disabled="disabled" </text> }>
                             <option value="">Select Form...</option>
                             @if (showManageFormFields)
                             {
