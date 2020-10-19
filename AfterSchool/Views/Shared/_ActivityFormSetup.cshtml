@@ -20,6 +20,8 @@
     var showManageFormFields = forms.Count >= maxFormCount ? false : true;
 }
 
+<input id="hdnAdvanceSettingToggle" type="hidden" name="isAdvanceSettingEnabled" />
+
 <div class="panel panel-default panel-small-padding">
     <div class="panel-heading">
         Settings
@@ -205,7 +207,7 @@
                         Registration Form <span class="text-danger">*</span>
                     </label>
                     <div class="col-md-6" @if (!showManageForms) { <text> onclick="return showUpgradeMyPlan()"</text> }>
-                        <select name="form" id="form" class="form-control" required @if (!showManageForms) { <text> disabled="disabled" </text> }>
+                        <select name="form" id="form" class="form-control" @(activeForm.IsNotEmpty() ? "required" : "") @if (!showManageForms) { <text> disabled="disabled" </text> }>
                             <option value="">Select Form...</option>
                             @if (showManageFormFields)
                             {
