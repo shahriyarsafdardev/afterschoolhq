@@ -94,5 +94,27 @@ namespace AfterSchoolLibrary.Services
 
             return msgs;
         }
+
+        public static Package GetPackageWithFeatureLowestPrice(FeatureType feature, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            List<FeatureType> features = ((FeatureType[])Enum.GetValues(typeof(FeatureType))).ToList();
+
+            if (!feature.In(features))
+            {
+                msgs.Add("feature type does not exist", MessageType.Error);
+                return null;
+            }
+
+            List<Package> packages = Package.LoadByIsActive(true, msgs, dc);
+            packages.OrderBy(p => p.Price);
+
+            foreach (Package package in packages)
+            {
+                if (package.HasFeature(feature))
+                    return package;
+            }
+
+            return null;
+        }
     }
 }

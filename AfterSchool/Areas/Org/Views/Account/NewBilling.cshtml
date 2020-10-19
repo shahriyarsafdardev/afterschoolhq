@@ -3,6 +3,7 @@
     var msgs = (SystemMessages)ViewBag.Messages;
     var currentPackage = SessionVariables.AccountPackage;
     var packages = (List<Package>)ViewBag.Packages;
+    var suggestedPackage = (Package)ViewBag.SuggestedPackage;
     var returnUrl = "";
     if (ViewBag.ReturnUrl != null)
     {
@@ -54,7 +55,11 @@
                                             var yearlySelected = "";
                                             var current = "";
 
-                                            if (p.IsNotEmpty() && currentPackage.IsNotEmpty() && p.ID == currentPackage.PackageId)
+                                            if (suggestedPackage.IsNotEmpty() && suggestedPackage.ID == p.ID)
+                                            {                                 
+                                                monthlySelected = " checked=\"checked\" ";
+                                            }
+                                            else if (p.IsNotEmpty() && currentPackage.IsNotEmpty() && p.ID == currentPackage.PackageId)
                                             {
                                                 if (currentPackage.BillingPeriodTypeId == BillingPeriodType.Month)
                                                 {
