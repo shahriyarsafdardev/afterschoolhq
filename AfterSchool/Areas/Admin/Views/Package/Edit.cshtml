@@ -20,7 +20,7 @@
 
     <div class="panel panel-default">
         <div class="panel-body">
-            <form method="post" action="@Url.Action("edit", "package", new { id = @Model.ID })" class="form-horizontal">
+            <form id="frmPackageFeatures" method="post" action="@Url.Action("edit", "package", new { id = @Model.ID })" class="form-horizontal">
 
                 <div class="form-group">
                     <label class="col-sm-3 control-label">Package Name</label>
@@ -115,107 +115,18 @@
                     <div class="form-group">
                         <label class="col-sm-3 control-label">@type.ToString().SplitByUpperCase()</label>
                         <div class="col-sm-6">
-                            <input id="@type" type="number" class="form-control" name="@type" value="@value" min="0" step="1" required @readonlyAttr
+                            <input id="@type" type="number" class="form-control" name="@type" value="@value" min="0" step="0.1" required @readonlyAttr
+                                   placeholder="Starts from 0.1"
                                    onfocus="this.select()"
                                    oninput="this.value = !!this.value && Math.abs(this.value) >= 0 ? Math.abs(this.value) : null"/>
                         </div>
                     </div>
                 }
-
-                @*
-                <div class="form-group">
-                    <label class="col-sm-3 control-label"># of @UILabel.ActivityLabel(true)</label>
-                    <div class="col-sm-6">
-                        <input type="number" class="form-control" id="maxactivities" name="maxactivities" value="@Model.MaxActivities" onfocus="this.select()" step="1" required @readonlyAttr />
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-sm-3 control-label"># of @UILabel.RegistrantLabel(true) / @UILabel.ActivityLabel()</label>
-                    <div class="col-sm-6">
-                        <input type="number" class="form-control" id="maxregistrants" name="maxregistrants" value="@Model.MaxRegistrants" onfocus="this.select()" step="1" @readonlyAttr />
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-sm-3 control-label"># of User Accounts</label>
-                    <div class="col-sm-6">
-                        <input type="number" class="form-control" id="maxusers" name="maxusers" value="@Model.MaxUsers" onfocus="this.select()" step="1" @readonlyAttr />
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-sm-3 control-label">Has Messaging</label>
-                    <div class="col-sm-6">
-                        @{Html.RenderPartial(
-                          "~/Views/Shared/_SwitchButton.cshtml",
-                          Model.HasMessaging,
-                          new ViewDataDictionary()
-                          {
-                              { "checkboxname", "hasmessaging" },
-                              { "checkboxid", "hasmessaging" },
-                              { "disabled", Model.IsAnyAccountUsing() && false }
-                          });}
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-sm-3 control-label">Waiting List Management</label>
-                    <div class="col-sm-6">
-                        @{Html.RenderPartial(
-                          "~/Views/Shared/_SwitchButton.cshtml",
-                          Model.HasWaitingList,
-                          new ViewDataDictionary()
-                          {
-                              { "checkboxname", "haswaitinglist" },
-                              { "checkboxid", "haswaitinglist" },
-                              { "disabled", Model.IsAnyAccountUsing() && false }
-                          });}
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-sm-3 control-label">Has Custom Url</label>
-                    <div class="col-sm-6">
-                        @{Html.RenderPartial(
-                          "~/Views/Shared/_SwitchButton.cshtml",
-                          Model.HasCNameUrl,
-                          new ViewDataDictionary()
-                          {
-                              { "checkboxname", "hascnameurl" },
-                              { "checkboxid", "hascnameurl" },
-                              { "disabled", Model.IsAnyAccountUsing() && false }
-                          });}
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-sm-3 control-label">Take Attendance</label>
-                    <div class="col-sm-6">
-                        @{Html.RenderPartial(
-                          "~/Views/Shared/_SwitchButton.cshtml",
-                          Model.HasAttendance,
-                          new ViewDataDictionary()
-                          {
-                              { "checkboxname", "hasattendance" },
-                              { "checkboxid", "hasattendance" },
-                              { "disabled", Model.IsAnyAccountUsing() && false }
-                          });}
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-sm-3 control-label">Accept Payments</label>
-                    <div class="col-sm-6">
-                        @{Html.RenderPartial(
-                          "~/Views/Shared/_SwitchButton.cshtml",
-                          Model.HasPayments,
-                          new ViewDataDictionary()
-                          {
-                              { "checkboxname", "haspayments" },
-                              { "checkboxid", "haspayments" },
-                              { "disabled", Model.IsAnyAccountUsing() && false }
-                          });}
-                    </div>
-                </div>
-                    *@
+                
                 <div class="form-group">
                     <label class="col-sm-3 control-label"></label>
                     <div class="col-sm-6">
-                        <button type="submit" class="btn btn-primary">Save</button>
+                        <button id="btnSavePackage" type="submit" class="btn btn-primary" onclick="return processPackageSave();">Save</button>
                         <button type="reset" class="btn btn-default">Discard Changes</button>
                         <a href="@Url.Action("index", "package")" class="btn btn-default pull-right"><i class="icon icon-left s7-left-arrow"></i> Back to List</a>
                     </div>
@@ -226,3 +137,27 @@
 </div>
 
 
+@section Scripts
+{
+    <script src="~/Scripts/jquery.validate.js"></script>
+    <script type="text/javascript">
+        function processPackageSave() {
+            var btnSave = $('#btnSavePackage');
+            var formClaimProfile = $('#frmPackageFeatures');
+
+            if (formClaimProfile.valid()) {
+                btnSave.prop('disabled', true);
+                btnSave.html('...');
+                showLoader();
+
+                formClaimProfile.submit();
+            } else {
+                Notifications.showBar({
+                    title: 'Error',
+                    message: 'Form is not valid, please check all the required fields.',
+                    success: false
+                });
+            }
+        }
+    </script>
+}
