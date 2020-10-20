@@ -148,7 +148,7 @@
                             {
                                 if (gradeLevelStart.IsNotEmpty() && gradeLevelEnd.IsNotEmpty())
                                 {
-                                    <span>Serving @gradeLevelStart.Name - @gradeLevelEnd.Name Grade @genderrestriction</span>
+                                    <span>Serving @gradeLevelStart.Name - @gradeLevelEnd.Name Grade &bull; @genderrestriction</span>
                                     @renderEditButtion(Model, "grades")
                                 }
                             }
@@ -156,7 +156,7 @@
                             {
                                 if (ageStart.IsNotEmpty() && ageEnd.IsNotEmpty())
                                 {
-                                    <span>Serving Ages @ageStart - @ageEnd @genderrestriction</span>
+                                    <span>Serving Ages @ageStart - @ageEnd &bull; @genderrestriction</span>
                                     @renderEditButtion(Model, "grades")
                                 }
                             }
