@@ -35,7 +35,8 @@ namespace AfterSchoolLibrary.Models
 		public bool IsActive { get { return (bool)MDV["IsActive"].Value; } set { MDV["IsActive"].Value = value; } }
 		public bool IsAfterSchool { get { return (bool)MDV["IsAfterSchool"].Value; } set { MDV["IsAfterSchool"].Value = value; } }
 		public string StripeCustomerId { get { return (string)MDV["StripeCustomerId"].Value; } set { MDV["StripeCustomerId"].Value = value; } }
-		public int? DefaultFormId { get { return (int?)MDV["DefaultFormId"].Value; } set { MDV["DefaultFormId"].Value = value; } }
+        public string StripeDefaultCardId { get { return (string)MDV["StripeDefaultCardId"].Value; } set { MDV["StripeDefaultCardId"].Value = value; } }
+        public int? DefaultFormId { get { return (int?)MDV["DefaultFormId"].Value; } set { MDV["DefaultFormId"].Value = value; } }
 		public int? InterestFormId { get { return (int?)MDV["InterestFormId"].Value; } set { MDV["InterestFormId"].Value = value; } }
 		public string StripeUserId { get { return (string)MDV["StripeUserId"].Value; } set { MDV["StripeUserId"].Value = value; } }
 		public string TimeZone { get { return (string)MDV["TimeZone"].Value; } set { MDV["TimeZone"].Value = value; } }
@@ -102,7 +103,8 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "IsActive", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "IsAfterSchool", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "StripeCustomerId", System.Data.SqlDbType.NVarChar , "50");
-				_dp.Add(className, "DefaultFormId", System.Data.SqlDbType.Int);
+                _dp.Add(className, "StripeDefaultCardId", System.Data.SqlDbType.NVarChar, "50");
+                _dp.Add(className, "DefaultFormId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "InterestFormId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "StripeUserId", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "TimeZone", System.Data.SqlDbType.NVarChar , "30");
@@ -243,7 +245,11 @@ namespace AfterSchoolLibrary.Models
 			dps.Add(ObjectMap["StripeCustomerId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+            dps = new BasicLibrary.DataAccess.DatabaseParameters();
+            dps.Add(ObjectMap["StripeDefaultCardId"]);
+            msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+            dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["DefaultFormId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
@@ -547,7 +553,7 @@ namespace AfterSchoolLibrary.Models
         {
             get
             {
-                return false; // this.StripeDefaultCardId.IsNotEmpty();
+                return this.StripeDefaultCardId.IsNotEmpty();
             }
         }
 

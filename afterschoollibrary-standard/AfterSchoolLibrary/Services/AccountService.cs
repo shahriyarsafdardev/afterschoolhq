@@ -1488,7 +1488,7 @@ namespace AfterSchoolLibrary.Services
                 }
 
                 // could be changing same package with other plan, like monthly or yearly
-                if (activePackage.PackageId == p.ID && activePackage.BillingPeriodTypeId != billingPeriodType)
+                if (activePackage.IsNotEmpty() && activePackage.PackageId == p.ID && activePackage.BillingPeriodTypeId != billingPeriodType)
                     signupType = SignUpType.ChangeBillingPeriodType;
                 
                 //package changed
@@ -1637,8 +1637,8 @@ namespace AfterSchoolLibrary.Services
         public static int GetTrialDaysRemaining(this Account account, AccountPackage currentPackage, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var daysRemaining = 0;
-            var firstAccountPackage = account.GetAccountPackages(msgs, dc).OrderBy(x => x.StartDate.Value).First();
-            var daysSinceSignUp = (DateTime.UtcNow - firstAccountPackage.StartDate.Value).Days;
+            var package = account.GetActiveAccountPackage(msgs, dc);
+            var daysSinceSignUp = (DateTime.UtcNow - (package.StartDate.HasValue ? package.StartDate.Value : package.TrialStartDate.Value)).Days;
             if (daysSinceSignUp < currentPackage.GetFeature(FeatureType.TrialDays, msgs, dc).GetMaxValue() + 1) // they get the full last day
                 daysRemaining = (currentPackage.GetFeature(FeatureType.TrialDays, msgs, dc).GetMaxValue() - daysSinceSignUp).ToInteger();
 
@@ -2628,6 +2628,14 @@ namespace AfterSchoolLibrary.Services
                 if (source.IsNotEmpty())
                 {
                     StripeHelper.AttachSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null, msgs);
+
+                    //set this source id to account, which will work as a default card
+                    if (fromAccount.StripeDefaultCardId.IsEmpty())
+                    {
+                        fromAccount.StripeDefaultCardId = source.Id;
+                        fromAccount.Save();
+                    }
+
                     return source.Id;
                 }                
             }
