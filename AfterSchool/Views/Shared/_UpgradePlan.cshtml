@@ -23,8 +23,8 @@
         $('#app-body').addClass('overlay')
         $('#upgrade-my-plan').fadeIn();
 
-        if(name)
-            $('#gain-access').append(` to ${name}`);
+        if (name)
+            $('#gain-access').html(`Gain access to this feature by upgrading your plan to ${name}`);
   
         if(id)
             featureId = id;

@@ -26,6 +26,8 @@
     var accountPackage = SessionVariables.AccountPackage;
     var showAllowInvites = accountPackage.HasFeature(FeatureType.AllowInvites);
     var showStudentCRM = accountPackage.HasFeature(FeatureType.StudentCRM);
+    var allowInvitesPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowInvites);
+    var studentCRMPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.StudentCRM);
 }
 
 @{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
@@ -166,7 +168,7 @@
                             }
                             else
                             {
-                                <a href="#" class="btn btn-default btn-space" onclick="return showUpgradeMyPlan()" disabled="disabled">
+                                <a href="#" class="btn btn-default btn-space" onclick="return showUpgradeMyPlan('@(studentCRMPackage.Name)',@(studentCRMPackage.ID))" disabled="disabled">
                                     Add Student
                                 </a>
                             }
@@ -187,7 +189,7 @@
                             }
                             else
                             {
-                                <a href="#" class="btn btn-default btn-space" onclick="return showUpgradeMyPlan()" disabled="disabled">
+                                <a href="#" class="btn btn-default btn-space" onclick="return showUpgradeMyPlan('@(allowInvitesPackage.Name)',@(allowInvitesPackage.ID))" disabled="disabled">
                                     Invite Contacts
                                 </a>
                             }

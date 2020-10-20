@@ -95,9 +95,21 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
+        private static Package getFirstPackageWithFeatureFromPackages(FeatureType feature, List<Package> packages)
+        {
+            foreach (Package package in packages)
+            {
+                if (package.HasFeature(feature))
+                    return package;
+            }
+            return null;
+        }
+
         public static Package GetPackageWithFeatureLowestPrice(FeatureType feature, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             List<FeatureType> features = ((FeatureType[])Enum.GetValues(typeof(FeatureType))).ToList();
+            List<Package> packages = Package.LoadByIsActive(true, msgs, dc);
+            packages.OrderBy(p => p.Price);
 
             if (!feature.In(features))
             {
@@ -105,13 +117,32 @@ namespace AfterSchoolLibrary.Services
                 return null;
             }
 
+            Package packageWithFeature = getFirstPackageWithFeatureFromPackages(feature, packages);
+
+            if (packageWithFeature.IsNotEmpty())
+                return packageWithFeature;
+
+            return null;
+        }
+        
+        public static Package GetPackageWithAnyFeaturesLowestPrice(List<FeatureType> features, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            List<FeatureType> allFeatures = ((FeatureType[])Enum.GetValues(typeof(FeatureType))).ToList();
             List<Package> packages = Package.LoadByIsActive(true, msgs, dc);
             packages.OrderBy(p => p.Price);
 
-            foreach (Package package in packages)
+            foreach (FeatureType feature in features)
             {
-                if (package.HasFeature(feature))
-                    return package;
+                if (!feature.In(allFeatures))
+                {
+                    msgs.Add("feature type does not exist", MessageType.Error);
+                    return null;
+                }
+
+                Package packageWithFeature = getFirstPackageWithFeatureFromPackages(feature, packages);
+
+                if (packageWithFeature.IsNotEmpty())
+                    return packageWithFeature;
             }
 
             return null;

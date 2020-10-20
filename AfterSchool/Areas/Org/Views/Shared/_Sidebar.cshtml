@@ -1,6 +1,7 @@
 @{ 
     var controller = ViewContext.RouteData.Values["controller"].ToString().ToLower();
     var action = ViewContext.RouteData.Values["action"].ToString().ToLower();
+    var manageContactsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManageContacts);
 
     string homeactive = "",
         activityactive = "",
@@ -174,7 +175,7 @@
                         }
                         else
                         {
-                            <li class="@contactactive"><a href="#" onclick="return showUpgradeMyPlan()"><i class="icon s7-notebook"></i> Contacts</a></li>
+                            <li class="@contactactive"><a href="#" onclick="return showUpgradeMyPlan('@(manageContactsPackage.Name)',@(manageContactsPackage.ID))"><i class="icon s7-notebook"></i> Contacts</a></li>
                         }
 
                     }

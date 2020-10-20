@@ -1,6 +1,7 @@
 ﻿@{     
     var actionName = ViewContext.RouteData.Values["action"].ToString().ToLower();
     var showStudentCRM = SessionVariables.AccountPackage.HasFeature(FeatureType.StudentCRM);
+    var studentCRMPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.StudentCRM);
 }
 <div class="btn-toolbar">
     <div class="btn-group hidden-xs">
@@ -12,7 +13,7 @@
         }
         else
         {
-            <a href="#" class="btn btn-alt6@(actionName == "index" ? "-active" : "")"  onclick="return showUpgradeMyPlan()">
+            <a href="#" class="btn btn-alt6@(actionName == "index" ? "-active" : "")"  onclick="return showUpgradeMyPlan('@(studentCRMPackage.Name)',@(studentCRMPackage.ID))">
                 <i class="s7-graph2"></i>  Students
             </a>
         }
@@ -22,7 +23,7 @@
         </a>
     </div>
     <div class="hidden-lg hidden-sm hidden-md">
-        <select class="form-control" onchange="this.value == '#' ? showUpgradeMyPlan() : location.href = this.value;">
+        <select class="form-control" onchange="this.value == '#' ? showUpgradeMyPlan('@(studentCRMPackage.Name)'S,@(studentCRMPackage.ID)) : location.href = this.value;">
             <option value="">Navigation</option>
             @if (showStudentCRM)
             {
