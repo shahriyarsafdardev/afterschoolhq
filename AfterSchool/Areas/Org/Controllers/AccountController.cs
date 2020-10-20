@@ -1262,7 +1262,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult NewBilling(string id, string ReturnUrl)
+        public ActionResult NewBilling(string id, string ReturnUrl, string featureId)
         {
             var msgs = new SystemMessages();
 
@@ -1290,6 +1290,12 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var package = id.IsGuid() ? Package.LoadByUid(id.ToGuid()) : SessionVariables.AccountPackage?.ToPackage();
 
+            Package suggestedPackage = null;
+
+            if (featureId.IsNotEmpty() && featureId.IsInteger())
+                suggestedPackage = Package.Load(featureId.ToInteger(), msgs);
+
+            ViewBag.SuggestedPackage = suggestedPackage;
             ViewBag.Package = package;
             ViewBag.Packages = Package.LoadByIsActiveByIsAfterSchool(true, SessionVariables.IsAfterSchool.Value);
             ViewBag.Messages = new SystemMessages();
