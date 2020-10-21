@@ -19,7 +19,7 @@
 
 <script type="text/javascript">
     var featureId;
-    function showUpgradeMyPlan(name, id) {
+    function showUpgradeMyPlan(name, id, preventClose = false) {
         $('#app-body').addClass('overlay')
         $('#upgrade-my-plan').fadeIn();
 
@@ -28,6 +28,9 @@
   
         if(id)
             featureId = id;
+
+        if (preventClose)
+            $('.span-upgrade-modal-close').hide();
 
     };
 

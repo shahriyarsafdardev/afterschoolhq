@@ -169,15 +169,7 @@
 
                     @if (CanView(SessionVariables.AccountUserType, PermissionType.ContactsView))
                     {
-                        if (SessionVariables.AccountPackage.HasFeature(FeatureType.ManageContacts))
-                        {
-                            <li class="@contactactive"><a href="@Url.Action("index", "contact")"><i class="icon s7-notebook"></i> Contacts</a></li>
-                        }
-                        else
-                        {
-                            <li class="@contactactive"><a href="#" onclick="return showUpgradeMyPlan('@(manageContactsPackage.Name)',@(manageContactsPackage.ID))"><i class="icon s7-notebook"></i> Contacts</a></li>
-                        }
-
+                        <li class="@contactactive"><a href="@Url.Action("index", "contact")"><i class="icon s7-notebook"></i> Contacts</a></li>
                     }
                 </ul>
             </li>
