@@ -1531,10 +1531,13 @@ namespace AfterSchoolLibrary.Services
                             signupType == SignUpType.ChangeBillingPeriodType ||
                             signupType == SignUpType.ChangePackageDuringTrial)
                         {
-                            //cancel existing package
-                            
+                            //cancel existing package                            
                             amsgs.AddRange(currentPackage.CancelPackageWithStripe(account.StripeCustomerId , false, adc));
                         }
+
+                        //TODO: refactor with new logic of getPrice instead of GetPrices
+                        var priceListForPackage = StripeHelper.GetPrices(package.Uid.ToString(), "month", "", msgs);
+                        var priceId = priceListForPackage.IsNotEmpty() ? priceListForPackage.FirstOrDefault().Id : "";
 
                         if (msgs.HasNoErrors())
                         {
@@ -1565,7 +1568,8 @@ namespace AfterSchoolLibrary.Services
                                     newap.StartDate = DateTime.UtcNow;
                                 }
 
-                                amsgs.AddRange(newap.SaveWithStripe(account.StripeCustomerId, false, newStripePlanId, adc));
+                                
+                                amsgs.AddRange(newap.SaveWithStripe(account.StripeCustomerId, false, priceId, newStripePlanId, adc));
                             }
                             // if it has a trial date end in the future, then end it now if they are converting from trial
                             else if (currentPackage.TrialEndDate.HasValue && currentPackage.TrialEndDate.Value >= DateTime.Now)
@@ -1574,7 +1578,7 @@ namespace AfterSchoolLibrary.Services
                                 currentPackage.LastModifiedDate = DateTime.UtcNow;
                                 currentPackage.LastModifiedBy = loggedInUserId;
 
-                                amsgs.AddRange(currentPackage.SaveWithStripe(account.StripeCustomerId, true, null, adc));
+                                amsgs.AddRange(currentPackage.SaveWithStripe(account.StripeCustomerId, true, priceId, null, adc));
 
                                 newap = currentPackage;
                             }

@@ -428,6 +428,152 @@ namespace AfterSchoolLibrary.Billing
 
         #endregion
 
+        #region StripePrices
+
+        private static PriceService GetPriceService()
+        {
+            return new PriceService(StripeClient);
+        }
+
+        public static Stripe.Price GetPrice(string priceId, string stripeAccountId, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            //TODO: should not needed if we store price id in database
+            var priceGetOptions = new PriceGetOptions();
+            //priceGetOptions.ExtraParams = new Dictionary<string, object> { { "uId", priceId } };
+
+            var requestOptions = new RequestOptions();
+            if (stripeAccountId.IsNotEmpty())
+                requestOptions.StripeAccount = stripeAccountId;
+
+            Stripe.Price price = null;
+
+            try
+            {
+                price = GetPriceService().Get(priceId, priceGetOptions, requestOptions);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add($"No stripe product found with ID: {priceId}", MessageType.Notice, ex);
+            }
+
+            return price;
+        }
+
+
+        public static StripeList<Price> GetPrices(string productId, string recurringInterval, string stripeAccountId = "", SystemMessages msgs = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var priceListOptions = new PriceListOptions();
+            priceListOptions.Product = productId;
+            priceListOptions.Recurring = new PriceRecurringListOptions
+            {
+                Interval = recurringInterval, //https://stripe.com/docs/api/prices/object#price_object-recurring-interval
+            };
+
+            // TODO: metadata filter not working, so we have to store the price id and move this logic to GetPrice
+
+            //var priceUId = "";
+            //if (recurringInterval == "month")
+            //{
+            //    priceUId = $"price_{productId}";
+            //}
+            //else if (recurringInterval == "year")
+            //{
+            //    priceUId = $"pricePerYear_{productId}";
+            //}
+
+            //if (priceUId.IsNotEmpty())            
+            //    priceListOptions.ExtraParams = new Dictionary<string, object> { { "uId", priceUId } };
+
+            var requestOptions = new RequestOptions();
+            if (stripeAccountId.IsNotEmpty())
+                requestOptions.StripeAccount = stripeAccountId;
+
+            StripeList<Price> prices = null;
+
+            try
+            {
+                prices = GetPriceService().List(priceListOptions, requestOptions);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add($"No stripe product price found with product ID: {productId}", MessageType.Notice, ex);
+            }
+
+            return prices;
+        }
+
+        public static Stripe.Price CreatePrice(string productId, decimal unitPrice, string recurringInterval, Dictionary<string, string> metaData, SystemMessages msgs = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            Stripe.Price price = null;
+
+            var options = new PriceCreateOptions
+            {
+                Product = $"{productId}",
+                UnitAmountDecimal = unitPrice * 100, //TODO: *100 becuase unit amount taken in as 0.00
+                Currency = "usd",
+                Recurring = new PriceRecurringOptions
+                {
+                    Interval = recurringInterval, //https://stripe.com/docs/api/prices/object#price_object-recurring-interval
+                },
+            };
+
+            if (metaData.IsNotEmpty())
+                options.Metadata = metaData;
+
+            try
+            {
+                price = GetPriceService().Create(options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Price was not created", MessageType.UserError);
+            }
+
+            return price;
+        }
+
+        public static Stripe.Price UpdatePrice(string priceId, bool active, string recurringInterval, Dictionary<string, string> metaData, SystemMessages msgs)
+        {
+            // After prices are created, we can only update their metadata, nickname, and active fields.
+
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var options = new PriceUpdateOptions
+            {
+                Active = active,
+                Recurring = new PriceRecurringOptions
+                {
+                    Interval = recurringInterval, //https://stripe.com/docs/api/prices/object#price_object-recurring-interval
+                },
+            };
+
+            if (metaData.IsNotEmpty())
+                options.Metadata = metaData;
+
+            Stripe.Price price = null;
+
+            try
+            {
+                price = GetPriceService().Update(priceId, options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Price ({priceId}) was not updated", MessageType.UserError);
+            }
+
+            return price;
+        }
+
+        #endregion
+
         #region StripeProducts
 
         private static ProductService GetProductService()
@@ -1141,7 +1287,47 @@ namespace AfterSchoolLibrary.Billing
             return new Stripe.SubscriptionService(StripeClient);
         }
 
-        public static Stripe.Subscription CreateSubscription(string customerId, string planId, string sourceId, decimal? platformFeePercent, DateTime? startDate, string stripeAccountId, string stripeCouponId, Dictionary<string, string> metaData, SystemMessages msgs)
+        //public static Stripe.Subscription CreateSubscription(string customerId, string planId, string sourceId, decimal? platformFeePercent, DateTime? startDate, string stripeAccountId, string stripeCouponId, Dictionary<string, string> metaData, SystemMessages msgs)
+        //{
+        //    if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+        //    Stripe.Subscription subscription = null;
+
+        //    var options = new Stripe.SubscriptionCreateOptions
+        //    {
+        //        Customer = customerId,
+        //        CollectionMethod = "charge_automatically",
+        //        DefaultSource = sourceId,
+        //        Coupon = stripeCouponId,
+        //        Items = new List<SubscriptionItemOptions>() { new SubscriptionItemOptions() { Plan = planId, Quantity = 1 } },
+        //        Metadata = metaData,
+        //        Prorate = false,
+        //    };
+
+        //    if (startDate.Value.AddDays(-1).IsAfter(DateTime.UtcNow))
+        //        options.TrialEnd = startDate.Value.AddDays(-1);
+
+        //    if (stripeAccountId.IsNotEmpty())
+        //        options.TransferData = new SubscriptionTransferDataOptions()
+        //        {
+        //            Destination = stripeAccountId,
+        //            AmountPercent = 100 - (platformFeePercent * 100)                
+        //        };
+
+        //    try
+        //    {
+        //        subscription = GetSubscriptionService().Create(options);
+        //    }
+        //    catch (StripeException ex)
+        //    {
+        //        msgs.Add(ex.Message, MessageType.UserError, ex);
+        //        msgs.Add($"Subscription was not created", MessageType.UserError);
+        //    }
+
+        //    return subscription;
+        //}
+
+        public static Stripe.Subscription CreateSubscription(string customerId, string priceId, string sourceId, decimal? platformFeePercent, DateTime? startDate, string stripeAccountId, string stripeCouponId, Dictionary<string, string> metaData, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -1153,7 +1339,8 @@ namespace AfterSchoolLibrary.Billing
                 CollectionMethod = "charge_automatically",
                 DefaultSource = sourceId,
                 Coupon = stripeCouponId,
-                Items = new List<SubscriptionItemOptions>() { new SubscriptionItemOptions() { Plan = planId, Quantity = 1 } },
+                Items = new List<SubscriptionItemOptions>() { new SubscriptionItemOptions() { Price = priceId, Quantity = 1 } },
+                // AddInvoiceItems = new List<SubscriptionAddInvoiceItemOptions> { new SubscriptionAddInvoiceItemOptions { Price = priceId } }, //TODO: need to review, do we need invoices as per our flow
                 Metadata = metaData,
                 Prorate = false,
             };
@@ -1165,7 +1352,7 @@ namespace AfterSchoolLibrary.Billing
                 options.TransferData = new SubscriptionTransferDataOptions()
                 {
                     Destination = stripeAccountId,
-                    AmountPercent = 100 - (platformFeePercent * 100)                
+                    AmountPercent = 100 - (platformFeePercent * 100)
                 };
 
             try

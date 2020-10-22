@@ -178,7 +178,7 @@ namespace AfterSchoolLibrary.Services
                 // create the subscription on the stripe account (could be added to main account or connected account)
                 var subscription = Billing.StripeHelper.CreateSubscription(
                                     customerId: customer.Id,
-                                    planId: plan.StripePlanId,
+                                    priceId: "price_1Hf2A3CEgXQRZLhkn4i9GSBb", //TODO: dynamic price for subscription
                                     sourceId: sourceId,
                                     platformFeePercent: platformFeePercent,
                                     stripeAccountId: stripeAccountId,
