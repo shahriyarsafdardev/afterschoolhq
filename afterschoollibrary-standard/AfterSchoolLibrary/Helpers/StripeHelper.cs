@@ -1176,7 +1176,8 @@ namespace AfterSchoolLibrary.Billing
             {
                 options = new Stripe.SubscriptionUpdateOptions()
                 {
-                    CancelAt = DateTime.Now.AddSeconds(15)
+                    CancelAt = DateTime.Now.AddSeconds(15),
+                    ProrationDate = DateTime.Now
                 };
             }
 
