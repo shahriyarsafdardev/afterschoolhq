@@ -1167,6 +1167,8 @@ property: IsActive, bool, Bit
 property: IsPopular, bool, Bit
 property: IsAfterSchool, bool, Bit
 property: Uid, Guid, UniqueIdentifier
+property: StripePricePerMonthId, string, NVarChar "50"
+property: StripePricePerYearId, string, NVarChar "50"
 baseproperty: Name, required
 loadmethod: IsActive, List<>
 loadmethod: IsActive|IsAfterSchool, List<>

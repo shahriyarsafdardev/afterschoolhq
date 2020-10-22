@@ -547,6 +547,94 @@ namespace AfterSchoolLibrary.Billing
 
         #endregion
 
+        #region StripePrices
+        private static PriceService GetPriceService()
+        {
+            return new PriceService(StripeClient);
+        }
+
+        public static Stripe.Price CreatePrice(string productId, int amount, BillingPeriodType billingPeriodType, string stripeAccountId, Dictionary<string, string> metaData, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            Stripe.Price price = null;
+
+            var options = new PriceCreateOptions
+            {
+                Product = productId,
+                UnitAmount = amount,
+                Currency = "usd",
+                Recurring = new PriceRecurringOptions
+                {
+                    Interval = billingPeriodType.ToString(),
+                },
+            };
+
+            var requestOptions = new Stripe.RequestOptions();
+
+            if (stripeAccountId.IsNotEmpty())
+                requestOptions.StripeAccount = stripeAccountId;
+
+            if (metaData.IsNotEmpty())
+                options.Metadata = metaData;
+
+            try
+            {
+                price = GetPriceService().Create(options, requestOptions);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Product was not created", MessageType.UserError);
+            }
+
+            return price;
+        }
+
+        public static Stripe.Price GetPrice(string priceId, SystemMessages msgs)
+        {
+            Stripe.Price price = null;
+
+            try
+            {
+                price = GetPriceService().Get(priceId);
+            } 
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Unable to retrieve price", MessageType.ApiError);
+            }
+
+            return price;
+        }
+
+        public static SystemMessages DeletePrice(string priceId, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty())
+                msgs = new SystemMessages();
+
+            var options = new PriceUpdateOptions
+            {
+                   Active = false,
+            };
+
+            try
+            {
+                GetPriceService().Update(priceId, options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Unable to retrieve price", MessageType.ApiError);
+            }
+
+            return msgs
+        }
+
+
+
+        #endregion
+
         #region StripePlans
 
         private static PlanService GetPlanService()
