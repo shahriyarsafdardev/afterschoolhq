@@ -1159,14 +1159,27 @@ namespace AfterSchoolLibrary.Billing
             return subscription;
         }
 
-        public static SystemMessages CancelSubscription(string subscriptionId, string stripeAccountId)
+        public static SystemMessages CancelSubscription(string subscriptionId, string stripeAccountId, bool cancelAtPeriodEnd = true)
         {
             var msgs = new SystemMessages();
-            
-            var options = new Stripe.SubscriptionUpdateOptions()
+
+            Stripe.SubscriptionUpdateOptions options;
+
+            if(cancelAtPeriodEnd)
             {
-                CancelAtPeriodEnd = true
-            };
+                options = new Stripe.SubscriptionUpdateOptions()
+                {
+                    CancelAtPeriodEnd = true
+                };
+            }
+            else
+            {
+                options = new Stripe.SubscriptionUpdateOptions()
+                {
+                    CancelAt = DateTime.Now.AddSeconds(15)
+                };
+            }
+
 
             var requestOptions = new Stripe.RequestOptions();
             if (stripeAccountId.IsNotEmpty())

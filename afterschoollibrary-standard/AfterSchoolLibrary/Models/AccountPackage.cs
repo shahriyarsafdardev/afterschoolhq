@@ -298,13 +298,13 @@ namespace AfterSchoolLibrary.Models
             return this.Save(dc: dc);
         }
 
-        public SystemMessages CancelPackageWithStripe(string stripeCustomerId, DatabaseConnection dc = null)
+        public SystemMessages CancelPackageWithStripe(string stripeCustomerId, bool cancelAtPeriodEnd = true, DatabaseConnection dc = null)
         {
             var msgs = this.CancelPackage(dc: dc);
 
             if(this.StripeSubscriptionId.IsNotEmpty())
             {
-                msgs.AddRange(Billing.StripeHelper.CancelSubscription(this.StripeSubscriptionId, null));
+                msgs.AddRange(Billing.StripeHelper.CancelSubscription(this.StripeSubscriptionId, null, cancelAtPeriodEnd));
             }
 
             return msgs;

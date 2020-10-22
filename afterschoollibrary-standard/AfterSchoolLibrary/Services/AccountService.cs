@@ -1532,7 +1532,8 @@ namespace AfterSchoolLibrary.Services
                             signupType == SignUpType.ChangePackageDuringTrial)
                         {
                             //cancel existing package
-                            amsgs.AddRange(currentPackage.CancelPackage(adc));
+                            
+                            amsgs.AddRange(currentPackage.CancelPackageWithStripe(account.StripeCustomerId , false, adc));
                         }
 
                         if (msgs.HasNoErrors())
