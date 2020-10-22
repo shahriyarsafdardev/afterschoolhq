@@ -351,6 +351,7 @@ namespace AfterSchoolLibrary.Helpers
                     Migrations.SubscriberToPolymorphicRelationship_20200726.Do(amsgs, adc);
 
                     Migrations.UpdateActivityMessageRegistrants_20201012.Do(amsgs, adc);
+                    Migrations.MigratePackagesToUseStripePricesAPI_20201021.Do(amsgs, adc);
                     // Migrations.AddProfilesToAllAccounts_20200727.Do(amsgs, adc);
 
                     // amsgs.Add("rollback please", MessageType.Error);

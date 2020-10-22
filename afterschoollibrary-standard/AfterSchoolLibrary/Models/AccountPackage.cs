@@ -315,7 +315,7 @@ namespace AfterSchoolLibrary.Models
             return Package.Load(this.PackageId.Value, msgs, dc);
         }
 
-        public SystemMessages SaveWithStripe(string stripeCustomerId, bool upgradingFromTrial, string priceId, string newStripePlanId = null, DatabaseConnection dc = null)
+        public SystemMessages SaveWithStripe(string stripeCustomerId, bool upgradingFromTrial, string priceId, DatabaseConnection dc = null)
         {
             SystemMessages msgs = new SystemMessages();
 
@@ -323,12 +323,10 @@ namespace AfterSchoolLibrary.Models
 
             if (!stripeCustomerId.IsEmpty())
             {
-                // var service = new Stripe.StripeSubscriptionService(StripeHelper.SecretKey);
-
                 // first time, may have payment info
                 if (this.StripeSubscriptionId.IsEmpty())
                 {
-                    var subscription = Billing.StripeHelper.CreateSubscription(
+                    var subscription = Billing.StripeHelper.CreatePackageSubscription(
                         customerId: stripeCustomerId, 
                         priceId: priceId, //TODO: dynamic price for subscription
                         sourceId: null,
@@ -375,7 +373,7 @@ namespace AfterSchoolLibrary.Models
                     
                     Billing.StripeHelper.UpdateSubscription(
                         this.StripeSubscriptionId,
-                        newStripePlanId,
+                        priceId,
                         billingCycleAnchorNow,
                         billingCycleAnchorUnchanged,
                         endTrialNow,

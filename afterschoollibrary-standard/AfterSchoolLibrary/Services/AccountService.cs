@@ -1535,9 +1535,7 @@ namespace AfterSchoolLibrary.Services
                             amsgs.AddRange(currentPackage.CancelPackageWithStripe(account.StripeCustomerId , false, adc));
                         }
 
-                        //TODO: refactor with new logic of getPrice instead of GetPrices
-                        var priceListForPackage = StripeHelper.GetPrices(package.Uid.ToString(), "month", "", msgs);
-                        var priceId = priceListForPackage.IsNotEmpty() ? priceListForPackage.FirstOrDefault().Id : "";
+                        var priceId = billingPeriodType != BillingPeriodType.Month ? package.StripePricePerMonthId : package.StripePricePerYearId;
 
                         if (msgs.HasNoErrors())
                         {
@@ -1569,7 +1567,7 @@ namespace AfterSchoolLibrary.Services
                                 }
 
                                 
-                                amsgs.AddRange(newap.SaveWithStripe(account.StripeCustomerId, false, priceId, newStripePlanId, adc));
+                                amsgs.AddRange(newap.SaveWithStripe(account.StripeCustomerId, false, priceId, adc));
                             }
                             // if it has a trial date end in the future, then end it now if they are converting from trial
                             else if (currentPackage.TrialEndDate.HasValue && currentPackage.TrialEndDate.Value >= DateTime.Now)
@@ -1578,7 +1576,7 @@ namespace AfterSchoolLibrary.Services
                                 currentPackage.LastModifiedDate = DateTime.UtcNow;
                                 currentPackage.LastModifiedBy = loggedInUserId;
 
-                                amsgs.AddRange(currentPackage.SaveWithStripe(account.StripeCustomerId, true, priceId, null, adc));
+                                amsgs.AddRange(currentPackage.SaveWithStripe(account.StripeCustomerId, true, priceId, adc));
 
                                 newap = currentPackage;
                             }

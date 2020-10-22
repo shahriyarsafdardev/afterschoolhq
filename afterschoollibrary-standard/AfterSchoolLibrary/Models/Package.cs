@@ -261,7 +261,6 @@ namespace AfterSchoolLibrary.Models
             Stripe.Price yearlyPrice = null;
             msgs.AddRange(this.Save(dc: dc));
 
-            //add to stripe plan, should do on every save
             if (msgs.HasNoErrors())
             {
                 stripeProduct = AddOrUpdateStripeProduct(msgs);
@@ -269,23 +268,27 @@ namespace AfterSchoolLibrary.Models
 
             if (msgs.HasNoErrors() && stripeProduct.IsNotEmpty())
             {
+                
                 monthlyPrice = AddOrUpdateStripePrice(
                     stripeProduct.Id,
-                    null,
+                    this.StripePricePerMonthId,
                     this.Price.Value,
+                    this.Name,
                     BillingPeriodType.Month,
                     msgs);
 
                 yearlyPrice = AddOrUpdateStripePrice(
                     stripeProduct.Id,
-                    null,
+                    this.StripePricePerYearId,
                     this.PricePerYear.Value,
+                    this.Name,
                     BillingPeriodType.Year,
                     msgs);
             }
 
             if(msgs.HasNoErrors() && monthlyPrice.IsNotEmpty() && yearlyPrice.IsNotEmpty())
             {
+                // always want to save the price ids because updating the id creates a new one.
                 this.StripePricePerMonthId = monthlyPrice.Id;
                 this.StripePricePerYearId = yearlyPrice.Id;
             }
@@ -324,7 +327,7 @@ namespace AfterSchoolLibrary.Models
             return product;
         }
 
-        private Stripe.Price AddOrUpdateStripePrice(string productId, string priceId, decimal amount, BillingPeriodType billingPeriodType, SystemMessages msgs)
+        private Stripe.Price AddOrUpdateStripePrice(string productId, string priceId, decimal amount, string nickname, BillingPeriodType billingPeriodType, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -339,6 +342,7 @@ namespace AfterSchoolLibrary.Models
                 price = Billing.StripeHelper.CreatePrice(
                      productId,
                      amount,
+                     nickname,
                      billingPeriodType,
                      null,
                      new Dictionary<string, string>()
