@@ -247,23 +247,80 @@ namespace AfterSchoolLibrary.Models
 
             msgs.AddRange(this.Save(dc: dc));
 
-            //add to stripe plan, should do on every save
             if (msgs.HasNoErrors())
-            {
-                var monthlyProduct = AddOrUpdateStripeProduct(BillingPeriodType.Month, msgs);
-                var yearlyProduct = AddOrUpdateStripeProduct(BillingPeriodType.Year, msgs);
-
-                var monthlyPlan = AddOrUpdateStripePlan(monthlyProduct, this.Price.Value, BillingPeriodType.Month, msgs);
-                var yearlyPlan = AddOrUpdateStripePlan(yearlyProduct, this.PricePerYear.Value, BillingPeriodType.Year, msgs);
-            }
+                AddOrUpdateStripeProduct(msgs);
 
             return msgs;
+        }
+
+        private Stripe.Product AddOrUpdateStripeProduct(SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var product = Billing.StripeHelper.GetProduct(this.Uid.ToString(), null, msgs);
+
+            if (product.IsEmpty())
+            {
+                product = Billing.StripeHelper.CreateProduct(
+                    this.Uid.ToString(),
+                    this.Name.ToString(),
+                    $"{Helpers.Utilities.AppName(this.IsAfterSchool)} - {this.Name}".MaxChars(22),
+                    true,
+                    null,
+                    null,
+                    msgs);
+
+                //monthly price
+                Billing.StripeHelper.CreatePrice(product.Id, this.Price.Value, "month", new Dictionary<string, string> { { "uId", $"price_{this.Uid}" } }, msgs);
+
+                //yearly price
+                Billing.StripeHelper.CreatePrice(product.Id, this.PricePerYear.Value, "year", new Dictionary<string, string> { { "uId", $"pricePerYear_{this.Uid}" } }, msgs);
+            }
+            else
+            {
+                product = Billing.StripeHelper.UpdateProduct(
+                    this.Uid.ToString(),
+                    this.Name.ToString(),
+                    $"{Helpers.Utilities.AppName(this.IsAfterSchool)} - {this.Name}".MaxChars(22),
+                    true,
+                    null,
+                    msgs);
+
+                // TODO: Billy, Darye:- price api does not support update in amount directly, we might have to disable the exisiting price object first and then create a new price
+
+                //monthly price update
+                //var monthlyPrice = Billing.StripeHelper.GetPrice($"price_{product.Id}", "", msgs);
+                //if (monthlyPrice.IsNotEmpty())
+                //{
+                //    Billing.StripeHelper.UpdatePrice(monthlyPrice.Id, true, "month", new Dictionary<string, string> { { "uId", $"price_{product.Id}" } }, msgs);
+                //}
+
+            }
+
+            // AddOrUpdateStripeProductPrices(product, msgs);
+            return product;
+        }
+
+        private void AddOrUpdateStripeProductPrices(Stripe.Product product, SystemMessages msgs = null)
+        {
+            // TOdO : need to refactor, not usable at this moment
+            //var prices = Billing.StripeHelper.GetPrices("eb2e6d57-ad7c-4e86-9d12-09442b131afc");
+
+            var myDict = new Dictionary<string, string> { 
+                { "uId", $"price_{product.Id}" }
+            };
+
+            //monthly price
+            Billing.StripeHelper.CreatePrice(product.Id, this.Price.Value, "month", new Dictionary<string, string> { { "uId", $"price_{product.Id}" } }, msgs);
+
+            //yearly price
+            Billing.StripeHelper.CreatePrice(product.Id, this.PricePerYear.Value, "year", new Dictionary<string, string> { { "uId", $"pricePerYear_{product.Id}" } }, msgs);
         }
 
         private Stripe.Product AddOrUpdateStripeProduct(BillingPeriodType billingPeriodType, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
-            
+
             var product = Billing.StripeHelper.GetProduct(this.GetStripePlanId(billingPeriodType), null, msgs);
 
             if (product.IsEmpty())
