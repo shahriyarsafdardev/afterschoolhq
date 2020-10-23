@@ -567,7 +567,7 @@ namespace AfterSchoolLibrary.Billing
                 Nickname = nickname,
                 Recurring = new PriceRecurringOptions
                 {
-                    Interval = billingPeriodType.ToString(),
+                    Interval = billingPeriodType.ToString().ToLower(),
                 },
             };
 
@@ -1246,6 +1246,42 @@ namespace AfterSchoolLibrary.Billing
             return subscription;
         }
 
+        public static Stripe.Subscription UpdatePackageSubscription(string subscriptionId, string priceId, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            Stripe.Subscription subscription = null;
+
+            var options = new Stripe.SubscriptionUpdateOptions();
+
+            if (priceId.IsNotBlank())
+            {
+                options.Items = new List<Stripe.SubscriptionItemOptions>()
+                    {
+                        new Stripe.SubscriptionItemOptions()
+                        {
+                            Price = priceId,
+                        }
+                    };
+            }
+
+            // TODO: discuss with team. https://stripe.com/docs/api/subscriptions/update#update_subscription-proration_behavior
+            // options.Prorate = false;
+            options.ProrationBehavior = "none"; 
+
+            try
+            {
+                subscription = GetSubscriptionService().Update(subscriptionId, options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Subscription was not created", MessageType.UserError);
+            }
+
+            return subscription;
+        }
+
         /// <summary>
         /// will create a recurring subscription with no end date, and automatic charging
         /// </summary>
@@ -1297,10 +1333,8 @@ namespace AfterSchoolLibrary.Billing
             try
             {
                 var service = GetSubscriptionService();
-                if (subscription.IsNotEmpty())
-                {
-                    subscription = service.Update(subscription.Id, options, requestOptions);
-                }
+                if (service.IsNotEmpty())
+                    subscription = service.Update(subscriptionId, options, requestOptions);
                 
             }
             catch (StripeException ex)
@@ -1368,7 +1402,7 @@ namespace AfterSchoolLibrary.Billing
             }
             catch (StripeException ex)
             {
-                // msgs.Add($"No stripe subscription found with ID: {subscriptionId}", MessageType.Notice, ex);
+                msgs.Add($"No stripe subscription found with ID: {subscriptionId}", MessageType.Notice, ex);
             }
 
             return subscription;

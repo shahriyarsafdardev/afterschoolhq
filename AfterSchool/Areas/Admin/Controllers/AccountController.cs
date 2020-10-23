@@ -202,7 +202,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                                             timeZone: timezone,
                                             loggedInUser: currentUser,
                                             isAfterSchool: true,
-                                            createWithStripe: false,
+                                            createWithStripe: true,
                                             msgs: amsgs,
                                             dc: adc);
                             }

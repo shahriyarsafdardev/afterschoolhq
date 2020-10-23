@@ -1528,21 +1528,18 @@ namespace AfterSchoolLibrary.Services
                     if (signupType != SignUpType.NotSet)
                     {
                         if (signupType == SignUpType.ChangePackage ||
-                            signupType == SignUpType.ChangeBillingPeriodType ||
                             signupType == SignUpType.ChangePackageDuringTrial)
                         {
                             //cancel existing package                            
                             amsgs.AddRange(currentPackage.CancelPackageWithStripe(account.StripeCustomerId , false, adc));
                         }
 
-                        var priceId = billingPeriodType != BillingPeriodType.Month ? package.StripePricePerMonthId : package.StripePricePerYearId;
+                        var priceId = billingPeriodType == BillingPeriodType.Month ? package.StripePricePerMonthId : package.StripePricePerYearId;
 
                         if (msgs.HasNoErrors())
                         {
                             if (signupType != SignUpType.ConvertingFromTrial)
                             {
-                                var newStripePlanId = package.GetStripePlanId(billingPeriodType);
-
                                 //create new package
                                 newap.AccountId = account.ID;
                                 newap.PackageId = packageId;
@@ -1553,7 +1550,18 @@ namespace AfterSchoolLibrary.Services
                                 newap.LastModifiedBy = loggedInUserId;
                                 newap.IsActive = true;
                                 newap.Price = billingPeriodType == BillingPeriodType.Month ? package.Price : package.PricePerYear;
-                                newap.StripeSubscriptionId = currentPackage?.StripeSubscriptionId ?? null;
+
+                                newap.StripeSubscriptionId = null;
+
+                                if (currentPackage.IsNotEmpty() && 
+                                    currentPackage.StripeSubscriptionId.IsNotEmpty() && 
+                                    signupType != SignUpType.ChangePackage && 
+                                    signupType != SignUpType.ChangePackageDuringTrial)
+                                {
+                                    var subscription = StripeHelper.GetSubscription(currentPackage?.StripeSubscriptionId, "", msgs);
+                                    if (subscription.IsNotEmpty() && subscription.Status == "active")
+                                        newap.StripeSubscriptionId = subscription.Id;
+                                }   
 
                                 // set trial end date if there are still trial days
                                 if (trialDayCount > 0)

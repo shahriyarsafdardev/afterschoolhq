@@ -259,16 +259,11 @@ namespace AfterSchoolLibrary.Models
             Stripe.Product stripeProduct = null;
             Stripe.Price monthlyPrice = null;
             Stripe.Price yearlyPrice = null;
-            msgs.AddRange(this.Save(dc: dc));
 
-            if (msgs.HasNoErrors())
-            {
-                stripeProduct = AddOrUpdateStripeProduct(msgs);
-            }
+            stripeProduct = AddOrUpdateStripeProduct(msgs);
 
             if (msgs.HasNoErrors() && stripeProduct.IsNotEmpty())
-            {
-                
+            {                
                 monthlyPrice = AddOrUpdateStripePrice(
                     stripeProduct.Id,
                     this.StripePricePerMonthId,
@@ -286,11 +281,17 @@ namespace AfterSchoolLibrary.Models
                     msgs);
             }
 
-            if(msgs.HasNoErrors() && monthlyPrice.IsNotEmpty() && yearlyPrice.IsNotEmpty())
+            if(msgs.HasNoErrors())
             {
                 // always want to save the price ids because updating the id creates a new one.
-                this.StripePricePerMonthId = monthlyPrice.Id;
-                this.StripePricePerYearId = yearlyPrice.Id;
+                if (monthlyPrice.IsNotEmpty())
+                    this.StripePricePerMonthId = monthlyPrice.Id;
+
+                if (yearlyPrice.IsNotEmpty())
+                    this.StripePricePerYearId = yearlyPrice.Id;
+
+                if (monthlyPrice.IsNotEmpty() || yearlyPrice.IsNotEmpty())
+                    this.Save(dc);
             }
 
             return msgs;
@@ -331,11 +332,10 @@ namespace AfterSchoolLibrary.Models
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var price = Billing.StripeHelper.GetPrice(priceId, msgs);
+            Stripe.Price price = null;
 
-            // since we cant truly update prices, we set active = false on the existing one and create a new one on the product
-            if(price.IsNotEmpty())
-                Billing.StripeHelper.DeletePrice(priceId, msgs);
+            if (priceId.IsNotEmpty())
+                price = Billing.StripeHelper.GetPrice(priceId, msgs);
 
             if (msgs.HasNoErrors())
             {
@@ -394,7 +394,8 @@ namespace AfterSchoolLibrary.Models
 
         public string GetStripeProductId()
         {
-            return this.Uid.ToString() + this.Name;
+            return this.Uid.ToString();
+            // return this.Uid.ToString() + this.Name; //this gives error while creating package
         }
 
         public string GetStripeProductName()

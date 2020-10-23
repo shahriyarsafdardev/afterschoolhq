@@ -370,16 +370,18 @@ namespace AfterSchoolLibrary.Models
                             billingCycleAnchorUnchanged = true;
                         }
                     }
-                    
-                    Billing.StripeHelper.UpdateSubscription(
-                        this.StripeSubscriptionId,
-                        priceId,
-                        billingCycleAnchorNow,
-                        billingCycleAnchorUnchanged,
-                        endTrialNow,
-                        prorate,
-                        null,
-                        msgs);                   
+
+                    Billing.StripeHelper.UpdatePackageSubscription(this.StripeSubscriptionId, priceId, msgs);
+
+                    //Billing.StripeHelper.UpdateSubscription(
+                    //    this.StripeSubscriptionId,
+                    //    priceId,
+                    //    billingCycleAnchorNow,
+                    //    billingCycleAnchorUnchanged,
+                    //    endTrialNow,
+                    //    prorate,
+                    //    null,
+                    //    msgs);                   
                 }
             }
 
