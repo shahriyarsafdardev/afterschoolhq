@@ -341,7 +341,7 @@ namespace AfterSchoolLibrary.Models
             {
                 price = Billing.StripeHelper.CreatePrice(
                      productId,
-                     amount,
+                     amount * 100,
                      nickname,
                      billingPeriodType,
                      null,

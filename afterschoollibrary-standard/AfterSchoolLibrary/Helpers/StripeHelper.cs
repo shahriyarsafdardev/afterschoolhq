@@ -1250,9 +1250,13 @@ namespace AfterSchoolLibrary.Billing
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            Stripe.Subscription subscription = null;
+            Stripe.Subscription subscription = GetSubscriptionService().Get(subscriptionId);
 
-            var options = new Stripe.SubscriptionUpdateOptions();
+            var options = new Stripe.SubscriptionUpdateOptions() 
+            { 
+                ProrationBehavior = "always_invoice",
+                BillingCycleAnchor = SubscriptionBillingCycleAnchor.Now
+            };
 
             if (priceId.IsNotBlank())
             {
@@ -1260,14 +1264,11 @@ namespace AfterSchoolLibrary.Billing
                     {
                         new Stripe.SubscriptionItemOptions()
                         {
+                            Id = subscription.Items.Data[0].Id,
                             Price = priceId,
                         }
                     };
-            }
-
-            // TODO: discuss with team. https://stripe.com/docs/api/subscriptions/update#update_subscription-proration_behavior
-            // options.Prorate = false;
-            options.ProrationBehavior = "none"; 
+            } 
 
             try
             {

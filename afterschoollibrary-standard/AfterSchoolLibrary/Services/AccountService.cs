@@ -1534,7 +1534,13 @@ namespace AfterSchoolLibrary.Services
                             amsgs.AddRange(currentPackage.CancelPackageWithStripe(account.StripeCustomerId , false, adc));
                         }
 
+                        if (package.StripePricePerMonthId.IsEmpty() || package.StripePricePerYearId.IsEmpty())
+                        {
+                            package.SaveWithStripe(adc);
+                        }
+
                         var priceId = billingPeriodType == BillingPeriodType.Month ? package.StripePricePerMonthId : package.StripePricePerYearId;
+                           
 
                         if (msgs.HasNoErrors())
                         {
@@ -1576,6 +1582,9 @@ namespace AfterSchoolLibrary.Services
 
                                 
                                 amsgs.AddRange(newap.SaveWithStripe(account.StripeCustomerId, false, priceId, adc));
+
+                                if (amsgs.HasNoErrors() && currentPackage.IsNotEmpty())
+                                    amsgs.AddRange(currentPackage.CancelPackage(adc));
                             }
                             // if it has a trial date end in the future, then end it now if they are converting from trial
                             else if (currentPackage.TrialEndDate.HasValue && currentPackage.TrialEndDate.Value >= DateTime.Now)
