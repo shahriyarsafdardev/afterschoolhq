@@ -32,3 +32,13 @@
 .am-content-full {
     padding: 40px;
 }
+
+.main-content-activity {
+    height: 100%;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.margin-bottom-zero{
+    margin-bottom:0px !important;
+}

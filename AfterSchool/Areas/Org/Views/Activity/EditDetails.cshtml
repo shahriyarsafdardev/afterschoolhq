@@ -12,13 +12,13 @@
 
 @{ Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
 
-<div class="main-content">
+<div class="main-content-activity">
 
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
     @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model); }
 
-    <div class="panel panel-default">
+    <div class="panel panel-default margin-bottom-zero">
         <div class="panel-heading">
             @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Name); }
 
@@ -27,7 +27,7 @@
                 Html.RenderPartial("_ExitFullScreen", "");
             }
         </div>
-        <div class="panel-body">
+        <div class="panel-body padding-lr-zero-sm">
 
             <div class="col-md-10 col-lg-9">
                 <form id="form1" method="post" action="@Url.Action("editdetails", "activity", new { id = Model.Uid, isnew = Request["isnew"], source = Request["source"] })" class="form-horizontal">

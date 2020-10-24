@@ -21,4 +21,10 @@
         color: white;
         display: none;
     }
+
+    .main-content-activity {
+        padding-left: 15px;
+        padding-right: 15px;
+        padding-top: 20px;
+    }
 }
