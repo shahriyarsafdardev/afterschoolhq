@@ -966,6 +966,17 @@ namespace AfterSchoolLibrary.Services
             return new List<Stripe.Source>();
         }
 
+        public static List<Stripe.Card> GetStripeCards(this Account account, SystemMessages msgs = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            var customer = account.GetStripeCustomer(msgs);
+
+            if (customer.IsNotEmpty())
+                return StripeHelper.GetCards(customer.Id, msgs);
+
+            return new List<Stripe.Card>();
+        }
+
         public static List<Stripe.BankAccount> GetStripeBankAccounts(this Account account, SystemMessages msgs = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -2660,6 +2671,30 @@ namespace AfterSchoolLibrary.Services
                 }                
             }
             
+            return customer.DefaultSourceId;
+        }
+
+        public static string CreateStripeCardFromToken(this Account fromAccount, string stripeToken, Stripe.Customer customer, SystemMessages msgs)
+        {
+            if (customer.IsEmpty())
+                customer = StripeHelper.GetCustomer(fromAccount.StripeCustomerId, null, msgs);
+
+            if (stripeToken.IsNotEmpty())
+            {
+                var card = StripeHelper.AddNewCardToCustomer(customer.Id, stripeToken, null, msgs);
+                if (card.IsNotEmpty())
+                {
+                    //set this card id to account, which will work as a default card
+                    if (fromAccount.StripeDefaultCardId.IsEmpty())
+                    {
+                        fromAccount.StripeDefaultCardId = card.Id;
+                        fromAccount.Save();
+                    }
+
+                    return card.Id;
+                }
+            }
+
             return customer.DefaultSourceId;
         }
 

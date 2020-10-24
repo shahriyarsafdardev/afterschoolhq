@@ -1021,6 +1021,33 @@ namespace AfterSchoolLibrary.Billing
             return source;
         }
 
+        public static Stripe.Card AddNewCardToCustomer(string customerId, string token, string stripeAccountId, SystemMessages msgs)
+        {
+            var options = new Stripe.CardCreateOptions()
+            {
+                Source = token
+            };
+
+            var requestOptions = new Stripe.RequestOptions();
+
+            if (stripeAccountId.IsNotEmpty())
+                requestOptions.StripeAccount = stripeAccountId;
+
+            Stripe.Card card = null;
+
+            try
+            {
+                card = GetCardService().Create(customerId, options, requestOptions);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Customer ({customerId}) was not updated", MessageType.UserError);
+            }
+
+            return card;
+        }
+
         public static Stripe.Card AddNewCardToCustomer(string customerId, Stripe.Source source, string stripeAccountId, SystemMessages msgs)
         {
             var options = new Stripe.CardCreateOptions()
@@ -1215,13 +1242,27 @@ namespace AfterSchoolLibrary.Billing
             {
                 Customer = customerId,
                 CollectionMethod = "charge_automatically",
-                DefaultSource = sourceId,
-                Coupon = stripeCouponId,
-                Items = new List<SubscriptionItemOptions>() { new SubscriptionItemOptions() { Price = priceId, Quantity = 1 } },
-                // AddInvoiceItems = new List<SubscriptionAddInvoiceItemOptions> { new SubscriptionAddInvoiceItemOptions { Price = priceId } }, //TODO: need to review, do we need invoices as per our flow
                 Metadata = metaData,
                 Prorate = false,
             };
+
+            if (sourceId.IsNotEmpty())
+                options.DefaultSource = sourceId;
+
+            if (priceId.IsNotBlank())
+            {
+                options.Items = new List<Stripe.SubscriptionItemOptions>()
+                    {
+                        new Stripe.SubscriptionItemOptions()
+                        {
+                            Price = priceId,
+                            Quantity = 1
+                        }
+                    };
+            }
+
+            if (stripeCouponId.IsNotEmpty())
+                options.Coupon = stripeCouponId;
 
             if (startDate.Value.AddDays(-1).IsAfter(DateTime.UtcNow))
                 options.TrialEnd = startDate.Value.AddDays(-1);

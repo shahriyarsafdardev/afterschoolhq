@@ -1256,7 +1256,7 @@ namespace AfterSchool.Areas.Org.Controllers
             Account a = SessionVariables.CurrentAccount;
             ViewBag.BillingHistory = a.GetStripeBillingHistory();
             ViewBag.RefundHistory = a.GetStripeRefundHistory();
-            ViewBag.Sources = a.GetStripeSources();            
+            ViewBag.Cards = a.GetStripeCards();
             ViewBag.Messages = new SystemMessages();
             return View(a);
         }
@@ -1362,8 +1362,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                         
                     customer = currentAccount.CreateStripeCustomer();
 
-                    // this will create the credit card source and attach it to the current StripeCustomerId
-                    currentAccount.CreateStripeSourceFromToken(stripetoken, customer, msgs);
+                    currentAccount.CreateStripeCardFromToken(stripetoken, customer, msgs);
 
                     if (amsgs.HasNoErrors())
                         newlyAddedPackage = currentAccount.AddPackage(package.ID.Value, billingPeriod, SessionVariables.LoggedInUser, amsgs, adc);                      
@@ -1393,7 +1392,7 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 ViewBag.BillingHistory = currentAccount.GetStripeBillingHistory();
                 ViewBag.RefundHistory = currentAccount.GetStripeRefundHistory();
-                ViewBag.Sources = currentAccount.GetStripeSources();
+                ViewBag.Cards = currentAccount.GetStripeCards();
                 return View("Billing", currentAccount);
             }
             else
@@ -1468,6 +1467,31 @@ namespace AfterSchool.Areas.Org.Controllers
             SessionVariables.CurrentAccount.DisconnectStripeConnect(SessionVariables.CurrentUser, msgs);
 
             return RedirectToAction("PaymentsOptions");
+        }
+
+        public ActionResult SetDefaultCard(string id)
+        {
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+
+            if (id.IsBlank())
+                msgs.Add("Card not found.", MessageType.UserError);
+            
+            if (msgs.HasNoErrors())
+            {                
+                var customer = currentAccount.GetStripeCustomer(msgs);
+                StripeHelper.UpdateCustomerDefaultCard(customer.Id, null, id);
+
+                currentAccount.StripeDefaultCardId = id;
+                currentAccount.Save();
+            }
+
+            ViewBag.BillingHistory = currentAccount.GetStripeBillingHistory();
+            ViewBag.RefundHistory = currentAccount.GetStripeRefundHistory();
+            ViewBag.Cards = currentAccount.GetStripeCards();
+            ViewBag.Messages = msgs;
+
+            return View("Billing", currentAccount);
         }
     }
 }
