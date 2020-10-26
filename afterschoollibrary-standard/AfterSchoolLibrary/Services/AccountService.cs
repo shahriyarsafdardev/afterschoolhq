@@ -1008,7 +1008,7 @@ namespace AfterSchoolLibrary.Services
 
         public static Stripe.Customer GetStripeCustomer(this Account account, SystemMessages msgs)
         {
-            if (!account.StripeCustomerId.IsEmpty())
+            if (account.StripeCustomerId.IsNotEmpty())
                 return StripeHelper.GetCustomer(account.StripeCustomerId, null, msgs);
 
             return null;
@@ -2918,6 +2918,7 @@ namespace AfterSchoolLibrary.Services
                     var isRegFree = checkoutObject.ParticipationObject.IsRegistrationFree;
                     var hasPaymentPlan = checkoutObject.PaymentPlan.IsNotEmpty();
                     var hasSubscription = checkoutObject.SubscriptionPlan.IsNotEmpty();
+                    var hasPostPayPlan = checkoutObject.PostPayPlan.IsNotEmpty();
                     var alreadyPaidRegFee = submittedRecord.GetAmountPaid(msgs, dc) > 0;
 
                     if (!isRegFree && !hasPaymentPlan && !alreadyPaidRegFee)
@@ -2932,6 +2933,9 @@ namespace AfterSchoolLibrary.Services
                             loggedInUser: loggedInUser,
                             msgs: amsgs,
                             dc: adc);
+
+                    if (hasPostPayPlan)
+                        AccountService.StorePaymentInfo(checkoutObject, loggedInUser, amsgs, adc);
 
                     // if they have a payment plan
                     if (hasPaymentPlan)
@@ -2977,6 +2981,25 @@ namespace AfterSchoolLibrary.Services
                 dc: dc
             );
 
+        }
+
+        public static void StorePaymentInfo(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (checkoutObject.StripeSourceId.IsEmpty())
+                checkoutObject.LoadStripeSource(msgs);
+
+            var costPerClass = checkoutObject.ParticipationObject.GetPostPayCostWithConvenienceFee();
+
+            if (checkoutObject.PaymentType == PaymentType.CreditCard)
+                costPerClass += checkoutObject.ParticipationObject.GetPostPayCreditCardFee(FeesPaidByType.Parent);
+
+            checkoutObject.Registration.SavePaymentSource(
+                checkoutObject.StripeSourceId, 
+                checkoutObject.PaymentType,
+                costPerClass,
+                loggedInUser, 
+                msgs, 
+                dc);
         }
 
         public static void ProcessPayment(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)

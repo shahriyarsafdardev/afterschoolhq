@@ -26,6 +26,7 @@ namespace AfterSchoolLibrary.Models
         public RegistrationPeriod RegistrationPeriod { get; set; }
         public List<SubscriptionPlan> PaymentPlans { get; set; }
         public List<SubscriptionPlan> SubscriptionPlans { get; set; }
+        public List<SubscriptionPlan> PostPayPlans { get; set; }
         public string UniqueName { get; set; }
         public RegistrationMode RegistrationMode { get; set; }
         public Form Form { get; set; }
@@ -147,7 +148,8 @@ namespace AfterSchoolLibrary.Models
                 UseStripeConnectedAccount = PaymentAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
                 PaymentPlans = activity.GetActivePaymentPlans(msgs, dc);
                 SubscriptionPlans = activity.GetActiveSubscriptionPlans(msgs, dc);
-                IsFree = IsRegistrationFree && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0;
+                PostPayPlans = activity.GetActivePostPayPlans(msgs, dc);
+                IsFree = IsRegistrationFree && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0 && PostPayPlans.Count == 0;
                 StartDate = activity.GetFirstDate(msgs, dc);
                 EndDate = activity.GetLastDate(msgs, dc);
             }
@@ -682,6 +684,38 @@ namespace AfterSchoolLibrary.Models
             msgs.AddRange(payment.Save(dc));
 
             return payment;
+        }
+
+        public decimal GetPostPayCost()
+        {
+            if (this.PostPayPlans.Any() && this.PostPayPlans.First().CostPerPeriod.HasValue)
+                return this.PostPayPlans.First().CostPerPeriod.Value;
+
+            return 0;
+        }
+
+        public decimal GetPostPayCostWithConvenienceFee()
+        {
+            if (this.PostPayPlans.Any() && this.PostPayPlans.First().CostPerPeriod.HasValue)
+                return this.PostPayPlans.First().CostPerPeriod.Value + GetPostPayConvenienceFee(FeesPaidByType.Parent);
+
+            return 0;
+        }
+
+        public decimal GetPostPayConvenienceFee(FeesPaidByType feesPaidByType)
+        {
+            if (this.PostPayPlans.Any() && this.PostPayPlans.First().CostPerPeriod.HasValue && PaymentAccount.ConvenienceFeesPaidBy == feesPaidByType)
+                return Billing.Platform.GetConvenienceFee(this.PostPayPlans.First().CostPerPeriod.Value);
+
+            return 0;
+        }
+
+        public decimal GetPostPayCreditCardFee(FeesPaidByType feesPaidByType)
+        {
+            if (this.PostPayPlans.Any() && this.PostPayPlans.First().CostPerPeriod.HasValue && PaymentAccount.CreditCardFeesPaidBy == feesPaidByType)
+                return Billing.Platform.GetCreditCardFee(this.PostPayPlans.First().CostPerPeriod.Value, PaymentAccount);
+
+            return 0;
         }
 
         public decimal GetCheckoutCostWithConvenienceFee()

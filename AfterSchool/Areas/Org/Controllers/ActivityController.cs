@@ -834,6 +834,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.CanProcessPayments = canProcessPayments;
             ViewBag.PaymentPlan = activity.GetPaymentPlan();
             ViewBag.SubscriptionPlan = activity.GetSubscriptionPlan();
+            ViewBag.PostPayPlan = activity.GetPostPayPlan();
             ViewBag.ActiveMenu = "EditCost";
             ViewBag.IsFullScreen = GetIsFullScreen(activity);
             ViewBag.hasSchedule = activity.HasSchedule;
@@ -849,7 +850,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditCost(string id, string cost, string costdescription, string acceptpaypal, string acceptcreditcard, string allowtopaylater, string cmd, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, string paymentplanpaymentstarttype, string splitcostevenly, string regfeedownpayment)
+        public ActionResult EditCost(string id, string cost, string costdescription, string acceptpaypal, string acceptcreditcard, string allowtopaylater, string cmd, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, string paymentplanpaymentstarttype, string splitcostevenly, string regfeedownpayment, string haspostpayplan, string postpaycost)
         {
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid());
@@ -873,6 +874,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "paymentplanpaymentstarttype", paymentplanpaymentstarttype },
                     { "splitcostevenly", splitcostevenly.IsBoolean().ToString() },
                     { "regfeedownpayment", regfeedownpayment.IsBoolean().ToString() },
+                    { "haspostpayplan", haspostpayplan.IfBlank("0") },
+                    { "postpaycost", postpaycost },
                 };
 
                 activity = ActivityService.EditExisting(

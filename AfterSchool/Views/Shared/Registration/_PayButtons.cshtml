@@ -4,6 +4,12 @@
     var acceptACH = (bool)ViewData["acceptACH"];
     var formActionUrl = (string)ViewData["formActionUrl"];
     var participationObject = (ParticipationObject)ViewData["participationObject"];
+    var showPayButtonAmount = true;
+
+    if (participationObject.IsRegistrationFree && participationObject.PostPayPlans.Any())
+    {
+        showPayButtonAmount = false;
+    }
 }
 
 <div class="margin-t-20 padding-v-20">
@@ -49,8 +55,11 @@
                             </div>
                             <div class="form-group">
                                 <button type="submit" class="btn btn-register-primary btn-lg btn-pay" id="btn-paywithexistingach">
-                                    Pay via ACH -
-                                    <span class="total-due-today-ach"></span>*
+                                    Pay via ACH
+                                    <span class="pay-button-amount @(!showPayButtonAmount ? "hide" : "")">
+                                        -
+                                        <span class="total-due-today-ach"></span>*
+                                    </span>
                                     &raquo;
                                 </button>
                             </div>
@@ -70,8 +79,11 @@
                         Clicking "Pay via ACH" will allow you to connect and pay using your bank account. After you login and select the account to use, it will checkout and complete your purchase using your bank account information.
                     </p>
                     <button id="plaid-button" class="btn btn-register@(bankAccounts.Any() ? "-default" : "-primary") btn-lg btn-pay">
-                        Pay via ACH -
-                        $<span class="total-due-today-ach"></span>*
+                        Pay via ACH
+                        <span class="pay-button-amount @(!showPayButtonAmount ? "hide" : "")">
+                            -
+                            $<span class="total-due-today-ach"></span>*
+                        </span>
                         &raquo;
                     </button>
 
@@ -93,7 +105,7 @@
 
         <div class="text-center">
             <p class="text-large">Pay using a credit card</p>
-            <p class="text-medium-small"><strong>$<span class="total-fee-ccf">0</span> Transaction Fee</strong></p>
+            <p class="text-medium-small"> @(showPayButtonAmount ? "" : "Credt card transactions will be charged an additional")  <strong>$<span class="total-fee-ccf">0</span> Transaction Fee</strong></p>
             <p class="text-muted text-center">Credit card transaction fees are non-refundable</p>
         </div>
 
@@ -129,8 +141,11 @@
                         </div>
                         <div class="form-group">
                             <button type="submit" class="btn btn-register-default btn-lg btn-pay" id="btn-paywithexistingcard">
-                                Pay via Card -
-                                $<span class="total-due-today-cc"></span>*
+                                Pay via Card
+                                <span class="pay-button-amount @(!showPayButtonAmount ? "hide" : "")">
+                                    -
+                                    $<span class="total-due-today-cc"></span>*
+                                </span>
                                 &raquo;
                             </button>
                         </div>
@@ -179,8 +194,11 @@
 
                     <div class="form-group padding-v-20">
                         <button type="button" id="btn-paywithnewcard" class="btn btn-register-default btn-lg btn-pay">
-                            Pay via Card -
-                            $<span class="total-due-today-cc"></span>*
+                            Pay via Card
+                            <span class="pay-button-amount @(!showPayButtonAmount ? "hide" : "")">
+                                -
+                                $<span class="total-due-today-cc"></span>*
+                            </span>
                             &raquo;
                         </button>
                     </div>

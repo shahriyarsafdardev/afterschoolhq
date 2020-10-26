@@ -11,6 +11,7 @@
     var accountCanAcceptPayments = (bool)ViewBag.AccountCanAcceptPayments;
     var paymentAccount = participationObject.PaymentAccount;
     var subscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault();
+    var postPayPlan = participationObject.PostPayPlans.FirstOrDefault();
     var registrant = registration.GetRegistrant();
     var readyToAcceptPayment = subscriptionPlan.IsEmpty() || !subscriptionPlan.SplitCostEvenly || participationObject.RegistrationFinalized;
 }
@@ -75,12 +76,19 @@
                     </p>
                 }
                 else
-                { 
+                {
                     <span id="payment-plan-cost-0" class="hide">@participationObject.GetCheckoutCostWithConvenienceFee()</span>
                     <span id="payment-plan-asf-0" class="hide">0</span>
                     if (subscriptionPlan.IsEmpty() || !subscriptionPlan.SplitCostEvenly || !participationObject.RegistrationFinalized)
                     {
-                        <span id="payment-plan-ccf-0" class="hide">@participationObject.GetCreditCardFee(FeesPaidByType.Parent)</span>
+                        if (postPayPlan.IsNotEmpty())
+                        {                            
+                            <span id="payment-plan-ccf-0" class="hide">@participationObject.GetPostPayCreditCardFee(FeesPaidByType.Parent)</span>
+                        }
+                        else
+                        {
+                            <span id="payment-plan-ccf-0" class="hide">@participationObject.GetCreditCardFee(FeesPaidByType.Parent)</span>
+                        }
                     }
                     else
                     {
@@ -172,6 +180,19 @@
                                         <p>Pay @PrintSubscriptionCost(subscriptionPlan, participationObject, false)</p>
                                     }
                                     <hr />
+                                </div>
+                            </div>
+                        }
+                        else if (postPayPlan.IsNotEmpty())
+                        {
+                            <div class="row">
+                                <div class="col-md-6 col-md-offset-3 col-sm-12 text-center text-medium-small">
+                                    <p>
+                                        The cost will be <span class="text-bold">@participationObject.GetPostPayCostWithConvenienceFee().ToCurrency()</span> per class attended.
+                                    </p>
+                                    <p>
+                                        Your payment information will be stored on file.
+                                    </p>
                                 </div>
                             </div>
                         }
@@ -309,7 +330,7 @@
                             <hr />
                         </div>
                     </div>
-                    
+
                     Html.RenderPartial(
                         "~/Views/Shared/Registration/_PayButtons.cshtml",
                         new ViewDataDictionary()
@@ -319,7 +340,7 @@
                             { "formActionUrl", Url.Action("payment", "account", new { id = registration.Uid }) },
                             { "acceptACH", true },
                             { "participationObject", participationObject }
-                        }
+                }
                     );
 
                     @* ALLOW TO PAY LATER *@
