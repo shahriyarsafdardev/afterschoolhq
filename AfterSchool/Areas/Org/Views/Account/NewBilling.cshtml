@@ -125,7 +125,7 @@
                                         @foreach (var card in cards)
                                         {
                                             <option value="@card.Id">
-                                                @card.Name,  **** **** **** @card.Last4 @card.Brand, @card.ExpMonth / @card.ExpYear
+                                                @card.Brand,  **** **** **** @card.Last4, @card.Name, @card.ExpMonth / @card.ExpYear
                                             </option>
                                         }
                                     </select>
@@ -266,7 +266,7 @@
                 // ..if card valud > 0, existing card
 
                 if (hiddenStripeCard) {
-                    if (hiddenStripeCard.val() == -1) {
+                    if (hiddenStripeCard.val() == -1 || hiddenStripeCard.val() == "") {
                         Notifications.showBar({
                             title: 'Error',
                             message: 'Please enter valid card to proceed further.',
@@ -277,12 +277,48 @@
                     } else if (hiddenStripeCard.val() == 0) {
                         validateAddNewCard();
                     }
-                    else if (hiddenStripeCard.val() > 0) {
+                    else {
                         showLoader();
                         submitForm();
                     }
                 }
             });
+
+            // ..due to stripe element, this function will come here in AFTER_INIT
+            function validateAddNewCard() {
+                var name = $('#new_billing_name').val();
+                if (name == null || name == undefined || name.length < 3) {
+                    Notifications.showBar({
+                        title: 'Error',
+                        message: 'Please enter card holder name with atleast 3 characters.',
+                        success: false
+                    });
+
+                    return;
+                }
+
+                showLoader();
+                updatePurchaseButton(true);
+
+                stripe.createToken(card, { name: name }).then(function (result) {
+                    hideLoader();
+
+                    if (result.error) {
+                        // Inform the customer that there was an error.
+                        Notifications.showBar({
+                            title: 'Error',
+                            message: result.error.message,
+                            success: false
+                        });
+
+                        updatePurchaseButton(false);
+                    } else {
+                        var hiddenStripeToken = $('#hidden-stripe-token');
+                        hiddenStripeToken.val(result.token.id);
+                        submitForm();
+                    }
+                });
+            }
         });
 
         updatePurchaseButton(true);
@@ -298,41 +334,6 @@
                 $('#newbilling-button').html('Purchase &raquo;');
                 $('#newbilling-button').prop('disabled', false);
             }
-        }
-
-        function validateAddNewCard() {
-            var name = $('#new_billing_name').val();
-            if (name == null || name == undefined || name.length < 3) {
-                Notifications.showBar({
-                    title: 'Error',
-                    message: 'Please enter card holder name with atleast 3 characters.',
-                    success: false
-                });
-
-                return;
-            }
-
-            showLoader();
-            updatePurchaseButton(true);
-
-            stripe.createToken(card, { name: name }).then(function (result) {
-                hideLoader();
-
-                if (result.error) {
-                    // Inform the customer that there was an error.
-                    Notifications.showBar({
-                        title: 'Error',
-                        message: result.error.message,
-                        success: false
-                    });
-
-                    updatePurchaseButton(false);
-                } else {
-                    var hiddenStripeToken = $('#hidden-stripe-token');
-                    hiddenStripeToken.val(result.token.id);
-                    submitForm();
-                }
-            });
         }
 
         function submitForm() {

@@ -2687,13 +2687,8 @@ namespace AfterSchoolLibrary.Services
                 var card = StripeHelper.AddNewCardToCustomer(customer.Id, stripeToken, null, msgs);
                 if (card.IsNotEmpty())
                 {
-                    //set this card id to account, which will work as a default card
-                    if (fromAccount.StripeDefaultCardId.IsEmpty())
-                    {
-                        fromAccount.StripeDefaultCardId = card.Id;
-                        fromAccount.Save();
-                    }
-
+                    //set this card as default           
+                    UpdateStripeCard(fromAccount, card.Id, customer, msgs);
                     return card.Id;
                 }
             }
@@ -2713,12 +2708,9 @@ namespace AfterSchoolLibrary.Services
             {
                 StripeHelper.UpdateCustomerDefaultCard(customer.Id, null, cardId);               
                 
-                //set this card id to account, which will work as a default card
-                if (fromAccount.StripeDefaultCardId.IsEmpty())
-                {
-                    fromAccount.StripeDefaultCardId = cardId;
-                    fromAccount.Save();
-                }
+                //set this card id to account, which will work as a default card                
+                fromAccount.StripeDefaultCardId = cardId;
+                fromAccount.Save();
             }
         }
 
