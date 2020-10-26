@@ -26,17 +26,12 @@ namespace AfterSchoolLibrary.Migrations
                         accountPackages.ForEach(accountPackage =>
                         {
                             var account = Account.Load(accountPackage.AccountId.Value, amsgs, adc);
+                            var priceId = accountPackage.BillingPeriodTypeId == BillingPeriodType.Month ? package.StripePricePerMonthId : package.StripePricePerYearId;
 
-                            if(account.IsNotEmpty())
-                            {
-                                var stripeCustomerId = account.StripeCustomerId;
-                                var priceId = accountPackage.BillingPeriodTypeId == BillingPeriodType.Month ? package.StripePricePerMonthId : package.StripePricePerYearId;
-
-                                // update each accountpackage in stripe by saving so it uses the stripe price api
-                                if (stripeCustomerId.IsNotEmpty())
-                                    accountPackage.SaveWithStripe(stripeCustomerId, false, priceId);
-                            }
-                           
+                            // update each accountpackage in stripe by saving so it uses the stripe price api
+                            if ((bool)account?.StripeCustomerId.IsNotEmpty())                          
+                                    accountPackage.SaveWithStripe(account.StripeCustomerId, false, priceId);
+                            
                         });
                     });
 
