@@ -2676,10 +2676,13 @@ namespace AfterSchoolLibrary.Services
 
         public static string CreateStripeCardFromToken(this Account fromAccount, string stripeToken, Stripe.Customer customer, SystemMessages msgs)
         {
-            if (customer.IsEmpty())
-                customer = StripeHelper.GetCustomer(fromAccount.StripeCustomerId, null, msgs);
+            if (stripeToken.IsEmpty())
+                msgs.Add("stripe token is not valid.", MessageType.Error);
 
-            if (stripeToken.IsNotEmpty())
+            if (customer.IsEmpty())
+                msgs.Add("Stripe customer is not valid.", MessageType.Error);
+
+            if (msgs.HasNoErrors())
             {
                 var card = StripeHelper.AddNewCardToCustomer(customer.Id, stripeToken, null, msgs);
                 if (card.IsNotEmpty())
@@ -2696,6 +2699,27 @@ namespace AfterSchoolLibrary.Services
             }
 
             return customer.DefaultSourceId;
+        }
+
+        public static void UpdateStripeCard(this Account fromAccount, string cardId, Stripe.Customer customer, SystemMessages msgs)
+        {
+            if (cardId.IsEmpty())
+                msgs.Add("stripe card is not valid.", MessageType.Error);
+
+            if (customer.IsEmpty())                
+                msgs.Add("Stripe customer is not valid.", MessageType.Error);
+
+            if (msgs.HasNoErrors())
+            {
+                StripeHelper.UpdateCustomerDefaultCard(customer.Id, null, cardId);               
+                
+                //set this card id to account, which will work as a default card
+                if (fromAccount.StripeDefaultCardId.IsEmpty())
+                {
+                    fromAccount.StripeDefaultCardId = cardId;
+                    fromAccount.Save();
+                }
+            }
         }
 
         /// <summary>

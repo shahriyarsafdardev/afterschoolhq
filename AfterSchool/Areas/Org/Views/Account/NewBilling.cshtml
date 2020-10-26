@@ -1,6 +1,8 @@
 ﻿@model Account
-@{ ViewBag.Title = Model.Name;
+@{ 
+    ViewBag.Title = Model.Name;
     var msgs = (SystemMessages)ViewBag.Messages;
+    var cards = Model.GetStripeCards();
     var currentPackage = SessionVariables.AccountPackage;
     var packages = (List<Package>)ViewBag.Packages;
     var suggestedPackage = (Package)ViewBag.SuggestedPackage;
@@ -14,7 +16,7 @@
         returnUrl = Url.Action("index", "activity");
     }
 
-    Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml"; 
+    Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
 }
 
 <div class="main-content-new">
@@ -110,25 +112,46 @@
                         </div>
                         <div class="panel-body">
                             <input id="hidden-stripe-token" type="hidden" name="stripetoken" />
+                            <input id="hidden-stripe-card" type="hidden" name="cardId" />
 
                             <div class="form-group">
-                                <label class="col-sm-3 control-label" for="new_billing_name">Name on Card</label>
+                                <label class="col-sm-3 control-label">
+                                    Payment method <span class="text-danger">*</span>
+                                </label>
                                 <div class="col-sm-6">
-                                    <input type="text" class="form-control" id="new_billing_name" name="name" value="" onfocus="this.select()" required data-tooltip-id="Name" data-toggle='popover' data-trigger='hover' data-content='Name on Card' data-placement='right' />
+                                    <select id="ddlPaymentMethod" name="ddlPaymentMethod" class="form-control" required onchange="paymentMethodSelectionChange(this)">
+                                        <option value="-1">Select Card...</option>
+                                        <option value="0"> + New Card</option>
+                                        @foreach (var card in cards)
+                                        {
+                                            <option value="@card.Id">
+                                                @card.Name,  **** **** **** @card.Last4 @card.Brand, @card.ExpMonth / @card.ExpYear
+                                            </option>
+                                        }
+                                    </select>
                                 </div>
                             </div>
 
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label" for="new_billing_number">Credit or Debit card</label>
-                                <div class="col-sm-6">
-                                    <div id="new_billing_number" class="form-control" style='height: 44px; padding-top: 3px;'>
-                                        <!-- A Stripe Element will be inserted here. -->
+                            <div id="container-add-payment-method" style="display: none;">
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="new_billing_name">Name on Card</label>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control" id="new_billing_name" name="name" value="" onfocus="this.select()" required data-tooltip-id="Name" data-toggle='popover' data-trigger='hover' data-content='Name on Card' data-placement='right' />
                                     </div>
                                 </div>
-                            </div>
 
-                            <div class="form-group">
-                                <div id="new_billing_card_errors" role="alert"></div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="new_billing_number">Credit or Debit card</label>
+                                    <div class="col-sm-6">
+                                        <div id="new_billing_number" class="form-control" style='height: 44px; padding-top: 3px;'>
+                                            <!-- A Stripe Element will be inserted here. -->
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div id="new_billing_card_errors" role="alert"></div>
+                                </div>
                             </div>
 
                             <div class="form-group">
@@ -209,6 +232,7 @@
 
         var isCurrentPackage = true;
         var currentPackage = '@((int)currentPackage.BillingPeriodTypeId)_@(currentPackage.PackageUid)';        
+        var hiddenStripeCard = $('#hidden-stripe-card');
 
         PageEvent.add(PageEvent.AFTER_INIT, function () {
 
@@ -236,36 +260,28 @@
             card.mount('#new_billing_number');
 
             $('#newbilling-button').click(function (e) {
-                var name = $('#new_billing_name').val();
-                if (name == null || name == undefined || name.length < 3) {
-                    Notifications.showBar({
-                        title: 'Error',
-                        message: 'Please enter card holder name with atleast 3 characters.',
-                        success: false
-                    });
 
-                    return;
-                }
+                // ..if card value -1, required field error
+                // ..if card value 0, new card                
+                // ..if card valud > 0, existing card
 
-                showLoader();
-                updatePurchaseButton(true);
-
-                stripe.createToken(card, { name: name }).then(function (result) {
-                    hideLoader();
-
-                    if (result.error) {
-                        // Inform the customer that there was an error.
+                if (hiddenStripeCard) {
+                    if (hiddenStripeCard.val() == -1) {
                         Notifications.showBar({
                             title: 'Error',
-                            message: result.error.message,
+                            message: 'Please enter valid card to proceed further.',
                             success: false
                         });
 
-                        updatePurchaseButton(false);
-                    } else {
-                        stripeTokenHandler_NewBilling(result.token);
+                        return;
+                    } else if (hiddenStripeCard.val() == 0) {
+                        validateAddNewCard();
                     }
-                });
+                    else if (hiddenStripeCard.val() > 0) {
+                        showLoader();
+                        submitForm();
+                    }
+                }
             });
         });
 
@@ -284,13 +300,44 @@
             }
         }
 
-        function stripeTokenHandler_NewBilling(token) {
+        function validateAddNewCard() {
+            var name = $('#new_billing_name').val();
+            if (name == null || name == undefined || name.length < 3) {
+                Notifications.showBar({
+                    title: 'Error',
+                    message: 'Please enter card holder name with atleast 3 characters.',
+                    success: false
+                });
+
+                return;
+            }
+
+            showLoader();
+            updatePurchaseButton(true);
+
+            stripe.createToken(card, { name: name }).then(function (result) {
+                hideLoader();
+
+                if (result.error) {
+                    // Inform the customer that there was an error.
+                    Notifications.showBar({
+                        title: 'Error',
+                        message: result.error.message,
+                        success: false
+                    });
+
+                    updatePurchaseButton(false);
+                } else {
+                    var hiddenStripeToken = $('#hidden-stripe-token');
+                    hiddenStripeToken.val(result.token.id);
+                    submitForm();
+                }
+            });
+        }
+
+        function submitForm() {
             // Insert the token ID into the form so it gets submitted to the srver
             var form = $('#new-billing-form');
-            var hiddenStripeToken = $('#hidden-stripe-token');
-
-            hiddenStripeToken.val(token.id);
-
             form.submit();
         }
 
@@ -345,6 +392,19 @@
                     }
                 }
             });
+        }
+
+        function paymentMethodSelectionChange(selectObject) {
+            var value = selectObject.value;
+            var containerPaymentMethod = $('#container-add-payment-method');            
+
+            if (value == 0) {
+                containerPaymentMethod.show();
+            } else {
+                containerPaymentMethod.hide();
+            }
+
+            hiddenStripeCard.val(value);
         }
     </script>
 }

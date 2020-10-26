@@ -1341,7 +1341,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult NewPayment(string selectedpackage, string stripetoken)
+        public ActionResult NewPayment(string selectedpackage, string stripetoken, string cardId)
         {
             var msgs = new SystemMessages();
 
@@ -1351,37 +1351,45 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var isFromTrialAccount = SessionVariables.AccountPackage?.IsDuringTrial ?? false;
 
-            Database.ExecuteTransaction(
-                action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                {
+            if (stripetoken.IsEmail() || cardId.IsEmpty())
+                msgs.Add("Please select valid card to proceed further.", MessageType.UserError);
 
-                    var selectedPackageArr = selectedpackage.Split('_');
-                    var billingPeriod = (BillingPeriodType)selectedPackageArr[0].ToInteger();
+            if (msgs.HasNoErrors())
+            {
+                Database.ExecuteTransaction(
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        var selectedPackageArr = selectedpackage.Split('_');
+                        var billingPeriod = (BillingPeriodType)selectedPackageArr[0].ToInteger();
 
-                    package = Package.LoadByUid(selectedPackageArr[1].ToGuid(), amsgs, adc);
-                                        
-                    customer = currentAccount.CreateStripeCustomer();
+                        package = Package.LoadByUid(selectedPackageArr[1].ToGuid(), amsgs, adc);
 
-                    currentAccount.CreateStripeCardFromToken(stripetoken, customer, msgs);
+                        customer = currentAccount.CreateStripeCustomer();
 
-                    if (amsgs.HasNoErrors())
-                        newlyAddedPackage = currentAccount.AddPackage(package.ID.Value, billingPeriod, SessionVariables.LoggedInUser, amsgs, adc);                      
-                },
-                onSuccess: (SystemMessages smsgs) =>
-                {
-                    msgs.AddRange(smsgs);
+                        if (stripetoken.IsNotEmpty())
+                            currentAccount.CreateStripeCardFromToken(stripetoken, customer, msgs);
+                        else if (cardId.IsNotEmpty())
+                            currentAccount.UpdateStripeCard(cardId, customer, msgs);
 
-                    msgs.Clear(MessageType.Success);
-                    msgs.Add(string.Format("The '{0} Package' has been added to your account", package.Name), MessageType.Success);
+                        if (amsgs.HasNoErrors())
+                            newlyAddedPackage = currentAccount.AddPackage(package.ID.Value, billingPeriod, SessionVariables.LoggedInUser, amsgs, adc);
+                    },
+                    onSuccess: (SystemMessages smsgs) =>
+                    {
+                        msgs.AddRange(smsgs);
 
-                    if (isFromTrialAccount)
-                        SessionVariables.CurrentAccount.SendWelcomeEmailPurchase(currentAccount.GetAccountOwner());
-                },
-                onFailure: (SystemMessages fmsgs) =>
-                {
-                    msgs.AddRange(fmsgs);
-                }
-            );
+                        msgs.Clear(MessageType.Success);
+                        msgs.Add(string.Format("The '{0} Package' has been added to your account", package.Name), MessageType.Success);
+
+                        if (isFromTrialAccount)
+                            SessionVariables.CurrentAccount.SendWelcomeEmailPurchase(currentAccount.GetAccountOwner());
+                    },
+                    onFailure: (SystemMessages fmsgs) =>
+                    {
+                        msgs.AddRange(fmsgs);
+                    }
+                );
+            }
 
             ViewBag.Messages = msgs;
             
@@ -1480,10 +1488,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {                
                 var customer = currentAccount.GetStripeCustomer(msgs);
-                StripeHelper.UpdateCustomerDefaultCard(customer.Id, null, id);
-
-                currentAccount.StripeDefaultCardId = id;
-                currentAccount.Save();
+                currentAccount.UpdateStripeCard(id, customer, msgs);
             }
 
             ViewBag.BillingHistory = currentAccount.GetStripeBillingHistory();
