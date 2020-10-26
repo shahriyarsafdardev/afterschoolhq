@@ -555,6 +555,7 @@ namespace AfterSchoolLibrary.Helpers
             var billingAccountOwner = billingAccount.GetAccountOwner(msgs, dc);
             var paymentPlan = checkoutObject.PaymentPlan;
             var subscription = checkoutObject.SubscriptionPlan;
+            var postPayPlan = checkoutObject.PostPayPlan;
             var masterRegistrant = checkoutObject.MasterRegistrant;
             var parentOrGuardian = masterRegistrant.GetParentOrGuardian(msgs, dc);
             var canAccountAcceptPayments = billingAccount.CanProcessPayments(msgs, dc);
@@ -615,6 +616,7 @@ namespace AfterSchoolLibrary.Helpers
             var isRegFree = participationObject.IsRegistrationFree;
             var hasPaymentPlan = paymentPlan.IsNotEmpty();
             var hasSubscriptionPlan = subscription.IsNotEmpty();
+            var hasPostPayPlan = postPayPlan.IsNotEmpty();
             var splitCostEvenly = subscription?.SplitCostEvenly ?? false;
             var regFinalized = participationObject.RegistrationFinalized;
             string registrationTable = "";
@@ -625,7 +627,7 @@ namespace AfterSchoolLibrary.Helpers
                 totalCost = checkoutObject.GetSubscriptionCostTodayWithFees(msgs, dc);
 
             // show this if no subscription plan, if there's a reg fee or there's a payment plan
-            if ((isCompletelyFree || !isRegFree || hasPaymentPlan) && (!splitCostEvenly || !regFinalized))
+            if ((isCompletelyFree || !isRegFree || hasPaymentPlan || hasPostPayPlan) && (!splitCostEvenly || !regFinalized))
             {
                 if (checkoutObject.IsFree)
                 {
@@ -761,15 +763,26 @@ namespace AfterSchoolLibrary.Helpers
 
                 if (isParentCopy || loggedInUser.HasAccessTo(billingAccount))
                 {
+                    var addClosingP = false;
+
+                    if (customMessage.Contains("<p>"))
+                    {
+                        customMessage += "<p>";
+                        addClosingP = true;
+                    }
+
                     if (isParentCopy)
-                        customMessage += $"{(customMessage.IsNotBlank() ? "<br /><br />" : "")}{masterRegistrant.FirstName} has registered";
+                        customMessage += $"{masterRegistrant.FirstName} has registered";
                     else if (loggedInUser.HasAccessTo(billingAccount))
-                        customMessage += $"{(customMessage.IsNotBlank() ? "<br /><br />" : "")}{masterRegistrant.FirstName} has been registered by {loggedInUser.DisplayName} at {billingAccount.Name}";
+                        customMessage += $"{masterRegistrant.FirstName} has been registered by {loggedInUser.DisplayName} at {billingAccount.Name}";
 
                     if (showTable)
                         customMessage += " for the following:";
                     else
                         customMessage += ".";
+
+                    if (addClosingP)
+                        customMessage += "</p>";
                 }
             }
 

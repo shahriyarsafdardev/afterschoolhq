@@ -120,7 +120,7 @@ namespace AfterSchoolLibrary.Services
                 var isCompletelyFree = participationObject.IsFree;
                 var noPayments = ra.IsEmpty() || participationObject.GetAmountPaidByRegistrant(ra.RegistrantId.Value, msgs, dc) == 0.ToDecimal();
 
-                if (!isCompletelyFree && noPayments)
+                if (!isCompletelyFree && noPayments && !participationObject.PostPayPlans.Any())
                     return RegistrationAssignmentType.ReservedPendingPayment;
 
                 return RegistrationAssignmentType.Reserved;
@@ -243,6 +243,16 @@ namespace AfterSchoolLibrary.Services
             registration.CompletionStatusId = RegistrationCompletionStatus.Signed;
             registration.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
             registration.LastModifiedDate = DateTime.UtcNow;
+            msgs.AddRange(registration.Save(dc));
+        }
+
+        public static void SavePaymentSource(this Registration registration, string stripeSourceId, PaymentType paymentType, decimal paymentAmount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            registration.StripeSourceId = stripeSourceId;
+            registration.PaymentTypeId = paymentType;
+            registration.CostPerClass = paymentAmount;
+            registration.LastModifiedDate = DateTime.UtcNow;
+            registration.LastModifiedBy = loggedInUser?.ID;
             msgs.AddRange(registration.Save(dc));
         }
 

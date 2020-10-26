@@ -558,9 +558,22 @@ namespace AfterSchoolLibrary.Models
                },
                msgs,
                dc) > 0;
-        }
+		}
 
-        public string HomePageUrl
+		public bool HasPostPayPlan(SystemMessages msgs = null, DatabaseConnection dc = null)
+		{
+			return SubscriptionPlan.GetCount(
+			   new Hashtable() {
+					{ "ParticipationObjectId", this.ID.Value },
+					{ "ParticipationObjectTypeId", (int)ParticipationObjectType.Activity },
+					{ "PlanTypeId", (int)SubscriptionPlanType.PostPayPlan },
+					{ "IsActive", true }
+			   },
+			   msgs,
+			   dc) > 0;
+		}
+
+		public string HomePageUrl
         {
             get
             {
@@ -735,7 +748,7 @@ namespace AfterSchoolLibrary.Models
         {
             get
             {
-                return (!this.CostPerRegistrant.HasValue || this.CostPerRegistrant.Value == 0) && !this.HasSubscriptionPlan() && !this.HasPaymentPlan();
+                return (!this.CostPerRegistrant.HasValue || this.CostPerRegistrant.Value == 0) && !this.HasSubscriptionPlan() && !this.HasPaymentPlan() && !this.HasPostPayPlan();
             }
         }
 

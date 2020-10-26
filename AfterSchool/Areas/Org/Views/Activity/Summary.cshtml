@@ -141,7 +141,11 @@
                                 }
                             </div>
                             <div class="panel-body">
-                                @if (!participationObject.PaymentPlans.Any())
+                                @if (participationObject.PostPayPlans.Any())
+                                {
+                                    Html.RenderPartial("~/Views/Shared/ParticipationObject/_TuitionAndPostPayPlans.cshtml", participationObject);
+                                }
+                                else if (!participationObject.PaymentPlans.Any())
                                 {
                                     Html.RenderPartial("~/Views/Shared/ParticipationObject/_TuitionAndNoPaymentPlans.cshtml", participationObject);
                                 }

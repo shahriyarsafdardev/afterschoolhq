@@ -190,6 +190,13 @@ namespace AfterSchoolLibrary.Services
                 .FirstOrDefault();
         }
 
+        public static SubscriptionPlan GetPostPayPlan(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return SubscriptionPlan.LoadActiveByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs, dc)
+                .Where(plan => plan.PlanTypeId == SubscriptionPlanType.PostPayPlan && plan.IsActive)
+                .FirstOrDefault();
+        }
+
         public static SubscriptionPlan GetPaymentPlan(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return SubscriptionPlan.LoadActiveByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs, dc)
@@ -207,6 +214,13 @@ namespace AfterSchoolLibrary.Services
         public static List<SubscriptionPlan> GetActiveSubscriptionPlans(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return SubscriptionPlan.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, SubscriptionPlanType.Subscription, msgs, dc)
+                .Where(plan => plan.IsActive)
+                .ToList();
+        }
+
+        public static List<SubscriptionPlan> GetActivePostPayPlans(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return SubscriptionPlan.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, SubscriptionPlanType.PostPayPlan, msgs, dc)
                 .Where(plan => plan.IsActive)
                 .ToList();
         }
@@ -585,6 +599,10 @@ namespace AfterSchoolLibrary.Services
                     if (oldPaymentPlan.IsNotEmpty())
                         oldPaymentPlan.Copy(copy.ID.Value, loggedInUserId, amsgs, adc);
 
+                    var oldPostPayPlan = activity.GetPostPayPlan(amsgs, adc);
+                    if (oldPostPayPlan.IsNotEmpty())
+                        oldPostPayPlan.Copy(copy.ID.Value, loggedInUserId, amsgs, adc);
+
                     //if (includeRegistrants)
                     //{
                     //    // need a new registration
@@ -810,6 +828,8 @@ namespace AfterSchoolLibrary.Services
             var paymentplanperiod = values.GetValueOrDefault("paymentplanperiod");
             var paymentplanperiodnumber = values.GetValueOrDefault("paymentplanperiodnumber");
             var paymentplanpaymentstarttype = values.GetValueOrDefault("paymentplanpaymentstarttype");
+            var haspostpayplan = values.GetValueOrDefault("haspostpayplan");
+            var postpaycost = values.GetValueOrDefault("postpaycost");
             var accountactivitygroup = values.GetValueOrDefault("accountactivitygroup");
             var provider = values.GetValueOrDefault("provider");
             var providername = values.GetValueOrDefault("providername");
@@ -1206,6 +1226,16 @@ namespace AfterSchoolLibrary.Services
                                 loggedInUserId,
                                 adc
                             ));
+
+                        //setup PaymentPlan
+                        if (amsgs.HasNoErrors() && haspaymentplan != null && haspaymentplan.ToString().IsBoolean())
+                            amsgs.AddRange(activity.SetupPostPayPlan(
+                                account,
+                                haspostpayplan.IfEmpty(""),
+                                postpaycost.IfEmpty(""),
+                                loggedInUserId,
+                                adc
+                            ));
                     },
                     onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
@@ -1379,6 +1409,38 @@ namespace AfterSchoolLibrary.Services
                     loggedInUserId,
                     msgs,
                     dc);
+
+            return msgs;
+        }
+
+        private static SystemMessages SetupPostPayPlan(this Activity activity, Account account, string haspostpayplan, string postpaycost, int loggedInUserId, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var hasChanges = true;
+
+            // first: desactivate the current plan if there are any changes
+            if (activity.HasPostPayPlan(msgs, dc))
+            {
+                var plan = activity.GetPostPayPlan(msgs, dc);
+
+                hasChanges = plan.CostPerPeriod.Value != postpaycost.ToDecimal();
+
+                // if has stripe changes or subscription option has been turned off
+                if (hasChanges || !haspostpayplan.ToBoolean())
+                    msgs.AddRange(plan.Deactivate(loggedInUserId, dc));
+            }
+
+            // if the subscription plan option(UI) is activated
+            if (haspostpayplan.ToBoolean() && hasChanges)
+                SubscriptionPlanService.CreateNewPostPayPlan(
+                    planOwner: account,
+                    participationObjectType: ParticipationObjectType.Activity,
+                    participationObjectId: activity.ID.Value,
+                    costPerPeriod: postpaycost.ToDecimal(),
+                    billingPeriodType: BillingPeriodType.Day,
+                    loggedInUserId: loggedInUserId,
+                    msgs: msgs,
+                    dc: dc);
 
             return msgs;
         }

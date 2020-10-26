@@ -1,0 +1,40 @@
+﻿@model ParticipationObject
+
+@{
+    var displayCheckoutPrice = false;
+
+    if (ViewData["DisplayCheckoutPrice"] != null && ViewData["DisplayCheckoutPrice"].ToString().IsBoolean())
+    {
+        displayCheckoutPrice = ViewData["DisplayCheckoutPrice"].ToString().ToBoolean();
+    }
+}
+
+<p>    
+    @if (!Model.IsRegistrationFree)
+    {
+        <span>Cost to register is @ParticipationObjectUI.PrintRegistrationFee(Model, displayCheckoutPrice) plus</span>
+    }
+
+    @if (Model.PostPayPlans.Any())
+    {
+        <span>
+            @if(!displayCheckoutPrice)
+            {
+                <span>You will receive</span>
+            }
+
+            <strong>
+                @if (displayCheckoutPrice)
+                {
+                    @Model.GetPostPayCostWithConvenienceFee().ToCurrency()
+                }
+                else
+                {
+                    @Model.GetPostPayCost().ToCurrency()
+                }
+            </strong>
+            per class attended
+        </span>
+    }
+
+</p>

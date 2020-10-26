@@ -1813,6 +1813,7 @@
     <Content Include="Views\Shared\_RestrictBySelection.cshtml" />
     <Content Include="Views\Shared\_UpgradePlan.cshtml" />
     <Content Include="Views\Shared\_PaymentSources.cshtml" />
+    <Content Include="Views\Shared\ParticipationObject\_TuitionAndPostPayPlans.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
