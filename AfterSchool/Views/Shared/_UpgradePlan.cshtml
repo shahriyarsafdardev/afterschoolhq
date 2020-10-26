@@ -2,7 +2,7 @@
     <div class="Container">
         <span class="span-upgrade-modal-close" onclick="return hideUpgradeMyPlan()">X</span>
         <div class="col-md-offset-3 col-lg-6 col-md-6 col-sm-6">
-            <h2>Gain access to this feature by upgrading your plan.</h2>            
+            <h2 id="gain-access">Gain access to this feature by upgrading your plan</h2>            
         </div>
         <div class="col-md-1 col-sm-12 visible-md visible-lg">
             <a href="#" class="btn btn-default btn-upgrade-plan btn-lg" onclick="return loadUpgradePage()">Upgrade My Plan</a>
@@ -18,9 +18,20 @@
 </div>
 
 <script type="text/javascript">
-    function showUpgradeMyPlan() {
+    var featureId;
+    function showUpgradeMyPlan(name, id, preventClose = false) {
         $('#app-body').addClass('overlay')
         $('#upgrade-my-plan').fadeIn();
+
+        if (name)
+            $('#gain-access').html(`Gain access to this feature by upgrading your plan to ${name}`);
+  
+        if(id)
+            featureId = id;
+
+        if (preventClose)
+            $('.span-upgrade-modal-close').hide();
+
     };
 
     function hideUpgradeMyPlan() {
@@ -29,8 +40,11 @@
     };
 
     function loadUpgradePage() {
-        var url = '@Url.Action("newbilling", "account", new { Area = "org", ReturnUrl = "updateThisText" })'
+        var url = '@Url.Action("newbilling", "account", new { Area = "org", ReturnUrl = "updateThisText"})'
         url = url.replace("updateThisText", location.pathname);
+        if (featureId)
+            url = url + `&featureId=${featureId}`;
+
         location.href = url;
     }
 </script>

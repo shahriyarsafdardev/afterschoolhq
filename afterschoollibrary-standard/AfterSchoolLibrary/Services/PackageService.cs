@@ -94,5 +94,58 @@ namespace AfterSchoolLibrary.Services
 
             return msgs;
         }
+
+        private static Package GetFirstPackageWithFeatureFromPackages(FeatureType feature, List<Package> packages)
+        {
+            foreach (var package in packages)
+            {
+                if (package.HasFeature(feature))
+                    return package;
+            }
+            return null;
+        }
+
+        public static Package GetPackageWithFeatureLowestPrice(FeatureType feature, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var features = ((FeatureType[])Enum.GetValues(typeof(FeatureType))).ToList();
+            var packages = Package.LoadByIsActive(true, msgs, dc);
+            packages.OrderBy(p => p.Price);
+
+            if (!feature.In(features))
+            {
+                msgs.Add("feature type does not exist", MessageType.Error);
+                return null;
+            }
+
+            var packageWithFeature = GetFirstPackageWithFeatureFromPackages(feature, packages);
+
+            if (packageWithFeature.IsNotEmpty())
+                return packageWithFeature;
+
+            return null;
+        }
+        
+        public static Package GetPackageWithAnyFeaturesLowestPrice(List<FeatureType> features, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var allFeatures = ((FeatureType[])Enum.GetValues(typeof(FeatureType))).ToList();
+            var packages = Package.LoadByIsActive(true, msgs, dc);
+            packages.OrderBy(p => p.Price);
+
+            foreach (FeatureType feature in features)
+            {
+                if (!feature.In(allFeatures))
+                {
+                    msgs.Add("feature type does not exist", MessageType.Error);
+                    return null;
+                }
+
+                var packageWithFeature = GetFirstPackageWithFeatureFromPackages(feature, packages);
+
+                if (packageWithFeature.IsNotEmpty())
+                    return packageWithFeature;
+            }
+
+            return null;
+        }
     }
 }

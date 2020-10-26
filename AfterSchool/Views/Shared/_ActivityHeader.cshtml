@@ -27,6 +27,9 @@
     }
 
     var showAttendance = SessionVariables.AccountPackage.HasFeature(FeatureType.Attendance);
+    var messagingPackage = PackageService.GetPackageWithAnyFeaturesLowestPrice(new List<FeatureType>() { FeatureType.EmailMessaging, FeatureType.TextMessaging });
+    var attendancePackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.Attendance);
+    var emailPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.EmailMessaging);
 }
 
 @if (Model?.ID.GetValueOrDefault(0) > 0 && !isFullScreen)
@@ -38,10 +41,6 @@
             @if (isActivityLeader)
             {
                 <a href="@Url.Action("editsetup", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "editsetup" ? "-active" : "")"><i class="s7-edit"></i> Setup</a>
-                if (!SessionVariables.AccountPackage.HasFeature(FeatureType.ManageForms))
-                {
-                    <a href="@Url.Action("form", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "form" ? "-active" : "")"><i class="s7-note2"></i> Reg Form</a>
-                }
             }
 
             @if (Model.IsPublished || registrantCount > 0)
@@ -56,7 +55,7 @@
                     }
                     else
                     {
-                        <a href="#" class="btn btn-alt6@(actionName == "attendance" ? "-active" : "")" onclick="return showUpgradeMyPlan()">
+                        <a href="#" class="btn btn-alt6@(actionName == "attendance" ? "-active" : "")" onclick="return showUpgradeMyPlan('@(attendancePackage.Name)',@(attendancePackage.ID))">
                             <i class="s7-check"></i> Attendance
                         </a>
                     }
@@ -68,7 +67,7 @@
                 }
                 else
                 {
-                    <a href="#" class="btn btn-alt6@(actionName == "messages" ? "-active" : "")"  onclick="return showUpgradeMyPlan()"><i class="s7-mail"></i> Messaging</a>
+                    <a href="#" class="btn btn-alt6@(actionName == "messages" ? "-active" : "")"  onclick="return showUpgradeMyPlan('@(messagingPackage.Name)', @(messagingPackage.ID))"><i class="s7-mail"></i> Messaging</a>
                 }
             }
 
@@ -99,16 +98,12 @@
             }
         </div>
         <div class="hidden-lg hidden-sm hidden-md">
-            <select class="form-control" onchange="this.value == '#' ? showUpgradeMyPlan() : location.href = this.value">
+            <select class="form-control" onchange="this.value == '#' ? showUpgradeMyPlan(this.packagename,this.packageid) : location.href = this.value">
                 <option value="">Navigation</option>
                 <option value="@Url.Action("summary", "activity", new { id = Model.Uid })">Summary</option>
                 @if (isActivityLeader)
                 {
                     <option value="@Url.Action("editsetup", "activity", new { id = Model.Uid })">Setup</option>
-                    if (!SessionVariables.AccountPackage.HasFeature(FeatureType.ManageForms))
-                    {
-                        <option value="@Url.Action("form", "activity", new { id = Model.Uid })">Reg Form</option>
-                    }
                 }
                 @if (Model.IsPublished || registrantCount > 0)
                 {
@@ -122,7 +117,7 @@
                         }
                         else
                         {
-                            <option value="#" onclick="return showUpgradeMyPlan()">Attendance</option>
+                            <option packagename="@(attendancePackage.Name)" packageid="@(attendancePackage.ID)" value="#" onclick="return showUpgradeMyPlan('@(attendancePackage.Name)',@(attendancePackage.ID)))">Attendance</option>
                         }
                     }
 
@@ -132,7 +127,7 @@
                     }
                     else
                     {
-                        <option value="#">Messaging</option>
+                        <option  packagename="@(emailPackage.Name)" packageid="@(emailPackage.ID)" value="#">Messaging</option>
                     }
                 }
                 @if (isActivityLeader)

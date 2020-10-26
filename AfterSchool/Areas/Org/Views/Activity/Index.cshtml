@@ -9,6 +9,7 @@
     var managePermissionSlips = accountPackage.HasFeature(FeatureType.ManagePermissionSlips);
     var maxPermissionSlipCount = accountPackage.IsNotEmpty() ? (int)accountPackage.GetFeature(FeatureType.ManagePermissionSlips).Max.Value : 0;
     var showPermissionSlipFields = ViewBag.PagingModel?.TotalCount >= maxPermissionSlipCount ? false : true;
+    var permissionSlipsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManagePermissionSlips);
 }
 
 @{Html.RenderPartial("OrgAccountHeader", SessionVariables.CurrentAccount.ID.ToString());}
@@ -31,7 +32,7 @@
                     }
                     else 
                     { 
-                        <a href="#" class="btn btn-primary" onclick="return showUpgradeMyPlan()">
+                        <a href="#" class="btn btn-primary" onclick="return showUpgradeMyPlan('@(permissionSlipsPackage.Name)', @(permissionSlipsPackage.ID))">
                             <i class="icon icon-left s7-plus"></i>
                             Add @UILabel.ActivityLabel(activityType)
                         </a>

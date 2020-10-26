@@ -298,13 +298,13 @@ namespace AfterSchoolLibrary.Models
             return this.Save(dc: dc);
         }
 
-        public SystemMessages CancelPackageWithStripe(string stripeCustomerId, DatabaseConnection dc = null)
+        public SystemMessages CancelPackageWithStripe(string stripeCustomerId, bool cancelAtPeriodEnd = true, DatabaseConnection dc = null)
         {
             var msgs = this.CancelPackage(dc: dc);
 
             if(this.StripeSubscriptionId.IsNotEmpty())
             {
-                msgs.AddRange(Billing.StripeHelper.CancelSubscription(this.StripeSubscriptionId, null));
+                msgs.AddRange(Billing.StripeHelper.CancelSubscription(this.StripeSubscriptionId, null, cancelAtPeriodEnd));
             }
 
             return msgs;
@@ -315,7 +315,7 @@ namespace AfterSchoolLibrary.Models
             return Package.Load(this.PackageId.Value, msgs, dc);
         }
 
-        public SystemMessages SaveWithStripe(string stripeCustomerId, bool upgradingFromTrial, string newStripePlanId = null, DatabaseConnection dc = null)
+        public SystemMessages SaveWithStripe(string stripeCustomerId, bool upgradingFromTrial, string priceId, DatabaseConnection dc = null)
         {
             SystemMessages msgs = new SystemMessages();
 
@@ -323,14 +323,12 @@ namespace AfterSchoolLibrary.Models
 
             if (!stripeCustomerId.IsEmpty())
             {
-                // var service = new Stripe.StripeSubscriptionService(StripeHelper.SecretKey);
-
                 // first time, may have payment info
                 if (this.StripeSubscriptionId.IsEmpty())
                 {
-                    var subscription = Billing.StripeHelper.CreateSubscription(
+                    var subscription = Billing.StripeHelper.CreatePackageSubscription(
                         customerId: stripeCustomerId, 
-                        planId: this.GetPackage(msgs, dc).GetStripePlanId(this.BillingPeriodTypeId), 
+                        priceId: priceId, //TODO: dynamic price for subscription
                         sourceId: null,
                         platformFeePercent: null,
                         // trialEndDate: this.TrialEndDate, 
@@ -349,39 +347,7 @@ namespace AfterSchoolLibrary.Models
                 }
                 else
                 {
-                    var billingCycleAnchorNow = new bool?();
-                    var endTrialNow = new bool?();
-                    var prorate = new bool?();
-                    var billingCycleAnchorUnchanged = new bool?();
-
-                    if (upgradingFromTrial)
-                    {
-                        billingCycleAnchorNow = true;
-                        endTrialNow = true;
-                    }
-                    else
-                    {
-                        if (this.BillingPeriodTypeId == BillingPeriodType.Year)
-                        {
-                            prorate = false;
-                            billingCycleAnchorNow = true;
-                        }
-                        else
-                        {
-                            prorate = true;
-                            billingCycleAnchorUnchanged = true;
-                        }
-                    }
-                    
-                    Billing.StripeHelper.UpdateSubscription(
-                        this.StripeSubscriptionId,
-                        newStripePlanId,
-                        billingCycleAnchorNow,
-                        billingCycleAnchorUnchanged,
-                        endTrialNow,
-                        prorate,
-                        null,
-                        msgs);                   
+                    Billing.StripeHelper.UpdatePackageSubscription(this.StripeSubscriptionId, priceId, msgs);
                 }
             }
 

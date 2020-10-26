@@ -191,7 +191,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd, string type, string inviteonly, string minseatsrequired)
+        public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd, string type, string inviteonly, string minseatsrequired, string isAdvanceSettingEnabled)
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
@@ -199,6 +199,7 @@ namespace AfterSchool.Areas.Org.Controllers
             Activity activity;
             Activity defaultActivity;
             ActivityGroup activityGroup = null;
+            ActivityForm activeForm;
 
             if (id.IsEmpty() || !id.IsGuid())
                 return HttpNotFound();
@@ -210,6 +211,30 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add("Activity name is required.", MessageType.UserError);
             else if (name.Length > 75)
                 msgs.Add("Activity name must not be greater then 75 chanracters.", MessageType.UserError);
+
+            if (form.IsEmpty() && (isAdvanceSettingEnabled.IsEmpty() || !isAdvanceSettingEnabled.ToBoolean()))
+            {
+                if (activity.IsNotEmpty())
+                {
+                    //.. edit activity
+                    activeForm = activity.GetActiveActivityForm(msgs);
+                }
+                else
+                {
+                    //.. create activity
+                    activeForm = currentAccount.GetDefaultActivityForm(msgs);
+                }
+
+                if (activeForm.IsEmpty())
+                {
+                    var defaultForm = currentAccount.CreateDefaultForm(currentUser, msgs);
+                    currentAccount.SetDefaultForm(defaultForm, currentUser);
+
+                    activeForm = currentAccount.GetDefaultActivityForm(msgs);
+                }
+
+                form = activeForm.FormId.Value.ToString();
+            }
 
             if (msgs.HasNoErrors())
             {

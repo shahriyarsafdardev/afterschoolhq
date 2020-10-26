@@ -13,26 +13,27 @@
                 <th>Name</th>
                 <th>Expiration</th>
                 <th>Card</th>
-                @*<th></th>*@
+                <th></th>
             </tr>
             @foreach (Stripe.Card card in cards)
             {
                 <tr>
-
                     <td>@card.Name</td>
                     <td>@card.ExpMonth / @card.ExpYear</td>
                     <td><span class="badge badge-success">@card.Brand</span> **** **** **** @card.Last4</td>
-                    @*<td>
+                    <td>
 
                         @if (Model.StripeDefaultCardId != card.Id)
                         {
-                            <a href="@Url.Action("setprimarycard", "account", new { id = card.Id })" class="btn btn-primary btn-xs">Set as Primary</a>
+                            <a href="@Url.Action("setdefaultcard", "account", new { id = card.Id, area="org" })" class="btn btn-primary btn-xs">Set as Primary</a>
+                        } else
+                        {
+                            <a href="#" disabled class="btn btn-default btn-xs">Set as Primary</a>
                         }
 
-                    </td>*@
+                    </td>
                 </tr>
             }
         </table>
     </div>
 }
-

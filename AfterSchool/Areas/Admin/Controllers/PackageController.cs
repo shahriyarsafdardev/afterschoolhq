@@ -127,7 +127,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                     onSuccess: (SystemMessages smsgs) => {
                         msgs.AddRange(smsgs);
 
-                        features = package.GetFeatures();
+                        features = package.GetFeatures(msgs);
                         msgs.Add("Package Saved", MessageType.Success);
                     },
                     onFailure: (SystemMessages fmsgs) => {

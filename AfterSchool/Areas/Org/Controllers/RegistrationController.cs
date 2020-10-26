@@ -22,11 +22,6 @@ namespace AfterSchool.Areas.Org.Controllers
         // GET: Org/Registrant
         public ActionResult Index(string activity, string group, string pn, string rpp, string q, string emailed, string question, string regstatus, string at)
         {
-            if (!SessionVariables.AccountPackage.HasFeature(FeatureType.StudentCRM))
-            {
-                return RedirectToAction("Messages");
-            }
-
             var msgs = new SystemMessages();
             int pageNumber = 1;
             int recordsPerPage = 10;

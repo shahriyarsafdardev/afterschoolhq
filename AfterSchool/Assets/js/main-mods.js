@@ -344,10 +344,12 @@ var ActivitySetup = {
         }
     },
     showAdvancedSettingsYes: function () {
+        $('#hdnAdvanceSettingToggle').val(true);
         $('.advanced-settings').removeClass('hide');
         $('#btn-advanced-settings').html('Hide Advanced Settings');
     },
     showAdvancedSettingsNo: function () {
+        $('#hdnAdvanceSettingToggle').val(false);
         $('.advanced-settings').addClass('hide');
         $('#btn-advanced-settings').html('Show Advanced Settings');
     },

@@ -51,6 +51,7 @@
     var managePermissionSlips = accountPackage.HasFeature(FeatureType.ManagePermissionSlips);
     var maxPermissionSlipCount = accountPackage.IsNotEmpty() ? (int)accountPackage.GetFeature(FeatureType.ManagePermissionSlips).Max.Value : 0;
     var showPermissionSlipFields = ViewBag.PagingModel?.TotalCount >= maxPermissionSlipCount ? false : true;
+    var managePermissionSlipsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManagePermissionSlips);
 }
 
 @if (Model.Count == 0 && group.IsEmpty() && !hasArchivedActivities)
@@ -72,7 +73,7 @@
                 else
                 {
                     <p>
-                        You haven't created any @UILabel.ActivityLabel(activityType, true).ToLower() yet. In order to get started, <a href="#" onclick="return showUpgradeMyPlan()"> Create your first @UILabel.ActivityLabel(activityType).ToLower()</a>.
+                        You haven't created any @UILabel.ActivityLabel(activityType, true).ToLower() yet. In order to get started, <a href="#" onclick="return showUpgradeMyPlan('@(managePermissionSlipsPackage.Name)',@(managePermissionSlipsPackage.ID))"> Create your first @UILabel.ActivityLabel(activityType).ToLower()</a>.
                     </p>
                     }
                 <p>&nbsp;</p>
@@ -82,7 +83,7 @@
                 }
                 else
                 {
-                    <a href="#" class="btn btn-primary btn-lg" onclick="return showUpgradeMyPlan()"> Create Your First @UILabel.ActivityLabel(activityType) &raquo;</a>
+                    <a href="#" class="btn btn-primary btn-lg" onclick="return showUpgradeMyPlan('@(managePermissionSlipsPackage.Name)',@(managePermissionSlipsPackage.ID))"> Create Your First @UILabel.ActivityLabel(activityType) &raquo;</a>
                 }
             </div>
         </div>
@@ -353,7 +354,7 @@ else
 	                                        }
 	                                        else
 	                                        {
-		                                        <button class="md-trigger btn btn-default btn-sm" onclick="return showUpgradeMyPlan()">
+		                                        <button class="md-trigger btn btn-default btn-sm" onclick="return showUpgradeMyPlan('@(managePermissionSlipsPackage.Name)',@(managePermissionSlipsPackage.ID))">
 			                                        <i class="s7-copy-file"></i> Copy
 		                                        </button>
 	                                        }
