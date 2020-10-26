@@ -1043,6 +1043,8 @@ property: ESignatureUserAgent, string, NVarChar "400"
 property: ESignatureIPAddress, string, NVarChar "50"
 property: CompletionStatusId, RegistrationCompletionStatus, Int
 property: PurchaseId, int?, Int
+property: StripeSourceId, string, NVarChar "100"
+property: CostPerClass, decimal?, Money
 loadmethod: Uid
 loadmethod: RegistrantId, List<>
 loadmethod: AccountId, List<>
@@ -1964,7 +1966,7 @@ values: NotSet, Started, Completed, RequiresParentSignature, Signed
 [begin]
 type: Enum
 name: SubscriptionPlanType
-values: NotSet, Subscription, PaymentPlan
+values: NotSet, Subscription, PaymentPlan, PostPayPlan
 [end]
 
 [begin]

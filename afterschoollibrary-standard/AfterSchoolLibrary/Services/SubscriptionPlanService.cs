@@ -81,6 +81,32 @@ namespace AfterSchoolLibrary.Services
             return plan;
         }
 
+        public static SubscriptionPlan CreateNewPostPayPlan(Account planOwner, ParticipationObjectType participationObjectType, int participationObjectId, decimal costPerPeriod, BillingPeriodType billingPeriodType, int? loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var plan = new SubscriptionPlan()
+            {
+                PlanOwnerAccountId = planOwner.ID,
+                BillingPeriodTypeId = billingPeriodType,
+                CostPerPeriod = costPerPeriod,
+                CreateDate = DateTime.UtcNow,
+                CreatedBy = loggedInUserId,
+                LastModifiedDate = DateTime.UtcNow,
+                LastModifiedBy = loggedInUserId,
+                IsActive = true,
+                ParticipationObjectId = participationObjectId,
+                ParticipationObjectTypeId = participationObjectType,
+                TotalPeriods = null,
+                PlanTypeId = SubscriptionPlanType.PostPayPlan,
+                PaymentStartTypeId = PlanPaymentStartType.NotSet
+            };
+
+            msgs.AddRange(plan.Save(dc));
+
+            return plan;
+        }
+
         public static ParticipationObject GetParticipationObject(this SubscriptionPlan plan, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return new ParticipationObject(plan.ParticipationObjectId.Value, plan.ParticipationObjectTypeId, msgs, dc);

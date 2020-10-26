@@ -14,6 +14,7 @@ namespace AfterSchoolLibrary.Models
         public Coupon Coupon { get; set; }
         public SubscriptionPlan SubscriptionPlan { get; set; }
         public SubscriptionPlan PaymentPlan { get; set; }
+        public SubscriptionPlan PostPayPlan { get; set; }
         public BankAccountPurchaseObject BankAccountPurchaseObject { get; set; }
         public CreditCardPurchaseObject CreditCardPurchaseObject { get; set; }
         public ParticipationObject ParticipationObject { get; set; }
@@ -367,7 +368,7 @@ namespace AfterSchoolLibrary.Models
                 BankAccountPurchaseObject.StripeSourceId = PayingAccount.GetStripeSourceFromPlaidToken(
                                                             BankAccountPurchaseObject, 
                                                             msgs);
-            else if (SavePaymentInfo || SubscriptionPlan.IsNotEmpty())
+            else if (SavePaymentInfo || SubscriptionPlan.IsNotEmpty() || PostPayPlan.IsNotEmpty())
                 CreditCardPurchaseObject.StripeSourceId = PayingAccount.GetStripeSourceFromToken(
                                                             BillingAccount,
                                                             CreditCardPurchaseObject.StripeToken, 
