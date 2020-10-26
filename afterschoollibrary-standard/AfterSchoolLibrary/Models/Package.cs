@@ -395,7 +395,6 @@ namespace AfterSchoolLibrary.Models
         public string GetStripeProductId()
         {
             return this.Uid.ToString();
-            // return this.Uid.ToString() + this.Name; //this gives error while creating package
         }
 
         public string GetStripeProductName()

@@ -41,10 +41,6 @@
             @if (isActivityLeader)
             {
                 <a href="@Url.Action("editsetup", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "editsetup" ? "-active" : "")"><i class="s7-edit"></i> Setup</a>
-                @*if (!SessionVariables.AccountPackage.HasFeature(FeatureType.ManageForms))
-                {
-                    <a href="@Url.Action("form", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "form" ? "-active" : "")"><i class="s7-note2"></i> Reg Form</a>
-                }*@
             }
 
             @if (Model.IsPublished || registrantCount > 0)
@@ -108,10 +104,6 @@
                 @if (isActivityLeader)
                 {
                     <option value="@Url.Action("editsetup", "activity", new { id = Model.Uid })">Setup</option>
-                    @*if (!SessionVariables.AccountPackage.HasFeature(FeatureType.ManageForms))
-                    {
-                        <option value="@Url.Action("form", "activity", new { id = Model.Uid })">Reg Form</option>
-                    }*@
                 }
                 @if (Model.IsPublished || registrantCount > 0)
                 {

@@ -347,41 +347,7 @@ namespace AfterSchoolLibrary.Models
                 }
                 else
                 {
-                    var billingCycleAnchorNow = new bool?();
-                    var endTrialNow = new bool?();
-                    var prorate = new bool?();
-                    var billingCycleAnchorUnchanged = new bool?();
-
-                    if (upgradingFromTrial)
-                    {
-                        billingCycleAnchorNow = true;
-                        endTrialNow = true;
-                    }
-                    else
-                    {
-                        if (this.BillingPeriodTypeId == BillingPeriodType.Year)
-                        {
-                            prorate = false;
-                            billingCycleAnchorNow = true;
-                        }
-                        else
-                        {
-                            prorate = true;
-                            billingCycleAnchorUnchanged = true;
-                        }
-                    }
-
                     Billing.StripeHelper.UpdatePackageSubscription(this.StripeSubscriptionId, priceId, msgs);
-
-                    //Billing.StripeHelper.UpdateSubscription(
-                    //    this.StripeSubscriptionId,
-                    //    priceId,
-                    //    billingCycleAnchorNow,
-                    //    billingCycleAnchorUnchanged,
-                    //    endTrialNow,
-                    //    prorate,
-                    //    null,
-                    //    msgs);                   
                 }
             }
 
