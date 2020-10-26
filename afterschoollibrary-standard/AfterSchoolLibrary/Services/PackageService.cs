@@ -95,9 +95,9 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
-        private static Package getFirstPackageWithFeatureFromPackages(FeatureType feature, List<Package> packages)
+        private static Package GetFirstPackageWithFeatureFromPackages(FeatureType feature, List<Package> packages)
         {
-            foreach (Package package in packages)
+            foreach (var package in packages)
             {
                 if (package.HasFeature(feature))
                     return package;
@@ -107,8 +107,8 @@ namespace AfterSchoolLibrary.Services
 
         public static Package GetPackageWithFeatureLowestPrice(FeatureType feature, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            List<FeatureType> features = ((FeatureType[])Enum.GetValues(typeof(FeatureType))).ToList();
-            List<Package> packages = Package.LoadByIsActive(true, msgs, dc);
+            var features = ((FeatureType[])Enum.GetValues(typeof(FeatureType))).ToList();
+            var packages = Package.LoadByIsActive(true, msgs, dc);
             packages.OrderBy(p => p.Price);
 
             if (!feature.In(features))
@@ -117,7 +117,7 @@ namespace AfterSchoolLibrary.Services
                 return null;
             }
 
-            Package packageWithFeature = getFirstPackageWithFeatureFromPackages(feature, packages);
+            var packageWithFeature = GetFirstPackageWithFeatureFromPackages(feature, packages);
 
             if (packageWithFeature.IsNotEmpty())
                 return packageWithFeature;
@@ -127,8 +127,8 @@ namespace AfterSchoolLibrary.Services
         
         public static Package GetPackageWithAnyFeaturesLowestPrice(List<FeatureType> features, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            List<FeatureType> allFeatures = ((FeatureType[])Enum.GetValues(typeof(FeatureType))).ToList();
-            List<Package> packages = Package.LoadByIsActive(true, msgs, dc);
+            var allFeatures = ((FeatureType[])Enum.GetValues(typeof(FeatureType))).ToList();
+            var packages = Package.LoadByIsActive(true, msgs, dc);
             packages.OrderBy(p => p.Price);
 
             foreach (FeatureType feature in features)
@@ -139,7 +139,7 @@ namespace AfterSchoolLibrary.Services
                     return null;
                 }
 
-                Package packageWithFeature = getFirstPackageWithFeatureFromPackages(feature, packages);
+                var packageWithFeature = GetFirstPackageWithFeatureFromPackages(feature, packages);
 
                 if (packageWithFeature.IsNotEmpty())
                     return packageWithFeature;
