@@ -89,7 +89,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "CompletionStatusId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "PurchaseId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "StripeSourceId", System.Data.SqlDbType.NVarChar , "100");
-				_dp.Add(className, "CostPerClass", System.Data.SqlDbType.Int);
+				_dp.Add(className, "CostPerClass", System.Data.SqlDbType.Money);
 				_dp.Add(className, "RegistrantEmail", typeof(Registrant).Name, "Email", System.Data.SqlDbType.NVarChar, "Registrant");
 				_dp.Add(className, "RegistrantFirstName", typeof(Registrant).Name, "FirstName", System.Data.SqlDbType.NVarChar, "Registrant");
 				_dp.Add(className, "RegistrantLastName", typeof(Registrant).Name, "LastName", System.Data.SqlDbType.NVarChar, "Registrant");

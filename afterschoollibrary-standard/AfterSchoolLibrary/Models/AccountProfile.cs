@@ -43,6 +43,7 @@ namespace AfterSchoolLibrary.Models
 		public bool IsOpenDuringCovid { get { return (bool)MDV["IsOpenDuringCovid"].Value; } set { MDV["IsOpenDuringCovid"].Value = value; } }
 		public bool IsELearningCenter { get { return (bool)MDV["IsELearningCenter"].Value; } set { MDV["IsELearningCenter"].Value = value; } }
 		public bool IsAHQApproved { get { return (bool)MDV["IsAHQApproved"].Value; } set { MDV["IsAHQApproved"].Value = value; } }
+		public bool IsVirtualProgram { get { return (bool)MDV["IsVirtualProgram"].Value; } set { MDV["IsVirtualProgram"].Value = value; } }
 		public string VideoUrl { get { return (string)MDV["VideoUrl"].Value; } set { MDV["VideoUrl"].Value = value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
 		public string AccountUniqueName { get { return (string)MDV["AccountUniqueName"].Value; } }
@@ -60,6 +61,7 @@ namespace AfterSchoolLibrary.Models
 			this.IsOpenDuringCovid = false;
 			this.IsELearningCenter = false;
 			this.IsAHQApproved = false;
+			this.IsVirtualProgram = false;
 			
         }
 
@@ -95,6 +97,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "IsOpenDuringCovid", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "IsELearningCenter", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "IsAHQApproved", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "IsVirtualProgram", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "VideoUrl", System.Data.SqlDbType.NVarChar , "200");
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "AccountUniqueName", typeof(Account).Name, "UniqueName", System.Data.SqlDbType.NVarChar, "Account");
@@ -274,6 +277,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["IsAHQApproved"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsVirtualProgram"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
