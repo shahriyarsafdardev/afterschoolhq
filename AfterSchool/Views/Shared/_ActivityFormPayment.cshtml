@@ -77,7 +77,7 @@
                 </div>
             </div>
 
-            <div class="form-group @(!canProcessPayments ? "hide": "")">
+            <div class="form-group">
                 <label class="col-sm-3 control-label">Allow to Pay Later</label>
                 <div class="col-sm-9" @if (!showAllowPayLater) { <text> onclick="return showUpgradeMyPlan('@(showAllPayLaterPackage.Name)','@(showAllPayLaterPackage.ID)')"</text> }>
                     @{
@@ -597,10 +597,9 @@
     }
 
     function postPayEnableOtherOptions() {
-
-        $('#hassubscriptionplan').prop('disabled', false);
-        $('#haspaymentplan').prop('disabled', false);
-        $('#allowtopaylater').prop('disabled', false);
+        hasSubscriptionsDisabledDefault();
+        paymentPlansDisabledDefault();
+        payLaterDisabledDefault();
         $('#cost').prop('disabled', false);
     }
 
@@ -610,6 +609,29 @@
 
         $('#paymentplanstarttypetext').html(text);
     }
+
+    function payLaterDisabledDefault() {
+        if (@((!showAllowPayLater).ToString().ToLower()))
+            $('#allowtopaylater').prop('disabled', true);
+        else
+            $('#allowtopaylater').prop('disabled', false);
+    }
+
+    function paymentPlansDisabledDefault() {
+        if (@((!showAllowPaymentPlans).ToString().ToLower()))
+          $('#haspaymentplan').prop('disabled', true);
+        else
+            $('#haspaymentplan').prop('disabled', false);
+    }
+
+    function hasSubscriptionsDisabledDefault() {
+        if (@((!showAllowPaymentPlans).ToString().ToLower()))
+            $('#hassubscriptionplan').prop('disabled', true);
+        else
+            $('#hassubscriptionplan').prop('disabled', false);
+    }
+
+
 </script>
 
 @helper BillingPeriodOptions(SubscriptionPlan plan)
