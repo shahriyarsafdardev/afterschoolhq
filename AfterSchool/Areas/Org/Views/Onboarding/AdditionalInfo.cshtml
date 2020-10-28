@@ -4,7 +4,7 @@
     var msgs = (SystemMessages)ViewBag.Messages;
     var opencovid = (bool)ViewBag.OpenCovid;
     var elc = (bool)ViewBag.ELC;
-    var isProgram = Model.AccountTypeId == AccountType.Teacher;
+    var isVirtualProgram = (bool)ViewBag.IsVirtualProgram; 
 }
 
 <div class="main-content">
@@ -20,10 +20,15 @@
                         Providing services during COVID?
                     </label>
                     <div class="col-lg-9">
-                        @{ Html.RenderPartial(
-                                 "~/Views/Shared/_SwitchButton.cshtml",
-                                 opencovid,
-                                 new ViewDataDictionary() { { "checkboxname", "opencovid" }, { "checkboxid", "opencovid" } }); }
+                        @{ 
+                            Html.RenderPartial(
+                               "~/Views/Shared/_SwitchButton.cshtml",
+                               opencovid,
+                               new ViewDataDictionary() { 
+                                   { "checkboxname", "opencovid" }, 
+                                   { "checkboxid", "chkOpenCovid" } 
+                               }); 
+                        }
                     </div>
                 </div>
 
@@ -32,10 +37,33 @@
                         Are you an E-Learning Center?
                     </label>
                     <div class="col-lg-9">
-                        @{ Html.RenderPartial(
-                                  "~/Views/Shared/_SwitchButton.cshtml",
-                                  elc,
-                                  new ViewDataDictionary() { { "checkboxname", "elearningcenter" }, { "checkboxid", "elearningcenter" } }); }
+                        @{ 
+                            Html.RenderPartial(
+                               "~/Views/Shared/_SwitchButton.cshtml",
+                               elc,
+                               new ViewDataDictionary() { 
+                                   { "checkboxname", "elearningcenter" }, 
+                                   { "checkboxid", "chkELearningCenter" } 
+                               }); 
+                        }
+                        <p class="text-muted">You will host/care for students to assist e-learning during the school day</p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-lg-3 control-label">
+                        Is it a Virtual Program?
+                    </label>
+                    <div class="col-lg-9">
+                        @{ 
+                            Html.RenderPartial(
+                               "~/Views/Shared/_SwitchButton.cshtml",
+                               isVirtualProgram,
+                               new ViewDataDictionary() { 
+                                   { "checkboxname", "isvirtualprogram" }, 
+                                   { "checkboxid", "chkIsVirtualProgram" } 
+                               }); 
+                        }
                         <p class="text-muted">You will host/care for students to assist e-learning during the school day</p>
                     </div>
                 </div>

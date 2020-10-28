@@ -139,18 +139,23 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.ELC = false;
             ViewBag.OpenCovid = true;
+            ViewBag.IsVirtualProgram = false;
             ViewBag.Messages = msgs;
 
             return View(account);
         }
 
         [HttpPost]
-        public ActionResult AdditionalInfo(string opencovid, string elearningcenter)
+        public ActionResult AdditionalInfo(string opencovid, string elearningcenter, string isvirtualprogram)
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var profile = account.GetOrCreateAccountProfile(currentUser, msgs);
+
+            var isOpenDuringCovid = opencovid.IsBoolean() && opencovid.ToBoolean();
+            var isElc = elearningcenter.IsBoolean() && elearningcenter.ToBoolean();
+            var isVirtualProgram = isvirtualprogram.IsBoolean() && isvirtualprogram.ToBoolean();
 
             if (msgs.HasNoErrors())
             {
@@ -162,8 +167,9 @@ namespace AfterSchool.Areas.Org.Controllers
                         amsgs.AddRange(account.Save(adc));
 
                         profile.UpdateProfile(
-                            opencovid: opencovid.IsNumber() ? opencovid : "0",
-                            elearningcenter: elearningcenter.IsNumber() ? opencovid : "0",
+                            opencovid: isOpenDuringCovid,
+                            elearningcenter: isElc,
+                            isvirtualprogram: isVirtualProgram,
                             loggedInUser: currentUser,
                             msgs: amsgs,
                             dc: adc);
@@ -177,8 +183,9 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
                 return RedirectToAction("ContactInfo");
 
-            ViewBag.OpenCovid = opencovid.IsNumber();
-            ViewBag.ELC = elearningcenter.IsNumber();
+            ViewBag.OpenCovid = opencovid.IsBoolean() && opencovid.ToBoolean();
+            ViewBag.ELC = isElc;
+            ViewBag.IsVirtualProgram = isVirtualProgram;
 
             return View(account);
         }
