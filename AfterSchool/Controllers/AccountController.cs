@@ -1759,6 +1759,7 @@ namespace AfterSchool.Controllers
             if (msgs.HasNoErrors())
             {
                 SubscriptionPlan paymentPlan = null;
+
                 var billingAccount = participationObject.PaymentAccount;
                 var payingAccount = SessionVariables.CurrentAccount;
                 var convenienceFeePayer = billingAccount.IsConvenienceFeeTakenOutOfCost ? billingAccount : payingAccount;
@@ -1798,6 +1799,7 @@ namespace AfterSchool.Controllers
                         ParticipationObject = participationObject,
                         PaymentPlan = paymentPlan,
                         SubscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault(),
+                        PostPayPlan = participationObject.PostPayPlans.FirstOrDefault(),
                         Products = new List<Product>(),
                         PayingAccount = payingAccount,
                         BillingAccount = billingAccount,

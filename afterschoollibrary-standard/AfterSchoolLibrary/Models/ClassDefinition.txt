@@ -340,7 +340,7 @@ property: StripePublishableKey, string, NVarChar "400"
 property: StripeSecretKey, string, NVarChar "400"
 property: StripeRefreshToken, string, NVarChar "400"
 -property: PayPalEmailAddress, string, NVarChar "100"
--property: StripeDefaultCardId, string, NVarChar "50"
+property: StripeDefaultCardId, string, NVarChar "50"
 -property: LandingPageText, string, NVarChar "4000"
 property: Uid, Guid, UniqueIdentifier, required
 property: UniqueName, string, NVarChar "50"
@@ -1043,6 +1043,8 @@ property: ESignatureUserAgent, string, NVarChar "400"
 property: ESignatureIPAddress, string, NVarChar "50"
 property: CompletionStatusId, RegistrationCompletionStatus, Int
 property: PurchaseId, int?, Int
+property: StripeSourceId, string, NVarChar "100"
+property: CostPerClass, decimal?, Money
 loadmethod: Uid
 loadmethod: RegistrantId, List<>
 loadmethod: AccountId, List<>
@@ -1167,6 +1169,8 @@ property: IsActive, bool, Bit
 property: IsPopular, bool, Bit
 property: IsAfterSchool, bool, Bit
 property: Uid, Guid, UniqueIdentifier
+property: StripePricePerMonthId, string, NVarChar "50"
+property: StripePricePerYearId, string, NVarChar "50"
 baseproperty: Name, required
 loadmethod: IsActive, List<>
 loadmethod: IsActive|IsAfterSchool, List<>
@@ -1962,7 +1966,7 @@ values: NotSet, Started, Completed, RequiresParentSignature, Signed
 [begin]
 type: Enum
 name: SubscriptionPlanType
-values: NotSet, Subscription, PaymentPlan
+values: NotSet, Subscription, PaymentPlan, PostPayPlan
 [end]
 
 [begin]

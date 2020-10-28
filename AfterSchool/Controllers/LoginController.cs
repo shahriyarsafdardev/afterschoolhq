@@ -73,13 +73,14 @@ namespace AfterSchool.Controllers
                     LoadSessionInfo(user, null, remember.IsBoolean(), msgs);
             }
 
+
             ViewBag.Messages = msgs;
 
             if (msgs.HasNoErrors())
             {
                 // select account
                 if (SessionVariables.CurrentAccount.IsEmpty())
-                    return RedirectToAction("select", "login", new { returnurl });
+                    return RedirectToAction("select", "login", new {  returnurl });
 
                 if (returnurl.IsNotEmpty())
                     return HandleRedirectAfterLogin(returnurl);

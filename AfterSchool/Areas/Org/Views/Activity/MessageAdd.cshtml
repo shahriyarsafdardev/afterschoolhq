@@ -14,6 +14,8 @@
     var maxEmailCount = accountPackage.HasFeature(FeatureType.EmailMessaging) ? (int)accountPackage.GetFeature(FeatureType.EmailMessaging).Max.Value : 0;
     var currentEmailCount = ViewBag.EmailCount != null ? (int)ViewBag.EmailCount : 0;
     var emailQuotaExceeded = currentEmailCount >= maxEmailCount ? true : false;
+    var emailMessagingPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.EmailMessaging);
+    var textMessagingPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.TextMessaging);
 }
 
 @{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
@@ -72,7 +74,7 @@
                                 </div>
                             } else
                             {
-                                 <div class="am-checkbox"  onclick="return showUpgradeMyPlan()">
+                                 <div class="am-checkbox"  onclick="return showUpgradeMyPlan('@(emailMessagingPackage.Name)', @(emailMessagingPackage.ID))">
                                     <input type="checkbox" id="sendtostaff" name="sendtostaff" value="1" disabled="disabled" />
                                     <label for="sendtostaff">Send Email To Staff</label>
                                 </div>
@@ -89,7 +91,7 @@
                             }
                             else
                             {
-                                <div class="am-checkbox" onclick="return showUpgradeMyPlan()">
+                                <div class="am-checkbox" onclick="return showUpgradeMyPlan('@(textMessagingPackage.Name)', @(textMessagingPackage.ID))">
                                     <input type="checkbox" id="sendtextmessages" name="sendtextmessages" value="0" disabled="disabled" />
                                     <label for="sendtextmessages">Send Text Messages</label>
                                 </div>

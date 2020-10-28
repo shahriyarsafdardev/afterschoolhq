@@ -144,7 +144,7 @@ namespace AfterSchoolLibrary.Services
         public static void StartSubscriptionPlan(this Registrant submittedRecord, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             submittedRecord.StartPlan(checkoutObject, SubscriptionPlanType.Subscription, loggedInUser, msgs, dc);
-        }        
+        }
 
         public static void StartPlan(this Registrant submittedRecord, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -176,7 +176,7 @@ namespace AfterSchoolLibrary.Services
                     stripeCouponId = GetACHCoupon(checkoutObject, billingAccount, plan, null, msgs, dc);
 
                 // create the subscription on the stripe account (could be added to main account or connected account)
-                var subscription = Billing.StripeHelper.CreateSubscription(
+                var subscription = Billing.StripeHelper.CreateRegistrantSubscription(
                                     customerId: customer.Id,
                                     planId: plan.StripePlanId,
                                     sourceId: sourceId,

@@ -6,7 +6,14 @@
 
 @if (!Model.IsFree)
 {
-    if (!Model.PaymentPlans.Any())
+    if (Model.PostPayPlans.Any())
+    {
+        Html.RenderPartial(
+            "~/Views/Shared/ParticipationObject/_TuitionAndPostPayPlans.cshtml",
+            Model,
+            new ViewDataDictionary() { { "DisplayCheckoutPrice", true } });     
+    }
+    else if (!Model.PaymentPlans.Any())
     {
         Html.RenderPartial(
             "~/Views/Shared/ParticipationObject/_TuitionAndNoPaymentPlans.cshtml",

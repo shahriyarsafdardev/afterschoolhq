@@ -3,6 +3,7 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace AfterSchoolLibrary.Services
@@ -41,6 +42,29 @@ namespace AfterSchoolLibrary.Services
             attendanceRegistrant.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
 
             msgs.AddRange(attendanceRegistrant.Save(dc));
+
+            //if (isPresent)
+            //{
+            //    var activity = Activity.Load(attendanceRegistrant.AttendanceActivityId.Value, msgs, dc);
+            //    var postPayPlan = activity.GetPostPayPlan(msgs, dc);
+
+            //    if (postPayPlan.IsNotEmpty())
+            //    {
+            //        var registrant = Registrant.Load(attendanceRegistrant.RegistrantId.Value, msgs, dc);
+            //        var registration = registrant.GetRegistrations(msgs, dc).First();
+            //        var masterRegistrant = registrant.GetMasterRegistrant(msgs, dc);
+            //        var payingAccount = masterRegistrant.GetAccount(msgs, dc);
+
+            //        var charge = Billing.StripeHelper.CreateCharge(
+            //                        payingAccount.StripeCustomerId,
+            //                        registration.StripeSourceId,
+            //                        registration.CostPerClass.Value,
+            //                        "Test charge",
+            //                        "AHQ Charge",
+            //                        null,
+            //                        msgs);
+            //    }
+            //}
         }
     }
 }

@@ -6,6 +6,9 @@
     var query = ViewBag.Query;
     var paging = (PagingModel)ViewData["PagingModel"];
 
+    var manageContactsEnabled = SessionVariables.CurrentAccount.HasFeature(FeatureType.ManageContacts);
+    var manageContactsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManageContacts);
+
     var previousLink = "#";
     var nextLink = "#";
     if (paging.IsNotEmpty())
@@ -29,7 +32,7 @@
 
     @{Html.RenderPartial("_ContactHeader");}
 
-    <div class="panel panel-default">
+    <div id="contactscontainer" class="panel panel-default">
 
         <div class="panel-heading">
             <div class="pull-right">
@@ -78,7 +81,7 @@
                         {
                             foreach (var registrant in Model)
                             {
-                                <tr id="registrant-@registrant.Uid">                                    
+                                <tr id="registrant-@registrant.Uid">
                                     <td>
                                         <a href="@Url.Action("edit", "contact", new {id = registrant.Uid})" class="btn btn-default btn-sm">
                                             <i class="icon icon-left s7-edit"></i> View
@@ -95,7 +98,7 @@
                                         <div class="btn-group btn-hspace">
                                             <button type="button" data-toggle="dropdown" class="btn btn-default btn-sm dropdown-toggle" aria-expanded="false">Add To List <span class="caret"></span></button>
                                             <ul role="menu" class="dropdown-menu" id="list-add-menu-@registrant.Uid">
-                                              @foreach (var list in lists)
+                                                @foreach (var list in lists)
                                                 {
                                                     if (!list.HasContact(registrant))
                                                     {
@@ -104,12 +107,12 @@
                                                         </li>
                                                     }
                                                 }
-                                               
+
                                                 <li>
-                                                <button class="btn btn-primary btn-space margin-r-10 md-trigger" data-modal="modal-add">
-                                                    <i class="icon icon-left s7-plus"></i>
-                                                    Add List
-                                                </button>
+                                                    <button class="btn btn-primary btn-space margin-r-10 md-trigger" data-modal="modal-add">
+                                                        <i class="icon icon-left s7-plus"></i>
+                                                        Add List
+                                                    </button>
                                                 </li>
                                             </ul>
                                         </div>
@@ -162,7 +165,7 @@
                         { "querystring", string.Format("list={0}&query={1}", Request["list"], Request["query"]) },
                         { "action", "index" },
                         { "controller", "contact" }
-                    }
+                }
                 );
             }
 
@@ -172,15 +175,15 @@
 
 
 @{ Html.RenderPartial(
-    "~/Views/Shared/_Modal.cshtml",
-    new ModalViewModel()
-    {
-        ID = "modal-delete",
-        Title = "Delete Contact",
-        ActionButtonId = "delete-contact-button",
-        ActionButtonHtml = "Delete Contact &raquo;",
-        HtmlBody = "<p>Are you sure you want to delete <strong><span id=\"delete-contact-name\"></span></strong>? This will also delete all existing invitations.</p><p>This action cannot be undone.</p>"
-    }); }
+     "~/Views/Shared/_Modal.cshtml",
+     new ModalViewModel()
+     {
+         ID = "modal-delete",
+         Title = "Delete Contact",
+         ActionButtonId = "delete-contact-button",
+         ActionButtonHtml = "Delete Contact &raquo;",
+         HtmlBody = "<p>Are you sure you want to delete <strong><span id=\"delete-contact-name\"></span></strong>? This will also delete all existing invitations.</p><p>This action cannot be undone.</p>"
+     }); }
 
 
 
@@ -211,6 +214,22 @@
 
 
 <script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        if (!@(manageContactsEnabled.ToString().ToLower())) {
+            $("#contactscontainer").find("button").addClass("disabled");
+            $("#contactscontainer").find("a").addClass("disabled");
+            $("#contactscontainer").find("input").addClass("disabled");
+            $("#contactscontainer").find("a").on("click", function (e) {
+                e.preventDefault();
+            });
+            showUpgradeMyPlan('@(manageContactsPackage.Name)','@(manageContactsPackage.ID)',true)
+            
+        }
+    });
+</script>
+
+<script>
+
     function deleteContactOK(name, url) {
         $('#delete-contact-name').html(name);
         $('#delete-contact-button').attr('href', url);

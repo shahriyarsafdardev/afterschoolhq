@@ -30,6 +30,8 @@ namespace AfterSchoolLibrary.Models
 		public bool IsPopular { get { return (bool)MDV["IsPopular"].Value; } set { MDV["IsPopular"].Value = value; } }
 		public bool IsAfterSchool { get { return (bool)MDV["IsAfterSchool"].Value; } set { MDV["IsAfterSchool"].Value = value; } }
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
+		public string StripePricePerMonthId { get { return (string)MDV["StripePricePerMonthId"].Value; } set { MDV["StripePricePerMonthId"].Value = value; } }
+		public string StripePricePerYearId { get { return (string)MDV["StripePricePerYearId"].Value; } set { MDV["StripePricePerYearId"].Value = value; } }
 		
 
         public Package()
@@ -56,6 +58,8 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "IsPopular", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "IsAfterSchool", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
+				_dp.Add(className, "StripePricePerMonthId", System.Data.SqlDbType.NVarChar , "50");
+				_dp.Add(className, "StripePricePerYearId", System.Data.SqlDbType.NVarChar , "50");
 				
                 return _dp;
             }
@@ -159,6 +163,14 @@ namespace AfterSchoolLibrary.Models
 			dps.Add(ObjectMap["Uid"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["StripePricePerMonthId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["StripePricePerYearId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -244,33 +256,58 @@ namespace AfterSchoolLibrary.Models
         public SystemMessages SaveWithStripe(DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
+            Stripe.Product stripeProduct = null;
+            Stripe.Price monthlyPrice = null;
+            Stripe.Price yearlyPrice = null;
 
-            msgs.AddRange(this.Save(dc: dc));
+            stripeProduct = AddOrUpdateStripeProduct(msgs);
 
-            //add to stripe plan, should do on every save
-            if (msgs.HasNoErrors())
+            if (msgs.HasNoErrors() && stripeProduct.IsNotEmpty())
+            {                
+                monthlyPrice = AddOrUpdateStripePrice(
+                    stripeProduct.Id,
+                    this.StripePricePerMonthId,
+                    this.Price.Value,
+                    this.Name,
+                    BillingPeriodType.Month,
+                    msgs);
+
+                yearlyPrice = AddOrUpdateStripePrice(
+                    stripeProduct.Id,
+                    this.StripePricePerYearId,
+                    this.PricePerYear.Value,
+                    this.Name,
+                    BillingPeriodType.Year,
+                    msgs);
+            }
+
+            if(msgs.HasNoErrors())
             {
-                var monthlyProduct = AddOrUpdateStripeProduct(BillingPeriodType.Month, msgs);
-                var yearlyProduct = AddOrUpdateStripeProduct(BillingPeriodType.Year, msgs);
+                // always want to save the price ids because updating the id creates a new one.
+                if (monthlyPrice.IsNotEmpty())
+                    this.StripePricePerMonthId = monthlyPrice.Id;
 
-                var monthlyPlan = AddOrUpdateStripePlan(monthlyProduct, this.Price.Value, BillingPeriodType.Month, msgs);
-                var yearlyPlan = AddOrUpdateStripePlan(yearlyProduct, this.PricePerYear.Value, BillingPeriodType.Year, msgs);
+                if (yearlyPrice.IsNotEmpty())
+                    this.StripePricePerYearId = yearlyPrice.Id;
+
+                if (monthlyPrice.IsNotEmpty() || yearlyPrice.IsNotEmpty())
+                    this.Save(dc);
             }
 
             return msgs;
         }
 
-        private Stripe.Product AddOrUpdateStripeProduct(BillingPeriodType billingPeriodType, SystemMessages msgs)
+        private Stripe.Product AddOrUpdateStripeProduct(SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             
-            var product = Billing.StripeHelper.GetProduct(this.GetStripePlanId(billingPeriodType), null, msgs);
+            var product = Billing.StripeHelper.GetProduct(this.GetStripeProductId(), null, msgs);
 
             if (product.IsEmpty())
             {
                 product = Billing.StripeHelper.CreateProduct(
-                    this.GetStripePlanId(billingPeriodType),
-                    this.GetStripePlanName(billingPeriodType),
+                    this.GetStripeProductId(),
+                    this.GetStripeProductName(),
                     $"{Helpers.Utilities.AppName(this.IsAfterSchool)} - {this.Name}".MaxChars(22),
                     true,
                     null,
@@ -280,8 +317,8 @@ namespace AfterSchoolLibrary.Models
             else
             {
                 product = Billing.StripeHelper.UpdateProduct(
-                    this.GetStripePlanId(billingPeriodType),
-                    this.GetStripePlanName(billingPeriodType),
+                    this.GetStripeProductId(),
+                    this.GetStripeProductName(),
                     $"{Helpers.Utilities.AppName(this.IsAfterSchool)} - {this.Name}".MaxChars(22),
                     true,
                     null,
@@ -289,6 +326,34 @@ namespace AfterSchoolLibrary.Models
             }
 
             return product;
+        }
+
+        private Stripe.Price AddOrUpdateStripePrice(string productId, string priceId, decimal amount, string nickname, BillingPeriodType billingPeriodType, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            Stripe.Price price = null;
+
+            if (priceId.IsNotEmpty())
+                price = Billing.StripeHelper.GetPrice(priceId, msgs);
+
+            if (msgs.HasNoErrors())
+            {
+                price = Billing.StripeHelper.CreatePrice(
+                     productId,
+                     amount * 100,
+                     nickname,
+                     billingPeriodType,
+                     null,
+                     new Dictionary<string, string>()
+                         {
+                            { "billingPeriodTypeId", ((int)billingPeriodType).ToString() }
+                         },
+                     msgs);
+            }
+
+            return price;
+
         }
 
         private Stripe.Plan AddOrUpdateStripePlan(Stripe.Product product, decimal price, BillingPeriodType billingPeriodType, SystemMessages msgs)
@@ -325,6 +390,16 @@ namespace AfterSchoolLibrary.Models
         public string GetStripePlanName(BillingPeriodType billingPeriodType)
         {
             return $"{this.Name.ToString()} - {billingPeriodType.ToString()}ly";
+        }
+
+        public string GetStripeProductId()
+        {
+            return this.Uid.ToString();
+        }
+
+        public string GetStripeProductName()
+        {
+            return $"{this.Name.ToString()}";
         }
 
         public bool IsAnyAccountUsing(DatabaseConnection dc = null)

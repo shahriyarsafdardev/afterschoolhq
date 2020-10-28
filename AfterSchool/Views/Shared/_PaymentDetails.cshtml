@@ -14,12 +14,14 @@
 
 <div class="row">
     <div class="col-md-8 col-md-offset-2">
-        @{Html.RenderPartial("~/Views/Shared/_PaymentSources.cshtml", Model);}
+        @{Html.RenderPartial("~/Views/Shared/_PaymentCards.cshtml", Model);}
     </div>
 </div>
 
 <div class="row">
-    <div class="col-md-8 col-md-offset-2">
-        @{Html.RenderPartial("~/Views/Shared/_PaymentCardAdd.cshtml", Model);}
-    </div>
+    @*
+            TODO :need to upgrade this screen with new token and validation based add new card screen
+        <div class="col-md-8 col-md-offset-2">
+            @{Html.RenderPartial("~/Views/Shared/_PaymentCardAdd.cshtml", Model);}
+        </div>*@
 </div>

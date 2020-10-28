@@ -3,6 +3,7 @@
 @{
     var subscriptionPlan = (SubscriptionPlan)ViewBag.SubscriptionPlan;
     var paymentPlan = (SubscriptionPlan)ViewBag.PaymentPlan;
+    var postPayPlan = (SubscriptionPlan)ViewBag.PostPayPlan;
     var canProcessPayments = (bool)ViewBag.CanProcessPayments;
     var accountPackage = (AccountPackage)ViewData["AccountPackage"];
     var paymentdisabled = "";
@@ -14,8 +15,13 @@
     }
 
     var showAllowPayLater = accountPackage.HasFeature(FeatureType.AllowPayLater);
+    var showAllPayLaterPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowPayLater);
+
     var showAllowPaymentPlans = accountPackage.HasFeature(FeatureType.AllowPaymentPlans);
+    var showAllowPaymentPlansPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowPaymentPlans);
+
     var showAllowSubscriptionPlans = accountPackage.HasFeature(FeatureType.AllowSubscriptionPlans);
+    var showAllowSubscriptionPlansPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowSubscriptionPlans);
 }
 
 <div class="panel panel-default panel-small-padding">
@@ -71,9 +77,9 @@
                 </div>
             </div>
 
-            <div class="form-group @(!canProcessPayments ? "hide": "")">
+            <div class="form-group">
                 <label class="col-sm-3 control-label">Allow to Pay Later</label>
-                <div class="col-sm-9" @if (!showAllowPayLater) { <text> onclick="return showUpgradeMyPlan()"</text> }>
+                <div class="col-sm-9" @if (!showAllowPayLater) { <text> onclick="return showUpgradeMyPlan('@(showAllPayLaterPackage.Name)','@(showAllPayLaterPackage.ID)')"</text> }>
                     @{
                         Html.RenderPartial(
                         "~/Views/Shared/_SwitchButton.cshtml",
@@ -93,7 +99,7 @@
                     </p>
                 </div>
             </div>
-                        
+
         </div>
     </div>
 </div>
@@ -107,7 +113,7 @@
     <div class="panel panel-default hide advanced-settings">
 
         <div class="panel-heading">
-            Payment Options
+            Payment Plan Options
         </div>
 
         <div class="panel-body">
@@ -115,7 +121,7 @@
             <div class="form-group">
                 <div class="row">
                     <label class="col-sm-3 control-label">Registration Payment Plan</label>
-                    <div class="col-sm-1" @if (!showAllowPaymentPlans) { <text> onclick="return showUpgradeMyPlan()"</text> }>
+                    <div class="col-sm-1" @if (!showAllowPaymentPlans) { <text> onclick="return showUpgradeMyPlan('@(showAllowPaymentPlansPackage.Name)','@(showAllowPaymentPlansPackage.ID)')"</text> }>
                         @{
                             Html.RenderPartial(
                             "~/Views/Shared/_SwitchButton.cshtml",
@@ -219,7 +225,7 @@
 
                 <div class="row">
                     <label class="col-sm-3 control-label">Subscription</label>
-                    <div class="col-sm-1" @if (!showAllowSubscriptionPlans) { <text> onclick="return showUpgradeMyPlan()"</text> }>
+                    <div class="col-sm-1" @if (!showAllowSubscriptionPlans) { <text> onclick="return showUpgradeMyPlan('@(showAllowSubscriptionPlansPackage.Name)','@(showAllowSubscriptionPlansPackage.ID)')"</text> }>
                         @{
                             Html.RenderPartial(
                               "~/Views/Shared/_SwitchButton.cshtml",
@@ -269,23 +275,23 @@
                 </div>
 
                 @*
-                <div class="row subscriptionplansection">
-                    <label class="col-sm-3 control-label">Apply Registration fee to subscription fees</label>
-                    <div class="col-sm-6 col-sm-9">
-                        @{Html.RenderPartial
-                            (
-                                "~/Views/Shared/_SwitchButton.cshtml",
-                                subscriptionPlan?.RegFeeAsDownPayment ?? false,
-                                new ViewDataDictionary()
-                                {
-                                { "checkboxname", "regfeedownpayment" },
-                                { "checkboxid", "regfeedownpayment" },
-                                { "disabled", false }
-                                }
-                            );
-                        }
+                    <div class="row subscriptionplansection">
+                        <label class="col-sm-3 control-label">Apply Registration fee to subscription fees</label>
+                        <div class="col-sm-6 col-sm-9">
+                            @{Html.RenderPartial
+                                (
+                                    "~/Views/Shared/_SwitchButton.cshtml",
+                                    subscriptionPlan?.RegFeeAsDownPayment ?? false,
+                                    new ViewDataDictionary()
+                                    {
+                                    { "checkboxname", "regfeedownpayment" },
+                                    { "checkboxid", "regfeedownpayment" },
+                                    { "disabled", false }
+                                    }
+                                );
+                            }
+                        </div>
                     </div>
-                </div>
                 *@
 
                 @if (Model.ActivityTypeId == ActivityType.LearningPod)
@@ -294,21 +300,21 @@
                         <label class="col-sm-3 control-label">Parents split cost evenly</label>
                         <div class="col-sm-6 col-sm-9">
                             @{Html.RenderPartial
-                                  (
-                                      "~/Views/Shared/_SwitchButton.cshtml",
-                                      subscriptionPlan?.SplitCostEvenly ?? false,
-                                      new ViewDataDictionary()
-                                      {
+                                      (
+                                          "~/Views/Shared/_SwitchButton.cshtml",
+                                          subscriptionPlan?.SplitCostEvenly ?? false,
+                                          new ViewDataDictionary()
+                                          {
                                         { "checkboxname", "splitcostevenly" },
                                         { "checkboxid", "splitcostevenly" },
                                         { "disabled", false }
-                                      }
-                                  );
+          }
+                                      );
                             }
                         </div>
                     </div>
                 }
-                
+
 
                 <div class="row">
                     <div class="col-sm-3"></div>
@@ -317,6 +323,65 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <div class="panel-heading">
+            Post Payment Options
+        </div>
+
+        <div class="panel-body">
+
+            <div class="form-group">
+                <div class="row">
+                    <label class="col-sm-3 control-label">Post Pay Option</label>
+                    <div class="col-sm-1">
+                        @{Html.RenderPartial
+                            (
+                                "~/Views/Shared/_SwitchButton.cshtml",
+                                Model.HasPostPayPlan(),
+                                new ViewDataDictionary()
+                                {
+                                { "checkboxname", "haspostpayplan" },
+                                { "checkboxid", "haspostpayplan" }
+                }
+                            );
+                        }
+                    </div>
+                </div>
+                <div id="postpaysection" class="row">
+                    <div class="col-md-3"></div>
+                    <div class="col-sm-6 col-md-9">
+                        <div class="input-group input-group-lg xs-mb-15">
+                            <span class="input-group-addon">Payment Amt $</span>
+                            <input type="number" class="form-control" id="postpaycost"
+                                   name="postpaycost" onfocus="this.select()"
+                                   value="@(postPayPlan.IsNotEmpty() && postPayPlan.CostPerPeriod.HasValue ? postPayPlan.CostPerPeriod.Value.ToString("0.00") : "0.00")"
+                                   required min="0.00" step=".01" @paymentdisabled />
+                        </div>
+                        <p class="text-muted">
+                            <em>The parent will be charged <span class="text-bold">$<span id="finalpostpaycost">0.00</span></span> per class attended</em>
+                        </p>
+                    </div>
+                    <!--
+                    <div class="col-md-3"></div>
+                    <div class="col-sm-6 col-md-9">
+                        <div class="input-group input-group-lg xs-mb-15">
+                            <span class="input-group-addon">Every</span>
+                            <select name="postpayperiod" id="postpayperiod" class="form-control" required>
+                                @BillingPeriodOptions(paymentPlan)
+                            </select>
+                        </div>
+                    </div>
+                    -->
+                </div>
+                <div class="row">
+                    <div class="col-sm-3"></div>
+                    <div class="col-sm-9">
+                        <p class="text-muted padding-v-10">Post payment options are used to allow parents to pay based on attendance.</p>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
     </div>
@@ -331,6 +396,7 @@
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         setSubscriptionPlanSection();
         setPaymentPlanSection();
+        setPostPayPlanSection();
 
         $('#hassubscriptionplan').change(function (cb) {
             setSubscriptionPlanSection();
@@ -338,6 +404,10 @@
 
         $('#haspaymentplan').change(function (cb) {
             setPaymentPlanSection();
+        });
+
+        $('#haspostpayplan').change(function (cb) {
+            setPostPayPlanSection();
         });
 
         $('#do-parents-pay-yes').click(function () {
@@ -353,7 +423,7 @@
             $('#do-parents-pay-yes').prop('checked', true);
             $('#do-parents-pay-yes').trigger('click');
 
-            if ('@Model.HasSubscriptionPlan()' == '@true' || '@Model.HasPaymentPlan()' == '@true') {
+            if ('@Model.HasSubscriptionPlan()' == '@true' || '@Model.HasPaymentPlan()' == '@true' || '@Model.HasPostPayPlan()' == '@true') {
                 ActivitySetup.showAdvancedSettings();
             }
         }
@@ -379,8 +449,16 @@
             }, 500);
         });
 
+        $('#postpaycost').keyup(function () {
+            postpayplanTimeOut = null;
+            postpayplanTimeOut = setTimeout(function () {
+                calculateFinalPrice($('#postpaycost').val(), $('#finalpostpaycost'));
+            }, 200);
+        });
+
         calculateFinalPrice($('#cost').val(), $('#finaltuitioncost'));
         calculateFinalPrice($('#paymentplancost').val(), $('#finalpaymentplancost'));
+        calculateFinalPrice($('#postpaycost').val(), $('#finalpostpaycost'));
         getSubscriptionFinalPrice();
 
         updateSubscriptionPeriodText();
@@ -446,6 +524,7 @@
     }
 
     function showTuitionCosts() {
+
         if ($('#do-parents-pay-yes').is(':checked')) {
             $('#tuition-costs').removeClass('hide');
             $('#provider-info').removeClass('hide');
@@ -462,8 +541,7 @@
             $('.subscriptionplansection').show();
             $('#subscriptionplanperiod').prop('required', true)
         } else {
-            $('.subscriptionplansection').hide();
-            $('#subscriptionplanperiod').prop('required', false)
+            disableSubscriptionPlanSection();
         }
     }
 
@@ -472,9 +550,57 @@
             $('#paymentplansection').show();
             $('#paymentplanperiod').prop('required', true);
         } else {
-            $('#paymentplansection').hide();
-            $('#paymentplanperiod').prop('required', false);
+            disablePaymentPlanSection();
         }
+    }
+
+    function disableSubscriptionPlanSection() {
+        $('.subscriptionplansection').hide();
+        $('#subscriptionplanperiod').prop('required', false)
+    }
+
+    function disablePaymentPlanSection() {
+        $('#paymentplansection').hide();
+        $('#paymentplanperiod').prop('required', false);
+    }
+
+    function setPostPayPlanSection() {
+        if ($('#haspostpayplan').is(':checked')) {
+            $('#postpaysection').show();
+            $('#postpaysection').prop('required', true);
+
+            postPayDisableOtherOptions();
+
+        } else {
+            $('#postpaysection').hide();
+            $('#postpaysection').prop('required', false);
+
+            // re-enable other options
+            postPayEnableOtherOptions();
+        }
+    }
+
+    function postPayDisableOtherOptions() {
+
+        if ($('#haspaymentplan').is(':checked')) {
+            $('#haspaymentplan').trigger('click');
+        }
+        if ($('#hassubscriptionplan').is(':checked')) {
+            $('#hassubscriptionplan').trigger('click');
+        }
+
+        $('#cost').val(0);
+        $('#hassubscriptionplan').prop('disabled', true);
+        $('#haspaymentplan').prop('disabled', true);
+        $('#allowtopaylater').prop('disabled', true);
+        $('#cost').prop('disabled', true);
+    }
+
+    function postPayEnableOtherOptions() {
+        hasSubscriptionsDisabledDefault();
+        paymentPlansDisabledDefault();
+        payLaterDisabledDefault();
+        $('#cost').prop('disabled', false);
     }
 
     function updatePaymentPlanStartText() {
@@ -483,6 +609,29 @@
 
         $('#paymentplanstarttypetext').html(text);
     }
+
+    function payLaterDisabledDefault() {
+        if (@((!showAllowPayLater).ToString().ToLower()))
+            $('#allowtopaylater').prop('disabled', true);
+        else
+            $('#allowtopaylater').prop('disabled', false);
+    }
+
+    function paymentPlansDisabledDefault() {
+        if (@((!showAllowPaymentPlans).ToString().ToLower()))
+          $('#haspaymentplan').prop('disabled', true);
+        else
+            $('#haspaymentplan').prop('disabled', false);
+    }
+
+    function hasSubscriptionsDisabledDefault() {
+        if (@((!showAllowPaymentPlans).ToString().ToLower()))
+            $('#hassubscriptionplan').prop('disabled', true);
+        else
+            $('#hassubscriptionplan').prop('disabled', false);
+    }
+
+
 </script>
 
 @helper BillingPeriodOptions(SubscriptionPlan plan)

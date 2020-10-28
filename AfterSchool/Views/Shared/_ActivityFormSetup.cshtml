@@ -17,8 +17,13 @@
     var showManageForms = accountPackage.HasFeature(FeatureType.ManageForms);
     var maxFormCount = accountPackage.IsNotEmpty() ? (int)accountPackage.GetFeature(FeatureType.ManageForms).Max.Value : 0;
     var showManageFormFields = forms.Count >= maxFormCount ? false : true;
+    var allowInvitesPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowInvites);
+    var waitingListPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.WaitingList);
+    var manageFormsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManageForms);
+    var allowAppilicationsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowApplications);
 }
 
+<input id="hdnAdvanceSettingToggle" type="hidden" name="isAdvanceSettingEnabled" />
 <div class="panel panel-default margin-bottom-zero">
     <div class="panel-heading activity-heading">
         Settings
@@ -67,7 +72,7 @@
                 <label class="col-sm-3 control-label">
                     Invite Only?
                 </label>
-                <div class="col-md-9" @if (!showInviteOnly) { <text> onclick="return showUpgradeMyPlan()"</text> }>
+                <div class="col-md-9" @if (!showInviteOnly) { <text> onclick="return showUpgradeMyPlan('@(allowInvitesPackage.Name)',@(allowInvitesPackage.ID))"</text> }>
                     @{
                         Html.RenderPartial(
                           "~/Views/Shared/_SwitchButton.cshtml", 
@@ -188,7 +193,7 @@
                             Waiting List Seats <span class="text-danger">*</span>
                             <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Can be any positive number" data-placement="top"></i>
                         </label>
-                        <div class="col-sm-9" @if (!showWaitingList) { <text> onclick="return showUpgradeMyPlan()"</text> }>
+                        <div class="col-sm-9" @if (!showWaitingList) { <text> onclick="return showUpgradeMyPlan('@(waitingListPackage.Name)',@(waitingListPackage.ID))"</text> }>
                             <input id="waitinglistseats"  class="form-control" type="number" name="waitinglistseats" value="@Model.WaitingListSeats" required step="1" 
                                    min="0"
                                    onfocus="this.select()"
@@ -203,7 +208,7 @@
                         Registration Form <span class="text-danger">*</span>
                     </label>
                     <div class="col-md-6" @if (!showManageForms) { <text> onclick="return showUpgradeMyPlan()"</text> }>
-                        <select name="form" id="form" class="form-control" required @if (!showManageForms) { <text> disabled="disabled" </text> }>
+                        <select name="form" id="form" class="form-control" @(activeForm.IsNotEmpty() && forms.Any(m => m.ID == activeForm.FormId)  ? "required" : "") @if (!showManageForms) { <text> disabled="disabled" </text> }>
                             <option value="">Select Form...</option>
                             @if (showManageFormFields)
                             {
@@ -212,7 +217,7 @@
 
                             @foreach (var form in forms)
                             {
-                                <option value="@form.ID" @(activeForm?.FormId == form.ID ? " selected=\"selected\" " : "")>@form.Name</option>
+                                <option value="@form.ID" @(activeForm?.FormId == form.ID ? "selected=\"selected\"" : "")>@form.Name</option>
                             }
                         </select>
                     </div>
@@ -223,7 +228,7 @@
                         }
                         else
                         {
-                            <a class="btn btn-block btn-link" href="#" onclick="return showUpgradeMyPlan()">Edit Form</a>
+                            <a class="btn btn-block btn-link" href="#" onclick="return showUpgradeMyPlan('@(manageFormsPackage.Name)',@(manageFormsPackage.ID))">Edit Form</a>
                         }
                     </div>
                 </div>                
@@ -235,7 +240,7 @@
                             Registration Mode <span class="text-danger">*</span>
                         </label>
                         <div class="col-sm-9">
-                            <div class="am-radio inline" @if (!showAllowApplications) { <text> onclick="return showUpgradeMyPlan()"</text> }>
+                            <div class="am-radio inline" @if (!showAllowApplications) { <text> onclick="return showUpgradeMyPlan('@(allowAppilicationsPackage.Name)',@(allowAppilicationsPackage.ID))"</text> }>
                                 @foreach (var item in Enum.GetValues(typeof(RegistrationMode)).Cast<RegistrationMode>().Where(x => x != RegistrationMode.NotSet))
                                 {
                                     <input type="radio" name="regmode" id="regmode-@item.ToString()" value="@((int)item)" 
@@ -281,7 +286,6 @@
 
         checkPeriodVal();
         checkFormVal();
-
     });
 
     function checkPeriodVal() {

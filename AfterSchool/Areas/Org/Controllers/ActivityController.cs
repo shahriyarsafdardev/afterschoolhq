@@ -191,7 +191,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd, string type, string inviteonly, string minseatsrequired)
+        public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd, string type, string inviteonly, string minseatsrequired, string isAdvanceSettingEnabled)
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
@@ -199,6 +199,7 @@ namespace AfterSchool.Areas.Org.Controllers
             Activity activity;
             Activity defaultActivity;
             ActivityGroup activityGroup = null;
+            ActivityForm activeForm;
 
             if (id.IsEmpty() || !id.IsGuid())
                 return HttpNotFound();
@@ -210,6 +211,30 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add("Activity name is required.", MessageType.UserError);
             else if (name.Length > 75)
                 msgs.Add("Activity name must not be greater then 75 chanracters.", MessageType.UserError);
+
+            if (form.IsEmpty() && (isAdvanceSettingEnabled.IsEmpty() || !isAdvanceSettingEnabled.ToBoolean()))
+            {
+                if (activity.IsNotEmpty())
+                {
+                    //.. edit activity
+                    activeForm = activity.GetActiveActivityForm(msgs);
+                }
+                else
+                {
+                    //.. create activity
+                    activeForm = currentAccount.GetDefaultActivityForm(msgs);
+                }
+
+                if (activeForm.IsEmpty())
+                {
+                    var defaultForm = currentAccount.CreateDefaultForm(currentUser, msgs);
+                    currentAccount.SetDefaultForm(defaultForm, currentUser);
+
+                    activeForm = currentAccount.GetDefaultActivityForm(msgs);
+                }
+
+                form = activeForm.FormId.Value.ToString();
+            }
 
             if (msgs.HasNoErrors())
             {
@@ -839,6 +864,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.CanProcessPayments = canProcessPayments;
             ViewBag.PaymentPlan = activity.GetPaymentPlan();
             ViewBag.SubscriptionPlan = activity.GetSubscriptionPlan();
+            ViewBag.PostPayPlan = activity.GetPostPayPlan();
             ViewBag.ActiveMenu = "EditCost";
             ViewBag.IsFullScreen = GetIsFullScreen(activity);
             ViewBag.hasSchedule = activity.HasSchedule;
@@ -854,7 +880,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditCost(string id, string cost, string costdescription, string acceptpaypal, string acceptcreditcard, string allowtopaylater, string cmd, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, string paymentplanpaymentstarttype, string splitcostevenly, string regfeedownpayment)
+        public ActionResult EditCost(string id, string cost, string costdescription, string acceptpaypal, string acceptcreditcard, string allowtopaylater, string cmd, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, string paymentplanpaymentstarttype, string splitcostevenly, string regfeedownpayment, string haspostpayplan, string postpaycost)
         {
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid());
@@ -878,6 +904,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "paymentplanpaymentstarttype", paymentplanpaymentstarttype },
                     { "splitcostevenly", splitcostevenly.IsBoolean().ToString() },
                     { "regfeedownpayment", regfeedownpayment.IsBoolean().ToString() },
+                    { "haspostpayplan", haspostpayplan.IfBlank("0") },
+                    { "postpaycost", postpaycost },
                 };
 
                 activity = ActivityService.EditExisting(
