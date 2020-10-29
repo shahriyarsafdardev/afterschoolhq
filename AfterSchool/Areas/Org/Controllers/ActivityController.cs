@@ -1156,11 +1156,11 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult ChargeAttendanceFee(string activityId)
+        public ActionResult ChargeAttendanceFee()
         {
-
             // this should return the amount to be charged for each registrant 
             var attendanceIds = Request.Form["AttendanceIds"];
+            var activityId = Request.Form["Uid"];
             var msgs = new SystemMessages();
             Activity activity = null;
 
@@ -1189,7 +1189,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 ViewBag.AttdncIds = attendanceIds;
                 ViewBag.Messages = msgs;
 
-                return View();
+                return View(activity);
             }
             return null;
         }

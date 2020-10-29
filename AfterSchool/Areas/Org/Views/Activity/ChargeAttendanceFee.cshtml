@@ -1,0 +1,67 @@
+﻿@model Activity
+@{
+    ViewBag.Title = Model.AccountName;
+    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+
+
+    //.. TODO design for now
+}
+
+
+@{
+    Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());
+}
+
+<div class="main-content">
+
+    @{
+        Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs);
+
+        Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model);
+    }
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            Charge attendance Fee - Preview
+
+            <div class="pull-right">
+                <p>
+                    @{
+
+                        @*if (diff > 0)
+                        {
+                            @payoutRequest.ToCurrency() Requested - @diff.ToCurrency() Owed = @maxPayout.ToCurrency() Total
+                        }
+                        else
+                        {
+                            @payoutRequest.ToCurrency()
+                        }*@
+                    }
+                </p>
+            </div>
+
+            <div class="clearfix"></div>
+
+            <div style="font-size: 13px">
+                <p>Please review the following attendaces to ensure all of the correct charges are listed</p>
+            </div>
+
+            <div>
+                <div class="pull-left">
+                    <button class="btn btn-default" onclick="returnToTransactions()">
+                        < Cancel
+                    </button>
+                </div>
+                <span class="pull-right">
+                    <button class="btn btn-primary" onclick="requestPayout('@ViewBag.TranIds')">
+                        Charge Parents >
+                    </button>
+                </span>
+            </div>
+            <br />
+        </div>
+        <div class="panel-body">
+
+        </div>
+    </div>
+</div>

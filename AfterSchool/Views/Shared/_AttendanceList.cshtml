@@ -1,16 +1,20 @@
 ﻿@model Activity
-@{ var list = Model.GetCompletedAttendance();
+@{ 
+    var list = Model.GetCompletedAttendance();
     var totalPresent = Model.GetAttendancePresentCount();
     var totalSeats = Model.GetAttendancePossibleCount();
     var totalAbsent = totalSeats - totalPresent;
     var attendanceRate = "0";
     var account = SessionVariables.CurrentAccount;
     var controller = (string)ViewData["controller"];
-
+    var postPayPlan = Model.HasPostPayPlan();
+    // postPayPlan = true;
     if (totalPresent > 0)
     {
         attendanceRate = ((totalPresent.ToDouble() / (totalPresent + totalAbsent)) * 100).Round(1).ToString("###.#");
-    } }
+    }
+}
+
 <div class="row">
     <div class="col-md-3">
         <div class="widget widget-tile widget-bordered">
@@ -33,29 +37,39 @@
     </div>
 </div>
 
-@if (Model.HasSchedule)
-{
-<a href="@Url.Action("trackattendance", controller, new { id = Model.Uid.ToString() })" class="btn btn-primary btn-space">Take Attendance</a> }
-else if (Model.ActivityTypeId.NotIn(new ActivityType[] { ActivityType.PermissionSlip, ActivityType.FieldTrip }))
-{
-<p>In order to take attendance, please <a href="@Url.Action("editschedule", "activity", new { id = Model.Uid })">add a schedule</a> to @Model.Name</p>            }
+@{
 
-@if (Model.HasPostPayPlan())
-{
-<a id="charge-attendance" onclick="chargeAttendanceFee()" class="btn btn-default btn-space">Charge Attendance Fee</a>}
+    if (Model.HasSchedule)
+    {
+        <a href="@Url.Action("trackattendance", controller, new { id = Model.Uid.ToString() })" class="btn btn-primary btn-space">Take Attendance</a> 
+    }
+    else if (Model.ActivityTypeId.NotIn(new ActivityType[] { ActivityType.PermissionSlip, ActivityType.FieldTrip }))
+    {
+        <p>In order to take attendance, please <a href="@Url.Action("editschedule", "activity", new { id = Model.Uid })">add a schedule</a> to @Model.Name</p>
+    }
+
+    if (postPayPlan)
+    {
+        <a id="charge-attendance" onclick="chargeAttendanceFee()" disabled="disabled" class="btn btn-default btn-space">Charge Attendance Fee</a>
+    }
+}
+
+
 
 <div class="table-responsive">
     <table class="table table-hover">
         <thead>
             <tr>
-                @if (Model.HasPostPayPlan())
-                {
-                    <th>
-                        <span class="am-checkbox">
-                            <input type="checkbox" id="selectAllTransaction" onchange="selectAllAttendance(this)" />
-                            <label for="selectAllTransaction"></label>
-                        </span>
-                    </th>
+                @{ 
+                    if (postPayPlan)
+                    {
+                        <th>
+                            <span class="am-checkbox">
+                                <input type="checkbox" id="selectAllTransaction" onchange="selectAllAttendance(this)" />
+                                <label for="selectAllTransaction"></label>
+                            </span>
+                        </th>
+                    }
                 }
                 <th></th>
                 <th>Date</th>
@@ -72,55 +86,65 @@ else if (Model.ActivityTypeId.NotIn(new ActivityType[] { ActivityType.Permission
                     var seatsPossible = attendance.GetAttendanceRegistrantCount();
                     var presentCount = attendance.GetPresentCount();
                     // var disableCheck = !attendance.CanBeCharged() ? "disabled" : "";  TODO - Need to write method for determining if an attendance can be charged
-<tr>
-    @if (Model.HasPostPayPlan())
-    {
-<td>
-    <span class="am-checkbox">
-        <input type="checkbox"
-               id="selectAttendance-@attendance.ID"
-               @*@disableChk  -- see above comment*@
-               class="chkAttendance"
-               onchange="selectAttendance(@attendance.ID,this)" />
-        <label for="selectAttendance-@attendance.ID"></label>
-    </span>
-</td>}
-    <td><a href="@Url.Action("trackattendance", controller, new { id = Model.Uid, att = attendance.ID })" class="btn btn-primary btn-xs"><i class="icon icon-left s7-user"></i> View Details</a></td>
-    <td>@account.ConvertToAccountTimeZone(attendance.GetActivityInstance().StartDateTime.Value).ToLongDateString()</td>
-    <td>@seatsPossible</td>
-    <td>@presentCount</td>
-    <td>@Math.Max(0, seatsPossible - presentCount)</td>
-</tr>
- }
-}
-else
-{
-<tr>
-    <td colspan="5">You have not taken attendance yet</td>
-</tr>
-       }
+                    <tr>
+                        @if (postPayPlan)
+                        {
+                            <td>
+                                <span class="am-checkbox">
+                                    <input type="checkbox"
+                                           id="selectAttendance-@attendance.ID"
+                                           @*@disableChk  -- see above comment*@
+                                           class="chkAttendance"
+                                           onchange="selectAttendance(@attendance.ID,this)" />
+                                    <label for="selectAttendance-@attendance.ID"></label>
+                                </span>
+                            </td>
+                        }
+
+                        <td>
+                            <a href="@Url.Action("trackattendance", controller, new { id = Model.Uid, att = attendance.ID })" class="btn btn-primary btn-xs"><i class="icon icon-left s7-user"></i> View Details</a>
+                        </td>
+
+                        <td>@account.ConvertToAccountTimeZone(attendance.GetActivityInstance().StartDateTime.Value).ToLongDateString()</td>
+
+                        <td>@seatsPossible</td>
+
+                        <td>@presentCount</td>
+
+                        <td>@Math.Max(0, seatsPossible - presentCount)</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5">You have not taken attendance yet</td>
+                </tr>
+            }
         </tbody>
     </table>
 </div>
 
 
-
-<form action="@Url.Action("ChargeAttendacne","Attendance")" id="chargeAttendanceForm" method="post">
+<form action="@Url.Action("chargeattendancefee","activity")" id="chargeAttendanceForm" method="post">
     @Html.Hidden("AttendanceIds")
+    @Html.HiddenFor(m => m.Uid)
 </form>
 
 <script>
 
     PageEvent.add(PageEvent.AFTER_INIT, function () {
-       
+
     });
 
-   
+
     var selectedAttendances = [];
 
     function chargeAttendanceFee() {
-        $("#AttendanceIds").val(this.selectedAttendances.join());
-        $("#chargeAttendanceForm").submit();
+        if (this.selectedAttendances.length > 0) {
+            $("#AttendanceIds").val(this.selectedAttendances.join());
+            $("#chargeAttendanceForm").submit();
+        }
     }
 
     function selectAttendance(id, event) {
@@ -129,8 +153,8 @@ else
         }
         else {
             var index = this.selectedAttendances.map(x => {
-                    return x;
-                }).indexOf(id);
+                return x;
+            }).indexOf(id);
             this.selectedAttendances.splice(index, 1);
         }
         if (this.selectedAttendances.length > 0)
@@ -145,12 +169,12 @@ else
             if (event.checked) {
                 if ($(this).prop("checked") == false)
                     this.click();
-               }
-             else {
+            }
+            else {
                 if ($(this).prop("checked") == true)
                     this.click();
-              }
-           })
+            }
+        })
     }
 
 </script>
