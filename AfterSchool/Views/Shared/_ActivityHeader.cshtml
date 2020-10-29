@@ -25,6 +25,11 @@
     {
         isFullScreen = (bool)ViewBag.IsFullScreen;
     }
+
+    var showAttendance = SessionVariables.AccountPackage.HasFeature(FeatureType.Attendance);
+    var messagingPackage = PackageService.GetPackageWithAnyFeaturesLowestPrice(new List<FeatureType>() { FeatureType.EmailMessaging, FeatureType.TextMessaging });
+    var attendancePackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.Attendance);
+    var emailPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.EmailMessaging);
 }
 
 @if (Model?.ID.GetValueOrDefault(0) > 0 && !isFullScreen)
@@ -36,24 +41,33 @@
             @if (isActivityLeader)
             {
                 <a href="@Url.Action("editsetup", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "editsetup" ? "-active" : "")"><i class="s7-edit"></i> Setup</a>
-                if (!SessionVariables.AccountPackage.HasFeature(FeatureType.ManageForms))
-                {
-                    <a href="@Url.Action("form", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "form" ? "-active" : "")"><i class="s7-note2"></i> Reg Form</a>
-                }
             }
 
-            @if(Model.IsPublished || registrantCount > 0)
+            @if (Model.IsPublished || registrantCount > 0)
             {
                 <a href="@Url.Action("registrants", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "registrants" ? "-active" : "")"><i class="s7-user"></i> @UILabel.RegistrantLabel(true)</a>
 
-                if (SessionVariables.AccountPackage.HasFeature(FeatureType.Attendance) && Model.ActivityTypeId.NotIn(new ActivityType[] { ActivityType.FieldTrip, ActivityType.PermissionSlip }) && Model.HasSchedule)
+                if (Model.HasSchedule && Model.ActivityTypeId.NotIn(new ActivityType[] { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
                 {
-                    <a href="@Url.Action("attendance", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "attendance" ? "-active" : "")"><i class="s7-check"></i> Attendance</a>
+                    if (showAttendance)
+                    {
+                        <a href="@Url.Action("attendance", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "attendance" ? "-active" : "")"><i class="s7-check"></i> Attendance</a>
+                    }
+                    else
+                    {
+                        <a href="#" class="btn btn-alt6@(actionName == "attendance" ? "-active" : "")" onclick="return showUpgradeMyPlan('@(attendancePackage.Name)',@(attendancePackage.ID))">
+                            <i class="s7-check"></i> Attendance
+                        </a>
+                    }
                 }
 
-                if (SessionVariables.AccountPackage.HasFeature(FeatureType.Messaging))
+                if (SessionVariables.AccountPackage.HasFeature(FeatureType.EmailMessaging) || SessionVariables.AccountPackage.HasFeature(FeatureType.TextMessaging))
                 {
                     <a href="@Url.Action("messages", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "messages" ? "-active" : "")"><i class="s7-mail"></i> Messaging</a>
+                }
+                else
+                {
+                    <a href="#" class="btn btn-alt6@(actionName == "messages" ? "-active" : "")"  onclick="return showUpgradeMyPlan('@(messagingPackage.Name)', @(messagingPackage.ID))"><i class="s7-mail"></i> Messaging</a>
                 }
             }
 
@@ -64,7 +78,7 @@
                     <a href="@Url.Action("team", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "team" ? "-active" : "")">
                         <i class="s7-users"></i> Staff
                     </a>
-                }                
+                }
             }
 
             @if (Model.ActivityTypeId != ActivityType.Team && (isActivityLeader || SessionVariables.CurrentUser.CanPublishActivity(SessionVariables.CurrentAccount, Model)))
@@ -84,28 +98,36 @@
             }
         </div>
         <div class="hidden-lg hidden-sm hidden-md">
-            <select class="form-control" onchange="location.href=this.value;">
+            <select class="form-control" onchange="this.value == '#' ? showUpgradeMyPlan(this.packagename,this.packageid) : location.href = this.value">
                 <option value="">Navigation</option>
                 <option value="@Url.Action("summary", "activity", new { id = Model.Uid })">Summary</option>
                 @if (isActivityLeader)
                 {
                     <option value="@Url.Action("editsetup", "activity", new { id = Model.Uid })">Setup</option>
-                    if (!SessionVariables.AccountPackage.HasFeature(FeatureType.ManageForms))
-                    {
-                        <option value="@Url.Action("form", "activity", new { id = Model.Uid })">Reg Form</option>
-                    }
                 }
                 @if (Model.IsPublished || registrantCount > 0)
                 {
                     <option value="@Url.Action("registrants", "activity", new { id = Model.Uid })">@UILabel.RegistrantLabel(true)</option>
 
-                    if (SessionVariables.AccountPackage.HasFeature(FeatureType.Attendance))
+                    if (Model.HasSchedule && Model.ActivityTypeId.NotIn(new ActivityType[] { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
                     {
-                        <option value="@Url.Action("attendance", "activity", new { id = Model.Uid })">Attendance</option>
+                        if (showAttendance)
+                        {
+                            <option value="@Url.Action("attendance", "activity", new { id = Model.Uid })">Attendance</option>
+                        }
+                        else
+                        {
+                            <option packagename="@(attendancePackage.Name)" packageid="@(attendancePackage.ID)" value="#" onclick="return showUpgradeMyPlan('@(attendancePackage.Name)',@(attendancePackage.ID)))">Attendance</option>
+                        }
                     }
-                    if (SessionVariables.AccountPackage.HasFeature(FeatureType.Messaging))
+
+                    if (SessionVariables.AccountPackage.HasFeature(FeatureType.EmailMessaging))
                     {
                         <option value="@Url.Action("messages", "activity", new { id = Model.Uid })">Messaging</option>
+                    }
+                    else
+                    {
+                        <option  packagename="@(emailPackage.Name)" packageid="@(emailPackage.ID)" value="#">Messaging</option>
                     }
                 }
                 @if (isActivityLeader)

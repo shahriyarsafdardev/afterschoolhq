@@ -3,7 +3,7 @@ public enum FeatureType
 	NotSet = 0,
 	Attendance,
 	AcceptPayments,
-	Messaging,
+	EmailMessaging,
 	CustomUrl,
 	TeamAccounts,
 	WaitingList,
@@ -25,5 +25,12 @@ public enum FeatureType
 	ManageLeagues,
 	ManageFieldTrips,
 	ManagePermissionSlips,
-	ManageLearningPods
+	ManageLearningPods,
+	TextMessaging,
+	AllowInvites,
+	AllowStudentRegistration,
+	AllowPaymentPlans,
+	AllowSubscriptionPlans,
+	AllowPayLater,
+	StudentCRM
 }

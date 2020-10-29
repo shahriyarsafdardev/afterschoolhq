@@ -1,6 +1,11 @@
 ﻿@model List<Form>
-@{
+@{ 
     var msgs = (SystemMessages)ViewBag.Messages;
+    var accountPackage = SessionVariables.AccountPackage;
+    var maxFormCount = accountPackage.IsNotEmpty() ? (int)accountPackage.GetFeature(FeatureType.ManageForms).Max.Value : 0;
+    var currentFormCount = Model.Count;
+    var showFormFields = currentFormCount >= maxFormCount ? false : true;
+    var showFormFieldsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManageForms);
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -15,16 +20,34 @@
 
         <div class="panel-heading">
             <div class="pull-right">
-                <button class="btn btn-primary btn-space md-trigger" data-modal="modal-newform">
-                    <i class="icon icon-left s7-plus"></i>
-                    Add Form
-                </button>
+                @if (showFormFields)
+                {
+                    <button class="btn btn-primary btn-space md-trigger" data-modal="modal-newform">
+                        <i class="icon icon-left s7-plus"></i>
+                        Add Form
+                    </button>
+                }
+                else
+                {
+                    <button class="btn btn-primary btn-space md-trigger" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage.Name)', @(showFormFieldsPackage.ID))">
+                        <i class="icon icon-left s7-plus"></i>
+                        Add Form
+                    </button>
+                }
+
             </div>
             <i class="s7-note2"></i> Forms
             <div class="clearfix"></div>
         </div>
 
         <div class="panel-body">
+             @if (maxFormCount > 0)
+             {
+                <p class="pull-right text-bold">
+                    @currentFormCount of @maxFormCount Forms
+                </p>
+                <div class="clearfix"></div>
+             }
 
             <div class="table-responsive">
                 <table class="table table-hover">
@@ -37,18 +60,43 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @if (Model.Count > 0)
+                        @if (maxFormCount == 0)
+                        {
+                            <tr>
+                                <td colspan="4">No forms available. Please <a href="#" class="md-trigger" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage.Name)', @(showFormFieldsPackage.ID))">upgrade your plan.</a></td>
+                            </tr>
+                        }
+                        else if (Model.Count > 0)
                         {
                             foreach (var form in Model)
                             {
                                 <tr>
-                                    <td><a href="@Url.Action("formedit", "account", new {id = form.ID})" class="btn btn-default btn-sm"><i class="icon icon-left s7-edit"></i> Edit</a></td>
+                                    <td>
+                                        @if (maxFormCount > 0)
+                                        {
+                                            <a href="@Url.Action("formedit", "account", new {id = form.ID})" class="btn btn-default btn-sm"><i class="icon icon-left s7-edit"></i> Edit</a>
+                                        }
+                                        else
+                                        {
+                                            <a href="#" class="btn btn-default btn-sm" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage.Name)', @(showFormFieldsPackage.ID))"><i class="icon icon-left s7-edit"></i> Edit</a>
+                                        }
+
+                                    </td>
                                     <td><a href="@Url.Action("formedit", "account", new {id = form.ID})">@form.Name</a></td>
                                     <td>@form.CreateDate.Value.ToLongDateString()</td>
                                     <td>
-                                        <button class="btn btn-default btn-sm md-trigger" data-modal="modal-newform" onclick="copy(@form.ID, '@form.Name')">
-                                            <i class="icon icon-left s7-copy-file"></i> Copy
-                                        </button>
+                                        @if (showFormFields)
+                                        {                                            
+                                            <button class="btn btn-default btn-sm md-trigger" data-modal="modal-newform" onclick="copy(@form.ID, '@form.Name')">
+                                                <i class="icon icon-left s7-copy-file"></i> Copy
+                                            </button>
+                                        }
+                                        else
+                                        {                                            
+                                            <button class="btn btn-default btn-sm md-trigger" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage.Name)', @(showFormFieldsPackage.ID))">
+                                                <i class="icon icon-left s7-copy-file"></i> Copy
+                                            </button>                                         
+                                        }
                                     </td>
                                 </tr>
                             }

@@ -22,6 +22,7 @@ namespace AfterSchoolLibrary.Models
 		public string StripePublishableKey { get { return (string)MDV["StripePublishableKey"].Value; } set { MDV["StripePublishableKey"].Value = value; } }
 		public string StripeSecretKey { get { return (string)MDV["StripeSecretKey"].Value; } set { MDV["StripeSecretKey"].Value = value; } }
 		public string StripeRefreshToken { get { return (string)MDV["StripeRefreshToken"].Value; } set { MDV["StripeRefreshToken"].Value = value; } }
+		public string StripeDefaultCardId { get { return (string)MDV["StripeDefaultCardId"].Value; } set { MDV["StripeDefaultCardId"].Value = value; } }
 		/// <summary>
 		/// Required.
 		/// </summary>
@@ -95,6 +96,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "StripePublishableKey", System.Data.SqlDbType.NVarChar , "400");
 				_dp.Add(className, "StripeSecretKey", System.Data.SqlDbType.NVarChar , "400");
 				_dp.Add(className, "StripeRefreshToken", System.Data.SqlDbType.NVarChar , "400");
+				_dp.Add(className, "StripeDefaultCardId", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
 				_dp.Add(className, "UniqueName", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "OwnerId", System.Data.SqlDbType.Int);
@@ -213,6 +215,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["StripeRefreshToken"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["StripeDefaultCardId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
@@ -547,7 +553,7 @@ namespace AfterSchoolLibrary.Models
         {
             get
             {
-                return false; // this.StripeDefaultCardId.IsNotEmpty();
+                return this.StripeDefaultCardId.IsNotEmpty();
             }
         }
 

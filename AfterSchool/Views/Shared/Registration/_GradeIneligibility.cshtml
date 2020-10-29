@@ -52,11 +52,11 @@
                 $('#ineligibile-activities').html('');
 
                 if (data && data.status == 'ok') {
-                    if (data.activities.length > 0) {
+                    if (data.ineligibleActivities.length > 0) {
 
                         $('#ineligible-student').html(data.studentName);
 
-                        for (let activity of data.activities) {
+                        for (let activity of data.ineligibleActivities) {
                             $('#ineligibile-activities').append(activity + '<br />');
                         }
 
@@ -78,6 +78,7 @@
                     }
                 } else {
                     Notifications.showErrors(data.messages);
+                    $('#btn-register').prop('disabled', true);
                 }
 
             }

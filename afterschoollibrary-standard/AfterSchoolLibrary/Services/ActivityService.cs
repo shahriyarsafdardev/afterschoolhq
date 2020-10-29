@@ -805,7 +805,6 @@ namespace AfterSchoolLibrary.Services
             var genderrestrictions = values.GetValueOrDefault("genderrestrictions");
             var regmode = values.GetValueOrDefault("regmode");
             var days = values.GetValueOrDefault("days");
-            var gradeIds = values.GetValueOrDefault("gradeIds");
             var group = values.GetValueOrDefault("group");
             var registrationthankyouemail = values.GetValueOrDefault("registrationthankyouemail");
             var applicationthankyouemail = values.GetValueOrDefault("applicationthankyouemail");
@@ -939,30 +938,48 @@ namespace AfterSchoolLibrary.Services
 
             if (agestart.IsNumber())
             {
-                if (agestart.ToString().ToInteger() >= 0)
+                if (agestart.ToString().ToInteger() > 0 && agestart.ToString().ToInteger() <= 18)
+                {
                     activity.AgeStart = agestart.ToString().ToInteger();
+                    activity.GradeLevelStart = null;
+                }
                 else
                     activity.AgeStart = null;
             }
+
             if (ageend.IsNumber())
             {
-                if (ageend.ToString().ToInteger() >= 0)
+                if (ageend.ToString().ToInteger() > 0 && ageend.ToString().ToInteger() <= 18)
+                {
                     activity.AgeEnd = ageend.ToString().ToInteger();
+                    activity.GradeLevelEnd = null;
+                }  
                 else
                     activity.AgeEnd = null;
             }
 
-            if (gradestart.IsNumber() && gradeend.IsNumber())
+            List<int?> gradeLevels = GradeLevel.Load(msgs: msgs, dc: dc).Select(grade => grade.ID).ToList();
+
+            if (gradestart.IsNumber())
             {
-                if (gradestart.ToString().ToInteger() > -1)
+                if (gradeLevels.Contains(gradestart.ToString().ToInteger()))
+                {
                     activity.GradeLevelStart = gradestart.ToString().ToInteger();
+                    activity.AgeStart = null;
+                }
                 else
                     activity.GradeLevelStart = null;
+            }
 
-                if (gradeend.ToString().ToInteger() > -1)
+            if (gradeend.IsNumber())
+            {
+                if (gradeLevels.Contains(gradeend.ToString().ToInteger()))
+                {
                     activity.GradeLevelEnd = gradeend.ToString().ToInteger();
+                    activity.AgeEnd = null;
+                }                   
                 else
-                    activity.GradeLevelEnd = null;
+                    activity.GradeLevelEnd = null;  
             }
 
             if (minseatsrequired.IsNumber())
@@ -2413,6 +2430,11 @@ namespace AfterSchoolLibrary.Services
                     msgs.AddRange(ra.SendPaymentReminder());
             });
 
+        }
+
+        public static bool RestrictByGrade(this Activity activity)
+        {
+            return activity.AgeStart.IsEmpty();
         }
     }
 }

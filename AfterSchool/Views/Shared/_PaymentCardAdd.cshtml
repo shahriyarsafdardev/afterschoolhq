@@ -46,7 +46,7 @@
             </select>
         </div>
     </div>
-    @if (cards.Count > 0) 
+    @if (cards.IsNotEmpty() && cards.Count > 0) 
     { 
         <div class="form-group">
             <label class="col-sm-3 control-label">Make primary</label>

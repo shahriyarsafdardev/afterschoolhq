@@ -314,8 +314,11 @@ property: ActivityMessageId, int?, Int, required
 property: RegistrantId, int?, Int, required
 property: DateSent, DateTime?, DateTime
 property: SendErrors, string, NVarChar "1000"
+property: SentText, bool, Bit
+property: SentEmail, bool, Bit
 loadmethod: ActivityMessageId, List<>
 loadmethod: RegistrantId, List<>
+loadmethod: CreatedBy, List<>
 loadmethod: ActivityMessageId|RegistrantId
 join: Registrant.ID, RegistrantId, InnerJoin
 joinproperty: Registrant.Email, string, NVarChar
@@ -337,7 +340,7 @@ property: StripePublishableKey, string, NVarChar "400"
 property: StripeSecretKey, string, NVarChar "400"
 property: StripeRefreshToken, string, NVarChar "400"
 -property: PayPalEmailAddress, string, NVarChar "100"
--property: StripeDefaultCardId, string, NVarChar "50"
+property: StripeDefaultCardId, string, NVarChar "50"
 -property: LandingPageText, string, NVarChar "4000"
 property: Uid, Guid, UniqueIdentifier, required
 property: UniqueName, string, NVarChar "50"
@@ -393,6 +396,8 @@ property: PrimaryColor, string, NVarChar "20"
 property: Website, string, NVarChar "400"
 property: GradeLevelStart, int?, Int
 property: GradeLevelEnd, int?, Int
+property: AgeStart, int?, Int
+property: AgeEnd, int?, Int
 property: Twitter, string, NVarChar "100"
 property: Facebook, string, NVarChar "100"
 property: Instagram, string, NVarChar "100"
@@ -648,6 +653,8 @@ property: HasLotteryRun, bool, Bit
 property: ActivityGroupTypeId, ActivityGroupType, Int
 property: MinGradeLevelId, int?, Int
 property: MaxGradeLevelId, int?, Int
+property: AgeStart, int?, Int
+property: AgeEnd, int?, Int
 property: GenderRestriction, GenderRestrictionType, Int
 property: AdministratorAccountId, int?, Int
 property: ActivityScheduleId, int?, Int
@@ -1162,6 +1169,8 @@ property: IsActive, bool, Bit
 property: IsPopular, bool, Bit
 property: IsAfterSchool, bool, Bit
 property: Uid, Guid, UniqueIdentifier
+property: StripePricePerMonthId, string, NVarChar "50"
+property: StripePricePerYearId, string, NVarChar "50"
 baseproperty: Name, required
 loadmethod: IsActive, List<>
 loadmethod: IsActive|IsAfterSchool, List<>
@@ -1783,7 +1792,7 @@ values: NotSet, Individual, Organization
 [begin]
 type: Enum
 name: FeatureType
-values: NotSet, Attendance, AcceptPayments, Messaging, CustomUrl, TeamAccounts, WaitingList, ManageForms, ManageLocations, ManageActivityGroups, Activities, Participants, AllowApplications, Lottery, TrialDays, ManageContacts, ViewInsights, PaymentsPercentageFee, PaymentsPercentageFlatFee, ManageExternalLeagues, UseStripeConnectedAccount, AcceptACH, ManageLeagues, ManageFieldTrips, ManagePermissionSlips, ManageLearningPods
+values: NotSet, Attendance, AcceptPayments, EmailMessaging, CustomUrl, TeamAccounts, WaitingList, ManageForms, ManageLocations, ManageActivityGroups, Activities, Participants, AllowApplications, Lottery, TrialDays, ManageContacts, ViewInsights, PaymentsPercentageFee, PaymentsPercentageFlatFee, ManageExternalLeagues, UseStripeConnectedAccount, AcceptACH, ManageLeagues, ManageFieldTrips, ManagePermissionSlips, ManageLearningPods,	TextMessaging, AllowInvites, AllowStudentRegistration, AllowPaymentPlans, AllowSubscriptionPlans, AllowPayLater, StudentCRM
 [end]
 
 [begin]

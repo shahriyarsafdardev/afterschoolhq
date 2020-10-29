@@ -966,6 +966,17 @@ namespace AfterSchoolLibrary.Services
             return new List<Stripe.Source>();
         }
 
+        public static List<Stripe.Card> GetStripeCards(this Account account, SystemMessages msgs = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            var customer = account.GetStripeCustomer(msgs);
+
+            if (customer.IsNotEmpty())
+                return StripeHelper.GetCards(customer.Id, msgs);
+
+            return new List<Stripe.Card>();
+        }
+
         public static List<Stripe.BankAccount> GetStripeBankAccounts(this Account account, SystemMessages msgs = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -1459,6 +1470,7 @@ namespace AfterSchoolLibrary.Services
             //        signupType = SignUpType.ConvertingFromTrial;
             //    }
             //}
+
             if (p.IsFree(billingPeriodType) || (activePackage.IsNotEmpty() && activePackage.IsFree))
             {
                 // new sign up
@@ -1485,7 +1497,17 @@ namespace AfterSchoolLibrary.Services
                     else
                         signupType = SignUpType.ChangePackageDuringTrial;
                 }
+
+                // could be changing same package with other plan, like monthly or yearly
+                if (activePackage.IsNotEmpty() && activePackage.PackageId == p.ID && activePackage.BillingPeriodTypeId != billingPeriodType)
+                    signupType = SignUpType.ChangeBillingPeriodType;
+                
+                //package changed
+                else if (activePackage.IsNotEmpty() && activePackage.PackageId != p.ID)
+                    signupType = SignUpType.ChangePackage;
             }
+
+
 
             return signupType;
         }
@@ -1517,19 +1539,24 @@ namespace AfterSchoolLibrary.Services
                     if (signupType != SignUpType.NotSet)
                     {
                         if (signupType == SignUpType.ChangePackage ||
-                            signupType == SignUpType.ChangeBillingPeriodType ||
                             signupType == SignUpType.ChangePackageDuringTrial)
                         {
-                            //cancel existing package
-                            amsgs.AddRange(currentPackage.CancelPackage(adc));
+                            //cancel existing package                            
+                            amsgs.AddRange(currentPackage.CancelPackageWithStripe(account.StripeCustomerId , false, adc));
                         }
+
+                        if (package.StripePricePerMonthId.IsEmpty() || package.StripePricePerYearId.IsEmpty())
+                        {
+                            package.SaveWithStripe(adc);
+                        }
+
+                        var priceId = billingPeriodType == BillingPeriodType.Month ? package.StripePricePerMonthId : package.StripePricePerYearId;
+                           
 
                         if (msgs.HasNoErrors())
                         {
                             if (signupType != SignUpType.ConvertingFromTrial)
                             {
-                                var newStripePlanId = package.GetStripePlanId(billingPeriodType);
-
                                 //create new package
                                 newap.AccountId = account.ID;
                                 newap.PackageId = packageId;
@@ -1540,7 +1567,18 @@ namespace AfterSchoolLibrary.Services
                                 newap.LastModifiedBy = loggedInUserId;
                                 newap.IsActive = true;
                                 newap.Price = billingPeriodType == BillingPeriodType.Month ? package.Price : package.PricePerYear;
-                                newap.StripeSubscriptionId = currentPackage?.StripeSubscriptionId ?? null;
+
+                                newap.StripeSubscriptionId = null;
+
+                                if (currentPackage.IsNotEmpty() && 
+                                    currentPackage.StripeSubscriptionId.IsNotEmpty() && 
+                                    signupType != SignUpType.ChangePackage && 
+                                    signupType != SignUpType.ChangePackageDuringTrial)
+                                {
+                                    var subscription = StripeHelper.GetSubscription(currentPackage?.StripeSubscriptionId, "", msgs);
+                                    if (subscription.IsNotEmpty() && subscription.Status == "active")
+                                        newap.StripeSubscriptionId = subscription.Id;
+                                }   
 
                                 // set trial end date if there are still trial days
                                 if (trialDayCount > 0)
@@ -1553,7 +1591,11 @@ namespace AfterSchoolLibrary.Services
                                     newap.StartDate = DateTime.UtcNow;
                                 }
 
-                                amsgs.AddRange(newap.SaveWithStripe(account.StripeCustomerId, false, newStripePlanId, adc));
+                                
+                                amsgs.AddRange(newap.SaveWithStripe(account.StripeCustomerId, false, priceId, adc));
+
+                                if (amsgs.HasNoErrors() && currentPackage.IsNotEmpty())
+                                    amsgs.AddRange(currentPackage.CancelPackage(adc));
                             }
                             // if it has a trial date end in the future, then end it now if they are converting from trial
                             else if (currentPackage.TrialEndDate.HasValue && currentPackage.TrialEndDate.Value >= DateTime.Now)
@@ -1562,7 +1604,7 @@ namespace AfterSchoolLibrary.Services
                                 currentPackage.LastModifiedDate = DateTime.UtcNow;
                                 currentPackage.LastModifiedBy = loggedInUserId;
 
-                                amsgs.AddRange(currentPackage.SaveWithStripe(account.StripeCustomerId, true, null, adc));
+                                amsgs.AddRange(currentPackage.SaveWithStripe(account.StripeCustomerId, true, priceId, adc));
 
                                 newap = currentPackage;
                             }
@@ -1626,8 +1668,8 @@ namespace AfterSchoolLibrary.Services
         public static int GetTrialDaysRemaining(this Account account, AccountPackage currentPackage, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var daysRemaining = 0;
-            var firstAccountPackage = account.GetAccountPackages(msgs, dc).OrderBy(x => x.StartDate.Value).First();
-            var daysSinceSignUp = (DateTime.UtcNow - firstAccountPackage.StartDate.Value).Days;
+            var package = account.GetActiveAccountPackage(msgs, dc);
+            var daysSinceSignUp = (DateTime.UtcNow - (package.StartDate.HasValue ? package.StartDate.Value : package.TrialStartDate.Value)).Days;
             if (daysSinceSignUp < currentPackage.GetFeature(FeatureType.TrialDays, msgs, dc).GetMaxValue() + 1) // they get the full last day
                 daysRemaining = (currentPackage.GetFeature(FeatureType.TrialDays, msgs, dc).GetMaxValue() - daysSinceSignUp).ToInteger();
 
@@ -1636,6 +1678,8 @@ namespace AfterSchoolLibrary.Services
 
         public static Activity GetDefaultNewActivity(this Account account)
         {
+            var profile = account.GetAccountProfile();
+
             return new Activity
             {
                 WaitingListSeats = 0,
@@ -1645,6 +1689,12 @@ namespace AfterSchoolLibrary.Services
                 RegistrationModeId = RegistrationMode.Register,
                 AllowToPayLater = true,
                 MinSeatsRequired = 1,
+                GradeLevelStart = profile?.GradeLevelStart,
+                GradeLevelEnd = profile?.GradeLevelEnd,
+                GenderRestriction = profile.IsNotEmpty() ?profile.GenderRestriction : GenderRestrictionType.None,
+                AgeStart = profile?.AgeStart,
+                AgeEnd = profile?.AgeEnd
+
             };
         }
 
@@ -2596,25 +2646,72 @@ namespace AfterSchoolLibrary.Services
         /// <param name="stripeToken"></param>
         /// <param name="msgs"></param>
         /// <returns></returns>
-        internal static string CreateStripeSourceFromToken(this Account fromAccount, string stripeToken, Stripe.Customer customer, SystemMessages msgs)
+        public static string CreateStripeSourceFromToken(this Account fromAccount, string stripeToken, Stripe.Customer customer, SystemMessages msgs)
         {
             // stripe stuff
             // create payment source if not already existent on the user
-            var sourceId = "";
-
             if (customer.IsEmpty())
                 customer = StripeHelper.GetCustomer(fromAccount.StripeCustomerId, null, msgs);
 
             if (stripeToken.IsNotEmpty())
             {
                 var source = StripeHelper.CreateCreditCardSource(stripeToken, msgs);
-                StripeHelper.AttachSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null, msgs);
-                sourceId = source.Id;
-            }
-            else
-                sourceId = customer.DefaultSourceId;
+                if (source.IsNotEmpty())
+                {
+                    StripeHelper.AttachSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null, msgs);
 
-            return sourceId;
+                    //set this source id to account, which will work as a default card
+                    if (fromAccount.StripeDefaultCardId.IsEmpty())
+                    {
+                        fromAccount.StripeDefaultCardId = source.Id;
+                        fromAccount.Save();
+                    }
+
+                    return source.Id;
+                }                
+            }
+            
+            return customer.DefaultSourceId;
+        }
+
+        public static string CreateStripeCardFromToken(this Account fromAccount, string stripeToken, Stripe.Customer customer, SystemMessages msgs)
+        {
+            if (stripeToken.IsEmpty())
+                msgs.Add("stripe token is not valid.", MessageType.Error);
+
+            if (customer.IsEmpty())
+                msgs.Add("Stripe customer is not valid.", MessageType.Error);
+
+            if (msgs.HasNoErrors())
+            {
+                var card = StripeHelper.AddNewCardToCustomer(customer.Id, stripeToken, null, msgs);
+                if (card.IsNotEmpty())
+                {
+                    //set this card as default           
+                    UpdateStripeCard(fromAccount, card.Id, customer, msgs);
+                    return card.Id;
+                }
+            }
+
+            return customer.DefaultSourceId;
+        }
+
+        public static void UpdateStripeCard(this Account fromAccount, string cardId, Stripe.Customer customer, SystemMessages msgs)
+        {
+            if (cardId.IsEmpty())
+                msgs.Add("stripe card is not valid.", MessageType.Error);
+
+            if (customer.IsEmpty())                
+                msgs.Add("Stripe customer is not valid.", MessageType.Error);
+
+            if (msgs.HasNoErrors())
+            {
+                StripeHelper.UpdateCustomerDefaultCard(customer.Id, null, cardId);               
+                
+                //set this card id to account, which will work as a default card                
+                fromAccount.StripeDefaultCardId = cardId;
+                fromAccount.Save();
+            }
         }
 
         /// <summary>
@@ -3667,5 +3764,31 @@ namespace AfterSchoolLibrary.Services
 
         #endregion
 
+        #region MessageCount
+
+        public static List<ActivityMessageRegistrant> GetActivityMessageRegistrantsForCurrentMessagePeriod(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            List<ActivityMessage> activityMessages = account.GetActivityMessages(msgs, dc);
+            List<ActivityMessageRegistrant> activityMessageRegistrants = new List<ActivityMessageRegistrant>();
+            List<ActivityMessageRegistrant> currentMessagePeriodActivivityRegistrants = new List<ActivityMessageRegistrant>();
+            DateTime packagePurchaseDate = account.GetActiveAccountPackage().CreateDate.Value;
+            DateTime thisMonthsMessageCountReset = new DateTime(DateTime.Now.Year, DateTime.Now.Month, packagePurchaseDate.Day);
+            DateTime mostRecentMessageCountReset = DateTime.Now.IsBefore(thisMonthsMessageCountReset) ? thisMonthsMessageCountReset.AddMonths(-1) : thisMonthsMessageCountReset;
+
+            activityMessages.ForEach(am => activityMessageRegistrants.AddRange(am.GetActivityMessageRegistrants(msgs, dc)));
+
+            return activityMessageRegistrants.Where(amr => amr.CreateDate.Value.IsInRange(mostRecentMessageCountReset, DateTime.Now.ToUniversalTime())).ToList();
+        }
+
+        public static int GetTextMessageCountForCurrentMessagePeriod(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.GetActivityMessageRegistrantsForCurrentMessagePeriod().Where(amr => amr.SentText).ToList().Count();
+        }
+
+        public static int GetEmailCountForCurrentMessagePeriod(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.GetActivityMessageRegistrantsForCurrentMessagePeriod().Where(amr => amr.SentEmail).ToList().Count();
+        }
+        #endregion
     }
 }

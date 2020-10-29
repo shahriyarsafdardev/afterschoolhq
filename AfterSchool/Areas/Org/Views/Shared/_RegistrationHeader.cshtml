@@ -1,19 +1,39 @@
 ﻿@{     
     var actionName = ViewContext.RouteData.Values["action"].ToString().ToLower();
+    var showStudentCRM = SessionVariables.AccountPackage.HasFeature(FeatureType.StudentCRM);
+    var studentCRMPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.StudentCRM);
 }
 <div class="btn-toolbar">
     <div class="btn-group hidden-xs">
-        <a href="@Url.Action("index", "registration")" class="btn btn-alt6@(actionName == "index" ? "-active" : "")">
-            <i class="s7-graph2"></i>  Students
-        </a>
+        @if (showStudentCRM)
+        {
+            <a href="@Url.Action("index", "registration")" class="btn btn-alt6@(actionName == "index" ? "-active" : "")">
+                <i class="s7-graph2"></i>  Students
+            </a>
+        }
+        else
+        {
+            <a href="#" class="btn btn-alt6@(actionName == "index" ? "-active" : "")"  onclick="return showUpgradeMyPlan('@(studentCRMPackage.Name)',@(studentCRMPackage.ID))">
+                <i class="s7-graph2"></i>  Students
+            </a>
+        }
+
         <a href="@Url.Action("messages", "registration")" class="btn btn-alt6@(actionName == "messages" ? "-active" : "")">
             <i class="s7-graph2"></i>  Messages
         </a>
     </div>
     <div class="hidden-lg hidden-sm hidden-md">
-        <select class="form-control" onchange="location.href=this.value;">
+        <select class="form-control" onchange="this.value == '#' ? showUpgradeMyPlan('@(studentCRMPackage.Name)'S,@(studentCRMPackage.ID)) : location.href = this.value;">
             <option value="">Navigation</option>
-            <option value="@Url.Action("index", "registration")">Students</option>
+            @if (showStudentCRM)
+            {
+                <option value="@Url.Action("index", "registration")">Students</option>
+            }
+            else
+            {
+                <option value="#">Students</option>
+            }
+            
             <option value="@Url.Action("messages", "registration")">Messages</option>
         </select>
     </div>

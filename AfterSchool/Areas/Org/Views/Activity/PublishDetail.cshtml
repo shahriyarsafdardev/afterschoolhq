@@ -11,6 +11,7 @@
                             !SessionVariables.CurrentAccount.CanReceivePaymentDeposits() &&
                             !SessionVariables.CurrentAccount.HasTreasurer() &&
                             !Model.IsFree;
+    var allowInvitesPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowInvites);
 
     if (Request["isnew"] == "1")
     {
@@ -36,6 +37,8 @@
     {
         Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
     }
+
+    var showAllowInvites = SessionVariables.AccountPackage.HasFeature(FeatureType.AllowInvites);
 }
 
 @{ Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
@@ -58,11 +61,18 @@
 
                         @if (!Model.ActivityGroupId.HasValue)
                         {
-                            <a href="@Url.Action("inviteto", "contact", new { id = Model.Uid, type = "activity" })" class="btn btn-default">Invite Parents &raquo;</a>
+                            if (!showAllowInvites)
+                            {
+                                <a href="#" class="btn btn-default" onclick="return showUpgradeMyPlan('@(allowInvitesPackage.Name)', @(allowInvitesPackage.ID))" disabled="disabled">Invite Parents &raquo;</a>
+                            }
+                            else
+                            {
+                                <a href="@Url.Action("inviteto", "contact", new { id = Model.Uid, type = "activity" })" class="btn btn-default">Invite Parents &raquo;</a>
+                            }
                         }
 
                         @if (Model.IsPublishable && !mustRequestToPublish)
-                        {                            
+                        {
                             if (!Model.IsPublished)
                             {
                                 <a href="@publishUrl" class="btn btn-success btn-space @btnDisabled">Publish Your @UILabel.ActivityLabel(Model.ActivityTypeId) <i class="s7-right-arrow"></i></a>
@@ -74,10 +84,10 @@
                         }
                         else if (!Model.IsPublished)
                         {
-                            <a href="@Url.Action("requesttopublish", "activity", new { id = Model.Uid, isnew = Request["isnew"] })" 
-                               class="btn btn-success btn-space 
+                            <a href="@Url.Action("requesttopublish", "activity", new { id = Model.Uid, isnew = Request["isnew"] })"
+                               class="btn btn-success btn-space
                                @btnDisabled">
-                                Request to Publish Your @UILabel.ActivityLabel(Model.ActivityTypeId) 
+                                Request to Publish Your @UILabel.ActivityLabel(Model.ActivityTypeId)
                                 <i class="s7-right-arrow"></i>
                             </a>
                         }

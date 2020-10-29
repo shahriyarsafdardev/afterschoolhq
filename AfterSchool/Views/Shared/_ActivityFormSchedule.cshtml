@@ -43,6 +43,9 @@
             forceNonRepeating = true;
         }
     }
+
+    var showAllowSubscriptionPlans = SessionVariables.AccountPackage.HasFeature(FeatureType.AllowSubscriptionPlans);
+    var allowSubscriptionPlansPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowSubscriptionPlans);
 }
 
 <div class="panel panel-default panel-small-padding">
@@ -170,18 +173,17 @@
                             <label class="col-md-3 control-label">
                                 Is this an ongoing @UILabel.ActivityLabel(ActivityType.Activity).ToLower()?
                             </label>
-                            <div class="col-md-9">
-                                @{Html.RenderPartial
-                                (
+                            <div class="col-md-9" @if (!showAllowSubscriptionPlans) { <text> onclick="return showUpgradeMyPlan('@(allowSubscriptionPlansPackage.Name)',@(allowSubscriptionPlansPackage.ID))"</text> }>
+                                @{
+                                    Html.RenderPartial(
                                     "~/Views/Shared/_SwitchButton.cshtml",
                                     Model.IsOngoing,
                                     new ViewDataDictionary()
                                     {
                                         { "checkboxname", "isongoing" },
                                         { "checkboxid", "isongoing" },
-                                        { "disabled", false }
-                                    }
-                                );
+                                        { "disabled", !showAllowSubscriptionPlans }
+                                    });
                                 }
 
                                 <p class="text-muted padding-v-10">

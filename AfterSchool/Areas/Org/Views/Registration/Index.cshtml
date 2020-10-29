@@ -1,12 +1,14 @@
 ﻿@model List<Registration>
-@{
+@{ 
     var msgs = (SystemMessages)ViewBag.Messages;
     var activities = (List<Activity>)ViewBag.Activities;
     var groups = (List<ActivityGroup>)ViewBag.Groups;
     var paging = (PagingModel)ViewBag.PagingModel;
     var questions = (List<FormQuestion>)ViewBag.Questions;
     var questionGroups = (List<FormQuestionGroup>)ViewBag.QuestionGroups;
-}
+    var studentCRMEnabled = SessionVariables.CurrentAccount.HasFeature(FeatureType.StudentCRM);
+    var studentCRMPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.StudentCRM);
+ }
 
 @{Html.RenderPartial("OrgAccountHeader");}
 
@@ -16,12 +18,12 @@
 
     @{Html.RenderPartial("_RegistrationHeader");}
 
-    <div class="panel panel-default">
+    <div id="studentcrmcontainer" class="panel panel-default">
         <div class="panel-heading">
             <i class="s7-id"></i> @UILabel.RegistrantLabel(true)
         </div>
         <div class="panel-body">
-            
+
             @{ Html.RenderPartial("_RegistrationSearchBar"); }
 
             <div class="row">
@@ -47,16 +49,30 @@
     </div>
 </div>
 
-@{  Html.RenderPartial("_EmailRegistrationReportModal", SessionVariables.CurrentAccount, new ViewDataDictionary() { { "PostAction", "emailreport" }, { "PostController", "registration" }, { "PostId", "" } }); }
+@{ Html.RenderPartial("_EmailRegistrationReportModal", SessionVariables.CurrentAccount, new ViewDataDictionary() { { "PostAction", "emailreport" }, { "PostController", "registration" }, { "PostId", "" } }); }
 
 @section scripts
 {
     <script>
-        
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        if (!@(studentCRMEnabled.ToString().ToLower())) {
+            $("#studentcrmcontainer").find("button").addClass("disabled");
+            $("#studentcrmcontainer").find("a").addClass("disabled");
+            $("#studentcrmcontainer").find("input").addClass("disabled");
+            $("#studentcrmcontainer").find("a").on("click", function (e) {
+                e.preventDefault();
+            });
+            showUpgradeMyPlan('@(studentCRMPackage.Name)','@(studentCRMPackage.ID)',true)
+
+        }
+    });
+    </script>
+    <script>
+
         function sendMessages() {
             location.href = `@Url.Action("messageadd", "registration")?${getQuery()}&${getActivityOrGroup()}${getFilterQuestionQS()}&${getRegStatus()}&${getAssignmentType()}`;
         }
-        
+
         function doSearch(){
             location.href = `@Url.Action("index", "registration")?${getQuery()}&${getActivityOrGroup()}${getFilterQuestionQS()}&${getRegStatus()}&${getAssignmentType()}`;
         }

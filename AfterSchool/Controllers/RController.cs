@@ -70,6 +70,10 @@ namespace AfterSchool.Controllers
             ViewBag.Photos = photos;
             ViewBag.GradeLevelStart = profile.GetGradeLevelStart(msgs);
             ViewBag.GradeLevelEnd = profile.GetGradeLevelEnd(msgs);
+            ViewBag.AgeStart = profile.GetAgeStart();
+            ViewBag.AgeEnd = profile.GetAgeEnd();
+            ViewBag.GenderRestriction = profile.PrintGenderRestrictions();
+            ViewBag.RestrictByGrade = profile.RestrictByGrade();
             ViewBag.Messages = msgs;
             ViewBag.ParticipationObjects = GetParticipationObjects(account, msgs)
                                             .Where(po => po.RegistrationPeriod.IsOpen(account, msgs) || po.RegistrationPeriod.WillOpen(account, msgs))

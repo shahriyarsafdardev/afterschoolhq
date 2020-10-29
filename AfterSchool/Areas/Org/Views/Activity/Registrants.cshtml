@@ -22,6 +22,12 @@
         .Where(x => x.AssignmentTypeId == RegistrationAssignmentType.Declined)
         .Count();
     var assignmentType = (RegistrationAssignmentType)ViewBag.AssignmentType;
+
+    var accountPackage = SessionVariables.AccountPackage;
+    var showAllowInvites = accountPackage.HasFeature(FeatureType.AllowInvites);
+    var showStudentCRM = accountPackage.HasFeature(FeatureType.StudentCRM);
+    var allowInvitesPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowInvites);
+    var studentCRMPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.StudentCRM);
 }
 
 @{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
@@ -154,20 +160,40 @@
                                 </script>
                             }
 
-                            <a href="@Url.Action("addregistration", "activity", new { id = Model.Uid })" class="btn btn-default btn-space">
-                                Add Student
-                            </a>
+                            if (showStudentCRM)
+                            {
+                                <a href="@Url.Action("addregistration", "activity", new { id = Model.Uid })" class="btn btn-default btn-space">
+                                    Add Student
+                                </a>
+                            }
+                            else
+                            {
+                                <a href="#" class="btn btn-default btn-space" onclick="return showUpgradeMyPlan('@(studentCRMPackage.Name)',@(studentCRMPackage.ID))" disabled="disabled">
+                                    Add Student
+                                </a>
+                            }
+
                         }
 
                         <a href="@Url.Action("registrantsummary", "activity" , new { id = Model.Uid })" class="btn btn-default btn-space">
                             Send Registration Report
                         </a>
 
-                        @if (SessionVariables.CurrentAccount.HasAccountPackageFeature(FeatureType.ManageContacts) && activeRegistrationPeriod.IsNotEmpty())
+                        @if (activeRegistrationPeriod.IsNotEmpty())
                         {
-                            <a href="@Url.Action("inviteto", "contact", new { id = activeRegistrationPeriod.Uid, type = "period" })" class="btn btn-default btn-space">
-                                Invite Contacts
-                            </a>
+                            if (showAllowInvites)
+                            {
+                                <a href="@Url.Action("inviteto", "contact", new { id = activeRegistrationPeriod.Uid, type = "period" })" class="btn btn-default btn-space">
+                                    Invite Contacts
+                                </a>
+                            }
+                            else
+                            {
+                                <a href="#" class="btn btn-default btn-space" onclick="return showUpgradeMyPlan('@(allowInvitesPackage.Name)',@(allowInvitesPackage.ID))" disabled="disabled">
+                                    Invite Contacts
+                                </a>
+                            }
+
                         }
                     </div>
 

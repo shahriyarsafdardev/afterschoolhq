@@ -1,4 +1,4 @@
-﻿using AfterSchoolLibrary.Models;
+﻿    using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Helpers;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
@@ -243,7 +243,7 @@ namespace AfterSchoolLibrary.Services
                 RegistrantId = registrantId,
                 ActivityMessageId = activityMessage.ID,
                 CreateDate = DateTime.UtcNow,
-                CreatedBy = loggedInUserId
+                CreatedBy = loggedInUserId,
             };
 
             msgs.AddRange(amr.Save(dc));

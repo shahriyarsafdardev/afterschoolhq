@@ -47,7 +47,9 @@
                         <div class="form-group">
                             <label class="col-sm-3 control-label">@type.ToString().SplitByUpperCase()</label>
                             <div class="col-sm-6">
-                                <input type="number" class="form-control" id="@type" name="@type" value="@value" step="any" onfocus="this.select()" required />
+                                <input id="@type" type="number" class="form-control" name="@type" value="@value" required min="0" step="0.1" 
+                                       onfocus="this.select()"
+                                       oninput="this.value = !!this.value && Math.abs(this.value) >= 0 ? Math.abs(this.value) : null"/>
                             </div>
                         </div>
                     }

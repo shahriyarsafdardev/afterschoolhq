@@ -11,6 +11,10 @@
     var photos = (List<AccountProperty>)ViewBag.Photos;
     var gradeLevelStart = (GradeLevel)ViewBag.GradeLevelStart;
     var gradeLevelEnd = (GradeLevel)ViewBag.GradeLevelEnd;
+    var ageStart = (int?)ViewBag.AgeStart;
+    var ageEnd = (int?)ViewBag.AgeEnd;
+    var restrictByGrade = (bool)ViewBag.RestrictByGrade;
+    var genderrestriction = (string)ViewBag.GenderRestriction;
     var participationObjects = (List<ParticipationObject>)ViewBag.ParticipationObjects;
     var takeActivities = 3;
     var locations = (List<Location>)ViewBag.Locations;
@@ -140,11 +144,23 @@
                 <div class="row">
                     <div class="col-lg-12">
                         <h3 class="text-center">
-                            @if (gradeLevelStart.IsNotEmpty() && gradeLevelEnd.IsNotEmpty())
+                            @if (restrictByGrade)
                             {
-                                <span>Serving @gradeLevelStart.Name - @gradeLevelEnd.Name Grade</span>
-                                @renderEditButtion(Model, "grades")
+                                if (gradeLevelStart.IsNotEmpty() && gradeLevelEnd.IsNotEmpty())
+                                {
+                                    <span>Serving @gradeLevelStart.Name - @gradeLevelEnd.Name Grade &bull; @genderrestriction</span>
+                                    @renderEditButtion(Model, "grades")
+                                }
                             }
+                            else
+                            {
+                                if (ageStart.IsNotEmpty() && ageEnd.IsNotEmpty())
+                                {
+                                    <span>Serving Ages @ageStart - @ageEnd &bull; @genderrestriction</span>
+                                    @renderEditButtion(Model, "grades")
+                                }
+                            }
+
                         </h3>
                     </div>
                 </div>
