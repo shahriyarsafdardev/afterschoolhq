@@ -32,6 +32,8 @@ namespace AfterSchoolLibrary.Models
 		public string StripeChargeId { get { return (string)MDV["StripeChargeId"].Value; } set { MDV["StripeChargeId"].Value = value; } }
 		public string PayPalTransactionId { get { return (string)MDV["PayPalTransactionId"].Value; } set { MDV["PayPalTransactionId"].Value = value; } }
 		public decimal? AmountPaid { get { return (decimal?)MDV["AmountPaid"].Value; } set { MDV["AmountPaid"].Value = value; } }
+		public decimal? ConvenienceFeePaid { get { return (decimal?)MDV["ConvenienceFeePaid"].Value; } set { MDV["ConvenienceFeePaid"].Value = value; } }
+		public decimal? PaymentTypeFeePaid { get { return (decimal?)MDV["PaymentTypeFeePaid"].Value; } set { MDV["PaymentTypeFeePaid"].Value = value; } }
 		public PaymentType PaymentTypeId { get { return (PaymentType)MDV["PaymentTypeId"].Value; } set { MDV["PaymentTypeId"].Value = value; } }
 		public DateTime? LastUpdated { get { return (DateTime?)MDV["LastUpdated"].Value; } set { MDV["LastUpdated"].Value = value; } }
 		public int? ActivityGroupId { get { return (int?)MDV["ActivityGroupId"].Value; } set { MDV["ActivityGroupId"].Value = value; } }
@@ -78,6 +80,8 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "StripeChargeId", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "PayPalTransactionId", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "AmountPaid", System.Data.SqlDbType.Money);
+				_dp.Add(className, "ConvenienceFeePaid", System.Data.SqlDbType.Money);
+				_dp.Add(className, "PaymentTypeFeePaid", System.Data.SqlDbType.Money);
 				_dp.Add(className, "PaymentTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "LastUpdated", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "ActivityGroupId", System.Data.SqlDbType.Int);
@@ -89,7 +93,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "CompletionStatusId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "PurchaseId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "StripeSourceId", System.Data.SqlDbType.NVarChar , "100");
-				_dp.Add(className, "CostPerClass", System.Data.SqlDbType.Int);
+				_dp.Add(className, "CostPerClass", System.Data.SqlDbType.Money);
 				_dp.Add(className, "RegistrantEmail", typeof(Registrant).Name, "Email", System.Data.SqlDbType.NVarChar, "Registrant");
 				_dp.Add(className, "RegistrantFirstName", typeof(Registrant).Name, "FirstName", System.Data.SqlDbType.NVarChar, "Registrant");
 				_dp.Add(className, "RegistrantLastName", typeof(Registrant).Name, "LastName", System.Data.SqlDbType.NVarChar, "Registrant");
@@ -205,6 +209,14 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["AmountPaid"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ConvenienceFeePaid"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["PaymentTypeFeePaid"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();

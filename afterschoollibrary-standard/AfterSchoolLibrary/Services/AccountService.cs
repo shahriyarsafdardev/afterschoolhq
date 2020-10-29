@@ -3090,10 +3090,15 @@ namespace AfterSchoolLibrary.Services
             if (checkoutObject.PaymentType == PaymentType.CreditCard)
                 costPerClass += checkoutObject.ParticipationObject.GetPostPayCreditCardFee(FeesPaidByType.Parent);
 
+            var convenienceFeePaid = checkoutObject.ParticipationObject.GetPostPayConvenienceFee(FeesPaidByType.Parent);
+            var paymentTypeFeePaid = checkoutObject.ParticipationObject.GetPostPayCreditCardFee(FeesPaidByType.Parent);
+
             checkoutObject.Registration.SavePaymentSource(
                 checkoutObject.StripeSourceId, 
                 checkoutObject.PaymentType,
                 costPerClass,
+                convenienceFeePaid,
+                paymentTypeFeePaid,
                 loggedInUser, 
                 msgs, 
                 dc);

@@ -1033,6 +1033,8 @@ property: DatePaid, DateTime?, DateTime
 property: StripeChargeId, string, NVarChar "100"
 property: PayPalTransactionId, string, NVarChar "50"
 property: AmountPaid, decimal?, Money
+property: ConvenienceFeePaid, decimal?, Money
+property: PaymentTypeFeePaid, decimal?, Money
 property: PaymentTypeId, PaymentType, Int
 property: LastUpdated, DateTime?, DateTime
 property: ActivityGroupId, int?, Int

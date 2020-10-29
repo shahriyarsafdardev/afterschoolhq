@@ -1155,6 +1155,58 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(attendance);
         }
 
+        [HttpPost]
+        public ActionResult ChargeAttendanceFee(string activityId)
+        {
+
+            // this should return the amount to be charged for each registrant 
+            var attendanceIds = Request.Form["AttendanceIds"];
+            var msgs = new SystemMessages();
+            Activity activity = null;
+
+            if (activityId.IsNotEmpty() && activityId.IsGuid())
+                activity = Activity.LoadByUid(activityId.ToGuid(), msgs);
+
+            if (!string.IsNullOrEmpty(attendanceIds) && activity.IsNotEmpty())
+            {
+                // get selected attendances
+                var attendanceIdsList = attendanceIds.Split(',').Select(p => Convert.ToInt32(p)).ToList();
+                var attendances = AfterSchoolLibrary.Models.Attendance.LoadByActivityId(activity.ID.Value, msgs);
+                var selectedAttendances = attendances.Where(a => attendanceIdsList.Contains(a.ID.Value));
+
+
+                // sum up total cost of all attendances per registrant to display
+                var registrants = activity.GetRegistrants(msgs);
+
+                foreach(var registrant in registrants)
+                {
+                    // sum up total cost of all attendances per registrant to display
+                    
+                }
+
+                // if a registrant does not have any associated attendance records, they should be left out from the preview information
+
+                ViewBag.AttdncIds = attendanceIds;
+                ViewBag.Messages = msgs;
+
+                return View();
+            }
+            return null;
+        }
+
+
+        //TODO
+        //[HttpPost]
+        //public ActionResult ChargeAttendanceFeeDone()
+        //{
+        //    // this should make the transaction purchase and activity payment records
+        //    //and send charges for each registrant to stripe
+
+        //    // also send an email with the receipt to each registrant with the amount charged and number of attendance charged for
+
+        //    // send a confirmation email to activity provider with the amount charged per student
+        //}
+
         [HttpGet]
         public ActionResult FinalizeRegistration(string id, string atype)
         {
