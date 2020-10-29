@@ -57,17 +57,21 @@
                                             var yearlySelected = "";
                                             var current = "";
 
+                                            // ..if suggestedPackage has value, that means user arrived from upgrade button and choose to select other premium plan, so highlight only that package
+                                            // ..if suggestedPackage is empty, select current package as highlighted
+
                                             if (suggestedPackage.IsNotEmpty() && suggestedPackage.ID == p.ID)
-                                            {                                 
+                                            {
                                                 monthlySelected = " checked=\"checked\" ";
                                             }
-                                            else if (p.IsNotEmpty() && currentPackage.IsNotEmpty() && p.ID == currentPackage.PackageId)
+
+                                            if (p.IsNotEmpty() && currentPackage.IsNotEmpty() && p.ID == currentPackage.PackageId)
                                             {
-                                                if (currentPackage.BillingPeriodTypeId == BillingPeriodType.Month)
+                                                if (suggestedPackage.IsEmpty() && currentPackage.BillingPeriodTypeId == BillingPeriodType.Month)
                                                 {
                                                     monthlySelected = " checked=\"checked\" ";
                                                 }
-                                                else if (currentPackage.BillingPeriodTypeId == BillingPeriodType.Year)
+                                                else if (suggestedPackage.IsEmpty() && currentPackage.BillingPeriodTypeId == BillingPeriodType.Year)
                                                 {
                                                     yearlySelected = " checked=\"checked\" ";
                                                 }
@@ -230,7 +234,7 @@
 
     <script type="text/javascript">
 
-        var isCurrentPackage = true;
+        var isCurrentPackage = '@(suggestedPackage.IsNotEmpty())' != 'True';
         var currentPackage = '@((int)currentPackage.BillingPeriodTypeId)_@(currentPackage.PackageUid)';        
         var hiddenStripeCard = $('#hidden-stripe-card');
 
@@ -321,7 +325,7 @@
             }
         });
 
-        updatePurchaseButton(true);
+        updatePurchaseButton(false);
 
         function updatePurchaseButton(purchasing) {
             if (isCurrentPackage) {
