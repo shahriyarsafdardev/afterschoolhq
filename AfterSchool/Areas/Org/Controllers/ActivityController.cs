@@ -1311,9 +1311,9 @@ namespace AfterSchool.Areas.Org.Controllers
                             PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
                             ConvenienceFeePayer = masterRegistrantAccount,
                             CreditCardFeePayer = masterRegistrantAccount,
-                            MasterRegistrant = masterRegistrantAccount.GetFirstParentOrGuardianRegistrant(msgs),
+                            MasterRegistrant = registrantActivity.GetRegistrant(msgs).GetMasterRegistrant(msgs),
                             Description = description,
-                            SavePaymentInfo = true
+                            SavePaymentInfo = false
                         },
                         loggedInUser: SessionVariables.CurrentUser,
                         msgs: msgs);
@@ -1343,7 +1343,7 @@ namespace AfterSchool.Areas.Org.Controllers
             else
                 msgs.Add("There was problem charging for attendance", MessageType.UserError);
 
-            return RedirectToAction("attendance", new { id = activityId });
+            return RedirectToAction("attendance", new { id = activityId },);
         }
         #endregion
 
