@@ -85,7 +85,7 @@
                 {
                     var seatsPossible = attendance.GetAttendanceRegistrantCount();
                     var presentCount = attendance.GetPresentCount();
-                    // var disableCheck = !attendance.CanBeCharged() ? "disabled" : "";  TODO - Need to write method for determining if an attendance can be charged
+                    var disableCheck = attendance.IsCharged ? "disabled" : ""; 
                     <tr>
                         @if (postPayPlan)
                         {
@@ -93,7 +93,7 @@
                                 <span class="am-checkbox">
                                     <input type="checkbox"
                                            id="selectAttendance-@attendance.ID"
-                                           @*@disableChk  -- see above comment*@
+                                           @disableCheck 
                                            class="chkAttendance"
                                            onchange="selectAttendance(@attendance.ID,this)" />
                                     <label for="selectAttendance-@attendance.ID"></label>
@@ -167,7 +167,7 @@
         var allChkBoxes = $(".chkAttendance");
         allChkBoxes.map(function (e) {
             if (event.checked) {
-                if ($(this).prop("checked") == false)
+                if ($(this).prop("checked") == false && $this.prop("disbaled") == false)
                     this.click();
             }
             else {

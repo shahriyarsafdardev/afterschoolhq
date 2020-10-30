@@ -1314,6 +1314,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
                     
                 }
+
+               
             }
 
             // send a confirmation email to activity provider with the amount charged per student
