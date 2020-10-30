@@ -1109,11 +1109,16 @@ namespace AfterSchool.Areas.Org.Controllers
 
         #region Attendance
         [HttpGet]
-        public ActionResult Attendance(string id)
+        public ActionResult Attendance(string id, string msg)
         {
             var activity = Activity.LoadByUid(id.ToGuid());
+            var msgs = new SystemMessages();
+            if (msg.IsNotEmpty())
+            {
+                msgs.Add(msg, msg.Contains("error") ? MessageType.UserError : MessageType.Success);
+            }
 
-            ViewBag.Messages = new SystemMessages();
+            ViewBag.Messages = msgs;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             return View(activity);
@@ -1255,6 +1260,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var activityId = Request.Form["Uid"];
             var msgs = new SystemMessages();
             Activity activity = null;
+            string msg = "Error Charging Attendances";
 
             if (activityId.IsNotEmpty() && activityId.IsGuid())
                 activity = Activity.LoadByUid(activityId.ToGuid(), msgs);
@@ -1332,18 +1338,13 @@ namespace AfterSchool.Areas.Org.Controllers
                     var attendanceRegistrantAcitivtyCounts = GetAttendanceRegistrantActivityCounts(selectedAttendances, registrantActivities, msgs);
                     var costPerClass = registrantActivities.First().GetRegistration(msgs).CostPerClass.Value;
                     AfterSchoolLibrary.Helpers.EmailHelper.SendAttendanceChargeConfirmation(attendanceRegistrantAcitivtyCounts, activity, costPerClass, null, SessionVariables.CurrentUser, false, msgs);
+
+                    var attendancePlural = selectedAttendances.Count > 1 ? "Attendances" : "Attendance";
+                    msg = $"Successfully Charged for {attendancePlural}";
                 }
-
-              
-
             }
 
-            if(msgs.HasNoErrors())
-                msgs.Add("Attendance has been successfully Charged", MessageType.Success);
-            else
-                msgs.Add("There was problem charging for attendance", MessageType.UserError);
-
-            return RedirectToAction("attendance", new { id = activityId },);
+            return RedirectToAction("attendance", new { id = activityId, msg });
         }
         #endregion
 
