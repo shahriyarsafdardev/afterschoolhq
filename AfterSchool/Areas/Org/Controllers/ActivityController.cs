@@ -1226,10 +1226,10 @@ namespace AfterSchool.Areas.Org.Controllers
             if (activityId.IsNotEmpty() && activityId.IsGuid())
                 activity = Activity.LoadByUid(activityId.ToGuid(), msgs);
 
-            if (!string.IsNullOrEmpty(attendanceIds) && activity.IsNotEmpty())
+            if (attendanceIds.IsNotEmpty() || attendanceIds.IsNotBlank())
             {
                 // get selected attendances
-                var attendanceIdsList = attendanceIds.Split(',').Select(p => Convert.ToInt32(p)).ToList();
+                var attendanceIdsList = attendanceIds.Split(',').Select(p => p.ToInteger()).ToList();
                 var attendances = AfterSchoolLibrary.Models.Attendance.LoadByActivityId(activity.ID.Value, msgs);
                 var selectedAttendances = attendances.Where(a => attendanceIdsList.Contains(a.ID.Value)).ToList();
 
@@ -1265,10 +1265,10 @@ namespace AfterSchool.Areas.Org.Controllers
             if (activityId.IsNotEmpty() && activityId.IsGuid())
                 activity = Activity.LoadByUid(activityId.ToGuid(), msgs);
 
-            if (!string.IsNullOrEmpty(attendanceIds) && activity.IsNotEmpty())
+            if (attendanceIds.IsNotEmpty() || attendanceIds.IsNotBlank())
             {
                 // get selected attendances
-                var attendanceIdsList = attendanceIds.Split(',').Select(p => Convert.ToInt32(p)).ToList();
+                var attendanceIdsList = attendanceIds.Split(',').Select(p => p.ToInteger()).ToList();
                 var attendances = AfterSchoolLibrary.Models.Attendance.LoadByActivityId(activity.ID.Value, msgs);
                 var selectedAttendances = attendances.Where(a => attendanceIdsList.Contains(a.ID.Value)).ToList();
 
