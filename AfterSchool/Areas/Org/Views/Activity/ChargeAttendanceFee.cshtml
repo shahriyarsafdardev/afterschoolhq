@@ -1,13 +1,9 @@
 ﻿@model Activity
 @{
     ViewBag.Title = Model.AccountName;
-    Dictionary<RegistrantActivity, int> registrantActivityAttendanceCounts = ViewBag.RegistrantActivityAttendanceCounts;
-    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
-
-
-    //.. TODO design for now
+    var registrantActivityAttendanceCounts = ViewBag.RegistrantActivityAttendanceCounts;
+    SystemMessages msgs = (SystemMessages)ViewBag.Messages;    
 }
-
 
 @{
     Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());
@@ -38,8 +34,8 @@
                     </button>
                 </div>
                 <span class="pull-right">
-                    <button class="btn btn-primary" onclick="confirmChargeForAttendances('@ViewBag.TranIds')">
-                        Charge Parents >
+                    <button class="btn btn-primary" onclick="confirmChargeForAttendances()">
+                        Confirm Attendance Fees >
                     </button>
                 </span>
             </div>
@@ -70,7 +66,7 @@
 
                                     <td>@presentCount</td>
 
-                                    <td>@((presentCount * registration.CostPerClass.Value).ToCurrency())</td>
+                                    <td>@((presentCount * (registration.CostPerClass != null ? registration.CostPerClass.Value : 1)))</td>
                                 </tr> 
                             }
                         }
@@ -87,7 +83,7 @@
     </div>
 </div>
 
-<form action="@Url.Action("confirmchargeattendancefee","activity")" id="chargeAttendanceForm" method="post">
+<form action="@Url.Action("ChargeAttendanceFeeDone","activity")" id="frmChargeAttendancePreview" method="post">
     @Html.Hidden("AttendanceIds")
     @Html.HiddenFor(m => m.Uid)
 </form>
@@ -98,11 +94,9 @@
 
     });
 
-    function chargeAttendanceFee() {
-        if (this.selectedAttendances.length > 0) {
-            $("#AttendanceIds").val(this.selectedAttendances.join());
-            $("#chargeAttendanceForm").submit();
-        }
+    function confirmChargeForAttendances() {
+        $("#AttendanceIds").val('@ViewBag.AttdanceIds');
+        $("#frmChargeAttendancePreview").submit();
     }
 
 </script>

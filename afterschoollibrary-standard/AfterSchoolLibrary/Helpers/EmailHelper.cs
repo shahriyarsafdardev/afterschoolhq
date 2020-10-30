@@ -875,22 +875,23 @@ namespace AfterSchoolLibrary.Helpers
 
             var receiptRows = "";
             decimal totalAttendanceCharge = 0;
-            // add registration fee row
+
+            // prepare registration fee rows
             attendanceRegistrantActivityCounts.ToList().ForEach(attendanceRegistrantActivityCount =>
             {
                 var attendance = attendanceRegistrantActivityCount.Key;
                 var attendanceCount = attendanceRegistrantActivityCount.Value;
                 var totalCharge = attendanceCount * costPerClass;
 
-                var attendanceModel = new NameValueCollection()
-                                {
-                                    { "Attendance Date", attendance.Date.ToShortDateTimeString() },
-                                    { "Number Present",  attendanceCount.ToString() },
-                                    { "Total Charge", totalCharge.ToCurrency() }
-                                };
+                var attendanceModel = new NameValueCollection() 
+                {
+                    { "AttendanceDate", attendance.Date.ToShortDateTimeString() },
+                    { "NumberPresent",  attendanceCount.ToString() },
+                    { "TotalCharge", totalCharge.ToCurrency() }
+                };
 
                 receiptRows += ProcessTemplate(
-                        EmailTemplates.Attendance_Charge_Confirmation_Rows, // TODO create email template
+                        EmailTemplates.Attendance_Charge_Confirmation_Rows,
                         attendanceModel,
                         "Attendance_Charge_Confirmation_Rows-1.0",
                         msgs);
@@ -898,38 +899,35 @@ namespace AfterSchoolLibrary.Helpers
                 totalAttendanceCharge += totalCharge;
             });
 
-   
+            var attendanceChargeTableModel = new NameValueCollection()
+            {
+                { "CostPerClass" , costPerClass.ToCurrency()  },
+                { "TotalAttendanceCharge", totalAttendanceCharge.ToCurrency() },
+                { "BodyRows", receiptRows }
+            };
 
             var attendanceChargeTable = ProcessTemplate(
-                                     EmailTemplates.Registration_Confirmation_Table,
-                                     new NameValueCollection()
-                                        {
-                                            { "CostPerClass" , costPerClass.ToCurrency()  },
-                                            { "TotalAttendanceCharge", totalAttendanceCharge.ToCurrency() },
-                                            { "BodyRows", receiptRows },
-                                        },
-                                     "Attendance_Charge_Confirmation_Table-1.0",
-                                     msgs);
+                EmailTemplates.Attendance_Charge_Confirmation_Table,
+                attendanceChargeTableModel,
+                "Attendance_Charge_Confirmation_Table-1.0",
+                msgs);
 
             var model = new NameValueCollection()
             {
                 { "FirstName", loggedInUser.FirstName },
                 { "ProductName", Utilities.AppName(isAfterSchool) },
                 { "LoginLink", Utilities.LoginUrl() },
-                { "AccountEmail", account.Email, },
-                { "AmountDueOrPaid", "Amount Paid" },
+                { "AccountEmail", account.Email },
                 { "RegistrationTable", attendanceChargeTable },
                 { "CustomMessage", customMessage },
                 { "RegistrationDetails", "Login to your account to view more details about this payment."},
-                { "VirtualInfo", "" },
-                { "SplitPaymentSubscriptionInfo", "" }
             };
 
             var subject = $"Attendance Charged for {activity.Name}";
             var body = ProcessTemplate(
-                EmailTemplates.Registration_Confirmation,
+                EmailTemplates.Attendance_Charge_Confirmation,
                 model,
-                "Registration_Confirmation-1.0",
+                "Attendance_Charge_Confirmation_Table-1.0",
                 msgs);
 
             // SEND EMAILS

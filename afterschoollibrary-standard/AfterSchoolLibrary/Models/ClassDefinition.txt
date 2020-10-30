@@ -1120,6 +1120,7 @@ property: ActivityId, int?, Int, required
 property: ActivityInstanceId, int?, Int
 property: Date, DateTime?, DateTime
 property: IsCompleted, bool, Bit
+property: IsCharged, bool, Bit
 join: Activity.ID, ActivityId, InnerJoin
 join: Account.ID, Activity.AccountId, InnerJoin
 joinproperty: Activity.Name, string, NVarChar

@@ -1171,11 +1171,9 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 var numberOfAttendances = attendances.FindAll(attendance =>
                 {
-                    var attendanceRegistrant = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(attendance.ID.Value, registrantActivity.RegistrantId.Value, msgs).First();
+                    var attendanceRegistrant = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(attendance.ID.Value, registrantActivity.RegistrantId.Value, msgs).FirstOrDefault();
                     if (attendanceRegistrant.IsNotEmpty())
-                    {
                         return attendanceRegistrant.NumberPresent > 0;
-                    }
 
                     return false;
                 }).Count;
@@ -1234,8 +1232,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 // sum up total cost of all attendances per registrant to display
                 var registrantActivities = RegistrantActivity.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs);
 
-                var registrantActivityAttendanceCounts = GetRegistrantActivityAttendanceCounts(registrantActivities, selectedAttendances, msgs);
-                
+                var registrantActivityAttendanceCounts = GetRegistrantActivityAttendanceCounts(registrantActivities, selectedAttendances, msgs);                
 
                 ViewBag.AttdanceIds = attendanceIds;
                 ViewBag.RegistrantActivityAttendanceCounts = registrantActivityAttendanceCounts;
@@ -1278,14 +1275,19 @@ namespace AfterSchool.Areas.Org.Controllers
                 foreach (var registrantActivityCount in registrantActivityAttendanceCounts)
                 {
                     var registrantActivity = registrantActivityCount.Key;
-                    var costPerAttenadance = registrantActivity.GetRegistration().CostPerClass.Value;
-                    var attendanceCount = registrantActivityCount.Value;
-                    var registrantAccount = registrantActivity.GetRegistrant(msgs).GetAccount(msgs);
                     var registration = registrantActivity.GetRegistration(msgs);
+
+                    var costPerAttenadance = registration.CostPerClass.IsNotEmpty() ? registration.CostPerClass.Value : 0;
+                    var attendanceCount = registrantActivityCount.Value;
+                    var registrantAccount = registrantActivity.GetRegistrant(msgs).GetAccount(msgs);                    
                     var description = $"{registrantActivity.GetActivity().Name.Capitalize()} attendance Fee times {attendanceCount}";
 
                     // TODO Create related transactions, purchase, and activity payment record
                     // Is this the correct way to send the trnasaction to stripe?
+
+                    // Bharat: I have looked whole flow, also tested registration but seems like we have to refactor this code.
+                    // even the current flow gives errors in few cases, when we use different account then afterschool one.
+                    // we have to discuss with darye I guess
                     AccountService.ProcessPayment(
                     checkoutObject: new CheckoutObject()
                     {
@@ -1294,7 +1296,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         PaymentTypeFeeOverrideAmount = registration.PaymentTypeFeePaid,
                         PayingAccount = registrantAccount,
                         // Not sure about these
-                        //BillingAccount = SessionVariables.CurrentAccount,
+                        BillingAccount = SessionVariables.CurrentAccount,
                         //CreditCardPurchaseObject = creditCardPurchaseObject,
                         //BankAccountPurchaseObject = bankAccountPurchaseObject,
                         //PaymentType = bankAccountPurchaseObject.IsNotEmpty() ? PaymentType.ACH : PaymentType.CreditCard,
@@ -1303,6 +1305,9 @@ namespace AfterSchool.Areas.Org.Controllers
                         CreditCardFeePayer = registrantAccount,
                         MasterRegistrant = registrantAccount.GetFirstParentOrGuardianRegistrant(msgs),
                         Description = description,
+                        
+                        // we will need token if we pass SavePaymentInfo true
+                        // SavePaymentInfo = true 
                     },
                     loggedInUser: SessionVariables.CurrentUser,
                     msgs: msgs);
@@ -1313,7 +1318,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             // send a confirmation email to activity provider with the amount charged per student
             // see EmailHelper.cs method SendAttendanceChargeConfirmation
-
+            return View();
         }
 
         #endregion

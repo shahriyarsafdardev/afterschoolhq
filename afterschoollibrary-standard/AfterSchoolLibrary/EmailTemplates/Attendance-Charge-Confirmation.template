@@ -1,0 +1,20 @@
+﻿<div>
+  <p>Hello @Model.FirstName,</p>  
+  
+  <p>@Model.CustomMessage</p>
+
+  @Model.RegistrationTable
+
+  <p>
+    <a href="@Model.LoginLink">@Model.RegistrationDetails</a>
+  </p>
+  
+  <p>
+    If you have any questions or concerns please contact (<a href="mailto:@Model.AccountEmail">@Model.AccountEmail</a>).
+  </p>
+
+  <p>
+    Thanks!<br />
+    @Model.ProductName
+  </p>
+</div>
