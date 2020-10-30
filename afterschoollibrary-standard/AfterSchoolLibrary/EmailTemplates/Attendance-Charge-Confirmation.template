@@ -3,6 +3,8 @@
   
   <p>@Model.CustomMessage</p>
 
+	<p>A recent attendance charge has been made for @Model.ActivityName</p>
+
   @Model.RegistrationTable
 
   <p>

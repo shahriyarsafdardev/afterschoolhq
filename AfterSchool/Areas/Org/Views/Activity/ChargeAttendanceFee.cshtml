@@ -60,13 +60,14 @@
                                 var registrant = registrantActivityAttendanceCount.Key.GetRegistrant();
                                 var registration = registrantActivityAttendanceCount.Key.GetRegistration();
                                 var presentCount = registrantActivityAttendanceCount.Value;
-   
+                                var totalAmountToCharge = (decimal)(presentCount * (registration.CostPerClass != null ? registration.CostPerClass : 1));
+
                                 <tr>
                                     <td>@registrant.FirstName @registrant.LastName</td>
 
                                     <td>@presentCount</td>
 
-                                    <td>@((presentCount * (registration.CostPerClass != null ? registration.CostPerClass.Value : 1)))</td>
+                                    <td>@totalAmountToCharge.ToCurrency()</td>
                                 </tr> 
                             }
                         }

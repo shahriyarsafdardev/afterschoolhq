@@ -867,14 +867,17 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
-        public static void SendAttendanceChargeConfirmation(Dictionary<Attendance, int> attendanceRegistrantActivityCounts, Activity activity, decimal costPerClass, string customMessage, Account account, WebUser loggedInUser, bool sendBcc, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void SendAttendanceChargeConfirmation(Dictionary<Attendance, int> attendanceRegistrantActivityCounts, Activity activity, decimal costPerClass, string customMessage, WebUser loggedInUser, bool sendBcc, SystemMessages msgs, DatabaseConnection dc = null)
         {
             msgs = msgs ?? new SystemMessages();
 
+            var account = activity.GetAccount(msgs, dc);
             var isAfterSchool = account.IsAfterSchool;
+
 
             var receiptRows = "";
             decimal totalAttendanceCharge = 0;
+            int totalNumberPresent = 0;
 
             // prepare registration fee rows
             attendanceRegistrantActivityCounts.ToList().ForEach(attendanceRegistrantActivityCount =>
@@ -897,11 +900,14 @@ namespace AfterSchoolLibrary.Helpers
                         msgs);
 
                 totalAttendanceCharge += totalCharge;
+                totalNumberPresent += attendanceCount;
             });
+
+
 
             var attendanceChargeTableModel = new NameValueCollection()
             {
-                { "CostPerClass" , costPerClass.ToCurrency()  },
+                { "TotalNumberPresent" , totalNumberPresent.ToString()  },
                 { "TotalAttendanceCharge", totalAttendanceCharge.ToCurrency() },
                 { "BodyRows", receiptRows }
             };
@@ -921,6 +927,7 @@ namespace AfterSchoolLibrary.Helpers
                 { "RegistrationTable", attendanceChargeTable },
                 { "CustomMessage", customMessage },
                 { "RegistrationDetails", "Login to your account to view more details about this payment."},
+                { "ActivityName", activity.Name.ToProperCase() }
             };
 
             var subject = $"Attendance Charged for {activity.Name}";
@@ -933,10 +940,10 @@ namespace AfterSchoolLibrary.Helpers
             // SEND EMAILS
             var mailMsgs = new SystemMessages();
 
-            // Send email to registerer
+            // Send email to activity account
             mailMsgs.AddRange(SendGridHelper.SendMail(
                 fromEmail: Email.SendGridNoReplyEmailAddress(isAfterSchool),
-                toEmail: new SendGrid.Helpers.Mail.EmailAddress(loggedInUser.Email),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(account.Email),
                 subject: subject,
                 body: body,
                 emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)));

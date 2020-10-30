@@ -1276,53 +1276,75 @@ namespace AfterSchool.Areas.Org.Controllers
                 {
                     var registrantActivity = registrantActivityCount.Key;
                     var registration = registrantActivity.GetRegistration(msgs);
-
                     var costPerAttenadance = registration.CostPerClass.IsNotEmpty() ? registration.CostPerClass.Value : 0;
                     var attendanceCount = registrantActivityCount.Value;
-                    var registrantAccount = registrantActivity.GetRegistrant(msgs).GetAccount(msgs);                    
+                    var masterRegistrantAccount = registrantActivity.GetRegistrant(msgs).GetMasterRegistrant(msgs).GetAccount(msgs);
                     var description = $"{registrantActivity.GetActivity().Name.Capitalize()} attendance Fee times {attendanceCount}";
+
+                    BankAccountPurchaseObject bankAccountPurchaseObject = null;
+                    CreditCardPurchaseObject creditCardPurchaseObject = null;
+
+                    if (registration.PaymentTypeId == PaymentType.ACH)
+                        bankAccountPurchaseObject = new BankAccountPurchaseObject { StripeSourceId = registration.StripeSourceId };
+                    else
+                        creditCardPurchaseObject = new CreditCardPurchaseObject { StripeSourceId = registration.StripeSourceId };
 
                     // TODO Create related transactions, purchase, and activity payment record
                     // Is this the correct way to send the trnasaction to stripe?
 
-                    // Bharat: I have looked whole flow, also tested registration but seems like we have to refactor this code.
-                    // even the current flow gives errors in few cases, when we use different account then afterschool one.
-                    // we have to discuss with darye I guess
-                    AccountService.ProcessPayment(
-                    checkoutObject: new CheckoutObject()
+                        // Bharat: I have looked whole flow, also tested registration but seems like we have to refactor this code.
+                        // even the current flow gives errors in few cases, when we use different account then afterschool one.
+                        // we have to discuss with darye I guess
+                    if(msgs.HasNoErrors() && attendanceCount > 0)
                     {
-                        OverrideAmount = costPerAttenadance * attendanceCount,
-                        ConvenienceFeeOverrideAmount = registration.ConvenienceFeePaid,
-                        PaymentTypeFeeOverrideAmount = registration.PaymentTypeFeePaid,
-                        PayingAccount = registrantAccount,
-                        // Not sure about these
-                        BillingAccount = SessionVariables.CurrentAccount,
-                        //CreditCardPurchaseObject = creditCardPurchaseObject,
-                        //BankAccountPurchaseObject = bankAccountPurchaseObject,
-                        //PaymentType = bankAccountPurchaseObject.IsNotEmpty() ? PaymentType.ACH : PaymentType.CreditCard,
-                        //PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
-                        ConvenienceFeePayer = registrantAccount,
-                        CreditCardFeePayer = registrantAccount,
-                        MasterRegistrant = registrantAccount.GetFirstParentOrGuardianRegistrant(msgs),
-                        Description = description,
-                        
-                        // we will need token if we pass SavePaymentInfo true
-                        // SavePaymentInfo = true 
-                    },
-                    loggedInUser: SessionVariables.CurrentUser,
-                    msgs: msgs);
-
+                        AccountService.ProcessPayment(
+                        checkoutObject: new CheckoutObject()
+                        {
+                            OverrideAmount = costPerAttenadance * attendanceCount,
+                            ConvenienceFeeOverrideAmount = registration.ConvenienceFeePaid,
+                            PaymentTypeFeeOverrideAmount = registration.PaymentTypeFeePaid,
+                            PayingAccount = masterRegistrantAccount,
+                            BillingAccount = activity.GetAccount(msgs),
+                            CreditCardPurchaseObject = creditCardPurchaseObject,
+                            BankAccountPurchaseObject = bankAccountPurchaseObject,
+                            PaymentType = bankAccountPurchaseObject.IsNotEmpty() ? PaymentType.ACH : PaymentType.CreditCard,
+                            PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
+                            ConvenienceFeePayer = masterRegistrantAccount,
+                            CreditCardFeePayer = masterRegistrantAccount,
+                            MasterRegistrant = masterRegistrantAccount.GetFirstParentOrGuardianRegistrant(msgs),
+                            Description = description,
+                            SavePaymentInfo = true
+                        },
+                        loggedInUser: SessionVariables.CurrentUser,
+                        msgs: msgs);
+                    }
                     
                 }
 
-               
+                if(msgs.HasNoErrors())
+                {
+                    selectedAttendances.ForEach(attendance =>
+                    {
+                        attendance.IsCharged = true;
+                        attendance.Save();
+                    });
+
+                    var attendanceRegistrantAcitivtyCounts = GetAttendanceRegistrantActivityCounts(selectedAttendances, registrantActivities, msgs);
+                    var costPerClass = registrantActivities.First().GetRegistration(msgs).CostPerClass.Value;
+                    AfterSchoolLibrary.Helpers.EmailHelper.SendAttendanceChargeConfirmation(attendanceRegistrantAcitivtyCounts, activity, costPerClass, null, SessionVariables.CurrentUser, false, msgs);
+                }
+
+              
+
             }
 
-            // send a confirmation email to activity provider with the amount charged per student
-            // see EmailHelper.cs method SendAttendanceChargeConfirmation
-            return View();
-        }
+            if(msgs.HasNoErrors())
+                msgs.Add("Attendance has been successfully Charged", MessageType.Success);
+            else
+                msgs.Add("There was problem charging for attendance", MessageType.UserError);
 
+            return RedirectToAction("attendance", new { id = activityId });
+        }
         #endregion
 
         [HttpGet]
