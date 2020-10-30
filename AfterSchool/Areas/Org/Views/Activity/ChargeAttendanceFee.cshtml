@@ -1,8 +1,8 @@
 ﻿@model Activity
 @{
     ViewBag.Title = Model.AccountName;
-    var registrantActivityAttendanceCounts = ViewBag.RegistrantActivityAttendanceCounts;
-    SystemMessages msgs = (SystemMessages)ViewBag.Messages;    
+    Dictionary<RegistrantActivity, List<Attendance>> registrantActivityAttendanceCounts = ViewBag.RegistrantActivityAttendanceCounts;
+    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
 }
 
 @{
@@ -19,7 +19,7 @@
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            Charge attendance Fee - Preview
+            Charge Attendance Fee - Preview
 
             <div class="clearfix"></div>
 
@@ -33,7 +33,7 @@
                 </div>
                 <span class="pull-right">
                     <button class="btn btn-primary" onclick="confirmChargeForAttendances()">
-                        Confirm Attendance Fees >
+                        Confirm and Charge Fees to Parents >
                     </button>
                 </span>
             </div>
@@ -46,7 +46,7 @@
                     <thead>
                         <tr>
                             <th>Student</th>
-                            <th>Number of Attendances</th>
+                            <th>Days Attended</th>
                             <th>Total Amount To Charge</th>
                         </tr>
                     </thead>
@@ -57,7 +57,7 @@
                             {
                                 var registrant = registrantActivityAttendanceCount.Key.GetRegistrant();
                                 var registration = registrantActivityAttendanceCount.Key.GetRegistration();
-                                var presentCount = registrantActivityAttendanceCount.Value;
+                                var presentCount = registrantActivityAttendanceCount.Value.Count;
                                 var totalAmountToCharge = (decimal)(presentCount * (registration.CostPerClass != null ? registration.CostPerClass : 1));
 
                                 <tr>

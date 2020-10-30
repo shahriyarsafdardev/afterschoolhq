@@ -8,7 +8,7 @@
     var account = SessionVariables.CurrentAccount;
     var controller = (string)ViewData["controller"];
     var postPayPlan = Model.HasPostPayPlan();
-    // postPayPlan = true;
+
     if (totalPresent > 0)
     {
         attendanceRate = ((totalPresent.ToDouble() / (totalPresent + totalAbsent)) * 100).Round(1).ToString("###.#");

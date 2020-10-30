@@ -38,6 +38,8 @@ namespace AfterSchoolLibrary.Models
         public Account CreditCardFeePayer { get; set; }
         public DateTime Date { get; set; }
 
+        public Transaction Transaction { get; set; }
+
         public CheckoutObject()
         {
             Products = new List<Product>();

@@ -1140,6 +1140,7 @@ description: This keeps track of the attendance marking for one particular stude
 inherits: BasicObjectWithModified
 property: RegistrantId, int?, Int, required
 property: AttendanceId, int?, Int, required
+property: TransactionId, int?, Int 
 property: IsPresent, bool, Bit
 property: IsLate, bool, Bit
 property: NumberPresent, int?, Int
@@ -1147,6 +1148,7 @@ property: NumberLate, int?, Int
 property: NumberPossible, int?, Int
 join: Registrant.ID, RegistrantId, InnerJoin
 join: Attendance.ID, AttendanceId, InnerJoin
+join Transaction.ID, TransactionId, InnerJoin
 joinproperty: Registrant.Email, string, NVarChar
 joinproperty: Registrant.FirstName, string, NVarChar
 joinproperty: Registrant.LastName, string, NVarChar

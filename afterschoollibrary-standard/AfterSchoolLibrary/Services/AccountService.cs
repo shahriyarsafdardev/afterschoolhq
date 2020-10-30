@@ -2833,6 +2833,8 @@ namespace AfterSchoolLibrary.Services
                 msgs,
                 dc);
 
+            checkoutObject.Transaction = transaction;
+
             // TODO: this is problematic, but a little better now
             // you really don't know this is the amount paid, but it works for now
             // var amountPaid = checkoutObject.TuitionCostNoFees;
