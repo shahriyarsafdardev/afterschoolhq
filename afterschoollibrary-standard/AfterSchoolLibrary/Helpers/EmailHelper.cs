@@ -867,10 +867,89 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
+        public static void SendAttendanceChargeConfirmation(Dictionary<Attendance, int> attendanceRegistrantActivityCounts, Activity activity, decimal costPerClass, string customMessage, Account account, WebUser loggedInUser, bool sendBcc, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            msgs = msgs ?? new SystemMessages();
+
+            var isAfterSchool = account.IsAfterSchool;
+
+            var receiptRows = "";
+            decimal totalAttendanceCharge = 0;
+            // add registration fee row
+            attendanceRegistrantActivityCounts.ToList().ForEach(attendanceRegistrantActivityCount =>
+            {
+                var attendance = attendanceRegistrantActivityCount.Key;
+                var attendanceCount = attendanceRegistrantActivityCount.Value;
+                var totalCharge = attendanceCount * costPerClass;
+
+                var attendanceModel = new NameValueCollection()
+                                {
+                                    { "Attendance Date", attendance.Date.ToShortDateTimeString() },
+                                    { "Number Present",  attendanceCount.ToString() },
+                                    { "Total Charge", totalCharge.ToCurrency() }
+                                };
+
+                receiptRows += ProcessTemplate(
+                        EmailTemplates.Attendance_Charge_Confirmation_Rows, // TODO create email template
+                        attendanceModel,
+                        "Attendance_Charge_Confirmation_Rows-1.0",
+                        msgs);
+
+                totalAttendanceCharge += totalCharge;
+            });
+
+   
+
+            var attendanceChargeTable = ProcessTemplate(
+                                     EmailTemplates.Registration_Confirmation_Table,
+                                     new NameValueCollection()
+                                        {
+                                            { "CostPerClass" , costPerClass.ToCurrency()  },
+                                            { "TotalAttendanceCharge", totalAttendanceCharge.ToCurrency() },
+                                            { "BodyRows", receiptRows },
+                                        },
+                                     "Attendance_Charge_Confirmation_Table-1.0",
+                                     msgs);
+
+            var model = new NameValueCollection()
+            {
+                { "FirstName", loggedInUser.FirstName },
+                { "ProductName", Utilities.AppName(isAfterSchool) },
+                { "LoginLink", Utilities.LoginUrl() },
+                { "AccountEmail", account.Email, },
+                { "AmountDueOrPaid", "Amount Paid" },
+                { "RegistrationTable", attendanceChargeTable },
+                { "CustomMessage", customMessage },
+                { "RegistrationDetails", "Login to your account to view more details about this payment."},
+                { "VirtualInfo", "" },
+                { "SplitPaymentSubscriptionInfo", "" }
+            };
+
+            var subject = $"Attendance Charged for {activity.Name}";
+            var body = ProcessTemplate(
+                EmailTemplates.Registration_Confirmation,
+                model,
+                "Registration_Confirmation-1.0",
+                msgs);
+
+            // SEND EMAILS
+            var mailMsgs = new SystemMessages();
+
+            // Send email to registerer
+            mailMsgs.AddRange(SendGridHelper.SendMail(
+                fromEmail: Email.SendGridNoReplyEmailAddress(isAfterSchool),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(loggedInUser.Email),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)));
+
+            msgs.AddRange(mailMsgs);
+        }
+
         public static void SendPaymentConfirmation(CheckoutObject checkoutObject, string customMessage, WebUser loggedInUser, bool sendBcc, SystemMessages msgs, DatabaseConnection dc = null)
         {
             msgs = msgs ?? new SystemMessages();
-            
+
             var isAfterSchool = checkoutObject.PayingAccount.IsAfterSchool;
             var purchaserAccount = checkoutObject.PayingAccount;
             var purchaser = checkoutObject.PayingAccount.GetAccountOwner(msgs, dc);

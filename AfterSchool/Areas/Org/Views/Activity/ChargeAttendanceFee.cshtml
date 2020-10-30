@@ -1,6 +1,7 @@
 ﻿@model Activity
 @{
     ViewBag.Title = Model.AccountName;
+    Dictionary<RegistrantActivity, int> registrantActivityAttendanceCounts = ViewBag.RegistrantActivityAttendanceCounts;
     SystemMessages msgs = (SystemMessages)ViewBag.Messages;
 
 
@@ -24,26 +25,10 @@
         <div class="panel-heading">
             Charge attendance Fee - Preview
 
-            <div class="pull-right">
-                <p>
-                    @{
-
-                        @*if (diff > 0)
-                        {
-                            @payoutRequest.ToCurrency() Requested - @diff.ToCurrency() Owed = @maxPayout.ToCurrency() Total
-                        }
-                        else
-                        {
-                            @payoutRequest.ToCurrency()
-                        }*@
-                    }
-                </p>
-            </div>
-
             <div class="clearfix"></div>
 
             <div style="font-size: 13px">
-                <p>Please review the following attendaces to ensure all of the correct charges are listed</p>
+                <p>Please review the following attendances to ensure all of the correct charges are listed</p>
             </div>
 
             <div>
@@ -53,7 +38,7 @@
                     </button>
                 </div>
                 <span class="pull-right">
-                    <button class="btn btn-primary" onclick="requestPayout('@ViewBag.TranIds')">
+                    <button class="btn btn-primary" onclick="confirmChargeForAttendances('@ViewBag.TranIds')">
                         Charge Parents >
                     </button>
                 </span>
@@ -62,6 +47,62 @@
         </div>
         <div class="panel-body">
 
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Number of Attendances</th>
+                            <th>Total Amount To Charge</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (registrantActivityAttendanceCounts.Count > 0)
+                        {
+                            foreach (var registrantActivityAttendanceCount in registrantActivityAttendanceCounts)
+                            {
+                                var registrant = registrantActivityAttendanceCount.Key.GetRegistrant();
+                                var registration = registrantActivityAttendanceCount.Key.GetRegistration();
+                                var presentCount = registrantActivityAttendanceCount.Value;
+   
+                                <tr>
+                                    <td>@registrant.FirstName @registrant.LastName</td>
+
+                                    <td>@presentCount</td>
+
+                                    <td>@((presentCount * registration.CostPerClass.Value).ToCurrency())</td>
+                                </tr> 
+                            }
+                        }
+                        else
+                        {
+                        <tr>
+                            <td colspan="5">You have not taken attendance yet</td>
+                        </tr>            
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
+
+<form action="@Url.Action("confirmchargeattendancefee","activity")" id="chargeAttendanceForm" method="post">
+    @Html.Hidden("AttendanceIds")
+    @Html.HiddenFor(m => m.Uid)
+</form>
+
+<script>
+
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+
+    });
+
+    function chargeAttendanceFee() {
+        if (this.selectedAttendances.length > 0) {
+            $("#AttendanceIds").val(this.selectedAttendances.join());
+            $("#chargeAttendanceForm").submit();
+        }
+    }
+
+</script>
