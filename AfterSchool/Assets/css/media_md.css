@@ -27,7 +27,12 @@
         padding-right: 15px;
         padding-top: 20px;
     }
+
     .margin-left {
         margin-left:-10px;
+    }
+
+    .datetimepicker-mobile {
+        padding: 0 !important;
     }
 }
