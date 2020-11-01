@@ -246,13 +246,15 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(registration.Save(dc));
         }
 
-        public static void SavePaymentSource(this Registration registration, string stripeSourceId, PaymentType paymentType, decimal paymentAmount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void SavePaymentSource(this Registration registration, string stripeSourceId, PaymentType paymentType, decimal paymentAmount, decimal convenienceFeePaid, decimal paymentTypeFeePaid, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             registration.StripeSourceId = stripeSourceId;
             registration.PaymentTypeId = paymentType;
             registration.CostPerClass = paymentAmount;
             registration.LastModifiedDate = DateTime.UtcNow;
             registration.LastModifiedBy = loggedInUser?.ID;
+            registration.ConvenienceFeePaid = convenienceFeePaid;
+            registration.PaymentTypeFeePaid = paymentTypeFeePaid;
             msgs.AddRange(registration.Save(dc));
         }
 
