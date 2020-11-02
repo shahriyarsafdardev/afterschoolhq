@@ -58,6 +58,7 @@
                                 var registrant = registrantActivityAttendanceCount.Key.GetRegistrant();
                                 var registration = registrantActivityAttendanceCount.Key.GetRegistration();
                                 var presentCount = registrantActivityAttendanceCount.Value.Count;
+                                var costPerClass = registration.CostPerClass.HasValue ? registration.CostPerClass.Value : 0;
                                 var totalAmountToCharge = (decimal)(presentCount * (registration.CostPerClass.HasValue ? registration.CostPerClass.Value : 0));
 
                                 <tr>
