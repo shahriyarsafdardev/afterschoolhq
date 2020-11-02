@@ -43,8 +43,7 @@
                                 <table class="table table-striped">
                                     <thead>
                                         <tr>
-                                            <th>Package</th>
-                                            
+                                            <th>Package</th>                                            
                                             <th class="text-center">Monthly Plan</th>
                                             <th class="text-center">Annual Plan (2 months free)</th>
                                         </tr>
@@ -58,7 +57,7 @@
                                             var current = "";
 
                                             if (suggestedPackage.IsNotEmpty() && suggestedPackage.ID == p.ID)
-                                            {                                 
+                                            {
                                                 monthlySelected = " checked=\"checked\" ";
                                             }
                                             else if (p.IsNotEmpty() && currentPackage.IsNotEmpty() && p.ID == currentPackage.PackageId)
@@ -78,7 +77,12 @@
                                             <tr>
                                                 <td>
                                                     <a href="#" onclick="return loadFeatures('@p.ID', '@p.Name')"> @p.Name </a><br />
-                                                    <span class="font-size-11">(@current)</span>
+                                                    @{ 
+                                                        if (current.IsNotEmpty())
+                                                        {
+                                                            <span class="font-size-11">(@current)</span>
+                                                        }
+                                                     }
                                                 </td>
 
 
