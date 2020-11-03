@@ -972,7 +972,7 @@ namespace AfterSchoolLibrary.Helpers
 
             if (checkoutObject.Quantity.HasValue && isAttendanceCharge)
             {
-                description = $"Payment to {billingAccount.Name} ({(totalCostWithFees / checkoutObject.Quantity.Value).ToCurrency()} per class)";
+                description = $"Payment to {billingAccount.Name} ({(totalCost / checkoutObject.Quantity.Value).ToCurrency()} per class)";
             }
 
             var receiptRows = "";
