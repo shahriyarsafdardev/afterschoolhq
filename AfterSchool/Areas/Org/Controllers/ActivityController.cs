@@ -1301,8 +1301,8 @@ namespace AfterSchool.Areas.Org.Controllers
                         var checkoutObject = new CheckoutObject()
                         {
                             OverrideAmount = costPerAttenadance * raAttendances.Count,
-                            ConvenienceFeeOverrideAmount = registration.ConvenienceFeePaid,
-                            PaymentTypeFeeOverrideAmount = registration.PaymentTypeFeePaid,
+                            ConvenienceFeeOverrideAmount = registration.ConvenienceFeePaid * raAttendances.Count,
+                            PaymentTypeFeeOverrideAmount = registration.PaymentTypeFeePaid * raAttendances.Count,
                             PayingAccount = masterRegistrantAccount,
                             BillingAccount = activity.GetAccount(msgs),
                             CreditCardPurchaseObject = creditCardPurchaseObject,
