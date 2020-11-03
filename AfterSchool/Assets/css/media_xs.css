@@ -67,4 +67,12 @@
     .margin-left-sm {
         margin-left: 10px;
     }
+
+    .mobile-padding {
+        padding: 4px !important;
+    }
+
+    .display-days {
+        display: grid;
+    }
 }

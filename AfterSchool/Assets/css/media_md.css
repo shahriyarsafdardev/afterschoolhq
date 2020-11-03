@@ -30,4 +30,12 @@
     .margin-left {
         margin-left:-10px;
     }
+
+    .mobile-padding {
+        padding: 4px !important;
+    }
+
+    .display-days {
+        display: inline-flex;
+    }
 }
