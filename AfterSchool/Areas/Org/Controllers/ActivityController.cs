@@ -1314,7 +1314,8 @@ namespace AfterSchool.Areas.Org.Controllers
                             MasterRegistrant = registrantActivity.GetRegistrant(msgs).GetMasterRegistrant(msgs),
                             Description = description,
                             SavePaymentInfo = false,
-                            ParticipationObject = activity.GetParticipationObject(msgs)
+                            ParticipationObject = activity.GetParticipationObject(msgs),
+                            Quantity = raAttendances.Count
                         };
 
                         if (msgs.HasNoErrors() && raAttendances?.Count > 0)

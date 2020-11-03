@@ -967,6 +967,7 @@ namespace AfterSchoolLibrary.Helpers
             var totalCostWithFees = checkoutObject.GetStripeAmount(msgs, dc);
             var totalCost = totalCostWithFees - checkoutObject.PaymentTypeFeeOverrideAmount.Value;
             var totalFees = checkoutObject.PaymentTypeFeeOverrideAmount.Value;
+            var quantity = checkoutObject.Quantity.HasValue ? checkoutObject.Quantity.Value.ToString() : "1";
 
             var receiptRows = "";
 
@@ -974,7 +975,7 @@ namespace AfterSchoolLibrary.Helpers
             var paymentModel = new NameValueCollection()
                                 {
                                     { "Description", $"Payment to {billingAccount.Name}" },
-                                    { "Quantity",  "1"},
+                                    { "Quantity", quantity },
                                     { "Cost", totalCost.ToCurrency() },
                                     { "AdditionalDetails", "" }
                                 };
