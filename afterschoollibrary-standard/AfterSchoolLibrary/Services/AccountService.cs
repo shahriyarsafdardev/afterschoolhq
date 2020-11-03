@@ -2833,6 +2833,8 @@ namespace AfterSchoolLibrary.Services
                 msgs,
                 dc);
 
+            checkoutObject.Transaction = transaction;
+
             // TODO: this is problematic, but a little better now
             // you really don't know this is the amount paid, but it works for now
             // var amountPaid = checkoutObject.TuitionCostNoFees;
@@ -3090,16 +3092,21 @@ namespace AfterSchoolLibrary.Services
             if (checkoutObject.PaymentType == PaymentType.CreditCard)
                 costPerClass += checkoutObject.ParticipationObject.GetPostPayCreditCardFee(FeesPaidByType.Parent);
 
+            var convenienceFeePaid = checkoutObject.ParticipationObject.GetPostPayConvenienceFee(FeesPaidByType.Parent);
+            var paymentTypeFeePaid = checkoutObject.ParticipationObject.GetPostPayCreditCardFee(FeesPaidByType.Parent);
+
             checkoutObject.Registration.SavePaymentSource(
                 checkoutObject.StripeSourceId, 
                 checkoutObject.PaymentType,
                 costPerClass,
+                convenienceFeePaid,
+                paymentTypeFeePaid,
                 loggedInUser, 
                 msgs, 
                 dc);
         }
 
-        public static void ProcessPayment(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void ProcessPayment(CheckoutObject checkoutObject, WebUser loggedInUser, bool isAttendanceCharge = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
             (
@@ -3121,7 +3128,7 @@ namespace AfterSchoolLibrary.Services
                 {
                     msgs.AddRange(smsgs);
 
-                    Helpers.EmailHelper.SendPaymentConfirmation(checkoutObject, null, loggedInUser, true, msgs, dc);
+                    Helpers.EmailHelper.SendPaymentConfirmation(checkoutObject, null, loggedInUser, true,msgs, isAttendanceCharge, dc);
                 },
                 onFailure: (SystemMessages amsgs) => msgs.AddRange(amsgs),
                 onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),

@@ -867,10 +867,94 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
-        public static void SendPaymentConfirmation(CheckoutObject checkoutObject, string customMessage, WebUser loggedInUser, bool sendBcc, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void SendAttendanceChargeConfirmation(Dictionary<Attendance, int> attendanceRegistrantActivityCounts, Activity activity, decimal costPerClass, string customMessage, WebUser loggedInUser, bool sendBcc, SystemMessages msgs, DatabaseConnection dc = null)
         {
             msgs = msgs ?? new SystemMessages();
-            
+
+            var account = activity.GetAccount(msgs, dc);
+            var isAfterSchool = account.IsAfterSchool;
+
+
+            var receiptRows = "";
+            decimal totalAttendanceCharge = 0;
+            int totalNumberPresent = 0;
+
+            // prepare registration fee rows
+            attendanceRegistrantActivityCounts.ToList().ForEach(attendanceRegistrantActivityCount =>
+            {
+                var attendance = attendanceRegistrantActivityCount.Key;
+                var attendanceCount = attendanceRegistrantActivityCount.Value;
+                var totalCharge = attendanceCount * costPerClass;
+
+                var attendanceModel = new NameValueCollection() 
+                {
+                    { "AttendanceDate", attendance.Date.ToShortDateTimeString() },
+                    { "NumberPresent",  attendanceCount.ToString() },
+                    { "TotalCharge", totalCharge.ToCurrency() }
+                };
+
+                receiptRows += ProcessTemplate(
+                        EmailTemplates.Attendance_Charge_Confirmation_Rows,
+                        attendanceModel,
+                        "Attendance_Charge_Confirmation_Rows-1.0",
+                        msgs);
+
+                totalAttendanceCharge += totalCharge;
+                totalNumberPresent += attendanceCount;
+            });
+
+
+
+            var attendanceChargeTableModel = new NameValueCollection()
+            {
+                { "TotalNumberPresent" , totalNumberPresent.ToString()  },
+                { "TotalAttendanceCharge", totalAttendanceCharge.ToCurrency() },
+                { "BodyRows", receiptRows }
+            };
+
+            var attendanceChargeTable = ProcessTemplate(
+                EmailTemplates.Attendance_Charge_Confirmation_Table,
+                attendanceChargeTableModel,
+                "Attendance_Charge_Confirmation_Table-1.0",
+                msgs);
+
+            var model = new NameValueCollection()
+            {
+                { "FirstName", loggedInUser.FirstName },
+                { "ProductName", Utilities.AppName(isAfterSchool) },
+                { "LoginLink", Utilities.LoginUrl() },
+                { "AccountEmail", account.Email },
+                { "RegistrationTable", attendanceChargeTable },
+                { "CustomMessage", customMessage },
+                { "RegistrationDetails", "Login to your account to view more details about this payment."},
+                { "ActivityName", activity.Name.ToProperCase() }
+            };
+
+            var subject = $"Attendance Charged for {activity.Name}";
+            var body = ProcessTemplate(
+                EmailTemplates.Attendance_Charge_Confirmation,
+                model,
+                "Attendance_Charge_Confirmation_Table-1.0",
+                msgs);
+
+            // SEND EMAILS
+            var mailMsgs = new SystemMessages();
+
+            // Send email to activity account
+            mailMsgs.AddRange(SendGridHelper.SendMail(
+                fromEmail: Email.SendGridNoReplyEmailAddress(isAfterSchool),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(account.Email),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)));
+
+            msgs.AddRange(mailMsgs);
+        }
+
+        public static void SendPaymentConfirmation(CheckoutObject checkoutObject, string customMessage, WebUser loggedInUser, bool sendBcc, SystemMessages msgs, bool isAttendanceCharge = false, DatabaseConnection dc = null)
+        {
+            msgs = msgs ?? new SystemMessages();
+
             var isAfterSchool = checkoutObject.PayingAccount.IsAfterSchool;
             var purchaserAccount = checkoutObject.PayingAccount;
             var purchaser = checkoutObject.PayingAccount.GetAccountOwner(msgs, dc);
@@ -883,14 +967,21 @@ namespace AfterSchoolLibrary.Helpers
             var totalCostWithFees = checkoutObject.GetStripeAmount(msgs, dc);
             var totalCost = totalCostWithFees - checkoutObject.PaymentTypeFeeOverrideAmount.Value;
             var totalFees = checkoutObject.PaymentTypeFeeOverrideAmount.Value;
+            var quantity = checkoutObject.Quantity.HasValue ? checkoutObject.Quantity.Value.ToString() : "1";
+            var description = $"Payment to {billingAccount.Name}";
+
+            if (checkoutObject.Quantity.HasValue && isAttendanceCharge)
+            {
+                description = $"Payment to {billingAccount.Name} ({(totalCost / checkoutObject.Quantity.Value).ToCurrency()} per class)";
+            }
 
             var receiptRows = "";
 
             // add registration fee row
             var paymentModel = new NameValueCollection()
                                 {
-                                    { "Description", $"Payment to {billingAccount.Name}" },
-                                    { "Quantity",  "1"},
+                                    { "Description", description },
+                                    { "Quantity", quantity },
                                     { "Cost", totalCost.ToCurrency() },
                                     { "AdditionalDetails", "" }
                                 };

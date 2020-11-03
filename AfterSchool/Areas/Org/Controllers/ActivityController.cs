@@ -153,6 +153,8 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(finalActivities);
         }
 
+
+        #region Edit Activity
         [HttpGet]
         public ActionResult EditSetup(string id, string group, string type)
         {
@@ -1020,6 +1022,9 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(activity);
         }
 
+        #endregion
+
+        #region Copy, Delete, Archive, Restore
         [HttpPost]
         public ActionResult Copy(string id, string activitynamecopy, string usesameformcopy, string copywithregistrants, string type)
         {
@@ -1099,13 +1104,21 @@ namespace AfterSchool.Areas.Org.Controllers
 
             return RedirectToAction("index", "activity");
         }
+        #endregion
 
+
+        #region Attendance
         [HttpGet]
-        public ActionResult Attendance(string id)
+        public ActionResult Attendance(string id, string msg)
         {
             var activity = Activity.LoadByUid(id.ToGuid());
+            var msgs = new SystemMessages();
+            if (msg.IsNotEmpty())
+            {
+                msgs.Add(msg, msg.Contains("error") ? MessageType.UserError : MessageType.Success);
+            }
 
-            ViewBag.Messages = new SystemMessages();
+            ViewBag.Messages = msgs;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             return View(activity);
@@ -1154,6 +1167,202 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             return View(attendance);
         }
+
+        private Dictionary<RegistrantActivity,List<Attendance>> GetRegistrantActivityAttendances(List<RegistrantActivity> registrantActivities, List<Attendance> attendances, SystemMessages msgs)
+        {
+            Dictionary<RegistrantActivity, List<Attendance>> registrantActivityAttendanceCounts = new Dictionary<RegistrantActivity, List<Attendance>>();
+
+            registrantActivities.ForEach(registrantActivity =>
+            {
+                var attendancesToCharge = attendances.FindAll(attendance =>
+                {
+                    var attendanceRegistrant = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(attendance.ID.Value, registrantActivity.RegistrantId.Value, msgs).FirstOrDefault();
+                    if (attendanceRegistrant.IsNotEmpty() && !attendanceRegistrant.TransactionId.HasValue)
+                        return attendanceRegistrant.NumberPresent > 0;        
+
+                    return false;
+                }).ToList();
+
+                registrantActivityAttendanceCounts.Add(registrantActivity, attendancesToCharge);
+
+            });
+
+            return registrantActivityAttendanceCounts;
+        }
+
+        private Dictionary<Attendance, int> GetAttendanceRegistrantActivityCounts(List<Attendance> attendances, List<RegistrantActivity> registrantActivities, SystemMessages msgs)
+        {
+            Dictionary<Attendance, int> attendanceRegistrantActivityCounts = new Dictionary<Attendance, int>();
+
+            attendances.ForEach(attendance =>
+            {
+                var numberOfRegistrants = registrantActivities.FindAll(registrantActivity =>
+                {
+                    var attendanceRegistrant = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(attendance.ID.Value, registrantActivity.RegistrantId.Value, msgs).First();
+                    if (attendanceRegistrant.IsNotEmpty())
+                    {
+                        return attendanceRegistrant.NumberPresent > 0;
+                    }
+
+                    return false;
+                }).Count;
+
+                attendanceRegistrantActivityCounts.Add(attendance, numberOfRegistrants);
+
+            });
+
+            return attendanceRegistrantActivityCounts;
+        }
+
+        [HttpPost]
+        public ActionResult ChargeAttendanceFee()
+        {
+            // this should return the amount to be charged for each registrant 
+            var attendanceIds = Request.Form["AttendanceIds"];
+            var activityId = Request.Form["Uid"];
+            var msgs = new SystemMessages();
+            Activity activity = null;
+
+            if (activityId.IsNotEmpty() && activityId.IsGuid())
+                activity = Activity.LoadByUid(activityId.ToGuid(), msgs);
+
+            if (attendanceIds.IsNotEmpty() || attendanceIds.IsNotBlank())
+            {
+                // get selected attendances
+                var attendanceIdsList = attendanceIds.Split(',').Select(p => p.ToInteger()).ToList();
+                var attendances = AfterSchoolLibrary.Models.Attendance.LoadByActivityId(activity.ID.Value, msgs);
+                var selectedAttendances = attendances.Where(a => attendanceIdsList.Contains(a.ID.Value)).ToList();
+
+
+                // sum up total cost of all attendances per registrant to display
+                var registrantActivities = RegistrantActivity.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs);
+
+                var registrantActivityAttendances = GetRegistrantActivityAttendances(registrantActivities, selectedAttendances, msgs);                
+
+                ViewBag.AttdanceIds = attendanceIds;
+                ViewBag.RegistrantActivityAttendanceCounts = registrantActivityAttendances;
+                ViewBag.Messages = msgs;
+
+                return View(activity);
+            }
+            return RedirectToAction("Attendance");
+        }
+
+
+
+        [HttpPost]
+        public ActionResult ChargeAttendanceFeeDone()
+        {
+            // this should make the transaction purchase and activity payment records
+            //and send charges for each registrant to stripe
+
+            var attendanceIds = Request.Form["AttendanceIds"];
+            var activityId = Request.Form["Uid"];
+            var msgs = new SystemMessages();
+            Activity activity = null;
+            string msg = "An error occurred while processing payments. Please contact support";
+
+            if (activityId.IsNotEmpty() && activityId.IsGuid())
+                activity = Activity.LoadByUid(activityId.ToGuid(), msgs);
+
+            if (attendanceIds.IsNotEmpty() || attendanceIds.IsNotBlank())
+            {
+                // get selected attendances
+                var attendanceIdsList = attendanceIds.Split(',').Select(p => p.ToInteger()).ToList();
+                var attendances = AfterSchoolLibrary.Models.Attendance.LoadByActivityId(activity.ID.Value, msgs);
+                var selectedAttendances = attendances.Where(a => attendanceIdsList.Contains(a.ID.Value)).ToList();
+
+
+                // sum up total cost of all attendances per registrant to display
+                var registrantActivities = RegistrantActivity.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs);
+
+                var registrantActivityAttendances = GetRegistrantActivityAttendances(registrantActivities, selectedAttendances, msgs);
+
+                foreach (var registrantActivityAttendance in registrantActivityAttendances)
+                {
+                    var registrantActivity = registrantActivityAttendance.Key;
+                    var registration = registrantActivity.GetRegistration(msgs);
+                    var costPerAttenadance = registration.CostPerClass.IsNotEmpty() ? registration.CostPerClass.Value : 0;
+                    if(costPerAttenadance > 0)
+                    {
+                        var raAttendances = registrantActivityAttendance.Value;
+                        var masterRegistrantAccount = registrantActivity.GetRegistrant(msgs).GetMasterRegistrant(msgs).GetAccount(msgs);
+                        var description = $"{registrantActivity.GetActivity().Name.ToProperCase()} attendance Fee times {raAttendances.Count}";
+
+                        BankAccountPurchaseObject bankAccountPurchaseObject = null;
+                        CreditCardPurchaseObject creditCardPurchaseObject = null;
+
+                        if (registration.PaymentTypeId == PaymentType.ACH)
+                            bankAccountPurchaseObject = new BankAccountPurchaseObject { StripeSourceId = registration.StripeSourceId };
+                        else
+                            creditCardPurchaseObject = new CreditCardPurchaseObject { StripeSourceId = registration.StripeSourceId };
+
+
+                        var checkoutObject = new CheckoutObject()
+                        {
+                            OverrideAmount = costPerAttenadance * raAttendances.Count,
+                            ConvenienceFeeOverrideAmount = registration.ConvenienceFeePaid * raAttendances.Count,
+                            PaymentTypeFeeOverrideAmount = registration.PaymentTypeFeePaid * raAttendances.Count,
+                            PayingAccount = masterRegistrantAccount,
+                            BillingAccount = activity.GetAccount(msgs),
+                            CreditCardPurchaseObject = creditCardPurchaseObject,
+                            BankAccountPurchaseObject = bankAccountPurchaseObject,
+                            PaymentType = bankAccountPurchaseObject.IsNotEmpty() ? PaymentType.ACH : PaymentType.CreditCard,
+                            PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
+                            ConvenienceFeePayer = masterRegistrantAccount,
+                            CreditCardFeePayer = masterRegistrantAccount,
+                            MasterRegistrant = registrantActivity.GetRegistrant(msgs).GetMasterRegistrant(msgs),
+                            Description = description,
+                            SavePaymentInfo = false,
+                            ParticipationObject = activity.GetParticipationObject(msgs),
+                            Quantity = raAttendances.Count
+                        };
+
+                        if (msgs.HasNoErrors() && raAttendances?.Count > 0)
+                        {
+                            AccountService.ProcessPayment(
+                            checkoutObject,
+                            isAttendanceCharge: true,
+                            loggedInUser: SessionVariables.CurrentUser,
+                            msgs: msgs);
+                        }
+
+                        if (msgs.HasNoErrors())
+                        {
+                            raAttendances.ForEach(raAttendance =>
+                            {
+                                var attendanceRegistrant = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(raAttendance.ID.Value, registrantActivity.GetRegistrant(msgs).ID.Value, msgs).FirstOrDefault();
+                                if(attendanceRegistrant.IsNotEmpty() && checkoutObject.Transaction.IsNotEmpty())
+                                {
+                                    attendanceRegistrant.TransactionId = checkoutObject.Transaction.ID.Value;
+                                    msgs.AddRange(attendanceRegistrant.Save());
+                                }
+                            });
+                        }
+                    }
+
+                }
+
+                if(msgs.HasNoErrors())
+                {
+
+                    selectedAttendances.ForEach(attendance =>
+                    {
+                        attendance.IsCharged = true;
+                        msgs.AddRange(attendance.Save());
+                    });
+
+                    var attendanceRegistrantAcitivtyCounts = GetAttendanceRegistrantActivityCounts(selectedAttendances, registrantActivities, msgs);
+                    var costPerClass = registrantActivities.First().GetRegistration(msgs).CostPerClass.HasValue? registrantActivities.First().GetRegistration(msgs).CostPerClass.Value : 0;
+                    AfterSchoolLibrary.Helpers.EmailHelper.SendAttendanceChargeConfirmation(attendanceRegistrantAcitivtyCounts, activity, costPerClass, null, SessionVariables.CurrentUser, false, msgs);
+
+                    msg = "All accounts have been successfully charged.";
+                }
+            }
+
+            return RedirectToAction("attendance", new { id = activityId, msg });
+        }
+        #endregion
 
         [HttpGet]
         public ActionResult FinalizeRegistration(string id, string atype)

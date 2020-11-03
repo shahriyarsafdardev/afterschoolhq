@@ -1,0 +1,104 @@
+﻿@model Activity
+@{
+    ViewBag.Title = Model.AccountName;
+    Dictionary<RegistrantActivity, List<Attendance>> registrantActivityAttendanceCounts = ViewBag.RegistrantActivityAttendanceCounts;
+    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+}
+
+@{
+    Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());
+}
+
+<div class="main-content">
+
+    @{
+        Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs);
+
+        Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model);
+    }
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            Charge Attendance Fee - Preview
+
+            <div class="clearfix"></div>
+
+            <div style="font-size: 13px">
+                <p>Please review the following attendances to ensure all of the correct charges are listed</p>
+            </div>
+
+            <div>
+                <div class="pull-left">
+                    <a href="@Url.Action("attendance", new { id = Model.Uid })" class="btn btn-default btn-space">&laquo; Cancel</a>
+                </div>
+                <span class="pull-right">
+                    <button class="btn btn-primary" onclick="confirmChargeForAttendances()">
+                        Confirm and Charge Fees to Parents >
+                    </button>
+                </span>
+            </div>
+            <br />
+        </div>
+        <div class="panel-body">
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Days Attended</th>
+                            <th>Total Amount To Charge</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (registrantActivityAttendanceCounts.Count > 0)
+                        {
+                            foreach (var registrantActivityAttendanceCount in registrantActivityAttendanceCounts)
+                            {
+                                var registrant = registrantActivityAttendanceCount.Key.GetRegistrant();
+                                var registration = registrantActivityAttendanceCount.Key.GetRegistration();
+                                var presentCount = registrantActivityAttendanceCount.Value.Count;
+                                var costPerClass = registration.CostPerClass.HasValue ? registration.CostPerClass.Value : 0;
+                                var totalAmountToCharge = (decimal)(presentCount * (registration.CostPerClass.HasValue ? registration.CostPerClass.Value : 0));
+
+                                <tr>
+                                    <td>@registrant.FirstName @registrant.LastName</td>
+
+                                    <td>@presentCount</td>
+
+                                    <td>@totalAmountToCharge.ToCurrency()</td>
+                                </tr> 
+                            }
+                        }
+                        else
+                        {
+                        <tr>
+                            <td colspan="5">You have not taken attendance yet</td>
+                        </tr>            
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form action="@Url.Action("ChargeAttendanceFeeDone","activity")" id="frmChargeAttendancePreview" method="post">
+    @Html.Hidden("AttendanceIds")
+    @Html.HiddenFor(m => m.Uid)
+</form>
+
+<script>
+
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+
+    });
+
+
+
+    function confirmChargeForAttendances() {
+        $("#AttendanceIds").val('@ViewBag.AttdanceIds');
+        $("#frmChargeAttendancePreview").submit();
+    }
+
+</script>

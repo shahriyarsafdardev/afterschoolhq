@@ -295,6 +295,7 @@ namespace AfterSchoolLibrary.Models
 			Registration.Update(new Hashtable(){{"CompletionStatusId",0}}, new Hashtable(){{"CompletionStatusId", DBNull.Value}}, Registration.ObjectMap, dc);
 			ActivityWebUser.Update(new Hashtable(){{"IsLeader",false}}, new Hashtable(){{"IsLeader", DBNull.Value}}, ActivityWebUser.ObjectMap, dc);
 			Attendance.Update(new Hashtable(){{"IsCompleted",false}}, new Hashtable(){{"IsCompleted", DBNull.Value}}, Attendance.ObjectMap, dc);
+			Attendance.Update(new Hashtable(){{"IsCharged",false}}, new Hashtable(){{"IsCharged", DBNull.Value}}, Attendance.ObjectMap, dc);
 			AttendanceRegistrant.Update(new Hashtable(){{"IsPresent",false}}, new Hashtable(){{"IsPresent", DBNull.Value}}, AttendanceRegistrant.ObjectMap, dc);
 			AttendanceRegistrant.Update(new Hashtable(){{"IsLate",false}}, new Hashtable(){{"IsLate", DBNull.Value}}, AttendanceRegistrant.ObjectMap, dc);
 			Package.Update(new Hashtable(){{"IsActive",false}}, new Hashtable(){{"IsActive", DBNull.Value}}, Package.ObjectMap, dc);
