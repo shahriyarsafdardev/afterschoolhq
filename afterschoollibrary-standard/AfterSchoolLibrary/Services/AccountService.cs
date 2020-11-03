@@ -3128,7 +3128,7 @@ namespace AfterSchoolLibrary.Services
                 {
                     msgs.AddRange(smsgs);
 
-                    Helpers.EmailHelper.SendPaymentConfirmation(checkoutObject, null, loggedInUser, true, isAttendanceCharge,msgs, dc);
+                    Helpers.EmailHelper.SendPaymentConfirmation(checkoutObject, null, loggedInUser, true,msgs, isAttendanceCharge, dc);
                 },
                 onFailure: (SystemMessages amsgs) => msgs.AddRange(amsgs),
                 onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),

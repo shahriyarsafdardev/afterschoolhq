@@ -951,7 +951,7 @@ namespace AfterSchoolLibrary.Helpers
             msgs.AddRange(mailMsgs);
         }
 
-        public static void SendPaymentConfirmation(CheckoutObject checkoutObject, string customMessage, WebUser loggedInUser, bool sendBcc, bool isAttendanceCharge = false, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void SendPaymentConfirmation(CheckoutObject checkoutObject, string customMessage, WebUser loggedInUser, bool sendBcc, SystemMessages msgs, bool isAttendanceCharge = false, DatabaseConnection dc = null)
         {
             msgs = msgs ?? new SystemMessages();
 
