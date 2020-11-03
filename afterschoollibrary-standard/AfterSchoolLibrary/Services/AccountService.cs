@@ -3106,7 +3106,7 @@ namespace AfterSchoolLibrary.Services
                 dc);
         }
 
-        public static void ProcessPayment(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void ProcessPayment(CheckoutObject checkoutObject, WebUser loggedInUser, bool isAttendanceCharge = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
             (
@@ -3128,7 +3128,7 @@ namespace AfterSchoolLibrary.Services
                 {
                     msgs.AddRange(smsgs);
 
-                    Helpers.EmailHelper.SendPaymentConfirmation(checkoutObject, null, loggedInUser, true, msgs, dc);
+                    Helpers.EmailHelper.SendPaymentConfirmation(checkoutObject, null, loggedInUser, true, isAttendanceCharge,msgs, dc);
                 },
                 onFailure: (SystemMessages amsgs) => msgs.AddRange(amsgs),
                 onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),

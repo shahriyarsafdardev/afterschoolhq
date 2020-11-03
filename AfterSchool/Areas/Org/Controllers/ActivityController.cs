@@ -1322,6 +1322,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         {
                             AccountService.ProcessPayment(
                             checkoutObject,
+                            isAttendanceCharge: true,
                             loggedInUser: SessionVariables.CurrentUser,
                             msgs: msgs);
                         }

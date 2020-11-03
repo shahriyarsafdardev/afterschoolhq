@@ -951,7 +951,7 @@ namespace AfterSchoolLibrary.Helpers
             msgs.AddRange(mailMsgs);
         }
 
-        public static void SendPaymentConfirmation(CheckoutObject checkoutObject, string customMessage, WebUser loggedInUser, bool sendBcc, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void SendPaymentConfirmation(CheckoutObject checkoutObject, string customMessage, WebUser loggedInUser, bool sendBcc, bool isAttendanceCharge = false, SystemMessages msgs, DatabaseConnection dc = null)
         {
             msgs = msgs ?? new SystemMessages();
 
@@ -968,13 +968,19 @@ namespace AfterSchoolLibrary.Helpers
             var totalCost = totalCostWithFees - checkoutObject.PaymentTypeFeeOverrideAmount.Value;
             var totalFees = checkoutObject.PaymentTypeFeeOverrideAmount.Value;
             var quantity = checkoutObject.Quantity.HasValue ? checkoutObject.Quantity.Value.ToString() : "1";
+            var description = $"Payment to {billingAccount.Name}";
+
+            if (checkoutObject.Quantity.HasValue && isAttendanceCharge)
+            {
+                description = $"Payment to {billingAccount.Name} ({(totalCostWithFees / checkoutObject.Quantity.Value).ToCurrency()} per class)";
+            }
 
             var receiptRows = "";
 
             // add registration fee row
             var paymentModel = new NameValueCollection()
                                 {
-                                    { "Description", $"Payment to {billingAccount.Name}" },
+                                    { "Description", description },
                                     { "Quantity", quantity },
                                     { "Cost", totalCost.ToCurrency() },
                                     { "AdditionalDetails", "" }
