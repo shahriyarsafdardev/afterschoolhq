@@ -99,7 +99,7 @@
                                     </button>
 
                                 }
-                                else if (SessionVariables.AccountUserType.In(AccountService.AdminUserTypes))
+                                else if (SessionVariables.AccountUserType.In(AccountService.AdminUserTypes) && (user.ID != currentUser.ID))
                                 {
                                     <button type="button"
                                             class="btn btn-danger btn-sm md-trigger"
