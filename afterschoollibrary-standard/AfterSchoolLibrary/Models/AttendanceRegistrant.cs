@@ -26,6 +26,7 @@ namespace AfterSchoolLibrary.Models
 		/// Required.
 		/// </summary>
 		public int? AttendanceId { get { return (int?)MDV["AttendanceId"].Value; } set { MDV["AttendanceId"].Value = value; } }
+		public int? TransactionId { get { return (int?)MDV["TransactionId"].Value; } set { MDV["TransactionId"].Value = value; } }
 		public bool IsPresent { get { return (bool)MDV["IsPresent"].Value; } set { MDV["IsPresent"].Value = value; } }
 		public bool IsLate { get { return (bool)MDV["IsLate"].Value; } set { MDV["IsLate"].Value = value; } }
 		public int? NumberPresent { get { return (int?)MDV["NumberPresent"].Value; } set { MDV["NumberPresent"].Value = value; } }
@@ -60,6 +61,7 @@ namespace AfterSchoolLibrary.Models
                 _dp = BasicObjectWithModified.get_BaseObjectMap(className);
 				_dp.Add(className, "RegistrantId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AttendanceId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "TransactionId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "IsPresent", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "IsLate", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "NumberPresent", System.Data.SqlDbType.Int);
@@ -159,6 +161,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["AttendanceId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["TransactionId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();

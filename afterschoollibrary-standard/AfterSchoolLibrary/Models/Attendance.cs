@@ -25,6 +25,7 @@ namespace AfterSchoolLibrary.Models
 		public int? ActivityInstanceId { get { return (int?)MDV["ActivityInstanceId"].Value; } set { MDV["ActivityInstanceId"].Value = value; } }
 		public DateTime? Date { get { return (DateTime?)MDV["Date"].Value; } set { MDV["Date"].Value = value; } }
 		public bool IsCompleted { get { return (bool)MDV["IsCompleted"].Value; } set { MDV["IsCompleted"].Value = value; } }
+		public bool IsCharged { get { return (bool)MDV["IsCharged"].Value; } set { MDV["IsCharged"].Value = value; } }
 		public string ActivityName { get { return (string)MDV["ActivityName"].Value; } }
 		public Guid ActivityUid { get { return (Guid)MDV["ActivityUid"].Value; } }
 		public int? ActivityAccountId { get { return (int?)MDV["ActivityAccountId"].Value; } }
@@ -36,6 +37,7 @@ namespace AfterSchoolLibrary.Models
             this.Config(ObjectMap, DatabaseQuery, typeof(Attendance).Name, "ID");
             this.LoadObjectValues(ObjectMap);
 			this.IsCompleted = false;
+			this.IsCharged = false;
 			
         }
 
@@ -50,6 +52,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "ActivityInstanceId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "Date", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "IsCompleted", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "IsCharged", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "ActivityName", typeof(Activity).Name, "Name", System.Data.SqlDbType.NVarChar, "Activity");
 				_dp.Add(className, "ActivityUid", typeof(Activity).Name, "Uid", System.Data.SqlDbType.UniqueIdentifier, "Activity");
 				_dp.Add(className, "ActivityAccountId", typeof(Activity).Name, "AccountId", System.Data.SqlDbType.Int, "Activity");
@@ -145,6 +148,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["IsCompleted"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsCharged"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

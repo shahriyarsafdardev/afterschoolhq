@@ -253,6 +253,8 @@ namespace AfterSchoolLibrary.Models
             return _Features;
         }
 
+        public List<PackageFeature> GetLatestFeatures(SystemMessages msgs = null, DatabaseConnection dc = null) => PackageFeature.LoadByPackageId(this.ID.Value, msgs, dc);
+        
         public SystemMessages SaveWithStripe(DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();

@@ -1034,6 +1034,8 @@ property: DatePaid, DateTime?, DateTime
 property: StripeChargeId, string, NVarChar "100"
 property: PayPalTransactionId, string, NVarChar "50"
 property: AmountPaid, decimal?, Money
+property: ConvenienceFeePaid, decimal?, Money
+property: PaymentTypeFeePaid, decimal?, Money
 property: PaymentTypeId, PaymentType, Int
 property: LastUpdated, DateTime?, DateTime
 property: ActivityGroupId, int?, Int
@@ -1119,6 +1121,7 @@ property: ActivityId, int?, Int, required
 property: ActivityInstanceId, int?, Int
 property: Date, DateTime?, DateTime
 property: IsCompleted, bool, Bit
+property: IsCharged, bool, Bit
 join: Activity.ID, ActivityId, InnerJoin
 join: Account.ID, Activity.AccountId, InnerJoin
 joinproperty: Activity.Name, string, NVarChar
@@ -1138,6 +1141,7 @@ description: This keeps track of the attendance marking for one particular stude
 inherits: BasicObjectWithModified
 property: RegistrantId, int?, Int, required
 property: AttendanceId, int?, Int, required
+property: TransactionId, int?, Int 
 property: IsPresent, bool, Bit
 property: IsLate, bool, Bit
 property: NumberPresent, int?, Int
@@ -1145,6 +1149,7 @@ property: NumberLate, int?, Int
 property: NumberPossible, int?, Int
 join: Registrant.ID, RegistrantId, InnerJoin
 join: Attendance.ID, AttendanceId, InnerJoin
+join Transaction.ID, TransactionId, InnerJoin
 joinproperty: Registrant.Email, string, NVarChar
 joinproperty: Registrant.FirstName, string, NVarChar
 joinproperty: Registrant.LastName, string, NVarChar
