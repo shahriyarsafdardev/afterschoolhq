@@ -589,7 +589,9 @@
             $('#hassubscriptionplan').trigger('click');
         }
 
-        $('#cost').val(0);
+        $('#cost').val(0.00);
+        $('#finaltuitioncost').html(0.00);
+
         $('#hassubscriptionplan').prop('disabled', true);
         $('#haspaymentplan').prop('disabled', true);
         $('#allowtopaylater').prop('disabled', true);
