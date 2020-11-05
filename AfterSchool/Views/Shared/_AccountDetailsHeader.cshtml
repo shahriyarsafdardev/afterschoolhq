@@ -52,18 +52,29 @@
                 <option value="@Url.Action("forms", "account")">Forms</option>
                 <option value="@Url.Action("style", "account")">Profile Setup</option>
                 <option value="@Url.Action(defaultPaymentsAction, "account")">Accept Payments</option>
-                @if (SessionVariables.CurrentAccount.AccountTypeId.In(AccountService.LocationProviderAccountTypes))
-                {
-                    <option value="@Url.Action("visitors", "account")">Providers</option>
+                <option value="@Url.Action("newbilling", "account")">Packages</option>
+
+                @{
+                    if (!SessionVariables.AccountPackage.IsFree)
+                    {
+                        <option value="@Url.Action("billing", "account")">Billing</option>
+                    }
+
+                    if (SessionVariables.CurrentAccount.AccountTypeId.In(AccountService.LocationProviderAccountTypes))
+                    {
+                        <option value="@Url.Action("visitors", "account")">Providers</option>
+                    }
+                    else
+                    {
+                        <option class="hide" value="@Url.Action("hosts", "account")">Schools</option>
+                    }
+
+                    if (SessionVariables.OriginalLoggedInUser.IsNotEmpty())
+                    {
+                        <option value="@Url.Action("features", "account")">Features</option>
+                    }
                 }
-                else
-                {
-                    <option value="@Url.Action("hosts", "account")">Schools</option>
-                }
-                @if (SessionVariables.OriginalLoggedInUser.IsNotEmpty())
-                {
-                    <option value="@Url.Action("features", "account")">Features</option>
-                }
+
             </select>
         </div>
     </div>
