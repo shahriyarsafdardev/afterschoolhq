@@ -5,6 +5,9 @@
     var opencovid = (bool)ViewBag.OpenCovid;
     var elc = (bool)ViewBag.ELC;
     var isVirtualProgram = (bool)ViewBag.IsVirtualProgram;
+    var grades = (List<GradeLevel>)ViewBag.Grades;
+    var minGradeId = (string)ViewBag.MinGradeId;
+    var maxGradeId = (string)ViewBag.MaxGradeId;
     var headerText = $"Enter additional info about your organization";
 }
 
@@ -19,7 +22,22 @@
             <div class="col-md-offset-3 col-md-6">                
                     <div class="form-group">
                         <h1 class="text-center">@headerText</h1>
-                    </div>
+                    </div>                
+
+                    @{
+                        Html.RenderPartial(
+                            "~/Views/Shared/_RestrictBySelection.cshtml",
+                            null,
+                            new ViewDataDictionary() { 
+                                { "minGradeLevelId", null }, 
+                                { "MaxGradeLevelId", null }, 
+                                { "grades", grades }, 
+                                { "ageStart", 0 }, 
+                                { "ageEnd", 18 },
+                                { "restrictbygrade", true } }
+                        );
+                    }
+
                     <div class="form-group">
                         <label class="col-lg-3 control-label">
                             Providing services during COVID?

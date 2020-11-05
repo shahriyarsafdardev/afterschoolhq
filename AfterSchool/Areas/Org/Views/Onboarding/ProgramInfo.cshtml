@@ -2,9 +2,6 @@
 @{
     Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
     var msgs = (SystemMessages)ViewBag.Messages;
-    var grades = (List<GradeLevel>)ViewBag.Grades;
-    var minGradeId = (string)ViewBag.MinGradeId;
-    var maxGradeId = (string)ViewBag.MaxGradeId;
     var title = (string)ViewBag.Title;
     var isProgram = Model.AccountTypeId == AccountType.Teacher;
 
@@ -60,14 +57,6 @@
                         </p>
                     </div>
                 </div>
-
-                @{
-                    Html.RenderPartial(
-                        "~/Views/Shared/_RestrictBySelection.cshtml",
-                        null,
-                        new ViewDataDictionary() { { "minGradeLevelId", null }, { "MaxGradeLevelId", null }, { "grades", grades }, { "ageStart", 0 }, { "ageEnd", 18 }, { "restrictbygrade", true } }
-                        );
-                }
 
                 <div class="form-group">
                     <label class="col-lg-3 control-label">My program is designed for</label>

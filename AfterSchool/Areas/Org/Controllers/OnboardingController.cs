@@ -59,11 +59,6 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
-            var grades = GradeLevel.Load(msgs: msgs);
-
-            ViewBag.Grades = grades;
-            ViewBag.MinGradeId = grades.First().ID.ToString();
-            ViewBag.MaxGradeId = grades.Last().ID.ToString();
             ViewBag.Messages = msgs;
             ViewBag.Title = account.Name;
 
@@ -78,7 +73,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult ProgramInfo(string title, string headline, string mingrade, string maxgrade, string agestart, string ageend, string genderrestrictions)
+        public ActionResult ProgramInfo(string title, string headline, string genderrestrictions)
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
@@ -101,11 +96,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         profile.UpdateProfile(
                             title: title,
-                            headline: headline,
-                            mingrade: mingrade,
-                            maxgrade: maxgrade,
-                            agestart: agestart,
-                            ageend: ageend,
+                            headline: headline,                            
                             genderrestriction: genderrestrictions,
                             loggedInUser: currentUser,
                             msgs: amsgs,
@@ -120,11 +111,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
                 return RedirectToAction("AdditionalInfo");
 
-            var grades = GradeLevel.Load(msgs: msgs);
-
-            ViewBag.Grades = grades;
-            ViewBag.MinGradeId = Request["mingrade"] ?? grades.First().ID.ToString();
-            ViewBag.MaxGradeId = Request["maxgrade"] ?? grades.Last().ID.ToString();
+            
             ViewBag.Messages = msgs;
             ViewBag.Title = Request["title"] ?? account.Name;
 
@@ -136,17 +123,21 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
+            var grades = GradeLevel.Load(msgs: msgs);
 
+            ViewBag.Messages = msgs;
             ViewBag.ELC = false;
             ViewBag.OpenCovid = true;
-            ViewBag.IsVirtualProgram = false;
-            ViewBag.Messages = msgs;
+            ViewBag.IsVirtualProgram = false;            
+            ViewBag.Grades = grades;
+            ViewBag.MinGradeId = grades.First().ID.ToString();
+            ViewBag.MaxGradeId = grades.Last().ID.ToString();
 
             return View(account);
         }
 
         [HttpPost]
-        public ActionResult AdditionalInfo(string opencovid, string elearningcenter, string isvirtualprogram)
+        public ActionResult AdditionalInfo(string mingrade, string maxgrade, string agestart, string ageend, string opencovid, string elearningcenter, string isvirtualprogram)
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
@@ -167,6 +158,10 @@ namespace AfterSchool.Areas.Org.Controllers
                         amsgs.AddRange(account.Save(adc));
 
                         profile.UpdateProfile(
+                            mingrade: mingrade.IsInteger() ? mingrade.ToInteger() : 0,
+                            maxgrade: maxgrade.IsInteger() ? maxgrade.ToInteger() : 0,
+                            agestart: agestart.IsInteger() ? agestart.ToInteger() : 0,
+                            ageend: ageend.IsInteger() ? ageend.ToInteger() : 0,
                             opencovid: isOpenDuringCovid,
                             elearningcenter: isElc,
                             isvirtualprogram: isVirtualProgram,
@@ -183,6 +178,11 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
                 return RedirectToAction("ContactInfo");
 
+            var grades = GradeLevel.Load(msgs: msgs);
+
+            ViewBag.Grades = grades;
+            ViewBag.MinGradeId = Request["mingrade"] ?? grades.First().ID.ToString();
+            ViewBag.MaxGradeId = Request["maxgrade"] ?? grades.Last().ID.ToString();
             ViewBag.OpenCovid = opencovid.IsBoolean() && opencovid.ToBoolean();
             ViewBag.ELC = isElc;
             ViewBag.IsVirtualProgram = isVirtualProgram;
