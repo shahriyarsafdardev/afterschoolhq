@@ -247,13 +247,9 @@ namespace AfterSchoolLibrary.Models
         private List<PackageFeature> _Features;
         public List<PackageFeature> GetFeatures(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (_Features.IsEmpty())
-                _Features = PackageFeature.LoadByPackageId(this.ID.Value, msgs, dc);
-
+            _Features = PackageFeature.LoadByPackageId(this.ID.Value, msgs, dc);
             return _Features;
         }
-
-        public List<PackageFeature> GetLatestFeatures(SystemMessages msgs = null, DatabaseConnection dc = null) => PackageFeature.LoadByPackageId(this.ID.Value, msgs, dc);
         
         public SystemMessages SaveWithStripe(DatabaseConnection dc = null)
         {
