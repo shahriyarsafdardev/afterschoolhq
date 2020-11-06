@@ -16,12 +16,6 @@ namespace AfterSchool.Controllers
         {
             var msgs = new SystemMessages();
 
-            if (city.IsEmpty())
-                city = "Indianapolis";
-
-            if (state.IsEmpty())
-                state = "Indiana";
-
             List<string> neighborhoodSearch = null;
 
             if (neighborhoods.IsNotEmpty())
@@ -32,8 +26,8 @@ namespace AfterSchool.Controllers
                                 isOpenDuringCovid: covid.IsEmpty() ? new bool?() : covid.ToBoolean(),
                                 isELearningCenter: elc.IsEmpty() ? new bool?() : elc.ToBoolean(),
                                 neighborhoods: neighborhoodSearch,
-                                cities: city.AsList(),
-                                states: state.AsList(),
+                                cities: city.IsEmpty() ? null : city.AsList(),
+                                states: state.IsEmpty() ? null : state.AsList(),
                                 msgs: msgs);
 
             var neighborhoodList = Location.LoadAllNeighborhoods(

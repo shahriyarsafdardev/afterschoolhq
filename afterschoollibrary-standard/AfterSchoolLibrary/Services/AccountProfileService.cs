@@ -253,6 +253,28 @@ namespace AfterSchoolLibrary.Services
             );
         }
 
+        public static void UpdateProfile(this AccountProfile profile, int mingrade, int maxgrade, int agestart, int ageend, bool opencovid = false, bool elearningcenter = false, bool isvirtualprogram = false, WebUser loggedInUser = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    profile.GradeLevelStart = mingrade <= 0 ? new int?() : mingrade;
+                    profile.GradeLevelEnd = maxgrade <= 0 ? new int?() : maxgrade;
+                    profile.AgeStart = agestart <= 0 ? new int?() : agestart;
+                    profile.AgeEnd = ageend <= 0 ? new int?() : ageend;
+                    profile.IsOpenDuringCovid = opencovid;
+                    profile.IsELearningCenter = elearningcenter;
+                    profile.IsVirtualProgram = isvirtualprogram;
+                    amsgs.AddRange(profile.Save(adc));                    
+                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
+                dc: dc
+            );
+        }
+
         public static void ManageProperties(this AccountProfile profile, IEnumerable<string> properties, AccountPropertyType propertyType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var existingProperties = profile.GetProperties(propertyType, msgs, dc);

@@ -1,0 +1,43 @@
+﻿<div style="margin: 20px">
+  <table style="border: 2px solid #f7f7f7; width: 600px;" border="0">
+    <thead>
+      <tr>
+        <th style="padding: 10px;">
+          Attendance Date
+        </th>
+        <th style="padding: 10px; text-align:center;">
+          Number Present
+        </th>
+        <th style="padding: 10px; text-align:center;">
+          Total Charge
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      @Model.BodyRows
+    </tbody>
+    <tfoot>
+      <!--<tr>
+        <td colspan="2" style="text-align: right; padding: 10px;">
+          Credit Card Fee
+        </td>
+        <td style="padding: 10px; text-align: right">
+          @Model.CreditCardFee
+        </td>
+        <td></td>
+      </tr>-->
+      <tr>
+		<td colspan="2" style="font-weight: bold; text-align: right; padding: 10px;">
+		 <!--date column-->	 
+		</td>
+        <td colspan="2" style="font-weight: bold; text-align: right; padding: 10px;">
+		@Model.TotalNumberPresent
+		</td>
+        <td style="font-weight: bold; padding: 10px; text-align: right">
+          @Model.TotalAttendanceCharge
+        </td>
+        <td></td>
+      </tr>
+    </tfoot>
+  </table>
+</div>

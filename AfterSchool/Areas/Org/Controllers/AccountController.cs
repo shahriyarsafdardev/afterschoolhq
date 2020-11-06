@@ -1254,6 +1254,10 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Billing()
         {
             Account a = SessionVariables.CurrentAccount;
+
+            if (SessionVariables.AccountPackage.IsFree)
+                return new HttpUnauthorizedResult();
+
             ViewBag.BillingHistory = a.GetStripeBillingHistory();
             ViewBag.RefundHistory = a.GetStripeRefundHistory();
             ViewBag.Cards = a.GetStripeCards();

@@ -232,6 +232,7 @@ namespace AfterSchoolLibrary.Models
 			AccountProfile.Update(new Hashtable(){{"IsOpenDuringCovid",false}}, new Hashtable(){{"IsOpenDuringCovid", DBNull.Value}}, AccountProfile.ObjectMap, dc);
 			AccountProfile.Update(new Hashtable(){{"IsELearningCenter",false}}, new Hashtable(){{"IsELearningCenter", DBNull.Value}}, AccountProfile.ObjectMap, dc);
 			AccountProfile.Update(new Hashtable(){{"IsAHQApproved",false}}, new Hashtable(){{"IsAHQApproved", DBNull.Value}}, AccountProfile.ObjectMap, dc);
+			AccountProfile.Update(new Hashtable(){{"IsVirtualProgram",false}}, new Hashtable(){{"IsVirtualProgram", DBNull.Value}}, AccountProfile.ObjectMap, dc);
 			CheckPaymentAccount.Update(new Hashtable(){{"IsVerified",false}}, new Hashtable(){{"IsVerified", DBNull.Value}}, CheckPaymentAccount.ObjectMap, dc);
 			CheckPaymentAccount.Update(new Hashtable(){{"LegalEntityTypeId",0}}, new Hashtable(){{"LegalEntityTypeId", DBNull.Value}}, CheckPaymentAccount.ObjectMap, dc);
 			BankPaymentAccount.Update(new Hashtable(){{"IsVerified",false}}, new Hashtable(){{"IsVerified", DBNull.Value}}, BankPaymentAccount.ObjectMap, dc);
@@ -295,6 +296,7 @@ namespace AfterSchoolLibrary.Models
 			Registration.Update(new Hashtable(){{"CompletionStatusId",0}}, new Hashtable(){{"CompletionStatusId", DBNull.Value}}, Registration.ObjectMap, dc);
 			ActivityWebUser.Update(new Hashtable(){{"IsLeader",false}}, new Hashtable(){{"IsLeader", DBNull.Value}}, ActivityWebUser.ObjectMap, dc);
 			Attendance.Update(new Hashtable(){{"IsCompleted",false}}, new Hashtable(){{"IsCompleted", DBNull.Value}}, Attendance.ObjectMap, dc);
+			Attendance.Update(new Hashtable(){{"IsCharged",false}}, new Hashtable(){{"IsCharged", DBNull.Value}}, Attendance.ObjectMap, dc);
 			AttendanceRegistrant.Update(new Hashtable(){{"IsPresent",false}}, new Hashtable(){{"IsPresent", DBNull.Value}}, AttendanceRegistrant.ObjectMap, dc);
 			AttendanceRegistrant.Update(new Hashtable(){{"IsLate",false}}, new Hashtable(){{"IsLate", DBNull.Value}}, AttendanceRegistrant.ObjectMap, dc);
 			Package.Update(new Hashtable(){{"IsActive",false}}, new Hashtable(){{"IsActive", DBNull.Value}}, Package.ObjectMap, dc);

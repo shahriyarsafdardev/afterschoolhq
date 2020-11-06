@@ -1,5 +1,5 @@
 ﻿/*common style for whole application*/
-.ql-container p {
+.ql-container {
     min-height: 100px;
 }
 
@@ -41,4 +41,9 @@
 
 .margin-bottom-zero{
     margin-bottom:0px !important;
+}
+}
+
+.font-size-11 {
+    font-size: 11px;
 }
