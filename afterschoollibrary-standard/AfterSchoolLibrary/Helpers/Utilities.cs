@@ -353,6 +353,7 @@ namespace AfterSchoolLibrary.Helpers
                     Migrations.UpdateActivityMessageRegistrants_20201012.Do(amsgs, adc);
                     Migrations.MigratePackagesToUseStripePricesAPI_20201021.Do(amsgs, adc);
                     Migrations.UpdateAccountPackagesForSaasify_20201028.Do(amsgs, adc);
+                    Migrations.UpdateAccountOnboardingStepDone_20201106.Do(amsgs, adc);
                     // Migrations.AddProfilesToAllAccounts_20200727.Do(amsgs, adc);
 
                     // amsgs.Add("rollback please", MessageType.Error);

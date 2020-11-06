@@ -509,24 +509,9 @@
     </div>
 </div>
 
-<button id="btn-welcome-user" type="button" class="btn btn-default btn-space md-trigger hide" data-modal="modal-welcome-user">
-    welcome user
-</button>
-
-<div>
-    @{
-        Html.RenderPartial("~/Views/Shared/_Modal.cshtml", new ModalViewModel()
-        {
-            ID = "modal-welcome-user",
-            Title = "Welcome To Your Profile.",
-            HtmlBody = $"<p>This is your organizations profile. you can review your dashboard and create activities from there.</p>",
-        });
-    }
-</div>
-
 <script type="text/javascript">
     PageEvent.add(PageEvent.AFTER_INIT, function () {
-        $('#btn-welcome-user').click();
+        // can use this if you need to use jquery
     });
 
     (function () {
