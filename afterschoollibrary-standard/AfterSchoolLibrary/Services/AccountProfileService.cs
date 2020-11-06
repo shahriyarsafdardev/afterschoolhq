@@ -127,7 +127,7 @@ namespace AfterSchoolLibrary.Services
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     // ..update account name if title has been changed for profile
-                    if (account.IsNotEmpty() && profile.Title != title)
+                    if (account.IsNotEmpty() && title.IsNotEmpty() && profile.Title != title)
                     {
                         account.Name = title;
                         account.Save(dc);
