@@ -39,14 +39,19 @@
     @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model); }
 
     <div class="panel panel-default">
-        <div class="panel-heading">
-            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Name + " - Summary"); }   
-            
+        <div class="panel-heading text-center-sm">
+            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Name + " - Summary"); }
+
             @if (isActivityLeader)
-            {
-                <div class="pull-right">
+            {           
+                <div class="pull-right visible-lg visible-md">
                     <a href="@Url.Action("editsetup", "activity", new {id = Model.Uid })" class="btn btn-default">Edit @UILabel.ActivityLabel(Model.ActivityTypeId) &raquo;</a>
                 </div>
+           
+                <div class="visible-xs visible-sm">                
+                    <a href="@Url.Action("editsetup", "activity", new {id = Model.Uid })" class="btn btn-default">Edit @UILabel.ActivityLabel(Model.ActivityTypeId) &raquo;</a>                
+                </div>             
+
             }
 
         </div>
