@@ -35,4 +35,12 @@
     .datetimepicker-mobile {
         padding: 0 !important;
     }
+
+    .mobile-padding {
+        padding: 4px !important;
+    }
+
+    .display-days {
+        display: inline-flex;
+    }
 }

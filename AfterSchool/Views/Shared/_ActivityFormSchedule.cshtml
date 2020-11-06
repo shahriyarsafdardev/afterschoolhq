@@ -217,11 +217,11 @@
                     Day(s) of the week <span class="text-danger">*</span>
                 </label>
                 <div class="col-md-7">
-                    <div class="am-checkbox inline">
+                    <div class="am-checkbox display-days">
                         @foreach (DayOfWeekASL day in Enum.GetValues(typeof(DayOfWeekASL)).Cast<DayOfWeekASL>().Where(x => x != DayOfWeekASL.NotSet))
                         {
                             <input type="checkbox" name="schedulerepeat-@((int)day)" id="schedulerepeat-@((int)day)" value="1" @(Model.GetDaysOfTheWeek().Contains(day) ? " checked=\"checked\" " : "") class="schedulerepeat-checkbox" />
-                            <label for="schedulerepeat-@((int)day)" class="margin-h-10">@day.ToString().MaxChars(3)</label>
+                            <label for="schedulerepeat-@((int)day)" class="margin-h-10 mobile-padding">@day.ToString().MaxChars(3)</label>
                         }
                     </div>
                 </div>
