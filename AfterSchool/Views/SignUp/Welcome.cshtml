@@ -91,15 +91,15 @@
         </div>
     </div>
 
-    <div id="signup-select-usertype" class="row" style="display: none;">
-        <div class="col-md-offset-3 col-md-6">
+    <div id="signup-select-usertype" style="display: none;">
+        <div class="col-lg-offset-4 col-lg-4 col-md-offset-3 col-md-6 col-sm-12">
             <h2 class="text-center">What would you like to do?</h2>
             <div class="clearfix"></div>
 
             <div class="row margin-t-35">
-                <button id="btn-CreateIndividualAccount" type="button" class="col-lg-6 col-md-8 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SelectIndividualType')">Create an Individual Account</button>
+                <button id="btn-CreateIndividualAccount" type="button" class="col-sm-8 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SelectIndividualType')">Create an Individual Account</button>
                 <div class="clearfix"></div><br />
-                <button id="btn-CreateOrgAccount" type="button" class="col-lg-6 col-md-8 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SelectOrgType')">Create an Organization Account</button>
+                <button id="btn-CreateOrgAccount" type="button" class="col-sm-8 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SelectOrgType')">Create an Organization Account</button>
             </div>
             <div class="clearfix"></div>
 
@@ -109,15 +109,15 @@
         </div>
     </div>
 
-    <div id="signup-individualtype" class="row" style="display: none;">
-        <div class="col-md-offset-3 col-md-6">
+    <div id="signup-individualtype" style="display: none;">
+        <div class="col-lg-offset-4 col-lg-4 col-md-offset-3 col-md-6 col-sm-12">
             <h2 class="text-center">What would you like to do?</h2>
             <div class="clearfix"></div>
 
             <div class="row margin-t-35">
-                <button id="btn-ProgramForStudents" type="button" class="col-lg-6 col-md-8 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SearchProgramName')">Provide programs for students</button>
+                <button id="btn-ProgramForStudents" type="button" class="col-sm-8 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SearchProgramName')">Provide programs for students</button>
                 <div class="clearfix"></div><br />
-                <button id="btn-EnrollChild" type="button" class="col-lg-6 col-md-8 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SearchSchool')">Enroll my child in a program</button>
+                <button id="btn-EnrollChild" type="button" class="col-sm-8 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SearchSchool')">Enroll my child in a program</button>
             </div>
             <div class="clearfix"></div>
 
@@ -127,21 +127,21 @@
         </div>
     </div>
 
-    <div id="signup-orgtype" class="row" style="display: none;">
-        <div class="col-md-offset-3 col-md-6">
+    <div id="signup-orgtype" style="display: none;">
+        <div class="col-lg-offset-4 col-lg-4 col-md-offset-3 col-md-6 col-sm-12">
             <h2 class="text-center">What kind of organization?</h2>
             <div class="clearfix"></div>
 
             <div class="row margin-t-35">
-                <button id="btn-Business" type="button" class="col-lg-6 col-md-8 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.Business')">Business</button>
+                <button id="btn-Business" type="button" class="col-sm-8 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.Business')">Business</button>
                 <div class="clearfix"></div><br />
-                <button id="btn-School" type="button" class="col-lg-6 col-md-8 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.School')">School</button>
+                <button id="btn-School" type="button" class="col-sm-8 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.School')">School</button>
                 <div class="clearfix"></div><br />
-                <button id="btn-CommunityCenter" type="button" class="col-lg-6 col-md-8 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.CommunityCenter')">Community Center</button>
+                <button id="btn-CommunityCenter" type="button" class="col-sm-8 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.CommunityCenter')">Community Center</button>
                 <div class="clearfix"></div><br />
-                <button id="btn-Church" type="button" class="col-lg-6 col-md-8 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.Church')">Church</button>
+                <button id="btn-Church" type="button" class="col-sm-8 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.Church')">Church</button>
                 <div class="clearfix"></div><br />
-                <button id="btn-NonProfit" type="button" class="col-lg-6 col-md-8 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.ActivityProvider')">Non Profit</button>
+                <button id="btn-NonProfit" type="button" class="col-sm-8 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.ActivityProvider')">Non Profit</button>
             </div>
             <div class="clearfix"></div>
 
@@ -151,8 +151,8 @@
         </div>
     </div>
 
-    <div id="signup-search-name" class="row" style="display: none;">
-        <div class="col-md-offset-3 col-md-6">
+    <div id="signup-search-name" style="display: none;">
+        <div class="col-lg-offset-4 col-lg-4 col-md-offset-3 col-md-6 col-sm-12">
             <h2 id="lbl-org-search-title" class="text-center"></h2>
             <div class="clearfix"></div>
 
@@ -182,8 +182,8 @@
         </div>
     </div>
 
-    <div id="signup-register" class="row" style="display: none;">
-        <div class="col-md-offset-3 col-md-6">
+    <div id="signup-register" style="display: none;">
+        <div class="col-lg-offset-4 col-lg-4 col-md-offset-3 col-md-6 col-sm-12">
             <div class="panel panel-default">
                 <div class="panel-heading text-center">
                     <a href="/"><img src="@UILabel.ProductLogoInverse()" alt="logo" style="max-width: 100%; width: 350px;" class="logo-img"></a>
@@ -203,7 +203,7 @@
     </div>
 
     <div id="signup-claim-profile" style="display: none;">
-        <div class="col-md-offset-3 col-md-6">
+        <div class="col-lg-offset-4 col-lg-4 col-md-offset-3 col-md-6 col-sm-12">
             <h2 id="header-claim-profile-main" class="text-center"></h2>
             <div class="clearfix"></div><br />
             <h5 id="header-account-exist" class="text-center" style="display: none;">This profile already exists on AfterSchool HQ. Please start the claim process below.</h5>
@@ -262,7 +262,7 @@
     </div>
 
     <div id="signup-thank-you" class="row" style="display: none;">
-        <div class="col-md-offset-3 col-md-6">
+        <div class="col-lg-offset-4 col-lg-4 col-md-offset-3 col-md-6 col-sm-12">
             <h2 class="text-center">Thank You!</h2>
             <div class="clearfix"></div><br />
             <h5 id="header-thankyou-not-recognized" class="text-center" style="display: none;">We have sent an email with instructions to <strong id="lbl-org-member-email"></strong>.</h5>

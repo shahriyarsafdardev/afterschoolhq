@@ -364,7 +364,12 @@ var ActivitySetup = {
 
 var AccountSetup = {
       
-    sendVerificationEmail: function() {
+    sendVerificationEmail: function () {
+        Notifications.showBar({
+            title: 'Success',
+            message: 'Sending verification email...'
+        });
+
         $.get(
             '/org/services/sendverificationemail/',
             function (data) {
@@ -373,6 +378,7 @@ var AccountSetup = {
                         title: 'Success',
                         message: 'A verification email has been sent. Please check your email.'
                     });
+
                 } else {
                     Notifications.showBar({
                         title: 'Error',

@@ -9,11 +9,6 @@
         padding-right: 0 !important;
     }
 
-    .padding-lr-zero-sm {
-        padding-left: 0 !important;
-        padding-right: 0 !important;
-    }
-
     .btn-toolbar {
         margin-left: -2px;
         margin-right: -2px;
@@ -48,5 +43,42 @@
 
     .am-content-full {
         padding: 15px 10px;
+    }
+
+    .activity-heading {
+        margin: 0px !important;
+        padding-top: 5px !important;
+    }
+
+    .text-center-sm {
+        text-align: center;
+    }
+
+    .datetimepicker-mobile {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    .datetimepicker.dropdown-menu {
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        border-color: rgba(0, 0, 0, 0.1);
+        padding: 10px;
+        left: 35px !important;
+    }
+
+    .btn-upgrade-plan {
+        margin-bottom: 5px !important;
+    }
+
+    .margin-left-sm {
+        margin-left: 10px;
+    }
+
+    .mobile-padding {
+        padding: 4px !important;
+    }
+
+    .display-days {
+        display: grid;
     }
 }

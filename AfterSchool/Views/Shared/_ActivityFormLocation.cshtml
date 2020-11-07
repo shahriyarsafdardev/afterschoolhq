@@ -1,7 +1,7 @@
 ﻿@model Activity
 @{ var location = Model.GetLocation() ?? Model.GetAccount().GetAccountProfile()?.GetLocation() ?? new Location(); }
 <div class="panel panel-default panel-small-padding">
-    <div class="panel-heading">
+    <div class="panel-heading activity-heading">
         Your Activity Location Information
     </div>
     <div class="panel-body">

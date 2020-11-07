@@ -8,7 +8,7 @@
     
     <form class="form form-horizontal" method="post" action="@Url.Action("servicesoffered", "onboarding")">
         <div class="row">
-            <div class="col-md-offset-3 col-md-6">
+            <div class="col-lg-offset-4 col-lg-4 col-md-offset-3 col-md-6 col-sm-12">
                 <div class="form-group">
                     <h1 class="text-center">Enter More Details</h1>
                 </div>
@@ -39,82 +39,96 @@
                     </div>
                 </div>
 
-                <div class="form-group hide">
-                    <label class="col-lg-3 control-label">Times offered</label>
-                    <div class="col-lg-9">
-                        @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.OfferingTimes)
-                        {
-                            <div class="am-checkbox">
-                                <input type="checkbox"
-                                       name="times-offered-@item.ToLower()"
-                                       id="times-offered-@item.ToLower()"
-                                       value="@item"
-                                       @(Request[$"times-offered-{item.ToLower()}"].IsBoolean() ? "checked=\"checked\"" : "") />
-                                <label for="times-offered-@item.ToLower()">@item</label>
-                            </div>
-                        }
+                <div class="col-md-offset-3 col-md-9 padding-v-20" style="padding-left: 8px;">
+                    <span><a id="btn-onboarding-advanced-settings" href="#" onclick="return showAdvancedSettings(this)" class="pointer">Show More Options</a></span>
 
+                    <div class="visible-lg">
+                        <br />
+                        <br />
                     </div>
                 </div>
 
-                <div class="form-group hide">
-                    <label class="col-lg-3 control-label">Pricing options</label>
-                    <div class="col-lg-9">
-                        @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.PricingOptions)
-                        {
-                            <div class="am-checkbox">
-                                <input type="checkbox"
-                                       name="pricing-options-@item.ToLower()"
-                                       id="pricing-options-@item.ToLower()"
-                                       value="@item"
-                                       @(Request[$"pricing-options-{item.ToLower()}"].IsBoolean() ? "checked=\"checked\"" : "") />
-                                <label for="pricing-options-@item.ToLower()">@item</label>
-                            </div>
-                        }
+                
+                <div class="onboarding-advanced-settings hide">
 
+                    <div class="form-group">
+                        <label class="col-lg-3 control-label">Times offered</label>
+                        <div class="col-lg-9">
+                            @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.OfferingTimes)
+                            {
+                                <div class="am-checkbox">
+                                    <input type="checkbox"
+                                           name="times-offered-@item.ToLower()"
+                                           id="times-offered-@item.ToLower()"
+                                           value="@item"
+                                           @(Request[$"times-offered-{item.ToLower()}"].IsBoolean() ? "checked=\"checked\"" : "") />
+                                    <label for="times-offered-@item.ToLower()">@item</label>
+                                </div>
+                            }
+
+                        </div>
                     </div>
-                </div>
 
-                <div class="form-group hide">
-                    <label class="col-lg-3 control-label">Special Needs Offerings</label>
-                    <div class="col-lg-9">
-                        @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.SpecialNeedsOfferings)
-                        {
-                            <div class="am-checkbox">
-                                <input type="checkbox"
-                                       name="special-needs-@item.ToLower()"
-                                       id="special-needs-@item.ToLower()"
-                                       value="@item"
-                                       @(Request[$"special-needs-{item.ToLower()}"].IsBoolean() ? "checked=\"checked\"" : "") />
-                                <label for="special-needs-@item.ToLower()">@item</label>
-                            </div>
-                        }
+                    <div class="form-group">
+                        <label class="col-lg-3 control-label">Pricing options</label>
+                        <div class="col-lg-9">
+                            @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.PricingOptions)
+                            {
+                                <div class="am-checkbox">
+                                    <input type="checkbox"
+                                           name="pricing-options-@item.ToLower()"
+                                           id="pricing-options-@item.ToLower()"
+                                           value="@item"
+                                           @(Request[$"pricing-options-{item.ToLower()}"].IsBoolean() ? "checked=\"checked\"" : "") />
+                                    <label for="pricing-options-@item.ToLower()">@item</label>
+                                </div>
+                            }
 
+                        </div>
                     </div>
-                </div>
 
-                <div class="form-group hide">
-                    <label class="col-lg-3 control-label">Soft Skills (up to 10)</label>
-                    <div class="col-lg-9">
-                        <input type="text" name="softskills" id="softskills" class="form-control" data-role="tagsinput" value="@Request["softskills"]" />
-                        <p class="text-small text-muted">ex: Leadership, Teamwork, Communication</p>
-                    </div>
-                </div>
+                    <div class="form-group">
+                        <label class="col-lg-3 control-label">Special Needs Offerings</label>
+                        <div class="col-lg-9">
+                            @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.SpecialNeedsOfferings)
+                            {
+                                <div class="am-checkbox">
+                                    <input type="checkbox"
+                                           name="special-needs-@item.ToLower()"
+                                           id="special-needs-@item.ToLower()"
+                                           value="@item"
+                                           @(Request[$"special-needs-{item.ToLower()}"].IsBoolean() ? "checked=\"checked\"" : "") />
+                                    <label for="special-needs-@item.ToLower()">@item</label>
+                                </div>
+                            }
 
-                <div class="form-group hide">
-                    <label class="col-lg-3 control-label">Academic Subjects (up to 5)</label>
-                    <div class="col-lg-9">
-                        <input type="text" name="academicsubjects" id="academicsubjects" class="form-control" data-role="tagsinput" value="@Request["academicsubjects"]" />
-                        <p class="text-small text-muted">ex: Math, Science, Language Arts, Physical Education</p>
+                        </div>
                     </div>
-                </div>
 
-                <div class="form-group hide">
-                    <label class="col-lg-3 control-label">Teaching Methods (up to 3)</label>
-                    <div class="col-lg-9">
-                        <input type="text" name="teachingmethods" id="teachingmethods" class="form-control" data-role="tagsinput" value="@Request["teachingmethods"]" />
-                        <p class="text-small text-muted">ex: Project Based Learning, Team work, Games</p>
+                    <div class="form-group">
+                        <label class="col-lg-3 control-label">Soft Skills (up to 10)</label>
+                        <div class="col-lg-9">
+                            <input type="text" name="softskills" id="softskills" class="form-control" data-role="tagsinput" value="@Request["softskills"]" />
+                            <p class="text-small text-muted">ex: Leadership, Teamwork, Communication</p>
+                        </div>
                     </div>
+
+                    <div class="form-group">
+                        <label class="col-lg-3 control-label">Academic Subjects (up to 5)</label>
+                        <div class="col-lg-9">
+                            <input type="text" name="academicsubjects" id="academicsubjects" class="form-control" data-role="tagsinput" value="@Request["academicsubjects"]" />
+                            <p class="text-small text-muted">ex: Math, Science, Language Arts, Physical Education</p>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-lg-3 control-label">Teaching Methods (up to 3)</label>
+                        <div class="col-lg-9">
+                            <input type="text" name="teachingmethods" id="teachingmethods" class="form-control" data-role="tagsinput" value="@Request["teachingmethods"]" />
+                            <p class="text-small text-muted">ex: Project Based Learning, Team work, Games</p>
+                        </div>
+                    </div>                   
+
                 </div>
 
                 <div class="form-group">
@@ -171,6 +185,18 @@
         $('#teachingmethods').tagsinput({
             maxTags: 3
         });
+
+        var advanceSettings = $('.onboarding-advanced-settings');
+
+        function showAdvancedSettings(element) {
+            if (advanceSettings.attr('class').indexOf('hide') > -1) {
+                advanceSettings.removeClass('hide');
+                $(element).html('Hide More Options');
+            } else {
+                advanceSettings.addClass('hide');
+                $(element).html('Show More Options');
+            }
+        }
     </script>
 
 }

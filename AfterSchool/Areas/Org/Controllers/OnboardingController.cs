@@ -59,15 +59,8 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
-            var grades = GradeLevel.Load(msgs: msgs);
-
-            ViewBag.Grades = grades;
-            ViewBag.MinGradeId = grades.First().ID.ToString();
-            ViewBag.MaxGradeId = grades.Last().ID.ToString();
             ViewBag.Messages = msgs;
             ViewBag.Title = account.Name;
-            ViewBag.OpenCovid = true;
-            ViewBag.ELC = false;
 
             var user = account.GetAccountOwner(msgs);
 
@@ -80,7 +73,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult ProgramInfo(string title, string headline, string mingrade, string maxgrade, string agestart, string ageend, string genderrestrictions, string opencovid, string elearningcenter)
+        public ActionResult ProgramInfo(string title, string headline, string genderrestrictions)
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
@@ -103,14 +96,75 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         profile.UpdateProfile(
                             title: title,
-                            headline: headline,
-                            mingrade: mingrade,
-                            maxgrade: maxgrade,
-                            agestart: agestart,
-                            ageend: ageend,
+                            headline: headline,                            
                             genderrestriction: genderrestrictions,
-                            opencovid: opencovid.IsNumber() ? opencovid : "0",
-                            elearningcenter: elearningcenter.IsNumber() ? opencovid : "0",
+                            loggedInUser: currentUser,
+                            msgs: amsgs,
+                            dc: adc);
+                    },
+                    onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                    onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                );
+            }
+
+            if (msgs.HasNoErrors())
+                return RedirectToAction("AdditionalInfo");
+
+            
+            ViewBag.Messages = msgs;
+            ViewBag.Title = Request["title"] ?? account.Name;
+
+            return View(account);
+        }
+
+        [HttpGet]
+        public ActionResult AdditionalInfo()
+        {
+            var msgs = new SystemMessages();
+            var account = SessionVariables.CurrentAccount;
+            var grades = GradeLevel.Load(msgs: msgs);
+
+            ViewBag.Messages = msgs;
+            ViewBag.ELC = false;
+            ViewBag.OpenCovid = true;
+            ViewBag.IsVirtualProgram = false;            
+            ViewBag.Grades = grades;
+            ViewBag.MinGradeId = grades.First().ID.ToString();
+            ViewBag.MaxGradeId = grades.Last().ID.ToString();
+
+            return View(account);
+        }
+
+        [HttpPost]
+        public ActionResult AdditionalInfo(string mingrade, string maxgrade, string agestart, string ageend, string opencovid, string elearningcenter, string isvirtualprogram)
+        {
+            var msgs = new SystemMessages();
+            var account = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var profile = account.GetOrCreateAccountProfile(currentUser, msgs);
+
+            var isOpenDuringCovid = opencovid.IsBoolean() && opencovid.ToBoolean();
+            var isElc = elearningcenter.IsBoolean() && elearningcenter.ToBoolean();
+            var isVirtualProgram = isvirtualprogram.IsBoolean() && isvirtualprogram.ToBoolean();
+
+            if (msgs.HasNoErrors())
+            {
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        account.OnboardingStepDone = OnboardingStepType.AdditionalInfo;
+                        amsgs.AddRange(account.Save(adc));
+
+                        profile.UpdateProfile(
+                            mingrade: mingrade.IsInteger() ? mingrade.ToInteger() : 0,
+                            maxgrade: maxgrade.IsInteger() ? maxgrade.ToInteger() : 0,
+                            agestart: agestart.IsInteger() ? agestart.ToInteger() : 0,
+                            ageend: ageend.IsInteger() ? ageend.ToInteger() : 0,
+                            opencovid: isOpenDuringCovid,
+                            elearningcenter: isElc,
+                            isvirtualprogram: isVirtualProgram,
                             loggedInUser: currentUser,
                             msgs: amsgs,
                             dc: adc);
@@ -129,10 +183,9 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Grades = grades;
             ViewBag.MinGradeId = Request["mingrade"] ?? grades.First().ID.ToString();
             ViewBag.MaxGradeId = Request["maxgrade"] ?? grades.Last().ID.ToString();
-            ViewBag.Messages = msgs;
-            ViewBag.Title = Request["title"] ?? account.Name;
-            ViewBag.OpenCovid = opencovid.IsNumber();
-            ViewBag.ELC = elearningcenter.IsNumber();
+            ViewBag.OpenCovid = opencovid.IsBoolean() && opencovid.ToBoolean();
+            ViewBag.ELC = isElc;
+            ViewBag.IsVirtualProgram = isVirtualProgram;
 
             return View(account);
         }
