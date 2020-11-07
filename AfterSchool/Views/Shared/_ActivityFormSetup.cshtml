@@ -136,23 +136,31 @@
             <div class="form-group reg-period hide">
                 <label class="col-sm-3 control-label">@UILabel.RegistrationPeriodLabel() Open <span class="text-danger">*</span></label>
                 <div class="col-sm-5">
-                    <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
-                        <input size="16" type="text" class="form-control" id="registrationopendate" name="registrationopendate" onfocus="this.select()" required value="@activePeriod.StartDateTime.ToShortDateString()" data-type="date" />
-                        <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
-                    </div>
+                    @{
+                        Html.RenderPartial(
+                            "~/Views/Shared/Components/_Date.cshtml",
+                            new FormInputViewModel()
+                            {
+                                Id = "registrationopendate",
+                                Name = "registrationopendate",
+                                Value = activePeriod.StartDateTime.ToShortDateString()
+                            }
+                        );
+                    }
                 </div>
                 <div class="col-sm-4">
 
-                    @{Html.RenderPartial(
-                                  "~/Views/Shared/_TimeSelect.cshtml",
-                                  activePeriod.StartDateTime.Value,
-                                  new ViewDataDictionary()
-                                  {
+                    @{
+                        Html.RenderPartial(
+                            "~/Views/Shared/_TimeSelect.cshtml",
+                            activePeriod.StartDateTime.Value,
+                            new ViewDataDictionary()
+                            {
                                 { "name", "registrationopentime" },
                                 { "id", "registrationopentime" },
                                 { "required", true }
-          }
-                              );
+                            }
+                        );
                     }
 
                 </div>
@@ -161,23 +169,31 @@
             <div class="form-group reg-period hide">
                 <label class="col-sm-3 control-label">@UILabel.RegistrationPeriodLabel() Close <span class="text-danger">*</span></label>
                 <div class="col-sm-5">
-                    <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
-                        <input size="16" type="text" class="form-control" id="registrationclosedate" name="registrationclosedate" onfocus="this.select()" required value="@activePeriod.EndDateTime.ToShortDateString()" data-type="date" />
-                        <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
-                    </div>
+                    @{
+                        Html.RenderPartial(
+                            "~/Views/Shared/Components/_Date.cshtml",
+                            new FormInputViewModel()
+                            {
+                                Id = "registrationclosedate",
+                                Name = "registrationclosedate",
+                                Value = activePeriod.EndDateTime.ToShortDateString()
+                            }
+                        );
+                    }
                 </div>
                 <div class="col-sm-4">
 
-                    @{Html.RenderPartial(
-                                    "~/Views/Shared/_TimeSelect.cshtml",
-                                    activePeriod.EndDateTime.Value,
-                                    new ViewDataDictionary()
-                                    {
+                    @{
+                        Html.RenderPartial(
+                            "~/Views/Shared/_TimeSelect.cshtml",
+                            activePeriod.EndDateTime.Value,
+                            new ViewDataDictionary()
+                            {
                                 { "name", "registrationclosetime" },
                                 { "id", "registrationclosetime" },
                                 { "required", true }
-            }
-                                );
+                            }
+                        );
                     }
 
                 </div>

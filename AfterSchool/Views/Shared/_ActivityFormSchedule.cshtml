@@ -116,8 +116,8 @@
                         Has Schedule
                     </label>
                     <div class="col-md-1">
-                        @{Html.RenderPartial
-                          (
+                        @{
+                            Html.RenderPartial(
                               "~/Views/Shared/_SwitchButton.cshtml",
                               openInstances.Any(),
                               new ViewDataDictionary()
@@ -125,8 +125,8 @@
                                     { "checkboxname", "hasschedule" },
                                     { "checkboxid", "hasschedule" },
                                     { "disabled", false }
-                                }
-                          );
+                              }
+                            );
                         }
                     </div>
                 </div>
@@ -138,17 +138,17 @@
                             Repeats Weekly?
                         </label>
                         <div class="col-md-1">
-                            @{Html.RenderPartial
-                            (
-                                "~/Views/Shared/_SwitchButton.cshtml",
-                                Model.RepeatsWeekly,
-                                new ViewDataDictionary()
-                                {
-                                    { "checkboxname", "repeatsweekly" },
-                                    { "checkboxid", "repeatsweekly" },
-                                    { "disabled", false }
-                                }
-                            );
+                            @{
+                                Html.RenderPartial(
+                                    "~/Views/Shared/_SwitchButton.cshtml",
+                                    Model.RepeatsWeekly,
+                                    new ViewDataDictionary()
+                                    {
+                                        { "checkboxname", "repeatsweekly" },
+                                        { "checkboxid", "repeatsweekly" },
+                                        { "disabled", false }
+                                    }
+                                );
                             }
                         </div>
                     </div>
@@ -176,14 +176,15 @@
                             <div class="col-md-9" @if (!showAllowSubscriptionPlans) { <text> onclick="return showUpgradeMyPlan('@(allowSubscriptionPlansPackage.Name)',@(allowSubscriptionPlansPackage.ID))"</text> }>
                                 @{
                                     Html.RenderPartial(
-                                    "~/Views/Shared/_SwitchButton.cshtml",
-                                    Model.IsOngoing,
-                                    new ViewDataDictionary()
-                                    {
-                                        { "checkboxname", "isongoing" },
-                                        { "checkboxid", "isongoing" },
-                                        { "disabled", !showAllowSubscriptionPlans }
-                                    });
+                                        "~/Views/Shared/_SwitchButton.cshtml",
+                                        Model.IsOngoing,
+                                        new ViewDataDictionary()
+                                        {
+                                            { "checkboxname", "isongoing" },
+                                            { "checkboxid", "isongoing" },
+                                            { "disabled", !showAllowSubscriptionPlans }
+                                        }
+                                    );
                                 }
 
                                 <p class="text-muted padding-v-10">
@@ -235,10 +236,18 @@
                     Start Date <span class="text-danger">*</span>
                 </label>
                 <div class="col-md-7">
-                    <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
-                        <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
-                        <input size="16" type="text" class="form-control" id="startdate" name="startdate" onfocus="this.select()" required value="@Model.StartDate.ToShortDateString()" data-type="date" />
-                    </div>
+                    @{
+                        Html.RenderPartial(
+                            "~/Views/Shared/Components/_Date.cshtml",
+                            new FormInputViewModel()
+                            {
+                                Id = "startdate",
+                                Name = "startdate",
+                                Value = Model.StartDate.ToShortDateString(),
+                                Placeholder = "Start Date"
+                            }
+                        );
+                    }
                 </div>
             </div>
 
@@ -247,10 +256,18 @@
                     End Date <span class="text-danger">*</span>
                 </label>
                 <div class="col-md-7">
-                    <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
-                        <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
-                        <input size="16" type="text" class="form-control" id="enddate" name="enddate" onfocus="this.select()" required value="@Model.EndDate.ToShortDateString()" data-type="date" />                        
-                    </div>
+                    @{ 
+                        Html.RenderPartial(
+                            "~/Views/Shared/Components/_Date.cshtml",
+                            new FormInputViewModel()
+                            {
+                                Id = "enddate",
+                                Name = "enddate",
+                                Value = Model.EndDate.ToShortDateString(),
+                                Placeholder = "End Date"
+                            }
+                        ); 
+                    }
                 </div>
             </div>
 
@@ -259,16 +276,17 @@
                     @activityMeetingLabel Start Time <span class="text-danger">*</span>
                 </label>
                 <div class="col-md-7">
-                    @{Html.RenderPartial(
-                              "~/Views/Shared/_TimeSelect.cshtml",
-                              Model.DailyStartTime,
-                              new ViewDataDictionary()
-                              {
+                    @{
+                        Html.RenderPartial(
+                            "~/Views/Shared/_TimeSelect.cshtml",
+                            Model.DailyStartTime,
+                            new ViewDataDictionary()
+                            {
                                 { "name", "dailystarttime" },
                                 { "id", "dailystarttime" },
                                 { "required", true }
-                  }
-                          );
+                            }
+                        );
                     }
                 </div>
             </div>
@@ -278,16 +296,17 @@
                     @activityMeetingLabel End Time <span class="text-danger">*</span>
                 </label>
                 <div class="col-md-7">
-                    @{Html.RenderPartial(
-                              "~/Views/Shared/_TimeSelect.cshtml",
-                              Model.DailyEndTime,
-                              new ViewDataDictionary()
-                              {
+                    @{
+                        Html.RenderPartial(
+                            "~/Views/Shared/_TimeSelect.cshtml",
+                            Model.DailyEndTime,
+                            new ViewDataDictionary()
+                            {
                                 { "name", "dailyendtime" },
                                 { "id", "dailyendtime" },
                                 { "required", true }
-                  }
-                          );
+                            }
+                        );
                     }
                 </div>
             </div>
@@ -317,38 +336,48 @@
                         <table>
                             <tr>
                                 <td>
-                                    <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
-                                        <input size="16" type="text" class="form-control" id="meeting-open-date-@i" name="meeting-open-date-@i" onfocus="this.select()" required value="@startDate.ToShortDateString()" data-type="date" />
-                                        <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
-                                    </div>
+                                    @{
+                                        Html.RenderPartial(
+                                            "~/Views/Shared/Components/_Date.cshtml",
+                                            new FormInputViewModel()
+                                            {
+                                                Id = "meeting-open-date-" + i,
+                                                Name = "meeting-open-date-" + i,
+                                                Value = startDate.ToShortDateString(),
+                                                Placeholder = "Date " + i
+                                            }
+                                        );
+                                    }                                   
                                 </td>
                                 <td>
-                                    @{Html.RenderPartial(
-                                              "~/Views/Shared/_TimeSelect.cshtml",
-                                              startTime,
-                                              new ViewDataDictionary()
-                                              {
+                                    @{
+                                        Html.RenderPartial(
+                                            "~/Views/Shared/_TimeSelect.cshtml",
+                                            startTime,
+                                            new ViewDataDictionary()
+                                            {
                                                 { "name", string.Format("meeting-open-starttime-{0}", i) },
                                                 { "id", string.Format("meeting-open-starttime-{0}", i) },
                                                 { "required", true }
-                      }
-                                          );
+                                            }
+                                        );
                                     }
                                 </td>
                                 <td>
                                     &nbsp;To&nbsp;
                                 </td>
                                 <td>
-                                    @{Html.RenderPartial(
-                                              "~/Views/Shared/_TimeSelect.cshtml",
-                                              endTime,
-                                              new ViewDataDictionary()
-                                              {
+                                    @{
+                                        Html.RenderPartial(
+                                            "~/Views/Shared/_TimeSelect.cshtml",
+                                            endTime,
+                                            new ViewDataDictionary()
+                                            {
                                                 { "name", string.Format("meeting-open-endtime-{0}", i) },
                                                 { "id", string.Format("meeting-open-endtime-{0}", i) },
                                                 { "required", true }
-                      }
-                                          );
+                                            }
+                                        );
                                     }
                                 </td>
                                 <td>
@@ -402,10 +431,18 @@
                             <table>
                                 <tr>
                                     <td>
-                                        <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
-                                            <input size="16" type="text" class="form-control" id="meeting-closed-date-@i" name="meeting-closed-date-@i" onfocus="this.select()" required value="@startDate.ToShortDateString()" data-type="date" />
-                                            <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
-                                        </div>
+                                        @{
+                                            Html.RenderPartial(
+                                                "~/Views/Shared/Components/_Date.cshtml",
+                                                new FormInputViewModel()
+                                                {
+                                                    Id = "meeting-closed-date-" + i,
+                                                    Name = "meeting-closed-date-" + i,
+                                                    Value = startDate.ToShortDateString(),
+                                                    Placeholder = "Date " + i
+                                                }
+                                            );
+                                        }
                                     </td>
                                     <td>
                                         <button type="button" class="btn btn-default" onclick="removeClosedDate(@i)">Delete</button>
