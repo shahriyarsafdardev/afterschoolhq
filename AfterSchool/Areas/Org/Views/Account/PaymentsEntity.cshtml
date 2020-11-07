@@ -296,10 +296,17 @@
                                     <div class="form-group">
                                         <label class="col-sm-4 control-label">Date of Birth <span class="text-danger">*</span></label>
                                         <div class="col-sm-8">
-                                            <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
-                                                <input type="text" class="form-control individual-input" id="dateofbirth" name="dateofbirth" onfocus="this.select()" data-type="date" value="@Model.DateOfBirth.ToShortDateString()" @disabled />
-                                                <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
-                                            </div>
+                                            @{
+                                                Html.RenderPartial(
+                                                    "~/Views/Shared/Components/_Date.cshtml",
+                                                    new FormInputViewModel()
+                                                    {
+                                                        Id = "dateofbirth",
+                                                        Name = "dateofbirth",
+                                                        Value = Model.DateOfBirth.ToShortDateString()
+                                                    }
+                                                );
+                                            }
                                         </div>
                                     </div>
                                     <div class="form-group">
