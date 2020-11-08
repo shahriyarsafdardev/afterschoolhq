@@ -53,6 +53,18 @@ namespace AfterSchool.Areas.Org.Controllers
             if (name.IsEmpty())
                 msgs.Add("Organization Name is required", MessageType.UserError);
 
+            // ..update profile title if account name has been changed 
+            if (name.IsNotEmpty() && a.Name != name)
+            {
+                var profile = a.GetAccountProfile();
+
+                if (profile.IsNotEmpty())
+                {
+                    profile.Title = name;
+                    profile.Save();
+                }
+            }
+
             a.Name = name;
             a.Phone = phone;
             a.UniqueName = uniquename;
