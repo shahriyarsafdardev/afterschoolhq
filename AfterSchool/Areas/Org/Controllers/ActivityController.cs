@@ -1343,11 +1343,12 @@ namespace AfterSchool.Areas.Org.Controllers
                     else
                     {
                         msg = $"An error occured while charging attendance: Cost was $0. Please contact support and do NOT attempt to charge for attendance again.";
+                        msgs.Add(msg, MessageType.Error); // this is just so it doesnt save the attendance and send false confirmation email
                     }
 
                 }
 
-                if(msgs.HasNoErrors() && !msg.Contains("Cost was $0"))
+                if(msgs.HasNoErrors())
                 {
 
                     selectedAttendances.ForEach(attendance =>
