@@ -1314,13 +1314,15 @@ namespace AfterSchool.Areas.Org.Controllers
                             MasterRegistrant = registrantActivity.GetRegistrant(msgs).GetMasterRegistrant(msgs),
                             Description = description,
                             SavePaymentInfo = false,
-                            ParticipationObject = activity.GetParticipationObject(msgs)
+                            ParticipationObject = activity.GetParticipationObject(msgs),
+                            Quantity = raAttendances.Count
                         };
 
                         if (msgs.HasNoErrors() && raAttendances?.Count > 0)
                         {
                             AccountService.ProcessPayment(
                             checkoutObject,
+                            isAttendanceCharge: true,
                             loggedInUser: SessionVariables.CurrentUser,
                             msgs: msgs);
                         }
@@ -1355,7 +1357,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     });
 
                     var attendanceRegistrantAcitivtyCounts = GetAttendanceRegistrantActivityCounts(selectedAttendances, registrantActivities, msgs);
-                    var costPerClass = registrantActivities.First().GetRegistration(msgs).CostPerClass.Value;
+                    var costPerClass = registrantActivities.First().GetRegistration(msgs).CostPerClass.HasValue? registrantActivities.First().GetRegistration(msgs).CostPerClass.Value : 0;
                     AfterSchoolLibrary.Helpers.EmailHelper.SendAttendanceChargeConfirmation(attendanceRegistrantAcitivtyCounts, activity, costPerClass, null, SessionVariables.CurrentUser, false, msgs);
 
                     msg = "All accounts have been successfully charged.";

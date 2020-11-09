@@ -177,7 +177,11 @@ namespace AfterSchoolLibrary.Services
                         if(mingrade.ToInteger() < 0)
                             profile.GradeLevelStart = null;
                         else
+                        {
                             profile.GradeLevelStart = mingrade.ToInteger();
+                            profile.AgeStart = null;
+                        }
+                            
                     }
                         
                     if (maxgrade.IsInteger())
@@ -185,7 +189,10 @@ namespace AfterSchoolLibrary.Services
                         if(maxgrade.ToInteger() < 0)
                             profile.GradeLevelEnd = null;
                         else
+                        {
                             profile.GradeLevelEnd = maxgrade.ToInteger();
+                            profile.AgeEnd = null;
+                        }
                     }
 
                     if (agestart.IsInteger())
@@ -193,7 +200,11 @@ namespace AfterSchoolLibrary.Services
                         if (agestart.ToInteger() < 0)
                             profile.AgeStart = null;
                         else
+                        {
                             profile.AgeStart = agestart.ToInteger();
+                            profile.GradeLevelStart = null;
+                        }
+                            
                     }
 
                     if (ageend.IsInteger())
@@ -201,7 +212,11 @@ namespace AfterSchoolLibrary.Services
                         if(ageend.ToInteger() < 0)
                             profile.AgeEnd = null;
                         else
+                        {
                             profile.AgeEnd = ageend.ToInteger();
+                            profile.GradeLevelEnd = null;
+                        }
+                            
                     }
                         
                     if (opencovid.IsNumber())
