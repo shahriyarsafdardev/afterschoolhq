@@ -54,13 +54,6 @@
         padding-left: 0 !important;
         padding-right: 0 !important;
     }
-    
-    .datetimepicker.dropdown-menu {
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-        border-color: rgba(0, 0, 0, 0.1);
-        padding: 10px;
-        left: 220px !important;
-    }
 
     .btn-upgrade-plan {       
         margin-bottom: 5px !important;
