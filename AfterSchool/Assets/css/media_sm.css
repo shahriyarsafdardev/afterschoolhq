@@ -49,7 +49,12 @@
     .text-center-sm {
         text-align:center;
     }
-   
+
+    .datetimepicker-mobile {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
     .btn-upgrade-plan {       
         margin-bottom: 5px !important;
     }
