@@ -37,11 +37,18 @@
 
                 <div class="form-group reg-period">
                     <label class="col-md-3 control-label">Registration Opens <span class="text-danger">*</span></label>
-                    <div class="col-md-3">
-                        <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
-                            <input size="16" type="text" class="form-control" id="opendate" name="opendate" onfocus="this.select()" required value="@period.StartDateTime.ToShortDateString()" data-type="date" />
-                            <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
-                        </div>
+                    <div class="col-md-3">                       
+                        @{
+                            Html.RenderPartial(
+                                "~/Views/Shared/Components/_Date.cshtml",
+                                new FormInputViewModel()
+                                {
+                                    Id = "opendate",
+                                    Name = "opendate",
+                                    Value = period.StartDateTime.ToShortDateString()
+                                }
+                            );
+                        }
                     </div>
                     <div class="col-md-3">
 
@@ -64,13 +71,19 @@
                 <div class="form-group reg-period">
                     <label class="col-md-3 control-label">Registration Closes <span class="text-danger">*</span></label>
                     <div class="col-md-3">
-                        <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
-                            <input size="16" type="text" class="form-control" id="closedate" name="closedate" onfocus="this.select()" required value="@period.EndDateTime.ToShortDateString()" data-type="date" />
-                            <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
-                        </div>
+                        @{
+                            Html.RenderPartial(
+                                "~/Views/Shared/Components/_Date.cshtml",
+                                new FormInputViewModel()
+                                {
+                                    Id = "closedate",
+                                    Name = "closedate",
+                                    Value = period.EndDateTime.ToShortDateString()
+                                }
+                            );
+                        }
                     </div>
                     <div class="col-md-3">
-
                         @{
                             Html.RenderPartial(
                                 "~/Views/Shared/_TimeSelect.cshtml",
@@ -83,7 +96,6 @@
                                 }
                             );
                         }
-
                     </div>
                 </div>
 
