@@ -44,5 +44,17 @@ namespace AfterSchool.Controllers
 
             return View(providers.Shuffle().ToList());
         }
+
+        public ActionResult MccoySearch()
+        {
+            //The host should be MCCOY and the visitor should be the provider we want to search for 
+            var msgs = new SystemMessages();
+
+            var accounts = Account.SearchMccoyAccounts(msgs: msgs);
+
+            ViewBag.Messages = msgs;
+
+            return View("~/Views/mccoy/Index.cshtml", accounts);
+        }
     }
 }

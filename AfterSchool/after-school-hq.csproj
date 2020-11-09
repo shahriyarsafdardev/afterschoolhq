@@ -599,6 +599,7 @@
     <Compile Include="Controllers\LegalController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
     <Compile Include="Controllers\LogoutController.cs" />
+    <Compile Include="Controllers\MccoyController.cs" />
     <Compile Include="Controllers\MsgController.cs" />
     <Compile Include="Controllers\OAuthController.cs" />
     <Compile Include="Controllers\RController.cs" />
@@ -1816,6 +1817,7 @@
     <Content Include="Views\Shared\_UpgradePlan.cshtml" />
     <Content Include="Views\Shared\_PaymentSources.cshtml" />
     <Content Include="Views\Shared\ParticipationObject\_TuitionAndPostPayPlans.cshtml" />
+    <Content Include="Views\Mccoy\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

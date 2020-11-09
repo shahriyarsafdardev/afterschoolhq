@@ -1,0 +1,268 @@
+﻿@model List<Account>
+@{ 
+    Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
+    ViewBag.Title = "Search";
+
+    var msgs = (SystemMessages)ViewBag.Messages;
+    // var neighborhoods = (List<string>)ViewBag.Neighborhoods;
+    var headerUrl = "/img/image-3-1800x900-1.png";
+    var city = (string)ViewBag.City;
+    var state = (string)ViewBag.State;
+
+    headerUrl = $"https://maps.googleapis.com/maps/api/staticmap?center={city},{state}&zoom=13&size=1500x600&maptype=roadmap&key=AIzaSyAdjn8QBBStTz9TDAjZOyijAato7uzvjjk"; 
+}
+
+@{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+<div class="row">
+    <div class="reg-header" style="background-image: linear-gradient(rgba(0, 0, 0, .8), rgba(0, 0, 0, .8)), url(@headerUrl);">
+
+        <div class="reg-header-overlay col-lg-10 col-lg-offset-1 col-md-12">
+
+            <div class="col-lg-offset-4 col-lg-4 col-md-6 col-md-offset-3" style="margin-top: -75px; margin-bottom: 25px;">
+                <div class="reg-header-logo">
+                    <img src="@UILabel.ProductLogo()" style="max-width: 100%;" />
+                </div>
+            </div>
+
+            <div class="col-lg-12">
+
+                @{ 
+                    if (city.IsNotEmpty() && state.IsNotEmpty())
+                    {
+                        <h1 class="activity-title padding-v-10" style="border-top: solid 1px #ccc; border-bottom: solid 1px #ccc;">
+                            <span>@city.ToProperCase(), @state.ToProperCase()</span>
+                        </h1> 
+                    } 
+                }
+
+                <div class="hide">
+                    <input type="text" class="form-control" placeholder="Search by Program or Organization Name" />
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <h3>Filters</h3>
+                    </div>
+                    <div class="col-xs-6 col-sm-4 col-md-3 col-lg-3">
+                        <div class="am-checkbox">
+                            <input type="checkbox"
+                                   class="covid"
+                                   name="covid"
+                                   id="covid"
+                                   value="1"
+                                   @(Request[$"covid"] == "1" ? "checked=\"checked\"" : "")
+                                   onclick="loadCovid()" />
+                            <label for="covid">Open During Covid</label>
+                        </div>
+                    </div>
+                    <div class="col-xs-6 col-sm-4 col-md-3 col-lg-3">
+                        <div class="am-checkbox">
+                            <input type="checkbox"
+                                   class="elc"
+                                   name="elc"
+                                   id="elc"
+                                   value="1"
+                                   @(Request[$"elc"] == "1" ? "checked=\"checked\"" : "")
+                                   onclick="loadELC()" />
+                            <label for="elc">E-Learning Center</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    @*<div class="col-md-12">
+                        <h3>Neighborhoods</h3>
+                    </div>
+
+                    @foreach (var item in neighborhoods)
+                    {
+                        var requestNeighborhoods = Request["neighborhoods"];
+                        var isChecked = requestNeighborhoods.IsNotEmpty() && requestNeighborhoods.Contains(item);
+
+                        var text = item;
+
+                        if (item == "Brightwood")
+                        {
+                            text = "Martindale/Brightwood";
+                        }
+
+                        <div class="col-xs-6 col-sm-4 col-md-3 col-lg-3">
+                            <div class="am-checkbox">
+                                <input type="checkbox"
+                                       class="neighborhood"
+                                       name="neighborhood-@item.ToLower()"
+                                       id="neighborhood-@item.ToLower()"
+                                       value="@item"
+                                       @(isChecked ? "checked=\"checked\"" : "")
+                                       onclick="loadNeighborhoods()" />
+                                <label for="neighborhood-@item.ToLower()">@text</label>
+                            </div>
+                        </div>
+                    }*@
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="clearfix"></div>
+    </div>
+</div>
+
+<div>
+
+    @if (Model.Any())
+    {
+        <div>
+            <div class="row">
+                <div>
+                    @foreach (var item in Model)
+                    {
+                        var profile = item.GetAccountProfile();
+                        Html.RenderPartial("~/Views/Shared/Registration/_BrowseProvider.cshtml", profile);
+                    }
+                </div>
+            </div>
+        </div> 
+    }
+    else
+    {
+        <div class="text-center padding-v-30">
+            <h1>Sorry, no programs have been found</h1>
+            <p>Please adjust your search criteria</p>
+        </div>
+    }
+
+</div>
+
+@section header
+{
+    <script>
+        function loadNeighborhoods() {
+            var items = '';
+            $('.neighborhood:checked').each(function () {
+                if (items.length > 0) {
+                    items += ',';
+                }
+                items += $(this).val();
+            });
+
+            doCitySearch(null, null, items, null, null);
+        }
+
+        function loadCovid() {
+            var covid = '';
+
+            if ($('#covid').is(':checked')) {
+                covid = 1;
+            }
+
+            doCitySearch(null, null, null, covid, null);
+        }
+
+        function loadELC() {
+            var elc = '';
+
+            if ($('#elc').is(':checked')) {
+                elc = 1;
+            }
+
+            doCitySearch(null, null, null, null, elc);
+        }
+
+        function doCitySearch(city, state, neighborhoods, covid, elc) {
+
+            if (city === null) {
+                city = '@Request["city"]';
+            }
+
+            if (state === null) {
+                state = '@Request["state"]';
+            }
+
+            if (neighborhoods === null) {
+                neighborhoods = '@Request["neighborhoods"]';
+            }
+
+            if (covid === null) {
+                covid = '@Request["covid"]';
+            }
+
+            if (elc === null) {
+                elc = '@Request["elc"]';
+            }
+
+            location.href = '/search?city=' + city + '&state=' + state + '&neighborhoods=' + neighborhoods + '&covid=' + covid + '&elc=' + elc;
+        }
+    </script>
+
+    <style>
+
+        .am-checkbox input[type="checkbox"] + label:before,
+        .am-radio input[type="checkbox"] + label:before,
+        .am-checkbox input[type="radio"] + label:before,
+        .am-radio input[type="radio"] + label:before {
+            content: "";
+            width: 22px;
+            height: 22px;
+            display: inline-block;
+            border: 2px solid #eaeaea;
+            margin-right: 5px;
+            font-size: 18px;
+            font-family: 'Stroke 7';
+            font-weight: normal;
+            line-height: 19px;
+            vertical-align: bottom;
+            text-align: center;
+            background-color: transparent;
+            cursor: pointer;
+        }
+
+        .am-checkbox input[type="checkbox"] + label:hover:before,
+        .am-radio input[type="checkbox"] + label:hover:before,
+        .am-checkbox input[type="radio"] + label:hover:before,
+        .am-radio input[type="radio"] + label:hover:before {
+            border-color: #fff;
+        }
+
+        .am-checkbox input[type="checkbox"]:hover + label:before,
+        .am-radio input[type="checkbox"]:hover + label:before,
+        .am-checkbox input[type="radio"]:hover + label:before,
+        .am-radio input[type="radio"]:hover + label:before {
+            border-color: #fff;
+        }
+
+        .am-checkbox input[type="checkbox"]:checked + label:before,
+        .am-radio input[type="checkbox"]:checked + label:before,
+        .am-checkbox input[type="radio"]:checked + label:before,
+        .am-radio input[type="radio"]:checked + label:before {
+            content: "\e6cd";
+            color: #00AE83;
+            border-color: #00AE83;
+        }
+
+        .am-checkbox input[type="checkbox"]:disabled + label,
+        .am-radio input[type="checkbox"]:disabled + label,
+        .am-checkbox input[type="radio"]:disabled + label,
+        .am-radio input[type="radio"]:disabled + label {
+            opacity: .5;
+            pointer-events: none;
+        }
+
+            .am-checkbox input[type="checkbox"]:disabled + label:before,
+            .am-radio input[type="checkbox"]:disabled + label:before,
+            .am-checkbox input[type="radio"]:disabled + label:before,
+            .am-radio input[type="radio"]:disabled + label:before {
+                pointer-events: none !important;
+                background-color: #ffffff;
+            }
+
+        .am-checkbox input[type="radio"] + label:before,
+        .am-radio input[type="radio"] + label:before {
+            border-radius: 50%;
+            font-family: 'Stroke 7';
+            line-height: 19px;
+            font-size: 14px;
+        }
+    </style>
+}

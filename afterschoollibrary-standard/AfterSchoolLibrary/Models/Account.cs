@@ -1027,6 +1027,26 @@ namespace AfterSchoolLibrary.Models
             return 0;
         }
 
+        public static List<Account> SearchMccoyAccounts(int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var hostAccountId = 2020; // ..TODO: this should be off mccoy
+
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+
+            var sql = $@"
+                SELECT * FROM AccountRelationship ar
+                INNER JOIN Account a ON a.ID = ar.VisitorAccountId
+                WHERE ar.HostAccountId = {hostAccountId}
+                Order BY Name ASC
+            ";
+
+            dq.SelectRange.Start = start;
+            dq.SelectRange.Length = length;
+
+            return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
         #endregion
     }
 }
