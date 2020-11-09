@@ -61,14 +61,14 @@
             <div class="col-md-7">   
                 @{ 
                     Html.RenderPartial(
-                                    "~/Views/Shared/Components/_Date.cshtml",
-                                    new FormInputViewModel()
-                                    {
-                                        Id = "enddate",
-                                        Name = "enddate",
-                                        Value = @Model.EndDate.ToShortDateString()
-                                    }
-                                );
+                        "~/Views/Shared/Components/_Date.cshtml",
+                        new FormInputViewModel()
+                        {
+                           Id = "enddate",
+                           Name = "enddate",
+                           Value = Model.EndDate.ToShortDateString()
+                         }
+                      );
                     }
             </div>
         </div>
