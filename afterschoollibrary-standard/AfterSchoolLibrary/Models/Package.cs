@@ -239,16 +239,9 @@ namespace AfterSchoolLibrary.Models
             return this.GetFeatures(msgs, dc).Where(x => x.FeatureTypeId == featureType).FirstOrDefault();
         }
 
-        public void ResetFeatureList()
-        {
-            this._Features = null;
-        }
-
-        private List<PackageFeature> _Features;
         public List<PackageFeature> GetFeatures(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            _Features = PackageFeature.LoadByPackageId(this.ID.Value, msgs, dc);
-            return _Features;
+            return PackageFeature.LoadByPackageId(this.ID.Value, msgs, dc);
         }
         
         public SystemMessages SaveWithStripe(DatabaseConnection dc = null)

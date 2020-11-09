@@ -1260,7 +1260,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var activityId = Request.Form["Uid"];
             var msgs = new SystemMessages();
             Activity activity = null;
-            string msg = "An error occurred while processing payments. Please contact support";
+            string msg = "An error occurred while processing payments. Please contact support, do not attempt to charge attendance again";
 
             if (activityId.IsNotEmpty() && activityId.IsGuid())
                 activity = Activity.LoadByUid(activityId.ToGuid(), msgs);
@@ -1301,8 +1301,8 @@ namespace AfterSchool.Areas.Org.Controllers
                         var checkoutObject = new CheckoutObject()
                         {
                             OverrideAmount = costPerAttenadance * raAttendances.Count,
-                            ConvenienceFeeOverrideAmount = registration.ConvenienceFeePaid,
-                            PaymentTypeFeeOverrideAmount = registration.PaymentTypeFeePaid,
+                            ConvenienceFeeOverrideAmount = registration.ConvenienceFeePaid.IfEmpty(0) * raAttendances.Count,
+                            PaymentTypeFeeOverrideAmount = registration.PaymentTypeFeePaid.IfEmpty(0) * raAttendances.Count,
                             PayingAccount = masterRegistrantAccount,
                             BillingAccount = activity.GetAccount(msgs),
                             CreditCardPurchaseObject = creditCardPurchaseObject,
@@ -1313,7 +1313,8 @@ namespace AfterSchool.Areas.Org.Controllers
                             CreditCardFeePayer = masterRegistrantAccount,
                             MasterRegistrant = registrantActivity.GetRegistrant(msgs).GetMasterRegistrant(msgs),
                             Description = description,
-                            SavePaymentInfo = false
+                            SavePaymentInfo = false,
+                            ParticipationObject = activity.GetParticipationObject(msgs)
                         };
 
                         if (msgs.HasNoErrors() && raAttendances?.Count > 0)
@@ -1336,11 +1337,15 @@ namespace AfterSchool.Areas.Org.Controllers
                                 }
                             });
                         }
+                    } 
+                    else
+                    {
+                        msg = $"An error occured while charging attendance: Cost was $0. Please contact support and do NOT attempt to charge for attendance again.";
                     }
 
                 }
 
-                if(msgs.HasNoErrors())
+                if(msgs.HasNoErrors() && !msg.Contains("Cost was $0"))
                 {
 
                     selectedAttendances.ForEach(attendance =>
