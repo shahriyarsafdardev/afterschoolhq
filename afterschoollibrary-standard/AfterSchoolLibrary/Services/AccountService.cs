@@ -3108,6 +3108,7 @@ namespace AfterSchoolLibrary.Services
 
         public static void ProcessPayment(CheckoutObject checkoutObject, WebUser loggedInUser, bool isAttendanceCharge = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            Transaction transaction = null;
             Database.ExecuteTransaction
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
@@ -3117,7 +3118,7 @@ namespace AfterSchoolLibrary.Services
                     // must wait until after charges happen to know what card id is charged for sure
                     // add purchase
                     if (msgs.HasNoErrors())
-                        AccountService.AddTransaction(
+                        transaction = AccountService.AddTransaction(
                             checkoutObject,
                             TransactionType.Charge,
                             loggedInUser,
@@ -3127,7 +3128,7 @@ namespace AfterSchoolLibrary.Services
                 onSuccess: (SystemMessages smsgs) =>
                 {
                     msgs.AddRange(smsgs);
-
+                    checkoutObject.Transaction = transaction;
                     Helpers.EmailHelper.SendPaymentConfirmation(checkoutObject, null, loggedInUser, true,msgs, isAttendanceCharge, dc);
                 },
                 onFailure: (SystemMessages amsgs) => msgs.AddRange(amsgs),
