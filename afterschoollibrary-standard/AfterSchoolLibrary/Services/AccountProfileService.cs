@@ -120,12 +120,21 @@ namespace AfterSchoolLibrary.Services
 
         public static void UpdateProfile(this AccountProfile profile, string title = null, string headline = null, string about = null, string website = null, string opencovid = null, string elearningcenter = null, string mingrade = null, string maxgrade = null, string agestart = null, string ageend = null, string twitter = null, string facebook = null, string instagram = null, string linkedin = null, string youtube = null, string calendar = null, string genderrestriction = null, string profileemail = null, string profilephone = null, NameValueCollection savedAwards = null, NameValueCollection newAwards = null, NameValueCollection savedCertifications = null, NameValueCollection newCertifications = null, NameValueCollection servicesOffered = null, NameValueCollection timesOffered = null, NameValueCollection pricingOptions = null, NameValueCollection specialNeedsOfferings = null, string classifications = null, string softskills = null, string academicsubjects = null, string teachingmethods = null, string ahqapproved = null, string videoUrl = null, WebUser loggedInUser = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            var account = profile.GetAccount(msgs, dc);
+
             Database.ExecuteTransaction
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                {                   
+                {
+                    // ..update account name if title has been changed for profile
+                    if (account.IsNotEmpty() && title.IsNotEmpty() && profile.Title != title)
+                    {
+                        account.Name = title;
+                        account.Save(adc);
+                    }
+
                     if (title != null)
-                        profile.Title = title.MaxChars(400);
+                        profile.Title = title.MaxChars(400);                                     
                     
                     if (headline != null)
                         profile.Headline = headline.MaxChars(400);
@@ -260,6 +269,28 @@ namespace AfterSchoolLibrary.Services
                     if (teachingmethods.IsNotEmpty())
                         profile.ManageProperties(teachingmethods.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.TeachingMethods, loggedInUser, amsgs, adc);
 
+                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
+                dc: dc
+            );
+        }
+
+        public static void UpdateProfile(this AccountProfile profile, int mingrade, int maxgrade, int agestart, int ageend, bool opencovid = false, bool elearningcenter = false, bool isvirtualprogram = false, WebUser loggedInUser = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    profile.GradeLevelStart = mingrade <= 0 ? new int?() : mingrade;
+                    profile.GradeLevelEnd = maxgrade <= 0 ? new int?() : maxgrade;
+                    profile.AgeStart = agestart <= 0 ? new int?() : agestart;
+                    profile.AgeEnd = ageend <= 0 ? new int?() : ageend;
+                    profile.IsOpenDuringCovid = opencovid;
+                    profile.IsELearningCenter = elearningcenter;
+                    profile.IsVirtualProgram = isvirtualprogram;
+                    amsgs.AddRange(profile.Save(adc));                    
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),

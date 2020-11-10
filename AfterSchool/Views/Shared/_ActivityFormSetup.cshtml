@@ -10,7 +10,6 @@
     var isActivityLeader = (bool)ViewBag.IsActivityLeader;
     var showRegistrationPeriodList = SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups);
     var showSeats = Model.ActivityTypeId.NotIn(new ActivityType[] { ActivityType.FieldTrip, ActivityType.PermissionSlip });
-
     var showInviteOnly = accountPackage.HasFeature(FeatureType.AllowInvites);
     var showWaitingList = accountPackage.HasFeature(FeatureType.WaitingList);
     var maxWaitingListCount = showWaitingList ? (int)accountPackage.GetFeature(FeatureType.WaitingList).Max.Value : 0;
@@ -25,13 +24,11 @@
 }
 
 <input id="hdnAdvanceSettingToggle" type="hidden" name="isAdvanceSettingEnabled" />
-
-<div class="panel panel-default panel-small-padding">
-    <div class="panel-heading">
+<div class="panel panel-default margin-bottom-zero">
+    <div class="panel-heading activity-heading">
         Settings
     </div>
-    <div class="panel-body">
-
+    <div class="panel-body padding-lr-zero-sm">
         <div class="form-group">
             <label class="col-sm-3 control-label">@UILabel.ActivityLabel(Model.ActivityTypeId) Name <span class="text-danger">*</span></label>
             <div class="col-sm-9">
@@ -136,7 +133,7 @@
             <div class="form-group reg-period hide">
                 <label class="col-sm-3 control-label">@UILabel.RegistrationPeriodLabel() Open <span class="text-danger">*</span></label>
                 <div class="col-sm-5">
-                    <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
+                    <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker datetimepicker-mobile">
                         <input size="16" type="text" class="form-control" id="registrationopendate" name="registrationopendate" onfocus="this.select()" required value="@activePeriod.StartDateTime.ToShortDateString()" data-type="date" />
                         <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
                     </div>
@@ -161,7 +158,7 @@
             <div class="form-group reg-period hide">
                 <label class="col-sm-3 control-label">@UILabel.RegistrationPeriodLabel() Close <span class="text-danger">*</span></label>
                 <div class="col-sm-5">
-                    <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
+                    <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker datetimepicker-mobile">
                         <input size="16" type="text" class="form-control" id="registrationclosedate" name="registrationclosedate" onfocus="this.select()" required value="@activePeriod.EndDateTime.ToShortDateString()" data-type="date" />
                         <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
                     </div>
@@ -212,7 +209,7 @@
                     </label>
                     <div class="col-md-6" @if (!showManageForms) { <text> onclick="return showUpgradeMyPlan()"</text> }>
                         <select name="form" id="form" class="form-control" @(activeForm.IsNotEmpty() && forms.Any(m => m.ID == activeForm.FormId)  ? "required" : "") @if (!showManageForms) { <text> disabled="disabled" </text> }>
-                            <option value="">Select Form...</option>
+                            @*<option value="">Select Form...</option>*@
                             @if (showManageFormFields)
                             {
                                 <option value="0"> + New Form</option>

@@ -21,4 +21,26 @@
         padding: 30px;
         height: 20%;
     }
+
+    .main-content-activity {
+        padding-left: 15px;
+        padding-right: 15px;
+        padding-top: 20px;
+    }
+
+    .margin-left {
+        margin-left:-10px;
+    }
+
+    .datetimepicker-mobile {
+        padding: 0 !important;
+    }
+
+    .mobile-padding {
+        padding: 4px !important;
+    }
+
+    .display-days {
+        display: inline-flex;
+    }
 }

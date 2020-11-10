@@ -25,7 +25,7 @@
 }
 
 <div class="panel panel-default panel-small-padding">
-    <div class="panel-heading">
+    <div class="panel-heading activity-heading">
         Registration Fees
     </div>
 
@@ -589,7 +589,9 @@
             $('#hassubscriptionplan').trigger('click');
         }
 
-        $('#cost').val(0);
+        $('#cost').val(0.00);
+        $('#finaltuitioncost').html(0.00);
+
         $('#hassubscriptionplan').prop('disabled', true);
         $('#haspaymentplan').prop('disabled', true);
         $('#allowtopaylater').prop('disabled', true);

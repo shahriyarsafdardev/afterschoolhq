@@ -1168,6 +1168,7 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(attendance);
         }
 
+        // This returns all uncompleted AttendanceRegistrants by Registrant
         private Dictionary<RegistrantActivity,List<Attendance>> GetRegistrantActivityAttendances(List<RegistrantActivity> registrantActivities, List<Attendance> attendances, SystemMessages msgs)
         {
             Dictionary<RegistrantActivity, List<Attendance>> registrantActivityAttendanceCounts = new Dictionary<RegistrantActivity, List<Attendance>>();
@@ -1190,7 +1191,8 @@ namespace AfterSchool.Areas.Org.Controllers
             return registrantActivityAttendanceCounts;
         }
 
-        private Dictionary<Attendance, int> GetAttendanceRegistrantActivityCounts(List<Attendance> attendances, List<RegistrantActivity> registrantActivities, SystemMessages msgs)
+        // This returns all completed AttendanceRegistrants by Attendance
+        private Dictionary<Attendance, int> GetAttendanceRegistrantActivityCounts(List<Attendance> attendances, List<RegistrantActivity> registrantActivities,  SystemMessages msgs)
         {
             Dictionary<Attendance, int> attendanceRegistrantActivityCounts = new Dictionary<Attendance, int>();
 
@@ -1199,10 +1201,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 var numberOfRegistrants = registrantActivities.FindAll(registrantActivity =>
                 {
                     var attendanceRegistrant = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(attendance.ID.Value, registrantActivity.RegistrantId.Value, msgs).First();
-                    if (attendanceRegistrant.IsNotEmpty())
-                    {
+                    if (attendanceRegistrant.IsNotEmpty() && attendanceRegistrant.TransactionId.HasValue)
                         return attendanceRegistrant.NumberPresent > 0;
-                    }
 
                     return false;
                 }).Count;
@@ -1260,7 +1260,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var activityId = Request.Form["Uid"];
             var msgs = new SystemMessages();
             Activity activity = null;
-            string msg = "An error occurred while processing payments. Please contact support";
+            var defaultMsg = "An error occurred while processing payments. Please contact support, do not attempt to charge attendance again";
+            var msg = defaultMsg;
 
             if (activityId.IsNotEmpty() && activityId.IsGuid())
                 activity = Activity.LoadByUid(activityId.ToGuid(), msgs);
@@ -1283,7 +1284,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     var registrantActivity = registrantActivityAttendance.Key;
                     var registration = registrantActivity.GetRegistration(msgs);
                     var costPerAttenadance = registration.CostPerClass.IsNotEmpty() ? registration.CostPerClass.Value : 0;
-                    if(costPerAttenadance > 0)
+                    if (costPerAttenadance > 0)
                     {
                         var raAttendances = registrantActivityAttendance.Value;
                         var masterRegistrantAccount = registrantActivity.GetRegistrant(msgs).GetMasterRegistrant(msgs).GetAccount(msgs);
@@ -1301,8 +1302,8 @@ namespace AfterSchool.Areas.Org.Controllers
                         var checkoutObject = new CheckoutObject()
                         {
                             OverrideAmount = costPerAttenadance * raAttendances.Count,
-                            ConvenienceFeeOverrideAmount = registration.ConvenienceFeePaid * raAttendances.Count,
-                            PaymentTypeFeeOverrideAmount = registration.PaymentTypeFeePaid * raAttendances.Count,
+                            ConvenienceFeeOverrideAmount = registration.ConvenienceFeePaid.IfEmpty(0) * raAttendances.Count,
+                            PaymentTypeFeeOverrideAmount = registration.PaymentTypeFeePaid.IfEmpty(0) * raAttendances.Count,
                             PayingAccount = masterRegistrantAccount,
                             BillingAccount = activity.GetAccount(msgs),
                             CreditCardPurchaseObject = creditCardPurchaseObject,
@@ -1332,32 +1333,40 @@ namespace AfterSchool.Areas.Org.Controllers
                             raAttendances.ForEach(raAttendance =>
                             {
                                 var attendanceRegistrant = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(raAttendance.ID.Value, registrantActivity.GetRegistrant(msgs).ID.Value, msgs).FirstOrDefault();
-                                if(attendanceRegistrant.IsNotEmpty() && checkoutObject.Transaction.IsNotEmpty())
+                                if (attendanceRegistrant.IsNotEmpty() && checkoutObject.Transaction.IsNotEmpty())
                                 {
                                     attendanceRegistrant.TransactionId = checkoutObject.Transaction.ID.Value;
                                     msgs.AddRange(attendanceRegistrant.Save());
                                 }
                             });
                         }
-                    }
 
+                        if (msgs.HasErrors())
+                        {
+                            msg = $"An error occured while charging some parents, some parents may have already been processed and you will still receive a summary email if any have. Please contact support and do NOT attempt to charge for attendance again.";
+                            break;
+                        }
+                    }
                 }
 
-                if(msgs.HasNoErrors())
+                if (msgs.HasNoErrors() && msg == defaultMsg)
                 {
-
                     selectedAttendances.ForEach(attendance =>
                     {
                         attendance.IsCharged = true;
                         msgs.AddRange(attendance.Save());
                     });
 
-                    var attendanceRegistrantAcitivtyCounts = GetAttendanceRegistrantActivityCounts(selectedAttendances, registrantActivities, msgs);
-                    var costPerClass = registrantActivities.First().GetRegistration(msgs).CostPerClass.HasValue? registrantActivities.First().GetRegistration(msgs).CostPerClass.Value : 0;
-                    AfterSchoolLibrary.Helpers.EmailHelper.SendAttendanceChargeConfirmation(attendanceRegistrantAcitivtyCounts, activity, costPerClass, null, SessionVariables.CurrentUser, false, msgs);
-
                     msg = "All accounts have been successfully charged.";
                 }
+
+                // Send summary email of charged AttendanceRegistrants to Activity Provider if there were any successful charges
+                var attendanceRegistrantAcitivtyCounts = GetAttendanceRegistrantActivityCounts(selectedAttendances, registrantActivities, msgs);
+                var costPerClass = registrantActivities.First().GetRegistration(msgs).CostPerClass.HasValue ? registrantActivities.First().GetRegistration(msgs).CostPerClass.Value : 0;
+
+                if (attendanceRegistrantAcitivtyCounts.Count > 0)
+                    AfterSchoolLibrary.Helpers.EmailHelper.SendAttendanceChargeConfirmation(attendanceRegistrantAcitivtyCounts, activity, costPerClass, null, SessionVariables.CurrentUser, false, msgs);
+                    
             }
 
             return RedirectToAction("attendance", new { id = activityId, msg });
