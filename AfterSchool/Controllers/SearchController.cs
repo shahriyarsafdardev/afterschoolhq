@@ -1,8 +1,10 @@
-﻿using AfterSchoolLibrary.Models;
+﻿using AfterSchool.Models;
+using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -45,16 +47,32 @@ namespace AfterSchool.Controllers
             return View(providers.Shuffle().ToList());
         }
 
-        public ActionResult MccoySearch()
+        public ActionResult Mccoy()
         {
             //The host should be MCCOY and the visitor should be the provider we want to search for 
             var msgs = new SystemMessages();
 
-            var accounts = Account.SearchMccoyAccounts(msgs: msgs);
+            // var accounts = Account.SearchMccoyAccounts(msgs: msgs);
 
             ViewBag.Messages = msgs;
 
-            return View("~/Views/mccoy/Index.cshtml", accounts);
+            return View("~/Views/mccoy/Index.cshtml");
+        }
+
+        [HttpPost]
+        public JsonResult GetMccoySearch(string search)
+        {
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+
+            var searchedAccounts = AccountService.SearchMccoyAccounts(currentAccount, search, msgs: msgs);
+
+            if (searchedAccounts.IsNotEmpty() && searchedAccounts.Any())
+            {
+                return Json(new { success = true, status = "ok", data = searchedAccounts }, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(new { success = false, status = "error", data = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
         }
     }
 }

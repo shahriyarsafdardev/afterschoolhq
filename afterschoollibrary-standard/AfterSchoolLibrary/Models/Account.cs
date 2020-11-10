@@ -1027,24 +1027,31 @@ namespace AfterSchoolLibrary.Models
             return 0;
         }
 
-        public static List<Account> SearchMccoyAccounts(int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static DataTable SearchMccoyAccounts(string search, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var hostAccountId = 2020; // ..TODO: this should be off mccoy
+            // ..TODO: this should be off mccoy
+            var hostAccountId = 2020; 
 
             var dq = DatabaseQuery;
             dq.Connection = dc;
 
+            // ..TODO: need to check for full text search if needed
             var sql = $@"
-                SELECT * FROM AccountRelationship ar
+                SELECT DISTINCT 
+                    a.Name as AccountName, 
+                    a.Uid as AccountUid, 
+                    a.UniqueName as AccountUniqueName
+                FROM AccountRelationship ar
                 INNER JOIN Account a ON a.ID = ar.VisitorAccountId
-                WHERE ar.HostAccountId = {hostAccountId}
+                LEFT JOIN AccountProfile ap ON ap.AccountId = ar.VisitorAccountId
+                WHERE ar.HostAccountId = {hostAccountId} and (ap.Title IS NULL OR ap.Title like '%{search}%')
                 Order BY Name ASC
             ";
 
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
 
-            return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+            return dq.ExecuteSelect(sql, msgs);            
         }
 
         #endregion

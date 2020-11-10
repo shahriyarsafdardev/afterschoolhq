@@ -7,6 +7,8 @@ using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Billing;
 using Lob.Models;
+using AfterSchool.Models;
+using System.Data;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -2130,6 +2132,71 @@ namespace AfterSchoolLibrary.Services
                     loggedInUser,
                     msgs,
                     dc);
+        }
+
+        public static List<MccoySearchResponse> SearchMccoyAccounts(this Account account, string search, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var accountDataTable = Account.SearchMccoyAccounts(search, msgs: msgs);
+
+            if (accountDataTable.IsNotEmpty() && accountDataTable.Rows.Any())
+            {
+                List<MccoySearchResponse> ListResponse = new List<MccoySearchResponse>();
+                foreach (DataRow row in accountDataTable.Rows)
+                {
+                    if (row.IsNotEmpty())
+                    {
+                        MccoySearchResponse response = new MccoySearchResponse();
+
+                        // ..account
+                        response.AccountName = row["AccountName"].ToString();
+                        response.AccountUid = new Guid(row["AccountUid"].ToString());
+                        response.HomePageUrl = $"{Helpers.Utilities.BaseUrl()}/{row["AccountUniqueName"]}";
+                        response.IsAccountNowEnrolling = account.IsNowEnrolling();
+
+                        //.. account profile                        
+                        var profile = account.GetAccountProfile(msgs);
+
+                        response.IsOpenDuringCovid = profile.IsOpenDuringCovid;
+                        response.IsELearningCenter = profile.IsELearningCenter;
+                        response.ProfileHeadline = profile.Headline.MaxChars(70, "... (more)");
+
+                        response.IsRestrictByGrade = profile.RestrictByGrade();
+                        response.GradeStart = profile.GetGradeLevelStart()?.Abbreviation;
+                        response.GradeEnd = profile.GetGradeLevelEnd()?.Abbreviation;
+                        response.AgeStart = profile.GetAgeStart()?.ToString();
+                        response.AgeEnd = profile.GetAgeEnd()?.ToString();
+
+                        //..location
+                        var location = profile.GetLocation(msgs);
+                        response.Location = location.FormatCityState(false);
+
+                        //.. ProfileHeaderImageUrl
+                        var headerImage = profile.GetHeaderImageUrl(msgs);                        
+                        var photos = profile.GetPhotos(msgs);
+
+                        if (headerImage.IsBlank() && location.IsNotEmpty())
+                        {
+                            response.ProfileHeaderImageUrl = LocationService.GetGoogleMapsImageUrl(location, 1500, 600);
+                        } 
+                        else if (photos.Any() && headerImage.IsBlank())
+                        {
+                            var ah = Helpers.Utilities.GetNewAmazonHelper();
+                            response.ProfileHeaderImageUrl = ah.GetFileLink(photos.First().Value, true, null, true);
+                        } 
+                        else
+                        {
+                            response.ProfileHeaderImageUrl = headerImage;
+                        }
+
+                        
+                        ListResponse.Add(response);
+                    }
+                }
+
+                return ListResponse;
+            }
+
+            return null;
         }
 
         #endregion
