@@ -1343,7 +1343,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         if (msgs.HasErrors())
                         {
-                            msg = $"An error occured while charging some attendances, some attendancess may have already been processed and you will still receive a summary email if any have. Please contact support and do NOT attempt to charge for attendance again.";
+                            msg = $"An error occured while charging some attendances, some parents may have already been processed and you will still receive a summary email if any have. Please contact support and do NOT attempt to charge for attendance again.";
                             break;
                         }
                     }
