@@ -3,6 +3,10 @@
     min-height: 100px;
 }
 
+.no-padding {
+    padding: 0;
+}
+
 .overlay {
     position: absolute;
     top: 0;
@@ -64,4 +68,9 @@
 .mccoy-has-search .form-control {
     padding-right: 12px;
     padding-left: 34px;
+}
+
+.mccoy-filter-header {
+    font-weight: bold;
+    padding-top: 5px;
 }

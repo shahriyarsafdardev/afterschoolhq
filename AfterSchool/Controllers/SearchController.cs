@@ -48,23 +48,37 @@ namespace AfterSchool.Controllers
         }
 
         public ActionResult Mccoy()
-        {
-            //The host should be MCCOY and the visitor should be the provider we want to search for 
+        {            
             var msgs = new SystemMessages();
+            var neighborhoodList = Location.LoadAllNeighborhoods(
+                                       city: "",
+                                       state: "",
+                                       msgs: msgs)
+                                   .Where(x => x.IsNotEmpty())
+                                   .ToList();
 
-            // var accounts = Account.SearchMccoyAccounts(msgs: msgs);
+            var grades = GradeLevel.Load();
+            
 
             ViewBag.Messages = msgs;
+            ViewBag.Neighborhoods = neighborhoodList;
+            ViewBag.Grades = grades;
 
             return View("~/Views/mccoy/Index.cshtml");
         }
 
         [HttpPost]
-        public JsonResult GetMccoySearch(string search)
+        public JsonResult GetMccoySearch(string search, string neighborhoods)
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
 
+            List<string> neighborhoodSearch = null;
+
+            if (neighborhoods.IsNotEmpty())
+                neighborhoodSearch = neighborhoods.Split(',').ToList();
+
+            // ..TODO: updated call with filters
             var searchedAccounts = AccountService.SearchMccoyAccounts(currentAccount, search, msgs: msgs);
 
             if (searchedAccounts.IsNotEmpty() && searchedAccounts.Any())

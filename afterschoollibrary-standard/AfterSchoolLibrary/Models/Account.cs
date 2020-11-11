@@ -1030,6 +1030,7 @@ namespace AfterSchoolLibrary.Models
         public static DataTable SearchMccoyAccounts(string search, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             // ..TODO: this should be off mccoy
+            // ..The host should be MCCOY and the visitor should be the provider we want to search for 
             var hostAccountId = 2020; 
 
             var dq = DatabaseQuery;
