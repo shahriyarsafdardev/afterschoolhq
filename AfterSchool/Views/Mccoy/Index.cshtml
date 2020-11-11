@@ -38,70 +38,94 @@
 
 <div id="filters" class="col-md-3" style="padding-right: 0;">
 
-    @{
+    <div>
         <h4 class="mccoy-filter-header">Neighborhoods</h4>
 
-        foreach (var item in neighborhoods)
-        {
-            <div class="am-checkbox" style="padding: 3px 0;">
-                <input id="chk-neighborhoods-@(item.ToLower())" name="neighborhoods" value="@(item.ToLower())" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
-                <label for="chk-neighborhoods-@(item.ToLower())" class="margin-h-10 mobile-padding">@item</label>
-            </div>
+        @{
+            foreach (var item in neighborhoods)
+            {
+                <div class="am-checkbox" style="padding: 3px 0;">
+                    <input id="chk-neighborhoods-@(item.ToLower())" name="neighborhoods" value="@(item.ToLower())" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+                    <label for="chk-neighborhoods-@(item.ToLower())" class="margin-h-10 mobile-padding">@item</label>
+                </div>
+            }
         }
-    }
+    </div>
+    <div class="clearfix"></div>
 
-    @{
-        var totalGradeCount = grades.Count;
-        var firstHalf = totalGradeCount / 2;
-        var secondHalf = totalGradeCount - firstHalf;
-
+    <div>
         <h4 class="mccoy-filter-header">Grades</h4>
 
-        <div class="col-md-6 col-sm-12 no-padding">
-            @foreach (var item in grades.Take(firstHalf))
-            {
-                <div class="am-checkbox" style="padding: 3px 0;">
-                    <input id="chk-grades-@(item.ID)" name="grades" value="@(item.ID)" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
-                    <label for="chk-grades-@(item.ID)" class="margin-h-10 mobile-padding">@item.Name</label>
-                </div>
-            }
-        </div>
-        <div class="col-md-6 col-sm-12 no-padding">
-            @foreach (var item in grades.Skip(firstHalf).Take(secondHalf))
-            {
-                <div class="am-checkbox" style="padding: 3px 0;">
-                    <input id="chk-grades-@(item.ID)" name="grades" value="@(item.ID)" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
-                    <label for="chk-grades-@(item.ID)" class="margin-h-10 mobile-padding">@item.Name</label>
-                </div>
-            }
-        </div>
-    }
+        @{
+            var totalGradeCount = grades.Count;
+            var firstHalf = totalGradeCount / 2;
+            var secondHalf = totalGradeCount - firstHalf;
 
-    @{
+            <div class="col-md-6 col-sm-12 no-padding">
+                @foreach (var item in grades.Take(firstHalf))
+                {
+                    <div class="am-checkbox" style="padding: 3px 0;">
+                        <input id="chk-grades-@(item.ID)" name="grades" value="@(item.ID)" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+                        <label for="chk-grades-@(item.ID)" class="margin-h-10 mobile-padding">@item.Name</label>
+                    </div>
+                }
+            </div>
+            <div class="col-md-6 col-sm-12 no-padding">
+                @foreach (var item in grades.Skip(firstHalf).Take(secondHalf))
+                {
+                    <div class="am-checkbox" style="padding: 3px 0;">
+                        <input id="chk-grades-@(item.ID)" name="grades" value="@(item.ID)" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+                        <label for="chk-grades-@(item.ID)" class="margin-h-10 mobile-padding">@item.Name</label>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+    <div class="clearfix"></div>
+
+    <div>
         <h4 class="mccoy-filter-header">Ages</h4>
 
-        <div class="col-md-6 col-sm-12 no-padding">
-            <div class="am-checkbox" style="padding: 3px 0;">
-                <input id="chk-Ages-1" name="Ages" value="0,4" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
-                <label for="chk-Ages-1" class="margin-h-10 mobile-padding">0 - 4 yrs</label>
+        @{
+            <div class="col-md-6 col-sm-12 no-padding">
+                <div class="am-checkbox" style="padding: 3px 0;">
+                    <input id="chk-Ages-1" name="Ages" value="0,4" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+                    <label for="chk-Ages-1" class="margin-h-10 mobile-padding">0 - 4 yrs</label>
+                </div>
+                <div class="am-checkbox" style="padding: 3px 0;">
+                    <input id="chk-Ages-2" name="Ages" value="5,9" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+                    <label for="chk-Ages-2" class="margin-h-10 mobile-padding">5 - 9 yrs</label>
+                </div>
             </div>
-            <div class="am-checkbox" style="padding: 3px 0;">
-                <input id="chk-Ages-2" name="Ages" value="5,9" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
-                <label for="chk-Ages-2" class="margin-h-10 mobile-padding">5 - 9 yrs</label>
-            </div>
-        </div>
 
-        <div class="col-md-6 col-sm-12 no-padding">
-            <div class="am-checkbox" style="padding: 3px 0;">
-                <input id="chk-Ages-3" name="Ages" value="10,14" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
-                <label for="chk-Ages-3" class="margin-h-10 mobile-padding">10 - 14 yrs</label>
+            <div class="col-md-6 col-sm-12 no-padding">
+                <div class="am-checkbox" style="padding: 3px 0;">
+                    <input id="chk-Ages-3" name="Ages" value="10,14" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+                    <label for="chk-Ages-3" class="margin-h-10 mobile-padding">10 - 14 yrs</label>
+                </div>
+                <div class="am-checkbox" style="padding: 3px 0;">
+                    <input id="chk-Ages-4" name="Ages" value="15,18" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+                    <label for="chk-Ages-4" class="margin-h-10 mobile-padding">15 - 18 yrs</label>
+                </div>
             </div>
-            <div class="am-checkbox" style="padding: 3px 0;">
-                <input id="chk-Ages-4" name="Ages" value="15,18" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
-                <label for="chk-Ages-4" class="margin-h-10 mobile-padding">15 - 18 yrs</label>
-            </div>
-        </div>
-    }
+        }
+    </div>
+    <div class="clearfix"></div>
+
+    <div>
+        <h4 class="mccoy-filter-header"> Gender Restrictions</h4>
+
+        @{
+            foreach (GenderRestrictionType item in System.Enum.GetValues(typeof(GenderRestrictionType)))
+            {
+                <div class="am-checkbox" style="padding: 3px 0;">
+                    <input id="chk-gender-@((int)item)" name="gender" value="@((int)item)" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+                    <label for="chk-gender-@((int)item)" class="margin-h-10 mobile-padding"> @item.ToString().SplitByUpperCase() </label>
+                </div>
+            }
+        }
+    </div>
+    <div class="clearfix"></div>
 
 </div>
 
