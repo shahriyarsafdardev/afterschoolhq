@@ -896,7 +896,7 @@ namespace AfterSchoolLibrary.Helpers
                 receiptRows += ProcessTemplate(
                         EmailTemplates.Attendance_Charge_Confirmation_Rows,
                         attendanceModel,
-                        "Attendance_Charge_Confirmation_Rows-1.0",
+                        "Attendance_Charge_Confirmation_Rows-1.1",
                         msgs);
 
                 totalAttendanceCharge += totalCharge;
@@ -915,7 +915,7 @@ namespace AfterSchoolLibrary.Helpers
             var attendanceChargeTable = ProcessTemplate(
                 EmailTemplates.Attendance_Charge_Confirmation_Table,
                 attendanceChargeTableModel,
-                "Attendance_Charge_Confirmation_Table-1.0",
+                "Attendance_Charge_Confirmation_Table-1.1",
                 msgs);
 
             var model = new NameValueCollection()
@@ -934,7 +934,7 @@ namespace AfterSchoolLibrary.Helpers
             var body = ProcessTemplate(
                 EmailTemplates.Attendance_Charge_Confirmation,
                 model,
-                "Attendance_Charge_Confirmation_Table-1.0",
+                "Attendance_Charge_Confirmation-1.1",
                 msgs);
 
             // SEND EMAILS
