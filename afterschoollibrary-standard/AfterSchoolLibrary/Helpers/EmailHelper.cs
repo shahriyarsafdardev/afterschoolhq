@@ -927,14 +927,15 @@ namespace AfterSchoolLibrary.Helpers
                 { "RegistrationTable", attendanceChargeTable },
                 { "CustomMessage", customMessage },
                 { "RegistrationDetails", "Login to your account to view more details about this payment."},
-                { "ActivityName", activity.Name.ToProperCase() }
+                { "ActivityName", activity.Name.ToProperCase() },
+                { "SupportEmail", Email.AppSupportEmailAddress }
             };
 
             var subject = $"Attendance Charged for {activity.Name}";
             var body = ProcessTemplate(
                 EmailTemplates.Attendance_Charge_Confirmation,
                 model,
-                "Attendance_Charge_Confirmation-1.2",
+                "Attendance_Charge_Confirmation-1.1",
                 msgs);
 
             // SEND EMAILS
