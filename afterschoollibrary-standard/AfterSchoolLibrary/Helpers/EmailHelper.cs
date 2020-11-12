@@ -934,7 +934,7 @@ namespace AfterSchoolLibrary.Helpers
             var body = ProcessTemplate(
                 EmailTemplates.Attendance_Charge_Confirmation,
                 model,
-                "Attendance_Charge_Confirmation-1.1",
+                "Attendance_Charge_Confirmation-1.2",
                 msgs);
 
             // SEND EMAILS
