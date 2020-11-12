@@ -1,10 +1,7 @@
 ﻿@{ 
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
     ViewBag.Title = "Search";
-
-    var msgs = (SystemMessages)ViewBag.Messages;
-    var neighborhoods = (List<string>)ViewBag.Neighborhoods;
-    var grades = (List<GradeLevel>)ViewBag.Grades;
+    var msgs = (SystemMessages)ViewBag.Messages; 
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -36,97 +33,8 @@
     </div>
 </div>
 
-<div id="filters" class="col-md-3" style="padding-right: 0;">
-
-    <div>
-        <h4 class="mccoy-filter-header">Neighborhoods</h4>
-
-        @{
-            foreach (var item in neighborhoods)
-            {
-                <div class="am-checkbox" style="padding: 3px 0;">
-                    <input id="chk-neighborhoods-@(item.ToLower())" name="neighborhoods" value="@(item.ToLower())" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
-                    <label for="chk-neighborhoods-@(item.ToLower())" class="margin-h-10 mobile-padding">@item</label>
-                </div>
-            }
-        }
-    </div>
-    <div class="clearfix"></div>
-
-    <div>
-        <h4 class="mccoy-filter-header">Grades</h4>
-
-        @{
-            var totalGradeCount = grades.Count;
-            var firstHalf = totalGradeCount / 2;
-            var secondHalf = totalGradeCount - firstHalf;
-
-            <div class="col-md-6 col-sm-12 no-padding">
-                @foreach (var item in grades.Take(firstHalf))
-                {
-                    <div class="am-checkbox" style="padding: 3px 0;">
-                        <input id="chk-grades-@(item.ID)" name="grades" value="@(item.ID)" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
-                        <label for="chk-grades-@(item.ID)" class="margin-h-10 mobile-padding">@item.Name</label>
-                    </div>
-                }
-            </div>
-            <div class="col-md-6 col-sm-12 no-padding">
-                @foreach (var item in grades.Skip(firstHalf).Take(secondHalf))
-                {
-                    <div class="am-checkbox" style="padding: 3px 0;">
-                        <input id="chk-grades-@(item.ID)" name="grades" value="@(item.ID)" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
-                        <label for="chk-grades-@(item.ID)" class="margin-h-10 mobile-padding">@item.Name</label>
-                    </div>
-                }
-            </div>
-        }
-    </div>
-    <div class="clearfix"></div>
-
-    <div>
-        <h4 class="mccoy-filter-header">Ages</h4>
-
-        @{
-            <div class="col-md-6 col-sm-12 no-padding">
-                <div class="am-checkbox" style="padding: 3px 0;">
-                    <input id="chk-Ages-1" name="Ages" value="0,4" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
-                    <label for="chk-Ages-1" class="margin-h-10 mobile-padding">0 - 4 yrs</label>
-                </div>
-                <div class="am-checkbox" style="padding: 3px 0;">
-                    <input id="chk-Ages-2" name="Ages" value="5,9" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
-                    <label for="chk-Ages-2" class="margin-h-10 mobile-padding">5 - 9 yrs</label>
-                </div>
-            </div>
-
-            <div class="col-md-6 col-sm-12 no-padding">
-                <div class="am-checkbox" style="padding: 3px 0;">
-                    <input id="chk-Ages-3" name="Ages" value="10,14" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
-                    <label for="chk-Ages-3" class="margin-h-10 mobile-padding">10 - 14 yrs</label>
-                </div>
-                <div class="am-checkbox" style="padding: 3px 0;">
-                    <input id="chk-Ages-4" name="Ages" value="15,18" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
-                    <label for="chk-Ages-4" class="margin-h-10 mobile-padding">15 - 18 yrs</label>
-                </div>
-            </div>
-        }
-    </div>
-    <div class="clearfix"></div>
-
-    <div>
-        <h4 class="mccoy-filter-header"> Gender Restrictions</h4>
-
-        @{
-            foreach (GenderRestrictionType item in System.Enum.GetValues(typeof(GenderRestrictionType)))
-            {
-                <div class="am-checkbox" style="padding: 3px 0;">
-                    <input id="chk-gender-@((int)item)" name="gender" value="@((int)item)" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
-                    <label for="chk-gender-@((int)item)" class="margin-h-10 mobile-padding"> @item.ToString().SplitByUpperCase() </label>
-                </div>
-            }
-        }
-    </div>
-    <div class="clearfix"></div>
-
+<div id="filters" class="col-md-3" style="padding-right: 0; padding-bottom: 20px; padding-top: 10px;">
+    @{ Html.RenderPartial("~/Views/Shared/_MccoyFilters.cshtml"); }
 </div>
 
 <div id="search-result" class="col-md-9"> </div>
@@ -238,8 +146,19 @@
         var txtMccoySearch = $('#txtMccoySearch');
 
         $(document).ready(function () {
-            loadAccounts();
-        })
+            loadFiltersAndInitiateSearch();
+        });
+
+        function loadFiltersAndInitiateSearch() {
+            var hashUrl = WebPage.getHash();
+            var filters = hashUrl.split(',');
+
+            _.each(filters, function (filter) {
+                $(`input[value="${filter}"]`).attr('checked', 'checked');
+            });
+
+            prepareSearchParams();
+        }
 
         function waitAndFilterSearch() {
             clearTimeout(delayTimer);
@@ -250,29 +169,133 @@
 
         function prepareSearchParams() {
             //.. prepare params
+            var mainUrl = '';
             var comma_delimited_neighborhoods = '';
+            var comma_delimited_grades = '';
+            var comma_delimited_ages = '';
+            var comma_delimited_gender = '';
+            var comma_delimited_timing = '';
+            var comma_delimited_cost = '';
+            var comma_delimited_starting = '';
+            var comma_delimited_other = '';
+            var comma_delimited_special = '';
 
-            $('input:checkbox[name=neighborhoods]:checked').each(function ()
-            {
+            $('input:checkbox[name=neighborhoods]:checked').each(function () {
                 if (comma_delimited_neighborhoods.length > 0) {
                     comma_delimited_neighborhoods += ',';
                 }
-                comma_delimited_neighborhoods += $(this).val();   
+                comma_delimited_neighborhoods += $(this).val();
             });
 
+            $('input:checkbox[name=grades]:checked').each(function () {
+                if (comma_delimited_grades.length > 0) {
+                    comma_delimited_grades += ',';
+                }
+                comma_delimited_grades += $(this).val();
+            });
+
+            $('input:checkbox[name=ages]:checked').each(function () {
+                if (comma_delimited_ages.length > 0) {
+                    comma_delimited_ages += ',';
+                }
+                comma_delimited_ages += $(this).val();
+            });
+
+            $('input:checkbox[name=gender]:checked').each(function () {
+                if (comma_delimited_gender.length > 0) {
+                    comma_delimited_gender += ',';
+                }
+                comma_delimited_gender += $(this).val();
+            });
+
+            $('input:checkbox[name=timing]:checked').each(function () {
+                if (comma_delimited_timing.length > 0) {
+                    comma_delimited_timing += ',';
+                }
+                comma_delimited_timing += $(this).val();
+            });
+
+            $('input:checkbox[name=cost]:checked').each(function () {
+                if (comma_delimited_cost.length > 0) {
+                    comma_delimited_cost += ',';
+                }
+                comma_delimited_cost += $(this).val();
+            });
+
+            $('input:checkbox[name=starting]:checked').each(function () {
+                if (comma_delimited_starting.length > 0) {
+                    comma_delimited_starting += ',';
+                }
+                comma_delimited_starting += $(this).val();
+            });
+
+            $('input:checkbox[name=other]:checked').each(function () {
+                if (comma_delimited_other.length > 0) {
+                    comma_delimited_other += ',';
+                }
+                comma_delimited_other += $(this).val();
+            });
+
+            $('input:checkbox[name=special]:checked').each(function () {
+                if (comma_delimited_special.length > 0) {
+                    comma_delimited_special += ',';
+                }
+                comma_delimited_special += $(this).val();
+            });
+
+            if (comma_delimited_neighborhoods.length > 0) {
+                mainUrl += `${comma_delimited_neighborhoods},`;
+            }
+
+            if (comma_delimited_grades.length > 0) {
+                mainUrl += `${comma_delimited_grades},`;
+            }
+
+            if (comma_delimited_ages.length > 0) {
+                mainUrl += `${comma_delimited_ages},`;
+            }
+
+            if (comma_delimited_gender.length > 0) {
+                mainUrl += `${comma_delimited_gender},`;
+            }
+
+            if (comma_delimited_timing.length > 0) {
+                mainUrl += `${comma_delimited_timing},`;
+            }
+
+            if (comma_delimited_cost.length > 0) {
+                mainUrl += `${comma_delimited_cost},`;
+            }
+
+            if (comma_delimited_starting.length > 0) {
+                mainUrl += `${comma_delimited_starting},`;
+            }
+
+            if (comma_delimited_other.length > 0) {
+                mainUrl += `${comma_delimited_other},`;
+            }
+
+            if (comma_delimited_special.length > 0) {
+                mainUrl += `${comma_delimited_special},`;
+            }
+
+            if (mainUrl) {
+                WebPage.addHash(mainUrl);
+            }
+
             // .. call api
-            loadAccounts(txtMccoySearch.val(), comma_delimited_neighborhoods);
+            loadAccounts(txtMccoySearch.val(), comma_delimited_neighborhoods, comma_delimited_grades, comma_delimited_ages, comma_delimited_gender, comma_delimited_timing, comma_delimited_cost, comma_delimited_starting, comma_delimited_other, comma_delimited_special);
         }
 
 
-        function loadAccounts(search, neighborhoods) {            
+        function loadAccounts(search, neighborhoods, grades, ages, gender, timing, cost, starting, other, special) {
             showLoader();
 
             var url = '@Url.Action("GetMccoySearch", "Search", new { Area = "" })';
             $.ajax({
                 type: "POST",
                 url: url,
-                data: { search, neighborhoods },
+                data: { search, neighborhoods, grades, ages, gender, timing, cost, starting, other, special },
                 success: function (data) {
                     if (data && data.success == true) {
 
@@ -292,9 +315,11 @@
                         return;
                     }
                     else {
+                        $('#search-result').html('');
+
                         Notifications.showBar({
                             title: 'Error',
-                            message: 'No records found or something went wrong.',
+                            message: 'No records found.',
                             success: false
                         });
                         hideLoader();

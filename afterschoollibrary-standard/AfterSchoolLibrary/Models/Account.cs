@@ -1031,21 +1031,30 @@ namespace AfterSchoolLibrary.Models
         {
             // ..TODO: this should be off mccoy
             // ..The host should be MCCOY and the visitor should be the provider we want to search for 
-            var hostAccountId = 2020; 
+            var hostAccountId = 2020;
 
             var dq = DatabaseQuery;
             dq.Connection = dc;
 
+            var searchTerms = $"\"\"";
+
+            if (search.IsNotBlank())
+                searchTerms = $"\"{search}*\"";
+
             // ..TODO: need to check for full text search if needed
             var sql = $@"
+                DECLARE  @SearchTerm nvarchar(250)
+                SET @SearchTerm = '{searchTerms}'
+
                 SELECT DISTINCT 
-                    a.Name as AccountName, 
+                    a.Id as AccountId,
                     a.Uid as AccountUid, 
+                    a.Name as AccountName,                    
                     a.UniqueName as AccountUniqueName
                 FROM AccountRelationship ar
                 INNER JOIN Account a ON a.ID = ar.VisitorAccountId
                 LEFT JOIN AccountProfile ap ON ap.AccountId = ar.VisitorAccountId
-                WHERE ar.HostAccountId = {hostAccountId} and (ap.Title IS NULL OR ap.Title like '%{search}%')
+                WHERE ar.HostAccountId = {hostAccountId} and ((@SearchTerm = '""""') OR contains((ap.Title, ap.Headline, ap.About), @SearchTerm))
                 Order BY Name ASC
             ";
 

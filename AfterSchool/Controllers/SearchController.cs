@@ -68,7 +68,7 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public JsonResult GetMccoySearch(string search, string neighborhoods)
+        public JsonResult GetMccoySearch(string search, string neighborhoods, string grades, string ages, string gender, string timing, string cost, string starting, string other, string special)
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;

@@ -1818,6 +1818,7 @@
     <Content Include="Views\Shared\_PaymentSources.cshtml" />
     <Content Include="Views\Shared\ParticipationObject\_TuitionAndPostPayPlans.cshtml" />
     <Content Include="Views\Mccoy\Index.cshtml" />
+    <Content Include="Views\Shared\_MccoyFilters.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
