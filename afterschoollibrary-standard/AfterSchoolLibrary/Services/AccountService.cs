@@ -3425,6 +3425,11 @@ namespace AfterSchoolLibrary.Services
 
         #region Coupons
 
+        public static List<Coupon> GetCoupons(this Account account, string search, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, bool isDeleted, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Coupon.LoadByAccountId(account.ID.Value, search, startDate, endDate, participationObjects, isDeleted, start, length, msgs, dc);
+        }
+
         public static AttachedCoupon AttachCoupon(this Account account, Coupon coupon, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (account.AccountTypeId != AccountType.Registrant)
@@ -3451,7 +3456,7 @@ namespace AfterSchoolLibrary.Services
             return AttachedCoupon.LoadByAccountId(account.ID.Value, actionHelper?.Messages, actionHelper?.Connection);
         }
 
-        public static Coupon CreateCoupon(this Account account, decimal amount, DateTime? expirationDate, CouponAmountType amountType, CouponApplyType applyType, StripeCouponDuration couponDuration, int? durationInMonths, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Coupon CreateCoupon(this Account account, decimal amount, DateTime? expirationDate, CouponAmountType amountType, CouponApplyType applyType, int maxUsesAll, int maxUsesPerPerson, string couponCode, string label, string description, StripeCouponDuration couponDuration, int? durationInMonths, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var coupon = CouponService.CreateNew(
                 accountId: account.ID.Value,
@@ -3459,11 +3464,11 @@ namespace AfterSchoolLibrary.Services
                 expirationDate: expirationDate,
                 couponAmountType: amountType,
                 couponApplyType: applyType,
-                maxUsesAll: 1,
-                maxUsesPerPerson: 1,
-                couponCode: CouponService.GenerateCouponCode(account.ID.Value, msgs, dc),
-                label: $"Coupon - {account.NowInAccountTimeZone()}",
-                description: "",
+                maxUsesAll: maxUsesAll,
+                maxUsesPerPerson: maxUsesPerPerson,
+                couponCode: couponCode,
+                label: label,
+                description: description,
                 loggedInUser: loggedInUser,
                 msgs: msgs,
                 dc: dc);

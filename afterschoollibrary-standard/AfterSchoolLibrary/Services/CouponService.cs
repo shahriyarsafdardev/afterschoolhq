@@ -64,6 +64,11 @@ namespace AfterSchoolLibrary.Services
             return coupon.Amount.ToCurrency();
         }
 
+        public static int GetNumberOfUses(this Coupon coupon)
+        {
+            return Purchase.LoadByCouponId(coupon.ID.Value).Count;
+        }
+
         public static bool DoesApplyToRegistrationFee(this Coupon coupon)
         {
             return coupon.AppliesTo == CouponApplyType.RegistrationFee;

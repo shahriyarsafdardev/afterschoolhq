@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Web.Mvc;
+using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
+using AfterSchoolLibrary.Helpers;
 using AfterSchool.Models;
 using BasicLibrary;
 using System.Linq;
@@ -77,6 +79,8 @@ namespace AfterSchool.Areas.Org.Controllers
             };
             return View(allTransactions);
         }
+
+        #region Payouts
 
         [HttpGet]
         public ActionResult Payouts(string pn, string rpp, string sdate, string edate)
@@ -195,6 +199,8 @@ namespace AfterSchool.Areas.Org.Controllers
             return View("RequestPayout", transactions);
         }
 
+        #endregion
+
         public ActionResult DownloadCSV(string sdate, string edate, string poId, string poTypeId, string q)
         {
             var startDate = sdate.IsDateTime() ?
@@ -262,6 +268,8 @@ namespace AfterSchool.Areas.Org.Controllers
             return null;
         }
 
+        #region Subscriptions
+
         [HttpGet]
         public ActionResult Subscriptions()
         {
@@ -281,6 +289,10 @@ namespace AfterSchool.Areas.Org.Controllers
 
             return View(subscriptions);
         }
+
+        #endregion
+
+        #region Refunds
 
         [HttpGet]
         public ActionResult RefundRequests()
@@ -389,5 +401,136 @@ namespace AfterSchool.Areas.Org.Controllers
 
             return new JsonResult { Data = new { status = "error", messages = msgs }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
         }
+
+        #endregion
+
+        #region Coupons
+        // GET: Org/Accounting/Coupon
+        [HttpGet]
+        public ActionResult Coupon()
+        {
+            var msgs = new SystemMessages();
+            var coupons = AfterSchoolLibrary.Models.Coupon.LoadByAccountId(SessionVariables.CurrentAccount.ID.Value, msgs);
+
+            ViewBag.Messages = msgs;
+
+            return View(coupons);
+        }
+
+        [HttpGet]
+        public ActionResult AddCoupon()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult PostAddCoupon()
+        {
+            var msgs = new SystemMessages();
+            var label = Request.Form["label"];
+            var description = Request.Form["description"];
+            var couponCode = Request.Form["couponCode"];
+            var maxUsesAll = Request.Form["maxUsesAll"];
+            var maxUsesPerPerson = Request.Form["maxUsesPerPerson"];
+            var expirationDate = Request.Form["expirationDate"];
+            var amount = Request.Form["amount"];
+            var amountType = Request.Form["amountType"];
+            var activityIds = Request.Form["activityIds"];
+            var applyType = Request.Form["applyType"];
+
+            if (label.IsBlank())
+                msgs.Add("Label is required", MessageType.UserError);
+
+            // description can be empty
+
+            if (couponCode.IsBlank())
+                msgs.Add("Coupon Code Required", MessageType.UserError);
+
+            if (maxUsesAll.IsBlank() || !maxUsesAll.IsInteger())
+                msgs.Add("Number of Uses Required, Must be a number", MessageType.UserError);
+
+            if (maxUsesPerPerson.IsBlank() || !maxUsesPerPerson.IsInteger())
+                msgs.Add("Number of Uses per Person Required, Must be a number", MessageType.UserError);
+
+            if (expirationDate.IsBlank() || !expirationDate.IsDate())
+                msgs.Add("Valid Expiration Date Required", MessageType.UserError);
+
+            if (amount.IsBlank() || !amount.IsNumber())
+                msgs.Add("Amount Required, Must be a number", MessageType.UserError);
+
+            if (amountType.IsBlank() || Enum.IsDefined(typeof(CouponAmountType), amountType))
+                msgs.Add("Amount must be flate rate or percentage", MessageType.UserError);
+
+            if (activityIds.IsBlank())
+                msgs.Add("Coupon Must Be Applied to at Least One Activity", MessageType.UserError);
+
+            if (applyType.IsBlank() || Enum.IsDefined(typeof(CouponApplyType), applyType))
+                msgs.Add("Coupon Must have a Payment Type Set", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                var ids = activityIds.Split(',').Select(p => Convert.ToInt32(p)).ToList();
+                var activities = Activity.LoadList(ids, msgs);
+
+                Database.ExecuteTransaction
+               (
+                   action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                   {
+                   // create new coupon
+                   var coupon = SessionVariables.CurrentAccount.CreateCoupon(
+                        amount.ToDecimal(),
+                        expirationDate.ToDateTime(),
+                        amountType: (CouponAmountType)Enum.Parse(typeof(CouponAmountType), amountType),
+                        applyType: (CouponApplyType)Enum.Parse(typeof(CouponApplyType), applyType),
+                        maxUsesAll: maxUsesAll.ToInteger(),
+                        maxUsesPerPerson: maxUsesPerPerson.ToInteger(),
+                        couponCode: couponCode,
+                        label: label,
+                        description: description.IsBlank() ? "" : description,
+                        couponDuration: AfterSchoolLibrary.Billing.StripeCouponDuration.Once, // TODO :  figure this out
+                        durationInMonths: null,
+                        loggedInUser: SessionVariables.CurrentUser,
+                        msgs: amsgs,
+                        dc: adc);
+
+                       activities.ForEach(activity =>
+                       {
+                           // assign coupon to the activities
+                           var poc = PurchaseableObjectCouponService.CreateNew(
+                            purchaseableObject: activity.GetPurchaseableObject(),
+                            coupon: coupon,
+                            loggedInUser: SessionVariables.CurrentUser,
+                            msgs: amsgs,
+                            dc: adc);
+                       });
+                   },
+                   onSuccess: (SystemMessages smsgs) =>
+                   {
+                       msgs.AddRange(smsgs);
+                   },
+                   onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                   onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(msgs)
+               );
+
+            }
+
+            if (msgs.HasNoErrors())
+            {
+                msgs.Add("Coupon Created", MessageType.Success);
+                ViewBag.Messages = msgs;
+                return View("Coupon");
+            }
+            else
+            {
+                ViewBag.Messages = msgs;
+                return View("AddCoupon");
+            }
+               
+        }
+
+
+
+        #endregion
+
     }
 }

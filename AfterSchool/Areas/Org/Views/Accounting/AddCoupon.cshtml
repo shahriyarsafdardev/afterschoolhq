@@ -1,0 +1,115 @@
+﻿@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+}
+
+@{Html.RenderPartial("OrgAccountHeader");}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("_AccountingHeader"); }
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <div class="panel panel-default">
+
+        <div class="panel-heading">
+            <i class="s7-plus"></i> Add Coupon
+        </div>
+
+        <div class="panel-body">
+
+            <form class="form form-horizontal" method="post" action="@Url.Action("additionalinfo", "onboarding")">
+                <div class="row">
+                    <div class="col-lg-offset-4 col-lg-4 col-md-offset-3 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <h1 class="text-center">@headerText</h1>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-lg-3 control-label">
+                                Label
+                            </label>
+                            <div class="col-lg-9">
+                                <input type="text" class="form-control" name="label" id="label" value="@Request["label"]" required />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-lg-3 control-label">
+                                Description
+                            </label>
+                            <div class="col-lg-9">
+                                <input type="text" class="form-control" name="description" id="description" value="@Request["description"]" />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-lg-3 control-label">
+                                Coupon Code
+                            </label>
+                            <div class="col-lg-9">
+                                <input type="text" class="form-control" name="description" id="description" value="@Request["description"]" />
+                                <p class="text-muted">
+                                    <em>This is the code parents will enter on checkout.</em>
+                                </p>
+                            </div>
+                        </div>
+
+
+                        <div class="form-group">
+                            <label class="col-lg-3 control-label">
+                                Are you an E-Learning Center?
+                            </label>
+                            <div class="col-lg-9">
+                                @{ Html.RenderPartial(
+                                                     "~/Views/Shared/_SwitchButton.cshtml",
+                                                     elc,
+                                                     new ViewDataDictionary() {
+                                   { "checkboxname", "elearningcenter" },
+                                   { "checkboxid", "chkELearningCenter" },
+}); }
+                                <p class="text-muted">You will host/care for students to assist e-learning during the school day</p>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-lg-3 control-label">
+                                Is it a Virtual Program?
+                            </label>
+                            <div class="col-lg-9">
+                                @{ Html.RenderPartial(
+                                                     "~/Views/Shared/_SwitchButton.cshtml",
+                                                     isVirtualProgram,
+                                                     new ViewDataDictionary() {
+                                   { "checkboxname", "isvirtualprogram" },
+                                   { "checkboxid", "chkIsVirtualProgram" },
+}); }
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-lg-3 control-label"></label>
+                            <div class="col-lg-9">
+                                <div class="visible-sm visible-xs">
+                                    <button type="submit" class="btn btn-primary btn-lg btn-block">Save Changes &raquo;</button>
+                                </div>
+
+                                <div class="visible-sm visible-xs text-center margin-v-30">
+                                    <a href="@Url.Action("index", "onboarding")" class="text-muted">&laquo; Back</a>
+                                </div>
+
+                                <div class="visible-md visible-lg">
+                                    <a href="@Url.Action("index", "onboarding")" class="text-muted">&laquo; Back</a>
+                                    <button type="submit" class="btn btn-primary btn-lg pull-right">Save Changes &raquo;</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </form>
+
+
+        </div>
+    </div>
+</div>

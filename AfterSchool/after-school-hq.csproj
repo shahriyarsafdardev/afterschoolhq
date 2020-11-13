@@ -1345,6 +1345,8 @@
     <Content Include="Areas\Org\Views\Onboarding\AccountType.cshtml" />
     <Content Include="Areas\Org\Views\Onboarding\AdditionalInfo.cshtml" />
     <Content Include="Areas\Org\Views\Activity\ChargeAttendanceFee.cshtml" />
+    <Content Include="Areas\Org\Views\Accounting\Coupon.cshtml" />
+    <Content Include="Areas\Org\Views\Accounting\AddCoupon.cshtml" />
     <None Include="Scripts\jquery-3.0.0-vsdoc.js" />
     <Content Include="Scripts\jquery-3.0.0.js" />
     <Content Include="Scripts\jquery-3.0.0.min.js" />

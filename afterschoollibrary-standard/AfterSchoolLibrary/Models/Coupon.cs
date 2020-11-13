@@ -45,6 +45,8 @@ namespace AfterSchoolLibrary.Models
 		public int? MaxNumberOfUsesAll { get { return (int?)MDV["MaxNumberOfUsesAll"].Value; } set { MDV["MaxNumberOfUsesAll"].Value = value; } }
 		public string CouponCode { get { return (string)MDV["CouponCode"].Value; } set { MDV["CouponCode"].Value = value; } }
 		public string StripeCouponId { get { return (string)MDV["StripeCouponId"].Value; } set { MDV["StripeCouponId"].Value = value; } }
+		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
+		public bool IsDisabled { get { return (bool)MDV["IsDisabled"].Value; } set { MDV["IsDisabled"].Value = value; } }
 		
 
         public Coupon()
@@ -53,6 +55,8 @@ namespace AfterSchoolLibrary.Models
             this.LoadObjectValues(ObjectMap);
 			this.AmountTypeId = CouponAmountType.NotSet;
 			this.AppliesTo = CouponApplyType.NotSet;
+			this.Uid = Guid.NewGuid();
+			this.IsDisabled = false;
 			
         }
 
@@ -72,6 +76,8 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "MaxNumberOfUsesAll", System.Data.SqlDbType.Int);
 				_dp.Add(className, "CouponCode", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "StripeCouponId", System.Data.SqlDbType.NVarChar , "100");
+				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
+				_dp.Add(className, "IsDisabled", System.Data.SqlDbType.Bit);
 				
                 return _dp;
             }
@@ -187,6 +193,14 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["StripeCouponId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["Uid"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsDisabled"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

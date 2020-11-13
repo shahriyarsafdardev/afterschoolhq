@@ -335,6 +335,7 @@ namespace AfterSchoolLibrary.Models
 			ProductPurchase.Update(new Hashtable(){{"ParticipationObjectTypeId",0}}, new Hashtable(){{"ParticipationObjectTypeId", DBNull.Value}}, ProductPurchase.ObjectMap, dc);
 			Coupon.Update(new Hashtable(){{"AmountTypeId",0}}, new Hashtable(){{"AmountTypeId", DBNull.Value}}, Coupon.ObjectMap, dc);
 			Coupon.Update(new Hashtable(){{"AppliesTo",0}}, new Hashtable(){{"AppliesTo", DBNull.Value}}, Coupon.ObjectMap, dc);
+			Coupon.Update(new Hashtable(){{"IsDisabled",false}}, new Hashtable(){{"IsDisabled", DBNull.Value}}, Coupon.ObjectMap, dc);
 			AttachedCoupon.Update(new Hashtable(){{"IsUsed",false}}, new Hashtable(){{"IsUsed", DBNull.Value}}, AttachedCoupon.ObjectMap, dc);
 			PurchaseableObjectCoupon.Update(new Hashtable(){{"PurchaseableObjectTypeId",0}}, new Hashtable(){{"PurchaseableObjectTypeId", DBNull.Value}}, PurchaseableObjectCoupon.ObjectMap, dc);
 			RefundRequest.Update(new Hashtable(){{"RequestFulfilled",false}}, new Hashtable(){{"RequestFulfilled", DBNull.Value}}, RefundRequest.ObjectMap, dc);
