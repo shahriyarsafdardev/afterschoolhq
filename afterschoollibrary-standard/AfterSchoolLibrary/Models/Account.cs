@@ -1037,7 +1037,7 @@ namespace AfterSchoolLibrary.Models
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public static DataTable SearchMccoyAccounts(string search, string isELearningCenter, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static DataTable SearchMccoyAccounts(string search, string isELearningCenter, string isVirtualProgram, string isOpenDuringCovid, string specialNeeds, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             // ..TODO: this should be off mccoy
             // ..The host should be MCCOY and the visitor should be the provider we want to search for 
@@ -1052,11 +1052,20 @@ namespace AfterSchoolLibrary.Models
                 searchTerms = $"\"{search}*\"";
 
             var sql = $@"
-                DECLARE  @SearchTerm nvarchar(250), @IsELearningCenter bit = NULL
+                DECLARE  @SearchTerm nvarchar(250), @IsELearningCenter bit = NULL,  @IsVirtualProgram bit = null, @IsOpenDuringCovid bit = null, @SpecialNeeds nvarchar(100)
                 SET @SearchTerm = '{searchTerms}'";
 
             if (isELearningCenter.IsNotEmpty())
-                sql += $"SET @IsELearningCenter = {isELearningCenter}";
+                sql += $"SET @IsELearningCenter = {isELearningCenter}" ;
+
+            if (isVirtualProgram.IsNotEmpty())
+                sql += $"SET @IsVirtualProgram = {isVirtualProgram}";
+
+            if (isOpenDuringCovid.IsNotEmpty())
+                sql += $"SET @IsOpenDuringCovid = {isOpenDuringCovid}";
+
+            if (specialNeeds.IsNotEmpty())
+                sql += $"SET @SpecialNeeds = '{specialNeeds}'";
 
             sql += $@"
                 SELECT DISTINCT 
@@ -1067,9 +1076,13 @@ namespace AfterSchoolLibrary.Models
                 FROM AccountRelationship ar
                 INNER JOIN Account a ON a.ID = ar.VisitorAccountId
                 LEFT JOIN AccountProfile ap ON ap.AccountId = ar.VisitorAccountId
+                LEFT JOIN AccountProperty property on property.AccountId = ar.VisitorAccountId
                 WHERE ar.HostAccountId = {hostAccountId}                     
                     AND ((@SearchTerm = '""""') OR contains((ap.Title, ap.Headline, ap.About), @SearchTerm))
-                    and ((@IsELearningCenter IS NULL) OR ap.IsELearningCenter = @IsELearningCenter)
+                    AND ((@IsELearningCenter IS NULL) OR ap.IsELearningCenter = @IsELearningCenter)
+                    AND ((@IsVirtualProgram IS NULL) OR ap.IsVirtualProgram = @IsVirtualProgram)
+                    AND ((@IsOpenDuringCovid IS NULL) OR ap.IsOpenDuringCovid = @IsOpenDuringCovid)
+                    AND ((@specialNeeds IS NULL) OR property.Value In (SELECT value  FROM STRING_SPLIT(@specialNeeds, ',') WHERE RTRIM(value) <> ''))
                 Order BY Name ASC
             ";
 

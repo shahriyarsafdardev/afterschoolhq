@@ -2134,13 +2134,21 @@ namespace AfterSchoolLibrary.Services
                     dc);
         }
 
-        public static List<MccoySearchResponse> SearchMccoyAccounts(this Account account, string search, string other, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<MccoySearchResponse> SearchMccoyAccounts(this Account account, string search, string other, string specialNeeds, SystemMessages msgs = null, DatabaseConnection dc = null)
         {            
             var isELearningCenter = "";
             if (other.IsNotBlank() && other.Contains("e_learning"))
                 isELearningCenter = "1";
 
-            var accountDataTable = Account.SearchMccoyAccounts(search, isELearningCenter: isELearningCenter, msgs: msgs);
+            var isVirtualProgram = "";
+            if (other.IsNotBlank() && other.Contains("virtual_programming"))
+                isVirtualProgram = "1";
+
+            var isOpenDuringCovid = "";
+            if (other.IsNotBlank() && other.Contains("covid_protections"))
+                isOpenDuringCovid = "1";
+
+            var accountDataTable = Account.SearchMccoyAccounts(search, isELearningCenter, isVirtualProgram, isOpenDuringCovid, specialNeeds, msgs: msgs);
 
             if (accountDataTable.IsNotEmpty() && accountDataTable.Rows.Any())
             {
@@ -2157,7 +2165,8 @@ namespace AfterSchoolLibrary.Services
                         response.HomePageUrl = $"{Helpers.Utilities.BaseUrl()}/{row["AccountUniqueName"]}";
                         response.IsAccountNowEnrolling = account.IsNowEnrolling();
 
-                        //.. account profile                        
+                        //.. account profile    
+                        // ..TODO: get this from sql and not from enitites
                         var profile = account.GetAccountProfile(msgs);
 
                         response.IsOpenDuringCovid = profile.IsOpenDuringCovid;

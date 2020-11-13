@@ -92,35 +92,13 @@
 <div>
     <h4 class="mccoy-filter-header">Timing</h4>
 
-    <div class="am-checkbox" style="padding: 3px 0;">
-        <input id="chk-timing-1" name="timing" value="after_school" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
-        <label for="chk-timing-1" class="margin-h-10 mobile-padding">After-school</label>
-    </div>
-
-    <div class="am-checkbox" style="padding: 3px 0;">
-        <input id="chk-timing-2" name="timing" value="before_school" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
-        <label for="chk-timing-2" class="margin-h-10 mobile-padding">Before-school</label>
-    </div>
-
-    <div class="am-checkbox" style="padding: 3px 0;">
-        <input id="chk-timing-3" name="timing" value="during_school" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
-        <label for="chk-timing-3" class="margin-h-10 mobile-padding">During-school</label>
-    </div>
-
-    <div class="am-checkbox" style="padding: 3px 0;">
-        <input id="chk-timing-4" name="timing" value="summer_camp" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
-        <label for="chk-timing-4" class="margin-h-10 mobile-padding">Summer Camp</label>
-    </div>
-
-    <div class="am-checkbox" style="padding: 3px 0;">
-        <input id="chk-timing-5" name="timing" value="evening_program" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
-        <label for="chk-timing-5" class="margin-h-10 mobile-padding">Evening Program</label>
-    </div>
-
-    <div class="am-checkbox" style="padding: 3px 0;">
-        <input id="chk-timing-6" name="timing" value="weekend_program" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
-        <label for="chk-timing-6" class="margin-h-10 mobile-padding">Weekend Program</label>
-    </div>
+    @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.OfferingTimes)
+    {
+        <div class="am-checkbox" style="padding: 3px 0;">
+            <input id="chk-timing-@item.ToLower()" name="timing" value="@item" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+            <label for="chk-timing-@item.ToLower()" class="margin-h-10 mobile-padding">@item</label>
+        </div>
+    }
 
 </div>
 <div class="clearfix"></div>
@@ -193,19 +171,12 @@
 <div>
     <h4 class="mccoy-filter-header">Special Needs</h4>
 
-    <div class="am-checkbox" style="padding: 3px 0;">
-        <input id="chk-special-1" name="special" value="adhd" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
-        <label for="chk-special-1" class="margin-h-10 mobile-padding">ADHD</label>
-    </div>
-
-    <div class="am-checkbox" style="padding: 3px 0;">
-        <input id="chk-special-2" name="special" value="visual" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
-        <label for="chk-special-2" class="margin-h-10 mobile-padding">Visaual Disabilities</label>
-    </div>
-
-    <div class="am-checkbox" style="padding: 3px 0;">
-        <input id="chk-special-3" name="special" value="hearing" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
-        <label for="chk-special-3" class="margin-h-10 mobile-padding">Hearing Disabilities</label>
-    </div>
+    @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.SpecialNeedsOfferings)
+    {
+        <div class="am-checkbox" style="padding: 3px 0;">
+            <input id="chk-special-needs-@item.ToLower()" name="special-needs" value="@item" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+            <label for="chk-special-needs-@item.ToLower()" class="margin-h-10 mobile-padding">@item</label>
+        </div>
+    }
 </div>
 <div class="clearfix"></div>
