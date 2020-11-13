@@ -79,7 +79,7 @@ namespace AfterSchool.Controllers
                 neighborhoodSearch = neighborhoods.Split(',').ToList();
 
             // ..TODO: updated call with filters
-            var searchedAccounts = AccountService.SearchMccoyAccounts(currentAccount, search, msgs: msgs);
+            var searchedAccounts = AccountService.SearchMccoyAccounts(currentAccount, search, other, msgs: msgs);
 
             if (searchedAccounts.IsNotEmpty() && searchedAccounts.Any())
             {

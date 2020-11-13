@@ -1027,11 +1027,21 @@ namespace AfterSchoolLibrary.Models
             return 0;
         }
 
-        public static DataTable SearchMccoyAccounts(string search, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="search">search would be string like m, which will be resulted into '"m*"'</param>
+        /// <param name="isELearningCenter">it can be empty string, 0 or 1. empty string will be sent as null and will not affect this filter on query</param>
+        /// <param name="start"></param>
+        /// <param name="length"></param>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
+        /// <returns></returns>
+        public static DataTable SearchMccoyAccounts(string search, string isELearningCenter, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             // ..TODO: this should be off mccoy
             // ..The host should be MCCOY and the visitor should be the provider we want to search for 
-            var hostAccountId = 2020;
+            var hostAccountId = 3106;
 
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -1041,11 +1051,14 @@ namespace AfterSchoolLibrary.Models
             if (search.IsNotBlank())
                 searchTerms = $"\"{search}*\"";
 
-            // ..TODO: need to check for full text search if needed
             var sql = $@"
-                DECLARE  @SearchTerm nvarchar(250)
-                SET @SearchTerm = '{searchTerms}'
+                DECLARE  @SearchTerm nvarchar(250), @IsELearningCenter bit = NULL
+                SET @SearchTerm = '{searchTerms}'";
 
+            if (isELearningCenter.IsNotEmpty())
+                sql += $"SET @IsELearningCenter = {isELearningCenter}";
+
+            sql += $@"
                 SELECT DISTINCT 
                     a.Id as AccountId,
                     a.Uid as AccountUid, 
@@ -1054,7 +1067,9 @@ namespace AfterSchoolLibrary.Models
                 FROM AccountRelationship ar
                 INNER JOIN Account a ON a.ID = ar.VisitorAccountId
                 LEFT JOIN AccountProfile ap ON ap.AccountId = ar.VisitorAccountId
-                WHERE ar.HostAccountId = {hostAccountId} and ((@SearchTerm = '""""') OR contains((ap.Title, ap.Headline, ap.About), @SearchTerm))
+                WHERE ar.HostAccountId = {hostAccountId}                     
+                    AND ((@SearchTerm = '""""') OR contains((ap.Title, ap.Headline, ap.About), @SearchTerm))
+                    and ((@IsELearningCenter IS NULL) OR ap.IsELearningCenter = @IsELearningCenter)
                 Order BY Name ASC
             ";
 

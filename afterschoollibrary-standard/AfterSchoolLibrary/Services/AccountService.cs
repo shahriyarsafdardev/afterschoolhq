@@ -2134,9 +2134,13 @@ namespace AfterSchoolLibrary.Services
                     dc);
         }
 
-        public static List<MccoySearchResponse> SearchMccoyAccounts(this Account account, string search, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            var accountDataTable = Account.SearchMccoyAccounts(search, msgs: msgs);
+        public static List<MccoySearchResponse> SearchMccoyAccounts(this Account account, string search, string other, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {            
+            var isELearningCenter = "";
+            if (other.IsNotBlank() && other.Contains("e_learning"))
+                isELearningCenter = "1";
+
+            var accountDataTable = Account.SearchMccoyAccounts(search, isELearningCenter: isELearningCenter, msgs: msgs);
 
             if (accountDataTable.IsNotEmpty() && accountDataTable.Rows.Any())
             {
