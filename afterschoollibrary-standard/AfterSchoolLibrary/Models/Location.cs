@@ -346,6 +346,24 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(row => { return row[0].ToString(); });
         }
 
+        public static List<string> LoadMccoyNeighborhoods(string hostAccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+
+            var sql = $@"
+					SELECT Neighborhood FROM Location
+					WHERE Id IN (
+						SELECT LocationId FROM AccountProfile 
+						WHERE AccountId IN (
+							SELECT VisitorAccountId 
+							FROM AccountRelationship 
+							WHERE HostAccountId = {hostAccountId})
+						)";
+
+            return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(row => { return row[0].ToString(); });
+		}
+
         #endregion
     }
 }

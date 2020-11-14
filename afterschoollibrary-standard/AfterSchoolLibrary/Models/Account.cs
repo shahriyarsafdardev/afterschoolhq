@@ -1037,12 +1037,8 @@ namespace AfterSchoolLibrary.Models
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public static DataTable SearchMccoyAccounts(string search, string isELearningCenter, string isVirtualProgram, string isOpenDuringCovid, string specialNeeds, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static DataTable SearchMccoyAccounts(string hostAccountId, string search, string neighborhoods, string grades, string isELearningCenter, string isVirtualProgram, string isOpenDuringCovid, string specialNeeds, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            // ..TODO: this should be off mccoy
-            // ..The host should be MCCOY and the visitor should be the provider we want to search for 
-            var hostAccountId = 3106;
-
             var dq = DatabaseQuery;
             dq.Connection = dc;
 
@@ -1052,8 +1048,21 @@ namespace AfterSchoolLibrary.Models
                 searchTerms = $"\"{search}*\"";
 
             var sql = $@"
-                DECLARE  @SearchTerm nvarchar(250), @IsELearningCenter bit = NULL,  @IsVirtualProgram bit = null, @IsOpenDuringCovid bit = null, @SpecialNeeds nvarchar(100)
+                DECLARE @SearchTerm NVARCHAR(250),
+                        @Neighborhood NVARCHAR(100),
+                        @Grades NVARCHAR(100),
+                        @IsELearningCenter BIT = NULL,  
+                        @IsVirtualProgram BIT = NULL, 
+                        @IsOpenDuringCovid BIT = NULL, 
+                        @SpecialNeeds NVARCHAR(100)
+
                 SET @SearchTerm = '{searchTerms}'";
+
+            if (neighborhoods.IsNotEmpty())
+                sql += $"SET @Neighborhood = '{neighborhoods}'";
+
+            if (grades.IsNotEmpty())
+                sql += $"SET @Grades = '{grades}'";
 
             if (isELearningCenter.IsNotEmpty())
                 sql += $"SET @IsELearningCenter = {isELearningCenter}" ;
@@ -1076,14 +1085,20 @@ namespace AfterSchoolLibrary.Models
                 FROM AccountRelationship ar
                 INNER JOIN Account a ON a.ID = ar.VisitorAccountId
                 LEFT JOIN AccountProfile ap ON ap.AccountId = ar.VisitorAccountId
+                LEFT JOIN Location loc ON ap.LocationId = loc.ID
                 LEFT JOIN AccountProperty property on property.AccountId = ar.VisitorAccountId
                 WHERE ar.HostAccountId = {hostAccountId}                     
                     AND ((@SearchTerm = '""""') OR contains((ap.Title, ap.Headline, ap.About), @SearchTerm))
+                    AND ((@Neighborhood IS NULL) OR loc.Neighborhood IN (SELECT value FROM STRING_SPLIT(@Neighborhood, ',') WHERE RTRIM(value) <> ''))
                     AND ((@IsELearningCenter IS NULL) OR ap.IsELearningCenter = @IsELearningCenter)
                     AND ((@IsVirtualProgram IS NULL) OR ap.IsVirtualProgram = @IsVirtualProgram)
                     AND ((@IsOpenDuringCovid IS NULL) OR ap.IsOpenDuringCovid = @IsOpenDuringCovid)
-                    AND ((@specialNeeds IS NULL) OR property.Value In (SELECT value  FROM STRING_SPLIT(@specialNeeds, ',') WHERE RTRIM(value) <> ''))
-                Order BY Name ASC
+                    AND ((@specialNeeds IS NULL) OR property.Value IN (SELECT value FROM STRING_SPLIT(@specialNeeds, ',') WHERE RTRIM(value) <> ''))
+                    AND (
+                        ((@Grades IS NULL) OR ap.GradeLevelStart In (SELECT value  FROM STRING_SPLIT(@Grades, ',') WHERE RTRIM(value) <> '')) OR 
+                        ((@Grades IS NULL) OR ap.GradeLevelEnd In (SELECT value  FROM STRING_SPLIT(@Grades, ',') WHERE RTRIM(value) <> ''))
+                    )
+                Order BY a.Name ASC
             ";
 
             dq.SelectRange.Start = start;

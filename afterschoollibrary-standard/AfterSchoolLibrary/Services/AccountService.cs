@@ -2134,7 +2134,7 @@ namespace AfterSchoolLibrary.Services
                     dc);
         }
 
-        public static List<MccoySearchResponse> SearchMccoyAccounts(this Account account, string search, string other, string specialNeeds, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<MccoySearchResponse> SearchMccoyAccounts(this Account account, string hostAccountId, string search, string neighborhoods, string grades, string other, string specialNeeds, SystemMessages msgs = null, DatabaseConnection dc = null)
         {            
             var isELearningCenter = "";
             if (other.IsNotBlank() && other.Contains("e_learning"))
@@ -2146,9 +2146,9 @@ namespace AfterSchoolLibrary.Services
 
             var isOpenDuringCovid = "";
             if (other.IsNotBlank() && other.Contains("covid_protections"))
-                isOpenDuringCovid = "1";
+                isOpenDuringCovid = "1";               
 
-            var accountDataTable = Account.SearchMccoyAccounts(search, isELearningCenter, isVirtualProgram, isOpenDuringCovid, specialNeeds, msgs: msgs);
+            var accountDataTable = Account.SearchMccoyAccounts(hostAccountId, search, neighborhoods, grades, isELearningCenter, isVirtualProgram, isOpenDuringCovid, specialNeeds, msgs: msgs);
 
             if (accountDataTable.IsNotEmpty() && accountDataTable.Rows.Any())
             {

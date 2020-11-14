@@ -13,6 +13,10 @@ namespace AfterSchool.Controllers
 {
     public class SearchController : Controller
     {
+        // ..TODO: this should be off mccoy and we have to make this dynamic. ask darye once
+        private static string MccoyHostAccountId = "3106";
+        private static List<GradeLevel> ListGrades = GradeLevel.Load();
+
         // GET: Search
         public ActionResult Index(string city, string state, string neighborhoods, string covid, string elc)
         {
@@ -50,19 +54,13 @@ namespace AfterSchool.Controllers
         public ActionResult Mccoy()
         {            
             var msgs = new SystemMessages();
-            var neighborhoodList = Location.LoadAllNeighborhoods(
-                                       city: "",
-                                       state: "",
-                                       msgs: msgs)
+            var neighborhoodList = Location.LoadMccoyNeighborhoods(hostAccountId: MccoyHostAccountId, msgs: msgs)
                                    .Where(x => x.IsNotEmpty())
-                                   .ToList();
-
-            var grades = GradeLevel.Load();
-            
+                                   .ToList();            
 
             ViewBag.Messages = msgs;
             ViewBag.Neighborhoods = neighborhoodList;
-            ViewBag.Grades = grades;
+            ViewBag.Grades = ListGrades;
 
             return View("~/Views/mccoy/Index.cshtml");
         }
@@ -73,13 +71,20 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
 
-            List<string> neighborhoodSearch = null;
+            var gradeIds = "";
+            if (grades.IsNotEmpty())
+            {
+                var lstGrades = grades.Split(',');
+                foreach (var item in lstGrades)
+                {
+                    var grade = ListGrades.FirstOrDefault(m => m.Name.ToLower().Replace(" ", "_") == item);
 
-            if (neighborhoods.IsNotEmpty())
-                neighborhoodSearch = neighborhoods.Split(',').ToList();
+                    if (grade.IsNotEmpty())
+                        gradeIds += $"{grade.ID},";
+                }
+            }
 
-            // ..TODO: updated call with filters
-            var searchedAccounts = AccountService.SearchMccoyAccounts(currentAccount, search, other, special, msgs: msgs);
+            var searchedAccounts = AccountService.SearchMccoyAccounts(currentAccount, MccoyHostAccountId, search, neighborhoods, gradeIds, other, special, msgs: msgs);
 
             if (searchedAccounts.IsNotEmpty() && searchedAccounts.Any())
             {
