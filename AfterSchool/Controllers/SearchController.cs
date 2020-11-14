@@ -84,7 +84,35 @@ namespace AfterSchool.Controllers
                 }
             }
 
-            var searchedAccounts = AccountService.SearchMccoyAccounts(currentAccount, MccoyHostAccountId, search, neighborhoods, gradeIds, other, special, msgs: msgs);
+            var ageIds = "";
+            if (ages.IsNotEmpty())
+            {
+                var lstAges = ages.Split(',');
+                foreach (var item in lstAges)
+                {
+                    if (item.Contains('_'))
+                    {
+                        var age = item.Split('_');
+
+                        if (age.IsNotEmpty())
+                        {
+                            var ageStart = age[0];
+                            var ageEnd = age[1];
+
+                            if (ageStart.IsNotEmpty() && ageEnd.IsNotEmpty())
+                            {
+                                for (int i = ageStart.ToInteger(); i <= ageEnd.ToInteger(); i++)
+                                {
+                                    ageIds += $"{i},";
+                                }
+                            }                            
+                        }
+                    }
+                    
+                }
+            }
+
+            var searchedAccounts = AccountService.SearchMccoyAccounts(currentAccount, MccoyHostAccountId, search, neighborhoods, gradeIds, ageIds, gender, timing, other, special, msgs: msgs);
 
             if (searchedAccounts.IsNotEmpty() && searchedAccounts.Any())
             {

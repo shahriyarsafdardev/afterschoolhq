@@ -1037,7 +1037,7 @@ namespace AfterSchoolLibrary.Models
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public static DataTable SearchMccoyAccounts(string hostAccountId, string search, string neighborhoods, string grades, string isELearningCenter, string isVirtualProgram, string isOpenDuringCovid, string specialNeeds, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static DataTable SearchMccoyAccounts(string hostAccountId, string search, string neighborhoods, string grades, string ages, string gender, string timing, string isELearningCenter, string isVirtualProgram, string isOpenDuringCovid, string specialNeeds, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -1051,6 +1051,9 @@ namespace AfterSchoolLibrary.Models
                 DECLARE @SearchTerm NVARCHAR(250),
                         @Neighborhood NVARCHAR(100),
                         @Grades NVARCHAR(100),
+                        @Age NVARCHAR(100),
+                        @Gender varchar(10),
+                        @Timings nvarchar(100),
                         @IsELearningCenter BIT = NULL,  
                         @IsVirtualProgram BIT = NULL, 
                         @IsOpenDuringCovid BIT = NULL, 
@@ -1063,6 +1066,15 @@ namespace AfterSchoolLibrary.Models
 
             if (grades.IsNotEmpty())
                 sql += $"SET @Grades = '{grades}'";
+
+            if (ages.IsNotEmpty())
+                sql += $"SET @Age = '{ages}'";
+
+            if (gender.IsNotEmpty())
+                sql += $"SET @Gender = '{gender}'";
+
+            if (timing.IsNotEmpty())
+                sql += $"SET @Timings = '{timing}'";
 
             if (isELearningCenter.IsNotEmpty())
                 sql += $"SET @IsELearningCenter = {isELearningCenter}" ;
@@ -1089,14 +1101,22 @@ namespace AfterSchoolLibrary.Models
                 LEFT JOIN AccountProperty property on property.AccountId = ar.VisitorAccountId
                 WHERE ar.HostAccountId = {hostAccountId}                     
                     AND ((@SearchTerm = '""""') OR contains((ap.Title, ap.Headline, ap.About), @SearchTerm))
-                    AND ((@Neighborhood IS NULL) OR loc.Neighborhood IN (SELECT value FROM STRING_SPLIT(@Neighborhood, ',') WHERE RTRIM(value) <> ''))
+                    AND ((@Neighborhood IS NULL) OR loc.Neighborhood IN (SELECT value FROM STRING_SPLIT(@Neighborhood, ',') WHERE RTRIM(value) <> ''))                    
                     AND ((@IsELearningCenter IS NULL) OR ap.IsELearningCenter = @IsELearningCenter)
                     AND ((@IsVirtualProgram IS NULL) OR ap.IsVirtualProgram = @IsVirtualProgram)
                     AND ((@IsOpenDuringCovid IS NULL) OR ap.IsOpenDuringCovid = @IsOpenDuringCovid)
+                    AND ((@Gender IS NULL) OR ap.GenderRestriction In (SELECT value FROM STRING_SPLIT(@Gender, ',') WHERE RTRIM(value) <> ''))
+                    AND ((@Timings IS NULL) OR property.Value In (SELECT value FROM STRING_SPLIT(@Timings, ',') WHERE RTRIM(value) <> ''))
                     AND ((@specialNeeds IS NULL) OR property.Value IN (SELECT value FROM STRING_SPLIT(@specialNeeds, ',') WHERE RTRIM(value) <> ''))
                     AND (
-                        ((@Grades IS NULL) OR ap.GradeLevelStart In (SELECT value  FROM STRING_SPLIT(@Grades, ',') WHERE RTRIM(value) <> '')) OR 
-                        ((@Grades IS NULL) OR ap.GradeLevelEnd In (SELECT value  FROM STRING_SPLIT(@Grades, ',') WHERE RTRIM(value) <> ''))
+	                    (@Grades IS NULL) OR 
+	                    (ap.GradeLevelStart IN (SELECT value FROM STRING_SPLIT(@Grades, ',') WHERE RTRIM(value) <> '')) OR 
+	                    (ap.GradeLevelEnd IN (SELECT value FROM STRING_SPLIT(@Grades, ',') WHERE RTRIM(value) <> ''))
+                    )
+                    AND (
+	                    (@Age IS NULL) OR 
+	                    (ap.AgeStart IN (SELECT value FROM STRING_SPLIT(@Age, ',') WHERE RTRIM(value) <> '')) OR 
+	                    (ap.AgeEnd IN (SELECT value FROM STRING_SPLIT(@Age, ',') WHERE RTRIM(value) <> ''))
                     )
                 Order BY a.Name ASC
             ";
