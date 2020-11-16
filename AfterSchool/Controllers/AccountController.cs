@@ -1881,7 +1881,8 @@ namespace AfterSchool.Controllers
                 var convenienceFeePayer = billingAccount;
                 var creditCardFeePayer = payingAccount;
                 var cost = amount.ToDecimal();
-                var convenienceFee = AfterSchoolLibrary.Billing.Platform.GetConvenienceFee(cost);
+                var calcObj = new FeeCalculationObject(cost, billingAccount, msgs);
+                var convenienceFee = calcObj.GetConvenienceFee();
                 var ccFee = 0M;
                 var overrideAmount = cost;
                 var description = paymentdescription.IsNotBlank() ? paymentdescription : $"{billingAccount.Name} Payment";
@@ -1906,7 +1907,7 @@ namespace AfterSchool.Controllers
                         StripeSourceId = ccsource
                     };
 
-                    ccFee = AfterSchoolLibrary.Billing.Platform.GetCreditCardFee(cost, billingAccount);
+                    ccFee = calcObj.GetCreditCardFee();
                     overrideAmount += ccFee;
                 }
 

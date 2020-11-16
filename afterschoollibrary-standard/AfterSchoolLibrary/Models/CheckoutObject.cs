@@ -214,7 +214,12 @@ namespace AfterSchoolLibrary.Models
         public decimal GetRegistrationCreditCardFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (!IsRegistrationFree && CreditCardPurchaseObject.IsNotEmpty())
-                return Billing.Platform.GetCreditCardFee(RegistrationCostNoFees, BillingAccount);
+                return new FeeCalculationObject(
+                                RegistrationCostNoFees,
+                                BillingAccount,
+                                msgs,
+                                dc)
+                            .GetCreditCardFee();
 
             return 0;
         }
@@ -222,7 +227,12 @@ namespace AfterSchoolLibrary.Models
         public decimal GetRegistrationConvenienceFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (!IsRegistrationFree)
-                return Billing.Platform.GetConvenienceFee(RegistrationCostNoFees);
+                return new FeeCalculationObject(
+                                RegistrationCostNoFees,
+                                BillingAccount,
+                                msgs,
+                                dc)
+                            .GetConvenienceFee();
 
             return 0;
         }
@@ -256,14 +266,24 @@ namespace AfterSchoolLibrary.Models
         public decimal GetSubscriptionCostTodayCreditCardFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (CreditCardPurchaseObject.IsNotEmpty())
-                return Billing.Platform.GetCreditCardFee(GetSubscriptionCostTodayNoFees(msgs, dc), BillingAccount);
+                return new FeeCalculationObject(
+                                GetSubscriptionCostTodayNoFees(msgs, dc),
+                                BillingAccount,
+                                msgs,
+                                dc)
+                            .GetCreditCardFee();
 
             return 0;
         }
 
         public decimal GetSubscriptionCostTodayConvenienceFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Billing.Platform.GetConvenienceFee(GetSubscriptionCostTodayNoFees(msgs, dc));
+            return new FeeCalculationObject(
+                                GetSubscriptionCostTodayNoFees(msgs, dc),
+                                BillingAccount,
+                                msgs,
+                                dc)
+                            .GetConvenienceFee();
         }
 
         public decimal GetSubscriptionTotalFeesToday(SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -295,14 +315,24 @@ namespace AfterSchoolLibrary.Models
         public decimal GetPaymentPlanCostTodayCreditCardFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (CreditCardPurchaseObject.IsNotEmpty())
-                return Billing.Platform.GetCreditCardFee(PaymentPlanCostTodayNoFees, BillingAccount);
+                return new FeeCalculationObject(
+                                PaymentPlanCostTodayNoFees,
+                                BillingAccount,
+                                msgs,
+                                dc)
+                            .GetCreditCardFee();
 
             return 0;
         }
 
         public decimal GetPaymentPlanCostTodayConvenienceFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Billing.Platform.GetConvenienceFee(PaymentPlanCostTodayNoFees);
+            return new FeeCalculationObject(
+                                PaymentPlanCostTodayNoFees,
+                                BillingAccount,
+                                msgs,
+                                dc)
+                            .GetConvenienceFee();
         }
 
         public decimal GetPaymentPlanTotalFeesToday(SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -401,7 +431,12 @@ namespace AfterSchoolLibrary.Models
             if (PaymentTypeFeeOverrideAmount.HasValue)
                 transactionFeeAmount = PaymentTypeFeeOverrideAmount.Value;
             else if (CreditCardPurchaseObject.IsNotEmpty())
-                transactionFeeAmount = Billing.Platform.GetCreditCardFee(amountChargedNoFees + convenienceFeeAmount, BillingAccount);
+                transactionFeeAmount = new FeeCalculationObject(
+                                            amountChargedNoFees + convenienceFeeAmount,
+                                            BillingAccount,
+                                            msgs,
+                                            dc)
+                                        .GetCreditCardFee();
 
             return transactionFeeAmount + convenienceFeeAmount;
         }

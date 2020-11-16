@@ -2539,23 +2539,22 @@ namespace AfterSchoolLibrary.Services
                     return (totalAmountToCharge * percentageFee) + flatFee;
             }
 
-            return Platform.GetConvenienceFee(totalAmountToCharge);
+            return new FeeCalculationObject(
+                            totalAmountToCharge,
+                            billingAccount,
+                            msgs,
+                            dc)
+                        .GetConvenienceFee();
         }
 
         public static decimal GetPlatformConveniencePercentFee(this Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
-                return billingAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue();
-
-            return Platform.ConveniencePercentFee;
+            return billingAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue();
         }
 
         public static decimal GetPlatformConvenienceFlatFee(this Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
-                return billingAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFlatFee, msgs, dc).GetMaxValue();
-
-            return Platform.ConvenienceFlatFee;
+            return billingAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFlatFee, msgs, dc).GetMaxValue();
         }
 
         internal static string GetStripeSourceFromToken(this Account payingAccount, Account billingAccount, string stripeToken, SystemMessages msgs = null)
@@ -3368,23 +3367,31 @@ namespace AfterSchoolLibrary.Services
             return RefundRequest.LoadByAccountId(account.ID.Value, msgs, dc);
         }
 
+        // TODO: Needs review
         public static decimal GetSubscriptionPlatformFeePercent(this Account billingAccount, SubscriptionPlan plan, PaymentType paymentType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (plan.CostPerPeriod <= 0)
                 return 0;
 
             var costPerPeriod = plan.GetCostPerPeriodPerPerson(msgs, dc);
-            var feeAmount = Platform.GetConvenienceFee(costPerPeriod);
+
+            var calcObj = new FeeCalculationObject(
+                            costPerPeriod,
+                            billingAccount,
+                            msgs,
+                            dc);
+
+            var feeAmount = calcObj.GetConvenienceFee();
             var billedCostPerPeriod = costPerPeriod;
 
             if (paymentType == PaymentType.CreditCard)
-                feeAmount += Platform.GetCreditCardFee(costPerPeriod, billingAccount);
+                feeAmount += calcObj.GetCreditCardFee();
 
             if (!billingAccount.IsConvenienceFeeTakenOutOfCost)
-                billedCostPerPeriod += Platform.GetConvenienceFee(billedCostPerPeriod);
+                billedCostPerPeriod += calcObj.GetConvenienceFee();
 
             if (!billingAccount.IsCreditCardFeeTakenOutOfCost && paymentType == PaymentType.CreditCard)
-                billedCostPerPeriod += Platform.GetCreditCardFee(costPerPeriod, billingAccount);
+                billedCostPerPeriod += calcObj.GetCreditCardFee();
 
             return Math.Round(feeAmount / billedCostPerPeriod, 4);
         }
