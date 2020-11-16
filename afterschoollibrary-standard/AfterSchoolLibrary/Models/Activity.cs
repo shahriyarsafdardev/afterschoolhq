@@ -111,6 +111,10 @@ namespace AfterSchoolLibrary.Models
 		/// Used to set the interest form used on the activity page
 		/// </summary>
 		public int? InterestFormId { get { return (int?)MDV["InterestFormId"].Value; } set { MDV["InterestFormId"].Value = value; } }
+		/// <summary>
+		/// Used to allow a provider to set the final fee a parent sees
+		/// </summary>
+		public bool IsConvenienceFeeTakenOutOfCost { get { return (bool)MDV["IsConvenienceFeeTakenOutOfCost"].Value; } set { MDV["IsConvenienceFeeTakenOutOfCost"].Value = value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
 		public string AccountTimeZone { get { return (string)MDV["AccountTimeZone"].Value; } }
 		public bool? ActivityGroupIsArchived { get { return (bool?)MDV["ActivityGroupIsArchived"].Value; } }
@@ -136,6 +140,7 @@ namespace AfterSchoolLibrary.Models
 			this.ActivityLocationTypeId = ActivityLocationType.NotSet;
 			this.HidePreciseLocation = false;
 			this.RegistrationFinalized = false;
+			this.IsConvenienceFeeTakenOutOfCost = false;
 			
         }
 
@@ -188,6 +193,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "MinSeatsRequired", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrationFinalized", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "InterestFormId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "IsConvenienceFeeTakenOutOfCost", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "AccountTimeZone", typeof(Account).Name, "TimeZone", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "ActivityGroupIsArchived", typeof(ActivityGroup).Name, "IsArchived", System.Data.SqlDbType.Bit, "ActivityGroup");
@@ -444,6 +450,10 @@ namespace AfterSchoolLibrary.Models
 			dps.Add(ObjectMap["InterestFormId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsConvenienceFeeTakenOutOfCost"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -595,9 +605,18 @@ namespace AfterSchoolLibrary.Models
             {
                 return $"{HomePageUrl}{"?preview=true"}";
             }
-        }
+		}
 
-        public static List<Activity> LoadList(List<int> ids, SystemMessages msgs = null, DatabaseConnection dc = null)
+		public static Activity LoadByUid(Guid Uid, int accountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["Uid"], Uid);
+			dq.Criterias.Add(ObjectMap["accountId"], accountId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
+
+		public static List<Activity> LoadList(List<int> ids, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;

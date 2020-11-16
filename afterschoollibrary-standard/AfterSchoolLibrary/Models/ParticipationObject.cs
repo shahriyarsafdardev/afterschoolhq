@@ -748,7 +748,10 @@ namespace AfterSchoolLibrary.Models
         public decimal GetPostPayConvenienceFee(FeesPaidByType feesPaidByType)
         {
             if (this.PostPayPlans.Any() && this.PostPayPlans.First().CostPerPeriod.HasValue && PaymentAccount.ConvenienceFeesPaidBy == feesPaidByType)
-                return Billing.Platform.GetConvenienceFee(this.PostPayPlans.First().CostPerPeriod.Value);
+                return new FeeCalculationObject(
+                                this.PostPayPlans.First().CostPerPeriod.Value,
+                                OwnerAccount)
+                            .GetConvenienceFee();
 
             return 0;
         }
@@ -756,7 +759,10 @@ namespace AfterSchoolLibrary.Models
         public decimal GetPostPayCreditCardFee(FeesPaidByType feesPaidByType)
         {
             if (this.PostPayPlans.Any() && this.PostPayPlans.First().CostPerPeriod.HasValue && PaymentAccount.CreditCardFeesPaidBy == feesPaidByType)
-                return Billing.Platform.GetCreditCardFee(this.PostPayPlans.First().CostPerPeriod.Value, PaymentAccount);
+                return new FeeCalculationObject(
+                                this.PostPayPlans.First().CostPerPeriod.Value,
+                                PaymentAccount)
+                            .GetCreditCardFee();
 
             return 0;
         }
@@ -783,7 +789,10 @@ namespace AfterSchoolLibrary.Models
         public decimal GetCreditCardFee(FeesPaidByType feesPaidByType)
         {
             if (Cost.HasValue && PaymentAccount.CreditCardFeesPaidBy == feesPaidByType)
-                return Billing.Platform.GetCreditCardFee(Cost.Value, PaymentAccount);
+                return new FeeCalculationObject(
+                                Cost.Value,
+                                PaymentAccount)
+                            .GetCreditCardFee();
 
             return 0;
         }
@@ -791,7 +800,10 @@ namespace AfterSchoolLibrary.Models
         public decimal GetConvenienceFee(FeesPaidByType feesPaidByType)
         {
             if (Cost.HasValue && PaymentAccount.ConvenienceFeesPaidBy == feesPaidByType)
-                return Billing.Platform.GetConvenienceFee(Cost.Value);
+                return new FeeCalculationObject(
+                                Cost.Value,
+                                OwnerAccount)
+                            .GetConvenienceFee();
 
             return 0;
         }

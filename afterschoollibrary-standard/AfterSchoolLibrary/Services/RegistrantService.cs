@@ -239,7 +239,9 @@ namespace AfterSchoolLibrary.Services
         private static string GetSplitEvenlyCoupon(SubscriptionPlan plan, CheckoutObject checkoutObject, Account billingAccount, SystemMessages msgs, DatabaseConnection dc = null)
         {
             // what's the value of the subscription plan with convenience fees and credit card fees
-            var costWithAllFees = Billing.Platform.GetFinalTotalCost(plan.CostPerPeriod.Value, billingAccount);
+
+            var calcObj = new FeeCalculationObject(plan.CostPerPeriod.Value, billingAccount, msgs, dc);
+            var costWithAllFees = calcObj.GetFinalTotalCost();
             var individualCostWithFees = checkoutObject.GetSubscriptionCostTodayWithConvenienceFee(msgs, dc);
 
             if (checkoutObject.PaymentType == PaymentType.CreditCard)

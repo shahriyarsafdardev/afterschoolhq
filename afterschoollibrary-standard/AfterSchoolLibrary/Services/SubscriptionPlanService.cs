@@ -3,6 +3,7 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
 using System.Collections.Generic;
+using Amazon.S3.Model;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -396,7 +397,12 @@ namespace AfterSchoolLibrary.Services
                 ownerAccount = subscriptionPlan.GetAccount(msgs, dc);
 
             if (subscriptionPlan.CostPerPeriod.HasValue)
-                return Billing.Platform.GetCreditCardFee(subscriptionPlan.GetCostPerPeriodPerPerson(msgs, dc), ownerAccount);
+                return new FeeCalculationObject(
+                                subscriptionPlan.GetCostPerPeriodPerPerson(msgs, dc),
+                                ownerAccount,
+                                msgs,
+                                dc)
+                            .GetCreditCardFee();
 
             return 0;
         }
@@ -407,7 +413,12 @@ namespace AfterSchoolLibrary.Services
                 ownerAccount = subscriptionPlan.GetAccount(msgs, dc);
 
             if (subscriptionPlan.CostPerPeriod.HasValue)
-                return Billing.Platform.GetConvenienceFee(subscriptionPlan.GetCostPerPeriodPerPerson(msgs, dc));
+                return new FeeCalculationObject(
+                                subscriptionPlan.GetCostPerPeriodPerPerson(msgs, dc),
+                                ownerAccount,
+                                msgs,
+                                dc)
+                            .GetConvenienceFee();
 
             return 0;
         }
@@ -418,7 +429,12 @@ namespace AfterSchoolLibrary.Services
                 ownerAccount = subscriptionPlan.GetAccount(msgs, dc);
 
             if (subscriptionPlan.CostPerPeriod.HasValue)
-                return Billing.Platform.GetConvenienceFee(subscriptionPlan.CostPerPeriod.Value / seats);
+                return new FeeCalculationObject(
+                                subscriptionPlan.CostPerPeriod.Value / seats,
+                                ownerAccount,
+                                msgs,
+                                dc)
+                            .GetConvenienceFee();
 
             return 0;
         }

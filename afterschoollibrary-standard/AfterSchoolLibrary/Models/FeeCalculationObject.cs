@@ -1,0 +1,117 @@
+﻿using AfterSchoolLibrary.Billing;
+using AfterSchoolLibrary.Services;
+using BasicLibrary;
+using BasicLibrary.DataAccess;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace AfterSchoolLibrary.Models
+{
+    public class FeeCalculationObject
+    {
+        public decimal Cost { get; set; }
+        public Account BillingAccount { get; set; }
+        public Activity Activity { get; set; }
+        public decimal ConveniencePercentFee { get; private set; }
+        public decimal ConvenienceFlatFee { get; private set; }
+
+        public FeeCalculationObject(decimal cost, Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            Cost = cost;
+            BillingAccount = billingAccount;
+            LoadConvenienceFlatFee(msgs, dc);
+            LoadConveniencePercentFee(msgs, dc);
+        }
+
+        public FeeCalculationObject(decimal cost, Account billingAccount, Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            Cost = cost;
+            BillingAccount = billingAccount;
+            Activity = activity;
+        }
+
+        public bool IsConvenienceFeeTakenOutOfCost 
+        {
+            get
+            {
+                if (Activity.IsNotEmpty())
+                    return Activity.IsConvenienceFeeTakenOutOfCost;
+
+                return BillingAccount.IsConvenienceFeeTakenOutOfCost;
+            } 
+        }
+
+        public bool IsPaymentTypeFeeTakenOutOfCost
+        {
+            get
+            {
+                return BillingAccount.IsCreditCardFeeTakenOutOfCost;
+            }
+        }
+
+        public decimal GetConvenienceFee()
+        {
+            if (Cost <= 0)
+                return 0;
+
+
+            var fee = 0M;
+
+            if (IsConvenienceFeeTakenOutOfCost)
+                fee = (Cost * ConveniencePercentFee) + ConvenienceFlatFee;
+            else
+                fee = ((Cost + ConvenienceFlatFee) / (1 - ConveniencePercentFee)) - Cost;
+
+            var finalFee = Math.Ceiling(fee * 2) / 2;
+
+            if (Cost > 50)
+                finalFee = Math.Ceiling(fee);
+
+            return Math.Max(finalFee, 0.50M) + (Math.Ceiling(Cost) - Cost); // Math.Max(finalFee - .01M, 0.59M) + (Math.Ceiling(cost) - cost); // .KeepInRange(0.49M, 9.99M)
+        }
+
+        public decimal GetCreditCardFee()
+        {
+            if (Cost <= 0)
+                return 0;
+
+            // Because stripe will take their charge out of the total charge with the convenience fee
+            var costWithConvenienceFee = Cost + GetConvenienceFee();
+            var stripeFee = StripeHelper.GetStripeFee(costWithConvenienceFee, IsPaymentTypeFeeTakenOutOfCost);
+
+            // always round up to nearest dollar or .5
+            // result should always be 3.50 or 4.00 or 2.50 or 3.00, etc.
+            if (Cost <= 50)
+                return (Math.Ceiling(stripeFee * 2) / 2); //  - .01M;
+
+            return Math.Ceiling(stripeFee); // - .01M;
+        }
+
+        public decimal GetTotalFees()
+        {
+            return GetConvenienceFee() + GetCreditCardFee();
+        }
+
+        public decimal GetCostWithConvenienceFee()
+        {
+            return Cost + GetConvenienceFee();
+        }
+
+        public decimal GetFinalTotalCost()
+        {
+            return Cost + GetTotalFees();
+        }
+
+
+
+        private void LoadConveniencePercentFee(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            ConveniencePercentFee = BillingAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue();
+        }
+        private void LoadConvenienceFlatFee(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            ConvenienceFlatFee = BillingAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFlatFee, msgs, dc).GetMaxValue();
+        }
+    }
+}

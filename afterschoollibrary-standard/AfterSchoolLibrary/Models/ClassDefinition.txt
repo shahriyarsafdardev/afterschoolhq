@@ -91,6 +91,7 @@ property: HidePreciseLocation, bool, Bit, , If true then don't want to add a pin
 property: MinSeatsRequired, int?, Int, , Minimum seats required to have the activity
 property: RegistrationFinalized, bool, Bit, , Used to close registration and send notifications
 property: InterestFormId, int?, Int, , Used to set the interest form used on the activity page
+property: IsConvenienceFeeTakenOutOfCost, bool, Bit, , Used to allow a provider to set the final fee a parent sees
 -property: AllowPreRegistration, bool, Bit
 -property: RegistrationTimeZone, string, NVarChar "30"
 -property: AcceptPayPal, bool, Bit
