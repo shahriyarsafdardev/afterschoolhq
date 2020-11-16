@@ -61,7 +61,7 @@
                             </div>
                             <div class="form-group">
                                 <button type="submit" class="btn btn-register-primary btn-lg btn-pay" id="btn-paywithexistingach">
-                                    @(isPostPayPlan ? "Save ACH Payment Info" : "Pay via ACH")
+                                    @(isPostPayPlan ? "Save Bank Info" : "Pay via ACH")
                                     <span class="pay-button-amount @(!showPayButtonAmount ? "hide" : "")">
                                         -
                                         <span class="total-due-today-ach"></span>*
@@ -79,13 +79,13 @@
                 <div class="col-md-6 col-md-offset-3 col-sm-12 padding-30">
 
                     <p class="text-medium text-center">
-                        @(isPostPayPlan ? "Save new ACH Payment Info" : "Pay using a new Bank Account")
+                        @(isPostPayPlan ? "Save Bank Info" : "Pay using a new Bank Account")
                     </p>
                     <p class="text-muted">
-                        Clicking   @(isPostPayPlan ? "'Save new ACH Payment Info'" : "'Pay via ACH'") will allow you to connect and pay using your bank account. After you login and select the account to use, it will checkout and @(showPayButtonAmount ? "use your bank account information for attendance payments." : "complete your purchase using your bank account information.")
+                        Clicking   @(isPostPayPlan ? "'Save Bank Info'" : "'Pay via ACH'") will allow you to connect and pay using your bank account. After you login and select the account to use, it will checkout and @(showPayButtonAmount ? "use your bank account information for attendance payments." : "complete your purchase using your bank account information.")
                     </p>
                     <button id="plaid-button" class="btn btn-register@(bankAccounts.Any() ? "-default" : "-primary") btn-lg btn-pay">
-                        @(isPostPayPlan ? "Save ACH Payment Info" : "Pay via ACH")
+                        @(isPostPayPlan ? "Save Bank Info" : "Pay via ACH")
                         <span class="pay-button-amount @(!showPayButtonAmount ? "hide" : "")">
                             -
                             $<span class="total-due-today-ach"></span>*
