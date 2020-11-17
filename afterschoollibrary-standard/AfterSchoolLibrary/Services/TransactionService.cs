@@ -31,6 +31,11 @@ namespace AfterSchoolLibrary.Services
             return transaction.GetPaymentTypeFeesChargedToPayer() + transaction.GetConvenienceFeesChargedToPayer();
         }
 
+        public static decimal GetFees(this Transaction transaction)
+        {
+            return transaction.GetFeesChargedToPayer() + transaction.GetFeesChargedToBiller();
+        }
+
         public static decimal GetConvenienceFeesChargedToPayer(this Transaction transaction)
         {
             if (transaction.ConvenienceFeePayerAccountId == transaction.PayerAccountId)
@@ -179,8 +184,8 @@ namespace AfterSchoolLibrary.Services
                 transactionType,
                 checkoutObject.PaymentType,
                 checkoutObject.PaymentSourceType,
-                usePlatformFees ? checkoutObject.GetPlatformFlatFee(msgs, dc) : new decimal?(), // deprecated property
-                usePlatformFees ? checkoutObject.GetPlatformPercentFee(msgs, dc) : new decimal?(), // deprecated property
+                usePlatformFees ? checkoutObject.GetPlatformFlatFee(msgs, dc) : new decimal?(), 
+                usePlatformFees ? checkoutObject.GetPlatformPercentFee(msgs, dc) : new decimal?(),
                 checkoutObject.ConvenienceFeeOverrideAmount ?? checkoutObject.GetRegistrationConvenienceFee(msgs, dc),
                 checkoutObject.PaymentTypeFeeOverrideAmount ?? checkoutObject.GetRegistrationCreditCardFee(msgs, dc),
                 checkoutObject.StripeChargeId,

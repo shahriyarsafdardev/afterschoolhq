@@ -882,13 +882,19 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditCost(string id, string cost, string costdescription, string acceptpaypal, string acceptcreditcard, string allowtopaylater, string cmd, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, string paymentplanpaymentstarttype, string splitcostevenly, string regfeedownpayment, string haspostpayplan, string postpaycost)
+        public ActionResult EditCost(string id, string cost, string costdescription, string acceptpaypal, string acceptcreditcard, string allowtopaylater, string cmd, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, string paymentplanpaymentstarttype, string splitcostevenly, string regfeedownpayment, string haspostpayplan, string postpaycost, string isparentpricepostpay, string isparentpricecost)
         {
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid());
 
             if (id.IsGuid())
             {
+                if (!isparentpricecost.IsNumber())
+                    isparentpricecost = "0";
+
+                if (!isparentpricepostpay.IsNumber())
+                    isparentpricepostpay = "0";
+
                 var values = new Dictionary<string, object>()
                 {
                     { "cost", cost},
@@ -908,6 +914,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "regfeedownpayment", regfeedownpayment.IsBoolean().ToString() },
                     { "haspostpayplan", haspostpayplan.IfBlank("0") },
                     { "postpaycost", postpaycost },
+                    { "isparentpricepostpay", isparentpricepostpay },
+                    { "isparentpricecost", isparentpricecost },
                 };
 
                 activity = ActivityService.EditExisting(
@@ -1304,6 +1312,7 @@ namespace AfterSchool.Areas.Org.Controllers
             Activity activity = null;
             var defaultMsg = "An error occurred while processing payments. Please contact support, do not attempt to charge attendance again";
             var msg = defaultMsg;
+            var currentUser = SessionVariables.CurrentUser;
 
             if (activityId.IsNotEmpty() && activityId.IsGuid())
                 activity = Activity.LoadByUid(activityId.ToGuid(), msgs);
@@ -1326,11 +1335,15 @@ namespace AfterSchool.Areas.Org.Controllers
                     var registrantActivity = registrantActivityAttendance.Key;
                     var registration = registrantActivity.GetRegistration(msgs);
                     var costPerAttenadance = registration.CostPerClass.IsNotEmpty() ? registration.CostPerClass.Value : 0;
+
                     if (costPerAttenadance > 0)
                     {
+                        var masterRegistrant = registration.GetMasterRegistrant(msgs);
                         var raAttendances = registrantActivityAttendance.Value;
-                        var masterRegistrantAccount = registrantActivity.GetRegistrant(msgs).GetMasterRegistrant(msgs).GetAccount(msgs);
+                        var masterRegistrantAccount = masterRegistrant.GetAccount(msgs);
                         var description = $"{registrantActivity.GetActivity().Name.ToProperCase()} attendance Fee times {raAttendances.Count}";
+                        var convenienceFeePayer = registration.GetConvenienceFeePayer();
+                        var paymentTypeFeePayer = registration.GetPaymentTypeFeePayer();
 
                         BankAccountPurchaseObject bankAccountPurchaseObject = null;
                         CreditCardPurchaseObject creditCardPurchaseObject = null;
@@ -1339,7 +1352,6 @@ namespace AfterSchool.Areas.Org.Controllers
                             bankAccountPurchaseObject = new BankAccountPurchaseObject { StripeSourceId = registration.StripeSourceId };
                         else
                             creditCardPurchaseObject = new CreditCardPurchaseObject { StripeSourceId = registration.StripeSourceId };
-
 
                         var checkoutObject = new CheckoutObject()
                         {
@@ -1352,36 +1364,39 @@ namespace AfterSchool.Areas.Org.Controllers
                             BankAccountPurchaseObject = bankAccountPurchaseObject,
                             PaymentType = bankAccountPurchaseObject.IsNotEmpty() ? PaymentType.ACH : PaymentType.CreditCard,
                             PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
-                            ConvenienceFeePayer = masterRegistrantAccount,
-                            CreditCardFeePayer = masterRegistrantAccount,
-                            MasterRegistrant = registrantActivity.GetRegistrant(msgs).GetMasterRegistrant(msgs),
+                            ConvenienceFeePayer = convenienceFeePayer,
+                            CreditCardFeePayer = paymentTypeFeePayer,
+                            MasterRegistrant = masterRegistrant,
                             Description = description,
                             SavePaymentInfo = false,
                             ParticipationObject = activity.GetParticipationObject(msgs),
-                            Quantity = raAttendances.Count
+                            Quantity = raAttendances.Count,
+                            Registration = registration,
                         };
 
                         if (msgs.HasNoErrors() && raAttendances?.Count > 0)
-                        {
                             AccountService.ProcessPayment(
-                            checkoutObject,
-                            isAttendanceCharge: true,
-                            loggedInUser: SessionVariables.CurrentUser,
-                            msgs: msgs);
-                        }
+                                checkoutObject,
+                                isAttendanceCharge: true,
+                                loggedInUser: currentUser,
+                                msgs: msgs);
+
 
                         if (msgs.HasNoErrors())
-                        {
                             raAttendances.ForEach(raAttendance =>
                             {
-                                var attendanceRegistrant = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(raAttendance.ID.Value, registrantActivity.GetRegistrant(msgs).ID.Value, msgs).FirstOrDefault();
+                                var attendanceRegistrant = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(
+                                                                raAttendance.ID.Value, 
+                                                                registrantActivity.GetRegistrant(msgs).ID.Value, 
+                                                                msgs)
+                                                            .FirstOrDefault();
+
                                 if (attendanceRegistrant.IsNotEmpty() && checkoutObject.Transaction.IsNotEmpty())
                                 {
                                     attendanceRegistrant.TransactionId = checkoutObject.Transaction.ID.Value;
                                     msgs.AddRange(attendanceRegistrant.Save());
                                 }
                             });
-                        }
 
                         if (msgs.HasErrors())
                         {

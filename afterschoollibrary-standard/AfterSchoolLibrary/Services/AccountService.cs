@@ -2597,7 +2597,7 @@ namespace AfterSchoolLibrary.Services
                                 fromCustomerId: customerId,
                                 destinationAccountId: useStripeConnectedAccount ? checkoutObject.BillingAccount.StripeUserId : null,
                                 platformFee: useStripeConnectedAccount ? platformFeeAmount : new decimal?(),
-                                tokenOrSourceId: checkoutObject.StripeSourceId.IfEmpty(checkoutObject.CreditCardPurchaseObject?.StripeToken),
+                                tokenOrSourceId: checkoutObject.StripeSourceId,
                                 totalAmount: checkoutObject.GetStripeAmount(msgs, dc),
                                 description: checkoutObject.Description,
                                 statementDescriptor: $"{checkoutObject.BillingAccount.Name}",
@@ -3089,10 +3089,10 @@ namespace AfterSchoolLibrary.Services
             var costPerClass = checkoutObject.ParticipationObject.GetPostPayCostWithConvenienceFee();
 
             if (checkoutObject.PaymentType == PaymentType.CreditCard)
-                costPerClass += checkoutObject.ParticipationObject.GetPostPayCreditCardFee(FeesPaidByType.Parent);
+                costPerClass += checkoutObject.ParticipationObject.GetPostPayCreditCardFee();
 
-            var convenienceFeePaid = checkoutObject.ParticipationObject.GetPostPayConvenienceFee(FeesPaidByType.Parent);
-            var paymentTypeFeePaid = checkoutObject.ParticipationObject.GetPostPayCreditCardFee(FeesPaidByType.Parent);
+            var convenienceFeePaid = checkoutObject.ParticipationObject.GetPostPayConvenienceFee();
+            var paymentTypeFeePaid = checkoutObject.ParticipationObject.GetPostPayCreditCardFee();
 
             checkoutObject.Registration.SavePaymentSource(
                 checkoutObject.StripeSourceId, 
@@ -3100,6 +3100,8 @@ namespace AfterSchoolLibrary.Services
                 costPerClass,
                 convenienceFeePaid,
                 paymentTypeFeePaid,
+                checkoutObject.ConvenienceFeePayer,
+                checkoutObject.CreditCardFeePayer,
                 loggedInUser, 
                 msgs, 
                 dc);

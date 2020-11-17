@@ -1743,6 +1743,7 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             var participationObject = GetParticipationObjectFromCart();
             var coupon = new Coupon();
+            var currentRegistrant = SessionVariables.CurrentRegistrant;
 
             if (couponCode.IsNotEmpty())
                 coupon = SessionVariables.CurrentAccount.ValidateCoupon(participationObject, couponCode, msgs);
@@ -1751,7 +1752,7 @@ namespace AfterSchool.Controllers
                 msgs.Add("Please enter your payment information", MessageType.UserError);
 
             var registration = PaymentViewBag(id, participationObject, msgs);
-            var hasWithdrawn = SessionVariables.CurrentRegistrant.HasWithdrawn(participationObject, msgs);
+            var hasWithdrawn = currentRegistrant.HasWithdrawn(participationObject, msgs);
 
             if (registration.IsAlreadyPaidFor(msgs) && !hasWithdrawn)
                 return RedirectToAction("thankyou", new { id = registration.Uid });
@@ -1765,9 +1766,12 @@ namespace AfterSchool.Controllers
                 var convenienceFeePayer = billingAccount.IsConvenienceFeeTakenOutOfCost ? billingAccount : payingAccount;
                 var creditCardFeePayer = billingAccount.IsCreditCardFeeTakenOutOfCost ? billingAccount : payingAccount;
 
+                if (participationObject.PostPayPlans.Any())
+                    convenienceFeePayer = participationObject.PostPayPlans.First().isConvenienceFeeTakenOutOfCost ? billingAccount : payingAccount;
+
                 // get original cost
-                var registrant = registration.GetRegistrant(msgs);
-                var registrantActivity = registrant.GetRegistrantActivity(participationObject, msgs);
+                var submittedRecord = registration.GetRegistrant(msgs);
+                var registrantActivity = submittedRecord.GetRegistrantActivity(participationObject, msgs);
                 if (registrantActivity.IsNotEmpty() && registrantActivity.AmountCharged.HasValue && participationObject.Cost > registrantActivity.AmountCharged)
                     participationObject.Cost = registrantActivity.AmountCharged;
 
@@ -1807,7 +1811,7 @@ namespace AfterSchool.Controllers
                         CreditCardPurchaseObject = creditCardPurchaseObject,
                         BankAccountPurchaseObject = bankAccountPurchaseObject,
                         SavePaymentInfo = savepaymentinfo.IfEmpty("0").ToBoolean(),
-                        MasterRegistrant = SessionVariables.CurrentRegistrant,
+                        MasterRegistrant = currentRegistrant,
                         PaymentType = bankAccountPurchaseObject.IsNotEmpty() ? PaymentType.ACH : PaymentType.CreditCard,
                         PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
                         ConvenienceFeePayer = convenienceFeePayer,

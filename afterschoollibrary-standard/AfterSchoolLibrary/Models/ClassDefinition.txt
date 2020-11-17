@@ -1049,6 +1049,8 @@ property: CompletionStatusId, RegistrationCompletionStatus, Int
 property: PurchaseId, int?, Int
 property: StripeSourceId, string, NVarChar "100"
 property: CostPerClass, decimal?, Money
+property: PaymentTypeFeePayerAccountId, int?, Int, , which account is paying the payment type (stripe or ach) fee
+property: ConvenienceFeePayerAccountId, int?, Int, , which account is paying the convenience fee
 loadmethod: Uid
 loadmethod: RegistrantId, List<>
 loadmethod: AccountId, List<>
@@ -1415,6 +1417,7 @@ property: StartDayOfMonth, int?, Int
 property: PaymentStartTypeId, PlanPaymentStartType, Int
 property: SplitCostEvenly, bool, Bit, , Split cost evenly amongst all parents signed up
 property: RegFeeAsDownPayment, bool, Bit, , Count the registration fee as a down payment
+property: isConvenienceFeeTakenOutOfCost, bool, Bit
 loadmethod: ParticipationObjectId|ParticipationObjectTypeId|PlanTypeId, List<>, LoadByParticipationObject
 loadmethod: PlanOwnerAccountId, List<>
 [end]

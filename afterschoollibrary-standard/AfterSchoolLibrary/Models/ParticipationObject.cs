@@ -729,6 +729,7 @@ namespace AfterSchoolLibrary.Models
             return payment;
         }
 
+        #region "PostPayPlan"
         public decimal GetPostPayCost()
         {
             if (this.PostPayPlans.Any() && this.PostPayPlans.First().CostPerPeriod.HasValue)
@@ -739,33 +740,54 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetPostPayCostWithConvenienceFee()
         {
-            if (this.PostPayPlans.Any() && this.PostPayPlans.First().CostPerPeriod.HasValue)
-                return this.PostPayPlans.First().CostPerPeriod.Value + GetPostPayConvenienceFee(FeesPaidByType.Parent);
+            var plan = this.PostPayPlans.FirstOrDefault();
+
+            if (plan.IsNotEmpty())
+                return GetPostPayCost() + (plan.isConvenienceFeeTakenOutOfCost ? 0 : GetPostPayConvenienceFee());
 
             return 0;
         }
 
-        public decimal GetPostPayConvenienceFee(FeesPaidByType feesPaidByType)
+        public decimal GetPostPayProviderAmount()
         {
-            if (this.PostPayPlans.Any() && this.PostPayPlans.First().CostPerPeriod.HasValue && PaymentAccount.ConvenienceFeesPaidBy == feesPaidByType)
+            var plan = this.PostPayPlans.FirstOrDefault();
+
+            if (plan.IsNotEmpty() && plan.isConvenienceFeeTakenOutOfCost)
+                return GetPostPayCost() - GetPostPayConvenienceFee();
+
+            return GetPostPayCost();
+
+        }
+
+        public decimal GetPostPayConvenienceFee()
+        {
+            var plan = this.PostPayPlans.FirstOrDefault();
+
+            if (plan.IsNotEmpty())
                 return new FeeCalculationObject(
-                                this.PostPayPlans.First().CostPerPeriod.Value,
-                                OwnerAccount)
+                                GetPostPayCost(),
+                                OwnerAccount,
+                                plan.isConvenienceFeeTakenOutOfCost)
                             .GetConvenienceFee();
 
             return 0;
         }
 
-        public decimal GetPostPayCreditCardFee(FeesPaidByType feesPaidByType)
+        public decimal GetPostPayCreditCardFee()
         {
-            if (this.PostPayPlans.Any() && this.PostPayPlans.First().CostPerPeriod.HasValue && PaymentAccount.CreditCardFeesPaidBy == feesPaidByType)
+            var plan = this.PostPayPlans.FirstOrDefault();
+
+            if (plan.IsNotEmpty())
                 return new FeeCalculationObject(
-                                this.PostPayPlans.First().CostPerPeriod.Value,
-                                PaymentAccount)
+                                GetPostPayCost(),
+                                PaymentAccount,
+                                plan.isConvenienceFeeTakenOutOfCost)
                             .GetCreditCardFee();
 
             return 0;
         }
+
+        #endregion
 
         public decimal GetCheckoutCostWithConvenienceFee()
         {

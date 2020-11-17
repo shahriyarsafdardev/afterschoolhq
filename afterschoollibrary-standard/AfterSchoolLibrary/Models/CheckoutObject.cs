@@ -411,34 +411,20 @@ namespace AfterSchoolLibrary.Models
 
         public decimal CalculatePlatformFeeAmount(SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var amountChargedNoFees = 0M;
+            var totalAHQFees = 0M;
 
-            if (OverrideAmount.HasValue)
-            {
-                amountChargedNoFees = OverrideAmount.Value;
-                
-                if (PaymentTypeFeeOverrideAmount.HasValue)
-                    amountChargedNoFees -= PaymentTypeFeeOverrideAmount.Value;
-            }
+            if (ConvenienceFeeOverrideAmount.HasValue)
+                totalAHQFees += ConvenienceFeeOverrideAmount.Value;
             else
-            {
-                amountChargedNoFees = RegistrationCostNoFees;
-            }
-
-            var convenienceFeeAmount = BillingAccount.CalculatePlatformConvenienceFeeAmount(amountChargedNoFees, msgs, dc);
-            var transactionFeeAmount = 0M;
+                totalAHQFees += GetTotalConvenienceFeesToday(msgs, dc);
 
             if (PaymentTypeFeeOverrideAmount.HasValue)
-                transactionFeeAmount = PaymentTypeFeeOverrideAmount.Value;
-            else if (CreditCardPurchaseObject.IsNotEmpty())
-                transactionFeeAmount = new FeeCalculationObject(
-                                            amountChargedNoFees + convenienceFeeAmount,
-                                            BillingAccount,
-                                            msgs,
-                                            dc)
-                                        .GetCreditCardFee();
+                totalAHQFees += PaymentTypeFeeOverrideAmount.Value;
+            else
+                totalAHQFees += GetTotalCreditCardFeesToday(msgs, dc);
 
-            return transactionFeeAmount + convenienceFeeAmount;
+            return totalAHQFees;
+            
         }
 
     }

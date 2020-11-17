@@ -111,7 +111,10 @@
 
         <div class="text-center">
             <p class="text-large">@(isPostPayPlan ? "Save Credit Card Info" : "Pay using a credit card")</p>
-            <p class="text-medium-small"> @(isPostPayPlan ? "" : "Credt card transactions will be charged an additional")  <strong>$<span class="total-fee-ccf">0</span> Transaction Fee</strong></p>
+            <p class="text-medium-small"> 
+                @(isPostPayPlan ? "" : "Credit card transactions will be charged an additional")  <strong>$<span class="total-fee-ccf">0</span> Transaction Fee</strong>
+                @(isPostPayPlan ? "per class attended" : "")
+            </p>
             <p class="text-muted text-center">Credit card transaction fees are non-refundable</p>
         </div>
 

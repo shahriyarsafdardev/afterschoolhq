@@ -250,8 +250,9 @@
                                     <td class="text-center">
                                         @if (transaction.IsCharge())
                                         {
-                                           @transaction.GetFeesChargedToPayer().ToCurrency()
-                                           <i class="s7-info icon-small" data-toggle="popover" data-trigger="hover" data-html="true" data-content="Convenience Fees: @transaction.GetConvenienceFeesChargedToPayer().ToCurrency() <br/> Credit Card Fees: @transaction.GetPaymentTypeFeesChargedToPayer().ToCurrency()" data-placement="top"></i>
+                                           @transaction.GetFees().ToCurrency()
+
+                                           <i class="s7-info icon-small" data-toggle="popover" data-trigger="hover" data-html="true" data-content="Convenience Fees: @transaction.ConvenienceFeeCharged.ToCurrency() <br/> Credit Card Fees: @transaction.PaymentTypeFeeCharged.ToCurrency()" data-placement="top"></i>
                                         }
                                         else
                                         {

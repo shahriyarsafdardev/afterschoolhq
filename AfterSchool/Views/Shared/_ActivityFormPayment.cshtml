@@ -56,9 +56,20 @@
                         <span class="input-group-addon">$</span>
                         <input type="number" class="form-control" id="cost" name="cost" onfocus="this.select()" value="@(Model.CostPerRegistrant.HasValue ? Model.CostPerRegistrant.Value.ToString("0.00") : "0.00")" required min="0.00" step=".01" @paymentdisabled />
                     </div>
-                    <p class="text-muted">
-                        <em>The total cost will be <span class="text-bold">$<span id="finaltuitioncost">0.00</span></span> at checkout</em>
+                    <p class="text-muted text-medium-small">
+                        <span id="pricetoparent-span">
+                            <em>The total cost will be <span class="text-bold">$<span id="pricetoparent">0.00</span></span> at checkout</em>.
+                        </span>
+                        <span id="amounttoprovider-span">
+                            <em>The total amount you will receive is <span class="text-bold">$<span id="amounttoprovider">0.00</span></span></em>.
+                        </span>
                     </p>
+                    <div>
+                        <div class="am-checkbox">
+                            <input type="checkbox" name="isparentpricecost" id="isparentpricecost" />
+                            <label for="isparentpricecost">Price is the amount the parent pays</label>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -358,9 +369,24 @@
                                    value="@(postPayPlan.IsNotEmpty() && postPayPlan.CostPerPeriod.HasValue ? postPayPlan.CostPerPeriod.Value.ToString("0.00") : "0.00")"
                                    required min="0.00" step=".01" @paymentdisabled />
                         </div>
-                        <p class="text-muted">
-                            <em>The parent will be charged <span class="text-bold">$<span id="finalpostpaycost">0.00</span></span> per class attended</em>
+                        <p class="text-muted text-medium-small">
+                            <span id="pricetoparent-postpay-span">
+                                <em>The parent will be charged <span class="text-bold">$<span id="pricetoparent-postpay">0.00</span></span> per class attended</em>.
+                            </span>
+                            <span id="amounttoprovider-postpay-span">
+                                <em>The total amount you will receive is <span class="text-bold">$<span id="amounttoprovider-postpay">0.00</span></span> per class attended</em>.
+                            </span>
                         </p>
+                        <div>
+                            <div class="am-checkbox">
+                                <input type="checkbox" 
+                                       name="isparentpricepostpay" 
+                                       id="isparentpricepostpay" 
+                                       value="1"
+                                       @(postPayPlan.IsNotEmpty() && postPayPlan.isConvenienceFeeTakenOutOfCost ? "checked=\"checked\"" : "") />
+                                <label for="isparentpricepostpay">Price is the amount the parent pays</label>
+                            </div>
+                        </div>
                     </div>
                     <!--
                     <div class="col-md-3"></div>
@@ -398,6 +424,14 @@
         setPaymentPlanSection();
         setPostPayPlanSection();
 
+        $('#isparentpricecost').click(function () {
+            calculateFinalPrice($('#cost').val(), $('#pricetoparent'), $('#amounttoprovider'), $('#isparentpricecost'));
+        })
+
+        $('#isparentpricepostpay').click(function () {
+            calculateFinalPrice($('#postpaycost').val(), $('#pricetoparent-postpay'), $('#amounttoprovider-postpay'), $('#isparentpricepostpay'));
+        })
+
         $('#hassubscriptionplan').change(function (cb) {
             setSubscriptionPlanSection();
         });
@@ -431,7 +465,7 @@
         $('#cost').keyup(function () {
             costTimeOut = null;
             costTimeOut = setTimeout(function () {
-                calculateFinalPrice($('#cost').val(), $('#finaltuitioncost'));
+                calculateFinalPrice($('#cost').val(), $('#pricetoparent'), $('#amounttoprovider'), $('#isparentpricecost'));
             }, 200);
         });
 
@@ -452,14 +486,14 @@
         $('#postpaycost').keyup(function () {
             postpayplanTimeOut = null;
             postpayplanTimeOut = setTimeout(function () {
-                calculateFinalPrice($('#postpaycost').val(), $('#finalpostpaycost'));
+                calculateFinalPrice($('#postpaycost').val(), $('#pricetoparent-postpay'), $('#amounttoprovider-postpay'), $('#isparentpricepostpay'));
             }, 200);
         });
 
-        calculateFinalPrice($('#cost').val(), $('#finaltuitioncost'));
-        calculateFinalPrice($('#paymentplancost').val(), $('#finalpaymentplancost'));
-        calculateFinalPrice($('#postpaycost').val(), $('#finalpostpaycost'));
-        getSubscriptionFinalPrice();
+        calculateFinalPrice($('#cost').val(), $('#pricetoparent'), $('#amounttoprovider'), $('#isparentpricecost'));
+        // calculateFinalPrice($('#paymentplancost').val(), $('#finalpaymentplancost'));
+        calculateFinalPrice($('#postpaycost').val(), $('#pricetoparent-postpay'), $('#amounttoprovider-postpay'), $('#isparentpricepostpay'));
+        // getSubscriptionFinalPrice();
 
         updateSubscriptionPeriodText();
         updatePaymentPlanStartText();
@@ -506,18 +540,26 @@
         }
     }
 
-    function calculateFinalPrice(cost, span) {
+    function calculateFinalPrice(cost, priceToParentSpan, amountToProviderSpan, takenOutOfCostChk) {
 
         if (isNaN(cost))
             return;
 
+        var takenOutOfCost = 0;
+
+        if (takenOutOfCostChk.is(':checked')) {
+            takenOutOfCost = 1;
+        }
+
         $.get(
-            '@Url.Action("calculatefinalprice", "services")?cost=' + cost,
+            '@Url.Action("calculatefinalprice", "services")?cost=' + cost + '&activityUid=@Model.Uid.ToString()&takenoutofcost=' + takenOutOfCost,
             function (data) {
-                if (data && data.status == 'ok' && !isNaN(data.price)) {
-                    span.html(parseFloat(data.price).toFixed(2));
+                if (data && data.status == 'ok') {
+                    priceToParentSpan.html(parseFloat(data.priceToParent).toFixed(2));
+                    amountToProviderSpan.html(parseFloat(data.amountToProvider).toFixed(2));
                 } else {
-                    span.html('0.00');
+                    priceToParentSpan.html('0.00');
+                    amountToProviderSpan.html('0.00');
                 }
             }
         );
@@ -590,12 +632,15 @@
         }
 
         $('#cost').val(0.00);
-        $('#finaltuitioncost').html(0.00);
+        $('#pricetoparent').html(0.00);
+        $('#amounttoprovider').html(0.00);
 
         $('#hassubscriptionplan').prop('disabled', true);
         $('#haspaymentplan').prop('disabled', true);
         $('#allowtopaylater').prop('disabled', true);
         $('#cost').prop('disabled', true);
+        $('#isparentpricecost').prop('checked', false);
+        $('#isparentpricecost').prop('disabled', true);
     }
 
     function postPayEnableOtherOptions() {

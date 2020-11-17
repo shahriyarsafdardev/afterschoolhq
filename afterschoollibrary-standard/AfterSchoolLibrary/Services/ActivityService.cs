@@ -685,7 +685,10 @@ namespace AfterSchoolLibrary.Services
                 InstructorId = activity.InstructorId,
                 IsInviteOnly = activity.IsInviteOnly,
                 ActivityLocationTypeId = activity.ActivityLocationTypeId,
-                MinSeatsRequired = activity.MinSeatsRequired,                
+                MinSeatsRequired = activity.MinSeatsRequired,
+                HidePreciseLocation = activity.HidePreciseLocation,
+                InterestFormId = activity.InterestFormId,
+                IsConvenienceFeeTakenOutOfCost = activity.IsConvenienceFeeTakenOutOfCost,
             };
         }
 
@@ -844,6 +847,8 @@ namespace AfterSchoolLibrary.Services
             var splitcostevenly = values.GetValueOrDefault("splitcostevenly");
             var regfeedownpayment = values.GetValueOrDefault("regfeedownpayment");
             var hidepreciselocation = values.GetValueOrDefault("hidepreciselocation");
+            var isparentpricecost = values.GetValueOrDefault("isparentpricecost");
+            var isparentpricepostpay = values.GetValueOrDefault("isparentpricepostpay");
 
             var activityType = ActivityType.NotSet;
 
@@ -1047,6 +1052,9 @@ namespace AfterSchoolLibrary.Services
             if (hidepreciselocation.IsNotEmpty() && hidepreciselocation.ToString().IsBoolean())
                 activity.HidePreciseLocation = hidepreciselocation.ToString().ToBoolean();
 
+            if (isparentpricecost.IsNotEmpty() && isparentpricecost.ToString().IsBoolean())
+                activity.IsConvenienceFeeTakenOutOfCost = isparentpricecost.ToString().ToBoolean();
+
             if (msgs.HasNoErrors())
             {
                 Database.ExecuteTransaction(
@@ -1233,6 +1241,7 @@ namespace AfterSchoolLibrary.Services
                                 account,
                                 haspostpayplan.IfEmpty(""),
                                 postpaycost.IfEmpty(""),
+                                isparentpricepostpay.IfEmpty("0"),
                                 loggedInUserId,
                                 adc
                             ));
@@ -1413,17 +1422,18 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
-        private static SystemMessages SetupPostPayPlan(this Activity activity, Account account, string haspostpayplan, string postpaycost, int loggedInUserId, DatabaseConnection dc = null)
+        private static SystemMessages SetupPostPayPlan(this Activity activity, Account account, string haspostpayplan, string postpaycost, string isparentpricepostpay, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
             var hasChanges = true;
+            var isParentPrice = isparentpricepostpay.ToBoolean();
 
             // first: desactivate the current plan if there are any changes
             if (activity.HasPostPayPlan(msgs, dc))
             {
                 var plan = activity.GetPostPayPlan(msgs, dc);
 
-                hasChanges = plan.CostPerPeriod.Value != postpaycost.ToDecimal();
+                hasChanges = plan.CostPerPeriod.Value != postpaycost.ToDecimal() || isParentPrice != plan.isConvenienceFeeTakenOutOfCost;
 
                 // if has stripe changes or subscription option has been turned off
                 if (hasChanges || !haspostpayplan.ToBoolean())
@@ -1438,6 +1448,7 @@ namespace AfterSchoolLibrary.Services
                     participationObjectId: activity.ID.Value,
                     costPerPeriod: postpaycost.ToDecimal(),
                     billingPeriodType: BillingPeriodType.Day,
+                    isConvenienceFeeTakenOutOfCost: isParentPrice,
                     loggedInUserId: loggedInUserId,
                     msgs: msgs,
                     dc: dc);

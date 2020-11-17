@@ -7,6 +7,7 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
+using AfterSchoolLibrary.Services;
 
 namespace AfterSchoolLibrary.Models
 {
@@ -325,6 +326,11 @@ namespace AfterSchoolLibrary.Models
         public Registrant GetRegistrant(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Registrant.Load(this.RegistrantId.Value, msgs, dc);
+        }
+
+        public Registrant GetMasterRegistrant(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return GetRegistrant(msgs, dc)?.GetMasterRegistrant(msgs, dc);
         }
 
         public static List<RegistrantActivity> LoadByParticipationObject(int participationObjectId, ParticipationObjectType participationObjectType, int? start, int? length, DatabaseConnection dc = null)

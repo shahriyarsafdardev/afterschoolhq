@@ -18,22 +18,22 @@
     @if (Model.PostPayPlans.Any())
     {
         <span>
-            @if(!displayCheckoutPrice)
+            @if (displayCheckoutPrice)
             {
-                <span>You will receive</span>
+                <span>                        
+                    <strong>@Model.GetPostPayCostWithConvenienceFee().ToCurrency()</strong>
+                    per class attended per student
+                </span>
             }
-
-            <strong>
-                @if (displayCheckoutPrice)
-                {
-                    @Model.GetPostPayCostWithConvenienceFee().ToCurrency()
-                }
-                else
-                {
-                    @Model.GetPostPayCost().ToCurrency()
-                }
-            </strong>
-            per class attended per student
+            else
+            {
+                <span>
+                    Parents will pay <strong>@Model.GetPostPayCostWithConvenienceFee().ToCurrency()</strong> and you will receive
+                    <strong>@Model.GetPostPayProviderAmount().ToCurrency()</strong>
+                    per class attended per student
+                </span>
+                    
+            }
         </span>
     }
 

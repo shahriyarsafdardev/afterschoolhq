@@ -41,7 +41,7 @@ namespace AfterSchool.Areas.Org.Controllers
         //}
 
         [HttpGet]
-        public ActionResult CalculateFinalPrice(string cost, string activityUid)
+        public ActionResult CalculateFinalPrice(string cost, string activityUid, string takenOutOfCost)
         {
             var msgs = new SystemMessages();
 
@@ -55,13 +55,19 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 var currentAccount = SessionVariables.CurrentAccount;
                 var activity = Activity.LoadByUid(activityUid.ToGuid(), currentAccount.ID.Value, msgs);
-                var calcObject = new FeeCalculationObject(cost.ToDecimal(), currentAccount, activity);
-                var finalPrice = calcObject.GetCostWithConvenienceFee();
+                var calcObject = new FeeCalculationObject(
+                                    cost.ToDecimal(), 
+                                    currentAccount, 
+                                    activity, 
+                                    takenOutOfCost.IsBoolean() ? takenOutOfCost.ToBoolean() : new bool?());
+                var priceToParent = calcObject.GetCostWithConvenienceFee();
+                var amountToProvider = calcObject.GetAmountToProvider();
 
                 return Json(new
                 {
                     status = "ok",
-                    price = finalPrice,
+                    priceToParent = priceToParent,
+                    amountToProvider = amountToProvider,
                     messages = msgs
                 }, JsonRequestBehavior.AllowGet);
             }

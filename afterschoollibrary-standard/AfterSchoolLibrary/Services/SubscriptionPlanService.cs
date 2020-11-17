@@ -82,7 +82,7 @@ namespace AfterSchoolLibrary.Services
             return plan;
         }
 
-        public static SubscriptionPlan CreateNewPostPayPlan(Account planOwner, ParticipationObjectType participationObjectType, int participationObjectId, decimal costPerPeriod, BillingPeriodType billingPeriodType, int? loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public static SubscriptionPlan CreateNewPostPayPlan(Account planOwner, ParticipationObjectType participationObjectType, int participationObjectId, decimal costPerPeriod, BillingPeriodType billingPeriodType, bool isConvenienceFeeTakenOutOfCost, int? loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -100,7 +100,8 @@ namespace AfterSchoolLibrary.Services
                 ParticipationObjectTypeId = participationObjectType,
                 TotalPeriods = null,
                 PlanTypeId = SubscriptionPlanType.PostPayPlan,
-                PaymentStartTypeId = PlanPaymentStartType.NotSet
+                PaymentStartTypeId = PlanPaymentStartType.NotSet,
+                isConvenienceFeeTakenOutOfCost = isConvenienceFeeTakenOutOfCost,
             };
 
             msgs.AddRange(plan.Save(dc));
@@ -263,21 +264,22 @@ namespace AfterSchoolLibrary.Services
             return copy;
         }
 
-        private static SubscriptionPlan CopyFields(this SubscriptionPlan subscriptionPlan)
+        private static SubscriptionPlan CopyFields(this SubscriptionPlan plan)
         {
             return new SubscriptionPlan()
             {
-                ParticipationObjectTypeId = subscriptionPlan.ParticipationObjectTypeId,
-                PlanOwnerAccountId = subscriptionPlan.PlanOwnerAccountId,
-                CostPerPeriod = subscriptionPlan.CostPerPeriod,
-                BillingPeriodTypeId = subscriptionPlan.BillingPeriodTypeId,
-                DoesAutoRenew = subscriptionPlan.DoesAutoRenew,
-                IsActive = subscriptionPlan.IsActive,
-                PlanTypeId = subscriptionPlan.PlanTypeId,
-                TotalPeriods = subscriptionPlan.TotalPeriods,
-                PaymentStartTypeId = subscriptionPlan.PaymentStartTypeId,
-                SplitCostEvenly = subscriptionPlan.SplitCostEvenly,
-                RegFeeAsDownPayment = subscriptionPlan.RegFeeAsDownPayment,
+                ParticipationObjectTypeId = plan.ParticipationObjectTypeId,
+                PlanOwnerAccountId = plan.PlanOwnerAccountId,
+                CostPerPeriod = plan.CostPerPeriod,
+                BillingPeriodTypeId = plan.BillingPeriodTypeId,
+                DoesAutoRenew = plan.DoesAutoRenew,
+                IsActive = plan.IsActive,
+                PlanTypeId = plan.PlanTypeId,
+                TotalPeriods = plan.TotalPeriods,
+                PaymentStartTypeId = plan.PaymentStartTypeId,
+                SplitCostEvenly = plan.SplitCostEvenly,
+                RegFeeAsDownPayment = plan.RegFeeAsDownPayment,
+                isConvenienceFeeTakenOutOfCost = plan.isConvenienceFeeTakenOutOfCost,
             };
         }
 

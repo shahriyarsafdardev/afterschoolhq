@@ -16,6 +16,8 @@ namespace AfterSchoolLibrary.Models
         public decimal ConveniencePercentFee { get; private set; }
         public decimal ConvenienceFlatFee { get; private set; }
 
+        private bool? _IsConvenienceFeeTakenOutOfCost { get; set; }
+
         public FeeCalculationObject(decimal cost, Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Cost = cost;
@@ -24,17 +26,32 @@ namespace AfterSchoolLibrary.Models
             LoadConveniencePercentFee(msgs, dc);
         }
 
-        public FeeCalculationObject(decimal cost, Account billingAccount, Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public FeeCalculationObject(decimal cost, Account billingAccount, Activity activity, bool? isConvenienceFeeTakenOutOfCost, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Cost = cost;
             BillingAccount = billingAccount;
             Activity = activity;
+            _IsConvenienceFeeTakenOutOfCost = isConvenienceFeeTakenOutOfCost;
+            LoadConvenienceFlatFee(msgs, dc);
+            LoadConveniencePercentFee(msgs, dc);
+        }
+
+        public FeeCalculationObject(decimal cost, Account billingAccount, bool isConvenienceFeeTakenOutOfCost, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            Cost = cost;
+            BillingAccount = billingAccount;
+            _IsConvenienceFeeTakenOutOfCost = isConvenienceFeeTakenOutOfCost;
+            LoadConvenienceFlatFee(msgs, dc);
+            LoadConveniencePercentFee(msgs, dc);
         }
 
         public bool IsConvenienceFeeTakenOutOfCost 
         {
             get
             {
+                if (_IsConvenienceFeeTakenOutOfCost.HasValue)
+                    return _IsConvenienceFeeTakenOutOfCost.Value;
+
                 if (Activity.IsNotEmpty())
                     return Activity.IsConvenienceFeeTakenOutOfCost;
 
@@ -77,7 +94,11 @@ namespace AfterSchoolLibrary.Models
                 return 0;
 
             // Because stripe will take their charge out of the total charge with the convenience fee
-            var costWithConvenienceFee = Cost + GetConvenienceFee();
+            var costWithConvenienceFee = Cost;
+            
+            if (!IsConvenienceFeeTakenOutOfCost)
+                costWithConvenienceFee += GetConvenienceFee();
+
             var stripeFee = StripeHelper.GetStripeFee(costWithConvenienceFee, IsPaymentTypeFeeTakenOutOfCost);
 
             // always round up to nearest dollar or .5
@@ -95,12 +116,20 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetCostWithConvenienceFee()
         {
-            return Cost + GetConvenienceFee();
+            return Cost + (IsConvenienceFeeTakenOutOfCost ? 0 : GetConvenienceFee());
         }
 
         public decimal GetFinalTotalCost()
         {
             return Cost + GetTotalFees();
+        }
+
+        public decimal GetAmountToProvider()
+        {
+            if (IsConvenienceFeeTakenOutOfCost)
+                return Cost - GetConvenienceFee();
+
+            return Cost;
         }
 
 

@@ -50,6 +50,7 @@ namespace AfterSchoolLibrary.Models
 		/// Count the registration fee as a down payment
 		/// </summary>
 		public bool RegFeeAsDownPayment { get { return (bool)MDV["RegFeeAsDownPayment"].Value; } set { MDV["RegFeeAsDownPayment"].Value = value; } }
+		public bool isConvenienceFeeTakenOutOfCost { get { return (bool)MDV["isConvenienceFeeTakenOutOfCost"].Value; } set { MDV["isConvenienceFeeTakenOutOfCost"].Value = value; } }
 		
 
         public SubscriptionPlan()
@@ -64,6 +65,7 @@ namespace AfterSchoolLibrary.Models
 			this.PaymentStartTypeId = PlanPaymentStartType.NotSet;
 			this.SplitCostEvenly = false;
 			this.RegFeeAsDownPayment = false;
+			this.isConvenienceFeeTakenOutOfCost = false;
 			
         }
 
@@ -88,6 +90,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "PaymentStartTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "SplitCostEvenly", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "RegFeeAsDownPayment", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "isConvenienceFeeTakenOutOfCost", System.Data.SqlDbType.Bit);
 				
                 return _dp;
             }
@@ -223,6 +226,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["RegFeeAsDownPayment"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["isConvenienceFeeTakenOutOfCost"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
