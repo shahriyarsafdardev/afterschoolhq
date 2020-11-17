@@ -12,7 +12,8 @@ namespace AfterSchoolLibrary.Services
 
         public static decimal GetFeesChargedToBiller(this Transaction transaction)
         {            
-            if (transaction.PlatformFlatFee.HasValue || transaction.PlatformPercentFee.HasValue)
+            // handle old transactions
+            if (!transaction.ConvenienceFeePayerAccountId.HasValue)
                 return (transaction.Amount.Value * transaction.PlatformPercentFee.Value) + transaction.PlatformFlatFee.Value;
 
             var total = 0M;
@@ -33,7 +34,7 @@ namespace AfterSchoolLibrary.Services
 
         public static decimal GetFees(this Transaction transaction)
         {
-            return transaction.GetFeesChargedToPayer() + transaction.GetFeesChargedToBiller();
+            return transaction.ConvenienceFeeCharged.Value + transaction.PaymentTypeFeeCharged.Value;
         }
 
         public static decimal GetConvenienceFeesChargedToPayer(this Transaction transaction)
