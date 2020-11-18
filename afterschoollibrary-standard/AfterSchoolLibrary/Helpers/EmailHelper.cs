@@ -896,7 +896,7 @@ namespace AfterSchoolLibrary.Helpers
                 receiptRows += ProcessTemplate(
                         EmailTemplates.Attendance_Charge_Confirmation_Rows,
                         attendanceModel,
-                        "Attendance_Charge_Confirmation_Rows-1.0",
+                        "Attendance_Charge_Confirmation_Rows-1.1",
                         msgs);
 
                 totalAttendanceCharge += totalCharge;
@@ -915,7 +915,7 @@ namespace AfterSchoolLibrary.Helpers
             var attendanceChargeTable = ProcessTemplate(
                 EmailTemplates.Attendance_Charge_Confirmation_Table,
                 attendanceChargeTableModel,
-                "Attendance_Charge_Confirmation_Table-1.0",
+                "Attendance_Charge_Confirmation_Table-1.1",
                 msgs);
 
             var model = new NameValueCollection()
@@ -927,14 +927,15 @@ namespace AfterSchoolLibrary.Helpers
                 { "RegistrationTable", attendanceChargeTable },
                 { "CustomMessage", customMessage },
                 { "RegistrationDetails", "Login to your account to view more details about this payment."},
-                { "ActivityName", activity.Name.ToProperCase() }
+                { "ActivityName", activity.Name.ToProperCase() },
+                { "SupportEmail", Email.AppSupportEmailAddress }
             };
 
             var subject = $"Attendance Charged for {activity.Name}";
             var body = ProcessTemplate(
                 EmailTemplates.Attendance_Charge_Confirmation,
                 model,
-                "Attendance_Charge_Confirmation_Table-1.0",
+                "Attendance_Charge_Confirmation-1.1",
                 msgs);
 
             // SEND EMAILS
