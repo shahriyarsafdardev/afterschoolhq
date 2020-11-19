@@ -1,6 +1,6 @@
 ﻿@model Activity
 @{ 
-    var list = Model.GetCompletedAttendance();
+    var list = (List<Attendance>)ViewData["attendances"];
     var totalPresent = Model.GetAttendancePresentCount();
     var totalSeats = Model.GetAttendancePossibleCount();
     var totalAbsent = totalSeats - totalPresent;
@@ -13,6 +13,8 @@
     {
         attendanceRate = ((totalPresent.ToDouble() / (totalPresent + totalAbsent)) * 100).Round(1).ToString("###.#");
     }
+
+    var paging = (PagingModel)ViewData["PagingModel"];
 }
 
 <div class="row">
@@ -105,7 +107,7 @@
                             <a href="@Url.Action("trackattendance", controller, new { id = Model.Uid, att = attendance.ID })" class="btn btn-primary btn-xs"><i class="icon icon-left s7-user"></i> View Details</a>
                         </td>
 
-                        <td>@account.ConvertToAccountTimeZone(attendance.GetActivityInstance().StartDateTime.Value).ToLongDateString()</td>
+                        <td>@account.ConvertToAccountTimeZone(attendance.Date.Value).ToLongDateString()</td>
 
                         <td>@seatsPossible</td>
 
@@ -124,6 +126,23 @@
         </tbody>
     </table>
 </div>
+
+@{ 
+
+    Html.RenderPartial(
+       "~/Views/Shared/_Paging.cshtml",
+       paging,
+       new ViewDataDictionary()
+       {
+            { "id", Model.Uid.ToString() },
+            { "querystring", "" },
+            { "action", "attendance" },
+            { "controller", "activity" }
+       }
+   );
+}
+
+
 
 
 <form action="@Url.Action("chargeattendancefee","activity")" id="chargeAttendanceForm" method="post">

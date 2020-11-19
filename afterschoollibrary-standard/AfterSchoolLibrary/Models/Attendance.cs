@@ -273,6 +273,37 @@ namespace AfterSchoolLibrary.Models
             return dq.GetCount(msgs);
         }
 
+        public static List<Attendance> GetByActivityOrderBy(Activity activity, string orderbyParam, OrderByDirectionEnum direction, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseParameterizedQuery = false;
+            dq.SelectRange.Start = start;
+            dq.SelectRange.Length = length;
+            dq.OrderBys.Add(orderbyParam, direction);
+
+            var criterias = new Hashtable() { { "ActivityId", activity.ID.Value } };
+
+            return Attendance.BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<Attendance> GetByActivityInstance(ActivityInstance activityInstance, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["ActivityInstanceId"], activityInstance.ID.Value);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<Attendance> GetByActivityInstanceId(int activityInstanceId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["ActivityInstanceId"], activityInstanceId);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+
         #endregion
     }
 }

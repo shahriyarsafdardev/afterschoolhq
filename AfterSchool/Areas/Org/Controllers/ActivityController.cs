@@ -1109,48 +1109,90 @@ namespace AfterSchool.Areas.Org.Controllers
 
         #region Attendance
         [HttpGet]
-        public ActionResult Attendance(string id, string msg)
+        public ActionResult Attendance(string id, string orderby, string direction, string pn, string rpp, string msg)
         {
             var activity = Activity.LoadByUid(id.ToGuid());
             var msgs = new SystemMessages();
             if (msg.IsNotEmpty())
             {
-                msgs.Add(msg, msg.Contains("error") ? MessageType.UserError : MessageType.Success);
+                msgs.Add(msg, msg.Contains("error") || msg.Contains("Error") ? MessageType.UserError : MessageType.Success);
+            }
+
+            int pageNumber = 1;
+            int recordsPerPage = 10;
+            int totalAttendanceCount = 0;
+            int totalPages = 0;
+            string orderByParam = "Date";
+            OrderByDirectionEnum orderbyDirection = OrderByDirectionEnum.Descending;
+
+            if (pn.IsNumber() && pn.ToInteger() > 0)
+                pageNumber = pn.ToInteger();
+
+            if (rpp.IsNumber() && rpp.ToInteger() > 0)
+                recordsPerPage = rpp.ToInteger();
+
+            if (orderby.IsNotBlank())
+                orderByParam = orderby;
+            if (direction.IsNotBlank())
+                orderbyDirection = (OrderByDirectionEnum)Enum.Parse(typeof(OrderByDirectionEnum), direction);
+
+
+            var start = recordsPerPage * (pageNumber - 1);
+            var length = recordsPerPage;
+
+            List<Attendance> attendances = null;
+
+            if (activity.IsNotEmpty())
+            {
+                attendances = AfterSchoolLibrary.Models.Attendance.GetByActivityOrderBy(activity, orderByParam, orderbyDirection, start, length, msgs);
+                totalAttendanceCount = activity.GetTotalAttendanceCount(msgs);
+
+                if (totalAttendanceCount > 0)
+                    totalPages = Math.Ceiling(totalAttendanceCount.ToDouble() / recordsPerPage).ToInteger();
             }
 
             ViewBag.Messages = msgs;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.Attendances = attendances;
+
+            ViewBag.PagingModel = new PagingModel()
+            {
+                TotalCount = totalAttendanceCount,
+                PageNumber = pageNumber,
+                RecordsPerPage = recordsPerPage,
+                TotalPages = totalPages
+            };
+
             return View(activity);
         }
 
         [HttpGet]
-        public ActionResult TrackAttendance(string id, string att)
+        public ActionResult TrackAttendance(string id, string att, string actinst)
         {
             var msgs = new SystemMessages();
             var attendanceId = att.IsNumber() ? att.ToInteger() : new int?();
+            var activityInstanceId = actinst.IsNumber() ? actinst.ToInteger() : new int?();
             var activity = Activity.LoadByUid(id.ToGuid());
+            var attendance = activity.GetOrCreateNewAttendance(attendanceId, activityInstanceId, SessionVariables.CurrentUser, msgs);
 
-            var attendance = activity.GetOrCreateNewAttendance(attendanceId, SessionVariables.CurrentUser, msgs);
-
-
+            if (attendance.IsEmpty())
+                return RedirectToAction("Attendance",new { id, msg = "Error: No classes have taken place yet"});
+                
             ViewBag.Messages = msgs;
-            ViewBag.AttendanceRegistrants = attendance.GetAttendanceRegistrants();
+            ViewBag.AttendanceRegistrants = attendance?.GetAttendanceRegistrants();
             ViewBag.Schedule = activity.GetSchedule();
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             return View(attendance);
         }
 
         [HttpPost]
-        public ActionResult TrackAttendance(string id, string att, string activityinstance)
+        public ActionResult TrackAttendance(string id, string att)
         {
             var msgs = new SystemMessages();
             var presentStudents = new List<int>();
             var activity = Activity.LoadByUid(id.ToGuid());
             var attendance = AfterSchoolLibrary.Models.Attendance.Load(att.ToInteger(), msgs);
-
-            if (!activityinstance.IsNumber())
-                msgs.Add("Activity Date is required", MessageType.UserError);
 
             attendance.GetAttendanceRegistrants(msgs).ForEach(attendanceRegistrant => {
                 if (Request.Params[$"present-{attendanceRegistrant.ID.ToString()}"].IsNumber())
@@ -1158,7 +1200,7 @@ namespace AfterSchool.Areas.Org.Controllers
             });
 
             if (msgs.HasNoErrors())
-                attendance.UpdateAttendance(activityinstance.ToInteger(), presentStudents, SessionVariables.CurrentUser, msgs);
+                attendance.UpdateAttendance(attendance.ActivityInstanceId.Value, presentStudents, SessionVariables.CurrentUser, msgs);
 
 
             ViewBag.Messages = msgs;
@@ -1369,7 +1411,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     
             }
 
-            return RedirectToAction("attendance", new { id = activityId, msg });
+            return RedirectToAction("attendance", new { id = activityId, msg = msg });
         }
         #endregion
 
