@@ -1860,7 +1860,7 @@ namespace AfterSchoolLibrary.Services
 
             var closestActivityInstanceAttendance = Attendance.GetByActivityInstance(closestActivityInstance, msgs, dc).FirstOrDefault();
 
-            if (closestActivityInstanceAttendance.IsNotEmpty())
+            if (closestActivityInstanceAttendance.IsNotEmpty() && !activityInstanceId.HasValue)
                 return closestActivityInstanceAttendance;
 
             // otherwise create a new attendance if there is no attendance id
