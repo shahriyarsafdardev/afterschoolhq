@@ -650,7 +650,7 @@ namespace AfterSchoolLibrary.Helpers
                 }
                 else
                 {
-                    cost = (checkoutObject.RegistrationCostNoFees + checkoutObject.GetRegistrationConvenienceFee(msgs, dc)).ToCurrency();
+                    cost = checkoutObject.GetRegistrationCostWithConvenienceFee(msgs, dc).ToCurrency();
                     ccFee = checkoutObject.GetRegistrationCreditCardFee(msgs, dc).ToCurrency();
 
                     additionalDetails = "registration fee";

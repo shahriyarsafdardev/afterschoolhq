@@ -792,8 +792,15 @@ namespace AfterSchoolLibrary.Models
         public decimal GetCheckoutCostWithConvenienceFee()
         {
             if (this.Cost.HasValue)
-                return Cost.Value
-                    + GetConvenienceFee(FeesPaidByType.Parent);
+            {
+                var activity = this.GetActivity();
+
+                if (activity.IsNotEmpty())
+                    return Cost.Value
+                        + (activity.IsConvenienceFeeTakenOutOfCost ? 0 : GetConvenienceFee());
+
+                return Cost.Value + GetConvenienceFee();
+            }
 
             return 0;
         }
@@ -801,30 +808,30 @@ namespace AfterSchoolLibrary.Models
         public decimal GetCheckoutTotalCost()
         {
             if (this.Cost.HasValue)
-                return Cost.Value
-                    + GetCreditCardFee(FeesPaidByType.Parent)
-                    + GetConvenienceFee(FeesPaidByType.Parent);
+                return this.GetCheckoutCostWithConvenienceFee() + GetCreditCardFee();
 
             return 0;
         }
 
-        public decimal GetCreditCardFee(FeesPaidByType feesPaidByType)
+        public decimal GetCreditCardFee()
         {
-            if (Cost.HasValue && PaymentAccount.CreditCardFeesPaidBy == feesPaidByType)
+            if (Cost.HasValue)
                 return new FeeCalculationObject(
                                 Cost.Value,
-                                PaymentAccount)
+                                PaymentAccount,
+                                this)
                             .GetCreditCardFee();
 
             return 0;
         }
 
-        public decimal GetConvenienceFee(FeesPaidByType feesPaidByType)
+        public decimal GetConvenienceFee()
         {
-            if (Cost.HasValue && PaymentAccount.ConvenienceFeesPaidBy == feesPaidByType)
+            if (Cost.HasValue)
                 return new FeeCalculationObject(
                                 Cost.Value,
-                                OwnerAccount)
+                                OwnerAccount,
+                                this)
                             .GetConvenienceFee();
 
             return 0;

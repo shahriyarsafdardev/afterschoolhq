@@ -36,6 +36,16 @@ namespace AfterSchoolLibrary.Models
             LoadConveniencePercentFee(msgs, dc);
         }
 
+        public FeeCalculationObject(decimal cost, Account billingAccount, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            Cost = cost;
+            BillingAccount = billingAccount;
+            if (participationObject.IsActivity())
+                Activity = participationObject.GetActivity();
+            LoadConvenienceFlatFee(msgs, dc);
+            LoadConveniencePercentFee(msgs, dc);
+        }
+
         public FeeCalculationObject(decimal cost, Account billingAccount, bool isConvenienceFeeTakenOutOfCost, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Cost = cost;
