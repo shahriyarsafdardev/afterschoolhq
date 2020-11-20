@@ -849,6 +849,7 @@ namespace AfterSchoolLibrary.Services
             var hidepreciselocation = values.GetValueOrDefault("hidepreciselocation");
             var isparentpricecost = values.GetValueOrDefault("isparentpricecost");
             var isparentpricepostpay = values.GetValueOrDefault("isparentpricepostpay");
+            var isparentpricepaymentplan = values.GetValueOrDefault("isparentpricepaymentplan");
 
             var activityType = ActivityType.NotSet;
 
@@ -1231,6 +1232,7 @@ namespace AfterSchoolLibrary.Services
                                 paymentplanperiod.IfEmpty(""),
                                 paymentplanperiodnumber.IfEmpty(""),
                                 paymentplanpaymentstarttype.IfEmpty(""),
+                                isparentpricepaymentplan.IfEmpty("0"),
                                 loggedInUserId,
                                 adc
                             ));
@@ -1385,11 +1387,12 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
-        private static SystemMessages SetupPaymentPlan(this Activity activity, Account account, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, string paymentplanpaymentstarttype, int loggedInUserId, DatabaseConnection dc = null)
+        private static SystemMessages SetupPaymentPlan(this Activity activity, Account account, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, string paymentplanpaymentstarttype, string isparentpricepaymentplan, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
             var hasChanges = true;
             var planStartType = paymentplanpaymentstarttype.ToInteger().ToEnum<PlanPaymentStartType>();
+            var isParentPrice = isparentpricepaymentplan.ToBoolean();
 
             // first: desactivate the current plan if there are any changes
             if (activity.HasPaymentPlan(msgs, dc))
@@ -1399,7 +1402,8 @@ namespace AfterSchoolLibrary.Services
                 hasChanges = plan.CostPerPeriod.Value != paymentplancost.ToDecimal() || 
                             plan.BillingPeriodTypeId != (BillingPeriodType)paymentplanperiod.ToInteger() || 
                             plan.TotalPeriods.Value != paymentplanperiodnumber.ToInteger() ||
-                            plan.PaymentStartTypeId != planStartType;
+                            plan.PaymentStartTypeId != planStartType || 
+                            isParentPrice != plan.IsConvenienceFeeTakenOutOfCost; ;
 
                 if (hasChanges || !haspaymentplan.ToBoolean())
                     msgs.AddRange(plan.Deactivate(loggedInUserId, dc));
@@ -1415,6 +1419,7 @@ namespace AfterSchoolLibrary.Services
                     (BillingPeriodType)paymentplanperiod.ToInteger(),
                     paymentplanperiodnumber.ToInteger(),
                     planStartType,
+                    isParentPrice,
                     loggedInUserId,
                     msgs,
                     dc);
@@ -1433,7 +1438,7 @@ namespace AfterSchoolLibrary.Services
             {
                 var plan = activity.GetPostPayPlan(msgs, dc);
 
-                hasChanges = plan.CostPerPeriod.Value != postpaycost.ToDecimal() || isParentPrice != plan.isConvenienceFeeTakenOutOfCost;
+                hasChanges = plan.CostPerPeriod.Value != postpaycost.ToDecimal() || isParentPrice != plan.IsConvenienceFeeTakenOutOfCost;
 
                 // if has stripe changes or subscription option has been turned off
                 if (hasChanges || !haspostpayplan.ToBoolean())

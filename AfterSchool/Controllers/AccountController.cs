@@ -1767,7 +1767,7 @@ namespace AfterSchool.Controllers
                 var creditCardFeePayer = billingAccount.IsCreditCardFeeTakenOutOfCost ? billingAccount : payingAccount;
 
                 if (participationObject.PostPayPlans.Any())
-                    convenienceFeePayer = participationObject.PostPayPlans.First().isConvenienceFeeTakenOutOfCost ? billingAccount : payingAccount;
+                    convenienceFeePayer = participationObject.PostPayPlans.First().IsConvenienceFeeTakenOutOfCost ? billingAccount : payingAccount;
 
                 // get original cost
                 var submittedRecord = registration.GetRegistrant(msgs);

@@ -313,15 +313,18 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetPaymentPlanCostTodayWithFees(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return PaymentPlanCostTodayNoFees +
-                    GetPaymentPlanCostTodayCreditCardFee(msgs, dc) +
-                    GetPaymentPlanCostTodayConvenienceFee(msgs, dc);
+            return GetPaymentPlanCostTodayWithConvenienceFee(msgs, dc) +
+                    GetPaymentPlanCostTodayCreditCardFee(msgs, dc);
         }
 
         public decimal GetPaymentPlanCostTodayWithConvenienceFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return PaymentPlanCostTodayNoFees +
-                    GetPaymentPlanCostTodayConvenienceFee(msgs, dc);
+            var activity = ParticipationObject.GetActivity();
+
+            if (activity.IsConvenienceFeeTakenOutOfCost)
+                return PaymentPlanCostTodayNoFees;
+            
+            return PaymentPlanCostTodayNoFees + GetPaymentPlanCostTodayConvenienceFee(msgs, dc);
         }
 
         public decimal GetPaymentPlanCostTodayCreditCardFee(SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -330,6 +333,7 @@ namespace AfterSchoolLibrary.Models
                 return new FeeCalculationObject(
                                 PaymentPlanCostTodayNoFees,
                                 BillingAccount,
+                                ParticipationObject,
                                 msgs,
                                 dc)
                             .GetCreditCardFee();
@@ -342,6 +346,7 @@ namespace AfterSchoolLibrary.Models
             return new FeeCalculationObject(
                                 PaymentPlanCostTodayNoFees,
                                 BillingAccount,
+                                ParticipationObject,
                                 msgs,
                                 dc)
                             .GetConvenienceFee();

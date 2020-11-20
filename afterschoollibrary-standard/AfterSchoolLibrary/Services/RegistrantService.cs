@@ -241,7 +241,7 @@ namespace AfterSchoolLibrary.Services
             // what's the value of the subscription plan with convenience fees and credit card fees
 
             var calcObj = new FeeCalculationObject(plan.CostPerPeriod.Value, billingAccount, msgs, dc);
-            var costWithAllFees = calcObj.GetFinalTotalCost();
+            var costWithAllFees = calcObj.GetFinalTotalCost(PaymentType.CreditCard);
             var individualCostWithFees = checkoutObject.GetSubscriptionCostTodayWithConvenienceFee(msgs, dc);
 
             if (checkoutObject.PaymentType == PaymentType.CreditCard)
@@ -437,7 +437,7 @@ namespace AfterSchoolLibrary.Services
                 BillingPeriodType = plan.BillingPeriodTypeId
             };
         }
-     
+
         public static string GetParentOrGuardianEmail(this Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (registrant.ParentRegistrantId.HasValue)
@@ -1333,6 +1333,21 @@ namespace AfterSchoolLibrary.Services
                 onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
+        }
+
+        internal static void DeleteSessionActions(this Registrant registrant, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            SessionAction.LoadByRegistrantId(registrant.ID.Value, msgs, dc).ForEach(sa => msgs.AddRange(sa.Delete(dc)));
+        }
+
+        internal static void DeleteRegistrantActivities(this Registrant registrant, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            registrant.GetRegistrantActivities(msgs, dc).ForEach(ra => ra.CancelRegistration(msgs, dc));
+        }
+
+        public static int GetRegistrationCount(this Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Registration.GetCount(new Hashtable() { { "RegistrantId", registrant.ID.Value } }, msgs: msgs, dc: dc);
         }
 
         public static Registrant GetParentOrGuardian(this Registrant registrant, SystemMessages msgs, DatabaseConnection dc = null)

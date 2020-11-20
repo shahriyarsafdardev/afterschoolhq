@@ -320,7 +320,7 @@ namespace AfterSchoolLibrary.Models
 			SubscriptionPlan.Update(new Hashtable(){{"PaymentStartTypeId",0}}, new Hashtable(){{"PaymentStartTypeId", DBNull.Value}}, SubscriptionPlan.ObjectMap, dc);
 			SubscriptionPlan.Update(new Hashtable(){{"SplitCostEvenly",false}}, new Hashtable(){{"SplitCostEvenly", DBNull.Value}}, SubscriptionPlan.ObjectMap, dc);
 			SubscriptionPlan.Update(new Hashtable(){{"RegFeeAsDownPayment",false}}, new Hashtable(){{"RegFeeAsDownPayment", DBNull.Value}}, SubscriptionPlan.ObjectMap, dc);
-			SubscriptionPlan.Update(new Hashtable(){{"isConvenienceFeeTakenOutOfCost",false}}, new Hashtable(){{"isConvenienceFeeTakenOutOfCost", DBNull.Value}}, SubscriptionPlan.ObjectMap, dc);
+			SubscriptionPlan.Update(new Hashtable(){{"IsConvenienceFeeTakenOutOfCost",false}}, new Hashtable(){{"IsConvenienceFeeTakenOutOfCost", DBNull.Value}}, SubscriptionPlan.ObjectMap, dc);
 			RegistrantSubscriptionPlan.Update(new Hashtable(){{"PaymentTypeFeesPaidBy",0}}, new Hashtable(){{"PaymentTypeFeesPaidBy", DBNull.Value}}, RegistrantSubscriptionPlan.ObjectMap, dc);
 			RegistrantSubscriptionPlan.Update(new Hashtable(){{"ConvenienceFeesPaidBy",0}}, new Hashtable(){{"ConvenienceFeesPaidBy", DBNull.Value}}, RegistrantSubscriptionPlan.ObjectMap, dc);
 			RegistrantSubscriptionPlan.Update(new Hashtable(){{"PaymentTypeId",0}}, new Hashtable(){{"PaymentTypeId", DBNull.Value}}, RegistrantSubscriptionPlan.ObjectMap, dc);

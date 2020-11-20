@@ -158,9 +158,20 @@
                                    value="@(paymentPlan.IsNotEmpty() && paymentPlan.CostPerPeriod.HasValue ? paymentPlan.CostPerPeriod.Value.ToString("0.00") : "0.00")"
                                    required min="0.00" step=".01" @paymentdisabled />
                         </div>
-                        <p class="text-muted">
-                            <em>The parent will be charged <span class="text-bold">$<span id="finalpaymentplancost">0.00</span></span> <span id="paymentplanstarttypetext">on Checkout</span></em>
+                        <p class="text-muted text-medium-small">
+                            <span id="pricetoparent-paymentplan-span">
+                                <em>The total cost will be <span class="text-bold">$<span id="pricetoparent-paymentplan">0.00</span></span> at checkout</em>.
+                            </span>
+                            <span id="amounttoprovider-paymentplan-span">
+                                <em>The total amount you will receive is <span class="text-bold">$<span id="amounttoprovider-paymentplan">0.00</span></span></em>.
+                            </span>
                         </p>
+                        <div>
+                            <div class="am-checkbox">
+                                <input type="checkbox" name="isparentpricepaymentplan" id="isparentpricepaymentplan" value="1" @(paymentPlan.IsNotEmpty() && paymentPlan.IsConvenienceFeeTakenOutOfCost ? "checked=\"checked\"" : "") />
+                                <label for="isparentpricepaymentplan">Price is the amount the parent pays</label>
+                            </div>
+                        </div>
                     </div>
                     <div class="col-md-3"></div>
                     <div class="col-sm-6 col-md-9">
@@ -383,7 +394,7 @@
                                        name="isparentpricepostpay" 
                                        id="isparentpricepostpay" 
                                        value="1"
-                                       @(postPayPlan.IsNotEmpty() && postPayPlan.isConvenienceFeeTakenOutOfCost ? "checked=\"checked\"" : "") />
+                                       @(postPayPlan.IsNotEmpty() && postPayPlan.IsConvenienceFeeTakenOutOfCost ? "checked=\"checked\"" : "") />
                                 <label for="isparentpricepostpay">Price is the amount the parent pays</label>
                             </div>
                         </div>
@@ -419,18 +430,34 @@
     var paymentplanTimeOut = null;
     var subscriptionTimeOut = null;
 
+    function calculateFinalPriceCost() {
+        calculateFinalPrice($('#cost').val(), $('#pricetoparent'), $('#amounttoprovider'), $('#isparentpricecost'));
+    }
+
+    function calculateFinalPricePostPay() {
+        calculateFinalPrice($('#postpaycost').val(), $('#pricetoparent-postpay'), $('#amounttoprovider-postpay'), $('#isparentpricepostpay'));
+    }
+
+    function calculateFinalPricePaymentPlan() {
+        calculateFinalPrice($('#paymentplancost').val(), $('#pricetoparent-paymentplan'), $('#amounttoprovider-paymentplan'), $('#isparentpricepaymentplan'));
+    }
+
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         setSubscriptionPlanSection();
         setPaymentPlanSection();
         setPostPayPlanSection();
 
         $('#isparentpricecost').click(function () {
-            calculateFinalPrice($('#cost').val(), $('#pricetoparent'), $('#amounttoprovider'), $('#isparentpricecost'));
-        })
+            calculateFinalPriceCost();
+        });
 
         $('#isparentpricepostpay').click(function () {
-            calculateFinalPrice($('#postpaycost').val(), $('#pricetoparent-postpay'), $('#amounttoprovider-postpay'), $('#isparentpricepostpay'));
-        })
+            calculateFinalPricePostPay();
+        });
+
+        $('#isparentpricepaymentplan').click(function () {
+            calculateFinalPricePaymentPlan();
+        });
 
         $('#hassubscriptionplan').change(function (cb) {
             setSubscriptionPlanSection();
@@ -465,14 +492,14 @@
         $('#cost').keyup(function () {
             costTimeOut = null;
             costTimeOut = setTimeout(function () {
-                calculateFinalPrice($('#cost').val(), $('#pricetoparent'), $('#amounttoprovider'), $('#isparentpricecost'));
+                calculateFinalPriceCost();
             }, 200);
         });
 
         $('#paymentplancost').keyup(function () {
             paymentplanTimeOut = null;
             paymentplanTimeOut = setTimeout(function () {
-                calculateFinalPrice($('#paymentplancost').val(), $('#finalpaymentplancost'));
+                calculateFinalPricePaymentPlan();
             }, 200);
         });
 
@@ -486,13 +513,13 @@
         $('#postpaycost').keyup(function () {
             postpayplanTimeOut = null;
             postpayplanTimeOut = setTimeout(function () {
-                calculateFinalPrice($('#postpaycost').val(), $('#pricetoparent-postpay'), $('#amounttoprovider-postpay'), $('#isparentpricepostpay'));
+                calculateFinalPricePostPay();
             }, 200);
         });
 
-        calculateFinalPrice($('#cost').val(), $('#pricetoparent'), $('#amounttoprovider'), $('#isparentpricecost'));
-        // calculateFinalPrice($('#paymentplancost').val(), $('#finalpaymentplancost'));
-        calculateFinalPrice($('#postpaycost').val(), $('#pricetoparent-postpay'), $('#amounttoprovider-postpay'), $('#isparentpricepostpay'));
+        calculateFinalPriceCost();
+        calculateFinalPricePaymentPlan();
+        calculateFinalPricePostPay();
         // getSubscriptionFinalPrice();
 
         updateSubscriptionPeriodText();

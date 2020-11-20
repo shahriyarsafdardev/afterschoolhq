@@ -119,9 +119,9 @@ namespace AfterSchoolLibrary.Models
             return Math.Ceiling(stripeFee); // - .01M;
         }
 
-        public decimal GetTotalFees()
+        public decimal GetTotalFees(PaymentType paymentType)
         {
-            return GetConvenienceFee() + GetCreditCardFee();
+            return GetConvenienceFee() + (paymentType == PaymentType.CreditCard ? GetCreditCardFee() : 0);
         }
 
         public decimal GetCostWithConvenienceFee()
@@ -129,9 +129,9 @@ namespace AfterSchoolLibrary.Models
             return Cost + (IsConvenienceFeeTakenOutOfCost ? 0 : GetConvenienceFee());
         }
 
-        public decimal GetFinalTotalCost()
+        public decimal GetFinalTotalCost(PaymentType paymentType)
         {
-            return Cost + GetTotalFees();
+            return GetCostWithConvenienceFee() + (paymentType == PaymentType.CreditCard ? GetCreditCardFee() : 0);
         }
 
         public decimal GetAmountToProvider()

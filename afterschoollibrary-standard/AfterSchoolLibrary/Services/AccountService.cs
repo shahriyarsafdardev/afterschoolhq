@@ -3376,26 +3376,17 @@ namespace AfterSchoolLibrary.Services
                 return 0;
 
             var costPerPeriod = plan.GetCostPerPeriodPerPerson(msgs, dc);
-
             var calcObj = new FeeCalculationObject(
                             costPerPeriod,
                             billingAccount,
+                            plan.IsConvenienceFeeTakenOutOfCost,
                             msgs,
                             dc);
 
-            var feeAmount = calcObj.GetConvenienceFee();
-            var billedCostPerPeriod = costPerPeriod;
+            var feeAmount = calcObj.GetTotalFees(paymentType);
+            var totalCost = calcObj.GetFinalTotalCost(paymentType);
 
-            if (paymentType == PaymentType.CreditCard)
-                feeAmount += calcObj.GetCreditCardFee();
-
-            if (!billingAccount.IsConvenienceFeeTakenOutOfCost)
-                billedCostPerPeriod += calcObj.GetConvenienceFee();
-
-            if (!billingAccount.IsCreditCardFeeTakenOutOfCost && paymentType == PaymentType.CreditCard)
-                billedCostPerPeriod += calcObj.GetCreditCardFee();
-
-            return Math.Round(feeAmount / billedCostPerPeriod, 4);
+            return Math.Round(feeAmount / totalCost, 4);
         }
         public static void SendStripePayout(this Account account, Payout payout, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {

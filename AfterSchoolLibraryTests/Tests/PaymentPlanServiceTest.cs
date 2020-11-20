@@ -34,6 +34,7 @@ namespace AfterSchoolLibraryTests.Tests
                 BillingPeriodType.Month,
                 12,
                 PlanPaymentStartType.WhenActivityStarts,
+                false,
                 LoggedInUser.ID.Value,
                 msgs,
                 dc);
@@ -54,6 +55,7 @@ namespace AfterSchoolLibraryTests.Tests
                 BillingPeriodType.Month,
                 12,
                 PlanPaymentStartType.WhenActivityStarts,
+                false,
                 LoggedInUser.ID.Value,
                 msgs,
                 dc);

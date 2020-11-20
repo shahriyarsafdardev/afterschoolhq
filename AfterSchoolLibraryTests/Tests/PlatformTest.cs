@@ -29,7 +29,7 @@ namespace AfterSchoolLibraryTests.Tests
             var package = PackageFactory.Create(msgs, dc);
             var calcObj = new FeeCalculationObject(registrationFee, account, msgs, dc);
 
-            Assert.Equal(expectedResult.ToDecimal(), calcObj.GetFinalTotalCost());
+            Assert.Equal(expectedResult.ToDecimal(), calcObj.GetFinalTotalCost(PaymentType.CreditCard));
         }
 
         [Theory(DisplayName = "Get Total Checkout Cost without Credit Card ")]

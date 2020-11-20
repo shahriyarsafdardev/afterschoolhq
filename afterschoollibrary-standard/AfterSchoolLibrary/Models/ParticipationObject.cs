@@ -743,7 +743,7 @@ namespace AfterSchoolLibrary.Models
             var plan = this.PostPayPlans.FirstOrDefault();
 
             if (plan.IsNotEmpty())
-                return GetPostPayCost() + (plan.isConvenienceFeeTakenOutOfCost ? 0 : GetPostPayConvenienceFee());
+                return GetPostPayCost() + (plan.IsConvenienceFeeTakenOutOfCost ? 0 : GetPostPayConvenienceFee());
 
             return 0;
         }
@@ -752,7 +752,7 @@ namespace AfterSchoolLibrary.Models
         {
             var plan = this.PostPayPlans.FirstOrDefault();
 
-            if (plan.IsNotEmpty() && plan.isConvenienceFeeTakenOutOfCost)
+            if (plan.IsNotEmpty() && plan.IsConvenienceFeeTakenOutOfCost)
                 return GetPostPayCost() - GetPostPayConvenienceFee();
 
             return GetPostPayCost();
@@ -767,7 +767,7 @@ namespace AfterSchoolLibrary.Models
                 return new FeeCalculationObject(
                                 GetPostPayCost(),
                                 OwnerAccount,
-                                plan.isConvenienceFeeTakenOutOfCost)
+                                plan.IsConvenienceFeeTakenOutOfCost)
                             .GetConvenienceFee();
 
             return 0;
@@ -781,7 +781,7 @@ namespace AfterSchoolLibrary.Models
                 return new FeeCalculationObject(
                                 GetPostPayCost(),
                                 PaymentAccount,
-                                plan.isConvenienceFeeTakenOutOfCost)
+                                plan.IsConvenienceFeeTakenOutOfCost)
                             .GetCreditCardFee();
 
             return 0;
