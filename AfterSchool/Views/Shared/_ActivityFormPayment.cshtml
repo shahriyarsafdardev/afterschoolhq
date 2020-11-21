@@ -283,15 +283,28 @@
                                 @BillingPeriodOptions(subscriptionPlan)
                             </select>
                         </div>
+                        @*
                         <p class="text-muted subscription-plan-cost-split">
                             <em>The parent will be charged <span class="subscription-range">between</span> <span class="text-bold">$<span id="finalsubscriptionplancost-1">0.00</span></span> <span class="subscription-range"> and <span class="text-bold">$<span id="finalsubscriptionplancost-2" class="text-bold">0.00</span></span></span> every <span class="subscription-period-text text-bold"></span></em>
                         </p>
                         <p class="text-muted subscription-plan-cost-split">
                             <em>If registration was closed now the parent would be charged <span class="text-bold">$<span id="finalsubscriptionplancost-3">0.00</span></span> every <span class="subscription-period-text text-bold"></span></em>
                         </p>
-                        <p class="text-muted subscription-plan-cost-nosplit">
-                            <em>The parent will be charged <span class="text-bold">$<span id="finalsubscriptionplancost">0.00</span></span> upon checkout</em>
+                        *@
+                        <p class="text-muted text-medium-small">
+                            <span id="pricetoparent-subscription-span">
+                                <em>The total cost will be <span class="text-bold">$<span id="pricetoparent-subscription">0.00</span></span> at checkout</em>.
+                            </span>
+                            <span id="amounttoprovider-subscription-span">
+                                <em>The total amount you will receive is <span class="text-bold">$<span id="amounttoprovider-subscription">0.00</span></span></em>.
+                            </span>
                         </p>
+                        <div>
+                            <div class="am-checkbox">
+                                <input type="checkbox" name="isparentpricesubscription" id="isparentpricesubscription" value="1" @(subscriptionPlan.IsNotEmpty() && subscriptionPlan.IsConvenienceFeeTakenOutOfCost ? "checked=\"checked\"" : "") />
+                                <label for="isparentpricesubscription">Price is the amount the parent pays</label>
+                            </div>
+                        </div>
                     </div>
 
                 </div>
@@ -316,7 +329,7 @@
                     </div>
                 *@
 
-                @if (Model.ActivityTypeId == ActivityType.LearningPod)
+                @if (Model.ActivityTypeId == ActivityType.LearningPod && false)
                 {
                     <div class="row subscriptionplansection">
                         <label class="col-sm-3 control-label">Parents split cost evenly</label>
@@ -442,6 +455,10 @@
         calculateFinalPrice($('#paymentplancost').val(), $('#pricetoparent-paymentplan'), $('#amounttoprovider-paymentplan'), $('#isparentpricepaymentplan'));
     }
 
+    function calculateFinalPriceSubscription() {
+        calculateFinalPrice($('#subscriptionplancost').val(), $('#pricetoparent-subscription'), $('#amounttoprovider-subscription'), $('#isparentpricesubscription'));
+    }
+
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         setSubscriptionPlanSection();
         setPaymentPlanSection();
@@ -457,6 +474,10 @@
 
         $('#isparentpricepaymentplan').click(function () {
             calculateFinalPricePaymentPlan();
+        });
+
+        $('#isparentpricesubscription').click(function () {
+            calculateFinalPriceSubscription();
         });
 
         $('#hassubscriptionplan').change(function (cb) {
@@ -520,7 +541,7 @@
         calculateFinalPriceCost();
         calculateFinalPricePaymentPlan();
         calculateFinalPricePostPay();
-        // getSubscriptionFinalPrice();
+        getSubscriptionFinalPrice();
 
         updateSubscriptionPeriodText();
         updatePaymentPlanStartText();
@@ -546,14 +567,12 @@
     function getSubscriptionFinalPrice() {
 
         $('.subscription-range').addClass('hide');
-        $('.subscription-plan-cost-nosplit').addClass('hide');
-        $('.subscription-plan-cost-split').addClass('hide');
+        showHideSubscriptionSplit();
 
         if ($('#splitcostevenly').is(':checked')) {
             var totalAmt = $('#subscriptionplancost').val();
 
             $('.subscription-range').removeClass('hide');
-            $('.subscription-plan-cost-split').removeClass('hide');
 
             calculateFinalPrice(totalAmt / @Model.SeatsAvailable, $('#finalsubscriptionplancost-1'));
             calculateFinalPrice(totalAmt / @(Model.MinSeatsRequired ?? 1), $('#finalsubscriptionplancost-2'));
@@ -561,10 +580,22 @@
 
         } else {
 
-            $('.subscription-plan-cost-nosplit').removeClass('hide');
             var totalAmt = $('#subscriptionplancost').val();
-            calculateFinalPrice(totalAmt, $('#finalsubscriptionplancost'));
+            calculateFinalPriceSubscription();
         }
+    }
+
+    function showHideSubscriptionSplit() {
+
+        $('.subscription-plan-cost-nosplit').addClass('hide');
+        $('.subscription-plan-cost-split').addClass('hide');
+
+        if ($('#splitcostevenly').is(':checked')) {
+            $('.subscription-plan-cost-split').removeClass('hide');
+        } else {
+            $('.subscription-plan-cost-nosplit').removeClass('hide');
+        }
+
     }
 
     function calculateFinalPrice(cost, priceToParentSpan, amountToProviderSpan, takenOutOfCostChk) {

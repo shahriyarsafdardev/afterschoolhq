@@ -264,15 +264,16 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetSubscriptionCostTodayWithFees(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return GetSubscriptionCostTodayNoFees(msgs, dc) +
-                    GetSubscriptionCostTodayCreditCardFee(msgs, dc) +
-                    GetSubscriptionCostTodayConvenienceFee(msgs, dc);
+            return GetSubscriptionCostTodayWithConvenienceFee(msgs, dc) +
+                    GetSubscriptionCostTodayCreditCardFee(msgs, dc);
         }
 
         public decimal GetSubscriptionCostTodayWithConvenienceFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return GetSubscriptionCostTodayNoFees(msgs, dc) +
-                    GetSubscriptionCostTodayConvenienceFee(msgs, dc);
+            if (SubscriptionPlan.IsNotEmpty() && SubscriptionPlan.IsConvenienceFeeTakenOutOfCost)
+                return GetSubscriptionCostTodayNoFees(msgs, dc);
+            
+            return GetSubscriptionCostTodayNoFees(msgs, dc) + GetSubscriptionCostTodayConvenienceFee(msgs, dc);
         }
 
         public decimal GetSubscriptionCostTodayCreditCardFee(SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -319,9 +320,7 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetPaymentPlanCostTodayWithConvenienceFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var activity = ParticipationObject.GetActivity();
-
-            if (activity.IsConvenienceFeeTakenOutOfCost)
+            if (PaymentPlan.IsNotEmpty() && PaymentPlan.IsConvenienceFeeTakenOutOfCost)
                 return PaymentPlanCostTodayNoFees;
             
             return PaymentPlanCostTodayNoFees + GetPaymentPlanCostTodayConvenienceFee(msgs, dc);
