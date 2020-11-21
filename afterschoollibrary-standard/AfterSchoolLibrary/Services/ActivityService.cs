@@ -1842,23 +1842,24 @@ namespace AfterSchoolLibrary.Services
             // get attendance by activityInstanceId if it exists
             if (activityInstanceId.HasValue)
             {
-                var activityInstance = ActivityInstance.Load(activityInstanceId.Value, msgs);
-                if (activityInstance.IsEmpty() || activityInstance.ActivityScheduleId.Value != activity.GetSchedule(msgs).ID.Value)
+                var activityInstance = ActivityInstance.Load(activityInstanceId.Value, msgs, dc);
+                if (activityInstance?.ActivityScheduleId != activity.ActivityScheduleId)
                 {
                     msgs.Add("Invalid record error", MessageType.UserError);
                     return null;
                 }
-                var attendance = Attendance.GetByActivityInstance(activityInstance, msgs).FirstOrDefault();
+
+                var attendance = activityInstance.GetAttendance(msgs, dc);
                 if (attendance.IsNotEmpty())
                     return attendance;
             }
 
             // check if most recent activityinstance has an attendance
-            var closestActivityInstance = activity.GetClosestActivityInstanceToDate(DateTime.UtcNow, msgs, dc);
-            if (closestActivityInstance.StartDateTime > DateTime.UtcNow)
+            var closestActivityInstance = activity.GetClosestPastActivityInstanceToDate(DateTime.UtcNow, msgs, dc);            
+            if (closestActivityInstance.IsEmpty())
                 return null;
 
-            var closestActivityInstanceAttendance = Attendance.GetByActivityInstance(closestActivityInstance, msgs, dc).FirstOrDefault();
+            var closestActivityInstanceAttendance = Attendance.LoadByActivityInstanceId(closestActivityInstance.ID.Value, msgs, dc).FirstOrDefault();
 
             if (closestActivityInstanceAttendance.IsNotEmpty() && !activityInstanceId.HasValue)
                 return closestActivityInstanceAttendance;
@@ -1869,6 +1870,22 @@ namespace AfterSchoolLibrary.Services
 
             // otherwise return the attendance with given id
             return Attendance.Load(attendanceId.Value, msgs, dc);
+        }
+
+        public static ActivityInstance GetClosestPastActivityInstanceToDate(this Activity activity, DateTime date, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var instances = activity
+                .GetSchedule(msgs: msgs, dc: dc)
+                .GetInstances(msgs: msgs, dc: dc);
+
+            var account = activity.GetAccount(msgs, dc);
+            var dateInTimeZone = account.ConvertToAccountTimeZone(date);
+            var nowInTimeZone = account.ConvertToAccountTimeZone(DateTime.UtcNow);
+            var closestPastDate = instances
+                .Select(y => y.StartDateTime.Value)
+                .ClosestPastDate(dateInTimeZone, nowInTimeZone);
+
+            return instances.Where(x => x.StartDateTime.Value == closestPastDate).First();
         }
 
         public static ActivityInstance GetClosestActivityInstanceToDate(this Activity activity, DateTime date, SystemMessages msgs, DatabaseConnection dc)

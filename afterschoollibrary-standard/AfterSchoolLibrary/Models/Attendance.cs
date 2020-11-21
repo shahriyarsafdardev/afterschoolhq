@@ -218,34 +218,6 @@ namespace AfterSchoolLibrary.Models
             };
         }
 
-        public Activity GetActivity(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (this.ActivityId.HasValue)
-                return Activity.Load(this.ActivityId.Value, msgs, dc);
-
-            return null;
-        }
-
-        public ActivityInstance GetActivityInstance(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return ActivityInstance.Load(this.ActivityInstanceId.Value, msgs, dc);
-        }
-
-        public List<AttendanceRegistrant> GetAttendanceRegistrants(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return AttendanceRegistrant.LoadByAttendanceId(this.ID.Value, dc: dc);
-        }
-
-        public int GetAttendanceRegistrantCount(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return AttendanceRegistrant.GetPossibleCount(this.ID.Value, dc: dc);
-        }
-
-        public int GetPresentCount(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return AttendanceRegistrant.GetPresentCount(this.ID.Value, msgs, dc);
-        }
-
         public static List<Attendance> LoadByAccountIdByDate(int AccountId, DateTime Date, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
@@ -285,22 +257,6 @@ namespace AfterSchoolLibrary.Models
             var criterias = new Hashtable() { { "ActivityId", activity.ID.Value } };
 
             return Attendance.BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-        }
-
-        public static List<Attendance> GetByActivityInstance(ActivityInstance activityInstance, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
-            dq.Connection = dc;
-            dq.Criterias.Add(ObjectMap["ActivityInstanceId"], activityInstance.ID.Value);
-            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-        }
-
-        public static List<Attendance> GetByActivityInstanceId(int activityInstanceId, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
-            dq.Connection = dc;
-            dq.Criterias.Add(ObjectMap["ActivityInstanceId"], activityInstanceId);
-            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
 
