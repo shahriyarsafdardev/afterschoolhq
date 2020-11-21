@@ -245,7 +245,7 @@ namespace AfterSchoolLibrary.Models
             return dq.GetCount(msgs);
         }
 
-        public static List<Attendance> GetByActivityOrderBy(Activity activity, string orderbyParam, OrderByDirectionEnum direction, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<Attendance> LoadByActivityId(int activityId, string orderbyParam, OrderByDirectionEnum direction, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -254,7 +254,7 @@ namespace AfterSchoolLibrary.Models
             dq.SelectRange.Length = length;
             dq.OrderBys.Add(orderbyParam, direction);
 
-            var criterias = new Hashtable() { { "ActivityId", activity.ID.Value } };
+            var criterias = new Hashtable() { { "ActivityId", activityId } };
 
             return Attendance.BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }

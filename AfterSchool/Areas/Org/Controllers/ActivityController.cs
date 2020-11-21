@@ -1144,7 +1144,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (activity.IsNotEmpty())
             {
-                attendances = AfterSchoolLibrary.Models.Attendance.GetByActivityOrderBy(activity, orderByParam, orderbyDirection, start, length, msgs);
+                attendances = activity.GetAttendance(orderByParam, orderbyDirection, start, length, msgs);
                 totalAttendanceCount = activity.GetTotalAttendanceCount(msgs);
 
                 if (totalAttendanceCount > 0)
