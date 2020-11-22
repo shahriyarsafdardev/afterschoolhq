@@ -24,11 +24,25 @@
                     <strong>@Model.GetPostPayCostWithConvenienceFee().ToCurrency()</strong>
                     per class attended per student
                 </span>
+                if (Model.PostPayPlans.First().NumberOfPeriodsPrePaid.HasValue)
+                { 
+                    <span>
+                        with a pre-payment of 
+                        <strong>@((Model.GetPostPayCostWithConvenienceFee() * Model.PostPayPlans.First().NumberOfPeriodsPrePaid.Value).ToCurrency())</strong>
+                    </span>
+                }
             }
             else
             {
                 <span>
-                    Parents will pay <strong>@Model.GetPostPayCostWithConvenienceFee().ToCurrency()</strong> and you will receive
+                    Parents will pay <strong>@Model.GetPostPayCostWithConvenienceFee().ToCurrency()</strong> 
+                    @if (Model.PostPayPlans.First().NumberOfPeriodsPrePaid.HasValue)
+                    { 
+                <span>
+                    with a pre-payment of <strong>@((Model.GetPostPayCostWithConvenienceFee() * Model.PostPayPlans.First().NumberOfPeriodsPrePaid.Value).ToCurrency())</strong>
+                </span>
+                    }
+                    and you will receive
                     <strong>@Model.GetPostPayProviderAmount().ToCurrency()</strong>
                     per class attended per student
                 </span>

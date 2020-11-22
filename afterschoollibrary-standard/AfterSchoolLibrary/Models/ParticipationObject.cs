@@ -787,10 +787,32 @@ namespace AfterSchoolLibrary.Models
             return 0;
         }
 
+        public decimal GetCheckoutPostPayCreditCardFee()
+        {
+            var plan = this.PostPayPlans.FirstOrDefault();
+
+            if ((plan?.NumberOfPeriodsPrePaid).IsPositive())
+                return GetPostPayCreditCardFee() * plan.NumberOfPeriodsPrePaid.Value;
+
+            return 0;
+        }
+
+        public decimal GetPostPayCheckoutCostWithConvenienceFee()
+        {
+            var plan = this.PostPayPlans.FirstOrDefault();
+            if (plan.IsNotEmpty() && plan.NumberOfPeriodsPrePaid.HasValue)
+                return plan.NumberOfPeriodsPrePaid.Value * GetPostPayCostWithConvenienceFee();
+
+            return 0;
+        }
+
         #endregion
 
         public decimal GetCheckoutCostWithConvenienceFee()
         {
+            if (this.PostPayPlans.Any())
+                return GetPostPayCheckoutCostWithConvenienceFee();
+
             if (this.Cost.HasValue)
             {
                 var activity = this.GetActivity();
