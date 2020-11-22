@@ -1837,15 +1837,71 @@ namespace AfterSchoolLibrary.Services
             return Models.Match.LoadByTeamId(activity.ID.Value, msgs, dc).IsEmpty();
         }
 
-        public static Attendance GetOrCreateNewAttendance(this Activity activity, int? attendanceId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Attendance GetOrCreateNewAttendance(this Activity activity, int? attendanceId, int? activityInstanceId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (!attendanceId.HasValue)
-                return activity.CreateNewAttendance(loggedInUser, msgs, dc);
+            // get attendance by activityInstanceId if it exists
+            if (activityInstanceId.HasValue)
+            {
+                var activityInstance = ActivityInstance.Load(activityInstanceId.Value, msgs, dc);
+                if (activityInstance?.ActivityScheduleId != activity.ActivityScheduleId)
+                {
+                    msgs.Add("Invalid record error", MessageType.UserError);
+                    return null;
+                }
 
+                var attendance = activityInstance.GetAttendance(msgs, dc);
+                if (attendance.IsNotEmpty())
+                    return attendance;
+            }
+
+            // check if most recent activityinstance has an attendance
+            var closestActivityInstance = activity.GetClosestPastActivityInstanceToDate(DateTime.UtcNow, msgs, dc);            
+            if (closestActivityInstance.IsEmpty())
+                return null;
+
+            var closestActivityInstanceAttendance = Attendance.LoadByActivityInstanceId(closestActivityInstance.ID.Value, msgs, dc).FirstOrDefault();
+
+            if (closestActivityInstanceAttendance.IsNotEmpty() && !activityInstanceId.HasValue)
+                return closestActivityInstanceAttendance;
+
+            // otherwise create a new attendance if there is no attendance id
+            if (!attendanceId.HasValue)
+                return activity.CreateNewAttendance(activityInstanceId.IsEmpty() ? closestActivityInstance.ID.Value : activityInstanceId, loggedInUser, msgs, dc);
+
+            // otherwise return the attendance with given id
             return Attendance.Load(attendanceId.Value, msgs, dc);
         }
 
-        public static Attendance CreateNewAttendance(this Activity activity, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static ActivityInstance GetClosestPastActivityInstanceToDate(this Activity activity, DateTime date, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var instances = activity
+                .GetSchedule(msgs: msgs, dc: dc)
+                .GetInstances(msgs: msgs, dc: dc);
+
+            var account = activity.GetAccount(msgs, dc);
+            var dateInTimeZone = account.ConvertToAccountTimeZone(date);
+            var nowInTimeZone = account.ConvertToAccountTimeZone(DateTime.UtcNow);
+            var closestPastDate = instances
+                .Select(y => y.StartDateTime.Value)
+                .ClosestPastDate(dateInTimeZone, nowInTimeZone);
+
+            return instances.Where(x => x.StartDateTime.Value == closestPastDate).First();
+        }
+
+        public static ActivityInstance GetClosestActivityInstanceToDate(this Activity activity, DateTime date, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var instances = activity
+                .GetSchedule(msgs: msgs, dc: dc)
+                .GetInstances(msgs: msgs, dc: dc);
+
+            var closestDate = instances
+                .Select(y => y.StartDateTime.Value)
+                .ClosestDate(activity.GetAccount(msgs, dc).ConvertToAccountTimeZone(date));
+
+            return instances.Where(x => x.StartDateTime.Value == closestDate).First();
+        }
+
+        public static Attendance CreateNewAttendance(this Activity activity, int? activityInstanceId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             //create attendance records for this date and mark as absent by default (even if temporary)
             var attendance = new Attendance();
@@ -1854,8 +1910,11 @@ namespace AfterSchoolLibrary.Services
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
+                    ActivityInstance activityInstance = null;
+                    if (activityInstanceId.HasValue)
+                        activityInstance = ActivityInstance.Load(activityInstanceId.Value, amsgs, adc);
                     activity.ClearEmptyAttendances(amsgs, adc);
-                    attendance.InitAttendance(activity, loggedInUser, amsgs, adc);
+                    attendance.InitAttendance(activity, loggedInUser,activityInstance, amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {
@@ -2070,6 +2129,11 @@ namespace AfterSchoolLibrary.Services
             return Attendance.LoadByActivityId(activity.ID.Value, msgs: msgs, dc: dc);
         }
 
+        public static List<Attendance> GetAttendance(this Activity activity, string orderByParam, OrderByDirectionEnum direction, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            return Attendance.LoadByActivityId(activity.ID.Value, orderByParam, direction, start, length, msgs, dc);
+        }
+
         public static List<Attendance> GetCompletedAttendance(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Attendance.LoadByActivityIdByIsCompleted(activity.ID.Value, true, msgs: msgs, dc: dc);
@@ -2088,6 +2152,11 @@ namespace AfterSchoolLibrary.Services
         public static List<Attendance> GetAttendanceByDate(this Activity activity, DateTime date, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Attendance.LoadByActivityIdByDate(activity.ID.Value, date, msgs: msgs, dc: dc);
+        }
+
+        public static int GetTotalAttendanceCount(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Attendance.GetCount(new Hashtable() { { "ActivityId", activity.ID.Value } }, msgs, dc);
         }
 
         public static List<ActivityRegistrationPeriod> GetActivityRegistrationPeriods(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
