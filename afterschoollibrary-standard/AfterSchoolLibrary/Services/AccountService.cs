@@ -2818,57 +2818,80 @@ namespace AfterSchoolLibrary.Services
 
         public static void CreatePurchaseTransactionPayment(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            // not the master registrant record
-            var registrant = checkoutObject.Registration.GetRegistrant(msgs, dc);
+            Registrant registrant = null;
 
-            // need to check for existing purchase or create a new one
-            checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc);
+            // not the master registrant record
+            if (checkoutObject.Registration.IsNotEmpty())
+            {
+                registrant = checkoutObject.Registration.GetRegistrant(msgs, dc);
+
+                // need to check for existing purchase or create a new one
+                checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc);
+            }
 
             // charge successful so I need to create a transaction
             var transaction = AccountService.AddTransaction(
-                checkoutObject,
-                TransactionType.Charge,
-                loggedInUser,
-                msgs,
-                dc);
+                                checkoutObject,
+                                TransactionType.Charge,
+                                loggedInUser,
+                                msgs,
+                                dc);
 
             checkoutObject.Transaction = transaction;
 
-            // TODO: this is problematic, but a little better now
-            // you really don't know this is the amount paid, but it works for now
-            // var amountPaid = checkoutObject.TuitionCostNoFees;
-
-            // -- should be fixed now
-            var amountPaid = checkoutObject.GetTotalCostToPurchaseTodayNoFees(msgs, dc);
-
-            if (checkoutObject.OverrideAmount.HasValue)
-                amountPaid = checkoutObject.OverrideAmount.Value;
-
-            // need to track a payment for each activity/activitygroup
-            checkoutObject.ParticipationObject.AddPayment(
-                amount: amountPaid,
-                registrant: registrant,
-                transaction: transaction,
-                registrantSubscriptionPlan: checkoutObject.RegistrantSubscriptionPlan,
-                createDate: checkoutObject.Date,
-                loggedInUser: loggedInUser,
-                msgs: msgs,
-                dc: dc);
-
-            // if successful payment and reserved pending payment then it should be reserved
-            // TODO: Needs review!!
-            if (msgs.HasNoErrors())
+            if (registrant.IsNotEmpty())
             {
-                var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
-                    checkoutObject.ParticipationObject.ObjectID.Value,
-                    checkoutObject.ParticipationObject.ObjectType,
-                    registrant.ID.Value,
-                    msgs,
-                    dc);
+                // TODO: this is problematic, but a little better now
+                // you really don't know this is the amount paid, but it works for now
+                // var amountPaid = checkoutObject.TuitionCostNoFees;
 
-                if (ra.IsNotEmpty() && ra.AssignmentTypeId != RegistrationAssignmentType.Reserved)
-                    ra.ChangeSeatAssignment(RegistrationAssignmentType.Reserved, loggedInUser, msgs, dc);
+                // -- should be fixed now
+                // why is this being passed with no fees?
+                var amountPaid = checkoutObject.GetTotalCostToPurchaseTodayNoFees(msgs, dc);
+
+                if (checkoutObject.PostPayPlan.IsNotEmpty())
+                    amountPaid = checkoutObject.GetPostPayPlanCostTodayWithFees();
+
+                if (checkoutObject.OverrideAmount.HasValue)
+                    amountPaid = checkoutObject.OverrideAmount.Value;
+
+                // need to track a payment for each activity/activitygroup
+                checkoutObject.ParticipationObject.AddPayment(
+                    amount: amountPaid,
+                    registrant: registrant,
+                    transaction: transaction,
+                    registrantSubscriptionPlan: checkoutObject.RegistrantSubscriptionPlan,
+                    createDate: checkoutObject.Date,
+                    loggedInUser: loggedInUser,
+                    msgs: msgs,
+                    dc: dc);
+
+                // if successful payment and reserved pending payment then it should be reserved
+                // TODO: Needs review!!
+                if (msgs.HasNoErrors())
+                {
+                    var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
+                        checkoutObject.ParticipationObject.ObjectID.Value,
+                        checkoutObject.ParticipationObject.ObjectType,
+                        registrant.ID.Value,
+                        msgs,
+                        dc);
+
+                    if (ra.IsNotEmpty() && ra.AssignmentTypeId != RegistrationAssignmentType.Reserved)
+                        ra.ChangeSeatAssignment(RegistrationAssignmentType.Reserved, loggedInUser, msgs, dc);
+                }
             }
+        }
+
+        public static void ProcessPrePayFee(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (checkoutObject.RegistrationCostNoFees > 0)
+                AccountService.ProcessPaymentWithStripe(checkoutObject, msgs, dc);
+
+            // must wait until after charges happen to know what card id is charged for sure
+            // add purchase
+            if (msgs.HasNoErrors())
+                AccountService.CreatePurchaseTransactionPayment(checkoutObject, loggedInUser, msgs, dc);
         }
 
         public static void ProcessRegistrationFee(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
@@ -3019,7 +3042,7 @@ namespace AfterSchoolLibrary.Services
                     var hasPostPayPlan = checkoutObject.PostPayPlan.IsNotEmpty();
                     var alreadyPaidRegFee = submittedRecord.GetAmountPaid(msgs, dc) > 0;
 
-                    if (!isRegFree && !hasPaymentPlan && !alreadyPaidRegFee)
+                    if (!isRegFree && !hasPaymentPlan && !alreadyPaidRegFee && !hasPostPayPlan)
                         AccountService.ProcessRegistrationFee(checkoutObject, loggedInUser, amsgs, adc);
 
                     // Process Subscriptions separately, don't charge all at once for the registration Fee
@@ -3033,7 +3056,7 @@ namespace AfterSchoolLibrary.Services
                             dc: adc);
 
                     if (hasPostPayPlan)
-                        AccountService.StorePaymentInfo(checkoutObject, loggedInUser, amsgs, adc);
+                        AccountService.ProcessPostPayPlan(checkoutObject, loggedInUser, amsgs, adc);
 
                     // if they have a payment plan
                     if (hasPaymentPlan)
@@ -3081,6 +3104,14 @@ namespace AfterSchoolLibrary.Services
 
         }
 
+        public static void ProcessPostPayPlan(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            AccountService.StorePaymentInfo(checkoutObject, loggedInUser, msgs, dc);
+
+            if (msgs.HasNoErrors() && checkoutObject.PostPayPlan.NumberOfPeriodsPrePaid.IsPositive())
+                AccountService.ProcessPrePayFee(checkoutObject, loggedInUser, msgs, dc);
+        }
+
         public static void StorePaymentInfo(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (checkoutObject.StripeSourceId.IsEmpty())
@@ -3109,28 +3140,20 @@ namespace AfterSchoolLibrary.Services
 
         public static void ProcessPayment(CheckoutObject checkoutObject, WebUser loggedInUser, bool isAttendanceCharge = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            Transaction transaction = null;
             Database.ExecuteTransaction
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    AccountService.ProcessPaymentWithStripe(checkoutObject, msgs, dc);
+                    AccountService.ProcessPaymentWithStripe(checkoutObject, amsgs, adc);
 
                     // must wait until after charges happen to know what card id is charged for sure
-                    // add purchase
                     if (msgs.HasNoErrors())
-                        transaction = AccountService.AddTransaction(
-                            checkoutObject,
-                            TransactionType.Charge,
-                            loggedInUser,
-                            msgs,
-                            dc);
+                        AccountService.CreatePurchaseTransactionPayment(checkoutObject, loggedInUser, msgs, dc);
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {
                     msgs.AddRange(smsgs);
-                    checkoutObject.Transaction = transaction;
-                    Helpers.EmailHelper.SendPaymentConfirmation(checkoutObject, null, loggedInUser, true,msgs, isAttendanceCharge, dc);
+                    Helpers.EmailHelper.SendPaymentConfirmation(checkoutObject, null, loggedInUser, true, msgs, isAttendanceCharge, dc);
                 },
                 onFailure: (SystemMessages amsgs) => msgs.AddRange(amsgs),
                 onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),

@@ -797,10 +797,20 @@ namespace AfterSchoolLibrary.Models
             return 0;
         }
 
+        public decimal GetCheckoutPostPayConvenienceFee()
+        {
+            var plan = this.PostPayPlans.FirstOrDefault();
+
+            if ((plan?.NumberOfPeriodsPrePaid).IsPositive())
+                return GetPostPayConvenienceFee() * plan.NumberOfPeriodsPrePaid.Value;
+
+            return 0;
+        }
+
         public decimal GetPostPayCheckoutCostWithConvenienceFee()
         {
             var plan = this.PostPayPlans.FirstOrDefault();
-            if (plan.IsNotEmpty() && plan.NumberOfPeriodsPrePaid.HasValue)
+            if ((plan?.NumberOfPeriodsPrePaid).IsPositive())
                 return plan.NumberOfPeriodsPrePaid.Value * GetPostPayCostWithConvenienceFee();
 
             return 0;

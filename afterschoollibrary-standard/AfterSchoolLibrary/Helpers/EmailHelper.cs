@@ -650,8 +650,8 @@ namespace AfterSchoolLibrary.Helpers
                 }
                 else
                 {
-                    cost = checkoutObject.GetRegistrationCostWithConvenienceFee(msgs, dc).ToCurrency();
-                    ccFee = checkoutObject.GetRegistrationCreditCardFee(msgs, dc).ToCurrency();
+                    cost = checkoutObject.GetTotalCostToPurchaseTodayWithConvenienceFee(msgs, dc).ToCurrency();
+                    ccFee = checkoutObject.GetTotalCreditCardFeesToday(msgs, dc).ToCurrency();
 
                     additionalDetails = "registration fee";
                 }
@@ -967,13 +967,13 @@ namespace AfterSchoolLibrary.Helpers
             var registration = checkoutObject.Registration;
             var totalCostWithFees = checkoutObject.GetStripeAmount(msgs, dc);
             var totalCost = totalCostWithFees - checkoutObject.PaymentTypeFeeOverrideAmount.Value;
-            var totalFees = checkoutObject.PaymentTypeFeeOverrideAmount.Value;
+            var totalCreditCardFees = checkoutObject.PaymentTypeFeeOverrideAmount.Value;
             var quantity = checkoutObject.Quantity.HasValue ? checkoutObject.Quantity.Value.ToString() : "1";
             var description = $"Payment to {billingAccount.Name}";
 
             if (checkoutObject.Quantity.HasValue && isAttendanceCharge)
             {
-                description = $"Payment to {billingAccount.Name} ({(totalCost / checkoutObject.Quantity.Value).ToCurrency()} per class)";
+                description = $"Payment to {billingAccount.Name} ({(totalCost / checkoutObject.Quantity.Value).ToCurrency()} per {checkoutObject.PostPayPlan.BillingPeriodTypeId.ToString().ToLower()})";
             }
 
             var receiptRows = "";
@@ -1000,7 +1000,7 @@ namespace AfterSchoolLibrary.Helpers
                                             { "AmountDueOrPaid", "Amount Paid" },
                                             { "TotalCost", totalCostWithFees.ToCurrency() },
                                             { "BodyRows", receiptRows },
-                                            { "CreditCardFee", totalFees.ToCurrency() },
+                                            { "CreditCardFee", totalCreditCardFees.ToCurrency() },
                                         },
                                      "Registration_Confirmation_Table-1.0",
                                      msgs);

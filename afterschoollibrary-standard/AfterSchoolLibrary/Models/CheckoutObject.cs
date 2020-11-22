@@ -69,6 +69,9 @@ namespace AfterSchoolLibrary.Models
             if (OverrideAmount.HasValue)
                 return OverrideAmount.Value;
 
+            if (PostPayPlan.IsNotEmpty())
+                return GetPostPayPlanCostTodayWithFees();
+
             return this.GetRegistrationCostWithFees(msgs, dc);
         }
 
@@ -125,7 +128,7 @@ namespace AfterSchoolLibrary.Models
             if (PaymentPlan.IsNotEmpty())
                 return PaymentPlanCostTodayNoFees + GetSubscriptionCostTodayNoFees(msgs, dc);
 
-            return RegistrationCostNoFees + GetSubscriptionCostTodayNoFees(msgs, dc);
+            return RegistrationCostNoFees + GetSubscriptionCostTodayNoFees(msgs, dc) + GetPostPayPlanCostTodayWithFees();
         }
 
         public decimal GetTotalCostWithFees(SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -155,7 +158,18 @@ namespace AfterSchoolLibrary.Models
             if (PaymentPlan.IsNotEmpty())
                 return GetPaymentPlanCostTodayWithFees(msgs, dc) + GetSubscriptionCostTodayWithFees(msgs, dc);
 
-            return GetRegistrationCostWithFees(msgs, dc) + GetSubscriptionCostTodayWithFees(msgs, dc);
+            return GetRegistrationCostWithFees(msgs, dc) + GetSubscriptionCostTodayWithFees(msgs, dc) + GetPostPayPlanCostTodayWithFees();
+        }
+
+        public decimal GetTotalCostToPurchaseTodayWithConvenienceFee(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (OverrideAmount.HasValue && PaymentTypeFeeOverrideAmount.HasValue)
+                return OverrideAmount.Value - PaymentTypeFeeOverrideAmount.Value;
+
+            if (PaymentPlan.IsNotEmpty())
+                return GetPaymentPlanCostTodayWithFees(msgs, dc) + GetSubscriptionCostTodayWithFees(msgs, dc);
+
+            return GetRegistrationCostWithConvenienceFee(msgs, dc) + GetSubscriptionCostTodayWithConvenienceFee(msgs, dc) + GetPostPayPlanCostTodayWithConvenienceFee();
         }
 
         public decimal GetTotalFeesToday(SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -163,23 +177,29 @@ namespace AfterSchoolLibrary.Models
             if (PaymentPlan.IsNotEmpty())
                 return GetPaymentPlanTotalFeesToday(msgs, dc) + GetSubscriptionTotalFeesToday(msgs, dc);
 
-            return GetRegistrationTotalFees(msgs, dc) + GetSubscriptionTotalFeesToday(msgs, dc);
+            return GetRegistrationTotalFees(msgs, dc) + GetSubscriptionTotalFeesToday(msgs, dc) + GetPostPayPlanTotalFeesToday();
         }
 
         public decimal GetTotalConvenienceFeesToday(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            if (ConvenienceFeeOverrideAmount.HasValue)
+                return ConvenienceFeeOverrideAmount.Value;
+
             if (PaymentPlan.IsNotEmpty())
                 return GetPaymentPlanCostTodayConvenienceFee(msgs, dc) + GetSubscriptionCostTodayConvenienceFee(msgs, dc);
 
-            return GetRegistrationConvenienceFee(msgs, dc) + GetSubscriptionCostTodayConvenienceFee(msgs, dc);
+            return GetRegistrationConvenienceFee(msgs, dc) + GetSubscriptionCostTodayConvenienceFee(msgs, dc) + GetPostPayPlanCostTodayConvenienceFee();
         }
 
         public decimal GetTotalCreditCardFeesToday(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            if (PaymentTypeFeeOverrideAmount.HasValue)
+                return PaymentTypeFeeOverrideAmount.Value;
+
             if (PaymentPlan.IsNotEmpty())
                 return GetPaymentPlanCostTodayCreditCardFee(msgs, dc) + GetSubscriptionCostTodayCreditCardFee(msgs, dc);
 
-            return GetRegistrationCreditCardFee(msgs, dc) + GetSubscriptionCostTodayCreditCardFee(msgs, dc);
+            return GetRegistrationCreditCardFee(msgs, dc) + GetSubscriptionCostTodayCreditCardFee(msgs, dc) + GetPostPayPlanCostTodayCreditCardFee();
         }
 
         public decimal RegistrationCostNoFees
@@ -304,6 +324,8 @@ namespace AfterSchoolLibrary.Models
             return GetSubscriptionCostTodayConvenienceFee(msgs, dc) + GetSubscriptionCostTodayCreditCardFee(msgs, dc);
         }
 
+        #region "PaymentPlan"
+
         public decimal PaymentPlanCostTodayNoFees
         {
             get
@@ -354,7 +376,42 @@ namespace AfterSchoolLibrary.Models
         public decimal GetPaymentPlanTotalFeesToday(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return GetPaymentPlanCostTodayConvenienceFee(msgs, dc) + GetPaymentPlanCostTodayCreditCardFee(msgs, dc);
-        }        
+        }
+
+        #endregion
+
+        #region "PostPay"
+
+        public decimal GetPostPayPlanCostTodayWithFees()
+        {
+            return GetPostPayPlanCostTodayWithConvenienceFee() +
+                    GetPostPayPlanCostTodayCreditCardFee();
+        }
+
+        public decimal GetPostPayPlanCostTodayWithConvenienceFee()
+        {
+            return ParticipationObject.GetPostPayCheckoutCostWithConvenienceFee();
+        }
+
+        public decimal GetPostPayPlanCostTodayCreditCardFee()
+        {
+            if (CreditCardPurchaseObject.IsNotEmpty())
+                return ParticipationObject.GetCheckoutPostPayCreditCardFee();
+
+            return 0;
+        }
+
+        public decimal GetPostPayPlanCostTodayConvenienceFee()
+        {
+            return ParticipationObject.GetCheckoutPostPayConvenienceFee();
+        }
+
+        public decimal GetPostPayPlanTotalFeesToday()
+        {
+            return GetPostPayPlanCostTodayConvenienceFee() + GetPostPayPlanCostTodayCreditCardFee();
+        }
+
+        #endregion
 
         public decimal ApplyCoupon(decimal total)
         {

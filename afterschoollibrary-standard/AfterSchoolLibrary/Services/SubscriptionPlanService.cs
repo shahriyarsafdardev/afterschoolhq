@@ -357,10 +357,8 @@ namespace AfterSchoolLibrary.Services
                 ownerAccount = subscriptionPlan.GetAccount(msgs, dc);
 
             if (subscriptionPlan.CostPerPeriod.HasValue)
-            {
                 return subscriptionPlan.GetCostPerPeriodPerPerson(msgs, dc)
                             + (subscriptionPlan.IsConvenienceFeeTakenOutOfCost ? 0 : subscriptionPlan.GetConvenienceFee(ownerAccount, msgs, dc));
-            }
 
             return 0;
         }
