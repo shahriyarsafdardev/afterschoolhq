@@ -851,6 +851,7 @@ namespace AfterSchoolLibrary.Services
             var isparentpricepostpay = values.GetValueOrDefault("isparentpricepostpay");
             var isparentpricepaymentplan = values.GetValueOrDefault("isparentpricepaymentplan");
             var isparentpricesubscription = values.GetValueOrDefault("isparentpricesubscription");
+            var prepaidperiodspostpay = values.GetValueOrDefault("prepaidperiodspostpay");
 
             var activityType = ActivityType.NotSet;
 
@@ -1240,12 +1241,13 @@ namespace AfterSchoolLibrary.Services
                             ));
 
                         //setup PaymentPlan
-                        if (amsgs.HasNoErrors() && haspaymentplan != null && haspaymentplan.ToString().IsBoolean())
+                        if (amsgs.HasNoErrors() && haspostpayplan != null && haspostpayplan.ToString().IsBoolean())
                             amsgs.AddRange(activity.SetupPostPayPlan(
                                 account,
                                 haspostpayplan.IfEmpty(""),
                                 postpaycost.IfEmpty(""),
                                 isparentpricepostpay.IfEmpty("0"),
+                                prepaidperiodspostpay.IfEmpty(""),
                                 loggedInUserId,
                                 adc
                             ));
@@ -1432,18 +1434,21 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
-        private static SystemMessages SetupPostPayPlan(this Activity activity, Account account, string haspostpayplan, string postpaycost, string isparentpricepostpay, int loggedInUserId, DatabaseConnection dc = null)
+        private static SystemMessages SetupPostPayPlan(this Activity activity, Account account, string haspostpayplan, string postpaycost, string isparentpricepostpay, string prepaidperiodspostpay, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
             var hasChanges = true;
             var isParentPrice = isparentpricepostpay.ToBoolean();
+            var prepaidPeriods = prepaidperiodspostpay.IsNumber() ? prepaidperiodspostpay.ToInteger() : new int?();
 
             // first: desactivate the current plan if there are any changes
             if (activity.HasPostPayPlan(msgs, dc))
             {
                 var plan = activity.GetPostPayPlan(msgs, dc);
 
-                hasChanges = plan.CostPerPeriod.Value != postpaycost.ToDecimal() || isParentPrice != plan.IsConvenienceFeeTakenOutOfCost;
+                hasChanges = plan.CostPerPeriod.Value != postpaycost.ToDecimal() || 
+                            isParentPrice != plan.IsConvenienceFeeTakenOutOfCost ||
+                            prepaidPeriods != plan.NumberOfPeriodsPrePaid;
 
                 // if has stripe changes or subscription option has been turned off
                 if (hasChanges || !haspostpayplan.ToBoolean())
@@ -1459,6 +1464,7 @@ namespace AfterSchoolLibrary.Services
                     costPerPeriod: postpaycost.ToDecimal(),
                     billingPeriodType: BillingPeriodType.Day,
                     isConvenienceFeeTakenOutOfCost: isParentPrice,
+                    prepaidPeriods: prepaidPeriods,
                     loggedInUserId: loggedInUserId,
                     msgs: msgs,
                     dc: dc);

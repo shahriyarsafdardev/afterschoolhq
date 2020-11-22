@@ -371,15 +371,15 @@
                     <label class="col-sm-3 control-label">Post Pay Option</label>
                     <div class="col-sm-1">
                         @{Html.RenderPartial
-                            (
-                                "~/Views/Shared/_SwitchButton.cshtml",
-                                Model.HasPostPayPlan(),
-                                new ViewDataDictionary()
-                                {
+                                (
+                                    "~/Views/Shared/_SwitchButton.cshtml",
+                                    Model.HasPostPayPlan(),
+                                    new ViewDataDictionary()
+                                    {
                                 { "checkboxname", "haspostpayplan" },
                                 { "checkboxid", "haspostpayplan" }
-                }
-                            );
+}
+                                );
                         }
                     </div>
                 </div>
@@ -403,26 +403,34 @@
                         </p>
                         <div>
                             <div class="am-checkbox">
-                                <input type="checkbox" 
-                                       name="isparentpricepostpay" 
-                                       id="isparentpricepostpay" 
+                                <input type="checkbox"
+                                       name="isparentpricepostpay"
+                                       id="isparentpricepostpay"
                                        value="1"
                                        @(postPayPlan.IsNotEmpty() && postPayPlan.IsConvenienceFeeTakenOutOfCost ? "checked=\"checked\"" : "") />
                                 <label for="isparentpricepostpay">Price is the amount the parent pays</label>
                             </div>
                         </div>
                     </div>
-                    <!--
-                    <div class="col-md-3"></div>
+                    <div class="col-sm-3"></div>
                     <div class="col-sm-6 col-md-9">
+                        <p></p>
                         <div class="input-group input-group-lg xs-mb-15">
-                            <span class="input-group-addon">Every</span>
-                            <select name="postpayperiod" id="postpayperiod" class="form-control" required>
-                                @BillingPeriodOptions(paymentPlan)
-                            </select>
+                            <span class="input-group-addon"># of Days to Pre-pay</span>
+                            <input type="number" class="form-control" id="prepaidperiodspostpay"
+                                   name="prepaidperiodspostpay" onfocus="this.select()"
+                                   value="@(postPayPlan.IsNotEmpty() && postPayPlan.NumberOfPeriodsPrePaid.HasValue ? postPayPlan.NumberOfPeriodsPrePaid.ToString() : "0")"
+                                   required min="0" step="1" />
                         </div>
+                        <p class="text-muted text-medium-small">
+                            <span id="pricetoparent-postpay-prepay-span">
+                                <em>The parent will be charged <span class="text-bold">$<span id="pricetoparent-postpay-prepay">0.00</span></span> upon checkout</em>.
+                            </span>
+                            <span id="amounttoprovider-postpay-prepay-span">
+                                <em>The total amount you will receive is <span class="text-bold">$<span id="amounttoprovider-postpay-prepay">0.00</span></span></em>.
+                            </span>
+                        </p>
                     </div>
-                    -->
                 </div>
                 <div class="row">
                     <div class="col-sm-3"></div>
@@ -442,22 +450,6 @@
     var costTimeOut = null;
     var paymentplanTimeOut = null;
     var subscriptionTimeOut = null;
-
-    function calculateFinalPriceCost() {
-        calculateFinalPrice($('#cost').val(), $('#pricetoparent'), $('#amounttoprovider'), $('#isparentpricecost'));
-    }
-
-    function calculateFinalPricePostPay() {
-        calculateFinalPrice($('#postpaycost').val(), $('#pricetoparent-postpay'), $('#amounttoprovider-postpay'), $('#isparentpricepostpay'));
-    }
-
-    function calculateFinalPricePaymentPlan() {
-        calculateFinalPrice($('#paymentplancost').val(), $('#pricetoparent-paymentplan'), $('#amounttoprovider-paymentplan'), $('#isparentpricepaymentplan'));
-    }
-
-    function calculateFinalPriceSubscription() {
-        calculateFinalPrice($('#subscriptionplancost').val(), $('#pricetoparent-subscription'), $('#amounttoprovider-subscription'), $('#isparentpricesubscription'));
-    }
 
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         setSubscriptionPlanSection();
@@ -558,7 +550,41 @@
             updatePaymentPlanStartText();
         })
 
+        $('#prepaidperiodspostpay').change(function () {
+            updatePrePayDays();
+        });
+
     });
+
+    function calculateFinalPriceCost() {
+        calculateFinalPrice($('#cost').val(), $('#pricetoparent'), $('#amounttoprovider'), $('#isparentpricecost'));
+    }
+
+    function calculateFinalPricePostPay() {
+        calculateFinalPrice($('#postpaycost').val(), $('#pricetoparent-postpay'), $('#amounttoprovider-postpay'), $('#isparentpricepostpay'), function () {
+            updatePrePayDays();
+        });
+    }
+
+    function calculateFinalPricePaymentPlan() {
+        calculateFinalPrice($('#paymentplancost').val(), $('#pricetoparent-paymentplan'), $('#amounttoprovider-paymentplan'), $('#isparentpricepaymentplan'));
+    }
+
+    function calculateFinalPriceSubscription() {
+        calculateFinalPrice($('#subscriptionplancost').val(), $('#pricetoparent-subscription'), $('#amounttoprovider-subscription'), $('#isparentpricesubscription'));
+    }
+
+    function updatePrePayDays() {
+        var numOfDays = parseInt($('#prepaidperiodspostpay').val());
+        var priceToParent = parseFloat($('#pricetoparent-postpay').html());
+        var amountToProvider = parseFloat($('#amounttoprovider-postpay').html());
+
+        var priceToParentPrePay = numOfDays * priceToParent;
+        var amountToProviderPrePay = numOfDays * amountToProvider;
+
+        $('#pricetoparent-postpay-prepay').html(priceToParentPrePay.toFixed(2));
+        $('#amounttoprovider-postpay-prepay').html(amountToProviderPrePay.toFixed(2));
+    }
 
     function updateSubscriptionPeriodText() {
         $('.subscription-period-text').html($('#subscriptionplanperiod option:selected').text().toLowerCase());
@@ -598,7 +624,7 @@
 
     }
 
-    function calculateFinalPrice(cost, priceToParentSpan, amountToProviderSpan, takenOutOfCostChk) {
+    function calculateFinalPrice(cost, priceToParentSpan, amountToProviderSpan, takenOutOfCostChk, callback) {
 
         if (isNaN(cost))
             return;
@@ -619,6 +645,10 @@
                     priceToParentSpan.html('0.00');
                     amountToProviderSpan.html('0.00');
                 }
+
+                if (callback) {
+                    callback();
+                }                   
             }
         );
     }

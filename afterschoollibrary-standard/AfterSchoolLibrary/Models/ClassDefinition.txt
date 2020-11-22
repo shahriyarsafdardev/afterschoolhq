@@ -1418,6 +1418,7 @@ property: PaymentStartTypeId, PlanPaymentStartType, Int
 property: SplitCostEvenly, bool, Bit, , Split cost evenly amongst all parents signed up
 property: RegFeeAsDownPayment, bool, Bit, , Count the registration fee as a down payment
 property: IsConvenienceFeeTakenOutOfCost, bool, Bit
+property: NumberOfPeriodsPrePaid, int?, Int
 loadmethod: ParticipationObjectId|ParticipationObjectTypeId|PlanTypeId, List<>, LoadByParticipationObject
 loadmethod: PlanOwnerAccountId, List<>
 [end]

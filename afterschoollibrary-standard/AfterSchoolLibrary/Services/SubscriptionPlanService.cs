@@ -89,7 +89,7 @@ namespace AfterSchoolLibrary.Services
             return plan;
         }
 
-        public static SubscriptionPlan CreateNewPostPayPlan(Account planOwner, ParticipationObjectType participationObjectType, int participationObjectId, decimal costPerPeriod, BillingPeriodType billingPeriodType, bool isConvenienceFeeTakenOutOfCost, int? loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public static SubscriptionPlan CreateNewPostPayPlan(Account planOwner, ParticipationObjectType participationObjectType, int participationObjectId, decimal costPerPeriod, BillingPeriodType billingPeriodType, bool isConvenienceFeeTakenOutOfCost, int? prepaidPeriods, int? loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -109,6 +109,7 @@ namespace AfterSchoolLibrary.Services
                 PlanTypeId = SubscriptionPlanType.PostPayPlan,
                 PaymentStartTypeId = PlanPaymentStartType.NotSet,
                 IsConvenienceFeeTakenOutOfCost = isConvenienceFeeTakenOutOfCost,
+                NumberOfPeriodsPrePaid = prepaidPeriods,
             };
 
             msgs.AddRange(plan.Save(dc));
