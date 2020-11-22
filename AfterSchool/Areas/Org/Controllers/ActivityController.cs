@@ -1180,7 +1180,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 return RedirectToAction("Attendance",new { id, msg = "Error: No classes have taken place yet"});
                 
             ViewBag.Messages = msgs;
-            ViewBag.AttendanceRegistrants = attendance?.GetAttendanceRegistrants();
+            ViewBag.AttendanceRegistrants = attendance.GetAttendanceRegistrants();
             ViewBag.Schedule = activity.GetSchedule();
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             return View(attendance);

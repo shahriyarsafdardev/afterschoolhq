@@ -12,7 +12,6 @@ namespace AfterSchoolLibrary.Services
     {
         public static void InitAttendance(this Attendance attendance, Activity activity, WebUser loggedInUser, ActivityInstance activityInstance = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            attendance.Date = DateTime.UtcNow;
             attendance.IsCompleted = false;
             attendance.LastModifiedDate = attendance.CreateDate = DateTime.UtcNow;
             attendance.LastModifiedBy = attendance.CreatedBy = loggedInUser.ID;
