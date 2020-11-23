@@ -74,3 +74,15 @@
     font-weight: bold;
     padding-top: 5px;
 }
+
+.mccoy-filter-footer-container {
+    position: fixed;
+    z-index: 999999;
+    background-color: white;
+    width: 100%;
+    bottom: 0;
+    height: 100px;
+    padding-top: 15px;
+    border-top: 1px solid steelblue;
+    display: none;
+}

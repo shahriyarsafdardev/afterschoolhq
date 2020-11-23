@@ -81,4 +81,9 @@
     .display-days {
         display: grid;
     }
+
+    .participation-object {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
 }

@@ -1,40 +1,62 @@
-﻿@{ 
-    Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
+﻿@{ Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
     ViewBag.Title = "Search";
-    var msgs = (SystemMessages)ViewBag.Messages; 
-}
+    var msgs = (SystemMessages)ViewBag.Messages; }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-<div class="row">
-    <div class="reg-header" style="background-image: linear-gradient(rgba(0, 0, 0, .8), rgba(0, 0, 0, .8)), url(https://afterschoolhq-prod.s3.us-east-2.amazonaws.com/McCoyYouth/headerimage/120221640_10157669465950893_7044339041890392902_n.png); min-height: 100%;">
+<div class="visible-lg visible-md">
 
-        <div class="reg-header-overlay col-md-12">
+    <div class="row">
+        <div class="reg-header mccoy-bg" style="min-height: 100%;">
 
-            <div class="col-lg-3 col-md-6" style="margin-top: -75px; margin-bottom: 25px;">
-                <div class="reg-header-logo-mccoy">
-                    <img src="~/img/logo-white.png" />
+            <div class="reg-header-overlay col-md-12">
+
+                <div class="col-lg-3 col-md-6" style="margin-top: -75px; margin-bottom: 25px;">
+                    <div class="reg-header-logo-mccoy">
+                        <img src="~/img/logo-white.png" />
+                    </div>
+                </div>
+
+                <div class="col-lg-7 col-md-6">
+                    <div class="form-group has-feedback mccoy-has-search">
+                        <span class="glyphicon glyphicon-search form-control-feedback"></span>
+                        <input id="txtMccoySearch" name="search" type="text" class="form-control" placeholder="Search" onkeyup="return waitAndFilterSearch(this.value)">
+                    </div>
+                </div>
+
+                <div class="col-lg-2 col-md-6">
+                    <a href="~/mccoy.html" class="btn btn-default btn-md btn-center" style="margin-top: 5px;"> Join the MCCOY Directory </a>
                 </div>
             </div>
 
-            <div class="col-lg-7 col-md-6">
-                <div class="form-group has-feedback mccoy-has-search">
-                    <span class="glyphicon glyphicon-search form-control-feedback"></span>
-                    <input id="txtMccoySearch" name="search" type="text" class="form-control" placeholder="Search" onkeyup="return waitAndFilterSearch()">
-                </div>
-            </div>
-
-            <div class="col-lg-2 col-md-6">
-                <a href="~/mccoy.html" class="btn btn-default btn-md btn-center" style="margin-top: 5px;"> Join the MCCOY Directory </a>
-            </div>
+            <div class="clearfix"></div>
         </div>
-
-        <div class="clearfix"></div>
     </div>
 </div>
 
-<div id="filters" class="col-md-3" style="padding-right: 0; padding-bottom: 20px; padding-top: 10px;">
+<div class="visible-sm visible-xs">
+    <div class="col-xs-10">
+        <div class="form-group has-feedback mccoy-has-search" style="margin-top: 10px;">
+            <span class="glyphicon glyphicon-search form-control-feedback"></span>
+            <input id="txtMccoySearch-mobile" name="search" type="text" class="form-control" placeholder="Search" onkeyup="return waitAndFilterSearch()">
+        </div>
+    </div>
+    <div class="col-xs-2" style="padding: 0;">
+        <img src="~/img/filter.png" style="margin-top: 10px;" onclick="return mobileFilter()" />
+    </div>
+
+    <div class="clearfix"></div>
+
+    <div id="mobile-filter-footer" class="mccoy-filter-footer-container">
+        <button type="button" class="btn btn-default btn-lg btn-center" style="border-color: steelblue;" onclick="return applyMobileFilter()">Apply Filters</button>
+    </div>
+
+    <div class="clearfix"></div>
+</div>
+
+<div id="filters" class="col-md-3" style="display: none; padding-right: 0; padding-bottom: 20px;padding-top: 10px;">
     @{ Html.RenderPartial("~/Views/Shared/_MccoyFilters.cshtml"); }
+    <div class="clearfix"></div>
 </div>
 
 <div id="search-result" class="col-md-9"> </div>
@@ -45,7 +67,7 @@
 
     <% _.each(response, function(searchResult){ %>
 
-    <div id="<%= searchResult.AccountUid %>" name="<%= searchResult.AccountName %>" class="col-sm-12 col-md-6 col-lg-4 col-xl-3 participation-object searchable-object pointer" onclick="WebPage.navigateIframe('<%= searchResult.HomePageUrl %>')">
+    <div id="<%= searchResult.AccountUid %>" name="<%= searchResult.AccountName %>" class="col-sm-12 col-md-6 col-lg-4 col-xl-3 participation-object" onclick="WebPage.navigateIframe('<%= searchResult.HomePageUrl %>')">
 
         <div class="panel" style="overflow: hidden;">
             <div class="reg-header" style="background-image: url(<%= searchResult.ProfileHeaderImageUrl %>); min-height: 100px; height: 150px; padding: 5px 5px; position: relative;">
@@ -133,10 +155,9 @@
         </div>
     </div>
 
-    <% }); %>
+    <% }) %>
 
 </script>
-
 
 @section Scripts
 {
@@ -144,10 +165,16 @@
 
         var delayTimer;
         var txtMccoySearch = $('#txtMccoySearch');
+        var txtMccoySearchMobile = $('#txtMccoySearch-mobile');
+        var isMobile = window.innerWidth <= 768;
 
         $(document).ready(function () {
             loadFiltersAndInitiateSearch();
-        });
+
+            if (!isMobile) {
+                $('#filters').show();
+            }
+        })
 
         function loadFiltersAndInitiateSearch() {
             var hashUrl = WebPage.getHash();
@@ -161,17 +188,17 @@
                 }
             });
 
-            prepareSearchParams();
+            prepareSearchParams(true);
         }
 
-        function waitAndFilterSearch() {
+        function waitAndFilterSearch(search) {
             clearTimeout(delayTimer);
             delayTimer = setTimeout(function () {
-                prepareSearchParams();
+                prepareSearchParams(true);
             }, 1000); //1 second wait
         }
 
-        function prepareSearchParams() {
+        function prepareSearchParams(applyFilters) {
             //.. prepare params
             var mainUrl = '';
             var search = '';
@@ -185,8 +212,13 @@
             var comma_delimited_other = '';
             var comma_delimited_special = '';
 
-            search = txtMccoySearch.val();
-            if (search.length > 0) {
+            if (isMobile) {
+                search = txtMccoySearchMobile.val();
+            } else {
+                search = txtMccoySearch.val();
+            }
+
+            if (search && search.length > 0) {
                 mainUrl += `search_${search},`;
             }
 
@@ -293,12 +325,22 @@
                 WebPage.addHash(mainUrl);
             } else {
                 WebPage.addHash('');
-            }             
+            }
 
             // .. call api
-            loadAccounts(txtMccoySearch.val(), comma_delimited_neighborhoods, comma_delimited_grades, comma_delimited_ages, comma_delimited_gender, comma_delimited_timing, comma_delimited_cost, comma_delimited_starting, comma_delimited_other, comma_delimited_special);
+            if (!isMobile || applyFilters) {
+                loadAccounts(search,
+                    comma_delimited_neighborhoods,
+                    comma_delimited_grades,
+                    comma_delimited_ages,
+                    comma_delimited_gender,
+                    comma_delimited_timing,
+                    comma_delimited_cost,
+                    comma_delimited_starting,
+                    comma_delimited_other,
+                    comma_delimited_special);
+            }
         }
-
 
         function loadAccounts(search, neighborhoods, grades, ages, gender, timing, cost, starting, other, special) {
             showLoader();
@@ -339,6 +381,17 @@
                     }
                 }
             });
+        }
+
+        function mobileFilter() {
+            $('#search-result').toggle();
+            $('#filters').toggle();
+            $('#mobile-filter-footer').toggle();
+        }
+
+        function applyMobileFilter() {
+            prepareSearchParams(true);
+            mobileFilter();
         }
 
     </script>
