@@ -34,12 +34,12 @@ namespace AfterSchoolLibrary.Services
 
         public static decimal GetFees(this Transaction transaction)
         {
-            return transaction.ConvenienceFeeCharged.Value + transaction.PaymentTypeFeeCharged.Value;
+            return transaction.ConvenienceFeeCharged.IfEmpty(0) + transaction.PaymentTypeFeeCharged.IfEmpty(0);
         }
 
         public static decimal GetConvenienceFeesChargedToPayer(this Transaction transaction)
         {
-            if (transaction.ConvenienceFeePayerAccountId == transaction.PayerAccountId)
+            if (transaction.ConvenienceFeePayerAccountId == transaction.PayerAccountId && transaction.ConvenienceFeeCharged.HasValue)
                 return transaction.ConvenienceFeeCharged.Value;
 
             return 0;
@@ -47,7 +47,7 @@ namespace AfterSchoolLibrary.Services
 
         public static decimal GetPaymentTypeFeesChargedToPayer(this Transaction transaction)
         {            
-            if (transaction.PaymentTypeFeePayerAccountId == transaction.PayerAccountId)
+            if (transaction.PaymentTypeFeePayerAccountId == transaction.PayerAccountId && transaction.PaymentTypeFeeCharged.HasValue)
                 return transaction.PaymentTypeFeeCharged.Value;
 
             return 0;
