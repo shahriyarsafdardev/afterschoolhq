@@ -2892,6 +2892,17 @@ namespace AfterSchoolLibrary.Services
             // add purchase
             if (msgs.HasNoErrors())
                 AccountService.CreatePurchaseTransactionPayment(checkoutObject, loggedInUser, msgs, dc);
+
+            // add prepayment records to ensure this payment is associated with attendances later
+            if (msgs.HasNoErrors())
+                checkoutObject.PostPayPlan.CreatePrePayments(
+                    checkoutObject.PayingAccount,
+                    checkoutObject.ParticipationObject,
+                    checkoutObject.Transaction,
+                    checkoutObject.Registration,
+                    loggedInUser,
+                    msgs,
+                    dc);
         }
 
         public static void ProcessRegistrationFee(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)

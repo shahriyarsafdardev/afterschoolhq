@@ -1122,5 +1122,15 @@ namespace AfterSchoolLibrary.Services
         }
 
         #endregion
+
+        public static List<SubscriptionPlanPrePayment> GetAvailablePrePayments(this Registration registration, Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return SubscriptionPlanPrePayment.LoadUnused(
+                            registration.ID.Value,
+                            activity.ID.Value,
+                            ParticipationObjectType.Activity,
+                            msgs,
+                            dc);
+        }
     }
 }

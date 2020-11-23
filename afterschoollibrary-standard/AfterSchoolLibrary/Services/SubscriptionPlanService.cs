@@ -4,6 +4,7 @@ using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
 using System.Collections.Generic;
 using Amazon.S3.Model;
+using Twilio.TwiML.Voice;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -254,18 +255,9 @@ namespace AfterSchoolLibrary.Services
                    copy.LastModifiedBy = loggedInUserId;
                    amsgs.AddRange(copy.SaveWithStripe(adc));
                },
-               onSuccess: (SystemMessages smsgs) =>
-               {
-                   msgs.AddRange(smsgs);
-               },
-               onFailure: (SystemMessages fmsgs) =>
-               {
-                   msgs.AddRange(fmsgs);
-               },
-               onException: (SystemMessages emsgs) =>
-               {
-                   Helpers.Utilities.SystemErrorLog(emsgs);
-               },
+               onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+               onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+               onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
                dc: dc
            );
 
@@ -491,6 +483,48 @@ namespace AfterSchoolLibrary.Services
             }
 
             return plan.CostPerPeriod.Value;
+        }
+
+        public static List<SubscriptionPlanPrePayment> CreatePrePayments(this SubscriptionPlan plan, Account payerAccount, ParticipationObject participationObject, Transaction transaction, Registration registration, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            List<SubscriptionPlanPrePayment> list = null;
+
+            if (plan.PlanTypeId == SubscriptionPlanType.PostPayPlan && plan.NumberOfPeriodsPrePaid.IsPositive())
+            {
+                list = new List<SubscriptionPlanPrePayment>();
+
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        for (var i = 0; i < plan.NumberOfPeriodsPrePaid.Value; i++)
+                        {
+                            var prePayment = new SubscriptionPlanPrePayment()
+                            {
+                                PayerAccountId = payerAccount.ID,
+                                TransactionId = transaction.ID,
+                                ParticipationObjectId = participationObject.ObjectID,
+                                ParticipatioObjectTypeId = participationObject.ObjectType,
+                                RegistrationId = registration.ID,
+                                CreateDate = DateTime.UtcNow,
+                                CreatedBy = loggedInUser?.ID,
+                            };
+
+                            amsgs.AddRange(prePayment.Save(adc));
+
+                            if (amsgs.HasNoErrors())
+                                list.Add(prePayment);
+                        }
+                    },
+                   onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                   onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                   onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
+                   dc: dc
+                );
+
+            }
+
+            return list;
         }
     }
 }

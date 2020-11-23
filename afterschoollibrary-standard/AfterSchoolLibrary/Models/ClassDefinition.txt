@@ -1423,6 +1423,27 @@ loadmethod: ParticipationObjectId|ParticipationObjectTypeId|PlanTypeId, List<>, 
 loadmethod: PlanOwnerAccountId, List<>
 [end]
 
+[begin]
+type: Class
+name: SubscriptionPlanPrePayment
+description: Used to handle prepayments then credit them later to an attendance record
+serializable: true,
+inherits: BasicObjectWithModified
+property: ParticipationObjectId, int?, Int, required
+property: ParticipationObjectTypeId, ParticipationObjectType, Int, required
+property: TransactionId, int?, Int, required
+property: RegistrationId, int?, Int, required
+property: PayerAccountId, int?, Int, required
+property: AttendanceRegistrantId, int?, Int
+property: Value, decimal?, Money
+loadmethod: ParticipationObjectId|ParticipationObjectTypeId, List<>
+loadmethod: RegistrationId|ParticipationObjectId|ParticipationObjectTypeId, List<>
+loadmethod: TransactionId, List<>
+loadmethod: RegistrationId, List<>
+loadmethod: PayerAccountId, List<>
+loadmethod: AttendanceRegistrantId
+[end]
+
 [begin-ignore]
 type: Class
 name: RegistrantPaymentPlan
