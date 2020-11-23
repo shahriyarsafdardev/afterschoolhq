@@ -3129,12 +3129,14 @@ namespace AfterSchoolLibrary.Services
                 checkoutObject.LoadStripeSource(msgs);
 
             var costPerClass = checkoutObject.ParticipationObject.GetPostPayCostWithConvenienceFee();
+            var convenienceFeePaid = checkoutObject.ParticipationObject.GetPostPayConvenienceFee();
+            var paymentTypeFeePaid = 0M;
 
             if (checkoutObject.PaymentType == PaymentType.CreditCard)
+            {
                 costPerClass += checkoutObject.ParticipationObject.GetPostPayCreditCardFee();
-
-            var convenienceFeePaid = checkoutObject.ParticipationObject.GetPostPayConvenienceFee();
-            var paymentTypeFeePaid = checkoutObject.ParticipationObject.GetPostPayCreditCardFee();
+                paymentTypeFeePaid = checkoutObject.ParticipationObject.GetPostPayCreditCardFee();
+            }
 
             checkoutObject.Registration.SavePaymentSource(
                 checkoutObject.StripeSourceId, 
