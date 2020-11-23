@@ -65,7 +65,7 @@
                         var isPendingPayment = ra.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment;
                         var isNotFree = participationObject.IsNotFreeAndCanAcceptPayments;
                         var subscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault();
-                        var readyToPay = subscriptionPlan.IsEmpty() || !subscriptionPlan.SplitCostEvenly || participationObject.RegistrationFinalized;
+                        var readyToPay = subscriptionPlan.IsEmpty() || !subscriptionPlan.SplitCostEvenly || participationObject.RegistrationFinalized;                        
 
                         <tr>
                             <td>@participationObject.Name</td>

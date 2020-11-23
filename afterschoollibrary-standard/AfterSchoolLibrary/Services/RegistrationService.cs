@@ -246,7 +246,7 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(registration.Save(dc));
         }
 
-        public static void SavePaymentSource(this Registration registration, string stripeSourceId, PaymentType paymentType, decimal paymentAmount, decimal convenienceFeePaid, decimal paymentTypeFeePaid, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void SavePaymentSource(this Registration registration, string stripeSourceId, PaymentType paymentType, decimal paymentAmount, decimal convenienceFeePaid, decimal paymentTypeFeePaid, Account convenienceFeePayer, Account paymentTypeFeePayer, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             registration.StripeSourceId = stripeSourceId;
             registration.PaymentTypeId = paymentType;
@@ -255,7 +255,19 @@ namespace AfterSchoolLibrary.Services
             registration.LastModifiedBy = loggedInUser?.ID;
             registration.ConvenienceFeePaid = convenienceFeePaid;
             registration.PaymentTypeFeePaid = paymentTypeFeePaid;
+            registration.ConvenienceFeePayerAccountId = convenienceFeePayer.ID;
+            registration.PaymentTypeFeePayerAccountId = paymentTypeFeePayer.ID;
             msgs.AddRange(registration.Save(dc));
+        }
+
+        public static Account GetConvenienceFeePayer(this Registration registration, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Account.Load(registration.ConvenienceFeePayerAccountId.Value, msgs, dc);
+        }
+
+        public static Account GetPaymentTypeFeePayer(this Registration registration, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Account.Load(registration.PaymentTypeFeePayerAccountId.Value, msgs, dc);
         }
 
         #region CSVReport
@@ -1110,5 +1122,15 @@ namespace AfterSchoolLibrary.Services
         }
 
         #endregion
+
+        public static List<SubscriptionPlanPrePayment> GetAvailablePrePayments(this Registration registration, Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return SubscriptionPlanPrePayment.LoadUnused(
+                            registration.ID.Value,
+                            activity.ID.Value,
+                            ParticipationObjectType.Activity,
+                            msgs,
+                            dc);
+        }
     }
 }

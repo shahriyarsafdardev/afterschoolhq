@@ -1477,4 +1477,40 @@ Public Module Extensions
 
         Return (a - b) / 10000
     End Function
+
+    <Extension()>
+    Public Function IsPositive(ByVal aInt As Integer?) As Boolean
+        If aInt.HasValue AndAlso aInt.Value > 0 Then
+            Return True
+        End If
+
+        Return False
+    End Function
+
+    <Extension()>
+    Public Function IsPositive(ByVal aInt As Integer) As Boolean
+        If aInt > 0 Then
+            Return True
+        End If
+
+        Return False
+    End Function
+
+    <Extension()>
+    Public Function IsNegative(ByVal aInt As Integer?) As Boolean
+        If aInt.HasValue AndAlso aInt.Value < 0 Then
+            Return True
+        End If
+
+        Return False
+    End Function
+
+    <Extension()>
+    Public Function IsNegative(ByVal aInt As Integer) As Boolean
+        If aInt < 0 Then
+            Return True
+        End If
+
+        Return False
+    End Function
 End Module
