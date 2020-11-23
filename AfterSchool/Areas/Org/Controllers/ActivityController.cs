@@ -1368,7 +1368,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                             checkoutObject = new CheckoutObject()
                             {
-                                OverrideAmount = costPerAttendance * raAttendances.Count,
+                                OverrideAmount = costPerAttendance * attendanceDaysToCharge,
                                 ConvenienceFeeOverrideAmount = registration.ConvenienceFeePaid.IfEmpty(0) * attendanceDaysToCharge,
                                 PaymentTypeFeeOverrideAmount = registration.PaymentTypeFeePaid.IfEmpty(0) * attendanceDaysToCharge,
                                 PayingAccount = masterRegistrantAccount,
@@ -1383,8 +1383,9 @@ namespace AfterSchool.Areas.Org.Controllers
                                 Description = description,
                                 SavePaymentInfo = false,
                                 ParticipationObject = activity.GetParticipationObject(msgs),
-                                Quantity = raAttendances.Count,
+                                Quantity = attendanceDaysToCharge,
                                 Registration = registration,
+                                PostPayPlan = activity.GetPostPayPlan(msgs),
                             };
 
                             if (msgs.HasNoErrors())
