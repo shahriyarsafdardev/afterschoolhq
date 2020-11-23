@@ -9,15 +9,13 @@
     var savePaymentInfoOnly = false;
     var hasPlans = postPayPlan.IsNotEmpty() || subscriptionPlan.IsNotEmpty();
 
-    if (!(postPayPlan?.NumberOfPeriodsPrePaid).IsPositive())
+    if (postPayPlan.IsNotEmpty() && !postPayPlan.NumberOfPeriodsPrePaid.IsPositive())
     {
         savePaymentInfoOnly = true;
     }
 }
 
-<div class="margin-t-20 padding-v-20">
-    
-    <hr />
+<div class="margin-t-20 padding-v-20">    
 
     @if (acceptACH)
     {
@@ -57,7 +55,7 @@
                             </div>
                             <div class="form-group">
                                 <button type="submit" class="btn btn-register-primary btn-lg btn-pay" id="btn-paywithexistingach">
-                                    @(savePaymentInfoOnly ? "Save Bank Info" : "Pay via ACH")
+                                    @(savePaymentInfoOnly ? "Save Bank Info" : "Pay via Bank Account")
                                     <span class="pay-button-amount @(savePaymentInfoOnly ? "hide" : "")">
                                         -
                                         <span class="total-due-today-ach"></span>*
@@ -85,7 +83,7 @@
                             Clicking @(savePaymentInfoOnly ? "'Save Bank Info'" : "'Pay via ACH'") will allow you to connect and pay using your bank account. After you login and select the account to use, it will checkout and @(savePaymentInfoOnly ? "use your bank account information for attendance payments." : "complete your purchase using your bank account information.")
                         </p>
                         <button type="button" id="plaid-button" class="btn btn-register@(bankAccounts.Any() ? "-default" : "-primary") btn-lg btn-pay">
-                            @(savePaymentInfoOnly ? "Save Bank Info" : "Pay via ACH")
+                            @(savePaymentInfoOnly ? "Save Bank Info" : "Pay via Bank Account")
                             <span class="pay-button-amount @(savePaymentInfoOnly ? "hide" : "")">
                                 -
                                 $<span class="total-due-today-ach"></span>*
@@ -158,7 +156,7 @@
                         </div>
                         <div class="form-group">
                             <button type="submit" class="btn btn-register-default btn-lg btn-pay" id="btn-paywithexistingcard">
-                                @(savePaymentInfoOnly ? "Save Credit Card Info" : "Pay using a credit card")
+                                @(savePaymentInfoOnly ? "Save Credit Card Info" : "Pay via credit card")
                                 <span class="pay-button-amount @(savePaymentInfoOnly ? "hide" : "")">
                                     -
                                     $<span class="total-due-today-cc"></span>*

@@ -280,6 +280,7 @@ namespace AfterSchoolLibrary.Services
                 SplitCostEvenly = plan.SplitCostEvenly,
                 RegFeeAsDownPayment = plan.RegFeeAsDownPayment,
                 IsConvenienceFeeTakenOutOfCost = plan.IsConvenienceFeeTakenOutOfCost,
+                NumberOfPeriodsPrePaid = plan.NumberOfPeriodsPrePaid,
             };
         }
 

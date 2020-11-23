@@ -238,7 +238,7 @@ namespace AfterSchoolLibrary.Models
             if (activity.IsConvenienceFeeTakenOutOfCost)
                 return RegistrationCostNoFees;
             
-            return GetRegistrationConvenienceFee(msgs, dc);
+            return RegistrationCostNoFees + GetRegistrationConvenienceFee(msgs, dc);
         }
 
         public decimal GetRegistrationCreditCardFee(SystemMessages msgs = null, DatabaseConnection dc = null)
