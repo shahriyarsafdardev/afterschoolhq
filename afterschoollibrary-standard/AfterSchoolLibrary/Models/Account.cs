@@ -1037,7 +1037,7 @@ namespace AfterSchoolLibrary.Models
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public static DataTable SearchMccoyAccounts(string hostAccountId, string search, string neighborhoods, string grades, string ages, string gender, string timing, string isELearningCenter, string isVirtualProgram, string isOpenDuringCovid, string specialNeeds, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static DataTable SearchMccoyAccounts(string hostAccountId, string search, string neighborhoods, string grades, string ages, string gender, string timing, string cost, string starting, string isELearningCenter, string isVirtualProgram, string isOpenDuringCovid, string specialNeeds, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -1054,6 +1054,8 @@ namespace AfterSchoolLibrary.Models
                         @Age NVARCHAR(100),
                         @Gender varchar(10),
                         @Timings nvarchar(100),
+                        @Cost varchar(1),
+                        @Starting varchar(1),
                         @IsELearningCenter BIT = NULL,  
                         @IsVirtualProgram BIT = NULL, 
                         @IsOpenDuringCovid BIT = NULL, 
@@ -1076,6 +1078,12 @@ namespace AfterSchoolLibrary.Models
             if (timing.IsNotEmpty())
                 sql += $"SET @Timings = '{timing}'";
 
+            if (cost.IsNotEmpty())
+                sql += $"SET @Cost = '1'";
+
+            if (starting.IsNotEmpty())
+                sql += $"SET @Starting = '1'";
+
             if (isELearningCenter.IsNotEmpty())
                 sql += $"SET @IsELearningCenter = {isELearningCenter}" ;
 
@@ -1096,6 +1104,9 @@ namespace AfterSchoolLibrary.Models
                     a.UniqueName as AccountUniqueName
                 FROM AccountRelationship ar
                 INNER JOIN Account a ON a.ID = ar.VisitorAccountId
+                LEFT JOIN Activity act ON act.AccountId = ar.VisitorAccountId
+                LEFT JOIN ActivityRegistrationPeriod arp on arp.ActivityId = act.ID
+                LEFT JOIN RegistrationPeriod rp on rp.ID = arp.RegistrationPeriodId
                 LEFT JOIN AccountProfile ap ON ap.AccountId = ar.VisitorAccountId
                 LEFT JOIN Location loc ON ap.LocationId = loc.ID
                 LEFT JOIN AccountProperty property on property.AccountId = ar.VisitorAccountId
@@ -1106,7 +1117,7 @@ namespace AfterSchoolLibrary.Models
                     AND ((@IsVirtualProgram IS NULL) OR ap.IsVirtualProgram = @IsVirtualProgram)
                     AND ((@IsOpenDuringCovid IS NULL) OR ap.IsOpenDuringCovid = @IsOpenDuringCovid)
                     AND ((@Gender IS NULL) OR ap.GenderRestriction In (SELECT value FROM STRING_SPLIT(@Gender, ',') WHERE RTRIM(value) <> ''))
-                    AND ((@Timings IS NULL) OR property.Value In (SELECT value FROM STRING_SPLIT(@Timings, ',') WHERE RTRIM(value) <> ''))
+                    AND ((@Timings IS NULL) OR property.Value In (SELECT value FROM STRING_SPLIT(@Timings, ',') WHERE RTRIM(value) <> ''))                    
                     AND ((@specialNeeds IS NULL) OR property.Value IN (SELECT value FROM STRING_SPLIT(@specialNeeds, ',') WHERE RTRIM(value) <> ''))
                     AND (
 	                    (@Grades IS NULL) OR 
@@ -1117,9 +1128,45 @@ namespace AfterSchoolLibrary.Models
 	                    (@Age IS NULL) OR 
 	                    (ap.AgeStart IN (SELECT value FROM STRING_SPLIT(@Age, ',') WHERE RTRIM(value) <> '')) OR 
 	                    (ap.AgeEnd IN (SELECT value FROM STRING_SPLIT(@Age, ',') WHERE RTRIM(value) <> ''))
-                    )
-                Order BY a.Name ASC
+                    )               
             ";
+
+            if (cost.IsNotEmpty())
+            {
+                sql += $@"AND ((@Cost IS NULL)";
+
+                if (cost.Contains("cost_free"))
+                    sql += $@" OR act.CostPerRegistrant = 0";
+
+                if (cost.Contains("cost_0_50"))
+                    sql += $@" OR act.CostPerRegistrant < 50";
+
+                if (cost.Contains("cost_50_150"))
+                    sql += $@" OR act.CostPerRegistrant between 50 and 150";
+
+                if (cost.Contains("cost_150_above"))
+                    sql += $@" OR act.CostPerRegistrant > 150";
+
+                sql += $@")";
+            }
+
+            if (starting.IsNotEmpty())
+            {
+                sql += $@"AND ((@Starting IS NULL)";
+
+                if (starting.Contains("starting_0_7"))
+                    sql += $@" OR rp.StartDateTime between dateadd(dd, 0, cast(getdate() as date)) and dateadd(dd, 7, cast(getdate() as date))";
+
+                if (starting.Contains("starting_7_28"))
+                    sql += $@" OR rp.StartDateTime between dateadd(dd, 8, cast(getdate() as date)) and dateadd(dd, 28, cast(getdate() as date))";
+
+                if (starting.Contains("starting_30_90"))
+                    sql += $@" OR rp.StartDateTime between dateadd(dd, 29, cast(getdate() as date)) and dateadd(dd, 90, cast(getdate() as date))";
+
+                sql += $@")";
+            }
+
+            sql += $@" Order BY a.Name ASC";
 
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;

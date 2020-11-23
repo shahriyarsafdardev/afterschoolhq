@@ -2134,7 +2134,7 @@ namespace AfterSchoolLibrary.Services
                     dc);
         }
 
-        public static List<MccoySearchResponse> SearchMccoyAccounts(this Account account, string hostAccountId, string search, string neighborhoods, string grades, string ages, string gender, string timing, string other, string specialNeeds, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<MccoySearchResponse> SearchMccoyAccounts(this Account account, string hostAccountId, string search, string neighborhoods, string grades, string ages, string gender, string timing, string cost, string starting, string other, string specialNeeds, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var genderIds = "";
             if (gender.IsNotBlank() && gender.Contains("maleonly"))
@@ -2154,7 +2154,7 @@ namespace AfterSchoolLibrary.Services
             if (other.IsNotBlank() && other.Contains("covid_protections"))
                 isOpenDuringCovid = "1";               
 
-            var accountDataTable = Account.SearchMccoyAccounts(hostAccountId, search, neighborhoods, grades, ages, genderIds, timing, isELearningCenter, isVirtualProgram, isOpenDuringCovid, specialNeeds, msgs: msgs);
+            var accountDataTable = Account.SearchMccoyAccounts(hostAccountId, search, neighborhoods, grades, ages, genderIds, timing, cost, starting, isELearningCenter, isVirtualProgram, isOpenDuringCovid, specialNeeds, msgs: msgs);
 
             if (accountDataTable.IsNotEmpty() && accountDataTable.Rows.Any())
             {

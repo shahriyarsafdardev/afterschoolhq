@@ -112,7 +112,7 @@ namespace AfterSchool.Controllers
                 }
             }
 
-            var searchedAccounts = AccountService.SearchMccoyAccounts(currentAccount, MccoyHostAccountId, search, neighborhoods, gradeIds, ageIds, gender, timing, other, special, msgs: msgs);
+            var searchedAccounts = AccountService.SearchMccoyAccounts(currentAccount, MccoyHostAccountId, search, neighborhoods, gradeIds, ageIds, gender, timing, cost, starting, other, special, msgs: msgs);
 
             if (searchedAccounts.IsNotEmpty() && searchedAccounts.Any())
             {
