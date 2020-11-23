@@ -218,34 +218,6 @@ namespace AfterSchoolLibrary.Models
             };
         }
 
-        public Activity GetActivity(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (this.ActivityId.HasValue)
-                return Activity.Load(this.ActivityId.Value, msgs, dc);
-
-            return null;
-        }
-
-        public ActivityInstance GetActivityInstance(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return ActivityInstance.Load(this.ActivityInstanceId.Value, msgs, dc);
-        }
-
-        public List<AttendanceRegistrant> GetAttendanceRegistrants(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return AttendanceRegistrant.LoadByAttendanceId(this.ID.Value, dc: dc);
-        }
-
-        public int GetAttendanceRegistrantCount(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return AttendanceRegistrant.GetPossibleCount(this.ID.Value, dc: dc);
-        }
-
-        public int GetPresentCount(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return AttendanceRegistrant.GetPresentCount(this.ID.Value, msgs, dc);
-        }
-
         public static List<Attendance> LoadByAccountIdByDate(int AccountId, DateTime Date, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
@@ -272,6 +244,21 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["IsCompleted"], IsCompleted);
             return dq.GetCount(msgs);
         }
+
+        public static List<Attendance> LoadByActivityId(int activityId, string orderbyParam, OrderByDirectionEnum direction, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseParameterizedQuery = false;
+            dq.SelectRange.Start = start;
+            dq.SelectRange.Length = length;
+            dq.OrderBys.Add(orderbyParam, direction);
+
+            var criterias = new Hashtable() { { "ActivityId", activityId } };
+
+            return Attendance.BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
 
         #endregion
     }

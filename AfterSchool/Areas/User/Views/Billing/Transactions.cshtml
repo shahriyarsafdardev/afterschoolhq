@@ -155,7 +155,7 @@
                                         {
                                             var hasUnfulfilledRequest = transaction.HasUnfulfilledRefundRequests();
 
-                                            <button onclick="requestRefund('@transaction.Uid', @transaction.GetParentRefundableAmount().ToString("#.00"))"
+                                            <button onclick="requestRefund('@transaction.Uid', @transaction.GetParentRefundableAmount().ToString("0.00"))"
                                                     class="md-trigger btn btn-default btn-sm"
                                                     data-modal="modal-request-refund"
                                                     @(hasUnfulfilledRequest ? "disabled=\"disabled\"" : "")>
@@ -241,10 +241,10 @@
 
     function requestRefund(uid, maxAmount) {
         $('#refund-request-transaction-uid').val(uid);
-        $('#refund-request-max-amount').val(maxAmount);
-        $('.refund-request-max-amount').html(maxAmount);
-        $('#refund-request-amount').attr('max', maxAmount);
-        $('#refund-request-amount').val(maxAmount);
+        $('#refund-request-max-amount').val(maxAmount.toFixed(2));
+        $('.refund-request-max-amount').html(maxAmount.toFixed(2));
+        $('#refund-request-amount').attr('max', maxAmount.toFixed(2));
+        $('#refund-request-amount').val(maxAmount.toFixed(2));
         $('#refund-reason').val('');
 
         canProcessRequest();

@@ -56,9 +56,20 @@
                         <span class="input-group-addon">$</span>
                         <input type="number" class="form-control" id="cost" name="cost" onfocus="this.select()" value="@(Model.CostPerRegistrant.HasValue ? Model.CostPerRegistrant.Value.ToString("0.00") : "0.00")" required min="0.00" step=".01" @paymentdisabled />
                     </div>
-                    <p class="text-muted">
-                        <em>The total cost will be <span class="text-bold">$<span id="finaltuitioncost">0.00</span></span> at checkout</em>
+                    <p class="text-muted text-medium-small">
+                        <span id="pricetoparent-span">
+                            <em>The total cost will be <span class="text-bold">$<span id="pricetoparent">0.00</span></span> at checkout</em>.
+                        </span>
+                        <span id="amounttoprovider-span">
+                            <em>The total amount you will receive is <span class="text-bold">$<span id="amounttoprovider">0.00</span></span></em>.
+                        </span>
                     </p>
+                    <div>
+                        <div class="am-checkbox">
+                            <input type="checkbox" name="isparentpricecost" id="isparentpricecost" value="1" @(Model.IsConvenienceFeeTakenOutOfCost ? "checked=\"checked\"" : "") />
+                            <label for="isparentpricecost">Price is the amount the parent pays</label>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -147,9 +158,20 @@
                                    value="@(paymentPlan.IsNotEmpty() && paymentPlan.CostPerPeriod.HasValue ? paymentPlan.CostPerPeriod.Value.ToString("0.00") : "0.00")"
                                    required min="0.00" step=".01" @paymentdisabled />
                         </div>
-                        <p class="text-muted">
-                            <em>The parent will be charged <span class="text-bold">$<span id="finalpaymentplancost">0.00</span></span> <span id="paymentplanstarttypetext">on Checkout</span></em>
+                        <p class="text-muted text-medium-small">
+                            <span id="pricetoparent-paymentplan-span">
+                                <em>The total cost will be <span class="text-bold">$<span id="pricetoparent-paymentplan">0.00</span></span> at checkout</em>.
+                            </span>
+                            <span id="amounttoprovider-paymentplan-span">
+                                <em>The total amount you will receive is <span class="text-bold">$<span id="amounttoprovider-paymentplan">0.00</span></span></em>.
+                            </span>
                         </p>
+                        <div>
+                            <div class="am-checkbox">
+                                <input type="checkbox" name="isparentpricepaymentplan" id="isparentpricepaymentplan" value="1" @(paymentPlan.IsNotEmpty() && paymentPlan.IsConvenienceFeeTakenOutOfCost ? "checked=\"checked\"" : "") />
+                                <label for="isparentpricepaymentplan">Price is the amount the parent pays</label>
+                            </div>
+                        </div>
                     </div>
                     <div class="col-md-3"></div>
                     <div class="col-sm-6 col-md-9">
@@ -261,15 +283,28 @@
                                 @BillingPeriodOptions(subscriptionPlan)
                             </select>
                         </div>
+                        @*
                         <p class="text-muted subscription-plan-cost-split">
                             <em>The parent will be charged <span class="subscription-range">between</span> <span class="text-bold">$<span id="finalsubscriptionplancost-1">0.00</span></span> <span class="subscription-range"> and <span class="text-bold">$<span id="finalsubscriptionplancost-2" class="text-bold">0.00</span></span></span> every <span class="subscription-period-text text-bold"></span></em>
                         </p>
                         <p class="text-muted subscription-plan-cost-split">
                             <em>If registration was closed now the parent would be charged <span class="text-bold">$<span id="finalsubscriptionplancost-3">0.00</span></span> every <span class="subscription-period-text text-bold"></span></em>
                         </p>
-                        <p class="text-muted subscription-plan-cost-nosplit">
-                            <em>The parent will be charged <span class="text-bold">$<span id="finalsubscriptionplancost">0.00</span></span> upon checkout</em>
+                        *@
+                        <p class="text-muted text-medium-small">
+                            <span id="pricetoparent-subscription-span">
+                                <em>The total cost will be <span class="text-bold">$<span id="pricetoparent-subscription">0.00</span></span> at checkout</em>.
+                            </span>
+                            <span id="amounttoprovider-subscription-span">
+                                <em>The total amount you will receive is <span class="text-bold">$<span id="amounttoprovider-subscription">0.00</span></span></em>.
+                            </span>
                         </p>
+                        <div>
+                            <div class="am-checkbox">
+                                <input type="checkbox" name="isparentpricesubscription" id="isparentpricesubscription" value="1" @(subscriptionPlan.IsNotEmpty() && subscriptionPlan.IsConvenienceFeeTakenOutOfCost ? "checked=\"checked\"" : "") />
+                                <label for="isparentpricesubscription">Price is the amount the parent pays</label>
+                            </div>
+                        </div>
                     </div>
 
                 </div>
@@ -294,7 +329,7 @@
                     </div>
                 *@
 
-                @if (Model.ActivityTypeId == ActivityType.LearningPod)
+                @if (Model.ActivityTypeId == ActivityType.LearningPod && false)
                 {
                     <div class="row subscriptionplansection">
                         <label class="col-sm-3 control-label">Parents split cost evenly</label>
@@ -336,15 +371,15 @@
                     <label class="col-sm-3 control-label">Post Pay Option</label>
                     <div class="col-sm-1">
                         @{Html.RenderPartial
-                            (
-                                "~/Views/Shared/_SwitchButton.cshtml",
-                                Model.HasPostPayPlan(),
-                                new ViewDataDictionary()
-                                {
+                                (
+                                    "~/Views/Shared/_SwitchButton.cshtml",
+                                    Model.HasPostPayPlan(),
+                                    new ViewDataDictionary()
+                                    {
                                 { "checkboxname", "haspostpayplan" },
                                 { "checkboxid", "haspostpayplan" }
-                }
-                            );
+}
+                                );
                         }
                     </div>
                 </div>
@@ -358,21 +393,44 @@
                                    value="@(postPayPlan.IsNotEmpty() && postPayPlan.CostPerPeriod.HasValue ? postPayPlan.CostPerPeriod.Value.ToString("0.00") : "0.00")"
                                    required min="0.00" step=".01" @paymentdisabled />
                         </div>
-                        <p class="text-muted">
-                            <em>The parent will be charged <span class="text-bold">$<span id="finalpostpaycost">0.00</span></span> per class attended</em>
+                        <p class="text-muted text-medium-small">
+                            <span id="pricetoparent-postpay-span">
+                                <em>The parent will be charged <span class="text-bold">$<span id="pricetoparent-postpay">0.00</span></span> per class attended</em>.
+                            </span>
+                            <span id="amounttoprovider-postpay-span">
+                                <em>The total amount you will receive is <span class="text-bold">$<span id="amounttoprovider-postpay">0.00</span></span> per class attended</em>.
+                            </span>
                         </p>
-                    </div>
-                    <!--
-                    <div class="col-md-3"></div>
-                    <div class="col-sm-6 col-md-9">
-                        <div class="input-group input-group-lg xs-mb-15">
-                            <span class="input-group-addon">Every</span>
-                            <select name="postpayperiod" id="postpayperiod" class="form-control" required>
-                                @BillingPeriodOptions(paymentPlan)
-                            </select>
+                        <div>
+                            <div class="am-checkbox">
+                                <input type="checkbox"
+                                       name="isparentpricepostpay"
+                                       id="isparentpricepostpay"
+                                       value="1"
+                                       @(postPayPlan.IsNotEmpty() && postPayPlan.IsConvenienceFeeTakenOutOfCost ? "checked=\"checked\"" : "") />
+                                <label for="isparentpricepostpay">Price is the amount the parent pays</label>
+                            </div>
                         </div>
                     </div>
-                    -->
+                    <div class="col-sm-3"></div>
+                    <div class="col-sm-6 col-md-9">
+                        <p></p>
+                        <div class="input-group input-group-lg xs-mb-15">
+                            <span class="input-group-addon"># of Days to Pre-pay</span>
+                            <input type="number" class="form-control" id="prepaidperiodspostpay"
+                                   name="prepaidperiodspostpay" onfocus="this.select()"
+                                   value="@(postPayPlan.IsNotEmpty() && postPayPlan.NumberOfPeriodsPrePaid.HasValue ? postPayPlan.NumberOfPeriodsPrePaid.ToString() : "0")"
+                                   required min="0" step="1" />
+                        </div>
+                        <p class="text-muted text-medium-small">
+                            <span id="pricetoparent-postpay-prepay-span">
+                                <em>The parent will be charged <span class="text-bold">$<span id="pricetoparent-postpay-prepay">0.00</span></span> upon checkout</em>.
+                            </span>
+                            <span id="amounttoprovider-postpay-prepay-span">
+                                <em>The total amount you will receive is <span class="text-bold">$<span id="amounttoprovider-postpay-prepay">0.00</span></span></em>.
+                            </span>
+                        </p>
+                    </div>
                 </div>
                 <div class="row">
                     <div class="col-sm-3"></div>
@@ -397,6 +455,22 @@
         setSubscriptionPlanSection();
         setPaymentPlanSection();
         setPostPayPlanSection();
+
+        $('#isparentpricecost').click(function () {
+            calculateFinalPriceCost();
+        });
+
+        $('#isparentpricepostpay').click(function () {
+            calculateFinalPricePostPay();
+        });
+
+        $('#isparentpricepaymentplan').click(function () {
+            calculateFinalPricePaymentPlan();
+        });
+
+        $('#isparentpricesubscription').click(function () {
+            calculateFinalPriceSubscription();
+        });
 
         $('#hassubscriptionplan').change(function (cb) {
             setSubscriptionPlanSection();
@@ -431,14 +505,14 @@
         $('#cost').keyup(function () {
             costTimeOut = null;
             costTimeOut = setTimeout(function () {
-                calculateFinalPrice($('#cost').val(), $('#finaltuitioncost'));
+                calculateFinalPriceCost();
             }, 200);
         });
 
         $('#paymentplancost').keyup(function () {
             paymentplanTimeOut = null;
             paymentplanTimeOut = setTimeout(function () {
-                calculateFinalPrice($('#paymentplancost').val(), $('#finalpaymentplancost'));
+                calculateFinalPricePaymentPlan();
             }, 200);
         });
 
@@ -452,13 +526,13 @@
         $('#postpaycost').keyup(function () {
             postpayplanTimeOut = null;
             postpayplanTimeOut = setTimeout(function () {
-                calculateFinalPrice($('#postpaycost').val(), $('#finalpostpaycost'));
+                calculateFinalPricePostPay();
             }, 200);
         });
 
-        calculateFinalPrice($('#cost').val(), $('#finaltuitioncost'));
-        calculateFinalPrice($('#paymentplancost').val(), $('#finalpaymentplancost'));
-        calculateFinalPrice($('#postpaycost').val(), $('#finalpostpaycost'));
+        calculateFinalPriceCost();
+        calculateFinalPricePaymentPlan();
+        calculateFinalPricePostPay();
         getSubscriptionFinalPrice();
 
         updateSubscriptionPeriodText();
@@ -476,7 +550,41 @@
             updatePaymentPlanStartText();
         })
 
+        $('#prepaidperiodspostpay').change(function () {
+            updatePrePayDays();
+        });
+
     });
+
+    function calculateFinalPriceCost() {
+        calculateFinalPrice($('#cost').val(), $('#pricetoparent'), $('#amounttoprovider'), $('#isparentpricecost'));
+    }
+
+    function calculateFinalPricePostPay() {
+        calculateFinalPrice($('#postpaycost').val(), $('#pricetoparent-postpay'), $('#amounttoprovider-postpay'), $('#isparentpricepostpay'), function () {
+            updatePrePayDays();
+        });
+    }
+
+    function calculateFinalPricePaymentPlan() {
+        calculateFinalPrice($('#paymentplancost').val(), $('#pricetoparent-paymentplan'), $('#amounttoprovider-paymentplan'), $('#isparentpricepaymentplan'));
+    }
+
+    function calculateFinalPriceSubscription() {
+        calculateFinalPrice($('#subscriptionplancost').val(), $('#pricetoparent-subscription'), $('#amounttoprovider-subscription'), $('#isparentpricesubscription'));
+    }
+
+    function updatePrePayDays() {
+        var numOfDays = parseInt($('#prepaidperiodspostpay').val());
+        var priceToParent = parseFloat($('#pricetoparent-postpay').html());
+        var amountToProvider = parseFloat($('#amounttoprovider-postpay').html());
+
+        var priceToParentPrePay = numOfDays * priceToParent;
+        var amountToProviderPrePay = numOfDays * amountToProvider;
+
+        $('#pricetoparent-postpay-prepay').html(priceToParentPrePay.toFixed(2));
+        $('#amounttoprovider-postpay-prepay').html(amountToProviderPrePay.toFixed(2));
+    }
 
     function updateSubscriptionPeriodText() {
         $('.subscription-period-text').html($('#subscriptionplanperiod option:selected').text().toLowerCase());
@@ -485,14 +593,12 @@
     function getSubscriptionFinalPrice() {
 
         $('.subscription-range').addClass('hide');
-        $('.subscription-plan-cost-nosplit').addClass('hide');
-        $('.subscription-plan-cost-split').addClass('hide');
+        showHideSubscriptionSplit();
 
         if ($('#splitcostevenly').is(':checked')) {
             var totalAmt = $('#subscriptionplancost').val();
 
             $('.subscription-range').removeClass('hide');
-            $('.subscription-plan-cost-split').removeClass('hide');
 
             calculateFinalPrice(totalAmt / @Model.SeatsAvailable, $('#finalsubscriptionplancost-1'));
             calculateFinalPrice(totalAmt / @(Model.MinSeatsRequired ?? 1), $('#finalsubscriptionplancost-2'));
@@ -500,25 +606,49 @@
 
         } else {
 
-            $('.subscription-plan-cost-nosplit').removeClass('hide');
             var totalAmt = $('#subscriptionplancost').val();
-            calculateFinalPrice(totalAmt, $('#finalsubscriptionplancost'));
+            calculateFinalPriceSubscription();
         }
     }
 
-    function calculateFinalPrice(cost, span) {
+    function showHideSubscriptionSplit() {
+
+        $('.subscription-plan-cost-nosplit').addClass('hide');
+        $('.subscription-plan-cost-split').addClass('hide');
+
+        if ($('#splitcostevenly').is(':checked')) {
+            $('.subscription-plan-cost-split').removeClass('hide');
+        } else {
+            $('.subscription-plan-cost-nosplit').removeClass('hide');
+        }
+
+    }
+
+    function calculateFinalPrice(cost, priceToParentSpan, amountToProviderSpan, takenOutOfCostChk, callback) {
 
         if (isNaN(cost))
             return;
 
+        var takenOutOfCost = 0;
+
+        if (takenOutOfCostChk.is(':checked')) {
+            takenOutOfCost = 1;
+        }
+
         $.get(
-            '@Url.Action("calculatefinalprice", "services")?cost=' + cost,
+            '@Url.Action("calculatefinalprice", "services")?cost=' + cost + '&activityUid=@Model.Uid.ToString()&takenoutofcost=' + takenOutOfCost,
             function (data) {
-                if (data && data.status == 'ok' && !isNaN(data.price)) {
-                    span.html(parseFloat(data.price).toFixed(2));
+                if (data && data.status == 'ok') {
+                    priceToParentSpan.html(parseFloat(data.priceToParent).toFixed(2));
+                    amountToProviderSpan.html(parseFloat(data.amountToProvider).toFixed(2));
                 } else {
-                    span.html('0.00');
+                    priceToParentSpan.html('0.00');
+                    amountToProviderSpan.html('0.00');
                 }
+
+                if (callback) {
+                    callback();
+                }                   
             }
         );
     }
@@ -590,12 +720,15 @@
         }
 
         $('#cost').val(0.00);
-        $('#finaltuitioncost').html(0.00);
+        $('#pricetoparent').html(0.00);
+        $('#amounttoprovider').html(0.00);
 
         $('#hassubscriptionplan').prop('disabled', true);
         $('#haspaymentplan').prop('disabled', true);
         $('#allowtopaylater').prop('disabled', true);
         $('#cost').prop('disabled', true);
+        $('#isparentpricecost').prop('checked', false);
+        $('#isparentpricecost').prop('disabled', true);
     }
 
     function postPayEnableOtherOptions() {

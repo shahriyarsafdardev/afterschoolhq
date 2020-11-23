@@ -82,12 +82,19 @@
                     if (subscriptionPlan.IsEmpty() || !subscriptionPlan.SplitCostEvenly || !participationObject.RegistrationFinalized)
                     {
                         if (postPayPlan.IsNotEmpty())
-                        {                            
-                            <span id="payment-plan-ccf-0" class="hide">@participationObject.GetPostPayCreditCardFee(FeesPaidByType.Parent)</span>
+                        {
+                            if (postPayPlan.NumberOfPeriodsPrePaid.IsPositive())
+                            {
+                                <span id="payment-plan-ccf-0" class="hide">@participationObject.GetCheckoutPostPayCreditCardFee()</span>
+                            }
+                            else
+                            {
+                                <span id="payment-plan-ccf-0" class="hide">@participationObject.GetPostPayCreditCardFee()</span>
+                            }
                         }
                         else
                         {
-                            <span id="payment-plan-ccf-0" class="hide">@participationObject.GetCreditCardFee(FeesPaidByType.Parent)</span>
+                            <span id="payment-plan-ccf-0" class="hide">@participationObject.GetCreditCardFee()</span>
                         }
                     }
                     else
@@ -147,7 +154,7 @@
                                                         else
                                                         {
                                                             <span>
-                                                                one @plan.BillingPeriodTypeId.ToString().ToLower() from today
+                                                                one @plan.BillingPeriodTypeId.ToString().ToLower() later
                                                             </span>
                                                         }
                                                     </span>
@@ -188,7 +195,16 @@
                             <div class="row">
                                 <div class="col-md-6 col-md-offset-3 col-sm-12 text-center text-medium-small">
                                     <p>
-                                        The cost will be <span class="text-bold">@participationObject.GetPostPayCostWithConvenienceFee().ToCurrency()</span> per class attended.
+                                        The cost will be <span class="text-bold">@participationObject.GetPostPayCostWithConvenienceFee().ToCurrency()</span> per class attended per student
+                                        @if (participationObject.GetPostPayCheckoutCostWithConvenienceFee() > 0)
+                                        {
+                                            <br />
+                                            <span>
+                                                with a pre-payment of
+                                                <strong>@participationObject.GetPostPayCheckoutCostWithConvenienceFee().ToCurrency()</strong> to cover the first
+                                                <strong>@postPayPlan.NumberOfPeriodsPrePaid @(postPayPlan.BillingPeriodTypeId.ToString().ToLower())(s)</strong> due today.
+                                            </span>
+                                        }
                                     </p>
                                     <p>
                                         Your payment information will be stored on file.
@@ -200,135 +216,59 @@
 
                     @* Cost Table *@
                     <div class="row padding-30 hide">
-                        <div class="col-md-6 col-md-offset-3">
-                            <div class="table-responsive">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th class="text-center">Item</th>
-                                            <th class="text-center">Cost</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @if (!participationObject.IsRegistrationFree)
-                                        {
-                                            var regFeeToday = participationObject.GetCheckoutCostWithConvenienceFee().ToString("0.00");
 
-                                            if (subscriptionPlan.IsNotEmpty() && subscriptionPlan.SplitCostEvenly && participationObject.RegistrationFinalized)
-                                            {
-                                                regFeeToday = "0.00";
-                                            }
+                        @if (!participationObject.IsRegistrationFree)
+                        {
+                            var regFeeToday = participationObject.GetCheckoutCostWithConvenienceFee().ToString("0.00");
 
-                                            <tr id="registration-fee-row">
-                                                <td>Registration Fee</td>
-                                                <td class="text-right">
-                                                    <span id="fee-total-value" class="hide">@regFeeToday</span>
-                                                    <span>@participationObject.GetCheckoutCostWithConvenienceFee().ToCurrency()*</span>
-                                                </td>
-                                                <td></td>
-                                            </tr>
-                                        }
+                            if (subscriptionPlan.IsNotEmpty() && subscriptionPlan.SplitCostEvenly && participationObject.RegistrationFinalized)
+                            {
+                                regFeeToday = "0.00";
+                            }
 
-                                        @if (participationObject.PaymentPlans.Any())
-                                        {
-                                            foreach (var plan in participationObject.PaymentPlans)
-                                            {
-                                                <tr id="paymentplan-fee-row-@plan.ID" class="hide paymentplan-fee-row">
-                                                    <td>Payment Plan</td>
-                                                    <td class="text-right">
-                                                        @plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()*
-                                                    </td>
-                                                    <td>
-                                                        per
-                                                        <strong>@plan.BillingPeriodTypeId.ToString().ToLower()</strong> for
-                                                        <strong>@plan.TotalPeriods</strong>
-                                                        <strong>@plan.BillingPeriodTypeId.ToString().ToLower()s</strong>
-                                                    </td>
-                                                </tr>
-                                            }
-                                        }
+                            <span id="fee-total-value" class="hide">@regFeeToday</span>
+                        }
 
-                                        @if (participationObject.SubscriptionPlans.Any())
-                                        {
-                                            var subpricetoday = subscriptionPlan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount);
-                                            var subtransfeetoday = subscriptionPlan.GetCreditCardFee(paymentAccount);
+                        @if (postPayPlan.IsNotEmpty())
+                        {
+                            <span id="fee-total-value" class="hide">@participationObject.GetCheckoutCostWithConvenienceFee().ToString("0.00")</span>
+                        }
 
-                                            if (subscriptionPlan.SplitCostEvenly && !participationObject.RegistrationFinalized)
-                                            {
-                                                subpricetoday = 0;
-                                                subtransfeetoday = 0;
-                                            }
+                        @if (participationObject.SubscriptionPlans.Any())
+                        {
+                            var subpricetoday = subscriptionPlan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount);
+                            var subtransfeetoday = subscriptionPlan.GetCreditCardFee(paymentAccount);
 
-                                            <tr>
-                                                <td>Ongoing Subscription</td>
-                                                <td class="text-right">
-                                                    <span id="subscription-total-value" class="hide">@subpricetoday</span>
-                                                    <span id="subscription-asf-value" class="hide">0</span>
-                                                    <span id="subscription-ccf-value" class="hide">@subtransfeetoday</span>
-                                                    @subscriptionPlan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()*
-                                                </td>
-                                                <td>
-                                                    per
-                                                    <strong>@subscriptionPlan.BillingPeriodTypeId.ToString().ToLower()</strong>
-                                                </td>
-                                            </tr>
-                                        }
-                                        else
-                                        {
-                                            <span id="subscription-total-value" class="hide">0</span>
-                                            <span id="subscription-asf-value" class="hide">0</span>
-                                            <span id="subscription-ccf-value" class="hide">0</span>
-                                        }
+                            if (subscriptionPlan.SplitCostEvenly && !participationObject.RegistrationFinalized)
+                            {
+                                subpricetoday = 0;
+                                subtransfeetoday = 0;
+                            }
 
-                                        <tr id="credit-card-transaction-fee-row" class="@(participationObject.UseStripeConnectedAccount ? "hide" : "hide")">
-                                            <td>Credit Card Transaction Fee</td>
-                                            <td class="text-right">
-                                                <span id="fee-ccf" class="hide">0</span>
-                                                <span id="fee-ccf-text">$0</span>
-                                            </td>
-                                            <td></td>
-                                        </tr>
-                                        <tr id="afterschool-support-fee-row" class="@(participationObject.UseStripeConnectedAccount ? "hide" : "hide")">
-                                            <td>Afterschool Support Fee</td>
-                                            <td class="text-right">
-                                                <span id="fee-asf" class="hide">0</span>
-                                                <span id="fee-asf-text">$0</span>
-                                            </td>
-                                            <td></td>
-                                        </tr>
+                            <span id="subscription-total-value" class="hide">@subpricetoday</span>
+                            <span id="subscription-asf-value" class="hide">0</span>
+                            <span id="subscription-ccf-value" class="hide">@subtransfeetoday</span>
+                        }
+                        else
+                        {
+                            <span id="subscription-total-value" class="hide">0</span>
+                            <span id="subscription-asf-value" class="hide">0</span>
+                            <span id="subscription-ccf-value" class="hide">0</span>
+                        }
 
-                                        @*<tr>
-                                    <td>
-                                        Coupon
-                                    </td>
-                                    <td>
-                                        <input type="text" id="coupon-code" class="form-control" value="" />
-                                        <button type="button" class="btn btn-sm btn-default" onclick="applyCoupon()">Apply</button>
-                                    </td>
-                                </tr>*@
-                                    </tbody>
-                                    <tfoot>
-                                        <tr>
-                                            <td>
-                                                <p class="text-medium-small">
-                                                    Total Due Today
-                                                </p>
-                                            </td>
-                                            <td>
-                                                <p class="text-medium text-right">
-                                                    <span id="dollar-prefix">$</span><span class="total-due-today"></span>
-                                                </p>
-                                            </td>
-                                            <td></td>
-                                        </tr>
-                                    </tfoot>
-                                </table>
-                            </div>
+                        <span id="fee-ccf" class="hide">0</span>
+                        <span id="fee-asf" class="hide">0</span>
+                        <span class="total-due-today"></span>
 
-                            <p class="text-center text-small text-muted">* Cost includes fees supporting afterschool programs for @SessionVariables.RegistrationStartPageAccount.Name</p>
-
-                            <hr />
-                        </div>
+                        @*<tr>
+                    <td>
+                        Coupon
+                    </td>
+                    <td>
+                        <input type="text" id="coupon-code" class="form-control" value="" />
+                        <button type="button" class="btn btn-sm btn-default" onclick="applyCoupon()">Apply</button>
+                    </td>
+                </tr>*@
                     </div>
 
                     Html.RenderPartial(
@@ -340,7 +280,7 @@
                             { "formActionUrl", Url.Action("payment", "account", new { id = registration.Uid }) },
                             { "acceptACH", true },
                             { "participationObject", participationObject }
-                }
+        }
                     );
 
                     @* ALLOW TO PAY LATER *@

@@ -143,5 +143,141 @@ namespace AfterSchoolLibrary.Services
         {
             return registrantActivity.GetRegistration(msgs, dc).GetAnswers(msgs, dc);
         }
+
+        public static Registrant GetRegistrant(this RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Registrant.Load(registrantActivity.RegistrantId.Value, msgs, dc);
+        }
+
+        public static Registrant GetMasterRegistrant(this RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return registrantActivity.GetRegistrant(msgs, dc)?.GetMasterRegistrant(msgs, dc);
+        }
+
+        public static Registration GetRegistration(this RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (registrantActivity.RegistrationId.HasValue)
+                return Registration.Load(registrantActivity.RegistrationId.Value, msgs, dc);
+
+            return null;
+        }
+
+        public static void CancelRegistration(this RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    registrantActivity.AdjustPreferencesDuringRemoval(null, amsgs, adc);
+                    registrantActivity.AdjustSeatIndexesDuringRemoval(amsgs, adc);
+                    amsgs.AddRange(registrantActivity.Delete(adc));
+                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs),
+                dc: dc
+            );
+        }
+
+        public static void ChangeSeatAssignment(this RegistrantActivity registrantActivity, RegistrationAssignmentType to, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (registrantActivity.AssignmentTypeId == to)
+                return;
+
+            //if you move it before the change is made it will adjust everyone correctly. Has to be done before the change is saved.
+            //need a better function that can allow setting which seat index parameter needs to be handled
+            registrantActivity.AdjustSeatIndexesDuringRemoval(msgs, dc);
+
+            registrantActivity.SeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
+                assignmentType: to,
+                participationObjectId: registrantActivity.ParticipationObjectId,
+                participationObjectType: registrantActivity.ParticipationObjectTypeId,
+                msgs: msgs,
+                dc: dc) + 1;
+
+            registrantActivity.AssignmentTypeId = to;
+            registrantActivity.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+            registrantActivity.LastModifiedDate = DateTime.UtcNow;
+
+            msgs.AddRange(registrantActivity.Save(dc));
+        }
+
+        public static void AdjustSeatIndexesDuringRemoval(this RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            // get all all registrant activities where the activity id is the same, 
+            // the day is the same, and only update people with the same assignment type, 
+            // UPDATE: No longer the same day because registration is now according to a schedule, not a day
+            // I think they need to be in the same registration period if it exists   
+            // TODO: Review if I need to check the same registration period, probably more related to the activity group if anything?
+
+            var otherPeoplesActivities = RegistrantActivity.LoadByParticipationObject(
+                    registrantActivity.ParticipationObjectId.Value,
+                    registrantActivity.ParticipationObjectTypeId,
+                    msgs,
+                    dc
+                )
+                .Where(ra => ra.RegistrantId != registrantActivity.RegistrantId)
+                .ToList();
+
+            registrantActivity.AdjustSeatIndexes(otherPeoplesActivities, -1, msgs, dc);
+        }
+
+        public static void AdjustSeatIndexes(this RegistrantActivity registrantActivity, List<RegistrantActivity> ras, int factor, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            ras.Where(x => x.AssignmentTypeId == registrantActivity.AssignmentTypeId && x.SeatIndex > registrantActivity.SeatIndex)
+                .ToList()
+                .ForEach(item => item.AdjustSeatIndex(1 * factor, msgs, dc));
+        }
+
+        public static void AdjustSeatIndex(this RegistrantActivity registrantActivity, int amount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            registrantActivity.SeatIndex += amount;
+            msgs.AddRange(registrantActivity.Save(dc));
+        }
+
+        public static void AdjustPreferenceNumber(this RegistrantActivity registrantActivity, int amount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            registrantActivity.PreferenceNumber -= amount;
+            msgs.AddRange(registrantActivity.Save(dc));
+        }
+
+        public static void AdjustPreferencesDuringRemoval(this RegistrantActivity registrantActivity, List<RegistrantActivity> registrantActivities = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (registrantActivities.IsEmpty())
+            {
+                // has to be for the same registration period and same account
+                // need a better function to filter out registration period in the query
+                registrantActivities = RegistrantActivity
+                                        .LoadByRegistrantId(registrantActivity.RegistrantId.Value, dc: dc)
+                                        .Where(x => x.RegistrationPeriodId == registrantActivity.RegistrationPeriodId)
+                                        .ToList();
+            }
+
+            // lower choices really mean higher preference numbers. 
+            // Like choice #1 is a higher choice than choice #3, 
+            // but of course in math we know that 1 is lower than 3.
+            registrantActivities
+                .Where(x => x.PreferenceNumber.HasValue && x.PreferenceNumber.Value > registrantActivity.PreferenceNumber.Value)
+                .ToList()
+                .ForEach(ra => ra.AdjustPreferenceNumber(-1, msgs, dc));
+        }
+
+        public static decimal GetAmountPaid(this RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return ActivityPayment.GetTotalPaidByParticipationObjectByRegistrant(
+                registrantActivity.ParticipationObjectId.Value,
+                registrantActivity.ParticipationObjectTypeId,
+                registrantActivity.RegistrantId.Value,
+                false,
+                msgs,
+                dc);
+        }
+
+        public static SystemMessages SendPaymentReminder(this RegistrantActivity registrantActivity)
+        {
+            return Helpers.EmailHelper.SendPaymentReminder(registrantActivity);
+        }
     }
 }

@@ -245,27 +245,6 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        public string GetInviteUrl(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            var url = this.GetGroup(msgs, dc).BrowseUrl;
-            url += (url.Contains("?") ? "&" : "?") + $"invite={this.Uid.ToString()}";
-            return url;
-        }
-
-        public string GetDeclineUrl(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return GetInviteUrl(msgs, dc) + "&decline=1";
-        }
-
-        private ActivityGroup _Group = null;
-        public ActivityGroup GetGroup(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (_Group.IsEmpty())
-                _Group = ActivityGroup.Load(this.ActivityGroupId.Value, msgs, dc);
-
-            return _Group;
-        }
-
         public string RegistrantName
         {
             get
@@ -282,51 +261,6 @@ namespace AfterSchoolLibrary.Models
 
                 return rtn;
             }
-        }
-
-        public void DeclineInvite(int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            Database.ExecuteTransaction
-            (
-                action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                {
-                    // TODO: Fix
-                    this.NumberOfSeatsDeclined = this.NumberOfInvitationSeats;
-                    this.NumberOfInvitationSeats = 0;
-                    this.LastModifiedBy = loggedInUserId;
-                    this.LastModifiedDate = DateTime.UtcNow;
-                    amsgs.AddRange(this.Save(adc));
-                    
-                    RegistrantActivity.LoadByRegistrantId(this.RegistrantId.Value, amsgs, adc)
-                        .ForEach(ra => {
-                            ra.ChangeSeatAssignment(
-                                RegistrationAssignmentType.Declined,
-                                new WebUser() { ID = loggedInUserId },
-                                amsgs,
-                                adc);
-                        });
-                },
-                onSuccess: (SystemMessages smsgs) =>
-                {                    
-                    var body = $"<p>Hello,</p><p>{this.RegistrantName.IfEmpty(this.RegistrantEmail)} has opted to decline the invitation to register for {this.ActivityGroupName}</p>{Helpers.Email.GetAppSignature(true, "declined_invite_notice")}";
-                    var account = this.GetGroup(msgs, dc).GetAccount(msgs, dc);
-
-                    SendGridHelper.SendMail(
-                        fromEmail: Helpers.Email.SendGridNoReplyEmailAddress(),
-                        toEmail: new SendGrid.Helpers.Mail.EmailAddress(account.Email, account.Name),
-                        subject: string.Format("An invitation was declined for {0}", this.ActivityGroupName),
-                        body: body,        
-                        emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
-                    );
-
-                    msgs.Add("Your invitation has been declined", MessageType.Success);
-
-                    msgs.AddRange(smsgs);
-                },
-                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
-                dc: dc
-            );
         }
 
         public static List<RegistrantActivityGroup> LoadByActivityGroupId(int ActivityGroupId, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)

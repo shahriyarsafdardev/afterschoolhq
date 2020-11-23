@@ -18,7 +18,11 @@
         </div>
         <div class="panel-body">
 
-            @{Html.RenderPartial("~/Views/Shared/_AttendanceList.cshtml", Model, new ViewDataDictionary() { { "controller", "activity" } });}
+            @{Html.RenderPartial("~/Views/Shared/_AttendanceList.cshtml", Model, new ViewDataDictionary() {
+                  { "controller", "activity" },
+                  { "attendances", ViewBag.Attendances },
+                  { "PagingModel", ViewBag.PagingModel }
+              });}
 
         </div>
     </div>

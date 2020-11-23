@@ -246,6 +246,14 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
+        public bool IsAlreadyBilled
+        {
+            get
+            {
+                return this.TransactionId.HasValue;
+            }
+        }
+
         public static int GetPresentCount(int attendanceId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
