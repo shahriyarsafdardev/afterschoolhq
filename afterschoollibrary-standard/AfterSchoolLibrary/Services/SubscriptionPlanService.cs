@@ -504,7 +504,7 @@ namespace AfterSchoolLibrary.Services
                                 PayerAccountId = payerAccount.ID,
                                 TransactionId = transaction.ID,
                                 ParticipationObjectId = participationObject.ObjectID,
-                                ParticipatioObjectTypeId = participationObject.ObjectType,
+                                ParticipationObjectTypeId = participationObject.ObjectType,
                                 RegistrationId = registration.ID,
                                 CreateDate = DateTime.UtcNow,
                                 CreatedBy = loggedInUser?.ID,

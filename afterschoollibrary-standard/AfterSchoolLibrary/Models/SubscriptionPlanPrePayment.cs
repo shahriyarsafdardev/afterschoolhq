@@ -249,7 +249,7 @@ namespace AfterSchoolLibrary.Models
 			dq.UseParameterizedQuery = false;
 			dq.Criterias.Add(ObjectMap["RegistrationId"], RegistrationId);
 			dq.Criterias.Add(ObjectMap["ParticipationObjectId"], ParticipationObjectId);
-			dq.Criterias.Add(ObjectMap["ParticipationObjectTypeId"], ParticipationObjectTypeId);
+			dq.Criterias.Add(ObjectMap["ParticipationObjectTypeId"], (int)ParticipationObjectTypeId);
 			dq.Criterias.Add(ObjectMap["AttendanceRegistrantId"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}

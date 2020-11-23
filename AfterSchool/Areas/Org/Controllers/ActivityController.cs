@@ -1351,7 +1351,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         var paymentTypeFeePayer = registration.GetPaymentTypeFeePayer();
                         var availablePrePayments = registration.GetAvailablePrePayments(activity, msgs);
                         var attendanceDaysToCharge = Math.Max(0, raAttendances.Count - availablePrePayments.Count);
-                        var prePaymentsToUse = availablePrePayments.Count - attendanceDaysToCharge;
+                        CheckoutObject checkoutObject = null;
 
                         if (attendanceDaysToCharge > 0)
                         {
@@ -1363,7 +1363,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             else
                                 creditCardPurchaseObject = new CreditCardPurchaseObject { StripeSourceId = registration.StripeSourceId };
 
-                            var checkoutObject = new CheckoutObject()
+                            checkoutObject = new CheckoutObject()
                             {
                                 OverrideAmount = costPerAttendance * raAttendances.Count,
                                 ConvenienceFeeOverrideAmount = registration.ConvenienceFeePaid.IfEmpty(0) * attendanceDaysToCharge,
@@ -1390,36 +1390,35 @@ namespace AfterSchool.Areas.Org.Controllers
                                     isAttendanceCharge: true,
                                     loggedInUser: currentUser,
                                     msgs: msgs);
+                        }
 
+                        if (msgs.HasNoErrors())
+                            raAttendances.ForEach(raAttendance =>
+                            {
+                                var attendanceRegistrant = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(
+                                                                raAttendance.ID.Value,
+                                                                registrantActivity.GetRegistrant(msgs).ID.Value,
+                                                                msgs)
+                                                            .FirstOrDefault();
 
-                            if (msgs.HasNoErrors())
-                                raAttendances.ForEach(raAttendance =>
+                                if (attendanceRegistrant.IsNotEmpty())
                                 {
-                                    var attendanceRegistrant = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(
-                                                                    raAttendance.ID.Value,
-                                                                    registrantActivity.GetRegistrant(msgs).ID.Value,
-                                                                    msgs)
-                                                                .FirstOrDefault();
-
-                                    if (attendanceRegistrant.IsNotEmpty())
+                                    // add next available pre payment if available, if not then continue to set the checkoutobject transaction id
+                                    if (!attendanceRegistrant.AddNextAvailablePrePayment(currentUser, msgs))
                                     {
-                                        // add next available pre payment if available, if not then continue to set the checkoutobject transaction id
-                                        if (!attendanceRegistrant.AddNextAvailablePrePayment(currentUser, msgs))
+                                        if ((checkoutObject?.Transaction).IsNotEmpty() && !attendanceRegistrant.IsAlreadyBilled)
                                         {
-                                            if (checkoutObject.Transaction.IsNotEmpty() && !attendanceRegistrant.IsAlreadyBilled)
-                                            {
-                                                attendanceRegistrant.TransactionId = checkoutObject.Transaction.ID.Value;
-                                                msgs.AddRange(attendanceRegistrant.Save());
-                                            }
+                                            attendanceRegistrant.TransactionId = checkoutObject.Transaction.ID.Value;
+                                            msgs.AddRange(attendanceRegistrant.Save());
                                         }
                                     }
-                                });
+                                }
+                            });
 
-                            if (msgs.HasErrors())
-                            {
-                                msg = $"An error occured while charging some parents, some parents may have already been processed and you will still receive a summary email if any have. Please contact support and do NOT attempt to charge for attendance again.";
-                                break;
-                            }
+                        if (msgs.HasErrors())
+                        {
+                            msg = $"An error occured while charging some parents, some parents may have already been processed and you will still receive a summary email if any have. Please contact support and do NOT attempt to charge for attendance again.";
+                            break;
                         }
                     }
                 }
