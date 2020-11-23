@@ -73,7 +73,7 @@ namespace AfterSchoolLibrary.Services
                 return transaction.Amount.Value;
             }
 
-            return transaction.Amount.Value - transaction.GetFeesChargedToPayer();
+            return transaction.Amount.Value - transaction.GetFees();
         }
 
         public static decimal GetPayerAmount(this Transaction transaction)
@@ -84,7 +84,7 @@ namespace AfterSchoolLibrary.Services
         public static decimal GetBillerPayout(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (transaction.IsCharge())
-                return transaction.GetBillerAmount(msgs, dc) - transaction.GetFeesChargedToBiller() - transaction.GetRefundedAmountAHQWithoutFees(msgs, dc);
+                return transaction.GetBillerAmount(msgs, dc) - transaction.GetRefundedAmountAHQWithoutFees(msgs, dc);
 
             if (transaction.IsCredit())
             {
@@ -351,15 +351,15 @@ namespace AfterSchoolLibrary.Services
             return true; // transaction.CreateDate.Value.IsAfter(DateTime.UtcNow.AddDays(-2));
         }
 
-        public static decimal GetParentRefundableAmount(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetParentRefundableAmount(this Transaction transaction)
         {
-            var amount = transaction.GetBillerAmount(msgs, dc);
+            var amount = transaction.GetPayerAmount();
 
-            if (transaction.CanRefundConvenienceFee())
-                amount += transaction.ConvenienceFeeCharged.Value;
+            if (!transaction.CanRefundConvenienceFee())
+                amount -= transaction.ConvenienceFeeCharged.Value;
 
-            if (transaction.CanRefundTransactionFee())
-                amount += transaction.PaymentTypeFeeCharged.Value;
+            if (!transaction.CanRefundTransactionFee())
+                amount -= transaction.PaymentTypeFeeCharged.Value;
 
             return amount;
         }
