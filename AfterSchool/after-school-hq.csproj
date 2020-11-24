@@ -746,7 +746,6 @@
     <Content Include="img\sophie.png" />
     <Content Include="img\texture-fabric.png" />
     <Content Include="img\texture-geometry-shapes.png" />
-    <Content Include="img\tpffy-logo.png" />
     <Content Include="index-profiles.html" />
     <Content Include="index.html" />
     <Content Include="ips.html" />
