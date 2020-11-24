@@ -1110,7 +1110,15 @@ namespace AfterSchoolLibrary.Models
                     a.Id as AccountId,
                     a.Uid as AccountUid, 
                     a.Name as AccountName,                    
-                    a.UniqueName as AccountUniqueName
+                    a.UniqueName as AccountUniqueName,
+                    ap.IsOpenDuringCovid,
+					ap.IsELearningCenter,
+					ap.Headline,
+                    ap.LocationId,
+                    ap.AgeStart,
+					ap.AgeEnd,
+					glStart.Abbreviation as GradeLevelStart,
+					glEnd.Abbreviation as GradeLevelEnd
                 FROM AccountRelationship ar
                 INNER JOIN Account a ON a.ID = ar.VisitorAccountId
                 LEFT JOIN Activity act ON act.AccountId = ar.VisitorAccountId
@@ -1118,7 +1126,9 @@ namespace AfterSchoolLibrary.Models
                 LEFT JOIN RegistrationPeriod rp on rp.ID = arp.RegistrationPeriodId
                 LEFT JOIN AccountProfile ap ON ap.AccountId = ar.VisitorAccountId
                 LEFT JOIN Location loc ON ap.LocationId = loc.ID
-                LEFT JOIN AccountProperty property on property.AccountId = ar.VisitorAccountId
+                LEFT JOIN AccountProperty property on property.AccountId = ar.VisitorAccountId                
+				LEFT JOIN GradeLevel glStart on glStart.ID = ap.GradeLevelStart
+				LEFT JOIN GradeLevel glEnd on glEnd.ID = ap.GradeLevelEnd
                 WHERE ar.HostAccountId = {hostAccountId}                     
                     AND ((@SearchTerm = '""""') OR contains((ap.Title, ap.Headline, ap.About), @SearchTerm))
                     AND ((@Neighborhood IS NULL) OR loc.Neighborhood IN (SELECT value FROM STRING_SPLIT(@Neighborhood, ',') WHERE RTRIM(value) <> ''))                    

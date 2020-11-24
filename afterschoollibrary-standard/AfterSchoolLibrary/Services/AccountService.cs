@@ -2153,42 +2153,23 @@ namespace AfterSchoolLibrary.Services
                         response.HomePageUrl = $"{Helpers.Utilities.BaseUrl()}/{row["AccountUniqueName"]}";
                         response.IsAccountNowEnrolling = account.IsNowEnrolling();
 
-                        //.. account profile    
-                        // ..TODO: get this from sql and not from enitites
-                        var profile = account.GetAccountProfile(msgs);
+                        //.. account profile  
+                        response.IsOpenDuringCovid = row["IsOpenDuringCovid"].IsNotEmpty() ?  Convert.ToBoolean(row["IsOpenDuringCovid"]) : false;
+                        response.IsELearningCenter = row["IsELearningCenter"].IsNotEmpty() ? Convert.ToBoolean(row["IsELearningCenter"]) : false;
+                        response.ProfileHeadline = row["Headline"].IsNotEmpty() ? row["Headline"].ToString().MaxChars(70, "... (more)") : "";
+                        response.IsRestrictByGrade = row["AgeStart"].IsEmpty();
+                        response.AgeStart = row["AgeStart"].IsNotEmpty() ? row["AgeStart"].ToString() : null;
+                        response.AgeEnd = row["AgeEnd"].IsNotEmpty() ? row["AgeEnd"].ToString() : null;
+                        response.GradeStart = row["GradeLevelStart"].IsNotEmpty() ? row["GradeLevelStart"].ToString() : null;
+                        response.GradeEnd = row["GradeLevelEnd"].IsNotEmpty() ? row["GradeLevelEnd"].ToString() : null;
 
-                        response.IsOpenDuringCovid = profile.IsOpenDuringCovid;
-                        response.IsELearningCenter = profile.IsELearningCenter;
-                        response.ProfileHeadline = profile.Headline.MaxChars(70, "... (more)");
-
-                        response.IsRestrictByGrade = profile.RestrictByGrade();
-                        response.GradeStart = profile.GetGradeLevelStart()?.Abbreviation;
-                        response.GradeEnd = profile.GetGradeLevelEnd()?.Abbreviation;
-                        response.AgeStart = profile.GetAgeStart()?.ToString();
-                        response.AgeEnd = profile.GetAgeEnd()?.ToString();
-
-                        //..location
-                        var location = profile.GetLocation(msgs);
-                        response.Location = location.FormatCityState(false);
-
-                        //.. ProfileHeaderImageUrl
-                        var headerImage = profile.GetHeaderImageUrl(msgs);                        
-                        var photos = profile.GetPhotos(msgs);
-
-                        if (headerImage.IsBlank() && location.IsNotEmpty())
+                        //..Location, ProfileHeaderImageUrl
+                        if (row["LocationId"].IsNotEmpty())
                         {
+                            var location = Location.Load(Convert.ToInt32(row["LocationId"]));
+                            response.Location = location.FormatCityState(false);
                             response.ProfileHeaderImageUrl = LocationService.GetGoogleMapsImageUrl(location, 1500, 600);
-                        } 
-                        else if (photos.Any() && headerImage.IsBlank())
-                        {
-                            var ah = Helpers.Utilities.GetNewAmazonHelper();
-                            response.ProfileHeaderImageUrl = ah.GetFileLink(photos.First().Value, true, null, true);
-                        } 
-                        else
-                        {
-                            response.ProfileHeaderImageUrl = headerImage;
                         }
-
                         
                         ListResponse.Add(response);
                     }
