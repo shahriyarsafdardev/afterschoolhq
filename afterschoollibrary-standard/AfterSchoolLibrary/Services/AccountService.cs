@@ -2136,25 +2136,7 @@ namespace AfterSchoolLibrary.Services
 
         public static List<MccoySearchResponse> SearchMccoyAccounts(this Account account, string hostAccountId, string search, string neighborhoods, string grades, string ages, string gender, string timing, string cost, string starting, string other, string specialNeeds, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var genderIds = "";
-            if (gender.IsNotBlank() && gender.Contains("maleonly"))
-                genderIds = "1,";            
-            if (gender.IsNotBlank() && gender.Contains("femaleonly"))
-                genderIds += "2,";
-
-            var isELearningCenter = "";
-            if (other.IsNotBlank() && other.Contains("e_learning"))
-                isELearningCenter = "1";
-
-            var isVirtualProgram = "";
-            if (other.IsNotBlank() && other.Contains("virtual_programming"))
-                isVirtualProgram = "1";
-
-            var isOpenDuringCovid = "";
-            if (other.IsNotBlank() && other.Contains("covid_protections"))
-                isOpenDuringCovid = "1";               
-
-            var accountDataTable = Account.SearchMccoyAccounts(hostAccountId, search, neighborhoods, grades, ages, genderIds, timing, cost, starting, isELearningCenter, isVirtualProgram, isOpenDuringCovid, specialNeeds, msgs: msgs);
+            var accountDataTable = Account.SearchMccoyAccounts(hostAccountId, search, neighborhoods, grades, ages, gender, timing, cost, starting, other, specialNeeds, msgs: msgs);
 
             if (accountDataTable.IsNotEmpty() && accountDataTable.Rows.Any())
             {

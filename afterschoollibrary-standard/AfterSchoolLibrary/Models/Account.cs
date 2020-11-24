@@ -1030,14 +1030,23 @@ namespace AfterSchoolLibrary.Models
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="hostAccountId">mccoy id</param>
         /// <param name="search">search would be string like m, which will be resulted into '"m*"'</param>
-        /// <param name="isELearningCenter">it can be empty string, 0 or 1. empty string will be sent as null and will not affect this filter on query</param>
+        /// <param name="neighborhoods"></param>
+        /// <param name="grades"></param>
+        /// <param name="ages"></param>
+        /// <param name="gender"></param>
+        /// <param name="timing"></param>
+        /// <param name="cost"></param>
+        /// <param name="starting"></param>
+        /// <param name="other"></param>
+        /// <param name="specialNeeds"></param>
         /// <param name="start"></param>
         /// <param name="length"></param>
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public static DataTable SearchMccoyAccounts(string hostAccountId, string search, string neighborhoods, string grades, string ages, string gender, string timing, string cost, string starting, string isELearningCenter, string isVirtualProgram, string isOpenDuringCovid, string specialNeeds, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static DataTable SearchMccoyAccounts(string hostAccountId, string search, string neighborhoods, string grades, string ages, string gender, string timing, string cost, string starting, string other, string specialNeeds, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -1084,14 +1093,14 @@ namespace AfterSchoolLibrary.Models
             if (starting.IsNotEmpty())
                 sql += $"SET @Starting = '1'";
 
-            if (isELearningCenter.IsNotEmpty())
-                sql += $"SET @IsELearningCenter = {isELearningCenter}" ;
+            if (other.IsNotBlank() && other.Contains("e_learning"))
+                sql += $"SET @IsELearningCenter = 1";
 
-            if (isVirtualProgram.IsNotEmpty())
-                sql += $"SET @IsVirtualProgram = {isVirtualProgram}";
+            if (other.IsNotBlank() && other.Contains("virtual_programming"))
+                sql += $"SET @IsVirtualProgram = 1";
 
-            if (isOpenDuringCovid.IsNotEmpty())
-                sql += $"SET @IsOpenDuringCovid = {isOpenDuringCovid}";
+            if (other.IsNotBlank() && other.Contains("covid_protections"))
+                sql += $"SET @IsOpenDuringCovid = 1";
 
             if (specialNeeds.IsNotEmpty())
                 sql += $"SET @SpecialNeeds = '{specialNeeds}'";
