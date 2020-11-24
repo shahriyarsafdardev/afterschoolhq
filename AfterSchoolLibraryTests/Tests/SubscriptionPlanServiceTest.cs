@@ -34,6 +34,7 @@ namespace AfterSchoolLibraryTests.Tests
                         true,
                         false,
                         false,
+                        false,
                         LoggedInUser.ID.Value,
                         msgs,
                         dc);
@@ -53,6 +54,7 @@ namespace AfterSchoolLibraryTests.Tests
                         35.ToDecimal(),
                         BillingPeriodType.Month,
                         true,
+                        false,
                         false,
                         false,
                         LoggedInUser.ID.Value,

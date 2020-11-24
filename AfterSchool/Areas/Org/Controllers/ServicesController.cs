@@ -41,21 +41,33 @@ namespace AfterSchool.Areas.Org.Controllers
         //}
 
         [HttpGet]
-        public ActionResult CalculateFinalPrice(string cost)
+        public ActionResult CalculateFinalPrice(string cost, string activityUid, string takenOutOfCost)
         {
             var msgs = new SystemMessages();
 
             if (!cost.IsNumber() || cost.ToDecimal() <= 0)
                 msgs.Add("Total cost must be a number greater than 0", MessageType.UserError);
 
+            if (activityUid.IsEmpty())
+                msgs.Add("Invalid activity", MessageType.UserError);
+
             if (msgs.HasNoErrors())
             {
-               var finalPrice = AfterSchoolLibrary.Billing.Platform.GetCostWithConvenienceFee(cost.ToDecimal(), SessionVariables.CurrentAccount);
+                var currentAccount = SessionVariables.CurrentAccount;
+                var activity = Activity.LoadByUid(activityUid.ToGuid(), currentAccount.ID.Value, msgs);
+                var calcObject = new FeeCalculationObject(
+                                    cost.ToDecimal(), 
+                                    currentAccount, 
+                                    activity, 
+                                    takenOutOfCost.IsBoolean() ? takenOutOfCost.ToBoolean() : new bool?());
+                var priceToParent = calcObject.GetCostWithConvenienceFee();
+                var amountToProvider = calcObject.GetAmountToProvider();
 
                 return Json(new
                 {
                     status = "ok",
-                    price = finalPrice,
+                    priceToParent = priceToParent,
+                    amountToProvider = amountToProvider,
                     messages = msgs
                 }, JsonRequestBehavior.AllowGet);
             }

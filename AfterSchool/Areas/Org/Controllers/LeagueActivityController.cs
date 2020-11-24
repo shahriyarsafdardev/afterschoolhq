@@ -1082,7 +1082,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var attendanceId = att.IsNumber() ? att.ToInteger() : new int?();
             var activity = Activity.LoadByUid(id.ToGuid());
 
-            var attendance = activity.GetOrCreateNewAttendance(attendanceId, SessionVariables.CurrentUser, msgs);
+            var attendance = activity.GetOrCreateNewAttendance(attendanceId, null, SessionVariables.CurrentUser, msgs);
 
             ViewBag.Messages = msgs;
             ViewBag.AttendanceRegistrants = attendance.GetAttendanceRegistrants();

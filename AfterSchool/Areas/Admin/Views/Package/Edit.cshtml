@@ -115,7 +115,7 @@
                     <div class="form-group">
                         <label class="col-sm-3 control-label">@type.ToString().SplitByUpperCase()</label>
                         <div class="col-sm-6">
-                            <input id="@type" type="number" class="form-control" name="@type" value="@value" min="0" step="0.1" required @readonlyAttr
+                            <input id="@type" type="number" class="form-control" name="@type" value="@value" min="0" step="0.01" required @readonlyAttr
                                    onfocus="this.select()"
                                    oninput="this.value = !!this.value && Math.abs(this.value) >= 0 ? Math.abs(this.value) : null"/>
                         </div>

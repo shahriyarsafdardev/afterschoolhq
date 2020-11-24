@@ -650,8 +650,8 @@ namespace AfterSchoolLibrary.Helpers
                 }
                 else
                 {
-                    cost = (checkoutObject.RegistrationCostNoFees + checkoutObject.GetRegistrationConvenienceFee(msgs, dc)).ToCurrency();
-                    ccFee = checkoutObject.GetRegistrationCreditCardFee(msgs, dc).ToCurrency();
+                    cost = checkoutObject.GetTotalCostToPurchaseTodayWithConvenienceFee(msgs, dc).ToCurrency();
+                    ccFee = checkoutObject.GetTotalCreditCardFeesToday(msgs, dc).ToCurrency();
 
                     additionalDetails = "registration fee";
                 }
@@ -896,7 +896,7 @@ namespace AfterSchoolLibrary.Helpers
                 receiptRows += ProcessTemplate(
                         EmailTemplates.Attendance_Charge_Confirmation_Rows,
                         attendanceModel,
-                        "Attendance_Charge_Confirmation_Rows-1.0",
+                        "Attendance_Charge_Confirmation_Rows-1.1",
                         msgs);
 
                 totalAttendanceCharge += totalCharge;
@@ -915,7 +915,7 @@ namespace AfterSchoolLibrary.Helpers
             var attendanceChargeTable = ProcessTemplate(
                 EmailTemplates.Attendance_Charge_Confirmation_Table,
                 attendanceChargeTableModel,
-                "Attendance_Charge_Confirmation_Table-1.0",
+                "Attendance_Charge_Confirmation_Table-1.1",
                 msgs);
 
             var model = new NameValueCollection()
@@ -927,14 +927,15 @@ namespace AfterSchoolLibrary.Helpers
                 { "RegistrationTable", attendanceChargeTable },
                 { "CustomMessage", customMessage },
                 { "RegistrationDetails", "Login to your account to view more details about this payment."},
-                { "ActivityName", activity.Name.ToProperCase() }
+                { "ActivityName", activity.Name.ToProperCase() },
+                { "SupportEmail", Email.AppSupportEmailAddress }
             };
 
             var subject = $"Attendance Charged for {activity.Name}";
             var body = ProcessTemplate(
                 EmailTemplates.Attendance_Charge_Confirmation,
                 model,
-                "Attendance_Charge_Confirmation_Table-1.0",
+                "Attendance_Charge_Confirmation-1.1",
                 msgs);
 
             // SEND EMAILS
@@ -951,7 +952,7 @@ namespace AfterSchoolLibrary.Helpers
             msgs.AddRange(mailMsgs);
         }
 
-        public static void SendPaymentConfirmation(CheckoutObject checkoutObject, string customMessage, WebUser loggedInUser, bool sendBcc, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void SendPaymentConfirmation(CheckoutObject checkoutObject, string customMessage, WebUser loggedInUser, bool sendBcc, SystemMessages msgs, bool isAttendanceCharge = false, DatabaseConnection dc = null)
         {
             msgs = msgs ?? new SystemMessages();
 
@@ -966,15 +967,22 @@ namespace AfterSchoolLibrary.Helpers
             var registration = checkoutObject.Registration;
             var totalCostWithFees = checkoutObject.GetStripeAmount(msgs, dc);
             var totalCost = totalCostWithFees - checkoutObject.PaymentTypeFeeOverrideAmount.Value;
-            var totalFees = checkoutObject.PaymentTypeFeeOverrideAmount.Value;
+            var totalCreditCardFees = checkoutObject.PaymentTypeFeeOverrideAmount.Value;
+            var quantity = checkoutObject.Quantity.HasValue ? checkoutObject.Quantity.Value.ToString() : "1";
+            var description = $"Payment to {billingAccount.Name}";
+
+            if (checkoutObject.Quantity.HasValue && isAttendanceCharge)
+            {
+                description = $"Payment to {billingAccount.Name} ({(totalCost / checkoutObject.Quantity.Value).ToCurrency()} per {checkoutObject.PostPayPlan.BillingPeriodTypeId.ToString().ToLower()})";
+            }
 
             var receiptRows = "";
 
             // add registration fee row
             var paymentModel = new NameValueCollection()
                                 {
-                                    { "Description", $"Payment to {billingAccount.Name}" },
-                                    { "Quantity",  "1"},
+                                    { "Description", description },
+                                    { "Quantity", quantity },
                                     { "Cost", totalCost.ToCurrency() },
                                     { "AdditionalDetails", "" }
                                 };
@@ -992,7 +1000,7 @@ namespace AfterSchoolLibrary.Helpers
                                             { "AmountDueOrPaid", "Amount Paid" },
                                             { "TotalCost", totalCostWithFees.ToCurrency() },
                                             { "BodyRows", receiptRows },
-                                            { "CreditCardFee", totalFees.ToCurrency() },
+                                            { "CreditCardFee", totalCreditCardFees.ToCurrency() },
                                         },
                                      "Registration_Confirmation_Table-1.0",
                                      msgs);

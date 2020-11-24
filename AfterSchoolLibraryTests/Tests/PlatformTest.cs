@@ -27,9 +27,9 @@ namespace AfterSchoolLibraryTests.Tests
             var accountOwner = WebUserFactory.Create(msgs, dc);
             var account = AccountFactory.Create(accountOwner, msgs, dc);
             var package = PackageFactory.Create(msgs, dc);
-            var accountPackage = AccountPackageFactory.Create(account, package, msgs, dc);
+            var calcObj = new FeeCalculationObject(registrationFee, account, msgs, dc);
 
-            Assert.Equal(expectedResult.ToDecimal(), Platform.GetFinalTotalCost(registrationFee, account));
+            Assert.Equal(expectedResult.ToDecimal(), calcObj.GetFinalTotalCost(PaymentType.CreditCard));
         }
 
         [Theory(DisplayName = "Get Total Checkout Cost without Credit Card ")]
@@ -44,8 +44,9 @@ namespace AfterSchoolLibraryTests.Tests
             var account = AccountFactory.Create(accountOwner, msgs, dc);
             var package = PackageFactory.Create(msgs, dc);
             var accountPackage = AccountPackageFactory.Create(account, package, msgs, dc);
+            var calcObj = new FeeCalculationObject(registrationFee, account, msgs, dc);
 
-            Assert.Equal(expectedResult.ToDecimal(), Platform.GetCostWithConvenienceFee(registrationFee, account));
+            Assert.Equal(expectedResult.ToDecimal(), calcObj.GetCostWithConvenienceFee());
         }
     }
 }

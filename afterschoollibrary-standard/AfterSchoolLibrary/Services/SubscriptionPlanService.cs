@@ -3,22 +3,24 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
 using System.Collections.Generic;
+using Amazon.S3.Model;
+using Twilio.TwiML.Voice;
 
 namespace AfterSchoolLibrary.Services
 {
     public static class SubscriptionPlanService
     {
-        public static SubscriptionPlan CreateNewSubscriptionPlan(Account planOwner, Activity activity, decimal costPerPeriod, BillingPeriodType billingPeriodType, bool doesAutoRenew, bool splitCostEvenly, bool regFeeAsDownPayment, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static SubscriptionPlan CreateNewSubscriptionPlan(Account planOwner, Activity activity, decimal costPerPeriod, BillingPeriodType billingPeriodType, bool doesAutoRenew, bool splitCostEvenly, bool regFeeAsDownPayment, bool isConvenienceFeeTakenOutOfCost, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return CreateNewSubscriptionPlan(planOwner, ParticipationObjectType.Activity, activity.ID.Value, costPerPeriod, billingPeriodType, doesAutoRenew, splitCostEvenly, regFeeAsDownPayment, loggedInUser?.ID.IfEmpty(0), msgs, dc);
+            return CreateNewSubscriptionPlan(planOwner, ParticipationObjectType.Activity, activity.ID.Value, costPerPeriod, billingPeriodType, doesAutoRenew, splitCostEvenly, regFeeAsDownPayment, isConvenienceFeeTakenOutOfCost, loggedInUser?.ID.IfEmpty(0), msgs, dc);
         }
 
         public static SubscriptionPlan CreateNewSubscriptionPlan(Account planOwner, ActivityGroup activityGroup, decimal costPerPeriod, BillingPeriodType billingPeriodType, bool doesAutoRenew, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return CreateNewSubscriptionPlan(planOwner, ParticipationObjectType.ActivityGroup, activityGroup.ID.Value, costPerPeriod, billingPeriodType, doesAutoRenew, false, false, loggedInUser?.ID.IfEmpty(0), msgs, dc);
+            return CreateNewSubscriptionPlan(planOwner, ParticipationObjectType.ActivityGroup, activityGroup.ID.Value, costPerPeriod, billingPeriodType, doesAutoRenew, false, false, false, loggedInUser?.ID.IfEmpty(0), msgs, dc);
         }
 
-        public static SubscriptionPlan CreateNewSubscriptionPlan(Account planOwner, ParticipationObjectType participationObjectType, int participationObjectId, decimal costPerPeriod, BillingPeriodType billingPeriodType, bool doesAutoRenew, bool splitCostEvenly, bool regFeeAsDownPayment, int? loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public static SubscriptionPlan CreateNewSubscriptionPlan(Account planOwner, ParticipationObjectType participationObjectType, int participationObjectId, decimal costPerPeriod, BillingPeriodType billingPeriodType, bool doesAutoRenew, bool splitCostEvenly, bool regFeeAsDownPayment, bool isConvenienceFeeTakenOutOfCost, int? loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -38,6 +40,7 @@ namespace AfterSchoolLibrary.Services
                 SplitCostEvenly = splitCostEvenly,
                 PlanTypeId = SubscriptionPlanType.Subscription,
                 RegFeeAsDownPayment = regFeeAsDownPayment,
+                IsConvenienceFeeTakenOutOfCost = isConvenienceFeeTakenOutOfCost,
             };
 
             msgs.AddRange(plan.SaveWithStripe(dc));
@@ -45,17 +48,22 @@ namespace AfterSchoolLibrary.Services
             return plan;
         }
 
+        public static SubscriptionPlan CreateNewPaymentPlan(Account planOwner, Activity activity, decimal costPerPeriod, BillingPeriodType billingPeriodType, int totalPeriods, bool isConvenienceFeeTakenOutOfCost, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return CreateNewPaymentPlan(planOwner, ParticipationObjectType.Activity, activity.ID.Value, costPerPeriod, billingPeriodType, totalPeriods, PlanPaymentStartType.WhenActivityStarts, isConvenienceFeeTakenOutOfCost, loggedInUser?.ID.IfEmpty(0), msgs, dc);
+        }
+
         public static SubscriptionPlan CreateNewPaymentPlan(Account planOwner, Activity activity, decimal costPerPeriod, BillingPeriodType billingPeriodType, int totalPeriods, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return CreateNewPaymentPlan(planOwner, ParticipationObjectType.Activity, activity.ID.Value, costPerPeriod, billingPeriodType, totalPeriods, PlanPaymentStartType.WhenActivityStarts, loggedInUser?.ID.IfEmpty(0), msgs, dc);
+            return CreateNewPaymentPlan(planOwner, ParticipationObjectType.Activity, activity.ID.Value, costPerPeriod, billingPeriodType, totalPeriods, PlanPaymentStartType.WhenActivityStarts, false, loggedInUser?.ID.IfEmpty(0), msgs, dc);
         }
 
         public static SubscriptionPlan CreateNewPaymentPlan(Account planOwner, ActivityGroup activityGroup, decimal costPerPeriod, BillingPeriodType billingPeriodType, int totalPeriods, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return CreateNewPaymentPlan(planOwner, ParticipationObjectType.ActivityGroup, activityGroup.ID.Value, costPerPeriod, billingPeriodType, totalPeriods, PlanPaymentStartType.WhenActivityStarts, loggedInUser?.ID.IfEmpty(0), msgs, dc);
+            return CreateNewPaymentPlan(planOwner, ParticipationObjectType.ActivityGroup, activityGroup.ID.Value, costPerPeriod, billingPeriodType, totalPeriods, PlanPaymentStartType.WhenActivityStarts, false, loggedInUser?.ID.IfEmpty(0), msgs, dc);
         }
 
-        public static SubscriptionPlan CreateNewPaymentPlan(Account planOwner, ParticipationObjectType participationObjectType, int participationObjectId, decimal costPerPeriod, BillingPeriodType billingPeriodType, int totalPeriods, PlanPaymentStartType paymentStartType, int? loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public static SubscriptionPlan CreateNewPaymentPlan(Account planOwner, ParticipationObjectType participationObjectType, int participationObjectId, decimal costPerPeriod, BillingPeriodType billingPeriodType, int totalPeriods, PlanPaymentStartType paymentStartType, bool isConvenienceFeeTakenOutOfCost, int? loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -73,7 +81,8 @@ namespace AfterSchoolLibrary.Services
                 ParticipationObjectTypeId = participationObjectType,
                 TotalPeriods = totalPeriods,
                 PlanTypeId = SubscriptionPlanType.PaymentPlan,
-                PaymentStartTypeId = paymentStartType
+                PaymentStartTypeId = paymentStartType,
+                IsConvenienceFeeTakenOutOfCost = isConvenienceFeeTakenOutOfCost,
             };
 
             msgs.AddRange(plan.SaveWithStripe(dc));
@@ -81,7 +90,7 @@ namespace AfterSchoolLibrary.Services
             return plan;
         }
 
-        public static SubscriptionPlan CreateNewPostPayPlan(Account planOwner, ParticipationObjectType participationObjectType, int participationObjectId, decimal costPerPeriod, BillingPeriodType billingPeriodType, int? loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public static SubscriptionPlan CreateNewPostPayPlan(Account planOwner, ParticipationObjectType participationObjectType, int participationObjectId, decimal costPerPeriod, BillingPeriodType billingPeriodType, bool isConvenienceFeeTakenOutOfCost, int? prepaidPeriods, int? loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -99,7 +108,9 @@ namespace AfterSchoolLibrary.Services
                 ParticipationObjectTypeId = participationObjectType,
                 TotalPeriods = null,
                 PlanTypeId = SubscriptionPlanType.PostPayPlan,
-                PaymentStartTypeId = PlanPaymentStartType.NotSet
+                PaymentStartTypeId = PlanPaymentStartType.NotSet,
+                IsConvenienceFeeTakenOutOfCost = isConvenienceFeeTakenOutOfCost,
+                NumberOfPeriodsPrePaid = prepaidPeriods,
             };
 
             msgs.AddRange(plan.Save(dc));
@@ -244,39 +255,32 @@ namespace AfterSchoolLibrary.Services
                    copy.LastModifiedBy = loggedInUserId;
                    amsgs.AddRange(copy.SaveWithStripe(adc));
                },
-               onSuccess: (SystemMessages smsgs) =>
-               {
-                   msgs.AddRange(smsgs);
-               },
-               onFailure: (SystemMessages fmsgs) =>
-               {
-                   msgs.AddRange(fmsgs);
-               },
-               onException: (SystemMessages emsgs) =>
-               {
-                   Helpers.Utilities.SystemErrorLog(emsgs);
-               },
+               onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+               onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+               onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
                dc: dc
            );
 
             return copy;
         }
 
-        private static SubscriptionPlan CopyFields(this SubscriptionPlan subscriptionPlan)
+        private static SubscriptionPlan CopyFields(this SubscriptionPlan plan)
         {
             return new SubscriptionPlan()
             {
-                ParticipationObjectTypeId = subscriptionPlan.ParticipationObjectTypeId,
-                PlanOwnerAccountId = subscriptionPlan.PlanOwnerAccountId,
-                CostPerPeriod = subscriptionPlan.CostPerPeriod,
-                BillingPeriodTypeId = subscriptionPlan.BillingPeriodTypeId,
-                DoesAutoRenew = subscriptionPlan.DoesAutoRenew,
-                IsActive = subscriptionPlan.IsActive,
-                PlanTypeId = subscriptionPlan.PlanTypeId,
-                TotalPeriods = subscriptionPlan.TotalPeriods,
-                PaymentStartTypeId = subscriptionPlan.PaymentStartTypeId,
-                SplitCostEvenly = subscriptionPlan.SplitCostEvenly,
-                RegFeeAsDownPayment = subscriptionPlan.RegFeeAsDownPayment,
+                ParticipationObjectTypeId = plan.ParticipationObjectTypeId,
+                PlanOwnerAccountId = plan.PlanOwnerAccountId,
+                CostPerPeriod = plan.CostPerPeriod,
+                BillingPeriodTypeId = plan.BillingPeriodTypeId,
+                DoesAutoRenew = plan.DoesAutoRenew,
+                IsActive = plan.IsActive,
+                PlanTypeId = plan.PlanTypeId,
+                TotalPeriods = plan.TotalPeriods,
+                PaymentStartTypeId = plan.PaymentStartTypeId,
+                SplitCostEvenly = plan.SplitCostEvenly,
+                RegFeeAsDownPayment = plan.RegFeeAsDownPayment,
+                IsConvenienceFeeTakenOutOfCost = plan.IsConvenienceFeeTakenOutOfCost,
+                NumberOfPeriodsPrePaid = plan.NumberOfPeriodsPrePaid,
             };
         }
 
@@ -334,9 +338,8 @@ namespace AfterSchoolLibrary.Services
                 ownerAccount = subscriptionPlan.GetAccount(msgs, dc);
 
             if (subscriptionPlan.CostPerPeriod.HasValue)
-                return subscriptionPlan.CostPerPeriod.Value 
-                    + subscriptionPlan.GetCreditCardFee(ownerAccount, msgs, dc)
-                    + subscriptionPlan.GetConvenienceFee(ownerAccount, msgs, dc);
+                return subscriptionPlan.GetTotalCostWithConvenienceFee(ownerAccount, msgs, dc)
+                    + subscriptionPlan.GetCreditCardFee(ownerAccount, msgs, dc);
 
             return 0;
         }
@@ -348,7 +351,7 @@ namespace AfterSchoolLibrary.Services
 
             if (subscriptionPlan.CostPerPeriod.HasValue)
                 return subscriptionPlan.GetCostPerPeriodPerPerson(msgs, dc)
-                    + subscriptionPlan.GetConvenienceFee(ownerAccount, msgs, dc);
+                            + (subscriptionPlan.IsConvenienceFeeTakenOutOfCost ? 0 : subscriptionPlan.GetConvenienceFee(ownerAccount, msgs, dc));
 
             return 0;
         }
@@ -396,7 +399,12 @@ namespace AfterSchoolLibrary.Services
                 ownerAccount = subscriptionPlan.GetAccount(msgs, dc);
 
             if (subscriptionPlan.CostPerPeriod.HasValue)
-                return Billing.Platform.GetCreditCardFee(subscriptionPlan.GetCostPerPeriodPerPerson(msgs, dc), ownerAccount);
+                return new FeeCalculationObject(
+                                subscriptionPlan.GetCostPerPeriodPerPerson(msgs, dc),
+                                ownerAccount,
+                                msgs,
+                                dc)
+                            .GetCreditCardFee();
 
             return 0;
         }
@@ -407,7 +415,12 @@ namespace AfterSchoolLibrary.Services
                 ownerAccount = subscriptionPlan.GetAccount(msgs, dc);
 
             if (subscriptionPlan.CostPerPeriod.HasValue)
-                return Billing.Platform.GetConvenienceFee(subscriptionPlan.GetCostPerPeriodPerPerson(msgs, dc));
+                return new FeeCalculationObject(
+                                subscriptionPlan.GetCostPerPeriodPerPerson(msgs, dc),
+                                ownerAccount,
+                                msgs,
+                                dc)
+                            .GetConvenienceFee();
 
             return 0;
         }
@@ -418,7 +431,12 @@ namespace AfterSchoolLibrary.Services
                 ownerAccount = subscriptionPlan.GetAccount(msgs, dc);
 
             if (subscriptionPlan.CostPerPeriod.HasValue)
-                return Billing.Platform.GetConvenienceFee(subscriptionPlan.CostPerPeriod.Value / seats);
+                return new FeeCalculationObject(
+                                subscriptionPlan.CostPerPeriod.Value / seats,
+                                ownerAccount,
+                                msgs,
+                                dc)
+                            .GetConvenienceFee();
 
             return 0;
         }
@@ -466,6 +484,48 @@ namespace AfterSchoolLibrary.Services
             }
 
             return plan.CostPerPeriod.Value;
+        }
+
+        public static List<SubscriptionPlanPrePayment> CreatePrePayments(this SubscriptionPlan plan, Account payerAccount, ParticipationObject participationObject, Transaction transaction, Registration registration, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            List<SubscriptionPlanPrePayment> list = null;
+
+            if (plan.PlanTypeId == SubscriptionPlanType.PostPayPlan && plan.NumberOfPeriodsPrePaid.IsPositive())
+            {
+                list = new List<SubscriptionPlanPrePayment>();
+
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        for (var i = 0; i < plan.NumberOfPeriodsPrePaid.Value; i++)
+                        {
+                            var prePayment = new SubscriptionPlanPrePayment()
+                            {
+                                PayerAccountId = payerAccount.ID,
+                                TransactionId = transaction.ID,
+                                ParticipationObjectId = participationObject.ObjectID,
+                                ParticipationObjectTypeId = participationObject.ObjectType,
+                                RegistrationId = registration.ID,
+                                CreateDate = DateTime.UtcNow,
+                                CreatedBy = loggedInUser?.ID,
+                            };
+
+                            amsgs.AddRange(prePayment.Save(adc));
+
+                            if (amsgs.HasNoErrors())
+                                list.Add(prePayment);
+                        }
+                    },
+                   onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                   onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                   onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
+                   dc: dc
+                );
+
+            }
+
+            return list;
         }
     }
 }

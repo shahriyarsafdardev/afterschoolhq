@@ -26,18 +26,21 @@
                     <div class="col-md-10">
                         <select name="activityinstance" id="activityinstance" class="form-control">
                             <option value="">Select...</option>
-                            @foreach(var instance in schedule.GetInSessionInstances().DistinctBy(instance => instance.ID))
+                            @foreach (var instance in schedule.GetInSessionInstances().DistinctBy(instance => instance.ID))
                             {
-                                <option value="@instance.ID" @(Model.ActivityInstanceId == instance.ID ? " selected=\"selected\" " : "")>
-                                    @instance.StartDateTime.ToShortTimeString(), @instance.StartDateTime.Value.ToLongDateString()
-                                </option>
+                                if (instance.StartDateTime <= account.ConvertToAccountTimeZone(DateTime.UtcNow))
+                                {
+                                    <option value="@instance.ID" @(Model.ActivityInstanceId == instance.ID ? " selected=\"selected\" " : "")>
+                                        @instance.StartDateTime.ToShortTimeString(), @instance.StartDateTime.Value.ToLongDateString()
+                                    </option>
+                                }
                             }
                         </select>
                         @*
-                        <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
-                            <input size="16" type="text" class="form-control" id="date" name="date" onfocus="this.select()" required value="@account.ConvertToAccountTimeZone(Model.Date.Value).ToShortDateString()" />
-                            <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
-                        </div>
+                            <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
+                                <input size="16" type="text" class="form-control" id="date" name="date" onfocus="this.select()" required value="@account.ConvertToAccountTimeZone(Model.Date.Value).ToShortDateString()" />
+                                <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
+                            </div>
                         *@
                     </div>
                 </div>
@@ -52,7 +55,7 @@
                         </tr>
 
                         @foreach (var attendanceRegistrant in attendanceRegistrants)
-                        {                      
+                        {
                             <tr>
                                 <td>@attendanceRegistrant.RegistrantName</td>
                                 <td>
@@ -64,8 +67,9 @@
                                             new ViewDataDictionary()
                                             {
                                                 { "checkboxname", "present-" + attendanceRegistrant.ID },
-                                                { "checkboxid", "present-" + attendanceRegistrant.ID }
-                                            });
+                                                { "checkboxid", "present-" + attendanceRegistrant.ID },
+                                                { "disabled", attendanceRegistrant.TransactionId.IsNotEmpty().ToString() }
+                        });
                                     }
                                     else
                                     {
@@ -87,7 +91,7 @@
             <div class="form-group">
                 <label class="col-sm-2 control-label"></label>
                 <div class="col-sm-10">
-                    <button type="submit" class="btn btn-primary btn-lg btn-block pull-right" @(attendanceRegistrants.Count == 0 ? "disabled=\"disabled\"": "")><i class="s7-diskette"></i> Save</button>
+                    <button type="submit" class="btn btn-primary btn-lg btn-block pull-right" @(attendanceRegistrants.Count == 0 ? "disabled=\"disabled\"" : "")><i class="s7-diskette"></i> Save</button>
                 </div>
             </div>
 
@@ -96,11 +100,21 @@
 </form>
 
 <script>
+
     function checkAll() {
         $('input[id^="present-"]').prop('checked', true);
     }
     function uncheckAll() {
         $('input[id^="present-"]').prop('checked', false);
     }
+</script>
+
+
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('#activityinstance').change(function () {
+            location.href = '@Url.Action("trackattendance", "activity")?actinst=' + $(this).val();
+        });
+    });
 </script>
 

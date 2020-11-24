@@ -685,7 +685,10 @@ namespace AfterSchoolLibrary.Services
                 InstructorId = activity.InstructorId,
                 IsInviteOnly = activity.IsInviteOnly,
                 ActivityLocationTypeId = activity.ActivityLocationTypeId,
-                MinSeatsRequired = activity.MinSeatsRequired,                
+                MinSeatsRequired = activity.MinSeatsRequired,
+                HidePreciseLocation = activity.HidePreciseLocation,
+                InterestFormId = activity.InterestFormId,
+                IsConvenienceFeeTakenOutOfCost = activity.IsConvenienceFeeTakenOutOfCost,
             };
         }
 
@@ -844,6 +847,11 @@ namespace AfterSchoolLibrary.Services
             var splitcostevenly = values.GetValueOrDefault("splitcostevenly");
             var regfeedownpayment = values.GetValueOrDefault("regfeedownpayment");
             var hidepreciselocation = values.GetValueOrDefault("hidepreciselocation");
+            var isparentpricecost = values.GetValueOrDefault("isparentpricecost");
+            var isparentpricepostpay = values.GetValueOrDefault("isparentpricepostpay");
+            var isparentpricepaymentplan = values.GetValueOrDefault("isparentpricepaymentplan");
+            var isparentpricesubscription = values.GetValueOrDefault("isparentpricesubscription");
+            var prepaidperiodspostpay = values.GetValueOrDefault("prepaidperiodspostpay");
 
             var activityType = ActivityType.NotSet;
 
@@ -1047,6 +1055,9 @@ namespace AfterSchoolLibrary.Services
             if (hidepreciselocation.IsNotEmpty() && hidepreciselocation.ToString().IsBoolean())
                 activity.HidePreciseLocation = hidepreciselocation.ToString().ToBoolean();
 
+            if (isparentpricecost.IsNotEmpty() && isparentpricecost.ToString().IsBoolean())
+                activity.IsConvenienceFeeTakenOutOfCost = isparentpricecost.ToString().ToBoolean();
+
             if (msgs.HasNoErrors())
             {
                 Database.ExecuteTransaction(
@@ -1210,6 +1221,7 @@ namespace AfterSchoolLibrary.Services
                                 subscriptionplanperiod.IfEmpty(""),
                                 splitcostevenly.IfEmpty(""),
                                 regfeedownpayment.IfEmpty(""),
+                                isparentpricesubscription.IfEmpty("0"),
                                 loggedInUserId,
                                 adc
                             ));
@@ -1223,16 +1235,19 @@ namespace AfterSchoolLibrary.Services
                                 paymentplanperiod.IfEmpty(""),
                                 paymentplanperiodnumber.IfEmpty(""),
                                 paymentplanpaymentstarttype.IfEmpty(""),
+                                isparentpricepaymentplan.IfEmpty("0"),
                                 loggedInUserId,
                                 adc
                             ));
 
                         //setup PaymentPlan
-                        if (amsgs.HasNoErrors() && haspaymentplan != null && haspaymentplan.ToString().IsBoolean())
+                        if (amsgs.HasNoErrors() && haspostpayplan != null && haspostpayplan.ToString().IsBoolean())
                             amsgs.AddRange(activity.SetupPostPayPlan(
                                 account,
                                 haspostpayplan.IfEmpty(""),
                                 postpaycost.IfEmpty(""),
+                                isparentpricepostpay.IfEmpty("0"),
+                                prepaidperiodspostpay.IfEmpty(""),
                                 loggedInUserId,
                                 adc
                             ));
@@ -1334,18 +1349,20 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
-        private static SystemMessages SetupSubscriptionPlan(this Activity activity, Account account, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string splitcostevenly, string regfeedownpayment, int loggedInUserId, DatabaseConnection dc = null)
+        private static SystemMessages SetupSubscriptionPlan(this Activity activity, Account account, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string splitcostevenly, string regfeedownpayment, string isparentpricesubscription, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
             var hasStripeChanges = true;
+            var isParentPrice = isparentpricesubscription.ToBoolean();
 
             // first: desactivate the current plan if there are any changes
             if (activity.HasSubscriptionPlan(msgs, dc))
             {
                 var plan = activity.GetSubscriptionPlan(msgs, dc);
 
-                hasStripeChanges = plan.CostPerPeriod.Value != subscriptionplancost.ToDecimal() || 
-                                    plan.BillingPeriodTypeId != (BillingPeriodType)subscriptionplanperiod.ToInteger();
+                hasStripeChanges = plan.CostPerPeriod.Value != subscriptionplancost.ToDecimal() ||
+                                    plan.BillingPeriodTypeId != (BillingPeriodType)subscriptionplanperiod.ToInteger() ||
+                                    plan.IsConvenienceFeeTakenOutOfCost != isParentPrice;
 
                 // if has stripe changes or subscription option has been turned off
                 if (hasStripeChanges || !hassubscriptionplan.ToBoolean())
@@ -1369,6 +1386,7 @@ namespace AfterSchoolLibrary.Services
                     doesAutoRenew: true,
                     splitCostEvenly: splitcostevenly.ToBoolean(),
                     regFeeAsDownPayment: regfeedownpayment.ToBoolean(),
+                    isConvenienceFeeTakenOutOfCost: isParentPrice,
                     loggedInUserId: loggedInUserId,
                     msgs: msgs,
                     dc: dc);
@@ -1376,11 +1394,12 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
-        private static SystemMessages SetupPaymentPlan(this Activity activity, Account account, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, string paymentplanpaymentstarttype, int loggedInUserId, DatabaseConnection dc = null)
+        private static SystemMessages SetupPaymentPlan(this Activity activity, Account account, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, string paymentplanpaymentstarttype, string isparentpricepaymentplan, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
             var hasChanges = true;
             var planStartType = paymentplanpaymentstarttype.ToInteger().ToEnum<PlanPaymentStartType>();
+            var isParentPrice = isparentpricepaymentplan.ToBoolean();
 
             // first: desactivate the current plan if there are any changes
             if (activity.HasPaymentPlan(msgs, dc))
@@ -1390,7 +1409,8 @@ namespace AfterSchoolLibrary.Services
                 hasChanges = plan.CostPerPeriod.Value != paymentplancost.ToDecimal() || 
                             plan.BillingPeriodTypeId != (BillingPeriodType)paymentplanperiod.ToInteger() || 
                             plan.TotalPeriods.Value != paymentplanperiodnumber.ToInteger() ||
-                            plan.PaymentStartTypeId != planStartType;
+                            plan.PaymentStartTypeId != planStartType || 
+                            isParentPrice != plan.IsConvenienceFeeTakenOutOfCost; ;
 
                 if (hasChanges || !haspaymentplan.ToBoolean())
                     msgs.AddRange(plan.Deactivate(loggedInUserId, dc));
@@ -1406,6 +1426,7 @@ namespace AfterSchoolLibrary.Services
                     (BillingPeriodType)paymentplanperiod.ToInteger(),
                     paymentplanperiodnumber.ToInteger(),
                     planStartType,
+                    isParentPrice,
                     loggedInUserId,
                     msgs,
                     dc);
@@ -1413,17 +1434,21 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
-        private static SystemMessages SetupPostPayPlan(this Activity activity, Account account, string haspostpayplan, string postpaycost, int loggedInUserId, DatabaseConnection dc = null)
+        private static SystemMessages SetupPostPayPlan(this Activity activity, Account account, string haspostpayplan, string postpaycost, string isparentpricepostpay, string prepaidperiodspostpay, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
             var hasChanges = true;
+            var isParentPrice = isparentpricepostpay.ToBoolean();
+            var prepaidPeriods = prepaidperiodspostpay.IsNumber() ? prepaidperiodspostpay.ToInteger() : new int?();
 
             // first: desactivate the current plan if there are any changes
             if (activity.HasPostPayPlan(msgs, dc))
             {
                 var plan = activity.GetPostPayPlan(msgs, dc);
 
-                hasChanges = plan.CostPerPeriod.Value != postpaycost.ToDecimal();
+                hasChanges = plan.CostPerPeriod.Value != postpaycost.ToDecimal() || 
+                            isParentPrice != plan.IsConvenienceFeeTakenOutOfCost ||
+                            prepaidPeriods != plan.NumberOfPeriodsPrePaid;
 
                 // if has stripe changes or subscription option has been turned off
                 if (hasChanges || !haspostpayplan.ToBoolean())
@@ -1438,6 +1463,8 @@ namespace AfterSchoolLibrary.Services
                     participationObjectId: activity.ID.Value,
                     costPerPeriod: postpaycost.ToDecimal(),
                     billingPeriodType: BillingPeriodType.Day,
+                    isConvenienceFeeTakenOutOfCost: isParentPrice,
+                    prepaidPeriods: prepaidPeriods,
                     loggedInUserId: loggedInUserId,
                     msgs: msgs,
                     dc: dc);
@@ -1837,15 +1864,71 @@ namespace AfterSchoolLibrary.Services
             return Models.Match.LoadByTeamId(activity.ID.Value, msgs, dc).IsEmpty();
         }
 
-        public static Attendance GetOrCreateNewAttendance(this Activity activity, int? attendanceId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Attendance GetOrCreateNewAttendance(this Activity activity, int? attendanceId, int? activityInstanceId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (!attendanceId.HasValue)
-                return activity.CreateNewAttendance(loggedInUser, msgs, dc);
+            // get attendance by activityInstanceId if it exists
+            if (activityInstanceId.HasValue)
+            {
+                var activityInstance = ActivityInstance.Load(activityInstanceId.Value, msgs, dc);
+                if (activityInstance?.ActivityScheduleId != activity.ActivityScheduleId)
+                {
+                    msgs.Add("Invalid record error", MessageType.UserError);
+                    return null;
+                }
 
+                var attendance = activityInstance.GetAttendance(msgs, dc);
+                if (attendance.IsNotEmpty())
+                    return attendance;
+            }
+
+            // check if most recent activityinstance has an attendance
+            var closestActivityInstance = activity.GetClosestPastActivityInstanceToDate(DateTime.UtcNow, msgs, dc);            
+            if (closestActivityInstance.IsEmpty())
+                return null;
+
+            var closestActivityInstanceAttendance = Attendance.LoadByActivityInstanceId(closestActivityInstance.ID.Value, msgs, dc).FirstOrDefault();
+
+            if (closestActivityInstanceAttendance.IsNotEmpty() && !activityInstanceId.HasValue)
+                return closestActivityInstanceAttendance;
+
+            // otherwise create a new attendance if there is no attendance id
+            if (!attendanceId.HasValue)
+                return activity.CreateNewAttendance(activityInstanceId.IsEmpty() ? closestActivityInstance.ID.Value : activityInstanceId, loggedInUser, msgs, dc);
+
+            // otherwise return the attendance with given id
             return Attendance.Load(attendanceId.Value, msgs, dc);
         }
 
-        public static Attendance CreateNewAttendance(this Activity activity, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static ActivityInstance GetClosestPastActivityInstanceToDate(this Activity activity, DateTime date, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var instances = activity
+                .GetSchedule(msgs: msgs, dc: dc)
+                .GetInstances(msgs: msgs, dc: dc);
+
+            var account = activity.GetAccount(msgs, dc);
+            var dateInTimeZone = account.ConvertToAccountTimeZone(date);
+            var nowInTimeZone = account.ConvertToAccountTimeZone(DateTime.UtcNow);
+            var closestPastDate = instances
+                .Select(y => y.StartDateTime.Value)
+                .ClosestPastDate(dateInTimeZone, nowInTimeZone);
+
+            return instances.Where(x => x.StartDateTime.Value == closestPastDate).First();
+        }
+
+        public static ActivityInstance GetClosestActivityInstanceToDate(this Activity activity, DateTime date, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var instances = activity
+                .GetSchedule(msgs: msgs, dc: dc)
+                .GetInstances(msgs: msgs, dc: dc);
+
+            var closestDate = instances
+                .Select(y => y.StartDateTime.Value)
+                .ClosestDate(activity.GetAccount(msgs, dc).ConvertToAccountTimeZone(date));
+
+            return instances.Where(x => x.StartDateTime.Value == closestDate).First();
+        }
+
+        public static Attendance CreateNewAttendance(this Activity activity, int? activityInstanceId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             //create attendance records for this date and mark as absent by default (even if temporary)
             var attendance = new Attendance();
@@ -1854,8 +1937,11 @@ namespace AfterSchoolLibrary.Services
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
+                    ActivityInstance activityInstance = null;
+                    if (activityInstanceId.HasValue)
+                        activityInstance = ActivityInstance.Load(activityInstanceId.Value, amsgs, adc);
                     activity.ClearEmptyAttendances(amsgs, adc);
-                    attendance.InitAttendance(activity, loggedInUser, amsgs, adc);
+                    attendance.InitAttendance(activity, loggedInUser,activityInstance, amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {
@@ -2070,6 +2156,11 @@ namespace AfterSchoolLibrary.Services
             return Attendance.LoadByActivityId(activity.ID.Value, msgs: msgs, dc: dc);
         }
 
+        public static List<Attendance> GetAttendance(this Activity activity, string orderByParam, OrderByDirectionEnum direction, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            return Attendance.LoadByActivityId(activity.ID.Value, orderByParam, direction, start, length, msgs, dc);
+        }
+
         public static List<Attendance> GetCompletedAttendance(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Attendance.LoadByActivityIdByIsCompleted(activity.ID.Value, true, msgs: msgs, dc: dc);
@@ -2088,6 +2179,11 @@ namespace AfterSchoolLibrary.Services
         public static List<Attendance> GetAttendanceByDate(this Activity activity, DateTime date, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Attendance.LoadByActivityIdByDate(activity.ID.Value, date, msgs: msgs, dc: dc);
+        }
+
+        public static int GetTotalAttendanceCount(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Attendance.GetCount(new Hashtable() { { "ActivityId", activity.ID.Value } }, msgs, dc);
         }
 
         public static List<ActivityRegistrationPeriod> GetActivityRegistrationPeriods(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
