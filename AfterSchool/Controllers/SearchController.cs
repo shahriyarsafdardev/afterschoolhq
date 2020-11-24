@@ -1,22 +1,15 @@
-﻿using AfterSchool.Models;
-using AfterSchoolLibrary.Models;
+﻿using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
-using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 
 namespace AfterSchool.Controllers
 {
     public class SearchController : Controller
     {
-        // ..TODO: this should be off mccoy and we have to make this dynamic. ask darye once
-        private static string MccoyHostAccountId = "3106";
-        private static List<GradeLevel> ListGrades = GradeLevel.Load();
-
         // GET: Search
         public ActionResult Index(string city, string state, string neighborhoods, string covid, string elc)
         {
@@ -49,77 +42,6 @@ namespace AfterSchool.Controllers
             ViewBag.State = state;
 
             return View(providers.Shuffle().ToList());
-        }
-
-        public ActionResult Mccoy()
-        {            
-            var msgs = new SystemMessages();
-            var neighborhoodList = Location.LoadMccoyNeighborhoods(hostAccountId: MccoyHostAccountId, msgs: msgs)
-                                   .Where(x => x.IsNotEmpty())
-                                   .ToList();            
-
-            ViewBag.Messages = msgs;
-            ViewBag.Neighborhoods = neighborhoodList;
-            ViewBag.Grades = ListGrades;
-
-            return View("~/Views/mccoy/Index.cshtml");
-        }
-
-        [HttpPost]
-        public JsonResult GetMccoySearch(string search, string neighborhoods, string grades, string ages, string gender, string timing, string cost, string starting, string other, string special)
-        {
-            var msgs = new SystemMessages();
-            var currentAccount = SessionVariables.CurrentAccount;
-
-            var gradeIds = "";
-            if (grades.IsNotEmpty())
-            {
-                var lstGrades = grades.Split(',');
-                foreach (var item in lstGrades)
-                {
-                    var grade = ListGrades.FirstOrDefault(m => m.Name.ToLower().Replace(" ", "_") == item);
-
-                    if (grade.IsNotEmpty())
-                        gradeIds += $"{grade.ID},";
-                }
-            }
-
-            var ageIds = "";
-            if (ages.IsNotEmpty())
-            {
-                var lstAges = ages.Split(',');
-                foreach (var item in lstAges)
-                {
-                    if (item.Contains('_'))
-                    {
-                        var age = item.Split('_');
-
-                        if (age.IsNotEmpty())
-                        {
-                            var ageStart = age[0];
-                            var ageEnd = age[1];
-
-                            if (ageStart.IsNotEmpty() && ageEnd.IsNotEmpty())
-                            {
-                                for (int i = ageStart.ToInteger(); i <= ageEnd.ToInteger(); i++)
-                                {
-                                    ageIds += $"{i},";
-                                }
-                            }                            
-                        }
-                    }
-                    
-                }
-            }
-
-            var searchedAccounts = AccountService.SearchMccoyAccounts(currentAccount, MccoyHostAccountId, search, neighborhoods, gradeIds, ageIds, gender, timing, cost, starting, other, special, msgs: msgs);
-
-            if (searchedAccounts.IsNotEmpty() && searchedAccounts.Any())
-            {
-                return Json(new { success = true, status = "ok", data = searchedAccounts }, JsonRequestBehavior.AllowGet);
-            }
-
-            return Json(new { success = false, status = "error", data = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
         }
     }
 }

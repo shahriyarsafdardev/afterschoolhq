@@ -345,7 +345,7 @@
         function loadAccounts(search, neighborhoods, grades, ages, gender, timing, cost, starting, other, special) {
             showLoader();
 
-            var url = '@Url.Action("GetMccoySearch", "Search", new { Area = "" })';
+            var url = '@Url.Action("GetMccoySearch", "MccoyDirectory", new { Area = "" })';
             $.ajax({
                 type: "POST",
                 url: url,
