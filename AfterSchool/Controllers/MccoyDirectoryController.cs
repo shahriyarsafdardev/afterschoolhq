@@ -18,9 +18,18 @@ namespace AfterSchool.Controllers
         public MccoyDirectoryController()
         {
             var mcCoyCodeToShare = ConfigurationManager.AppSettings["MccoyInviteCodeToShare"];
+
+            SystemMessages emsgs = new SystemMessages();
+            emsgs.Add(new SystemMessage() { Text = mcCoyCodeToShare, MessageType = MessageType.UserError });
+            AfterSchoolLibrary.Helpers.Utilities.SystemLog(emsgs);
+
             if (mcCoyCodeToShare.IsNotEmpty() && mcCoyCodeToShare.IsGuid())
             {
                 var mccoyAccount = Account.LoadByInviteCodeToShare(new Guid(mcCoyCodeToShare));
+
+                SystemMessages emsgs2 = new SystemMessages();
+                emsgs2.Add(new SystemMessage() { Text = mccoyAccount.ID.ToString(), MessageType = MessageType.UserError });
+                AfterSchoolLibrary.Helpers.Utilities.SystemLog(emsgs2);
 
                 if (mccoyAccount.IsNotEmpty())
                     MccoyHostAccountId = mccoyAccount.ID.ToString();

@@ -95,6 +95,12 @@ namespace AfterSchoolLibrary.Helpers
             Rollbar.RollbarLocator.RollbarInstance.Error(msgs.RenderMessageList(MessageOutputType.Text));
         }
 
+        public static void SystemLog(SystemMessages msgs)
+        {
+            Rollbar.RollbarLocator.RollbarInstance.Configure(new Rollbar.RollbarConfig(RollbarAccessToken) { Environment = GetRollbarEnvironment() });
+            Rollbar.RollbarLocator.RollbarInstance.Info(msgs.RenderMessageList(MessageOutputType.Text));
+        }
+
         public static string RollbarAccessToken { get { return ConfigurationManager.AppSettings["Rollbar.AccessToken"]; } }
 
         public static string GetRollbarEnvironment()
