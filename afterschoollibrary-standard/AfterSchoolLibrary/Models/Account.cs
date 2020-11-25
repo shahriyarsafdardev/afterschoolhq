@@ -1187,10 +1187,6 @@ namespace AfterSchoolLibrary.Models
 
             sql += $@" Order BY a.Name ASC";
 
-            SystemMessages emsgs = new SystemMessages();
-            emsgs.Add(new SystemMessage() { Text = sql, MessageType = MessageType.UserError });
-            AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs);
-
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
 
