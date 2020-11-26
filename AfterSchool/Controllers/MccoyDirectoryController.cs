@@ -91,9 +91,9 @@ namespace AfterSchool.Controllers
             }
 
             var genderIds = "";
-            if (gender.IsNotBlank() && gender.Contains("maleonly"))
+            if (gender.IsNotBlank() && gender == GenderRestrictionType.MaleOnly.ToString().ToLower())
                 genderIds = "1,";
-            if (gender.IsNotBlank() && gender.Contains("femaleonly"))
+            if (gender.IsNotBlank() && gender == GenderRestrictionType.FemaleOnly.ToString().ToLower())
                 genderIds += "2,";
 
             var searchedAccounts = AccountService.SearchMccoyAccounts(currentAccount, MccoyHostAccountId, search, neighborhoods, gradeIds, ageIds, genderIds, timing, cost, starting, other, special, msgs: msgs);
