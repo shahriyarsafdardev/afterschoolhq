@@ -51,12 +51,10 @@
     font-size: 11px;
 }
 
-.reg-header-logo-mccoy > img {
-    display: block;
-    margin: auto;
-    margin-top: 25px;
+.mccoy-header-logo > img {
     width: 250px;
     max-width: 400px;
+    display: block;
 }
 
 .mccoy-has-search .form-control-feedback {
@@ -68,6 +66,7 @@
 .mccoy-has-search .form-control {
     padding-right: 12px;
     padding-left: 34px;
+    height: 38px !important;
 }
 
 .mccoy-filter-header {
@@ -86,3 +85,13 @@
     border-top: 1px solid steelblue;
     display: none;
 }
+
+.join-mccoy-btn {
+    height: 38px;
+}
+
+.mccoy-youth {
+    float: left;
+    font-size: 22px;
+}
+
