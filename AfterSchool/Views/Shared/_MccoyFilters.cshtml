@@ -80,7 +80,7 @@
         if (item != GenderRestrictionType.None)
         {
             <div class="am-checkbox" style="padding: 3px 0;">
-                <input id="chk-gender-@((int)item)" name="gender" value="@(item.ToString().ToLower().Replace(" ", "_"))" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+                <input id="chk-gender-@((int)item)" name="gender" value="@(item.ToString().ToLower())" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
                 <label for="chk-gender-@((int)item)" class="margin-h-10 mobile-padding"> @item.ToString().SplitByUpperCase() </label>
             </div>
         }

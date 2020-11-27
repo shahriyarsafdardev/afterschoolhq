@@ -1130,7 +1130,12 @@ namespace AfterSchoolLibrary.Models
 				LEFT JOIN GradeLevel glStart on glStart.ID = ap.GradeLevelStart
 				LEFT JOIN GradeLevel glEnd on glEnd.ID = ap.GradeLevelEnd
                 WHERE ar.HostAccountId = {hostAccountId}                     
-                    AND ((@SearchTerm = '""""') OR contains((ap.Title, ap.Headline, ap.About), @SearchTerm))
+                    AND (
+						    (@SearchTerm = '""""') OR 
+						    CONTAINS((ap.Title, ap.Headline, ap.About), @SearchTerm)  OR 
+						    CONTAINS((property.Value), @SearchTerm) OR 
+                            CONTAINS((loc.Address1, loc.Address2, loc.City, loc.State, loc.PostalCode, loc.Name, loc.StreetNumber, loc.StreetName, loc.Neighborhood, loc.County), @SearchTerm)
+					    )
                     AND ((@Neighborhood IS NULL) OR loc.Neighborhood IN (SELECT value FROM STRING_SPLIT(@Neighborhood, ',') WHERE RTRIM(value) <> ''))                    
                     AND ((@IsELearningCenter IS NULL) OR ap.IsELearningCenter = @IsELearningCenter)
                     AND ((@IsVirtualProgram IS NULL) OR ap.IsVirtualProgram = @IsVirtualProgram)
@@ -1139,15 +1144,15 @@ namespace AfterSchoolLibrary.Models
                     AND ((@Timings IS NULL) OR property.Value In (SELECT value FROM STRING_SPLIT(@Timings, ',') WHERE RTRIM(value) <> ''))                    
                     AND ((@specialNeeds IS NULL) OR property.Value IN (SELECT value FROM STRING_SPLIT(@specialNeeds, ',') WHERE RTRIM(value) <> ''))
                     AND (
-	                    (@Grades IS NULL) OR 
-	                    (ap.GradeLevelStart IN (SELECT value FROM STRING_SPLIT(@Grades, ',') WHERE RTRIM(value) <> '')) OR 
-	                    (ap.GradeLevelEnd IN (SELECT value FROM STRING_SPLIT(@Grades, ',') WHERE RTRIM(value) <> ''))
-                    )
+	                        (@Grades IS NULL) OR 
+	                        (ap.GradeLevelStart IN (SELECT value FROM STRING_SPLIT(@Grades, ',') WHERE RTRIM(value) <> '')) OR 
+	                        (ap.GradeLevelEnd IN (SELECT value FROM STRING_SPLIT(@Grades, ',') WHERE RTRIM(value) <> ''))
+                        )
                     AND (
-	                    (@Age IS NULL) OR 
-	                    (ap.AgeStart IN (SELECT value FROM STRING_SPLIT(@Age, ',') WHERE RTRIM(value) <> '')) OR 
-	                    (ap.AgeEnd IN (SELECT value FROM STRING_SPLIT(@Age, ',') WHERE RTRIM(value) <> ''))
-                    )               
+	                        (@Age IS NULL) OR 
+	                        (ap.AgeStart IN (SELECT value FROM STRING_SPLIT(@Age, ',') WHERE RTRIM(value) <> '')) OR 
+	                        (ap.AgeEnd IN (SELECT value FROM STRING_SPLIT(@Age, ',') WHERE RTRIM(value) <> ''))
+                        )               
             ";
 
             if (cost.IsNotEmpty())
