@@ -1,4 +1,4 @@
-﻿@{ 
+﻿@{
     var accountProfile = (AccountProfile)ViewBag.AccountProfile ?? new AccountProfile();
     var account = accountProfile?.GetAccount();
     var author = account?.Name;
@@ -49,7 +49,7 @@
         </div>
     </div>
 
-    <div class="layout-footer text-center">
+    <div id="footerShowHide" class="layout-footer text-center">
         <div class="container-footer" style="background: #212a2d">
             <div class="row" style="padding: 20px">
                 <ul class="list-inline last-icon-ul">

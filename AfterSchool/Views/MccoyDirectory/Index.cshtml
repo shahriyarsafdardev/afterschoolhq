@@ -33,27 +33,27 @@
     </div>
 </div>
 
-<div class="visible-sm visible-xs">
+<div class="visible-sm visible-xs bg-color">
     <div class="col-xs-10">
         <div class="form-group has-feedback mccoy-has-search" style="margin-top: 10px;">
             <span class="glyphicon glyphicon-search form-control-feedback"></span>
-            <input id="txtMccoySearch-mobile" name="search" type="text" class="form-control" placeholder="Search" onkeyup="return waitAndFilterSearch()">
+            <input id="txtMccoySearch-mobile" name="search" type="text" class="form-control" placeholder="Search MCCOY Directory" onkeyup="return waitAndFilterSearch()">
         </div>
     </div>
     <div class="col-xs-2" style="padding: 0;">
-        <img src="~/img/filter.png" style="margin-top: 10px;" onclick="return mobileFilter()" />
+        <img src="~/img/filter.png" class="mccoy-filter" onclick="return mobileFilter()" />
     </div>
 
     <div class="clearfix"></div>
 
     <div id="mobile-filter-footer" class="mccoy-filter-footer-container">
-        <button type="button" class="btn btn-default btn-lg btn-center" style="border-color: steelblue;" onclick="return applyMobileFilter()">Apply Filters</button>
+        <button type="button" class="btn btn-default btn-lg btn-center" style="border-color: steelblue; color:blue"  onclick="return applyMobileFilter()">Apply Filters</button>
     </div>
 
     <div class="clearfix"></div>
 </div>
 
-<div id="filters" class="col-md-3" style="display: none; padding-right: 0; padding-bottom: 20px;padding-top: 10px;">
+<div id="filters" class="col-md-3" style="display: none; padding-right: 0; padding-bottom: 120px;padding-top: 10px;">
     @{ Html.RenderPartial("~/Views/Shared/_MccoyFilters.cshtml"); }
     <div class="clearfix"></div>
 </div>
@@ -163,7 +163,7 @@
             if (!isMobile) {
                 $('#filters').show();
             }
-        })
+        })        
 
         function loadFiltersAndInitiateSearch() {
             var hashUrl = WebPage.getHash();
@@ -372,15 +372,17 @@
             });
         }
 
-        function mobileFilter() {
+        function mobileFilter() {         
             $('#search-result').toggle();
             $('#filters').toggle();
             $('#mobile-filter-footer').toggle();
+            $('#footerShowHide').hide();
         }
 
         function applyMobileFilter() {
             prepareSearchParams(true);
             mobileFilter();
+            $('#footerShowHide').show();
         }
 
     </script>
