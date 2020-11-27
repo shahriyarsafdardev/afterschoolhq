@@ -81,7 +81,7 @@
     width: 100%;
     bottom: 0;
     height: 100px;
-    padding-top: 15px;
+    padding-top: 24px;
     border-top: 1px solid steelblue;
     display: none;
 }
@@ -95,3 +95,11 @@
     font-size: 22px;
 }
 
+.mccoy-filter {
+    width: 45px;
+    margin-top: 10px;
+}
+
+.bg-color {
+    background-color: #ffffff;
+}

@@ -23,7 +23,7 @@
 <div>
     <h4 class="mccoy-filter-header">Grades</h4>
 
-    <div class="col-md-6 col-sm-12 no-padding">
+    <div class="col-md-6 col-sm-6 col-xs-6 no-padding">
         @foreach (var item in grades.Take(firstHalf))
         {
             <div class="am-checkbox" style="padding: 3px 0;">
@@ -33,7 +33,7 @@
         }
     </div>
 
-    <div class="col-md-6 col-sm-12 no-padding">
+    <div class="col-md-6 col-sm-6 col-xs-6 no-padding">
         @foreach (var item in grades.Skip(firstHalf).Take(secondHalf))
         {
             <div class="am-checkbox" style="padding: 3px 0;">
@@ -48,7 +48,7 @@
 <div>
     <h4 class="mccoy-filter-header">Ages</h4>
 
-    <div class="col-md-6 col-sm-12 no-padding">
+    <div class="col-md-6 col-sm-6 col-xs-6 no-padding">
         <div class="am-checkbox" style="padding: 3px 0;">
             <input id="chk-ages-1" name="ages" value="0_4" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
             <label for="chk-ages-1" class="margin-h-10 mobile-padding">0 - 4 yrs</label>
@@ -59,7 +59,7 @@
         </div>
     </div>
 
-    <div class="col-md-6 col-sm-12 no-padding">
+    <div class="col-md-6 col-sm-6 col-xs-6 no-padding">
         <div class="am-checkbox" style="padding: 3px 0;">
             <input id="chk-ages-3" name="ages" value="10_14" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
             <label for="chk-ages-3" class="margin-h-10 mobile-padding">10 - 14 yrs</label>
