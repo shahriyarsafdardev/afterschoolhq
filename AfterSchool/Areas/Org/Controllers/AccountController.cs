@@ -93,7 +93,8 @@ namespace AfterSchool.Areas.Org.Controllers
                },
                onFailure: (SystemMessages fmsgs) => {
                    msgs.AddRange(fmsgs);
-               }
+               },
+               onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
            );           
 
             ViewBag.Messages = msgs;
