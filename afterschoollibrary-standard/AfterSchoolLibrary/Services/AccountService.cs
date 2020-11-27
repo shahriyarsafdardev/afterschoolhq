@@ -2134,7 +2134,7 @@ namespace AfterSchoolLibrary.Services
                     dc);
         }
 
-        public static List<MccoySearchResponse> SearchMccoyAccounts(this Account account, string hostAccountId, string search, string neighborhoods, string grades, string ages, string gender, string timing, string cost, string starting, string other, string specialNeeds, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<MccoySearchResponse> SearchMccoyAccounts(string hostAccountId, string search, string neighborhoods, string grades, string ages, string gender, string timing, string cost, string starting, string other, string specialNeeds, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var accountDataTable = Account.SearchMccoyAccounts(hostAccountId, search, neighborhoods, grades, ages, gender, timing, cost, starting, other, specialNeeds, msgs: msgs);
 
@@ -2151,7 +2151,6 @@ namespace AfterSchoolLibrary.Services
                         response.AccountName = row["AccountName"].ToString();
                         response.AccountUid = new Guid(row["AccountUid"].ToString());
                         response.HomePageUrl = $"{Helpers.Utilities.BaseUrl()}/{row["AccountUniqueName"]}";
-                        response.IsAccountNowEnrolling = account.IsNowEnrolling();
 
                         //.. account profile  
                         response.IsOpenDuringCovid = row["IsOpenDuringCovid"].IsNotEmpty() ?  Convert.ToBoolean(row["IsOpenDuringCovid"]) : false;

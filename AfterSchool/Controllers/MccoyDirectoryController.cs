@@ -47,7 +47,6 @@ namespace AfterSchool.Controllers
         public JsonResult GetMccoySearch(string search, string neighborhoods, string grades, string ages, string gender, string timing, string cost, string starting, string other, string special)
         {
             var msgs = new SystemMessages();
-            var currentAccount = SessionVariables.CurrentAccount;
 
             var gradeIds = "";
             if (grades.IsNotEmpty())
@@ -96,7 +95,7 @@ namespace AfterSchool.Controllers
             if (gender.IsNotBlank() && gender == GenderRestrictionType.FemaleOnly.ToString().ToLower())
                 genderIds += "2,";
 
-            var searchedAccounts = AccountService.SearchMccoyAccounts(currentAccount, MccoyHostAccountId, search, neighborhoods, gradeIds, ageIds, genderIds, timing, cost, starting, other, special, msgs: msgs);
+            var searchedAccounts = AccountService.SearchMccoyAccounts(MccoyHostAccountId, search, neighborhoods, gradeIds, ageIds, genderIds, timing, cost, starting, other, special, msgs: msgs);
 
             if (searchedAccounts.IsNotEmpty() && searchedAccounts.Any())
             {

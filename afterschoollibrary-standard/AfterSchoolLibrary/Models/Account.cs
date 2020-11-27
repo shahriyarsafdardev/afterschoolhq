@@ -1061,14 +1061,13 @@ namespace AfterSchoolLibrary.Models
                         @Neighborhood NVARCHAR(100),
                         @Grades NVARCHAR(100),
                         @Age NVARCHAR(100),
-                        @Gender varchar(10),
-                        @Timings nvarchar(100),
+                        @Gender varchar(10),                        
                         @Cost varchar(1),
                         @Starting varchar(1),
                         @IsELearningCenter BIT = NULL,  
                         @IsVirtualProgram BIT = NULL, 
                         @IsOpenDuringCovid BIT = NULL, 
-                        @SpecialNeeds NVARCHAR(100)
+                        @Properties NVARCHAR(100)
 
                 SET @SearchTerm = '{searchTerms}'";
 
@@ -1082,10 +1081,7 @@ namespace AfterSchoolLibrary.Models
                 sql += $"SET @Age = '{ages}'";
 
             if (gender.IsNotEmpty())
-                sql += $"SET @Gender = '{gender}'";
-
-            if (timing.IsNotEmpty())
-                sql += $"SET @Timings = '{timing}'";
+                sql += $"SET @Gender = '{gender}'";            
 
             if (cost.IsNotEmpty())
                 sql += $"SET @Cost = '1'";
@@ -1102,8 +1098,17 @@ namespace AfterSchoolLibrary.Models
             if (other.IsNotBlank() && other.Contains("covid_protections"))
                 sql += $"SET @IsOpenDuringCovid = 1";
 
+            //.. below both query in same table, so creating one param only
+            var properties = "";
+
+            if (timing.IsNotEmpty())
+                properties = timing + ",";
+
             if (specialNeeds.IsNotEmpty())
-                sql += $"SET @SpecialNeeds = '{specialNeeds}'";
+                properties += specialNeeds;
+
+            if (properties.IsNotEmpty())
+                sql += $"SET @Properties = '{properties}'";
 
             sql += $@"
                 SELECT DISTINCT 
@@ -1121,7 +1126,7 @@ namespace AfterSchoolLibrary.Models
 					glEnd.Abbreviation as GradeLevelEnd
                 FROM AccountRelationship ar
                 INNER JOIN Account a ON a.ID = ar.VisitorAccountId
-                LEFT JOIN Activity act ON act.AccountId = ar.VisitorAccountId
+                LEFT JOIN Activity act ON act.AccountId = ar.VisitorAccountId and act.IsDeleted <> 1 and act.IsPublished = 1
                 LEFT JOIN ActivityRegistrationPeriod arp on arp.ActivityId = act.ID
                 LEFT JOIN RegistrationPeriod rp on rp.ID = arp.RegistrationPeriodId
                 LEFT JOIN AccountProfile ap ON ap.AccountId = ar.VisitorAccountId
@@ -1129,20 +1134,19 @@ namespace AfterSchoolLibrary.Models
                 LEFT JOIN AccountProperty property on property.AccountId = ar.VisitorAccountId                
 				LEFT JOIN GradeLevel glStart on glStart.ID = ap.GradeLevelStart
 				LEFT JOIN GradeLevel glEnd on glEnd.ID = ap.GradeLevelEnd
-                WHERE ar.HostAccountId = {hostAccountId}                     
+                WHERE ar.HostAccountId = {hostAccountId} and a.IsDeleted <> 1                  
                     AND (
 						    (@SearchTerm = '""""') OR 
 						    CONTAINS((ap.Title, ap.Headline, ap.About), @SearchTerm)  OR 
 						    CONTAINS((property.Value), @SearchTerm) OR 
                             CONTAINS((loc.Address1, loc.Address2, loc.City, loc.State, loc.PostalCode, loc.Name, loc.StreetNumber, loc.StreetName, loc.Neighborhood, loc.County), @SearchTerm)
 					    )
-                    AND ((@Neighborhood IS NULL) OR loc.Neighborhood IN (SELECT value FROM STRING_SPLIT(@Neighborhood, ',') WHERE RTRIM(value) <> ''))                    
+                    AND ((@Neighborhood IS NULL) OR loc.Neighborhood IN (SELECT value COLLATE Latin1_General_100_CI_AI FROM STRING_SPLIT(@Neighborhood, ',') WHERE RTRIM(value) <> ''))                    
                     AND ((@IsELearningCenter IS NULL) OR ap.IsELearningCenter = @IsELearningCenter)
                     AND ((@IsVirtualProgram IS NULL) OR ap.IsVirtualProgram = @IsVirtualProgram)
                     AND ((@IsOpenDuringCovid IS NULL) OR ap.IsOpenDuringCovid = @IsOpenDuringCovid)
                     AND ((@Gender IS NULL) OR ap.GenderRestriction In (SELECT value FROM STRING_SPLIT(@Gender, ',') WHERE RTRIM(value) <> ''))
-                    AND ((@Timings IS NULL) OR property.Value In (SELECT value FROM STRING_SPLIT(@Timings, ',') WHERE RTRIM(value) <> ''))                    
-                    AND ((@specialNeeds IS NULL) OR property.Value IN (SELECT value FROM STRING_SPLIT(@specialNeeds, ',') WHERE RTRIM(value) <> ''))
+                    AND ((@Properties IS NULL) OR property.Value In (SELECT value FROM STRING_SPLIT(@Properties, ',') WHERE RTRIM(value) <> ''))
                     AND (
 	                        (@Grades IS NULL) OR 
 	                        (ap.GradeLevelStart IN (SELECT value FROM STRING_SPLIT(@Grades, ',') WHERE RTRIM(value) <> '')) OR 
@@ -1163,7 +1167,7 @@ namespace AfterSchoolLibrary.Models
                     sql += $@" OR act.CostPerRegistrant = 0";
 
                 if (cost.Contains("cost_0_50"))
-                    sql += $@" OR act.CostPerRegistrant < 50";
+                    sql += $@" OR act.CostPerRegistrant between 1 and 150";
 
                 if (cost.Contains("cost_50_150"))
                     sql += $@" OR act.CostPerRegistrant between 50 and 150";
