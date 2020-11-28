@@ -66,7 +66,7 @@
 
     <% _.each(response, function(searchResult){ %>
 
-    <div id="<%= searchResult.AccountUid %>" name="<%= searchResult.AccountName %>" class="col-sm-12 col-md-6 col-lg-4 col-xl-3 participation-object" onclick="WebPage.navigateIframe('<%= searchResult.HomePageUrl %>')">
+    <div id="<%= searchResult.AccountUid %>" name="<%= searchResult.AccountName %>" class="col-sm-12 col-md-6 col-lg-4 col-xl-3 participation-object" style="height: 410px;" onclick="WebPage.navigateIframe('<%= searchResult.HomePageUrl %>')">
 
         <div class="panel" style="overflow: hidden;">
             <div class="reg-header" style="background-image: url(<%= searchResult.ProfileHeaderImageUrl %>); min-height: 100px; height: 150px; padding: 5px 5px; position: relative;">
