@@ -358,13 +358,25 @@
                         return;
                     }
                     else {
-                        $('#search-result').html('');
+                        if (data && data.status == 'error') {
+                            $('#search-result').html('');
 
-                        Notifications.showBar({
-                            title: 'Error',
-                            message: 'No records found.',
-                            success: false
-                        });
+                            var error = '';
+
+                            _.each(data.data, function (msg) {
+                                error += msg?.Text + '<br />';
+                            });
+
+                            Notifications.showBar({
+                                title: 'Error',
+                                message: error,
+                                success: false
+                            });
+                        }
+                        else {
+                            $('#search-result').html('<p style="margin-top: 35px; text-align: center; font-size: 16px;">Sorry, there are no results.</p>');
+                        }
+
                         hideLoader();
                         return false;
                     }

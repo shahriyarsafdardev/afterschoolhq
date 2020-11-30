@@ -99,10 +99,17 @@ namespace AfterSchool.Controllers
 
             if (searchedAccounts.IsNotEmpty() && searchedAccounts.Any())
             {
+                //.. call success and records found
                 return Json(new { success = true, status = "ok", data = searchedAccounts }, JsonRequestBehavior.AllowGet);
             }
+            else if (msgs.IsNotEmpty() && msgs.Count > 0)
+            {
+                //.. something went wrong, error occured
+                return Json(new { success = false, status = "error", data = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
+            }
 
-            return Json(new { success = false, status = "error", data = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
+            //.. no result found
+            return Json(new { success = false, status = "no-result" }, JsonRequestBehavior.AllowGet);
         }
     }
 }
