@@ -183,12 +183,16 @@ namespace AfterSchoolLibrary.Services
 
         public static List<Activity> GetPublishedActivitiesInLocations(this Account account, List<int> locationIds, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var periods = account.GetOpenUpcomingRecentlyClosedRegistrationPeriods(msgs, dc);
             var activities = new List<Activity>();
 
-            periods.ForEach(period =>
-                activities.AddRange(period.GetActivitiesInLocations(locationIds, msgs, dc).Where(x => x.IsPubliclyViewable))
-            );
+            if (locationIds.Any())
+            {
+                var periods = account.GetOpenUpcomingRecentlyClosedRegistrationPeriods(msgs, dc);
+
+                periods.ForEach(period =>
+                    activities.AddRange(period.GetActivitiesInLocations(locationIds, msgs, dc).Where(x => x.IsPubliclyViewable))
+                );
+            }            
 
             return activities;
         }

@@ -41,56 +41,67 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult Account(string accountname)
         {
+            //.. log account name in rollbar
+            AfterSchoolLibrary.Helpers.Utilities.SystemLog(accountname);
+
             if (isUnsupportedBrowser())
                 return RedirectUnsupportedBrowser();
 
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
 
-            if (account.IsEmpty() || account.IsDeleted)
-                return HttpNotFound();
+            try
+            {
+                if (account.IsEmpty() || account.IsDeleted)
+                    return HttpNotFound();
 
-            RestartRegistrationSession();
-            SetRegistrationStartPage(account, true);
+                RestartRegistrationSession();
+                SetRegistrationStartPage(account, true);
 
-            var profile = account.GetAccountProfile(msgs);
+                var profile = account.GetAccountProfile(msgs);
 
-            if (profile.IsEmpty())
-                return Redirect(account.BrowseUrl);
+                if (profile.IsEmpty())
+                    return Redirect(account.BrowseUrl);
 
-            var photos = profile.GetPhotos(msgs);
-            var ah = AfterSchoolLibrary.Helpers.Utilities.GetNewAmazonHelper();
+                var photos = profile.GetPhotos(msgs);
+                var ah = AfterSchoolLibrary.Helpers.Utilities.GetNewAmazonHelper();
 
-            photos.ForEach(photo => photo.Value = ah.GetFileLink(photo.Value, true, null, true));
+                photos.ForEach(photo => photo.Value = ah.GetFileLink(photo.Value, true, null, true));
 
-            ViewBag.AccountProfile = profile;
-            ViewBag.Location = profile.GetLocation(msgs) ?? account.GetDefaultLocation(msgs);
-            ViewBag.Awards = profile.GetAwards(msgs);
-            ViewBag.Certifications = profile.GetCertifications(msgs);
-            ViewBag.Photos = photos;
-            ViewBag.GradeLevelStart = profile.GetGradeLevelStart(msgs);
-            ViewBag.GradeLevelEnd = profile.GetGradeLevelEnd(msgs);
-            ViewBag.AgeStart = profile.GetAgeStart();
-            ViewBag.AgeEnd = profile.GetAgeEnd();
-            ViewBag.GenderRestriction = profile.PrintGenderRestrictions();
-            ViewBag.RestrictByGrade = profile.RestrictByGrade();
-            ViewBag.Messages = msgs;
-            ViewBag.ParticipationObjects = GetParticipationObjects(account, msgs)
-                                            .Where(po => po.RegistrationPeriod.IsOpen(account, msgs) || po.RegistrationPeriod.WillOpen(account, msgs))
-                                            .ToList();
-            ViewBag.Locations = account.GetAllAvailableLocations(msgs);
-            ViewBag.AccountProperties = account.GetAccountProperties(
-                                            new List<AccountPropertyType>() 
-                                            { 
-                                                AccountPropertyType.AcademicSubjects, 
-                                                AccountPropertyType.Classifications, 
-                                                AccountPropertyType.ServiceOffered, 
-                                                AccountPropertyType.SoftSkills, 
-                                                AccountPropertyType.TeachingMethods, 
+                ViewBag.AccountProfile = profile;
+                ViewBag.Location = profile.GetLocation(msgs) ?? account.GetDefaultLocation(msgs);
+                ViewBag.Awards = profile.GetAwards(msgs);
+                ViewBag.Certifications = profile.GetCertifications(msgs);
+                ViewBag.Photos = photos;
+                ViewBag.GradeLevelStart = profile.GetGradeLevelStart(msgs);
+                ViewBag.GradeLevelEnd = profile.GetGradeLevelEnd(msgs);
+                ViewBag.AgeStart = profile.GetAgeStart();
+                ViewBag.AgeEnd = profile.GetAgeEnd();
+                ViewBag.GenderRestriction = profile.PrintGenderRestrictions();
+                ViewBag.RestrictByGrade = profile.RestrictByGrade();
+                ViewBag.Messages = msgs;
+                ViewBag.ParticipationObjects = GetParticipationObjects(account, msgs)
+                                                .Where(po => po.RegistrationPeriod.IsOpen(account, msgs) || po.RegistrationPeriod.WillOpen(account, msgs))
+                                                .ToList();
+                ViewBag.Locations = account.GetAllAvailableLocations(msgs);
+                ViewBag.AccountProperties = account.GetAccountProperties(
+                                                new List<AccountPropertyType>()
+                                                {
+                                                AccountPropertyType.AcademicSubjects,
+                                                AccountPropertyType.Classifications,
+                                                AccountPropertyType.ServiceOffered,
+                                                AccountPropertyType.SoftSkills,
+                                                AccountPropertyType.TeachingMethods,
                                                 AccountPropertyType.TimeOffered,
                                                 AccountPropertyType.SpecialNeedsOffering,
                                                 AccountPropertyType.PricingOption,
-                                            }, msgs);
+                                                }, msgs);
+            }
+            catch (Exception ex)
+            {
+                msgs.Add(new SystemMessage() { Exception = ex, Text = ex.Message, MessageType = MessageType.Error });
+                AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(msgs);
+            }
 
             return View(account);
         }
