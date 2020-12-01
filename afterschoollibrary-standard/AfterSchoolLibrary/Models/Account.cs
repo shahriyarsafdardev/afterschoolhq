@@ -1134,6 +1134,7 @@ namespace AfterSchoolLibrary.Models
                 LEFT JOIN AccountProperty property on property.AccountId = ar.VisitorAccountId                
 				LEFT JOIN GradeLevel glStart on glStart.ID = ap.GradeLevelStart
 				LEFT JOIN GradeLevel glEnd on glEnd.ID = ap.GradeLevelEnd
+                OUTER APPLY STRING_SPLIT(@Grades, ',') s
                 WHERE ar.HostAccountId = {hostAccountId} and a.IsDeleted <> 1                  
                     AND (
 						    (@SearchTerm = '""""') OR 
@@ -1147,11 +1148,7 @@ namespace AfterSchoolLibrary.Models
                     AND ((@IsOpenDuringCovid IS NULL) OR ap.IsOpenDuringCovid = @IsOpenDuringCovid)
                     AND ((@Gender IS NULL) OR ap.GenderRestriction In (SELECT value FROM STRING_SPLIT(@Gender, ',') WHERE RTRIM(value) <> ''))
                     AND ((@Properties IS NULL) OR property.Value In (SELECT value FROM STRING_SPLIT(@Properties, ',') WHERE RTRIM(value) <> ''))
-                    AND (
-	                        (@Grades IS NULL) OR 
-	                        (ap.GradeLevelStart IN (SELECT value FROM STRING_SPLIT(@Grades, ',') WHERE RTRIM(value) <> '')) OR 
-	                        (ap.GradeLevelEnd IN (SELECT value FROM STRING_SPLIT(@Grades, ',') WHERE RTRIM(value) <> ''))
-                        )
+                    AND ((@Grades IS NULL) OR (s.value) BETWEEN ap.GradeLevelStart and ap.GradeLevelEnd)
                     AND (
 	                        (@Age IS NULL) OR 
 	                        (ap.AgeStart IN (SELECT value FROM STRING_SPLIT(@Age, ',') WHERE RTRIM(value) <> '')) OR 

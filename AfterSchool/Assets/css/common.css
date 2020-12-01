@@ -89,15 +89,18 @@
 .join-mccoy-btn {
     height: 38px;
     color: darkblue;
+    min-width: 180px;
+    font-size: 12px;
 }
 
 .mccoy-youth {
     float: left;
     font-size: 22px;
+    margin-left: 20px;
 }
 
 .mccoy-filter {
-    width: 45px;
+    width: 47px;
     margin-top: 10px;
 }
 
