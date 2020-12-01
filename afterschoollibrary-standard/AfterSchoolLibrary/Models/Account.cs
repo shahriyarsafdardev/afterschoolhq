@@ -1164,10 +1164,10 @@ namespace AfterSchoolLibrary.Models
                 sql += $@"AND ((@Cost IS NULL)";
 
                 if (cost.Contains("cost_free"))
-                    sql += $@" OR act.CostPerRegistrant = 0";
+                    sql += $@" OR COALESCE(act.CostPerRegistrant, 0) = 0";
 
                 if (cost.Contains("cost_0_50"))
-                    sql += $@" OR act.CostPerRegistrant between 1 and 150";
+                    sql += $@" OR act.CostPerRegistrant between 1 and 50";
 
                 if (cost.Contains("cost_50_150"))
                     sql += $@" OR act.CostPerRegistrant between 50 and 150";
