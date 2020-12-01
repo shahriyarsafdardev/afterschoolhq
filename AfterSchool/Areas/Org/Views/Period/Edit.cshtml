@@ -51,11 +51,18 @@
                     *@
                     <div class="form-group">
                         <label class="col-sm-3 control-label">Open Date &amp; Time <span class="text-danger">*</span></label>
-                        <div class="col-sm-5">
-                            <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
-                                <input size="16" type="text" class="form-control" id="opendate" name="opendate" onfocus="this.select()" required value="@Model.StartDateTime.ToShortDateString()" data-type="date" />
-                                <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
-                            </div>
+                        <div class="col-sm-5">    
+                            @{
+                                Html.RenderPartial(
+                                    "~/Views/Shared/Components/_Date.cshtml",
+                                    new FormInputViewModel()
+                                    {
+                                        Id = "opendate",
+                                        Name = "opendate",
+                                        Value = Model.StartDateTime.ToShortDateString()
+                                    }
+                                );
+                            }
                         </div>
                         <div class="col-sm-4">
                             @{Html.RenderPartial(
@@ -74,11 +81,18 @@
 
                     <div class="form-group">
                         <label class="col-sm-3 control-label">Close Date &amp; Time <span class="text-danger">*</span></label>
-                        <div class="col-sm-5">
-                            <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
-                                <input size="16" type="text" class="form-control" id="closedate" name="closedate" onfocus="this.select()" required value="@Model.EndDateTime.ToShortDateString()" data-type="date" />
-                                <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
-                            </div>
+                        <div class="col-sm-5">   
+                            @{
+                                Html.RenderPartial(
+                                    "~/Views/Shared/Components/_Date.cshtml",
+                                    new FormInputViewModel()
+                                    {
+                                        Id = "closedate",
+                                        Name = "closedate",
+                                        Value = Model.EndDateTime.ToShortDateString()
+                                    }
+                                );
+                            }
                         </div>
                         <div class="col-sm-4">
                             @{Html.RenderPartial(
