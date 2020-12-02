@@ -83,6 +83,7 @@ namespace AfterSchoolLibrary.Models
 			CartItem.Create(dc);
 			PasswordResetToken.Create(dc);
 			SubscriptionPlan.Create(dc);
+			SubscriptionPlanPrePayment.Create(dc);
 			RegistrantSubscriptionPlan.Create(dc);
 			Transaction.Create(dc);
 			Payout.Create(dc);
@@ -162,6 +163,7 @@ namespace AfterSchoolLibrary.Models
 			CartItem.Alter(dc);
 			PasswordResetToken.Alter(dc);
 			SubscriptionPlan.Alter(dc);
+			SubscriptionPlanPrePayment.Alter(dc);
 			RegistrantSubscriptionPlan.Alter(dc);
 			Transaction.Alter(dc);
 			Payout.Alter(dc);
@@ -204,6 +206,7 @@ namespace AfterSchoolLibrary.Models
 			Activity.Update(new Hashtable(){{"ActivityLocationTypeId",0}}, new Hashtable(){{"ActivityLocationTypeId", DBNull.Value}}, Activity.ObjectMap, dc);
 			Activity.Update(new Hashtable(){{"HidePreciseLocation",false}}, new Hashtable(){{"HidePreciseLocation", DBNull.Value}}, Activity.ObjectMap, dc);
 			Activity.Update(new Hashtable(){{"RegistrationFinalized",false}}, new Hashtable(){{"RegistrationFinalized", DBNull.Value}}, Activity.ObjectMap, dc);
+			Activity.Update(new Hashtable(){{"IsConvenienceFeeTakenOutOfCost",false}}, new Hashtable(){{"IsConvenienceFeeTakenOutOfCost", DBNull.Value}}, Activity.ObjectMap, dc);
 			Location.Update(new Hashtable(){{"IsDefault",false}}, new Hashtable(){{"IsDefault", DBNull.Value}}, Location.ObjectMap, dc);
 			Location.Update(new Hashtable(){{"LocationTypeId",0}}, new Hashtable(){{"LocationTypeId", DBNull.Value}}, Location.ObjectMap, dc);
 			Location.Update(new Hashtable(){{"IsTest",false}}, new Hashtable(){{"IsTest", DBNull.Value}}, Location.ObjectMap, dc);
@@ -319,6 +322,8 @@ namespace AfterSchoolLibrary.Models
 			SubscriptionPlan.Update(new Hashtable(){{"PaymentStartTypeId",0}}, new Hashtable(){{"PaymentStartTypeId", DBNull.Value}}, SubscriptionPlan.ObjectMap, dc);
 			SubscriptionPlan.Update(new Hashtable(){{"SplitCostEvenly",false}}, new Hashtable(){{"SplitCostEvenly", DBNull.Value}}, SubscriptionPlan.ObjectMap, dc);
 			SubscriptionPlan.Update(new Hashtable(){{"RegFeeAsDownPayment",false}}, new Hashtable(){{"RegFeeAsDownPayment", DBNull.Value}}, SubscriptionPlan.ObjectMap, dc);
+			SubscriptionPlan.Update(new Hashtable(){{"IsConvenienceFeeTakenOutOfCost",false}}, new Hashtable(){{"IsConvenienceFeeTakenOutOfCost", DBNull.Value}}, SubscriptionPlan.ObjectMap, dc);
+			SubscriptionPlanPrePayment.Update(new Hashtable(){{"ParticipationObjectTypeId",0}}, new Hashtable(){{"ParticipationObjectTypeId", DBNull.Value}}, SubscriptionPlanPrePayment.ObjectMap, dc);
 			RegistrantSubscriptionPlan.Update(new Hashtable(){{"PaymentTypeFeesPaidBy",0}}, new Hashtable(){{"PaymentTypeFeesPaidBy", DBNull.Value}}, RegistrantSubscriptionPlan.ObjectMap, dc);
 			RegistrantSubscriptionPlan.Update(new Hashtable(){{"ConvenienceFeesPaidBy",0}}, new Hashtable(){{"ConvenienceFeesPaidBy", DBNull.Value}}, RegistrantSubscriptionPlan.ObjectMap, dc);
 			RegistrantSubscriptionPlan.Update(new Hashtable(){{"PaymentTypeId",0}}, new Hashtable(){{"PaymentTypeId", DBNull.Value}}, RegistrantSubscriptionPlan.ObjectMap, dc);
@@ -588,6 +593,12 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_PasswordResetToken_Uid ON [PasswordResetToken] (Uid)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SubscriptionPlan_ParticipationObjectId_ParticipationObjectTypeId_PlanTypeId ON [SubscriptionPlan] (ParticipationObjectId,ParticipationObjectTypeId,PlanTypeId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SubscriptionPlan_PlanOwnerAccountId ON [SubscriptionPlan] (PlanOwnerAccountId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SubscriptionPlanPrePayment_ParticipationObjectId_ParticipationObjectTypeId ON [SubscriptionPlanPrePayment] (ParticipationObjectId,ParticipationObjectTypeId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SubscriptionPlanPrePayment_ParticipationObjectId_ParticipationObjectTypeId_RegistrationId ON [SubscriptionPlanPrePayment] (RegistrationId,ParticipationObjectId,ParticipationObjectTypeId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SubscriptionPlanPrePayment_TransactionId ON [SubscriptionPlanPrePayment] (TransactionId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SubscriptionPlanPrePayment_RegistrationId ON [SubscriptionPlanPrePayment] (RegistrationId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SubscriptionPlanPrePayment_PayerAccountId ON [SubscriptionPlanPrePayment] (PayerAccountId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_SubscriptionPlanPrePayment_AttendanceRegistrantId ON [SubscriptionPlanPrePayment] (AttendanceRegistrantId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrantSubscriptionPlan_PurchaseId ON [RegistrantSubscriptionPlan] (PurchaseId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrantSubscriptionPlan_RegistrantId ON [RegistrantSubscriptionPlan] (RegistrantId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrantSubscriptionPlan_SubscriptionPlanId ON [RegistrantSubscriptionPlan] (SubscriptionPlanId)"));

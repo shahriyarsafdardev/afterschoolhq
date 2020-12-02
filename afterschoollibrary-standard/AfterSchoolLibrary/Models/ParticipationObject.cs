@@ -729,6 +729,7 @@ namespace AfterSchoolLibrary.Models
             return payment;
         }
 
+        #region "PostPayPlan"
         public decimal GetPostPayCost()
         {
             if (this.PostPayPlans.Any() && this.PostPayPlans.First().CostPerPeriod.HasValue)
@@ -739,33 +740,99 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetPostPayCostWithConvenienceFee()
         {
-            if (this.PostPayPlans.Any() && this.PostPayPlans.First().CostPerPeriod.HasValue)
-                return this.PostPayPlans.First().CostPerPeriod.Value + GetPostPayConvenienceFee(FeesPaidByType.Parent);
+            var plan = this.PostPayPlans.FirstOrDefault();
+
+            if (plan.IsNotEmpty())
+                return GetPostPayCost() + (plan.IsConvenienceFeeTakenOutOfCost ? 0 : GetPostPayConvenienceFee());
 
             return 0;
         }
 
-        public decimal GetPostPayConvenienceFee(FeesPaidByType feesPaidByType)
+        public decimal GetPostPayProviderAmount()
         {
-            if (this.PostPayPlans.Any() && this.PostPayPlans.First().CostPerPeriod.HasValue && PaymentAccount.ConvenienceFeesPaidBy == feesPaidByType)
-                return Billing.Platform.GetConvenienceFee(this.PostPayPlans.First().CostPerPeriod.Value);
+            var plan = this.PostPayPlans.FirstOrDefault();
 
-            return 0;
+            if (plan.IsNotEmpty() && plan.IsConvenienceFeeTakenOutOfCost)
+                return GetPostPayCost() - GetPostPayConvenienceFee();
+
+            return GetPostPayCost();
+
         }
 
-        public decimal GetPostPayCreditCardFee(FeesPaidByType feesPaidByType)
+        public decimal GetPostPayConvenienceFee()
         {
-            if (this.PostPayPlans.Any() && this.PostPayPlans.First().CostPerPeriod.HasValue && PaymentAccount.CreditCardFeesPaidBy == feesPaidByType)
-                return Billing.Platform.GetCreditCardFee(this.PostPayPlans.First().CostPerPeriod.Value, PaymentAccount);
+            var plan = this.PostPayPlans.FirstOrDefault();
+
+            if (plan.IsNotEmpty())
+                return new FeeCalculationObject(
+                                GetPostPayCost(),
+                                OwnerAccount,
+                                plan.IsConvenienceFeeTakenOutOfCost)
+                            .GetConvenienceFee();
 
             return 0;
         }
+
+        public decimal GetPostPayCreditCardFee()
+        {
+            var plan = this.PostPayPlans.FirstOrDefault();
+
+            if (plan.IsNotEmpty())
+                return new FeeCalculationObject(
+                                GetPostPayCost(),
+                                PaymentAccount,
+                                plan.IsConvenienceFeeTakenOutOfCost)
+                            .GetCreditCardFee();
+
+            return 0;
+        }
+
+        public decimal GetCheckoutPostPayCreditCardFee()
+        {
+            var plan = this.PostPayPlans.FirstOrDefault();
+
+            if ((plan?.NumberOfPeriodsPrePaid).IsPositive())
+                return GetPostPayCreditCardFee() * plan.NumberOfPeriodsPrePaid.Value;
+
+            return 0;
+        }
+
+        public decimal GetCheckoutPostPayConvenienceFee()
+        {
+            var plan = this.PostPayPlans.FirstOrDefault();
+
+            if ((plan?.NumberOfPeriodsPrePaid).IsPositive())
+                return GetPostPayConvenienceFee() * plan.NumberOfPeriodsPrePaid.Value;
+
+            return 0;
+        }
+
+        public decimal GetPostPayCheckoutCostWithConvenienceFee()
+        {
+            var plan = this.PostPayPlans.FirstOrDefault();
+            if ((plan?.NumberOfPeriodsPrePaid).IsPositive())
+                return plan.NumberOfPeriodsPrePaid.Value * GetPostPayCostWithConvenienceFee();
+
+            return 0;
+        }
+
+        #endregion
 
         public decimal GetCheckoutCostWithConvenienceFee()
         {
+            if (this.PostPayPlans.Any())
+                return GetPostPayCheckoutCostWithConvenienceFee();
+
             if (this.Cost.HasValue)
-                return Cost.Value
-                    + GetConvenienceFee(FeesPaidByType.Parent);
+            {
+                var activity = this.GetActivity();
+
+                if (activity.IsNotEmpty())
+                    return Cost.Value
+                        + (activity.IsConvenienceFeeTakenOutOfCost ? 0 : GetConvenienceFee());
+
+                return Cost.Value + GetConvenienceFee();
+            }
 
             return 0;
         }
@@ -773,25 +840,31 @@ namespace AfterSchoolLibrary.Models
         public decimal GetCheckoutTotalCost()
         {
             if (this.Cost.HasValue)
-                return Cost.Value
-                    + GetCreditCardFee(FeesPaidByType.Parent)
-                    + GetConvenienceFee(FeesPaidByType.Parent);
+                return this.GetCheckoutCostWithConvenienceFee() + GetCreditCardFee();
 
             return 0;
         }
 
-        public decimal GetCreditCardFee(FeesPaidByType feesPaidByType)
+        public decimal GetCreditCardFee()
         {
-            if (Cost.HasValue && PaymentAccount.CreditCardFeesPaidBy == feesPaidByType)
-                return Billing.Platform.GetCreditCardFee(Cost.Value, PaymentAccount);
+            if (Cost.HasValue)
+                return new FeeCalculationObject(
+                                Cost.Value,
+                                PaymentAccount,
+                                this)
+                            .GetCreditCardFee();
 
             return 0;
         }
 
-        public decimal GetConvenienceFee(FeesPaidByType feesPaidByType)
+        public decimal GetConvenienceFee()
         {
-            if (Cost.HasValue && PaymentAccount.ConvenienceFeesPaidBy == feesPaidByType)
-                return Billing.Platform.GetConvenienceFee(Cost.Value);
+            if (Cost.HasValue)
+                return new FeeCalculationObject(
+                                Cost.Value,
+                                OwnerAccount,
+                                this)
+                            .GetConvenienceFee();
 
             return 0;
         }

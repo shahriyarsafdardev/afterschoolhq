@@ -550,16 +550,6 @@ namespace AfterSchoolLibrary.Models
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        internal void DeleteSessionActions(SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            SessionAction.LoadByRegistrantId(this.ID.Value, msgs, dc).ForEach(sa => msgs.AddRange(sa.Delete(dc)));
-        }
-
-        internal void DeleteRegistrantActivities(SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            this.GetRegistrantActivities(msgs, dc).ForEach(ra => ra.CancelRegistration(msgs, dc));
-        }
-
         public Registrant Copy(WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -573,11 +563,6 @@ namespace AfterSchoolLibrary.Models
             msgs.AddRange(copy.Save(dc: dc));
 
             return copy;
-        }
-
-        public int GetRegistrationCount(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return Registration.GetCount(new Hashtable() { { "RegistrantId", this.ID.Value } }, msgs: msgs, dc: dc);
         }
 
         #endregion

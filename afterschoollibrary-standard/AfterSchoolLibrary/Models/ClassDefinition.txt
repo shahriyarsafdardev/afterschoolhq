@@ -91,6 +91,7 @@ property: HidePreciseLocation, bool, Bit, , If true then don't want to add a pin
 property: MinSeatsRequired, int?, Int, , Minimum seats required to have the activity
 property: RegistrationFinalized, bool, Bit, , Used to close registration and send notifications
 property: InterestFormId, int?, Int, , Used to set the interest form used on the activity page
+property: IsConvenienceFeeTakenOutOfCost, bool, Bit, , Used to allow a provider to set the final fee a parent sees
 -property: AllowPreRegistration, bool, Bit
 -property: RegistrationTimeZone, string, NVarChar "30"
 -property: AcceptPayPal, bool, Bit
@@ -1048,6 +1049,8 @@ property: CompletionStatusId, RegistrationCompletionStatus, Int
 property: PurchaseId, int?, Int
 property: StripeSourceId, string, NVarChar "100"
 property: CostPerClass, decimal?, Money
+property: PaymentTypeFeePayerAccountId, int?, Int, , which account is paying the payment type (stripe or ach) fee
+property: ConvenienceFeePayerAccountId, int?, Int, , which account is paying the convenience fee
 loadmethod: Uid
 loadmethod: RegistrantId, List<>
 loadmethod: AccountId, List<>
@@ -1414,8 +1417,31 @@ property: StartDayOfMonth, int?, Int
 property: PaymentStartTypeId, PlanPaymentStartType, Int
 property: SplitCostEvenly, bool, Bit, , Split cost evenly amongst all parents signed up
 property: RegFeeAsDownPayment, bool, Bit, , Count the registration fee as a down payment
+property: IsConvenienceFeeTakenOutOfCost, bool, Bit
+property: NumberOfPeriodsPrePaid, int?, Int
 loadmethod: ParticipationObjectId|ParticipationObjectTypeId|PlanTypeId, List<>, LoadByParticipationObject
 loadmethod: PlanOwnerAccountId, List<>
+[end]
+
+[begin]
+type: Class
+name: SubscriptionPlanPrePayment
+description: Used to handle prepayments then credit them later to an attendance record
+serializable: true,
+inherits: BasicObjectWithModified
+property: ParticipationObjectId, int?, Int, required
+property: ParticipationObjectTypeId, ParticipationObjectType, Int, required
+property: TransactionId, int?, Int, required
+property: RegistrationId, int?, Int, required
+property: PayerAccountId, int?, Int, required
+property: AttendanceRegistrantId, int?, Int
+property: Value, decimal?, Money
+loadmethod: ParticipationObjectId|ParticipationObjectTypeId, List<>
+loadmethod: RegistrationId|ParticipationObjectId|ParticipationObjectTypeId, List<>
+loadmethod: TransactionId, List<>
+loadmethod: RegistrationId, List<>
+loadmethod: PayerAccountId, List<>
+loadmethod: AttendanceRegistrantId
 [end]
 
 [begin-ignore]

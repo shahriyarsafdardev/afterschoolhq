@@ -144,7 +144,7 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
-                var fee = AfterSchoolLibrary.Billing.Platform.GetCreditCardFee(amount.ToDecimal(), account);
+                var fee = new FeeCalculationObject(amount.ToDecimal(), account, msgs).GetCreditCardFee();
                 return Json(new { status = "ok", creditCardFee = fee, creditCardFeeFormatted = fee.ToCurrency() }, JsonRequestBehavior.AllowGet);
 
             }
