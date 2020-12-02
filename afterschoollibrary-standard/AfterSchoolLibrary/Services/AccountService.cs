@@ -270,7 +270,7 @@ namespace AfterSchoolLibrary.Services
         {
             get
             {
-                return new AccountType[] { AccountType.Teacher, AccountType.ActivityProvider, AccountType.Business, AccountType.CommunityCenter, AccountType.School, AccountType.Church };
+                return new AccountType[] { AccountType.Teacher, AccountType.ActivityProvider, AccountType.Business, AccountType.CommunityCenter, AccountType.School, AccountType.Church, AccountType.Registrant, AccountType.SchoolDistrict };
             }
         }
 
