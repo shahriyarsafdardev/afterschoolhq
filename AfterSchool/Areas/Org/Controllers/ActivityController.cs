@@ -12,6 +12,7 @@ using AfterSchool.Models;
 using Hangfire;
 using AfterSchoolLibrary.Billing;
 using AfterSchoolLibrary;
+using AfterSchoolLibrary.Helpers;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -1839,6 +1840,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid());
             var mustRequestToPublish = MustRequestToPublish(activity);
+            var account = SessionVariables.CurrentAccount;
+            var user = account.GetAccountOwner(msgs);
 
             if (mustRequestToPublish)
                 msgs.Add("You do not have permissions to publish", MessageType.UserError);
@@ -1851,6 +1854,23 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
+                //.. send support email for AHQ just to notifiy the team a new profile has been completed
+                var body = $"<p>Account: {account.Name}<br />" +
+                        $"Account Profile Url: {account.HomePageUrl}<br />" +
+                        $"Activity: {activity.Name}<br />" +
+                        $"Url: {activity.HomePageUrl}<br />" +
+                        $"User: {user.FirstName} {user.LastName}<br />";
+
+                var registrationDate = activity.GetActiveRegistrationPeriod();
+                if (registrationDate.IsNotEmpty() && registrationDate.StartDateTime.IsNotEmpty())
+                    body += $"Activity Start Date: {registrationDate.StartDateTime} <br />";
+
+                EmailHelper.SendEmail(
+                    toEmail: AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress,
+                    subject: $"{account.Name} has published a new Activity: {activity.Name}",
+                    body,
+                    isAfterSchool: true);
+
                 msgs.Add(string.Format("{0} has been published", activity.Name), MessageType.Success);
                 UpdateSession(SessionActionType.ActivityPublish, SessionVariables.CurrentAccount.ID, activity.ID);
             }
@@ -1860,10 +1880,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.MustRequestToPublish = mustRequestToPublish;
             ViewBag.ShowCopyButton = ShowCopyButtonOnPublishDetail(activity);
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
-
-            var account = SessionVariables.CurrentAccount;
-            var user = account.GetAccountOwner(msgs);
-
+            
             if (user.IsNotEmpty() && account.IsNotEmpty())
             {
                 SendGridHelper.AddOrUpdateContact(account, user, msgs);

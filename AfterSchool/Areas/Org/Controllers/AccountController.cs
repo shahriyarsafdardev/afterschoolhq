@@ -11,6 +11,7 @@ using Hangfire;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Billing;
 using System.Web;
+using AfterSchoolLibrary.Helpers;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -310,7 +311,9 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult PaymentsEntity(PaymentsEntityViewModel paymentsEntityVM)
         {
             var msgs = new SystemMessages();
-            var stripeAccount = SessionVariables.CurrentAccount.GetStripeCustomAccount(msgs);
+            var account = SessionVariables.CurrentAccount;
+            var user = SessionVariables.CurrentUser;
+            var stripeAccount = account.GetStripeCustomAccount(msgs);            
 
             if (paymentsEntityVM.BusinessType == LegalEntityType.NotSet)
                 msgs.Add("Please select your business type", MessageType.UserError);
@@ -414,6 +417,17 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
+                //.. send support email to AHQ just to notifiy the team that a payment has been added/updated.
+                var body = $"<p>Account: {account.Name}<br />" +
+                        $"Account Profile Url: {account.HomePageUrl}<br />" +
+                        $"User: {user.FirstName} {user.LastName}<br />";
+
+                EmailHelper.SendEmail(
+                    toEmail: AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress,
+                    subject: $"{account.Name} has connected their stripe account",
+                    body,
+                    isAfterSchool: true);
+
                 msgs.Add("Your update information has been submitted.", MessageType.Success);
 
                 //if (startingStatus != stripeAccount.VerificationStatusId && stripeAccount.VerificationStatusId == StripeVerificationStatus.Verified)
