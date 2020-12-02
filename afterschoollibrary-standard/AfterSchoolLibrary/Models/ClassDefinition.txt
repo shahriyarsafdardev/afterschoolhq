@@ -1358,6 +1358,8 @@ serializable: true
 inherits: BasicObjectWithModified
 property: CartId, int?, Int, required
 property: Uid, Guid, UniqueIdentifier
+property: PurchaseableObjectTypeId, PurchaseableObjectType, Int
+property: PurchaseableObjectId, int?, Int
 property: ParticipationObjectTypeId, ParticipationObjectType, Int, required
 property: ParticipationObjectId, int?, Int, required
 property: Day, DayOfWeekASL, Int

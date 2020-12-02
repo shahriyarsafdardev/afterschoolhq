@@ -311,6 +311,7 @@ namespace AfterSchoolLibrary.Models
 			AccountPackageFeature.Update(new Hashtable(){{"FeatureTypeId",0}}, new Hashtable(){{"FeatureTypeId", DBNull.Value}}, AccountPackageFeature.ObjectMap, dc);
 			File.Update(new Hashtable(){{"FileTypeId",0}}, new Hashtable(){{"FileTypeId", DBNull.Value}}, File.ObjectMap, dc);
 			SessionAction.Update(new Hashtable(){{"SessionActionTypeId",0}}, new Hashtable(){{"SessionActionTypeId", DBNull.Value}}, SessionAction.ObjectMap, dc);
+			CartItem.Update(new Hashtable(){{"PurchaseableObjectTypeId",0}}, new Hashtable(){{"PurchaseableObjectTypeId", DBNull.Value}}, CartItem.ObjectMap, dc);
 			CartItem.Update(new Hashtable(){{"ParticipationObjectTypeId",0}}, new Hashtable(){{"ParticipationObjectTypeId", DBNull.Value}}, CartItem.ObjectMap, dc);
 			CartItem.Update(new Hashtable(){{"Day",0}}, new Hashtable(){{"Day", DBNull.Value}}, CartItem.ObjectMap, dc);
 			PasswordResetToken.Update(new Hashtable(){{"Used",false}}, new Hashtable(){{"Used", DBNull.Value}}, PasswordResetToken.ObjectMap, dc);
