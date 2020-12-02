@@ -73,7 +73,7 @@ namespace AfterSchoolLibrary.Services
                 return transaction.Amount.Value;
             }
 
-            return transaction.Amount.Value - transaction.GetFees();
+            return Math.Max(transaction.Amount.Value - transaction.GetFees(),0);
         }
 
         public static decimal GetPayerAmount(this Transaction transaction)
@@ -303,14 +303,17 @@ namespace AfterSchoolLibrary.Services
                         dc) > 0;
         }
 
-        public static bool IsTotallyRefunded(this Transaction transaction, bool includeFees, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool IsTotallyRefunded(this Transaction transaction, bool includeFees, bool allowFullRefundAmount = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (transaction.IsCharge())
             {
                 var amount = transaction.GetPayerAmount();
 
                 if (!includeFees)
-                    amount = transaction.GetBillerAmount(msgs, dc);
+                    amount = transaction.GetBillerPayout(msgs, dc);
+
+                if (allowFullRefundAmount)
+                    amount = transaction.Amount.Value;
 
                 return transaction.GetRefundedAmount(msgs, dc) >= amount;
             }
@@ -328,9 +331,9 @@ namespace AfterSchoolLibrary.Services
             if (transaction.IsCharge())
             {
                 if (allowFullAmountRefund)
-                    return transaction.GetPayerAmount() - transaction.GetRefundedAmountAHQ(msgs, dc);
+                    return transaction.Amount.Value;
 
-                return transaction.GetBillerPayout(msgs, dc) + transaction.GetFeesChargedToBiller();
+                return transaction.Amount.Value - transaction.PaymentTypeFeeCharged.Value;
             }
 
             return 0;
