@@ -20,85 +20,160 @@
 
 <style>
 
+    /*.. TODO : move this to common css later*/
+    .main-content {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #signup-welcome {
+        width: 1040px;
+    }
+
+    .welcome-outer-ring {
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0 2px 9px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .welcome-inner-ring {
+        padding: 112px 187px 162px 143px;
+        border-radius: 6px;
+        background-color: #f9fcfb;
+    }
+
+    .img-client-success-manager {
+        width: 217px;
+        height: 270px;
+        margin: 0 36px 30px 0px;
+        border-radius: 6px;
+        border: solid 1px #00c5a3;
+        float: left;
+    }
+
+    .manager-name {
+        width: 143px;
+        height: 22px;
+        margin: 0 73px 7px 37px;
+        font-family: Montserrat;
+        font-size: 18px;
+        font-weight: bold;
+        font-stretch: normal;
+        font-style: normal;
+        line-height: normal;
+        letter-spacing: normal;
+        text-align: center;
+        color: #00c5a3;
+    }
+
+    .manager-position {
+        width: 217px;
+        height: 22px;
+        margin: 7px 36px 5px 0;
+        font-family: Montserrat;
+        font-size: 18px;
+        font-weight: normal;
+        font-stretch: normal;
+        font-style: normal;
+        line-height: normal;
+        letter-spacing: normal;
+        text-align: center;
+        color: #4a4a4a;
+    }
+
+    .welcome-text {
+        font-family: Montserrat;
+        font-size: 25px;
+        font-weight: bold;
+        font-stretch: normal;
+        font-style: normal;
+        line-height: normal;
+        letter-spacing: normal;
+        text-align: center;
+        color: #4a4a4a;
+    }
+
+    .common-font {
+        font-family: Montserrat;        
+        font-weight: normal;
+        font-stretch: normal;
+        font-style: normal;
+        line-height: normal;
+        letter-spacing: normal;
+        color: #4a4a4a;
+    }
+
+    .btn-proceedfuther {
+        width: 250px;
+        margin-top: 60px;
+        border-radius: 6px;
+        background-color: #00c5a3;
+    }
 </style>
+
 <div class="row main-content">
 
-    <div id="signup-welcome" class="row">
-        <div class="col-md-offset-3 col-md-6">
-            @*<h2 class="text-center">Welcome</h2>
-            <div class="clearfix"></div>
-            <br />
-            <br />*@
+    <div id="signup-welcome">
 
-            <div class="visible-lg" style="padding: 10px; border-radius: 8px; box-shadow: 0 2px 9px 5px rgba(0, 0, 0, 0.2);">
-                <div style="padding: 112px 187px 162px 143px; border-radius: 6px; background-color: #f9fcfb;">
-                    <img src="~/img/client_success_manager.jpeg" alt="@clientSuccessManagerName" style="width: 217px; height: 270px; margin: 0 36px 30px 0px; border-radius: 6px; border: solid 1px #00c5a3; float: left;">
-                    <span style="font-family: Montserrat; font-size: 25px; font-weight: bold; font-stretch: normal; font-style: normal; line-height: normal; letter-spacing: normal; text-align: center; color: #4a4a4a;">Welcome</span>
+        <div class="visible-lg visible-md welcome-outer-ring">
+            <div class="welcome-inner-ring">
+
+                <div class="pull-left">
+                    <img src="~/img/client_success_manager.jpeg" alt="@clientSuccessManagerName" class="img-client-success-manager">
                     <div class="clearfix"></div>
-                    <!--<div class="col-md-3">-->
-                        
-                        @*<div class="clearfix"></div>
-                        <br />
-                        <div class="pull-left">
-                            <h5>@clientSuccessManagerName</h5>
-                            <h6>Client Success Manager</h6>
-                        </div>*@
-                    <!--</div>
-                    <div class="col-md-9">
-                        <span style="width: 120px; height: 30px; margin: 0 316px 6px 37px; font-family: Montserrat; font-size: 25px; font-weight: bold; font-stretch: normal; font-style: normal; line-height: normal; letter-spacing: normal; text-align: center; color: #4a4a4a;">Welcome</span>-->
-                        @*<p class="text-medium">Thank you for joining us at AfterSchool HQ! </p>
-                        <p class="text-medium-small">Boisterous cheers and applause for taking the first step towards streamlining the promotion and management of your enrichment program. To get your program up and running on our platform, we just need a few bits of information from you. </p>
-                        <p class="text-medium-small">I promise it will be quick, painless, and well worth a few minutes of your time.</p>*@
-                    <!--</div>-->
+                    <p class="manager-name">@clientSuccessManagerName</p>
+                    <p class="manager-position">Client Success Manager</p>
                 </div>
-                <div class="clearfix"></div>
-            </div>
 
-            <div class="visible-md">
-                <div class="col-md-4" style="padding: 0;">
-                    <img src="~/img/client_success_manager.jpeg" alt="@clientSuccessManagerName" style="max-width: 110px;">
+                <div>
+                    <span class="welcome-text">Welcome</span>
+                    <p class="common-font" style="font-size: 20px; margin: 6px 1px 17px 36px;">Thank you for joining us at AfterSchool HQ! </p>
+                    <p class="common-font" style="font-size: 18px; margin: 17px 0 25px 37px;">Boisterous cheers and applause for taking the first step towards streamlining the promotion and management of your enrichment program. To get your program up and running on our platform, we just need a few bits of information from you. </p>
+                    <p class="common-font" style="font-size: 18px;">I promise it will be quick, painless, and well worth a few minutes of your time.</p>
+                    <button id="btn-GetStarted" type="button" class="col-md-3 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center btn-proceedfuther" onclick="return proceedFurther('@EnumSignupPages.WelCome')">Get Started</button>
                     <div class="clearfix"></div>
-                    <br />
-                    <div class="pull-left">
-                        <h5>@clientSuccessManagerName</h5>
-                        <h6>Client Success Manager</h6>
-                    </div>
                 </div>
-                <div class="col-md-8" style="padding: 0;">
-                    <p class="text-medium">Thank you for joining us at AfterSchool HQ! </p>
-                    <p class="text-medium-small">Boisterous cheers and applause for taking the first step towards streamlining the promotion and management of your enrichment program. To get your program up and running on our platform, we just need a few bits of information from you. </p>
-                    <p class="text-medium-small">I promise it will be quick, painless, and well worth a few minutes of your time.</p>
-                </div>
-                <div class="clearfix"></div>
-            </div>
-
-            <div class="visible-xs visible-sm">
-                <div class="col-sm-12 col-xs-12 text-center">
-                    <p class="text-medium">Thank you for joining us at AfterSchool HQ! </p>
-                    <br />
-                    <p class="text-medium-small">Boisterous cheers and applause for taking the first step towards streamlining the promotion and management of your enrichment program. To get your program up and running on our platform, we just need a few bits of information from you. </p>
-                    <p class="text-medium-small">I promise it will be quick, painless, and well worth a few minutes of your time.</p>
-                </div>
-                <div class="clearfix"></div>
-                <div class="col-sm-12 col-xs-12 margin-t-30">
-                    <div class="pull-left">
-                        <img src="~/img/client_success_manager.jpeg" alt="@clientSuccessManagerName" style="max-width: 70px;">
-                    </div>
-                    <div class="pull-left" style="margin-left: 20px;">
-                        <h5>@clientSuccessManagerName</h5>
-                        <h6>Client Success Manager</h6>
-                    </div>
-                </div>
-                <div class="clearfix"></div>
-            </div>
-
-            <div class="clearfix"></div>
-            <div class="text-center margin-v-40">
-                <button id="btn-GetStarted" type="button" class="col-md-3 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.WelCome')">Get Started</button>
                 <div class="clearfix"></div>
             </div>
             <div class="clearfix"></div>
         </div>
+
+        <div class="visible-xs visible-sm welcome-outer-ring" style="margin-bottom: 20px;">
+            <div style="padding: 10px; border-radius: 6px; background-color: #f9fcfb;">
+                <h2 class="text-center welcome-text">Welcome</h2>
+                <div class="clearfix"></div>
+                <br />
+
+                <div class="col-sm-12 col-xs-12 text-center">
+                    <p class="common-font" style="font-size: 20px; margin: 6px 1px 17px 0px;">Thank you for joining us at AfterSchool HQ! </p>
+                    <p class="common-font" style="font-size: 18px; margin: 17px 0 25px 0px;">Boisterous cheers and applause for taking the first step towards streamlining the promotion and management of your enrichment program. To get your program up and running on our platform, we just need a few bits of information from you. </p>
+                    <p class="common-font" style="font-size: 18px;">I promise it will be quick, painless, and well worth a few minutes of your time.</p>
+                </div>
+
+                <div class="col-sm-12 col-xs-12 margin-t-30">
+                    <div class="pull-left">
+                        <img src="~/img/client_success_manager.jpeg" alt="@clientSuccessManagerName" style="max-width: 70px; border-radius: 6px; border: solid 1px #00c5a3;">
+                    </div>
+                    <div class="pull-left" style="margin-left: 20px;">
+                        <p style=" font-family: Montserrat; font-size: 18px; font-weight: bold; font-stretch: normal; font-style: normal; line-height: normal; letter-spacing: normal; text-align: left; color: #00c5a3;">@clientSuccessManagerName</p>
+                        <p style=" font-family: Montserrat; font-size: 18px; font-weight: normal; font-stretch: normal; font-style: normal; line-height: normal; letter-spacing: normal; text-align: left; color: #4a4a4a;">Client Success Manager</p>
+                    </div>
+                </div>
+
+                <div class="clearfix"></div>
+                <div class="text-center margin-v-40">
+                    <button id="btn-GetStarted" type="button" class="col-md-3 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center btn-proceedfuther" onclick="return proceedFurther('@EnumSignupPages.WelCome')">Get Started</button>
+                    <div class="clearfix"></div>
+                </div>
+
+                <div class="clearfix"></div>
+            </div>
+
+            <div class="clearfix"></div>
+        </div>
+
+        <div class="clearfix"></div>
     </div>
 
     <div id="signup-select-usertype" style="display: none;">
@@ -454,7 +529,7 @@
                                 }
 
                                 list.append(`
-                                <div 
+                                <div
                                     style="${signupListLastItemStyle} ${borderStyle}"
                                     class="${signupListItemClass}"
                                     id="signup-search-listItem-0"
@@ -541,7 +616,7 @@
                 if (selectedAccount.isClaimed) {
                     headerClaimProfileMain.text('Request Access');
                     headerAccountExist.hide();
-                    headerAccountClaimed.show();                    
+                    headerAccountClaimed.show();
                     proceedFurther('@EnumSignupPages.ClaimProfile');
                     btnSaveClaims.html('Request Access &raquo;');
                 } else {
@@ -699,7 +774,7 @@
         var inputElement = document.getElementById('signup-claim-profile-phone');
         inputElement.addEventListener('keydown', enforceFormat);
         inputElement.addEventListener('keyup', formatToPhone);
-       
+
     // #endregion: phone number validation
 
     </script>
