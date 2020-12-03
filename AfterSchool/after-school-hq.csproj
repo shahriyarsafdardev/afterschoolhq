@@ -688,6 +688,7 @@
     <Content Include="img\banner-classroom.jpg" />
     <Content Include="img\BCALogo.jpg" />
     <Content Include="img\billy2.png" />
+    <Content Include="img\client_success_manager.jpeg" />
     <Content Include="img\darye.png" />
     <Content Include="img\david.png" />
     <Content Include="img\fee.png" />
@@ -1813,6 +1814,7 @@
     <Content Include="Views\Shared\_UpgradePlan.cshtml" />
     <Content Include="Views\Shared\_PaymentSources.cshtml" />
     <Content Include="Views\Shared\ParticipationObject\_TuitionAndPostPayPlans.cshtml" />
+    <Content Include="Views\Shared\Layouts\_FullScreen_Onboarding.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
