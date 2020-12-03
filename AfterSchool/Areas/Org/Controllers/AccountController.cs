@@ -1254,8 +1254,9 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Billing()
         {
             Account a = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
 
-            var packages = AccountPackage.LoadByAccountId(a.ID.Value);
+            var packages = a.GetAccountPackages(msgs);
 
             if (packages.Count <= 0 || !packages.Any(m => !m.IsFree))
                 return RedirectToAction("NewBilling");
@@ -1263,7 +1264,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.BillingHistory = a.GetStripeBillingHistory();
             ViewBag.RefundHistory = a.GetStripeRefundHistory();
             ViewBag.Cards = a.GetStripeCards();
-            ViewBag.Messages = new SystemMessages();
+            ViewBag.Messages = msgs;
             return View(a);
         }
 
