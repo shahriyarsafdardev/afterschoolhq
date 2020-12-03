@@ -58,7 +58,7 @@ namespace AfterSchool.Areas.Org.Controllers
                    // ..update profile title if account name has been changed 
                    if (name.IsNotEmpty() && a.Name != name)
                    {
-                       var profile = a.GetAccountProfile();
+                       var profile = a.GetAccountProfile(amsgs, adc);
 
                        if (profile.IsNotEmpty())
                        {
@@ -82,7 +82,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                        a.LastModifiedDate = DateTime.UtcNow;
                        a.LastModifiedBy = SessionVariables.CurrentUser.ID;
-                       msgs.AddRange(a.SaveWithStripe());                       
+                       amsgs.AddRange(a.SaveWithStripe(adc));                       
                    }
                },
                onSuccess: (SystemMessages smsgs) => {
