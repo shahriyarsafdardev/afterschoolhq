@@ -1841,7 +1841,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = Activity.LoadByUid(id.ToGuid());
             var mustRequestToPublish = MustRequestToPublish(activity);
             var account = SessionVariables.CurrentAccount;
-            var user = account.GetAccountOwner(msgs);
+            var currentUser = SessionVariables.CurrentUser;
 
             if (mustRequestToPublish)
                 msgs.Add("You do not have permissions to publish", MessageType.UserError);
@@ -1859,7 +1859,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         $"Account Profile Url: {account.HomePageUrl}<br />" +
                         $"Activity: {activity.Name}<br />" +
                         $"Url: {activity.HomePageUrl}<br />" +
-                        $"User: {user.FirstName} {user.LastName}<br />";
+                        $"User: {currentUser.FirstName} {currentUser.LastName}<br />";
 
                 var registrationDate = activity.GetActiveRegistrationPeriod();
                 if (registrationDate.IsNotEmpty() && registrationDate.StartDateTime.IsNotEmpty())
@@ -1880,7 +1880,8 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.MustRequestToPublish = mustRequestToPublish;
             ViewBag.ShowCopyButton = ShowCopyButtonOnPublishDetail(activity);
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
-            
+
+            var user = account.GetAccountOwner(msgs);
             if (user.IsNotEmpty() && account.IsNotEmpty())
             {
                 SendGridHelper.AddOrUpdateContact(account, user, msgs);
