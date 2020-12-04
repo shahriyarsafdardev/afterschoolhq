@@ -472,16 +472,19 @@ namespace AfterSchool.Areas.Org.Controllers
                 var ids = activityIds.Split(',').Select(p => Convert.ToInt32(p)).ToList();
                 var activities = Activity.LoadList(ids, msgs);
 
+                var loggedInUser = SessionVariables.CurrentUser;
+                var account = SessionVariables.CurrentAccount;
+
                 Database.ExecuteTransaction
                (
                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
                    {
                    // create new coupon
-                   var coupon = SessionVariables.CurrentAccount.CreateCoupon(
+                   var coupon = account.CreateCoupon(
                         amount.ToDecimal(),
                         expirationDate.ToDateTime(),
-                        amountType: (CouponAmountType)Enum.Parse(typeof(CouponAmountType), amountType),
-                        applyType: (CouponApplyType)Enum.Parse(typeof(CouponApplyType), applyType),
+                        amountType: amountType.ToInteger().ToEnum<CouponAmountType>(),
+                        applyType: applyType.ToInteger().ToEnum<CouponApplyType>(),
                         maxUsesAll: maxUsesAll.ToInteger(),
                         maxUsesPerPerson: maxUsesPerPerson.ToInteger(),
                         couponCode: couponCode,
@@ -489,7 +492,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         description: description.IsBlank() ? "" : description,
                         couponDuration: AfterSchoolLibrary.Billing.StripeCouponDuration.Once, // TODO :  figure this out
                         durationInMonths: null,
-                        loggedInUser: SessionVariables.CurrentUser,
+                        loggedInUser: loggedInUser,
                         msgs: amsgs,
                         dc: adc);
 
@@ -499,15 +502,12 @@ namespace AfterSchool.Areas.Org.Controllers
                            var poc = PurchaseableObjectCouponService.CreateNew(
                             purchaseableObject: activity.GetPurchaseableObject(),
                             coupon: coupon,
-                            loggedInUser: SessionVariables.CurrentUser,
+                            loggedInUser: loggedInUser,
                             msgs: amsgs,
                             dc: adc);
                        });
                    },
-                   onSuccess: (SystemMessages smsgs) =>
-                   {
-                       msgs.AddRange(smsgs);
-                   },
+                   onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                    onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(msgs)
                );

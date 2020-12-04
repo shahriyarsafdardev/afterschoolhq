@@ -14,7 +14,7 @@ namespace AfterSchoolLibrary.Models
         public PurchaseableObjectType ObjectType { get; set; }
         public string Name { get; set; }
 
-        public ParticipationObject? ParticipationObject { get; set; }
+        public ParticipationObject ParticipationObject { get; set; }
 
         public bool IsActivity()
         {

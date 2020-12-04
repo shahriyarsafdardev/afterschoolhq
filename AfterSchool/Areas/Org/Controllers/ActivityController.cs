@@ -1745,6 +1745,11 @@ namespace AfterSchool.Areas.Org.Controllers
                             expirationDate: expirationDate,
                             amountType: discountType,
                             applyType: couponApplyType,
+                            maxUsesAll: 1, //
+                            maxUsesPerPerson: 1,
+                            couponCode: "code",
+                            label: "label",
+                            description: "description",
                             durationInMonths: durationInMonths,
                             couponDuration: duration,
                             loggedInUser: SessionVariables.CurrentUser,

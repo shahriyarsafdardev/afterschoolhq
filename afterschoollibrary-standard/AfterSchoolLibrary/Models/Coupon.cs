@@ -230,12 +230,20 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		
 
-        #endregion
+
+		#endregion
 
 		#region "UserDefined"
 
-        #endregion
-    }
+		public static List<Coupon> LoadByAccountId(int AccountId,string search, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> particiPationObjects, bool isDeleted, int? start, int? length,  SystemMessages msgs, DatabaseConnection dc)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		#endregion
+	}
 }
