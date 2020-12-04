@@ -287,6 +287,7 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult PaymentsEntity()
         {
+            //.. this view is depreciated and paymentsoptions is the right view
             var msgs = new SystemMessages();
             var paymentsEntityVM = PaymentsEntityViewModel.LoadFromStripeAccount(SessionVariables.CurrentAccount.GetStripeCustomAccount(msgs));
 
@@ -417,17 +418,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                //.. send support email to AHQ just to notifiy the team that a payment has been added/updated.
-                var body = $"<p>Account: {account.Name}<br />" +
-                        $"Account Profile Url: {account.HomePageUrl}<br />" +
-                        $"User: {user.FirstName} {user.LastName}<br />";
-
-                EmailHelper.SendEmail(
-                    toEmail: AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress,
-                    subject: $"{account.Name} has connected their stripe account",
-                    body,
-                    isAfterSchool: true);
-
                 msgs.Add("Your update information has been submitted.", MessageType.Success);
 
                 //if (startingStatus != stripeAccount.VerificationStatusId && stripeAccount.VerificationStatusId == StripeVerificationStatus.Verified)
@@ -499,8 +489,20 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.IsFullScreen = GetIsFullScreen();
 
             var account = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
             var user = account.GetAccountOwner(msgs);
-            
+
+            //.. send support email to AHQ just to notifiy the team that a payment has been added/updated.
+            var body = $"<p>Account: {account.Name}<br />" +
+                    $"Account Profile Url: {account.HomePageUrl}<br />" +
+                    $"User: {currentUser.FirstName} {currentUser.LastName}<br />";
+
+            EmailHelper.SendEmail(
+                toEmail: AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress,
+                subject: $"{account.Name} has connected their stripe account",
+                body,
+                isAfterSchool: true);
+
             if (user.IsNotEmpty() && account.IsNotEmpty())
             {
                 SendGridHelper.AddOrUpdateContact(account, user, msgs);
