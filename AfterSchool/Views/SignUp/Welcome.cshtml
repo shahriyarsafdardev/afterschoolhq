@@ -19,19 +19,6 @@
 }
 
 <style>
-    .Fill-1 {
-        width: 32px;
-        height: 32px;
-        margin: 11px 260px 9.5px 0;
-        padding: 9px 13px 8px 10px;
-        background-color: #c3eae0;
-    }
-
-    .Fill-2 {
-        width: 9px;
-        height: 15px;
-        background-color: #c3eae0;
-    }
 
     /*.. TODO : move this to common css later*/
     .main-content {
@@ -215,17 +202,15 @@
                 <div class="clearfix"></div>
 
                 <div class="row margin-t-35">
-                    <button type="button" class="col-md-6 btn btn-lg btn-primary btn-center btn-common" onclick="return proceedFurther('@EnumSignupPages.SelectIndividualType')">Create an Individual Account</button>
+                    <button type="button" class="col-md-8 btn btn-lg btn-primary btn-center btn-common" onclick="return proceedFurther('@EnumSignupPages.SelectIndividualType')">Create an Individual Account</button>
                     <div class="clearfix"></div><br />
-                    <button type="button" class="col-md-6 btn btn-lg btn-primary btn-center btn-common" onclick="return proceedFurther('@EnumSignupPages.SelectOrgType')">Create an Organization Account</button>
+                    <button type="button" class="col-md-8 btn btn-lg btn-primary btn-center btn-common" onclick="return proceedFurther('@EnumSignupPages.SelectOrgType')">Create an Organization Account</button>
                 </div>
                 <div class="clearfix"></div>
 
-                <div class="text-center margin-v-30">
-
-                    <a class="Fill-1"><p class="Fill-2"></p></a>
-                    @*<a href="#" class="text-muted" onclick="return proceedBack('@EnumSignupPages.WelCome')">&laquo; Back</a>*@
-                </div>
+                <a href="#" style="margin-left: -120px;" onclick="return proceedBack('@EnumSignupPages.WelCome')">
+                    <img style="margin-top: -150px;" src="~/img/welcome-back-arrow.PNG" />
+                </a>
             </div>
         </div>
 
