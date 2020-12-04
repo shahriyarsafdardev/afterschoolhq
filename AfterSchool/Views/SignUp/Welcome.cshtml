@@ -27,7 +27,7 @@
         align-items: center;
     }
 
-    #signup-welcome, #signup-select-usertype {
+    #signup-welcome, #signup-select-usertype, #signup-individualtype {
         width: 1040px;
     }
 
@@ -234,21 +234,43 @@
     </div>
 
     <div id="signup-individualtype" style="display: none;">
-        <div class="col-lg-offset-4 col-lg-4 col-md-offset-3 col-md-6 col-sm-12">
-            <h2 class="text-center">What would you like to do?</h2>
-            <div class="clearfix"></div>
 
-            <div class="row margin-t-35">
-                <button id="btn-ProgramForStudents" type="button" class="col-sm-8 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SearchProgramName')">Provide programs for students</button>
-                <div class="clearfix"></div><br />
-                <button id="btn-EnrollChild" type="button" class="col-sm-8 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SearchSchool')">Enroll my child in a program</button>
-            </div>
-            <div class="clearfix"></div>
+        <div class="visible-lg visible-md welcome-outer-ring">
+            <div class="welcome-inner-ring">
+                <h2 class="text-center common-font" style="font-size: 24px;">What would you like to do?</h2>
+                <div class="clearfix"></div>
 
-            <div class="text-center margin-v-30">
-                <a href="#" class="text-muted" onclick="return proceedBack('@EnumSignupPages.SelectUserType')">&laquo; Back</a>
+                <div class="row margin-t-35">
+                    <button type="button" class="col-md-8 btn btn-lg btn-primary btn-center btn-common" onclick="return proceedFurther('@EnumSignupPages.SearchProgramName')">Provide programs for students</button>
+                    <div class="clearfix"></div><br />
+                    <button type="button" class="col-md-8 btn btn-lg btn-primary btn-center btn-common" onclick="return proceedFurther('@EnumSignupPages.SearchSchool')">Enroll my child in a program</button>
+                </div>
+                <div class="clearfix"></div>
+
+                <a href="#" style="margin-left: -120px;" onclick="return proceedBack('@EnumSignupPages.SelectUserType')">
+                    <img style="margin-top: -150px;" src="~/img/welcome-back-arrow.PNG" />
+                </a>
             </div>
         </div>
+
+        <div class="visible-xs visible-sm welcome-outer-ring" style="margin-bottom: 20px;">
+            <div style="padding: 10px; border-radius: 6px; background-color: #f9fcfb; min-height: 676.95px;">
+                <h2 class="text-center common-font" style="font-size: 24px;">What would you like to do?</h2>
+                <div class="clearfix"></div>
+
+                <div class="row margin-t-35">
+                    <button type="button" class="col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center btn-common-mobile" onclick="return proceedFurther('@EnumSignupPages.SearchProgramName')">Provide programs for students</button>
+                    <div class="clearfix"></div><br />
+                    <button type="button" class="col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center btn-common-mobile" onclick="return proceedFurther('@EnumSignupPages.SearchSchool')">Enroll my child in a program</button>
+                </div>
+                <div class="clearfix"></div>
+
+                <div class="text-center margin-v-30">
+                    <a href="#" class="text-muted" onclick="return proceedBack('@EnumSignupPages.SelectUserType')">&laquo; Back</a>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <div id="signup-orgtype" style="display: none;">
