@@ -35,4 +35,10 @@
     .datetimepicker-mobile {
         padding: 0 !important;
     }
+
+    .search-inner-ring {
+        padding: 112px 187px 162px 143px;
+        border-radius: 6px;
+        background-color: #f9fcfb;
+    }
 }

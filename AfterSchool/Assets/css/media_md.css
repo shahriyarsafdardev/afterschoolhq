@@ -43,4 +43,10 @@
     .display-days {
         display: inline-flex;
     }
+
+    .search-inner-ring {
+        padding: 112px 187px 162px 143px;
+        border-radius: 6px;
+        background-color: #f9fcfb;
+    }
 }

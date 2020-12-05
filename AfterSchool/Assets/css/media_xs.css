@@ -74,4 +74,11 @@
     .display-days {
         display: grid;
     }
+
+    .search-inner-ring {
+        padding: 10px;
+        border-radius: 6px;
+        background-color: #f9fcfb;
+        min-height: 676.95px;
+    }
 }

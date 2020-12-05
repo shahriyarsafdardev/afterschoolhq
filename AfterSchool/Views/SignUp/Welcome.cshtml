@@ -27,7 +27,7 @@
         align-items: center;
     }
 
-    #signup-welcome, #signup-select-usertype, #signup-individualtype {
+    #signup-welcome, #signup-select-usertype, #signup-individualtype, #signup-search-name, #signup-orgtype {
         width: 1040px;
     }
 
@@ -41,6 +41,13 @@
         padding: 112px 187px 162px 143px;
         border-radius: 6px;
         background-color: #f9fcfb;
+    }
+
+    .mobile-inner-ring {
+        padding: 10px;
+        border-radius: 6px;
+        background-color: #f9fcfb;
+        min-height: 676.95px;
     }
 
     .img-client-success-manager {
@@ -95,7 +102,7 @@
     }
 
     .common-font {
-        /*font-family: Montserrat;*/        
+        /*font-family: Montserrat;*/
         font-weight: normal;
         font-stretch: normal;
         font-style: normal;
@@ -121,12 +128,30 @@
         background-color: #00c5a3;
         padding: 15px 54px 16px 72px;
         font-size: 18px;
+        width: 390px;
     }
 
     .btn-common-mobile {
         width: 250px;
         border-radius: 6px;
         background-color: #00c5a3;
+    }
+
+    .btn-org-height-width {
+        height: 53px;
+        width: 219px;
+    }
+
+    .btn-org-common {
+        font-weight: normal;
+        font-stretch: normal;
+        font-style: normal;
+        line-height: normal;
+        letter-spacing: normal;
+        border-radius: 6px;
+        background-color: #00c5a3;
+        padding: 15px 12px 16px;
+        font-size: 18px;
     }
 </style>
 
@@ -158,7 +183,7 @@
         </div>
 
         <div class="visible-xs visible-sm welcome-outer-ring" style="margin-bottom: 20px;">
-            <div style="padding: 10px; border-radius: 6px; background-color: #f9fcfb;">
+            <div class="mobile-inner-ring">
                 <h2 class="text-center welcome-text">Welcome</h2>
                 <div class="clearfix"></div>
                 <br />
@@ -215,7 +240,7 @@
         </div>
 
         <div class="visible-xs visible-sm welcome-outer-ring" style="margin-bottom: 20px;">
-            <div style="padding: 10px; border-radius: 6px; background-color: #f9fcfb; min-height: 676.95px;">
+            <div class="mobile-inner-ring">
                 <h2 class="text-center common-font" style="font-size: 24px;">What would you like to do?</h2>
                 <div class="clearfix"></div>
 
@@ -233,6 +258,7 @@
         </div>
     </div>
 
+    <div class="clearfix"></div>
     <div id="signup-individualtype" style="display: none;">
 
         <div class="visible-lg visible-md welcome-outer-ring">
@@ -254,7 +280,7 @@
         </div>
 
         <div class="visible-xs visible-sm welcome-outer-ring" style="margin-bottom: 20px;">
-            <div style="padding: 10px; border-radius: 6px; background-color: #f9fcfb; min-height: 676.95px;">
+            <div class="mobile-inner-ring">
                 <h2 class="text-center common-font" style="font-size: 24px;">What would you like to do?</h2>
                 <div class="clearfix"></div>
 
@@ -273,47 +299,100 @@
 
     </div>
 
+    <div class="clearfix"></div>
     <div id="signup-orgtype" style="display: none;">
-        <div class="col-lg-offset-4 col-lg-4 col-md-offset-3 col-md-6 col-sm-12">
-            <h2 class="text-center">What kind of organization?</h2>
-            <div class="clearfix"></div>
 
-            <div class="row margin-t-35">
-                <button id="btn-Business" type="button" class="col-sm-8 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.Business')">Business</button>
-                <div class="clearfix"></div><br />
-                <button id="btn-School" type="button" class="col-sm-8 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.School')">School</button>
-                <div class="clearfix"></div><br />
-                <button id="btn-CommunityCenter" type="button" class="col-sm-8 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.CommunityCenter')">Community Center</button>
-                <div class="clearfix"></div><br />
-                <button id="btn-Church" type="button" class="col-sm-8 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.Church')">Church</button>
-                <div class="clearfix"></div><br />
-                <button id="btn-NonProfit" type="button" class="col-sm-8 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.ActivityProvider')">Non Profit</button>
+        <div class="visible-lg visible-md welcome-outer-ring">
+            <div class="welcome-inner-ring">
+                <h2 class="text-center common-font" style="font-size: 24px;">What kind of organization?</h2>
+                <div class="clearfix"></div>
+
+                <div class="row margin-t-35">
+                    <div class="col-md-offset-2 col-md-4">
+                        <button type="button" class="btn btn-primary btn-center btn-common btn-org-height-width" style="padding: 15px 57px 16px 58px;" onclick="return setOrgTypeAndProceedFurther('@AccountType.Business')">Business</button>
+                        <div class="clearfix"></div><br />
+
+                        <button type="button" class="btn btn-primary btn-center btn-common btn-org-height-width" style="padding: 16px 69px 15px;" onclick="return setOrgTypeAndProceedFurther('@AccountType.School')">School</button>
+                        <div class="clearfix"></div><br />
+
+                        <button type="button" class="btn btn-primary btn-center btn-org-height-width btn-org-common" onclick="return setOrgTypeAndProceedFurther('@AccountType.CommunityCenter')">Community Center</button>
+                        <div class="clearfix"></div><br />
+                    </div>
+                    <div class="col-md-4">
+                        <button type="button" class="btn btn-primary btn-center btn-org-height-width btn-org-common" onclick="return setOrgTypeAndProceedFurther('@AccountType.Church')">Church</button>
+                        <div class="clearfix"></div><br />
+
+                        <button type="button" class="btn btn-primary btn-center btn-org-height-width btn-org-common" onclick="return setOrgTypeAndProceedFurther('@AccountType.ActivityProvider')">Non Profit</button>
+                        <div class="clearfix"></div><br />
+
+                        <button type="button" class="btn btn-primary btn-center btn-org-height-width btn-org-common" onclick="return setOrgTypeAndProceedFurther('@AccountType.ActivityProvider')">Other</button>
+                        <div class="clearfix"></div><br />
+                    </div>
+                    <div class="clearfix"></div><br />
+
+                </div>
+                <div class="clearfix"></div>
+
+                <a href="#" style="margin-left: -120px;" onclick="return proceedBack('@EnumSignupPages.SelectUserType')">
+                    <img style="margin-top: -270px;" src="~/img/welcome-back-arrow.PNG" />
+                </a>
             </div>
-            <div class="clearfix"></div>
+        </div>
 
-            <div class="text-center margin-v-30">
-                <a href="#" class="text-muted" onclick="return proceedBack('@EnumSignupPages.SelectUserType')">&laquo; Back</a>
+        <div class="visible-xs visible-sm welcome-outer-ring" style="margin-bottom: 20px;">
+            <div class="mobile-inner-ring">
+                <h2 class="text-center common-font" style="font-size: 24px;">What kind of organization?</h2>
+                <div class="clearfix"></div>
+
+                <div class="row margin-t-35">
+                    <button type="button" class="col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center btn-common-mobile" onclick="return setOrgTypeAndProceedFurther('@AccountType.Business')">Business</button>
+                    <div class="clearfix"></div><br />
+                    <button type="button" class="col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center btn-common-mobile" onclick="return setOrgTypeAndProceedFurther('@AccountType.School')">School</button>
+                    <div class="clearfix"></div><br />
+                    <button type="button" class="col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center btn-common-mobile" onclick="return setOrgTypeAndProceedFurther('@AccountType.CommunityCenter')">Community Center</button>
+                    <div class="clearfix"></div><br />
+                    <button type="button" class="col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center btn-common-mobile" onclick="return setOrgTypeAndProceedFurther('@AccountType.Church')">Church</button>
+                    <div class="clearfix"></div><br />
+                    <button type="button" class="col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center btn-common-mobile" onclick="return setOrgTypeAndProceedFurther('@AccountType.ActivityProvider')">Non Profit</button>
+                    <div class="clearfix"></div><br />
+                </div>
+                <div class="clearfix"></div>
+
+                <div class="text-center margin-v-30">
+                    <a href="#" class="text-muted" onclick="return proceedBack('@EnumSignupPages.SelectUserType')">&laquo; Back</a>
+                </div>
             </div>
         </div>
     </div>
 
     <div id="signup-search-name" style="display: none;">
-        <div class="col-lg-offset-4 col-lg-4 col-md-offset-3 col-md-6 col-sm-12">
-            <h2 id="lbl-org-search-title" class="text-center"></h2>
-            <div class="clearfix"></div>
+        <div class="welcome-outer-ring">
+            <div class="search-inner-ring">                
+                <div class="">                   
 
-            <div class="row margin-t-35">
-                <div class="">
-                    <input type="text" class="form-control" id="signup-account-search" placeholder="placeholder" autocomplete="off" />
-                    <div id="signup-account-search-list" class="border-light-gray pointer hide" style="position:absolute; width:100%; z-index:1000; background-color: white; border-width: 2px;"></div>
+                    <div class="visible-md visible-lg">
+                        <a href="#" style="margin-left: -120px;" onclick="return proceedBack('@EnumSignupPages.SearchProgramName')">
+                            <img style=" position: fixed; margin-top: 150px;" src="~/img/welcome-back-arrow.PNG" />
+                        </a>                        
+                    </div>
+
+                    <h2 id="lbl-org-search-title" class="text-center"></h2>
+                    <div class="clearfix"></div>
+
+                    <div class="row margin-t-35">
+                        <div class="col-md-12">
+                            <label id="signup-search-label" style="font-size: 14px; font-weight: 600; font-stretch: normal; font-style: normal; line-height: normal; letter-spacing: 1.56px; text-align: center; color: #00c5a3;"></label>
+                            <input id="signup-account-search" type="text" class="form-control" autocomplete="off" style="height: 50px; margin: 5px 0 0; border-radius: 6px; border: solid 1px #00ae85; background-color: #ffffff;" />
+                            <div id="signup-account-search-list" class="border-light-gray pointer hide" style="z-index:1000; background-color: white; border-width: 2px;"></div>
+                        </div>
+                        <div class="clearfix"></div><br />                        
+                    </div>
                 </div>
                 <div class="clearfix"></div><br />
 
-                <div class="visible-md visible-lg margin-v-30">
-                    <a href="#" class="text-muted" onclick="return proceedBack('@EnumSignupPages.SearchProgramName')">&laquo; Back</a>
-                    <button type="button" class="btn-SearchContinue col-md-3 btn btn-primary btn-lg pull-right" disabled="disabled" onclick="return decideToProceedFurther(this)">Continue &raquo;</button>
+                <div class="visible-md visible-lg">
+                    <button type="button" class="btn-SearchContinue btn btn-primary btn-center btn-common btn-org-height-width" disabled="disabled" onclick="return decideToProceedFurther(this)">Continue &raquo;</button>
                 </div>
-                <div class="clearfix"></div><br />
 
                 <div class="visible-sm visible-xs">
                     <button type="button" class="btn-SearchContinue btn btn-primary btn-lg pull-right col-xs-12" disabled="disabled" onclick="return decideToProceedFurther(this)">Continue &raquo;</button>
@@ -465,6 +544,7 @@
         var hiddeAccountType = $('#hidden-signup-accountType');
         var signupAccountSearchList = $('#signup-account-search-list');
         var signupAccountSearch = $('#signup-account-search');
+        var signupSearchLable = $('#signup-search-label');
         var signupListItemClass = "text-small padding-10";
         var signupListItemStyle = "background-color: #f0f0f0;";
         var signupListLastItemStyle = "background-color: #ddeae0;";
@@ -632,7 +712,7 @@
                 isSchool = false;
                 hiddeAccountType.val('@AccountType.Teacher');
                 lblOrgSearchTitle.text('What\'s the name of your program?');
-                signupAccountSearch.attr('placeholder', 'Type in your program name');
+                signupSearchLable.html('SEARCH OR ADD YOUR PROGRAM')
                 clearSearch();
                 signupIndividualType.hide();
                 signupSearchName.show();
@@ -641,7 +721,7 @@
                 isOrganization = true;
                 isSchool = false;
                 lblOrgSearchTitle.text('What\'s the name of your organization?');
-                signupAccountSearch.attr('placeholder', 'Type in your organization name');
+                signupSearchLable.html('SEARCH OR ADD YOUR ORGANIZATION')
                 clearSearch();
                 signupOrgType.hide();
                 signupSearchName.show();
@@ -649,7 +729,7 @@
                 isSchool = true;
                 isOrganization = false;
                 lblOrgSearchTitle.text('Find your school, organization or program');
-                signupAccountSearch.attr('placeholder', 'School, Organization or Proram name');
+                signupSearchLable.html('SEARCH OR ADD YOUR SCHOOL, ORGANIZATION OR PRORAM NAME')
                 clearSearch();
                 signupIndividualType.hide();
                 signupSearchName.show();
