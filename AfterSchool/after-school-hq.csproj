@@ -1816,6 +1816,7 @@
     <Content Include="Views\Shared\_PaymentSources.cshtml" />
     <Content Include="Views\Shared\ParticipationObject\_TuitionAndPostPayPlans.cshtml" />
     <Content Include="Views\Shared\Layouts\_FullScreen_Onboarding.cshtml" />
+    <Content Include="Views\Shared\Login\_SignUpForm-NewAccount-Welcome.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

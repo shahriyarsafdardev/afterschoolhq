@@ -27,7 +27,7 @@
         align-items: center;
     }
 
-    #signup-welcome, #signup-select-usertype, #signup-individualtype, #signup-search-name, #signup-orgtype {
+    #signup-welcome, #signup-select-usertype, #signup-individualtype, #signup-search-name, #signup-orgtype, #signup-register {
         width: 1040px;
     }
 
@@ -153,11 +153,62 @@
         padding: 15px 12px 16px;
         font-size: 18px;
     }
+
+    #signup-search-label {
+        font-size: 14px;
+        font-weight: 600;
+        font-stretch: normal;
+        font-style: normal;
+        line-height: normal;
+        letter-spacing: 1.56px;
+        text-align: center;
+        color: #00c5a3;
+    }
+
+    #signup-account-search {
+        height: 50px;
+        margin: 5px 0 0;
+        border-radius: 6px;
+        border: solid 1px #00ae85;
+        background-color: #ffffff;
+    }
+
+    #signup-account-search-list {
+        z-index: 1000;
+        background-color: white;
+        border-width: 2px;
+        position: absolute;
+        width: -webkit-fill-available;
+        width: -moz-available;
+        width: fill-available;
+        margin-right: 30px;
+    }
+
+    .onboarding-lable {
+        height: 18px;
+        margin: 0 522px 8px 0;
+        font-size: 14px;
+        font-weight: normal;
+        font-stretch: normal;
+        font-style: normal;
+        line-height: normal;
+        letter-spacing: 1.56px;
+        text-align: center;
+        color: #00c5a3;
+    }
+
+    .onboarding-input {
+        width: 627px;
+        height: 35px;
+        border-radius: 6px !important;
+        border: solid 1px #00c5a3;
+        background-color: #ffffff;
+    }
 </style>
 
 <div class="row main-content">
 
-    <div id="signup-welcome">
+    <div id="signup-welcome" style="display: none;">
 
         <div class="visible-lg visible-md welcome-outer-ring">
             <div class="welcome-inner-ring">
@@ -381,9 +432,9 @@
 
                     <div class="row margin-t-35">
                         <div class="col-md-12">
-                            <label id="signup-search-label" style="font-size: 14px; font-weight: 600; font-stretch: normal; font-style: normal; line-height: normal; letter-spacing: 1.56px; text-align: center; color: #00c5a3;"></label>
-                            <input id="signup-account-search" type="text" class="form-control" autocomplete="off" style="height: 50px; margin: 5px 0 0; border-radius: 6px; border: solid 1px #00ae85; background-color: #ffffff;" />
-                            <div id="signup-account-search-list" class="border-light-gray pointer hide" style="z-index:1000; background-color: white; border-width: 2px;"></div>
+                            <label id="signup-search-label"></label>
+                            <input id="signup-account-search" type="text" class="form-control" autocomplete="off" />
+                            <div id="signup-account-search-list" class="border-light-gray pointer hide"></div>
                         </div>
                         <div class="clearfix"></div><br />                        
                     </div>
@@ -407,23 +458,24 @@
         </div>
     </div>
 
-    <div id="signup-register" style="display: none;">
-        <div class="col-lg-offset-4 col-lg-4 col-md-offset-3 col-md-6 col-sm-12">
-            <div class="panel panel-default">
-                <div class="panel-heading text-center">
-                    <a href="/"><img src="@UILabel.ProductLogoInverse()" alt="logo" style="max-width: 100%; width: 350px;" class="logo-img"></a>
-                </div>
-                <div class="panel-body">
-                    <p class="text-medium-small text-center">Thanks for joining our platform to provide learning opportunities for students everywhere.</p>
-                    <p class="text-medium-small text-center">We just need a little information to get started.</p>
+    <div id="signup-register">
 
-                    <form id="form-signup-personal-details" class="form-horizontal" method="post" action="@Url.Action("index", "signup")">
-                        @{ Html.RenderPartial("~/Views/Shared/Login/_SignUpForm-NewAccount.cshtml", Model); }
-                    </form>
+        <div class="visible-lg visible-md welcome-outer-ring">
+            <div class="search-inner-ring" style="padding-bottom: 5px;">
+                <div class="">
+                    <div class="text-center">
+                        <div style="width: 15px; height: 15px; margin: 0 5px 0 0; background-color: #00c5a3; border-radius: 7px;"></div>                        
+                    </div>
+                    <div class="">
+                        <p class="" style="font-size: 22px; font-weight: 300; font-stretch: normal; font-style: normal; line-height: normal; letter-spacing: 0.53px; text-align: center; color: #4a4a4a; margin-bottom: 40px;">Thanks for joining our platform to provide learning opportunities for students everywhere.</p>
+                        <p class="" style="font-size: 22px; font-weight: 600; font-stretch: normal; font-style: normal; line-height: normal; letter-spacing: 0.53px; text-align: center; color: #4a4a4a; margin-bottom: 20px;">We just need a little information to get started.</p>
 
-                </div>
+                        <form id="form-signup-personal-details" class="form-horizontal" method="post" action="@Url.Action("index", "signup")">
+                            @{ Html.RenderPartial("~/Views/Shared/Login/_SignUpForm-NewAccount-Welcome.cshtml", Model); }
+                        </form>
+                    </div>
+                </div>                
             </div>
-            <div class="text-center out-links"><a href="/">&copy; @DateTime.UtcNow.Year @UILabel.ProductName()</a></div>
         </div>
     </div>
 
