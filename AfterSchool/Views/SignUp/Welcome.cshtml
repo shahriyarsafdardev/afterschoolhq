@@ -27,7 +27,7 @@
         align-items: center;
     }
 
-    #signup-welcome, #signup-select-usertype, #signup-individualtype, #signup-search-name, #signup-orgtype, #signup-register {
+    #signup-welcome, #signup-select-usertype, #signup-individualtype, #signup-search-name, #signup-orgtype, #signup-register, #signup-claim-profile {
         width: 1040px;
     }
 
@@ -198,7 +198,6 @@
     }
 
     .onboarding-input {
-        width: 627px;
         height: 35px;
         border-radius: 6px !important;
         border: solid 1px #00c5a3;
@@ -208,7 +207,7 @@
 
 <div class="row main-content">
 
-    <div id="signup-welcome" style="display: none;">
+    <div id="signup-welcome">
 
         <div class="visible-lg visible-md welcome-outer-ring">
             <div class="welcome-inner-ring">
@@ -416,15 +415,16 @@
         </div>
     </div>
 
+    <div class="clearfix"></div>
     <div id="signup-search-name" style="display: none;">
         <div class="welcome-outer-ring">
-            <div class="search-inner-ring">                
-                <div class="">                   
+            <div class="search-inner-ring">
+                <div class="">
 
                     <div class="visible-md visible-lg">
                         <a href="#" style="margin-left: -120px;" onclick="return proceedBack('@EnumSignupPages.SearchProgramName')">
                             <img style=" position: fixed; margin-top: 150px;" src="~/img/welcome-back-arrow.PNG" />
-                        </a>                        
+                        </a>
                     </div>
 
                     <h2 id="lbl-org-search-title" class="text-center"></h2>
@@ -436,7 +436,7 @@
                             <input id="signup-account-search" type="text" class="form-control" autocomplete="off" />
                             <div id="signup-account-search-list" class="border-light-gray pointer hide"></div>
                         </div>
-                        <div class="clearfix"></div><br />                        
+                        <div class="clearfix"></div><br />
                     </div>
                 </div>
                 <div class="clearfix"></div><br />
@@ -458,13 +458,13 @@
         </div>
     </div>
 
-    <div id="signup-register">
-
+    <div class="clearfix"></div>
+    <div id="signup-register" style="display: none;">
         <div class="visible-lg visible-md welcome-outer-ring">
             <div class="search-inner-ring" style="padding-bottom: 5px;">
                 <div class="">
                     <div class="text-center">
-                        <div style="width: 15px; height: 15px; margin: 0 5px 0 0; background-color: #00c5a3; border-radius: 7px;"></div>                        
+                        <div style="width: 15px; height: 15px; margin: 0 5px 0 0; background-color: #00c5a3; border-radius: 7px;"></div>
                     </div>
                     <div class="">
                         <p class="" style="font-size: 22px; font-weight: 300; font-stretch: normal; font-style: normal; line-height: normal; letter-spacing: 0.53px; text-align: center; color: #4a4a4a; margin-bottom: 40px;">Thanks for joining our platform to provide learning opportunities for students everywhere.</p>
@@ -474,70 +474,82 @@
                             @{ Html.RenderPartial("~/Views/Shared/Login/_SignUpForm-NewAccount-Welcome.cshtml", Model); }
                         </form>
                     </div>
-                </div>                
+                </div>
             </div>
         </div>
     </div>
 
+    <div class="clearfix"></div>
     <div id="signup-claim-profile" style="display: none;">
-        <div class="col-lg-offset-4 col-lg-4 col-md-offset-3 col-md-6 col-sm-12">
-            <h2 id="header-claim-profile-main" class="text-center"></h2>
-            <div class="clearfix"></div><br />
-            <h5 id="header-account-exist" class="text-center" style="display: none;">This profile already exists on AfterSchool HQ. Please start the claim process below.</h5>
-            <h5 id="header-account-claimed" class="text-center" style="display: none;">This profile already claimed on AfterSchool HQ. You can request access by entering your information below.</h5>
-            <div class="clearfix"></div><br />
+        <div class="visible-lg visible-md welcome-outer-ring">
+            <div class="search-inner-ring" style="padding-bottom: 5px;">
 
-            <div class="row margin-t-35">
-                <form id="form-signup-claim-form" class="form-horizontal">
-                    @Html.AntiForgeryToken()
+                <h2 id="header-claim-profile-main" class="text-center"></h2>
+                <div class="clearfix"></div><br />
+                <h5 id="header-account-exist" class="text-center" style="display: none;">This profile already exists on AfterSchool HQ. Please start the claim process below.</h5>
+                <p id="header-account-claimed" class="text-center" style="display: none; font-size: 22px; font-weight: 600; font-stretch: normal; font-style: normal; line-height: normal; letter-spacing: 0.53px; text-align: center; color: #4a4a4a; margin-bottom: 40px;">This profile already claimed on AfterSchool HQ. You can request access by entering your information below.</p>
+                <div class="clearfix"></div>
 
-                    <input id="hidden-claim-accountId" type="hidden" name="accountId" />
+                <div class="">
+                    <form id="form-signup-claim-form" class="form-horizontal">
+                        @Html.AntiForgeryToken()
 
-                    <div class="form-group row">
-                        <input class="form-control" type="text" required="required" name="firstName" placeholder="First Name">
-                    </div>
-                    <div class="clearfix"></div>
+                        <input id="hidden-claim-accountId" type="hidden" name="accountId" />
 
-                    <div class="form-group row">
-                        <input class="form-control" type="text" required="required" name="lastName" placeholder="Last Name">
-                    </div>
-                    <div class="clearfix"></div>
-
-                    <div class="form-group row">
-                        <input class="form-control" type="email" required="required" name="email" placeholder="Email">
-                    </div>
-                    <div class="clearfix"></div>
-
-                    <div class="form-group row">
-                        <input id="signup-claim-profile-phone" class="form-control" type="text" required="required" name="phone" placeholder="ex. (317) 483 3489">
-                    </div>
-                    <div class="clearfix"></div>
-
-                    <div class="form-group row text-center">
-                        @{ Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", ""); }
-                    </div>
-                    <div class="clearfix"></div>
-
-                    <div class="visible-sm visible-xs margin-v-30">
-                        <button type="button" class="btn-save-claims btn btn-primary btn-lg pull-right col-xs-12" onclick="return saveClaims(this)"></button>
-
-                        <div class="clearfix"></div>
-                        <div class="text-center margin-v-30">
-                            <a href="#" class="text-muted" onclick="return proceedBack('@EnumSignupPages.ClaimProfile')">&laquo; Back</a>
+                        <div class="form-group row">
+                            <label class="onboarding-lable">FIRST NAME</label>
+                            <input class="form-control onboarding-input" type="text" required="required" name="firstName">
                         </div>
-                    </div>
+                        <div class="clearfix"></div>
 
-                    <div class="visible-md visible-lg margin-v-30">
-                        <a href="#" class="pull-left text-muted" onclick="return proceedBack('@EnumSignupPages.ClaimProfile')">&laquo; Back</a>
-                        <button type="button" class="btn-save-claims btn btn-primary btn-lg pull-right" onclick="return saveClaims()"></button>
-                    </div>
+                        <div class="form-group row">
+                            <label class="onboarding-lable">LAST NAME</label>
+                            <input class="form-control onboarding-input" type="text" required="required" name="lastName">
+                        </div>
+                        <div class="clearfix"></div>
 
-                    <div class="clearfix"></div><br />
-                </form>
+                        <div class="form-group row">
+                            <label class="onboarding-lable">EMAIL ADDRESS</label>
+                            <input class="form-control onboarding-input" type="email" required="required" name="email">
+                        </div>
+                        <div class="clearfix"></div>
+
+                        <div class="form-group row">
+                            <label class="onboarding-lable">PHONE</label>
+                            <input id="signup-claim-profile-phone" class="form-control onboarding-input" placeholder="ex. (317) 483 3489" type="text" required="required" name="phone">
+                        </div>
+                        <div class="clearfix"></div>
+
+                        <div class="form-group row text-center">
+                            @{ Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", ""); }
+                        </div>
+                        <div class="clearfix"></div>
+
+                        <div class="visible-sm visible-xs margin-v-30">
+                            <button type="button" class="btn-save-claims btn btn-primary btn-lg pull-right col-xs-12" onclick="return saveClaims(this)"></button>
+
+                            <div class="clearfix"></div>
+                            <div class="text-center margin-v-30">
+                                <a href="#" class="text-muted" onclick="return proceedBack('@EnumSignupPages.ClaimProfile')">&laquo; Back</a>
+                            </div>
+                        </div>
+
+                        <div class="visible-md visible-lg margin-v-30">
+                            <a href="#" style="margin-top: 10px; position: absolute; margin-left: 170px;" onclick="return proceedBack('@EnumSignupPages.ClaimProfile')">
+                                <img src="~/img/welcome-back-arrow.PNG" />
+                            </a>
+                            <button type="button" class="btn-save-claims btn btn-primary btn-lg pull-right" style="width: 195px; height: 53px; border-radius: 6px; background-color: #00c5a3; margin:0 auto; float: none !important; display: block; font-size: 18px;" onclick="return saveClaims()"></button>
+                        </div>
+
+                        <div class="clearfix"></div><br />
+                    </form>
+                </div>
+
             </div>
         </div>
     </div>
 
+    <div class="clearfix"></div>
     <div id="signup-thank-you" class="row" style="display: none;">
         <div class="col-lg-offset-4 col-lg-4 col-md-offset-3 col-md-6 col-sm-12">
             <h2 class="text-center">Thank You!</h2>
