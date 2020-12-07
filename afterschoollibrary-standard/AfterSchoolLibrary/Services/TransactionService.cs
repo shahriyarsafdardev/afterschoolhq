@@ -303,19 +303,17 @@ namespace AfterSchoolLibrary.Services
                         dc) > 0;
         }
 
-        public static bool IsTotallyRefunded(this Transaction transaction, bool includeFees, bool allowFullRefundAmount = false, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool IsTotallyRefunded(this Transaction transaction, Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (transaction.IsCharge())
             {
-                var amount = transaction.GetPayerAmount();
+                var refundedAmount = transaction.GetRefundedAmount(msgs, dc);
+                var totalAmount = transaction.Amount.Value;
 
-                if (!includeFees)
-                    amount = transaction.GetBillerPayout(msgs, dc);
+                if (account.IsAdminAccount || account.AccountTypeId == AccountType.Registrant)
+                    return refundedAmount >= totalAmount;
 
-                if (allowFullRefundAmount)
-                    amount = transaction.Amount.Value;
-
-                return transaction.GetRefundedAmount(msgs, dc) >= amount;
+                return refundedAmount >= (totalAmount - transaction.PaymentTypeFeeCharged.Value);
             }
 
             return false;
@@ -331,7 +329,7 @@ namespace AfterSchoolLibrary.Services
             if (transaction.IsCharge())
             {
                 if (allowFullAmountRefund)
-                    return transaction.Amount.Value;
+                    return transaction.GetPayerAmount() - transaction.GetRefundedAmountAHQ(msgs, dc);
 
                 return transaction.Amount.Value - transaction.PaymentTypeFeeCharged.Value;
             }
@@ -604,7 +602,8 @@ namespace AfterSchoolLibrary.Services
                                     chargeId: transaction.StripeChargeOrRefundId,
                                     totalAmount: refundAmount,
                                     reason: Billing.StripeRefundReason.RequestedByCustomer.ToString().SplitByUpperCase().Replace(" ", "_").ToLower(),
-                                    msgs: msgs);
+                                    reverseTransfer: transaction.GetBillerAccount(msgs, dc).HasStripeConnectedAccount,
+                                    msgs: msgs); 
 
                     if (stripeRefund.IsNotEmpty())
                         stripeRefundId = stripeRefund.Id;

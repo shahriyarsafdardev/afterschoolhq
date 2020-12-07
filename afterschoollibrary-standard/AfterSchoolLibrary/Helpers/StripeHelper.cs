@@ -1877,7 +1877,7 @@ namespace AfterSchoolLibrary.Billing
             return new Stripe.RefundService(StripeClient);
         }
 
-        public static Stripe.Refund CreateRefund(string chargeId, decimal totalAmount, string reason, SystemMessages msgs)
+        public static Stripe.Refund CreateRefund(string chargeId, decimal totalAmount, string reason, bool reverseTransfer, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -1885,7 +1885,7 @@ namespace AfterSchoolLibrary.Billing
             {
                 Amount = (totalAmount * 100).ToInteger(),
                 Reason = reason,
-                // ReverseTransfer = true,  should this be uncommented?
+                ReverseTransfer = reverseTransfer,
                 Charge = chargeId
             };
 
