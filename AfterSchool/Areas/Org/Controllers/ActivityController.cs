@@ -399,10 +399,13 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             Activity activity = null;
+            var accountPackage = SessionVariables.AccountPackage;
 
             activity = Activity.LoadByUid(id.ToGuid());
             if (activity.IsNotEmpty())
             {
+                if (!accountPackage.HasFeature(FeatureType.AllowStudentRegistration) && requiresparentalconsent.IsBlank())
+                    requiresparentalconsent = "1";
 
                 var values = new Dictionary<string, object>()
                 {
@@ -429,7 +432,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
-            ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.AccountPackage = accountPackage;
 
             if (msgs.HasNoErrors())
             {
