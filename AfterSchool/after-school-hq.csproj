@@ -1798,7 +1798,7 @@
     <Content Include="Views\Shared\Registration\_PayButtons.cshtml" />
     <Content Include="Views\Account\PaymentThankYou.cshtml" />
     <Content Include="Views\Shared\Registration\_ProfilePhotoGallery.cshtml" />
-    <Content Include="Views\Shared\Components\_GoogleLocationEdit.cshtml" />
+    <Content Include="Views\Shared\Components\_GoogleLocationEditNew.cshtml" />
     <Content Include="Views\Account\Interested.cshtml" />
     <Content Include="Views\Search\Index.cshtml" />
     <Content Include="Views\Shared\Registration\_BrowseProvider.cshtml" />
@@ -1820,6 +1820,7 @@
     <Content Include="Views\Shared\_RestrictBySelection.cshtml" />
     <Content Include="Views\Shared\Registration\_GradeRestrictions.cshtml" />
     <Content Include="Views\Shared\_AgeRestrictions.cshtml" />
+    <Content Include="Views\Shared\Components\_GoogleLocationEdit.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
