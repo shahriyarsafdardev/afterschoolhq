@@ -186,7 +186,7 @@
 
     .onboarding-lable {
         height: 18px;
-        margin: 0 522px 8px 0;
+        /*margin: 0 522px 8px 0;*/
         font-size: 14px;
         font-weight: normal;
         font-stretch: normal;
@@ -202,6 +202,58 @@
         border-radius: 6px !important;
         border: solid 1px #00c5a3;
         background-color: #ffffff;
+    }
+
+    .onboarding-form-group {
+        padding: 12px 0;
+    }
+
+    .m-b-20 {
+        margin-bottom: 20px;
+    }
+
+    .p-b-5 {
+        padding-bottom: 5px;
+    }
+
+    .register-thankyou-1 {
+        font-size: 22px;
+        font-weight: 300;
+        font-stretch: normal;
+        font-style: normal;
+        line-height: normal;
+        letter-spacing: 0.53px;
+        text-align: center;
+        color: #4a4a4a;
+        margin-bottom: 40px;
+    }
+
+    .register-thankyou-2 {
+        font-size: 22px;
+        font-weight: 600;
+        font-stretch: normal;
+        font-style: normal;
+        line-height: normal;
+        letter-spacing: 0.53px;
+        text-align: center;
+        color: #4a4a4a;        
+    }
+
+    .register-continue {
+        width: 195px;
+        height: 53px;
+        border-radius: 6px;
+        background-color: #00c5a3;
+        margin: 0 auto;
+        float: none !important;
+        display: block;
+        font-size: 18px;
+    }
+
+    .process-back {
+        margin-top: 10px;
+        position: absolute;
+        margin-left: 170px;
     }
 </style>
 
@@ -460,67 +512,70 @@
 
     <div class="clearfix"></div>
     <div id="signup-register" style="display: none;">
-        <div class="visible-lg visible-md welcome-outer-ring">
-            <div class="search-inner-ring" style="padding-bottom: 5px;">
-                <div class="">
-                    <div class="text-center">
-                        <div style="width: 15px; height: 15px; margin: 0 5px 0 0; background-color: #00c5a3; border-radius: 7px;"></div>
-                    </div>
-                    <div class="">
-                        <p class="" style="font-size: 22px; font-weight: 300; font-stretch: normal; font-style: normal; line-height: normal; letter-spacing: 0.53px; text-align: center; color: #4a4a4a; margin-bottom: 40px;">Thanks for joining our platform to provide learning opportunities for students everywhere.</p>
-                        <p class="" style="font-size: 22px; font-weight: 600; font-stretch: normal; font-style: normal; line-height: normal; letter-spacing: 0.53px; text-align: center; color: #4a4a4a; margin-bottom: 20px;">We just need a little information to get started.</p>
+        <div class="welcome-outer-ring m-b-20">
+            <div class="search-inner-ring p-b-5">
+                <div class="margin-t-35">
+                    @*<div class="text-center">
+                            <div style="width: 15px; height: 15px; margin: 0 5px 0 0; background-color: #00c5a3; border-radius: 7px;"></div>
+                        </div>*@
 
-                        <form id="form-signup-personal-details" class="form-horizontal" method="post" action="@Url.Action("index", "signup")">
-                            @{ Html.RenderPartial("~/Views/Shared/Login/_SignUpForm-NewAccount-Welcome.cshtml", Model); }
-                        </form>
-                    </div>
+                    <p class="register-thankyou-1">Thanks for joining our platform to provide learning opportunities for students everywhere.</p>
+                    <p class="register-thankyou-2" style="margin-bottom: 20px;">We just need a little information to get started.</p>
+
+                    <div class="clearfix"></div><br />
+                    <form id="form-signup-personal-details" class="form-horizontal" method="post" action="@Url.Action("index", "signup")">
+                        @{ Html.RenderPartial("~/Views/Shared/Login/_SignUpForm-NewAccount-Welcome.cshtml", Model); }
+                        <div class="clearfix"></div>
+                    </form>
+
                 </div>
+                <div class="clearfix"></div>
             </div>
         </div>
     </div>
 
     <div class="clearfix"></div>
     <div id="signup-claim-profile" style="display: none;">
-        <div class="visible-lg visible-md welcome-outer-ring">
-            <div class="search-inner-ring" style="padding-bottom: 5px;">
+        <div class="welcome-outer-ring m-b-20">
+            <div class="search-inner-ring p-b-5">
 
                 <h2 id="header-claim-profile-main" class="text-center"></h2>
                 <div class="clearfix"></div><br />
-                <h5 id="header-account-exist" class="text-center" style="display: none;">This profile already exists on AfterSchool HQ. Please start the claim process below.</h5>
-                <p id="header-account-claimed" class="text-center" style="display: none; font-size: 22px; font-weight: 600; font-stretch: normal; font-style: normal; line-height: normal; letter-spacing: 0.53px; text-align: center; color: #4a4a4a; margin-bottom: 40px;">This profile already claimed on AfterSchool HQ. You can request access by entering your information below.</p>
+                <h5 id="header-account-exist" class="text-center register-thankyou-2" style="display: none;">This profile already exists on AfterSchool HQ. Please start the claim process below.</h5>
+                <p id="header-account-claimed" class="text-center register-thankyou-2">This profile already claimed on AfterSchool HQ. You can request access by entering your information below.</p>
                 <div class="clearfix"></div>
 
-                <div class="">
+                <div class="margin-t-35">
                     <form id="form-signup-claim-form" class="form-horizontal">
                         @Html.AntiForgeryToken()
 
                         <input id="hidden-claim-accountId" type="hidden" name="accountId" />
 
-                        <div class="form-group row">
+                        <div class="col-md-12 onboarding-form-group">
                             <label class="onboarding-lable">FIRST NAME</label>
                             <input class="form-control onboarding-input" type="text" required="required" name="firstName">
                         </div>
                         <div class="clearfix"></div>
 
-                        <div class="form-group row">
+                        <div class="col-md-12 onboarding-form-group">
                             <label class="onboarding-lable">LAST NAME</label>
                             <input class="form-control onboarding-input" type="text" required="required" name="lastName">
                         </div>
                         <div class="clearfix"></div>
 
-                        <div class="form-group row">
+                        <div class="col-md-12 onboarding-form-group">
                             <label class="onboarding-lable">EMAIL ADDRESS</label>
                             <input class="form-control onboarding-input" type="email" required="required" name="email">
                         </div>
                         <div class="clearfix"></div>
 
-                        <div class="form-group row">
+                        <div class="col-md-12 onboarding-form-group">
                             <label class="onboarding-lable">PHONE</label>
                             <input id="signup-claim-profile-phone" class="form-control onboarding-input" placeholder="ex. (317) 483 3489" type="text" required="required" name="phone">
                         </div>
                         <div class="clearfix"></div>
 
-                        <div class="form-group row text-center">
+                        <div class="col-md-12 onboarding-form-group text-center" style="margin-top: 20px;">
                             @{ Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", ""); }
                         </div>
                         <div class="clearfix"></div>
@@ -535,10 +590,10 @@
                         </div>
 
                         <div class="visible-md visible-lg margin-v-30">
-                            <a href="#" style="margin-top: 10px; position: absolute; margin-left: 170px;" onclick="return proceedBack('@EnumSignupPages.ClaimProfile')">
+                            <a href="#" class="process-back" onclick="return proceedBack('@EnumSignupPages.ClaimProfile')">
                                 <img src="~/img/welcome-back-arrow.PNG" />
                             </a>
-                            <button type="button" class="btn-save-claims btn btn-primary btn-lg pull-right" style="width: 195px; height: 53px; border-radius: 6px; background-color: #00c5a3; margin:0 auto; float: none !important; display: block; font-size: 18px;" onclick="return saveClaims()"></button>
+                            <button type="button" class="btn-save-claims btn btn-primary btn-lg pull-right register-continue" onclick="return saveClaims()"></button>
                         </div>
 
                         <div class="clearfix"></div><br />

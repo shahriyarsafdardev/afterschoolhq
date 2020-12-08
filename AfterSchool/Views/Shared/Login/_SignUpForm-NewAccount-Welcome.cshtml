@@ -9,42 +9,33 @@
     <input id="hidden-invitecode" type="hidden" name="invitecodetoshare" value="@Model.InviteCodeToShare" />
     <input id="hidden-isrequestaccessonly" type="hidden" name="isrequestonlyaccess" value="@Model.IsRequestOnlyAccess.ToString()" />
 
-    <div class="form-group">
-        <div id="nick-handler" class="input-group">            
-            <label class="onboarding-lable">FIRST NAME</label>
-            <input type="text" name="firstname" required="required" autocomplete="off" class="form-control onboarding-input" value="@Model.FirstName" />
-        </div>
+    <div class="col-md-12 onboarding-form-group">        
+        <label class="onboarding-lable">FIRST NAME</label>
+        <input type="text" name="firstname" required="required" autocomplete="off" class="form-control onboarding-input" value="@Model.FirstName" />
     </div>
 
-    <div class="form-group">
-        <div id="nick-handler" class="input-group">
-            <label class="onboarding-lable">LAST NAME</label>
-            <input type="text" name="lastname" required="required" autocomplete="off" class="form-control onboarding-input" value="@Model.LastName">
-        </div>
+    <div class="col-md-12 onboarding-form-group">        
+        <label class="onboarding-lable">LAST NAME</label>
+        <input type="text" name="lastname" required="required" autocomplete="off" class="form-control onboarding-input" value="@Model.LastName">        
     </div>
 
-    <div class="form-group">
-        <div id="email-handler" class="input-group">
-            <label class="onboarding-lable">EMAIL ADDRESS</label>
-            <input type="email" name="email" required="required" autocomplete="off" class="form-control onboarding-input" value="@Model.Email" />
-        </div>
+    <div class="col-md-12 onboarding-form-group">        
+        <label class="onboarding-lable">EMAIL ADDRESS</label>
+        <input type="email" name="email" required="required" autocomplete="off" class="form-control onboarding-input" value="@Model.Email" />
     </div>
 
-    <div class="form-group">
-        <div id="password-handler" class="input-group">
-            <label class="onboarding-lable">PASSWORD</label>
-            <input type="password" name="password1" required="required" class="form-control onboarding-input" />
-        </div>
+    <div class="col-md-12 onboarding-form-group">
+        <label class="onboarding-lable">PASSWORD</label>
+        <input type="password" name="password1" required="required" class="form-control onboarding-input" />
     </div>
 
-    <div class="form-group">
-        <div id="confirm-handler" class="input-group">
-            <label class="onboarding-lable">CONFIRM PASSWORD</label>
-            <input type="password" name="password2" required="required" class="form-control onboarding-input">
-        </div>
+    <div class="col-md-12 onboarding-form-group">
+        <label class="onboarding-lable">CONFIRM PASSWORD</label>
+        <input type="password" name="password2" required="required" class="form-control onboarding-input">
     </div>
 
-    <div class="form-group text-center" style="margin-top: 20px;">
+    <div class="clearfix"></div>
+    <div class="text-center onboarding-form-group" style="margin-top: 20px;">
         @{ Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", ""); }
     </div>
 
@@ -55,12 +46,12 @@
 <p class="conditions text-center">By creating an account, you agree with the <a href="/tos" target="_blank">Terms and Conditions</a>.</p>
 
 <div class="visible-md visible-lg margin-v-30">
-    
-    <a href="#" style="margin-top: 10px; position: absolute; margin-left: 170px;" onclick="return proceedBack('7')">
+
+    <a href="#" class="process-back" onclick="return proceedBack('7')">
         <img src="~/img/welcome-back-arrow.PNG" />
     </a>
 
-    <button type="submit" class="btn btn-primary pull-right" style="width: 195px; height: 53px; border-radius: 6px; background-color: #00c5a3; margin:0 auto; float: none !important; display: block; font-size: 18px;">Continue</button>
+    <button type="submit" class="btn btn-primary pull-right register-continue">Continue</button>
 </div>
 
 <div class="visible-sm visible-xs margin-v-30">
