@@ -11,7 +11,7 @@
 
 }
 
-<input type="text" class="form-control" name="location" id="location" value="@(Model?.FormatAddress(false))" placeholder="" />
+<input type="text" class="form-control onboarding-input" name="location" id="location" value="@(Model?.FormatAddress(false))" placeholder="" />
 <input type="hidden" id="streetnumber" name="streetnumber" value="@(Model?.StreetNumber)" />
 <input type="hidden" id="streetname" name="streetname" value="@(Model?.StreetName)" />
 <input type="hidden" id="address2" name="address2" value="@(Model?.Address2)" />
@@ -24,7 +24,7 @@
 <input type="hidden" id="placeid" name="placeid" value="@(Model?.GooglePlaceId)" />
 <input type="hidden" id="locationname" name="locationname" value="@(Model?.Name)" />
 
-<p class="text-muted">
+<p class="text-muted" style="padding: 5px 0;">
     @description
 </p>
 
