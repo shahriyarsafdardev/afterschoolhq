@@ -233,6 +233,9 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetRegistrationCostWithConvenienceFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            if (ParticipationObject.IsActivityGroup())
+                return 0;
+
             var activity = ParticipationObject.GetActivity();
 
             if (activity.IsConvenienceFeeTakenOutOfCost)
