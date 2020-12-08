@@ -41,9 +41,6 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult Account(string accountname)
         {
-            //.. log account name in rollbar
-            AfterSchoolLibrary.Helpers.Utilities.SystemLog(accountname);
-
             if (isUnsupportedBrowser())
                 return RedirectUnsupportedBrowser();
 
@@ -99,6 +96,7 @@ namespace AfterSchool.Controllers
             }
             catch (Exception ex)
             {
+                msgs.Add(accountname, MessageType.Notice);
                 msgs.Add(new SystemMessage() { Exception = ex, Text = ex.Message, MessageType = MessageType.Error });
                 AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(msgs);
             }
