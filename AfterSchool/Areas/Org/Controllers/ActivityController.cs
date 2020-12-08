@@ -12,6 +12,7 @@ using AfterSchool.Models;
 using Hangfire;
 using AfterSchoolLibrary.Billing;
 using AfterSchoolLibrary;
+using AfterSchoolLibrary.Helpers;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -399,10 +400,13 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             Activity activity = null;
+            var accountPackage = SessionVariables.AccountPackage;
 
             activity = Activity.LoadByUid(id.ToGuid());
             if (activity.IsNotEmpty())
             {
+                if (!accountPackage.HasFeature(FeatureType.AllowStudentRegistration) && requiresparentalconsent.IsBlank())
+                    requiresparentalconsent = "1";
 
                 var values = new Dictionary<string, object>()
                 {
@@ -429,7 +433,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
-            ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.AccountPackage = accountPackage;
 
             if (msgs.HasNoErrors())
             {
@@ -1839,6 +1843,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid());
             var mustRequestToPublish = MustRequestToPublish(activity);
+            var account = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
 
             if (mustRequestToPublish)
                 msgs.Add("You do not have permissions to publish", MessageType.UserError);
@@ -1851,6 +1857,26 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
+                //.. send support email for AHQ just to notifiy the team a new profile has been completed
+                var body = $"<p>Account: {account.Name}<br />" +
+                        $"Account Profile Url: {account.HomePageUrl}<br />" +
+                        $"Activity: {activity.Name}<br />" +
+                        $"Url: {activity.HomePageUrl}<br />" +
+                        $"User: {currentUser.FirstName} {currentUser.LastName}<br />";
+
+                var registrationDate = activity.GetActiveRegistrationPeriod();
+                if (registrationDate.IsNotEmpty() && registrationDate.StartDateTime.IsNotEmpty())
+                    body += $"Registration Start Date: {registrationDate.StartDateTime} <br />";
+
+                if(activity.HasSchedule)
+                    body += $"Activity Start Date: {activity.GetSchedule(msgs).StartDate.ToShortDateString()} <br />";
+
+                EmailHelper.SendEmail(
+                    toEmail: AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress,
+                    subject: $"{account.Name} has published a new Activity: {activity.Name}",
+                    body,
+                    isAfterSchool: true);
+
                 msgs.Add(string.Format("{0} has been published", activity.Name), MessageType.Success);
                 UpdateSession(SessionActionType.ActivityPublish, SessionVariables.CurrentAccount.ID, activity.ID);
             }
@@ -1861,9 +1887,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.ShowCopyButton = ShowCopyButtonOnPublishDetail(activity);
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
 
-            var account = SessionVariables.CurrentAccount;
             var user = account.GetAccountOwner(msgs);
-
             if (user.IsNotEmpty() && account.IsNotEmpty())
             {
                 SendGridHelper.AddOrUpdateContact(account, user, msgs);
