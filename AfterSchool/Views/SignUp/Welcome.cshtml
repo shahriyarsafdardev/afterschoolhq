@@ -550,28 +550,28 @@
     </div>
 
     <div class="clearfix"></div>
-    <div id="signup-thank-you" class="row" style="display: none;">
-        <div class="col-lg-offset-4 col-lg-4 col-md-offset-3 col-md-6 col-sm-12">
-            <h2 class="text-center">Thank You!</h2>
-            <div class="clearfix"></div><br />
-            <h5 id="header-thankyou-not-recognized" class="text-center" style="display: none;">We have sent an email with instructions to <strong id="lbl-org-member-email"></strong>.</h5>
-            <h5 id="header2-thankyou-not-recognized" class="text-center" style="display: none;">No longer have access to this email? Incorrect email? Click <a href="#" onclick="return contactSupport()">Here</a> to automatically submit a request to our support team.</h5>
+    <div id="signup-thank-you" style="display: none;">
+        <div class="welcome-outer-ring">
+            <div class="search-inner-ring" style="min-height: 509px;padding-bottom: 5px;">                    
+                <h2 class="text-center">Thank You!</h2>
+                <div class="clearfix"></div><br />
+                <h5 id="header-thankyou-not-recognized" class="text-center" style="display: none;">We have sent an email with instructions to <strong id="lbl-org-member-email"></strong>.</h5>
+                <h5 id="header2-thankyou-not-recognized" class="text-center" style="display: none;">No longer have access to this email? Incorrect email? Click <a href="#" onclick="return contactSupport()">Here</a> to automatically submit a request to our support team.</h5>
 
-            <div id="header3-thankyou-not-recognized" class="col-md-offset-3 alert alert-info alert-icon alert-border-color alert-dismissible" role="alert" style="display: none; width: 50%; margin-top: 40px; text-align: center;">
-                <div class="icon"><span class="s7-info"></span></div>
-                <div class="message">
-                    <button class="close" data-dismiss="alert" aria-label="Close"><span class="s7-close" aria-hidden="true"></span></button><strong>We have sent your request!</strong> You should hear back from us in the next 24-48 hours.
+                <div id="header3-thankyou-not-recognized" class="col-md-offset-3 alert alert-info alert-icon alert-border-color alert-dismissible" role="alert" style="display: none; width: 50%; margin-top: 40px; text-align: center;">
+                    <div class="icon"><span class="s7-info"></span></div>
+                    <div class="message">
+                        <button class="close" data-dismiss="alert" aria-label="Close"><span class="s7-close" aria-hidden="true"></span></button><strong>We have sent your request!</strong> You should hear back from us in the next 24-48 hours.
+                    </div>
                 </div>
-            </div>
 
-            <h5 id="header-thankyou-recognized" class="text-center" style="display: none;">We see that you have email from same domain. We have sent you instruction to claim your account.</h5>
-            <h5 id="header-thankyou-request-access" class="text-center" style="display: none;">Your access request has been sent to the owner of this profile.</h5>
-            <div class="clearfix"></div><br />
+                <h5 id="header-thankyou-recognized" class="text-center" style="display: none;">We see that you have email from same domain. We have sent you instruction to claim your account.</h5>
+                <h5 id="header-thankyou-request-access" class="text-center" style="display: none;font-size: 22px; font-weight: 600; font-stretch: normal; font-style: normal; line-height: normal; letter-spacing: 0.53px; text-align: center; color: rgb(74, 74, 74); margin-bottom: 40px;" ">Your access request has been sent to the owner of this profile.</h5>
+                <div class="clearfix"></div><br />
+            </div>            
         </div>
     </div>
-
 </div>
-
 @section Scripts
 {
     <script src="~/Scripts/jquery.validate.js"></script>
