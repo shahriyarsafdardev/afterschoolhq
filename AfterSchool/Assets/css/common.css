@@ -48,16 +48,13 @@
     font-size: 11px;
 }
 
-
-
-/*.. TODO : move this to common css later*/
-.main-content {
+.main-content-welcome-pages {
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-#signup-welcome, #signup-select-usertype, #signup-individualtype, #signup-search-name, #signup-orgtype, #signup-register, #signup-claim-profile, #onboarding-program-info, #onboarding-additional-info {
+#signup-welcome, #signup-select-usertype, #signup-individualtype, #signup-search-name, #signup-orgtype, #signup-register, #signup-claim-profile, .welcome-box-width {
     width: 1040px;
 }
 
