@@ -49,4 +49,8 @@
         border-radius: 6px;
         background-color: #f9fcfb;
     }
+
+    .desktop-text-center {
+        text-align: center;
+    }
 }

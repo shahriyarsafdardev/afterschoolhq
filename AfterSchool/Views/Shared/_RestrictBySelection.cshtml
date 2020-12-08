@@ -14,47 +14,46 @@
     }
 }
 
-    <div class="form-group">
-        <label class="col-lg-3 control-label">
-            Restrict by
-        </label>
-        <div class="col-lg-9 margin-left-sm"> 
-            <div class="am-radio inline">
-                <input type="radio" id="restrictby-grade" name="restrictbygrade" class="form-control" value="1" @(restrictbygrade ?  "checked=\"checked\"" : "")   />
-                <label for="restrictby-grade">Grade</label>
-            </div>
-            <div class="am-radio inline">
-                <input type="radio" id="restrictby-age" name="restrictbygrade" class="form-control" value="0"  @(!restrictbygrade ?  "checked=\"checked\"" : "")  />
-                <label for="restrictby-age">Age</label>
-            </div>
-        </div>
+<div class="col-md-12 onboarding-form-group">
+    <label class="onboarding-lable"> RESTRICT BY </label>
+    <br />
+    <div class="am-radio inline">
+        <input type="radio" id="restrictby-grade" name="restrictbygrade" class="form-control onboarding-input" value="1" @(restrictbygrade ? "checked=\"checked\"" : "") />
+        <label for="restrictby-grade">GRADE</label>
     </div>
-    <div id="restrictbygrade" name="restrictbygrade">
-        @{
-            Html.RenderPartial(
-                "~/Views/Shared/_GradeRestrictions.cshtml",
-                null,
-                new ViewDataDictionary() {
-                    { "minGradeLevelId", minGradeLevelId },
-                    { "MaxGradeLevelId", maxGradeLevelId },
-                    { "grades", grades }, 
-                    { "showToggle", false } }
-                );
-        }
+    <div class="am-radio inline">
+        <input type="radio" id="restrictby-age" name="restrictbygrade" class="form-control onboarding-input" value="0" @(!restrictbygrade ? "checked=\"checked\"" : "") />
+        <label for="restrictby-age">AGE</label>
     </div>
+</div>
+<div class="clearfix"></div>
 
-    <div id="restrictbyage">
-        @{
-            Html.RenderPartial(
-                "~/Views/Shared/_AgeRestrictions.cshtml",
-                null,
-                new ViewDataDictionary() {
-                    { "ageStart", agestart },
-                    { "ageEnd", ageend }, 
-                    { "showToggle", false } }
-                );
-        }
-    </div>
+<div id="restrictbygrade" name="restrictbygrade">
+    @{
+        Html.RenderPartial(
+            "~/Views/Shared/_GradeRestrictions.cshtml",
+            null,
+            new ViewDataDictionary() {
+                { "minGradeLevelId", minGradeLevelId },
+                { "MaxGradeLevelId", maxGradeLevelId },
+                { "grades", grades }, 
+                { "showToggle", false } }
+            );
+    }
+</div>
+
+<div id="restrictbyage">
+    @{
+        Html.RenderPartial(
+            "~/Views/Shared/_AgeRestrictions.cshtml",
+            null,
+            new ViewDataDictionary() {
+                { "ageStart", agestart },
+                { "ageEnd", ageend }, 
+                { "showToggle", false } }
+            );
+    }
+</div>
 
 
 <script>
