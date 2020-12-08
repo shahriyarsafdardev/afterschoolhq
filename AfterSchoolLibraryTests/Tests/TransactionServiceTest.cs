@@ -202,7 +202,8 @@ namespace AfterSchoolLibraryTests.Tests
 
             var refund = transaction.RefundPayerFullAmount(BillerAccountOwner, msgs, dc);
 
-            Assert.True(refund.IsTotallyRefunded(true, false, msgs, dc));
+            Assert.True(refund.IsTotallyRefunded(BillerAccount, msgs, dc));
+            Assert.False(refund.IsTotallyRefunded(PayerAccount, msgs, dc));
         }
 
     }
