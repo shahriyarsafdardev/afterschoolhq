@@ -23,7 +23,7 @@
                         <h1 class="text-center register-thankyou-2">@headerText</h1>
                     </div>
 
-                    @{Html.RenderPartial("~/Views/Shared/_RestrictBySelection.cshtml", null, new ViewDataDictionary() {
+                    @{Html.RenderPartial("~/Views/Shared/_RestrictBySelectionNew.cshtml", null, new ViewDataDictionary() {
                                     { "minGradeLevelId", 1 },
                                     { "MaxGradeLevelId", 14 },
                                     { "grades", grades },

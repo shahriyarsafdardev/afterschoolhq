@@ -13,60 +13,23 @@
     }
 
 }
-
-<div class="col-md-12 onboarding-form-group">
-    <label class="onboarding-lable">  GRADE RESTRICTIONS</label>
-
-    <div class=@(showToggle ? "col-md-1": "")>
-        @{Html.RenderPartial("~/Views/Shared/_SwitchButton.cshtml", minGradeLevelId.HasValue || (showToggleUpdated && !showToggle), new ViewDataDictionary() {
-              { "checkboxname", "graderestrictions" },
-              { "checkboxid", "graderestrictions" },
-              { "disabled", false },
-              { "hidden", showToggle ? "" : "hide" }
-        }); }
-    </div>
-
-    <div class="hide" id="grade">
-        <div class="col-md-4 col-xs-12" style="padding: 0;">
-            <select id="mingrade" name="mingrade" class="form-control onboarding-input" style="height: 44px;">
-                @foreach (var grade in grades)
-                {
-                    <option value="@grade.ID" @(minGradeLevelId == grade.ID ? " selected=\"selected\" " : "")>@grade.Name</option>
-                }
-            </select>
-        </div>
-         <p class="col-md-1 col-xs-12 margin-v-10 desktop-text-center" style="color: #00c5a3; font-size: 16px;">
-            TO
-        </p>
-        <div class="col-md-4 col-xs-12" style="padding: 0;">
-            <select id="maxgrade" name="maxgrade" class="form-control onboarding-input" style="height: 44px;">
-                @foreach (var grade in grades)
-                {
-                    <option value="@grade.ID" @(maxGradeLevelId == grade.ID ? " selected=\"selected\" " : "")>@grade.Name</option>
-                }
-            </select>
-        </div>
-    </div>
-</div>
-<div class="clearfix"></div>
-
-@*<div class="form-group">
+<div class="form-group">
     <label class="col-lg-3 control-label">
         Grade Restrictions
     </label>
     <div class=@(showToggle ? "col-md-1": "")>
-       @{Html.RenderPartial
-            (
-                "~/Views/Shared/_SwitchButton.cshtml",
-                minGradeLevelId.HasValue || (showToggleUpdated && !showToggle),
-                new ViewDataDictionary()
-                {
+        @{Html.RenderPartial
+               (
+                   "~/Views/Shared/_SwitchButton.cshtml",
+                   minGradeLevelId.HasValue || (showToggleUpdated && !showToggle),
+                   new ViewDataDictionary()
+                   {
                 { "checkboxname", "graderestrictions" },
                 { "checkboxid", "graderestrictions" },
                 { "disabled", false },
                 { "hidden", showToggle ? "" : "hide" }
-                }
-            );
+                   }
+               );
         }
     </div>
     <div class="col-lg-9 hide" id="grade">
@@ -86,7 +49,7 @@
             }
         </select>
     </div>
-</div>*@
+</div>
 
 
 <script>

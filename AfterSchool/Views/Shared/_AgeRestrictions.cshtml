@@ -9,11 +9,12 @@
         showToggle = (bool)ViewData["showToggle"];
         showToggleUpdated = true;
     }
+
 }
-
-<div class="col-md-12 onboarding-form-group">
-    <label class="onboarding-lable">AGE RESTRICTIONS</label>
-
+<div class="form-group">
+    <label class="col-lg-3 control-label">
+        Age Restrictions
+    </label>
     <div class=@(showToggle ? "col-md-1": "")>
         @{Html.RenderPartial
               (
@@ -26,55 +27,12 @@
                 { "disabled", false },
                 { "hidden", showToggle ? "" : "hide" }
                   }
-              ); }
-    </div>
-
-    <div class="hide" id="age">
-        <div class="col-md-4 col-xs-12" style="padding: 0;">
-            <select id="agestart" name="agestart" class="form-control onboarding-input" style="height: 44px;">
-                @for (int i = 0; i <= 18; i++)
-                {
-                    <option value="@i" @(agestart == i ? " selected=\"selected\" " : "")>@i</option>            
-                }
-            </select>
-        </div>
-        <p class="col-md-1 col-xs-12 margin-v-10 desktop-text-center" style="color: #00c5a3; font-size: 16px;">
-            TO
-        </p>
-        <div class="col-md-4 col-xs-12" style="padding: 0;">
-            <select id="ageend" name="ageend" class="form-control onboarding-input" style="height: 44px;">
-                @for (int i = 0; i <= 18; i++)
-                {
-                    <option value="@i" @(ageend == i ? " selected=\"selected\" " : "")>@i</option>            
-                }
-            </select>
-        </div>
-    </div>
-</div>
-<div class="clearfix"></div>
-
-@*<div class="form-group">
-    <label class="col-lg-3 control-label">
-       Age Restrictions
-    </label>
-    <div class=@(showToggle ? "col-md-1": "")>
-        @{Html.RenderPartial
-            (
-                "~/Views/Shared/_SwitchButton.cshtml",
-                agestart.IsEmpty() || ageend.IsEmpty() || (showToggleUpdated && !showToggle),
-                new ViewDataDictionary()
-                {
-                { "checkboxname", "agerestrictions" },
-                { "checkboxid", "agerestrictions" },
-                { "disabled", false },
-                { "hidden", showToggle ? "" : "hide" }
-                }
-            );
+              );
         }
     </div>
     <div class="col-lg-9" id="age">
         <select id="agestart" name="agestart" class="form-control">
-            @for(int i = 0; i <= 18; i++)
+            @for (int i = 0; i <= 18; i++)
             {
                 <option value="@i" @(agestart == i ? " selected=\"selected\" " : "")>@i</option>
             }
@@ -89,7 +47,7 @@
             }
         </select>
     </div>
-</div>*@
+</div>
 
 
 <script>

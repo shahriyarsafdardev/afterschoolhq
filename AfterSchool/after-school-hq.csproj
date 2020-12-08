@@ -1741,7 +1741,7 @@
     <Content Include="Views\Shared\_AccountPaymentEditNav.cshtml" />
     <Content Include="Views\Shared\_GoogleTagManagerNoScript.cshtml" />
     <Content Include="Views\Shared\_ZendeskWidget.cshtml" />
-    <Content Include="Views\Shared\_GradeRestrictions.cshtml" />
+    <Content Include="Views\Shared\_GradeRestrictionsNew.cshtml" />
     <Content Include="Views\Account\AddParent.cshtml" />
     <Content Include="Views\Shared\Registration\_RegisterButton.cshtml" />
     <Content Include="Views\Shared\Registration\_AccountTopBar.cshtml" />
@@ -1810,13 +1810,16 @@
     <Content Include="Views\Shared\Registrant\_Answers.cshtml" />
     <Content Include="Views\Shared\JavascriptIncludes\_QuillEditorScripts.cshtml" />
     <Content Include="Views\SignUp\Welcome.cshtml" />
-    <Content Include="Views\Shared\_AgeRestrictions.cshtml" />
-    <Content Include="Views\Shared\_RestrictBySelection.cshtml" />
+    <Content Include="Views\Shared\_AgeRestrictionsNew.cshtml" />
+    <Content Include="Views\Shared\_RestrictBySelectionNew.cshtml" />
     <Content Include="Views\Shared\_UpgradePlan.cshtml" />
     <Content Include="Views\Shared\_PaymentSources.cshtml" />
     <Content Include="Views\Shared\ParticipationObject\_TuitionAndPostPayPlans.cshtml" />
     <Content Include="Views\Shared\Layouts\_FullScreen_Onboarding.cshtml" />
     <Content Include="Views\Shared\Login\_SignUpForm-NewAccount-Welcome.cshtml" />
+    <Content Include="Views\Shared\_RestrictBySelection.cshtml" />
+    <Content Include="Views\Shared\Registration\_GradeRestrictions.cshtml" />
+    <Content Include="Views\Shared\_AgeRestrictions.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
