@@ -1866,7 +1866,10 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 var registrationDate = activity.GetActiveRegistrationPeriod();
                 if (registrationDate.IsNotEmpty() && registrationDate.StartDateTime.IsNotEmpty())
-                    body += $"Activity Start Date: {registrationDate.StartDateTime} <br />";
+                    body += $"Registration Start Date: {registrationDate.StartDateTime} <br />";
+
+                if(activity.HasSchedule)
+                    body += $"Activity Start Date: {activity.GetSchedule(msgs).StartDate.ToShortDateString()} <br />";
 
                 EmailHelper.SendEmail(
                     toEmail: AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress,
