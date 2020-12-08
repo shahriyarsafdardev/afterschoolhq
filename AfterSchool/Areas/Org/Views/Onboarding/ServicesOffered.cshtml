@@ -27,7 +27,7 @@
                         <label class="onboarding-lable"> SERVICES OFFERED</label>
 
                         <div class="clearfix"></div>
-                        <div class="pull-left col-md-3" style="padding: 0;">
+                        <div class="pull-left col-md-4" style="padding: 0;">
                             @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.ServicesOfferings.Take(6))
                             {
                                 <div class="am-checkbox">
@@ -42,7 +42,7 @@
                             }
                         </div>
 
-                        <div class="pull-left col-md-3">
+                        <div class="pull-left col-md-4">
                             @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.ServicesOfferings.Skip(6))
                             {
                                 <div class="am-checkbox">
@@ -67,16 +67,16 @@
                             <br />
                         </div>
                     </div>
-
-
+                                        
                     <div class="onboarding-advanced-settings hide">
+                        
                         <div class="clearfix"></div>
                         <div class="col-md-12 onboarding-form-group">
                             <label class="onboarding-lable">TIMES OFFERED</label>
 
                             <div class="clearfix"></div>
-                            <div class="pull-left col-md-3" style="padding: 0;">
-                                @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.OfferingTimes.Skip(3))
+                            <div class="pull-left col-md-4" style="padding: 0;">
+                                @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.OfferingTimes.Take(3))
                                 {
                                     <div class="am-checkbox">
                                         <input type="checkbox"
@@ -91,7 +91,7 @@
                             </div>
 
                             <div class="pull-left">
-                                @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.OfferingTimes.Take(3))
+                                @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.OfferingTimes.Skip(3))
                                 {
                                     <div class="am-checkbox">
                                         <input type="checkbox"
@@ -107,7 +107,7 @@
                         </div>
 
                         <div class="clearfix"></div>
-                        <div class="col-md-12 col-sm-6 onboarding-form-group">
+                        <div class="col-md-12 onboarding-form-group">
                             <label class="onboarding-lable">PRICING OPTIONS</label>
 
                             <div class="clearfix"></div>
@@ -129,11 +129,11 @@
                         </div>
 
                         <div class="clearfix"></div>
-                        <div class="col-md-12 col-sm-6 onboarding-form-group">
-                            <label class="onboarding-lable">Special Needs Offerings</label>
+                        <div class="col-md-12 onboarding-form-group">
+                            <label class="onboarding-lable">SPECIAL NEEDS OFFERINGS</label>
 
                             <div class="clearfix"></div>
-                            <div class="pull-left col-md-3" style="padding: 0;">
+                            <div class="pull-left col-md-4" style="padding: 0;">
                                 @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.SpecialNeedsOfferings.Take(8))
                                 {
                                     <div class="am-checkbox">
@@ -150,7 +150,7 @@
                             </div>
 
                             <div class="pull-left">
-                                @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.SpecialNeedsOfferings.Take(8))
+                                @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.SpecialNeedsOfferings.Skip(8))
                                 {
                                     <div class="am-checkbox">
                                         <input type="checkbox"
@@ -173,12 +173,14 @@
                             <p class="text-muted" style="padding: 5px 0; font-size: 14px;">ex: Leadership, Teamwork, Communication</p>
                         </div>
 
+                        <div class="clearfix"></div>
                         <div class="col-md-12 onboarding-form-group">
                             <label class="onboarding-lable">ACADEMIC SUBJECTS (UP TO 5)</label>
                             <input type="text" name="academicsubjects" id="academicsubjects" class="form-control onboarding-input" data-role="tagsinput" value="@Request["academicsubjects"]" />
                             <p class="text-muted" style="padding: 5px 0; font-size: 14px;">ex: Math, Science, Language Arts, Physical Education</p>
                         </div>
 
+                        <div class="clearfix"></div>
                         <div class="col-md-12 onboarding-form-group">
                             <label class="onboarding-lable">TEACHING METHODS (UP TO 3)</label>
                             <input type="text" name="teachingmethods" id="teachingmethods" class="form-control onboarding-input" data-role="tagsinput" value="@Request["teachingmethods"]" />
