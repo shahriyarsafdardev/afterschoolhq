@@ -10,7 +10,7 @@
             Transactions
         </a>
         @if (!SessionVariables.CurrentAccount.UseStripeConnectDuringCheckout())
-        { 
+        {
             <a class="btn btn-alt6@(actionName == "payouts" ? "-active" : "")" href="@Url.Action("payouts", "accounting")">
                 Payouts
             </a>
@@ -21,6 +21,9 @@
         <a class="btn btn-alt6@(actionName == "refundrequests" ? "-active" : "")" href="@Url.Action("refundrequests", "accounting")">
             Refund Requests
         </a>
+        <a class="btn btn-alt6@(actionName == "coupons" ? "-active" : "")" href="@Url.Action("coupon", "accounting")">
+            Coupons
+        </a>
     </div>
     <div class="hidden-lg hidden-sm hidden-md">
         <select class="form-control" onchange="handleNav(this.value)">
@@ -29,6 +32,7 @@
                 <option value="@Url.Action("payouts", "accounting")">Payouts</option>
                 <option value="@Url.Action("subscriptions", "accounting")">Subscriptions &amp; Plans</option>
                 <option value="@Url.Action("refundrequests", "accounting")">Refund Requests</option>
+                <option value="@Url.Action("coupon", "accounting")">Coupons</option>
             </optgroup>
         </select>
     </div>
