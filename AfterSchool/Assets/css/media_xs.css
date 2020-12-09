@@ -74,4 +74,30 @@
     .display-days {
         display: grid;
     }
+
+    .search-inner-ring {
+        padding: 10px;
+        border-radius: 6px;
+        background-color: #f9fcfb;
+        min-height: 676.95px;
+    }
+
+    .onboarding-inner-ring {
+        padding: 10px;
+        border-radius: 6px;
+        background-color: #f9fcfb;
+    }
+
+    .manger-comment {
+        width: 100px;
+        height: 125px;
+        margin-top: 30px;
+        border-radius: 6px;
+        border: solid 1px #00c5a3;
+    }
+
+    .dialogbox {
+        width: 200px;
+        margin: 5px;
+    }
 }
