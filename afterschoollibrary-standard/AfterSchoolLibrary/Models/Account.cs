@@ -627,6 +627,20 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
+        public static List<Account> Search(string search, List<AccountType> accountTypes, bool isDeleted, string OrderByProperty, OrderByDirectionEnum orderByDirection, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            if (search.IsNotEmpty())
+                dq.Criterias.Add(ObjectMap["Name"], search, DatabaseCriteriaOperatorEnum.Like);
+            dq.Criterias.Add(ObjectMap["AccountTypeId"], accountTypes.Select(x => (int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], isDeleted);
+            dq.SelectRange.Start = start;
+            dq.SelectRange.Length = length;
+            dq.OrderBys.Add(OrderByProperty, orderByDirection);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
         public static List<Account> FullTextSearch(string query, List<AccountType> accountTypes, int? start, int? length, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var searchTerms = query.Split(' ').Where(term =>

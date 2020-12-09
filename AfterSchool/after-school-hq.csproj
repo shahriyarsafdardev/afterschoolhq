@@ -745,6 +745,7 @@
     <Content Include="img\search.png" />
     <Content Include="img\smiling-group.png" />
     <Content Include="img\sophie.png" />
+    <Content Include="img\tempsnip.png" />
     <Content Include="img\texture-fabric.png" />
     <Content Include="img\texture-geometry-shapes.png" />
     <Content Include="img\welcome-back-arrow.PNG" />
@@ -1818,9 +1819,9 @@
     <Content Include="Views\Shared\Layouts\_FullScreen_Onboarding.cshtml" />
     <Content Include="Views\Shared\Login\_SignUpForm-NewAccount-Welcome.cshtml" />
     <Content Include="Views\Shared\_RestrictBySelection.cshtml" />
-    <Content Include="Views\Shared\Registration\_GradeRestrictions.cshtml" />
     <Content Include="Views\Shared\_AgeRestrictions.cshtml" />
     <Content Include="Views\Shared\Components\_GoogleLocationEdit.cshtml" />
+    <Content Include="Views\Shared\_GradeRestrictions.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
