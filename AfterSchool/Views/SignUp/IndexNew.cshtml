@@ -1,0 +1,41 @@
+﻿@model SignUpIndexViewModel
+@{ 
+    Layout = "~/Views/Shared/layouts/_FullScreen_Onboarding.cshtml";
+    ViewBag.Title = "Sign Up";
+    var msgs = (SystemMessages)ViewBag.Messages; 
+}
+
+@{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+<div class="row main-content main-content-welcome-pages">
+    <div class="welcome-box-width">
+        <div class="welcome-outer-ring">
+            <div class="onboarding-inner-ring">
+                @*<div class="text-center">
+                        <div style="width: 15px; height: 15px; margin: 0 5px 0 0; background-color: #00c5a3; border-radius: 7px;"></div>
+                    </div>*@
+
+                <p class="register-thankyou-1">Thanks for joining our platform to provide learning opportunities for students everywhere.</p>
+                <p class="register-thankyou-2" style="margin-bottom: 20px;">We just need a little information to get started.</p>
+
+                <div class="clearfix"></div><br />
+
+                <form id="form-signup-personal-details" action="@Url.Action("indexnew", "signup")" method="post">
+                    @{ Html.RenderPartial("~/Views/Shared/Login/_SignUpForm-NewAccount-Welcome.cshtml", Model); }
+                    <div class="clearfix"></div>
+                </form>
+
+            </div>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('#form-signup-personal-details').submit(function () {
+            $('button[type="submit"]').html('Creating Account...');
+            $('button[type="submit"]').prop('disabled', true);
+        });
+    });
+</script>

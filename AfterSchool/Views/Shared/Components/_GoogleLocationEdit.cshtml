@@ -1,6 +1,6 @@
 ﻿@model Location
 
-@{ 
+@{
     var types = ViewData["types"];
     var description = "Enter your full address, your city and state, or your zipcode";
 
@@ -107,7 +107,7 @@
             }
         });
 
-        function clearHiddenInputs() {            
+        function clearHiddenInputs() {
             $('#location').val('');
             $('#streetnumber').val('');
             $('#streetname').val('');
