@@ -16,7 +16,7 @@
                     <div class="col-md-12 onboarding-form-group">
                         <label class="onboarding-lable"> PROGRAM CATEGORIES (UP TO 3)</label>
 
-                        <input type="text" class="form-control onboarding-input" name="programCategories" id="programCategories" data-role="tagsinput" value="@Request["programCategories"]" />
+                        <input type="text" class="form-control onboarding-input" name="programCategories" id="txtProgramCategories" data-role="tagsinput" value="@Request["programCategories"]" />
                         <p class="text-muted" style="padding: 5px 0; font-size: 14px;">Seprate with a comma (ex: Karate, Sports, Leadership)</p>
                     </div>
 
@@ -188,7 +188,7 @@
 
                     <div class="clearfix"></div>
                     <div class="visible-sm visible-xs margin-v-30">
-                        <button type="submit" class="btn-save-claims btn btn-primary btn-lg pull-right col-xs-12">Save Changes &raquo;</button>
+                        <button type="submit" class="btn-save-claims btn btn-primary btn-lg pull-right col-xs-12">Save and Continue</button>
 
                         <div class="clearfix"></div>
                         <div class="text-center margin-v-30">
@@ -200,7 +200,7 @@
                         <a href="@Url.Action("logo", "onboarding")" class="process-back">
                             <img src="~/img/welcome-back-arrow.PNG" />
                         </a>
-                        <button type="submit" class="btn-save-claims btn btn-primary btn-lg pull-right register-continue">Save Changes &raquo;</button>
+                        <button type="submit" class="btn-save-claims btn btn-primary btn-lg pull-right register-continue">Save and Continue</button>
                     </div>
 
                     <div class="clearfix"></div>

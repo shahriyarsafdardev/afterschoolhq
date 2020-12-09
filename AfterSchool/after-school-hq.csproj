@@ -1822,6 +1822,7 @@
     <Content Include="Views\Shared\_AgeRestrictions.cshtml" />
     <Content Include="Views\Shared\Components\_GoogleLocationEdit.cshtml" />
     <Content Include="Views\Shared\_GradeRestrictions.cshtml" />
+    <Content Include="Views\SignUp\IndexNew.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
