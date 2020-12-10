@@ -77,22 +77,22 @@
                                 <td>
                                     @if (account.GetMemberCount() == 0)
                                     {
-                                        <a href="@Url.Action("invite", "account", new { id = account.Uid })" class="btn btn-default btn-xs">
+                                        <a href="@Url.Action("invite", "account", new { id = account.Uid, pn = paging.PageNumber, rpp = paging.RecordsPerPage, search = Request["search"], type = Request["type"] })" class="btn btn-default btn-xs">
                                             Invite To Account
                                         </a> 
                                     } 
                                     else if (account.GetActiveMemberCount() == 0) 
                                     {
-                                        <a href="@Url.Action("resendinvite", "account", new { id = account.Uid })" class="btn btn-default btn-xs">
+                                        <a href="@Url.Action("resendinvite", "account", new { id = account.Uid, pn = paging.PageNumber, rpp = paging.RecordsPerPage, search = Request["search"], type = Request["type"] })" class="btn btn-default btn-xs">
                                             Resend Invite
                                         </a>
                                     }
 
-                                    <a href="@Url.Action("updateaccountstatus", "account", new { id = account.Uid })" class="btn btn-xs @($"{(account.IsActive ? "btn-warning" : "btn-info" )}")">
+                                    <a href="@Url.Action("updateaccountstatus", "account", new { id = account.Uid, pn = paging.PageNumber, rpp = paging.RecordsPerPage, search = Request["search"], type = Request["type"] })" class="btn btn-xs @($"{(account.IsActive ? "btn-warning" : "btn-info" )}")">
                                         @($"{(account.IsActive ? "Deactivate" : "Activate" )}")
                                     </a>
 
-                                    <a href="@Url.Action("updateaccountclaims", "account", new { id = account.Uid })" class="btn @($"{(account.IsClaimed ? "btn-default" : "btn-info" )}") btn-xs">
+                                    <a href="@Url.Action("updateaccountclaims", "account", new { id = account.Uid, pn = paging.PageNumber, rpp = paging.RecordsPerPage, search = Request["search"], type = Request["type"] })" class="btn @($"{(account.IsClaimed ? "btn-default" : "btn-info" )}") btn-xs">
                                         @($"{(!account.IsClaimed ? "Mark as Claimed" : "Mark as UnClaimed")}")
                                     </a>
                                     
@@ -111,14 +111,14 @@
                                         });
                                     }
 
-                                     <a href="@Url.Action("UpdateAccountTestFlagStatus", "account", new { id = account.Uid })" class="btn btn-xs @($"{(account.IsTest ? "btn-success" : "btn-info" )}")">
+                                     <a href="@Url.Action("UpdateAccountTestFlagStatus", "account", new { id = account.Uid, pn = paging.PageNumber, rpp = paging.RecordsPerPage, search = Request["search"], type = Request["type"] })" class="btn btn-xs @($"{(account.IsTest ? "btn-success" : "btn-info" )}")">
                                         @($"{(account.IsTest ? "Unset as Test" : "Set as Test")}")
                                     </a>
 
                                 <script>
                                     PageEvent.add(PageEvent.AFTER_INIT, function () {
                                             $('#btn-confirm-account-deletion-@account.Uid').click(function () {
-                                                location.href = '@Url.Action("deleteaccount", "account", new { id = account.Uid })';
+                                                location.href = '@Url.Action("deleteaccount", "account", new { id = account.Uid, pn = paging.PageNumber, rpp = paging.RecordsPerPage, search = Request["search"], type = Request["type"] })';
                                             });
                                         });
                                 </script>   

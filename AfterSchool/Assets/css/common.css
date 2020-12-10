@@ -1,4 +1,27 @@
 ﻿/*common style for whole application*/
+
+/*site wide Padding */
+
+.no-padding {
+    padding: 0 !important;
+}
+
+.p-5 {
+    padding: 5px;
+}
+
+.p-b-5 {
+    padding-bottom: 5px;
+}
+
+.p-tb-5 {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+/*site wide margin */
+
+
 .ql-container {
     min-height: 100px;
 }
@@ -46,4 +69,311 @@
 
 .font-size-11 {
     font-size: 11px;
+}
+
+.main-content-welcome-pages {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#signup-welcome, #signup-select-usertype, #signup-individualtype, #signup-search-name, #signup-orgtype, #signup-register, #signup-claim-profile, .welcome-box-width {
+    width: 1040px;
+}
+
+.welcome-outer-ring {
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 9px 5px rgba(0, 0, 0, 0.2);
+}
+
+.welcome-inner-ring {
+    padding: 112px 187px 162px 143px;
+    border-radius: 6px;
+    background-color: #f9fcfb;
+}
+
+.mobile-inner-ring {
+    padding: 10px;
+    border-radius: 6px;
+    background-color: #f9fcfb;
+    min-height: 676.95px;
+}
+
+.img-client-success-manager {
+    width: 217px;
+    height: 270px;
+    margin: 0 36px 30px 0px;
+    border-radius: 6px;
+    border: solid 1px #00c5a3;
+    float: left;
+}
+
+.manager-name {
+    width: 143px;
+    height: 22px;
+    margin: 0 73px 7px 37px;
+    /*font-family: Montserrat;*/
+    font-size: 18px;
+    font-weight: bold;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    text-align: center;
+    color: #00c5a3;
+}
+
+.manager-position {
+    width: 217px;
+    height: 22px;
+    margin: 7px 36px 5px 0;
+    /*font-family: Montserrat;*/
+    font-size: 18px;
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    text-align: center;
+    color: #4a4a4a;
+}
+
+.welcome-text {
+    /*font-family: Montserrat;*/
+    font-size: 25px;
+    font-weight: bold;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    text-align: center;
+    color: #4a4a4a;
+}
+
+.common-font {
+    /*font-family: Montserrat;*/
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    color: #4a4a4a;
+}
+
+.btn-proceedfuther {
+    width: 250px;
+    margin-top: 60px;
+    border-radius: 6px;
+    background-color: #00c5a3;
+}
+
+.btn-common {
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    border-radius: 6px;
+    background-color: #00c5a3;
+    padding: 15px 54px 16px 72px;
+    font-size: 18px;
+    width: 390px;
+}
+
+.btn-common-mobile {
+    width: 250px;
+    border-radius: 6px;
+    background-color: #00c5a3;
+}
+
+.btn-org-height-width {
+    height: 53px;
+    width: 219px;
+}
+
+.btn-org-common {
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    border-radius: 6px;
+    background-color: #00c5a3;
+    padding: 15px 12px 16px;
+    font-size: 18px;
+}
+
+#signup-search-label {
+    font-size: 14px;
+    font-weight: 600;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: 1.56px;
+    text-align: center;
+    color: #00c5a3;
+}
+
+#signup-account-search {
+    height: 50px;
+    margin: 5px 0 0;
+    border-radius: 6px;
+    border: solid 1px #00ae85;
+    background-color: #ffffff;
+}
+
+#signup-account-search-list {
+    z-index: 1000;
+    background-color: white;
+    border-width: 2px;
+    position: absolute;
+    width: -webkit-fill-available;
+    width: -moz-available;
+    width: fill-available;
+    margin-right: 30px;
+}
+
+.onboarding-lable {
+    height: 18px;
+    /*margin: 0 522px 8px 0;*/
+    font-size: 14px;
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: 1.56px;
+    text-align: center;
+    color: #00c5a3;
+}
+
+.onboarding-input {
+    height: 35px;
+    border-radius: 6px !important;
+    border: solid 1px #00c5a3;
+    background-color: #ffffff;
+}
+
+.onboarding-form-group {
+    padding: 12px 0;
+}
+
+.m-b-20 {
+    margin-bottom: 20px;
+}
+
+.register-thankyou-1 {
+    font-size: 22px;
+    font-weight: 300;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: 0.53px;
+    text-align: center;
+    color: #4a4a4a;
+    margin-bottom: 40px;
+}
+
+.register-thankyou-2 {
+    font-size: 22px;
+    font-weight: 600;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: 0.53px;
+    text-align: center;
+    color: #4a4a4a;
+}
+
+.register-continue {
+    width: 195px;
+    height: 53px;
+    border-radius: 6px;
+    background-color: #00c5a3;
+    margin: 0 auto;
+    float: none !important;
+    display: block;
+    font-size: 18px;
+}
+
+.process-back {
+    margin-top: 10px;
+    position: absolute;
+   
+}
+
+.program-radio {
+    float: left;
+    padding-right: 10px !important;
+}
+
+.tip {
+    width: 0px;
+    height: 0px;
+    position: absolute;
+    background: transparent;
+    border: 10px solid #00c5a3;
+}
+
+.tip-left {
+    top: 10px;
+    left: -25px;
+    border-top-color: transparent;
+    border-left-color: transparent;
+    border-bottom-color: transparent;
+}
+
+.dialogbox .dialogbox-body {
+    position: relative;
+    max-width: 300px;
+    height: auto;
+    margin: 20px 10px;
+    padding: 5px;
+    border: 5px solid #00c5a3;
+    border-radius: 6px;
+    background-color: #00c5a3;
+}
+
+.dialogbox-body .message {
+    min-height: 30px;
+    border-radius: 3px;
+    font-size: 14px;
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: 1.5;
+    letter-spacing: 1.5px;
+    color: #fff;
+}
+
+.chk-lable {
+    min-width: 500px;
+    cursor: pointer;
+}
+
+    .chk-lable:before {
+        float: right;
+        margin-left: 25px;
+    }
+
+.has-search .form-control {
+    padding-left: 2.375rem;
+}
+
+.has-search .form-control-search {
+    position: absolute;
+    z-index: 2;
+    display: block;
+    width: 2.375rem;
+    height: 2.375rem;
+    line-height: 2.375rem;
+    text-align: center;
+    pointer-events: none;
+    color: #aaa;
+    margin-top: 10px;
+}
+
+.has-search .form-control:focus {
+    box-shadow: none;
+    border-color: #00c5a3;
 }

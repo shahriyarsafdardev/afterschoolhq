@@ -420,7 +420,29 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult AddCoupon()
         {
-            return View();
+            var msgs = new SystemMessages();
+            ViewBag.Messages = msgs;
+
+            var model = GetActivities(msgs);
+
+            return View(model);
+        }
+
+        public static List<ModalViewModel> GetActivities(SystemMessages msgs)
+        {
+            var activities = Activity.LoadByAccountId(SessionVariables.CurrentAccount.ID.Value, msgs);
+
+            var model = new List<ModalViewModel>();
+            foreach (var item in activities)
+            {
+                model.Add(new ModalViewModel()
+                {
+                    ID = item.ID.Value.ToString(),
+                    Title = item.Name
+                });
+            }
+
+            return model;
         }
 
         [HttpPost]
@@ -523,7 +545,8 @@ namespace AfterSchool.Areas.Org.Controllers
             else
             {
                 ViewBag.Messages = msgs;
-                return View("AddCoupon");
+                var model = GetActivities(msgs);
+                return View("AddCoupon", model);
             }
                
         }

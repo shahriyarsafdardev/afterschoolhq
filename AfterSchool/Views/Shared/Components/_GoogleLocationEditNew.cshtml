@@ -1,0 +1,125 @@
+﻿@model Location
+
+@{ 
+    var types = ViewData["types"];
+    var description = "Enter your full address, your city and state, or your zipcode";
+
+    if (ViewData["description"].IsNotEmpty())
+    {
+        description = ViewData["description"].ToString();
+    }
+
+}
+
+<input type="text" class="form-control onboarding-input" name="location" id="location" value="@(Model?.FormatAddress(false))" placeholder="" />
+<input type="hidden" id="streetnumber" name="streetnumber" value="@(Model?.StreetNumber)" />
+<input type="hidden" id="streetname" name="streetname" value="@(Model?.StreetName)" />
+<input type="hidden" id="address2" name="address2" value="@(Model?.Address2)" />
+<input type="hidden" id="neighborhood" name="neighborhood" value="@(Model?.Neighborhood)" />
+<input type="hidden" id="city" name="city" value="@(Model?.City)" />
+<input type="hidden" id="state" name="state" value="@(Model?.State)" />
+<input type="hidden" id="postalcode" name="postalcode" value="@(Model?.PostalCode)" />
+<input type="hidden" id="county" name="county" value="@(Model?.County)" />
+<input type="hidden" id="country" name="country" value="@(Model?.Country)" />
+<input type="hidden" id="placeid" name="placeid" value="@(Model?.GooglePlaceId)" />
+<input type="hidden" id="locationname" name="locationname" value="@(Model?.Name)" />
+
+<p class="text-muted" style="padding: 5px 0;">
+    @description
+</p>
+
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBq47Ro2O69sQhVLEW4_2L0ClOBSW_Srmc&libraries=places"></script>
+
+<script>
+
+    var selected = false;
+
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        var input = document.getElementById('location');
+
+        var options = {
+            @if (types.IsNotEmpty())
+            {
+                @:types: ['@types'],
+            }
+        };
+
+        autocomplete = new google.maps.places.Autocomplete(input, options);
+
+        autocomplete.setFields(['place_id', 'name', 'address_components']);
+
+        autocomplete.addListener('place_changed', function () {
+
+            selected = true
+            const place = autocomplete.getPlace();
+            const components = place.address_components;
+
+            $('#placeid').val(place.place_id);
+            $('#locationname').val(place.name);
+
+            for (component of components) {
+
+                const type = component.types[0];
+                const longName = component.long_name;
+                const shortName = component.short_name;
+
+                switch (type) {
+                    case 'street_number':
+                        $('#streetnumber').val(longName);
+                        break;
+                    case 'route':
+                        $('#streetname').val(shortName);
+                        break;
+                    case 'subpremise':
+                        $('#address2').val(longName);
+                        break;
+                    case 'neighborhood':
+                        $('#neighborhood').val(longName);
+                        break;
+                    case 'street_number':
+                        $('#address1').val(longName);
+                        break;
+                    case 'postal_code':
+                        $('#postalcode').val(longName);
+                        break;
+                    case 'locality':
+                        $('#city').val(longName);
+                        break;
+                    case 'administrative_area_level_2':
+                        $('#county').val(longName);
+                        break;
+                    case 'administrative_area_level_1':
+                        $('#state').val(longName);
+                        break;
+                    case 'country':
+                        $('#country').val(shortName);
+                        break;
+                }
+            }
+
+        });
+
+        $(input).on('focus', function () {
+            selected = false;
+        }).on('blur', function () {
+            if (!selected) {
+                clearHiddenInputs();
+            }
+        });
+
+        function clearHiddenInputs() {            
+            $('#location').val('');
+            $('#streetnumber').val('');
+            $('#streetname').val('');
+            $('#address2').val('');
+            $('#neighborhood').val('');
+            $('#city').val('');
+            $('#state').val('');
+            $('#postalcode').val('');
+            $('#county').val('');
+            $('#country').val('');
+            $('#placeid').val('');
+            $('#locationname').val('');
+        }
+    });
+</script>

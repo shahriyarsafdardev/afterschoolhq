@@ -1,6 +1,5 @@
-﻿@{
-    var msgs = (SystemMessages)ViewBag.Messages;
-}
+﻿@model List<ModalViewModel>
+@{ var msgs = (SystemMessages)ViewBag.Messages; }
 
 @{Html.RenderPartial("OrgAccountHeader");}
 
@@ -13,103 +12,161 @@
     <div class="panel panel-default">
 
         <div class="panel-heading">
+            <a href="@Url.Action("coupon", "accounting")" class="btn btn-default pull-right">&laquo; All Coupons</a>
             <i class="s7-plus"></i> Add Coupon
         </div>
 
-        <div class="panel-body">
+        <form class="form form-horizontal" method="post" action="@Url.Action("postaddcoupon", "accounting")">
 
-            <form class="form form-horizontal" method="post" action="@Url.Action("additionalinfo", "onboarding")">
-                <div class="row">
-                    <div class="col-lg-offset-4 col-lg-4 col-md-offset-3 col-md-6 col-sm-12">
-                        <div class="form-group">
-                            <h1 class="text-center">@headerText</h1>
+            <div class="panel-body">
+
+                <div class="col-md-6 col-sm-12">
+
+                    <div class="col-md-10 p-tb-5">
+                        <label class="control-label p-5"> Name </label>
+                        <input id="txtName" name="label" value="@Request["label"]" type="text" class="form-control" required />
+                    </div>
+                    <div class="clearfix"></div>
+
+                    <div class="col-md-10 p-tb-5">
+                        <label class="control-label p-5"> Description </label>
+                        <input id="txtDescription" name="description" value="@Request["description"]" type="text" class="form-control" />
+                    </div>
+                    <div class="clearfix"></div>
+
+                    <div class="col-md-10 p-tb-5">
+                        <label class="control-label p-5"> Coupon Code </label>
+                        <input id="txtCouponCode" name="couponCode" value="@Request["couponCode"]" type="text" class="form-control" />
+                        <p class="text-muted">
+                            <em>This is the code parents will enter on checkout.</em>
+                        </p>
+                    </div>
+                    <div class="clearfix"></div>
+
+                    <div class="col-md-10 p-tb-5">
+                        <label class="control-label p-5"> Number of Uses </label>
+                        <input id="txtMaxUsesAll" name="maxUsesAll" value="@Request["maxUsesAll"]" type="text" class="form-control" />
+                    </div>
+                    <div class="clearfix"></div>
+
+                    <div class="col-md-10 p-tb-5">
+                        <label class="control-label p-5"> Number of Uses Per Person </label>
+                        <input id="txtMaxUsesPerPerson" name="maxUsesPerPerson" value="@Request["maxUsesPerPerson"]" type="text" class="form-control" />
+                    </div>
+                    <div class="clearfix"></div>
+
+                    <div class="col-md-10 p-tb-5">
+                        <label class="control-label p-5">  Expiration Date </label>
+                        @{ Html.RenderPartial("~/Views/Shared/Components/_Date.cshtml",
+                                new FormInputViewModel()
+                                {
+                                    Id = "dateExpdate",
+                                    Name = "expirationDate",
+                                    Value = Request["expirationDate"],
+                                    Placeholder = "Expiration Date"
+                                }); }
+                    </div>
+                    <div class="clearfix"></div>
+
+                    <div class="col-md-10 p-tb-5">
+                        <div class="col-md-7 no-padding">
+                            <label class="control-label p-5"> Discount Amount </label>
+                            <input id="txtAmount" name="amount" value="@Request["amount"]" type="text" class="form-control" />
                         </div>
+                        <div class="col-md-offset-1 col-md-4 no-padding">
+                            <label class="control-label p-5"> % or $ </label>
 
-                        <div class="form-group">
-                            <label class="col-lg-3 control-label">
-                                Label
-                            </label>
-                            <div class="col-lg-9">
-                                <input type="text" class="form-control" name="label" id="label" value="@Request["label"]" required />
-                            </div>
+                            <select class="form-control" id="amountType" name="amountType">
+
+                                @{ 
+                                    foreach (var item in EnumHelper.GetSelectList(typeof(AmountType)))
+                                    {
+                                        if (item.Text.ToString() != AmountType.NotSet.ToString())
+                                        {
+                                            <option value="@item.Value.ToString()">@item.Text</option>
+                                        }
+                                    } 
+                                }
+
+                            </select>
                         </div>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
 
-                        <div class="form-group">
-                            <label class="col-lg-3 control-label">
-                                Description
-                            </label>
-                            <div class="col-lg-9">
-                                <input type="text" class="form-control" name="description" id="description" value="@Request["description"]" />
-                            </div>
+                <div class="col-md-6 col-sm-12">
+
+                    <input id="hdnActivityIds" type="hidden" name="activityIds" value="@Request["activityIds"]" />
+
+                    <div class="col-md-10 p-tb-5">
+                        <label class="row control-label p-5"> Activities(Only Show Current or Future Activities) </label>
+                        <div class="form-group has-search">
+                            <span class="fa fa-search form-control-search"></span>
+                            <input type="text" class="form-control" placeholder="Search" onkeyup="return filterRecords(this.value)">
                         </div>
+                    </div>
+                    <div class="clearfix"></div>
 
-                        <div class="form-group">
-                            <label class="col-lg-3 control-label">
-                                Coupon Code
-                            </label>
-                            <div class="col-lg-9">
-                                <input type="text" class="form-control" name="description" id="description" value="@Request["description"]" />
-                                <p class="text-muted">
-                                    <em>This is the code parents will enter on checkout.</em>
-                                </p>
-                            </div>
-                        </div>
-
-
-                        <div class="form-group">
-                            <label class="col-lg-3 control-label">
-                                Are you an E-Learning Center?
-                            </label>
-                            <div class="col-lg-9">
-                                @{ Html.RenderPartial(
-                                                     "~/Views/Shared/_SwitchButton.cshtml",
-                                                     elc,
-                                                     new ViewDataDictionary() {
-                                   { "checkboxname", "elearningcenter" },
-                                   { "checkboxid", "chkELearningCenter" },
-}); }
-                                <p class="text-muted">You will host/care for students to assist e-learning during the school day</p>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="col-lg-3 control-label">
-                                Is it a Virtual Program?
-                            </label>
-                            <div class="col-lg-9">
-                                @{ Html.RenderPartial(
-                                                     "~/Views/Shared/_SwitchButton.cshtml",
-                                                     isVirtualProgram,
-                                                     new ViewDataDictionary() {
-                                   { "checkboxname", "isvirtualprogram" },
-                                   { "checkboxid", "chkIsVirtualProgram" },
-}); }
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="col-lg-3 control-label"></label>
-                            <div class="col-lg-9">
-                                <div class="visible-sm visible-xs">
-                                    <button type="submit" class="btn btn-primary btn-lg btn-block">Save Changes &raquo;</button>
-                                </div>
-
-                                <div class="visible-sm visible-xs text-center margin-v-30">
-                                    <a href="@Url.Action("index", "onboarding")" class="text-muted">&laquo; Back</a>
-                                </div>
-
-                                <div class="visible-md visible-lg">
-                                    <a href="@Url.Action("index", "onboarding")" class="text-muted">&laquo; Back</a>
-                                    <button type="submit" class="btn btn-primary btn-lg pull-right">Save Changes &raquo;</button>
-                                </div>
-                            </div>
-                        </div>
-
+                    <div id="activities-data" class="am-checkbox" style="max-height: 500px; overflow-x: auto;">
                     </div>
                 </div>
-            </form>
 
+                <div class="clearfix"></div>
+                <br />
+                <br />
+                <div class="col-md-12 p-tb-5">
+                    <button type="submit" class="btn btn-primary btn-lg btn-center register-continue">Save Coupon</button>
+                </div>
 
-        </div>
+                <div class="clearfix"></div>
+            </div>
+
+        </form>
+
     </div>
 </div>
+
+@section Scripts
+{
+    <script type="text/javascript">
+        var activities;
+        $(document).ready(function () {
+            var data = '@Html.Raw(Json.Encode(Model))';
+            if (data) {
+                activities = JSON.parse(data);
+                loadActivities(activities);
+            }
+        });
+
+        function loadActivities(data) {
+            var divActivities = $('#activities-data');
+            divActivities.html('');
+
+            if (data) {
+                _.each(data, function (activity) {
+                    var html = `<div class="form-check p-tb-5">`;
+                    html += `<input id="chk-activity-${activity.ID}" name="coupoun-activities" type="checkbox" value="${activity.ID}" onclick="return prepareActivities()">`;
+                    html += `<label for="chk-activity-${activity.ID}" class="margin-h-10 mobile-padding chk-lable">${activity.Title}</label>`;
+                    html += `</div>`;
+                    divActivities.append(html)
+                });
+            }
+        }
+
+        function filterRecords(search) {
+            var filteredActivities = _.filter(activities, function (activity) {
+                return activity.Title.toLowerCase().indexOf(search.toLowerCase()) !== -1; // -1 means not present
+            });
+
+            loadActivities(filteredActivities);
+        }
+
+        function prepareActivities() {
+            var ids = $('input[name="coupoun-activities"]:checked').map(function () {
+                return this.value;
+            }).get().join(",");
+
+            $('#hdnActivityIds').val(ids);
+        }
+    </script>
+}
