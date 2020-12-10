@@ -35,4 +35,38 @@
     .datetimepicker-mobile {
         padding: 0 !important;
     }
+
+    .search-inner-ring {
+        padding: 112px 187px 50px 143px;
+        border-radius: 6px;
+        background-color: #f9fcfb;
+    }
+
+    .onboarding-inner-ring {
+        padding: 50px 187px 50px 143px;
+        border-radius: 6px;
+        background-color: #f9fcfb;
+    }
+
+    .desktop-text-center {
+        text-align: center;
+    }
+
+    .manger-comment {
+        width: 100px;
+        height: 125px;
+        margin: 30px 7px 0 165px;
+        border-radius: 6px;
+        border: solid 1px #00c5a3;
+        /*-webkit-filter: grayscale(100%);
+        filter: grayscale(100%);*/
+    }
+
+    .dialogbox {
+        margin: 10px 7px 0 0;
+    }
+
+    .process-back {      
+        margin-left: 170px;
+    }
 }

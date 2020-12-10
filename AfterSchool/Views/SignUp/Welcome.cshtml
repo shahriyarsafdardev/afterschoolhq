@@ -1,7 +1,8 @@
 ﻿@model SignUpIndexViewModel
 @{
-    Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
+    Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml";
     var msgs = (SystemMessages)ViewBag.Messages;
+    var clientSuccessManagerName = "Tatiana Givens";
     var EnumSignupPages = new
     {
         WelCome = 0,
@@ -17,164 +18,255 @@
 
 }
 
-<div class="row main-content">
+<style>
+</style>
 
-    <div id="signup-welcome" class="row">
-        <div class="col-md-offset-3 col-md-6">
-            <h2 class="text-center">Welcome</h2>
+<div class="row main-content main-content-welcome-pages">
+
+    <div id="signup-welcome">
+
+        <div class="visible-lg visible-md welcome-outer-ring">
+            <div class="welcome-inner-ring">
+
+                <div class="pull-left">
+                    <img src="~/img/client_success_manager.jpeg" alt="@clientSuccessManagerName" class="img-client-success-manager">
+                    <div class="clearfix"></div>
+                    <p class="manager-name">@clientSuccessManagerName</p>
+                    <p class="manager-position">Client Success Manager</p>
+                </div>
+
+                <div>
+                    <span class="welcome-text">Welcome</span>
+                    <p class="common-font" style="font-size: 20px; margin: 6px 1px 17px 36px;">Thank you for joining us at AfterSchool HQ! </p>
+                    <p class="common-font" style="font-size: 18px; margin: 17px 0 25px 37px;">Boisterous cheers and applause for taking the first step towards streamlining the promotion and management of your enrichment program. To get your program up and running on our platform, we just need a few bits of information from you. </p>
+                    <p class="common-font" style="font-size: 18px;">I promise it will be quick, painless, and well worth a few minutes of your time.</p>
+                    <button id="btn-GetStarted" type="button" class="col-md-3 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center btn-proceedfuther" onclick="return proceedFurther('@EnumSignupPages.WelCome')">Get Started</button>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="clearfix"></div>
+            </div>
             <div class="clearfix"></div>
-            <br />
-            <br />
+        </div>
 
-            <div class="visible-lg">
-                <div class="col-md-3">
-                    <img src="~/img/allison-romano.jpeg" alt="Allison Romano" style="max-width: 110px;">
-                    <div class="clearfix"></div>
-                    <br />
-                    <div class="pull-left">
-                        <h5>Allison Romano</h5>
-                        <h6>Client Success Manager</h6>
-                    </div>
-                </div>
-                <div class="col-md-9">
-                    <p class="text-medium">Thank you for joining us at AfterSchool HQ! </p>
-                    <p class="text-medium-small">Boisterous cheers and applause for taking the first step towards streamlining the promotion and management of your enrichment program. To get your program up and running on our platform, we just need a few bits of information from you. </p>
-                    <p class="text-medium-small">I promise it will be quick, painless, and well worth a few minutes of your time.</p>
-                </div>
+        <div class="visible-xs visible-sm welcome-outer-ring" style="margin-bottom: 20px;">
+            <div class="mobile-inner-ring">
+                <h2 class="text-center welcome-text">Welcome</h2>
                 <div class="clearfix"></div>
-            </div>
+                <br />
 
-            <div class="visible-md">
-                <div class="col-md-4" style="padding: 0;">
-                    <img src="~/img/allison-romano.jpeg" alt="Allison Romano" style="max-width: 110px;">
-                    <div class="clearfix"></div>
-                    <br />
-                    <div class="pull-left">
-                        <h5>Allison Romano</h5>
-                        <h6>Client Success Manager</h6>
-                    </div>
-                </div>
-                <div class="col-md-8" style="padding: 0;">
-                    <p class="text-medium">Thank you for joining us at AfterSchool HQ! </p>
-                    <p class="text-medium-small">Boisterous cheers and applause for taking the first step towards streamlining the promotion and management of your enrichment program. To get your program up and running on our platform, we just need a few bits of information from you. </p>
-                    <p class="text-medium-small">I promise it will be quick, painless, and well worth a few minutes of your time.</p>
-                </div>
-                <div class="clearfix"></div>
-            </div>
-
-            <div class="visible-xs visible-sm">
                 <div class="col-sm-12 col-xs-12 text-center">
-                    <p class="text-medium">Thank you for joining us at AfterSchool HQ! </p>
-                    <br />
-                    <p class="text-medium-small">Boisterous cheers and applause for taking the first step towards streamlining the promotion and management of your enrichment program. To get your program up and running on our platform, we just need a few bits of information from you. </p>
-                    <p class="text-medium-small">I promise it will be quick, painless, and well worth a few minutes of your time.</p>
+                    <p class="common-font" style="font-size: 20px; margin: 6px 1px 17px 0px;">Thank you for joining us at AfterSchool HQ! </p>
+                    <p class="common-font" style="font-size: 18px; margin: 17px 0 25px 0px;">Boisterous cheers and applause for taking the first step towards streamlining the promotion and management of your enrichment program. To get your program up and running on our platform, we just need a few bits of information from you. </p>
+                    <p class="common-font" style="font-size: 18px;">I promise it will be quick, painless, and well worth a few minutes of your time.</p>
                 </div>
-                <div class="clearfix"></div>
+
                 <div class="col-sm-12 col-xs-12 margin-t-30">
                     <div class="pull-left">
-                        <img src="~/img/allison-romano.jpeg" alt="Allison Romano" style="max-width: 70px;">
+                        <img src="~/img/client_success_manager.jpeg" alt="@clientSuccessManagerName" style="max-width: 70px; border-radius: 6px; border: solid 1px #00c5a3;">
                     </div>
                     <div class="pull-left" style="margin-left: 20px;">
-                        <h5>Allison Romano</h5>
-                        <h6>Client Success Manager</h6>
+                        <p style=" font-family: Montserrat; font-size: 18px; font-weight: bold; font-stretch: normal; font-style: normal; line-height: normal; letter-spacing: normal; text-align: left; color: #00c5a3;">@clientSuccessManagerName</p>
+                        <p style=" font-family: Montserrat; font-size: 18px; font-weight: normal; font-stretch: normal; font-style: normal; line-height: normal; letter-spacing: normal; text-align: left; color: #4a4a4a;">Client Success Manager</p>
                     </div>
                 </div>
+
+                <div class="clearfix"></div>
+                <div class="text-center margin-v-40">
+                    <button id="btn-GetStarted" type="button" class="col-md-3 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center btn-proceedfuther" onclick="return proceedFurther('@EnumSignupPages.WelCome')">Get Started</button>
+                    <div class="clearfix"></div>
+                </div>
+
                 <div class="clearfix"></div>
             </div>
 
-            <div class="clearfix"></div>
-            <div class="text-center margin-v-40">
-                <button id="btn-GetStarted" type="button" class="col-md-3 col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.WelCome')">Get Started</button>
-                <div class="clearfix"></div>
-            </div>
             <div class="clearfix"></div>
         </div>
+
+        <div class="clearfix"></div>
     </div>
 
+    <div class="clearfix"></div>
     <div id="signup-select-usertype" style="display: none;">
-        <div class="col-lg-offset-4 col-lg-4 col-md-offset-3 col-md-6 col-sm-12">
-            <h2 class="text-center">What would you like to do?</h2>
-            <div class="clearfix"></div>
+        <div class="visible-lg visible-md welcome-outer-ring">
+            <div class="welcome-inner-ring">
+                <h2 class="text-center common-font" style="font-size: 24px;">What would you like to do?</h2>
+                <div class="clearfix"></div>
 
-            <div class="row margin-t-35">
-                <button id="btn-CreateIndividualAccount" type="button" class="col-sm-8 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SelectIndividualType')">Create an Individual Account</button>
-                <div class="clearfix"></div><br />
-                <button id="btn-CreateOrgAccount" type="button" class="col-sm-8 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SelectOrgType')">Create an Organization Account</button>
+                <div class="row margin-t-35">
+                    <button type="button" class="col-md-8 btn btn-lg btn-primary btn-center btn-common" onclick="return proceedFurther('@EnumSignupPages.SelectIndividualType')">Create an Individual Account</button>
+                    <div class="clearfix"></div><br />
+                    <button type="button" class="col-md-8 btn btn-lg btn-primary btn-center btn-common" onclick="return proceedFurther('@EnumSignupPages.SelectOrgType')">Create an Organization Account</button>
+                </div>
+                <div class="clearfix"></div>
+
+                <a href="#" style="margin-left: -120px;" onclick="return proceedBack('@EnumSignupPages.WelCome')">
+                    <img style="margin-top: -150px;" src="~/img/welcome-back-arrow.PNG" />
+                </a>
             </div>
-            <div class="clearfix"></div>
+        </div>
 
-            <div class="text-center margin-v-30">
-                <a href="#" class="text-muted" onclick="return proceedBack('@EnumSignupPages.WelCome')">&laquo; Back</a>
+        <div class="visible-xs visible-sm welcome-outer-ring" style="margin-bottom: 20px;">
+            <div class="mobile-inner-ring">
+                <h2 class="text-center common-font" style="font-size: 24px;">What would you like to do?</h2>
+                <div class="clearfix"></div>
+
+                <div class="row margin-t-35">
+                    <button type="button" class="col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center btn-common-mobile" onclick="return proceedFurther('@EnumSignupPages.SelectIndividualType')">Create an Individual Account</button>
+                    <div class="clearfix"></div><br />
+                    <button type="button" class="col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center btn-common-mobile" onclick="return proceedFurther('@EnumSignupPages.SelectOrgType')">Create an Organization Account</button>
+                </div>
+                <div class="clearfix"></div>
+
+                <div class="text-center margin-v-30">
+                    <a href="#" class="text-muted" onclick="return proceedBack('@EnumSignupPages.WelCome')">Back</a>
+                </div>
             </div>
         </div>
     </div>
 
+    <div class="clearfix"></div>
     <div id="signup-individualtype" style="display: none;">
-        <div class="col-lg-offset-4 col-lg-4 col-md-offset-3 col-md-6 col-sm-12">
-            <h2 class="text-center">What would you like to do?</h2>
-            <div class="clearfix"></div>
 
-            <div class="row margin-t-35">
-                <button id="btn-ProgramForStudents" type="button" class="col-sm-8 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SearchProgramName')">Provide programs for students</button>
-                <div class="clearfix"></div><br />
-                <button id="btn-EnrollChild" type="button" class="col-sm-8 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return proceedFurther('@EnumSignupPages.SearchSchool')">Enroll my child in a program</button>
-            </div>
-            <div class="clearfix"></div>
+        <div class="visible-lg visible-md welcome-outer-ring">
+            <div class="welcome-inner-ring">
+                <h2 class="text-center common-font" style="font-size: 24px;">What would you like to do?</h2>
+                <div class="clearfix"></div>
 
-            <div class="text-center margin-v-30">
-                <a href="#" class="text-muted" onclick="return proceedBack('@EnumSignupPages.SelectUserType')">&laquo; Back</a>
+                <div class="row margin-t-35">
+                    <button type="button" class="col-md-8 btn btn-lg btn-primary btn-center btn-common" onclick="return proceedFurther('@EnumSignupPages.SearchProgramName')">Provide programs for students</button>
+                    <div class="clearfix"></div><br />
+                    <button type="button" class="col-md-8 btn btn-lg btn-primary btn-center btn-common" onclick="return proceedFurther('@EnumSignupPages.SearchSchool')">Enroll my child in a program</button>
+                </div>
+                <div class="clearfix"></div>
+
+                <a href="#" style="margin-left: -120px;" onclick="return proceedBack('@EnumSignupPages.SelectUserType')">
+                    <img style="margin-top: -150px;" src="~/img/welcome-back-arrow.PNG" />
+                </a>
             </div>
         </div>
+
+        <div class="visible-xs visible-sm welcome-outer-ring" style="margin-bottom: 20px;">
+            <div class="mobile-inner-ring">
+                <h2 class="text-center common-font" style="font-size: 24px;">What would you like to do?</h2>
+                <div class="clearfix"></div>
+
+                <div class="row margin-t-35">
+                    <button type="button" class="col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center btn-common-mobile" onclick="return proceedFurther('@EnumSignupPages.SearchProgramName')">Provide programs for students</button>
+                    <div class="clearfix"></div><br />
+                    <button type="button" class="col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center btn-common-mobile" onclick="return proceedFurther('@EnumSignupPages.SearchSchool')">Enroll my child in a program</button>
+                </div>
+                <div class="clearfix"></div>
+
+                <div class="text-center margin-v-30">
+                    <a href="#" class="text-muted" onclick="return proceedBack('@EnumSignupPages.SelectUserType')">Back</a>
+                </div>
+            </div>
+        </div>
+
     </div>
 
+    <div class="clearfix"></div>
     <div id="signup-orgtype" style="display: none;">
-        <div class="col-lg-offset-4 col-lg-4 col-md-offset-3 col-md-6 col-sm-12">
-            <h2 class="text-center">What kind of organization?</h2>
-            <div class="clearfix"></div>
 
-            <div class="row margin-t-35">
-                <button id="btn-Business" type="button" class="col-sm-8 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.Business')">Business</button>
-                <div class="clearfix"></div><br />
-                <button id="btn-School" type="button" class="col-sm-8 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.School')">School</button>
-                <div class="clearfix"></div><br />
-                <button id="btn-CommunityCenter" type="button" class="col-sm-8 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.CommunityCenter')">Community Center</button>
-                <div class="clearfix"></div><br />
-                <button id="btn-Church" type="button" class="col-sm-8 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.Church')">Church</button>
-                <div class="clearfix"></div><br />
-                <button id="btn-NonProfit" type="button" class="col-sm-8 col-xs-12 btn btn-lg btn-primary btn-center" onclick="return setOrgTypeAndProceedFurther('@AccountType.ActivityProvider')">Non Profit</button>
+        <div class="visible-lg visible-md welcome-outer-ring">
+            <div class="welcome-inner-ring">
+                <h2 class="text-center common-font" style="font-size: 24px;">What kind of organization?</h2>
+                <div class="clearfix"></div>
+
+                <div class="row margin-t-35">
+                    <div class="col-md-offset-2 col-md-4">
+                        <button type="button" class="btn btn-primary btn-center btn-common btn-org-height-width" style="padding: 15px 57px 16px 58px;" onclick="return setOrgTypeAndProceedFurther('@AccountType.Business')">Business</button>
+                        <div class="clearfix"></div><br />
+
+                        <button type="button" class="btn btn-primary btn-center btn-common btn-org-height-width" style="padding: 16px 69px 15px;" onclick="return setOrgTypeAndProceedFurther('@AccountType.School')">School</button>
+                        <div class="clearfix"></div><br />
+
+                        <button type="button" class="btn btn-primary btn-center btn-org-height-width btn-org-common" onclick="return setOrgTypeAndProceedFurther('@AccountType.CommunityCenter')">Community Center</button>
+                        <div class="clearfix"></div><br />
+                    </div>
+                    <div class="col-md-4">
+                        <button type="button" class="btn btn-primary btn-center btn-org-height-width btn-org-common" onclick="return setOrgTypeAndProceedFurther('@AccountType.Church')">Church</button>
+                        <div class="clearfix"></div><br />
+
+                        <button type="button" class="btn btn-primary btn-center btn-org-height-width btn-org-common" onclick="return setOrgTypeAndProceedFurther('@AccountType.ActivityProvider')">Non Profit</button>
+                        <div class="clearfix"></div><br />
+
+                        <button type="button" class="btn btn-primary btn-center btn-org-height-width btn-org-common" onclick="return setOrgTypeAndProceedFurther('@AccountType.ActivityProvider')">Other</button>
+                        <div class="clearfix"></div><br />
+                    </div>
+                    <div class="clearfix"></div><br />
+
+                </div>
+                <div class="clearfix"></div>
+
+                <a href="#" style="margin-left: -120px;" onclick="return proceedBack('@EnumSignupPages.SelectUserType')">
+                    <img style="margin-top: -270px;" src="~/img/welcome-back-arrow.PNG" />
+                </a>
             </div>
-            <div class="clearfix"></div>
+        </div>
 
-            <div class="text-center margin-v-30">
-                <a href="#" class="text-muted" onclick="return proceedBack('@EnumSignupPages.SelectUserType')">&laquo; Back</a>
+        <div class="visible-xs visible-sm welcome-outer-ring" style="margin-bottom: 20px;">
+            <div class="mobile-inner-ring">
+                <h2 class="text-center common-font" style="font-size: 24px;">What kind of organization?</h2>
+                <div class="clearfix"></div>
+
+                <div class="row margin-t-35">
+                    <button type="button" class="col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center btn-common-mobile" onclick="return setOrgTypeAndProceedFurther('@AccountType.Business')">Business</button>
+                    <div class="clearfix"></div><br />
+                    <button type="button" class="col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center btn-common-mobile" onclick="return setOrgTypeAndProceedFurther('@AccountType.School')">School</button>
+                    <div class="clearfix"></div><br />
+                    <button type="button" class="col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center btn-common-mobile" onclick="return setOrgTypeAndProceedFurther('@AccountType.CommunityCenter')">Community Center</button>
+                    <div class="clearfix"></div><br />
+                    <button type="button" class="col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center btn-common-mobile" onclick="return setOrgTypeAndProceedFurther('@AccountType.Church')">Church</button>
+                    <div class="clearfix"></div><br />
+                    <button type="button" class="col-sm-12 col-xs-12 btn btn-lg btn-primary btn-center btn-common-mobile" onclick="return setOrgTypeAndProceedFurther('@AccountType.ActivityProvider')">Non Profit</button>
+                    <div class="clearfix"></div><br />
+                </div>
+                <div class="clearfix"></div>
+
+                <div class="text-center margin-v-30">
+                    <a href="#" class="text-muted" onclick="return proceedBack('@EnumSignupPages.SelectUserType')">Back</a>
+                </div>
             </div>
         </div>
     </div>
 
+    <div class="clearfix"></div>
     <div id="signup-search-name" style="display: none;">
-        <div class="col-lg-offset-4 col-lg-4 col-md-offset-3 col-md-6 col-sm-12">
-            <h2 id="lbl-org-search-title" class="text-center"></h2>
-            <div class="clearfix"></div>
-
-            <div class="row margin-t-35">
+        <div class="welcome-outer-ring">
+            <div class="search-inner-ring">
                 <div class="">
-                    <input type="text" class="form-control" id="signup-account-search" placeholder="placeholder" autocomplete="off" />
-                    <div id="signup-account-search-list" class="border-light-gray pointer hide" style="position:absolute; width:100%; z-index:1000; background-color: white; border-width: 2px;"></div>
+
+                    <div class="visible-md visible-lg">
+                        <a href="#" style="margin-left: -120px;" onclick="return proceedBack('@EnumSignupPages.SearchProgramName')">
+                            <img style=" position: fixed; margin-top: 150px;" src="~/img/welcome-back-arrow.PNG" />
+                        </a>
+                    </div>
+
+                    <h2 id="lbl-org-search-title" class="text-center"></h2>
+                    <div class="clearfix"></div>
+
+                    <div class="row margin-t-35">
+                        <div class="col-md-12">
+                            <label id="signup-search-label"></label>
+                            <input id="signup-account-search" type="text" class="form-control" autocomplete="off" />
+                            <div id="signup-account-search-list" class="border-light-gray pointer hide"></div>
+                        </div>
+                        <div class="clearfix"></div><br />
+                    </div>
                 </div>
                 <div class="clearfix"></div><br />
 
-                <div class="visible-md visible-lg margin-v-30">
-                    <a href="#" class="text-muted" onclick="return proceedBack('@EnumSignupPages.SearchProgramName')">&laquo; Back</a>
-                    <button type="button" class="btn-SearchContinue col-md-3 btn btn-primary btn-lg pull-right" disabled="disabled" onclick="return decideToProceedFurther(this)">Continue &raquo;</button>
+                <div class="visible-md visible-lg">
+                    <button type="button" class="btn-SearchContinue btn btn-primary btn-center btn-common btn-org-height-width register-continue" disabled="disabled" onclick="return decideToProceedFurther(this)">Continue</button>
                 </div>
-                <div class="clearfix"></div><br />
 
                 <div class="visible-sm visible-xs">
-                    <button type="button" class="btn-SearchContinue btn btn-primary btn-lg pull-right col-xs-12" disabled="disabled" onclick="return decideToProceedFurther(this)">Continue &raquo;</button>
+                    <button type="button" class="btn-SearchContinue btn btn-primary btn-lg pull-right col-xs-12 register-continue" disabled="disabled" onclick="return decideToProceedFurther(this)">Continue</button>
 
                     <div class="clearfix"></div>
                     <div class="text-center margin-v-30">
-                        <a href="#" class="text-muted" onclick="return proceedBack('@EnumSignupPages.SearchProgramName')">&laquo; Back</a>
+                        <a href="#" class="text-muted" onclick="return proceedBack('@EnumSignupPages.SearchProgramName')">Back</a>
                     </div>
                 </div>
                 <div class="clearfix"></div><br />
@@ -182,107 +274,123 @@
         </div>
     </div>
 
+    <div class="clearfix"></div>
     <div id="signup-register" style="display: none;">
-        <div class="col-lg-offset-4 col-lg-4 col-md-offset-3 col-md-6 col-sm-12">
-            <div class="panel panel-default">
-                <div class="panel-heading text-center">
-                    <a href="/"><img src="@UILabel.ProductLogoInverse()" alt="logo" style="max-width: 100%; width: 350px;" class="logo-img"></a>
-                </div>
-                <div class="panel-body">
-                    <p class="text-medium-small text-center">Thanks for joining our platform to provide learning opportunities for students everywhere.</p>
-                    <p class="text-medium-small text-center">We just need a little information to get started.</p>
+        <div class="welcome-outer-ring m-b-20">
+            <div class="search-inner-ring p-b-5">
+                <div class="margin-t-35">
+                    @*<div class="text-center">
+                            <div style="width: 15px; height: 15px; margin: 0 5px 0 0; background-color: #00c5a3; border-radius: 7px;"></div>
+                        </div>*@
 
-                    <form id="form-signup-personal-details" class="form-horizontal" method="post" action="@Url.Action("index", "signup")">
-                        @{ Html.RenderPartial("~/Views/Shared/Login/_SignUpForm-NewAccount.cshtml", Model); }
+                    <p class="register-thankyou-1">Thanks for joining our platform to provide learning opportunities for students everywhere.</p>
+                    <p class="register-thankyou-2" style="margin-bottom: 20px;">We just need a little information to get started.</p>
+
+                    <div class="clearfix"></div><br />
+                    <form id="form-signup-personal-details" class="form-horizontal" method="post" action="@Url.Action("indexnew", "signup")">
+                        @{ Html.RenderPartial("~/Views/Shared/Login/_SignUpForm-NewAccount-Welcome.cshtml", Model); }
+                        <div class="clearfix"></div>
                     </form>
 
                 </div>
+                <div class="clearfix"></div>
             </div>
-            <div class="text-center out-links"><a href="/">&copy; @DateTime.UtcNow.Year @UILabel.ProductName()</a></div>
         </div>
     </div>
 
+    <div class="clearfix"></div>
     <div id="signup-claim-profile" style="display: none;">
-        <div class="col-lg-offset-4 col-lg-4 col-md-offset-3 col-md-6 col-sm-12">
-            <h2 id="header-claim-profile-main" class="text-center"></h2>
-            <div class="clearfix"></div><br />
-            <h5 id="header-account-exist" class="text-center" style="display: none;">This profile already exists on AfterSchool HQ. Please start the claim process below.</h5>
-            <h5 id="header-account-claimed" class="text-center" style="display: none;">This profile already claimed on AfterSchool HQ. You can request access by entering your information below.</h5>
-            <div class="clearfix"></div><br />
+        <div class="welcome-outer-ring m-b-20">
+            <div class="search-inner-ring p-b-5">
 
-            <div class="row margin-t-35">
-                <form id="form-signup-claim-form" class="form-horizontal">
-                    @Html.AntiForgeryToken()
+                <h2 id="header-claim-profile-main" class="text-center"></h2>
+                <div class="clearfix"></div><br />
+                <h5 id="header-account-exist" class="text-center register-thankyou-2" style="display: none;">This profile already exists on AfterSchool HQ. Please start the claim process below.</h5>
+                <p id="header-account-claimed" class="text-center register-thankyou-2">This profile already claimed on AfterSchool HQ. You can request access by entering your information below.</p>
+                <div class="clearfix"></div>
 
-                    <input id="hidden-claim-accountId" type="hidden" name="accountId" />
+                <div class="margin-t-35">
+                    <form id="form-signup-claim-form" class="form-horizontal">
+                        @Html.AntiForgeryToken()
 
-                    <div class="form-group row">
-                        <input class="form-control" type="text" required="required" name="firstName" placeholder="First Name">
-                    </div>
-                    <div class="clearfix"></div>
+                        <input id="hidden-claim-accountId" type="hidden" name="accountId" />
 
-                    <div class="form-group row">
-                        <input class="form-control" type="text" required="required" name="lastName" placeholder="Last Name">
-                    </div>
-                    <div class="clearfix"></div>
-
-                    <div class="form-group row">
-                        <input class="form-control" type="email" required="required" name="email" placeholder="Email">
-                    </div>
-                    <div class="clearfix"></div>
-
-                    <div class="form-group row">
-                        <input id="signup-claim-profile-phone" class="form-control" type="text" required="required" name="phone" placeholder="ex. (317) 483 3489">
-                    </div>
-                    <div class="clearfix"></div>
-
-                    <div class="form-group row text-center">
-                        @{ Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", ""); }
-                    </div>
-                    <div class="clearfix"></div>
-
-                    <div class="visible-sm visible-xs margin-v-30">
-                        <button type="button" class="btn-save-claims btn btn-primary btn-lg pull-right col-xs-12" onclick="return saveClaims(this)"></button>
-
-                        <div class="clearfix"></div>
-                        <div class="text-center margin-v-30">
-                            <a href="#" class="text-muted" onclick="return proceedBack('@EnumSignupPages.ClaimProfile')">&laquo; Back</a>
+                        <div class="col-md-12 onboarding-form-group">
+                            <label class="onboarding-lable">FIRST NAME</label>
+                            <input class="form-control onboarding-input" type="text" required="required" name="firstName">
                         </div>
-                    </div>
+                        <div class="clearfix"></div>
 
-                    <div class="visible-md visible-lg margin-v-30">
-                        <a href="#" class="pull-left text-muted" onclick="return proceedBack('@EnumSignupPages.ClaimProfile')">&laquo; Back</a>
-                        <button type="button" class="btn-save-claims btn btn-primary btn-lg pull-right" onclick="return saveClaims()"></button>
-                    </div>
+                        <div class="col-md-12 onboarding-form-group">
+                            <label class="onboarding-lable">LAST NAME</label>
+                            <input class="form-control onboarding-input" type="text" required="required" name="lastName">
+                        </div>
+                        <div class="clearfix"></div>
 
-                    <div class="clearfix"></div><br />
-                </form>
-            </div>
-        </div>
-    </div>
+                        <div class="col-md-12 onboarding-form-group">
+                            <label class="onboarding-lable">EMAIL ADDRESS</label>
+                            <input class="form-control onboarding-input" type="email" required="required" name="email">
+                        </div>
+                        <div class="clearfix"></div>
 
-    <div id="signup-thank-you" class="row" style="display: none;">
-        <div class="col-lg-offset-4 col-lg-4 col-md-offset-3 col-md-6 col-sm-12">
-            <h2 class="text-center">Thank You!</h2>
-            <div class="clearfix"></div><br />
-            <h5 id="header-thankyou-not-recognized" class="text-center" style="display: none;">We have sent an email with instructions to <strong id="lbl-org-member-email"></strong>.</h5>
-            <h5 id="header2-thankyou-not-recognized" class="text-center" style="display: none;">No longer have access to this email? Incorrect email? Click <a href="#" onclick="return contactSupport()">Here</a> to automatically submit a request to our support team.</h5>
+                        <div class="col-md-12 onboarding-form-group">
+                            <label class="onboarding-lable">PHONE</label>
+                            <input id="signup-claim-profile-phone" class="form-control onboarding-input" placeholder="ex. (317) 483 3489" type="text" required="required" name="phone">
+                        </div>
+                        <div class="clearfix"></div>
 
-            <div id="header3-thankyou-not-recognized" class="col-md-offset-3 alert alert-info alert-icon alert-border-color alert-dismissible" role="alert" style="display: none; width: 50%; margin-top: 40px; text-align: center;">
-                <div class="icon"><span class="s7-info"></span></div>
-                <div class="message">
-                    <button class="close" data-dismiss="alert" aria-label="Close"><span class="s7-close" aria-hidden="true"></span></button><strong>We have sent your request!</strong> You should hear back from us in the next 24-48 hours.
+                        <div class="col-md-12 onboarding-form-group text-center" style="margin-top: 20px;">
+                            @{ Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", ""); }
+                        </div>
+                        <div class="clearfix"></div>
+
+                        <div class="visible-sm visible-xs margin-v-30">
+                            <button type="button" class="btn-save-claims btn btn-primary btn-lg pull-right col-xs-12 register-continue" onclick="return saveClaims(this)"></button>
+
+                            <div class="clearfix"></div>
+                            <div class="text-center margin-v-30">
+                                <a href="#" class="text-muted" onclick="return proceedBack('@EnumSignupPages.ClaimProfile')">Back</a>
+                            </div>
+                        </div>
+
+                        <div class="visible-md visible-lg margin-v-30">
+                            <a href="#" class="process-back" onclick="return proceedBack('@EnumSignupPages.ClaimProfile')">
+                                <img src="~/img/welcome-back-arrow.PNG" />
+                            </a>
+                            <button type="button" class="btn-save-claims btn btn-primary btn-lg pull-right register-continue" onclick="return saveClaims()"></button>
+                        </div>
+
+                        <div class="clearfix"></div><br />
+                    </form>
                 </div>
-            </div>
 
-            <h5 id="header-thankyou-recognized" class="text-center" style="display: none;">We see that you have email from same domain. We have sent you instruction to claim your account.</h5>
-            <h5 id="header-thankyou-request-access" class="text-center" style="display: none;">Your access request has been sent to the owner of this profile.</h5>
-            <div class="clearfix"></div><br />
+            </div>
         </div>
     </div>
 
-</div>
+    <div class="clearfix"></div>
+    <div id="signup-thank-you" style="display: none;">
+        <div class="welcome-outer-ring">
+            <div class="search-inner-ring" style="min-height: 509px;padding-bottom: 5px;">                    
+                <h2 class="text-center">Thank You!</h2>
+                <div class="clearfix"></div><br />
+                <h5 id="header-thankyou-not-recognized" class="text-center" style="display: none;">We have sent an email with instructions to <strong id="lbl-org-member-email"></strong>.</h5>
+                <h5 id="header2-thankyou-not-recognized" class="text-center" style="display: none;">No longer have access to this email? Incorrect email? Click <a href="#" onclick="return contactSupport()">Here</a> to automatically submit a request to our support team.</h5>
 
+                <div id="header3-thankyou-not-recognized" class="col-md-offset-3 alert alert-info alert-icon alert-border-color alert-dismissible" role="alert" style="display: none; width: 50%; margin-top: 40px; text-align: center;">
+                    <div class="icon"><span class="s7-info"></span></div>
+                    <div class="message">
+                        <button class="close" data-dismiss="alert" aria-label="Close"><span class="s7-close" aria-hidden="true"></span></button><strong>We have sent your request!</strong> You should hear back from us in the next 24-48 hours.
+                    </div>
+                </div>
+
+                <h5 id="header-thankyou-recognized" class="text-center" style="display: none;">We see that you have email from same domain. We have sent you instruction to claim your account.</h5>
+                <h5 id="header-thankyou-request-access" class="text-center" style="display: none;font-size: 22px; font-weight: 600; font-stretch: normal; font-style: normal; line-height: normal; letter-spacing: 0.53px; text-align: center; color: rgb(74, 74, 74); margin-bottom: 40px;" ">Your access request has been sent to the owner of this profile.</h5>
+                <div class="clearfix"></div><br />
+            </div>            
+        </div>
+    </div>
+</div>
 @section Scripts
 {
     <script src="~/Scripts/jquery.validate.js"></script>
@@ -319,6 +427,7 @@
         var hiddeAccountType = $('#hidden-signup-accountType');
         var signupAccountSearchList = $('#signup-account-search-list');
         var signupAccountSearch = $('#signup-account-search');
+        var signupSearchLable = $('#signup-search-label');
         var signupListItemClass = "text-small padding-10";
         var signupListItemStyle = "background-color: #f0f0f0;";
         var signupListLastItemStyle = "background-color: #ddeae0;";
@@ -444,7 +553,7 @@
                                 }
 
                                 list.append(`
-                                <div 
+                                <div
                                     style="${signupListLastItemStyle} ${borderStyle}"
                                     class="${signupListItemClass}"
                                     id="signup-search-listItem-0"
@@ -486,7 +595,7 @@
                 isSchool = false;
                 hiddeAccountType.val('@AccountType.Teacher');
                 lblOrgSearchTitle.text('What\'s the name of your program?');
-                signupAccountSearch.attr('placeholder', 'Type in your program name');
+                signupSearchLable.html('SEARCH OR ADD YOUR PROGRAM')
                 clearSearch();
                 signupIndividualType.hide();
                 signupSearchName.show();
@@ -495,7 +604,7 @@
                 isOrganization = true;
                 isSchool = false;
                 lblOrgSearchTitle.text('What\'s the name of your organization?');
-                signupAccountSearch.attr('placeholder', 'Type in your organization name');
+                signupSearchLable.html('SEARCH OR ADD YOUR ORGANIZATION')
                 clearSearch();
                 signupOrgType.hide();
                 signupSearchName.show();
@@ -503,7 +612,7 @@
                 isSchool = true;
                 isOrganization = false;
                 lblOrgSearchTitle.text('Find your school, organization or program');
-                signupAccountSearch.attr('placeholder', 'School, Organization or Proram name');
+                signupSearchLable.html('SEARCH OR ADD YOUR SCHOOL, ORGANIZATION OR PRORAM NAME')
                 clearSearch();
                 signupIndividualType.hide();
                 signupSearchName.show();
@@ -531,15 +640,15 @@
                 if (selectedAccount.isClaimed) {
                     headerClaimProfileMain.text('Request Access');
                     headerAccountExist.hide();
-                    headerAccountClaimed.show();                    
+                    headerAccountClaimed.show();
                     proceedFurther('@EnumSignupPages.ClaimProfile');
-                    btnSaveClaims.html('Request Access &raquo;');
+                    btnSaveClaims.html('Request Access');
                 } else {
                     headerClaimProfileMain.text('Claim Profile');
                     headerAccountClaimed.hide();
                     headerAccountExist.show();
                     proceedFurther('@EnumSignupPages.ClaimProfile');
-                    btnSaveClaims.html('Start the claim process &raquo;');
+                    btnSaveClaims.html('Start the claim process');
                 }
 
             } else {
@@ -689,7 +798,7 @@
         var inputElement = document.getElementById('signup-claim-profile-phone');
         inputElement.addEventListener('keydown', enforceFormat);
         inputElement.addEventListener('keyup', formatToPhone);
-       
+
     // #endregion: phone number validation
 
     </script>
