@@ -90,14 +90,14 @@
                                                 </td>
 
 
-                                                <td class="text-center padding-zero">
+                                                <td class="text-center mobile-padding-zero">
                                                     <div class="am-radio inline">
                                                         <input type="radio" name="selectedpackage" id="selectedpackage-@p.ID-monthly" @monthlySelected value="@((int)BillingPeriodType.Month)_@p.Uid.ToString()" />
                                                         <label for="selectedpackage-@p.ID-monthly">@p.Price.ToCurrency()</label>
                                                     </div>
                                                 </td>
 
-                                                <td class="text-center padding-zero">
+                                                <td class="text-center mobile-padding-zero">
                                                     <div class="am-radio">
                                                         <input type="radio" name="selectedpackage" id="selectedpackage-@p.ID-yearly" @yearlySelected value="@((int)BillingPeriodType.Year)_@p.Uid.ToString()" />
                                                         <label for="selectedpackage-@p.ID-yearly">@p.PricePerYear.ToCurrency()</label>
