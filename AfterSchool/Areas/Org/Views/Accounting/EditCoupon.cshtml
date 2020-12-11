@@ -1,11 +1,20 @@
 ﻿@model Coupon
 @{ 
     var msgs = (SystemMessages)ViewBag.Messages;
-    var label = (string)Model.Label ?? Request["label"];
+    var id = Model.Uid.ToString() ?? Request["Uid"];
+    var name = (string)Model.Name ?? Request["Name"];
     var description = (string)Model.Description ?? Request["description"];
     var couponCode = (string)Model.CouponCode ?? Request["couponcode"];
     var maxUsesAll = (int)(Model.MaxNumberOfUsesAll.HasValue ? Model.MaxNumberOfUsesAll : Request["maxusesall"].ToInteger());
     var maxUsesPerPerson = (int)(Model.MaxNumberOfUsesPerPerson.HasValue ? Model.MaxNumberOfUsesAll : Request["maxUsesPerPerson"].ToInteger());
+    var expirationDate = Model.ExpirationDate.ToShortDateString() ?? Request["expirationDate"];
+    var amount = Model.Amount.ToString() ?? Request["amount"];
+
+    var activityIds = "";
+    if (ViewBag.Activities != null)
+    {
+        activityIds = (string)ViewBag.Activities;
+    }
  }
 
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -25,25 +34,28 @@
 
         <form class="form form-horizontal" method="post" action="@Url.Action("savecoupon", "accounting")">
 
+            <input id="hdnActivityIds" type="hidden" name="activityIds" value="@activityIds" />
+            <input id="hdnCouponId" type="hidden" name="id" value="@id" />
+
             <div class="panel-body">
 
                 <div class="col-md-6 col-sm-12">
 
                     <div class="col-md-10 p-tb-5">
-                        <label class="control-label p-5"> Label </label>
-                        <input id="txtName" name="label" value="@Request["label"]" type="text" class="form-control" required />
+                        <label class="control-label p-5"> Name </label>
+                        <input id="txtName" name="name" value="@name" type="text" class="form-control" required />
                     </div>
                     <div class="clearfix"></div>
 
                     <div class="col-md-10 p-tb-5">
                         <label class="control-label p-5"> Description </label>
-                        <input id="txtDescription" name="description" value="@Request["description"]" type="text" class="form-control" />
+                        <input id="txtDescription" name="description" value="@description" type="text" class="form-control" />
                     </div>
                     <div class="clearfix"></div>
 
                     <div class="col-md-10 p-tb-5">
                         <label class="control-label p-5"> Coupon Code </label>
-                        <input id="txtCouponCode" name="couponCode" value="@Request["couponCode"]" type="text" class="form-control" />
+                        <input id="txtCouponCode" name="couponCode" value="@couponCode" type="text" class="form-control" />
                         <p class="text-muted">
                             <em>This is the code parents will enter on checkout.</em>
                         </p>
@@ -52,13 +64,13 @@
 
                     <div class="col-md-10 p-tb-5">
                         <label class="control-label p-5"> Number of Uses </label>
-                        <input id="txtMaxUsesAll" name="maxUsesAll" value="@Request["maxUsesAll"]" type="number" step="1" class="form-control" />
+                        <input id="txtMaxUsesAll" name="maxUsesAll" value="@maxUsesAll" type="number" step="1" class="form-control" />
                     </div>
                     <div class="clearfix"></div>
 
                     <div class="col-md-10 p-tb-5">
                         <label class="control-label p-5"> Number of Uses Per Person </label>
-                        <input id="txtMaxUsesPerPerson" name="maxUsesPerPerson" value="@Request["maxUsesPerPerson"]" type="number" step="1" class="form-control" />
+                        <input id="txtMaxUsesPerPerson" name="maxUsesPerPerson" value="@maxUsesPerPerson" type="number" step="1" class="form-control" />
                     </div>
                     <div class="clearfix"></div>
 
@@ -69,7 +81,7 @@
                                 {
                                     Id = "dateExpdate",
                                     Name = "expirationDate",
-                                    Value = Request["expirationDate"],
+                                    Value = expirationDate,
                                     Placeholder = "Expiration Date"
                                 }); }
                     </div>
@@ -78,7 +90,7 @@
                     <div class="col-md-10 p-tb-5">
                         <div class="col-md-7 no-padding">
                             <label class="control-label p-5"> Discount Amount </label>
-                            <input id="txtAmount" name="amount" value="@Request["amount"]" type="text" class="form-control" />
+                            <input id="txtAmount" name="amount" value="@amount" type="text" class="form-control" />
                         </div>
                         <div class="col-md-offset-1 col-md-4 no-padding">
                             <label class="control-label p-5"> % or $ </label>
@@ -102,9 +114,7 @@
                 </div>
 
                 <div class="col-md-6 col-sm-12">
-
-                    <input id="hdnActivityIds" type="hidden" name="activityIds" value="@Request["activityIds"]" />
-
+                    
                     <div class="col-md-10 p-tb-5">
                         <label class="row control-label p-5"> Activities(Only Show Current or Future Activities) </label>
                         <div class="form-group has-search">
@@ -137,13 +147,57 @@
 {
     <script type="text/javascript">
         var activities;
+        var comma_seperated_activities = @Html.Raw(Json.Encode(activityIds));
+        var activityIdsToSelect;
+
         $(document).ready(function () {
-            var data = '@Html.Raw(Json.Encode(Model))';
-            if (data) {
-                activities = JSON.parse(data);
-                loadActivities(activities);
+            getActivities();
+
+            if (comma_seperated_activities) {
+                activityIdsToSelect = comma_seperated_activities.split(',');
             }
         });
+
+        function getActivities() {
+            var url = '@Url.Action("GetActivities", "Accounting", new { Area = "Org" })';
+
+                $.ajax({
+                    url: url,
+                    type: "POST",
+                    dataType: "json",
+                    success: function (data) {
+                        if (data && data.success == false) {
+                            var errors = ''
+                            data.data.forEach(function (error) {
+                                if (error && error.Text) {
+                                    errors += '<li style="color: white;">' + error.Text + '</li>';
+                                }
+                                else {
+                                    errors += '<li style="color: white;">' + error + '</li>';
+                                }
+                            });
+                            Notifications.showBar({
+                                title: 'Error',
+                                message: errors,
+                                success: false
+                            });
+                            return false;
+                        } else if (data && data.data && data.success == true) {
+                            activities = data.data;
+                            loadActivities(data.data)
+                        }
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.log(errorThrown);
+                        Notifications.showBar({
+                            title: 'Error',
+                            message: 'Something went wrong. Please contact customer support.',
+                            success: false
+                        });
+                        return;
+                    }
+                });
+        }
 
         function loadActivities(data) {
             var divActivities = $('#activities-data');
@@ -151,8 +205,14 @@
 
             if (data) {
                 _.each(data, function (activity) {
+                    var isSelected = _.contains(activityIdsToSelect, activity.ID);
                     var html = `<div class="form-check p-tb-5">`;
-                    html += `<input id="chk-activity-${activity.ID}" name="coupoun-activities" type="checkbox" value="${activity.ID}" onclick="return prepareActivities()">`;
+                    if (isSelected) {
+                        html += `<input id="chk-activity-${activity.ID}" name="coupoun-activities" type="checkbox" checked="checked" value="${activity.ID}" onclick="return prepareActivities()">`;
+                    } else {
+                        html += `<input id="chk-activity-${activity.ID}" name="coupoun-activities" type="checkbox" value="${activity.ID}" onclick="return prepareActivities()">`;
+                    }
+                    
                     html += `<label for="chk-activity-${activity.ID}" class="margin-h-10 mobile-padding chk-lable">${activity.Title}</label>`;
                     html += `</div>`;
                     divActivities.append(html)

@@ -17,7 +17,9 @@ namespace AfterSchoolLibrary.Services
                 AccountId = account.ID.Value,
                 CreateDate = DateTime.UtcNow,
                 CreatedBy = loggedInUser?.ID,
-                Uid = new Guid()
+                Uid = Guid.NewGuid(),
+                Name = "blank",
+                Amount = 0
             };
 
             msgs.AddRange(coupon.Save(dc));
@@ -44,6 +46,11 @@ namespace AfterSchoolLibrary.Services
                 msgs.AddRange(coupon.Save(dc));
 
            return coupon;
+        }
+
+        public static void Remove(this Coupon coupon, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            msgs.AddRange(coupon.Delete(dc));
         }
 
         public static string GenerateCouponCode(int accountId, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -123,9 +130,10 @@ namespace AfterSchoolLibrary.Services
             return participationObjects;
         }
 
-        public static ValidateCode()
+        public static string ValidateCode(Account account, string code)
         {
             /// TODO
+            return code;            
         }
     }
 }

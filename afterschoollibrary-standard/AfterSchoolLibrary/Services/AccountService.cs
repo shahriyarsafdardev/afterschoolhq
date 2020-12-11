@@ -3496,7 +3496,7 @@ namespace AfterSchoolLibrary.Services
             return AttachedCoupon.LoadByAccountId(account.ID.Value, actionHelper?.Messages, actionHelper?.Connection);
         }
 
-        public static Coupon CreateorUpdateCoupon(this Account account, Coupon coupon, decimal amount, DateTime? expirationDate, CouponAmountType amountType, CouponApplyType applyType, int maxUsesAll, int maxUsesPerPerson, string couponCode, string label, string description, StripeCouponDuration couponDuration, int? durationInMonths, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Coupon CreateorUpdateCoupon(this Account account, Coupon coupon, decimal amount, DateTime? expirationDate, CouponAmountType amountType, CouponApplyType applyType, int maxUsesAll, int maxUsesPerPerson, string couponCode, string name, string description, StripeCouponDuration couponDuration, int? durationInMonths, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
 
             coupon.CreateOrUpdate(
@@ -3508,7 +3508,7 @@ namespace AfterSchoolLibrary.Services
                 maxUsesAll: maxUsesAll,
                 maxUsesPerPerson: maxUsesPerPerson,
                 couponCode: couponCode,
-                label: label,
+                name: name,
                 description: description,
                 loggedInUser: loggedInUser,
                 msgs: msgs,

@@ -277,7 +277,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var plans = SessionVariables.CurrentAccount.GetSubscriptionPlans(msgs);
             var subscriptions = new List<RegistrantSubscriptionPlan>();
 
-            plans.ForEach(plan => {
+            plans.ForEach(plan =>
+            {
                 subscriptions.AddRange(plan.GetRegistrantSubscriptionPlans(msgs));
             });
 
@@ -424,20 +425,51 @@ namespace AfterSchool.Areas.Org.Controllers
             Coupon coupon = null;
 
             if (id.IsNotBlank() && id.IsGuid())
+            {
                 coupon = AfterSchoolLibrary.Models.Coupon.LoadByUid(id.ToGuid(), msgs);
-            else
+                ViewBag.Activities = GetActivityIdsForCoupon(coupon.ID.Value);
+            }
+            else {
                 coupon = CouponService.CreateBlank(SessionVariables.CurrentAccount, SessionVariables.CurrentUser, msgs);
-            
-            ViewBag.Activites = GetActivities(msgs);
-            ViewBag.Messages = msgs;
+            }
 
+            ViewBag.Messages = msgs;            
             return View(coupon);
         }
 
-        public static List<Activity> GetActivities(SystemMessages msgs)
+        public static string GetActivityIdsForCoupon(int id)
         {
-            return Activity.LoadByAccountId(SessionVariables.CurrentAccount.ID.Value, msgs)
-                .Where(activity => activity.GetActiveRegistrationPeriod(msgs).StartDateTime >= DateTime.Now || activity.GetFirstDate(msgs) >= DateTime.Now).ToList();
+            var purchaseableObjectCoupons = PurchaseableObjectCoupon.LoadByCouponId(id);
+            if (purchaseableObjectCoupons.Any())
+                return string.Join(",", purchaseableObjectCoupons.Where(m => m.PurchaseableObjectTypeId == PurchaseableObjectType.Activity).Select(m => m.PurchaseableObjectId).Distinct());
+
+            return string.Empty;
+        }
+
+        [HttpPost]
+        public virtual JsonResult GetActivities()
+        {
+            var msgs = new SystemMessages();
+
+            try
+            {
+                var activities = Activity.LoadByAccountId(SessionVariables.CurrentAccount.ID.Value, msgs)
+                .Where(activity => activity.GetActiveRegistrationPeriod(msgs).StartDateTime >= DateTime.Now || activity.GetFirstDate(msgs) >= DateTime.Now)
+                .Select(m => new ModalViewModel()
+                {
+                    ID = m.ID.Value.ToString(),
+                    Title = m.Name
+                }).ToList();
+
+                if (msgs.HasNoErrors())
+                    return Json(new { success = true, status = "ok", data = activities }, JsonRequestBehavior.AllowGet);
+                else
+                    return Json(new { success = false, status = "error", data = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, status = "error", data = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
         }
 
         [HttpPost]
@@ -451,7 +483,7 @@ namespace AfterSchool.Areas.Org.Controllers
             else
                 return View("coupon");
 
-            var label = Request.Form["label"];
+            var name = Request.Form["name"];
             var description = Request.Form["description"];
             var couponCode = Request.Form["couponCode"];
             var maxUsesAll = Request.Form["maxUsesAll"];
@@ -462,11 +494,13 @@ namespace AfterSchool.Areas.Org.Controllers
             var activityIds = Request.Form["activityIds"];
             var applyType = Request.Form["applyType"];
 
-            if (label.IsBlank())
-                msgs.Add("Label is required", MessageType.UserError);
+            //..applyType applies to the registration fee or the subscription, payment plan, post pay plan.  but for now we are just having coupons be just for registration fees
+            applyType = Convert.ToString((int)CouponApplyType.RegistrationFee);
+
+            if (name.IsBlank())
+                msgs.Add("Name is required", MessageType.UserError);
 
             // description can be empty
-
             if (couponCode.IsBlank())
                 msgs.Add("Coupon Code Required", MessageType.UserError);
 
@@ -494,67 +528,73 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 var ids = activityIds.Split(',').Select(p => Convert.ToInt32(p)).ToList();
-                var activities = Activity.LoadList(ids, msgs);
-
                 var loggedInUser = SessionVariables.CurrentUser;
                 var account = SessionVariables.CurrentAccount;
 
-                Database.ExecuteTransaction
-               (
+                Database.ExecuteTransaction(
                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
                    {
-                   // create new coupon
-                   coupon = account.CreateorUpdateCoupon(
-                        coupon,
-                        amount.ToDecimal(),
-                        expirationDate.ToDateTime(),
-                        amountType: amountType.ToInteger().ToEnum<CouponAmountType>(),
-                        applyType: applyType.ToInteger().ToEnum<CouponApplyType>(),
-                        maxUsesAll: maxUsesAll.ToInteger(),
-                        maxUsesPerPerson: maxUsesPerPerson.ToInteger(),
-                        couponCode: couponCode,
-                        label: label,
-                        description: description.IsBlank() ? "" : description,
-                        couponDuration: AfterSchoolLibrary.Billing.StripeCouponDuration.Once, // TODO :  figure this out
-                        durationInMonths: null,
-                        loggedInUser: loggedInUser,
-                        msgs: amsgs,
-                        dc: adc);
-
-                       activities.ForEach(activity =>
-                       {
-                           // assign coupon to the activities
-                           var poc = PurchaseableObjectCouponService.CreateNew(
-                            purchaseableObject: activity.GetPurchaseableObject(),
-                            coupon: coupon,
+                       // create new coupon
+                       coupon = account.CreateorUpdateCoupon(
+                            coupon,
+                            amount.ToDecimal(),
+                            expirationDate.ToDateTime(),
+                            amountType: amountType.ToInteger().ToEnum<CouponAmountType>(),
+                            applyType: applyType.ToInteger().ToEnum<CouponApplyType>(),
+                            maxUsesAll: maxUsesAll.ToInteger(),
+                            maxUsesPerPerson: maxUsesPerPerson.ToInteger(),
+                            couponCode: couponCode,
+                            name: name,
+                            description: description.IsBlank() ? "" : description,
+                            couponDuration: AfterSchoolLibrary.Billing.StripeCouponDuration.Once, // TODO :  figure this out
+                            durationInMonths: null,
                             loggedInUser: loggedInUser,
                             msgs: amsgs,
                             dc: adc);
-                       });
+
+                       //clear previous entries
+                       PurchaseableObjectCouponService.ClearPurchaseableObjectCoupons(coupon.ID.Value, amsgs, adc);
+
+                       //add newly selected activities
+                       PurchaseableObjectCouponService.InsertPurchaseableObjectCoupons(activityIds: ids, 
+                           CouponId: coupon.ID.Value, 
+                           loggedInUser: loggedInUser, 
+                           msgs: amsgs,
+                           dc: adc);
                    },
                    onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                    onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(msgs)
                );
-
             }
 
             if (msgs.HasNoErrors())
             {
                 msgs.Add("Coupon Created", MessageType.Success);
                 ViewBag.Messages = msgs;
-                return View("Coupon");
+                return RedirectToAction("Coupon");
             }
             else
             {
+                //todo.. need to discuss, remove added blank record
+                //CouponService.Remove(coupon);
+
                 ViewBag.Messages = msgs;
-                var model = GetActivities(msgs);
-                return View("AddCoupon", model);
+                ViewBag.Activities = activityIds;
+
+                return View("EditCoupon", new Coupon() {
+                    ID = coupon.ID,
+                    Uid = coupon.Uid,
+                    Name = name,
+                    Description = description,
+                    MaxNumberOfUsesAll = Convert.ToInt32(maxUsesAll),
+                    MaxNumberOfUsesPerPerson = Convert.ToInt32(maxUsesPerPerson),
+                    ExpirationDate = Convert.ToDateTime(expirationDate),
+                    Amount = Convert.ToDecimal(amount),
+                    AmountTypeId = amountType.ToInteger().ToEnum<CouponAmountType>()                    
+                });
             }
-               
         }
-
-
 
         #endregion
 

@@ -36,21 +36,13 @@
             <div class="table-responsive">
                 <table class="table table-hover table-condensed" id="transaction-table">
                     <thead>
-                        <tr>
-                            <th>
-                                <span class="am-checkbox">
-                                    <input type="checkbox" id="selectAllTransaction" onchange="selectAllTransaction(this)" />
-                                    <label for="selectAllTransaction"></label>
-                                </span>
-                            </th>
-                            <th>ID</th>
+                        <tr>                           
                             <th>Code</th>
                             <th>Number of Uses</th>
                             <th>Total Uses Allows</th>
                             <th>Activity</th>
-                            <th class="text-center">Amount</th>
+                            <th>Discount</th>
                             <th>Expiration Date</th>
-                            <th>Copy</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -73,9 +65,15 @@
                                     </td>
                                     <td>
                                         <ul>
-                                            @foreach (var po in participationObjects)
+                                            @if (participationObjects.IsNotEmpty())
                                             {
-                                                <li>@po.Name</li>
+                                                foreach (var po in participationObjects)
+                                                {
+                                                    if (po.IsNotEmpty())
+                                                    {
+                                                        <li>@po.Name</li>
+                                                    }                                                    
+                                                }
                                             }
                                         </ul>
                                     </td>
@@ -86,13 +84,15 @@
                                         @coupon.ExpirationDate.ToShortDateString()
                                     </td>
                                     <td>
-                                        <a href="@Url.Action("copy", "coupon", new { couponId = coupon.Uid })" class="btn btn-default">
+                                        <a href="@Url.Action("EditCoupon", "Accounting", new { id = coupon.Uid })" class="btn btn-success btn-sm">
+                                            <i class="icon icon-left s7-copy-file"></i>
+                                            Edit
+                                        </a>
+                                        <a href="@Url.Action("copy", "coupon", new { couponId = coupon.Uid })" class="btn btn-default btn-sm">
                                             <i class="icon icon-left s7-copy-file"></i>
                                             Copy
                                         </a>
-                                    </td>
-                                    <td>
-                                        <a href="@Url.Action("disable", "coupon", new { couponId = coupon.Uid })" class="btn btn-warning">
+                                        <a href="@Url.Action("disable", "coupon", new { couponId = coupon.Uid })" class="btn btn-warning btn-sm">
                                             <i class="icon icon-left s7-junk warning"></i>
                                             @(!coupon.IsDisabled && coupon.ExpirationDate > DateTime.Now ? "Enable" : "Disable")
                                         </a>
