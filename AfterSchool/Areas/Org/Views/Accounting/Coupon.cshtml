@@ -22,7 +22,7 @@
             <div class="clearfix"></div>
 
             <div class="pull-right">
-                <a href="@Url.Action("addcoupon", "accounting", new { area = "org" })" class="btn btn-primary">
+                <a href="@Url.Action("editcoupon", "accounting", new { area = "org" })" class="btn btn-primary">
                     <i class="icon icon-left s7-plus"></i>
                     Add Coupon
                 </a>
@@ -59,6 +59,7 @@
                         {
                             foreach (var coupon in Model)
                             {
+                                var participationObjects = coupon.GetParticipationObjects();
 
                                 <tr id="@coupon.ID">
                                     <td>
@@ -69,6 +70,14 @@
                                     </td>
                                     <td>
                                         @coupon.MaxNumberOfUsesAll
+                                    </td>
+                                    <td>
+                                        <ul>
+                                            @foreach (var po in participationObjects)
+                                            {
+                                                <li>@po.Name</li>
+                                            }
+                                        </ul>
                                     </td>
                                     <td>
                                         @coupon.GetAmountAsString()

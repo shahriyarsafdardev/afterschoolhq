@@ -3496,10 +3496,11 @@ namespace AfterSchoolLibrary.Services
             return AttachedCoupon.LoadByAccountId(account.ID.Value, actionHelper?.Messages, actionHelper?.Connection);
         }
 
-        public static Coupon CreateCoupon(this Account account, decimal amount, DateTime? expirationDate, CouponAmountType amountType, CouponApplyType applyType, int maxUsesAll, int maxUsesPerPerson, string couponCode, string label, string description, StripeCouponDuration couponDuration, int? durationInMonths, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Coupon CreateorUpdateCoupon(this Account account, Coupon coupon, decimal amount, DateTime? expirationDate, CouponAmountType amountType, CouponApplyType applyType, int maxUsesAll, int maxUsesPerPerson, string couponCode, string label, string description, StripeCouponDuration couponDuration, int? durationInMonths, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var coupon = CouponService.CreateNew(
-                accountId: account.ID.Value,
+
+            coupon.CreateOrUpdate(
+                account: account,
                 amount: amount,
                 expirationDate: expirationDate,
                 couponAmountType: amountType,

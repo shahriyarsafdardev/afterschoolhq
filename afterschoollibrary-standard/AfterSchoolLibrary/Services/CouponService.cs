@@ -10,29 +10,40 @@ namespace AfterSchoolLibrary.Services
 {
     public static class CouponService
     {
-        public static Coupon CreateNew(int accountId, decimal amount, DateTime? expirationDate, CouponAmountType couponAmountType, CouponApplyType couponApplyType, int? maxUsesAll, int? maxUsesPerPerson, string couponCode, string label, string description, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Coupon CreateBlank(Account account, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var coupon = new Coupon()
             {
-                AccountId = accountId,
-                Amount = amount,
-                AmountTypeId = couponAmountType,
-                CouponCode = couponCode,
-                AppliesTo = couponApplyType,
+                AccountId = account.ID.Value,
                 CreateDate = DateTime.UtcNow,
                 CreatedBy = loggedInUser?.ID,
-                LastModifiedDate = DateTime.UtcNow,
-                LastModifiedBy = loggedInUser?.ID,
-                Description = description,
-                ExpirationDate = expirationDate,
-                MaxNumberOfUsesAll = maxUsesAll,
-                MaxNumberOfUsesPerPerson = maxUsesPerPerson,
-                Name = label
+                Uid = new Guid()
             };
 
             msgs.AddRange(coupon.Save(dc));
 
             return coupon;
+        }
+
+        public static Coupon CreateOrUpdate(this Coupon coupon, Account account, decimal amount, DateTime? expirationDate, CouponAmountType couponAmountType, CouponApplyType couponApplyType, int? maxUsesAll, int? maxUsesPerPerson, string couponCode, string name, string description, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            coupon.AccountId = account.ID.Value;
+            coupon.Amount = amount;
+            coupon.ExpirationDate = expirationDate ?? null;
+            coupon.AmountTypeId = couponAmountType;
+            coupon.AppliesTo = couponApplyType;
+            coupon.MaxNumberOfUsesAll = maxUsesAll ?? 0;
+            coupon.MaxNumberOfUsesPerPerson = maxUsesPerPerson ?? 0;
+            coupon.Name = name;
+            coupon.Description = description;
+            coupon.LastModifiedDate = DateTime.UtcNow;
+            coupon.LastModifiedBy = loggedInUser?.ID;
+            coupon.CouponCode = ValidateCode(account, couponCode);
+
+            if (msgs.HasNoErrors())
+                msgs.AddRange(coupon.Save(dc));
+
+           return coupon;
         }
 
         public static string GenerateCouponCode(int accountId, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -97,6 +108,24 @@ namespace AfterSchoolLibrary.Services
             }
 
             return stripeCoupon;
+        }
+
+        public static List<ParticipationObject> GetParticipationObjects(this Coupon coupon, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var purchasbleObjectCoupons = coupon.GetPurchaseableObjectCoupons(msgs, dc);
+            List<ParticipationObject> participationObjects = new List<ParticipationObject>();
+
+            purchasbleObjectCoupons.ForEach(purchaseableObjectCoupon =>
+            {
+                participationObjects.Add(purchaseableObjectCoupon.GetPurchaseableObject(msgs, dc).ParticipationObject);
+            });
+
+            return participationObjects;
+        }
+
+        public static ValidateCode()
+        {
+            /// TODO
         }
     }
 }

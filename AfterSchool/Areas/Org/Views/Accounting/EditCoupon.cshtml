@@ -1,5 +1,12 @@
-﻿@model List<ModalViewModel>
-@{ var msgs = (SystemMessages)ViewBag.Messages; }
+﻿@model Coupon
+@{ 
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var label = (string)Model.Label ?? Request["label"];
+    var description = (string)Model.Description ?? Request["description"];
+    var couponCode = (string)Model.CouponCode ?? Request["couponcode"];
+    var maxUsesAll = (int)(Model.MaxNumberOfUsesAll.HasValue ? Model.MaxNumberOfUsesAll : Request["maxusesall"].ToInteger());
+    var maxUsesPerPerson = (int)(Model.MaxNumberOfUsesPerPerson.HasValue ? Model.MaxNumberOfUsesAll : Request["maxUsesPerPerson"].ToInteger());
+ }
 
 @{Html.RenderPartial("OrgAccountHeader");}
 
@@ -16,14 +23,14 @@
             <i class="s7-plus"></i> Add Coupon
         </div>
 
-        <form class="form form-horizontal" method="post" action="@Url.Action("postaddcoupon", "accounting")">
+        <form class="form form-horizontal" method="post" action="@Url.Action("savecoupon", "accounting")">
 
             <div class="panel-body">
 
                 <div class="col-md-6 col-sm-12">
 
                     <div class="col-md-10 p-tb-5">
-                        <label class="control-label p-5"> Name </label>
+                        <label class="control-label p-5"> Label </label>
                         <input id="txtName" name="label" value="@Request["label"]" type="text" class="form-control" required />
                     </div>
                     <div class="clearfix"></div>
@@ -45,13 +52,13 @@
 
                     <div class="col-md-10 p-tb-5">
                         <label class="control-label p-5"> Number of Uses </label>
-                        <input id="txtMaxUsesAll" name="maxUsesAll" value="@Request["maxUsesAll"]" type="text" class="form-control" />
+                        <input id="txtMaxUsesAll" name="maxUsesAll" value="@Request["maxUsesAll"]" type="number" step="1" class="form-control" />
                     </div>
                     <div class="clearfix"></div>
 
                     <div class="col-md-10 p-tb-5">
                         <label class="control-label p-5"> Number of Uses Per Person </label>
-                        <input id="txtMaxUsesPerPerson" name="maxUsesPerPerson" value="@Request["maxUsesPerPerson"]" type="text" class="form-control" />
+                        <input id="txtMaxUsesPerPerson" name="maxUsesPerPerson" value="@Request["maxUsesPerPerson"]" type="number" step="1" class="form-control" />
                     </div>
                     <div class="clearfix"></div>
 

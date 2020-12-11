@@ -77,7 +77,7 @@
                 }
                 else
                 {
-                    <span id="payment-plan-cost-0" class="hide">@participationObject.GetCheckoutCostWithConvenienceFee()</span>
+                    <span id="payment-plan-cost-0" class="hide">@checkoutObject.GetTotalCostToPurchaseTodayWithConvenienceFee()</span>
                     <span id="payment-plan-asf-0" class="hide">0</span>
                     if (subscriptionPlan.IsEmpty() || !subscriptionPlan.SplitCostEvenly || !participationObject.RegistrationFinalized)
                     {
@@ -260,15 +260,15 @@
                         <span id="fee-asf" class="hide">0</span>
                         <span class="total-due-today"></span>
 
-                        @*<tr>
-                    <td>
-                        Coupon
-                    </td>
-                    <td>
-                        <input type="text" id="coupon-code" class="form-control" value="" />
-                        <button type="button" class="btn btn-sm btn-default" onclick="applyCoupon()">Apply</button>
-                    </td>
-                </tr>*@
+                        <div class="row">
+                            <p>
+                                Coupon
+                            </p>
+                            <div>
+                                <input type="text" id="coupon-code" class="form-control" value="" />
+                                <button type="button" class="btn btn-sm btn-default" onclick="applyCoupon()">Apply</button>
+                            </div>
+                        </div>
                     </div>
 
                     Html.RenderPartial(

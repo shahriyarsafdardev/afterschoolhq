@@ -418,37 +418,39 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult AddCoupon()
+        public ActionResult EditCoupon(string id)
         {
             var msgs = new SystemMessages();
+            Coupon coupon = null;
+
+            if (id.IsNotBlank() && id.IsGuid())
+                coupon = AfterSchoolLibrary.Models.Coupon.LoadByUid(id.ToGuid(), msgs);
+            else
+                coupon = CouponService.CreateBlank(SessionVariables.CurrentAccount, SessionVariables.CurrentUser, msgs);
+            
+            ViewBag.Activites = GetActivities(msgs);
             ViewBag.Messages = msgs;
 
-            var model = GetActivities(msgs);
-
-            return View(model);
+            return View(coupon);
         }
 
-        public static List<ModalViewModel> GetActivities(SystemMessages msgs)
+        public static List<Activity> GetActivities(SystemMessages msgs)
         {
-            var activities = Activity.LoadByAccountId(SessionVariables.CurrentAccount.ID.Value, msgs);
-
-            var model = new List<ModalViewModel>();
-            foreach (var item in activities)
-            {
-                model.Add(new ModalViewModel()
-                {
-                    ID = item.ID.Value.ToString(),
-                    Title = item.Name
-                });
-            }
-
-            return model;
+            return Activity.LoadByAccountId(SessionVariables.CurrentAccount.ID.Value, msgs)
+                .Where(activity => activity.GetActiveRegistrationPeriod(msgs).StartDateTime >= DateTime.Now || activity.GetFirstDate(msgs) >= DateTime.Now).ToList();
         }
 
         [HttpPost]
-        public ActionResult PostAddCoupon()
+        public ActionResult SaveCoupon(string id)
         {
             var msgs = new SystemMessages();
+            Coupon coupon = null;
+
+            if (id.IsNotBlank() && id.IsGuid())
+                coupon = AfterSchoolLibrary.Models.Coupon.LoadByUid(id.ToGuid(), msgs);
+            else
+                return View("coupon");
+
             var label = Request.Form["label"];
             var description = Request.Form["description"];
             var couponCode = Request.Form["couponCode"];
@@ -502,7 +504,8 @@ namespace AfterSchool.Areas.Org.Controllers
                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
                    {
                    // create new coupon
-                   var coupon = account.CreateCoupon(
+                   coupon = account.CreateorUpdateCoupon(
+                        coupon,
                         amount.ToDecimal(),
                         expirationDate.ToDateTime(),
                         amountType: amountType.ToInteger().ToEnum<CouponAmountType>(),

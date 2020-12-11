@@ -628,6 +628,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ProductPurchase_ParticipationObjectId_ParticipationObjectTypeId_RegistrantId ON [ProductPurchase] (RegistrantId,ParticipationObjectId,ParticipationObjectTypeId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Coupon_AccountId ON [Coupon] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Coupon_AccountId_CouponCode ON [Coupon] (AccountId,CouponCode)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Coupon_Uid ON [Coupon] (Uid)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AttachedCoupon_CouponId ON [AttachedCoupon] (CouponId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AttachedCoupon_AccountId ON [AttachedCoupon] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AttachedCoupon_AccountId_IsUsed ON [AttachedCoupon] (AccountId,IsUsed)"));
