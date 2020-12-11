@@ -758,7 +758,10 @@ namespace AfterSchool.Areas.Org.Controllers
                         }
                 }
             }
-            
+
+            if (ViewBag.Schedule == null)
+                LoadEditScheduleViewBag(activity, null);
+
             ViewBag.ActiveMenu = "EditSchedule";
             return View(activity);
         }
