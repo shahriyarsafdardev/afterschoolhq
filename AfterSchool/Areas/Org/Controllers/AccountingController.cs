@@ -430,7 +430,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 ViewBag.Activities = GetActivityIdsForCoupon(coupon.ID.Value);
             }
             else {
-                coupon = CouponService.CreateBlank(SessionVariables.CurrentAccount, SessionVariables.CurrentUser, msgs);
+                coupon = CouponService.CreateBlank(SessionVariables.CurrentAccount, SessionVariables.CurrentUser);
             }
 
             ViewBag.Messages = msgs;            
@@ -480,8 +480,9 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (id.IsNotBlank() && id.IsGuid())
                 coupon = AfterSchoolLibrary.Models.Coupon.LoadByUid(id.ToGuid(), msgs);
-            else
-                return View("coupon");
+            
+            if(coupon.IsEmpty())
+                coupon = CouponService.CreateBlank(SessionVariables.CurrentAccount, SessionVariables.LoggedInUser);
 
             var name = Request.Form["name"];
             var description = Request.Form["description"];
@@ -570,14 +571,12 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                msgs.Add("Coupon Created", MessageType.Success);
+                msgs.Add("Coupon Saved", MessageType.Success);
                 ViewBag.Messages = msgs;
                 return RedirectToAction("Coupon");
             }
             else
             {
-                //todo.. need to discuss, remove added blank record
-                //CouponService.Remove(coupon);
 
                 ViewBag.Messages = msgs;
                 ViewBag.Activities = activityIds;

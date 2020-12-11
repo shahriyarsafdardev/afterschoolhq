@@ -10,19 +10,14 @@ namespace AfterSchoolLibrary.Services
 {
     public static class CouponService
     {
-        public static Coupon CreateBlank(Account account, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Coupon CreateBlank(Account account, WebUser loggedInUser)
         {
             var coupon = new Coupon()
             {
                 AccountId = account.ID.Value,
                 CreateDate = DateTime.UtcNow,
-                CreatedBy = loggedInUser?.ID,
-                Uid = Guid.NewGuid(),
-                Name = "blank",
-                Amount = 0
+                CreatedBy = loggedInUser?.ID
             };
-
-            msgs.AddRange(coupon.Save(dc));
 
             return coupon;
         }
@@ -41,6 +36,9 @@ namespace AfterSchoolLibrary.Services
             coupon.LastModifiedDate = DateTime.UtcNow;
             coupon.LastModifiedBy = loggedInUser?.ID;
             coupon.CouponCode = ValidateCode(account, couponCode);
+
+            if (coupon.Uid.IsEmpty())
+                coupon.Uid = new Guid();
 
             if (msgs.HasNoErrors())
                 msgs.AddRange(coupon.Save(dc));
@@ -77,7 +75,7 @@ namespace AfterSchoolLibrary.Services
         public static string GetAmountAsString(this Coupon coupon)
         {
             if (coupon.AmountTypeId == CouponAmountType.Percentage)
-                return String.Format("{0:0.00}%", (coupon.Amount * 100).Value);
+                return String.Format("{0:0.00}%", (coupon.Amount).Value);
 
             return coupon.Amount.ToCurrency();
         }
@@ -124,7 +122,8 @@ namespace AfterSchoolLibrary.Services
 
             purchasbleObjectCoupons.ForEach(purchaseableObjectCoupon =>
             {
-                participationObjects.Add(purchaseableObjectCoupon.GetPurchaseableObject(msgs, dc).ParticipationObject);
+                var purchObj = purchaseableObjectCoupon.GetPurchaseableObject(msgs, dc);
+                participationObjects.Add(purchaseableObjectCoupon.GetPurchaseableObject(msgs, dc).GetParticipationObject(msgs,dc));
             });
 
             return participationObjects;

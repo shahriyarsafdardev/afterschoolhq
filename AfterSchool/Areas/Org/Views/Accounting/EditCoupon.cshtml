@@ -32,7 +32,7 @@
             <i class="s7-plus"></i> Add Coupon
         </div>
 
-        <form class="form form-horizontal" method="post" action="@Url.Action("savecoupon", "accounting")">
+        <form class="form form-horizontal" method="post" action="@Url.Action("savecoupon", "accounting", new { id = Model.Uid })">
 
             <input id="hdnActivityIds" type="hidden" name="activityIds" value="@activityIds" />
             <input id="hdnCouponId" type="hidden" name="id" value="@id" />
@@ -55,7 +55,7 @@
 
                     <div class="col-md-10 p-tb-5">
                         <label class="control-label p-5"> Coupon Code </label>
-                        <input id="txtCouponCode" name="couponCode" value="@couponCode" type="text" class="form-control" />
+                        <input id="txtCouponCode" name="couponCode" value="@couponCode" type="text" class="form-control" required/>
                         <p class="text-muted">
                             <em>This is the code parents will enter on checkout.</em>
                         </p>
@@ -64,7 +64,7 @@
 
                     <div class="col-md-10 p-tb-5">
                         <label class="control-label p-5"> Number of Uses </label>
-                        <input id="txtMaxUsesAll" name="maxUsesAll" value="@maxUsesAll" type="number" step="1" class="form-control" />
+                        <input id="txtMaxUsesAll" name="maxUsesAll" value="@maxUsesAll" type="number" step="1" class="form-control" required />
                     </div>
                     <div class="clearfix"></div>
 
@@ -90,7 +90,7 @@
                     <div class="col-md-10 p-tb-5">
                         <div class="col-md-7 no-padding">
                             <label class="control-label p-5"> Discount Amount </label>
-                            <input id="txtAmount" name="amount" value="@amount" type="text" class="form-control" />
+                            <input id="txtAmount" name="amount" value="@amount" type="number" class="form-control" required />
                         </div>
                         <div class="col-md-offset-1 col-md-4 no-padding">
                             <label class="control-label p-5"> % or $ </label>
@@ -116,7 +116,7 @@
                 <div class="col-md-6 col-sm-12">
                     
                     <div class="col-md-10 p-tb-5">
-                        <label class="row control-label p-5"> Activities(Only Show Current or Future Activities) </label>
+                        <label class="row control-label p-5"> Activities </label>
                         <div class="form-group has-search">
                             <span class="fa fa-search form-control-search"></span>
                             <input type="text" class="form-control" placeholder="Search" onkeyup="return filterRecords(this.value)">
@@ -124,7 +124,7 @@
                     </div>
                     <div class="clearfix"></div>
 
-                    <div id="activities-data" class="am-checkbox" style="max-height: 500px; overflow-x: auto;">
+                    <div id="activities-data" class="am-checkbox form-group " style="max-height: 500px;">
                     </div>
                 </div>
 
