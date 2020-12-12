@@ -5,6 +5,7 @@ using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Billing;
+using System.Linq;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -35,7 +36,7 @@ namespace AfterSchoolLibrary.Services
             coupon.Description = description;
             coupon.LastModifiedDate = DateTime.UtcNow;
             coupon.LastModifiedBy = loggedInUser?.ID;
-            coupon.CouponCode = ValidateCode(account, couponCode);
+            coupon.ValidateCouponCode(account.ID.Value, couponCode, msgs, dc);
 
             if (coupon.Uid.IsEmpty())
                 coupon.Uid = new Guid();
@@ -122,17 +123,22 @@ namespace AfterSchoolLibrary.Services
 
             purchasbleObjectCoupons.ForEach(purchaseableObjectCoupon =>
             {
-                var purchObj = purchaseableObjectCoupon.GetPurchaseableObject(msgs, dc);
                 participationObjects.Add(purchaseableObjectCoupon.GetPurchaseableObject(msgs, dc).GetParticipationObject(msgs,dc));
             });
 
             return participationObjects;
         }
 
-        public static string ValidateCode(Account account, string code)
+        public static void ValidateCouponCode(this Coupon coupon, int accountId, string newCode, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            /// TODO
-            return code;            
+            //unique for given account and check for expiration date
+            var coupons = Coupon.LoadByAccountId(accountId, msgs, dc).ToList();
+            var duplicateCoupoun = coupons.Where(m => m.ID != coupon.ID && m.CouponCode.IsNotBlank() && m.CouponCode.ToLower() == newCode.ToLower() && m.ExpirationDate.IsNotEmpty() && DateTime.Now < m.ExpirationDate);
+
+            if (duplicateCoupoun.Any())
+                msgs.Add("This coupon code is in use, try something different.", MessageType.UserError);
+            else
+                coupon.CouponCode = newCode;
         }
     }
 }
