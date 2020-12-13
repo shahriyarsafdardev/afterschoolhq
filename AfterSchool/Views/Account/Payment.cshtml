@@ -77,7 +77,7 @@
                 }
                 else
                 {
-                    <span id="payment-plan-cost-0" class="hide">@checkoutObject.GetTotalCostToPurchaseTodayWithConvenienceFee()</span>
+                    <span id="payment-plan-cost-0" class="hide">@participationObject.GetCheckoutTotalCost()</span>
                     <span id="payment-plan-asf-0" class="hide">0</span>
                     if (subscriptionPlan.IsEmpty() || !subscriptionPlan.SplitCostEvenly || !participationObject.RegistrationFinalized)
                     {
@@ -260,15 +260,20 @@
                         <span id="fee-asf" class="hide">0</span>
                         <span class="total-due-today"></span>
 
-                        <div class="row">
-                            <p>
-                                Coupon
-                            </p>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 col-md-offset-3 col-sm-12 ">
+                            <div class="text-center">
+                                <p class="text-medium-small"><strong>Coupon Code</strong></p>
+                            </div>
+                            
                             <div>
                                 <input type="text" id="coupon-code" class="form-control" value="" />
-                                <button type="button" class="btn btn-sm btn-default" onclick="applyCoupon()">Apply</button>
+                                <button type="button" class="btn btn-sm btn-default btn-register-default" onclick="applyCoupon()">Apply</button>
                             </div>
                         </div>
+                        
                     </div>
 
                     Html.RenderPartial(
@@ -280,7 +285,7 @@
                             { "formActionUrl", Url.Action("payment", "account", new { id = registration.Uid }) },
                             { "acceptACH", true },
                             { "participationObject", participationObject }
-        }
+    }
                     );
 
                     @* ALLOW TO PAY LATER *@
