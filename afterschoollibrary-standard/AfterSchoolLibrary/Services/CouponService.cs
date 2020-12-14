@@ -47,6 +47,32 @@ namespace AfterSchoolLibrary.Services
            return coupon;
         }
 
+        public static Coupon CreateCoupon(Account account, decimal amount, DateTime? expirationDate, CouponAmountType couponAmountType, CouponApplyType couponApplyType, int? maxUsesAll, int? maxUsesPerPerson, string couponCode, string name, string description, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var coupon = CreateBlank(account, loggedInUser);
+
+            coupon.AccountId = account.ID.Value;
+            coupon.Amount = amount;
+            coupon.ExpirationDate = expirationDate ?? null;
+            coupon.AmountTypeId = couponAmountType;
+            coupon.AppliesTo = couponApplyType;
+            coupon.MaxNumberOfUsesAll = maxUsesAll ?? 0;
+            coupon.MaxNumberOfUsesPerPerson = maxUsesPerPerson ?? 0;
+            coupon.Name = name;
+            coupon.Description = description;
+            coupon.LastModifiedDate = DateTime.UtcNow;
+            coupon.LastModifiedBy = loggedInUser?.ID;
+            coupon.ValidateCouponCode(account.ID.Value, couponCode, msgs, dc);
+
+            if (coupon.Uid.IsEmpty())
+                coupon.Uid = new Guid();
+
+            if (msgs.HasNoErrors())
+                msgs.AddRange(coupon.Save(dc));
+
+            return coupon;
+        }
+
         public static void Remove(this Coupon coupon, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             msgs.AddRange(coupon.Delete(dc));

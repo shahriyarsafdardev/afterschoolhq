@@ -562,6 +562,12 @@ namespace AfterSchool.Areas.Org.Controllers
                            loggedInUser: loggedInUser, 
                            msgs: amsgs,
                            dc: adc);
+
+                       //attach coupon to account
+                       //TODO: this should be a registrant account
+                       var attachedCoupons = account.GetAttachedCoupons();
+                       if (attachedCoupons.IsEmpty())
+                           account.AttachCoupon(coupon, SessionVariables.CurrentUser, amsgs, adc);                       
                    },
                    onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),

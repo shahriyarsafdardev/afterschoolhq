@@ -1743,33 +1743,33 @@ namespace AfterSchool.Areas.Org.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                       //TODO
-                       // create new coupon
-                       //var coupon = SessionVariables.CurrentAccount.CreateCoupon(
-                       //     amount: couponAmount,
-                       //     expirationDate: expirationDate,
-                       //     amountType: discountType,
-                       //     applyType: couponApplyType,
-                       //     maxUsesAll: 1, //
-                       //     maxUsesPerPerson: 1,
-                       //     couponCode: "code",
-                       //     label: "label",
-                       //     description: "description",
-                       //     durationInMonths: durationInMonths,
-                       //     couponDuration: duration,
-                       //     loggedInUser: SessionVariables.CurrentUser,
-                       //     msgs: amsgs,
-                       //     dc: adc);
+                        // create new coupon
+                        var coupon = CouponService.CreateCoupon(
+                            account: SessionVariables.CurrentAccount,
+                             amount: couponAmount,
+                             expirationDate: expirationDate,
+                             couponAmountType: discountType,
+                             couponApplyType: couponApplyType,
+                             maxUsesAll: 1, //
+                             maxUsesPerPerson: 1,
+                             couponCode: "code",
+                             name: "label",
+                             description: "description",
+                             //durationInMonths: durationInMonths, TODO
+                             //couponDuration: duration,
+                             loggedInUser: SessionVariables.CurrentUser,
+                             msgs: amsgs,
+                             dc: adc);
 
-                       // // assign coupon to the activity (only works for this activity)
-                       // var poc = PurchaseableObjectCouponService.CreateNew(
-                       //     purchaseableObject: activity.GetPurchaseableObject(), 
-                       //     coupon: coupon, 
-                       //     loggedInUser: SessionVariables.CurrentUser, 
-                       //     msgs: amsgs, 
-                       //     dc: adc);
+                        // assign coupon to the activity (only works for this activity)
+                        PurchaseableObjectCouponService.CreateNew(
+                            purchaseableObject: activity.GetPurchaseableObject(),
+                            CouponId: coupon.ID.Value,
+                            loggedInUser: SessionVariables.CurrentUser,
+                            msgs: amsgs,
+                            dc: adc);
 
-                       // attachedCoupon = registrantAccount.AttachCoupon(coupon, SessionVariables.CurrentUser, amsgs, adc);
+                        attachedCoupon = registrantAccount.AttachCoupon(coupon, SessionVariables.CurrentUser, amsgs, adc);
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {

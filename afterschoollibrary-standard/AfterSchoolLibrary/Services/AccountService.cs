@@ -3553,7 +3553,8 @@ namespace AfterSchoolLibrary.Services
                     (PurchaseableObjectType)participationObject.ObjectType
                 );
 
-                if (attachedCoupon.IsEmpty() || purchaseableObjectCoupon.IsEmpty())
+                //TODO: need to understand this logic of attachedCoupon here
+                if (purchaseableObjectCoupon.IsEmpty())
                     msgs.Add("You are not allowed to use this coupon", MessageType.UserError);
                 else
                 {

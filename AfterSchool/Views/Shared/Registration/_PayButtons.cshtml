@@ -538,7 +538,7 @@
 <script>
     function applyCoupon() {
 
-        var couponCode = $('#coupon-code').val();
+        var couponCode = $('#txt-coupon-code').val();
         var paymentOption = $('input[name=paymentoption]:checked').val();
 
         $.get(
@@ -603,7 +603,7 @@
     function unapplyCoupon() {
         $(".total-due-today").removeAttr("style");
         $("#dollar-prefix").removeAttr("style");
-        $("#coupon-code").val('');
+        $("#txt-coupon-code").val('');
         $(".coupon").val('');
     }
 </script>
