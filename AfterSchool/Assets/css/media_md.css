@@ -44,6 +44,38 @@
         display: inline-flex;
     }
 
+    .search-inner-ring {
+        padding: 112px 187px 162px 143px;
+        border-radius: 6px;
+        background-color: #f9fcfb;
+    }
+
+    .onboarding-inner-ring {
+        padding: 50px 187px 50px 143px;
+        border-radius: 6px;
+        background-color: #f9fcfb;
+    }
+
+    .desktop-text-center {
+        text-align: center;
+    }
+
+    .manger-comment {
+        width: 100px;
+        height: 125px;
+        margin: 30px 7px 0 50px;
+        border-radius: 6px;
+        border: solid 1px #00c5a3;
+    }
+
+    .dialogbox {
+        margin: 10px 7px 0 0;
+    }
+
+    .process-back {
+        margin-left: 100px;
+    }
+
     .mccoy-bg {
         background-image: linear-gradient(rgba(0, 0, 0, .8), rgba(0, 0, 0, .8)), url(https://afterschoolhq-prod.s3.us-east-2.amazonaws.com/McCoyYouth/headerimage/120221640_10157669465950893_7044339041890392902_n.png) !important;
     }

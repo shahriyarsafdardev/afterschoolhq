@@ -139,6 +139,108 @@ namespace AfterSchool.Controllers
             return View(model);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult IndexNew(SignUpIndexViewModel model)
+        {
+            var msgs = new SystemMessages();
+            Account invitingAccount = null;
+
+            if (model.FirstName.IsEmpty())
+                msgs.Add("First Name is required", MessageType.UserError);
+
+            if (model.LastName.IsEmpty())
+                msgs.Add("Last Name is required", MessageType.UserError);
+
+            if (!model.Email.IsEmail())
+                msgs.Add("Please enter a valid email address", MessageType.UserError);
+            else if (WebUser.ExistsByEmail(model.Email, msgs))
+                msgs.Add("This email has already been registered", MessageType.UserError);
+
+            if (model.Password1.IsEmpty() || model.Password2.IsEmpty() || (model.Password1 != model.Password2))
+                msgs.Add("Passwords are required and must match", MessageType.UserError);
+            else if (model.Password1.Length < 8)
+                msgs.Add("Password must be at least 8 characters", MessageType.UserError);
+
+            msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
+
+            if (model.InviteCodeToShare.IsNotEmpty())
+            {
+                if (!model.InviteCodeToShare.IsGuid())
+                    msgs.Add("Invalid invitation code", MessageType.UserError);
+
+                invitingAccount = Account.LoadByInviteCodeToShare(model.InviteCodeToShare.ToGuid());
+                if (invitingAccount.IsEmpty())
+                    msgs.Add("Invalid invitation code", MessageType.UserError);
+            }
+
+            if (msgs.HasNoErrors())
+            {
+                WebUser user = null;
+                Account account = null;
+
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        user = WebUserService.CreateNewWithNoPhone(
+                            firstName: model.FirstName,
+                            lastName: model.LastName,
+                            email: model.Email,
+                            password: model.Password2,
+                            isActive: true,
+                            isRegistered: true,
+                            isVerified: false,
+                            loggedInUser: null,
+                            msgs: amsgs,
+                            dc: adc);
+
+                        account = user.AddNewAccount(
+                               orgName: model.OrgName,
+                               accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
+                               loggedInUser: user,
+                               msgs: amsgs,
+                               dc: adc);
+
+                        if (invitingAccount.IsNotEmpty())
+                        {
+                            if (model.IsRequestOnlyAccess)
+                            {
+                                account.RequestAccessToAccount(invitingAccount, HostPermissionType.ApproveOnly, user, msgs, adc);
+                            }
+                            else
+                            {
+                                invitingAccount.ApproveAccessToAccount(account, user, amsgs, adc);
+                            }
+                        }
+
+                    },
+                    onSuccess: (SystemMessages smsgs) =>
+                    {
+                        msgs.AddRange(smsgs);
+                        LoadSessionInfo(user, account, msgs: msgs);
+
+                        if (user.IsNotEmpty() && account.IsNotEmpty())
+                        {
+                            SendGridHelper.AddOrUpdateContact(account, user, msgs);
+                        }
+
+                        BackgroundJob.Enqueue(() => WebUserService.SendVerificationEmail(user, account.IsAfterSchool));
+                        BackgroundJob.Enqueue(() => WebUserService.SendWelcomePurchase(user.FirstName, user.Email, account.IsAfterSchool));
+                    },
+                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                    onException: (SystemMessages emsgs) => msgs.AddRange(emsgs)
+                );
+            }
+
+            if (msgs.HasNoErrors())
+                return RedirectToAction("index", "onboarding", new { area = "org" });
+
+            ViewBag.Messages = msgs;
+
+            return View(model);
+        }
+
         public ActionResult McCoyRegistration()
         {
             var mcCoyCodeToShare = ConfigurationManager.AppSettings["MccoyInviteCodeToShare"];

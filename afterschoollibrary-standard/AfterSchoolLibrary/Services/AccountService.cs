@@ -185,12 +185,16 @@ namespace AfterSchoolLibrary.Services
 
         public static List<Activity> GetPublishedActivitiesInLocations(this Account account, List<int> locationIds, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var periods = account.GetOpenUpcomingRecentlyClosedRegistrationPeriods(msgs, dc);
             var activities = new List<Activity>();
 
-            periods.ForEach(period =>
-                activities.AddRange(period.GetActivitiesInLocations(locationIds, msgs, dc).Where(x => x.IsPubliclyViewable))
-            );
+            if (locationIds.Any())
+            {
+                var periods = account.GetOpenUpcomingRecentlyClosedRegistrationPeriods(msgs, dc);
+
+                periods.ForEach(period =>
+                    activities.AddRange(period.GetActivitiesInLocations(locationIds, msgs, dc).Where(x => x.IsPubliclyViewable))
+                );
+            }            
 
             return activities;
         }
@@ -272,7 +276,7 @@ namespace AfterSchoolLibrary.Services
         {
             get
             {
-                return new AccountType[] { AccountType.Teacher, AccountType.ActivityProvider, AccountType.Business, AccountType.CommunityCenter, AccountType.School, AccountType.Church };
+                return new AccountType[] { AccountType.Teacher, AccountType.ActivityProvider, AccountType.Business, AccountType.CommunityCenter, AccountType.School, AccountType.Church, AccountType.Registrant, AccountType.SchoolDistrict };
             }
         }
 

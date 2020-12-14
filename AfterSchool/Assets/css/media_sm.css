@@ -54,13 +54,6 @@
         padding-left: 0 !important;
         padding-right: 0 !important;
     }
-    
-    .datetimepicker.dropdown-menu {
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-        border-color: rgba(0, 0, 0, 0.1);
-        padding: 10px;
-        left: 220px !important;
-    }
 
     .btn-upgrade-plan {       
         margin-bottom: 5px !important;
@@ -76,6 +69,32 @@
 
     .display-days {
         display: grid;
+    }
+
+    .search-inner-ring {
+        padding: 10px;
+        border-radius: 6px;
+        background-color: #f9fcfb;
+        min-height: 676.95px;
+    }
+
+    .onboarding-inner-ring {
+        padding: 10px;
+        border-radius: 6px;
+        background-color: #f9fcfb;
+    }
+
+    .manger-comment {
+        width: 100px;
+        height: 125px;
+        margin-top: 30px;
+        border-radius: 6px;
+        border: solid 1px #00c5a3;
+        margin-left: 100px;
+    }
+
+    .dialogbox {
+        margin: 5px;
     }
 
     .participation-object {

@@ -689,6 +689,7 @@
     <Content Include="img\banner-classroom.jpg" />
     <Content Include="img\BCALogo.jpg" />
     <Content Include="img\billy2.png" />
+    <Content Include="img\client_success_manager.jpeg" />
     <Content Include="img\darye.png" />
     <Content Include="img\david.png" />
     <Content Include="img\fee.png" />
@@ -725,7 +726,6 @@
     <Content Include="img\image-12.png" />
     <Content Include="img\image-14.jpg" />
     <Content Include="img\image-1800x900-1.png" />
-    <Content Include="img\image-2-1800x900-1.png" />
     <Content Include="img\image-2.png" />
     <Content Include="img\image-3-1800x900-1.png" />
     <Content Include="img\image-9.png" />
@@ -747,9 +747,10 @@
     <Content Include="img\search.png" />
     <Content Include="img\smiling-group.png" />
     <Content Include="img\sophie.png" />
+    <Content Include="img\tempsnip.png" />
     <Content Include="img\texture-fabric.png" />
     <Content Include="img\texture-geometry-shapes.png" />
-    <Content Include="img\tpffy-logo.png" />
+    <Content Include="img\welcome-back-arrow.PNG" />
     <Content Include="index-profiles.html" />
     <Content Include="index.html" />
     <Content Include="ips.html" />
@@ -1743,7 +1744,7 @@
     <Content Include="Views\Shared\_AccountPaymentEditNav.cshtml" />
     <Content Include="Views\Shared\_GoogleTagManagerNoScript.cshtml" />
     <Content Include="Views\Shared\_ZendeskWidget.cshtml" />
-    <Content Include="Views\Shared\_GradeRestrictions.cshtml" />
+    <Content Include="Views\Shared\_GradeRestrictionsNew.cshtml" />
     <Content Include="Views\Account\AddParent.cshtml" />
     <Content Include="Views\Shared\Registration\_RegisterButton.cshtml" />
     <Content Include="Views\Shared\Registration\_AccountTopBar.cshtml" />
@@ -1800,7 +1801,7 @@
     <Content Include="Views\Shared\Registration\_PayButtons.cshtml" />
     <Content Include="Views\Account\PaymentThankYou.cshtml" />
     <Content Include="Views\Shared\Registration\_ProfilePhotoGallery.cshtml" />
-    <Content Include="Views\Shared\Components\_GoogleLocationEdit.cshtml" />
+    <Content Include="Views\Shared\Components\_GoogleLocationEditNew.cshtml" />
     <Content Include="Views\Account\Interested.cshtml" />
     <Content Include="Views\Search\Index.cshtml" />
     <Content Include="Views\Shared\Registration\_BrowseProvider.cshtml" />
@@ -1812,11 +1813,18 @@
     <Content Include="Views\Shared\Registrant\_Answers.cshtml" />
     <Content Include="Views\Shared\JavascriptIncludes\_QuillEditorScripts.cshtml" />
     <Content Include="Views\SignUp\Welcome.cshtml" />
-    <Content Include="Views\Shared\_AgeRestrictions.cshtml" />
-    <Content Include="Views\Shared\_RestrictBySelection.cshtml" />
+    <Content Include="Views\Shared\_AgeRestrictionsNew.cshtml" />
+    <Content Include="Views\Shared\_RestrictBySelectionNew.cshtml" />
     <Content Include="Views\Shared\_UpgradePlan.cshtml" />
     <Content Include="Views\Shared\_PaymentSources.cshtml" />
     <Content Include="Views\Shared\ParticipationObject\_TuitionAndPostPayPlans.cshtml" />
+    <Content Include="Views\Shared\Layouts\_FullScreen_Onboarding.cshtml" />
+    <Content Include="Views\Shared\Login\_SignUpForm-NewAccount-Welcome.cshtml" />
+    <Content Include="Views\Shared\_RestrictBySelection.cshtml" />
+    <Content Include="Views\Shared\_AgeRestrictions.cshtml" />
+    <Content Include="Views\Shared\Components\_GoogleLocationEdit.cshtml" />
+    <Content Include="Views\Shared\_GradeRestrictions.cshtml" />
+    <Content Include="Views\SignUp\IndexNew.cshtml" />
     <Content Include="Views\MccoyDirectory\Index.cshtml" />
     <Content Include="Views\Shared\_MccoyFilters.cshtml" />
   </ItemGroup>

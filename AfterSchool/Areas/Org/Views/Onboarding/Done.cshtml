@@ -1,30 +1,34 @@
 ﻿@model Account
-@{
-    Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
+@{ Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml"; }
 
-}
+<div class="row main-content main-content-welcome-pages">
+    <div class="welcome-box-width">
+        <div class="welcome-outer-ring">
+            <div class="onboarding-inner-ring">
 
-<div class="main-content">
-
-    <div class="row">    
-        <div class="col-lg-offset-4 col-lg-4 col-md-offset-3 col-md-6 col-sm-12">
-            <h1>Great Job!</h1>
-            <div class="text-medium-small">
-                <p class="padding-v-10">
-                    You have setup your @AfterSchoolLibrary.Helpers.Utilities.AppName() profile. You have completed the first step to enabling education for children everywhere.
-                </p>
-            </div>
-
-            <div class="form-group">
-                <label class="col-lg-3 control-label"></label>
-                <div class="col-lg-9">
-                    <div class="visible-sm visible-xs">
-                        <a href="@Model.HomePageUrl?edit=1" class="btn btn-primary btn-lg btn-block">View Your Profile &raquo;</a>
-                    </div>
-                    <div class="visible-md visible-lg">
-                        <a href="@Model.HomePageUrl?edit=1" class="btn btn-primary btn-lg pull-right">View Your Profile &raquo;</a>
-                    </div>
+                <div class="col-md-12 onboarding-form-group text-center">
+                    <img src="~/img/tempsnip.png" class="img-responsive" style="display: initial;" />
+                    <h1 class="text-center register-thankyou-2">Great Job!!</h1>
                 </div>
+
+                <div class="clearfix"></div>
+                <div class="text-medium-small text-center">
+                    <p class="padding-v-10">
+                        You have setup your @AfterSchoolLibrary.Helpers.Utilities.AppName() profile. You have completed the first step to enabling education for children everywhere.
+                    </p>
+                </div>
+
+                <div class="clearfix"></div>
+                <div class="visible-sm visible-xs margin-v-30">
+                    <a href="@Model.HomePageUrl?edit=1" class="btn-save-claims btn btn-primary btn-lg pull-right col-xs-12 register-continue">View Your Profile</a>
+                </div>
+
+                <div class="visible-md visible-lg margin-v-30">
+                    <a href="@Model.HomePageUrl?edit=1" class="btn-save-claims btn btn-primary btn-lg pull-right register-continue">View Your Profile</a>
+                </div>
+
+
+                <div class="clearfix"></div>
             </div>
         </div>
     </div>
