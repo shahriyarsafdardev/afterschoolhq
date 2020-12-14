@@ -77,7 +77,7 @@
                 }
                 else
                 {
-                    <span id="payment-plan-cost-0" class="hide">@checkoutObject?.GetTotalCostToPurchaseTodayWithConvenienceFee()</span> //..TODO: checkoutObject comes null and there is no implementation of this in get method for viewbag
+                    <span id="payment-plan-cost-0" class="hide">@participationObject.GetCheckoutTotalCost()</span>
                     <span id="payment-plan-asf-0" class="hide">0</span>
                     if (subscriptionPlan.IsEmpty() || !subscriptionPlan.SplitCostEvenly || !participationObject.RegistrationFinalized)
                     {
