@@ -556,11 +556,11 @@
 
                     //.. calculated this value on back end side and updated the UI on the fly
                     updateTotalsCC(data.discountedAmountCC, 0);
-                    updateTotalsACH(data.discountedAmountAVH, 0);
+                    updateTotalsACH(data.discountedAmountACH, 0);
+                    updateCC(data.discountedCCFee);
 
                     $('.coupon').val(couponCode);
 
-                    //..todo: made discusout amout dynamic
                     $('#txt-coupon-applied').html(`Coupon ${couponCode} applied successfully with ${discountString} discount.`).show();
 
                     Notifications.showBar({

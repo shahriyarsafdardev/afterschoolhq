@@ -646,25 +646,23 @@ namespace AfterSchool.Controllers
             SubscriptionPlan subscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault();
 
             var coupon = SessionVariables.CurrentAccount.ValidateCoupon(participationObject, couponcode, msgs);
-            decimal amount = participationObject.Cost.Value;
-            var amountAVH = participationObject.GetCheckoutCostWithConvenienceFee();
-            var amountCC = participationObject.GetCheckoutTotalCost();
+            var amount = participationObject.Cost.Value;
+            var feeCalcObject = new FeeCalculationObject(amount, participationObject.OwnerAccount, msgs);
+        
+            var discountedAmountACH = feeCalcObject.GetFinalTotalCost(PaymentType.ACH);
+            var discountedAmountCC = feeCalcObject.GetFinalTotalCost(PaymentType.CreditCard);
+            var discountedCCFee = feeCalcObject.GetCreditCardFee();
+
             int numberInMonths = 0;
-            decimal subscriptionPlanAmount = 0, discountedAmountCC = 0, discountedAmountAVH = 0;
+            decimal subscriptionPlanAmount = 0;
 
             if (coupon.IsNotEmpty() && coupon.ID.IsNotEmpty() && coupon.DoesApplyToRegistrationFee())
             {
-                if (amountAVH.IsNotEmpty())
-                {
-                    var couponValueAVH = coupon.GetValue(amountAVH);
-                    discountedAmountAVH = amountAVH - couponValueAVH;
-                }
-
-                if (amountCC.IsNotEmpty())
-                {
-                    var couponValue = coupon.GetValue(amountCC);
-                    discountedAmountCC = amountCC - couponValue;
-                }                              
+                var couponValue = coupon.GetValue(amount);
+                var discountedFeeCalcObject = new FeeCalculationObject(amount - couponValue, participationObject.OwnerAccount, msgs);
+                discountedAmountACH = discountedFeeCalcObject.GetFinalTotalCost(PaymentType.ACH);
+                discountedAmountCC = discountedFeeCalcObject.GetFinalTotalCost(PaymentType.CreditCard);
+                discountedCCFee = discountedFeeCalcObject.GetCreditCardFee();
             }
 
             if (paymentPlan.IsNotEmpty())
@@ -679,7 +677,7 @@ namespace AfterSchool.Controllers
             var discountString = coupon.GetDiscountString();
 
             if (msgs.HasNoErrors())
-                return Json(new { status = "ok", coupon, amount, discountedAmountCC, discountedAmountAVH, numberInMonths, subscriptionPlanAmount, discountString }, JsonRequestBehavior.AllowGet);
+                return Json(new { status = "ok", coupon, amount, discountedAmountCC, discountedAmountACH, discountedCCFee, numberInMonths, subscriptionPlanAmount, discountString }, JsonRequestBehavior.AllowGet);
 
             return Json(new { status = "error", messages = msgs, amount, subscriptionPlanAmount }, JsonRequestBehavior.AllowGet);
         }
