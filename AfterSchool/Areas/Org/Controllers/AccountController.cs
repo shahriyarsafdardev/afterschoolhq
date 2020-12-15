@@ -1270,14 +1270,17 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Billing()
         {
             Account a = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
 
-            if (SessionVariables.AccountPackage.IsFree)
-                return new HttpUnauthorizedResult();
+            var packages = a.GetAccountPackages(msgs);
+
+            if (packages.Count <= 0 || !packages.Any(m => !m.IsFree))
+                return RedirectToAction("NewBilling");
 
             ViewBag.BillingHistory = a.GetStripeBillingHistory();
             ViewBag.RefundHistory = a.GetStripeRefundHistory();
             ViewBag.Cards = a.GetStripeCards();
-            ViewBag.Messages = new SystemMessages();
+            ViewBag.Messages = msgs;
             return View(a);
         }
 
@@ -1308,7 +1311,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 ViewBag.ReturnUrl = ReturnUrl;
             }
 
-            var package = id.IsGuid() ? Package.LoadByUid(id.ToGuid()) : SessionVariables.AccountPackage?.ToPackage();
+             var package = id.IsGuid() ? Package.LoadByUid(id.ToGuid()) : SessionVariables.AccountPackage?.ToPackage();
 
             Package suggestedPackage = null;
 
