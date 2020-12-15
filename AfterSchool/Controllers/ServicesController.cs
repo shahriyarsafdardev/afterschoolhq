@@ -647,23 +647,24 @@ namespace AfterSchool.Controllers
 
             var coupon = SessionVariables.CurrentAccount.ValidateCoupon(participationObject, couponcode, msgs);
             decimal amount = participationObject.Cost.Value;
-            decimal subscriptionPlanAmount = 0;
+            var amountAVH = participationObject.GetCheckoutCostWithConvenienceFee();
+            var amountCC = participationObject.GetCheckoutTotalCost();
             int numberInMonths = 0;
-            decimal discountedAmount = 0;
+            decimal subscriptionPlanAmount = 0, discountedAmountCC = 0, discountedAmountAVH = 0;
 
-            //..TODO: need to add credit card fee. GetRegistrationCreditCardFee
-            if (participationObject.IsNotEmpty() && participationObject.Cost.HasValue)
+            if (coupon.IsNotEmpty() && coupon.ID.IsNotEmpty() && coupon.DoesApplyToRegistrationFee())
             {
-                //var total = participationObject.Cost.Value * NumberOfSeats;
-                var total = participationObject.Cost.Value;
-
-                // if coupon applyTo is `RegistrationFee`
-                // then apply coupon discount
-                if (coupon.IsNotEmpty() && coupon.ID.IsNotEmpty() && coupon.DoesApplyToRegistrationFee())
+                if (amountAVH.IsNotEmpty())
                 {
-                    var couponValue = coupon.GetValue(total);
-                    discountedAmount = total - couponValue;               
+                    var couponValueAVH = coupon.GetValue(amountAVH);
+                    discountedAmountAVH = amountAVH - couponValueAVH;
                 }
+
+                if (amountCC.IsNotEmpty())
+                {
+                    var couponValue = coupon.GetValue(amountCC);
+                    discountedAmountCC = amountCC - couponValue;
+                }                              
             }
 
             if (paymentPlan.IsNotEmpty())
@@ -676,7 +677,7 @@ namespace AfterSchool.Controllers
                 subscriptionPlanAmount = subscriptionPlan.CostPerPeriod.Value;
 
             if (msgs.HasNoErrors())
-                return Json(new { status = "ok", coupon, amount, discountedAmount, numberInMonths, subscriptionPlanAmount }, JsonRequestBehavior.AllowGet);
+                return Json(new { status = "ok", coupon, amount, discountedAmountCC, discountedAmountAVH, numberInMonths, subscriptionPlanAmount }, JsonRequestBehavior.AllowGet);
 
             return Json(new { status = "error", messages = msgs, amount, subscriptionPlanAmount }, JsonRequestBehavior.AllowGet);
         }
