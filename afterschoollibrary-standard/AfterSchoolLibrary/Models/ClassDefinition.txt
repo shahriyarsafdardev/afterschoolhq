@@ -1517,6 +1517,8 @@ property: IsDeleted, bool, Bit
 property: UsedStripeConnect, bool, Bit, If using stripe connect during purchase then no payout is allowed because its automatic
 property: PlatformPercentFee, decimal?, Decimal "10,2", , deprecated
 property: PlatformFlatFee, decimal?, Decimal "10,2", , deprecated
+property: CouponId, int?, Int
+property: CouponValue, decimal?, Decimal "10,2"
 loadmethod: BillerAccountId|IsDeleted, List<>
 loadmethod: PayerAccountId|IsDeleted, List<>
 loadmethod: Uid
@@ -1525,6 +1527,7 @@ loadmethod: PayerAccountId|TransactionTypeId|IsDeleted, List<>
 loadmethod: StripeChargeOrRefundId
 loadmethod: OriginalTransactionId|IsDeleted, List<>
 loadmethod: PayoutId|IsDeleted, List<>
+loadmethod: CouponId|IsDeleted, List<>
 [end]
 
 [begin]

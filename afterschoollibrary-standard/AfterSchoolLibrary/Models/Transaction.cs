@@ -65,6 +65,8 @@ namespace AfterSchoolLibrary.Models
 		public bool UsedStripeConnect { get { return (bool)MDV["UsedStripeConnect"].Value; } set { MDV["UsedStripeConnect"].Value = value; } }
 		public decimal? PlatformPercentFee { get { return (decimal?)MDV["PlatformPercentFee"].Value; } set { MDV["PlatformPercentFee"].Value = value; } }
 		public decimal? PlatformFlatFee { get { return (decimal?)MDV["PlatformFlatFee"].Value; } set { MDV["PlatformFlatFee"].Value = value; } }
+		public int? CouponId { get { return (int?)MDV["CouponId"].Value; } set { MDV["CouponId"].Value = value; } }
+		public decimal? CouponValue { get { return (decimal?)MDV["CouponValue"].Value; } set { MDV["CouponValue"].Value = value; } }
 		
 
         public Transaction()
@@ -107,6 +109,8 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "UsedStripeConnect", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "PlatformPercentFee", System.Data.SqlDbType.Decimal , "10,2");
 				_dp.Add(className, "PlatformFlatFee", System.Data.SqlDbType.Decimal , "10,2");
+				_dp.Add(className, "CouponId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "CouponValue", System.Data.SqlDbType.Decimal , "10,2");
 				
                 return _dp;
             }
@@ -272,6 +276,14 @@ namespace AfterSchoolLibrary.Models
 			dps.Add(ObjectMap["PlatformFlatFee"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["CouponId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["CouponValue"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -350,6 +362,15 @@ namespace AfterSchoolLibrary.Models
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["PayoutId"], PayoutId);
+			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<Transaction> LoadByCouponIdByIsDeleted(int CouponId, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["CouponId"], CouponId);
 			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}

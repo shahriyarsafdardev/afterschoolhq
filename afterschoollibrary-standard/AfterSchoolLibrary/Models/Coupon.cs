@@ -18,7 +18,6 @@ namespace AfterSchoolLibrary.Models
     {
 		#region "ClassGenerator"
 
-		public string Label { get { return (string)MDV["Label"].Value; } set { MDV["Label"].Value = value; } }
 		public string Description { get { return (string)MDV["Description"].Value; } set { MDV["Description"].Value = value; } }
 		/// <summary>
 		/// Required.
@@ -69,7 +68,6 @@ namespace AfterSchoolLibrary.Models
                 BasicLibrary.DataAccess.DatabaseParameters _dp = new BasicLibrary.DataAccess.DatabaseParameters();
                 string className = typeof(Coupon).Name;
                 _dp = BasicLookUpObject.get_BaseObjectMap(className);
-				_dp.Add(className, "Label", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "Description", System.Data.SqlDbType.NVarChar , "400");
 				_dp.Add(className, "Amount", System.Data.SqlDbType.Money);
 				_dp.Add(className, "AmountTypeId", System.Data.SqlDbType.Int);
@@ -162,10 +160,6 @@ namespace AfterSchoolLibrary.Models
         {
             SystemMessages msgs = new SystemMessages();
             BasicLibrary.DataAccess.DatabaseParameters dps;
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["Label"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["Description"]);

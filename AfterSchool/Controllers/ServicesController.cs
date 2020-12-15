@@ -661,16 +661,8 @@ namespace AfterSchool.Controllers
                 // then apply coupon discount
                 if (coupon.IsNotEmpty() && coupon.ID.IsNotEmpty() && coupon.DoesApplyToRegistrationFee())
                 {
-                    var couponAmount = coupon.Amount.Value;
-                    if (coupon.HasPercentageAmountType())
-                    {
-                        var number = (couponAmount / 100) * total;
-                        discountedAmount = total - number;
-                    } 
-                    else
-                    {
-                        discountedAmount = total - couponAmount;
-                    }                    
+                    var couponValue = coupon.GetValue(total);
+                    discountedAmount = total - couponValue;               
                 }
             }
 

@@ -613,6 +613,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Transaction_StripeChargeOrRefundId ON [Transaction] (StripeChargeOrRefundId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Transaction_IsDeleted_OriginalTransactionId ON [Transaction] (OriginalTransactionId,IsDeleted)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Transaction_IsDeleted_PayoutId ON [Transaction] (PayoutId,IsDeleted)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Transaction_CouponId_IsDeleted ON [Transaction] (CouponId,IsDeleted)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Payout_AccountId ON [Payout] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Payout_AccountId_PayoutStatusId ON [Payout] (AccountId,PayoutStatusId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Payout_PayoutStatusId ON [Payout] (PayoutStatusId)"));

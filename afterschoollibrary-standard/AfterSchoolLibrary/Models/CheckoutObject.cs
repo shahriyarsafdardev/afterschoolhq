@@ -217,17 +217,8 @@ namespace AfterSchoolLibrary.Models
                     // then apply coupon discount
                     if (Coupon.IsNotEmpty() && Coupon.ID.IsNotEmpty() && Coupon.DoesApplyToRegistrationFee())
                     {
-                        var couponAmount = Coupon.Amount.Value;
-                        if (Coupon.HasPercentageAmountType())
-                        {
-                            //..todo: this previous logic looks wrong to get percentage. so updated. need to review
-                            var number = (couponAmount / 100) * total;
-                            return total - number;
-                        }
-                        else
-                        {
-                            return total - couponAmount;
-                        }
+                        var couponValue = Coupon.GetValue(total);
+                        return total - couponValue;
                     }
                 }
 

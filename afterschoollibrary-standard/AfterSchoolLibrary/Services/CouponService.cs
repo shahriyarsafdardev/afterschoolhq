@@ -166,5 +166,16 @@ namespace AfterSchoolLibrary.Services
             else
                 coupon.CouponCode = newCode;
         }
+
+        public static decimal GetValue(this Coupon coupon, decimal amount)
+        {
+            if (coupon.AmountTypeId == CouponAmountType.FlatAmount && coupon.Amount.HasValue)
+                return coupon.Amount.Value;
+
+            if (coupon.AmountTypeId == CouponAmountType.Percentage && coupon.Amount.HasValue)
+                return amount * (coupon.Amount.Value / 100);
+
+            return 0;
+        }
     }
 }
