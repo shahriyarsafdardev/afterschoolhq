@@ -72,6 +72,9 @@ namespace AfterSchoolLibrary.Models
             if (PostPayPlan.IsNotEmpty())
                 return GetPostPayPlanCostTodayWithFees();
 
+            //if (Coupon.IsNotEmpty())
+            //    return RegistrationCostNoFees;
+
             return this.GetRegistrationCostWithFees(msgs, dc);
         }
 
@@ -216,10 +219,16 @@ namespace AfterSchoolLibrary.Models
                     {
                         var couponAmount = Coupon.Amount.Value;
                         if (Coupon.HasPercentageAmountType())
-                            couponAmount *=  total;
-                        return total - couponAmount;
+                        {
+                            //..todo: this previous logic looks wrong to get percentage. so updated. need to review
+                            var number = (couponAmount / 100) * total;
+                            return total - number;
+                        }
+                        else
+                        {
+                            return total - couponAmount;
+                        }
                     }
-                    return total;
                 }
 
                 return 0;
@@ -238,6 +247,7 @@ namespace AfterSchoolLibrary.Models
 
             var activity = ParticipationObject.GetActivity();
 
+            //if (activity.IsConvenienceFeeTakenOutOfCost || (Coupon.IsNotEmpty() && Coupon.ID.IsNotEmpty() && Coupon.DoesApplyToRegistrationFee()))
             if (activity.IsConvenienceFeeTakenOutOfCost)
                 return RegistrationCostNoFees;
             
@@ -478,7 +488,7 @@ namespace AfterSchoolLibrary.Models
                 BankAccountPurchaseObject.StripeSourceId = PayingAccount.GetStripeSourceFromPlaidToken(
                                                             BankAccountPurchaseObject, 
                                                             msgs);
-            else if (SavePaymentInfo || SubscriptionPlan.IsNotEmpty() || PostPayPlan.IsNotEmpty())
+            else if (SavePaymentInfo || SubscriptionPlan.IsNotEmpty() || PostPayPlan.IsNotEmpty() || CreditCardPurchaseObject.StripeToken.IsNotEmpty())
                 CreditCardPurchaseObject.StripeSourceId = PayingAccount.GetStripeSourceFromToken(
                                                             BillingAccount,
                                                             CreditCardPurchaseObject.StripeToken, 

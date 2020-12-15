@@ -264,13 +264,17 @@
                     //..TODO: IsRegistrationFree is not working properly so I had to add this condition as 
                     if (participationObject.Cost > 0 && participationObject.SubscriptionPlans.Count <= 0 && participationObject.PostPayPlans.Count <= 0 && participationObject.PaymentPlans.Count <= 0)
                     {
-                        <div class="row text-center margin-t-20 padding-v-20">       
+                        <div class="row text-center padding-v-20">       
                             <div class="input-group col-md-6 col-md-offset-3 col-sm-12">
                                 <input id="txt-coupon-code" type="text" class="form-control" placeholder="COUPON CODE" aria-describedby="coupon-code">
-                                <span class="input-group-addon btn btn-primary" id="coupon-code" onclick="applyCoupon()">Apply</span>
+                                <span class="input-group-addon btn btn-primary" id="coupon-code" onclick="applyCoupon()">Apply</span>                                
                             </div>                           
+                            <div class="clearfix"></div>
+                            <p id="txt-coupon-applied" class="text-small" style="display: none;"></p>
                         </div>
                     }
+
+                    <hr />
 
                     Html.RenderPartial(
                         "~/Views/Shared/Registration/_PayButtons.cshtml",

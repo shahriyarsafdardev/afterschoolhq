@@ -564,7 +564,7 @@ namespace AfterSchool.Areas.Org.Controllers
                            dc: adc);
 
                        //attach coupon to account
-                       //TODO: this should be a registrant account
+                       //TODO: is this the right place for attach coupon to be inserted?
                        var attachedCoupons = account.GetAttachedCoupons();
                        if (attachedCoupons.IsEmpty())
                            account.AttachCoupon(coupon, SessionVariables.CurrentUser, amsgs, adc);                       

@@ -649,6 +649,30 @@ namespace AfterSchool.Controllers
             decimal amount = participationObject.Cost.Value;
             decimal subscriptionPlanAmount = 0;
             int numberInMonths = 0;
+            decimal discountedAmount = 0;
+
+            //..TODO: need to add credit card fee. GetRegistrationCreditCardFee
+            if (participationObject.IsNotEmpty() && participationObject.Cost.HasValue)
+            {
+                //var total = participationObject.Cost.Value * NumberOfSeats;
+                var total = participationObject.Cost.Value;
+
+                // if coupon applyTo is `RegistrationFee`
+                // then apply coupon discount
+                if (coupon.IsNotEmpty() && coupon.ID.IsNotEmpty() && coupon.DoesApplyToRegistrationFee())
+                {
+                    var couponAmount = coupon.Amount.Value;
+                    if (coupon.HasPercentageAmountType())
+                    {
+                        var number = (couponAmount / 100) * total;
+                        discountedAmount = total - number;
+                    } 
+                    else
+                    {
+                        discountedAmount = total - couponAmount;
+                    }                    
+                }
+            }
 
             if (paymentPlan.IsNotEmpty())
             {
@@ -660,7 +684,7 @@ namespace AfterSchool.Controllers
                 subscriptionPlanAmount = subscriptionPlan.CostPerPeriod.Value;
 
             if (msgs.HasNoErrors())
-                return Json(new { status = "ok", coupon, amount, numberInMonths, subscriptionPlanAmount }, JsonRequestBehavior.AllowGet);
+                return Json(new { status = "ok", coupon, amount, discountedAmount, numberInMonths, subscriptionPlanAmount }, JsonRequestBehavior.AllowGet);
 
             return Json(new { status = "error", messages = msgs, amount, subscriptionPlanAmount }, JsonRequestBehavior.AllowGet);
         }

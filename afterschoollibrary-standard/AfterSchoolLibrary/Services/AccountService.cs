@@ -2589,12 +2589,17 @@ namespace AfterSchoolLibrary.Services
             string customerId = null;
             var billingAccount = checkoutObject.BillingAccount;
 
-            if (checkoutObject.SavePaymentInfo || checkoutObject.HasStripeSourceId)
+            if (checkoutObject.SavePaymentInfo ||
+                checkoutObject.HasStripeSourceId ||
+                (checkoutObject.PayingAccount.IsNotEmpty() && checkoutObject.PayingAccount.StripeCustomerId.IsNotEmpty()))
+            {
                 customerId = checkoutObject.PayingAccount.StripeCustomerId;
+            }
 
             // if can charge fees we bill it directly from our AHQ account
             var useStripeConnectedAccount = billingAccount.UseStripeConnectDuringCheckout(msgs, dc);
             var platformFeeAmount = checkoutObject.CalculatePlatformFeeAmount(msgs, dc);
+            var amount = checkoutObject.GetStripeAmount(msgs, dc);
 
             // only charge tuition during checkout, because subscriptions are billed through stripe
             var charge = StripeHelper.CreateCharge(
@@ -2602,7 +2607,7 @@ namespace AfterSchoolLibrary.Services
                                 destinationAccountId: useStripeConnectedAccount ? checkoutObject.BillingAccount.StripeUserId : null,
                                 platformFee: useStripeConnectedAccount ? platformFeeAmount : new decimal?(),
                                 tokenOrSourceId: checkoutObject.StripeSourceId,
-                                totalAmount: checkoutObject.GetStripeAmount(msgs, dc),
+                                totalAmount: amount,
                                 description: checkoutObject.Description,
                                 statementDescriptor: $"{checkoutObject.BillingAccount.Name}",
                                 metaData: new Dictionary<string, string>()
@@ -3577,9 +3582,13 @@ namespace AfterSchoolLibrary.Services
                 false
             );
 
-            attachedCoupon.IsUsed = true;
+            //..todo: this is still yet need to configure
+            if (attachedCoupon.IsNotEmpty())
+            {
+                attachedCoupon.IsUsed = true;
 
-            attachedCoupon.Save(dc);
+                attachedCoupon.Save(dc);
+            }            
         }
 
         #endregion

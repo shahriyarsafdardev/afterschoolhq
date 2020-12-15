@@ -181,7 +181,7 @@
 
                     <input type="hidden" name="paymentoption" id="paymentoption-new" class="payment-option" value="0" />
                     <textarea name="paymentdescription" id="payment-description-new-cc" class="hide payment-description"></textarea>
-                    @*<input type="hidden" name="coupon" class="coupon" value="" />*@
+                    <input type="hidden" name="coupon" class="coupon" value="" />
 
                     <div class="form-group">
                         <label for="card-element">
@@ -538,6 +538,8 @@
 <script>
     function applyCoupon() {
 
+        showLoader();
+
         var couponCode = $('#txt-coupon-code').val();
         var paymentOption = $('input[name=paymentoption]:checked').val();
 
@@ -551,6 +553,7 @@
 
                 if (data && data.status == 'ok') {
 
+                    @* ..TODO: this logic has issue and it gives amount in minus, so will be verifying this 
                     var coupon = data.coupon;
                     var totalDueToday = 0;
 
@@ -572,15 +575,25 @@
 
                     $(".total-due-today").text(totalDueToday.toFixed(2));
                     $(".total-due-today").css("color", "red");
-                    $("#dollar-prefix").css("color", "red");
-                    $(".coupon").val(couponCode);
+                    $("#dollar-prefix").css("color", "red");*@
+
+                    //.. calculated this value on back end side and updated the UI on the fly
+                    updateTotalsCC(data.discountedAmount + parseFloat($('#fee-ccf').html()), 0);
+                    updateTotalsACH(data.discountedAmount, 0);
+
+                    $('.coupon').val(couponCode);
+
+                    //..todo: made discusout amout dynamic
+                    $('#txt-coupon-applied').html(`Coupon ${couponCode} applied successfully with 5% discount.`).show();
+
                     Notifications.showBar({
                         title: 'Success',
                         message: 'The coupon has been applied',
                         success: true
                     });
+                    hideLoader();
                 } else {
-                    $(".coupon").val('');
+                    $('.coupon').val('');
                     $(".total-due-today").text((amount + spAmount).toFixed(2));
                     $(".total-due-today").removeAttr("style");
                     $("#dollar-prefix").removeAttr("style");
@@ -595,6 +608,7 @@
                         message: '<ul>' + items + '</ul>',
                         success: false
                     });
+                    hideLoader();
                 }
             }
         )
@@ -604,6 +618,6 @@
         $(".total-due-today").removeAttr("style");
         $("#dollar-prefix").removeAttr("style");
         $("#txt-coupon-code").val('');
-        $(".coupon").val('');
+        $('.coupon').val('');
     }
 </script>
