@@ -3532,7 +3532,7 @@ namespace AfterSchoolLibrary.Services
             return coupon;
         }
 
-        public static Coupon ValidateCoupon(this Account account, ParticipationObject participationObject, string couponCode, SystemMessages msgs = null)
+        public static Coupon ValidateCoupon(this Account account, ParticipationObject participationObject, string couponCode, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -3568,6 +3568,10 @@ namespace AfterSchoolLibrary.Services
 
                     if (coupon.DoesApplyToSubscriptionPlan() && !participationObject.SubscriptionPlans.Any())
                         msgs.Add("Coupon can only be applied to a subscription", MessageType.UserError);
+
+                    if (!coupon.ValidateUses(account.ID.Value, msgs, dc))
+                        msgs.Add("Coupon has reached the limit of uses", MessageType.UserError);
+
                 }
             }
 

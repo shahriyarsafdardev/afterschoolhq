@@ -375,6 +375,26 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
+		public static List<Transaction> LoadByCouponIdByPayerAccountIdByIsDeleted(int CouponId, int PayerAccountId, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["CouponId"], CouponId);
+			dq.Criterias.Add(ObjectMap["PayerAccountId"], PayerAccountId);
+			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<Transaction> LoadByCouponIdByBillerAccountIdByIsDeleted(int CouponId, int BillerAccountId, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["CouponId"], CouponId);
+			dq.Criterias.Add(ObjectMap["BillerAccountId"], BillerAccountId);
+			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
 		
 
         #endregion

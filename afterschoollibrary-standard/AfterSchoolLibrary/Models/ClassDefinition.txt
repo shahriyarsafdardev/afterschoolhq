@@ -1528,6 +1528,8 @@ loadmethod: StripeChargeOrRefundId
 loadmethod: OriginalTransactionId|IsDeleted, List<>
 loadmethod: PayoutId|IsDeleted, List<>
 loadmethod: CouponId|IsDeleted, List<>
+loadmethod: CouponId|PayerAccountId|IsDeleted, List<>
+loadmethod: CouponId|BillerAccountId|IsDeleted, List<>
 [end]
 
 [begin]

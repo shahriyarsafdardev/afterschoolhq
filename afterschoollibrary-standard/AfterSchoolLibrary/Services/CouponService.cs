@@ -177,5 +177,24 @@ namespace AfterSchoolLibrary.Services
 
             return 0;
         }
+
+        public static int GetTotalUses(this Coupon coupon, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.LoadByCouponIdByIsDeleted(coupon.ID.Value, false, msgs, dc).Count;
+        }
+
+        public static int GetTotalUsesByPayer(this Coupon coupon, int payerAccountId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.LoadByCouponIdByPayerAccountIdByIsDeleted(coupon.ID.Value, payerAccountId, false, msgs, dc).Count;
+        }
+
+        public static bool ValidateUses(this Coupon coupon, int payerAccountId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (coupon.MaxNumberOfUsesAll < 0)
+                return true;
+            
+            return coupon.MaxNumberOfUsesAll >= coupon.GetTotalUses(msgs, dc) && coupon.MaxNumberOfUsesPerPerson >= coupon.GetTotalUsesByPayer(payerAccountId, msgs, dc); 
+        }
+
     }
 }
