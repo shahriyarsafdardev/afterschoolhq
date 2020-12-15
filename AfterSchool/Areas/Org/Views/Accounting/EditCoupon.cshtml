@@ -9,6 +9,7 @@
     var maxUsesPerPerson = (int)(Model.MaxNumberOfUsesPerPerson.HasValue ? Model.MaxNumberOfUsesAll : Request["maxUsesPerPerson"].ToInteger());
     var expirationDate = Model.ExpirationDate.ToShortDateString() ?? Request["expirationDate"];
     var amount = Model.Amount.ToString() ?? Request["amount"];
+    var amountType = (int)(Model.AmountTypeId.IsNotEmpty() ? (int)Model.AmountTypeId : Request["amountType"].ToInteger());
 
     var activityIds = "";
     if (ViewBag.Activities != null)
@@ -100,11 +101,12 @@
                                 @{ 
                                     foreach (var item in EnumHelper.GetSelectList(typeof(AmountType)))
                                     {
+                                        var selected = item.Value.ToInteger() == amountType ? " selected=\"selected\" "  : "";
                                         if (item.Text.ToString() != AmountType.NotSet.ToString())
                                         {
-                                            <option value="@item.Value.ToString()">@item.Text</option>
+                                            <option value="@item.Value.ToString()" @selected>@item.Text</option>
                                         }
-                                    } 
+                                    }
                                 }
 
                             </select>

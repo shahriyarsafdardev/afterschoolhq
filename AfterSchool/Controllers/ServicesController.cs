@@ -676,8 +676,10 @@ namespace AfterSchool.Controllers
             if (subscriptionPlan.IsNotEmpty())
                 subscriptionPlanAmount = subscriptionPlan.CostPerPeriod.Value;
 
+            var discountString = coupon.GetDiscountString();
+
             if (msgs.HasNoErrors())
-                return Json(new { status = "ok", coupon, amount, discountedAmountCC, discountedAmountAVH, numberInMonths, subscriptionPlanAmount }, JsonRequestBehavior.AllowGet);
+                return Json(new { status = "ok", coupon, amount, discountedAmountCC, discountedAmountAVH, numberInMonths, subscriptionPlanAmount, discountString }, JsonRequestBehavior.AllowGet);
 
             return Json(new { status = "error", messages = msgs, amount, subscriptionPlanAmount }, JsonRequestBehavior.AllowGet);
         }

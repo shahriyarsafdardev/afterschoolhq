@@ -178,6 +178,14 @@ namespace AfterSchoolLibrary.Services
             return 0;
         }
 
+        public static string GetDiscountString(this Coupon coupon)
+        {
+            if (coupon.AmountTypeId == CouponAmountType.FlatAmount)
+                return coupon.Amount.ToCurrency();
+
+            return $"{string.Format("{0:0.00}", coupon.Amount)} %";
+        }
+
         public static int GetTotalUses(this Coupon coupon, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Transaction.LoadByCouponIdByIsDeleted(coupon.ID.Value, false, msgs, dc).Count;
