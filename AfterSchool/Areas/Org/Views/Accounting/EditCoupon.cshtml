@@ -126,7 +126,7 @@
                     </div>
                     <div class="clearfix"></div>
 
-                    <div id="activities-data" class="am-checkbox form-group " style="max-height: 500px;">
+                    <div id="activities-data" class="am-checkbox form-group " style="max-height: 500px; overflow-x: auto;">
                     </div>
                 </div>
 
@@ -187,6 +187,8 @@
                         } else if (data && data.data && data.success == true) {
                             activities = data.data;
                             loadActivities(data.data)
+                        } else {
+                            $('#activities-data').html('No current or future activities found to show.')
                         }
                     },
                     error: function (jqXHR, textStatus, errorThrown) {
@@ -214,7 +216,7 @@
                     } else {
                         html += `<input id="chk-activity-${activity.ID}" name="coupoun-activities" type="checkbox" value="${activity.ID}" onclick="return prepareActivities()">`;
                     }
-                    
+
                     html += `<label for="chk-activity-${activity.ID}" class="margin-h-10 mobile-padding chk-lable">${activity.Title}</label>`;
                     html += `</div>`;
                     divActivities.append(html)

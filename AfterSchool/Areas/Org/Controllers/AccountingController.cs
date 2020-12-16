@@ -454,7 +454,7 @@ namespace AfterSchool.Areas.Org.Controllers
             try
             {
                 var activities = Activity.LoadByAccountId(SessionVariables.CurrentAccount.ID.Value, msgs)
-                .Where(activity => activity.GetActiveRegistrationPeriod(msgs).StartDateTime >= DateTime.Now || activity.GetFirstDate(msgs) >= DateTime.Now)
+                .Where(activity => activity.IsOpenOrUpcoming(msgs))
                 .Select(m => new ModalViewModel()
                 {
                     ID = m.ID.Value.ToString(),
