@@ -220,6 +220,8 @@ namespace AfterSchoolLibrary.Models
                         var couponValue = Coupon.GetValue(total);
                         return total - couponValue;
                     }
+
+                    return total;
                 }
 
                 return 0;
