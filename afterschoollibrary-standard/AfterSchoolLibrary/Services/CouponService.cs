@@ -170,10 +170,10 @@ namespace AfterSchoolLibrary.Services
         public static decimal GetValue(this Coupon coupon, decimal amount)
         {
             if (coupon.AmountTypeId == CouponAmountType.FlatAmount && coupon.Amount.HasValue)
-                return coupon.Amount.Value;
+                return Math.Min(coupon.Amount.Value, amount);
 
             if (coupon.AmountTypeId == CouponAmountType.Percentage && coupon.Amount.HasValue)
-                return amount * (coupon.Amount.Value / 100);
+                return Math.Min(amount * (coupon.Amount.Value / 100),amount);
 
             return 0;
         }
