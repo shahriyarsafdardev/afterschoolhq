@@ -588,7 +588,14 @@
                     hideLoader();
                 }
             }
-        )
+        ).fail(function () {
+            Notifications.showBar({
+                title: 'Error',
+                message: 'Something went wrong, Please contact customer support.',
+                success: false
+            });
+            hideLoader();
+        })
     }
 
     function unapplyCoupon() {

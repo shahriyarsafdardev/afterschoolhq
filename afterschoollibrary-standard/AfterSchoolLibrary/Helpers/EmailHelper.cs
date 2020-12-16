@@ -650,14 +650,18 @@ namespace AfterSchoolLibrary.Helpers
                 }
                 else
                 {
-                    cost = checkoutObject.GetTotalCostToPurchaseTodayWithConvenienceFee(msgs, dc).ToCurrency();
-                    ccFee = checkoutObject.GetTotalCreditCardFeesToday(msgs, dc).ToCurrency();
+                    if (checkoutObject.Coupon.IsNotEmpty() &&
+                        checkoutObject.Coupon.ID.IsNotEmpty() && 
+                        checkoutObject.Coupon.DoesApplyToRegistrationFee())
+                    {                        
+                        var amountCC = participationObject.GetCheckoutTotalCost();
+                        var couponValueCC = checkoutObject.Coupon.GetValue(amountCC);
+                        
+                        cost = (amountCC - couponValueCC).ToCurrency();
+                        additionalDetails = "registration fee";
 
-                    additionalDetails = "registration fee";
-                }
-
-                // add registration fee row
-                var registrationFeeModel = new NameValueCollection()
+                        // add registration fee row
+                        var registrationFeeModel = new NameValueCollection()
                                             {
                                                 { "Description", description },
                                                 { "Quantity",  "1"},
@@ -665,13 +669,51 @@ namespace AfterSchoolLibrary.Helpers
                                                 { "AdditionalDetails", additionalDetails }
                                             };
 
-                receiptRows += ProcessTemplate(
-                                EmailTemplates.Registration_Confirmation_Rows,
-                                registrationFeeModel,
-                                "Registration_Confirmation_Rows",
-                                msgs);
+                        receiptRows += ProcessTemplate(
+                                        EmailTemplates.Registration_Confirmation_Rows,
+                                        registrationFeeModel,
+                                        "Registration_Confirmation_Rows",
+                                        msgs);
 
-                showTable = true;
+                        // add coupon discount row
+                        var couponDiscountModel = new NameValueCollection()
+                                            {
+                                                { "Description", $"Coupon {checkoutObject.Coupon.Name} Applied" },
+                                                { "Quantity",  "1"},
+                                                { "Cost", couponValueCC.ToCurrency() },
+                                                { "AdditionalDetails", $"{(checkoutObject.Coupon.GetDiscountString())} discount applied." }
+                                            };
+
+                        receiptRows += ProcessTemplate(
+                                        EmailTemplates.Registration_Confirmation_Rows,
+                                        couponDiscountModel,
+                                        "Registration_Confirmation_Rows",
+                                        msgs);
+                    }
+                    else
+                    {
+                        cost = checkoutObject.GetTotalCostToPurchaseTodayWithConvenienceFee(msgs, dc).ToCurrency();                        
+                        additionalDetails = "registration fee";
+
+                        // add registration fee row
+                        var registrationFeeModel = new NameValueCollection()
+                                            {
+                                                { "Description", description },
+                                                { "Quantity",  "1"},
+                                                { "Cost", cost },
+                                                { "AdditionalDetails", additionalDetails }
+                                            };
+
+                        receiptRows += ProcessTemplate(
+                                        EmailTemplates.Registration_Confirmation_Rows,
+                                        registrationFeeModel,
+                                        "Registration_Confirmation_Rows",
+                                        msgs);                        
+                    }
+
+                    ccFee = checkoutObject.GetTotalCreditCardFeesToday(msgs, dc).ToCurrency();
+                    showTable = true;
+                }
             }
 
             // if has subscription
