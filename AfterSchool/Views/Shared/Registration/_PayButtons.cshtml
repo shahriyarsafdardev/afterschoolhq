@@ -522,6 +522,12 @@
             var form = $('#payment-form-ach');
             form.append('<input type="hidden" name="plaidtoken" value="' + token + '" />');
             form.append('<input type="hidden" name="plaidaccountid" value="' + accountId + '" />');
+
+            var coupon = $('#txt-coupon-code').val();
+            if (coupon) {
+                form.append('<input type="hidden" name="coupon" value="' + coupon + '" />');
+            }
+            
             form.append('<textarea name="paymentdescription" class="hide">' + $('#payment-description-new-ach').val() + '</textarea>');
             form.submit();
         }
