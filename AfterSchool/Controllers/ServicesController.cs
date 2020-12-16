@@ -646,6 +646,10 @@ namespace AfterSchool.Controllers
             SubscriptionPlan subscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault();
 
             var coupon = SessionVariables.CurrentAccount.ValidateCoupon(participationObject, couponcode, msgs);
+
+            if (coupon.IsEmpty())
+                return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+
             var amount = participationObject.Cost.Value;
             var feeCalcObject = new FeeCalculationObject(amount, participationObject.OwnerAccount, msgs);
         
