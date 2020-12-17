@@ -54,26 +54,49 @@ namespace AfterSchool.Areas.Org.Controllers
             if (name.IsEmpty())
                 msgs.Add("Organization Name is required", MessageType.UserError);
 
-            a.Name = name;
-            a.Phone = phone;
-            a.UniqueName = uniquename;
-            a.TimeZone = timezone;
-            a.Email = email;
+            Database.ExecuteTransaction(
+               action: (SystemMessages amsgs, DatabaseConnection adc) => {
+                   // ..update profile title if account name has been changed 
+                   if (name.IsNotEmpty() && a.Name != name)
+                   {
+                       var profile = a.GetAccountProfile(amsgs, adc);
 
-            if (msgs.HasNoErrors())
-            {
-                if (a.UniqueName.IsEmpty() && uniquename.IsEmpty())
-                    a.UniqueName = AccountService.GenerateUniqueName(name, a.ID);
-                else
-                    a.UniqueName = AccountService.GenerateUniqueName(uniquename, a.ID);
+                       if (profile.IsNotEmpty())
+                       {
+                           profile.Title = name;
+                           profile.Save();
+                       }
+                   }
 
-                a.LastModifiedDate = DateTime.UtcNow;
-                a.LastModifiedBy = SessionVariables.CurrentUser.ID;
-                msgs.AddRange(a.SaveWithStripe());
+                   a.Name = name;
+                   a.Phone = phone;
+                   a.UniqueName = uniquename;
+                   a.TimeZone = timezone;
+                   a.Email = email;
 
-                if (msgs.HasNoErrors())
-                    msgs.Add("Saved Successfully", MessageType.Success);
-            }
+                   if (msgs.HasNoErrors())
+                   {
+                       if (a.UniqueName.IsEmpty() && uniquename.IsEmpty())
+                           a.UniqueName = AccountService.GenerateUniqueName(name, a.ID);
+                       else
+                           a.UniqueName = AccountService.GenerateUniqueName(uniquename, a.ID);
+
+                       a.LastModifiedDate = DateTime.UtcNow;
+                       a.LastModifiedBy = SessionVariables.CurrentUser.ID;
+                       amsgs.AddRange(a.SaveWithStripe(adc));                       
+                   }
+               },
+               onSuccess: (SystemMessages smsgs) => {
+                   msgs.AddRange(smsgs);
+
+                   if (msgs.HasNoErrors())
+                       msgs.Add("Saved Successfully", MessageType.Success);
+               },
+               onFailure: (SystemMessages fmsgs) => {
+                   msgs.AddRange(fmsgs);
+               },
+               onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+           );           
 
             ViewBag.Messages = msgs;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
