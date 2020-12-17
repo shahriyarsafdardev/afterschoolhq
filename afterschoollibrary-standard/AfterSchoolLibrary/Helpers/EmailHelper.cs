@@ -654,10 +654,10 @@ namespace AfterSchoolLibrary.Helpers
                         checkoutObject.Coupon.ID.IsNotEmpty() && 
                         checkoutObject.Coupon.DoesApplyToRegistrationFee())
                     {                        
-                        var amountCC = participationObject.GetCheckoutTotalCost();
-                        var couponValueCC = checkoutObject.Coupon.GetValue(amountCC);
+                        var amountCC = participationObject.Cost + participationObject.GetConvenienceFee();
+                        var couponValueCC = checkoutObject.Transaction.CouponValue;
                         
-                        cost = (amountCC - couponValueCC).ToCurrency();
+                        cost = amountCC.ToCurrency();
                         additionalDetails = "registration fee";
 
                         // add registration fee row
