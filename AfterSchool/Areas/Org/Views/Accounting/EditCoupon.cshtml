@@ -115,11 +115,13 @@
                     <div class="clearfix"></div>
                 </div>
 
-                <div class="col-md-6 col-sm-12">
+                <div class="visible-sm visible-xs"><hr /></div>
+
+                <div class="col-md-6 col-sm-12 no-padding">
                     
-                    <div class="col-md-10 p-tb-5">
+                    <div class="col-md-10">
                         <label class="row control-label p-5"> Activities </label>
-                        <div class="form-group has-search">
+                        <div class="form-group has-search no-padding">
                             <span class="fa fa-search form-control-search"></span>
                             <input type="text" class="form-control" placeholder="Search" onkeyup="return filterRecords(this.value)">
                         </div>
@@ -217,7 +219,7 @@
                         html += `<input id="chk-activity-${activity.ID}" name="coupoun-activities" type="checkbox" value="${activity.ID}" onclick="return prepareActivities()">`;
                     }
 
-                    html += `<label for="chk-activity-${activity.ID}" class="margin-h-10 mobile-padding chk-lable">${activity.Title}</label>`;
+                    html += `<label for="chk-activity-${activity.ID}" class="mobile-padding chk-lable">${activity.Title}</label>`;
                     html += `</div>`;
                     divActivities.append(html)
                 });

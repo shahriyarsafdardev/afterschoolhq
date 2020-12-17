@@ -347,13 +347,15 @@
 }
 
 .chk-lable {
-    min-width: 500px;
+    /*min-width: 500px;*/
     cursor: pointer;
 }
 
     .chk-lable:before {
-        float: right;
-        margin-left: 25px;
+        /*float: right;
+        margin-left: 25px;*/
+        margin-left: 20px;
+        margin-right: 10px !important;
     }
 
 .has-search .form-control {
