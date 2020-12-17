@@ -88,14 +88,14 @@
                                             <i class="icon icon-left s7-copy-file"></i>
                                             Edit
                                         </a>
-                                        <a href="@Url.Action("copy", "coupon", new { couponId = coupon.Uid })" class="btn btn-default btn-sm">
+                                        @*<a href="@Url.Action("copy", "coupon", new { couponId = coupon.Uid })" class="btn btn-default btn-sm">
                                             <i class="icon icon-left s7-copy-file"></i>
                                             Copy
                                         </a>
                                         <a href="@Url.Action("disable", "coupon", new { couponId = coupon.Uid })" class="btn btn-warning btn-sm">
                                             <i class="icon icon-left s7-junk warning"></i>
                                             @(!coupon.IsDisabled && coupon.ExpirationDate > DateTime.Now ? "Enable" : "Disable")
-                                        </a>
+                                        </a>*@
                                     </td>
 
                                 </tr>
