@@ -758,7 +758,10 @@ namespace AfterSchool.Areas.Org.Controllers
                         }
                 }
             }
-            
+
+            if (ViewBag.Schedule == null)
+                ViewBag.Schedule = ActivitySchedule.GetNewDefaultSchedule(inSessionDates);
+
             ViewBag.ActiveMenu = "EditSchedule";
             return View(activity);
         }
