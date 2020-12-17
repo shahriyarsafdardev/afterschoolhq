@@ -561,13 +561,7 @@ namespace AfterSchool.Areas.Org.Controllers
                            CouponId: coupon.ID.Value, 
                            loggedInUser: loggedInUser, 
                            msgs: amsgs,
-                           dc: adc);
-
-                       //attach coupon to account
-                       //TODO: is this the right place for attach coupon to be inserted?
-                       var attachedCoupons = account.GetAttachedCoupons();
-                       if (attachedCoupons.IsEmpty())
-                           account.AttachCoupon(coupon, SessionVariables.CurrentUser, amsgs, adc);                       
+                           dc: adc);                                           
                    },
                    onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
