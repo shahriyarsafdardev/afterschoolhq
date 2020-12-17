@@ -72,9 +72,6 @@ namespace AfterSchoolLibrary.Models
             if (PostPayPlan.IsNotEmpty())
                 return GetPostPayPlanCostTodayWithFees();
 
-            //if (Coupon.IsNotEmpty())
-            //    return RegistrationCostNoFees;
-
             return this.GetRegistrationCostWithFees(msgs, dc);
         }
 
@@ -240,7 +237,6 @@ namespace AfterSchoolLibrary.Models
 
             var activity = ParticipationObject.GetActivity();
 
-            //if (activity.IsConvenienceFeeTakenOutOfCost || (Coupon.IsNotEmpty() && Coupon.ID.IsNotEmpty() && Coupon.DoesApplyToRegistrationFee()))
             if (activity.IsConvenienceFeeTakenOutOfCost)
                 return RegistrationCostNoFees;
             

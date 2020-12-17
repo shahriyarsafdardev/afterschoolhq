@@ -3558,7 +3558,6 @@ namespace AfterSchoolLibrary.Services
                     (PurchaseableObjectType)participationObject.ObjectType
                 );
 
-                //TODO: need to understand this logic of attachedCoupon here
                 if (purchaseableObjectCoupon.IsEmpty())
                     msgs.Add("You are not allowed to use this coupon", MessageType.UserError);
                 else
@@ -3586,11 +3585,9 @@ namespace AfterSchoolLibrary.Services
                 false
             );
 
-            //..todo: this is still yet need to configure
             if (attachedCoupon.IsNotEmpty())
             {
                 attachedCoupon.IsUsed = true;
-
                 attachedCoupon.Save(dc);
             }            
         }

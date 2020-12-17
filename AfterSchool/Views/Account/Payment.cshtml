@@ -261,8 +261,10 @@
                         <span class="total-due-today"></span>
                     </div>
 
-                    //..TODO: IsRegistrationFree is not working properly so I had to add this condition as 
-                    if (participationObject.Cost > 0 && participationObject.SubscriptionPlans.Count <= 0 && participationObject.PostPayPlans.Count <= 0 && participationObject.PaymentPlans.Count <= 0)
+                    if (participationObject.Cost > 0 && 
+                        participationObject.SubscriptionPlans.Count <= 0 && 
+                        participationObject.PostPayPlans.Count <= 0 && 
+                        participationObject.PaymentPlans.Count <= 0)
                     {
                         <div class="row text-center padding-v-20">       
                             <div class="input-group col-md-6 col-md-offset-3 col-sm-12">
