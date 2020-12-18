@@ -443,7 +443,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (purchaseableObjectCoupons.Any())
                 return string.Join(",", purchaseableObjectCoupons.Where(m => m.PurchaseableObjectTypeId == PurchaseableObjectType.Activity).Select(m => m.PurchaseableObjectId).Distinct());
 
-            return string.Empty;
+            return null;
         }
 
         [HttpPost]
