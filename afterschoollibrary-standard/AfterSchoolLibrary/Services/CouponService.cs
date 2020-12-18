@@ -201,7 +201,7 @@ namespace AfterSchoolLibrary.Services
             if (coupon.MaxNumberOfUsesAll < 0)
                 return true;
             
-            return coupon.MaxNumberOfUsesAll >= coupon.GetTotalUses(msgs, dc) && coupon.MaxNumberOfUsesPerPerson >= coupon.GetTotalUsesByPayer(payerAccountId, msgs, dc); 
+            return coupon.MaxNumberOfUsesAll > coupon.GetTotalUses(msgs, dc) && coupon.MaxNumberOfUsesPerPerson > coupon.GetTotalUsesByPayer(payerAccountId, msgs, dc); 
         }
 
     }
