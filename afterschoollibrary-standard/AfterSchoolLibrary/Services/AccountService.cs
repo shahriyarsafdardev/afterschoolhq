@@ -3574,6 +3574,9 @@ namespace AfterSchoolLibrary.Services
                 }
             }
 
+            if (msgs.HasErrors())
+                return null;
+
             return coupon;
         }
 
