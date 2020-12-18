@@ -79,16 +79,29 @@
                                 if (Model.RestrictByGrade())
                                 {
                                     <span>
-                                       Grades @ParticipationObjectUI.PrintGradeLevels(Model) &bull;
+                                        Grades @ParticipationObjectUI.PrintGradeLevels(Model) &bull;
                                     </span>
                                 }
                                 else
                                 {
                                     <span>
-                                       Ages  @ParticipationObjectUI.PrintAges(Model) &bull;
+                                        Ages  @ParticipationObjectUI.PrintAges(Model) &bull;
                                     </span>
                                 }
 
+                            }
+
+                            @if (Model.ActivityLocationType == ActivityLocationType.Physical)
+                            {
+                                <span>
+                                    In-Person &bull;
+                                </span>
+                            }
+                            else if (Model.ActivityLocationType == ActivityLocationType.Virtual)
+                            {
+                                <span>
+                                    Virtual &bull;
+                                </span>
                             }
 
                             @ParticipationObjectUI.PrintGenderRestrictions(Model)
