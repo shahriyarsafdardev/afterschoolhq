@@ -552,46 +552,35 @@
         $.get(
             '/services/validatecoupon?couponcode=' + encodeURIComponent(couponCode)+'&paymentoption='+ paymentOption,
             function (data) {
-
-                var amount = data.amount;
-                var spAmount = data.subscriptionPlanAmount;
-                var numberInMonths = data.numberInMonths;
-                var discountString = data.discountString;
-
-                if (data && data.status == 'ok') {
+                hideLoader();
+                if (data) {
+                    //var amount = data.amount;
+                    //var spAmount = data.subscriptionPlanAmount;
+                    //var numberInMonths = data.numberInMonths;
+                    var discountString = data.discountString;
 
                     //.. calculated this value on back end side and updated the UI on the fly
-                    updateTotalsCC(data.discountedAmountCC, 0);
-                    updateTotalsACH(data.discountedAmountACH, 0);
-                    updateCC(data.discountedCCFee);
-
-                    $('.coupon').val(couponCode);
-
-                    $('#txt-coupon-applied').html(`Coupon ${couponCode} applied successfully with ${discountString} discount.`).show();
-
-                    Notifications.showBar({
-                        title: 'Success',
-                        message: 'The coupon has been applied',
-                        success: true
-                    });
-                    hideLoader();
-                } else {
-                    $('.coupon').val('');
-                    $(".total-due-today").text((amount + spAmount).toFixed(2));
-                    $(".total-due-today").removeAttr("style");
-                    $("#dollar-prefix").removeAttr("style");
-
-                    var items = "";
+                    // if coupon is invalid amounts will be regular amount of activity
+                    updateTotalsCC(data.calculatedAmountCC, 0);
+                    updateTotalsACH(data.calculatedAmountACH, 0);
+                    updateCC(data.calculatedCCFee);
+               
+                    if (data && data.status == 'ok') {
+                        $('.coupon').val(couponCode);
+                        $('#txt-coupon-applied').html(`Coupon ${couponCode} applied successfully with ${discountString} discount.`).show();
+                    } else {
+                        unapplyCoupon();
+                        $('#txt-coupon-applied').html(``).hide();
+                    }
 
                     for (var message of data.messages) {
-                        items += "<li>" + message.Text + "</li>";
+                        var title = message.IsError ? 'Error' : 'Success';
+                        Notifications.showBar({
+                            title,
+                            message: message.Text,
+                            success: !message.IsError
+                        });
                     }
-                    Notifications.showBar({
-                        title: 'Error',
-                        message: '<ul>' + items + '</ul>',
-                        success: false
-                    });
-                    hideLoader();
                 }
             }
         ).fail(function () {
