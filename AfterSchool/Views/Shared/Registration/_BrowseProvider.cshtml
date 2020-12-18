@@ -41,6 +41,15 @@
                 </div>
             }
 
+            @if (Model.IsVirtualProgram)
+            {
+                <div class="pull-right margin-l-10">
+                    <span class="badge badge-blue profile-badge text-small">
+                        Virtual
+                    </span>
+                </div>
+            }
+
             @if (Model.IsELearningCenter)
             {
                 <div class="pull-right margin-l-10">
