@@ -59,8 +59,16 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var profile = account.GetAccountProfile(msgs);      
+            var headline = profile.IsNotEmpty() ? profile.Headline : "";
+            var genderrestrictions = profile.IsNotEmpty()?(int)profile.GenderRestriction:(int)GenderRestrictionType.None;
+
+            ViewBag.Headline = headline;
+            ViewBag.GenderRestriction = genderrestrictions;
             ViewBag.Messages = msgs;
             ViewBag.Title = account.Name;
+            
 
             var user = account.GetAccountOwner(msgs);
 
@@ -123,8 +131,8 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
-            var grades = GradeLevel.Load(msgs: msgs);
-
+            var grades = GradeLevel.Load(msgs: msgs);         
+                        
             ViewBag.Messages = msgs;
             ViewBag.ELC = false;
             ViewBag.OpenCovid = true;
@@ -191,15 +199,16 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult ContactInfo()
+        public ActionResult ContactInfo( )
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
+            var profile = account.GetAccountProfile(msgs);
             var currentUser = SessionVariables.CurrentUser;
-
+            var location = profile.GetLocation();
+            ViewBag.Location = location ?? new Location();            
             ViewBag.Email = currentUser.Email;
-            ViewBag.Phone = currentUser.Phone;
-            ViewBag.Location = new Location();
+            ViewBag.Phone = profile.ProfilePhone;
             ViewBag.Messages = msgs;
             return View(account);
         }
@@ -347,7 +356,8 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
-
+            var profile = account.GetAccountProfile(msgs);
+            
             ViewBag.Messages = msgs;
             return View(account);
         }
