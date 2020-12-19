@@ -60,15 +60,14 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
-            var profile = account.GetAccountProfile(msgs);      
+            var profile = account.GetOrCreateAccountProfile(currentUser, msgs);
             var headline = profile.IsNotEmpty() ? profile.Headline : "";
-            var genderrestrictions = profile.IsNotEmpty()?(int)profile.GenderRestriction:(int)GenderRestrictionType.None;
+            var genderrestrictions = profile.IsNotEmpty() ? (int)profile.GenderRestriction : (int)GenderRestrictionType.None;
 
             ViewBag.Headline = headline;
             ViewBag.GenderRestriction = genderrestrictions;
             ViewBag.Messages = msgs;
-            ViewBag.Title = account.Name;
-            
+            ViewBag.Title = account.Name;            
 
             var user = account.GetAccountOwner(msgs);
 
@@ -131,15 +130,31 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var profile = account.GetOrCreateAccountProfile(currentUser, msgs);
             var grades = GradeLevel.Load(msgs: msgs);         
                         
             ViewBag.Messages = msgs;
-            ViewBag.ELC = false;
-            ViewBag.OpenCovid = true;
-            ViewBag.IsVirtualProgram = false;            
+            ViewBag.ELC = profile.IsNotEmpty() && profile.IsELearningCenter;
+            ViewBag.OpenCovid = profile.IsNotEmpty() && profile.IsOpenDuringCovid;
+            ViewBag.IsVirtualProgram = profile.IsNotEmpty() && profile.IsVirtualProgram;
+            ViewBag.IsRestrictByGrade = profile.RestrictByGrade();
+
             ViewBag.Grades = grades;
-            ViewBag.MinGradeId = grades.First().ID.ToString();
-            ViewBag.MaxGradeId = grades.Last().ID.ToString();
+
+            var minGradeId = grades.First().ID.HasValue ? grades.First().ID.Value : 1;
+            var gradeStart = profile.GetGradeLevelStart();
+            ViewBag.GradeStart = gradeStart.IsNotEmpty() ? gradeStart.ID : minGradeId;
+
+            var maxGradeId = grades.Last().ID.HasValue ? grades.Last().ID.Value : 14;
+            var gradeEnd = profile.GetGradeLevelEnd();
+            ViewBag.GradeEnd = gradeEnd.IsNotEmpty() ? gradeEnd.ID : maxGradeId;
+
+            var ageStart = profile.GetAgeStart();
+            ViewBag.AgeStart = ageStart.HasValue ? ageStart.Value : 1;
+
+            var ageEnd = profile.GetAgeEnd();
+            ViewBag.AgeEnd = ageEnd.HasValue ? ageEnd.Value : 18;
 
             return View(account);
         }
