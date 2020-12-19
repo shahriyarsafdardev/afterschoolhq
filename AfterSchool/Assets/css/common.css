@@ -326,3 +326,7 @@
     letter-spacing: 1.5px;
     color: #fff;
 }
+
+.badge-blue {
+    background-color: darkslateblue;
+}

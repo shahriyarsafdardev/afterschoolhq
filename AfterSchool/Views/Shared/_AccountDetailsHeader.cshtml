@@ -32,13 +32,8 @@
             }
             <a href="@Url.Action("newbilling", "account")" class="btn btn-alt6@(actionName == "newbilling" ? "-active" : "")">Packages</a>
 
-            @{
-                if (!SessionVariables.AccountPackage.IsFree)
-                {
-                    <a href="@Url.Action("billing", "account")" class="btn btn-alt6@(actionName == "billing" ? "-active" : "")">Billing</a>
-                }
-            }
-
+            <a href="@Url.Action("billing", "account")" class="btn btn-alt6@(actionName == "billing" ? "-active" : "")">Billing</a>
+            
             @if (SessionVariables.OriginalLoggedInUser.IsNotEmpty())
             {
                 <a href="@Url.Action("features", "account")" class="btn btn-alt6@(actionName == "features" ? "-active" : "")">Features</a>
@@ -55,10 +50,7 @@
                 <option value="@Url.Action("newbilling", "account")">Packages</option>
 
                 @{
-                    if (!SessionVariables.AccountPackage.IsFree)
-                    {
-                        <option value="@Url.Action("billing", "account")">Billing</option>
-                    }
+                    <option value="@Url.Action("billing", "account")">Billing</option>
 
                     if (SessionVariables.CurrentAccount.AccountTypeId.In(AccountService.LocationProviderAccountTypes))
                     {

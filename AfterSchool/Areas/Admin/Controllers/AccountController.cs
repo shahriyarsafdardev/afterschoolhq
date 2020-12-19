@@ -189,6 +189,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                                 account = AccountService.CreateNewUnclaimedAccount(
                                             orgName: orgname,
                                             email: null,
+                                            claimemaildomain: claimemaildomain,
                                             phone: null,
                                             isActive: true,
                                             accountType: (AccountType)accounttype.ToInteger(),

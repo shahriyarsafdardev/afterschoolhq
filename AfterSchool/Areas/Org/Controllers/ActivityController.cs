@@ -758,7 +758,10 @@ namespace AfterSchool.Areas.Org.Controllers
                         }
                 }
             }
-            
+
+            if (ViewBag.Schedule == null)
+                ViewBag.Schedule = ActivitySchedule.GetNewDefaultSchedule(inSessionDates);
+
             ViewBag.ActiveMenu = "EditSchedule";
             return View(activity);
         }
@@ -1857,12 +1860,14 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                //.. send support email for AHQ just to notifiy the team a new profile has been completed
-                var body = $"<p>Account: {account.Name}<br />" +
-                        $"Account Profile Url: {account.HomePageUrl}<br />" +
-                        $"Activity: {activity.Name}<br />" +
-                        $"Url: {activity.HomePageUrl}<br />" +
-                        $"User: {currentUser.FirstName} {currentUser.LastName}<br />";
+                if (!activity.ActivityGroupId.HasValue)
+                {
+                    //.. send support email for AHQ just to notifiy the team a new profile has been completed
+                    var body = $"<p>Account: {account.Name}<br />" +
+                            $"Account Profile Url: {account.HomePageUrl}<br />" +
+                            $"Activity: {activity.Name}<br />" +
+                            $"Url: {activity.HomePageUrl}<br />" +
+                            $"User: {currentUser.FirstName} {currentUser.LastName}<br />";
 
                 var registrationDate = activity.GetActiveRegistrationPeriod();
                 if (registrationDate.IsNotEmpty() && registrationDate.StartDateTime.IsNotEmpty())
@@ -1871,11 +1876,12 @@ namespace AfterSchool.Areas.Org.Controllers
                 if(activity.HasSchedule)
                     body += $"Activity Start Date: {activity.GetSchedule(msgs).StartDate.ToShortDateString()} <br />";
 
-                EmailHelper.SendEmail(
-                    toEmail: AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress,
-                    subject: $"{account.Name} has published a new Activity: {activity.Name}",
-                    body,
-                    isAfterSchool: true);
+                    EmailHelper.SendEmail(
+                        toEmail: AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress,
+                        subject: $"{account.Name} has published a new Activity: {activity.Name}",
+                        body,
+                        isAfterSchool: true);
+                }
 
                 msgs.Add(string.Format("{0} has been published", activity.Name), MessageType.Success);
                 UpdateSession(SessionActionType.ActivityPublish, SessionVariables.CurrentAccount.ID, activity.ID);
