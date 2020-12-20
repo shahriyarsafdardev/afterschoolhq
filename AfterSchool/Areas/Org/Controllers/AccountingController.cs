@@ -509,9 +509,6 @@ namespace AfterSchool.Areas.Org.Controllers
             var hasMaxUsesPerPerson = maxUsesPerPerson.IsNotBlank();
             var hasExpirationDate = expirationDate.IsNotBlank();
 
-            if (!hasMaxUses && !hasMaxUsesPerPerson && !hasExpirationDate)
-                msgs.Add("Please enter at least one: Number of Uses, Number of Uses Per Person, or Expiration Date", MessageType.UserError);
-
             if (hasMaxUses && !maxUsesAll.IsInteger())
                 msgs.Add("Number of Uses must be a number", MessageType.UserError);
 

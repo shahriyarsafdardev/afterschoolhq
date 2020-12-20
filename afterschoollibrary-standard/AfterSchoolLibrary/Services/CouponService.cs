@@ -199,19 +199,19 @@ namespace AfterSchoolLibrary.Services
             {
                 var totalUses = coupon.GetTotalUses(msgs, dc);
 
-                if (totalUses < coupon.MaxNumberOfUsesAll)
-                    return false;               
+                if (totalUses >= coupon.MaxNumberOfUsesAll)
+                    return true;               
             }
 
             if (coupon.MaxNumberOfUsesPerPerson.HasValue && payerAccountId.HasValue)
             {
                 var totalUsesForPayer = coupon.GetTotalUsesByPayer(payerAccountId.Value, msgs, dc);
 
-                if (totalUsesForPayer < coupon.MaxNumberOfUsesPerPerson)
-                    return false;
+                if (totalUsesForPayer >= coupon.MaxNumberOfUsesPerPerson)
+                    return true;
             }
 
-            return true;
+            return false;
         }
 
     }
