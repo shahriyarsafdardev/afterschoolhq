@@ -36,11 +36,12 @@
             <div class="table-responsive">
                 <table class="table table-hover table-condensed" id="transaction-table">
                     <thead>
-                        <tr>                           
+                        <tr>                   
+                            <th>Name</th>
                             <th>Code</th>
-                            <th>Number of Uses</th>
-                            <th>Total Uses Allows</th>
-                            <th>Activity</th>
+                            <th>Total Times Used</th>
+                            <th>Max Uses Allowed</th>
+                            <th>Activities</th>
                             <th>Discount</th>
                             <th>Expiration Date</th>
                             <th></th>
@@ -54,6 +55,9 @@
                                 var participationObjects = coupon.GetParticipationObjects();
 
                                 <tr id="@coupon.ID">
+                                    <td>
+                                        @coupon.Name
+                                    </td>
                                     <td>
                                         @coupon.CouponCode
                                     </td>

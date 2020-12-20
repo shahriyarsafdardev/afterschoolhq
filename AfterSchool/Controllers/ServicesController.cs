@@ -635,6 +635,8 @@ namespace AfterSchool.Controllers
                 return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
 
             var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+
             SubscriptionPlan paymentPlan = null;
 
             var participationObject = SessionVariables.Cart.GetCartItems(msgs)
@@ -643,9 +645,10 @@ namespace AfterSchool.Controllers
 
             if (paymentoption.IsNotEmpty() && paymentoption.IsNumber())
                 paymentPlan = SubscriptionPlan.Load(paymentoption.ToInteger(), msgs);
-            SubscriptionPlan subscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault();
 
-            var coupon = SessionVariables.CurrentAccount.ValidateCoupon(participationObject, couponcode, msgs);
+            var subscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault();
+
+            var coupon = currentAccount.ValidateCoupon(participationObject, couponcode, msgs);
             var amount = participationObject.Cost.Value;
             var feeCalcObject = new FeeCalculationObject(amount, participationObject.OwnerAccount, msgs);
            

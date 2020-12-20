@@ -7,6 +7,8 @@ using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Billing;
 using Lob.Models;
+using System.ComponentModel.Composition.Primitives;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -3501,9 +3503,8 @@ namespace AfterSchoolLibrary.Services
             return AttachedCoupon.LoadByAccountId(account.ID.Value, actionHelper?.Messages, actionHelper?.Connection);
         }
 
-        public static Coupon CreateorUpdateCoupon(this Account account, Coupon coupon, decimal amount, DateTime? expirationDate, CouponAmountType amountType, CouponApplyType applyType, int maxUsesAll, int maxUsesPerPerson, string couponCode, string name, string description, StripeCouponDuration couponDuration, int? durationInMonths, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Coupon CreateorUpdateCoupon(this Account account, Coupon coupon, decimal amount, DateTime? expirationDate, CouponAmountType amountType, CouponApplyType applyType, int? maxUsesAll, int? maxUsesPerPerson, string couponCode, string name, string description, StripeCouponDuration couponDuration, int? durationInMonths, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-
             coupon.CreateOrUpdate(
                 account: account,
                 amount: amount,
@@ -3526,49 +3527,55 @@ namespace AfterSchoolLibrary.Services
                     durationInMonths,
                     coupon.Amount.Value,
                     msgs,
-                    dc
-                );
+                    dc);
 
             return coupon;
         }
 
-        public static Coupon ValidateCoupon(this Account account, ParticipationObject participationObject, string couponCode, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Coupon GetCoupon(this Account ownerAccount, string couponCode, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Coupon.LoadByAccountIdByCouponCode(
+                           ownerAccount.ID.Value,
+                           couponCode,
+                           msgs);
+        }
+
+        public static Coupon ValidateCoupon(this Account payerAccount, ParticipationObject participationObject, string couponCode, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var coupon = Coupon.LoadByAccountIdByCouponCode(
-               participationObject.OwnerAccount.ID.Value,
-               couponCode,
-               msgs
-           );
+            var coupon = participationObject.OwnerAccount.GetCoupon(couponCode, msgs, dc);
 
             if (coupon.IsEmpty())
                 msgs.Add("Invalid coupon", MessageType.UserError);
             else
             {
-                var attachedCoupon = AttachedCoupon.LoadByCouponIdByAccountIdIsUsed(
-                    coupon.ID.Value,
-                    account.ID.Value,
-                    false
-                );
+                //var attachedCoupon = AttachedCoupon.LoadByCouponIdByAccountIdIsUsed(
+                //                        coupon.ID.Value,
+                //                        payerAccount.ID.Value,
+                //                        false);
 
                 var purchaseableObjectCoupon = PurchaseableObjectCoupon.LoadByCouponByPurchaseableObject(
-                    coupon.ID.Value,
-                    participationObject.ObjectID.Value,
-                    (PurchaseableObjectType)participationObject.ObjectType
-                );
+                                                coupon.ID.Value,
+                                                participationObject.ObjectID.Value,
+                                                (PurchaseableObjectType)participationObject.ObjectType);
 
-                if (purchaseableObjectCoupon.IsEmpty())
-                    msgs.Add("You are not allowed to use this coupon", MessageType.UserError);
+                // if coupon is not assigned to any purchaseable object that means it can be applied to any purchaseable object
+                if (coupon.HasPurchaseableObjects(msgs) && purchaseableObjectCoupon.IsEmpty())
+                    msgs.Add("This coupon code is invalid", MessageType.UserError);
                 else
                 {
-                    if (DateTime.UtcNow > coupon.ExpirationDate)
-                        msgs.Add("Coupon is Expired", MessageType.UserError);
+                    if (coupon.ExpirationDate.HasValue)
+                    {
+                        var today = participationObject.OwnerAccount.ConvertToAccountTimeZone(DateTime.UtcNow).Date;
+                        if (coupon.ExpirationDate.Value.IsBefore(today))
+                            msgs.Add($"Coupon is Expired on {coupon.ExpirationDate.ToShortDateString()}", MessageType.UserError);
+                    }
 
                     if (coupon.DoesApplyToSubscriptionPlan() && !participationObject.SubscriptionPlans.Any())
                         msgs.Add("Coupon can only be applied to a subscription", MessageType.UserError);
 
-                    if (!coupon.ValidateUses(account.ID.Value, msgs, dc))
+                    if (coupon.HasReachedLimit(payerAccount.ID.Value, msgs, dc))
                         msgs.Add("Coupon has reached the limit of uses", MessageType.UserError);
 
                 }
@@ -3583,10 +3590,9 @@ namespace AfterSchoolLibrary.Services
         public static void MarkCouponAsUsed(this Account account, Coupon coupon, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var attachedCoupon = AttachedCoupon.LoadByCouponIdByAccountIdIsUsed(
-                coupon.ID.Value,
-                account.ID.Value,
-                false
-            );
+                                    coupon.ID.Value,
+                                    account.ID.Value,
+                                    false);
 
             if (attachedCoupon.IsNotEmpty())
             {

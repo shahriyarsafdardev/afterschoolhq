@@ -505,45 +505,52 @@ namespace AfterSchool.Areas.Org.Controllers
             if (couponCode.IsBlank())
                 msgs.Add("Coupon Code Required", MessageType.UserError);
 
-            if (maxUsesAll.IsBlank() || !maxUsesAll.IsInteger())
-                msgs.Add("Number of Uses Required, Must be a number", MessageType.UserError);
+            var hasMaxUses = maxUsesAll.IsNotBlank();
+            var hasMaxUsesPerPerson = maxUsesPerPerson.IsNotBlank();
+            var hasExpirationDate = expirationDate.IsNotBlank();
 
-            if (maxUsesPerPerson.IsBlank() || !maxUsesPerPerson.IsInteger())
-                msgs.Add("Number of Uses per Person Required, Must be a number", MessageType.UserError);
+            if (!hasMaxUses && !hasMaxUsesPerPerson && !hasExpirationDate)
+                msgs.Add("Please enter at least one: Number of Uses, Number of Uses Per Person, or Expiration Date", MessageType.UserError);
 
-            if (expirationDate.IsBlank() || !expirationDate.IsDate())
-                msgs.Add("Valid Expiration Date Required", MessageType.UserError);
+            if (hasMaxUses && !maxUsesAll.IsInteger())
+                msgs.Add("Number of Uses must be a number", MessageType.UserError);
+
+            if (hasMaxUsesPerPerson && !maxUsesPerPerson.IsInteger())
+                msgs.Add("Number of Uses Per Person must be a number", MessageType.UserError);
+
+            if (hasExpirationDate && !expirationDate.IsDate())
+                msgs.Add("Please enter a valid Expiration Date", MessageType.UserError);
 
             if (amount.IsBlank() || !amount.IsNumber())
-                msgs.Add("Amount Required, Must be a number", MessageType.UserError);
+                msgs.Add("Amount Required, Must be a number greater than 0", MessageType.UserError);
 
             if (amountType.IsBlank() || Enum.IsDefined(typeof(CouponAmountType), amountType))
                 msgs.Add("Amount must be flate rate or percentage", MessageType.UserError);
 
-            if (activityIds.IsBlank())
-                msgs.Add("Coupon Must Be Applied to at Least One Activity", MessageType.UserError);
-
             if (applyType.IsBlank() || Enum.IsDefined(typeof(CouponApplyType), applyType))
-                msgs.Add("Coupon Must have a Payment Type Set", MessageType.UserError);
+                msgs.Add("Coupon Must have a Fee Type Set", MessageType.UserError);
 
             if (msgs.HasNoErrors())
             {
-                var ids = activityIds.Split(',').Select(p => Convert.ToInt32(p)).ToList();
+                var ids = new List<int>();
                 var loggedInUser = SessionVariables.CurrentUser;
                 var account = SessionVariables.CurrentAccount;
+
+                if (activityIds.IsNotBlank())
+                    ids = activityIds.Split(',').Select(p => Convert.ToInt32(p)).ToList();
 
                 Database.ExecuteTransaction(
                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
                    {
                        // create new coupon
                        coupon = account.CreateorUpdateCoupon(
-                            coupon,
-                            amount.ToDecimal(),
-                            expirationDate.ToDateTime(),
+                            coupon: coupon,
+                            amount: amount.ToDecimal(),
+                            expirationDate: hasExpirationDate ? expirationDate.ToDateTime() : new DateTime?(),
                             amountType: amountType.ToInteger().ToEnum<CouponAmountType>(),
                             applyType: applyType.ToInteger().ToEnum<CouponApplyType>(),
-                            maxUsesAll: maxUsesAll.ToInteger(),
-                            maxUsesPerPerson: maxUsesPerPerson.ToInteger(),
+                            maxUsesAll: hasMaxUses ? maxUsesAll.ToInteger() : new int?(),
+                            maxUsesPerPerson: hasMaxUsesPerPerson ? maxUsesPerPerson.ToInteger() : new int?(),
                             couponCode: couponCode,
                             name: name,
                             description: description.IsBlank() ? "" : description,
@@ -557,11 +564,13 @@ namespace AfterSchool.Areas.Org.Controllers
                        PurchaseableObjectCouponService.ClearPurchaseableObjectCoupons(coupon.ID.Value, amsgs, adc);
 
                        //add newly selected activities
-                       PurchaseableObjectCouponService.InsertPurchaseableObjectCoupons(activityIds: ids, 
-                           CouponId: coupon.ID.Value, 
-                           loggedInUser: loggedInUser, 
-                           msgs: amsgs,
-                           dc: adc);                                           
+                       if (ids.Any())
+                           PurchaseableObjectCouponService.InsertPurchaseableObjectCoupons(
+                               activityIds: ids, 
+                               CouponId: coupon.ID.Value, 
+                               loggedInUser: loggedInUser, 
+                               msgs: amsgs,
+                               dc: adc);                                           
                    },
                    onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),

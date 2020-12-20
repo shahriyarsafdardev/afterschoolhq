@@ -82,12 +82,11 @@ namespace AfterSchoolLibrary.Models
             if (Cost <= 0)
                 return 0;
 
-
             var fee = 0M;
 
             if (IsConvenienceFeeTakenOutOfCost)
                 fee = (Cost * ConveniencePercentFee) + ConvenienceFlatFee;
-            else if(ConveniencePercentFee > 1) //..TODO: review this logic, ConveniencePercentFee is 1, it will give error devide by zero
+            else
                 fee = ((Cost + ConvenienceFlatFee) / (1 - ConveniencePercentFee)) - Cost;
 
             var finalFee = Math.Ceiling(fee * 2) / 2;

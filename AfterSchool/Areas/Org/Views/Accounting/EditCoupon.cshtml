@@ -5,10 +5,10 @@
     var name = (string)Model.Name ?? Request["Name"];
     var description = (string)Model.Description ?? Request["description"];
     var couponCode = (string)Model.CouponCode ?? Request["couponcode"];
-    var maxUsesAll = (int)(Model.MaxNumberOfUsesAll.HasValue ? Model.MaxNumberOfUsesAll : Request["maxusesall"].ToInteger());
-    var maxUsesPerPerson = (int)(Model.MaxNumberOfUsesPerPerson.HasValue ? Model.MaxNumberOfUsesAll : Request["maxUsesPerPerson"].ToInteger());
+    var maxUsesAll = Model.MaxNumberOfUsesAll.HasValue ? Model.MaxNumberOfUsesAll.ToString() : Request["maxusesall"];
+    var maxUsesPerPerson = Model.MaxNumberOfUsesPerPerson.HasValue ? Model.MaxNumberOfUsesPerPerson.ToString() : Request["maxUsesPerPerson"];
     var expirationDate = Model.ExpirationDate.ToShortDateString() ?? Request["expirationDate"];
-    var amount = Model.Amount.ToString() ?? Request["amount"];
+    var amount = Model.Amount.HasValue ? Model.Amount.Value.ToString("#.00") : Request["amount"];
     var amountType = (int)(Model.AmountTypeId.IsNotEmpty() ? (int)Model.AmountTypeId : Request["amountType"].ToInteger());
 
     var activityIds = "";

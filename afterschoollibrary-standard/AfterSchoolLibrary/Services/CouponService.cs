@@ -6,6 +6,7 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Billing;
 using System.Linq;
+using Amazon.S3.Model;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -25,21 +26,19 @@ namespace AfterSchoolLibrary.Services
 
         public static Coupon CreateOrUpdate(this Coupon coupon, Account account, decimal amount, DateTime? expirationDate, CouponAmountType couponAmountType, CouponApplyType couponApplyType, int? maxUsesAll, int? maxUsesPerPerson, string couponCode, string name, string description, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            coupon.AccountId = account.ID.Value;
+            coupon.AccountId = account.ID;
             coupon.Amount = amount;
-            coupon.ExpirationDate = expirationDate ?? null;
+            coupon.ExpirationDate = expirationDate;
             coupon.AmountTypeId = couponAmountType;
             coupon.AppliesTo = couponApplyType;
-            coupon.MaxNumberOfUsesAll = maxUsesAll ?? 0;
-            coupon.MaxNumberOfUsesPerPerson = maxUsesPerPerson ?? 0;
-            coupon.Name = name;
-            coupon.Description = description;
+            coupon.MaxNumberOfUsesAll = maxUsesAll;
+            coupon.MaxNumberOfUsesPerPerson = maxUsesPerPerson;
+            coupon.Name = name.MaxChars(50);
+            coupon.Description = description.MaxChars(400);
             coupon.LastModifiedDate = DateTime.UtcNow;
             coupon.LastModifiedBy = loggedInUser?.ID;
-            coupon.ValidateCouponCode(account.ID.Value, couponCode, msgs, dc);
 
-            if (coupon.Uid.IsEmpty())
-                coupon.Uid = new Guid();
+            coupon.ValidateCouponCode(account.ID.Value, couponCode, msgs, dc);
 
             if (msgs.HasNoErrors())
                 msgs.AddRange(coupon.Save(dc));
@@ -49,28 +48,21 @@ namespace AfterSchoolLibrary.Services
 
         public static Coupon CreateCoupon(Account account, decimal amount, DateTime? expirationDate, CouponAmountType couponAmountType, CouponApplyType couponApplyType, int? maxUsesAll, int? maxUsesPerPerson, string couponCode, string name, string description, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var coupon = CreateBlank(account, loggedInUser);
-
-            coupon.AccountId = account.ID.Value;
-            coupon.Amount = amount;
-            coupon.ExpirationDate = expirationDate ?? null;
-            coupon.AmountTypeId = couponAmountType;
-            coupon.AppliesTo = couponApplyType;
-            coupon.MaxNumberOfUsesAll = maxUsesAll ?? 0;
-            coupon.MaxNumberOfUsesPerPerson = maxUsesPerPerson ?? 0;
-            coupon.Name = name;
-            coupon.Description = description;
-            coupon.LastModifiedDate = DateTime.UtcNow;
-            coupon.LastModifiedBy = loggedInUser?.ID;
-            coupon.ValidateCouponCode(account.ID.Value, couponCode, msgs, dc);
-
-            if (coupon.Uid.IsEmpty())
-                coupon.Uid = new Guid();
-
-            if (msgs.HasNoErrors())
-                msgs.AddRange(coupon.Save(dc));
-
-            return coupon;
+            return CreateBlank(account, loggedInUser)
+                    .CreateOrUpdate(
+                        account, 
+                        amount, 
+                        expirationDate, 
+                        couponAmountType, 
+                        couponApplyType, 
+                        maxUsesAll, 
+                        maxUsesPerPerson, 
+                        couponCode, 
+                        name, 
+                        description, 
+                        loggedInUser, 
+                        msgs, 
+                        dc);
         }
 
         public static void Remove(this Coupon coupon, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -142,6 +134,11 @@ namespace AfterSchoolLibrary.Services
             return stripeCoupon;
         }
 
+        public static bool HasPurchaseableObjects(this Coupon coupon, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return coupon.GetPurchaseableObjectCoupons(msgs, dc).Any();
+        }
+
         public static List<ParticipationObject> GetParticipationObjects(this Coupon coupon, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var purchasbleObjectCoupons = coupon.GetPurchaseableObjectCoupons(msgs, dc);
@@ -196,12 +193,25 @@ namespace AfterSchoolLibrary.Services
             return Transaction.LoadByCouponIdByPayerAccountIdByIsDeleted(coupon.ID.Value, payerAccountId, false, msgs, dc).Count;
         }
 
-        public static bool ValidateUses(this Coupon coupon, int payerAccountId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool HasReachedLimit(this Coupon coupon, int? payerAccountId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (coupon.MaxNumberOfUsesAll < 0)
-                return true;
-            
-            return coupon.MaxNumberOfUsesAll > coupon.GetTotalUses(msgs, dc) && coupon.MaxNumberOfUsesPerPerson > coupon.GetTotalUsesByPayer(payerAccountId, msgs, dc); 
+            if (coupon.MaxNumberOfUsesAll.HasValue)
+            {
+                var totalUses = coupon.GetTotalUses(msgs, dc);
+
+                if (totalUses < coupon.MaxNumberOfUsesAll)
+                    return false;               
+            }
+
+            if (coupon.MaxNumberOfUsesPerPerson.HasValue && payerAccountId.HasValue)
+            {
+                var totalUsesForPayer = coupon.GetTotalUsesByPayer(payerAccountId.Value, msgs, dc);
+
+                if (totalUsesForPayer < coupon.MaxNumberOfUsesPerPerson)
+                    return false;
+            }
+
+            return true;
         }
 
     }
