@@ -1795,6 +1795,12 @@ namespace AfterSchool.Controllers
                 if (paymentoption.IsNotEmpty() && paymentoption.IsNumber())
                     paymentPlan = SubscriptionPlan.Load(paymentoption.ToInteger(), msgs);
 
+                var paymentType = PaymentType.NotSet;
+                if (bankAccountPurchaseObject.IsNotEmpty())
+                    paymentType = PaymentType.ACH;
+                else if (creditCardPurchaseObject.IsNotEmpty())
+                    paymentType = PaymentType.CreditCard;
+
                 AccountService.ProcessRegistrationWithPayment(
                     checkoutObject: new CheckoutObject()
                     {
@@ -1812,7 +1818,7 @@ namespace AfterSchool.Controllers
                         BankAccountPurchaseObject = bankAccountPurchaseObject,
                         SavePaymentInfo = savepaymentinfo.IfEmpty("0").ToBoolean(),
                         MasterRegistrant = currentRegistrant,
-                        PaymentType = bankAccountPurchaseObject.IsNotEmpty() ? PaymentType.ACH : PaymentType.CreditCard,
+                        PaymentType = paymentType,
                         PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
                         ConvenienceFeePayer = convenienceFeePayer,
                         CreditCardFeePayer = creditCardFeePayer
