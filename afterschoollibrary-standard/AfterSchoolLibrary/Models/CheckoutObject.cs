@@ -189,7 +189,7 @@ namespace AfterSchoolLibrary.Models
             if (PaymentPlan.IsNotEmpty())
                 return GetPaymentPlanCostTodayConvenienceFee(msgs, dc) + GetSubscriptionCostTodayConvenienceFee(msgs, dc);
 
-            return GetRegistrationConvenienceFee(msgs, dc) + GetSubscriptionCostTodayConvenienceFee(msgs, dc) + GetPostPayPlanCostTodayConvenienceFee();
+            return GetRegistrationConvenienceFeeWithCoupon(msgs, dc) + GetSubscriptionCostTodayConvenienceFee(msgs, dc) + GetPostPayPlanCostTodayConvenienceFee();
         }
 
         public decimal GetTotalCreditCardFeesToday(SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -200,7 +200,7 @@ namespace AfterSchoolLibrary.Models
             if (PaymentPlan.IsNotEmpty())
                 return GetPaymentPlanCostTodayCreditCardFee(msgs, dc) + GetSubscriptionCostTodayCreditCardFee(msgs, dc);
 
-            return GetRegistrationCreditCardFee(msgs, dc) + GetSubscriptionCostTodayCreditCardFee(msgs, dc) + GetPostPayPlanCostTodayCreditCardFee();
+            return GetRegistrationCreditCardFeeWithCoupon(msgs, dc) + GetSubscriptionCostTodayCreditCardFee(msgs, dc) + GetPostPayPlanCostTodayCreditCardFee();
         }
 
         public decimal RegistrationCostNoFees
@@ -231,7 +231,7 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetRegistrationCostWithFees(SystemMessages msgs = null, DatabaseConnection dc = null)
         {           
-            return GetRegistrationCostWithConvenienceFee(msgs, dc) +  GetRegistrationCreditCardFee(msgs, dc);
+            return GetRegistrationCostWithConvenienceFee(msgs, dc) +  GetRegistrationCreditCardFeeWithCoupon(msgs, dc);
         }
 
         public decimal GetAmountToApplyToCoupon(SystemMessages msgs, DatabaseConnection dc)
@@ -257,14 +257,14 @@ namespace AfterSchoolLibrary.Models
             if (activity.IsConvenienceFeeTakenOutOfCost)
                 return RegistrationCostWithCoupon(msgs, dc);
             
-            return RegistrationCostWithCoupon(msgs, dc) + GetRegistrationConvenienceFee(msgs, dc);
+            return RegistrationCostWithCoupon(msgs, dc) + GetRegistrationConvenienceFeeWithCoupon(msgs, dc);
         }
 
         public decimal GetRegistrationCreditCardFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (!IsRegistrationFree && CreditCardPurchaseObject.IsNotEmpty())
                 return new FeeCalculationObject(
-                                 RegistrationCostWithCoupon(msgs, dc),
+                                RegistrationCostNoFees,
                                 BillingAccount,
                                 ParticipationObject,
                                 msgs,
@@ -278,7 +278,35 @@ namespace AfterSchoolLibrary.Models
         {
             if (!IsRegistrationFree)
                 return new FeeCalculationObject(
-                                 RegistrationCostWithCoupon(msgs, dc),
+                                RegistrationCostNoFees,
+                                BillingAccount,
+                                ParticipationObject,
+                                msgs,
+                                dc)
+                            .GetConvenienceFee();
+
+            return 0;
+        }
+
+        public decimal GetRegistrationCreditCardFeeWithCoupon(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (!IsRegistrationFree && CreditCardPurchaseObject.IsNotEmpty())
+                return new FeeCalculationObject(
+                                RegistrationCostWithCoupon(msgs, dc),
+                                BillingAccount,
+                                ParticipationObject,
+                                msgs,
+                                dc)
+                            .GetCreditCardFee();
+
+            return 0;
+        }
+
+        public decimal GetRegistrationConvenienceFeeWithCoupon(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (!IsRegistrationFree)
+                return new FeeCalculationObject(
+                                RegistrationCostWithCoupon(msgs, dc),
                                 BillingAccount,
                                 ParticipationObject,
                                 msgs,
@@ -290,7 +318,7 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetRegistrationTotalFees(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return GetRegistrationConvenienceFee(msgs, dc) + GetRegistrationCreditCardFee(msgs, dc);
+            return GetRegistrationConvenienceFeeWithCoupon(msgs, dc) + GetRegistrationCreditCardFeeWithCoupon(msgs, dc);
         }
 
         public decimal GetSubscriptionCostTodayNoFees(SystemMessages msgs = null, DatabaseConnection dc = null)
