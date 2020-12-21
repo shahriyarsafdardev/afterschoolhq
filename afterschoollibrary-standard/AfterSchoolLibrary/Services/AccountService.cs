@@ -1732,9 +1732,9 @@ namespace AfterSchoolLibrary.Services
             return CreateNew(orgName, null, null, false, accountType, null, null, null, null, loggedInUser, isAfterSchool, false, msgs, dc);
         }
 
-        public static Account CreateNewUnclaimedAccount(string orgName, string email, string phone, bool isActive, AccountType accountType, WebUser accountOwner, int? packageId, BillingPeriodType? packageBillingPeriod, string timeZone, WebUser loggedInUser, bool isAfterSchool, bool createWithStripe, SystemMessages msgs, DatabaseConnection dc)
+        public static Account CreateNewUnclaimedAccount(string orgName, string email, string claimemaildomain, string phone, bool isActive, AccountType accountType, WebUser accountOwner, int? packageId, BillingPeriodType? packageBillingPeriod, string timeZone, WebUser loggedInUser, bool isAfterSchool, bool createWithStripe, SystemMessages msgs, DatabaseConnection dc)
         {
-            return CreateNew(orgName, email, phone, isActive, accountType, accountOwner, packageId, packageBillingPeriod, timeZone, loggedInUser, isAfterSchool, createWithStripe, false, msgs, dc);
+            return CreateNew(orgName, email, claimemaildomain, phone, isActive, accountType, accountOwner, packageId, packageBillingPeriod, timeZone, loggedInUser, isAfterSchool, createWithStripe, false, msgs, dc);
         }
 
         public static Account CreateNew(string orgName, string email, string phone, bool isActive, AccountType accountType, WebUser accountOwner, int? packageId, BillingPeriodType? packageBillingPeriod, string timeZone, WebUser loggedInUser, bool isAfterSchool, bool createWithStripe, SystemMessages msgs, DatabaseConnection dc)
