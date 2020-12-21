@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AfterSchoolLibrary.Services;
+using Amazon.DynamoDBv2.Model;
 
 namespace AfterSchoolLibrary.Models
 {
@@ -207,21 +208,28 @@ namespace AfterSchoolLibrary.Models
             get
             {
                 if (ParticipationObject.IsNotEmpty() && ParticipationObject.Cost.HasValue)
-                {
-                    var total = ParticipationObject.Cost.Value * NumberOfSeats;
-
-                    // if coupon applyTo is `RegistrationFee`
-                    // then apply coupon discount
-                    if (Coupon.IsNotEmpty() && Coupon.ID.IsNotEmpty() && Coupon.DoesApplyToRegistrationFee())
-                    {
-                        var couponValue = Coupon.GetValue(total);
-                        return total - couponValue;
-                    }
-
-                    return total;
-                }
+                    return ParticipationObject.Cost.Value * NumberOfSeats;
 
                 return 0;
+            }
+        }
+
+        public decimal CouponValue
+        {
+            get
+            {
+                if (Coupon.IsNotEmpty() && Coupon.ID.IsNotEmpty() && Coupon.DoesApplyToRegistrationFee())
+                    return Coupon.GetValue(RegistrationCostNoFees);
+
+                return 0;
+            }
+        }
+
+        public decimal RegistrationCostWithCoupon
+        {
+            get
+            {
+                return RegistrationCostNoFees - CouponValue;
             }
         }
 
@@ -238,9 +246,9 @@ namespace AfterSchoolLibrary.Models
             var activity = ParticipationObject.GetActivity();
 
             if (activity.IsConvenienceFeeTakenOutOfCost)
-                return RegistrationCostNoFees;
+                return RegistrationCostWithCoupon;
             
-            return RegistrationCostNoFees + GetRegistrationConvenienceFee(msgs, dc);
+            return RegistrationCostWithCoupon + GetRegistrationConvenienceFee(msgs, dc);
         }
 
         public decimal GetRegistrationCreditCardFee(SystemMessages msgs = null, DatabaseConnection dc = null)
