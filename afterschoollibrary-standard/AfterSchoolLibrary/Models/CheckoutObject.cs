@@ -219,14 +219,14 @@ namespace AfterSchoolLibrary.Models
         public decimal CouponValue(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (Coupon.IsNotEmpty() && Coupon.ID.IsNotEmpty() && Coupon.DoesApplyToRegistrationFee())
-                return Coupon.GetValue(GetAmountToApplyToCoupon(msgs, dc)); // I think we should pass in Registration Cost with Convenience Fee here.
+                return Coupon.GetValue(GetAmountToApplyToCoupon(msgs, dc)); 
 
             return 0;
         }
 
         public decimal RegistrationCostWithCoupon(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Math.Min(RegistrationCostNoFees - CouponValue(msgs, dc), 0); // I think this should be RegCost with Conv fee - Coupon Value
+            return Math.Min(RegistrationCostNoFees - CouponValue(msgs, dc), 0); 
         }
 
         public decimal GetRegistrationCostWithFees(SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -264,7 +264,7 @@ namespace AfterSchoolLibrary.Models
         {
             if (!IsRegistrationFree && CreditCardPurchaseObject.IsNotEmpty())
                 return new FeeCalculationObject(
-                                RegistrationCostWithCoupon(msgs, dc),
+                                 RegistrationCostWithCoupon(msgs, dc),
                                 BillingAccount,
                                 ParticipationObject,
                                 msgs,
@@ -278,7 +278,7 @@ namespace AfterSchoolLibrary.Models
         {
             if (!IsRegistrationFree)
                 return new FeeCalculationObject(
-                                RegistrationCostWithCoupon(msgs, dc),
+                                 RegistrationCostWithCoupon(msgs, dc),
                                 BillingAccount,
                                 ParticipationObject,
                                 msgs,
