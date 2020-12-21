@@ -657,8 +657,8 @@ namespace AfterSchoolLibrary.Helpers
                         // Billy: let's change to use checkoutObject.TotalCheckOutCost
                         // value should be what the parent pays, not what the provider gets
                         // Coupon value should include the convenience fee
-                        var amountCC = participationObject.Cost + participationObject.GetConvenienceFee();
-                        var couponValueCC = checkoutObject.Transaction.CouponValue;
+                        var amountCC =  checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs,dc);
+                        var couponValueCC = checkoutObject.CouponValue(msgs,dc);
                         
                         cost = amountCC.ToCurrency();
                         additionalDetails = "registration fee";
