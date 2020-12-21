@@ -311,6 +311,7 @@ namespace AfterSchoolLibrary.Models
 			AccountPackageFeature.Update(new Hashtable(){{"FeatureTypeId",0}}, new Hashtable(){{"FeatureTypeId", DBNull.Value}}, AccountPackageFeature.ObjectMap, dc);
 			File.Update(new Hashtable(){{"FileTypeId",0}}, new Hashtable(){{"FileTypeId", DBNull.Value}}, File.ObjectMap, dc);
 			SessionAction.Update(new Hashtable(){{"SessionActionTypeId",0}}, new Hashtable(){{"SessionActionTypeId", DBNull.Value}}, SessionAction.ObjectMap, dc);
+			CartItem.Update(new Hashtable(){{"PurchaseableObjectTypeId",0}}, new Hashtable(){{"PurchaseableObjectTypeId", DBNull.Value}}, CartItem.ObjectMap, dc);
 			CartItem.Update(new Hashtable(){{"ParticipationObjectTypeId",0}}, new Hashtable(){{"ParticipationObjectTypeId", DBNull.Value}}, CartItem.ObjectMap, dc);
 			CartItem.Update(new Hashtable(){{"Day",0}}, new Hashtable(){{"Day", DBNull.Value}}, CartItem.ObjectMap, dc);
 			PasswordResetToken.Update(new Hashtable(){{"Used",false}}, new Hashtable(){{"Used", DBNull.Value}}, PasswordResetToken.ObjectMap, dc);
@@ -340,6 +341,7 @@ namespace AfterSchoolLibrary.Models
 			ProductPurchase.Update(new Hashtable(){{"ParticipationObjectTypeId",0}}, new Hashtable(){{"ParticipationObjectTypeId", DBNull.Value}}, ProductPurchase.ObjectMap, dc);
 			Coupon.Update(new Hashtable(){{"AmountTypeId",0}}, new Hashtable(){{"AmountTypeId", DBNull.Value}}, Coupon.ObjectMap, dc);
 			Coupon.Update(new Hashtable(){{"AppliesTo",0}}, new Hashtable(){{"AppliesTo", DBNull.Value}}, Coupon.ObjectMap, dc);
+			Coupon.Update(new Hashtable(){{"IsDisabled",false}}, new Hashtable(){{"IsDisabled", DBNull.Value}}, Coupon.ObjectMap, dc);
 			AttachedCoupon.Update(new Hashtable(){{"IsUsed",false}}, new Hashtable(){{"IsUsed", DBNull.Value}}, AttachedCoupon.ObjectMap, dc);
 			PurchaseableObjectCoupon.Update(new Hashtable(){{"PurchaseableObjectTypeId",0}}, new Hashtable(){{"PurchaseableObjectTypeId", DBNull.Value}}, PurchaseableObjectCoupon.ObjectMap, dc);
 			RefundRequest.Update(new Hashtable(){{"RequestFulfilled",false}}, new Hashtable(){{"RequestFulfilled", DBNull.Value}}, RefundRequest.ObjectMap, dc);
@@ -611,6 +613,9 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Transaction_StripeChargeOrRefundId ON [Transaction] (StripeChargeOrRefundId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Transaction_IsDeleted_OriginalTransactionId ON [Transaction] (OriginalTransactionId,IsDeleted)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Transaction_IsDeleted_PayoutId ON [Transaction] (PayoutId,IsDeleted)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Transaction_CouponId_IsDeleted ON [Transaction] (CouponId,IsDeleted)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Transaction_CouponId_IsDeleted_PayerAccountId ON [Transaction] (CouponId,PayerAccountId,IsDeleted)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Transaction_BillerAccountId_CouponId_IsDeleted ON [Transaction] (CouponId,BillerAccountId,IsDeleted)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Payout_AccountId ON [Payout] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Payout_AccountId_PayoutStatusId ON [Payout] (AccountId,PayoutStatusId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Payout_PayoutStatusId ON [Payout] (PayoutStatusId)"));
@@ -626,6 +631,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ProductPurchase_ParticipationObjectId_ParticipationObjectTypeId_RegistrantId ON [ProductPurchase] (RegistrantId,ParticipationObjectId,ParticipationObjectTypeId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Coupon_AccountId ON [Coupon] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Coupon_AccountId_CouponCode ON [Coupon] (AccountId,CouponCode)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Coupon_Uid ON [Coupon] (Uid)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AttachedCoupon_CouponId ON [AttachedCoupon] (CouponId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AttachedCoupon_AccountId ON [AttachedCoupon] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AttachedCoupon_AccountId_IsUsed ON [AttachedCoupon] (AccountId,IsUsed)"));

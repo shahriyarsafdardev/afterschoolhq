@@ -1737,49 +1737,6 @@ namespace AfterSchool.Areas.Org.Controllers
             if (expirationDate.IsEmpty() || expirationDate <= DateTime.UtcNow.Date)
                 msgs.Add("Expiration date must be in the future", MessageType.UserError);
 
-            if (msgs.HasNoErrors())
-            {
-                var registrantAccount = registrantActivity.GetRegistrant().GetMasterRegistrant()?.GetAccount();
-                AttachedCoupon attachedCoupon = null;
-
-                Database.ExecuteTransaction
-                (
-                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                    {
-                        // create new coupon
-                       var coupon = SessionVariables.CurrentAccount.CreateCoupon(
-                            amount: couponAmount,
-                            expirationDate: expirationDate,
-                            amountType: discountType,
-                            applyType: couponApplyType,
-                            durationInMonths: durationInMonths,
-                            couponDuration: duration,
-                            loggedInUser: SessionVariables.CurrentUser,
-                            msgs: amsgs,
-                            dc: adc);
-
-                        // assign coupon to the activity (only works for this activity)
-                        var poc = PurchaseableObjectCouponService.CreateNew(
-                            purchaseableObject: activity.GetPurchaseableObject(), 
-                            coupon: coupon, 
-                            loggedInUser: SessionVariables.CurrentUser, 
-                            msgs: amsgs, 
-                            dc: adc);
-
-                        attachedCoupon = registrantAccount.AttachCoupon(coupon, SessionVariables.CurrentUser, amsgs, adc);
-                    },
-                    onSuccess: (SystemMessages smsgs) =>
-                    {
-                        msgs.AddRange(smsgs);
-                   
-                        attachedCoupon.Send();                   
-                    },
-                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                    onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(msgs)
-                );
-
-            }
-
             ViewBag.Messages = msgs;
             ViewBag.AttachedCoupons = GetAttachedCoupons(registrantActivity);
             ViewBag.IsActivityLeader = IsActivityLeader(activity);

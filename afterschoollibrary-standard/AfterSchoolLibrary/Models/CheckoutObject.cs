@@ -214,11 +214,10 @@ namespace AfterSchoolLibrary.Models
                     // then apply coupon discount
                     if (Coupon.IsNotEmpty() && Coupon.ID.IsNotEmpty() && Coupon.DoesApplyToRegistrationFee())
                     {
-                        var couponAmount = Coupon.Amount.Value;
-                        if (Coupon.HasPercentageAmountType())
-                            couponAmount *=  total;
-                        return total - couponAmount;
+                        var couponValue = Coupon.GetValue(total);
+                        return total - couponValue;
                     }
+
                     return total;
                 }
 
@@ -478,7 +477,7 @@ namespace AfterSchoolLibrary.Models
                 BankAccountPurchaseObject.StripeSourceId = PayingAccount.GetStripeSourceFromPlaidToken(
                                                             BankAccountPurchaseObject, 
                                                             msgs);
-            else if (SavePaymentInfo || SubscriptionPlan.IsNotEmpty() || PostPayPlan.IsNotEmpty())
+            else if (SavePaymentInfo || SubscriptionPlan.IsNotEmpty() || PostPayPlan.IsNotEmpty() || CreditCardPurchaseObject.StripeToken.IsNotEmpty())
                 CreditCardPurchaseObject.StripeSourceId = PayingAccount.GetStripeSourceFromToken(
                                                             BillingAccount,
                                                             CreditCardPurchaseObject.StripeToken, 
