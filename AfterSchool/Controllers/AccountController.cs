@@ -1748,7 +1748,7 @@ namespace AfterSchool.Controllers
             if (couponCode.IsNotEmpty())
                 coupon = SessionVariables.CurrentAccount.ValidateCoupon(participationObject, couponCode, msgs);
 
-            if (ccSourceId.IsEmpty() && stripetoken.IsEmpty() && plaidtoken.IsEmpty() && bankSourceId.IsEmpty())
+            if (ccSourceId.IsEmpty() && stripetoken.IsEmpty() && plaidtoken.IsEmpty() && bankSourceId.IsEmpty() && paymentoption.IsNotEmpty() && paymentoption.ToInteger() >= 0)
                 msgs.Add("Please enter your payment information", MessageType.UserError);
 
             var registration = PaymentViewBag(id, participationObject, msgs);
