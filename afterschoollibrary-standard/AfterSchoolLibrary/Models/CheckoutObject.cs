@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AfterSchoolLibrary.Services;
+using Amazon.DynamoDBv2.Model;
 
 namespace AfterSchoolLibrary.Models
 {
@@ -128,7 +129,7 @@ namespace AfterSchoolLibrary.Models
             if (PaymentPlan.IsNotEmpty())
                 return PaymentPlanCostTodayNoFees + GetSubscriptionCostTodayNoFees(msgs, dc);
 
-            return RegistrationCostNoFees + GetSubscriptionCostTodayNoFees(msgs, dc) + GetPostPayPlanCostTodayWithFees();
+            return RegistrationCostWithCoupon(msgs,dc) + GetSubscriptionCostTodayNoFees(msgs, dc) + GetPostPayPlanCostTodayWithFees();
         }
 
         public decimal GetTotalCostWithFees(SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -142,7 +143,7 @@ namespace AfterSchoolLibrary.Models
             return GetRegistrationCostWithFees(msgs, dc);
         }
 
-        public decimal GetTotalCost()
+        public decimal GetTotalCost(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (PaymentPlan.IsNotEmpty())
                 return PaymentPlan.CostPerPeriod.Value * PaymentPlan.TotalPeriods.Value;
@@ -150,7 +151,7 @@ namespace AfterSchoolLibrary.Models
             if (OverrideAmount.HasValue)
                 return OverrideAmount.Value - PaymentTypeFeeOverrideAmount.Value;
 
-            return RegistrationCostNoFees;
+            return RegistrationCostWithCoupon(msgs, dc);
         }
 
         public decimal GetTotalCostToPurchaseTodayWithFees(SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -188,7 +189,7 @@ namespace AfterSchoolLibrary.Models
             if (PaymentPlan.IsNotEmpty())
                 return GetPaymentPlanCostTodayConvenienceFee(msgs, dc) + GetSubscriptionCostTodayConvenienceFee(msgs, dc);
 
-            return GetRegistrationConvenienceFee(msgs, dc) + GetSubscriptionCostTodayConvenienceFee(msgs, dc) + GetPostPayPlanCostTodayConvenienceFee();
+            return GetRegistrationConvenienceFeeWithCoupon(msgs, dc) + GetSubscriptionCostTodayConvenienceFee(msgs, dc) + GetPostPayPlanCostTodayConvenienceFee();
         }
 
         public decimal GetTotalCreditCardFeesToday(SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -199,7 +200,7 @@ namespace AfterSchoolLibrary.Models
             if (PaymentPlan.IsNotEmpty())
                 return GetPaymentPlanCostTodayCreditCardFee(msgs, dc) + GetSubscriptionCostTodayCreditCardFee(msgs, dc);
 
-            return GetRegistrationCreditCardFee(msgs, dc) + GetSubscriptionCostTodayCreditCardFee(msgs, dc) + GetPostPayPlanCostTodayCreditCardFee();
+            return GetRegistrationCreditCardFeeWithCoupon(msgs, dc) + GetSubscriptionCostTodayCreditCardFee(msgs, dc) + GetPostPayPlanCostTodayCreditCardFee();
         }
 
         public decimal RegistrationCostNoFees
@@ -207,27 +208,43 @@ namespace AfterSchoolLibrary.Models
             get
             {
                 if (ParticipationObject.IsNotEmpty() && ParticipationObject.Cost.HasValue)
-                {
-                    var total = ParticipationObject.Cost.Value * NumberOfSeats;
-
-                    // if coupon applyTo is `RegistrationFee`
-                    // then apply coupon discount
-                    if (Coupon.IsNotEmpty() && Coupon.ID.IsNotEmpty() && Coupon.DoesApplyToRegistrationFee())
-                    {
-                        var couponValue = Coupon.GetValue(total);
-                        return total - couponValue;
-                    }
-
-                    return total;
-                }
+                    return ParticipationObject.Cost.Value * NumberOfSeats;
 
                 return 0;
             }
         }
+        /// <summary>
+        /// Coupon value needs to include convenience fees
+        /// </summary>
+        public decimal CouponValue(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (Coupon.IsNotEmpty() && Coupon.ID.IsNotEmpty() && Coupon.DoesApplyToRegistrationFee())
+                return Coupon.GetValue(GetAmountToApplyToCoupon(msgs, dc)); 
+
+            return 0;
+        }
+
+        public decimal RegistrationCostWithCoupon(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Math.Max(RegistrationCostNoFees - CouponValue(msgs, dc), 0); 
+        }
 
         public decimal GetRegistrationCostWithFees(SystemMessages msgs = null, DatabaseConnection dc = null)
         {           
-            return GetRegistrationCostWithConvenienceFee(msgs, dc) +  GetRegistrationCreditCardFee(msgs, dc);
+            return GetRegistrationCostWithConvenienceFee(msgs, dc) +  GetRegistrationCreditCardFeeWithCoupon(msgs, dc);
+        }
+
+        public decimal GetAmountToApplyToCoupon(SystemMessages msgs, DatabaseConnection dc)
+        {
+            if (ParticipationObject.IsActivityGroup())
+                return 0;
+
+            var activity = ParticipationObject.GetActivity();
+
+            if (activity.IsConvenienceFeeTakenOutOfCost)
+                return RegistrationCostNoFees;
+
+            return RegistrationCostNoFees + GetRegistrationConvenienceFee(msgs, dc);
         }
 
         public decimal GetRegistrationCostWithConvenienceFee(SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -238,9 +255,9 @@ namespace AfterSchoolLibrary.Models
             var activity = ParticipationObject.GetActivity();
 
             if (activity.IsConvenienceFeeTakenOutOfCost)
-                return RegistrationCostNoFees;
+                return RegistrationCostWithCoupon(msgs, dc);
             
-            return RegistrationCostNoFees + GetRegistrationConvenienceFee(msgs, dc);
+            return RegistrationCostWithCoupon(msgs, dc) + GetRegistrationConvenienceFeeWithCoupon(msgs, dc);
         }
 
         public decimal GetRegistrationCreditCardFee(SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -271,9 +288,37 @@ namespace AfterSchoolLibrary.Models
             return 0;
         }
 
+        public decimal GetRegistrationCreditCardFeeWithCoupon(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (!IsRegistrationFree && CreditCardPurchaseObject.IsNotEmpty())
+                return new FeeCalculationObject(
+                                RegistrationCostWithCoupon(msgs, dc),
+                                BillingAccount,
+                                ParticipationObject,
+                                msgs,
+                                dc)
+                            .GetCreditCardFee();
+
+            return 0;
+        }
+
+        public decimal GetRegistrationConvenienceFeeWithCoupon(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (!IsRegistrationFree)
+                return new FeeCalculationObject(
+                                RegistrationCostWithCoupon(msgs, dc),
+                                BillingAccount,
+                                ParticipationObject,
+                                msgs,
+                                dc)
+                            .GetConvenienceFee();
+
+            return 0;
+        }
+
         public decimal GetRegistrationTotalFees(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return GetRegistrationConvenienceFee(msgs, dc) + GetRegistrationCreditCardFee(msgs, dc);
+            return GetRegistrationConvenienceFeeWithCoupon(msgs, dc) + GetRegistrationCreditCardFeeWithCoupon(msgs, dc);
         }
 
         public decimal GetSubscriptionCostTodayNoFees(SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -442,6 +487,22 @@ namespace AfterSchoolLibrary.Models
                 return BillingAccount.GetPlatformConvenienceFlatFee(msgs, dc);
 
             return 0;
+        }
+
+        public decimal GetPlatformPercentFeeWithCoupon(SystemMessages msgs, DatabaseConnection dc)
+        {
+            if (CouponValue(msgs, dc) >= GetTotalCostToPurchaseTodayWithConvenienceFee())
+                return 0;
+
+            return GetPlatformPercentFee(msgs, dc);
+        }
+
+        public decimal GetPlatformFlatFeeWithCoupon(SystemMessages msgs, DatabaseConnection dc)
+        {
+            if (CouponValue(msgs, dc) >= GetTotalCostToPurchaseTodayWithConvenienceFee())
+                return 0;
+
+            return GetPlatformFlatFee(msgs, dc);
         }
 
         public Purchase CreateOrUpdatePurchase(WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
