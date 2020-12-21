@@ -8,6 +8,7 @@
     var showLocation = false;
     var hidePreciseLocation = false;
     var accountProfile = (AccountProfile)ViewBag.AccountProfile;
+    var instruction = Model.ActivityLocationType == ActivityLocationType.Physical ? "In-Person Instruction" : "Virtual Instruction";
 
     if (Model.HidePreciseLocation)
     {
@@ -91,19 +92,6 @@
 
                             }
 
-                            @if (Model.ActivityLocationType == ActivityLocationType.Physical)
-                            {
-                                <span>
-                                    In-Person &bull;
-                                </span>
-                            }
-                            else if (Model.ActivityLocationType == ActivityLocationType.Virtual)
-                            {
-                                <span>
-                                    Virtual &bull;
-                                </span>
-                            }
-
                             @ParticipationObjectUI.PrintGenderRestrictions(Model)
                         </h3>
                     </div>
@@ -118,7 +106,7 @@
                                    { "canRegisterFor", ViewBag.CanRegisterFor },
                                    { "session", session },
                                    { "accountprofile", ViewBag.AccountProfile }
-}
+                               }
                             );
                         }
                     </div>
@@ -136,10 +124,14 @@
 
                     </div>
                     <div class="col-lg-4 col-md-12">
+                        
+                        <div class="activity-detail-block">
+                           <h3>@instruction</h3>
+                        </div>
 
                         <div class="activity-detail-block">
                             @{ Html.RenderPartial("~/Views/Shared/ParticipationObject/_PaymentInfo.cshtml", Model); }
-                        </div>
+                        
 
                         @if (Model.IsActivityGroup() && Model.GetActivityGroup().IsInviteOnly)
                         {
