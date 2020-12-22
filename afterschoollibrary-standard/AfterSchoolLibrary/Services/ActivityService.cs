@@ -2478,6 +2478,20 @@ namespace AfterSchoolLibrary.Services
             return false;
         }
 
+        public static bool IsOpenOrUpcoming(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var regPeriod = activity.GetActiveRegistrationPeriod(msgs, dc);
+
+            if (regPeriod.IsEmpty())
+                return false;
+
+            var account = activity.GetAccount(msgs, dc);
+            if (regPeriod.IsOpen(account, msgs, dc) || regPeriod.IsFuture(msgs, dc))
+                return true;
+
+            return false;
+        }
+
         public static void RequestToPublish(this Activity activity, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var location = activity.GetLocation(msgs, dc);

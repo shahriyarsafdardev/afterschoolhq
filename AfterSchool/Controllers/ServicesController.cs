@@ -635,6 +635,8 @@ namespace AfterSchool.Controllers
                 return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
 
             var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+
             SubscriptionPlan paymentPlan = null;
 
             var participationObject = SessionVariables.Cart.GetCartItems(msgs)
@@ -643,12 +645,32 @@ namespace AfterSchool.Controllers
 
             if (paymentoption.IsNotEmpty() && paymentoption.IsNumber())
                 paymentPlan = SubscriptionPlan.Load(paymentoption.ToInteger(), msgs);
-            SubscriptionPlan subscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault();
 
-            var coupon = SessionVariables.CurrentAccount.ValidateCoupon(participationObject, couponcode, msgs);
-            decimal amount = participationObject.Cost.Value;
-            decimal subscriptionPlanAmount = 0;
+            var subscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault();
+
+            var coupon = currentAccount.ValidateCoupon(participationObject, couponcode, msgs);
+            var amount = participationObject.Cost.Value;
+            var feeCalcObject = new FeeCalculationObject(amount, participationObject.OwnerAccount, msgs);
+           
+            // These amounts will either be the regular price or the discounted price, but we always return a value to update the UI
+            var calculatedAmountACH = feeCalcObject.GetFinalTotalCost(PaymentType.ACH);
+            var calculatedAmountCC = feeCalcObject.GetFinalTotalCost(PaymentType.CreditCard);
+            var calculatedCCFee = feeCalcObject.GetCreditCardFee();
+
             int numberInMonths = 0;
+            decimal subscriptionPlanAmount = 0;
+            var discountString = "";
+
+            // If coupon is valid we update the amount shown to the user here
+            if (coupon.IsNotEmpty() && coupon.ID.IsNotEmpty() && coupon.DoesApplyToRegistrationFee())
+            {
+                var couponValue = coupon.GetValue(amount);
+                var discountedFeeCalcObject = new FeeCalculationObject(amount - couponValue, participationObject.OwnerAccount, msgs);
+                calculatedAmountACH = discountedFeeCalcObject.GetFinalTotalCost(PaymentType.ACH);
+                calculatedAmountCC = discountedFeeCalcObject.GetFinalTotalCost(PaymentType.CreditCard);
+                calculatedCCFee = discountedFeeCalcObject.GetCreditCardFee();
+                discountString = coupon.GetDiscountString();
+            }
 
             if (paymentPlan.IsNotEmpty())
             {
@@ -659,10 +681,15 @@ namespace AfterSchool.Controllers
             if (subscriptionPlan.IsNotEmpty())
                 subscriptionPlanAmount = subscriptionPlan.CostPerPeriod.Value;
 
-            if (msgs.HasNoErrors())
-                return Json(new { status = "ok", coupon, amount, numberInMonths, subscriptionPlanAmount }, JsonRequestBehavior.AllowGet);
+            var status = "error";
 
-            return Json(new { status = "error", messages = msgs, amount, subscriptionPlanAmount }, JsonRequestBehavior.AllowGet);
+            if (msgs.HasNoErrors())
+            {
+                status = "ok";
+                msgs.Add("Coupon has successfuly been applied", MessageType.Success);
+            }
+                   
+            return Json(new { status, coupon, amount, calculatedAmountCC, calculatedAmountACH, calculatedCCFee, numberInMonths, subscriptionPlanAmount, discountString, messages = msgs }, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult SubmitContactForm(string name, string email, string message, string g_recaptcha_response)

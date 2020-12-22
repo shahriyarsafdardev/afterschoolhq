@@ -82,7 +82,6 @@ namespace AfterSchoolLibrary.Models
             if (Cost <= 0)
                 return 0;
 
-
             var fee = 0M;
 
             if (IsConvenienceFeeTakenOutOfCost)
