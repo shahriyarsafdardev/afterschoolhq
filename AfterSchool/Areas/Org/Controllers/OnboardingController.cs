@@ -371,8 +371,24 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
-            var profile = account.GetAccountProfile(msgs);
-            
+            var profile = account.GetOrCreateAccountProfile(SessionVariables.CurrentUser, msgs);
+            var classfication = profile.GetProperties(AccountPropertyType.Classifications,msgs);
+            var softskills = profile.GetProperties(AccountPropertyType.SoftSkills, msgs);
+            var academicsubjects = profile.GetProperties(AccountPropertyType.AcademicSubjects, msgs);
+            var teachingmethod = profile.GetProperties(AccountPropertyType.TeachingMethods, msgs);
+            var serviceoffered = profile.GetProperties(AccountPropertyType.ServiceOffered, msgs);
+            var timeoffered =  profile.GetProperties(AccountPropertyType.TimeOffered, msgs);
+            var pricingoption = profile.GetProperties(AccountPropertyType.PricingOption, msgs);
+            var specialneedsoffering =  profile.GetProperties(AccountPropertyType.SpecialNeedsOffering, msgs);
+
+            ViewBag.ServiceOffered = serviceoffered;
+            ViewBag.TimeOffered = timeoffered;
+            ViewBag.PricingOption = pricingoption;
+            ViewBag.SpecialNeedsOffering = specialneedsoffering;
+            ViewBag.TeachingMethods = teachingmethod;
+            ViewBag.AcademicSubjects = academicsubjects;
+            ViewBag.Softskills = softskills;
+            ViewBag.ProgramCategories = classfication;
             ViewBag.Messages = msgs;
             return View(account);
         }
