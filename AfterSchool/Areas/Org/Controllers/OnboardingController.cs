@@ -132,28 +132,23 @@ namespace AfterSchool.Areas.Org.Controllers
             var account = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var profile = account.GetOrCreateAccountProfile(currentUser, msgs);
-            var grades = GradeLevel.Load(msgs: msgs);         
-                        
+            var grades = GradeLevel.Load(msgs: msgs);
+            var minGradeId = grades.First().ID.HasValue ? grades.First().ID.Value : 1;
+            var gradeStart = profile.GetGradeLevelStart();
+            var maxGradeId = grades.Last().ID.HasValue ? grades.Last().ID.Value : 14;
+            var gradeEnd = profile.GetGradeLevelEnd();
+            var ageStart = profile.GetAgeStart();
+            var ageEnd = profile.GetAgeEnd();
+
+            ViewBag.Grades = grades;
             ViewBag.Messages = msgs;
             ViewBag.ELC = profile.IsNotEmpty() && profile.IsELearningCenter;
             ViewBag.OpenCovid = profile.IsNotEmpty() && profile.IsOpenDuringCovid;
             ViewBag.IsVirtualProgram = profile.IsNotEmpty() && profile.IsVirtualProgram;
-            ViewBag.IsRestrictByGrade = profile.RestrictByGrade();
-
-            ViewBag.Grades = grades;
-
-            var minGradeId = grades.First().ID.HasValue ? grades.First().ID.Value : 1;
-            var gradeStart = profile.GetGradeLevelStart();
+            ViewBag.IsRestrictByGrade = profile.IsRestrictByGrade();
             ViewBag.GradeStart = gradeStart.IsNotEmpty() ? gradeStart.ID : minGradeId;
-
-            var maxGradeId = grades.Last().ID.HasValue ? grades.Last().ID.Value : 14;
-            var gradeEnd = profile.GetGradeLevelEnd();
-            ViewBag.GradeEnd = gradeEnd.IsNotEmpty() ? gradeEnd.ID : maxGradeId;
-
-            var ageStart = profile.GetAgeStart();
-            ViewBag.AgeStart = ageStart.HasValue ? ageStart.Value : 1;
-
-            var ageEnd = profile.GetAgeEnd();
+            ViewBag.GradeEnd = gradeEnd.IsNotEmpty() ? gradeEnd.ID : maxGradeId;            
+            ViewBag.AgeStart = ageStart.HasValue ? ageStart.Value : 0;            
             ViewBag.AgeEnd = ageEnd.HasValue ? ageEnd.Value : 18;
 
             return View(account);
@@ -372,24 +367,17 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
             var profile = account.GetOrCreateAccountProfile(SessionVariables.CurrentUser, msgs);
-            var classfication = profile.GetProperties(AccountPropertyType.Classifications,msgs);
-            var softskills = profile.GetProperties(AccountPropertyType.SoftSkills, msgs);
-            var academicsubjects = profile.GetProperties(AccountPropertyType.AcademicSubjects, msgs);
-            var teachingmethod = profile.GetProperties(AccountPropertyType.TeachingMethods, msgs);
-            var serviceoffered = profile.GetProperties(AccountPropertyType.ServiceOffered, msgs);
-            var timeoffered =  profile.GetProperties(AccountPropertyType.TimeOffered, msgs);
-            var pricingoption = profile.GetProperties(AccountPropertyType.PricingOption, msgs);
-            var specialneedsoffering =  profile.GetProperties(AccountPropertyType.SpecialNeedsOffering, msgs);
 
-            ViewBag.ServiceOffered = serviceoffered;
-            ViewBag.TimeOffered = timeoffered;
-            ViewBag.PricingOption = pricingoption;
-            ViewBag.SpecialNeedsOffering = specialneedsoffering;
-            ViewBag.TeachingMethods = teachingmethod;
-            ViewBag.AcademicSubjects = academicsubjects;
-            ViewBag.Softskills = softskills;
-            ViewBag.ProgramCategories = classfication;
+            ViewBag.ServiceOffered = profile.GetProperties(AccountPropertyType.ServiceOffered, msgs);
+            ViewBag.TimeOffered = profile.GetProperties(AccountPropertyType.TimeOffered, msgs);
+            ViewBag.PricingOption = profile.GetProperties(AccountPropertyType.PricingOption, msgs);
+            ViewBag.SpecialNeedsOffering = profile.GetProperties(AccountPropertyType.SpecialNeedsOffering, msgs);
+            ViewBag.TeachingMethods = profile.GetProperties(AccountPropertyType.TeachingMethods, msgs);
+            ViewBag.AcademicSubjects = profile.GetProperties(AccountPropertyType.AcademicSubjects, msgs);
+            ViewBag.Softskills = profile.GetProperties(AccountPropertyType.SoftSkills, msgs);
+            ViewBag.ProgramCategories = profile.GetProperties(AccountPropertyType.Classifications, msgs);
             ViewBag.Messages = msgs;
+
             return View(account);
         }
 

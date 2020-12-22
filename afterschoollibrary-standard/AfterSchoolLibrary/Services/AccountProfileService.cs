@@ -460,6 +460,11 @@ namespace AfterSchoolLibrary.Services
             return profile.AgeStart.IsEmpty();
         }
 
+        public static bool IsRestrictByGrade(this AccountProfile profile)
+        {
+            return profile.GradeLevelStart.IsNotEmpty();
+        }
+
         public static string PrintGenderRestrictions(this AccountProfile profile)
         {
             switch (profile.GenderRestriction)
