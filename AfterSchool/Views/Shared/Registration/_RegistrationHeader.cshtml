@@ -276,8 +276,8 @@
                                 </div>
                             }
                         }
-                        else
-                        {                            
+                        else if (Model.ParticipationObject.ActivityGroupType != ActivityGroupType.Session)
+                        {
                             <a href="@Model.ParticipationObject.GetInterestedPageUrl()" class="btn btn-header-action">
                                 <i class="icon icon-left s7-bell"></i>
                                 <span class="">I'm Interested</span>

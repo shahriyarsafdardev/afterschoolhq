@@ -277,6 +277,7 @@ namespace AfterSchool.Controllers
                 if (activity.ActivityGroupId.HasValue)
                 {
                     session = activity.GetActivityGroup(msgs)?.GetParticipationObject(msgs);
+                    participationObject.ActivityGroupType = ActivityGroupType.Session;
                     AddNoCacheHeaders();
                 }
 
