@@ -362,6 +362,8 @@ namespace AfterSchoolLibrary.Helpers
                     Migrations.UpdateAccountOnboardingStepDone_20201106.Do(amsgs, adc);
                     Migrations.AddPayerIdsToRegistrations_20201116.Do(amsgs, adc);
 
+                    Migrations.AddManageCouponFeatureInPremiumPackage_20201224.Do(amsgs, adc);
+
 
                     // Migrations.AddProfilesToAllAccounts_20200727.Do(amsgs, adc);
 
