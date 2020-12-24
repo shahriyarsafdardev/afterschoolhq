@@ -246,6 +246,13 @@
                                         {
                                             <i class="s7-back-2"></i>
                                         }
+
+                                        @if (transaction.CouponId.IsNotEmpty() && transaction.CouponValue.IsNotEmpty())
+                                        {
+                                            <i class="s7-info icon-small" data-toggle="popover" data-trigger="hover" data-html="true" data-placement="top"
+                                               data-content="Coupon: @transaction.CouponValue.ToCurrency()">
+                                            </i>
+                                        }
                                     </td>
                                     <td class="text-center">
                                         @if (transaction.IsCharge())
