@@ -1022,7 +1022,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult Style(string id, string logo, string headerimage, string about, string title, string headline, string primaryColor, string website, string mingrade, string maxgrade, string agestart, string ageend, string restrictby, string twitter, string facebook, string instagram, string linkedin, string youtube, string calendar, string genderrestriction, string programCategories, string softskills, string academicsubjects, string teachingmethods, string profileemail, string profilephone, string locationname, string streetnumber, string streetname, string address2, string neighborhood, string city, string state, string postalcode, string county, string country, string placeid, string opencovid, string elearningcenter, string ahqapproved, string videoUrl, IEnumerable<HttpPostedFileBase> photos)
+        public ActionResult Style(string id, string logo, string headerimage, string about, string title, string headline, string primaryColor, string website, string mingrade, string maxgrade, string agestart, string ageend, string restrictby, string twitter, string facebook, string instagram, string linkedin, string youtube, string calendar, string genderrestriction, string programCategories, string softskills, string academicsubjects, string teachingmethods, string profileemail, string profilephone, string locationname, string streetnumber, string streetname, string address2, string neighborhood, string city, string state, string postalcode, string county, string country, string placeid, string opencovid, string elearningcenter, string virtualprogram, string ahqapproved, string videoUrl, IEnumerable<HttpPostedFileBase> photos)
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
@@ -1134,14 +1134,14 @@ namespace AfterSchool.Areas.Org.Controllers
                     }
                 }
 
-
-                profile.UpdateProfile(
+                profile.UpdateProfileExtended(
                     title,
                     headline,
                     about,
                     website,
-                    opencovid,
-                    elearningcenter,
+                    opencovid.IsNumber() && opencovid.ToBoolean(),
+                    elearningcenter.IsNumber() && elearningcenter.ToBoolean(),
+                    virtualprogram.IsNumber() && virtualprogram.ToBoolean(),
                     mingrade,
                     maxgrade,
                     agestart,
