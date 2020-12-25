@@ -3,10 +3,11 @@
 
     .btn-upgrade-plan {
         margin-top: 12px;
-        right: 80px;
         position: fixed;
         font-size: 16px;
         font-weight: bold;
+        border-radius: 7px;
+        background-color: aliceblue;
     }
 
     #upgrade-my-plan {

@@ -1,14 +1,21 @@
 ﻿<div id="upgrade-my-plan">
     <div class="Container">
         <span class="span-upgrade-modal-close" onclick="return hideUpgradeMyPlan()">X</span>
-        <div class="col-md-offset-3 col-lg-6 col-md-6 col-sm-6">
-            <h2 id="gain-access">Gain access to this feature by upgrading your plan</h2>            
-        </div>
-        <div class="col-md-1 col-sm-12 visible-md visible-lg">
-            <a href="#" class="btn btn-default btn-upgrade-plan btn-lg" onclick="return loadUpgradePage()">Upgrade My Plan</a>
+       
+        <div class="visible-md visible-lg">
+            <div class="" style="margin-left:230px">
+                <h2 class="gain-access">Gain access to this feature by upgrading your plan</h2>
+            </div>
+
+            <a href="#" class="btn btn-default btn-upgrade-plan btn-lg" onclick="return loadUpgradePage()" style="margin-left: 900px;margin-top: -44px;">Upgrade My Plan</a>
             <div class="clearfix"></div>
         </div>
-        <div class="col-sm-6 col-xs-12 visible-xs visible-sm">
+
+        <div class="visible-xs visible-sm"style="padding-left: 10px;padding-right: 10px;">
+            <div class="">
+                <h2 class="gain-access">Gain access to this feature by upgrading your plan</h2>
+            </div>
+
             <a href="#" class="btn btn-default btn-upgrade-plan text-center btn-center btn-lg" onclick="return loadUpgradePage()">Upgrade My Plan</a>
             <div class="clearfix"></div>
         </div>
@@ -24,7 +31,7 @@
         $('#upgrade-my-plan').fadeIn();
 
         if (name)
-            $('#gain-access').html(`Gain access to this feature by upgrading your plan to ${name}`);
+            $('.gain-access').html('Upgrade to '+`${name}`+' to access this feature.');
   
         if(id)
             featureId = id;

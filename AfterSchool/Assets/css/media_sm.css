@@ -28,6 +28,8 @@
     .btn-upgrade-plan {
         margin-top: 25px;
         font-size: 15px;
+        border-radius: 7px;
+        background-color: aliceblue;
     }
 
     .main-content-new {
