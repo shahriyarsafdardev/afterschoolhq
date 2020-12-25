@@ -1,13 +1,11 @@
 ﻿/* Large devices (laptops/desktops, 1200px and up) */
 @media(min-width: 1200px) {
 
-    .btn-upgrade-plan {
-        margin-top: 12px;       
-        position: fixed;
-        font-size: 18px;
+    .btn-upgrade-plan {        
         font-weight: bold;
         border-radius: 7px;
         background-color: aliceblue;
+        margin-left: 20px;
     }
 
     #upgrade-my-plan {
