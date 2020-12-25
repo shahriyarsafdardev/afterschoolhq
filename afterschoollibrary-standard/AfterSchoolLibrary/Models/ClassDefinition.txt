@@ -1051,6 +1051,8 @@ property: StripeSourceId, string, NVarChar "100"
 property: CostPerClass, decimal?, Money
 property: PaymentTypeFeePayerAccountId, int?, Int, , which account is paying the payment type (stripe or ach) fee
 property: ConvenienceFeePayerAccountId, int?, Int, , which account is paying the convenience fee
+property: CouponId, int?, Int
+property: CouponValue, decimal?, Decimal "10,2"
 loadmethod: Uid
 loadmethod: RegistrantId, List<>
 loadmethod: AccountId, List<>
@@ -1059,6 +1061,7 @@ loadmethod: AccountId|RegistrantId, List<>
 loadmethod: ActivityGroupId, List<>
 loadmethod: AccountActivityGroupId, List<>
 loadmethod: FirstRegistrationId, List<>
+loadmethod: CouponId|IsDeleted, List<>
 join: Registrant.ID, RegistrantId, InnerJoin
 joinproperty: Registrant.Email, string, NVarChar
 joinproperty: Registrant.FirstName, string, NVarChar

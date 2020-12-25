@@ -54,6 +54,8 @@ namespace AfterSchoolLibrary.Models
 		/// which account is paying the convenience fee
 		/// </summary>
 		public int? ConvenienceFeePayerAccountId { get { return (int?)MDV["ConvenienceFeePayerAccountId"].Value; } set { MDV["ConvenienceFeePayerAccountId"].Value = value; } }
+		public int? CouponId { get { return (int?)MDV["CouponId"].Value; } set { MDV["CouponId"].Value = value; } }
+		public decimal? CouponValue { get { return (decimal?)MDV["CouponValue"].Value; } set { MDV["CouponValue"].Value = value; } }
 		public string RegistrantEmail { get { return (string)MDV["RegistrantEmail"].Value; } }
 		public string RegistrantFirstName { get { return (string)MDV["RegistrantFirstName"].Value; } }
 		public string RegistrantLastName { get { return (string)MDV["RegistrantLastName"].Value; } }
@@ -104,6 +106,8 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "CostPerClass", System.Data.SqlDbType.Money);
 				_dp.Add(className, "PaymentTypeFeePayerAccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ConvenienceFeePayerAccountId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "CouponId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "CouponValue", System.Data.SqlDbType.Decimal , "10,2");
 				_dp.Add(className, "RegistrantEmail", typeof(Registrant).Name, "Email", System.Data.SqlDbType.NVarChar, "Registrant");
 				_dp.Add(className, "RegistrantFirstName", typeof(Registrant).Name, "FirstName", System.Data.SqlDbType.NVarChar, "Registrant");
 				_dp.Add(className, "RegistrantLastName", typeof(Registrant).Name, "LastName", System.Data.SqlDbType.NVarChar, "Registrant");
@@ -285,6 +289,14 @@ namespace AfterSchoolLibrary.Models
 			dps.Add(ObjectMap["ConvenienceFeePayerAccountId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["CouponId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["CouponValue"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -357,6 +369,15 @@ namespace AfterSchoolLibrary.Models
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["FirstRegistrationId"], FirstRegistrationId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<Registration> LoadByCouponIdByIsDeleted(int CouponId, string IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["CouponId"], CouponId);
+			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
