@@ -1982,7 +1982,7 @@ namespace AfterSchoolLibrary.Helpers
         {
             get
             {
-                return $"{(Utilities.IsProduction ? "customers" : "dev")}@{ReplyHostName}";
+                return $"{(Utilities.IsProduction ? "support" : "dev")}@{ReplyHostName}";
             }
         }
 
@@ -1993,6 +1993,16 @@ namespace AfterSchoolLibrary.Helpers
                 return $"noreply@{SenderHostName}";
             }
         }
+
+        public static string AppCustomersEmailAddress
+        {
+            get
+            {
+                return $"{(Utilities.IsProduction ? "customers" : "dev")}@{ReplyHostName}";
+                //return $"customers@{ReplyHostName}";
+            }
+        }
+
         public static string AppEmailFromName(bool isAfterSchool)
         {
             return Utilities.AppName(isAfterSchool);

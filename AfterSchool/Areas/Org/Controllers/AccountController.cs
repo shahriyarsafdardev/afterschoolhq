@@ -521,7 +521,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     $"User: {currentUser.FirstName} {currentUser.LastName}<br />";
 
             EmailHelper.SendEmail(
-                toEmail: AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress,
+                toEmail: AfterSchoolLibrary.Helpers.Email.AppCustomersEmailAddress,
                 subject: $"{account.Name} has connected their stripe account",
                 body,
                 isAfterSchool: true);
