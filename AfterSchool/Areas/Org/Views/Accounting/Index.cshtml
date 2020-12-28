@@ -1,6 +1,7 @@
 ﻿@model List<Transaction>
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
+    var account = SessionVariables.CurrentAccount;
     var transactionCount = ((PagingModel)ViewBag.PagingModel).TotalCount;
     var totalTransactionAmount = (decimal)ViewBag.TotalAmountPaid;
     var totalAmountRefunded = (decimal)ViewBag.TotalAmountRefunded;
@@ -11,6 +12,7 @@
     var totalAvailableForPayout = (decimal)ViewBag.TotalAvailableForPayout;
 
     var isSearchResult = Request["sdate"].IsNotBlank() || Request["edate"].IsNotBlank() || Request["q"].IsNotBlank();
+    var payoutMsg = account.HasStripeConnectedAccount ? "Pending Payout" : "Available for Payout";
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -151,7 +153,7 @@
                         <div class="widget widget-tile widget-bordered">
                             <div class="data-info">
                                 <div data-toggle="counter" data-end="@totalAvailableForPayout" id="totalPayout" data-decimals="2" data-suffix="" class="value">@totalAvailableForPayout.ToCurrency()</div>
-                                <div class="desc">Available For Payout</div>
+                                <div class="desc">@payoutMsg</div>
                             </div>
                             <div class="icon"><span class=""></span></div>
                         </div>
