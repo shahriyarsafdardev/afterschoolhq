@@ -238,6 +238,8 @@ namespace AfterSchool.Areas.Org.Controllers
             row.Add("Total Amount Paid");
             row.Add("Platform Fee");
             row.Add("Your Amount");
+            row.Add("Status");
+            row.Add("Type");
             table.Add(row);
             foreach (var t in allTransactions)
             {
@@ -249,10 +251,12 @@ namespace AfterSchool.Areas.Org.Controllers
                 row.Add(t.CreateDate.ToShortDateTimeString());
                 row.Add(t.GetPayerAccount().Name);
                 row.Add(t.IsCharge() && registrant.IsNotEmpty() ? registrant.DisplayName : t.GetBillerAccount().Name);
-                row.Add(participationObjects.DistinctBy(po => new { po.ObjectID, po.ObjectType }).Select(po => po.Name).ToStringList(", "));
-                row.Add(t.GetBillerAmount().ToCurrency());
-                row.Add(t.GetFeesChargedToBiller().ToCurrency());
+                row.Add(t.Description);
+                row.Add(t.GetPayerAmount().ToCurrency());
+                row.Add(t.GetFees().ToCurrency());
                 row.Add(t.GetBillerPayout().ToCurrency());
+                row.Add(t.GetStatus());
+                row.Add(t.PaymentTypeId == PaymentType.NotSet ? "" : t.PaymentTypeId.ToString().SplitByUpperCase());
                 table.Add(row);
             }
             string csv = CsvFile.Create(table);
