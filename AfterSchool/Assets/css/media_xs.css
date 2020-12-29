@@ -1,6 +1,6 @@
 ﻿/* Extra small devices (phones) */
 @media screen and (max-width: 479px) {
-    .padding-zero {
+    .mobile-padding-zero {
         padding: 0 !important;
     }
 
