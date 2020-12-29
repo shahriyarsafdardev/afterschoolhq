@@ -1999,7 +1999,6 @@ namespace AfterSchoolLibrary.Helpers
             get
             {
                 return $"{(Utilities.IsProduction ? "customers" : "dev")}@{ReplyHostName}";
-                //return $"customers@{ReplyHostName}";
             }
         }
 
