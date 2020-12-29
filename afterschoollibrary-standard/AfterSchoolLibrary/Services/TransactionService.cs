@@ -442,7 +442,7 @@ namespace AfterSchoolLibrary.Services
 
         public static string GetStatus(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var payerAccount = transaction.GetPayerAccount(msgs, dc);
+            var billerAccount = transaction.GetBillerAccount(msgs, dc);
 
             if (transaction.PaymentSourceTypeId != PaymentSourceType.AfterSchoolPlatform)
                 return "N/A";
@@ -478,7 +478,7 @@ namespace AfterSchoolLibrary.Services
             if (transaction.HasRefundsManual(msgs, dc))
                 return "Manual Refund / Ready For Payout";
 
-            if (payerAccount.IsNotEmpty() && payerAccount.HasStripeConnectedAccount)
+            if (billerAccount.IsNotEmpty() && billerAccount.HasStripeConnectedAccount)
                 return "Payout Completed";
 
             return "Ready For Payout";
