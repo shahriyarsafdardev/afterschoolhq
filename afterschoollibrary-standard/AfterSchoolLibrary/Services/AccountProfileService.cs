@@ -277,6 +277,25 @@ namespace AfterSchoolLibrary.Services
             );
         }
 
+        public static void UpdateProfile(this AccountProfile profile, string classifications = null, string softskills = null, NameValueCollection servicesOffered = null, NameValueCollection timesOffered = null, NameValueCollection pricingOptions = null, NameValueCollection specialNeedsOfferings = null, string academicsubjects = null, string teachingmethods = null, WebUser loggedInUser = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            profile.ManageProperties(servicesOffered, AccountPropertyType.ServiceOffered, loggedInUser, msgs, dc);
+            
+            profile.ManageProperties(timesOffered, AccountPropertyType.TimeOffered, loggedInUser, msgs, dc);
+
+            profile.ManageProperties(pricingOptions, AccountPropertyType.PricingOption, loggedInUser, msgs, dc);
+
+            profile.ManageProperties(specialNeedsOfferings, AccountPropertyType.SpecialNeedsOffering, loggedInUser, msgs, dc);
+
+            profile.ManageProperties(classifications.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.Classifications, loggedInUser, msgs, dc);
+
+            profile.ManageProperties(softskills.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.SoftSkills, loggedInUser, msgs, dc);
+
+            profile.ManageProperties(academicsubjects.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.AcademicSubjects, loggedInUser, msgs, dc);
+
+            profile.ManageProperties(teachingmethods.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.TeachingMethods, loggedInUser, msgs, dc);             
+        }
+
         public static void UpdateProfile(this AccountProfile profile, int mingrade, int maxgrade, int agestart, int ageend, bool opencovid = false, bool elearningcenter = false, bool isvirtualprogram = false, WebUser loggedInUser = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
