@@ -18,6 +18,7 @@ namespace AfterSchoolLibrary.Models
     {
 		#region "ClassGenerator"
 
+		public string Description { get { return (string)MDV["Description"].Value; } set { MDV["Description"].Value = value; } }
 		/// <summary>
 		/// Required.
 		/// Store the amount a percentage or flat amount. If percentage it should be stored as a decimal meaning 100% should be stored as 1.00
@@ -45,6 +46,8 @@ namespace AfterSchoolLibrary.Models
 		public int? MaxNumberOfUsesAll { get { return (int?)MDV["MaxNumberOfUsesAll"].Value; } set { MDV["MaxNumberOfUsesAll"].Value = value; } }
 		public string CouponCode { get { return (string)MDV["CouponCode"].Value; } set { MDV["CouponCode"].Value = value; } }
 		public string StripeCouponId { get { return (string)MDV["StripeCouponId"].Value; } set { MDV["StripeCouponId"].Value = value; } }
+		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
+		public bool IsDisabled { get { return (bool)MDV["IsDisabled"].Value; } set { MDV["IsDisabled"].Value = value; } }
 		
 
         public Coupon()
@@ -53,6 +56,8 @@ namespace AfterSchoolLibrary.Models
             this.LoadObjectValues(ObjectMap);
 			this.AmountTypeId = CouponAmountType.NotSet;
 			this.AppliesTo = CouponApplyType.NotSet;
+			this.Uid = Guid.NewGuid();
+			this.IsDisabled = false;
 			
         }
 
@@ -63,6 +68,7 @@ namespace AfterSchoolLibrary.Models
                 BasicLibrary.DataAccess.DatabaseParameters _dp = new BasicLibrary.DataAccess.DatabaseParameters();
                 string className = typeof(Coupon).Name;
                 _dp = BasicLookUpObject.get_BaseObjectMap(className);
+				_dp.Add(className, "Description", System.Data.SqlDbType.NVarChar , "400");
 				_dp.Add(className, "Amount", System.Data.SqlDbType.Money);
 				_dp.Add(className, "AmountTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
@@ -72,6 +78,8 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "MaxNumberOfUsesAll", System.Data.SqlDbType.Int);
 				_dp.Add(className, "CouponCode", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "StripeCouponId", System.Data.SqlDbType.NVarChar , "100");
+				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
+				_dp.Add(className, "IsDisabled", System.Data.SqlDbType.Bit);
 				
                 return _dp;
             }
@@ -154,6 +162,10 @@ namespace AfterSchoolLibrary.Models
             BasicLibrary.DataAccess.DatabaseParameters dps;
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["Description"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["Amount"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
@@ -189,6 +201,14 @@ namespace AfterSchoolLibrary.Models
 			dps.Add(ObjectMap["StripeCouponId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["Uid"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsDisabled"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -216,12 +236,28 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
+		public static Coupon LoadByUid(Guid Uid, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["Uid"], Uid);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
+
 		
 
         #endregion
 
 		#region "UserDefined"
 
-        #endregion
+		public static List<Coupon> LoadByAccountId(int AccountId,string search, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> particiPationObjects, bool isDeleted, int? start, int? length,  SystemMessages msgs, DatabaseConnection dc)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		#endregion
     }
 }

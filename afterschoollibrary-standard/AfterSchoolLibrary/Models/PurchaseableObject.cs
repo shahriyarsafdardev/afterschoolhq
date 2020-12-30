@@ -14,6 +14,8 @@ namespace AfterSchoolLibrary.Models
         public PurchaseableObjectType ObjectType { get; set; }
         public string Name { get; set; }
 
+        public ParticipationObject ParticipationObject { get; set; }
+
         public bool IsActivity()
         {
             return ObjectType == PurchaseableObjectType.Activity;
@@ -67,6 +69,7 @@ namespace AfterSchoolLibrary.Models
                 ObjectID = activity.ID,
                 ObjectType = PurchaseableObjectType.Activity,
                 Name = activity.Name,
+                ParticipationObject = activity.GetParticipationObject(),
             };
         }
 
@@ -78,6 +81,7 @@ namespace AfterSchoolLibrary.Models
                 ObjectID = activityGroup.ID,
                 ObjectType = PurchaseableObjectType.ActivityGroup,
                 Name = activityGroup.Name,
+                ParticipationObject = activityGroup.GetParticipationObject(),
             };
         }
 
@@ -89,7 +93,36 @@ namespace AfterSchoolLibrary.Models
                 ObjectID = accountActivityGroup.ID,
                 ObjectType = PurchaseableObjectType.AccountActivityGroup,
                 Name = accountActivityGroup.GetActivityGroup(msgs, dc).Name,
+                ParticipationObject = accountActivityGroup.GetParticipationObject(),
             };
+        }
+
+        public static PurchaseableObject FromParticipationObject(ParticipationObject participationObject, SystemMessages msgs = null)
+        {
+            PurchaseableObject purchaseableObject = new PurchaseableObject();
+            switch (participationObject.ObjectType)
+            {
+                case ParticipationObjectType.AccountActivityGroup:
+                    purchaseableObject = FromAccountActivityGroup(participationObject.GetAccountActivityGroup(), msgs);
+                    break;
+                case ParticipationObjectType.ActivityGroup:
+                    purchaseableObject = FromActivityGroup(participationObject.GetActivityGroup());
+                    break;
+                case ParticipationObjectType.Activity:
+                    purchaseableObject = FromActivity(participationObject.GetActivity());
+                    break;
+                case ParticipationObjectType.NotSet:
+                    msgs.Add("Invalid object conversion", MessageType.ApiError);
+                    break;
+            }
+
+            return purchaseableObject;
+        }
+
+        public static PurchaseableObject FromParticipationObjectIdParticipationObjectTypeId(int participationObjectId, ParticipationObjectType participationObjectType)
+        {
+            var participationObject = new ParticipationObject(participationObjectId, participationObjectType);
+            return FromParticipationObject(participationObject);
         }
     }
 }

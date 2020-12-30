@@ -771,7 +771,15 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        public bool IsPublishable
+		public bool HasRegistrationFeeOnly
+		{
+			get
+			{
+				return this.CostPerRegistrant.HasValue && this.CostPerRegistrant.Value > 0 && !this.HasSubscriptionPlan() && !this.HasPaymentPlan() && !this.HasPostPayPlan();
+			}
+		}
+
+		public bool IsPublishable
         {
             get
             {

@@ -214,11 +214,12 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
             var profile = account.GetAccountProfile(msgs);
-            var currentUser = SessionVariables.CurrentUser;
             var location = profile.GetLocation();
             ViewBag.Location = location ?? new Location();            
-            ViewBag.Email = currentUser.Email;
-            ViewBag.Phone = profile.ProfilePhone;
+            ViewBag.Email = profile.ProfileEmail.IsNotEmpty() ? profile.ProfileEmail : account.Email;            
+            ViewBag.Phone = profile.ProfilePhone.IsNotEmpty() ? profile.ProfilePhone : account.Phone;
+            ViewBag.IsProfileEmail = profile.ProfileEmail.IsNotEmpty();
+            ViewBag.IsProfilePhone = profile.ProfilePhone.IsNotEmpty();
             ViewBag.Messages = msgs;
             return View(account);
         }
@@ -255,10 +256,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         profile.UpdateProfile(
                             profileemail: publicemail.IsBoolean() ? email : null,
-                            profilephone: publicphone.IsBoolean() ? extractedPhoneNumber : null,
-                            loggedInUser: currentUser,
-                            msgs: amsgs,
-                            dc: adc);
+                            profilephone: publicphone.IsBoolean() ? extractedPhoneNumber : null
+                        );
 
                         profile.AddNewLocation(
                             locationname,
@@ -293,6 +292,8 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Location = location;
             ViewBag.Email = Request["email"] ?? currentUser.Email;
             ViewBag.Phone = Request["phone"] ?? currentUser.Phone;
+            ViewBag.IsProfileEmail = publicemail.IsBoolean() && publicemail.ToBoolean();
+            ViewBag.IsProfilePhone = publicphone.IsBoolean() && publicphone.ToBoolean();
 
             ViewBag.Messages = msgs;
             return View(account);

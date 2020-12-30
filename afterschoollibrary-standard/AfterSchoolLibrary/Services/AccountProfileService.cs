@@ -118,6 +118,169 @@ namespace AfterSchoolLibrary.Services
             return AccountProperty.LoadByAccountIdByAccountPropertyTypeId(profile.AccountId.Value, AccountPropertyType.Photo, msgs, dc);
         }
 
+        public static void UpdateProfile(this AccountProfile profile, string profileemail = null, string profilephone = null)
+        {
+            profile.ProfileEmail = profileemail;
+            profile.ProfilePhone = profilephone;            
+        }
+
+        public static void UpdateProfileExtended(this AccountProfile profile, string title = null, string headline = null, string about = null, string website = null, bool opencovid = false, bool elearningcenter = false, bool isvirtualprogram = false, string mingrade = null, string maxgrade = null, string agestart = null, string ageend = null, string twitter = null, string facebook = null, string instagram = null, string linkedin = null, string youtube = null, string calendar = null, string genderrestriction = null, string profileemail = null, string profilephone = null, NameValueCollection savedAwards = null, NameValueCollection newAwards = null, NameValueCollection savedCertifications = null, NameValueCollection newCertifications = null, NameValueCollection servicesOffered = null, NameValueCollection timesOffered = null, NameValueCollection pricingOptions = null, NameValueCollection specialNeedsOfferings = null, string classifications = null, string softskills = null, string academicsubjects = null, string teachingmethods = null, string ahqapproved = null, string videoUrl = null, WebUser loggedInUser = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var account = profile.GetAccount(msgs, dc);
+
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    // ..update account name if title has been changed for profile
+                    if (account.IsNotEmpty() && title.IsNotEmpty() && profile.Title != title)
+                    {
+                        account.Name = title;
+                        account.Save(adc);
+                    }
+
+                    if (title != null)
+                        profile.Title = title.MaxChars(400);
+
+                    if (headline != null)
+                        profile.Headline = headline.MaxChars(400);
+
+                    if (about != null)
+                        profile.About = about.MaxChars(4000);
+
+                    if (website != null)
+                        profile.Website = website.MaxChars(400);
+
+                    if (twitter != null)
+                        profile.Twitter = twitter;
+
+                    if (instagram != null)
+                        profile.Instagram = instagram;
+
+                    if (facebook != null)
+                        profile.Facebook = facebook;
+
+                    if (linkedin != null)
+                        profile.LinkedIn = linkedin;
+
+                    if (youtube != null)
+                        profile.YouTube = youtube;
+
+                    if (calendar != null)
+                        profile.CalendarBookingLink = calendar;
+
+                    if (profileemail != null)
+                        profile.ProfileEmail = profileemail;
+
+                    if (profilephone != null)
+                        profile.ProfilePhone = profilephone;
+
+                    if (genderrestriction.IsInteger())
+                        profile.GenderRestriction = (GenderRestrictionType)genderrestriction.ToInteger();
+
+                    if (mingrade.IsInteger())
+                    {
+                        if (mingrade.ToInteger() < 0)
+                            profile.GradeLevelStart = null;
+                        else
+                        {
+                            profile.GradeLevelStart = mingrade.ToInteger();
+                            profile.AgeStart = null;
+                        }
+
+                    }
+
+                    if (maxgrade.IsInteger())
+                    {
+                        if (maxgrade.ToInteger() < 0)
+                            profile.GradeLevelEnd = null;
+                        else
+                        {
+                            profile.GradeLevelEnd = maxgrade.ToInteger();
+                            profile.AgeEnd = null;
+                        }
+                    }
+
+                    if (agestart.IsInteger())
+                    {
+                        if (agestart.ToInteger() < 0)
+                            profile.AgeStart = null;
+                        else
+                        {
+                            profile.AgeStart = agestart.ToInteger();
+                            profile.GradeLevelStart = null;
+                        }
+
+                    }
+
+                    if (ageend.IsInteger())
+                    {
+                        if (ageend.ToInteger() < 0)
+                            profile.AgeEnd = null;
+                        else
+                        {
+                            profile.AgeEnd = ageend.ToInteger();
+                            profile.GradeLevelEnd = null;
+                        }
+
+                    }
+
+                    profile.IsOpenDuringCovid = opencovid;
+                    profile.IsELearningCenter = elearningcenter;
+                    profile.IsVirtualProgram = isvirtualprogram;
+
+                    if (ahqapproved.IsNumber())
+                        profile.IsAHQApproved = ahqapproved.ToBoolean();
+
+                    if (videoUrl != null)
+                        profile.VideoUrl = videoUrl;
+
+                    amsgs.AddRange(profile.Save(adc));
+
+                    if (savedAwards.IsNotEmpty())
+                        UpdateProperties(savedAwards, loggedInUser, amsgs, adc);
+
+                    if (savedCertifications.IsNotEmpty())
+                        UpdateProperties(savedCertifications, loggedInUser, amsgs, adc);
+
+                    if (newAwards.IsNotEmpty())
+                        profile.AddProperties(newAwards, AccountPropertyType.Award, loggedInUser, amsgs, adc);
+
+                    if (newCertifications.IsNotEmpty())
+                        profile.AddProperties(newCertifications, AccountPropertyType.Certification, loggedInUser, amsgs, adc);
+
+                    if (servicesOffered.IsNotEmpty())
+                        profile.ManageProperties(servicesOffered, AccountPropertyType.ServiceOffered, loggedInUser, amsgs, adc);
+
+                    if (timesOffered.IsNotEmpty())
+                        profile.ManageProperties(timesOffered, AccountPropertyType.TimeOffered, loggedInUser, amsgs, adc);
+
+                    if (pricingOptions.IsNotEmpty())
+                        profile.ManageProperties(pricingOptions, AccountPropertyType.PricingOption, loggedInUser, amsgs, adc);
+
+                    if (specialNeedsOfferings.IsNotEmpty())
+                        profile.ManageProperties(specialNeedsOfferings, AccountPropertyType.SpecialNeedsOffering, loggedInUser, amsgs, adc);
+
+                    if (classifications.IsNotEmpty())
+                        profile.ManageProperties(classifications.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.Classifications, loggedInUser, amsgs, adc);
+
+                    if (softskills.IsNotEmpty())
+                        profile.ManageProperties(softskills.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.SoftSkills, loggedInUser, amsgs, adc);
+
+                    if (academicsubjects.IsNotEmpty())
+                        profile.ManageProperties(academicsubjects.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.AcademicSubjects, loggedInUser, amsgs, adc);
+
+                    if (teachingmethods.IsNotEmpty())
+                        profile.ManageProperties(teachingmethods.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.TeachingMethods, loggedInUser, amsgs, adc);
+
+                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
+                dc: dc
+            );
+        }
+
         public static void UpdateProfile(this AccountProfile profile, string title = null, string headline = null, string about = null, string website = null, string opencovid = null, string elearningcenter = null, string mingrade = null, string maxgrade = null, string agestart = null, string ageend = null, string twitter = null, string facebook = null, string instagram = null, string linkedin = null, string youtube = null, string calendar = null, string genderrestriction = null, string profileemail = null, string profilephone = null, NameValueCollection savedAwards = null, NameValueCollection newAwards = null, NameValueCollection savedCertifications = null, NameValueCollection newCertifications = null, NameValueCollection servicesOffered = null, NameValueCollection timesOffered = null, NameValueCollection pricingOptions = null, NameValueCollection specialNeedsOfferings = null, string classifications = null, string softskills = null, string academicsubjects = null, string teachingmethods = null, string ahqapproved = null, string videoUrl = null, WebUser loggedInUser = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var account = profile.GetAccount(msgs, dc);

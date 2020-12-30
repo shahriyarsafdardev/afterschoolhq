@@ -8,6 +8,15 @@
     var showLocation = false;
     var hidePreciseLocation = false;
     var accountProfile = (AccountProfile)ViewBag.AccountProfile;
+    var instruction = "";
+    if (Model.ActivityLocationType == ActivityLocationType.Physical)
+    {
+        instruction = "In-Person Instruction";
+    }
+    else if (Model.ActivityLocationType == ActivityLocationType.Virtual)
+    {
+        instruction = "Virtual Instruction";
+    }
 
     if (Model.HidePreciseLocation)
     {
@@ -79,13 +88,13 @@
                                 if (Model.RestrictByGrade())
                                 {
                                     <span>
-                                       Grades @ParticipationObjectUI.PrintGradeLevels(Model) &bull;
+                                        Grades @ParticipationObjectUI.PrintGradeLevels(Model) &bull;
                                     </span>
                                 }
                                 else
                                 {
                                     <span>
-                                       Ages  @ParticipationObjectUI.PrintAges(Model) &bull;
+                                        Ages  @ParticipationObjectUI.PrintAges(Model) &bull;
                                     </span>
                                 }
 
@@ -105,7 +114,7 @@
                                    { "canRegisterFor", ViewBag.CanRegisterFor },
                                    { "session", session },
                                    { "accountprofile", ViewBag.AccountProfile }
-}
+                               }
                             );
                         }
                     </div>
@@ -124,65 +133,72 @@
                     </div>
                     <div class="col-lg-4 col-md-12">
 
+                        @if (instruction.IsNotEmpty())
+                        {
+                            <div class="activity-detail-block">
+                                <h3>@instruction</h3>
+                            </div>
+                        }
+
                         <div class="activity-detail-block">
                             @{ Html.RenderPartial("~/Views/Shared/ParticipationObject/_PaymentInfo.cshtml", Model); }
+
+
+                            @if (Model.IsActivityGroup() && Model.GetActivityGroup().IsInviteOnly)
+                            {
+                                <div class="activity-detail-block">
+                                    <strong>Registration unavailable: Requires Invite to Register</strong>
+                                </div>
+                            }
+
+                            @if (Model.Schedule.IsNotEmpty() || Model.StartDate.HasValue)
+                            {
+                                <div class="activity-detail-block">
+                                    <h3>Schedule</h3>
+
+                                    @if (Model.StartDate.HasValue && (!Model.EndDate.HasValue || Model.StartDate.Value.Date != Model.EndDate.Value.Date))
+                                    {
+                                        <p>
+                                            Starts: <strong>@Model.StartDate.Value.ToLongDateString()</strong><br />
+                                            @if (Model.EndDate.HasValue)
+                                            {
+                                                <span>
+                                                    Ends: <strong>@Model.EndDate.Value.ToLongDateString()</strong>
+                                                </span>
+                                            }
+                                        </p>
+                                    }
+
+                                    @if (Model.Schedule.IsNotEmpty())
+                                    {
+                                        <p>
+                                            @{ Html.RenderPartial("_ActivityScheduleHtml", Model.Schedule); }
+                                        </p>
+                                    }
+                                </div>
+                            }
+
+                            <div class="activity-detail-block">
+                                <h3>Contact</h3>
+                                <p>
+                                    @Model.ContactName.IfEmpty(Model.OwnerAccount.Name)<br />
+                                    @if (Model.ContactPhone.IfEmpty(Model.OwnerAccount.Phone).IsNotBlank())
+                                    {
+                                        <span>@Model.ContactPhone.IfEmpty(Model.OwnerAccount.Phone)</span><br />
+                                    }
+                                    <a href="mailto:@Model.ContactEmail.IfEmpty(Model.OwnerAccount.Email)">Send Email</a><br />
+                                </p>
+                            </div>
+
+                            @if (Model.RequiresParentalConsent)
+                            {
+                                <div class="activity-detail-block">
+                                    <strong>Requires Parental Consent</strong>
+                                </div>
+                            }
                         </div>
 
-                        @if (Model.IsActivityGroup() && Model.GetActivityGroup().IsInviteOnly)
-                        {
-                            <div class="activity-detail-block">
-                                <strong>Registration unavailable: Requires Invite to Register</strong>
-                            </div>
-                        }
-
-                        @if (Model.Schedule.IsNotEmpty() || Model.StartDate.HasValue)
-                        {
-                            <div class="activity-detail-block">
-                                <h3>Schedule</h3>
-
-                                @if (Model.StartDate.HasValue && (!Model.EndDate.HasValue || Model.StartDate.Value.Date != Model.EndDate.Value.Date))
-                                {
-                                    <p>
-                                        Starts: <strong>@Model.StartDate.Value.ToLongDateString()</strong><br />
-                                        @if (Model.EndDate.HasValue)
-                                        {
-                                            <span>
-                                                Ends: <strong>@Model.EndDate.Value.ToLongDateString()</strong>
-                                            </span>
-                                        }
-                                    </p>
-                                }
-
-                                @if (Model.Schedule.IsNotEmpty())
-                                {
-                                    <p>
-                                        @{ Html.RenderPartial("_ActivityScheduleHtml", Model.Schedule); }
-                                    </p>
-                                }
-                            </div>
-                        }
-
-                        <div class="activity-detail-block">
-                            <h3>Contact</h3>
-                            <p>
-                                @Model.ContactName.IfEmpty(Model.OwnerAccount.Name)<br />
-                                @if (Model.ContactPhone.IfEmpty(Model.OwnerAccount.Phone).IsNotBlank())
-                                {
-                                    <span>@Model.ContactPhone.IfEmpty(Model.OwnerAccount.Phone)</span><br />
-                                }
-                                <a href="mailto:@Model.ContactEmail.IfEmpty(Model.OwnerAccount.Email)">Send Email</a><br />
-                            </p>
-                        </div>
-
-                        @if (Model.RequiresParentalConsent)
-                        {
-                            <div class="activity-detail-block">
-                                <strong>Requires Parental Consent</strong>
-                            </div>
-                        }
                     </div>
-
-                </div>
 
                 <div class="row">
                     <div class="margin-b-20">
