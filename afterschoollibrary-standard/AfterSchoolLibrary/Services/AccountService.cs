@@ -2832,9 +2832,18 @@ namespace AfterSchoolLibrary.Services
             if (checkoutObject.Registration.IsNotEmpty())
             {
                 registrant = checkoutObject.Registration.GetRegistrant(msgs, dc);
-
-                // need to check for existing purchase or create a new one
-                checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc);
+                
+                if (checkoutObject.PostPayPlan.IsNotEmpty())
+                {
+                    //.. we will need to add purchase for post pay, so no need to check existing schenario
+                    checkoutObject.CreatePurchase(loggedInUser, msgs, dc);
+                } 
+                else
+                {
+                    // need to check for existing purchase or create a new one
+                    checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc);
+                }
+                
             }
 
             // charge successful so I need to create a transaction
@@ -3154,6 +3163,7 @@ namespace AfterSchoolLibrary.Services
                 paymentTypeFeePaid,
                 checkoutObject.ConvenienceFeePayer,
                 checkoutObject.CreditCardFeePayer,
+                checkoutObject.Coupon,
                 loggedInUser, 
                 msgs, 
                 dc);
@@ -3572,7 +3582,7 @@ namespace AfterSchoolLibrary.Services
                     if (coupon.DoesApplyToSubscriptionPlan() && !participationObject.SubscriptionPlans.Any())
                         msgs.Add("Coupon can only be applied to a subscription", MessageType.UserError);
 
-                    if (coupon.HasReachedLimit(payerAccount.ID.Value, msgs, dc))
+                    if (coupon.HasReachedLimit(payerAccount.ID.Value, participationObject.PostPayPlans.IsNotEmpty(), msgs, dc))
                         msgs.Add("Coupon has reached the limit of uses", MessageType.UserError);
 
                 }

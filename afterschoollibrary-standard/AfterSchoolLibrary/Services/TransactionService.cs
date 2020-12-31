@@ -173,6 +173,17 @@ namespace AfterSchoolLibrary.Services
         {
             var useConnectedAccount = checkoutObject.BillingAccount.UseStripeConnectDuringCheckout(msgs, dc);
             var usePlatformFees = useConnectedAccount && !checkoutObject.OverrideAmount.HasValue;
+            var couponValue = new decimal?();
+
+            if (checkoutObject.PostPayPlan.IsNotEmpty())
+            {
+                //.. if post pay plan, then we will have coupon value in registration to discount and pass that to transaction to keep record.
+                couponValue = checkoutObject.Registration.CouponValue;
+            }
+            else if (checkoutObject.Coupon.IsNotEmpty())
+            {
+                couponValue = checkoutObject.CouponValue(msgs, dc);
+            }
 
             return CreateNew(
                 checkoutObject.PayingAccount,
@@ -194,7 +205,7 @@ namespace AfterSchoolLibrary.Services
                 checkoutObject.Date,
                 useConnectedAccount,
                 loggedInUser,
-                checkoutObject.Coupon.IsNotEmpty() ? checkoutObject.CouponValue(msgs, dc) : new decimal?(),
+                couponValue,
                 checkoutObject.Coupon,
                 msgs,
                 dc);

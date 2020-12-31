@@ -505,6 +505,15 @@ namespace AfterSchoolLibrary.Models
             return GetPlatformFlatFee(msgs, dc);
         }
 
+        public Purchase CreatePurchase(WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            this.Purchase = AccountService.AddPurchase(this, loggedInUser, msgs, dc);
+            this.Registration.PurchaseId = this.Purchase.ID;
+            msgs.AddRange(this.Registration.Save(dc));
+
+            return this.Purchase;
+        }
+
         public Purchase CreateOrUpdatePurchase(WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (this.Purchase.IsEmpty())

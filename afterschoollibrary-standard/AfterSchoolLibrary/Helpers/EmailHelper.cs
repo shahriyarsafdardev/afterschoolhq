@@ -916,7 +916,6 @@ namespace AfterSchoolLibrary.Helpers
             var account = activity.GetAccount(msgs, dc);
             var isAfterSchool = account.IsAfterSchool;
 
-
             var receiptRows = "";
             decimal totalAttendanceCharge = 0;
             int totalNumberPresent = 0;
@@ -927,12 +926,16 @@ namespace AfterSchoolLibrary.Helpers
                 var attendance = attendanceRegistrantActivityCount.Key;
                 var attendanceCount = attendanceRegistrantActivityCount.Value;
                 var totalCharge = attendanceCount * costPerClass;
+                var couponDiscount = new decimal?();
+
+               //.. todo: get coupon discount and prepare calculation
 
                 var attendanceModel = new NameValueCollection() 
                 {
                     { "AttendanceDate", attendance.Date.ToShortDateTimeString() },
                     { "NumberPresent",  attendanceCount.ToString() },
-                    { "TotalCharge", totalCharge.ToCurrency() }
+                    { "TotalCharge", totalCharge.ToCurrency() },
+                    { "CouponDiscount", couponDiscount.ToCurrency() }
                 };
 
                 receiptRows += ProcessTemplate(
@@ -944,8 +947,6 @@ namespace AfterSchoolLibrary.Helpers
                 totalAttendanceCharge += totalCharge;
                 totalNumberPresent += attendanceCount;
             });
-
-
 
             var attendanceChargeTableModel = new NameValueCollection()
             {

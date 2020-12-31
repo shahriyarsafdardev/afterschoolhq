@@ -454,7 +454,7 @@ namespace AfterSchool.Areas.Org.Controllers
             try
             {
                 var activities = Activity.LoadByAccountId(SessionVariables.CurrentAccount.ID.Value, msgs)
-                .Where(activity => activity.IsOpenOrUpcoming(msgs) && activity.HasRegistrationFeeOnly)
+                .Where(activity => activity.IsOpenOrUpcoming(msgs) && activity.HasRegistrationFeeAndPostPayPlan)
                 .Select(m => new ModalViewModel()
                 {
                     ID = m.ID.Value.ToString(),

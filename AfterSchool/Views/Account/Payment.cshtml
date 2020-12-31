@@ -261,9 +261,8 @@
                         <span class="total-due-today"></span>
                     </div>
 
-                    if (participationObject.Cost > 0 && 
-                        participationObject.SubscriptionPlans.Count <= 0 && 
-                        participationObject.PostPayPlans.Count <= 0 && 
+                    if ((participationObject.Cost > 0 || postPayPlan.IsNotEmpty()) &&
+                        participationObject.SubscriptionPlans.Count <= 0 &&
                         participationObject.PaymentPlans.Count <= 0)
                     {
                         <div class="row text-center padding-v-20">       

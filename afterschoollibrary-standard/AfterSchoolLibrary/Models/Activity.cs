@@ -771,11 +771,11 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-		public bool HasRegistrationFeeOnly
+		public bool HasRegistrationFeeAndPostPayPlan
 		{
 			get
 			{
-				return this.CostPerRegistrant.HasValue && this.CostPerRegistrant.Value > 0 && !this.HasSubscriptionPlan() && !this.HasPaymentPlan() && !this.HasPostPayPlan();
+				return (this.CostPerRegistrant.HasValue && this.CostPerRegistrant.Value > 0 || this.HasPostPayPlan()) && !this.HasSubscriptionPlan() && !this.HasPaymentPlan() ;
 			}
 		}
 

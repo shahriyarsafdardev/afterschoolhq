@@ -647,6 +647,7 @@ namespace AfterSchool.Controllers
                 paymentPlan = SubscriptionPlan.Load(paymentoption.ToInteger(), msgs);
 
             var subscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault();
+            var postPayPlan = participationObject.PostPayPlans.FirstOrDefault();
 
             var coupon = currentAccount.ValidateCoupon(participationObject, couponcode, msgs);
             var amount = participationObject.Cost.Value;
@@ -659,6 +660,7 @@ namespace AfterSchool.Controllers
 
             int numberInMonths = 0;
             decimal subscriptionPlanAmount = 0;
+            decimal postPayPlanAmount = 0;
             var discountString = "";
 
             // If coupon is valid we update the amount shown to the user here
@@ -681,6 +683,9 @@ namespace AfterSchool.Controllers
             if (subscriptionPlan.IsNotEmpty())
                 subscriptionPlanAmount = subscriptionPlan.CostPerPeriod.Value;
 
+            if (postPayPlan.IsNotEmpty())
+                postPayPlanAmount = postPayPlan.CostPerPeriod.Value;
+
             var status = "error";
 
             if (msgs.HasNoErrors())
@@ -689,7 +694,7 @@ namespace AfterSchool.Controllers
                 msgs.Add("Coupon has successfuly been applied", MessageType.Success);
             }
                    
-            return Json(new { status, coupon, amount, calculatedAmountCC, calculatedAmountACH, calculatedCCFee, numberInMonths, subscriptionPlanAmount, discountString, messages = msgs }, JsonRequestBehavior.AllowGet);
+            return Json(new { status, coupon, amount, calculatedAmountCC, calculatedAmountACH, calculatedCCFee, numberInMonths, subscriptionPlanAmount, postPayPlanAmount, discountString, messages = msgs }, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult SubmitContactForm(string name, string email, string message, string g_recaptcha_response)

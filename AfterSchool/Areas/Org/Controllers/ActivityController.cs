@@ -1362,6 +1362,10 @@ namespace AfterSchool.Areas.Org.Controllers
                         var availablePrePayments = registration.GetAvailablePrePayments(activity, msgs);
                         var attendanceDaysToCharge = Math.Max(0, raAttendances.Count - availablePrePayments.Count);
                         CheckoutObject checkoutObject = null;
+                        var coupon = new Coupon();
+
+                        if (registration.CouponId.HasValue)
+                            coupon = Coupon.Load(registration.CouponId.Value);
 
                         if (attendanceDaysToCharge > 0)
                         {
@@ -1373,9 +1377,20 @@ namespace AfterSchool.Areas.Org.Controllers
                             else
                                 creditCardPurchaseObject = new CreditCardPurchaseObject { StripeSourceId = registration.StripeSourceId };
 
+                            var postPayPlan = activity.GetPostPayPlan(msgs);
+                            var overrideAmount = costPerAttendance * attendanceDaysToCharge;
+
+                            if (postPayPlan.IsNotEmpty())
+                            {
+                                //.. if post pay plan, then we will have coupon value in registration to discount.
+                                var couponDiscount = attendanceDaysToCharge * (registration.CouponValue.HasValue ? registration.CouponValue.Value : 0);
+                                overrideAmount = costPerAttendance - couponDiscount;
+                            }                          
+
                             checkoutObject = new CheckoutObject()
                             {
-                                OverrideAmount = costPerAttendance * attendanceDaysToCharge,
+                                Coupon = coupon,
+                                OverrideAmount = overrideAmount,
                                 ConvenienceFeeOverrideAmount = registration.ConvenienceFeePaid.IfEmpty(0) * attendanceDaysToCharge,
                                 PaymentTypeFeeOverrideAmount = registration.PaymentTypeFeePaid.IfEmpty(0) * attendanceDaysToCharge,
                                 PayingAccount = masterRegistrantAccount,
@@ -1392,7 +1407,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                 ParticipationObject = activity.GetParticipationObject(msgs),
                                 Quantity = attendanceDaysToCharge,
                                 Registration = registration,
-                                PostPayPlan = activity.GetPostPayPlan(msgs),
+                                PostPayPlan = postPayPlan,
                             };
 
                             if (msgs.HasNoErrors())
