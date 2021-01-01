@@ -244,6 +244,9 @@ namespace AfterSchoolLibrary.Models
             if (activity.IsConvenienceFeeTakenOutOfCost)
                 return RegistrationCostNoFees;
 
+            if (PostPayPlan.IsNotEmpty())
+                return ParticipationObject.GetPostPayCheckoutCostWithoutConvenienceFee();
+
             return RegistrationCostNoFees + GetRegistrationConvenienceFee(msgs, dc);
         }
 
@@ -431,13 +434,21 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetPostPayPlanCostTodayWithFees()
         {
-            return GetPostPayPlanCostTodayWithConvenienceFee() +
+            return GetPostPayPlanCostTodayWithConvenienceFeeAndCouponDiscount() +
                     GetPostPayPlanCostTodayCreditCardFee();
         }
 
         public decimal GetPostPayPlanCostTodayWithConvenienceFee()
         {
             return ParticipationObject.GetPostPayCheckoutCostWithConvenienceFee();
+        }
+
+        public decimal GetPostPayPlanCostTodayWithConvenienceFeeAndCouponDiscount()
+        {
+            var couponDiscount = CouponValue();
+            var costWithDiscount = ParticipationObject.GetPostPayCheckoutCostWithoutConvenienceFee() - couponDiscount;
+            var convenienceFee = ParticipationObject.GetCheckoutPostPayConvenienceFee();
+            return Math.Max(costWithDiscount + convenienceFee, 0);
         }
 
         public decimal GetPostPayPlanCostTodayCreditCardFee()
@@ -503,15 +514,6 @@ namespace AfterSchoolLibrary.Models
                 return 0;
 
             return GetPlatformFlatFee(msgs, dc);
-        }
-
-        public Purchase CreatePurchase(WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            this.Purchase = AccountService.AddPurchase(this, loggedInUser, msgs, dc);
-            this.Registration.PurchaseId = this.Purchase.ID;
-            msgs.AddRange(this.Registration.Save(dc));
-
-            return this.Purchase;
         }
 
         public Purchase CreateOrUpdatePurchase(WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)

@@ -2833,16 +2833,16 @@ namespace AfterSchoolLibrary.Services
             {
                 registrant = checkoutObject.Registration.GetRegistrant(msgs, dc);
                 
-                if (checkoutObject.PostPayPlan.IsNotEmpty())
-                {
-                    //.. we will need to add purchase for post pay, so no need to check existing schenario
-                    checkoutObject.CreatePurchase(loggedInUser, msgs, dc);
-                } 
-                else
-                {
+                //if (checkoutObject.PostPayPlan.IsNotEmpty())
+                //{
+                //    //.. we will need to add purchase for post pay, so no need to check existing schenario
+                //    checkoutObject.CreatePurchase(loggedInUser, msgs, dc);
+                //} 
+                //else
+                //{
                     // need to check for existing purchase or create a new one
                     checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc);
-                }
+                //}
                 
             }
 

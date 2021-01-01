@@ -133,6 +133,11 @@ namespace AfterSchoolLibrary.Models
             return GetCostWithConvenienceFee() + (paymentType == PaymentType.CreditCard ? GetCreditCardFee() : 0);
         }
 
+        public decimal GetFinalTotalCostForPostPay(PaymentType paymentType)
+        {            
+            return Math.Ceiling(Cost + (paymentType == PaymentType.CreditCard ? GetCreditCardFee() : 0));
+        }
+
         public decimal GetAmountToProvider()
         {
             if (IsConvenienceFeeTakenOutOfCost)

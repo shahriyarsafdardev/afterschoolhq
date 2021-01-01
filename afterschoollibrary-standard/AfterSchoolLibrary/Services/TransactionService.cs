@@ -175,15 +175,15 @@ namespace AfterSchoolLibrary.Services
             var usePlatformFees = useConnectedAccount && !checkoutObject.OverrideAmount.HasValue;
             var couponValue = new decimal?();
 
-            if (checkoutObject.PostPayPlan.IsNotEmpty())
-            {
-                //.. if post pay plan, then we will have coupon value in registration to discount and pass that to transaction to keep record.
-                couponValue = checkoutObject.Registration.CouponValue;
-            }
-            else if (checkoutObject.Coupon.IsNotEmpty())
-            {
+            //if (checkoutObject.PostPayPlan.IsNotEmpty())
+            //{
+            //    //.. if post pay plan, then we will have coupon value in registration to discount and pass that to transaction to keep record.
+            //    couponValue = checkoutObject.Registration.CouponValue;
+            //}
+            //else if (checkoutObject.Coupon.IsNotEmpty())
+            //{
                 couponValue = checkoutObject.CouponValue(msgs, dc);
-            }
+            //}
 
             return CreateNew(
                 checkoutObject.PayingAccount,

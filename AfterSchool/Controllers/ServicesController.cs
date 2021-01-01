@@ -651,6 +651,14 @@ namespace AfterSchool.Controllers
 
             var coupon = currentAccount.ValidateCoupon(participationObject, couponcode, msgs);
             var amount = participationObject.Cost.Value;
+
+            if (postPayPlan.IsNotEmpty())
+            {
+                //..TODO: reiview this logic
+                //amount = participationObject.GetCheckoutCostWithConvenienceFee() - participationObject.GetCheckoutPostPayConvenienceFee();
+                amount = participationObject.GetCheckoutCostWithConvenienceFee();
+            }
+            
             var feeCalcObject = new FeeCalculationObject(amount, participationObject.OwnerAccount, msgs);
            
             // These amounts will either be the regular price or the discounted price, but we always return a value to update the UI
@@ -668,7 +676,14 @@ namespace AfterSchool.Controllers
             {
                 var couponValue = coupon.GetValue(amount);
                 var discountedFeeCalcObject = new FeeCalculationObject(amount - couponValue, participationObject.OwnerAccount, msgs);
-                calculatedAmountACH = discountedFeeCalcObject.GetFinalTotalCost(PaymentType.ACH);
+
+                //.. since this will be a post pay pre payment, we'll have already applied all the charges upfornt when adding activity.
+                //.. TODO: review this logic once with darye
+                if (postPayPlan.IsNotEmpty())
+                    calculatedAmountACH = discountedFeeCalcObject.GetFinalTotalCostForPostPay(PaymentType.ACH);
+                else
+                    calculatedAmountACH = discountedFeeCalcObject.GetFinalTotalCost(PaymentType.ACH);                    
+
                 calculatedAmountCC = discountedFeeCalcObject.GetFinalTotalCost(PaymentType.CreditCard);
                 calculatedCCFee = discountedFeeCalcObject.GetCreditCardFee();
                 discountString = coupon.GetDiscountString();

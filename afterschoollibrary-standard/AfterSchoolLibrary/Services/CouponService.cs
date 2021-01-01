@@ -100,17 +100,15 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static int GetNumberOfUses(this Coupon coupon)
-        {
-            //.. for post pay plan we will get disctinct registration as we can have multiple purchase for same coupon
-            var purchase = Purchase.LoadByCouponId(coupon.ID.Value);            
-            return purchase.DistinctBy(m => m.RegistrantId).Count(); 
+        {            
+            var purchase = Purchase.LoadByCouponId(coupon.ID.Value);              
+            return purchase.DistinctBy(m => m.RegistrationId).Count(); 
         }
 
         public static int GetNumberOfUsesByPurchaseAccount(this Coupon coupon, int PurchaserAccountId, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            //.. for post pay plan we will get disctinct registration as we can have multiple purchase for same coupon
+        {            
             var purchase = Purchase.LoadByCouponIdByPurchaseAccountId(coupon.ID.Value, PurchaserAccountId, msgs, dc);
-            return purchase.DistinctBy(m => m.RegistrantId).Count();
+            return purchase.DistinctBy(m => m.RegistrationId).Count();
         }
 
         public static bool DoesApplyToRegistrationFee(this Coupon coupon)
