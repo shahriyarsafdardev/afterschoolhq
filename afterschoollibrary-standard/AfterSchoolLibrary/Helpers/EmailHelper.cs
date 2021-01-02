@@ -909,7 +909,7 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
-        public static void SendAttendanceChargeConfirmation(Dictionary<Attendance, int> attendanceRegistrantActivityCounts, Activity activity, decimal costPerClass, string customMessage, WebUser loggedInUser, bool sendBcc, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void SendAttendanceChargeConfirmation(Dictionary<Attendance, int> attendanceRegistrantActivityCounts, Activity activity, decimal costPerClass, decimal couponDiscount, string customMessage, WebUser loggedInUser, bool sendBcc, SystemMessages msgs, DatabaseConnection dc = null)
         {
             msgs = msgs ?? new SystemMessages();
 
@@ -926,16 +926,16 @@ namespace AfterSchoolLibrary.Helpers
                 var attendance = attendanceRegistrantActivityCount.Key;
                 var attendanceCount = attendanceRegistrantActivityCount.Value;
                 var totalCharge = attendanceCount * costPerClass;
-                var couponDiscount = new decimal?();
+                var totalDiscount = attendanceCount * couponDiscount;
 
-               //.. todo: get coupon discount and prepare calculation
+                //.. todo: get coupon discount and prepare calculation
 
                 var attendanceModel = new NameValueCollection() 
                 {
                     { "AttendanceDate", attendance.Date.ToShortDateTimeString() },
                     { "NumberPresent",  attendanceCount.ToString() },
                     { "TotalCharge", totalCharge.ToCurrency() },
-                    { "CouponDiscount", couponDiscount.ToCurrency() }
+                    { "CouponDiscount", totalDiscount.ToCurrency() }
                 };
 
                 receiptRows += ProcessTemplate(
@@ -944,7 +944,7 @@ namespace AfterSchoolLibrary.Helpers
                         "Attendance_Charge_Confirmation_Rows-1.1",
                         msgs);
 
-                totalAttendanceCharge += totalCharge;
+                totalAttendanceCharge += (totalCharge - totalDiscount);
                 totalNumberPresent += attendanceCount;
             });
 
@@ -1021,20 +1021,58 @@ namespace AfterSchoolLibrary.Helpers
 
             var receiptRows = "";
 
-            // add registration fee row
-            var paymentModel = new NameValueCollection()
-                                {
-                                    { "Description", description },
-                                    { "Quantity", quantity },
-                                    { "Cost", totalCost.ToCurrency() },
-                                    { "AdditionalDetails", "" }
-                                };
+            if (checkoutObject.Coupon.IsNotEmpty() && checkoutObject.Coupon.ID.IsNotEmpty() && checkoutObject.Coupon.DoesApplyToRegistrationFee())
+            {
+                var cost = checkoutObject.ParticipationObject.GetPostPayCostWithConvenienceFee();               
+                var couponValue = checkoutObject.Coupon.GetValue(checkoutObject.ParticipationObject.GetPostPayCost());                
 
-            receiptRows += ProcessTemplate(
-                    EmailTemplates.Registration_Confirmation_Rows,
-                    paymentModel,
-                    "Registration_Confirmation_Rows",
-                    msgs);
+                // add registration fee row
+                var paymentModel = new NameValueCollection()
+                            {
+                                { "Description", description },
+                                { "Quantity", quantity },
+                                { "Cost", cost.ToCurrency() },
+                                { "AdditionalDetails", "" }
+                            };
+
+                receiptRows += ProcessTemplate(
+                        EmailTemplates.Registration_Confirmation_Rows,
+                        paymentModel,
+                        "Registration_Confirmation_Rows",
+                        msgs);
+
+                // add coupon discount row
+                var couponDiscountModel = new NameValueCollection()
+                                            {
+                                                { "Description", $"Coupon {checkoutObject.Coupon.Name} Applied" },
+                                                { "Quantity",  "1"},
+                                                { "Cost", couponValue.ToCurrency() },
+                                                { "AdditionalDetails", $"{(checkoutObject.Coupon.GetDiscountString())} discount applied." }
+                                            };
+
+                receiptRows += ProcessTemplate(
+                                EmailTemplates.Registration_Confirmation_Rows,
+                                couponDiscountModel,
+                                "Registration_Confirmation_Rows",
+                                msgs);
+            }
+            else
+            {
+                // add registration fee row
+                var paymentModel = new NameValueCollection()
+                            {
+                                { "Description", description },
+                                { "Quantity", quantity },
+                                { "Cost", totalCost.ToCurrency() },
+                                { "AdditionalDetails", "" }
+                            };
+
+                receiptRows += ProcessTemplate(
+                        EmailTemplates.Registration_Confirmation_Rows,
+                        paymentModel,
+                        "Registration_Confirmation_Rows",
+                        msgs);
+            }
 
             var registrationTable = ProcessTemplate(
                                      EmailTemplates.Registration_Confirmation_Table,

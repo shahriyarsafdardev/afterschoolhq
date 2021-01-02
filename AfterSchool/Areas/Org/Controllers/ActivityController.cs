@@ -1462,10 +1462,12 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 // Send summary email of charged AttendanceRegistrants to Activity Provider if there were any successful charges
                 var attendanceRegistrantAcitivtyCounts = GetAttendanceRegistrantActivityCounts(selectedAttendances, registrantActivities, msgs);
-                var costPerClass = registrantActivities.First().GetRegistration(msgs).CostPerClass.HasValue ? registrantActivities.First().GetRegistration(msgs).CostPerClass.Value : 0;
+                var objRegistration = registrantActivities.First().GetRegistration(msgs);
+                var costPerClass = objRegistration.CostPerClass.HasValue ? objRegistration.CostPerClass.Value : 0;
+                var couponValue = objRegistration.CouponValue.HasValue ? objRegistration.CouponValue.Value : 0;
 
                 if (attendanceRegistrantAcitivtyCounts.Count > 0)
-                    AfterSchoolLibrary.Helpers.EmailHelper.SendAttendanceChargeConfirmation(attendanceRegistrantAcitivtyCounts, activity, costPerClass, null, SessionVariables.CurrentUser, false, msgs);
+                    EmailHelper.SendAttendanceChargeConfirmation(attendanceRegistrantAcitivtyCounts, activity, costPerClass, couponValue, null, SessionVariables.CurrentUser, false, msgs);
                     
             }
 

@@ -660,11 +660,18 @@ namespace AfterSchool.Controllers
             }
             
             var feeCalcObject = new FeeCalculationObject(amount, participationObject.OwnerAccount, msgs);
-           
+
             // These amounts will either be the regular price or the discounted price, but we always return a value to update the UI
             var calculatedAmountACH = feeCalcObject.GetFinalTotalCost(PaymentType.ACH);
             var calculatedAmountCC = feeCalcObject.GetFinalTotalCost(PaymentType.CreditCard);
             var calculatedCCFee = feeCalcObject.GetCreditCardFee();
+
+            if (postPayPlan.IsNotEmpty())
+            {
+                calculatedAmountACH = amount;
+                calculatedAmountCC = amount + participationObject.GetCheckoutPostPayCreditCardFee();
+                calculatedCCFee = participationObject.GetCheckoutPostPayCreditCardFee();
+            }
 
             int numberInMonths = 0;
             decimal subscriptionPlanAmount = 0;

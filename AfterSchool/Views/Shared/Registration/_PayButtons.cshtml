@@ -583,20 +583,18 @@
 
                     //.. calculated this value on back end side and updated the UI on the fly
                     // if coupon is invalid amounts will be regular amount of activity
-                    if (data.postPayPlanAmount <= 0) { //.. post pay plan is not aplied and it's only a registration fee
-                        if (data.calculatedAmountCC == 0 && data.calculatedAmountACH == 0 && data.calculatedCCFee == 0) {
-                            $('#payment-info-ach').hide()
-                            $('#payment-info').hide()
-                            $('#payment-for-zero-checkout').show();
-                        } else {
-                            $('#payment-for-zero-checkout').hide();
-                            $('#payment-info-ach').show()
-                            $('#payment-info').show()
+                    if (data.postPayPlanAmount <= 0 && data.calculatedAmountCC == 0 && data.calculatedAmountACH == 0 && data.calculatedCCFee == 0) {
+                        $('#payment-info-ach').hide()
+                        $('#payment-info').hide()
+                        $('#payment-for-zero-checkout').show();
+                    } else {
+                        $('#payment-for-zero-checkout').hide();
+                        $('#payment-info-ach').show()
+                        $('#payment-info').show()
 
-                            updateTotalsCC(data.calculatedAmountCC, 0);
-                            updateTotalsACH(data.calculatedAmountACH, 0);
-                            updateCC(data.calculatedCCFee);
-                        }
+                        updateTotalsCC(data.calculatedAmountCC, 0);
+                        updateTotalsACH(data.calculatedAmountACH, 0);
+                        updateCC(data.calculatedCCFee);
                     }
                
                     if (data && data.status == 'ok') {
