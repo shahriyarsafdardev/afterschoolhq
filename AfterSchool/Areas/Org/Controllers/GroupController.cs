@@ -459,9 +459,39 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Messages(string id)
+        public ActionResult Messages(string id, string pn, string rpp)
         {
             var group = ActivityGroup.LoadByUid(id.ToGuid());
+
+            int pageNumber = 1;
+            int recordsPerPage = 10;
+
+            if (pn.IsNumber() && pn.ToInteger() > 0)
+            {
+                pageNumber = pn.ToInteger();
+            }
+            if (rpp.IsNumber() && rpp.ToInteger() > 0)
+            {
+                recordsPerPage = rpp.ToInteger();
+            }
+
+            var start = recordsPerPage * (pageNumber - 1);
+            var length = recordsPerPage;
+            var totalCount = 0;
+
+            var contacts = group.GetInvitedContacts(start, length);
+            totalCount = group.GetInvitedContactCount();
+
+            var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
+
+            ViewBag.PagingModel = new PagingModel()
+            {
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                RecordsPerPage = recordsPerPage,
+                TotalPages = totalPages
+            };
+
             ViewBag.Messages = new SystemMessages();
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             return View(group);
