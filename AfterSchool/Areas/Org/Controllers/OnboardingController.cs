@@ -473,8 +473,9 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors() && account.IsNotEmpty() && currentUser.IsNotEmpty())
             {
+                //.. send support email to AHQ just to notifiy the team that a profile completed.
                 EmailHelper.SendEmail(
-                    AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress,
+                    AfterSchoolLibrary.Helpers.Email.AppCustomersEmailAddress,
                     $"AHQ Profile Completed - {account.Name}",
                     $"<p>Organization: {account.Name}<br />Name: {currentUser.FirstName} {currentUser.LastName}<br />Email: {currentUser.Email}<br />Profile Link: {account.HomePageUrl}</p>",
                     true);

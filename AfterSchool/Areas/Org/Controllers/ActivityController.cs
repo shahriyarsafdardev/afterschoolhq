@@ -1831,7 +1831,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         body += $"Activity Start Date: {registrationDate.StartDateTime} <br />";
 
                     EmailHelper.SendEmail(
-                        toEmail: AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress,
+                        toEmail: AfterSchoolLibrary.Helpers.Email.AppCustomersEmailAddress,
                         subject: $"{account.Name} has published a new Activity: {activity.Name}",
                         body,
                         isAfterSchool: true);

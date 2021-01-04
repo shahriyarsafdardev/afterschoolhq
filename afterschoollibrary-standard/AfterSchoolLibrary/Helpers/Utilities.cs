@@ -1993,6 +1993,15 @@ namespace AfterSchoolLibrary.Helpers
                 return $"noreply@{SenderHostName}";
             }
         }
+
+        public static string AppCustomersEmailAddress
+        {
+            get
+            {
+                return $"{(Utilities.IsProduction ? "customers" : "dev")}@{ReplyHostName}";
+            }
+        }
+
         public static string AppEmailFromName(bool isAfterSchool)
         {
             return Utilities.AppName(isAfterSchool);
