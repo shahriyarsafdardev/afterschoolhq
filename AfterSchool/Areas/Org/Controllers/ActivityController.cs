@@ -253,7 +253,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "registrationclosetime", registrationclosetime },
                     { "timezone", timezone },
                     { "form", form },
-                    { "regmode", regmode },
+                    { "regmode", regmode.IsNotEmpty() ? regmode : ((int)RegistrationMode.Register).ToString() },
                     { "group", group },
                     { "type", type },
                     { "inviteonly", inviteonly.IsBoolean().ToString() },
