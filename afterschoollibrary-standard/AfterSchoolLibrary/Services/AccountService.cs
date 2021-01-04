@@ -2832,18 +2832,7 @@ namespace AfterSchoolLibrary.Services
             if (checkoutObject.Registration.IsNotEmpty())
             {
                 registrant = checkoutObject.Registration.GetRegistrant(msgs, dc);
-                
-                //if (checkoutObject.PostPayPlan.IsNotEmpty())
-                //{
-                //    //.. we will need to add purchase for post pay, so no need to check existing schenario
-                //    checkoutObject.CreatePurchase(loggedInUser, msgs, dc);
-                //} 
-                //else
-                //{
-                    // need to check for existing purchase or create a new one
-                    checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc);
-                //}
-                
+                checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc);                
             }
 
             // charge successful so I need to create a transaction

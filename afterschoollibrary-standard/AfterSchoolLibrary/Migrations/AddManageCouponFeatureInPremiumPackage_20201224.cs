@@ -1,7 +1,7 @@
 ﻿using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using System.Collections;
 using System.Linq;
 
 namespace AfterSchoolLibrary.Migrations
@@ -19,7 +19,7 @@ namespace AfterSchoolLibrary.Migrations
 
                     foreach (var package in packages.Where(m => m.Name.ToLower().Contains("premium")))
                     {
-                        PackageFeature.AddPackageFeature(PackageId: package.ID, featureTypeId: FeatureType.ManageCoupons, maxValue: 1, loggedInUser: loggedInUser, msgs: amsgs, dc: adc);
+                        PackageFeatureService.AddPackageFeature(PackageId: package.ID, featureTypeId: FeatureType.ManageCoupons, maxValue: 1, loggedInUser: loggedInUser, msgs: amsgs, dc: adc);
                     }
                 },
                 uniqueIdenfier: "AddManageCouponFeatureInPremiumPackage_20201224",

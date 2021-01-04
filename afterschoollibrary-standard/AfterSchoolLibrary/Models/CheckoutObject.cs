@@ -434,16 +434,11 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetPostPayPlanCostTodayWithFees()
         {
-            return GetPostPayPlanCostTodayWithConvenienceFeeAndCouponDiscount() +
+            return GetPostPayPlanCostTodayWithConvenienceFee() +
                     GetPostPayPlanCostTodayCreditCardFee();
         }
 
         public decimal GetPostPayPlanCostTodayWithConvenienceFee()
-        {
-            return ParticipationObject.GetPostPayCheckoutCostWithConvenienceFee();
-        }
-
-        public decimal GetPostPayPlanCostTodayWithConvenienceFeeAndCouponDiscount()
         {
             var couponDiscount = CouponValue();
             var costWithDiscount = ParticipationObject.GetPostPayCheckoutCostWithoutConvenienceFee() - couponDiscount;
