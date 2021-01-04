@@ -26,8 +26,10 @@
     }
 
     .btn-upgrade-plan {
-        margin-top: 25px;
-        font-size: 15px;
+        margin: 25px 10px 10px 10px;
+        font-weight: bold;
+        border-radius: 7px;
+        display: block;
     }
 
     .main-content-new {
@@ -53,10 +55,6 @@
     .datetimepicker-mobile {
         padding-left: 0 !important;
         padding-right: 0 !important;
-    }
-
-    .btn-upgrade-plan {       
-        margin-bottom: 5px !important;
     }
 
     .margin-left-sm {

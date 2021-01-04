@@ -380,3 +380,10 @@
 .badge-blue {
     background-color: darkslateblue;
 }
+
+.btn-upgrade-plan {
+    padding: 12px 30px;
+    box-shadow: 0 0 4px 0px #555555;
+    background-color: #c3eae0;
+    border-color: #c3eae0;
+}
