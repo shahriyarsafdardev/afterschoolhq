@@ -101,7 +101,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         account.OnboardingStepDone = OnboardingStepType.ProgramInfo;
                         amsgs.AddRange(account.Save(adc));
 
-                        profile.UpdateProfile(
+                        profile.UpdateProfileProgramInfo(
                             title: title,
                             headline: headline,                            
                             genderrestriction: genderrestrictions,
@@ -175,7 +175,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         account.OnboardingStepDone = OnboardingStepType.AdditionalInfo;
                         amsgs.AddRange(account.Save(adc));
 
-                        profile.UpdateProfile(
+                        profile.UpdateProfileAdditionalInfo(
                             mingrade: mingrade.IsInteger() ? mingrade.ToInteger() : 0,
                             maxgrade: maxgrade.IsInteger() ? maxgrade.ToInteger() : 0,
                             agestart: agestart.IsInteger() ? agestart.ToInteger() : 0,
@@ -254,9 +254,11 @@ namespace AfterSchool.Areas.Org.Controllers
                         account.OnboardingStepDone = OnboardingStepType.ContactInfo;
                         amsgs.AddRange(account.Save(adc));
 
-                        profile.UpdateProfile(
+                        profile.UpdateProfileContactinfo(
                             profileemail: publicemail.IsBoolean() ? email : null,
-                            profilephone: publicphone.IsBoolean() ? extractedPhoneNumber : null
+                            profilephone: publicphone.IsBoolean() ? extractedPhoneNumber : null,
+                            msgs: msgs,
+                            dc: adc
                         );
 
                         profile.AddNewLocation(
@@ -304,6 +306,14 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
+            var profile = account.GetOrCreateAccountProfile(SessionVariables.CurrentUser, msgs);
+            var ah = AfterSchoolLibrary.Helpers.Utilities.GetNewAmazonHelper();
+
+            if (profile.Logo.IsNotBlank())
+                ViewBag.LogoUrl = ah.GetFileLink(profile.Logo, true, null, true);
+
+            if (profile.HeaderImage.IsNotBlank())
+                ViewBag.HeaderImageUrl = ah.GetFileLink(profile.HeaderImage, true, null, true);
 
             ViewBag.Messages = msgs;
             return View(account);
@@ -398,7 +408,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         account.OnboardingStepDone = OnboardingStepType.ServicesOffered;
                         amsgs.AddRange(account.Save(adc));
 
-                        profile.UpdateProfile(
+                        profile.UpdateProfileServicesOffered(
                             servicesOffered: Request.Params.Filter("services-offered-"),
                             timesOffered: Request.Params.Filter("times-offered-"),
                             pricingOptions: Request.Params.Filter("pricing-options-"),
@@ -466,7 +476,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         account.Website = website;
                         amsgs.AddRange(account.Save(adc));
 
-                        profile.UpdateProfile(
+                        profile.UpdateProfileLinks(
                             website: website,
                             twitter: twitter,
                             facebook: facebook,
