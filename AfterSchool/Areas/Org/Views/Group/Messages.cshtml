@@ -2,6 +2,7 @@
 @{
     ViewBag.Title = Model.AccountName;
     SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+    PagingModel pagingModel = (PagingModel)ViewBag.PagingModel;
 }
 
 @{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
@@ -18,15 +19,16 @@
         </div>
         <div class="panel-body">
             @{Html.RenderPartial(
-                "~/Views/Shared/_Messages.cshtml",
-                Model.GetMessages().ToList(),
-                new ViewDataDictionary()
-                {
+                  "~/Views/Shared/_Messages.cshtml",
+                  Model.GetMessages().ToList(),
+                  new ViewDataDictionary()
+                  {
                     { "SendNewMessageLink", Url.Action("messageadd", "group", new { id = Model.Uid }) },
                     { "Account", SessionVariables.CurrentAccount },
-                    { "ViewLinkController", "group" }
-                }
-                );}
+                    { "ViewLinkController", "group" },
+                    { "PagingModel", pagingModel }
+                  }
+                  );}
         </div>
     </div>
 </div>
