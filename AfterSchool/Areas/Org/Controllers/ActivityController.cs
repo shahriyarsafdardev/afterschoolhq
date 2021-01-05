@@ -1384,7 +1384,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             {
                                 //.. if post pay plan, then we will have coupon value in registration to discount.
                                 var couponDiscount = attendanceDaysToCharge * (registration.CouponValue.HasValue ? registration.CouponValue.Value : 0);
-                                overrideAmount = costPerAttendance - couponDiscount;
+                                overrideAmount = (costPerAttendance * attendanceDaysToCharge) - couponDiscount;
                             }                          
 
                             checkoutObject = new CheckoutObject()
