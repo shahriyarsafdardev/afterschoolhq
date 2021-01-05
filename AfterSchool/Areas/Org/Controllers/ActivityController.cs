@@ -1365,7 +1365,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         var coupon = new Coupon();
 
                         if (registration.CouponId.HasValue)
-                            coupon = Coupon.Load(registration.CouponId.Value);
+                            coupon = CouponService.GetCoupon(registration.CouponId.Value, msgs);
 
                         if (attendanceDaysToCharge > 0)
                         {

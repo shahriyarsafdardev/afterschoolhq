@@ -771,7 +771,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-		public bool HasRegistrationFeeAndPostPayPlan
+		public bool HasRegistrationFeeOrPostPayPlan
 		{
 			get
 			{

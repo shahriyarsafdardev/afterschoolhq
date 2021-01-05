@@ -1,17 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Billing;
 using System.Linq;
-using Amazon.S3.Model;
 
 namespace AfterSchoolLibrary.Services
 {
     public static class CouponService
     {
+        public static Coupon GetCoupon(int id, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Coupon.Load(id, msgs, dc);
+        }
+
         public static Coupon CreateBlank(Account account, WebUser loggedInUser)
         {
             var coupon = new Coupon()
