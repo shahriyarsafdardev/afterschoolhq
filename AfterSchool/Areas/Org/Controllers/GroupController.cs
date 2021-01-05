@@ -118,7 +118,7 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 { "name", name },
                 { "description", description },
-                { "regmode", regmode },
+                { "regmode", regmode.IsNotEmpty() ? regmode : ((int)RegistrationMode.Register).ToString() },
                 { "form", form },
                 { "isinviteonly", isinviteonly.IsBoolean() },
                 // { "genderrestrictions", genderrestrictions },
