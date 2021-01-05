@@ -12,7 +12,7 @@ namespace AfterSchoolLibrary.Services
 
         public static decimal GetFeesChargedToBiller(this Transaction transaction)
         {
-            if (transaction.PaymentSourceTypeId == PaymentSourceType.AfterSchoolPlatform)
+            if (transaction.PaymentSourceTypeId != PaymentSourceType.AfterSchoolPlatform)
                 return 0;
 
             // handle old transactions
