@@ -173,20 +173,6 @@ namespace AfterSchoolLibrary.Services
         {
             var useConnectedAccount = checkoutObject.BillingAccount.UseStripeConnectDuringCheckout(msgs, dc);
             var usePlatformFees = useConnectedAccount && !checkoutObject.OverrideAmount.HasValue;
-            var couponValue = new decimal?();
-
-            if (checkoutObject.PostPayPlan.IsNotEmpty() && checkoutObject.OverrideAmount > 0)
-            {
-                //.. this is specific case, 
-                //.. post pay plan has pre payement enabled and provider is taking attendace, 
-                //.. so in that case, CouponValue is also multiplying the CostPerPeriod with number of class, which should not happen.
-                //.. reason for that is right now we can't differentiate between amount is for pre payment or for attendace so.
-                couponValue = checkoutObject.Registration.CouponValue;
-            }
-            else if (checkoutObject.Coupon.IsNotEmpty())
-            {
-                couponValue = checkoutObject.CouponValue(msgs, dc);
-            }
 
             return CreateNew(
                 checkoutObject.PayingAccount,
@@ -208,7 +194,7 @@ namespace AfterSchoolLibrary.Services
                 checkoutObject.Date,
                 useConnectedAccount,
                 loggedInUser,
-                couponValue,
+                checkoutObject.CouponValue(msgs, dc),
                 checkoutObject.Coupon,
                 msgs,
                 dc);
