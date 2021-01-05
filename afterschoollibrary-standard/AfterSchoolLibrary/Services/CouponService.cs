@@ -100,19 +100,7 @@ namespace AfterSchoolLibrary.Services
                 return String.Format("{0:0.00}%", (coupon.Amount).Value);
 
             return coupon.Amount.ToCurrency();
-        }
-
-        public static int GetNumberOfUses(this Coupon coupon)
-        {            
-            var purchase = Purchase.LoadByCouponId(coupon.ID.Value);              
-            return purchase.DistinctBy(m => m.RegistrationId).Count(); 
-        }
-
-        public static int GetNumberOfUsesByPurchaseAccount(this Coupon coupon, int PurchaserAccountId, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {            
-            var purchase = Purchase.LoadByCouponIdByPurchaseAccountId(coupon.ID.Value, PurchaserAccountId, msgs, dc);
-            return purchase.DistinctBy(m => m.RegistrationId).Count();
-        }
+        }        
 
         public static bool DoesApplyToRegistrationFee(this Coupon coupon)
         {
@@ -193,22 +181,21 @@ namespace AfterSchoolLibrary.Services
             return $"{string.Format("{0:0.00}", coupon.Amount)} %";
         }
 
-        public static int GetTotalUses(this Coupon coupon, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetNumberOfUses(this Coupon coupon)
         {
-            return Transaction.LoadByCouponIdByIsDeleted(coupon.ID.Value, false, msgs, dc).Count;
+            return Registration.LoadByCouponId(coupon.ID.Value).Distinct().Count();            
         }
 
-        public static int GetTotalUsesByPayer(this Coupon coupon, int payerAccountId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetNumberOfUsesByPurchaseAccount(this Coupon coupon, int PurchaserAccountId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Transaction.LoadByCouponIdByPayerAccountIdByIsDeleted(coupon.ID.Value, payerAccountId, false, msgs, dc).Count;
+            return Registration.LoadByCouponIdByPurchaseAccountId(coupon.ID.Value, PurchaserAccountId, msgs, dc).Distinct().Count();
         }
 
         public static bool HasReachedLimit(this Coupon coupon, int? payerAccountId, bool hasPostPayPlan = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (coupon.MaxNumberOfUsesAll.HasValue)
             {
-                //.. if post pay plan, we will check based on purchase else we check on transactions
-                var totalUses = hasPostPayPlan ? coupon.GetNumberOfUses() : coupon.GetTotalUses(msgs, dc);
+                var totalUses = coupon.GetNumberOfUses();
 
                 if (totalUses >= coupon.MaxNumberOfUsesAll)
                     return true;               
@@ -216,7 +203,7 @@ namespace AfterSchoolLibrary.Services
 
             if (coupon.MaxNumberOfUsesPerPerson.HasValue && payerAccountId.HasValue)
             {
-                var totalUsesForPayer = hasPostPayPlan ? coupon.GetNumberOfUsesByPurchaseAccount(payerAccountId.Value, msgs, dc) : coupon.GetTotalUsesByPayer(payerAccountId.Value, msgs, dc);
+                var totalUsesForPayer = coupon.GetNumberOfUsesByPurchaseAccount(payerAccountId.Value, msgs, dc);
 
                 if (totalUsesForPayer >= coupon.MaxNumberOfUsesPerPerson)
                     return true;

@@ -2832,6 +2832,8 @@ namespace AfterSchoolLibrary.Services
             if (checkoutObject.Registration.IsNotEmpty())
             {
                 registrant = checkoutObject.Registration.GetRegistrant(msgs, dc);
+
+                // need to check for existing purchase or create a new one
                 checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc);                
             }
 
