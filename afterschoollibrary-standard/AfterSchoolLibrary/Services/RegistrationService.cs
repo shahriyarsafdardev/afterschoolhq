@@ -261,7 +261,7 @@ namespace AfterSchoolLibrary.Services
             if (coupon.IsNotEmpty())
             {
                 registration.CouponId = coupon.ID;
-                registration.CouponValue = coupon.GetValue(paymentAmount - convenienceFeePaid - paymentTypeFeePaid);
+                registration.CouponValue = coupon.GetValue(paymentAmount - paymentTypeFeePaid);
             }
 
             msgs.AddRange(registration.Save(dc));
