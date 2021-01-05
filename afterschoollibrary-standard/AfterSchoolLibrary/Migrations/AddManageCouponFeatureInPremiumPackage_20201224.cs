@@ -16,10 +16,17 @@ namespace AfterSchoolLibrary.Migrations
                 {
                     var packages = Package.Load(msgs: amsgs, dc: adc);
                     var loggedInUser = WebUser.Load(1, amsgs, adc);
+                    var premiumPackage = packages.Where(m => m.Name.ToLower().Contains("premium")).FirstOrDefault();
 
-                    foreach (var package in packages.Where(m => m.Name.ToLower().Contains("premium")))
+                    if (premiumPackage.IsNotEmpty())
                     {
-                        PackageFeatureService.AddPackageFeature(PackageId: package.ID, featureTypeId: FeatureType.ManageCoupons, maxValue: 1, loggedInUser: loggedInUser, msgs: amsgs, dc: adc);
+                        //all packages where cost is greater than or equal to premium
+                        var packagesToUpdate = packages.Where(m => m.Price >= premiumPackage.Price).ToList();
+
+                        foreach (var package in packagesToUpdate)
+                        {
+                            PackageFeatureService.AddPackageFeature(PackageId: package.ID, featureTypeId: FeatureType.ManageCoupons, maxValue: 1, loggedInUser: loggedInUser, msgs: amsgs, dc: adc);
+                        }
                     }
                 },
                 uniqueIdenfier: "AddManageCouponFeatureInPremiumPackage_20201224",
