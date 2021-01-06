@@ -1362,10 +1362,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         var availablePrePayments = registration.GetAvailablePrePayments(activity, msgs);
                         var attendanceDaysToCharge = Math.Max(0, raAttendances.Count - availablePrePayments.Count);
                         CheckoutObject checkoutObject = null;
-                        var coupon = new Coupon();
-
-                        if (registration.CouponId.HasValue)
-                            coupon = CouponService.GetCoupon(registration.CouponId.Value, msgs);
+                        var coupon = CouponService.GetCoupon(registration, msgs);
 
                         if (attendanceDaysToCharge > 0)
                         {

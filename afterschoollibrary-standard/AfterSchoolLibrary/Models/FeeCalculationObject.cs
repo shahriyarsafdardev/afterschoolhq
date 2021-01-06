@@ -134,7 +134,8 @@ namespace AfterSchoolLibrary.Models
         }
 
         public decimal GetFinalTotalCostForPostPay(PaymentType paymentType)
-        {            
+        {
+            //assuming that we have a ConvenienceFee applied
             return Math.Ceiling(Cost + (paymentType == PaymentType.CreditCard ? GetCreditCardFee() : 0));
         }
 

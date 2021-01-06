@@ -15,6 +15,14 @@ namespace AfterSchoolLibrary.Services
             return Coupon.Load(id, msgs, dc);
         }
 
+        public static Coupon GetCoupon(this Registration registration, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (registration.CouponId.HasValue)
+                return Coupon.Load(registration.CouponId.Value, msgs, dc);
+
+            return null;
+        }
+
         public static Coupon CreateBlank(Account account, WebUser loggedInUser)
         {
             var coupon = new Coupon()

@@ -650,28 +650,15 @@ namespace AfterSchool.Controllers
             var postPayPlan = participationObject.PostPayPlans.FirstOrDefault();
 
             var coupon = currentAccount.ValidateCoupon(participationObject, couponcode, msgs);
-            var amount = participationObject.Cost.Value;
-
-            if (postPayPlan.IsNotEmpty())
-            {
-                //..TODO: reiview this logic
-                //amount = participationObject.GetCheckoutCostWithConvenienceFee() - participationObject.GetCheckoutPostPayConvenienceFee();
-                amount = participationObject.GetCheckoutCostWithConvenienceFee();
-            }
+            var isPostPayPlan = postPayPlan.IsNotEmpty();
+            var amount = isPostPayPlan ? participationObject.GetCheckoutCostWithConvenienceFee() :  participationObject.Cost.Value;
             
             var feeCalcObject = new FeeCalculationObject(amount, participationObject.OwnerAccount, msgs);
 
             // These amounts will either be the regular price or the discounted price, but we always return a value to update the UI
-            var calculatedAmountACH = feeCalcObject.GetFinalTotalCost(PaymentType.ACH);
-            var calculatedAmountCC = feeCalcObject.GetFinalTotalCost(PaymentType.CreditCard);
-            var calculatedCCFee = feeCalcObject.GetCreditCardFee();
-
-            if (postPayPlan.IsNotEmpty())
-            {
-                calculatedAmountACH = amount;
-                calculatedAmountCC = amount + participationObject.GetCheckoutPostPayCreditCardFee();
-                calculatedCCFee = participationObject.GetCheckoutPostPayCreditCardFee();
-            }
+            var calculatedAmountACH = isPostPayPlan ? amount : feeCalcObject.GetFinalTotalCost(PaymentType.ACH);
+            var calculatedAmountCC = isPostPayPlan ? amount + participationObject.GetCheckoutPostPayCreditCardFee() : feeCalcObject.GetFinalTotalCost(PaymentType.CreditCard);
+            var calculatedCCFee = isPostPayPlan ? participationObject.GetCheckoutPostPayCreditCardFee() : feeCalcObject.GetCreditCardFee();           
 
             int numberInMonths = 0;
             decimal subscriptionPlanAmount = 0;
@@ -684,14 +671,9 @@ namespace AfterSchool.Controllers
                 var couponValue = coupon.GetValue(amount);
                 var discountedFeeCalcObject = new FeeCalculationObject(amount - couponValue, participationObject.OwnerAccount, msgs);
 
-                //.. since this will be a post pay pre payment, we'll have already applied all the charges upfornt when adding activity.
-                //.. TODO: review this logic once with darye
-                if (postPayPlan.IsNotEmpty())
-                    calculatedAmountACH = discountedFeeCalcObject.GetFinalTotalCostForPostPay(PaymentType.ACH);
-                else
-                    calculatedAmountACH = discountedFeeCalcObject.GetFinalTotalCost(PaymentType.ACH);                    
-
-                calculatedAmountCC = discountedFeeCalcObject.GetFinalTotalCost(PaymentType.CreditCard);
+                //.. if post pay pre payment, we'll have already applied all the charges upfornt when adding activity. so final cost will be row cost only.               
+                calculatedAmountACH = isPostPayPlan ? discountedFeeCalcObject.GetFinalTotalCostForPostPay(PaymentType.ACH) : discountedFeeCalcObject.GetFinalTotalCost(PaymentType.ACH);
+                calculatedAmountCC = isPostPayPlan ? discountedFeeCalcObject.GetFinalTotalCostForPostPay(PaymentType.CreditCard) : discountedFeeCalcObject.GetFinalTotalCost(PaymentType.CreditCard);
                 calculatedCCFee = discountedFeeCalcObject.GetCreditCardFee();
                 discountString = coupon.GetDiscountString();
             }
@@ -705,7 +687,7 @@ namespace AfterSchool.Controllers
             if (subscriptionPlan.IsNotEmpty())
                 subscriptionPlanAmount = subscriptionPlan.CostPerPeriod.Value;
 
-            if (postPayPlan.IsNotEmpty())
+            if (isPostPayPlan)
                 postPayPlanAmount = postPayPlan.CostPerPeriod.Value;
 
             var status = "error";
