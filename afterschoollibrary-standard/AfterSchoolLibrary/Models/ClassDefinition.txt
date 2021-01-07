@@ -672,6 +672,7 @@ property: AllowToPayLater, bool, Bit
 property: Details, string, NVarChar "4000"
 property: StartDate, DateTime?, DateTime
 property: EndDate, DateTime?, DateTime
+property: DeletedAt, DateTime?, DateTime
 baseproperty: Name, required
 loadmethod: AccountId, List<>
 loadmethod: AccountId|ActivityGroupTypeId, List<>
