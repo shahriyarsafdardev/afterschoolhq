@@ -823,8 +823,8 @@ namespace AfterSchoolLibrary.Models
 
             if ((plan?.NumberOfPeriodsPrePaid).IsPositive())
                 return plan.NumberOfPeriodsPrePaid.Value * GetPostPayCost();
-            else
-                return GetPostPayCost();
+            
+            return GetPostPayCost();
         }
 
         #endregion
