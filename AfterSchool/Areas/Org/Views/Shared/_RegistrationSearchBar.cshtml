@@ -53,9 +53,15 @@
                             selectedGroup = " selected=\"selected\" ";
                         }
 
+                        var numberOfRegistrants = $" ({group.GetRegistrationCount().ToString()} students)";
+
+                        var isArchived = "";
+                        if (group.IsArchived)
+                           isArchived = " (Archived)";
+
                         <optgroup label="@group.Name">
                             <option value="group-@group.ID" @selectedGroup>
-                                @group.Name - All @UILabel.ActivityLabel(group.ActivityGroupTypeId, true)
+                                @group.Name - All @UILabel.ActivityLabel(group.ActivityGroupTypeId, true) @numberOfRegistrants @isArchived
                             </option>
 
                             @foreach (var activity in activities.Where(x => x.ActivityGroupId == group.ID))
