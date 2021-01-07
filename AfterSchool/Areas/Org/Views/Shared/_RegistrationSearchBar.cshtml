@@ -53,7 +53,7 @@
                             selectedGroup = " selected=\"selected\" ";
                         }
 
-                        var numberOfRegistrants = $" ({group.GetRegistrationCount().ToString()} students)";
+                        var numberOfRegistrants = $" - {group.GetRegistrationCount().ToString()} students";
 
                         var isArchived = "";
                         if (group.IsArchived)
