@@ -324,12 +324,11 @@ namespace AfterSchoolLibrary.Models
 			return ActivityGroup.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
-		public static List<ActivityGroup> LoadByAccountId(int AccountId, bool IsDeleted = false, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<ActivityGroup> LoadByAccountId(int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
-            dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
