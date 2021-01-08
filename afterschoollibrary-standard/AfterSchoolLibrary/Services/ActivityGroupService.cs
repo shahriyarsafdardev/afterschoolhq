@@ -871,12 +871,11 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(group.Save(dc));
         }
 
-        public static void SetDeletedAt(this ActivityGroup group, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void SetIsDeleted(this ActivityGroup group, int loggedInUserId,bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var now = DateTime.UtcNow;
             group.LastModifiedDate = DateTime.UtcNow;
             group.LastModifiedBy = loggedInUserId;
-            group.DeletedAt = now;
+            group.IsDeleted = isDeleted;
             msgs.AddRange(group.Save(dc));
         }
 

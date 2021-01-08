@@ -685,7 +685,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var group = ActivityGroup.LoadByUid(id.ToGuid());
 
             if (group.IsNotEmpty())
-                group.SetDeletedAt(SessionVariables.CurrentUser.ID.Value, msgs);
+                group.SetIsDeleted(SessionVariables.CurrentUser.ID.Value, true, msgs);
 
             ViewBag.Messages = msgs;
 

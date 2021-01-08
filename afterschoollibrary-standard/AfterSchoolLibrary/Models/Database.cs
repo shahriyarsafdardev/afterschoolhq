@@ -268,6 +268,7 @@ namespace AfterSchoolLibrary.Models
 			ActivityGroup.Update(new Hashtable(){{"CostUnitTypeId",0}}, new Hashtable(){{"CostUnitTypeId", DBNull.Value}}, ActivityGroup.ObjectMap, dc);
 			ActivityGroup.Update(new Hashtable(){{"RequiresParentalConsent",false}}, new Hashtable(){{"RequiresParentalConsent", DBNull.Value}}, ActivityGroup.ObjectMap, dc);
 			ActivityGroup.Update(new Hashtable(){{"AllowToPayLater",false}}, new Hashtable(){{"AllowToPayLater", DBNull.Value}}, ActivityGroup.ObjectMap, dc);
+			ActivityGroup.Update(new Hashtable(){{"IsDeleted",false}}, new Hashtable(){{"IsDeleted", DBNull.Value}}, ActivityGroup.ObjectMap, dc);
 			AccountActivityGroup.Update(new Hashtable(){{"InviteStatusId",0}}, new Hashtable(){{"InviteStatusId", DBNull.Value}}, AccountActivityGroup.ObjectMap, dc);
 			AccountActivityGroup.Update(new Hashtable(){{"IsPublished",false}}, new Hashtable(){{"IsPublished", DBNull.Value}}, AccountActivityGroup.ObjectMap, dc);
 			AccountActivityGroup.Update(new Hashtable(){{"CostUnitTypeId",0}}, new Hashtable(){{"CostUnitTypeId", DBNull.Value}}, AccountActivityGroup.ObjectMap, dc);
