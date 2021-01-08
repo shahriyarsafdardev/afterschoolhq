@@ -695,7 +695,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (Request.UrlReferrer.IsNotEmpty())
                 return Redirect(Request.UrlReferrer.ToString());
 
-            return RedirectToAction("index", "league");
+            return RedirectToAction("index", "group");
         }
 
         [HttpGet]
