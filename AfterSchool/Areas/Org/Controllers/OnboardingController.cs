@@ -73,7 +73,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult ProgramInfo(string title, string headline, string genderrestrictions)
+        public ActionResult ProgramInfo(string title, string headline, string genderrestrictions, string timeZone)
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
@@ -92,6 +92,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         account.Name = title;
                         account.UniqueName = AccountService.GenerateUniqueName(title, account.ID, amsgs, adc);
                         account.OnboardingStepDone = OnboardingStepType.ProgramInfo;
+                        account.TimeZone = timeZone.IsNotEmpty() ? timeZone : null;
                         amsgs.AddRange(account.Save(adc));
 
                         profile.UpdateProfile(
