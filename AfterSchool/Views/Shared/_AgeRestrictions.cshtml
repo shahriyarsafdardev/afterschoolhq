@@ -1,6 +1,6 @@
 ﻿@{
-    var agestart = (int?)ViewData["agestart"];
-    var ageend = (int?)ViewData["ageend"];
+    var agestart = (int?)ViewData["agestart"] ?? 0;
+    var ageend = (int?)ViewData["ageend"] ?? 18;
     var showToggle = true;
     var showToggleUpdated = false;
 

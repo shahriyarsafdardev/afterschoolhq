@@ -1,7 +1,7 @@
 ﻿@{
     var grades = (List<GradeLevel>)ViewData["grades"];
-    var minGradeLevelId = (int?)ViewData["minGradeLevelId"];
-    var maxGradeLevelId = (int?)ViewData["maxGradeLevelId"];
+    var minGradeLevelId = (int?)ViewData["minGradeLevelId"] ?? grades.FirstOrDefault().ID;
+    var maxGradeLevelId = (int?)ViewData["maxGradeLevelId"] ?? grades.OrderByDescending(m => m.ID).FirstOrDefault().ID;
 
     var showToggle = true;
     var showToggleUpdated = false;
