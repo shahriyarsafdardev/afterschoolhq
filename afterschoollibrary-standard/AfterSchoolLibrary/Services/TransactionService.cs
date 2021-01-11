@@ -197,7 +197,7 @@ namespace AfterSchoolLibrary.Services
                 checkoutObject.Date,
                 useConnectedAccount,
                 loggedInUser,
-                checkoutObject.Coupon.IsNotEmpty() ? checkoutObject.CouponValue(msgs, dc) : new decimal?(),
+                checkoutObject.CouponValue(msgs, dc),
                 checkoutObject.Coupon,
                 msgs,
                 dc);

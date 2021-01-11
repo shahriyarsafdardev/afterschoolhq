@@ -219,7 +219,18 @@ namespace AfterSchoolLibrary.Models
         public decimal CouponValue(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (Coupon.IsNotEmpty() && Coupon.ID.IsNotEmpty() && Coupon.DoesApplyToRegistrationFee())
-                return Coupon.GetValue(GetAmountToApplyToCoupon(msgs, dc)); 
+            {
+                if (PostPayPlan.IsNotEmpty() && OverrideAmount > 0 && Registration.CouponValue.HasValue)
+                {
+                    //.. this is specific case, 
+                    //.. post pay plan has pre payement enabled and provider is taking attendace, 
+                    //.. so in that case, CouponValue is also multiplying the CostPerPeriod with number of class, which should not happen.
+                    //.. reason for that is right now we can't differentiate between amount is for pre payment or for attendace so.
+                    return Registration.CouponValue.Value;
+                }
+                else
+                    return Coupon.GetValue(GetAmountToApplyToCoupon(msgs, dc));
+            }
 
             return 0;
         }
@@ -243,6 +254,9 @@ namespace AfterSchoolLibrary.Models
 
             if (activity.IsConvenienceFeeTakenOutOfCost)
                 return RegistrationCostNoFees;
+
+            if (PostPayPlan.IsNotEmpty())
+                return ParticipationObject.GetPostPayCheckoutCostWithoutConvenienceFee();
 
             return RegistrationCostNoFees + GetRegistrationConvenienceFee(msgs, dc);
         }
@@ -437,7 +451,10 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetPostPayPlanCostTodayWithConvenienceFee()
         {
-            return ParticipationObject.GetPostPayCheckoutCostWithConvenienceFee();
+            var couponDiscount = CouponValue();
+            var costWithDiscount = ParticipationObject.GetPostPayCheckoutCostWithoutConvenienceFee() - couponDiscount;
+            var convenienceFee = ParticipationObject.GetCheckoutPostPayConvenienceFee();
+            return Math.Max(costWithDiscount + convenienceFee, 0);
         }
 
         public decimal GetPostPayPlanCostTodayCreditCardFee()
