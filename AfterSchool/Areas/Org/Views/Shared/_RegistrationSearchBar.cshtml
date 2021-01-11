@@ -57,7 +57,9 @@
 
                         var isArchived = "";
                         if (group.IsArchived)
-                           isArchived = " (Archived)";
+                        {
+                            isArchived = " (Archived)";
+                        }
 
                         <optgroup label="@group.Name">
                             <option value="group-@group.ID" @selectedGroup>
