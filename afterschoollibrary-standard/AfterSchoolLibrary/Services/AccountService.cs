@@ -2452,8 +2452,9 @@ namespace AfterSchoolLibrary.Services
             var totalFeesRefunded = account.GetTotalFeesRefunded(search, startDate, endDate, msgs, dc);
 
             var totalRefunds = account.GetTotalAmountRefundedAHQ(search, true, startDate, endDate, msgs, dc);
+            var totalRefundManual = account.GetTotalAmountRefundedManually(search, startDate, endDate, msgs, dc);
             var totalDebits = account.GetTotalAmountDebited(search, startDate, endDate, msgs, dc);
-            var totalCredits = account.GetTotalAmountCredited(search, startDate, endDate, msgs, dc);
+            var totalCredits = account.GetTotalAmountCredited(search, startDate, endDate, msgs, dc);            
 
             return totalAmountBilledACH + 
                     totalAmountBilledCredit +
@@ -2463,6 +2464,7 @@ namespace AfterSchoolLibrary.Services
                     totalFeesPaidCredit - 
                     totalPayoutAmount - 
                     totalRefunds - 
+                    totalRefundManual -
                     totalDebits;
         }
 

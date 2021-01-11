@@ -753,6 +753,11 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["BillerAccountId"], BillerAccountId);
             dq.Criterias.Add(ObjectMap["TransactionTypeId"], (int)TransactionType.Charge);
 
+            //.. the way the code used to be was that a transaction either had the platform percent fee + flatfee or it had the ConvenienceFee + paymenttypefee
+            //.. We are now storing the platformfee + flat fee all the time, so it is mistakenly using that old calculation which is not valid for new accounts
+            //.. so it should only use PlatformFees if there is no convenience fee (and really this is for only old accounts)
+            dq.Criterias.Add(ObjectMap["ConvenienceFeeCharged"], 0, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+
             if (paymentType.HasValue)
                 dq.Criterias.Add(ObjectMap["PaymentTypeId"], (int)paymentType.Value);
 
