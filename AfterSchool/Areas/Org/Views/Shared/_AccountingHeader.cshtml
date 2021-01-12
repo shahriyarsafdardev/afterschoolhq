@@ -1,6 +1,7 @@
 ﻿
 @{
     var actionName = ViewContext.RouteData.Values["action"].ToString().ToLower();
+    var couponPackage = PackageService.GetPackageWithAnyFeaturesLowestPrice(new List<FeatureType>() { FeatureType.ManageCoupons });
 }
 
 
@@ -21,14 +22,35 @@
         <a class="btn btn-alt6@(actionName == "refundrequests" ? "-active" : "")" href="@Url.Action("refundrequests", "accounting")">
             Refund Requests
         </a>
+
+        @if (SessionVariables.AccountPackage.HasFeature(FeatureType.ManageCoupons))
+        {
+            <a class="btn btn-alt6@(actionName.Contains("coupon") ? "-active" : "")" href="@Url.Action("coupon", "accounting")">
+                Coupons
+            </a>
+        } 
+        else
+        {
+            <a href="#" class="btn btn-alt6@(actionName == "coupon" ? "-active" : "")"  
+               onclick="return showUpgradeMyPlan('@(couponPackage?.Name)', @(couponPackage?.ID))">
+                Coupons
+            </a>
+        }
     </div>
     <div class="hidden-lg hidden-sm hidden-md">
-        <select class="form-control" onchange="handleNav(this.value)">
+        <select class="form-control" onchange="this.value == '#' ? showUpgradeMyPlan(this.packagename,this.packageid) : handleNav(this.value)">
             <optgroup label="Navigation">
                 <option value="@Url.Action("index", "accounting")">Transactions</option>
                 <option value="@Url.Action("payouts", "accounting")">Payouts</option>
                 <option value="@Url.Action("subscriptions", "accounting")">Subscriptions &amp; Plans</option>
                 <option value="@Url.Action("refundrequests", "accounting")">Refund Requests</option>
+                @if (SessionVariables.AccountPackage.HasFeature(FeatureType.ManageCoupons))
+                {
+                    <option value="@Url.Action("coupon", "accounting")">Coupons</option>
+                } else
+                {
+                    <option packagename="@(couponPackage?.Name)" packageid="@(couponPackage?.ID)" value="#">Coupons</option>
+                }
             </optgroup>
         </select>
     </div>

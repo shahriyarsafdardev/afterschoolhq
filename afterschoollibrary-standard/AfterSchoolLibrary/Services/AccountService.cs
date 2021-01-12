@@ -379,9 +379,9 @@ namespace AfterSchoolLibrary.Services
             return groups.Where(group => periods.Select(period => period.ActivityGroupId.Value).Contains(group.ID.Value)).ToList();
         }
 
-        public static List<ActivityGroup> GetSessions(this Account account, bool IsArchived, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<ActivityGroup> GetSessions(this Account account, bool IsArchived, int? start, int? length, bool IsDeleted = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityGroup.LoadByAccountId(account.ID.Value, ActivityGroupType.Session, IsArchived, start, length, msgs, dc);
+            return ActivityGroup.LoadByAccountId(account.ID.Value, ActivityGroupType.Session, IsArchived, start, length, IsDeleted, msgs, dc);
         }
 
         public static int GetSessionCount(this Account account, bool IsArchived = false, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -1735,9 +1735,9 @@ namespace AfterSchoolLibrary.Services
             return CreateNew(orgName, null, null, false, accountType, null, null, null, null, loggedInUser, isAfterSchool, false, msgs, dc);
         }
 
-        public static Account CreateNewUnclaimedAccount(string orgName, string email, string phone, bool isActive, AccountType accountType, WebUser accountOwner, int? packageId, BillingPeriodType? packageBillingPeriod, string timeZone, WebUser loggedInUser, bool isAfterSchool, bool createWithStripe, SystemMessages msgs, DatabaseConnection dc)
+        public static Account CreateNewUnclaimedAccount(string orgName, string email, string claimemaildomain, string phone, bool isActive, AccountType accountType, WebUser accountOwner, int? packageId, BillingPeriodType? packageBillingPeriod, string timeZone, WebUser loggedInUser, bool isAfterSchool, bool createWithStripe, SystemMessages msgs, DatabaseConnection dc)
         {
-            return CreateNew(orgName, email, phone, isActive, accountType, accountOwner, packageId, packageBillingPeriod, timeZone, loggedInUser, isAfterSchool, createWithStripe, false, msgs, dc);
+            return CreateNew(orgName, email, claimemaildomain, phone, isActive, accountType, accountOwner, packageId, packageBillingPeriod, timeZone, loggedInUser, isAfterSchool, createWithStripe, false, msgs, dc);
         }
 
         public static Account CreateNew(string orgName, string email, string phone, bool isActive, AccountType accountType, WebUser accountOwner, int? packageId, BillingPeriodType? packageBillingPeriod, string timeZone, WebUser loggedInUser, bool isAfterSchool, bool createWithStripe, SystemMessages msgs, DatabaseConnection dc)
@@ -2423,7 +2423,7 @@ namespace AfterSchoolLibrary.Services
 
         public static bool UseStripeConnectDuringCheckout(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc) && !account.CanReceiveCheckPayouts(msgs, dc);
+            return account.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc) && account.StripeChargesEnabled;
         }
 
         public static Payout RequestNewPayout(this Account account, List<Transaction> transactions, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
@@ -2645,12 +2645,17 @@ namespace AfterSchoolLibrary.Services
             string customerId = null;
             var billingAccount = checkoutObject.BillingAccount;
 
-            if (checkoutObject.SavePaymentInfo || checkoutObject.HasStripeSourceId)
+            if (checkoutObject.SavePaymentInfo ||
+                checkoutObject.HasStripeSourceId ||
+                (checkoutObject.PayingAccount.IsNotEmpty() && checkoutObject.PayingAccount.StripeCustomerId.IsNotEmpty()))
+            {
                 customerId = checkoutObject.PayingAccount.StripeCustomerId;
+            }
 
             // if can charge fees we bill it directly from our AHQ account
             var useStripeConnectedAccount = billingAccount.UseStripeConnectDuringCheckout(msgs, dc);
             var platformFeeAmount = checkoutObject.CalculatePlatformFeeAmount(msgs, dc);
+            var amount = checkoutObject.GetStripeAmount(msgs, dc);
 
             // only charge tuition during checkout, because subscriptions are billed through stripe
             var charge = StripeHelper.CreateCharge(
@@ -2658,7 +2663,7 @@ namespace AfterSchoolLibrary.Services
                                 destinationAccountId: useStripeConnectedAccount ? checkoutObject.BillingAccount.StripeUserId : null,
                                 platformFee: useStripeConnectedAccount ? platformFeeAmount : new decimal?(),
                                 tokenOrSourceId: checkoutObject.StripeSourceId,
-                                totalAmount: checkoutObject.GetStripeAmount(msgs, dc),
+                                totalAmount: amount,
                                 description: checkoutObject.Description,
                                 statementDescriptor: $"{checkoutObject.BillingAccount.Name}",
                                 metaData: new Dictionary<string, string>()
@@ -2886,7 +2891,7 @@ namespace AfterSchoolLibrary.Services
                 registrant = checkoutObject.Registration.GetRegistrant(msgs, dc);
 
                 // need to check for existing purchase or create a new one
-                checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc);
+                checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc);                
             }
 
             // charge successful so I need to create a transaction
@@ -2967,7 +2972,7 @@ namespace AfterSchoolLibrary.Services
 
         public static void ProcessRegistrationFee(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            if (checkoutObject.RegistrationCostNoFees > 0)
+            if (checkoutObject.RegistrationCostWithCoupon(msgs, dc) > 0)
                 AccountService.ProcessPaymentWithStripe(checkoutObject, msgs, dc);
 
             // must wait until after charges happen to know what card id is charged for sure
@@ -3206,6 +3211,7 @@ namespace AfterSchoolLibrary.Services
                 paymentTypeFeePaid,
                 checkoutObject.ConvenienceFeePayer,
                 checkoutObject.CreditCardFeePayer,
+                checkoutObject.Coupon,
                 loggedInUser, 
                 msgs, 
                 dc);
@@ -3521,6 +3527,11 @@ namespace AfterSchoolLibrary.Services
 
         #region Coupons
 
+        public static List<Coupon> GetCoupons(this Account account, string search, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, bool isDeleted, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Coupon.LoadByAccountId(account.ID.Value, search, startDate, endDate, participationObjects, isDeleted, start, length, msgs, dc);
+        }
+
         public static AttachedCoupon AttachCoupon(this Account account, Coupon coupon, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (account.AccountTypeId != AccountType.Registrant)
@@ -3547,19 +3558,19 @@ namespace AfterSchoolLibrary.Services
             return AttachedCoupon.LoadByAccountId(account.ID.Value, actionHelper?.Messages, actionHelper?.Connection);
         }
 
-        public static Coupon CreateCoupon(this Account account, decimal amount, DateTime? expirationDate, CouponAmountType amountType, CouponApplyType applyType, StripeCouponDuration couponDuration, int? durationInMonths, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Coupon CreateorUpdateCoupon(this Account account, Coupon coupon, decimal amount, DateTime? expirationDate, CouponAmountType amountType, CouponApplyType applyType, int? maxUsesAll, int? maxUsesPerPerson, string couponCode, string name, string description, StripeCouponDuration couponDuration, int? durationInMonths, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var coupon = CouponService.CreateNew(
-                accountId: account.ID.Value,
+            coupon.CreateOrUpdate(
+                account: account,
                 amount: amount,
                 expirationDate: expirationDate,
                 couponAmountType: amountType,
                 couponApplyType: applyType,
-                maxUsesAll: 1,
-                maxUsesPerPerson: 1,
-                couponCode: CouponService.GenerateCouponCode(account.ID.Value, msgs, dc),
-                label: $"Coupon - {account.NowInAccountTimeZone()}",
-                description: "",
+                maxUsesAll: maxUsesAll,
+                maxUsesPerPerson: maxUsesPerPerson,
+                couponCode: couponCode,
+                name: name,
+                description: description,
                 loggedInUser: loggedInUser,
                 msgs: msgs,
                 dc: dc);
@@ -3571,49 +3582,62 @@ namespace AfterSchoolLibrary.Services
                     durationInMonths,
                     coupon.Amount.Value,
                     msgs,
-                    dc
-                );
+                    dc);
 
             return coupon;
         }
 
-        public static Coupon ValidateCoupon(this Account account, ParticipationObject participationObject, string couponCode, SystemMessages msgs = null)
+        public static Coupon GetCoupon(this Account ownerAccount, string couponCode, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Coupon.LoadByAccountIdByCouponCode(
+                           ownerAccount.ID.Value,
+                           couponCode,
+                           msgs);
+        }
+
+        public static Coupon ValidateCoupon(this Account payerAccount, ParticipationObject participationObject, string couponCode, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var coupon = Coupon.LoadByAccountIdByCouponCode(
-               participationObject.OwnerAccount.ID.Value,
-               couponCode,
-               msgs
-           );
+            var coupon = participationObject.OwnerAccount.GetCoupon(couponCode, msgs, dc);
 
             if (coupon.IsEmpty())
                 msgs.Add("Invalid coupon", MessageType.UserError);
             else
             {
-                var attachedCoupon = AttachedCoupon.LoadByCouponIdByAccountIdIsUsed(
-                    coupon.ID.Value,
-                    account.ID.Value,
-                    false
-                );
+                //var attachedCoupon = AttachedCoupon.LoadByCouponIdByAccountIdIsUsed(
+                //                        coupon.ID.Value,
+                //                        payerAccount.ID.Value,
+                //                        false);
 
                 var purchaseableObjectCoupon = PurchaseableObjectCoupon.LoadByCouponByPurchaseableObject(
-                    coupon.ID.Value,
-                    participationObject.ObjectID.Value,
-                    (PurchaseableObjectType)participationObject.ObjectType
-                );
+                                                coupon.ID.Value,
+                                                participationObject.ObjectID.Value,
+                                                (PurchaseableObjectType)participationObject.ObjectType);
 
-                if (attachedCoupon.IsEmpty() || purchaseableObjectCoupon.IsEmpty())
-                    msgs.Add("You are not allowed to use this coupon", MessageType.UserError);
+                // if coupon is not assigned to any purchaseable object that means it can be applied to any purchaseable object
+                if (coupon.HasPurchaseableObjects(msgs) && purchaseableObjectCoupon.IsEmpty())
+                    msgs.Add("This coupon code is invalid", MessageType.UserError);
                 else
                 {
-                    if (DateTime.UtcNow > coupon.ExpirationDate)
-                        msgs.Add("Coupon is Expired", MessageType.UserError);
+                    if (coupon.ExpirationDate.HasValue)
+                    {
+                        var today = participationObject.OwnerAccount.ConvertToAccountTimeZone(DateTime.UtcNow).Date;
+                        if (coupon.ExpirationDate.Value.IsBefore(today))
+                            msgs.Add($"Coupon is Expired on {coupon.ExpirationDate.ToShortDateString()}", MessageType.UserError);
+                    }
 
                     if (coupon.DoesApplyToSubscriptionPlan() && !participationObject.SubscriptionPlans.Any())
                         msgs.Add("Coupon can only be applied to a subscription", MessageType.UserError);
+
+                    if (coupon.HasReachedLimit(payerAccount.ID.Value, participationObject.PostPayPlans.IsNotEmpty(), msgs, dc))
+                        msgs.Add("Coupon has reached the limit of uses", MessageType.UserError);
+
                 }
             }
+
+            if (msgs.HasErrors())
+                return null;
 
             return coupon;
         }
@@ -3621,14 +3645,15 @@ namespace AfterSchoolLibrary.Services
         public static void MarkCouponAsUsed(this Account account, Coupon coupon, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var attachedCoupon = AttachedCoupon.LoadByCouponIdByAccountIdIsUsed(
-                coupon.ID.Value,
-                account.ID.Value,
-                false
-            );
+                                    coupon.ID.Value,
+                                    account.ID.Value,
+                                    false);
 
-            attachedCoupon.IsUsed = true;
-
-            attachedCoupon.Save(dc);
+            if (attachedCoupon.IsNotEmpty())
+            {
+                attachedCoupon.IsUsed = true;
+                attachedCoupon.Save(dc);
+            }            
         }
 
         #endregion
@@ -3642,7 +3667,7 @@ namespace AfterSchoolLibrary.Services
 
         public static List<ActivityGroup> GetLeagues(this Account account, bool IsArchived, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityGroup.LoadByAccountId(account.ID.Value, ActivityGroupType.League, IsArchived, start, length, msgs, dc);
+            return ActivityGroup.LoadByAccountId(account.ID.Value, ActivityGroupType.League, IsArchived, start, length, false, msgs, dc);
         }
 
         public static int GetLeagueCount(this Account account, bool IsArchived, SystemMessages msgs = null, DatabaseConnection dc = null)

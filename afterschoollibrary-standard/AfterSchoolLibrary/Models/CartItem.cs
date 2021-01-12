@@ -23,6 +23,8 @@ namespace AfterSchoolLibrary.Models
 		/// </summary>
 		public int? CartId { get { return (int?)MDV["CartId"].Value; } set { MDV["CartId"].Value = value; } }
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
+		public PurchaseableObjectType PurchaseableObjectTypeId { get { return (PurchaseableObjectType)MDV["PurchaseableObjectTypeId"].Value; } set { MDV["PurchaseableObjectTypeId"].Value = value; } }
+		public int? PurchaseableObjectId { get { return (int?)MDV["PurchaseableObjectId"].Value; } set { MDV["PurchaseableObjectId"].Value = value; } }
 		/// <summary>
 		/// Required.
 		/// </summary>
@@ -40,6 +42,7 @@ namespace AfterSchoolLibrary.Models
             this.Config(ObjectMap, DatabaseQuery, typeof(CartItem).Name, "ID");
             this.LoadObjectValues(ObjectMap);
 			this.Uid = Guid.NewGuid();
+			this.PurchaseableObjectTypeId = PurchaseableObjectType.NotSet;
 			this.ParticipationObjectTypeId = ParticipationObjectType.NotSet;
 			this.Day = DayOfWeekASL.NotSet;
 			
@@ -54,6 +57,8 @@ namespace AfterSchoolLibrary.Models
                 _dp = BasicObjectWithModified.get_BaseObjectMap(className);
 				_dp.Add(className, "CartId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
+				_dp.Add(className, "PurchaseableObjectTypeId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "PurchaseableObjectId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ParticipationObjectTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ParticipationObjectId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "Day", System.Data.SqlDbType.Int);
@@ -143,6 +148,14 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["Uid"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["PurchaseableObjectTypeId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["PurchaseableObjectId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();

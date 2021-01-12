@@ -1,4 +1,4 @@
-﻿@{
+﻿@{ 
     var accountProfile = (AccountProfile)ViewBag.AccountProfile ?? new AccountProfile();
     var account = accountProfile?.GetAccount();
     var author = account?.Name;
@@ -59,7 +59,7 @@
                 </ul>
             </div>
         </div>
-    </div>
+    </div>    
 
     @{Html.RenderPartial("~/Views/Shared/_JavascriptIncludes.cshtml");}
 

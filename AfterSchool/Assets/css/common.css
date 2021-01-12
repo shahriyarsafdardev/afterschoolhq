@@ -1,4 +1,27 @@
 ﻿/*common style for whole application*/
+
+/*site wide Padding */
+
+.no-padding {
+    padding: 0 !important;
+}
+
+.p-5 {
+    padding: 5px;
+}
+
+.p-b-5 {
+    padding-bottom: 5px;
+}
+
+.p-tb-5 {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+/*site wide margin */
+
+
 .ql-container {
     min-height: 100px;
 }
@@ -242,10 +265,6 @@
     margin-bottom: 20px;
 }
 
-.p-b-5 {
-    padding-bottom: 5px;
-}
-
 .register-thankyou-1 {
     font-size: 22px;
     font-weight: 300;
@@ -329,7 +348,49 @@
     letter-spacing: 1.5px;
     color: #fff;
 }
+
+.chk-lable {
+    cursor: pointer;
 }
+
+    .chk-lable:before {
+        margin-left: 20px;
+        margin-right: 10px !important;
+    }
+
+.has-search .form-control {
+    padding-left: 2.375rem;
+}
+
+.has-search .form-control-search {
+    position: absolute;
+    z-index: 2;
+    display: block;
+    width: 2.375rem;
+    height: 2.375rem;
+    line-height: 2.375rem;
+    text-align: center;
+    pointer-events: none;
+    color: #aaa;
+    margin-top: 10px;
+}
+
+.has-search .form-control:focus {
+    box-shadow: none;
+    border-color: #00c5a3;
+}
+
+.badge-blue {
+    background-color: darkslateblue;
+}
+
+.btn-upgrade-plan {
+    padding: 12px 30px;
+    box-shadow: 0 0 4px 0px #555555;
+    background-color: #c3eae0;
+    border-color: #c3eae0;
+}
+
 
 .mccoy-header-logo > img {
     width: 250px;

@@ -635,6 +635,8 @@ namespace AfterSchool.Controllers
                 return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
 
             var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+
             SubscriptionPlan paymentPlan = null;
 
             var participationObject = SessionVariables.Cart.GetCartItems(msgs)
@@ -643,12 +645,38 @@ namespace AfterSchool.Controllers
 
             if (paymentoption.IsNotEmpty() && paymentoption.IsNumber())
                 paymentPlan = SubscriptionPlan.Load(paymentoption.ToInteger(), msgs);
-            SubscriptionPlan subscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault();
 
-            var coupon = SessionVariables.CurrentAccount.ValidateCoupon(participationObject, couponcode, msgs);
-            decimal amount = participationObject.Cost.Value;
-            decimal subscriptionPlanAmount = 0;
+            var subscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault();
+            var postPayPlan = participationObject.PostPayPlans.FirstOrDefault();
+
+            var coupon = currentAccount.ValidateCoupon(participationObject, couponcode, msgs);
+            var isPostPayPlan = postPayPlan.IsNotEmpty();
+            var amount = isPostPayPlan ? participationObject.GetCheckoutCostWithConvenienceFee() :  participationObject.Cost.Value;
+            
+            var feeCalcObject = new FeeCalculationObject(amount, participationObject.OwnerAccount, msgs);
+
+            // These amounts will either be the regular price or the discounted price, but we always return a value to update the UI
+            var calculatedAmountACH = isPostPayPlan ? amount : feeCalcObject.GetFinalTotalCost(PaymentType.ACH);
+            var calculatedAmountCC = isPostPayPlan ? amount + participationObject.GetCheckoutPostPayCreditCardFee() : feeCalcObject.GetFinalTotalCost(PaymentType.CreditCard);
+            var calculatedCCFee = isPostPayPlan ? participationObject.GetCheckoutPostPayCreditCardFee() : feeCalcObject.GetCreditCardFee();           
+
             int numberInMonths = 0;
+            decimal subscriptionPlanAmount = 0;
+            decimal postPayPlanAmount = 0;
+            var discountString = "";
+
+            // If coupon is valid we update the amount shown to the user here
+            if (coupon.IsNotEmpty() && coupon.ID.IsNotEmpty() && coupon.DoesApplyToRegistrationFee())
+            {
+                var couponValue = coupon.GetValue(amount);
+                var discountedFeeCalcObject = new FeeCalculationObject(amount - couponValue, participationObject.OwnerAccount, msgs);
+
+                //.. if post pay pre payment, we'll have already applied all the charges upfornt when adding activity. so final cost will be row cost only.               
+                calculatedAmountACH = isPostPayPlan ? discountedFeeCalcObject.GetFinalTotalCostForPostPay(PaymentType.ACH) : discountedFeeCalcObject.GetFinalTotalCost(PaymentType.ACH);
+                calculatedAmountCC = isPostPayPlan ? discountedFeeCalcObject.GetFinalTotalCostForPostPay(PaymentType.CreditCard) : discountedFeeCalcObject.GetFinalTotalCost(PaymentType.CreditCard);
+                calculatedCCFee = discountedFeeCalcObject.GetCreditCardFee();
+                discountString = coupon.GetDiscountString();
+            }
 
             if (paymentPlan.IsNotEmpty())
             {
@@ -659,10 +687,18 @@ namespace AfterSchool.Controllers
             if (subscriptionPlan.IsNotEmpty())
                 subscriptionPlanAmount = subscriptionPlan.CostPerPeriod.Value;
 
-            if (msgs.HasNoErrors())
-                return Json(new { status = "ok", coupon, amount, numberInMonths, subscriptionPlanAmount }, JsonRequestBehavior.AllowGet);
+            if (isPostPayPlan)
+                postPayPlanAmount = postPayPlan.CostPerPeriod.Value;
 
-            return Json(new { status = "error", messages = msgs, amount, subscriptionPlanAmount }, JsonRequestBehavior.AllowGet);
+            var status = "error";
+
+            if (msgs.HasNoErrors())
+            {
+                status = "ok";
+                msgs.Add("Coupon has successfuly been applied", MessageType.Success);
+            }
+                   
+            return Json(new { status, coupon, amount, calculatedAmountCC, calculatedAmountACH, calculatedCCFee, numberInMonths, subscriptionPlanAmount, postPayPlanAmount, discountString, messages = msgs }, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult SubmitContactForm(string name, string email, string message, string g_recaptcha_response)

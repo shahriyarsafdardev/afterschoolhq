@@ -125,5 +125,15 @@ namespace AfterSchoolLibrary.Services
 
             return null;
         }
+
+        public static bool IsFuture(this RegistrationPeriod period, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (period.IsNotEmpty())
+            {
+                return period.StartDateTime.Value >= DateTime.Now;
+            }
+
+            return false;
+        }
     }
 }

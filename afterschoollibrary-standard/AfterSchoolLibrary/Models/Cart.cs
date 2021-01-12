@@ -173,12 +173,16 @@ namespace AfterSchoolLibrary.Models
 
         public CartItem AddCartItem(RegistrantActivity ra, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return AddCartItem(ra.ParticipationObjectId.Value, ParticipationObjectType.Activity, ra.ID.Value, msgs, dc: dc);
+
+            var purchaseableObject = PurchaseableObject.FromParticipationObjectIdParticipationObjectTypeId(ra.ParticipationObjectId.Value, ParticipationObjectType.Activity);
+            return AddCartItem(purchaseableObject, ra.ParticipationObjectId.Value, ParticipationObjectType.Activity, ra.ID.Value, msgs, dc: dc);
         }
 
         public CartItem AddCartItem(Activity activity, SystemMessages msgs, DatabaseConnection dc = null)
         {
+            var purchaseableObject = PurchaseableObject.FromActivity(activity);
             return AddCartItem(
+                purchaseableObject,
                 activity.ID.Value,
                 ParticipationObjectType.Activity,
                 null,
@@ -189,7 +193,9 @@ namespace AfterSchoolLibrary.Models
 
         public CartItem AddCartItem(ParticipationObject participationObject, SystemMessages msgs, DatabaseConnection dc = null)
         {
+            var purchaseableObject = PurchaseableObject.FromParticipationObject(participationObject, msgs);
             return AddCartItem(
+                purchaseableObject,
                 participationObject.ObjectID.Value,
                 participationObject.ObjectType,
                 null,
@@ -198,7 +204,7 @@ namespace AfterSchoolLibrary.Models
                 );
         }
 
-        public CartItem AddCartItem(int participationObjectId, ParticipationObjectType participationObjectType, int? registrantActivityId, SystemMessages msgs, DatabaseConnection dc = null)
+        public CartItem AddCartItem(PurchaseableObject purchaseableObject, int participationObjectId, ParticipationObjectType participationObjectType, int? registrantActivityId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if(msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -214,6 +220,8 @@ namespace AfterSchoolLibrary.Models
                 var item = new CartItem
                 {
                     CartId = this.ID,
+                    PurchaseableObjectId = purchaseableObject.ObjectID.Value,
+                    PurchaseableObjectTypeId = purchaseableObject.ObjectType,
                     ParticipationObjectId = participationObjectId,
                     ParticipationObjectTypeId = participationObjectType,
                     RegistrantActivityId = registrantActivityId,

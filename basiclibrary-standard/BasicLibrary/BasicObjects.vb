@@ -794,7 +794,11 @@ Public MustInherit Class BaseAddress
     End Property
     Public Property Neighborhood() As String
         Get
-            Return MDV("Neighborhood").Value
+            If MDV("Neighborhood").IsNotEmpty() Then
+                Return MDV("Neighborhood").Value
+            End If
+
+            Return Nothing
         End Get
         Set(ByVal value As String)
             MDV("Neighborhood").Value = value
@@ -810,7 +814,11 @@ Public MustInherit Class BaseAddress
     End Property
     Public Property County() As String
         Get
-            Return MDV("County").Value
+            If MDV("County").IsNotEmpty() Then
+                Return MDV("County").Value
+            End If
+
+            Return Nothing
         End Get
         Set(ByVal value As String)
             MDV("County").Value = value

@@ -82,7 +82,6 @@ namespace AfterSchoolLibrary.Models
             if (Cost <= 0)
                 return 0;
 
-
             var fee = 0M;
 
             if (IsConvenienceFeeTakenOutOfCost)
@@ -132,6 +131,12 @@ namespace AfterSchoolLibrary.Models
         public decimal GetFinalTotalCost(PaymentType paymentType)
         {
             return GetCostWithConvenienceFee() + (paymentType == PaymentType.CreditCard ? GetCreditCardFee() : 0);
+        }
+
+        public decimal GetFinalTotalCostForPostPay(PaymentType paymentType)
+        {
+            //assuming that we have a ConvenienceFee applied
+            return Math.Ceiling(Cost + (paymentType == PaymentType.CreditCard ? GetCreditCardFee() : 0));
         }
 
         public decimal GetAmountToProvider()
