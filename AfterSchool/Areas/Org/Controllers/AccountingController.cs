@@ -235,8 +235,8 @@ namespace AfterSchool.Areas.Org.Controllers
             row.Add("Payer");
             row.Add("For");
             row.Add("Item Description");
-            row.Add("Total Amount Paid");
-            row.Add("Platform Fee");
+            row.Add("Amount Paid");
+            row.Add("Fees");
             row.Add("Your Amount");
             row.Add("Status");
             row.Add("Type");
