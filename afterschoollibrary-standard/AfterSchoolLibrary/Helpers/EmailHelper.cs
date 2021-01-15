@@ -195,6 +195,45 @@ namespace AfterSchoolLibrary.Helpers
                 emailTemplateId: SendGridHelper.GetGenericTemplateId()));
         }
 
+        public static void SendStripeHasUnfulFilledRequirementsEmail(Stripe.Account stripeAccount, Stripe.Person person, List<string> requirementList, Account account, SystemMessages msgs)
+        {
+            var unFulfilledRequirements = "<ul>";
+
+            requirementList.ForEach(req =>
+            {
+                unFulfilledRequirements += $"<li>{person.FirstName} {person.LastName}'s {req}</li>";
+            });
+
+            unFulfilledRequirements += "</ul>";
+
+            var model = new NameValueCollection()
+            {
+                { "UnfullFilledRequirements", unFulfilledRequirements },
+                { "StripeBusinessName", stripeAccount.BusinessProfile.Name },
+                { "StripeAccountEmail", stripeAccount.Email },
+                { "AHQAccountName", account.Name },
+                { "AHQAccountOwner", account.GetAccountOwner(msgs).DisplayName },
+                { "AccountName", Utilities.AppName() }
+            };
+
+            var subject = $"{account.Name} is missing information On it's Stripe Account";
+            var body = ProcessTemplate(
+                EmailTemplates.Stripe_Has_Unfulfilled_Requirements,
+                model,
+                "StripeHasUnfulfilledRequirements",
+                msgs);
+
+            var mailMsgs = new SystemMessages();
+
+            mailMsgs.AddRange(
+                SendGridHelper.SendMail(
+                    fromEmail: Email.SendGridNoReplyEmailAddress().ToString(),
+                    toEmail: Email.AppSupportEmailAddress,
+                    subject: subject,
+                    body: body,
+                    emailTemplateId: SendGridHelper.GetGenericTemplateId()));
+        }
+
         public static void SendClaimEmail(Account account, SystemMessages msgs)
         {
             var claimProfileDetails = $"<p><a href=\"{Utilities.BaseUrl()}\">{Utilities.AppName()}</a> is promoting your program in our online marketplace to enable thousands of parents to quickly find programs for their children. You can view your profile profile here: <a href=\"{account.ShortHomePageUrl}\">{account.ShortHomePageUrl}</a>. <br /><br />Ready to claim your profile? Click the following link: {account.ClaimAccountUrl} or forward this email to a team member to claim your <em>free</em> profile</p>";

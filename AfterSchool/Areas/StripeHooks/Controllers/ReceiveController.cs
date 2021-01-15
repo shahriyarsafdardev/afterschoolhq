@@ -5,6 +5,7 @@ using BasicLibrary.DataAccess;
 using Newtonsoft.Json;
 using Stripe;
 using System;
+using System.Collections.Generic;
 using System.Web.Http;
 
 namespace AfterSchool.Areas.StripeHooks.Controllers
@@ -106,6 +107,8 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
             msgs.Add("Getting serializedAccountJson", MessageType.Notice);
             var stripeAccount = stripeEvent.Data.Object as Stripe.Account;
 
+            CheckStripeAccountRequirements(stripeAccount, account, msgs);
+
             msgs.Add("Getting SendStripeAccountVerified", MessageType.Notice);
             if (msgs.HasNoErrors() && !account.StripeChargesEnabled && stripeAccount.ChargesEnabled)
             {
@@ -117,6 +120,57 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                 return Return500(msgs);
 
             return ReturnOK(msgs);
+        }
+
+        private void CheckStripeAccountRequirements(Stripe.Account stripeAccount, AfterSchoolLibrary.Models.Account account, SystemMessages msgs)
+        {
+            var requirements = stripeAccount.Requirements;
+            if(requirements.PastDue.IsNotEmpty())
+            {
+
+                account.UpdateStripeChargesAndPayouts(stripeAccount, msgs);
+
+                var stripePersonId = requirements.PastDue[0].Split(',')[0]; // "person_Il5xWlikTYlOj1.address.city"
+                var stripePerson = AfterSchoolLibrary.Billing.StripeHelper.GetPerson(stripeAccount.Id, stripePersonId, msgs);
+                var requirementList = new List<string>();
+
+                requirements.PastDue.ForEach(req =>
+                {
+                    switch (req)
+                    {
+                        case string a when a.Contains("city"):
+                            requirementList.Add("Address: City");
+                            break;
+                        case string b when b.Contains("line1"):
+                            requirementList.Add("Address: Line1");
+                            break;
+                        case string c when c.Contains("postal_code"):
+                            requirementList.Add("Address: Postal Code");
+                            break;
+                        case string d when d.Contains("state"):
+                            requirementList.Add("Address: State");
+                            break;
+                        case string e when e.Contains("dob.day"):
+                            requirementList.Add("DOB: Day");
+                            break;
+                        case string f when f.Contains("dob.month"):
+                            requirementList.Add("DOB: Month");
+                            break;
+                        case string g when g.Contains("dob.year"):
+                            requirementList.Add("DOB: Year");
+                            break;
+                        case string h when h.Contains("relationship.title"):
+                            requirementList.Add("Job Title");
+                            break;
+                        default:
+                            requirementList.Add(req);
+                            break;
+                    }
+                });
+
+                AfterSchoolLibrary.Helpers.EmailHelper.SendStripeHasUnfulFilledRequirementsEmail(stripeAccount, stripePerson, requirementList, account, msgs);
+            }
+
         }
 
         private IHttpActionResult PaymentIntentProcessing(Stripe.Event stripeEvent, SystemMessages msgs)

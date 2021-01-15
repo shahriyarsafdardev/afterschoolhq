@@ -4,6 +4,8 @@
     var currentUser = SessionVariables.CurrentUser;
     var msgs = (SystemMessages)ViewBag.Messages;
     var isFullScreen = (bool)ViewBag.IsFullScreen;
+    var supportEmail = (string)ViewBag.SupportEmail;
+    var supportEmailHref = $"mailto:{supportEmail}";
 
     ViewBag.Title = account.Name;
 
@@ -54,6 +56,26 @@
                             });
                         });
                     </script>
+                }
+                else if (account.HasStripeConnectedAccount)
+                {
+                    var chargesEnabledIcon = "s7-close-circle text-warning";
+                    var chargesEnabledText = "Your account does NOT have charges enabled, so you won't be able to charge fee to parents.";
+                    var payoutsEnabledIcon = "s7-close-circle text-warning";
+                    var payoutsEnabledText = "Your account does NOT have payout enabled, so you won't be able to receive any money parents may have paid until this is enabled.";
+                    if (account.StripeChargesEnabled) {
+                        chargesEnabledIcon = "s7-check-circle text-succes";
+
+                    };
+                    <div class="text-center">
+                        <h1 class=""><i class="s7-check-circle text-success"></i> Your account has been connected to Stripe, however it is missing a few things:</h1>
+                        <ul>
+                            <li><i class="@chargesEnabledIcon"></i><h3>@chargesEnabledText</h3></li>
+                            <li><i class="@payoutsEnabledIcon"></i><h3>@payoutsEnabledText</h3></li>
+                        </ul>
+                        <p class="margin-v-30">Please check for an email from Stripe to complete your payment setup. If you have any questions please contact support at <a href="@supportEmailHref">@supportEmail</a></p>
+                        
+                    </div>
                 }
                 else
                 {
@@ -170,6 +192,7 @@
                             </table>
                         </div>
                         <div class="col-xl-3 col-lg-2 visible-xl visible-lg"></div>
+                        <p>If you have any questions about how to setup your payments, our Support team will be happy to help!  <a href="@supportEmailHref">@supportEmail</a> </p>
                     </div>
                 }
             </div>

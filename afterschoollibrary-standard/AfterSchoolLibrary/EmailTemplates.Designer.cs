@@ -399,7 +399,19 @@ namespace AfterSchoolLibrary {
                 return ((byte[])(obj));
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] Stripe_Has_Unfulfilled_Requirements
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("Stripe_Has_Unfulfilled_Requirements", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
