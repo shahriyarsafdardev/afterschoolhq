@@ -1140,6 +1140,7 @@ namespace AfterSchoolLibrary.Models
                 LEFT JOIN RegistrationPeriod rp on rp.ID = arp.RegistrationPeriodId
                 LEFT JOIN AccountProfile ap ON ap.AccountId = ar.VisitorAccountId
                 LEFT JOIN Location loc ON ap.LocationId = loc.ID
+                LEFT JOIN AccountProperty properties on properties.AccountId = ar.VisitorAccountId and properties.AccountPropertyTypeId in (12, 13, 14, 15)    
                 LEFT JOIN AccountProperty specialNeeds on specialNeeds.AccountId = ar.VisitorAccountId and specialNeeds.AccountPropertyTypeId = 17          
 				LEFT JOIN AccountProperty timing on timing.AccountId = ar.VisitorAccountId and timing.AccountPropertyTypeId = 10
 				LEFT JOIN GradeLevel glStart on glStart.ID = ap.GradeLevelStart
@@ -1149,6 +1150,7 @@ namespace AfterSchoolLibrary.Models
                     AND (
 						    (@SearchTerm = '""""') OR 
 						    CONTAINS((ap.Title, ap.Headline, ap.About), @SearchTerm)  OR 
+                            CONTAINS((properties.Value), @SearchTerm) OR 
 						    CONTAINS((specialNeeds.Value), @SearchTerm) OR 
 							CONTAINS((timing.Value), @SearchTerm) OR 
                             CONTAINS((loc.Address1, loc.Address2, loc.City, loc.State, loc.PostalCode, loc.Name, loc.StreetNumber, loc.StreetName, loc.Neighborhood, loc.County), @SearchTerm)
