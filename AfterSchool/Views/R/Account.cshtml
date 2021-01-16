@@ -527,8 +527,15 @@
 </div>
 
 <script type="text/javascript">
-    PageEvent.add(PageEvent.AFTER_INIT, function () {
-        //$('#btn-welcome-user').click(); leaving out of this release, needs more design
+    PageEvent.add(PageEvent.AFTER_INIT, function () {        
+        //$('#btn-welcome-user').click(); leaving out of this release, needs more design           
+        
+        var url_string = window.location.href; //window.location.href
+        var url = new URL(url_string);
+        var claimprofile = url.searchParams.get("claimprofile");
+        if (claimprofile == 1) {
+            $('#model-claim').click();
+        }        
     });
 
     (function () {
