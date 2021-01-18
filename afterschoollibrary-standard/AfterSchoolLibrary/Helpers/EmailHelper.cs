@@ -208,11 +208,12 @@ namespace AfterSchoolLibrary.Helpers
 
             var model = new NameValueCollection()
             {
-                { "UnfullFilledRequirements", unFulfilledRequirements },
+                { "UnfulfilledRequirements", unFulfilledRequirements },
                 { "StripeBusinessName", stripeAccount.BusinessProfile.Name },
                 { "StripeAccountEmail", stripeAccount.Email },
                 { "AHQAccountName", account.Name },
                 { "AHQAccountOwner", account.GetAccountOwner(msgs).DisplayName },
+                { "AHQAccountEmail", account.Email },
                 { "AccountName", Utilities.AppName() }
             };
 
@@ -227,7 +228,7 @@ namespace AfterSchoolLibrary.Helpers
 
             mailMsgs.AddRange(
                 SendGridHelper.SendMail(
-                    fromEmail: Email.SendGridNoReplyEmailAddress().ToString(),
+                    fromEmail: Email.AppCustomersEmailAddress,
                     toEmail: Email.AppSupportEmailAddress,
                     subject: subject,
                     body: body,
