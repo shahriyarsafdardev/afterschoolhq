@@ -2,14 +2,15 @@
 	<p>@Model.AHQAccountOwner,</p>
 
 	<p>
-		The Stripe Account, @Model.StripeBusinessName,  connected to your AfterSchoolHQ Account, @Model.AHQAccountName, is missing the follwoing required information.
+		The Stripe Account, @Model.StripeBusinessName recently connected to your AfterSchoolHQ Account (@Model.AHQAccountName, @Model.AHQAccountEmail) is missing the following required information.
 	</p>
 	<br/>
 	@Model.UnfulfilledRequirements
 	<br/>
 	<p>
-		In order for your AfterSchoolHQ account to receive payments, Stripe will need this information.
-		Please check for the email address:  @Model.StripeAccountEmail for an email from Stripe to provide this information to Stripe.
+		In order for your AfterSchoolHQ account to process payments, Stripe will need this information. <br/>
+		Please check the email address:  @Model.StripeAccountEmail for an email from Stripe to provide this information to Stripe. <br/>
+		If you do not recognize this email address, please contact us immediately by responding to this email.
 	</p>
 	<p>
 		Please let us know if you have any questions.

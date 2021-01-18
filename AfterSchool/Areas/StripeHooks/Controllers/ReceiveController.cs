@@ -130,8 +130,6 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
 
                 account.UpdateStripeChargesAndPayouts(stripeAccount, msgs);
 
-                var stripePersonId = requirements.PastDue[0].Split(',')[0]; // "person_Il5xWlikTYlOj1.address.city"
-                var stripePerson = AfterSchoolLibrary.Billing.StripeHelper.GetPerson(stripeAccount.Id, stripePersonId, msgs);
                 var requirementList = new List<string>();
 
                 requirements.PastDue.ForEach(req =>
@@ -168,7 +166,7 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                     }
                 });
 
-                AfterSchoolLibrary.Helpers.EmailHelper.SendStripeHasUnfulFilledRequirementsEmail(stripeAccount, stripePerson, requirementList, account, msgs);
+                AfterSchoolLibrary.Helpers.EmailHelper.SendStripeHasUnfulFilledRequirementsEmail(stripeAccount, requirementList, account, msgs);
             }
 
         }

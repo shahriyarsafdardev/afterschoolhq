@@ -59,9 +59,9 @@
                 }
                 else if (account.HasStripeConnectedAccount)
                 {
-                    var chargesEnabledIcon = "s7-close-circle text-warning";
-                    var chargesEnabledText = "Your account does NOT have charges enabled, so you won't be able to charge fee to parents.";
-                    var payoutsEnabledIcon = "s7-close-circle text-warning";
+                    var chargesEnabledIcon = "s7-close-circle text-danger";
+                    var chargesEnabledText = "Your account does NOT have charges enabled, so you won't be able to charge fees to parents.";
+                    var payoutsEnabledIcon = "s7-close-circle text-danger";
                     var payoutsEnabledText = "Your account does NOT have payout enabled, so you won't be able to receive any money parents may have paid until this is enabled.";
                     if (account.StripeChargesEnabled) {
                         chargesEnabledIcon = "s7-check-circle text-succes";
@@ -69,13 +69,13 @@
                     };
                     <div class="text-center">
                         <h1 class=""><i class="s7-check-circle text-success"></i> Your account has been connected to Stripe, however it is missing a few things:</h1>
-                        <ul>
-                            <li><i class="@chargesEnabledIcon"></i><h3>@chargesEnabledText</h3></li>
-                            <li><i class="@payoutsEnabledIcon"></i><h3>@payoutsEnabledText</h3></li>
-                        </ul>
+                        <div class="text-left offset-2">
+                            <h4><i class="@chargesEnabledIcon"></i> @chargesEnabledText</h4>
+                            <h4><i class="@payoutsEnabledIcon"></i> @payoutsEnabledText</h4>
+                        </div>
                         <p class="margin-v-30">Please check for an email from Stripe to complete your payment setup. If you have any questions please contact support at <a href="@supportEmailHref">@supportEmail</a></p>
-                        
-                    </div>
+
+</div>
                 }
                 else
                 {

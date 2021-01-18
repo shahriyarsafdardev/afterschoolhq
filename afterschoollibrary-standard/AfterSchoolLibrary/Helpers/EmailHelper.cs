@@ -195,13 +195,13 @@ namespace AfterSchoolLibrary.Helpers
                 emailTemplateId: SendGridHelper.GetGenericTemplateId()));
         }
 
-        public static void SendStripeHasUnfulFilledRequirementsEmail(Stripe.Account stripeAccount, Stripe.Person person, List<string> requirementList, Account account, SystemMessages msgs)
+        public static void SendStripeHasUnfulFilledRequirementsEmail(Stripe.Account stripeAccount, List<string> requirementList, Account account, SystemMessages msgs)
         {
             var unFulfilledRequirements = "<ul>";
 
             requirementList.ForEach(req =>
             {
-                unFulfilledRequirements += $"<li>{person.FirstName} {person.LastName}'s {req}</li>";
+                unFulfilledRequirements += $"<li>{req}</li>";
             });
 
             unFulfilledRequirements += "</ul>";

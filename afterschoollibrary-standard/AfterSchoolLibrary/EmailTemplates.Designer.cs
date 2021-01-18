@@ -393,25 +393,23 @@ namespace AfterSchoolLibrary {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] Stripe_Has_Unfulfilled_Requirements {
+            get {
+                object obj = ResourceManager.GetObject("Stripe-Has-Unfulfilled-Requirements", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] StripeAccount_Verified {
             get {
                 object obj = ResourceManager.GetObject("StripeAccount_Verified", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] Stripe_Has_Unfulfilled_Requirements
-        {
-            get
-            {
-                object obj = ResourceManager.GetObject("Stripe_Has_Unfulfilled_Requirements", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-
+        
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
