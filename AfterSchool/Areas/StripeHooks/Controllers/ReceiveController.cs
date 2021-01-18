@@ -109,8 +109,10 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
 
             CheckStripeAccountRequirements(stripeAccount, account, msgs);
 
+            var updateChargesEnabled = !account.StripeChargesEnabled && stripeAccount.ChargesEnabled;
+            var updatePayoutsEnabled = !account.StripePayoutsEnabled & stripeAccount.PayoutsEnabled;
             msgs.Add("Getting SendStripeAccountVerified", MessageType.Notice);
-            if (msgs.HasNoErrors() && !account.StripeChargesEnabled && stripeAccount.ChargesEnabled)
+            if (msgs.HasNoErrors() && (updateChargesEnabled || updatePayoutsEnabled) )
             {
                 account.UpdateStripeChargesAndPayouts(stripeAccount, msgs);
                 // account.SendStripeAccountVerified(null);
