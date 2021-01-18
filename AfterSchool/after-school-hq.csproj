@@ -756,6 +756,7 @@
     <Content Include="index-profiles.html" />
     <Content Include="index.html" />
     <Content Include="ips.html" />
+    <Content Include="ISYP.html" />
     <Content Include="iyi-providers.html" />
     <Content Include="js\blocs.min.js" />
     <Content Include="js\bootstrap.bundle.min.js" />
