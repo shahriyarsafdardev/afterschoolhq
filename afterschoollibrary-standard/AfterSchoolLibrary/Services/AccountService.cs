@@ -2138,11 +2138,11 @@ namespace AfterSchoolLibrary.Services
                     dc);
         }
 
-        public static List<MccoySearchResponse> SearchMccoyAccounts(string hostAccountId, string search, string neighborhoods, string grades, string ages, string gender, string timing, string cost, string starting, string other, string specialNeeds, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<MccoySearchResponse> SearchAccounts(string hostAccountId, string search, string neighborhoods, string grades, string ages, string gender, string timing, string cost, string starting, string other, string specialNeeds, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             try
             {
-                var accountDataTable = Account.SearchMccoyAccounts(hostAccountId, search, neighborhoods, grades, ages, gender, timing, cost, starting, other, specialNeeds, msgs: msgs);
+                var accountDataTable = Account.SearchAccounts(hostAccountId, search, neighborhoods, grades, ages, gender, timing, cost, starting, other, specialNeeds, msgs: msgs);
                                 
                 if (accountDataTable.IsNotEmpty() && accountDataTable.Rows.Any())
                 {

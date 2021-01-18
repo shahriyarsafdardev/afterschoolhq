@@ -32,7 +32,7 @@ namespace AfterSchool.Controllers
         public ActionResult Index()
         {
             var msgs = new SystemMessages();
-            var neighborhoodList = Location.LoadMccoyNeighborhoods(hostAccountId: MccoyHostAccountId, msgs: msgs)
+            var neighborhoodList = Location.LoadNeighborhoods(hostAccountId: MccoyHostAccountId, msgs: msgs)
                                    .Where(x => x.IsNotEmpty())
                                    .ToList();
 
@@ -95,7 +95,7 @@ namespace AfterSchool.Controllers
             if (gender.IsNotBlank() && gender == GenderRestrictionType.FemaleOnly.ToString().ToLower())
                 genderIds += "2,";
 
-            var searchedAccounts = AccountService.SearchMccoyAccounts(MccoyHostAccountId, search, neighborhoods, gradeIds, ageIds, genderIds, timing, cost, starting, other, special, msgs: msgs);
+            var searchedAccounts = AccountService.SearchAccounts(MccoyHostAccountId, search, neighborhoods, gradeIds, ageIds, genderIds, timing, cost, starting, other, special, msgs: msgs);
 
             if (searchedAccounts.IsNotEmpty() && searchedAccounts.Any())
             {

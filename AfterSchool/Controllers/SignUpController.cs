@@ -256,6 +256,21 @@ namespace AfterSchool.Controllers
             
         }
 
+        public ActionResult ISYPRegistration()
+        {
+            var isypCodeToShare = ConfigurationManager.AppSettings["ISYPInviteCodeToShare"];
+            if (isypCodeToShare.IsNotEmpty() && isypCodeToShare.IsGuid())
+            {
+                var isypAccount = Account.LoadByInviteCodeToShare(new Guid(isypCodeToShare));
+
+                if (isypAccount.IsNotEmpty())
+                    return RedirectToAction("Welcome", new { invite = isypCodeToShare, isrequestonlyaccess = true });
+            }
+
+            return HttpNotFound();
+
+        }
+
         [HttpGet]
         public ActionResult New(string id, string a)
         {
@@ -980,7 +995,7 @@ namespace AfterSchool.Controllers
         {
             var model = new SignUpIndexViewModel()
             {
-                IsRequestOnlyAccess = isrequestonlyaccess.IsBoolean() ? isrequestonlyaccess.ToBoolean() : false,
+                IsRequestOnlyAccess = isrequestonlyaccess.IsBoolean() && isrequestonlyaccess.ToBoolean(),
                 InviteCodeToShare = invite.IsNotEmpty() ? invite : ""
             };
             return View(model);

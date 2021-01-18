@@ -596,6 +596,7 @@
     <Compile Include="Controllers\FaqController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\IndianapolisController.cs" />
+    <Compile Include="Controllers\IsypDirectoryController.cs" />
     <Compile Include="Controllers\LegalController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
     <Compile Include="Controllers\LogoutController.cs" />
@@ -730,6 +731,7 @@
     <Content Include="img\image-3-1800x900-1.png" />
     <Content Include="img\image-9.png" />
     <Content Include="img\IPS.png" />
+    <Content Include="img\isyp-logo.png" />
     <Content Include="img\lawrence.png" />
     <Content Include="img\lazyload-ph.png" />
     <Content Include="img\logo-white.png" />
@@ -1829,6 +1831,7 @@
     <Content Include="Views\SignUp\IndexNew.cshtml" />
     <Content Include="Views\MccoyDirectory\Index.cshtml" />
     <Content Include="Views\Shared\_MccoyFilters.cshtml" />
+    <Content Include="Views\ISYPDirectory\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
