@@ -118,7 +118,7 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 { "name", name },
                 { "description", description },
-                { "regmode", regmode },
+                { "regmode", regmode.IsNotEmpty() ? regmode : ((int)RegistrationMode.Register).ToString() },
                 { "form", form },
                 { "isinviteonly", isinviteonly.IsBoolean() },
                 // { "genderrestrictions", genderrestrictions },
@@ -671,6 +671,26 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
                 msgs.Add($"{group.Name} has been restored", MessageType.Success);
+
+            if (Request.UrlReferrer.IsNotEmpty())
+                return Redirect(Request.UrlReferrer.ToString());
+
+            return RedirectToAction("index", "group");
+        }
+
+        [HttpGet]
+        public ActionResult Delete(string id)
+        {
+            var msgs = new SystemMessages();
+            var group = ActivityGroup.LoadByUid(id.ToGuid());
+
+            if (group.IsNotEmpty())
+                group.SetIsDeleted(SessionVariables.CurrentUser.ID.Value, true, msgs);
+
+            ViewBag.Messages = msgs;
+
+            if (msgs.HasNoErrors())
+                msgs.Add($"{group.Name} was deleted at {SessionVariables.CurrentAccount.ConvertToAccountTimeZone(DateTime.UtcNow).ToLongDateTimeString()}", MessageType.Success);
 
             if (Request.UrlReferrer.IsNotEmpty())
                 return Redirect(Request.UrlReferrer.ToString());

@@ -4,6 +4,8 @@
     var currentUser = SessionVariables.CurrentUser;
     var msgs = (SystemMessages)ViewBag.Messages;
     var isFullScreen = (bool)ViewBag.IsFullScreen;
+    var supportEmail = (string)ViewBag.SupportEmail;
+    var supportEmailHref = $"mailto:{supportEmail}";
 
     ViewBag.Title = account.Name;
 
@@ -36,10 +38,34 @@
         <div class="panel-body">
 
             <div class="col-md-12">
-                @if (account.CanReceiveStripeDeposits())
+                @if (account.HasStripeConnectedAccount)
                 {
+                    if (!account.CanReceiveStripeDeposits())
+                    {
+                        var chargesEnabledIcon = "s7-close-circle text-danger";
+                        var chargesEnabledText = "Your account does NOT have charges enabled, so you won't be able to charge fees to parents.";
+                        var payoutsEnabledIcon = "s7-close-circle text-danger";
+                        var payoutsEnabledText = "Your account does NOT have payout enabled, so you won't be able to receive any money parents may have paid until this is enabled.";
+                        if (account.StripeChargesEnabled)
+                        {
+                            chargesEnabledIcon = "s7-check-circle text-succes";
+
+                        };
+                        <div class="text-center">
+                            <h1 class=""><i class="s7-check-circle text-success"></i> Your account has been connected to Stripe, however it is missing a few things:</h1>
+                            <div class="text-left offset-2">
+                                <h4><i class="@chargesEnabledIcon"></i> @chargesEnabledText</h4>
+                                <h4><i class="@payoutsEnabledIcon"></i> @payoutsEnabledText</h4>
+                            </div>
+                            <p class="margin-v-30">Please check for an email from Stripe to complete your payment setup. If you have any questions please contact support at <a href="@supportEmailHref">@supportEmail</a></p>
+                        </div>
+                    } else
+                    {                         
+                        <div class="text-center">
+                            <h1 class=""><i class="s7-check-circle text-success"></i> Your payment account has been setup.</h1>
+                        </div>
+                    }
                     <div class="text-center">
-                        <h1 class=""><i class="s7-check-circle text-success"></i> Your payment account has been setup.</h1>
                         <p class="margin-v-30">
                             <button type="button" class="btn btn-default md-trigger" data-modal="modal-disconnect-confirm" onclick="disconnectPaymentAccount()">Disconnect Payment Account</button>
                         </p>
@@ -170,6 +196,7 @@
                             </table>
                         </div>
                         <div class="col-xl-3 col-lg-2 visible-xl visible-lg"></div>
+                        <p>If you have any questions about how to setup your payments, our Support team will be happy to help!  <a href="@supportEmailHref">@supportEmail</a> </p>
                     </div>
                 }
             </div>

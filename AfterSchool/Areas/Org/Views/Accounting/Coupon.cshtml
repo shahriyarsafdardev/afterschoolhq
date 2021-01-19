@@ -2,7 +2,9 @@
 @model List<Coupon>
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
-  
+    var couponFeatureEnabled = SessionVariables.CurrentAccount.HasFeature(FeatureType.ManageCoupons);
+    var couponPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManageCoupons);
+
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -118,3 +120,11 @@
         </div>
     </div>
 </div>
+
+<script type="text/javascript">
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        if (!@(couponFeatureEnabled.ToString().ToLower())) {
+            showUpgradeMyPlan('@(couponPackage?.Name)','@(couponPackage?.ID)',true)
+        }
+    });
+</script>
