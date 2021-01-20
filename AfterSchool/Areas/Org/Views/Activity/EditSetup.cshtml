@@ -6,6 +6,7 @@
     var group = (ActivityGroup)ViewBag.Group;
     var isFullScreen = (bool)ViewBag.IsFullScreen;
     var title = $"{(Model.ActivityGroupName.IsNotEmpty() ? $"{Model.ActivityGroupName} - " : "")}{Model.Name.IfBlank("New " + UILabel.ActivityLabel(Model.ActivityTypeId))}";
+    var url = $"/Org/activity/editsetup/{Model.Uid}?cmd=next&amp;isnew={Request["isnew"]}";
 
     if (isFullScreen)
     {
@@ -34,8 +35,9 @@
 
             <div class="col-md-10 col-lg-9">
                 <form id="form1" method="post" action="@Url.Action("editsetup", "activity", new { id = Model.Uid, isnew = Request["isnew"], source = Request["source"] })" class="form-horizontal">
+                    
+                    <button type="submit" class="btn pull-right btn-space btn-primary" onclick="return validateSetup('@url')">»</button>
 
-                    @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editsetup", "next", true, true, Request))
                     @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(true, false))
 
                     @{Html.RenderPartial("~/Views/Shared/_ActivityFormSetup.cshtml", Model);}
@@ -47,7 +49,7 @@
                         </div>
 
                         <div class="col-sm-3">
-                            @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editsetup", "next", false, true, Request))
+                            <button type="submit" class="btn btn-space btn-lg btn-block btn-primary" onclick="return validateSetup(1);">Save &amp; Next »</button>                    
                         </div>
 
                     </div>
@@ -62,3 +64,25 @@
         </div>
     </div>
 </div>
+
+<script type="text/javascript">
+    function validateSetup(flag) {        
+        var startDate = moment($('#registrationopendate').val());
+        var endDate = moment($('#registrationclosedate').val());
+        var beginningTime = moment($('#registrationopentime').val(), 'h:mma');
+        var endingTime = moment($('#registrationclosetime').val(), 'h:mma');
+
+        if (endDate.isBefore(startDate) ||
+            (endDate.isSame(startDate) && (endingTime.isSame(beginningTime) || endingTime.isBefore(beginningTime))))
+        {
+            Notifications.showBar({
+                title: 'Error',
+                message: 'Please make the end date after the start date.',
+                success: false
+            });
+            return false;
+        } else if (flag) {
+            return ActivitySetup.navigateActivity('@url');
+        }
+    }
+</script>
