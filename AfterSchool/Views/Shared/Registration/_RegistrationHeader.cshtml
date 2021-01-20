@@ -13,7 +13,7 @@
     var shareUrl = Model.Account.ShortHomePageUrl;
     var shareObject = Model.Account.Name;
     var isInEditMode = currentUser.IsNotEmpty() && currentUser.HasAccessTo(Model.Account) && Request["edit"] == "1";
-    var groupId = Model.ParticipationObject.GetAnyRelatedActivityGroupId();
+    var groupId = Model.ParticipationObject?.GetAnyRelatedActivityGroupId();
 
     if (Model.ParticipationObject.IsNotEmpty())
     {
