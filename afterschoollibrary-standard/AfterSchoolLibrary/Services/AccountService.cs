@@ -376,9 +376,9 @@ namespace AfterSchoolLibrary.Services
             return groups.Where(group => periods.Select(period => period.ActivityGroupId.Value).Contains(group.ID.Value)).ToList();
         }
 
-        public static List<ActivityGroup> GetSessions(this Account account, bool IsArchived, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<ActivityGroup> GetSessions(this Account account, bool IsArchived, int? start, int? length, bool IsDeleted = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityGroup.LoadByAccountId(account.ID.Value, ActivityGroupType.Session, IsArchived, start, length, msgs, dc);
+            return ActivityGroup.LoadByAccountId(account.ID.Value, ActivityGroupType.Session, IsArchived, start, length, IsDeleted, msgs, dc);
         }
 
         public static int GetSessionCount(this Account account, bool IsArchived = false, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -2834,7 +2834,7 @@ namespace AfterSchoolLibrary.Services
                 registrant = checkoutObject.Registration.GetRegistrant(msgs, dc);
 
                 // need to check for existing purchase or create a new one
-                checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc);
+                checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc);                
             }
 
             // charge successful so I need to create a transaction
@@ -3154,6 +3154,7 @@ namespace AfterSchoolLibrary.Services
                 paymentTypeFeePaid,
                 checkoutObject.ConvenienceFeePayer,
                 checkoutObject.CreditCardFeePayer,
+                checkoutObject.Coupon,
                 loggedInUser, 
                 msgs, 
                 dc);
@@ -3572,7 +3573,7 @@ namespace AfterSchoolLibrary.Services
                     if (coupon.DoesApplyToSubscriptionPlan() && !participationObject.SubscriptionPlans.Any())
                         msgs.Add("Coupon can only be applied to a subscription", MessageType.UserError);
 
-                    if (coupon.HasReachedLimit(payerAccount.ID.Value, msgs, dc))
+                    if (coupon.HasReachedLimit(payerAccount.ID.Value, participationObject.PostPayPlans.IsNotEmpty(), msgs, dc))
                         msgs.Add("Coupon has reached the limit of uses", MessageType.UserError);
 
                 }
@@ -3609,7 +3610,7 @@ namespace AfterSchoolLibrary.Services
 
         public static List<ActivityGroup> GetLeagues(this Account account, bool IsArchived, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityGroup.LoadByAccountId(account.ID.Value, ActivityGroupType.League, IsArchived, start, length, msgs, dc);
+            return ActivityGroup.LoadByAccountId(account.ID.Value, ActivityGroupType.League, IsArchived, start, length, false, msgs, dc);
         }
 
         public static int GetLeagueCount(this Account account, bool IsArchived, SystemMessages msgs = null, DatabaseConnection dc = null)

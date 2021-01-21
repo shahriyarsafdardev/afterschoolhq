@@ -817,6 +817,16 @@ namespace AfterSchoolLibrary.Models
             return 0;
         }
 
+        public decimal GetPostPayCheckoutCostWithoutConvenienceFee()
+        {
+            var plan = this.PostPayPlans?.FirstOrDefault();
+
+            if ((plan?.NumberOfPeriodsPrePaid).IsPositive())
+                return plan.NumberOfPeriodsPrePaid.Value * GetPostPayCost();
+            
+            return GetPostPayCost();
+        }
+
         #endregion
 
         public decimal GetCheckoutCostWithConvenienceFee()

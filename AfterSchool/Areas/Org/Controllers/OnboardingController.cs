@@ -80,7 +80,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult ProgramInfo(string title, string headline, string genderrestrictions)
+        public ActionResult ProgramInfo(string title, string headline, string genderrestrictions, string timeZone)
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
@@ -99,6 +99,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         account.Name = title;
                         account.UniqueName = AccountService.GenerateUniqueName(title, account.ID, amsgs, adc);
                         account.OnboardingStepDone = OnboardingStepType.ProgramInfo;
+                        account.TimeZone = timeZone.IsNotEmpty() ? timeZone : null;
                         amsgs.AddRange(account.Save(adc));
 
                         profile.UpdateProfileProgramInfo(
@@ -513,8 +514,9 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors() && account.IsNotEmpty() && currentUser.IsNotEmpty())
             {
+                //.. send support email to AHQ just to notifiy the team that a profile completed.
                 EmailHelper.SendEmail(
-                    AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress,
+                    AfterSchoolLibrary.Helpers.Email.AppCustomersEmailAddress,
                     $"AHQ Profile Completed - {account.Name}",
                     $"<p>Organization: {account.Name}<br />Name: {currentUser.FirstName} {currentUser.LastName}<br />Email: {currentUser.Email}<br />Profile Link: {account.HomePageUrl}</p>",
                     true);

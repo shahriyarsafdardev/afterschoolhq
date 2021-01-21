@@ -11,7 +11,10 @@ namespace AfterSchoolLibrary.Services
     {
 
         public static decimal GetFeesChargedToBiller(this Transaction transaction)
-        {            
+        {
+            if (transaction.PaymentSourceTypeId != PaymentSourceType.AfterSchoolPlatform)
+                return 0;
+
             // handle old transactions
             if (!transaction.ConvenienceFeePayerAccountId.HasValue)
                 return (transaction.Amount.Value * transaction.PlatformPercentFee.Value) + transaction.PlatformFlatFee.Value;
@@ -194,7 +197,7 @@ namespace AfterSchoolLibrary.Services
                 checkoutObject.Date,
                 useConnectedAccount,
                 loggedInUser,
-                checkoutObject.Coupon.IsNotEmpty() ? checkoutObject.CouponValue(msgs, dc) : new decimal?(),
+                checkoutObject.CouponValue(msgs, dc),
                 checkoutObject.Coupon,
                 msgs,
                 dc);

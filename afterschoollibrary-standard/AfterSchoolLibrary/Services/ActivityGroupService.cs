@@ -871,6 +871,14 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(group.Save(dc));
         }
 
+        public static void SetIsDeleted(this ActivityGroup group, int loggedInUserId,bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            group.LastModifiedDate = DateTime.UtcNow;
+            group.LastModifiedBy = loggedInUserId;
+            group.IsDeleted = isDeleted;
+            msgs.AddRange(group.Save(dc));
+        }
+
         public static List<RegistrantActivityGroup> GetInvitedContacts(this ActivityGroup group, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return RegistrantActivityGroup.LoadByActivityGroupId(group.ID.Value, start, length, msgs, dc);

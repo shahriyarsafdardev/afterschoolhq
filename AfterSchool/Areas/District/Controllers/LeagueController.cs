@@ -107,6 +107,26 @@ namespace AfterSchool.Areas.District.Controllers
             return RedirectToAction("index", "league");
         }
 
+        [HttpGet]
+        public ActionResult Delete(string id)
+        {
+            var msgs = new SystemMessages();
+            var group = ActivityGroup.LoadByUid(id.ToGuid());
+
+            if (group.IsNotEmpty())
+                group.SetIsDeleted(SessionVariables.CurrentUser.ID.Value, true, msgs);
+
+            ViewBag.Messages = msgs;
+
+            if (msgs.HasNoErrors())
+                msgs.Add($"{group.Name} was deleted at {SessionVariables.CurrentAccount.ConvertToAccountTimeZone(DateTime.UtcNow).ToLongDateTimeString()}", MessageType.Success);
+
+            if (Request.UrlReferrer.IsNotEmpty())
+                return Redirect(Request.UrlReferrer.ToString());
+
+            return RedirectToAction("index", "league");
+        }
+
         [ValidateInput(false)]
         [HttpGet]
         public ActionResult Summary(string id)
