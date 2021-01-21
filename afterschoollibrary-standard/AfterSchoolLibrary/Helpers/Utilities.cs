@@ -95,6 +95,18 @@ namespace AfterSchoolLibrary.Helpers
             Rollbar.RollbarLocator.RollbarInstance.Error(msgs.RenderMessageList(MessageOutputType.Text));
         }
 
+        public static void SystemErrorLog(Exception ex)
+        {
+            Rollbar.RollbarLocator.RollbarInstance.Configure(new Rollbar.RollbarConfig(RollbarAccessToken) { Environment = GetRollbarEnvironment() });
+            Rollbar.RollbarLocator.RollbarInstance.Error(ex.Message + " - " + ex.InnerException + " - " + ex.StackTrace);
+        }
+
+        public static void SystemLog(SystemMessages msgs)
+        {
+            Rollbar.RollbarLocator.RollbarInstance.Configure(new Rollbar.RollbarConfig(RollbarAccessToken) { Environment = GetRollbarEnvironment() });
+            Rollbar.RollbarLocator.RollbarInstance.Info(msgs.RenderMessageList(MessageOutputType.Text));
+        }
+
         public static void SystemLog(string msg)
         {
             Rollbar.RollbarLocator.RollbarInstance.Configure(new Rollbar.RollbarConfig(RollbarAccessToken) { Environment = GetRollbarEnvironment() });

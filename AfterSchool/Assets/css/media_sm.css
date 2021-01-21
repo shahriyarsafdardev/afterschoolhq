@@ -94,4 +94,9 @@
     .dialogbox {
         margin: 5px;
     }
+
+    .participation-object {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
 }
