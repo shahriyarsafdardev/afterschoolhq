@@ -1068,7 +1068,7 @@ namespace AfterSchoolLibrary.Models
             var searchTerms = $"\"\"";
 
             if (search.IsNotBlank())
-                searchTerms = $"\"{search}*\"";
+                searchTerms = $"\"*{search}*\"";
 
             var sql = $@"
                 DECLARE @SearchTerm NVARCHAR(250),
