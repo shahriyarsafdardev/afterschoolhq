@@ -655,7 +655,7 @@ namespace AfterSchoolLibrary.Models
                 var sql = $@"
                     select * from Account
                     where
-                        name like '%{query}%'
+                        Contains(name, '{"\""}{searchTerms.ToStringList("*\" AND \"")}{"*\""}')
                         AND IsActive = 1 
                         AND IsDeleted = 0 
                         AND IsTest = 0 
