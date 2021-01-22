@@ -2138,20 +2138,83 @@ namespace AfterSchoolLibrary.Services
                     dc);
         }
 
-        public static List<MccoySearchResponse> SearchAccounts(string hostAccountId, string search, string neighborhoods, string grades, string ages, string gender, string timing, string cost, string starting, string other, string specialNeeds, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static string ParseAndLoadGrade(string grades)
+        {
+            var gradeIds = "";
+            List<GradeLevel> ListGrades = GradeLevel.Load();
+
+            if (grades.IsNotEmpty())
+            {
+                var lstGrades = grades.Split(',');
+                foreach (var item in lstGrades)
+                {
+                    var grade = ListGrades.FirstOrDefault(m => m.Name.ToLower().Replace(" ", "_") == item);
+
+                    if (grade.IsNotEmpty())
+                        gradeIds += $"{grade.ID},";
+                }
+            }
+
+            return gradeIds;
+        }
+
+        public static string ParseAndLoadAge(string ages)
+        {
+            var ageIds = "";
+            if (ages.IsNotEmpty())
+            {
+                var lstAges = ages.Split(',');
+                foreach (var item in lstAges)
+                {
+                    if (item.Contains('_'))
+                    {
+                        var age = item.Split('_');
+
+                        if (age.IsNotEmpty())
+                        {
+                            var ageStart = age[0];
+                            var ageEnd = age[1];
+
+                            if (ageStart.IsNotEmpty() && ageEnd.IsNotEmpty())
+                            {
+                                for (int i = ageStart.ToInteger(); i <= ageEnd.ToInteger(); i++)
+                                {
+                                    ageIds += $"{i},";
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return ageIds;
+        }
+
+        public static string ParseAndLoadGender(string gender)
+        {
+            var genderIds = "";
+            if (gender.IsNotBlank() && gender == GenderRestrictionType.MaleOnly.ToString().ToLower())
+                genderIds = "1,";
+            if (gender.IsNotBlank() && gender == GenderRestrictionType.FemaleOnly.ToString().ToLower())
+                genderIds += "2,";
+
+            return genderIds;
+        }
+
+        public static List<SearchDirectoryResponse> SearchDirectoryAccounts(string hostAccountId, string search, string neighborhoods, string grades, string ages, string gender, string timing, string cost, string starting, string other, string specialNeeds, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             try
             {
-                var accountDataTable = Account.SearchAccounts(hostAccountId, search, neighborhoods, grades, ages, gender, timing, cost, starting, other, specialNeeds, msgs: msgs);
+                var accountDataTable = Account.SearchVisitorAccountsByHostAccount(hostAccountId, search, neighborhoods, ParseAndLoadGrade(grades), ParseAndLoadAge(ages), ParseAndLoadGender(gender), timing, cost, starting, other, specialNeeds, msgs: msgs);
                                 
                 if (accountDataTable.IsNotEmpty() && accountDataTable.Rows.Any())
                 {
-                    List<MccoySearchResponse> ListResponse = new List<MccoySearchResponse>();
+                    List<SearchDirectoryResponse> ListResponse = new List<SearchDirectoryResponse>();
                     foreach (DataRow row in accountDataTable.Rows)
                     {
                         if (row.IsNotEmpty())
                         {
-                            MccoySearchResponse response = new MccoySearchResponse();
+                            SearchDirectoryResponse response = new SearchDirectoryResponse();
 
                             // ..account
                             response.AccountName = row["AccountName"].ToString();
