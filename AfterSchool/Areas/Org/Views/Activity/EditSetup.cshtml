@@ -5,8 +5,7 @@
     var accountPackage = (AccountPackage)ViewBag.AccountPackage;
     var group = (ActivityGroup)ViewBag.Group;
     var isFullScreen = (bool)ViewBag.IsFullScreen;
-    var title = $"{(Model.ActivityGroupName.IsNotEmpty() ? $"{Model.ActivityGroupName} - " : "")}{Model.Name.IfBlank("New " + UILabel.ActivityLabel(Model.ActivityTypeId))}";
-    var url = $"/Org/activity/editsetup/{Model.Uid}?cmd=next&amp;isnew={Request["isnew"]}";
+    var title = $"{(Model.ActivityGroupName.IsNotEmpty() ? $"{Model.ActivityGroupName} - " : "")}{Model.Name.IfBlank("New " + UILabel.ActivityLabel(Model.ActivityTypeId))}";    
 
     if (isFullScreen)
     {
@@ -35,8 +34,8 @@
 
             <div class="col-md-10 col-lg-9">
                 <form id="form1" method="post" action="@Url.Action("editsetup", "activity", new { id = Model.Uid, isnew = Request["isnew"], source = Request["source"] })" class="form-horizontal">
-                    
-                    <button type="submit" class="btn pull-right btn-space btn-primary" onclick="return validateSetup('@url')">»</button>
+
+                    @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButtonWithSetupValidation(Model, "editsetup", "next", true, true, Request))
 
                     @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(true, false))
 
@@ -49,7 +48,7 @@
                         </div>
 
                         <div class="col-sm-3">
-                            <button type="submit" class="btn btn-space btn-lg btn-block btn-primary" onclick="return validateSetup(1);">Save &amp; Next »</button>                    
+                            @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButtonWithSetupValidation(Model, "editsetup", "next", false, true, Request))
                         </div>
 
                     </div>
@@ -66,7 +65,7 @@
 </div>
 
 <script type="text/javascript">
-    function validateSetup(flag) {        
+    function validateSetup(flag, url) {        
         var startDate = moment($('#registrationopendate').val());
         var endDate = moment($('#registrationclosedate').val());
         var beginningTime = moment($('#registrationopentime').val(), 'h:mma');
@@ -82,7 +81,7 @@
             });
             return false;
         } else if (flag) {
-            return ActivitySetup.navigateActivity('@url');
+            return ActivitySetup.navigateActivity(url);
         }
     }
 </script>
