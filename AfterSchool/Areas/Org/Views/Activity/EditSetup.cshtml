@@ -65,7 +65,7 @@
 </div>
 
 <script type="text/javascript">
-    function validateSetup(flag, url) {        
+    function validateSetup(flag, event, url) {        
         var startDate = moment($('#registrationopendate').val());
         var endDate = moment($('#registrationclosedate').val());
         var beginningTime = moment($('#registrationopentime').val(), 'h:mma');
@@ -79,6 +79,8 @@
                 message: 'Please make the end date after the start date.',
                 success: false
             });
+
+            event.preventDefault();
             return false;
         } else if (flag) {
             return ActivitySetup.navigateActivity(url);

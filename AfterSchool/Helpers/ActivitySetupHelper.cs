@@ -29,7 +29,7 @@ namespace AfterSchool.Helpers
         {
             var canPublishActivity = SessionVariables.CurrentUser.CanPublishActivity(SessionVariables.CurrentAccount, activity);
 
-            return $"<button type=\"submit\" class=\"{ButtonStyle(isTop, isPrimary)}\" onclick=\"validateSetup(1, '{GenerateUrl(activity, action, "activity", cmd, request)}')\">{ButtonText(cmd, isTop, canPublishActivity)}</button>";
+            return $"<button type=\"submit\" class=\"{ButtonStyle(isTop, isPrimary)}\" onclick=\"return validateSetup(1, event, '{GenerateUrl(activity, action, "activity", cmd, request)}')\">{ButtonText(cmd, isTop, canPublishActivity)}</button>";
         }
 
         public static string NavButton(ActivityGroup group, string action, string cmd, bool isTop, bool isPrimary, HttpRequestBase request)
