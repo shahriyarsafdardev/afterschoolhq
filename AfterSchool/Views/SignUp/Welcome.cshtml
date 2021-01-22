@@ -484,21 +484,11 @@
                 };
 
                 signupAccountSearch.val(text);
-
-                //if (isSchool) {
-                //    window.location = `${slug}`; //move to profile page
-                //    return;
-                //}
                 
                 if (isClaimed == false) {
                     var url = slug + '?claimprofile=1';
                     window.location = url ; //move to profile page
-                    return;
                 }
-                else {
-                    window.location = slug;
-                }
-
             } else {
                 selectedAccount = null; //support for back click
                 hiddenAccountName.val(signupAccountSearch.val())
