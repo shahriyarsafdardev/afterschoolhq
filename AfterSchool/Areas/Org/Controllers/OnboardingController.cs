@@ -159,10 +159,10 @@ namespace AfterSchool.Areas.Org.Controllers
                         amsgs.AddRange(account.Save(adc));
 
                         profile.UpdateProfile(
-                            mingrade: mingrade.IsInteger() ? mingrade.ToInteger() : 0,
-                            maxgrade: maxgrade.IsInteger() ? maxgrade.ToInteger() : 0,
-                            agestart: agestart.IsInteger() ? agestart.ToInteger() : 0,
-                            ageend: ageend.IsInteger() ? ageend.ToInteger() : 0,
+                            mingrade: mingrade,
+                            maxgrade: maxgrade,
+                            agestart: agestart,
+                            ageend: ageend,
                             opencovid: isOpenDuringCovid,
                             elearningcenter: isElc,
                             isvirtualprogram: isVirtualProgram,
