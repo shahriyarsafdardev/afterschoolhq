@@ -13,6 +13,7 @@ using AfterSchool.Helpers;
 using System.Net.Mail;
 using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary;
+using System.Configuration;
 
 namespace AfterSchool.Controllers
 {
@@ -242,9 +243,17 @@ namespace AfterSchool.Controllers
 
         public ActionResult McCoyRegistration()
         {
-            //TODO: need to review with darye on how to fetch this code, via using key in config or db call.
-            var mcCoyCodeToShare = new Guid("8BBDC665-8B16-4034-BAD4-C7FCC457BED9");
-            return RedirectToAction("Welcome", new { invite = mcCoyCodeToShare, isrequestonlyaccess = true });
+            var mcCoyCodeToShare = ConfigurationManager.AppSettings["MccoyInviteCodeToShare"];
+            if (mcCoyCodeToShare.IsNotEmpty() && mcCoyCodeToShare.IsGuid())
+            {
+                var mccoyAccount = Account.LoadByInviteCodeToShare(mcCoyCodeToShare.ToGuid());
+
+                if (mccoyAccount.IsNotEmpty())
+                    return RedirectToAction("Welcome", new { invite = mcCoyCodeToShare, isrequestonlyaccess = true });
+            }
+
+            return HttpNotFound();
+            
         }
 
         [HttpGet]

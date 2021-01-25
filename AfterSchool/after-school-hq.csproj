@@ -599,6 +599,7 @@
     <Compile Include="Controllers\LegalController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
     <Compile Include="Controllers\LogoutController.cs" />
+    <Compile Include="Controllers\MccoyDirectoryController.cs" />
     <Compile Include="Controllers\MsgController.cs" />
     <Compile Include="Controllers\OAuthController.cs" />
     <Compile Include="Controllers\RController.cs" />
@@ -688,10 +689,10 @@
     <Content Include="img\banner-classroom.jpg" />
     <Content Include="img\BCALogo.jpg" />
     <Content Include="img\billy2.png" />
-    <Content Include="img\client_success_manager.jpeg" />
     <Content Include="img\darye.png" />
     <Content Include="img\david.png" />
     <Content Include="img\fee.png" />
+    <Content Include="img\filter.png" />
     <Content Include="img\frank-mckenna-LhOjrOlcLx4-unsplash.jpg" />
     <Content Include="img\gabriel-baranski-vGICUyYW2CE-unsplash.jpg" />
     <Content Include="img\handshake-icon.png" />
@@ -1825,6 +1826,8 @@
     <Content Include="Views\Shared\Components\_GoogleLocationEdit.cshtml" />
     <Content Include="Views\Shared\_GradeRestrictions.cshtml" />
     <Content Include="Views\SignUp\IndexNew.cshtml" />
+    <Content Include="Views\MccoyDirectory\Index.cshtml" />
+    <Content Include="Views\Shared\_MccoyFilters.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -6,6 +6,9 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Billing;
+using Lob.Models;
+using AfterSchool.Models;
+using System.Data;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -2133,6 +2136,60 @@ namespace AfterSchoolLibrary.Services
                     loggedInUser,
                     msgs,
                     dc);
+        }
+
+        public static List<MccoySearchResponse> SearchMccoyAccounts(int hostAccountId, string search, string neighborhoods, string grades, string ages, string gender, string timing, string cost, string starting, string other, string specialNeeds, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            try
+            {
+                var accountDataTable = Account.SearchMccoyAccounts(hostAccountId, search, neighborhoods, grades, ages, gender, timing, cost, starting, other, specialNeeds, msgs: msgs);
+                                
+                if (accountDataTable.IsNotEmpty() && accountDataTable.Rows.Any())
+                {
+                    List<MccoySearchResponse> ListResponse = new List<MccoySearchResponse>();
+                    foreach (DataRow row in accountDataTable.Rows)
+                    {
+                        if (row.IsNotEmpty())
+                        {
+                            MccoySearchResponse response = new MccoySearchResponse();
+
+                            // ..account
+                            response.AccountName = row["AccountName"].ToString();
+                            response.AccountUid = new Guid(row["AccountUid"].ToString());
+                            response.HomePageUrl = $"{Helpers.Utilities.BaseUrl()}/{row["AccountUniqueName"]}";
+
+                            //.. account profile  
+                            response.IsOpenDuringCovid = row["IsOpenDuringCovid"].IsNotEmpty() ? Convert.ToBoolean(row["IsOpenDuringCovid"]) : false;
+                            response.IsELearningCenter = row["IsELearningCenter"].IsNotEmpty() ? Convert.ToBoolean(row["IsELearningCenter"]) : false;
+                            response.ProfileHeadline = row["Headline"].IsNotEmpty() ? row["Headline"].ToString().MaxChars(70, "... (more)") : "";
+                            response.IsRestrictByGrade = row["AgeStart"].IsEmpty();
+                            response.AgeStart = row["AgeStart"].IsNotEmpty() ? row["AgeStart"].ToString() : null;
+                            response.AgeEnd = row["AgeEnd"].IsNotEmpty() ? row["AgeEnd"].ToString() : null;
+                            response.GradeStart = row["GradeLevelStart"].IsNotEmpty() ? row["GradeLevelStart"].ToString() : null;
+                            response.GradeEnd = row["GradeLevelEnd"].IsNotEmpty() ? row["GradeLevelEnd"].ToString() : null;
+
+                            //..Location, ProfileHeaderImageUrl
+                            if (row["LocationId"].IsNotEmpty())
+                            {
+                                var location = Location.Load(Convert.ToInt32(row["LocationId"]));
+                                response.Location = location.FormatCityState(false);
+                                response.ProfileHeaderImageUrl = LocationService.GetGoogleMapsImageUrl(location, 1500, 600);
+                            }
+
+                            ListResponse.Add(response);
+                        }
+                    }
+
+                    return ListResponse;
+                }
+            }
+            catch (Exception ex)
+            {
+                msgs.Add(new SystemMessage() { Exception = ex, Text= ex.Message, MessageType = MessageType.Error });
+                Helpers.Utilities.SystemErrorLog(ex);                
+            }
+
+            return null;
         }
 
         #endregion
