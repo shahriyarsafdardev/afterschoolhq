@@ -246,7 +246,7 @@ namespace AfterSchool.Controllers
             var mcCoyCodeToShare = ConfigurationManager.AppSettings["MccoyInviteCodeToShare"];
             if (mcCoyCodeToShare.IsNotEmpty() && mcCoyCodeToShare.IsGuid())
             {
-                var mccoyAccount = Account.LoadByInviteCodeToShare(new Guid(mcCoyCodeToShare));
+                var mccoyAccount = Account.LoadByInviteCodeToShare(mcCoyCodeToShare.ToGuid());
 
                 if (mccoyAccount.IsNotEmpty())
                     return RedirectToAction("Welcome", new { invite = mcCoyCodeToShare, isrequestonlyaccess = true });
