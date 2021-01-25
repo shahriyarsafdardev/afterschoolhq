@@ -12,7 +12,7 @@ namespace AfterSchool.Controllers
 {
     public class MccoyDirectoryController : Controller
     {
-        private readonly string MccoyHostAccountId = ConfigurationManager.AppSettings["MccoyAccountUID"];
+        private readonly string MccoyHostAccountId = string.Empty;
         private static List<GradeLevel> ListGrades = GradeLevel.Load();
 
         public MccoyDirectoryController()
@@ -21,7 +21,7 @@ namespace AfterSchool.Controllers
 
             if (mcCoyCodeToShare.IsNotEmpty() && mcCoyCodeToShare.IsGuid())
             {
-                var mccoyAccount = Account.LoadByInviteCodeToShare(new Guid(mcCoyCodeToShare));               
+                var mccoyAccount = Account.LoadByInviteCodeToShare(mcCoyCodeToShare.ToGuid());               
 
                 if (mccoyAccount.IsNotEmpty())
                     MccoyHostAccountId = mccoyAccount.ID.ToString();
