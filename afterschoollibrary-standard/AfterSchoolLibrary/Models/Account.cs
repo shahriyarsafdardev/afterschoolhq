@@ -1146,7 +1146,7 @@ namespace AfterSchoolLibrary.Models
 				LEFT JOIN GradeLevel glStart on glStart.ID = ap.GradeLevelStart
 				LEFT JOIN GradeLevel glEnd on glEnd.ID = ap.GradeLevelEnd
                 OUTER APPLY STRING_SPLIT(@Grades, ',') s
-                WHERE ar.HostAccountId = '{hostAccountId}' and a.IsDeleted <> 1                  
+                WHERE ar.HostAccountId = {hostAccountId} and a.IsDeleted <> 1                  
                     AND (
 						    (@SearchTerm = '""""') OR 
 						    CONTAINS((ap.Title, ap.Headline, ap.About), @SearchTerm)  OR 
