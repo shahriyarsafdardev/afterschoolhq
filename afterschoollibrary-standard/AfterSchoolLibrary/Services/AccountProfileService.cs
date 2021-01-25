@@ -314,12 +314,12 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(profile.Save(dc));
         }
 
-        public static void UpdateProfileAdditionalInfo(this AccountProfile profile, int mingrade, int maxgrade, int agestart, int ageend, bool opencovid = false, bool elearningcenter = false, bool isvirtualprogram = false, WebUser loggedInUser = null, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {           
-            profile.GradeLevelStart = mingrade <= 0 ? new int?() : mingrade;
-            profile.GradeLevelEnd = maxgrade <= 0 ? new int?() : maxgrade;
-            profile.AgeStart = agestart <= 0 ? new int?() : agestart;
-            profile.AgeEnd = ageend <= 0 ? new int?() : ageend;
+        public static void UpdateProfileAdditionalInfo(this AccountProfile profile, string mingrade, string maxgrade, string agestart, string ageend, bool opencovid = false, bool elearningcenter = false, bool isvirtualprogram = false, WebUser loggedInUser = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            profile.GradeLevelStart = mingrade.IsInteger() ? mingrade.ToInteger() : new int?();
+            profile.GradeLevelEnd = maxgrade.IsInteger() ? maxgrade.ToInteger() : new int?();
+            profile.AgeStart = agestart.IsInteger() ? agestart.ToInteger() : new int?();
+            profile.AgeEnd = ageend.IsInteger() ? ageend.ToInteger() : new int?();
             profile.IsOpenDuringCovid = opencovid;
             profile.IsELearningCenter = elearningcenter;
             profile.IsVirtualProgram = isvirtualprogram;
