@@ -1041,6 +1041,178 @@ namespace AfterSchoolLibrary.Models
             return 0;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="hostAccountId">mccoy id</param>
+        /// <param name="search">search would be string like m, which will be resulted into '"m*"'</param>
+        /// <param name="neighborhoods"></param>
+        /// <param name="grades"></param>
+        /// <param name="ages"></param>
+        /// <param name="gender"></param>
+        /// <param name="timing"></param>
+        /// <param name="cost"></param>
+        /// <param name="starting"></param>
+        /// <param name="other"></param>
+        /// <param name="specialNeeds"></param>
+        /// <param name="start"></param>
+        /// <param name="length"></param>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
+        /// <returns></returns>
+        public static DataTable SearchMccoyAccounts(string hostAccountId, string search, string neighborhoods, string grades, string ages, string gender, string timing, string cost, string starting, string other, string specialNeeds, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+
+            var searchTerms = $"\"\"";
+
+            if (search.IsNotBlank())
+                searchTerms = $"\"*{search}*\"";
+
+            var sql = $@"
+                DECLARE @SearchTerm NVARCHAR(250),
+                        @Neighborhood NVARCHAR(100),
+                        @Grades NVARCHAR(100),
+                        @Age NVARCHAR(100),
+                        @Gender varchar(10),                        
+                        @Cost varchar(1),
+                        @Starting varchar(1),
+                        @IsELearningCenter BIT = NULL,  
+                        @IsVirtualProgram BIT = NULL, 
+                        @IsOpenDuringCovid BIT = NULL, 
+                        @Timing NVARCHAR(100),
+                        @SpecialNeeds NVARCHAR(100)
+
+                SET @SearchTerm = '{searchTerms}'";
+
+            if (neighborhoods.IsNotEmpty())
+                sql += $"SET @Neighborhood = '{neighborhoods}'";
+
+            if (grades.IsNotEmpty())
+                sql += $"SET @Grades = '{grades}'";
+
+            if (ages.IsNotEmpty())
+                sql += $"SET @Age = '{ages}'";
+
+            if (gender.IsNotEmpty())
+                sql += $"SET @Gender = '{gender}'";            
+
+            if (cost.IsNotEmpty())
+                sql += $"SET @Cost = '1'";
+
+            if (starting.IsNotEmpty())
+                sql += $"SET @Starting = '1'";
+
+            if (other.IsNotBlank() && other.Contains("e_learning"))
+                sql += $"SET @IsELearningCenter = 1";
+
+            if (other.IsNotBlank() && other.Contains("virtual_programming"))
+                sql += $"SET @IsVirtualProgram = 1";
+
+            if (other.IsNotBlank() && other.Contains("covid_protections"))
+                sql += $"SET @IsOpenDuringCovid = 1";
+
+            if (timing.IsNotEmpty())
+                sql += $"SET @Timing = '{timing}'";
+
+            if (specialNeeds.IsNotEmpty())
+                sql += $"SET @SpecialNeeds = '{specialNeeds}'";
+
+            sql += $@"
+                SELECT DISTINCT 
+                    a.Id as AccountId,
+                    a.Uid as AccountUid, 
+                    a.Name as AccountName,                    
+                    a.UniqueName as AccountUniqueName,
+                    ap.IsOpenDuringCovid,
+					ap.IsELearningCenter,
+					ap.Headline,
+                    ap.LocationId,
+                    ap.AgeStart,
+					ap.AgeEnd,
+					glStart.Abbreviation as GradeLevelStart,
+					glEnd.Abbreviation as GradeLevelEnd
+                FROM AccountRelationship ar
+                INNER JOIN Account a ON a.ID = ar.VisitorAccountId
+                LEFT JOIN Activity act ON act.AccountId = ar.VisitorAccountId and act.IsDeleted <> 1 and act.IsPublished = 1
+                LEFT JOIN ActivityRegistrationPeriod arp on arp.ActivityId = act.ID
+                LEFT JOIN RegistrationPeriod rp on rp.ID = arp.RegistrationPeriodId
+                LEFT JOIN AccountProfile ap ON ap.AccountId = ar.VisitorAccountId
+                LEFT JOIN Location loc ON ap.LocationId = loc.ID
+                LEFT JOIN AccountProperty properties on properties.AccountId = ar.VisitorAccountId and properties.AccountPropertyTypeId in (12, 13, 14, 15)    
+                LEFT JOIN AccountProperty specialNeeds on specialNeeds.AccountId = ar.VisitorAccountId and specialNeeds.AccountPropertyTypeId = 17          
+				LEFT JOIN AccountProperty timing on timing.AccountId = ar.VisitorAccountId and timing.AccountPropertyTypeId = 10
+				LEFT JOIN GradeLevel glStart on glStart.ID = ap.GradeLevelStart
+				LEFT JOIN GradeLevel glEnd on glEnd.ID = ap.GradeLevelEnd
+                OUTER APPLY STRING_SPLIT(@Grades, ',') s
+                WHERE ar.HostAccountId = {hostAccountId} and a.IsDeleted <> 1                  
+                    AND (
+						    (@SearchTerm = '""""') OR 
+						    CONTAINS((ap.Title, ap.Headline, ap.About), @SearchTerm)  OR 
+                            CONTAINS((properties.Value), @SearchTerm) OR 
+						    CONTAINS((specialNeeds.Value), @SearchTerm) OR 
+							CONTAINS((timing.Value), @SearchTerm) OR 
+                            CONTAINS((loc.Address1, loc.Address2, loc.City, loc.State, loc.PostalCode, loc.Name, loc.StreetNumber, loc.StreetName, loc.Neighborhood, loc.County), @SearchTerm)
+					    )
+                    AND ((@Neighborhood IS NULL) OR loc.Neighborhood IN (SELECT value COLLATE Latin1_General_100_CI_AI FROM STRING_SPLIT(@Neighborhood, ',') WHERE RTRIM(value) <> ''))                    
+                    AND ((@IsELearningCenter IS NULL) OR ap.IsELearningCenter = @IsELearningCenter)
+                    AND ((@IsVirtualProgram IS NULL) OR ap.IsVirtualProgram = @IsVirtualProgram)
+                    AND ((@IsOpenDuringCovid IS NULL) OR ap.IsOpenDuringCovid = @IsOpenDuringCovid)
+                    AND ((@Gender IS NULL) OR ap.GenderRestriction In (SELECT value FROM STRING_SPLIT(@Gender, ',') WHERE RTRIM(value) <> ''))
+                    AND ((@SpecialNeeds IS NULL) OR specialNeeds.Value In (SELECT value FROM STRING_SPLIT(@SpecialNeeds, ',') WHERE RTRIM(value) <> ''))
+					AND ((@Timing IS NULL) OR timing.Value In (SELECT value FROM STRING_SPLIT(@Timing, ',') WHERE RTRIM(value) <> ''))
+                    AND ((@Grades IS NULL) OR (s.value) BETWEEN ap.GradeLevelStart and ap.GradeLevelEnd)
+                    AND (
+	                        (@Age IS NULL) OR 
+	                        (ap.AgeStart IN (SELECT value FROM STRING_SPLIT(@Age, ',') WHERE RTRIM(value) <> '')) OR 
+	                        (ap.AgeEnd IN (SELECT value FROM STRING_SPLIT(@Age, ',') WHERE RTRIM(value) <> ''))
+                        )               
+            ";
+
+            if (cost.IsNotEmpty())
+            {
+                sql += $@"AND ((@Cost IS NULL)";
+
+                if (cost.Contains("cost_free"))
+                    sql += $@" OR COALESCE(act.CostPerRegistrant, 0) = 0";
+
+                if (cost.Contains("cost_0_50"))
+                    sql += $@" OR act.CostPerRegistrant between 1 and 50";
+
+                if (cost.Contains("cost_50_150"))
+                    sql += $@" OR act.CostPerRegistrant between 50 and 150";
+
+                if (cost.Contains("cost_150_above"))
+                    sql += $@" OR act.CostPerRegistrant > 150";
+
+                sql += $@")";
+            }
+
+            if (starting.IsNotEmpty())
+            {
+                sql += $@"AND ((@Starting IS NULL)";
+
+                if (starting.Contains("starting_0_7"))
+                    sql += $@" OR rp.StartDateTime between dateadd(dd, 0, cast(getdate() as date)) and dateadd(dd, 7, cast(getdate() as date))";
+
+                if (starting.Contains("starting_7_28"))
+                    sql += $@" OR rp.StartDateTime between dateadd(dd, 8, cast(getdate() as date)) and dateadd(dd, 28, cast(getdate() as date))";
+
+                if (starting.Contains("starting_30_90"))
+                    sql += $@" OR rp.StartDateTime between dateadd(dd, 29, cast(getdate() as date)) and dateadd(dd, 90, cast(getdate() as date))";
+
+                sql += $@")";
+            }
+
+            sql += $@" Order BY a.Name ASC";
+
+            dq.SelectRange.Start = start;
+            dq.SelectRange.Length = length;
+
+            return dq.ExecuteSelect(sql, msgs);            
+        }
+
         #endregion
     }
 }

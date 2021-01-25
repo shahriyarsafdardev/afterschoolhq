@@ -1,0 +1,181 @@
+﻿@{
+    var neighborhoods = (List<string>)ViewBag.Neighborhoods;
+    var grades = (List<GradeLevel>)ViewBag.Grades;
+
+    var totalGradeCount = grades.Count;
+    var firstHalf = totalGradeCount / 2;
+    var secondHalf = totalGradeCount - firstHalf;
+}
+
+<div>
+    <h4 class="mccoy-filter-header">Neighborhoods</h4>
+
+    @foreach (var item in neighborhoods)
+    {
+        <div class="am-checkbox" style="padding: 3px 0;">
+            <input id="chk-neighborhoods-@(item.ToLower())" name="neighborhoods" value="@(item.ToLower())" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+            <label for="chk-neighborhoods-@(item.ToLower())" class="margin-h-10 mobile-padding">@item</label>
+        </div>
+    }
+</div>
+<div class="clearfix"></div>
+
+<div>
+    <h4 class="mccoy-filter-header">Grades</h4>
+
+    <div class="col-md-6 col-sm-6 col-xs-6 no-padding">
+        @foreach (var item in grades.Take(firstHalf))
+        {
+            <div class="am-checkbox" style="padding: 3px 0;">
+                <input id="chk-grades-@(item.ID)" name="grades" value="@(item.Name.ToLower().Replace(" ", "_"))" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+                <label for="chk-grades-@(item.ID)" class="margin-h-10 mobile-padding">@item.Name</label>
+            </div>
+        }
+    </div>
+
+    <div class="col-md-6 col-sm-6 col-xs-6 no-padding">
+        @foreach (var item in grades.Skip(firstHalf).Take(secondHalf))
+        {
+            <div class="am-checkbox" style="padding: 3px 0;">
+                <input id="chk-grades-@(item.ID)" name="grades" value="@(item.Name.ToLower().Replace(" ", "_"))" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+                <label for="chk-grades-@(item.ID)" class="margin-h-10 mobile-padding">@item.Name</label>
+            </div>
+        }
+    </div>
+</div>
+<div class="clearfix"></div>
+
+<div>
+    <h4 class="mccoy-filter-header">Ages</h4>
+
+    <div class="col-md-6 col-sm-6 col-xs-6 no-padding">
+        <div class="am-checkbox" style="padding: 3px 0;">
+            <input id="chk-ages-1" name="ages" value="0_4" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+            <label for="chk-ages-1" class="margin-h-10 mobile-padding">0 - 4 yrs</label>
+        </div>
+        <div class="am-checkbox" style="padding: 3px 0;">
+            <input id="chk-ages-2" name="ages" value="5_9" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+            <label for="chk-ages-2" class="margin-h-10 mobile-padding">5 - 9 yrs</label>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-sm-6 col-xs-6 no-padding">
+        <div class="am-checkbox" style="padding: 3px 0;">
+            <input id="chk-ages-3" name="ages" value="10_14" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+            <label for="chk-ages-3" class="margin-h-10 mobile-padding">10 - 14 yrs</label>
+        </div>
+        <div class="am-checkbox" style="padding: 3px 0;">
+            <input id="chk-ages-4" name="ages" value="15_18" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+            <label for="chk-ages-4" class="margin-h-10 mobile-padding">15 - 18 yrs</label>
+        </div>
+    </div>
+</div>
+<div class="clearfix"></div>
+
+<div>
+    <h4 class="mccoy-filter-header"> Gender Restrictions</h4>
+
+    @foreach (GenderRestrictionType item in System.Enum.GetValues(typeof(GenderRestrictionType)))
+    {
+        if (item != GenderRestrictionType.None)
+        {
+            <div class="am-checkbox" style="padding: 3px 0;">
+                <input id="chk-gender-@((int)item)" name="gender" value="@(item.ToString().ToLower())" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+                <label for="chk-gender-@((int)item)" class="margin-h-10 mobile-padding"> @item.ToString().SplitByUpperCase() </label>
+            </div>
+        }
+    }
+</div>
+<div class="clearfix"></div>
+
+<div>
+    <h4 class="mccoy-filter-header">Timing</h4>
+
+    @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.OfferingTimes)
+    {
+        <div class="am-checkbox" style="padding: 3px 0;">
+            <input id="chk-timing-@item.ToLower()" name="timing" value="@item" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+            <label for="chk-timing-@item.ToLower()" class="margin-h-10 mobile-padding">@item</label>
+        </div>
+    }
+
+</div>
+<div class="clearfix"></div>
+
+<div>
+    <h4 class="mccoy-filter-header">Cost</h4>
+
+    <div class="am-checkbox" style="padding: 3px 0;">
+        <input id="chk-cost-1" name="cost" value="cost_free" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+        <label for="chk-cost-1" class="margin-h-10 mobile-padding">Free</label>
+    </div>
+
+    <div class="am-checkbox" style="padding: 3px 0;">
+        <input id="chk-cost-2" name="cost" value="cost_0_50" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+        <label for="chk-cost-2" class="margin-h-10 mobile-padding">Less than $50</label>
+    </div>
+
+    <div class="am-checkbox" style="padding: 3px 0;">
+        <input id="chk-cost-3" name="cost" value="cost_50_150" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+        <label for="chk-cost-3" class="margin-h-10 mobile-padding">Between $50 and $150</label>
+    </div>
+
+    <div class="am-checkbox" style="padding: 3px 0;">
+        <input id="chk-cost-4" name="cost" value="cost_150_above" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+        <label for="chk-cost-4" class="margin-h-10 mobile-padding">$150 and Above</label>
+    </div>
+</div>
+<div class="clearfix"></div>
+
+<div>
+    <h4 class="mccoy-filter-header">Starts in</h4>
+
+    <div class="am-checkbox" style="padding: 3px 0;">
+        <input id="chk-startingIn-1" name="starting" value="starting_0_7" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+        <label for="chk-startingIn-1" class="margin-h-10 mobile-padding">1 Week or less</label>
+    </div>
+
+    <div class="am-checkbox" style="padding: 3px 0;">
+        <input id="chk-startingIn-2" name="starting" value="starting_7_28" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+        <label for="chk-startingIn-2" class="margin-h-10 mobile-padding">1 to 4 weeks</label>
+    </div>
+
+    <div class="am-checkbox" style="padding: 3px 0;">
+        <input id="chk-startingIn-3" name="starting" value="starting_30_90" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+        <label for="chk-startingIn-3" class="margin-h-10 mobile-padding">30 - 90 days</label>
+    </div>
+</div>
+<div class="clearfix"></div>
+
+<div>
+    <h4 class="mccoy-filter-header">Other</h4>
+
+    <div class="am-checkbox" style="padding: 3px 0;">
+        <input id="chk-other-1" name="other" value="e_learning" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+        <label for="chk-other-1" class="margin-h-10 mobile-padding">E-learning center</label>
+    </div>
+
+    <div class="am-checkbox" style="padding: 3px 0;">
+        <input id="chk-other-2" name="other" value="virtual_programming" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+        <label for="chk-other-2" class="margin-h-10 mobile-padding">Virtual Programming</label>
+    </div>
+
+    <div class="am-checkbox" style="padding: 3px 0;">
+        <input id="chk-other-3" name="other" value="covid_protections" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+        <label for="chk-other-3" class="margin-h-10 mobile-padding">COVID Protections</label>
+    </div>
+</div>
+<div class="clearfix"></div>
+
+<div>
+    <h4 class="mccoy-filter-header">Special Needs</h4>
+
+    @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.SpecialNeedsOfferings)
+    {
+        <div class="am-checkbox" style="padding: 3px 0;">
+            <input id="chk-special-needs-@item.ToLower()" name="special-needs" value="@item" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+            <label for="chk-special-needs-@item.ToLower()" class="margin-h-10 mobile-padding">@item</label>
+        </div>
+    }
+</div>
+<div class="clearfix"></div>
