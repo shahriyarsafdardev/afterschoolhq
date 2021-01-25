@@ -12,7 +12,7 @@ namespace AfterSchool.Controllers
 {
     public class MccoyDirectoryController : Controller
     {
-        private readonly string MccoyHostAccountId = string.Empty;
+        private readonly int MccoyHostAccountId = new int();
         private static List<GradeLevel> ListGrades = GradeLevel.Load();
 
         public MccoyDirectoryController()
@@ -24,7 +24,7 @@ namespace AfterSchool.Controllers
                 var mccoyAccount = Account.LoadByInviteCodeToShare(mcCoyCodeToShare.ToGuid());               
 
                 if (mccoyAccount.IsNotEmpty())
-                    MccoyHostAccountId = mccoyAccount.ID.ToString();
+                    MccoyHostAccountId = mccoyAccount.ID.Value;
             }
         }
 
