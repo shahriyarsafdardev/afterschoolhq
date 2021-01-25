@@ -434,16 +434,16 @@ namespace AfterSchoolLibrary.Services
             );
         }
 
-        public static void UpdateProfile(this AccountProfile profile, int mingrade, int maxgrade, int agestart, int ageend, bool opencovid = false, bool elearningcenter = false, bool isvirtualprogram = false, WebUser loggedInUser = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void UpdateProfile(this AccountProfile profile, string mingrade, string maxgrade, string agestart, string ageend, bool opencovid = false, bool elearningcenter = false, bool isvirtualprogram = false, WebUser loggedInUser = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    profile.GradeLevelStart = mingrade <= 0 ? new int?() : mingrade;
-                    profile.GradeLevelEnd = maxgrade <= 0 ? new int?() : maxgrade;
-                    profile.AgeStart = agestart <= 0 ? new int?() : agestart;
-                    profile.AgeEnd = ageend <= 0 ? new int?() : ageend;
+                    profile.GradeLevelStart = mingrade.IsInteger() ? mingrade.ToInteger() : new int?();
+                    profile.GradeLevelEnd = maxgrade.IsInteger() ? maxgrade.ToInteger() : new int?();
+                    profile.AgeStart = agestart.IsInteger() ? agestart.ToInteger() : new int?();
+                    profile.AgeEnd = ageend.IsInteger() ? ageend.ToInteger() : new int?();
                     profile.IsOpenDuringCovid = opencovid;
                     profile.IsELearningCenter = elearningcenter;
                     profile.IsVirtualProgram = isvirtualprogram;
