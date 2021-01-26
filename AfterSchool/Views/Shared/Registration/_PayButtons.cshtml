@@ -4,8 +4,8 @@
     var acceptACH = (bool)ViewData["acceptACH"];
     var formActionUrl = (string)ViewData["formActionUrl"];
     var participationObject = (ParticipationObject)ViewData["participationObject"];
-    var postPayPlan = participationObject.IsNotEmpty() ? participationObject.GetPostPayPlan() : null;
-    var subscriptionPlan = participationObject.IsNotEmpty() ? participationObject.GetSubscriptionPlan() : null;
+    var postPayPlan = participationObject?.GetPostPayPlan();
+    var subscriptionPlan = participationObject?.GetSubscriptionPlan();
     var savePaymentInfoOnly = false;
 
     var hasPlans = postPayPlan.IsNotEmpty() || subscriptionPlan.IsNotEmpty();
@@ -416,7 +416,7 @@
         updatePaymentFees(0);
         updatePaymentFeesACH(0);
 
-        @if ((participationObject.IsNotEmpty() && participationObject.PaymentPlans.Any()) || postPayPlan.IsNotEmpty())
+        @if ( (participationObject.IsNotEmpty() && participationObject.PaymentPlans.Any()) || postPayPlan.IsNotEmpty())
         {
             @: updatePaymentOptionCost(0);
         }
