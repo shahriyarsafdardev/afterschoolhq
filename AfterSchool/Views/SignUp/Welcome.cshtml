@@ -436,7 +436,7 @@
         var signupListOnMouseOut = "signupListMouseOut";
         var signupListOnClick = "signupListMouseClick";
 
-        PageEvent.add(PageEvent.AFTER_INIT, function () {
+        PageEvent.add(PageEvent.AFTER_INIT, function () {           
             signupAccountSearch.keyup(function () {
 
                 if (signupAccountSearch.val().length <= 2) {
@@ -474,7 +474,7 @@
             $(`#signup-search-listItem-${id}`).attr('style', signupListItemStyle);
         }
 
-        function signupListMouseClick(id, text, slug, isClaimed) {
+        function signupListMouseClick(id, text, slug, isClaimed) {           
             if (id && isGuid(id)) {
                 hiddenClaimAccountId.val(id);
                 selectedAccount = {
@@ -484,10 +484,10 @@
                 };
 
                 signupAccountSearch.val(text);
-
-                if (isSchool) {
-                    window.location = `${slug}`; //move to profile page
-                    return;
+                
+                if (isClaimed == false) {
+                    var url = slug + '?claimprofile=1';
+                    window.location = url ; //move to profile page
                 }
             } else {
                 selectedAccount = null; //support for back click
@@ -503,7 +503,7 @@
             btnContinue.removeAttr("disabled");
         }
 
-        function doAccountSearch(search, list) {
+        function doAccountSearch(search, list) {            
             if (search.val().length > 0 && !isSearching) {
                 isSearching = true;
 
