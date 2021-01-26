@@ -682,6 +682,32 @@ namespace AfterSchoolLibrary.Models
             return subscriber;
         }
 
+        public bool HasSubscriptionPlans()
+        {
+            return this.SubscriptionPlans.IsNotEmpty();
+        }
+
+        public SubscriptionPlan GetSubscriptionPlan()
+        {
+            if (HasSubscriptionPlans())
+                return SubscriptionPlans.FirstOrDefault();
+
+            return null;
+        }
+
+        public bool HasPostPayPlan()
+        {
+            return this.PostPayPlans.IsNotEmpty();
+        }
+
+        public SubscriptionPlan GetPostPayPlan()
+        {
+            if (HasPostPayPlan())
+                return PostPayPlans.FirstOrDefault();
+
+            return null;
+        }
+
         #endregion
 
         #region Financial
