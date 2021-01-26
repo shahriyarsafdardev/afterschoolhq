@@ -1023,7 +1023,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult Style(string id, string logo, string headerimage, string about, string title, string headline, string primaryColor, string website, string mingrade, string maxgrade, string agestart, string ageend, string restrictby, string twitter, string facebook, string instagram, string linkedin, string youtube, string calendar, string genderrestriction, string programCategories, string softskills, string academicsubjects, string teachingmethods, string profileemail, string profilephone, string locationname, string streetnumber, string streetname, string address2, string neighborhood, string city, string state, string postalcode, string county, string country, string placeid, string opencovid, string elearningcenter, string virtualprogram, string ahqapproved, string videoUrl, IEnumerable<HttpPostedFileBase> photos)
+        public ActionResult Style(string id, string logo, string headerimage, string about, string title, string headline, string primaryColor, string website, string mingrade, string maxgrade, string agestart, string ageend, string restrictbygrade, string twitter, string facebook, string instagram, string linkedin, string youtube, string calendar, string genderrestriction, string programCategories, string softskills, string academicsubjects, string teachingmethods, string profileemail, string profilephone, string locationname, string streetnumber, string streetname, string address2, string neighborhood, string city, string state, string postalcode, string county, string country, string placeid, string opencovid, string elearningcenter, string virtualprogram, string ahqapproved, string videoUrl, IEnumerable<HttpPostedFileBase> photos)
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
@@ -1121,9 +1121,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 if (SessionVariables.AccountUserType == UserType.TechSupport)
                     ahqapproved = ahqapproved.IsNumber() ? "1" : "0";
 
-                if(restrictby.IsNotEmpty() && restrictby.IsBoolean())
+                if(restrictbygrade.IsNotEmpty() && restrictbygrade.IsBoolean())
                 {
-                    if(restrictby.ToBoolean())
+                    if(restrictbygrade.ToBoolean())
                     {
                         agestart = "";
                         ageend = "";
