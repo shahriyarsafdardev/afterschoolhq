@@ -244,7 +244,7 @@ namespace AfterSchool.Controllers
         public ActionResult McCoyRegistration()
         {
             var mcCoyCodeToShare = ConfigurationManager.AppSettings["MccoyInviteCodeToShare"];
-            if (mcCoyCodeToShare.IsNotEmpty() && mcCoyCodeToShare.IsGuid())
+            if (mcCoyCodeToShare.IsGuid())
             {
                 var mccoyAccount = Account.LoadByInviteCodeToShare(mcCoyCodeToShare.ToGuid());
 
@@ -254,6 +254,21 @@ namespace AfterSchool.Controllers
 
             return HttpNotFound();
             
+        }
+
+        public ActionResult ISYPRegistration()
+        {
+            var isypCodeToShare = ConfigurationManager.AppSettings["ISYPInviteCodeToShare"];
+            if (isypCodeToShare.IsGuid())
+            {
+                var isypAccount = Account.LoadByInviteCodeToShare(isypCodeToShare.ToGuid());
+
+                if (isypAccount.IsNotEmpty())
+                    return RedirectToAction("Welcome", new { invite = isypCodeToShare, isrequestonlyaccess = true });
+            }
+
+            return HttpNotFound();
+
         }
 
         [HttpGet]
@@ -980,7 +995,7 @@ namespace AfterSchool.Controllers
         {
             var model = new SignUpIndexViewModel()
             {
-                IsRequestOnlyAccess = isrequestonlyaccess.IsBoolean() ? isrequestonlyaccess.ToBoolean() : false,
+                IsRequestOnlyAccess = isrequestonlyaccess.IsBoolean() && isrequestonlyaccess.ToBoolean(),
                 InviteCodeToShare = invite.IsNotEmpty() ? invite : ""
             };
             return View(model);

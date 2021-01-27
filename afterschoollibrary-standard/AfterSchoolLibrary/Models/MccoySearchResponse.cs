@@ -2,7 +2,7 @@
 
 namespace AfterSchool.Models
 {
-    public class MccoySearchResponse
+    public class SearchDirectoryResponse
     {
         public Guid AccountUid { get; set; }
         public string AccountName { get; set; }

@@ -8,7 +8,7 @@
 }
 
 <div>
-    <h4 class="mccoy-filter-header">Neighborhoods</h4>
+    <h4 class="filter-header">Neighborhoods</h4>
 
     @foreach (var item in neighborhoods)
     {
@@ -21,7 +21,7 @@
 <div class="clearfix"></div>
 
 <div>
-    <h4 class="mccoy-filter-header">Grades</h4>
+    <h4 class="filter-header">Grades</h4>
 
     <div class="col-md-6 col-sm-6 col-xs-6 no-padding">
         @foreach (var item in grades.Take(firstHalf))
@@ -46,7 +46,7 @@
 <div class="clearfix"></div>
 
 <div>
-    <h4 class="mccoy-filter-header">Ages</h4>
+    <h4 class="filter-header">Ages</h4>
 
     <div class="col-md-6 col-sm-6 col-xs-6 no-padding">
         <div class="am-checkbox" style="padding: 3px 0;">
@@ -73,7 +73,7 @@
 <div class="clearfix"></div>
 
 <div>
-    <h4 class="mccoy-filter-header"> Gender Restrictions</h4>
+    <h4 class="filter-header"> Gender Restrictions</h4>
 
     @foreach (GenderRestrictionType item in System.Enum.GetValues(typeof(GenderRestrictionType)))
     {
@@ -89,7 +89,7 @@
 <div class="clearfix"></div>
 
 <div>
-    <h4 class="mccoy-filter-header">Timing</h4>
+    <h4 class="filter-header">Timing</h4>
 
     @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.OfferingTimes)
     {
@@ -103,7 +103,7 @@
 <div class="clearfix"></div>
 
 <div>
-    <h4 class="mccoy-filter-header">Cost</h4>
+    <h4 class="filter-header">Cost</h4>
 
     <div class="am-checkbox" style="padding: 3px 0;">
         <input id="chk-cost-1" name="cost" value="cost_free" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
@@ -128,7 +128,7 @@
 <div class="clearfix"></div>
 
 <div>
-    <h4 class="mccoy-filter-header">Starts in</h4>
+    <h4 class="filter-header">Starts in</h4>
 
     <div class="am-checkbox" style="padding: 3px 0;">
         <input id="chk-startingIn-1" name="starting" value="starting_0_7" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
@@ -148,7 +148,7 @@
 <div class="clearfix"></div>
 
 <div>
-    <h4 class="mccoy-filter-header">Other</h4>
+    <h4 class="filter-header">Other</h4>
 
     <div class="am-checkbox" style="padding: 3px 0;">
         <input id="chk-other-1" name="other" value="e_learning" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
@@ -168,7 +168,7 @@
 <div class="clearfix"></div>
 
 <div>
-    <h4 class="mccoy-filter-header">Special Needs</h4>
+    <h4 class="filter-header">Special Needs</h4>
 
     @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.SpecialNeedsOfferings)
     {
