@@ -220,16 +220,9 @@
                                         @transaction.GetPayerAccount().Name
                                     </td>
                                     <td>
-                                        @if (transaction.IsCharge())
+                                        @if (transaction.IsCharge() && registrant.IsNotEmpty())
                                         {
-                                            if (registrant.IsNotEmpty())
-                                            {
-                                                @registrant.DisplayName
-                                            }
-                                            else
-                                            {
-                                                @:-
-                                            }
+                                            @registrant.DisplayName
                                         }
                                         else
                                         {
