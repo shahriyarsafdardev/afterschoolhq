@@ -304,7 +304,7 @@
         checkFormVal();
 
         $('input[name=registrationclosedate],input[name=registrationopendate],#registrationopentime,#registrationclosetime').on('change', function () {
-            validateSetup(0);
+            validateSetup(0, event);
         });
     });
 

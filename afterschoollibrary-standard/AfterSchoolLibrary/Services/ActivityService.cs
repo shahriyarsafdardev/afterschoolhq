@@ -946,24 +946,24 @@ namespace AfterSchoolLibrary.Services
 
             if (agestart.IsNumber())
             {
-                if (agestart.ToString().ToInteger() > 0 && agestart.ToString().ToInteger() <= 18)
+                if (agestart.ToString().ToInteger() < 0)
+                    activity.AgeStart = null;
+                else
                 {
                     activity.AgeStart = agestart.ToString().ToInteger();
                     activity.GradeLevelStart = null;
                 }
-                else
-                    activity.AgeStart = null;
             }
 
             if (ageend.IsNumber())
             {
-                if (ageend.ToString().ToInteger() > 0 && ageend.ToString().ToInteger() <= 18)
+                if (ageend.ToString().ToInteger() < 0)
+                    activity.AgeEnd = null;
+                else
                 {
                     activity.AgeEnd = ageend.ToString().ToInteger();
                     activity.GradeLevelEnd = null;
-                }  
-                else
-                    activity.AgeEnd = null;
+                }
             }
 
             List<int?> gradeLevels = GradeLevel.Load(msgs: msgs, dc: dc).Select(grade => grade.ID).ToList();

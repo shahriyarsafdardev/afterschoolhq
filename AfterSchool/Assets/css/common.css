@@ -392,30 +392,30 @@
 }
 
 
-.mccoy-header-logo > img {
+.header-logo > img {
     width: 250px;
     max-width: 400px;
     display: block;
 }
 
-.mccoy-has-search .form-control-feedback {
+.has-search .form-control-feedback {
     right: initial;
     left: 0;
     color: #ccc;
 }
 
-.mccoy-has-search .form-control {
+.has-search .form-control {
     padding-right: 12px;
     padding-left: 34px;
     height: 38px !important;
 }
 
-.mccoy-filter-header {
+.filter-header {
     font-weight: bold;
     padding-top: 5px;
 }
 
-.mccoy-filter-footer-container {
+.filter-footer-container {
     position: fixed;
     z-index: 999999;
     background-color: white;
@@ -427,20 +427,20 @@
     display: none;
 }
 
-.join-mccoy-btn {
+.join-directory-btn {
     height: 38px;
     color: darkblue;
     min-width: 180px;
     font-size: 12px;
 }
 
-.mccoy-youth {
+.search-youth {
     float: left;
     font-size: 22px;
     margin-left: 20px;
 }
 
-.mccoy-filter {
+.filter {
     width: 47px;
     margin-top: 10px;
 }

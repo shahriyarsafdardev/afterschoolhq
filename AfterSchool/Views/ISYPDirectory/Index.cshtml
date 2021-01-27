@@ -17,14 +17,14 @@
 
             <div class="reg-header-overlay col-md-12">
 
-                <div class="col-lg-3 col-md-6 mccoy-header-logo" style="margin-top: -50px;">
+                <div class="col-lg-3 col-md-6 header-logo" style="margin-top: -50px;">
                     <img src="~/img/isyp-logo.png" />
                 </div>
 
                 <div class="col-lg-7 col-md-6">
-                    <div class="form-group has-feedback mccoy-has-search">
+                    <div class="form-group has-feedback has-search">
                         <span class="glyphicon glyphicon-search form-control-feedback"></span>
-                        <input id="txtMccoySearch" name="search" type="text" class="form-control" placeholder="Search" onkeyup="return waitAndFilterSearch(this.value)">
+                        <input id="txtSearch" name="search" type="text" class="form-control" placeholder="Search" onkeyup="return waitAndFilterSearch(this.value)">
                     </div>
                 </div>
 
@@ -40,18 +40,18 @@
 
 <div class="visible-sm visible-xs bg-color">
     <div class="col-xs-10">
-        <div class="form-group has-feedback mccoy-has-search" style="margin-top: 10px;">
+        <div class="form-group has-feedback has-search" style="margin-top: 10px;">
             <span class="glyphicon glyphicon-search form-control-feedback"></span>
-            <input id="txtMccoySearch-mobile" name="search" type="text" class="form-control" placeholder="Search ISYP Directory" onkeyup="return waitAndFilterSearch()">
+            <input id="txtSearch-mobile" name="search" type="text" class="form-control" placeholder="Search ISYP Directory" onkeyup="return waitAndFilterSearch()">
         </div>
     </div>
     <div class="col-xs-2" style="padding: 0; text-align: center;">
-        <img src="~/img/filter.png" class="mccoy-filter" onclick="return mobileFilter()" />
+        <img src="~/img/filter.png" class="filter" onclick="return mobileFilter()" />
     </div>
 
     <div class="clearfix"></div>
 
-    <div id="mobile-filter-footer" class="mccoy-filter-footer-container">
+    <div id="mobile-filter-footer" class="filter-footer-container">
         <button type="button" class="btn btn-default btn-lg btn-center" style="border-color: steelblue; color:blue" onclick="return applyMobileFilter()">Apply Filters</button>
     </div>
 
@@ -59,7 +59,7 @@
 </div>
 
 <div id="filters" class="col-md-3" style="display: none; padding-right: 0; padding-bottom: 120px;padding-top: 10px;">
-    @{ Html.RenderPartial("~/Views/Shared/_MccoyFilters.cshtml"); }
+    @{ Html.RenderPartial("~/Views/Shared/_DirectoryFilters.cshtml"); }
     <div class="clearfix"></div>
 </div>
 
@@ -158,8 +158,8 @@
     <script type="text/javascript">
 
         var delayTimer;
-        var txtMccoySearch = $('#txtMccoySearch');
-        var txtMccoySearchMobile = $('#txtMccoySearch-mobile');
+        var txtSearch = $('#txtSearch');
+        var txtSearchMobile = $('#txtSearch-mobile');
         var isMobile = window.innerWidth <= 768;
 
         $(document).ready(function () {
@@ -207,9 +207,9 @@
             var comma_delimited_special = '';
 
             if (isMobile) {
-                search = txtMccoySearchMobile.val();
+                search = txtSearchMobile.val();
             } else {
-                search = txtMccoySearch.val();
+                search = txtSearch.val();
             }
 
             if (search && search.length > 0) {

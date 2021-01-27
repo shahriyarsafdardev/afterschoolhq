@@ -20,7 +20,7 @@ namespace AfterSchool.Controllers
 
             if (mcCoyCodeToShare.IsNotEmpty() && mcCoyCodeToShare.IsGuid())
             {
-                var mccoyAccount = Account.LoadByInviteCodeToShare(new Guid(mcCoyCodeToShare));               
+                var mccoyAccount = Account.LoadByInviteCodeToShare(mcCoyCodeToShare.ToGuid());               
 
                 if (mccoyAccount.IsNotEmpty())
                     MccoyHostAccountId = mccoyAccount.ID.ToString();

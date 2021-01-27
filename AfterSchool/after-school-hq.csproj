@@ -748,8 +748,10 @@
     <Content Include="img\search.png" />
     <Content Include="img\smiling-group.png" />
     <Content Include="img\sophie.png" />
+    <Content Include="img\tempsnip.png" />
     <Content Include="img\texture-fabric.png" />
     <Content Include="img\texture-geometry-shapes.png" />
+    <Content Include="img\welcome-back-arrow.PNG" />
     <Content Include="index-profiles.html" />
     <Content Include="index.html" />
     <Content Include="ips.html" />
@@ -1828,7 +1830,7 @@
     <Content Include="Views\Shared\_GradeRestrictions.cshtml" />
     <Content Include="Views\SignUp\IndexNew.cshtml" />
     <Content Include="Views\MccoyDirectory\Index.cshtml" />
-    <Content Include="Views\Shared\_MccoyFilters.cshtml" />
+    <Content Include="Views\Shared\_DirectoryFilters.cshtml" />
     <Content Include="Views\ISYPDirectory\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
