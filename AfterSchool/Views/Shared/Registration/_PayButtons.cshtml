@@ -4,9 +4,10 @@
     var acceptACH = (bool)ViewData["acceptACH"];
     var formActionUrl = (string)ViewData["formActionUrl"];
     var participationObject = (ParticipationObject)ViewData["participationObject"];
-    var postPayPlan = participationObject.PostPayPlans.FirstOrDefault();
-    var subscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault();
+    var postPayPlan = participationObject?.GetPostPayPlan();
+    var subscriptionPlan = participationObject?.GetSubscriptionPlan();
     var savePaymentInfoOnly = false;
+
     var hasPlans = postPayPlan.IsNotEmpty() || subscriptionPlan.IsNotEmpty();
 
     if (postPayPlan.IsNotEmpty() && !postPayPlan.NumberOfPeriodsPrePaid.IsPositive())
@@ -415,7 +416,7 @@
         updatePaymentFees(0);
         updatePaymentFeesACH(0);
 
-        @if ((participationObject?.PaymentPlans).Any() || postPayPlan.IsNotEmpty())
+        @if ( (participationObject.IsNotEmpty() && participationObject.PaymentPlans.Any()) || postPayPlan.IsNotEmpty())
         {
             @: updatePaymentOptionCost(0);
         }

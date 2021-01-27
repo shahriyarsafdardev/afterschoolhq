@@ -23,7 +23,7 @@ namespace AfterSchool.Controllers
                 var mccoyAccount = Account.LoadByInviteCodeToShare(mcCoyCodeToShare.ToGuid());               
 
                 if (mccoyAccount.IsNotEmpty())
-                    MccoyHostAccountId = mccoyAccount.ID.ToString();
+                    MccoyHostAccountId = mccoyAccount.ID.Value;
             }
         }
 
