@@ -1828,7 +1828,7 @@
     <Content Include="Views\Shared\_GradeRestrictions.cshtml" />
     <Content Include="Views\SignUp\IndexNew.cshtml" />
     <Content Include="Views\MccoyDirectory\Index.cshtml" />
-    <Content Include="Views\Shared\_MccoyFilters.cshtml" />
+    <Content Include="Views\Shared\_DirectoryFilters.cshtml" />
     <Content Include="Views\ISYPDirectory\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>

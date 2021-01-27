@@ -20,7 +20,7 @@ namespace AfterSchool.Controllers
 
             if (isypCodeToShare.IsNotEmpty() && isypCodeToShare.IsGuid())
             {
-                var isypAccount = Account.LoadByInviteCodeToShare(new Guid(isypCodeToShare));
+                var isypAccount = Account.LoadByInviteCodeToShare(isypCodeToShare.ToGuid());
 
                 if (isypAccount.IsNotEmpty())
                     IsypHostAccountId = isypAccount.ID.ToString();
