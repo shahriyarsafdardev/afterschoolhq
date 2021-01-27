@@ -19,7 +19,7 @@
                 <div class="col-lg-7 col-md-6">
                     <div class="form-group has-feedback mccoy-has-search">
                         <span class="glyphicon glyphicon-search form-control-feedback"></span>
-                        <input id="txtMccoySearch" name="search" type="text" class="form-control" placeholder="Search" onkeyup="return waitAndFilterSearch(this.value)">
+                        <input id="txtSearch" name="search" type="text" class="form-control" placeholder="Search" onkeyup="return waitAndFilterSearch(this.value)">
                     </div>
                 </div>
 
@@ -37,7 +37,7 @@
     <div class="col-xs-10">
         <div class="form-group has-feedback mccoy-has-search" style="margin-top: 10px;">
             <span class="glyphicon glyphicon-search form-control-feedback"></span>
-            <input id="txtMccoySearch-mobile" name="search" type="text" class="form-control" placeholder="Search MCCOY Directory" onkeyup="return waitAndFilterSearch()">
+            <input id="txtSearch-mobile" name="search" type="text" class="form-control" placeholder="Search MCCOY Directory" onkeyup="return waitAndFilterSearch()">
         </div>
     </div>
     <div class="col-xs-2" style="padding: 0; text-align: center;">
@@ -153,8 +153,8 @@
     <script type="text/javascript">
 
         var delayTimer;
-        var txtMccoySearch = $('#txtMccoySearch');
-        var txtMccoySearchMobile = $('#txtMccoySearch-mobile');
+        var txtSearch = $('#txtSearch');
+        var txtSearchMobile = $('#txtSearch-mobile');
         var isMobile = window.innerWidth <= 768;
 
         $(document).ready(function () {
@@ -202,9 +202,9 @@
             var comma_delimited_special = '';
 
             if (isMobile) {
-                search = txtMccoySearchMobile.val();
+                search = txtSearchMobile.val();
             } else {
-                search = txtMccoySearch.val();
+                search = txtSearch.val();
             }
 
             if (search && search.length > 0) {
