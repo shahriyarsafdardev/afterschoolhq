@@ -246,19 +246,20 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 var registrant = t.GetPurchase()?.GetRegistrant();
                 var participationObjects = t.GetParticipationObjects();
+                var description = participationObjects.DistinctBy(po => new { po.ObjectID, po.ObjectType }).Select(po => po.Name).ToStringList(", ");
 
                 row = new List<string>();
-                row.Add(t.GetTransactionNumber());
-                row.Add(t.CreateDate.ToShortDateTimeString());
-                row.Add(t.GetPayerAccount().Name);
-                row.Add(t.IsCharge() && registrant.IsNotEmpty() ? registrant.DisplayName : t.GetBillerAccount().Name);
-                row.Add(participationObjects.DistinctBy(po => new { po.ObjectID, po.ObjectType }).Select(po => po.Name).ToStringList(", "));
-                row.Add(t.GetPayerAmount().ToCurrency());
-                row.Add(t.GetConvenienceFeesChargedToPayer().ToCurrency());
-                row.Add(t.GetPaymentTypeFeesChargedToPayer().ToCurrency());
-                row.Add(t.GetBillerPayout().ToCurrency());
-                row.Add(t.GetStatus());
-                row.Add(t.PaymentTypeId.ToString().SplitByUpperCase());
+                row.Add(t.GetTransactionNumber()); // ID
+                row.Add(t.CreateDate.ToShortDateTimeString()); // CreatedOn
+                row.Add(t.GetPayerAccount().Name);  // Payer
+                row.Add(t.IsCharge() && registrant.IsNotEmpty() ? registrant.DisplayName : t.GetBillerAccount().Name); // For
+                row.Add(description.IsNotEmpty() ? description : t.Description); // Item Description
+                row.Add(t.GetPayerAmount().ToCurrency()); // Total Amount Paid
+                row.Add(t.ConvenienceFeeCharged.ToCurrency()); // Platform Fee
+                row.Add(t.PaymentTypeFeeCharged.ToCurrency()); // Credit Card Fee
+                row.Add(t.GetBillerPayout().ToCurrency()); // Your Amount
+                row.Add(t.GetStatus()); // Status
+                row.Add(t.PaymentTypeId.ToString().SplitByUpperCase()); // Type
                 table.Add(row);
             }
             string csv = CsvFile.Create(table);
