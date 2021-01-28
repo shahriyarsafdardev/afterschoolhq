@@ -346,7 +346,7 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(row => { return row[0].ToString(); });
         }
 
-        public static List<string> LoadMccoyNeighborhoods(int hostAccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<string> LoadNeighborhoodsByHostAccount(string hostAccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -359,7 +359,7 @@ namespace AfterSchoolLibrary.Models
 							SELECT VisitorAccountId 
 							FROM AccountRelationship 
 							WHERE HostAccountId = {hostAccountId})
-						)";
+						) AND (COALESCE (Neighborhood, '') <> '')";
 
             return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(row => { return row[0].ToString(); });
 		}

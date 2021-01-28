@@ -5,14 +5,13 @@ using System.Configuration;
 using System.Linq;
 using System.Web.Mvc;
 using BasicLibrary;
-using AfterSchool.Models;
 using AfterSchoolLibrary.Services;
 
 namespace AfterSchool.Controllers
 {
     public class MccoyDirectoryController : Controller
     {
-        private readonly int MccoyHostAccountId = new int();
+        private readonly string MccoyHostAccountId;
         private static List<GradeLevel> ListGrades = GradeLevel.Load();
 
         public MccoyDirectoryController()
@@ -24,7 +23,7 @@ namespace AfterSchool.Controllers
                 var mccoyAccount = Account.LoadByInviteCodeToShare(mcCoyCodeToShare.ToGuid());               
 
                 if (mccoyAccount.IsNotEmpty())
-                    MccoyHostAccountId = mccoyAccount.ID.Value;
+                    MccoyHostAccountId = mccoyAccount.ID.ToString();
             }
         }
 
@@ -32,9 +31,7 @@ namespace AfterSchool.Controllers
         public ActionResult Index()
         {
             var msgs = new SystemMessages();
-            var neighborhoodList = Location.LoadMccoyNeighborhoods(hostAccountId: MccoyHostAccountId, msgs: msgs)
-                                   .Where(x => x.IsNotEmpty())
-                                   .ToList();
+            var neighborhoodList = Location.LoadNeighborhoodsByHostAccount(hostAccountId: MccoyHostAccountId, msgs: msgs).ToList();
 
             ViewBag.Messages = msgs;
             ViewBag.Neighborhoods = neighborhoodList;
@@ -48,54 +45,7 @@ namespace AfterSchool.Controllers
         {
             var msgs = new SystemMessages();
 
-            var gradeIds = "";
-            if (grades.IsNotEmpty())
-            {
-                var lstGrades = grades.Split(',');
-                foreach (var item in lstGrades)
-                {
-                    var grade = ListGrades.FirstOrDefault(m => m.Name.ToLower().Replace(" ", "_") == item);
-
-                    if (grade.IsNotEmpty())
-                        gradeIds += $"{grade.ID},";
-                }
-            }
-
-            var ageIds = "";
-            if (ages.IsNotEmpty())
-            {
-                var lstAges = ages.Split(',');
-                foreach (var item in lstAges)
-                {
-                    if (item.Contains('_'))
-                    {
-                        var age = item.Split('_');
-
-                        if (age.IsNotEmpty())
-                        {
-                            var ageStart = age[0];
-                            var ageEnd = age[1];
-
-                            if (ageStart.IsNotEmpty() && ageEnd.IsNotEmpty())
-                            {
-                                for (int i = ageStart.ToInteger(); i <= ageEnd.ToInteger(); i++)
-                                {
-                                    ageIds += $"{i},";
-                                }
-                            }
-                        }
-                    }
-
-                }
-            }
-
-            var genderIds = "";
-            if (gender.IsNotBlank() && gender == GenderRestrictionType.MaleOnly.ToString().ToLower())
-                genderIds = "1,";
-            if (gender.IsNotBlank() && gender == GenderRestrictionType.FemaleOnly.ToString().ToLower())
-                genderIds += "2,";
-
-            var searchedAccounts = AccountService.SearchMccoyAccounts(MccoyHostAccountId, search, neighborhoods, gradeIds, ageIds, genderIds, timing, cost, starting, other, special, msgs: msgs);
+            var searchedAccounts = AccountService.SearchDirectoryAccounts(MccoyHostAccountId, search, neighborhoods, grades, ages, gender, timing, cost, starting, other, special, msgs: msgs);
 
             if (searchedAccounts.IsNotEmpty() && searchedAccounts.Any())
             {
