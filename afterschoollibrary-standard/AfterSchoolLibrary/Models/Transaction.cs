@@ -871,13 +871,13 @@ namespace AfterSchoolLibrary.Models
             var results = dq.Select(msgs);
             if (results.Rows.Any())
                 return results.Rows[0][0].ToString().ToDecimal() -
-                    GetTotalConvenienceFeesNotPaidByBillerAccount(BillerAccountId, paymentType, startDate, endDate, isDeleted, msgs, dc) -
-                    GetTotalPaymentTypeFeesNotPaidByBillerAccount(BillerAccountId, paymentType, startDate, endDate, isDeleted, msgs, dc);
+                    GetTotalConvenienceFeesNotPaidByBillerAccount(BillerAccountId, paymentSourceType, paymentType, startDate, endDate, isDeleted, msgs, dc) -
+                    GetTotalPaymentTypeFeesNotPaidByBillerAccount(BillerAccountId, paymentSourceType, paymentType, startDate, endDate, isDeleted, msgs, dc);
 
             return 0;
         }
 
-        public static decimal GetTotalConvenienceFeesNotPaidByBillerAccount(int BillerAccountId, PaymentType? paymentType, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetTotalConvenienceFeesNotPaidByBillerAccount(int BillerAccountId, PaymentSourceType? paymentSourceType, PaymentType? paymentType, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -891,6 +891,9 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["BillerAccountId"], BillerAccountId);
             dq.Criterias.Add(ObjectMap["ConvenienceFeePayerAccountId"], BillerAccountId, DatabaseCriteriaOperatorEnum.NotEqualTo);
             dq.Criterias.Add(ObjectMap["isDeleted"], isDeleted);
+
+            if (paymentSourceType.HasValue)
+                dq.Criterias.Add(ObjectMap["PaymentSourceTypeId"], (int)paymentSourceType.Value);
 
             if (paymentType.HasValue)
                 dq.Criterias.Add(ObjectMap["PaymentTypeId"], (int)paymentType.Value);
@@ -939,7 +942,7 @@ namespace AfterSchoolLibrary.Models
             return 0;
         }
 
-        public static decimal GetTotalPaymentTypeFeesNotPaidByBillerAccount(int BillerAccountId, PaymentType? paymentType, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetTotalPaymentTypeFeesNotPaidByBillerAccount(int BillerAccountId, PaymentSourceType? paymentSourceType, PaymentType? paymentType, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -953,6 +956,9 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["BillerAccountId"], BillerAccountId);
             dq.Criterias.Add(ObjectMap["isDeleted"], isDeleted);
             dq.Criterias.Add(ObjectMap["PaymentTypeFeePayerAccountId"], BillerAccountId, DatabaseCriteriaOperatorEnum.NotEqualTo);
+
+            if (paymentSourceType.HasValue)
+                dq.Criterias.Add(ObjectMap["PaymentSourceTypeId"], (int)paymentSourceType.Value);
 
             if (paymentType.HasValue)
                 dq.Criterias.Add(ObjectMap["PaymentTypeId"], (int)paymentType.Value);
