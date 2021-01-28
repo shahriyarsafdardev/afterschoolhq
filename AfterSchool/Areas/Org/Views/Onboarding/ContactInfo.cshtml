@@ -6,6 +6,8 @@
     string email = (string)ViewBag.Email;
     string phone = (string)ViewBag.Phone;
     var location = (Location)ViewBag.Location; 
+    var isProfileEmail = (bool)ViewBag.IsProfileEmail;
+    var isProfilePhone = (bool)ViewBag.IsProfilePhone;
 }
 
 <div class="row main-content main-content-welcome-pages">
@@ -30,8 +32,8 @@
                             <input type="checkbox"
                                    name="publicemail"
                                    id="publicemail"
-                                   value="1"
-                                   checked="checked" />
+                                   value="@isProfileEmail"
+                                   @(isProfileEmail ? "checked=\"checked\"" : "") />
                             <label for="publicemail">Show email on public profile page</label>
                         </div>
                     </div>
@@ -45,8 +47,8 @@
                             <input type="checkbox"
                                    name="publicphone"
                                    id="publicphone"
-                                   value="1"
-                                   checked="checked" />
+                                   value="@isProfilePhone"
+                                   @(isProfilePhone ? "checked=\"checked\"" : "") />
                             <label for="publicphone">Show phone number on public profile page</label>
                         </div>
                     </div>

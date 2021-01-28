@@ -1,7 +1,15 @@
 ﻿@model Account
 @{ 
     Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml";
-    var msgs = (SystemMessages)ViewBag.Messages; 
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var profile = Model.GetOrCreateAccountProfile(SessionVariables.CurrentUser, msgs);
+    var website = profile.IsNotEmpty() ? profile.Website ?? Request["website"] : "";
+    var twitter = profile.IsNotEmpty() ? profile.TwitterUrl ?? Request["twitter"] : "";
+    var instagram = profile.IsNotEmpty() ? profile.InstagramUrl ?? Request["instagram"] : "";
+    var facebook = profile.IsNotEmpty() ? profile.Facebook ?? Request["facebook"] : "";
+    var youtube = profile.IsNotEmpty() ? profile.YouTube ?? Request["youtube"] : "";
+    var linkedin = profile.IsNotEmpty() ? profile.LinkedIn ?? Request["linkedin"] : "";
+    var calendar = profile.IsNotEmpty() ? profile.CalendarBookingLink ?? Request["calendar"] : "";
 }
 
 <div class="row main-content main-content-welcome-pages">
@@ -20,43 +28,43 @@
                     <div class="clearfix"></div>
                     <div class="col-md-12 onboarding-form-group">
                         <label class="onboarding-lable">PROFILE IMAGE</label>
-                        <input type="text" class="form-control onboarding-input" name="website" id="website" value="@Request["website"]" placeholder="https://your-website.com" style="height: 44px;" />
+                        <input type="text" class="form-control onboarding-input" name="website" id="website" value="@website" placeholder="https://your-website.com" style="height: 44px;" />
                     </div>
 
                     <div class="clearfix"></div>
                     <div class="col-md-12 onboarding-form-group">
                         <label class="onboarding-lable">TWITTER HANDLE</label>
-                        <input type="text" class="form-control onboarding-input" name="twitter" id="twitter" value="@Request["twitter"]" placeholder="@("@your_twitter_handle")" style="height: 44px;" />
+                        <input type="text" class="form-control onboarding-input" name="twitter" id="twitter" value="@twitter" placeholder="@("@your_twitter_handle")" style="height: 44px;" />
                     </div>
 
                     <div class="clearfix"></div>
                     <div class="col-md-12 onboarding-form-group">
                         <label class="onboarding-lable">INSTAGRAM HANDLE</label>
-                        <input type="text" class="form-control onboarding-input" name="instagram" id="instagram" value="@Request["instagram"]" placeholder="@("@your_instagram_handle")" style="height: 44px;" />
+                        <input type="text" class="form-control onboarding-input" name="instagram" id="instagram" value="@instagram" placeholder="@("@your_instagram_handle")" style="height: 44px;" />
                     </div>
 
                     <div class="clearfix"></div>
                     <div class="col-md-12 onboarding-form-group">
                         <label class="onboarding-lable">FACEBOOK PAGE URL</label>
-                        <input type="text" class="form-control onboarding-input" name="facebook" id="facebook" value="@Request["facebook"]" placeholder="https://facebook.com/your-page" style="height: 44px;" />
+                        <input type="text" class="form-control onboarding-input" name="facebook" id="facebook" value="@facebook" placeholder="https://facebook.com/your-page" style="height: 44px;" />
                     </div>
 
                     <div class="clearfix"></div>
                     <div class="col-md-12 onboarding-form-group">
                         <label class="onboarding-lable">YOUTUBE URL</label>
-                        <input type="text" class="form-control onboarding-input" name="youtube" id="youtube" value="@Request["youtube"]" placeholder="https://youtube.com/your-page" style="height: 44px;" />
+                        <input type="text" class="form-control onboarding-input" name="youtube" id="youtube" value="@youtube" placeholder="https://youtube.com/your-page" style="height: 44px;" />
                     </div>
 
                     <div class="clearfix"></div>
                     <div class="col-md-12 onboarding-form-group">
                         <label class="onboarding-lable">LINKEDIN URL</label>
-                        <input type="text" class="form-control onboarding-input" name="linkedin" id="linkedin" value="@Request["linkedin"]" placeholder="https://linkedin.com/your-page" style="height: 44px;" />
+                        <input type="text" class="form-control onboarding-input" name="linkedin" id="linkedin" value="@linkedin" placeholder="https://linkedin.com/your-page" style="height: 44px;" />
                     </div>
 
                     <div class="clearfix"></div>
                     <div class="col-md-12 onboarding-form-group">
                         <label class="onboarding-lable">APPOINTMENT BOOKING LINK</label>
-                        <input type="text" class="form-control onboarding-input" name="calendar" id="calendar" value="@Request["calendar"]" placeholder="https://calendly.com/your-page" style="height: 44px;" />
+                        <input type="text" class="form-control onboarding-input" name="calendar" id="calendar" value="@calendar" placeholder="https://calendly.com/your-page" style="height: 44px;" />
                     </div>
 
                     <div class="clearfix"></div>

@@ -59,8 +59,15 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var profile = account.GetOrCreateAccountProfile(currentUser, msgs);
+            var headline = profile.IsNotEmpty() ? profile.Headline : "";
+            var genderrestrictions = profile.IsNotEmpty() ? (int)profile.GenderRestriction : (int)GenderRestrictionType.None;
+
+            ViewBag.Headline = headline;
+            ViewBag.GenderRestriction = genderrestrictions;
             ViewBag.Messages = msgs;
-            ViewBag.Title = account.Name;
+            ViewBag.Title = account.Name;            
 
             var user = account.GetAccountOwner(msgs);
 
@@ -95,7 +102,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         account.TimeZone = timeZone.IsNotEmpty() ? timeZone : null;
                         amsgs.AddRange(account.Save(adc));
 
-                        profile.UpdateProfile(
+                        profile.UpdateProfileProgramInfo(
                             title: title,
                             headline: headline,                            
                             genderrestriction: genderrestrictions,
@@ -124,15 +131,26 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var profile = account.GetOrCreateAccountProfile(currentUser, msgs);
             var grades = GradeLevel.Load(msgs: msgs);
+            var minGradeId = grades.First().ID.HasValue ? grades.First().ID.Value : 1;
+            var gradeStart = profile.GetGradeLevelStart();
+            var maxGradeId = grades.Last().ID.HasValue ? grades.Last().ID.Value : 14;
+            var gradeEnd = profile.GetGradeLevelEnd();
+            var ageStart = profile.GetAgeStart();
+            var ageEnd = profile.GetAgeEnd();
 
-            ViewBag.Messages = msgs;
-            ViewBag.ELC = false;
-            ViewBag.OpenCovid = true;
-            ViewBag.IsVirtualProgram = false;            
             ViewBag.Grades = grades;
-            ViewBag.MinGradeId = grades.First().ID.ToString();
-            ViewBag.MaxGradeId = grades.Last().ID.ToString();
+            ViewBag.Messages = msgs;
+            ViewBag.ELC = profile.IsNotEmpty() && profile.IsELearningCenter;
+            ViewBag.OpenCovid = profile.IsNotEmpty() && profile.IsOpenDuringCovid;
+            ViewBag.IsVirtualProgram = profile.IsNotEmpty() && profile.IsVirtualProgram;
+            ViewBag.IsRestrictByGrade = profile.IsRestrictByGrade();
+            ViewBag.GradeStart = gradeStart.IsNotEmpty() ? gradeStart.ID : minGradeId;
+            ViewBag.GradeEnd = gradeEnd.IsNotEmpty() ? gradeEnd.ID : maxGradeId;            
+            ViewBag.AgeStart = ageStart.HasValue ? ageStart.Value : 0;            
+            ViewBag.AgeEnd = ageEnd.HasValue ? ageEnd.Value : 18;
 
             return View(account);
         }
@@ -158,7 +176,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         account.OnboardingStepDone = OnboardingStepType.AdditionalInfo;
                         amsgs.AddRange(account.Save(adc));
 
-                        profile.UpdateProfile(
+                        profile.UpdateProfileAdditionalInfo(
                             mingrade: mingrade,
                             maxgrade: maxgrade,
                             agestart: agestart,
@@ -192,15 +210,17 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult ContactInfo()
+        public ActionResult ContactInfo( )
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
-            var currentUser = SessionVariables.CurrentUser;
-
-            ViewBag.Email = currentUser.Email;
-            ViewBag.Phone = currentUser.Phone;
-            ViewBag.Location = new Location();
+            var profile = account.GetAccountProfile(msgs);
+            var location = profile.GetLocation();
+            ViewBag.Location = location ?? new Location();            
+            ViewBag.Email = profile.ProfileEmail.IsNotEmpty() ? profile.ProfileEmail : account.Email;            
+            ViewBag.Phone = profile.ProfilePhone.IsNotEmpty() ? profile.ProfilePhone : account.Phone;
+            ViewBag.IsProfileEmail = profile.ProfileEmail.IsNotEmpty();
+            ViewBag.IsProfilePhone = profile.ProfilePhone.IsNotEmpty();
             ViewBag.Messages = msgs;
             return View(account);
         }
@@ -235,12 +255,12 @@ namespace AfterSchool.Areas.Org.Controllers
                         account.OnboardingStepDone = OnboardingStepType.ContactInfo;
                         amsgs.AddRange(account.Save(adc));
 
-                        profile.UpdateProfile(
+                        profile.UpdateProfileContactinfo(
                             profileemail: publicemail.IsBoolean() ? email : null,
                             profilephone: publicphone.IsBoolean() ? extractedPhoneNumber : null,
-                            loggedInUser: currentUser,
-                            msgs: amsgs,
-                            dc: adc);
+                            msgs: msgs,
+                            dc: adc
+                        );
 
                         profile.AddNewLocation(
                             locationname,
@@ -275,6 +295,8 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Location = location;
             ViewBag.Email = Request["email"] ?? currentUser.Email;
             ViewBag.Phone = Request["phone"] ?? currentUser.Phone;
+            ViewBag.IsProfileEmail = publicemail.IsBoolean() && publicemail.ToBoolean();
+            ViewBag.IsProfilePhone = publicphone.IsBoolean() && publicphone.ToBoolean();
 
             ViewBag.Messages = msgs;
             return View(account);
@@ -285,6 +307,14 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
+            var profile = account.GetOrCreateAccountProfile(SessionVariables.CurrentUser, msgs);
+            var ah = AfterSchoolLibrary.Helpers.Utilities.GetNewAmazonHelper();
+
+            if (profile.Logo.IsNotBlank())
+                ViewBag.LogoUrl = ah.GetFileLink(profile.Logo, true, null, true);
+
+            if (profile.HeaderImage.IsNotBlank())
+                ViewBag.HeaderImageUrl = ah.GetFileLink(profile.HeaderImage, true, null, true);
 
             ViewBag.Messages = msgs;
             return View(account);
@@ -348,8 +378,18 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
+            var profile = account.GetOrCreateAccountProfile(SessionVariables.CurrentUser, msgs);
 
+            ViewBag.ServiceOffered = profile.GetProperties(AccountPropertyType.ServiceOffered, msgs);
+            ViewBag.TimeOffered = profile.GetProperties(AccountPropertyType.TimeOffered, msgs);
+            ViewBag.PricingOption = profile.GetProperties(AccountPropertyType.PricingOption, msgs);
+            ViewBag.SpecialNeedsOffering = profile.GetProperties(AccountPropertyType.SpecialNeedsOffering, msgs);
+            ViewBag.TeachingMethods = profile.GetProperties(AccountPropertyType.TeachingMethods, msgs);
+            ViewBag.AcademicSubjects = profile.GetProperties(AccountPropertyType.AcademicSubjects, msgs);
+            ViewBag.Softskills = profile.GetProperties(AccountPropertyType.SoftSkills, msgs);
+            ViewBag.ProgramCategories = profile.GetProperties(AccountPropertyType.Classifications, msgs);
             ViewBag.Messages = msgs;
+
             return View(account);
         }
 
@@ -369,7 +409,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         account.OnboardingStepDone = OnboardingStepType.ServicesOffered;
                         amsgs.AddRange(account.Save(adc));
 
-                        profile.UpdateProfile(
+                        profile.UpdateProfileServicesOffered(
                             servicesOffered: Request.Params.Filter("services-offered-"),
                             timesOffered: Request.Params.Filter("times-offered-"),
                             pricingOptions: Request.Params.Filter("pricing-options-"),
@@ -437,7 +477,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         account.Website = website;
                         amsgs.AddRange(account.Save(adc));
 
-                        profile.UpdateProfile(
+                        profile.UpdateProfileLinks(
                             website: website,
                             twitter: twitter,
                             facebook: facebook,
