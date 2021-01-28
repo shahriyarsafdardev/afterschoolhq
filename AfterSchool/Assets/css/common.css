@@ -88,6 +88,8 @@
     padding: 10px;
     border-radius: 8px;
     box-shadow: 0 2px 9px 5px rgba(0, 0, 0, 0.2);
+    background: rgb(24,90,157);
+    background: linear-gradient(6deg, #08ecc0, transparent);
 }
 
 .welcome-inner-ring {
@@ -155,7 +157,7 @@
 }
 
 .common-font {
-    /*font-family: Montserrat;*/
+    font-family: Montserrat;
     font-weight: normal;
     font-stretch: normal;
     font-style: normal;
