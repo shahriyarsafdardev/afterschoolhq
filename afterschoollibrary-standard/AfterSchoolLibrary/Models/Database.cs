@@ -268,6 +268,7 @@ namespace AfterSchoolLibrary.Models
 			ActivityGroup.Update(new Hashtable(){{"CostUnitTypeId",0}}, new Hashtable(){{"CostUnitTypeId", DBNull.Value}}, ActivityGroup.ObjectMap, dc);
 			ActivityGroup.Update(new Hashtable(){{"RequiresParentalConsent",false}}, new Hashtable(){{"RequiresParentalConsent", DBNull.Value}}, ActivityGroup.ObjectMap, dc);
 			ActivityGroup.Update(new Hashtable(){{"AllowToPayLater",false}}, new Hashtable(){{"AllowToPayLater", DBNull.Value}}, ActivityGroup.ObjectMap, dc);
+			ActivityGroup.Update(new Hashtable(){{"IsDeleted",false}}, new Hashtable(){{"IsDeleted", DBNull.Value}}, ActivityGroup.ObjectMap, dc);
 			AccountActivityGroup.Update(new Hashtable(){{"InviteStatusId",0}}, new Hashtable(){{"InviteStatusId", DBNull.Value}}, AccountActivityGroup.ObjectMap, dc);
 			AccountActivityGroup.Update(new Hashtable(){{"IsPublished",false}}, new Hashtable(){{"IsPublished", DBNull.Value}}, AccountActivityGroup.ObjectMap, dc);
 			AccountActivityGroup.Update(new Hashtable(){{"CostUnitTypeId",0}}, new Hashtable(){{"CostUnitTypeId", DBNull.Value}}, AccountActivityGroup.ObjectMap, dc);
@@ -544,6 +545,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registration_ActivityGroupId ON [Registration] (ActivityGroupId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registration_AccountActivityGroupId ON [Registration] (AccountActivityGroupId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registration_FirstRegistrationId ON [Registration] (FirstRegistrationId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registration_CouponId_IsDeleted ON [Registration] (CouponId,IsDeleted)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityWebUser_ActivityId ON [ActivityWebUser] (ActivityId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityWebUser_WebUserId ON [ActivityWebUser] (WebUserId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityWebUser_IsLeader_WebUserId ON [ActivityWebUser] (WebUserId,IsLeader)"));

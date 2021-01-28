@@ -13,6 +13,7 @@
     var shareUrl = Model.Account.ShortHomePageUrl;
     var shareObject = Model.Account.Name;
     var isInEditMode = currentUser.IsNotEmpty() && currentUser.HasAccessTo(Model.Account) && Request["edit"] == "1";
+    var groupId = Model.ParticipationObject?.GetAnyRelatedActivityGroupId();
 
     if (Model.ParticipationObject.IsNotEmpty())
     {
@@ -237,7 +238,7 @@
                         {
                             if (!Model.Account.IsClaimed)
                             {
-                                <button class="btn btn-header-action md-trigger btn-danger" data-modal="modal-claim-profile" onclick="resetClaimForm()">
+                                <button id="model-claim" class="btn btn-header-action md-trigger btn-danger" data-modal="modal-claim-profile" onclick="resetClaimForm()">
                                     <i class="icon icon-left s7-door-lock"></i>
                                     <span class="">Claim Profile</span>
                                 </button>
@@ -276,8 +277,9 @@
                                 </div>
                             }
                         }
-                        else
-                        {                            
+                        else if (groupId.IsEmpty())
+                        {
+                            //.. we will not show this button if activity is associated with session or activity group.
                             <a href="@Model.ParticipationObject.GetInterestedPageUrl()" class="btn btn-header-action">
                                 <i class="icon icon-left s7-bell"></i>
                                 <span class="">I'm Interested</span>

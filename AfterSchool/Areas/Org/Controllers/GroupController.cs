@@ -118,7 +118,7 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 { "name", name },
                 { "description", description },
-                { "regmode", regmode },
+                { "regmode", regmode.IsNotEmpty() ? regmode : ((int)RegistrationMode.Register).ToString() },
                 { "form", form },
                 { "isinviteonly", isinviteonly.IsBoolean() },
                 // { "genderrestrictions", genderrestrictions },
@@ -459,9 +459,39 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Messages(string id)
+        public ActionResult Messages(string id, string pn, string rpp)
         {
             var group = ActivityGroup.LoadByUid(id.ToGuid());
+
+            int pageNumber = 1;
+            int recordsPerPage = 10;
+
+            if (pn.IsNumber() && pn.ToInteger() > 0)
+            {
+                pageNumber = pn.ToInteger();
+            }
+            if (rpp.IsNumber() && rpp.ToInteger() > 0)
+            {
+                recordsPerPage = rpp.ToInteger();
+            }
+
+            var start = recordsPerPage * (pageNumber - 1);
+            var length = recordsPerPage;
+            var totalCount = 0;
+
+            var contacts = group.GetInvitedContacts(start, length);
+            totalCount = group.GetInvitedContactCount();
+
+            var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
+
+            ViewBag.PagingModel = new PagingModel()
+            {
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                RecordsPerPage = recordsPerPage,
+                TotalPages = totalPages
+            };
+
             ViewBag.Messages = new SystemMessages();
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             return View(group);
@@ -641,6 +671,26 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
                 msgs.Add($"{group.Name} has been restored", MessageType.Success);
+
+            if (Request.UrlReferrer.IsNotEmpty())
+                return Redirect(Request.UrlReferrer.ToString());
+
+            return RedirectToAction("index", "group");
+        }
+
+        [HttpGet]
+        public ActionResult Delete(string id)
+        {
+            var msgs = new SystemMessages();
+            var group = ActivityGroup.LoadByUid(id.ToGuid());
+
+            if (group.IsNotEmpty())
+                group.SetIsDeleted(SessionVariables.CurrentUser.ID.Value, true, msgs);
+
+            ViewBag.Messages = msgs;
+
+            if (msgs.HasNoErrors())
+                msgs.Add($"{group.Name} was deleted at {SessionVariables.CurrentAccount.ConvertToAccountTimeZone(DateTime.UtcNow).ToLongDateTimeString()}", MessageType.Success);
 
             if (Request.UrlReferrer.IsNotEmpty())
                 return Redirect(Request.UrlReferrer.ToString());

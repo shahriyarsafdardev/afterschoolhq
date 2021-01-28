@@ -6,6 +6,9 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Billing;
+using Lob.Models;
+using AfterSchool.Models;
+using System.Data;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -376,9 +379,9 @@ namespace AfterSchoolLibrary.Services
             return groups.Where(group => periods.Select(period => period.ActivityGroupId.Value).Contains(group.ID.Value)).ToList();
         }
 
-        public static List<ActivityGroup> GetSessions(this Account account, bool IsArchived, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<ActivityGroup> GetSessions(this Account account, bool IsArchived, int? start, int? length, bool IsDeleted = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityGroup.LoadByAccountId(account.ID.Value, ActivityGroupType.Session, IsArchived, start, length, msgs, dc);
+            return ActivityGroup.LoadByAccountId(account.ID.Value, ActivityGroupType.Session, IsArchived, start, length, IsDeleted, msgs, dc);
         }
 
         public static int GetSessionCount(this Account account, bool IsArchived = false, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -2135,6 +2138,123 @@ namespace AfterSchoolLibrary.Services
                     dc);
         }
 
+        public static string ParseAndLoadGrade(string grades)
+        {
+            var gradeIds = "";
+            List<GradeLevel> ListGrades = GradeLevel.Load();
+
+            if (grades.IsNotEmpty())
+            {
+                var lstGrades = grades.Split(',');
+                foreach (var item in lstGrades)
+                {
+                    var grade = ListGrades.FirstOrDefault(m => m.Name.ToLower().Replace(" ", "_") == item);
+
+                    if (grade.IsNotEmpty())
+                        gradeIds += $"{grade.ID},";
+                }
+            }
+
+            return gradeIds;
+        }
+
+        public static string ParseAndLoadAge(string ages)
+        {
+            var ageIds = "";
+            if (ages.IsNotEmpty())
+            {
+                var lstAges = ages.Split(',');
+                foreach (var item in lstAges)
+                {
+                    if (item.Contains('_'))
+                    {
+                        var age = item.Split('_');
+
+                        if (age.IsNotEmpty())
+                        {
+                            var ageStart = age[0];
+                            var ageEnd = age[1];
+
+                            if (ageStart.IsNotEmpty() && ageEnd.IsNotEmpty())
+                            {
+                                for (int i = ageStart.ToInteger(); i <= ageEnd.ToInteger(); i++)
+                                {
+                                    ageIds += $"{i},";
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return ageIds;
+        }
+
+        public static string ParseAndLoadGender(string gender)
+        {
+            var genderIds = "";
+            if (gender.IsNotBlank() && gender == GenderRestrictionType.MaleOnly.ToString().ToLower())
+                genderIds = "1,";
+            if (gender.IsNotBlank() && gender == GenderRestrictionType.FemaleOnly.ToString().ToLower())
+                genderIds += "2,";
+
+            return genderIds;
+        }
+
+        public static List<SearchDirectoryResponse> SearchDirectoryAccounts(string hostAccountId, string search, string neighborhoods, string grades, string ages, string gender, string timing, string cost, string starting, string other, string specialNeeds, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            try
+            {
+                var accountDataTable = Account.SearchVisitorAccountsByHostAccount(hostAccountId, search, neighborhoods, ParseAndLoadGrade(grades), ParseAndLoadAge(ages), ParseAndLoadGender(gender), timing, cost, starting, other, specialNeeds, msgs: msgs);
+                                
+                if (accountDataTable.IsNotEmpty() && accountDataTable.Rows.Any())
+                {
+                    List<SearchDirectoryResponse> ListResponse = new List<SearchDirectoryResponse>();
+                    foreach (DataRow row in accountDataTable.Rows)
+                    {
+                        if (row.IsNotEmpty())
+                        {
+                            SearchDirectoryResponse response = new SearchDirectoryResponse();
+
+                            // ..account
+                            response.AccountName = row["AccountName"].ToString();
+                            response.AccountUid = new Guid(row["AccountUid"].ToString());
+                            response.HomePageUrl = $"{Helpers.Utilities.BaseUrl()}/{row["AccountUniqueName"]}";
+
+                            //.. account profile  
+                            response.IsOpenDuringCovid = row["IsOpenDuringCovid"].IsNotEmpty() ? Convert.ToBoolean(row["IsOpenDuringCovid"]) : false;
+                            response.IsELearningCenter = row["IsELearningCenter"].IsNotEmpty() ? Convert.ToBoolean(row["IsELearningCenter"]) : false;
+                            response.ProfileHeadline = row["Headline"].IsNotEmpty() ? row["Headline"].ToString().MaxChars(70, "... (more)") : "";
+                            response.IsRestrictByGrade = row["AgeStart"].IsEmpty();
+                            response.AgeStart = row["AgeStart"].IsNotEmpty() ? row["AgeStart"].ToString() : null;
+                            response.AgeEnd = row["AgeEnd"].IsNotEmpty() ? row["AgeEnd"].ToString() : null;
+                            response.GradeStart = row["GradeLevelStart"].IsNotEmpty() ? row["GradeLevelStart"].ToString() : null;
+                            response.GradeEnd = row["GradeLevelEnd"].IsNotEmpty() ? row["GradeLevelEnd"].ToString() : null;
+
+                            //..Location, ProfileHeaderImageUrl
+                            if (row["LocationId"].IsNotEmpty())
+                            {
+                                var location = Location.Load(Convert.ToInt32(row["LocationId"]));
+                                response.Location = location.FormatCityState(false);
+                                response.ProfileHeaderImageUrl = LocationService.GetGoogleMapsImageUrl(location, 1500, 600);
+                            }
+
+                            ListResponse.Add(response);
+                        }
+                    }
+
+                    return ListResponse;
+                }
+            }
+            catch (Exception ex)
+            {
+                msgs.Add(new SystemMessage() { Exception = ex, Text= ex.Message, MessageType = MessageType.Error });
+                Helpers.Utilities.SystemErrorLog(ex);                
+            }
+
+            return null;
+        }
+
         #endregion
 
         #region ManageAfterSchool
@@ -2836,7 +2956,7 @@ namespace AfterSchoolLibrary.Services
                 registrant = checkoutObject.Registration.GetRegistrant(msgs, dc);
 
                 // need to check for existing purchase or create a new one
-                checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc);
+                checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc);                
             }
 
             // charge successful so I need to create a transaction
@@ -3156,6 +3276,7 @@ namespace AfterSchoolLibrary.Services
                 paymentTypeFeePaid,
                 checkoutObject.ConvenienceFeePayer,
                 checkoutObject.CreditCardFeePayer,
+                checkoutObject.Coupon,
                 loggedInUser, 
                 msgs, 
                 dc);
@@ -3574,7 +3695,7 @@ namespace AfterSchoolLibrary.Services
                     if (coupon.DoesApplyToSubscriptionPlan() && !participationObject.SubscriptionPlans.Any())
                         msgs.Add("Coupon can only be applied to a subscription", MessageType.UserError);
 
-                    if (coupon.HasReachedLimit(payerAccount.ID.Value, msgs, dc))
+                    if (coupon.HasReachedLimit(payerAccount.ID.Value, participationObject.PostPayPlans.IsNotEmpty(), msgs, dc))
                         msgs.Add("Coupon has reached the limit of uses", MessageType.UserError);
 
                 }
@@ -3611,7 +3732,7 @@ namespace AfterSchoolLibrary.Services
 
         public static List<ActivityGroup> GetLeagues(this Account account, bool IsArchived, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityGroup.LoadByAccountId(account.ID.Value, ActivityGroupType.League, IsArchived, start, length, msgs, dc);
+            return ActivityGroup.LoadByAccountId(account.ID.Value, ActivityGroupType.League, IsArchived, start, length, false, msgs, dc);
         }
 
         public static int GetLeagueCount(this Account account, bool IsArchived, SystemMessages msgs = null, DatabaseConnection dc = null)

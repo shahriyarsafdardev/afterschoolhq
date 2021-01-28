@@ -74,24 +74,12 @@
     );
 
     function gradeOrAgeCheck() {
-
         if ($('#restrictby-grade').is(':checked')) {
             $('#restrictbyage').addClass('hide');
             $('#restrictbygrade').removeClass('hide');
-            $('#agestart').val(null);
-            $('#ageend').val(null);
-            $('#mingrade').val(@minGradeLevelId);
-            $('#maxgrade').val(@maxGradeLevelId);
-
         } else {
             $('#restrictbyage').removeClass('hide');
-
             $('#restrictbygrade').addClass('hide');
-            $('#agestart').val(@agestart);
-            $('#ageend').val(@ageend);
-            $('#mingrade').val(null);
-            $('#maxgrade').val(null);
-
         }
     }
 

@@ -49,8 +49,8 @@
         </div>
     </div>
 
-    <div class="layout-footer text-center">
-        <div class="container-footer" style="background: #212a2d">
+    <div id="footerShowHide" class="layout-footer text-center">
+        <div class="container-footer footer-extended">
             <div class="row" style="padding: 20px">
                 <ul class="list-inline last-icon-ul">
                     <li><a href="https://afterschoolhq.com/?utm_source=app&utm_medium=registration" target="_blank">AfterSchool HQ was created</a></li>
@@ -59,17 +59,14 @@
                 </ul>
             </div>
         </div>
-    </div>
-
-
-    <div id="modal-saving"
-         class="hide"
-         style="position: fixed; width: 250px; height: 65px; top: 10px; right: 10px; padding: 0px; margin: 0px; background-color: white; color: black; border-radius: 10px; border: 1px solid;">
-        <h3 class="text-center">Loading...</h3>
-    </div>
+    </div>    
 
     @{Html.RenderPartial("~/Views/Shared/_JavascriptIncludes.cshtml");}
 
     @RenderSection("scripts", required: false)
+
+    <div id="modal-saving" class="hide" style="position: fixed; width: 250px; height: 65px; top: 10px; right: 10px; padding: 0px; margin: 0px; background-color: white; color: black; border-radius: 10px; border: 1px solid;">
+        <h3 class="text-center">Loading...</h3>
+    </div>
 </body>
 </html>

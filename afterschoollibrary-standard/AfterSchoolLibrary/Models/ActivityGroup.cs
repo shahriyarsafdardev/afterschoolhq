@@ -53,6 +53,7 @@ namespace AfterSchoolLibrary.Models
 		public string Details { get { return (string)MDV["Details"].Value; } set { MDV["Details"].Value = value; } }
 		public DateTime? StartDate { get { return (DateTime?)MDV["StartDate"].Value; } set { MDV["StartDate"].Value = value; } }
 		public DateTime? EndDate { get { return (DateTime?)MDV["EndDate"].Value; } set { MDV["EndDate"].Value = value; } }
+		public bool IsDeleted { get { return (bool)MDV["IsDeleted"].Value; } set { MDV["IsDeleted"].Value = value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
 		
 
@@ -71,6 +72,7 @@ namespace AfterSchoolLibrary.Models
 			this.CostUnitTypeId = CostUnitType.NotSet;
 			this.RequiresParentalConsent = false;
 			this.AllowToPayLater = false;
+			this.IsDeleted = false;
 			
         }
 
@@ -110,6 +112,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "Details", System.Data.SqlDbType.NVarChar , "4000");
 				_dp.Add(className, "StartDate", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "EndDate", System.Data.SqlDbType.DateTime);
+				_dp.Add(className, "IsDeleted", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
 				
                 return _dp;
@@ -307,6 +310,10 @@ namespace AfterSchoolLibrary.Models
 			dps.Add(ObjectMap["EndDate"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsDeleted"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -322,7 +329,7 @@ namespace AfterSchoolLibrary.Models
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
 		public static List<ActivityGroup> LoadByAccountIdByActivityGroupTypeId(int AccountId, ActivityGroupType ActivityGroupTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -498,24 +505,26 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static List<ActivityGroup> LoadByAccountId(int AccountId, ActivityGroupType activityGroupTypeId, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<ActivityGroup> LoadByAccountId(int AccountId, ActivityGroupType activityGroupTypeId, int? start, int? length, bool isDeleted = false, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
             dq.Criterias.Add(ObjectMap["ActivityGroupTypeId"], (int)activityGroupTypeId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], isDeleted);
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static List<ActivityGroup> LoadByAccountId(int AccountId, ActivityGroupType activityGroupTypeId, bool isArchived, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<ActivityGroup> LoadByAccountId(int AccountId, ActivityGroupType activityGroupTypeId, bool isArchived, int? start, int? length, bool isDeleted = false, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
             dq.Criterias.Add(ObjectMap["isArchived"], isArchived);
             dq.Criterias.Add(ObjectMap["ActivityGroupTypeId"], (int)activityGroupTypeId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], isDeleted);
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
@@ -559,6 +568,7 @@ namespace AfterSchoolLibrary.Models
             }
             return uniqueName;
         }
+
 
         private List<RegistrationPeriod> _RegistrationPeriods = null;
         public List<RegistrationPeriod> GetRegistrationPeriods(SystemMessages msgs = null, DatabaseConnection dc = null)

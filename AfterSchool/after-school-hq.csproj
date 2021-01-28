@@ -596,9 +596,11 @@
     <Compile Include="Controllers\FaqController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\IndianapolisController.cs" />
+    <Compile Include="Controllers\IsypDirectoryController.cs" />
     <Compile Include="Controllers\LegalController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
     <Compile Include="Controllers\LogoutController.cs" />
+    <Compile Include="Controllers\MccoyDirectoryController.cs" />
     <Compile Include="Controllers\MsgController.cs" />
     <Compile Include="Controllers\OAuthController.cs" />
     <Compile Include="Controllers\RController.cs" />
@@ -688,10 +690,10 @@
     <Content Include="img\banner-classroom.jpg" />
     <Content Include="img\BCALogo.jpg" />
     <Content Include="img\billy2.png" />
-    <Content Include="img\client_success_manager.jpeg" />
     <Content Include="img\darye.png" />
     <Content Include="img\david.png" />
     <Content Include="img\fee.png" />
+    <Content Include="img\filter.png" />
     <Content Include="img\frank-mckenna-LhOjrOlcLx4-unsplash.jpg" />
     <Content Include="img\gabriel-baranski-vGICUyYW2CE-unsplash.jpg" />
     <Content Include="img\handshake-icon.png" />
@@ -728,6 +730,7 @@
     <Content Include="img\image-3-1800x900-1.png" />
     <Content Include="img\image-9.png" />
     <Content Include="img\IPS.png" />
+    <Content Include="img\isyp-logo.png" />
     <Content Include="img\lawrence.png" />
     <Content Include="img\lazyload-ph.png" />
     <Content Include="img\logo-white.png" />
@@ -752,6 +755,7 @@
     <Content Include="index-profiles.html" />
     <Content Include="index.html" />
     <Content Include="ips.html" />
+    <Content Include="joinisyp.html" />
     <Content Include="iyi-providers.html" />
     <Content Include="js\blocs.min.js" />
     <Content Include="js\bootstrap.bundle.min.js" />
@@ -1825,6 +1829,9 @@
     <Content Include="Views\Shared\Components\_GoogleLocationEdit.cshtml" />
     <Content Include="Views\Shared\_GradeRestrictions.cshtml" />
     <Content Include="Views\SignUp\IndexNew.cshtml" />
+    <Content Include="Views\MccoyDirectory\Index.cshtml" />
+    <Content Include="Views\Shared\_DirectoryFilters.cshtml" />
+    <Content Include="Views\ISYPDirectory\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

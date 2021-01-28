@@ -253,7 +253,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "registrationclosetime", registrationclosetime },
                     { "timezone", timezone },
                     { "form", form },
-                    { "regmode", regmode },
+                    { "regmode", regmode.IsNotEmpty() ? regmode : ((int)RegistrationMode.Register).ToString() },
                     { "group", group },
                     { "type", type },
                     { "inviteonly", inviteonly.IsBoolean().ToString() },
@@ -396,7 +396,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditRestrictions(string id, string alloworganization, string agerestrictions, string agestart, string ageend, string graderestrictions, string mingrade, string maxgrade, string genderrestrictions, string requiresparentalconsent, string cmd)
+        public ActionResult EditRestrictions(string id, string alloworganization, string restrictbygrade, string agestart, string ageend, string graderestrictions, string mingrade, string maxgrade, string genderrestrictions, string requiresparentalconsent, string cmd)
         {
             var msgs = new SystemMessages();
             Activity activity = null;
@@ -408,13 +408,27 @@ namespace AfterSchool.Areas.Org.Controllers
                 if (!accountPackage.HasFeature(FeatureType.AllowStudentRegistration) && requiresparentalconsent.IsBlank())
                     requiresparentalconsent = "1";
 
+                if (restrictbygrade.IsNotEmpty() && restrictbygrade.IsBoolean())
+                {
+                    if (restrictbygrade.ToBoolean())
+                    {
+                        agestart = "";
+                        ageend = "";
+                    }
+                    else
+                    {
+                        mingrade = "";
+                        maxgrade = "";
+                    }
+                }
+
                 var values = new Dictionary<string, object>()
                 {
                     { "alloworganization", alloworganization.IfBlank("0")},
-                    { "agestart", agerestrictions.IsNumber() ? agestart : ""},
-                    { "ageend", agerestrictions.IsNumber() ? ageend : ""},
-                    { "gradestart", mingrade.IsNumber() ? mingrade : ""},
-                    { "gradeend", maxgrade.IsNumber() ? maxgrade : ""},
+                    { "agestart", agestart },
+                    { "ageend", ageend },
+                    { "gradestart", mingrade },
+                    { "gradeend", maxgrade },
                     { "genderrestrictions", genderrestrictions},
                     { "requiresparentalconsent", requiresparentalconsent.IfBlank("0") }
                 };
@@ -1362,6 +1376,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         var availablePrePayments = registration.GetAvailablePrePayments(activity, msgs);
                         var attendanceDaysToCharge = Math.Max(0, raAttendances.Count - availablePrePayments.Count);
                         CheckoutObject checkoutObject = null;
+                        var coupon = CouponService.GetCoupon(registration, msgs);
 
                         if (attendanceDaysToCharge > 0)
                         {
@@ -1373,9 +1388,20 @@ namespace AfterSchool.Areas.Org.Controllers
                             else
                                 creditCardPurchaseObject = new CreditCardPurchaseObject { StripeSourceId = registration.StripeSourceId };
 
+                            var postPayPlan = activity.GetPostPayPlan(msgs);
+                            var overrideAmount = costPerAttendance * attendanceDaysToCharge;
+
+                            if (postPayPlan.IsNotEmpty())
+                            {
+                                //.. if post pay plan, then we will have coupon value in registration to discount.
+                                var couponDiscount = attendanceDaysToCharge * (registration.CouponValue.HasValue ? registration.CouponValue.Value : 0);
+                                overrideAmount = (costPerAttendance * attendanceDaysToCharge) - couponDiscount;
+                            }                          
+
                             checkoutObject = new CheckoutObject()
                             {
-                                OverrideAmount = costPerAttendance * attendanceDaysToCharge,
+                                Coupon = coupon,
+                                OverrideAmount = overrideAmount,
                                 ConvenienceFeeOverrideAmount = registration.ConvenienceFeePaid.IfEmpty(0) * attendanceDaysToCharge,
                                 PaymentTypeFeeOverrideAmount = registration.PaymentTypeFeePaid.IfEmpty(0) * attendanceDaysToCharge,
                                 PayingAccount = masterRegistrantAccount,
@@ -1392,7 +1418,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                 ParticipationObject = activity.GetParticipationObject(msgs),
                                 Quantity = attendanceDaysToCharge,
                                 Registration = registration,
-                                PostPayPlan = activity.GetPostPayPlan(msgs),
+                                PostPayPlan = postPayPlan,
                             };
 
                             if (msgs.HasNoErrors())
@@ -1447,10 +1473,12 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 // Send summary email of charged AttendanceRegistrants to Activity Provider if there were any successful charges
                 var attendanceRegistrantAcitivtyCounts = GetAttendanceRegistrantActivityCounts(selectedAttendances, registrantActivities, msgs);
-                var costPerClass = registrantActivities.First().GetRegistration(msgs).CostPerClass.HasValue ? registrantActivities.First().GetRegistration(msgs).CostPerClass.Value : 0;
+                var objRegistration = registrantActivities.First().GetRegistration(msgs);
+                var costPerClass = objRegistration.CostPerClass.HasValue ? objRegistration.CostPerClass.Value : 0;
+                var couponValue = objRegistration.CouponValue.HasValue ? objRegistration.CouponValue.Value : 0;
 
                 if (attendanceRegistrantAcitivtyCounts.Count > 0)
-                    AfterSchoolLibrary.Helpers.EmailHelper.SendAttendanceChargeConfirmation(attendanceRegistrantAcitivtyCounts, activity, costPerClass, null, SessionVariables.CurrentUser, false, msgs);
+                    EmailHelper.SendAttendanceChargeConfirmation(attendanceRegistrantAcitivtyCounts, activity, costPerClass, couponValue, null, SessionVariables.CurrentUser, false, msgs);
                     
             }
 
@@ -1831,7 +1859,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         body += $"Activity Start Date: {registrationDate.StartDateTime} <br />";
 
                     EmailHelper.SendEmail(
-                        toEmail: AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress,
+                        toEmail: AfterSchoolLibrary.Helpers.Email.AppCustomersEmailAddress,
                         subject: $"{account.Name} has published a new Activity: {activity.Name}",
                         body,
                         isAfterSchool: true);

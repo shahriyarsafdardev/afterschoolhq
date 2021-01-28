@@ -73,7 +73,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult ProgramInfo(string title, string headline, string genderrestrictions)
+        public ActionResult ProgramInfo(string title, string headline, string genderrestrictions, string timeZone)
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
@@ -92,6 +92,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         account.Name = title;
                         account.UniqueName = AccountService.GenerateUniqueName(title, account.ID, amsgs, adc);
                         account.OnboardingStepDone = OnboardingStepType.ProgramInfo;
+                        account.TimeZone = timeZone.IsNotEmpty() ? timeZone : null;
                         amsgs.AddRange(account.Save(adc));
 
                         profile.UpdateProfile(
@@ -158,10 +159,10 @@ namespace AfterSchool.Areas.Org.Controllers
                         amsgs.AddRange(account.Save(adc));
 
                         profile.UpdateProfile(
-                            mingrade: mingrade.IsInteger() ? mingrade.ToInteger() : 0,
-                            maxgrade: maxgrade.IsInteger() ? maxgrade.ToInteger() : 0,
-                            agestart: agestart.IsInteger() ? agestart.ToInteger() : 0,
-                            ageend: ageend.IsInteger() ? ageend.ToInteger() : 0,
+                            mingrade: mingrade,
+                            maxgrade: maxgrade,
+                            agestart: agestart,
+                            ageend: ageend,
                             opencovid: isOpenDuringCovid,
                             elearningcenter: isElc,
                             isvirtualprogram: isVirtualProgram,
@@ -473,8 +474,9 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors() && account.IsNotEmpty() && currentUser.IsNotEmpty())
             {
+                //.. send support email to AHQ just to notifiy the team that a profile completed.
                 EmailHelper.SendEmail(
-                    AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress,
+                    AfterSchoolLibrary.Helpers.Email.AppCustomersEmailAddress,
                     $"AHQ Profile Completed - {account.Name}",
                     $"<p>Organization: {account.Name}<br />Name: {currentUser.FirstName} {currentUser.LastName}<br />Email: {currentUser.Email}<br />Profile Link: {account.HomePageUrl}</p>",
                     true);

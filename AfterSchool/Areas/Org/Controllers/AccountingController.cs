@@ -235,8 +235,9 @@ namespace AfterSchool.Areas.Org.Controllers
             row.Add("Payer");
             row.Add("For");
             row.Add("Item Description");
-            row.Add("Amount Paid");
-            row.Add("Fees");
+            row.Add("Total Amount Paid");
+            row.Add("Platform Fee");
+            row.Add("Credit Card Fee");
             row.Add("Your Amount");
             row.Add("Status");
             row.Add("Type");
@@ -245,18 +246,20 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 var registrant = t.GetPurchase()?.GetRegistrant();
                 var participationObjects = t.GetParticipationObjects();
+                var description = participationObjects.DistinctBy(po => new { po.ObjectID, po.ObjectType }).Select(po => po.Name).ToStringList(", ");
 
                 row = new List<string>();
-                row.Add(t.GetTransactionNumber());
-                row.Add(t.CreateDate.ToShortDateTimeString());
-                row.Add(t.GetPayerAccount().Name);
-                row.Add(t.IsCharge() && registrant.IsNotEmpty() ? registrant.DisplayName : t.GetBillerAccount().Name);
-                row.Add(t.Description);
-                row.Add(t.GetPayerAmount().ToCurrency());
-                row.Add(t.GetFees().ToCurrency());
-                row.Add(t.GetBillerPayout().ToCurrency());
-                row.Add(t.GetStatus());
-                row.Add(t.PaymentTypeId == PaymentType.NotSet ? "" : t.PaymentTypeId.ToString().SplitByUpperCase());
+                row.Add(t.GetTransactionNumber()); // ID
+                row.Add(t.CreateDate.ToShortDateTimeString()); // CreatedOn
+                row.Add(t.GetPayerAccount().Name);  // Payer
+                row.Add(t.IsCharge() && registrant.IsNotEmpty() ? registrant.DisplayName : t.GetBillerAccount().Name); // For
+                row.Add(description.IsNotEmpty() ? description : t.Description); // Item Description
+                row.Add(t.GetPayerAmount().ToCurrency()); // Total Amount Paid
+                row.Add(t.ConvenienceFeeCharged.ToCurrency()); // Platform Fee
+                row.Add(t.PaymentTypeFeeCharged.ToCurrency()); // Credit Card Fee
+                row.Add(t.GetBillerPayout().ToCurrency()); // Your Amount
+                row.Add(t.GetStatus()); // Status
+                row.Add(t.PaymentTypeId.ToString().SplitByUpperCase()); // Type
                 table.Add(row);
             }
             string csv = CsvFile.Create(table);
@@ -458,7 +461,7 @@ namespace AfterSchool.Areas.Org.Controllers
             try
             {
                 var activities = Activity.LoadByAccountId(SessionVariables.CurrentAccount.ID.Value, msgs)
-                .Where(activity => activity.IsOpenOrUpcoming(msgs) && activity.HasRegistrationFeeOnly)
+                .Where(activity => activity.IsOpenOrUpcoming(msgs) && !activity.IsFree && !activity.HasPostPayPlan() && !activity.HasSubscriptionPlan())
                 .Select(m => new ModalViewModel()
                 {
                     ID = m.ID.Value.ToString(),
