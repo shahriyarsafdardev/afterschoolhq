@@ -2534,19 +2534,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static decimal GetMaxAmountAvailableForPayout(this Account account, string search, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            var achWaitDays = TransactionService.GetWaitPeriodInDays(PaymentType.ACH);
-            var creditWaitDays = TransactionService.GetWaitPeriodInDays(PaymentType.CreditCard);
-            var achEndDate = endDate;
-            var creditEndDate = endDate;
-            var utcNow = DateTime.UtcNow.Date.AddDays(1).AddMilliseconds(-1);
-
-            if (!endDate.HasValue || utcNow.AddDays(achWaitDays * -1).IsBefore(endDate.Value))
-                achEndDate = utcNow.AddDays(achWaitDays * -1);
-
-            if (!endDate.HasValue || utcNow.AddDays(creditWaitDays * -1).IsBefore(endDate.Value))
-                creditEndDate = utcNow.AddDays(creditWaitDays * -1);
-
+        {   
             var totalPayoutAmount = account.GetTotalPayoutAmount(search, null, startDate, endDate, msgs, dc);
             
             var totalAmountBilledACH = account.GetTotalAmountBilledOut(
@@ -2554,7 +2542,7 @@ namespace AfterSchoolLibrary.Services
                                         PaymentSourceType.AfterSchoolPlatform, 
                                         PaymentType.ACH, 
                                         startDate, 
-                                        achEndDate, 
+                                        endDate, 
                                         msgs, 
                                         dc);
 
@@ -2563,12 +2551,12 @@ namespace AfterSchoolLibrary.Services
                                             PaymentSourceType.AfterSchoolPlatform, 
                                             PaymentType.CreditCard, 
                                             startDate, 
-                                            creditEndDate,
+                                            endDate,
                                             msgs, 
                                             dc);
 
-            var totalFeesPaidACH = account.GetTotalFeesPaidAsBiller(search, PaymentType.ACH, startDate, achEndDate, msgs, dc);
-            var totalFeesPaidCredit = account.GetTotalFeesPaidAsBiller(search, PaymentType.CreditCard, startDate, creditEndDate, msgs, dc);
+            var totalFeesPaidACH = account.GetTotalFeesPaidAsBiller(search, PaymentType.ACH, startDate, endDate, msgs, dc);
+            var totalFeesPaidCredit = account.GetTotalFeesPaidAsBiller(search, PaymentType.CreditCard, startDate, endDate, msgs, dc);
             var totalFeesRefunded = account.GetTotalFeesRefunded(search, startDate, endDate, msgs, dc);
 
             var totalRefunds = account.GetTotalAmountRefundedAHQ(search, true, startDate, endDate, msgs, dc);
@@ -3459,7 +3447,8 @@ namespace AfterSchoolLibrary.Services
 
         public static decimal GetTotalPayoutAmount(this Account account, string search, PayoutStatus? payoutStatus, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Payout.GetTotalAmountByAccountId(account.ID.Value, search, payoutStatus, startDate, endDate, msgs, dc);
+            return Payout.GetTotalAmountByAccountId(account.ID.Value, search, payoutStatus, startDate, endDate, msgs, dc) +
+                Transaction.GetPayoutAmountForBillerAccount(account.ID.Value, msgs, dc);
         }
 
         public static decimal GetTotalAmountBilledOut(this Account account, string search, PaymentSourceType? paymentSourceType = null, PaymentType? paymentType = null, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)

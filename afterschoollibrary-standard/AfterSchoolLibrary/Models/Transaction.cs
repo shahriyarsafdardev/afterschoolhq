@@ -1070,8 +1070,7 @@ namespace AfterSchoolLibrary.Models
                 return results.Rows[0][0].ToString().ToDecimal();
 
             return 0;
-        }
-
+        }       
 
         public static decimal GetTotalAmountPaidByPayerAccount(int PayerAccountId, string search, PaymentSourceType? paymentSourceType, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -1355,6 +1354,39 @@ namespace AfterSchoolLibrary.Models
             var sql = "select * from [Transaction] where ConvenienceFeePayerAccountId = BillerAccountId and PlatformFlatFee is null and PayoutId is null";
 
             return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        /// <summary>
+        /// This method is created to get amount of payout for providers
+        /// In future, we will be using stripe webhooks to get connected accounts payouts
+        /// But till then we will be using this work around
+        /// </summary>
+        /// <param name="BillerAccountId"></param>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
+        /// <returns></returns>
+        public static decimal GetPayoutAmountForBillerAccount(int BillerAccountId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+
+            var sql = $@"   
+                            SELECT SUM(Amount - ConvenienceFeeCharged - PaymentTypeFeeCharged) AS Amount FROM [Transaction] 
+                            WHERE 
+                                BillerAccountId = {BillerAccountId} AND 
+                                PayoutId IS NULL AND 
+                                IsDeleted = 0 AND 
+                                (
+                                    (PaymentTypeId = 1 and GETDATE() >= DATEADD(day, 2, CreateDate)) OR  --cc 2 days
+                                    (PaymentTypeId = 5 and GETDATE() >= DATEADD(day, 5, CreateDate))     -- ach 5 days
+								)";
+
+            var dt = dq.ExecuteSelect(sql, msgs);
+
+            if (dt.Rows.Any())
+                return dt.Rows[0][0].ToString().ToDecimal();
+
+            return 0;
         }
 
         #endregion
