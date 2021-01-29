@@ -255,16 +255,19 @@ namespace AfterSchoolLibrary.Services
                     if (specialNeedsOfferings.IsNotEmpty())
                         profile.ManageProperties(specialNeedsOfferings, AccountPropertyType.SpecialNeedsOffering, loggedInUser, amsgs, adc);
                                      
-                        profile.ManageProperties(classifications.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.Classifications, loggedInUser, amsgs, adc);
+                    profile.ManageProperties(classifications.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.Classifications, loggedInUser, amsgs, adc);
 
                     
-                        profile.ManageProperties(softskills.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.SoftSkills, loggedInUser, amsgs, adc);
+                    profile.ManageProperties(softskills.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.SoftSkills, loggedInUser, amsgs, adc);
 
                    
-                        profile.ManageProperties(academicsubjects.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.AcademicSubjects, loggedInUser, amsgs, adc);
+                    profile.ManageProperties(academicsubjects.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.AcademicSubjects, loggedInUser, amsgs, adc);
 
                     
-                        profile.ManageProperties(teachingmethods.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.TeachingMethods, loggedInUser, amsgs, adc);
+                    profile.ManageProperties(teachingmethods.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.TeachingMethods, loggedInUser, amsgs, adc);
+
+                    profile.LastModifiedBy = loggedInUser.ID.Value;
+                    profile.LastModifiedDate = DateTime.UtcNow;
 
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
@@ -283,13 +286,17 @@ namespace AfterSchoolLibrary.Services
             profile.LinkedIn = linkedin;
             profile.YouTube = youtube;
             profile.CalendarBookingLink = calendar;
+            profile.LastModifiedBy = loggedInUser.ID.Value;
+            profile.LastModifiedDate = DateTime.UtcNow;
             msgs.AddRange(profile.Save(dc));
         }
 
-        public static void UpdateProfileContactinfo(this AccountProfile profile, string profileemail = null, string profilephone = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void UpdateProfileContactinfo(this AccountProfile profile, WebUser loggedInUser, string profileemail = null, string profilephone = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             profile.ProfileEmail = profileemail;
             profile.ProfilePhone = profilephone;
+            profile.LastModifiedBy = loggedInUser.ID.Value;
+            profile.LastModifiedDate = DateTime.UtcNow;
             msgs.AddRange(profile.Save(dc));
         }
 
@@ -298,6 +305,8 @@ namespace AfterSchoolLibrary.Services
             profile.Title = title.MaxChars(400);
             profile.Headline = headline.MaxChars(400);
             profile.GenderRestriction = (GenderRestrictionType)genderrestriction.ToInteger();
+            profile.LastModifiedBy = loggedInUser.ID.Value;
+            profile.LastModifiedDate = DateTime.UtcNow;
             msgs.AddRange(profile.Save(dc));
         }      
 
@@ -311,6 +320,8 @@ namespace AfterSchoolLibrary.Services
             profile.ManageProperties(softskills.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.SoftSkills, loggedInUser, msgs, dc);
             profile.ManageProperties(academicsubjects.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.AcademicSubjects, loggedInUser, msgs, dc);
             profile.ManageProperties(teachingmethods.Split(',').Select(x => x.Trim().ToProperCase()), AccountPropertyType.TeachingMethods, loggedInUser, msgs, dc);
+            profile.LastModifiedBy = loggedInUser.ID.Value;
+            profile.LastModifiedDate = DateTime.UtcNow;
             msgs.AddRange(profile.Save(dc));
         }
 
@@ -323,6 +334,8 @@ namespace AfterSchoolLibrary.Services
             profile.IsOpenDuringCovid = opencovid;
             profile.IsELearningCenter = elearningcenter;
             profile.IsVirtualProgram = isvirtualprogram;
+            profile.LastModifiedBy = loggedInUser.ID.Value;
+            profile.LastModifiedDate = DateTime.UtcNow;
             msgs.AddRange(profile.Save(dc)); 
         }
 
