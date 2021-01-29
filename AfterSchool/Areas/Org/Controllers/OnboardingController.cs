@@ -134,9 +134,9 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentUser = SessionVariables.CurrentUser;
             var profile = account.GetOrCreateAccountProfile(currentUser, msgs);
             var grades = GradeLevel.Load(msgs: msgs);
-            var minGradeId = grades.First().ID.HasValue ? grades.First().ID.Value : 1;
+            var minGradeId = grades.First().ID.Value;
             var gradeStart = profile.GetGradeLevelStart();
-            var maxGradeId = grades.Last().ID.HasValue ? grades.Last().ID.Value : 14;
+            var maxGradeId = grades.Last().ID.Value;
             var gradeEnd = profile.GetGradeLevelEnd();
             var ageStart = profile.GetAgeStart();
             var ageEnd = profile.GetAgeEnd();
@@ -210,7 +210,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult ContactInfo( )
+        public ActionResult ContactInfo()
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
@@ -230,8 +230,9 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
-            var profile = account.GetOrCreateAccountProfile(SessionVariables.CurrentUser, msgs);
             var currentUser = SessionVariables.CurrentUser;
+            var profile = account.GetOrCreateAccountProfile(currentUser, msgs);
+            
 
             if (email.IsEmpty())
                 msgs.Add("Program Email is required", MessageType.UserError);
@@ -258,6 +259,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         profile.UpdateProfileContactinfo(
                             profileemail: publicemail.IsBoolean() ? email : null,
                             profilephone: publicphone.IsBoolean() ? extractedPhoneNumber : null,
+                            loggedInUser: currentUser,
                             msgs: msgs,
                             dc: adc
                         );
@@ -398,7 +400,8 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
-            var profile = account.GetOrCreateAccountProfile(SessionVariables.CurrentUser, msgs);
+            var currentUser = SessionVariables.CurrentUser;
+            var profile = account.GetOrCreateAccountProfile(currentUser, msgs);
 
             if (msgs.HasNoErrors())
             {
@@ -418,7 +421,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             softskills: softskills,
                             academicsubjects: academicsubjects,
                             teachingmethods: teachingmethods,
-                            loggedInUser: SessionVariables.CurrentUser,
+                            loggedInUser: currentUser,
                             msgs: amsgs,
                             dc: adc);
                     },
@@ -450,7 +453,8 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
-            var profile = account.GetOrCreateAccountProfile(SessionVariables.CurrentUser, msgs);
+            var currentUser = SessionVariables.CurrentUser;
+            var profile = account.GetOrCreateAccountProfile(currentUser, msgs);
 
             if (website.IsNotEmpty() && !website.IsRegExMatch(BasicLibrary.Utilities.WebsiteRegEx))
                 msgs.Add("Please enter a valid website address", MessageType.UserError);
@@ -485,7 +489,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             linkedin: linkedin,
                             youtube: youtube,
                             calendar: calendar,
-                            loggedInUser: SessionVariables.CurrentUser,
+                            loggedInUser: currentUser,
                             msgs: amsgs,
                             dc: adc);
                     },
