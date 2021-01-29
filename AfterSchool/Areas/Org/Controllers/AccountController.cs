@@ -1135,7 +1135,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     }
                 }
 
-                profile.UpdateProfileExtended(
+                profile.UpdateProfile(
                     title,
                     headline,
                     about,
