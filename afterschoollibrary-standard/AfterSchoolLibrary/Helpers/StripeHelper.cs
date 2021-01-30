@@ -1800,6 +1800,44 @@ namespace AfterSchoolLibrary.Billing
             return charge;
         }
 
+        private static Stripe.PaymentIntentService GetPaymentIntentService()
+        {
+            return new Stripe.PaymentIntentService(StripeClient);
+        }
+
+        public static Stripe.PaymentIntent Charge(string fromCustomerId, string destinationAccountId, string tokenOrSourceId, decimal totalAmount, decimal? platformFee, string description, string statementDescriptor, Dictionary<string, string> metaData, SystemMessages msgs)
+        {
+            var createOptions = new PaymentIntentCreateOptions
+            {                
+                Amount = (totalAmount * 100).ToInteger(),
+                ApplicationFeeAmount = (platformFee.Value * 100).ToInteger(),
+                Currency = "usd",
+                Customer = fromCustomerId,
+                Description = description,
+                Source = tokenOrSourceId,
+                StatementDescriptorSuffix = statementDescriptor.Replace("'", "").MaxChars(22),
+                TransferData = new PaymentIntentTransferDataOptions
+                {
+                    Destination = destinationAccountId,
+                },
+            };
+
+            Stripe.PaymentIntent charge = null;
+
+            try
+            {
+                charge = GetPaymentIntentService().Create(createOptions);
+                GetPaymentIntentService().Confirm(charge.Id);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Error charging payment source", MessageType.UserError);
+            }
+
+            return charge;
+        }
+
         public static List<Stripe.Charge> GetCharges(string customerId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -1904,7 +1942,7 @@ namespace AfterSchoolLibrary.Billing
                 Amount = (totalAmount * 100).ToInteger(),
                 Reason = reason,
                 ReverseTransfer = reverseTransfer,
-                //RefundApplicationFee = true,
+                RefundApplicationFee = true,
                 Charge = chargeId,                
             };
 
