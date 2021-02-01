@@ -451,8 +451,8 @@ namespace AfterSchoolLibrary.Services
             if (!transaction.IsCharge())
                 return "Processed";
 
-            if (transaction.PlatformPercentFee.HasValue)
-                return "Paid";
+            //if (transaction.PlatformPercentFee.HasValue)
+            //    return "Paid";
 
             if (!transaction.HasRefundableAmount(false, msgs, dc))
                 return "Refunded";

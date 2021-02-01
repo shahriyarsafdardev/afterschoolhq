@@ -1371,13 +1371,14 @@ namespace AfterSchoolLibrary.Models
             dq.Connection = dc;
 
             var sql = $@"   
-                            SELECT SUM(Amount - ConvenienceFeeCharged - PaymentTypeFeeCharged) AS Amount FROM [Transaction] 
+                            SELECT SUM(Amount - ConvenienceFeeCharged - PaymentTypeFeeCharged) AS Amount 
+                            FROM [Transaction] 
                             WHERE 
                                 BillerAccountId = {BillerAccountId} AND 
                                 PayoutId IS NULL AND 
                                 IsDeleted = 0 AND 
                                 (
-                                    (PaymentTypeId = 1 and GETDATE() >= DATEADD(day, 2, CreateDate)) OR  --cc 2 days
+                                    (PaymentTypeId = 1 and GETDATE() >= DATEADD(day, 2, CreateDate)) OR  -- cc 2 days
                                     (PaymentTypeId = 5 and GETDATE() >= DATEADD(day, 5, CreateDate))     -- ach 5 days
 								)";
 
