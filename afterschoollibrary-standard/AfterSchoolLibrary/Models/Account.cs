@@ -1136,8 +1136,7 @@ namespace AfterSchoolLibrary.Models
                 FROM AccountRelationship ar
                 INNER JOIN Account a ON a.ID = ar.VisitorAccountId
                 LEFT JOIN Activity act ON act.AccountId = ar.VisitorAccountId AND act.IsDeleted <> 1 AND act.IsPublished = 1 AND act.IsInviteOnly <> 1
-                LEFT JOIN ActivityRegistrationPeriod arp on arp.ActivityId = act.ID
-                LEFT JOIN RegistrationPeriod rp on rp.ID = arp.RegistrationPeriodId AND rp.EndDateTime < GETDATE()
+                LEFt JOIN ActivitySchedule acs ON act.ActivityScheduleId = acs.ID
                 LEFT JOIN AccountProfile ap ON ap.AccountId = ar.VisitorAccountId
                 LEFT JOIN Location loc ON ap.LocationId = loc.ID
                 LEFT JOIN AccountProperty properties on properties.AccountId = ar.VisitorAccountId AND properties.AccountPropertyTypeId in (12, 13, 14, 15)    
@@ -1194,13 +1193,13 @@ namespace AfterSchoolLibrary.Models
                 sql += $@"AND ((@Starting IS NULL)";
 
                 if (starting.Contains("starting_0_7"))
-                    sql += $@" OR rp.StartDateTime between dateadd(dd, 0, cast(getdate() as date)) AND dateadd(dd, 7, cast(getdate() as date))";
+                    sql += $@" OR acs.StartDate between dateadd(dd, 0, cast(getdate() as date)) AND dateadd(dd, 7, cast(getdate() as date))";
 
                 if (starting.Contains("starting_7_28"))
-                    sql += $@" OR rp.StartDateTime between dateadd(dd, 8, cast(getdate() as date)) AND dateadd(dd, 28, cast(getdate() as date))";
+                    sql += $@" OR acs.StartDate between dateadd(dd, 8, cast(getdate() as date)) AND dateadd(dd, 28, cast(getdate() as date))";
 
                 if (starting.Contains("starting_30_90"))
-                    sql += $@" OR rp.StartDateTime between dateadd(dd, 29, cast(getdate() as date)) AND dateadd(dd, 90, cast(getdate() as date))";
+                    sql += $@" OR acs.StartDate between dateadd(dd, 29, cast(getdate() as date)) AND dateadd(dd, 90, cast(getdate() as date))";
 
                 sql += $@")";
             }
