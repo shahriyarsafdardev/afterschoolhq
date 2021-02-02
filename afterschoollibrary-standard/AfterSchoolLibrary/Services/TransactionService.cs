@@ -4,6 +4,7 @@ using System.Linq;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Billing;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -604,14 +605,38 @@ namespace AfterSchoolLibrary.Services
 
                 if (paymentSourceType == PaymentSourceType.AfterSchoolPlatform)
                 {
+                    //.. TODO: review this logic
+                    //.. when refunding, platform will pay all the amount to parent first
+                    //.. then based on that and after deducting fee, we will charge remaining amount to provider
+                    //.. lets say activity charge is 100$, and convenience charge is 6$, then parent pays 110$ (106$ + 4$ cc fee).
+                    //.. so while refunding, parent can refund only 106$(cc fee is not refundable),
+
                     var stripeRefund = Billing.StripeHelper.CreateRefund(
                                     chargeId: transaction.StripeChargeOrRefundId,
                                     totalAmount: refundAmount,
                                     reason: Billing.StripeRefundReason.RequestedByCustomer.ToString().SplitByUpperCase().Replace(" ", "_").ToLower(),
+                                    reverseTransfer: false,
                                     msgs: msgs);
 
                     if (stripeRefund.IsNotEmpty())
+                    {
                         stripeRefundId = stripeRefund.Id;
+
+                        var billerAccount = transaction.GetBillerAccount(msgs);
+
+                        //.. basically this is a transaction.billerammount and this amount will be first deducted from platform, but if user wanted a less refund 
+                        //.. then platform will have to charge provider refund amount - ConvenienceFeeCharged
+                        //.. so sticking with that simple logic only
+                        var feesWithoutCreditCardCharges = transaction.ConvenienceFeeCharged.IfEmpty(0);
+                        var amountToBeRefundedFromProvider = refundAmount - feesWithoutCreditCardCharges;
+
+                        //create reverse charge
+                        if (billerAccount.IsNotEmpty() && billerAccount.StripeUserId.IsNotEmpty() && amountToBeRefundedFromProvider > 0)
+                        {
+                            //.. should we store this info somewhere?
+                            var charge = StripeHelper.CreateRefundChargeOnConnectedAccount(totalAmount: amountToBeRefundedFromProvider, connectedAccountId: billerAccount.StripeUserId, msgs: msgs);
+                        }                        
+                    }
                     else
                         msgs.Add("Error creating refund", MessageType.UserError);
                 }

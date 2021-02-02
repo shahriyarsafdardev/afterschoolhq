@@ -2639,7 +2639,7 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        internal static Stripe.PaymentIntent CreateStripeChargeDuringCheckout(CheckoutObject checkoutObject, SystemMessages msgs, DatabaseConnection dc = null)
+        internal static Stripe.Charge CreateStripeChargeDuringCheckout(CheckoutObject checkoutObject, SystemMessages msgs, DatabaseConnection dc = null)
         {
             // if stripe token then don't send customer id
             string customerId = null;
@@ -2658,7 +2658,7 @@ namespace AfterSchoolLibrary.Services
             var amount = checkoutObject.GetStripeAmount(msgs, dc);
 
             // only charge tuition during checkout, because subscriptions are billed through stripe
-            var charge = StripeHelper.Charge(
+            var charge = StripeHelper.CreateCharge(
                                 fromCustomerId: customerId,
                                 destinationAccountId: useStripeConnectedAccount ? checkoutObject.BillingAccount.StripeUserId : null,
                                 platformFee: useStripeConnectedAccount ? platformFeeAmount : new decimal?(),
