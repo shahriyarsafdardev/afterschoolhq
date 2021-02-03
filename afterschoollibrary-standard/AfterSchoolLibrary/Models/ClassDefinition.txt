@@ -672,6 +672,7 @@ property: AllowToPayLater, bool, Bit
 property: Details, string, NVarChar "4000"
 property: StartDate, DateTime?, DateTime
 property: EndDate, DateTime?, DateTime
+property: IsDeleted, bool, Bit
 baseproperty: Name, required
 loadmethod: AccountId, List<>
 loadmethod: AccountId|ActivityGroupTypeId, List<>
@@ -1051,6 +1052,8 @@ property: StripeSourceId, string, NVarChar "100"
 property: CostPerClass, decimal?, Money
 property: PaymentTypeFeePayerAccountId, int?, Int, , which account is paying the payment type (stripe or ach) fee
 property: ConvenienceFeePayerAccountId, int?, Int, , which account is paying the convenience fee
+property: CouponId, int?, Int
+property: CouponValue, decimal?, Decimal "10,2"
 loadmethod: Uid
 loadmethod: RegistrantId, List<>
 loadmethod: AccountId, List<>
@@ -1059,6 +1062,7 @@ loadmethod: AccountId|RegistrantId, List<>
 loadmethod: ActivityGroupId, List<>
 loadmethod: AccountActivityGroupId, List<>
 loadmethod: FirstRegistrationId, List<>
+loadmethod: CouponId|IsDeleted, List<>
 join: Registrant.ID, RegistrantId, InnerJoin
 joinproperty: Registrant.Email, string, NVarChar
 joinproperty: Registrant.FirstName, string, NVarChar
@@ -1358,6 +1362,8 @@ serializable: true
 inherits: BasicObjectWithModified
 property: CartId, int?, Int, required
 property: Uid, Guid, UniqueIdentifier
+property: PurchaseableObjectTypeId, PurchaseableObjectType, Int
+property: PurchaseableObjectId, int?, Int
 property: ParticipationObjectTypeId, ParticipationObjectType, Int, required
 property: ParticipationObjectId, int?, Int, required
 property: Day, DayOfWeekASL, Int
@@ -1515,6 +1521,8 @@ property: IsDeleted, bool, Bit
 property: UsedStripeConnect, bool, Bit, If using stripe connect during purchase then no payout is allowed because its automatic
 property: PlatformPercentFee, decimal?, Decimal "10,2", , deprecated
 property: PlatformFlatFee, decimal?, Decimal "10,2", , deprecated
+property: CouponId, int?, Int
+property: CouponValue, decimal?, Decimal "10,2"
 loadmethod: BillerAccountId|IsDeleted, List<>
 loadmethod: PayerAccountId|IsDeleted, List<>
 loadmethod: Uid
@@ -1523,6 +1531,9 @@ loadmethod: PayerAccountId|TransactionTypeId|IsDeleted, List<>
 loadmethod: StripeChargeOrRefundId
 loadmethod: OriginalTransactionId|IsDeleted, List<>
 loadmethod: PayoutId|IsDeleted, List<>
+loadmethod: CouponId|IsDeleted, List<>
+loadmethod: CouponId|PayerAccountId|IsDeleted, List<>
+loadmethod: CouponId|BillerAccountId|IsDeleted, List<>
 [end]
 
 [begin]
@@ -1597,6 +1608,7 @@ type: Class
 name: Coupon
 description: Used to give discounts to parents during the purchase of a registration, product, etc
 inherits: BasicLookUpObject
+property: Description, string, NVarChar "400"
 property: Amount, decimal?, Money, required, Store the amount a percentage or flat amount. If percentage it should be stored as a decimal meaning 100% should be stored as 1.00
 property: AmountTypeId, CouponAmountType, Int, required, Either a percentage or a flat amount
 property: AccountId, int?, Int, required, the account that is the owner
@@ -1606,9 +1618,12 @@ property: MaxNumberOfUsesPerPerson, int?, Int
 property: MaxNumberOfUsesAll, int?, Int, , The amount of uses that a coupon can have across all users
 property: CouponCode, string, NVarChar "50"
 property: StripeCouponId, string, NVarChar "100"
+property: Uid, Guid, UniqueIdentifier
+property: IsDisabled, bool, Bit
 baseproperty: Name, required
 loadmethod: AccountId, List<>
 loadmethod: AccountId|CouponCode
+loadmethod: Uid
 [end]
 
 [begin]

@@ -1,0 +1,406 @@
+﻿@{ Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
+    ViewBag.Title = "Search";
+    var msgs = (SystemMessages)ViewBag.Messages; }
+
+@{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+<style>
+    .footer-extended {
+        background: #22253a;
+    }
+</style>
+
+<div class="visible-lg visible-md">
+
+    <div class="row">
+        <div class="reg-header" style="min-height: 100%; background: white;">
+
+            <div class="reg-header-overlay col-md-12">
+
+                <div class="col-lg-3 col-md-6 header-logo" style="margin-top: -50px;">
+                    <img src="~/img/isyp-logo.png" />
+                </div>
+
+                <div class="col-lg-7 col-md-6">
+                    <div class="form-group has-feedback has-search">
+                        <span class="glyphicon glyphicon-search form-control-feedback"></span>
+                        <input id="txtSearch" name="search" type="text" class="form-control" placeholder="Search" onkeyup="return waitAndFilterSearch(this.value)">
+                    </div>
+                </div>
+
+                <div class="col-lg-2 col-md-6">
+                    <a href="~/isyp.html" class="btn btn-default btn-md btn-center join-isyp-btn"> Join the ISYP Directory </a>
+                </div>
+            </div>
+
+            <div class="clearfix"></div>
+        </div>
+    </div>
+</div>
+
+<div class="visible-sm visible-xs bg-color">
+    <div class="col-xs-10">
+        <div class="form-group has-feedback has-search" style="margin-top: 10px;">
+            <span class="glyphicon glyphicon-search form-control-feedback"></span>
+            <input id="txtSearch-mobile" name="search" type="text" class="form-control" placeholder="Search ISYP Directory" onkeyup="return waitAndFilterSearch()">
+        </div>
+    </div>
+    <div class="col-xs-2" style="padding: 0; text-align: center;">
+        <img src="~/img/filter.png" class="filter" onclick="return mobileFilter()" />
+    </div>
+
+    <div class="clearfix"></div>
+
+    <div id="mobile-filter-footer" class="filter-footer-container">
+        <button type="button" class="btn btn-default btn-lg btn-center" style="border-color: steelblue; color:blue" onclick="return applyMobileFilter()">Apply Filters</button>
+    </div>
+
+    <div class="clearfix"></div>
+</div>
+
+<div id="filters" class="col-md-3" style="display: none; padding-right: 0; padding-bottom: 120px;padding-top: 10px;">
+    @{ Html.RenderPartial("~/Views/Shared/_DirectoryFilters.cshtml"); }
+    <div class="clearfix"></div>
+</div>
+
+<div id="search-result" class="col-md-9"> </div>
+
+<div class="clearfix"></div>
+
+<script id="script-search-result-list" type="text/template">
+
+    <% _.each(response, function(searchResult){ %>
+
+    <div id="<%= searchResult.AccountUid %>" name="<%= searchResult.AccountName %>" class="col-sm-12 col-md-6 col-lg-4 col-xl-3 participation-object" style="height: 410px;" onclick="WebPage.navigateIframe('<%= searchResult.HomePageUrl %>')">
+
+        <div class="panel" style="overflow: hidden;">
+            <div class="reg-header" style="background-image: url(<%= searchResult.ProfileHeaderImageUrl %>); min-height: 100px; height: 150px; padding: 5px 5px; position: relative;">
+
+                <% if(searchResult.IsOpenDuringCovid) { %>
+
+                <div class="pull-right margin-l-10">
+                    <span class="badge badge-success profile-badge text-small">
+                        Open During COVID
+                    </span>
+                </div>
+
+                <% } %>
+
+                <% if(searchResult.IsELearningCenter) { %>
+
+                <div class="pull-right margin-l-10">
+                    <span class="badge badge-success profile-badge text-small">
+                        E-Learning Center
+                    </span>
+                </div>
+
+                <% } %>
+
+                <div style="position: absolute; bottom: 0; right: 0; background-color: #fff; color: #333;">
+                    <div class="padding-h-10">
+                        <span class="text-small">
+                            <%= searchResult.Location %>
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+            <div class="panel-body" style="position: relative;">
+
+                <div class="" style="position: absolute; top: 10px; left: 15px; overflow: hidden; height: 20px;">
+
+                    <div class="pull-left margin-l-5">
+                        <% if(searchResult.IsRestrictByGrade) { %>
+
+                        <span class="badge badge-gray profile-badge text-small">
+                            <%= searchResult.GradeStart %> - <%= searchResult.GradeEnd %> Grade
+                        </span>
+
+                        <% } else { %>
+
+                        <span class="badge badge-gray profile-badge text-small">
+                            Ages <%= searchResult.AgeStart %> - <%= searchResult.AgeEnd %>
+                        </span>
+
+                        <% } %>
+                    </div>
+
+                </div>
+
+                <div style="margin-top: 20px; height: 75px;display: table-cell; vertical-align: middle;">
+                    <h3>
+                        <strong title="<%= searchResult.AccountName %>"><%= searchResult.AccountName %></strong>
+                    </h3>
+                </div>
+
+                <div class="" style="height: 40px;">
+                    <span class="text-medium-small">
+                        <%= searchResult.ProfileHeadline %>
+                    </span>
+                </div>
+
+                <div class="margin-t-20">
+                    <a href="javascript:WebPage.navigateIframe('<%= searchResult.HomePageUrl %>')" class="btn btn-register btn-block join-isyp-btn">
+                        Learn More &raquo;
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <% }) %>
+
+</script>
+
+@section Scripts
+{
+    <script type="text/javascript">
+
+        var delayTimer;
+        var txtSearch = $('#txtSearch');
+        var txtSearchMobile = $('#txtSearch-mobile');
+        var isMobile = window.innerWidth <= 768;
+
+        $(document).ready(function () {
+            loadFiltersAndInitiateSearch();
+
+            if (!isMobile) {
+                $('#filters').show();
+            }
+        })
+
+        function loadFiltersAndInitiateSearch() {
+            var hashUrl = WebPage.getHash();
+            var filters = hashUrl.split(',');
+
+            _.each(filters, function (filter) {
+                if (filter.indexOf('search_') == 0) {
+                    $(`input[name="search"]`).val(filter.split('_')[1]);
+                } else {
+                    $(`input[value="${decodeURIComponent(filter.trim())}"]`).attr('checked', 'checked');
+                }
+            });
+
+            prepareSearchParams(true);
+        }
+
+        function waitAndFilterSearch(search) {
+            clearTimeout(delayTimer);
+            delayTimer = setTimeout(function () {
+                prepareSearchParams(true);
+            }, 1000); //1 second wait
+        }
+
+        function prepareSearchParams(applyFilters) {
+            //.. prepare params
+            var mainUrl = '';
+            var search = '';
+            var comma_delimited_neighborhoods = '';
+            var comma_delimited_grades = '';
+            var comma_delimited_ages = '';
+            var comma_delimited_gender = '';
+            var comma_delimited_timing = '';
+            var comma_delimited_cost = '';
+            var comma_delimited_starting = '';
+            var comma_delimited_other = '';
+            var comma_delimited_special = '';
+
+            if (isMobile) {
+                search = txtSearchMobile.val();
+            } else {
+                search = txtSearch.val();
+            }
+
+            if (search && search.length > 0) {
+                mainUrl += `search_${search},`;
+            }
+
+            $('input:checkbox[name=neighborhoods]:checked').each(function () {
+                if (comma_delimited_neighborhoods.length > 0) {
+                    comma_delimited_neighborhoods += ',';
+                }
+                comma_delimited_neighborhoods += $(this).val();
+            });
+
+            $('input:checkbox[name=grades]:checked').each(function () {
+                if (comma_delimited_grades.length > 0) {
+                    comma_delimited_grades += ',';
+                }
+                comma_delimited_grades += $(this).val();
+            });
+
+            $('input:checkbox[name=ages]:checked').each(function () {
+                if (comma_delimited_ages.length > 0) {
+                    comma_delimited_ages += ',';
+                }
+                comma_delimited_ages += $(this).val();
+            });
+
+            $('input:checkbox[name=gender]:checked').each(function () {
+                if (comma_delimited_gender.length > 0) {
+                    comma_delimited_gender += ',';
+                }
+                comma_delimited_gender += $(this).val();
+            });
+
+            $('input:checkbox[name=timing]:checked').each(function () {
+                if (comma_delimited_timing.length > 0) {
+                    comma_delimited_timing += ',';
+                }
+                comma_delimited_timing += $(this).val();
+            });
+
+            $('input:checkbox[name=cost]:checked').each(function () {
+                if (comma_delimited_cost.length > 0) {
+                    comma_delimited_cost += ',';
+                }
+                comma_delimited_cost += $(this).val();
+            });
+
+            $('input:checkbox[name=starting]:checked').each(function () {
+                if (comma_delimited_starting.length > 0) {
+                    comma_delimited_starting += ',';
+                }
+                comma_delimited_starting += $(this).val();
+            });
+
+            $('input:checkbox[name=other]:checked').each(function () {
+                if (comma_delimited_other.length > 0) {
+                    comma_delimited_other += ',';
+                }
+                comma_delimited_other += $(this).val();
+            });
+
+            $('input:checkbox[name=special-needs]:checked').each(function () {
+                if (comma_delimited_special.length > 0) {
+                    comma_delimited_special += ',';
+                }
+                comma_delimited_special += $(this).val();
+            });
+
+            if (comma_delimited_neighborhoods.length > 0) {
+                mainUrl += `${comma_delimited_neighborhoods},`;
+            }
+
+            if (comma_delimited_grades.length > 0) {
+                mainUrl += `${comma_delimited_grades},`;
+            }
+
+            if (comma_delimited_ages.length > 0) {
+                mainUrl += `${comma_delimited_ages},`;
+            }
+
+            if (comma_delimited_gender.length > 0) {
+                mainUrl += `${comma_delimited_gender},`;
+            }
+
+            if (comma_delimited_timing.length > 0) {
+                mainUrl += `${comma_delimited_timing},`;
+            }
+
+            if (comma_delimited_cost.length > 0) {
+                mainUrl += `${comma_delimited_cost},`;
+            }
+
+            if (comma_delimited_starting.length > 0) {
+                mainUrl += `${comma_delimited_starting},`;
+            }
+
+            if (comma_delimited_other.length > 0) {
+                mainUrl += `${comma_delimited_other},`;
+            }
+
+            if (comma_delimited_special.length > 0) {
+                mainUrl += `${comma_delimited_special},`;
+            }
+
+            if (mainUrl) {
+                WebPage.addHash(mainUrl);
+            } else {
+                WebPage.addHash('');
+            }
+
+            // .. call api
+            if (!isMobile || applyFilters) {
+                loadAccounts(search,
+                    comma_delimited_neighborhoods,
+                    comma_delimited_grades,
+                    comma_delimited_ages,
+                    comma_delimited_gender,
+                    comma_delimited_timing,
+                    comma_delimited_cost,
+                    comma_delimited_starting,
+                    comma_delimited_other,
+                    comma_delimited_special);
+            }
+        }
+
+        function loadAccounts(search, neighborhoods, grades, ages, gender, timing, cost, starting, other, special) {
+            showLoader();
+
+            var url = '@Url.Action("GetISYPSearch", "ISYPDirectory", new { Area = "" })';
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: { search, neighborhoods, grades, ages, gender, timing, cost, starting, other, special },
+                success: function (data) {
+                    if (data && data.success == true) {
+
+                        //.. prepare source and template
+                        var source = $("#script-search-result-list").html();
+                        var compiled = _.template(source);
+
+                        //.. format data as JSON and combine with template
+                        var compiledHtml = compiled({
+                            response: data.data,
+                        });
+
+                        //.. update html to dom
+                        $('#search-result').html(compiledHtml);
+
+                        hideLoader();
+                        return;
+                    }
+                    else {
+                        if (data && data.status == 'error') {
+                            $('#search-result').html('');
+
+                            var error = '';
+
+                            _.each(data.data, function (msg) {
+                                error += msg?.Text + '<br />';
+                            });
+
+                            Notifications.showBar({
+                                title: 'Error',
+                                message: error,
+                                success: false
+                            });
+                        }
+                        else {
+                            $('#search-result').html('<p style="margin-top: 35px; text-align: center; font-size: 16px;">Sorry, there are no results.</p>');
+                        }
+
+                        hideLoader();
+                        return false;
+                    }
+                }
+            });
+        }
+
+        function mobileFilter() {
+            $('#search-result').toggle();
+            $('#filters').toggle();
+            $('#mobile-filter-footer').toggle();
+            $('#footerShowHide').hide();
+        }
+
+        function applyMobileFilter() {
+            prepareSearchParams(true);
+            mobileFilter();
+            $('#footerShowHide').show();
+        }
+
+    </script>
+}

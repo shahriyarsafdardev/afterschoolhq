@@ -24,10 +24,6 @@ namespace AfterSchool.Areas.Admin.Controllers
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var tempMsgs = TempData["Messages"] as SystemMessages;
-            if (tempMsgs.IsNotEmpty())
-                msgs.AddRange(tempMsgs);
-
             var pageNumber = 1;
             var recordsPerPage = 10;
 
@@ -45,7 +41,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                 accountTypes = type.AsList();
 
             var count = Account.GetSearchCount(search, accountTypes, false, msgs);
-            var accounts = Account.Search(search, accountTypes, false, start, length, msgs);
+            var accounts = Account.Search(search, accountTypes, isDeleted: false, OrderByProperty: "CreateDate", orderByDirection: OrderByDirectionEnum.Descending, start, length, msgs);
             var totalPages = Math.Ceiling(count.ToDouble() / recordsPerPage).ToInteger();
 
             ViewBag.Messages = msgs;
@@ -193,6 +189,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                                 account = AccountService.CreateNewUnclaimedAccount(
                                             orgName: orgname,
                                             email: null,
+                                            claimemaildomain: claimemaildomain,
                                             phone: null,
                                             isActive: true,
                                             accountType: (AccountType)accounttype.ToInteger(),
@@ -254,7 +251,7 @@ namespace AfterSchool.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        public ActionResult UpdateAccountStatus(string id)
+        public ActionResult UpdateAccountStatus(string id, string pn, string rpp, string search, AccountType type = AccountType.NotSet)
         {
             var msgs = new SystemMessages();
             var currentUser = SessionVariables.CurrentUser;
@@ -270,11 +267,11 @@ namespace AfterSchool.Areas.Admin.Controllers
             }
 
             TempData["Messages"] = msgs;
-            return RedirectToAction("Index");
+            return View("index", IndexViewBag(pn, rpp, search, type, msgs));
         }
 
         [HttpGet]
-        public ActionResult UpdateAccountClaims(string id)
+        public ActionResult UpdateAccountClaims(string id, string pn, string rpp, string search, AccountType type = AccountType.NotSet)
         {
             var msgs = new SystemMessages();
             var currentUser = SessionVariables.CurrentUser;
@@ -290,11 +287,11 @@ namespace AfterSchool.Areas.Admin.Controllers
             }
 
             TempData["Messages"] = msgs;
-            return RedirectToAction("Index");
+            return View("index", IndexViewBag(pn, rpp, search, type, msgs));
         }
 
         [HttpGet]
-        public ActionResult DeleteAccount(string id)
+        public ActionResult DeleteAccount(string id, string pn, string rpp, string search, AccountType type = AccountType.NotSet)
         {
             var msgs = new SystemMessages();
             var currentUser = SessionVariables.CurrentUser;
@@ -310,11 +307,11 @@ namespace AfterSchool.Areas.Admin.Controllers
             }
 
             TempData["Messages"] = msgs;
-            return RedirectToAction("Index");
+            return View("index", IndexViewBag(pn, rpp, search, type, msgs));
         }
 
         [HttpGet]
-        public ActionResult UpdateAccountTestFlagStatus(string id)
+        public ActionResult UpdateAccountTestFlagStatus(string id, string pn, string rpp, string search, AccountType type = AccountType.NotSet)
         {
             var msgs = new SystemMessages();
             var currentUser = SessionVariables.CurrentUser;
@@ -330,7 +327,7 @@ namespace AfterSchool.Areas.Admin.Controllers
             }
 
             TempData["Messages"] = msgs;
-            return RedirectToAction("Index");
+            return View("index", IndexViewBag(pn, rpp, search, type, msgs));
         }
     }
 }

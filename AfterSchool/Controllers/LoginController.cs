@@ -116,6 +116,9 @@ namespace AfterSchool.Controllers
                 return LoginRedirect();
             }
 
+            if (SessionVariables.CurrentUser.IsEmpty())
+                return RedirectToAction("Index");
+
             var accounts = SessionVariables.CurrentUser.GetAccounts(msgs);
 
             ViewBag.ReturnUrl = returnurl;

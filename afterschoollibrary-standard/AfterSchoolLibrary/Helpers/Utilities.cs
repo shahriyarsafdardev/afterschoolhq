@@ -95,6 +95,24 @@ namespace AfterSchoolLibrary.Helpers
             Rollbar.RollbarLocator.RollbarInstance.Error(msgs.RenderMessageList(MessageOutputType.Text));
         }
 
+        public static void SystemErrorLog(Exception ex)
+        {
+            Rollbar.RollbarLocator.RollbarInstance.Configure(new Rollbar.RollbarConfig(RollbarAccessToken) { Environment = GetRollbarEnvironment() });
+            Rollbar.RollbarLocator.RollbarInstance.Error(ex.Message + " - " + ex.InnerException + " - " + ex.StackTrace);
+        }
+
+        public static void SystemLog(SystemMessages msgs)
+        {
+            Rollbar.RollbarLocator.RollbarInstance.Configure(new Rollbar.RollbarConfig(RollbarAccessToken) { Environment = GetRollbarEnvironment() });
+            Rollbar.RollbarLocator.RollbarInstance.Info(msgs.RenderMessageList(MessageOutputType.Text));
+        }
+
+        public static void SystemLog(string msg)
+        {
+            Rollbar.RollbarLocator.RollbarInstance.Configure(new Rollbar.RollbarConfig(RollbarAccessToken) { Environment = GetRollbarEnvironment() });
+            Rollbar.RollbarLocator.RollbarInstance.Info(msg);
+        }
+
         public static string RollbarAccessToken { get { return ConfigurationManager.AppSettings["Rollbar.AccessToken"]; } }
 
         public static string GetRollbarEnvironment()
@@ -355,6 +373,8 @@ namespace AfterSchoolLibrary.Helpers
                     Migrations.UpdateAccountPackagesForSaasify_20201028.Do(amsgs, adc);
                     Migrations.UpdateAccountOnboardingStepDone_20201106.Do(amsgs, adc);
                     Migrations.AddPayerIdsToRegistrations_20201116.Do(amsgs, adc);
+
+                    Migrations.AddManageCouponFeatureInPremiumPackage_20201224.Do(amsgs, adc);
 
 
                     // Migrations.AddProfilesToAllAccounts_20200727.Do(amsgs, adc);
@@ -1987,6 +2007,15 @@ namespace AfterSchoolLibrary.Helpers
                 return $"noreply@{SenderHostName}";
             }
         }
+
+        public static string AppCustomersEmailAddress
+        {
+            get
+            {
+                return $"{(Utilities.IsProduction ? "customers" : "dev")}@{ReplyHostName}";
+            }
+        }
+
         public static string AppEmailFromName(bool isAfterSchool)
         {
             return Utilities.AppName(isAfterSchool);

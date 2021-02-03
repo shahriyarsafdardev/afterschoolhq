@@ -220,16 +220,9 @@
                                         @transaction.GetPayerAccount().Name
                                     </td>
                                     <td>
-                                        @if (transaction.IsCharge())
+                                        @if (transaction.IsCharge() && registrant.IsNotEmpty())
                                         {
-                                            if (registrant.IsNotEmpty())
-                                            {
-                                                @registrant.DisplayName
-                                            }
-                                            else
-                                            {
-                                                @:-
-                                            }
+                                            @registrant.DisplayName
                                         }
                                         else
                                         {
@@ -245,6 +238,13 @@
                                         @if (transaction.IsRefund() || transaction.IsDebit())
                                         {
                                             <i class="s7-back-2"></i>
+                                        }
+
+                                        @if (transaction.CouponId.IsNotEmpty() && transaction.CouponValue.IsNotEmpty())
+                                        {
+                                            <i class="s7-info icon-small" data-toggle="popover" data-trigger="hover" data-html="true" data-placement="top"
+                                               data-content="Coupon: @transaction.CouponValue.ToCurrency()">
+                                            </i>
                                         }
                                     </td>
                                     <td class="text-center">

@@ -4,9 +4,10 @@
     var acceptACH = (bool)ViewData["acceptACH"];
     var formActionUrl = (string)ViewData["formActionUrl"];
     var participationObject = (ParticipationObject)ViewData["participationObject"];
-    var postPayPlan = participationObject.PostPayPlans.FirstOrDefault();
-    var subscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault();
+    var postPayPlan = participationObject?.GetPostPayPlan();
+    var subscriptionPlan = participationObject?.GetSubscriptionPlan();
     var savePaymentInfoOnly = false;
+
     var hasPlans = postPayPlan.IsNotEmpty() || subscriptionPlan.IsNotEmpty();
 
     if (postPayPlan.IsNotEmpty() && !postPayPlan.NumberOfPeriodsPrePaid.IsPositive())
@@ -101,9 +102,8 @@
                 </div>
             </div>
 
-        </div>
-
-        <hr />
+            <hr />
+        </div>        
     }
 
     <div id="payment-info" style="position:relative;">
@@ -181,7 +181,7 @@
 
                     <input type="hidden" name="paymentoption" id="paymentoption-new" class="payment-option" value="0" />
                     <textarea name="paymentdescription" id="payment-description-new-cc" class="hide payment-description"></textarea>
-                    @*<input type="hidden" name="coupon" class="coupon" value="" />*@
+                    <input type="hidden" name="coupon" class="coupon" value="" />
 
                     <div class="form-group">
                         <label for="card-element">
@@ -230,9 +230,32 @@
 
         <div class="clearfix"></div>
 
-    </div>
+        <hr />
+    </div>   
 
-    <hr />
+    <div id="payment-for-zero-checkout" style="display: none;">
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3 col-sm-12">
+
+                <form id="payment-form-zero-checkout" class="form-horizontal existing-payment-form" action="@formActionUrl" method="post">
+                    <input type="hidden" name="paymentoption" value="-1" />
+                    <input type="hidden" name="coupon" class="coupon" value="" />
+
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-register-primary btn-lg btn-pay">
+                            Checkout
+                            <span class="pay-button-amount">
+                                - $<span>0.00</span>*
+                            </span>
+                            &raquo;
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
 
     <p class="text-center text-small text-muted hide">
         * Cost includes fees supporting afterschool programs for @SessionVariables.RegistrationStartPageAccount.Name
@@ -393,7 +416,7 @@
         updatePaymentFees(0);
         updatePaymentFeesACH(0);
 
-        @if ((participationObject?.PaymentPlans).Any() || postPayPlan.IsNotEmpty())
+        @if ( (participationObject.IsNotEmpty() && participationObject.PaymentPlans.Any()) || postPayPlan.IsNotEmpty())
         {
             @: updatePaymentOptionCost(0);
         }
@@ -522,6 +545,12 @@
             var form = $('#payment-form-ach');
             form.append('<input type="hidden" name="plaidtoken" value="' + token + '" />');
             form.append('<input type="hidden" name="plaidaccountid" value="' + accountId + '" />');
+
+            var coupon = $('#txt-coupon-code').val();
+            if (coupon) {
+                form.append('<input type="hidden" name="coupon" value="' + coupon + '" />');
+            }
+            
             form.append('<textarea name="paymentdescription" class="hide">' + $('#payment-description-new-ach').val() + '</textarea>');
             form.submit();
         }
@@ -538,72 +567,69 @@
 <script>
     function applyCoupon() {
 
-        var couponCode = $('#coupon-code').val();
+        showLoader();
+
+        var couponCode = $('#txt-coupon-code').val();
         var paymentOption = $('input[name=paymentoption]:checked').val();
 
         $.get(
             '/services/validatecoupon?couponcode=' + encodeURIComponent(couponCode)+'&paymentoption='+ paymentOption,
             function (data) {
+                hideLoader();
+                if (data) {
+                    //var amount = data.amount;
+                    //var spAmount = data.subscriptionPlanAmount;
+                    //var numberInMonths = data.numberInMonths;
+                    var discountString = data.discountString;
 
-                var amount = data.amount;
-                var spAmount = data.subscriptionPlanAmount;
-                var numberInMonths = data.numberInMonths;
+                    //.. calculated this value on back end side and updated the UI on the fly
+                    // if coupon is invalid amounts will be regular amount of activity
+                    if (data.postPayPlanAmount <= 0 && data.calculatedAmountCC == 0 && data.calculatedAmountACH == 0 && data.calculatedCCFee == 0) {
+                        $('#payment-info-ach').hide()
+                        $('#payment-info').hide()
+                        $('#payment-for-zero-checkout').show();
+                    } else {
+                        $('#payment-for-zero-checkout').hide();
+                        $('#payment-info-ach').show()
+                        $('#payment-info').show()
 
-                if (data && data.status == 'ok') {
-
-                    var coupon = data.coupon;
-                    var totalDueToday = 0;
-
-                    if (coupon.AmountTypeId === @((int)CouponAmountType.Percentage)) { // percentage coupon type
-                        if (coupon.AppliesTo === @((int)CouponApplyType.SubscriptionPlan)) { // subscription plan
-                            totalDueToday = amount + (spAmount * (1 - coupon.Amount));
-                        } else if (coupon.AppliesTo === @((int)CouponApplyType.RegistrationFee)) { // Registration Fee
-                            totalDueToday = amount * (1 - coupon.Amount) + spAmount;
-                        }
-                    } else { // flat amount coupon type
-                        if (coupon.AppliesTo === @((int)CouponApplyType.SubscriptionPlan) || !paymentOption) { // subscription plan or registration fee without payment plan
-                            totalDueToday = amount - coupon.Amount + spAmount;
-                        } else { // registration fee with payment plan
-                            var totalCost = amount * numberInMonths;
-
-                            totalDueToday = (amount - ((totalCost - coupon.Amount) / numberInMonths)) + spAmount;
-                        }
+                        updateTotalsCC(data.calculatedAmountCC, 0);
+                        updateTotalsACH(data.calculatedAmountACH, 0);
+                        updateCC(data.calculatedCCFee);
                     }
-
-                    $(".total-due-today").text(totalDueToday.toFixed(2));
-                    $(".total-due-today").css("color", "red");
-                    $("#dollar-prefix").css("color", "red");
-                    $(".coupon").val(couponCode);
-                    Notifications.showBar({
-                        title: 'Success',
-                        message: 'The coupon has been applied',
-                        success: true
-                    });
-                } else {
-                    $(".coupon").val('');
-                    $(".total-due-today").text((amount + spAmount).toFixed(2));
-                    $(".total-due-today").removeAttr("style");
-                    $("#dollar-prefix").removeAttr("style");
-
-                    var items = "";
+               
+                    if (data && data.status == 'ok') {
+                        $('.coupon').val(couponCode);
+                        $('#txt-coupon-applied').html(`Coupon ${couponCode} applied successfully with ${discountString} discount.`).show();
+                    } else {
+                        unapplyCoupon();
+                        $('#txt-coupon-applied').html(``).hide();
+                    }
 
                     for (var message of data.messages) {
-                        items += "<li>" + message.Text + "</li>";
+                        var title = message.IsError ? 'Error' : 'Success';
+                        Notifications.showBar({
+                            title,
+                            message: message.Text,
+                            success: !message.IsError
+                        });
                     }
-                    Notifications.showBar({
-                        title: 'Error',
-                        message: '<ul>' + items + '</ul>',
-                        success: false
-                    });
                 }
             }
-        )
+        ).fail(function () {
+            Notifications.showBar({
+                title: 'Error',
+                message: 'Something went wrong, Please contact customer support.',
+                success: false
+            });
+            hideLoader();
+        })
     }
 
     function unapplyCoupon() {
         $(".total-due-today").removeAttr("style");
         $("#dollar-prefix").removeAttr("style");
-        $("#coupon-code").val('');
-        $(".coupon").val('');
+        $("#txt-coupon-code").val('');
+        $('.coupon').val('');
     }
 </script>

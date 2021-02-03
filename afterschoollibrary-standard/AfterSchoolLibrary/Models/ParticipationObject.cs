@@ -682,6 +682,32 @@ namespace AfterSchoolLibrary.Models
             return subscriber;
         }
 
+        public bool HasSubscriptionPlans()
+        {
+            return this.SubscriptionPlans.IsNotEmpty();
+        }
+
+        public SubscriptionPlan GetSubscriptionPlan()
+        {
+            if (HasSubscriptionPlans())
+                return SubscriptionPlans.FirstOrDefault();
+
+            return null;
+        }
+
+        public bool HasPostPayPlan()
+        {
+            return this.PostPayPlans.IsNotEmpty();
+        }
+
+        public SubscriptionPlan GetPostPayPlan()
+        {
+            if (HasPostPayPlan())
+                return PostPayPlans.FirstOrDefault();
+
+            return null;
+        }
+
         #endregion
 
         #region Financial
@@ -740,7 +766,7 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetPostPayCostWithConvenienceFee()
         {
-            var plan = this.PostPayPlans.FirstOrDefault();
+            var plan = this.PostPayPlans?.FirstOrDefault();
 
             if (plan.IsNotEmpty())
                 return GetPostPayCost() + (plan.IsConvenienceFeeTakenOutOfCost ? 0 : GetPostPayConvenienceFee());
@@ -750,7 +776,7 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetPostPayProviderAmount()
         {
-            var plan = this.PostPayPlans.FirstOrDefault();
+            var plan = this.PostPayPlans?.FirstOrDefault();
 
             if (plan.IsNotEmpty() && plan.IsConvenienceFeeTakenOutOfCost)
                 return GetPostPayCost() - GetPostPayConvenienceFee();
@@ -761,7 +787,7 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetPostPayConvenienceFee()
         {
-            var plan = this.PostPayPlans.FirstOrDefault();
+            var plan = this.PostPayPlans?.FirstOrDefault();
 
             if (plan.IsNotEmpty())
                 return new FeeCalculationObject(
@@ -775,7 +801,7 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetPostPayCreditCardFee()
         {
-            var plan = this.PostPayPlans.FirstOrDefault();
+            var plan = this.PostPayPlans?.FirstOrDefault();
 
             if (plan.IsNotEmpty())
                 return new FeeCalculationObject(
@@ -789,7 +815,7 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetCheckoutPostPayCreditCardFee()
         {
-            var plan = this.PostPayPlans.FirstOrDefault();
+            var plan = this.PostPayPlans?.FirstOrDefault();
 
             if ((plan?.NumberOfPeriodsPrePaid).IsPositive())
                 return GetPostPayCreditCardFee() * plan.NumberOfPeriodsPrePaid.Value;
@@ -799,7 +825,7 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetCheckoutPostPayConvenienceFee()
         {
-            var plan = this.PostPayPlans.FirstOrDefault();
+            var plan = this.PostPayPlans?.FirstOrDefault();
 
             if ((plan?.NumberOfPeriodsPrePaid).IsPositive())
                 return GetPostPayConvenienceFee() * plan.NumberOfPeriodsPrePaid.Value;
@@ -809,11 +835,22 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetPostPayCheckoutCostWithConvenienceFee()
         {
-            var plan = this.PostPayPlans.FirstOrDefault();
+            var plan = this.PostPayPlans?.FirstOrDefault();
+
             if ((plan?.NumberOfPeriodsPrePaid).IsPositive())
                 return plan.NumberOfPeriodsPrePaid.Value * GetPostPayCostWithConvenienceFee();
 
             return 0;
+        }
+
+        public decimal GetPostPayCheckoutCostWithoutConvenienceFee()
+        {
+            var plan = this.PostPayPlans?.FirstOrDefault();
+
+            if ((plan?.NumberOfPeriodsPrePaid).IsPositive())
+                return plan.NumberOfPeriodsPrePaid.Value * GetPostPayCost();
+            
+            return GetPostPayCost();
         }
 
         #endregion

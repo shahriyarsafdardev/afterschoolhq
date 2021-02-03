@@ -1,7 +1,7 @@
 ﻿@{
     var grades = (List<GradeLevel>)ViewData["grades"];
-    var minGradeLevelId = (int?)ViewData["minGradeLevelId"];
-    var maxGradeLevelId = (int?)ViewData["maxGradeLevelId"];
+    var minGradeLevelId = (int?)ViewData["minGradeLevelId"] ?? grades.FirstOrDefault().ID;
+    var maxGradeLevelId = (int?)ViewData["maxGradeLevelId"] ?? grades.OrderByDescending(m => m.ID).FirstOrDefault().ID;
 
     var showToggle = true;
     var showToggleUpdated = false;
@@ -18,18 +18,18 @@
         Grade Restrictions
     </label>
     <div class=@(showToggle ? "col-md-1": "")>
-       @{Html.RenderPartial
-            (
-                "~/Views/Shared/_SwitchButton.cshtml",
-                minGradeLevelId.HasValue || (showToggleUpdated && !showToggle),
-                new ViewDataDictionary()
-                {
+        @{Html.RenderPartial
+               (
+                   "~/Views/Shared/_SwitchButton.cshtml",
+                   minGradeLevelId.HasValue || (showToggleUpdated && !showToggle),
+                   new ViewDataDictionary()
+                   {
                 { "checkboxname", "graderestrictions" },
                 { "checkboxid", "graderestrictions" },
                 { "disabled", false },
                 { "hidden", showToggle ? "" : "hide" }
-                }
-            );
+                   }
+               );
         }
     </div>
     <div class="col-lg-9 hide" id="grade">

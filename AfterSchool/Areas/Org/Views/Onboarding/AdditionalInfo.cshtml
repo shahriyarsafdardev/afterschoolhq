@@ -1,115 +1,95 @@
 ﻿@model Account
 @{ 
-    Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
+    Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml";
     var msgs = (SystemMessages)ViewBag.Messages;
     var opencovid = (bool)ViewBag.OpenCovid;
     var elc = (bool)ViewBag.ELC;
     var isVirtualProgram = (bool)ViewBag.IsVirtualProgram;
     var grades = (List<GradeLevel>)ViewBag.Grades;
-    var minGradeId = (string)ViewBag.MinGradeId;
-    var maxGradeId = (string)ViewBag.MaxGradeId;
-    var headerText = $"Enter additional info about your organization";
+    var gradeStart = (int)ViewBag.GradeStart;
+    var gradeEnd = (int)ViewBag.GradeEnd;
+    var ageStart = (int)ViewBag.AgeStart;
+    var ageEnd = (int)ViewBag.AgeEnd;
+    var isRestrictByGrade = (bool)ViewBag.IsRestrictByGrade;
+    var headerText = $"Share info about your organization with parents.";
 }
 
-<div class="main-content">
+<div class="row main-content main-content-welcome-pages">
+    <div class="welcome-box-width">
+        <div class="welcome-outer-ring">
+            <div class="onboarding-inner-ring">
+                @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-    @{ 
-        Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); 
-    }
+                <form class="form form-horizontal" method="post" action="@Url.Action("additionalinfo", "onboarding")">
 
-    <form class="form form-horizontal" method="post" action="@Url.Action("additionalinfo", "onboarding")">
-        <div class="row">
-            <div class="col-lg-offset-4 col-lg-4 col-md-offset-3 col-md-6 col-sm-12">                
-                    <div class="form-group">
-                        <h1 class="text-center">@headerText</h1>
-                    </div>                
+                    <div class="col-md-12 onboarding-form-group">
+                        <h1 class="text-center register-thankyou-2">@headerText</h1>
+                    </div>
 
-                    @{
-                        Html.RenderPartial(
-                            "~/Views/Shared/_RestrictBySelection.cshtml",
-                            null,
-                            new ViewDataDictionary() { 
-                                { "minGradeLevelId", 1 }, 
-                                { "MaxGradeLevelId", 14 }, 
-                                { "grades", grades }, 
-                                { "ageStart", 0 }, 
-                                { "ageEnd", 18 },
-                                { "restrictbygrade", true } }
-                        );
-                    }
+                    @{Html.RenderPartial("~/Views/Shared/_RestrictBySelectionNew.cshtml", null, new ViewDataDictionary() {
+                                    { "minGradeLevelId", gradeStart },
+                                    { "MaxGradeLevelId", gradeEnd },
+                                    { "grades", grades },
+                                    { "ageStart", ageStart },
+                                    { "ageEnd", ageEnd },
+                                    { "restrictbygrade", isRestrictByGrade } }
+                                ); }
 
-                    <div class="form-group">
-                        <label class="col-lg-3 control-label">
-                            Providing services during COVID?
-                        </label>
-                        <div class="col-lg-9">
-                            @{
-                                Html.RenderPartial(
-                                   "~/Views/Shared/_SwitchButton.cshtml",
-                                   opencovid,
-                                   new ViewDataDictionary() {
-                                   { "checkboxname", "opencovid" },
-                                   { "checkboxid", "chkOpenCovid" },
-                                });
-                            }
+                    <div class="clearfix"></div>
+                    <div class="col-md-12 onboarding-form-group">
+                        <label class="onboarding-lable"> PROVIDING SERVICES DURING COVID-19? </label>
+                        <div class="clearfix"></div>
+                        @{ Html.RenderPartial("~/Views/Shared/_SwitchButton.cshtml", opencovid, new ViewDataDictionary() {
+                                        { "checkboxname", "opencovid" },
+                                        { "checkboxid", "chkOpenCovid" },
+                                        {"classname", "form-control onboarding-input " }
+                                    }); }
+                    </div>
+
+                    <div class="clearfix"></div>
+                    <div class="col-md-12 onboarding-form-group">
+                        <label class="onboarding-lable"> ARE YOU AN E-LEARNING CENTER? </label>
+                        <div class="clearfix"></div>
+
+                        @{ Html.RenderPartial("~/Views/Shared/_SwitchButton.cshtml", elc, new ViewDataDictionary() {
+                                        { "checkboxname", "elearningcenter" },
+                                        { "checkboxid", "chkELearningCenter" },
+                                        {"classname", "form-control onboarding-input " }
+                                    }); }
+
+                    </div>
+
+                    <div class="clearfix"></div>
+                    <div class="col-md-12 onboarding-form-group">
+                        <label class="onboarding-lable">  IS IT A VIRTUAL PROGRAM? </label>
+                        <div class="clearfix"></div>
+
+                        @{ Html.RenderPartial("~/Views/Shared/_SwitchButton.cshtml", isVirtualProgram, new ViewDataDictionary() {
+                                        { "checkboxname", "isvirtualprogram" },
+                                        { "checkboxid", "chkIsVirtualProgram" },
+                                        {"classname", "form-control onboarding-input " }
+                                    }); }
+                    </div>
+
+                    <div class="clearfix"></div>
+                    <div class="visible-sm visible-xs margin-v-30">
+                        <button type="submit" class="btn-save-claims btn btn-primary btn-lg pull-right col-xs-12 register-continue">Save and Continue</button>
+
+                        <div class="clearfix"></div>
+                        <div class="text-center margin-v-30">
+                            <a href="@Url.Action("index", "onboarding")" class="text-muted">Back</a>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label class="col-lg-3 control-label">
-                            Are you an E-Learning Center?
-                        </label>
-                        <div class="col-lg-9">
-                            @{
-                                Html.RenderPartial(
-                                   "~/Views/Shared/_SwitchButton.cshtml",
-                                   elc,
-                                   new ViewDataDictionary() {
-                                   { "checkboxname", "elearningcenter" },
-                                   { "checkboxid", "chkELearningCenter" },
-                                });
-                            }
-                            <p class="text-muted">You will host/care for students to assist e-learning during the school day</p>
-                        </div>
+                    <div class="visible-md visible-lg margin-v-30">
+                        <a href="@Url.Action("index", "onboarding")" class="process-back">
+                            <img src="~/img/welcome-back-arrow.PNG" />
+                        </a>
+                        <button type="submit" class="btn-save-claims btn btn-primary btn-lg pull-right register-continue">Save and Continue</button>
                     </div>
 
-                    <div class="form-group">
-                        <label class="col-lg-3 control-label">
-                            Is it a Virtual Program?
-                        </label>
-                        <div class="col-lg-9">
-                            @{
-                                Html.RenderPartial(
-                                   "~/Views/Shared/_SwitchButton.cshtml",
-                                   isVirtualProgram,
-                                   new ViewDataDictionary() {
-                                   { "checkboxname", "isvirtualprogram" },
-                                   { "checkboxid", "chkIsVirtualProgram" },
-                                });
-                            }                            
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="col-lg-3 control-label"></label>
-                        <div class="col-lg-9">
-                            <div class="visible-sm visible-xs">
-                                <button type="submit" class="btn btn-primary btn-lg btn-block">Save Changes &raquo;</button>
-                            </div>
-
-                            <div class="visible-sm visible-xs text-center margin-v-30">
-                                <a href="@Url.Action("index", "onboarding")" class="text-muted">&laquo; Back</a>
-                            </div>
-
-                            <div class="visible-md visible-lg">
-                                <a href="@Url.Action("index", "onboarding")" class="text-muted">&laquo; Back</a>
-                                <button type="submit" class="btn btn-primary btn-lg pull-right">Save Changes &raquo;</button>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
+                </form>
             </div>
-    </form>
-
+        </div>
+    </div>
 </div>

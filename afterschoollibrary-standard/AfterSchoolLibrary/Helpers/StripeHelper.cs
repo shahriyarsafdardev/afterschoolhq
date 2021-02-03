@@ -311,6 +311,24 @@ namespace AfterSchoolLibrary.Billing
             return person;
         }
 
+        public static Stripe.Person GetPerson(string stripeAccountId, string stripePersonId, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            Stripe.Person person = null;
+
+            try
+            {
+                person = GetPersonService().Get(stripeAccountId, stripePersonId);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add("Error retrieving person from stripe", MessageType.Error);
+            }
+
+            return person;
+        }
+
         #endregion
 
         #region StripeTransfer

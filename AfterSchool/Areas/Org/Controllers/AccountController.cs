@@ -11,6 +11,7 @@ using Hangfire;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Billing;
 using System.Web;
+using AfterSchoolLibrary.Helpers;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -53,26 +54,49 @@ namespace AfterSchool.Areas.Org.Controllers
             if (name.IsEmpty())
                 msgs.Add("Organization Name is required", MessageType.UserError);
 
-            a.Name = name;
-            a.Phone = phone;
-            a.UniqueName = uniquename;
-            a.TimeZone = timezone;
-            a.Email = email;
+            Database.ExecuteTransaction(
+               action: (SystemMessages amsgs, DatabaseConnection adc) => {
+                   // ..update profile title if account name has been changed 
+                   if (name.IsNotEmpty() && a.Name != name)
+                   {
+                       var profile = a.GetAccountProfile(amsgs, adc);
 
-            if (msgs.HasNoErrors())
-            {
-                if (a.UniqueName.IsEmpty() && uniquename.IsEmpty())
-                    a.UniqueName = AccountService.GenerateUniqueName(name, a.ID);
-                else
-                    a.UniqueName = AccountService.GenerateUniqueName(uniquename, a.ID);
+                       if (profile.IsNotEmpty())
+                       {
+                           profile.Title = name;
+                           profile.Save();
+                       }
+                   }
 
-                a.LastModifiedDate = DateTime.UtcNow;
-                a.LastModifiedBy = SessionVariables.CurrentUser.ID;
-                msgs.AddRange(a.SaveWithStripe());
+                   a.Name = name;
+                   a.Phone = phone;
+                   a.UniqueName = uniquename;
+                   a.TimeZone = timezone;
+                   a.Email = email;
 
-                if (msgs.HasNoErrors())
-                    msgs.Add("Saved Successfully", MessageType.Success);
-            }
+                   if (msgs.HasNoErrors())
+                   {
+                       if (a.UniqueName.IsEmpty() && uniquename.IsEmpty())
+                           a.UniqueName = AccountService.GenerateUniqueName(name, a.ID);
+                       else
+                           a.UniqueName = AccountService.GenerateUniqueName(uniquename, a.ID);
+
+                       a.LastModifiedDate = DateTime.UtcNow;
+                       a.LastModifiedBy = SessionVariables.CurrentUser.ID;
+                       amsgs.AddRange(a.SaveWithStripe(adc));                       
+                   }
+               },
+               onSuccess: (SystemMessages smsgs) => {
+                   msgs.AddRange(smsgs);
+
+                   if (msgs.HasNoErrors())
+                       msgs.Add("Saved Successfully", MessageType.Success);
+               },
+               onFailure: (SystemMessages fmsgs) => {
+                   msgs.AddRange(fmsgs);
+               },
+               onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+           );           
 
             ViewBag.Messages = msgs;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
@@ -159,6 +183,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Account = account;
             ViewBag.IsFullScreen = GetIsFullScreen();
             ViewBag.Messages = new SystemMessages();
+            ViewBag.SupportEmail = AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress;
             return View();
         }
 
@@ -286,6 +311,7 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult PaymentsEntity()
         {
+            //.. this view is depreciated and paymentsoptions is the right view
             var msgs = new SystemMessages();
             var paymentsEntityVM = PaymentsEntityViewModel.LoadFromStripeAccount(SessionVariables.CurrentAccount.GetStripeCustomAccount(msgs));
 
@@ -310,7 +336,9 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult PaymentsEntity(PaymentsEntityViewModel paymentsEntityVM)
         {
             var msgs = new SystemMessages();
-            var stripeAccount = SessionVariables.CurrentAccount.GetStripeCustomAccount(msgs);
+            var account = SessionVariables.CurrentAccount;
+            var user = SessionVariables.CurrentUser;
+            var stripeAccount = account.GetStripeCustomAccount(msgs);            
 
             if (paymentsEntityVM.BusinessType == LegalEntityType.NotSet)
                 msgs.Add("Please select your business type", MessageType.UserError);
@@ -485,8 +513,20 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.IsFullScreen = GetIsFullScreen();
 
             var account = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
             var user = account.GetAccountOwner(msgs);
-            
+
+            //.. send support email to AHQ just to notifiy the team that a payment has been added/updated.
+            var body = $"<p>Account: {account.Name}<br />" +
+                    $"Account Profile Url: {account.HomePageUrl}<br />" +
+                    $"User: {currentUser.FirstName} {currentUser.LastName}<br />";
+
+            EmailHelper.SendEmail(
+                toEmail: AfterSchoolLibrary.Helpers.Email.AppCustomersEmailAddress,
+                subject: $"{account.Name} has connected their stripe account",
+                body,
+                isAfterSchool: true);
+
             if (user.IsNotEmpty() && account.IsNotEmpty())
             {
                 SendGridHelper.AddOrUpdateContact(account, user, msgs);
@@ -983,7 +1023,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult Style(string id, string logo, string headerimage, string about, string title, string headline, string primaryColor, string website, string mingrade, string maxgrade, string agestart, string ageend, string restrictby, string twitter, string facebook, string instagram, string linkedin, string youtube, string calendar, string genderrestriction, string programCategories, string softskills, string academicsubjects, string teachingmethods, string profileemail, string profilephone, string locationname, string streetnumber, string streetname, string address2, string neighborhood, string city, string state, string postalcode, string county, string country, string placeid, string opencovid, string elearningcenter, string ahqapproved, string videoUrl, IEnumerable<HttpPostedFileBase> photos)
+        public ActionResult Style(string id, string logo, string headerimage, string about, string title, string headline, string primaryColor, string website, string mingrade, string maxgrade, string agestart, string ageend, string restrictbygrade, string twitter, string facebook, string instagram, string linkedin, string youtube, string calendar, string genderrestriction, string programCategories, string softskills, string academicsubjects, string teachingmethods, string profileemail, string profilephone, string locationname, string streetnumber, string streetname, string address2, string neighborhood, string city, string state, string postalcode, string county, string country, string placeid, string opencovid, string elearningcenter, string virtualprogram, string ahqapproved, string videoUrl, IEnumerable<HttpPostedFileBase> photos)
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
@@ -1081,9 +1121,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 if (SessionVariables.AccountUserType == UserType.TechSupport)
                     ahqapproved = ahqapproved.IsNumber() ? "1" : "0";
 
-                if(restrictby.IsNotEmpty() && restrictby.IsBoolean())
+                if(restrictbygrade.IsNotEmpty() && restrictbygrade.IsBoolean())
                 {
-                    if(restrictby.ToBoolean())
+                    if(restrictbygrade.ToBoolean())
                     {
                         agestart = "";
                         ageend = "";
@@ -1095,14 +1135,14 @@ namespace AfterSchool.Areas.Org.Controllers
                     }
                 }
 
-
                 profile.UpdateProfile(
                     title,
                     headline,
                     about,
                     website,
-                    opencovid,
-                    elearningcenter,
+                    opencovid.IsNumber() && opencovid.ToBoolean(),
+                    elearningcenter.IsNumber() && elearningcenter.ToBoolean(),
+                    virtualprogram.IsNumber() && virtualprogram.ToBoolean(),
                     mingrade,
                     maxgrade,
                     agestart,
@@ -1254,14 +1294,17 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Billing()
         {
             Account a = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
 
-            if (SessionVariables.AccountPackage.IsFree)
-                return new HttpUnauthorizedResult();
+            var packages = a.GetAccountPackages(msgs);
+
+            if (packages.Count <= 0 || !packages.Any(m => !m.IsFree))
+                return RedirectToAction("NewBilling");
 
             ViewBag.BillingHistory = a.GetStripeBillingHistory();
             ViewBag.RefundHistory = a.GetStripeRefundHistory();
             ViewBag.Cards = a.GetStripeCards();
-            ViewBag.Messages = new SystemMessages();
+            ViewBag.Messages = msgs;
             return View(a);
         }
 
@@ -1292,7 +1335,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 ViewBag.ReturnUrl = ReturnUrl;
             }
 
-            var package = id.IsGuid() ? Package.LoadByUid(id.ToGuid()) : SessionVariables.AccountPackage?.ToPackage();
+             var package = id.IsGuid() ? Package.LoadByUid(id.ToGuid()) : SessionVariables.AccountPackage?.ToPackage();
 
             Package suggestedPackage = null;
 

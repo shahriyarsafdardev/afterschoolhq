@@ -1,6 +1,6 @@
 ﻿/* Extra small devices (phones) */
 @media screen and (max-width: 479px) {
-    .padding-zero {
+    .mobile-padding-zero {
         padding: 0 !important;
     }
 
@@ -30,8 +30,10 @@
     }
 
     .btn-upgrade-plan {
-        margin-top: 25px;
-        font-size: 15px;
+        margin: 25px 10px 10px 10px;
+        font-weight: bold;
+        border-radius: 7px;
+        display: block;
     }
 
     .main-content-new {
@@ -59,10 +61,6 @@
         padding-right: 0 !important;
     }
 
-    .btn-upgrade-plan {
-        margin-bottom: 5px !important;
-    }
-
     .margin-left-sm {
         margin-left: 10px;
     }
@@ -73,5 +71,36 @@
 
     .display-days {
         display: grid;
+    }
+
+    .search-inner-ring {
+        padding: 10px;
+        border-radius: 6px;
+        background-color: #f9fcfb;
+        min-height: 676.95px;
+    }
+
+    .onboarding-inner-ring {
+        padding: 10px;
+        border-radius: 6px;
+        background-color: #f9fcfb;
+    }
+
+    .manger-comment {
+        width: 100px;
+        height: 125px;
+        margin-top: 30px;
+        border-radius: 6px;
+        border: solid 1px #00c5a3;
+    }
+
+    .dialogbox {
+        width: 200px;
+        margin: 5px;
+    }
+
+    .participation-object {
+        padding-top: 10px;
+        padding-bottom: 10px;
     }
 }

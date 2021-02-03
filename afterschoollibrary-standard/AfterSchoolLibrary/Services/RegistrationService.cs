@@ -246,8 +246,8 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(registration.Save(dc));
         }
 
-        public static void SavePaymentSource(this Registration registration, string stripeSourceId, PaymentType paymentType, decimal paymentAmount, decimal convenienceFeePaid, decimal paymentTypeFeePaid, Account convenienceFeePayer, Account paymentTypeFeePayer, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
-        {
+        public static void SavePaymentSource(this Registration registration, string stripeSourceId, PaymentType paymentType, decimal paymentAmount, decimal convenienceFeePaid, decimal paymentTypeFeePaid, Account convenienceFeePayer, Account paymentTypeFeePayer, Coupon coupon, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {            
             registration.StripeSourceId = stripeSourceId;
             registration.PaymentTypeId = paymentType;
             registration.CostPerClass = paymentAmount;
@@ -257,6 +257,13 @@ namespace AfterSchoolLibrary.Services
             registration.PaymentTypeFeePaid = paymentTypeFeePaid;
             registration.ConvenienceFeePayerAccountId = convenienceFeePayer.ID;
             registration.PaymentTypeFeePayerAccountId = paymentTypeFeePayer.ID;
+
+            if (coupon.IsNotEmpty())
+            {
+                registration.CouponId = coupon.ID;
+                registration.CouponValue = coupon.GetValue(paymentAmount - paymentTypeFeePaid);
+            }
+
             msgs.AddRange(registration.Save(dc));
         }
 

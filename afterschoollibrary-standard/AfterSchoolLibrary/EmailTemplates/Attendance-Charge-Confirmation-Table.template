@@ -11,6 +11,9 @@
         <th style="padding: 10px; text-align:center;">
           Total Charge
         </th>
+        <th style="padding: 10px; text-align:center;">
+          Coupon Discount
+        </th>
       </tr>
     </thead>
     <tbody>

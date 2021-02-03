@@ -11,7 +11,10 @@ namespace AfterSchoolLibrary.Services
     {
 
         public static decimal GetFeesChargedToBiller(this Transaction transaction)
-        {            
+        {
+            if (transaction.PaymentSourceTypeId != PaymentSourceType.AfterSchoolPlatform)
+                return 0;
+
             // handle old transactions
             if (!transaction.ConvenienceFeePayerAccountId.HasValue)
                 return (transaction.Amount.Value * transaction.PlatformPercentFee.Value) + transaction.PlatformFlatFee.Value;
@@ -185,8 +188,8 @@ namespace AfterSchoolLibrary.Services
                 transactionType,
                 checkoutObject.PaymentType,
                 checkoutObject.PaymentSourceType,
-                usePlatformFees ? checkoutObject.GetPlatformFlatFee(msgs, dc) : new decimal?(), 
-                usePlatformFees ? checkoutObject.GetPlatformPercentFee(msgs, dc) : new decimal?(),
+                usePlatformFees ? checkoutObject.GetPlatformFlatFeeWithCoupon(msgs, dc) : new decimal?(), 
+                usePlatformFees ? checkoutObject.GetPlatformPercentFeeWithCoupon(msgs, dc) : new decimal?(),
                 checkoutObject.ConvenienceFeeOverrideAmount ?? checkoutObject.GetTotalConvenienceFeesToday(msgs, dc),
                 checkoutObject.PaymentTypeFeeOverrideAmount ?? checkoutObject.GetTotalCreditCardFeesToday(msgs, dc),
                 checkoutObject.StripeChargeId,
@@ -194,11 +197,13 @@ namespace AfterSchoolLibrary.Services
                 checkoutObject.Date,
                 useConnectedAccount,
                 loggedInUser,
+                checkoutObject.CouponValue(msgs, dc),
+                checkoutObject.Coupon,
                 msgs,
                 dc);
         }
 
-        public static Transaction CreateNew(Account payingAccount, Account billingAccount, Account ConvenienceFeePayer, Account PaymentTypeFeePayer, decimal? amount, string participationObjectName, int? purchaseId, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, decimal? platformFee, decimal? platformPercentFee, decimal convenienceFee, decimal paymentTypeFee, string stripeChargeOrRefundId, string description, DateTime createDate, bool usedStripeConnect, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Transaction CreateNew(Account payingAccount, Account billingAccount, Account ConvenienceFeePayer, Account PaymentTypeFeePayer, decimal? amount, string participationObjectName, int? purchaseId, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, decimal? platformFee, decimal? platformPercentFee, decimal convenienceFee, decimal paymentTypeFee, string stripeChargeOrRefundId, string description, DateTime createDate, bool usedStripeConnect, WebUser loggedInUser, decimal? couponValue, Coupon coupon = null,  SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -224,6 +229,8 @@ namespace AfterSchoolLibrary.Services
                 ConvenienceFeeCharged = convenienceFee,
                 PaymentTypeFeeCharged = paymentTypeFee,
                 UsedStripeConnect = usedStripeConnect,
+                CouponId = coupon?.ID,
+                CouponValue = couponValue
             };
             msgs.AddRange(transaction.Save(dc));
 

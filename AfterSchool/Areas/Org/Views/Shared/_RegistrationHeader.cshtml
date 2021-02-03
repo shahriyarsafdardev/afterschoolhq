@@ -23,7 +23,7 @@
         </a>
     </div>
     <div class="hidden-lg hidden-sm hidden-md">
-        <select class="form-control" onchange="this.value == '#' ? showUpgradeMyPlan('@(studentCRMPackage.Name)'S,@(studentCRMPackage.ID)) : location.href = this.value;">
+        <select class="form-control" onchange="this.value == '#' ? showUpgradeMyPlan('@(studentCRMPackage.Name)',@(studentCRMPackage.ID)) : location.href = this.value;">
             <option value="">Navigation</option>
             @if (showStudentCRM)
             {

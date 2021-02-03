@@ -1,0 +1,65 @@
+﻿using AfterSchoolLibrary.Models;
+using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Linq;
+using System.Web.Mvc;
+using BasicLibrary;
+using AfterSchoolLibrary.Services;
+
+namespace AfterSchool.Controllers
+{
+    public class MccoyDirectoryController : Controller
+    {
+        private readonly string MccoyHostAccountId;
+        private static List<GradeLevel> ListGrades = GradeLevel.Load();
+
+        public MccoyDirectoryController()
+        {
+            var mcCoyCodeToShare = ConfigurationManager.AppSettings["MccoyInviteCodeToShare"];
+
+            if (mcCoyCodeToShare.IsNotEmpty() && mcCoyCodeToShare.IsGuid())
+            {
+                var mccoyAccount = Account.LoadByInviteCodeToShare(mcCoyCodeToShare.ToGuid());               
+
+                if (mccoyAccount.IsNotEmpty())
+                    MccoyHostAccountId = mccoyAccount.ID.ToString();
+            }
+        }
+
+        // GET: Mccoy
+        public ActionResult Index()
+        {
+            var msgs = new SystemMessages();
+            var neighborhoodList = Location.LoadNeighborhoodsByHostAccount(hostAccountId: MccoyHostAccountId, msgs: msgs).ToList();
+
+            ViewBag.Messages = msgs;
+            ViewBag.Neighborhoods = neighborhoodList;
+            ViewBag.Grades = ListGrades;
+
+            return View();
+        }
+
+        [HttpPost]
+        public JsonResult GetMccoySearch(string search, string neighborhoods, string grades, string ages, string gender, string timing, string cost, string starting, string other, string special)
+        {
+            var msgs = new SystemMessages();
+
+            var searchedAccounts = AccountService.SearchDirectoryAccounts(MccoyHostAccountId, search, neighborhoods, grades, ages, gender, timing, cost, starting, other, special, msgs: msgs);
+
+            if (searchedAccounts.IsNotEmpty() && searchedAccounts.Any())
+            {
+                //.. call success and records found
+                return Json(new { success = true, status = "ok", data = searchedAccounts }, JsonRequestBehavior.AllowGet);
+            }
+            else if (msgs.IsNotEmpty() && msgs.Count > 0)
+            {
+                //.. something went wrong, error occured
+                return Json(new { success = false, status = "error", data = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
+            }
+
+            //.. no result found
+            return Json(new { success = false, status = "no-result" }, JsonRequestBehavior.AllowGet);
+        }
+    }
+}
