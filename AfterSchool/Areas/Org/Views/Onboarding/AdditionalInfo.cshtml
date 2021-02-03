@@ -6,9 +6,12 @@
     var elc = (bool)ViewBag.ELC;
     var isVirtualProgram = (bool)ViewBag.IsVirtualProgram;
     var grades = (List<GradeLevel>)ViewBag.Grades;
-    var minGradeId = (string)ViewBag.MinGradeId;
-    var maxGradeId = (string)ViewBag.MaxGradeId;
-    var headerText = $"Share info about your organization with parents."; 
+    var gradeStart = (int)ViewBag.GradeStart;
+    var gradeEnd = (int)ViewBag.GradeEnd;
+    var ageStart = (int)ViewBag.AgeStart;
+    var ageEnd = (int)ViewBag.AgeEnd;
+    var isRestrictByGrade = (bool)ViewBag.IsRestrictByGrade;
+    var headerText = $"Share info about your organization with parents.";
 }
 
 <div class="row main-content main-content-welcome-pages">
@@ -24,12 +27,12 @@
                     </div>
 
                     @{Html.RenderPartial("~/Views/Shared/_RestrictBySelectionNew.cshtml", null, new ViewDataDictionary() {
-                                    { "minGradeLevelId", 1 },
-                                    { "MaxGradeLevelId", 14 },
+                                    { "minGradeLevelId", gradeStart },
+                                    { "MaxGradeLevelId", gradeEnd },
                                     { "grades", grades },
-                                    { "ageStart", 0 },
-                                    { "ageEnd", 18 },
-                                    { "restrictbygrade", true } }
+                                    { "ageStart", ageStart },
+                                    { "ageEnd", ageEnd },
+                                    { "restrictbygrade", isRestrictByGrade } }
                                 ); }
 
                     <div class="clearfix"></div>

@@ -1,5 +1,17 @@
 ﻿@model Account
-@{ Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml"; }
+@{ Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml";
+
+    var programCategories = (List<AccountProperty>)ViewBag.ProgramCategories;
+    var softSkills = (List<AccountProperty>)ViewBag.SoftSkills;
+    var academicsubjects = (List<AccountProperty>)ViewBag.AcademicSubjects;
+    var teachingmethods = (List<AccountProperty>)ViewBag.TeachingMethods;
+    var servicesoffered = (List<AccountProperty>)ViewBag.ServiceOffered;
+    var timesoffered = (List<AccountProperty>)ViewBag.TimeOffered;
+    var pricingoptions = (List<AccountProperty>)ViewBag.PricingOption;
+    var specialneedsfferings = (List<AccountProperty>)ViewBag.SpecialNeedsOffering;
+
+
+ }
 
 <div class="row main-content main-content-welcome-pages">
     <div class="welcome-box-width">
@@ -16,7 +28,7 @@
                     <div class="col-md-12 onboarding-form-group">
                         <label class="onboarding-lable"> PROGRAM CATEGORIES (UP TO 3)</label>
 
-                        <input type="text" class="form-control onboarding-input" name="programCategories" id="txtProgramCategories" data-role="tagsinput" value="@Request["programCategories"]" />
+                        <input type="text" class="form-control onboarding-input" name="programCategories" id="txtProgramCategories" data-role="tagsinput" value="@programCategories.Select(x => x.Value).ToStringList(",")" />
                         <p class="text-muted" style="padding: 5px 0; font-size: 14px;">Seprate with a comma (ex: Karate, Sports, Leadership)</p>
                     </div>
 
@@ -34,7 +46,7 @@
                                            name="services-offered-@item.ToLower()"
                                            id="services-offered-@item.ToLower()"
                                            value="@item"
-                                           @(Request[$"services-offered-{item.ToLower()}"].IsBoolean() ? "checked=\"checked\"" : "") />
+                                           @(servicesoffered.Select(x => x.Value.ToLower()).Contains(item.ToLower()) ? "checked=\"checked\"" : "") />
                                     <label for="services-offered-@item.ToLower()">@item</label>
                                 </div>
                             }
@@ -49,7 +61,7 @@
                                            name="services-offered-@item.ToLower()"
                                            id="services-offered-@item.ToLower()"
                                            value="@item"
-                                           @(Request[$"services-offered-{item.ToLower()}"].IsBoolean() ? "checked=\"checked\"" : "") />
+                                           @(servicesoffered.Select(x => x.Value.ToLower()).Contains(item.ToLower()) ? "checked=\"checked\"" : "") />
                                     <label for="services-offered-@item.ToLower()">@item</label>
                                 </div>
                             }
@@ -82,7 +94,7 @@
                                                name="times-offered-@item.ToLower()"
                                                id="times-offered-@item.ToLower()"
                                                value="@item"
-                                               @(Request[$"times-offered-{item.ToLower()}"].IsBoolean() ? "checked=\"checked\"" : "") />
+                                               @(timesoffered.Select(x => x.Value.ToLower()).Contains(item.ToLower()) ? "checked=\"checked\"" : "") />
                                         <label for="times-offered-@item.ToLower()">@item</label>
                                     </div>
                                 }
@@ -97,7 +109,7 @@
                                                name="times-offered-@item.ToLower()"
                                                id="times-offered-@item.ToLower()"
                                                value="@item"
-                                               @(Request[$"times-offered-{item.ToLower()}"].IsBoolean() ? "checked=\"checked\"" : "") />
+                                               @(timesoffered.Select(x => x.Value.ToLower()).Contains(item.ToLower()) ? "checked=\"checked\"" : "") />
                                         <label for="times-offered-@item.ToLower()">@item</label>
                                     </div>
                                 }
@@ -118,7 +130,7 @@
                                                name="pricing-options-@item.ToLower()"
                                                id="pricing-options-@item.ToLower()"
                                                value="@item"
-                                               @(Request[$"pricing-options-{item.ToLower()}"].IsBoolean() ? "checked=\"checked\"" : "") />
+                                               @(pricingoptions.Select(x => x.Value.ToLower()).Contains(item.ToLower()) ? "checked=\"checked\"" : "") />
                                         <label for="pricing-options-@item.ToLower()">@item</label>
                                     </div>
                                 }
@@ -140,7 +152,7 @@
                                                name="special-needs-@item.ToLower()"
                                                id="special-needs-@item.ToLower()"
                                                value="@item"
-                                               @(Request[$"special-needs-{item.ToLower()}"].IsBoolean() ? "checked=\"checked\"" : "") />
+                                               @(specialneedsfferings.Select(x => x.Value.ToLower()).Contains(item.ToLower()) ? "checked=\"checked\"" : "") />
                                         <label for="special-needs-@item.ToLower()">@item</label>
                                     </div>
                                 }
@@ -156,7 +168,7 @@
                                                name="special-needs-@item.ToLower()"
                                                id="special-needs-@item.ToLower()"
                                                value="@item"
-                                               @(Request[$"special-needs-{item.ToLower()}"].IsBoolean() ? "checked=\"checked\"" : "") />
+                                               @(specialneedsfferings.Select(x => x.Value.ToLower()).Contains(item.ToLower()) ? "checked=\"checked\"" : "") />
                                         <label for="special-needs-@item.ToLower()">@item</label>
                                     </div>
                                 }
@@ -167,21 +179,21 @@
                         <div class="clearfix"></div>
                         <div class="col-md-12 onboarding-form-group">
                             <label class="onboarding-lable">SOFT SKILLS (UP TO 10)</label>
-                            <input type="text" name="softskills" id="softskills" class="form-control onboarding-input" data-role="tagsinput" value="@Request["softskills"]" />
+                            <input type="text" name="softskills" id="softskills" class="form-control onboarding-input" data-role="tagsinput" value="@softSkills.Select(x => x.Value).ToStringList(",")" />
                             <p class="text-muted" style="padding: 5px 0; font-size: 14px;">ex: Leadership, Teamwork, Communication</p>
                         </div>
 
                         <div class="clearfix"></div>
                         <div class="col-md-12 onboarding-form-group">
                             <label class="onboarding-lable">ACADEMIC SUBJECTS (UP TO 5)</label>
-                            <input type="text" name="academicsubjects" id="academicsubjects" class="form-control onboarding-input" data-role="tagsinput" value="@Request["academicsubjects"]" />
+                            <input type="text" name="academicsubjects" id="academicsubjects" class="form-control onboarding-input" data-role="tagsinput" value="@academicsubjects.Select(x => x.Value).ToStringList(",")" />
                             <p class="text-muted" style="padding: 5px 0; font-size: 14px;">ex: Math, Science, Language Arts, Physical Education</p>
                         </div>
 
                         <div class="clearfix"></div>
                         <div class="col-md-12 onboarding-form-group">
                             <label class="onboarding-lable">TEACHING METHODS (UP TO 3)</label>
-                            <input type="text" name="teachingmethods" id="teachingmethods" class="form-control onboarding-input" data-role="tagsinput" value="@Request["teachingmethods"]" />
+                            <input type="text" name="teachingmethods" id="teachingmethods" class="form-control onboarding-input" data-role="tagsinput" value="@teachingmethods.Select(x => x.Value).ToStringList(",")" />
                             <p class="text-muted" style="padding: 5px 0; font-size: 14px;">ex: Project Based Learning, Team work, Games</p>
                         </div>
                     </div>
@@ -245,8 +257,8 @@
 {
     <script src="~/Assets/tagsinput/tagsinput.js"></script>
     <script>
-        $('#txtProgramCategories').tagsinput({
-            maxTags: 3
+        $('#txtProgramCategories').tagsinput({  
+            maxTags: 3           
         });
         $('#softskills').tagsinput({
             maxTags: 10
