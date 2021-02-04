@@ -44,7 +44,8 @@ namespace AfterSchoolLibrary.Migrations
                         {
                             var percentageFee = billingAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue();
                             var flatFee = billingAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFlatFee, msgs, dc).GetMaxValue();
-                            convenienceFeeCharged = (cost * percentageFee) + flatFee;
+                            var charge = (cost * percentageFee) + flatFee;
+                            convenienceFeeCharged = Math.Ceiling(charge * 2) / 2;
                         }
                         else
                         {
