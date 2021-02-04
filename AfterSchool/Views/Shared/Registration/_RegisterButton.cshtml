@@ -6,6 +6,7 @@
     var canRegiserFor = true;
     var session = (ParticipationObject)ViewData["session"];
     var currentUser = SessionVariables.CurrentUser;
+    var anotherChild = (bool)ViewData["anotherChild"].IsNotEmpty() ? true: false;
 
     if (ViewData["condensed"].IsNotEmpty() && ViewData["condensed"].ToString().ToBoolean())
     {
@@ -159,8 +160,9 @@ else
         }
         else
         {
+            var anotherChildString = anotherChild ? "Another Child" : "";
             <a href="@Model.GetRegistrationPageUrl()" class="btn btn-register btn-block">
-                @Model.RegistrationMode.ToString() Now &raquo;
+                @Model.RegistrationMode.ToString() @anotherChildString Now &raquo;
             </a>
         }
     }
