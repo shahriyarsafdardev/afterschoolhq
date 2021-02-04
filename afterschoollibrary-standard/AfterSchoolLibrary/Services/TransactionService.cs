@@ -369,6 +369,11 @@ namespace AfterSchoolLibrary.Services
             if (!transaction.CanRefundTransactionFee())
                 amount -= transaction.PaymentTypeFeeCharged.Value;
 
+            //partial refund, if any then deduct that too.
+            var refunded = transaction.GetRefundedAmount();
+            if (refunded.IsNotEmpty())
+                amount -= refunded;
+
             return amount;
         }
 
@@ -625,16 +630,20 @@ namespace AfterSchoolLibrary.Services
                         var billerAccount = transaction.GetBillerAccount(msgs);
 
                         //.. basically this is a transaction.billerammount and this amount will be first deducted from platform, but if user wanted a less refund 
-                        //.. then platform will have to charge provider refund amount - ConvenienceFeeCharged
-                        //.. so sticking with that simple logic only
-                        var feesWithoutCreditCardCharges = transaction.ConvenienceFeeCharged.IfEmpty(0);
-                        var amountToBeRefundedFromProvider = refundAmount - feesWithoutCreditCardCharges;
+                        //.. then platform will have to charge provider refund amount - ConvenienceFeeCharged for first refund
+                        //.. next refunds will be direct charge on provider
+                        var amountToChargeFromProvider = refundAmount;
+                        if (transaction.GetRefundedAmount() <= 0)
+                        {
+                            var feesWithoutCreditCardCharges = transaction.ConvenienceFeeCharged.IfEmpty(0);
+                            amountToChargeFromProvider = refundAmount - feesWithoutCreditCardCharges;
+                        }
 
                         //create reverse charge
-                        if (billerAccount.IsNotEmpty() && billerAccount.StripeUserId.IsNotEmpty() && amountToBeRefundedFromProvider > 0)
+                        if (billerAccount.IsNotEmpty() && billerAccount.StripeUserId.IsNotEmpty() && amountToChargeFromProvider > 0)
                         {
                             //.. should we store this info somewhere?
-                            var charge = StripeHelper.CreateRefundChargeOnConnectedAccount(totalAmount: amountToBeRefundedFromProvider, connectedAccountId: billerAccount.StripeUserId, msgs: msgs);
+                            var charge = StripeHelper.CreateRefundChargeOnConnectedAccount(totalAmount: amountToChargeFromProvider, connectedAccountId: billerAccount.StripeUserId, msgs: msgs);
                         }                        
                     }
                     else
