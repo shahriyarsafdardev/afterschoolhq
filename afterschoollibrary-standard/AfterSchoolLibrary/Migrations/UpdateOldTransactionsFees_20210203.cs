@@ -30,37 +30,32 @@ namespace AfterSchoolLibrary.Migrations
                                             dc: adc);
 
                     foreach (var transaction in oldTransactions)
-                    {
-                        //.. calculate ConvenienceFeeCharged
-                        decimal convenienceFeeCharged, paymentTypeFeeCharged, fee = 0M;
-                        var cost = transaction.Amount.IfEmpty(0);
+                    {                        
+                        decimal convenienceFeeCharged, paymentTypeFeeCharged = 0M;
+                        var cost = transaction.Amount.IfEmpty(0);                        
 
-                        if (cost <= 0)
+                        if (cost <= 0 || transaction.PlatformFlatFee.IsEmpty() || transaction.PlatformPercentFee.IsEmpty())
                             continue;
 
-                        var conveniencePercentFee = transaction.PlatformPercentFee.IfEmpty(0);
-                        var convenienceFlatFee = transaction.PlatformFlatFee.IfEmpty(0);
+                        var billingAccount = transaction.GetBillerAccount(amsgs, adc);
 
-                        //.. since the platform fees were always taken out of the cost
-                        fee = (cost * conveniencePercentFee) + convenienceFlatFee;
-
-                        var finalFee = Math.Ceiling(fee * 2) / 2;
-
-                        if (cost > 50)
-                            finalFee = Math.Ceiling(fee);
-
-                        convenienceFeeCharged = Math.Max(finalFee, 0.50M) + (Math.Ceiling(cost) - cost);
+                        //.. calculate ConvenienceFeeCharged
+                        if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
+                        {
+                            var percentageFee = billingAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue();
+                            var flatFee = billingAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFlatFee, msgs, dc).GetMaxValue();
+                            convenienceFeeCharged = (cost * percentageFee) + flatFee;
+                        }
+                        else
+                        {
+                            convenienceFeeCharged = PlatformOldLogic.GetConvenienceFee(cost, billingAccount);
+                        }
 
                         //.. calculate PaymentTypeFeeCharged
-                        //.. since the platform fees were always taken out of the cost
-                        var stripeFee = StripeHelper.GetStripeFee(cost, true);
-
-                        // always round up to nearest dollar or .5
-                        // result should always be 3.50 or 4.00 or 2.50 or 3.00, etc.
-                        if (cost <= 50)
-                            paymentTypeFeeCharged = (Math.Ceiling(stripeFee * 2) / 2);
-                        else
-                            paymentTypeFeeCharged = Math.Ceiling(stripeFee);
+                        if (transaction.PaymentTypeId == PaymentType.CreditCard)
+                        {
+                            paymentTypeFeeCharged = PlatformOldLogic.GetCreditCardFee(cost, billingAccount);
+                        }                        
 
                         transaction.ConvenienceFeeCharged = convenienceFeeCharged;
                         transaction.PaymentTypeFeeCharged = paymentTypeFeeCharged;
