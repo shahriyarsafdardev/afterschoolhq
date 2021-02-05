@@ -2217,7 +2217,7 @@ namespace AfterSchoolLibrary.Services
                             SearchDirectoryResponse response = new SearchDirectoryResponse();
 
                             // ..account
-                            response.AccountName = row["AccountName"].ToString();
+                            response.AccountName = row["AccountName"].IsNotEmpty() ? row["AccountName"].ToString().MaxChars(30, "... (more)") : "";
                             response.AccountUid = new Guid(row["AccountUid"].ToString());
                             response.HomePageUrl = $"{Helpers.Utilities.BaseUrl()}/{row["AccountUniqueName"]}";
 
