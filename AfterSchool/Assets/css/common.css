@@ -88,6 +88,8 @@
     padding: 10px;
     border-radius: 8px;
     box-shadow: 0 2px 9px 5px rgba(0, 0, 0, 0.2);
+    background: rgb(24,90,157);
+    background: linear-gradient(6deg, #08ecc0, transparent);
 }
 
 .welcome-inner-ring {
@@ -116,7 +118,7 @@
     width: 143px;
     height: 22px;
     margin: 0 73px 7px 37px;
-    /*font-family: Montserrat;*/
+    font-family: Montserrat;
     font-size: 18px;
     font-weight: bold;
     font-stretch: normal;
@@ -131,7 +133,7 @@
     width: 217px;
     height: 22px;
     margin: 7px 36px 5px 0;
-    /*font-family: Montserrat;*/
+    font-family: Montserrat;
     font-size: 18px;
     font-weight: normal;
     font-stretch: normal;
@@ -143,7 +145,7 @@
 }
 
 .welcome-text {
-    /*font-family: Montserrat;*/
+    font-family: Montserrat;
     font-size: 25px;
     font-weight: bold;
     font-stretch: normal;
@@ -155,7 +157,7 @@
 }
 
 .common-font {
-    /*font-family: Montserrat;*/
+    font-family: Montserrat;
     font-weight: normal;
     font-stretch: normal;
     font-style: normal;
