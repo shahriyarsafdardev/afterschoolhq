@@ -451,8 +451,8 @@ namespace AfterSchoolLibrary.Services
             if (!transaction.IsCharge())
                 return "Processed";
 
-            if (transaction.PlatformPercentFee.HasValue)
-                return "Paid";
+            //if (transaction.PlatformPercentFee.HasValue)
+            //    return "Paid";
 
             if (!transaction.HasRefundableAmount(false, msgs, dc))
                 return "Refunded";
@@ -478,6 +478,10 @@ namespace AfterSchoolLibrary.Services
 
             if (transaction.HasRefundsManual(msgs, dc))
                 return "Manual Refund / Ready For Payout";
+
+            var billerAccount = transaction.GetBillerAccount(msgs, dc);
+            if (billerAccount.IsNotEmpty() && billerAccount.HasStripeConnectedAccount)
+                return "Payout Completed";
 
             return "Ready For Payout";
         }
