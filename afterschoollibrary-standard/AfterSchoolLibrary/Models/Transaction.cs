@@ -1378,11 +1378,7 @@ namespace AfterSchoolLibrary.Models
 
             var sql = $@"   
                             SELECT 
-                                CASE 
-                                    WHEN SUM(Amount - ConvenienceFeeCharged - PaymentTypeFeeCharged) IS NOT NULL 
-                                        THEN  SUM(Amount - ConvenienceFeeCharged - PaymentTypeFeeCharged)
-                                    ELSE 0
-                                END AS Amount 
+                               ISNULL(SUM(Amount - ConvenienceFeeCharged - PaymentTypeFeeCharged), 0) AS Amount 
                             FROM [Transaction] 
                             WHERE 
                                 BillerAccountId = {BillerAccountId} AND 
