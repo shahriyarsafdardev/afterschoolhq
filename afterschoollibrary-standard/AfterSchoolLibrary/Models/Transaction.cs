@@ -1377,7 +1377,8 @@ namespace AfterSchoolLibrary.Models
             dq.Connection = dc;
 
             var sql = $@"   
-                            SELECT SUM(Amount - ConvenienceFeeCharged - PaymentTypeFeeCharged) AS Amount 
+                            SELECT 
+                               ISNULL(SUM(Amount - ConvenienceFeeCharged - PaymentTypeFeeCharged), 0) AS Amount 
                             FROM [Transaction] 
                             WHERE 
                                 BillerAccountId = {BillerAccountId} AND 
