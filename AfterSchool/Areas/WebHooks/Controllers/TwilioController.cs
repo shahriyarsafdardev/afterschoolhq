@@ -1,4 +1,5 @@
-﻿using AfterSchoolLibrary.Models;
+﻿using AfterSchoolLibrary;
+using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
@@ -6,6 +7,7 @@ using Newtonsoft.Json;
 using Stripe;
 using System;
 using System.Web.Http;
+using Twilio;
 using Twilio.AspNet.Common;
 using Twilio.Rest.Api.V2010.Account;
 
@@ -18,7 +20,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
         {
             var msgs = new SystemMessages();
 
-            if (request.IsNotEmpty() && request.MessageStatus.In(new string[] { "failed", "undelivered" }) && id.IsGuid() && id2.IsGuid())
+            if (request.IsNotEmpty() && request.MessageStatus.IsNotEmpty() && id.IsGuid() && id2.IsGuid())
             {
                 try
                 {
@@ -27,6 +29,10 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
                     if (activityMessage.IsNotEmpty() && registrant.IsNotEmpty())
                     {
+                        UpdateTwilioSMSStatus(activityMessageId: activityMessage.ID.Value, registrantId: registrant.ID.Value, status: request.MessageStatus);
+
+                        TwilioHelper.InitializeTwilioClientService();
+
                         var resource = MessageResource.Fetch(request.SmsSid);
 
                         if (resource.IsNotEmpty() && resource.ErrorCode.HasValue)
@@ -43,6 +49,17 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             }
 
             return ReturnOK(msgs);
+        }
+
+        private void UpdateTwilioSMSStatus(int activityMessageId, int registrantId, string status)
+        {
+            var smsRecord = TwilioSMS.LoadByRegistrantIdByActivityMessageId(RegistrantId: registrantId, ActivityMessageId: activityMessageId);
+
+            if (smsRecord.IsNotEmpty())
+            {
+                smsRecord.TwilioStatus = status;
+                smsRecord.Save();
+            }
         }
 
         private void SendLogEmail(SystemMessages msgs)
