@@ -18,6 +18,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
         [HttpPost]
         public IHttpActionResult UpdateStatus(string id, string id2, [FromBody] SmsRequest request)
         {
+            AfterSchoolLibrary.Helpers.Utilities.SystemLog(request.SmsSid + " " + request.MessageStatus);
             var msgs = new SystemMessages();
 
             if (request.IsNotEmpty() && request.MessageStatus.IsNotEmpty() && id.IsGuid() && id2.IsGuid())
