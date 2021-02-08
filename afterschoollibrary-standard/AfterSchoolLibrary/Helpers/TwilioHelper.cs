@@ -47,6 +47,8 @@ namespace AfterSchoolLibrary
                     to: new Twilio.Types.PhoneNumber(phoneNumber),
                     statusCallback: statusCallback
                 );
+
+                AfterSchoolLibrary.Helpers.Utilities.SystemLog("resource created, no errors.");
             }
             catch (TwilioException ex)
             {
