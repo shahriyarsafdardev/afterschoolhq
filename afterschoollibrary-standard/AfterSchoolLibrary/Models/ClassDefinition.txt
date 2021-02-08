@@ -1753,6 +1753,86 @@ loadmethod: ObjectId|ObjectTypeId|SubscriberStatusId, List<>
 [end]
 
 [begin]
+type: Class
+name: WebSession
+serializable: true
+description: keeps track of a user session where a user is hitting our system and taking actions, basically data analytics inside of our system. Not sure if we should keep this, but good for keeping some basic updates of what is happening in the system.
+inherits: BasicObjectWithModified
+property: IPAddress, string, NVarChar "50"
+property: IPAddressTimeZone, string, NVarChar
+property: UserAgent, string, NVarChar "400"
+property: UserLocation, string, NVarChar "400"
+property: UrlReferrer, string, NVarChar "400"
+property: PreviousId, int?, Int
+property: WebUserId, int?, Int
+property: AccountId, int?, Int
+join: WebUser.ID, WebUserId, LeftOuterJoin
+join: WebUser.ID, CreatedBy, LeftOuterJoin, CreatedBy
+loadmethod: WebUserId, List<>
+loadmethod: AccountId, List<>
+[end]
+
+[begin]
+type: Class
+name: WebSessionAction
+description: An action taken during a particular user session.
+inherits: BasicObject
+property: SessionId, int?, Int, required
+property: ActorId, int?, Int
+property: ActivityId, int?, Int
+property: AccountId, int?, Int, required
+property: ObjectId, int?, Int
+property: IndirectObjectId, int?, Int
+property: ActionStringFormat, string, NVarChar
+property: ActionString, string, NVarChar
+join: WebUser.ID, WebUserId, LeftOuterJoin
+join: WebUser.ID, CreatedBy, LeftOuterJoin, CreatedBy
+join: Account.ID, AccountId, InnerJoin
+joinproperty: WebUser.Username, string, NVarChar
+joinproperty: WebUser.Email, string, NVarChar
+joinproperty: WebUser.FirstName, string, NVarChar
+joinproperty: WebUser.LastName, string, NVarChar
+joinproperty: WebUser.TimeZone, string, NVarChar
+joinproperty: CreatedBy.Username, string, NVarChar
+joinproperty: CreatedBy.Email, string, NVarChar
+joinproperty: CreatedBy.FirstName, string, NVarChar
+joinproperty: CreatedBy.LastName, string, NVarChar
+joinproperty: Account.Name, string, NVarChar
+joinproperty: Account.TimeZone, string, NVarChar
+joinproperty: Account.AccountTypeId, AccountType, Int
+loadmethod: Id, List<>
+loadmethod: WebUserId, List<>
+loadmethod: Id|WebUserId, List<>
+loadmethod: Id|AccountId, List<>
+loadmethod: Id|WebUserId|AccountId, List<>
+loadmethod: ObjectId, List<>
+loadmethod: ObjectId|ActionId, List<>
+loadmethod: IndirectObjectId, List<>
+loadmethod: WebUserId|ObjectId, List<>
+[end]
+
+[begin]
+type: Class
+name: WebSessionObjectSnapshot
+serializable: true
+description: Copy of each instance of a WebSessionObject each time it is changed so that things can be restored to any point in time
+inherits: BasicObjectWithModified
+property: Action, int?, Int
+property: ObjectBlob, string, NVarChar "MAX"
+property: ParentObjectSnapshotId, int?, Int
+join: WebUser.ID, WebUserId, LeftOuterJoin
+join: WebUser.ID, CreatedBy, LeftOuterJoin, CreatedBy
+loadmethod: WebUserId, List<>
+loadmethod: AccountId, List<>
+[end]
+
+[begin]
+type: Enum
+name: WebSessionActionType
+values: NotSet, Created, Updated, Published, Unpublished, Sent, Registered, Paid, Refunded, Requested, Invited, Archived, Deleted, ManuallyRegistered, ManuallyPaid, ManuallyRefunded, Approved, Verified, Viewed, Moved, Navigated, Searched, Paged, Connected, LoggedIn, LoggedOut
+[end]
+
+[begin]
 type: Enum
 name: AHQObjectType
 values: NotSet, Account, Activity, ActivityGroup, AccountActivityGroup
@@ -1839,7 +1919,7 @@ values: NotSet, Individual, Organization
 [begin]
 type: Enum
 name: FeatureType
-values: NotSet, Attendance, AcceptPayments, EmailMessaging, CustomUrl, TeamAccounts, WaitingList, ManageForms, ManageLocations, ManageActivityGroups, Activities, Participants, AllowApplications, Lottery, TrialDays, ManageContacts, ViewInsights, PaymentsPercentageFee, PaymentsPercentageFlatFee, ManageExternalLeagues, UseStripeConnectedAccount, AcceptACH, ManageLeagues, ManageFieldTrips, ManagePermissionSlips, ManageLearningPods,	TextMessaging, AllowInvites, AllowStudentRegistration, AllowPaymentPlans, AllowSubscriptionPlans, AllowPayLater, StudentCRM
+values: NotSet, Attendance, AcceptPayments, EmailMessaging, CustomUrl, TeamAccounts, WaitingList, ManageForms, ManageLocations, ManageActivityGroups, Activities, Participants, AllowApplications, Lottery, TrialDays, ManageContacts, ViewInsights, PaymentsPercentageFee, PaymentsPercentageFlatFee, ManageExternalLeagues, UseStripeConnectedAccount, AcceptACH, ManageLeagues, ManageFieldTrips, ManagePermissionSlips, ManageLearningPods,	TextMessaging, AllowInvites, AllowStudentRegistration, AllowPaymentPlans, AllowSubscriptionPlans, AllowPayLater, StudentCRM, ManageCoupons
 [end]
 
 [begin]

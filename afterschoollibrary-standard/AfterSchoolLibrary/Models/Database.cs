@@ -99,6 +99,9 @@ namespace AfterSchoolLibrary.Models
 			Migration.Create(dc);
 			RefundRequest.Create(dc);
 			Subscriber.Create(dc);
+			WebSession.Create(dc);
+			WebSessionAction.Create(dc);
+			WebSessionObjectSnapshot.Create(dc);
 			
 
 			return msgs;
@@ -179,6 +182,9 @@ namespace AfterSchoolLibrary.Models
 			Migration.Alter(dc);
 			RefundRequest.Alter(dc);
 			Subscriber.Alter(dc);
+			WebSession.Alter(dc);
+			WebSessionAction.Alter(dc);
+			WebSessionObjectSnapshot.Alter(dc);
 			
 
 			return msgs;
@@ -662,6 +668,19 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Subscriber_ObjectId_ObjectTypeId ON [Subscriber] (ObjectId,ObjectTypeId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Subscriber_SubscriberStatusId_WebUserId ON [Subscriber] (WebUserId,SubscriberStatusId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Subscriber_ObjectId_ObjectTypeId_SubscriberStatusId ON [Subscriber] (ObjectId,ObjectTypeId,SubscriberStatusId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSession_WebUserId ON [WebSession] (WebUserId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSession_AccountId ON [WebSession] (AccountId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionAction_Id ON [WebSessionAction] (Id)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionAction_WebUserId ON [WebSessionAction] (WebUserId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionAction_Id_WebUserId ON [WebSessionAction] (Id,WebUserId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionAction_AccountId_Id ON [WebSessionAction] (Id,AccountId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionAction_AccountId_Id_WebUserId ON [WebSessionAction] (Id,WebUserId,AccountId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionAction_ObjectId ON [WebSessionAction] (ObjectId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionAction_ActionId_ObjectId ON [WebSessionAction] (ObjectId,ActionId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionAction_IndirectObjectId ON [WebSessionAction] (IndirectObjectId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionAction_ObjectId_WebUserId ON [WebSessionAction] (WebUserId,ObjectId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionObjectSnapshot_WebUserId ON [WebSessionObjectSnapshot] (WebUserId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionObjectSnapshot_AccountId ON [WebSessionObjectSnapshot] (AccountId)"));
 			
 
 			return msgs;
