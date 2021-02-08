@@ -39,6 +39,8 @@ namespace AfterSchoolLibrary
                 if (!Helpers.Utilities.IsLocalHost && messageUid.IsNotBlank() && registrantUid.IsNotBlank())
                     statusCallback = new Uri($"{Helpers.Utilities.BaseUrl()}{UpdateStatusCallbackUrl}/{messageUid}/{registrantUid}");                
 
+                AfterSchoolLibrary.Helpers.Utilities.SystemLog(statusCallback.IsNotEmpty() ? statusCallback.ToString() : "");
+
                 resource = MessageResource.Create(
                     body: body,
                     from: new Twilio.Types.PhoneNumber(TwilioPhoneNumber),
