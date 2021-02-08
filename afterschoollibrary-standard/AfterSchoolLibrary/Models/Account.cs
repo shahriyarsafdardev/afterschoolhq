@@ -1135,18 +1135,17 @@ namespace AfterSchoolLibrary.Models
 					glEnd.Abbreviation as GradeLevelEnd
                 FROM AccountRelationship ar
                 INNER JOIN Account a ON a.ID = ar.VisitorAccountId
-                LEFT JOIN Activity act ON act.AccountId = ar.VisitorAccountId and act.IsDeleted <> 1 and act.IsPublished = 1
-                LEFT JOIN ActivityRegistrationPeriod arp on arp.ActivityId = act.ID
-                LEFT JOIN RegistrationPeriod rp on rp.ID = arp.RegistrationPeriodId
+                LEFT JOIN Activity act ON act.AccountId = ar.VisitorAccountId AND act.IsDeleted <> 1 AND act.IsPublished = 1 AND act.IsInviteOnly <> 1
+                LEFt JOIN ActivitySchedule acs ON act.ActivityScheduleId = acs.ID
                 LEFT JOIN AccountProfile ap ON ap.AccountId = ar.VisitorAccountId
                 LEFT JOIN Location loc ON ap.LocationId = loc.ID
-                LEFT JOIN AccountProperty properties on properties.AccountId = ar.VisitorAccountId and properties.AccountPropertyTypeId in (12, 13, 14, 15)    
-                LEFT JOIN AccountProperty specialNeeds on specialNeeds.AccountId = ar.VisitorAccountId and specialNeeds.AccountPropertyTypeId = 17          
-				LEFT JOIN AccountProperty timing on timing.AccountId = ar.VisitorAccountId and timing.AccountPropertyTypeId = 10
+                LEFT JOIN AccountProperty properties on properties.AccountId = ar.VisitorAccountId AND properties.AccountPropertyTypeId in (12, 13, 14, 15)    
+                LEFT JOIN AccountProperty specialNeeds on specialNeeds.AccountId = ar.VisitorAccountId AND specialNeeds.AccountPropertyTypeId = 17          
+				LEFT JOIN AccountProperty timing on timing.AccountId = ar.VisitorAccountId AND timing.AccountPropertyTypeId = 10
 				LEFT JOIN GradeLevel glStart on glStart.ID = ap.GradeLevelStart
 				LEFT JOIN GradeLevel glEnd on glEnd.ID = ap.GradeLevelEnd
                 OUTER APPLY STRING_SPLIT(@Grades, ',') s
-                WHERE ar.HostAccountId = {hostAccountId} and a.IsDeleted <> 1                  
+                WHERE ar.HostAccountId = {hostAccountId} AND a.IsDeleted <> 1 AND a.IsTest <> 1                     
                     AND (
 						    (@SearchTerm = '""""') OR 
 						    CONTAINS((ap.Title, ap.Headline, ap.About), @SearchTerm)  OR 
@@ -1162,7 +1161,7 @@ namespace AfterSchoolLibrary.Models
                     AND ((@Gender IS NULL) OR ap.GenderRestriction In (SELECT value FROM STRING_SPLIT(@Gender, ',') WHERE RTRIM(value) <> ''))
                     AND ((@SpecialNeeds IS NULL) OR specialNeeds.Value In (SELECT value FROM STRING_SPLIT(@SpecialNeeds, ',') WHERE RTRIM(value) <> ''))
 					AND ((@Timing IS NULL) OR timing.Value In (SELECT value FROM STRING_SPLIT(@Timing, ',') WHERE RTRIM(value) <> ''))
-                    AND ((@Grades IS NULL) OR (s.value) BETWEEN ap.GradeLevelStart and ap.GradeLevelEnd)
+                    AND ((@Grades IS NULL) OR (s.value) BETWEEN ap.GradeLevelStart AND ap.GradeLevelEnd)
                     AND (
 	                        (@Age IS NULL) OR 
 	                        (ap.AgeStart IN (SELECT value FROM STRING_SPLIT(@Age, ',') WHERE RTRIM(value) <> '')) OR 
@@ -1178,10 +1177,10 @@ namespace AfterSchoolLibrary.Models
                     sql += $@" OR COALESCE(act.CostPerRegistrant, 0) = 0";
 
                 if (cost.Contains("cost_0_50"))
-                    sql += $@" OR act.CostPerRegistrant between 1 and 50";
+                    sql += $@" OR act.CostPerRegistrant between 1 AND 50";
 
                 if (cost.Contains("cost_50_150"))
-                    sql += $@" OR act.CostPerRegistrant between 50 and 150";
+                    sql += $@" OR act.CostPerRegistrant between 50 AND 150";
 
                 if (cost.Contains("cost_150_above"))
                     sql += $@" OR act.CostPerRegistrant > 150";
@@ -1194,13 +1193,13 @@ namespace AfterSchoolLibrary.Models
                 sql += $@"AND ((@Starting IS NULL)";
 
                 if (starting.Contains("starting_0_7"))
-                    sql += $@" OR rp.StartDateTime between dateadd(dd, 0, cast(getdate() as date)) and dateadd(dd, 7, cast(getdate() as date))";
+                    sql += $@" OR acs.StartDate between dateadd(dd, 0, cast(getdate() as date)) AND dateadd(dd, 7, cast(getdate() as date))";
 
                 if (starting.Contains("starting_7_28"))
-                    sql += $@" OR rp.StartDateTime between dateadd(dd, 8, cast(getdate() as date)) and dateadd(dd, 28, cast(getdate() as date))";
+                    sql += $@" OR acs.StartDate between dateadd(dd, 8, cast(getdate() as date)) AND dateadd(dd, 28, cast(getdate() as date))";
 
                 if (starting.Contains("starting_30_90"))
-                    sql += $@" OR rp.StartDateTime between dateadd(dd, 29, cast(getdate() as date)) and dateadd(dd, 90, cast(getdate() as date))";
+                    sql += $@" OR acs.StartDate between dateadd(dd, 29, cast(getdate() as date)) AND dateadd(dd, 90, cast(getdate() as date))";
 
                 sql += $@")";
             }
