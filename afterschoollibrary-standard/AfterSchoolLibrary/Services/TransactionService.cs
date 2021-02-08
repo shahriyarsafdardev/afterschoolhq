@@ -642,8 +642,24 @@ namespace AfterSchoolLibrary.Services
                         //create reverse charge
                         if (billerAccount.IsNotEmpty() && billerAccount.StripeUserId.IsNotEmpty() && amountToChargeFromProvider > 0)
                         {
+                            // refund id, account uid, activity uid, activity name, parent account uid, parent account name
+                            var registration = Registration.Load(transaction.GetPurchase(msgs, dc).RegistrationId.IfEmpty(0), msgs, dc);
+                            var participationObjects = registration.GetParticipationObjects(msgs,dc);
+                            var activities = new Dictionary<string, string>();
+                            participationObjects.ForEach(po => activities.Add(po.Uid.ToString(), po.UniqueName));
+                            var hostAccount = billerAccount.GetHostAccounts(dc).FirstOrDefault();
+
+                            var metaData = new Dictionary<string, string>()
+                            {
+                                { "AccountUid", billerAccount.Uid.ToString() },
+                                { "RegistrationUid", registration.Uid.ToString() },
+                                { "Activities", activities.ToJSON().ToString() },
+                                { "HostAccountUid", hostAccount?.Uid.ToString() },
+                                { "HostAccountName", hostAccount?.Name },
+                                { "stripeRefundId", stripeRefundId }
+                            };
                             //.. should we store this info somewhere?
-                            var charge = StripeHelper.CreateRefundChargeOnConnectedAccount(totalAmount: amountToChargeFromProvider, connectedAccountId: billerAccount.StripeUserId, msgs: msgs);
+                            var charge = StripeHelper.CreateRefundChargeOnConnectedAccount(totalAmount: amountToChargeFromProvider, connectedAccountId: billerAccount.StripeUserId, metaData: metaData, msgs: msgs);
                         }                        
                     }
                     else

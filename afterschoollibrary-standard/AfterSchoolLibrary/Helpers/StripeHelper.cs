@@ -1857,7 +1857,7 @@ namespace AfterSchoolLibrary.Billing
         /// <param name="connectedAccountId"></param>
         /// <param name="msgs"></param>
         /// <returns></returns>
-        public static Stripe.Charge CreateRefundChargeOnConnectedAccount(decimal totalAmount, string connectedAccountId, SystemMessages msgs = null)
+        public static Stripe.Charge CreateRefundChargeOnConnectedAccount(decimal totalAmount, string connectedAccountId, Dictionary<string,string> metaData, SystemMessages msgs = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -1866,6 +1866,7 @@ namespace AfterSchoolLibrary.Billing
                 Amount = (totalAmount * 100).ToInteger(),
                 Currency = "usd",
                 Source = connectedAccountId,
+                Metadata = metaData,
             };
 
             Stripe.Charge charge = null;
