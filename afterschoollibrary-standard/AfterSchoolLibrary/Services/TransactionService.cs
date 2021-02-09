@@ -609,8 +609,7 @@ namespace AfterSchoolLibrary.Services
                 string stripeRefundId = null;
 
                 if (paymentSourceType == PaymentSourceType.AfterSchoolPlatform)
-                {
-                    //.. TODO: review this logic
+                {                    
                     //.. when refunding, platform will pay all the amount to parent first
                     //.. then based on that and after deducting fee, we will charge remaining amount to provider
                     //.. lets say activity charge is 100$, and convenience charge is 6$, then parent pays 110$ (106$ + 4$ cc fee).
@@ -628,6 +627,7 @@ namespace AfterSchoolLibrary.Services
                         stripeRefundId = stripeRefund.Id;
 
                         var billerAccount = transaction.GetBillerAccount(msgs);
+                        var payerAccount = transaction.GetPayerAccount(msgs);
 
                         //.. basically this is a transaction.billerammount and this amount will be first deducted from platform, but if user wanted a less refund 
                         //.. then platform will have to charge provider refund amount - ConvenienceFeeCharged for first refund
@@ -644,21 +644,27 @@ namespace AfterSchoolLibrary.Services
                         {
                             // refund id, account uid, activity uid, activity name, parent account uid, parent account name
                             var registration = Registration.Load(transaction.GetPurchase(msgs, dc).RegistrationId.IfEmpty(0), msgs, dc);
+                            var registrant = registration.GetRegistrant(msgs, dc);
                             var participationObjects = registration.GetParticipationObjects(msgs,dc);
                             var activities = new Dictionary<string, string>();
-                            participationObjects.ForEach(po => activities.Add(po.Uid.ToString(), po.UniqueName));
-                            var hostAccount = billerAccount.GetHostAccounts(dc).FirstOrDefault();
+                            participationObjects.ForEach(po => activities.Add(po.Uid.ToString(), po.UniqueName));                            
 
+                            //.. biller will be activity provider
+                            //.. payer will be parent and registrant will be student
                             var metaData = new Dictionary<string, string>()
-                            {
-                                { "AccountUid", billerAccount.Uid.ToString() },
+                            {                                
                                 { "RegistrationUid", registration.Uid.ToString() },
                                 { "Activities", activities.ToJSON().ToString() },
-                                { "HostAccountUid", hostAccount?.Uid.ToString() },
-                                { "HostAccountName", hostAccount?.Name },
+                                { "BillerAccountUid", billerAccount?.Uid.ToString() },
+                                { "BillerAccountName", billerAccount?.Name },
+                                { "PayerAccountUid", payerAccount?.Uid.ToString() },
+                                { "PayerAccountName", payerAccount?.Name },
+                                { "RegistrantAccountUid", registrant?.Uid.ToString() },
+                                { "RegistrantAccountName", registrant?.Name },
                                 { "stripeRefundId", stripeRefundId }
                             };
-                            //.. should we store this info somewhere?
+
+                            //.. We probably should store this in our system somewhere, but for now, we will be sending metadata over to stripe.
                             var charge = StripeHelper.CreateRefundChargeOnConnectedAccount(totalAmount: amountToChargeFromProvider, connectedAccountId: billerAccount.StripeUserId, metaData: metaData, msgs: msgs);
                         }                        
                     }
