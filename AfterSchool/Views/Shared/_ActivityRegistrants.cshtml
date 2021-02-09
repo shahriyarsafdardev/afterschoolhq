@@ -53,7 +53,7 @@
                                 </a>
                             }
                         </td>
-                        <td>@ra.RegistrantName.IfBlank(ra.RegistrantEmail)</td>
+                        <td>@ra.GetRegistrantName(SessionVariables.LoggedInUser)</td>
                         <td class="text-center">@ra.SeatIndex</td>
                         <td>@account.ConvertToAccountTimeZone(ra.CreateDate.Value).ToLongDateTimeString()</td>
                         @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView))

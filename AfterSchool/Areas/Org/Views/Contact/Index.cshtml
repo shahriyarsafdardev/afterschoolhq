@@ -8,6 +8,7 @@
 
     var manageContactsEnabled = SessionVariables.CurrentAccount.HasFeature(FeatureType.ManageContacts);
     var manageContactsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManageContacts);
+    var isTechSupport = (bool)SessionVariables.LoggedInUser.IsTechSupport(SessionVariables.CurrentAccount);
 
     var previousLink = "#";
     var nextLink = "#";
@@ -89,7 +90,7 @@
                                     </td>
                                     <td>
                                         <a href="@Url.Action("edit", "contact", new {id = registrant.Uid})" id="registrant-name-@registrant.Uid">
-                                            @registrant.Name
+                                            @(isTechSupport ? registrant.Uid.ToString() : registrant.Name)
                                         </a>
                                     </td>
                                     <td><a href="mailto:@registrant.Email" id="registrant-email-@registrant.Uid">@registrant.Email</a></td>
