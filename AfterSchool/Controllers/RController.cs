@@ -52,6 +52,9 @@ namespace AfterSchool.Controllers
                 if (account.IsEmpty() || account.IsDeleted)
                     return HttpNotFound();
 
+                if (account.AccountTypeId == AccountType.Directory)
+                    return RedirectToAction("Search", account);
+
                 RestartRegistrationSession();
                 SetRegistrationStartPage(account, true);
 
@@ -568,6 +571,12 @@ namespace AfterSchool.Controllers
             }
 
             return RedirectToRegistration(account, participationObject, reg, msgs);
+        }
+
+        [HttpGet]
+        public ActionResult Search(Account account)
+        {
+            return View();
         }
 
         private ActionResult RedirectToRegistration(Account account, ParticipationObject participationObject, string reg, SystemMessages msgs)
