@@ -62,15 +62,6 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             }
         }
 
-        private void SendLogEmail(SystemMessages msgs)
-        {
-            string toEmail = "darye+twilio+errors@afterschoolhq.com";
-            string subject = $"Twilio Webhook Errors - {AfterSchoolLibrary.Helpers.Utilities.HostName}";
-            string body = msgs.RenderMessageList(MessageOutputType.Html);
-
-            AfterSchoolLibrary.Helpers.EmailHelper.SendEmail(toEmail, subject, body, true);
-        }
-
         private IHttpActionResult ReturnOK(SystemMessages msgs)
         {
             return Ok(msgs.ToJSON());
@@ -78,7 +69,16 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
         private IHttpActionResult Return500(SystemMessages msgs)
         {
-            SendLogEmail(msgs);
+            if (msgs.IsEmpty())
+                msgs = new SystemMessages();
+
+            msgs.Add(new SystemMessage()
+            {
+                MessageType = MessageType.Error, 
+                Text = $"Twilio Webhook Errors - {AfterSchoolLibrary.Helpers.Utilities.HostName}"
+            });
+
+            AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(msgs);
             return InternalServerError(new Exception(msgs.RenderMessageList(MessageOutputType.Text)));
         }
     }
