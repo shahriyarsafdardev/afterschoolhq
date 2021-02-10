@@ -307,6 +307,11 @@ namespace AfterSchool
                 new { controller = "r", action = "account", accountname = UrlParameter.Optional });
 
             routes.MapRoute(
+                "DirectoryProfile",
+                "directory/{accountname}",
+                new { controller = "Search", action = "Search", accountname = UrlParameter.Optional });
+
+            routes.MapRoute(
                 "AccountBrowse",
                 "{accountname}/browse",
                 new { controller = "r", action = "browse", accountname = UrlParameter.Optional });
