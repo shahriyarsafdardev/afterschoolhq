@@ -1833,7 +1833,6 @@
     <Content Include="Views\Shared\_DirectoryFilters.cshtml" />
     <Content Include="Views\ISYPDirectory\Index.cshtml" />
     <Content Include="Views\R\Search.cshtml" />
-    <Content Include="Views\Search\Search.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

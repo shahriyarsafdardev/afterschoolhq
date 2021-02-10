@@ -8,6 +8,7 @@ using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
 using System;
 using System.Text.RegularExpressions;
+using System.Web.Routing;
 
 namespace AfterSchool.Controllers
 {
@@ -53,7 +54,18 @@ namespace AfterSchool.Controllers
                     return HttpNotFound();
 
                 if (account.AccountTypeId == AccountType.Directory)
-                    return RedirectToAction("Search", account);
+                {
+                    var neighborhoodList = Location.LoadNeighborhoodsByHostAccount(hostAccountId: account.ID.ToString(), msgs: msgs).ToList();
+
+                    ViewBag.Messages = msgs;
+                    ViewBag.Neighborhoods = neighborhoodList;
+                    ViewBag.Grades = GradeLevel.Load();
+                    ViewBag.AccountUniqueName = accountname;
+                    ViewBag.AccountId = account.ID.ToString();
+
+                    return View("search");
+                }
+                    
 
                 RestartRegistrationSession();
                 SetRegistrationStartPage(account, true);
@@ -571,12 +583,6 @@ namespace AfterSchool.Controllers
             }
 
             return RedirectToRegistration(account, participationObject, reg, msgs);
-        }
-
-        [HttpGet]
-        public ActionResult Search(Account account)
-        {
-            return View();
         }
 
         private ActionResult RedirectToRegistration(Account account, ParticipationObject participationObject, string reg, SystemMessages msgs)

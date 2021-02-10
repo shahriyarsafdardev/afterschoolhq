@@ -1,7 +1,6 @@
 ﻿using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
-using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -11,8 +10,6 @@ namespace AfterSchool.Controllers
 {
     public class SearchController : Controller
     {
-        private static List<GradeLevel> ListGrades = GradeLevel.Load();
-
         // GET: Search
         public ActionResult Index(string city, string state, string neighborhoods, string covid, string elc)
         {
@@ -45,35 +42,6 @@ namespace AfterSchool.Controllers
             ViewBag.State = state;
 
             return View(providers.Shuffle().ToList());
-        }
-
-        [HttpGet]
-        public ActionResult Search(string accountname)
-        {
-            var msgs = new SystemMessages();
-            var account = Account.LoadByUniqueName(accountname, msgs);
-
-            try
-            {
-                if (account.IsEmpty() || account.IsDeleted)
-                    return HttpNotFound();
-
-                var neighborhoodList = Location.LoadNeighborhoodsByHostAccount(hostAccountId: account.ID.ToString(), msgs: msgs).ToList();
-
-                ViewBag.Messages = msgs;
-                ViewBag.Neighborhoods = neighborhoodList;
-                ViewBag.Grades = ListGrades;
-                ViewBag.AccountUniqueName = accountname;
-                ViewBag.AccountId = account.ID.ToString();
-            }
-            catch (Exception ex)
-            {
-                msgs.Add(accountname, MessageType.Notice);
-                msgs.Add(new SystemMessage() { Exception = ex, Text = ex.Message, MessageType = MessageType.Error });
-                AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(msgs);
-            }
-
-            return View();
         }
 
         [HttpPost]
