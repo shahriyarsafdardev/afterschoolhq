@@ -4,6 +4,7 @@ using System.Linq;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Billing;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -368,6 +369,11 @@ namespace AfterSchoolLibrary.Services
             if (!transaction.CanRefundTransactionFee())
                 amount -= transaction.PaymentTypeFeeCharged.Value;
 
+            //partial refund, if any then deduct that too.
+            var refunded = transaction.GetRefundedAmount();
+            if (refunded.IsNotEmpty())
+                amount -= refunded;
+
             return amount;
         }
 
@@ -607,15 +613,65 @@ namespace AfterSchoolLibrary.Services
                 string stripeRefundId = null;
 
                 if (paymentSourceType == PaymentSourceType.AfterSchoolPlatform)
-                {
+                {                    
+                    //.. when refunding, platform will pay all the amount to parent first
+                    //.. then based on that and after deducting fee, we will charge remaining amount to provider
+                    //.. lets say activity charge is 100$, and convenience charge is 6$, then parent pays 110$ (106$ + 4$ cc fee).
+                    //.. so while refunding, parent can refund only 106$(cc fee is not refundable),
+
                     var stripeRefund = Billing.StripeHelper.CreateRefund(
                                     chargeId: transaction.StripeChargeOrRefundId,
                                     totalAmount: refundAmount,
                                     reason: Billing.StripeRefundReason.RequestedByCustomer.ToString().SplitByUpperCase().Replace(" ", "_").ToLower(),
+                                    reverseTransfer: false,
                                     msgs: msgs);
 
                     if (stripeRefund.IsNotEmpty())
+                    {
                         stripeRefundId = stripeRefund.Id;
+
+                        var billerAccount = transaction.GetBillerAccount(msgs);
+                        var payerAccount = transaction.GetPayerAccount(msgs);
+
+                        //.. basically this is a transaction.billerammount and this amount will be first deducted from platform, but if user wanted a less refund 
+                        //.. then platform will have to charge provider refund amount - ConvenienceFeeCharged for first refund
+                        //.. next refunds will be direct charge on provider
+                        var amountToChargeFromProvider = refundAmount;
+                        if (transaction.GetRefundedAmount() <= 0)
+                        {
+                            var feesWithoutCreditCardCharges = transaction.ConvenienceFeeCharged.IfEmpty(0);
+                            amountToChargeFromProvider = refundAmount - feesWithoutCreditCardCharges;
+                        }
+
+                        //create reverse charge
+                        if (billerAccount.IsNotEmpty() && billerAccount.StripeUserId.IsNotEmpty() && amountToChargeFromProvider > 0)
+                        {
+                            // refund id, account uid, activity uid, activity name, parent account uid, parent account name
+                            var registration = Registration.Load(transaction.GetPurchase(msgs, dc).RegistrationId.IfEmpty(0), msgs, dc);
+                            var registrant = registration.GetRegistrant(msgs, dc);
+                            var participationObjects = registration.GetParticipationObjects(msgs,dc);
+                            var activities = new Dictionary<string, string>();
+                            participationObjects.ForEach(po => activities.Add(po.Uid.ToString(), po.UniqueName));                            
+
+                            //.. biller will be activity provider
+                            //.. payer will be parent and registrant will be student
+                            var metaData = new Dictionary<string, string>()
+                            {                                
+                                { "RegistrationUid", registration.Uid.ToString() },
+                                { "Activities", activities.ToJSON().ToString() },
+                                { "BillerAccountUid", billerAccount?.Uid.ToString() },
+                                { "BillerAccountName", billerAccount?.Name },
+                                { "PayerAccountUid", payerAccount?.Uid.ToString() },
+                                { "PayerAccountName", payerAccount?.Name },
+                                { "RegistrantAccountUid", registrant?.Uid.ToString() },
+                                { "RegistrantAccountName", registrant?.Name },
+                                { "stripeRefundId", stripeRefundId }
+                            };
+
+                            //.. We probably should store this in our system somewhere, but for now, we will be sending metadata over to stripe.
+                            var charge = StripeHelper.CreateRefundChargeOnConnectedAccount(totalAmount: amountToChargeFromProvider, connectedAccountId: billerAccount.StripeUserId, metaData: metaData, msgs: msgs);
+                        }                        
+                    }
                     else
                         msgs.Add("Error creating refund", MessageType.UserError);
                 }
