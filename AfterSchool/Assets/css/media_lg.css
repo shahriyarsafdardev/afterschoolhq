@@ -71,4 +71,27 @@
     .search-bg {
         background-image: linear-gradient(rgba(0, 0, 0, .8), rgba(0, 0, 0, .8)), url(https://afterschoolhq-prod.s3.us-east-2.amazonaws.com/McCoyYouth/headerimage/120221640_10157669465950893_7044339041890392902_n.png) !important;
     }
+
+    .div-center {
+        margin-left: 135px;
+    }
+
+    .Rectangle {
+        border-radius: 6px;
+        width: 415px;
+    }
+
+    .text-paragraph {
+        height: 57px;
+        margin: 5px 0 0 20px;
+        font-family: Montserrat,sans-serif;
+        font-size: 16px;
+        font-weight: normal;
+        font-stretch: normal;
+        font-style: normal;
+        line-height: normal;
+        letter-spacing: 0.28px;
+        color: #4a4a4a;
+        margin-left: 65px;
+    }
 }

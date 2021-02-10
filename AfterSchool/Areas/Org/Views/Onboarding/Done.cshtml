@@ -1,6 +1,31 @@
 ﻿@model Account
 @{ Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml"; }
 
+<style>
+    .Create-your-profile {
+        font-family: Montserrat,sans-serif;
+        font-weight: bold;
+        font-stretch: normal;
+        font-style: normal;
+        line-height: normal;
+        letter-spacing: 0.32px;
+        color: #4a4a4a;
+        margin-left: 65px;
+        margin-bottom: 8px;
+    }
+    .inner-rect {
+        width: 20px;
+        height: 20px;
+        border-radius: 6px;
+        border: solid 1px #00c5a3;
+        margin-bottom: -18px;
+        margin-left: 25px;
+    }
+    .div-hover:hover {
+        background-color: #f0f0f0;
+        border-radius: 6px;
+    }
+</style>
 <div class="row main-content main-content-welcome-pages">
     <div class="welcome-box-width">
         <div class="welcome-outer-ring">
@@ -17,7 +42,37 @@
                         You have setup your @AfterSchoolLibrary.Helpers.Utilities.AppName() profile. You have completed the first step to enabling education for children everywhere.
                     </p>
                 </div>
-
+                <div class="clearfix"></div>
+                <div class="div-center">
+                    <div class="Rectangle">
+                        <div class="div-hover" style=" padding: 10px;">
+                            <p class="inner-rect"></p>
+                            <p class="Create-your-profile">Create your profile.</p>
+                            <p class="text-paragraph">Parents need to know what you offer. This <br />helps us match parents to your program.</p>
+                        </div>
+                    </div><br />
+                    <div class="Rectangle">
+                        <div class="div-hover" style=" padding: 10px;">
+                            <p class="inner-rect"></p>
+                            <p class="Create-your-profile">Create your first activity.</p>
+                            <p class="text-paragraph">Adding your first activity informs parents of<br /> your program’s offerings and enables them<br /> to register online immediately.</p>
+                        </div>
+                    </div><br />
+                    <div class="Rectangle">
+                        <div class="div-hover" style=" padding: 10px;">
+                            <p class="inner-rect"></p>
+                            <p class="Create-your-profile">Validate your email.</p>
+                            <p class="text-paragraph">We need to confirm your identity before we<br /> publish your programs and activities.</p>
+                        </div>
+                    </div><br />
+                    <div class="Rectangle">
+                        <div class="div-hover" style=" padding: 10px;">
+                            <p class="inner-rect"></p>
+                            <p class="Create-your-profile">Accept payments.</p>
+                            <p class="text-paragraph">Let’s get you set up to make payments. This<br /> not only makes it easier for parents to pay,<br /> but you will also receive funds quicker.</p>
+                        </div>
+                    </div><br />
+                </div>
                 <div class="clearfix"></div>
                 <div class="visible-sm visible-xs margin-v-30">
                     <a href="@Model.HomePageUrl?edit=1" class="btn-save-claims btn btn-primary btn-lg pull-right col-xs-12 register-continue">View Your Profile</a>
