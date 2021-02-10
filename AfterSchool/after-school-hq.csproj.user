@@ -20,7 +20,8 @@
     </WebStackScaffolding_LayoutPageFile>
     <WebStackScaffolding_IsAsyncSelected>False</WebStackScaffolding_IsAsyncSelected>
     <WebStackScaffolding_ViewDialogWidth>1440</WebStackScaffolding_ViewDialogWidth>
-    <ProjectView>ProjectFiles</ProjectView>    
+    <ProjectView>ProjectFiles</ProjectView>
+    <NameOfLastUsedPublishProfile>Angle-jq-Pub</NameOfLastUsedPublishProfile>
   </PropertyGroup>
   <ProjectExtensions>
     <VisualStudio>
