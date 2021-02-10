@@ -1071,7 +1071,8 @@ namespace AfterSchoolLibrary.Models
                 searchTerms = $"\"*{search}*\"";
 
             var sql = $@"
-                DECLARE @SearchTerm NVARCHAR(250),
+                DECLARE @AccountId NVARCHAR(50),
+                        @SearchTerm NVARCHAR(250),
                         @Neighborhood NVARCHAR(100),
                         @Grades NVARCHAR(100),
                         @Age NVARCHAR(100),
@@ -1085,6 +1086,14 @@ namespace AfterSchoolLibrary.Models
                         @SpecialNeeds NVARCHAR(100)
 
                 SET @SearchTerm = '{searchTerms}'";
+
+            if (hostAccountId.ToInteger() <= 0)
+                sql += $"SET @AccountId = NULL";
+            else
+                sql += $"SET @AccountId = '{hostAccountId}'";
+
+            if (neighborhoods.IsNotEmpty())
+                sql += $"SET @Neighborhood = '{neighborhoods}'";
 
             if (neighborhoods.IsNotEmpty())
                 sql += $"SET @Neighborhood = '{neighborhoods}'";
@@ -1145,7 +1154,7 @@ namespace AfterSchoolLibrary.Models
 				LEFT JOIN GradeLevel glStart on glStart.ID = ap.GradeLevelStart
 				LEFT JOIN GradeLevel glEnd on glEnd.ID = ap.GradeLevelEnd
                 OUTER APPLY STRING_SPLIT(@Grades, ',') s
-                WHERE ar.HostAccountId = {hostAccountId} AND a.IsDeleted <> 1 AND a.IsTest <> 1                     
+                WHERE ((@AccountId IS NULL) OR ar.HostAccountId = @AccountId) AND a.IsDeleted <> 1 AND a.IsTest <> 1                     
                     AND (
 						    (@SearchTerm = '""""') OR 
 						    CONTAINS((ap.Title, ap.Headline, ap.About), @SearchTerm)  OR 

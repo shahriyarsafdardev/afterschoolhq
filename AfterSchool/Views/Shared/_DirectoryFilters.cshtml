@@ -1,5 +1,5 @@
 ﻿@{
-    var neighborhoods = (List<string>)ViewBag.Neighborhoods;
+    var neighborhoods = ViewBag.Neighborhoods != null ? (List<string>)ViewBag.Neighborhoods : null;
     var grades = (List<GradeLevel>)ViewBag.Grades;
 
     var totalGradeCount = grades.Count;
@@ -7,18 +7,22 @@
     var secondHalf = totalGradeCount - firstHalf;
 }
 
-<div>
-    <h4 class="filter-header">Neighborhoods</h4>
+@if (neighborhoods.IsNotEmpty() && neighborhoods.Count > 0)
+{
+    <div>
+        <h4 class="filter-header">Neighborhoods</h4>
 
-    @foreach (var item in neighborhoods)
-    {
-        <div class="am-checkbox" style="padding: 3px 0;">
-            <input id="chk-neighborhoods-@(item.ToLower())" name="neighborhoods" value="@(item.ToLower())" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
-            <label for="chk-neighborhoods-@(item.ToLower())" class="margin-h-10 mobile-padding">@item</label>
-        </div>
-    }
-</div>
-<div class="clearfix"></div>
+        @foreach (var item in neighborhoods)
+        {
+            <div class="am-checkbox" style="padding: 3px 0;">
+                <input id="chk-neighborhoods-@(item.ToLower())" name="neighborhoods" value="@(item.ToLower())" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+                <label for="chk-neighborhoods-@(item.ToLower())" class="margin-h-10 mobile-padding">@item</label>
+            </div>
+        }
+    </div>
+    <div class="clearfix"></div>
+
+}
 
 <div>
     <h4 class="filter-header">Grades</h4>

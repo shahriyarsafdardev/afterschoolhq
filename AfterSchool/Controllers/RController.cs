@@ -53,6 +53,9 @@ namespace AfterSchool.Controllers
                 if (account.IsEmpty() || account.IsDeleted)
                     return HttpNotFound();
 
+                var profile = account.GetAccountProfile(msgs);
+                var ah = AfterSchoolLibrary.Helpers.Utilities.GetNewAmazonHelper();
+
                 if (account.AccountTypeId == AccountType.Directory)
                 {
                     var neighborhoodList = Location.LoadNeighborhoodsByHostAccount(hostAccountId: account.ID.ToString(), msgs: msgs).ToList();
@@ -62,21 +65,25 @@ namespace AfterSchool.Controllers
                     ViewBag.Grades = GradeLevel.Load();
                     ViewBag.AccountUniqueName = accountname;
                     ViewBag.AccountId = account.ID.ToString();
+                    ViewBag.PrimaryColor = profile.PrimaryColor;
+
+                    if (profile.Logo.IsNotBlank())
+                        ViewBag.LogoUrl = ah.GetFileLink(profile.Logo, true, null, true);
+
+                    if (profile.HeaderImage.IsNotBlank())
+                        ViewBag.HeaderImageUrl = ah.GetFileLink(profile.HeaderImage, true, null, true);
 
                     return View("search");
                 }
                     
 
                 RestartRegistrationSession();
-                SetRegistrationStartPage(account, true);
-
-                var profile = account.GetAccountProfile(msgs);
+                SetRegistrationStartPage(account, true);                
 
                 if (profile.IsEmpty())
                     return Redirect(account.BrowseUrl);
 
-                var photos = profile.GetPhotos(msgs);
-                var ah = AfterSchoolLibrary.Helpers.Utilities.GetNewAmazonHelper();
+                var photos = profile.GetPhotos(msgs);                
 
                 photos.ForEach(photo => photo.Value = ah.GetFileLink(photo.Value, true, null, true));
 
