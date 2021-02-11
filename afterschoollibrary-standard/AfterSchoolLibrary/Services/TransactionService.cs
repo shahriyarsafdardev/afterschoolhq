@@ -77,7 +77,7 @@ namespace AfterSchoolLibrary.Services
                 return transaction.Amount.Value;
             }
 
-            return transaction.Amount.Value - transaction.GetFees();
+            return transaction.Amount.Value - transaction.GetFees() - transaction.GetRefundedAmountAHQ(msgs, dc);
         }
 
         public static decimal GetPayerAmount(this Transaction transaction)
@@ -628,49 +628,18 @@ namespace AfterSchoolLibrary.Services
 
                     if (stripeRefund.IsNotEmpty())
                     {
-                        stripeRefundId = stripeRefund.Id;
+                        // get stripe transfer from original payment
+                        var stripeOriginalPaymentChargeId = stripeRefund.ChargeId;
+                        var stripeOriginalCharge = Billing.StripeHelper.GetCharge(stripeOriginalPaymentChargeId, msgs);
+                        var stripeTransferId = stripeOriginalCharge.TransferId;
 
-                        var billerAccount = transaction.GetBillerAccount(msgs);
-                        var payerAccount = transaction.GetPayerAccount(msgs);
+                        // create transfer reversal
+                        // calculate amount to reverse
+                        var billerPayout = transaction.GetBillerPayout(msgs, dc);
+                        var amountToReverse = Math.Min(billerPayout, refundAmount);
 
-                        //.. basically this is a transaction.billerammount and this amount will be first deducted from platform, but if user wanted a less refund 
-                        //.. then platform will have to charge provider refund amount - ConvenienceFeeCharged for first refund
-                        //.. next refunds will be direct charge on provider
-                        var amountToChargeFromProvider = refundAmount;
-                        if (transaction.GetRefundedAmount() <= 0)
-                        {
-                            var feesWithoutCreditCardCharges = transaction.ConvenienceFeeCharged.IfEmpty(0);
-                            amountToChargeFromProvider = refundAmount - feesWithoutCreditCardCharges;
-                        }
+                       var transferReversal = Billing.StripeHelper.CreateTransferReversal(stripeTransferId, amountToReverse, msgs);
 
-                        //create reverse charge
-                        if (billerAccount.IsNotEmpty() && billerAccount.StripeUserId.IsNotEmpty() && amountToChargeFromProvider > 0)
-                        {
-                            // refund id, account uid, activity uid, activity name, parent account uid, parent account name
-                            var registration = Registration.Load(transaction.GetPurchase(msgs, dc).RegistrationId.IfEmpty(0), msgs, dc);
-                            var registrant = registration.GetRegistrant(msgs, dc);
-                            var participationObjects = registration.GetParticipationObjects(msgs,dc);
-                            var activities = new Dictionary<string, string>();
-                            participationObjects.ForEach(po => activities.Add(po.Uid.ToString(), po.UniqueName));                            
-
-                            //.. biller will be activity provider
-                            //.. payer will be parent and registrant will be student
-                            var metaData = new Dictionary<string, string>()
-                            {                                
-                                { "RegistrationUid", registration.Uid.ToString() },
-                                { "Activities", activities.ToJSON().ToString() },
-                                { "BillerAccountUid", billerAccount?.Uid.ToString() },
-                                { "BillerAccountName", billerAccount?.Name },
-                                { "PayerAccountUid", payerAccount?.Uid.ToString() },
-                                { "PayerAccountName", payerAccount?.Name },
-                                { "RegistrantAccountUid", registrant?.Uid.ToString() },
-                                { "RegistrantAccountName", registrant?.Name },
-                                { "stripeRefundId", stripeRefundId }
-                            };
-
-                            //.. We probably should store this in our system somewhere, but for now, we will be sending metadata over to stripe.
-                            var charge = StripeHelper.CreateRefundChargeOnConnectedAccount(totalAmount: amountToChargeFromProvider, connectedAccountId: billerAccount.StripeUserId, metaData: metaData, msgs: msgs);
-                        }                        
                     }
                     else
                         msgs.Add("Error creating refund", MessageType.UserError);

@@ -338,6 +338,11 @@ namespace AfterSchoolLibrary.Billing
             return new TransferService(StripeClient);
         }
 
+        private static TransferReversalService GetTranferReversalService()
+        {
+            return new TransferReversalService(StripeClient);
+        }
+
         public static Transfer CreateTransfer(decimal amount, string description, string transferIdentifier, string destinationId, Dictionary<string, string> metaData, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -365,6 +370,30 @@ namespace AfterSchoolLibrary.Billing
             }
 
             return transfer;
+        }
+
+
+        internal static TransferReversal CreateTransferReversal(string stripeTransferId, decimal amountToReverse, SystemMessages msgs)
+        {
+
+            var options = new TransferReversalCreateOptions
+            {
+                Amount = (long)(amountToReverse * 100),
+            };
+
+            TransferReversal transferReversal = null;
+
+            try
+            {
+                transferReversal = GetTranferReversalService().Create(stripeTransferId, options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Transfer Reversal was not created", MessageType.UserError);
+            }
+
+            return transferReversal;
         }
 
         #endregion
@@ -1799,7 +1828,24 @@ namespace AfterSchoolLibrary.Billing
 
             return charge;
         }
-               
+
+        public static Stripe.Charge GetCharge(string stripeChargeId, SystemMessages msgs)
+        {
+            Stripe.Charge charge = null;
+
+            try
+            {
+                charge = GetChargeService().Get(stripeChargeId);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Error charging payment source", MessageType.UserError);
+            }
+
+            return charge;
+        }
+
         public static List<Stripe.Charge> GetCharges(string customerId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
