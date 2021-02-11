@@ -1148,6 +1148,7 @@ namespace AfterSchoolLibrary.Models
             sql += $@"
                 SELECT DISTINCT 
                     a.Id as AccountId,
+                    act.ID as ActivityId,
                     a.Uid as AccountUid, 
                     a.Name as AccountName,                    
                     a.UniqueName as AccountUniqueName,
@@ -1158,11 +1159,15 @@ namespace AfterSchoolLibrary.Models
                     ap.AgeStart,
 					ap.AgeEnd,
 					glStart.Abbreviation as GradeLevelStart,
-					glEnd.Abbreviation as GradeLevelEnd
+					glEnd.Abbreviation as GradeLevelEnd,
+                    rp.StartDateTime as RegistrationPeriodStart, 
+					rp.EndDateTime as RegistrationPeriodEnd
                 FROM AccountRelationship ar
                 INNER JOIN Account a ON a.ID = ar.VisitorAccountId
                 LEFT JOIN Activity act ON act.AccountId = ar.VisitorAccountId AND act.IsDeleted <> 1 AND act.IsPublished = 1 AND act.IsInviteOnly <> 1
                 LEFt JOIN ActivitySchedule acs ON act.ActivityScheduleId = acs.ID
+                LEFT JOIN ActivityRegistrationPeriod arp on arp.ActivityId = act.ID and arp.IsActive = 1
+				LEFT JOIN RegistrationPeriod rp on rp.Id = arp.RegistrationPeriodId
                 LEFT JOIN AccountProfile ap ON ap.AccountId = ar.VisitorAccountId
                 LEFT JOIN Location loc ON ap.LocationId = loc.ID
                 LEFT JOIN AccountProperty properties on properties.AccountId = ar.VisitorAccountId AND properties.AccountPropertyTypeId in (12, 13, 14, 15)    

@@ -2239,7 +2239,30 @@ namespace AfterSchoolLibrary.Services
                                 response.ProfileHeaderImageUrl = LocationService.GetGoogleMapsImageUrl(location, 1500, 600);
                             }
 
+                            //..registration period
+                            response.RegistrationPeriodStart = row["RegistrationPeriodStart"].IsNotEmpty() ? row["RegistrationPeriodStart"].ToString() : null;
+                            response.RegistrationPeriodEnd = row["RegistrationPeriodEnd"].IsNotEmpty() ? row["RegistrationPeriodEnd"].ToString() : null;
+
                             ListResponse.Add(response);
+                        }
+                    }
+
+                    //.. Show programs that are now registering first, today is in between StartDateTime and EndDateTime
+                    //.. Closing soon, (end date is nearest to today)
+                    //.. Opening soon (start data is nearest to today)                 
+
+                    List<SearchDirectoryResponse> ListResponse2 = new List<SearchDirectoryResponse>();
+
+                    ListResponse2.AddRange(ListResponse.OrderByDescending(m =>
+                        m.RegistrationPeriodStart.ToDateTime() <= DateTime.Now &&
+                        m.RegistrationPeriodEnd.ToDateTime() > DateTime.Now
+                    ).ToList());
+
+                    foreach (var item in ListResponse)
+                    {
+                        if (item.RegistrationPeriodEnd.ToDateTime() > DateTime.Now)
+                        {
+                            ListResponse2.Add(item);
                         }
                     }
 
