@@ -7,6 +7,11 @@
     var secondHalf = totalGradeCount - firstHalf;
 }
 
+<div style="text-align: center; text-decoration: underline;">
+    <a id="clear-filters" href="#" style="display: none;" onclick="return clearFilters();">Clear Filters</a>
+    <div class="clearfix"></div>
+</div>
+
 @if (neighborhoods.IsNotEmpty() && neighborhoods.Count > 0)
 {
     <div>
