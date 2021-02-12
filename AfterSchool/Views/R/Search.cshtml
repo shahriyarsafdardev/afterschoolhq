@@ -104,6 +104,16 @@
         <div class="panel" style="overflow: hidden;">
             <div class="reg-header" style="background-image: url(<%= searchResult.ProfileHeaderImageUrl %>); min-height: 100px; height: 150px; padding: 5px 5px; position: relative;">
 
+                <% if(searchResult.IsAccountNowEnrolling) { %>
+
+                <div class="pull-right margin-l-10">
+                    <span class="badge badge-danger profile-badge text-small">
+                        Now Enrolling
+                    </span>
+                </div>
+
+                <% } %>
+
                 <% if(searchResult.IsOpenDuringCovid) { %>
 
                 <div class="pull-right margin-l-10">

@@ -370,11 +370,13 @@ namespace AfterSchoolLibrary.Models
 			dq.UseParameterizedQuery = false;
 
 			dq.Joins.Add(Location.ObjectMap["ID"], ObjectMap["LocationId"], DatabaseJoinTypeEnum.InnerJoin);
+			dq.Joins.Add(Activity.ObjectMap["AccountId"], ObjectMap["Id"], DatabaseJoinTypeEnum.LeftOuterJoin);			
 
 			dq.Criterias.Add(ObjectMap["AccountAccountTypeId"], accountTypes.Select(x => (int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
 			dq.Criterias.Add(ObjectMap["AccountIsDeleted"], false);
 			dq.Criterias.Add(ObjectMap["AccountIsActive"], true);
 			dq.Criterias.Add(ObjectMap["AccountIsTest"], false);
+			dq.Criterias.Add(Activity.ObjectMap["IsDeleted"], false);
 			//dq.Criterias.Add(ObjectMap["IsAHQApproved"], true);
 
 			dq.Criterias.Add(ObjectMap["LocationId"], DBNull.Value, DatabaseCriteriaOperatorEnum.IsNot);
@@ -399,11 +401,13 @@ namespace AfterSchoolLibrary.Models
 			dq.SelectRange.Start = start;
 			dq.SelectRange.Length = length;
 
-			if (getRandomSample)
-			{
-				dq.SelectParameters.Add("RandomSort", "NEWID()");
-				dq.OrderBys.Add("RandomSort", OrderByDirectionEnum.Ascending);
-			}
+			//if (getRandomSample)
+			//{
+			//	dq.SelectParameters.Add("RandomSort", "NEWID()");
+			//	dq.OrderBys.Add("RandomSort", OrderByDirectionEnum.Ascending);
+			//}
+
+			//dq.OrderBys.Add(RegistrationPeriod.ObjectMap["EndDateTime"], OrderByDirectionEnum.Ascending);
 
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}

@@ -1146,7 +1146,8 @@ namespace AfterSchoolLibrary.Models
             sql += $"\n";
 
             sql += $@"
-                SELECT DISTINCT 
+                SELECT 
+                    --DISTINCT
                     a.Id as AccountId,
                     act.ID as ActivityId,
                     a.Uid as AccountUid, 
@@ -1154,6 +1155,7 @@ namespace AfterSchoolLibrary.Models
                     a.UniqueName as AccountUniqueName,
                     ap.IsOpenDuringCovid,
 					ap.IsELearningCenter,
+                    CASE WHEN GETDATE() BETWEEN rp.StartDateTime AND rp.EndDateTime THEN 1 ELSE 0 END as IsAccountNowEnrolling,
 					ap.Headline,
                     ap.LocationId,
                     ap.AgeStart,
@@ -1161,7 +1163,7 @@ namespace AfterSchoolLibrary.Models
 					glStart.Abbreviation as GradeLevelStart,
 					glEnd.Abbreviation as GradeLevelEnd,
                     rp.StartDateTime as RegistrationPeriodStart, 
-					rp.EndDateTime as RegistrationPeriodEnd
+					rp.EndDateTime as RegistrationPeriodEnd                    
                 FROM AccountRelationship ar
                 INNER JOIN Account a ON a.ID = ar.VisitorAccountId
                 LEFT JOIN Activity act ON act.AccountId = ar.VisitorAccountId AND act.IsDeleted <> 1 AND act.IsPublished = 1 AND act.IsInviteOnly <> 1
@@ -1237,8 +1239,14 @@ namespace AfterSchoolLibrary.Models
                 sql += $@")";
             }
 
-            sql += $@" 
-                Order BY a.Name ASC";
+            sql += $@"
+                ORDER BY
+                    (CASE WHEN GETDATE() BETWEEN rp.StartDateTime AND rp.EndDateTime THEN 1 ELSE 2 END), 
+				    (CASE WHEN rp.EndDateTime IS NULL THEN 2 ELSE 1 END), 
+				        rp.EndDateTime ASC,
+				    (CASE WHEN rp.StartDateTime IS NULL THEN 2 ELSE 1 END), 
+				        rp.StartDateTime DESC, 
+                    a.Name ASC";
 
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;

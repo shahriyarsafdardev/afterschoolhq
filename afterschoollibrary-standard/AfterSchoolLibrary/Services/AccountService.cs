@@ -2224,6 +2224,7 @@ namespace AfterSchoolLibrary.Services
                             //.. account profile  
                             response.IsOpenDuringCovid = row["IsOpenDuringCovid"].IsNotEmpty() ? Convert.ToBoolean(row["IsOpenDuringCovid"]) : false;
                             response.IsELearningCenter = row["IsELearningCenter"].IsNotEmpty() ? Convert.ToBoolean(row["IsELearningCenter"]) : false;
+                            response.IsAccountNowEnrolling = row["IsAccountNowEnrolling"].IsNotEmpty() ? Convert.ToBoolean(row["IsAccountNowEnrolling"]) : false;
                             response.ProfileHeadline = row["Headline"].IsNotEmpty() ? row["Headline"].ToString().MaxChars(70, "... (more)") : "";
                             response.IsRestrictByGrade = row["AgeStart"].IsEmpty();
                             response.AgeStart = row["AgeStart"].IsNotEmpty() ? row["AgeStart"].ToString() : null;
@@ -2247,26 +2248,7 @@ namespace AfterSchoolLibrary.Services
                         }
                     }
 
-                    //.. Show programs that are now registering first, today is in between StartDateTime and EndDateTime
-                    //.. Closing soon, (end date is nearest to today)
-                    //.. Opening soon (start data is nearest to today)                 
-
-                    List<SearchDirectoryResponse> ListResponse2 = new List<SearchDirectoryResponse>();
-
-                    ListResponse2.AddRange(ListResponse.OrderByDescending(m =>
-                        m.RegistrationPeriodStart.ToDateTime() <= DateTime.Now &&
-                        m.RegistrationPeriodEnd.ToDateTime() > DateTime.Now
-                    ).ToList());
-
-                    foreach (var item in ListResponse)
-                    {
-                        if (item.RegistrationPeriodEnd.ToDateTime() > DateTime.Now)
-                        {
-                            ListResponse2.Add(item);
-                        }
-                    }
-
-                    return ListResponse;
+                    return ListResponse.DistinctBy(m => m.AccountName).ToList();
                 }
             }
             catch (Exception ex)
