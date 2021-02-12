@@ -196,6 +196,13 @@
                                     <strong>Requires Parental Consent</strong>
                                 </div>
                             }
+
+                            @if (Model.OwnerAccount.IsNotEmpty() && Model.OwnerAccount.TimeZone.IsNotEmpty())
+                            {
+                                <div class="activity-detail-block">
+                                    <strong>All times are in @Model.OwnerAccount.TimeZone</strong>
+                                </div>
+                            }
                         </div>
 
                     </div>

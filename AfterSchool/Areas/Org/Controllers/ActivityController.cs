@@ -1861,6 +1861,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 if(activity.HasSchedule)
                     body += $"Activity Start Date: {activity.GetSchedule(msgs).StartDate.ToShortDateString()} <br />";
 
+                    if (activity.AccountTimeZone.IsNotEmpty())
+                        body += $"All times are in {activity.AccountTimeZone} <br />";
+
                     EmailHelper.SendEmail(
                         toEmail: AfterSchoolLibrary.Helpers.Email.AppCustomersEmailAddress,
                         subject: $"{account.Name} has published a new Activity: {activity.Name}",
