@@ -15,36 +15,6 @@ namespace AfterSchool.Controllers
         {
             var msgs = new SystemMessages();
 
-            //List<string> neighborhoodSearch = null;
-
-            //if (neighborhoods.IsNotEmpty())
-            //    neighborhoodSearch = neighborhoods.Split(',').ToList();
-
-            //var providers = AccountProfile.Search(
-            //                    accountTypes: AccountService.CustomerAccountTypes,
-            //                    isOpenDuringCovid: covid.IsEmpty() ? new bool?() : covid.ToBoolean(),
-            //                    isELearningCenter: elc.IsEmpty() ? new bool?() : elc.ToBoolean(),
-            //                    neighborhoods: neighborhoodSearch,
-            //                    cities: city.IsEmpty() ? null : city.AsList(),
-            //                    states: state.IsEmpty() ? null : state.AsList(),
-            //                    msgs: msgs);
-
-            //var neighborhoodList = Location.LoadAllNeighborhoods(
-            //                            city: city,
-            //                            state: state,
-            //                            msgs: msgs)
-            //                        .Where(x => x.IsNotEmpty())
-            //                        .ToList();
-
-            //ViewBag.Messages = msgs;
-            //ViewBag.Neighborhoods = neighborhoodList;
-            //ViewBag.City = city;
-            //ViewBag.State = state;
-
-            //return View(providers.Shuffle().ToList());
-
-            //var neighborhoodList = Location.LoadNeighborhoodsByHostAccount(hostAccountId: 0, msgs: msgs).ToList();
-
             ViewBag.Messages = msgs;
             ViewBag.Neighborhoods = null;
             ViewBag.Grades = GradeLevel.Load();
