@@ -1421,48 +1421,6 @@ namespace AfterSchool.Controllers
 
         #endregion
 
-        //#region RegisterAnotherChild
-        //[HttpGet]
-        //public ActionResult RegisterAnotherChild(string accountname, string activitytype, string activityname)
-        //{
-        //    ParticipationObject participationObject = null;
-        //    var msgs = new SystemMessages();
-        //    var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
-
-        //    if (!account.IsEmpty())
-        //    {
-        //        if (account.IsDeleted)
-        //            return HttpNotFound();
-
-        //        var activity = AfterSchoolLibrary.Models.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
-
-        //        if (activity.IsEmpty())
-        //            return HttpNotFound();
-
-        //        participationObject = activity.GetParticipationObject(msgs);
-
-        //        if (activity.ActivityGroupId.HasValue)
-        //        {
-        //            session = activity.GetActivityGroup(msgs)?.GetParticipationObject(msgs);
-        //            AddNoCacheHeaders();
-        //        }
-
-        //        if (!activity.IsPublished && activity.GetLocation().HostAccountId != activity.AccountId)
-        //        {
-        //            var accountOwnerId = activity.GetLocation().GetHostAccount().OwnerId;
-
-        //            if (SessionVariables.CurrentUser.ID == accountOwnerId)
-        //                canPublishActivity = true;
-        //        }
-        //    }
-        //    else
-        //    { 
-                
-        //    }
-
-        //    }
-        //#endregion
-
         #region Register
 
         private List<FormQuestion> RegisterViewBag(ParticipationObject participationObject, SystemMessages msgs)
