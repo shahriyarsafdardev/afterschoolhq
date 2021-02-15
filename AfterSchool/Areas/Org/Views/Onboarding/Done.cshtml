@@ -2,24 +2,31 @@
 @{ Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml"; }
 
 <style>
-    .Create-your-profile {
-        font-family: Montserrat,sans-serif;
-        font-weight: bold;
-        font-stretch: normal;
-        font-style: normal;
-        line-height: normal;
-        letter-spacing: 0.32px;
-        color: #4a4a4a;
-        margin-left: 65px;
-        margin-bottom: 8px;
-    }
-    .inner-rect {
-        width: 20px;
-        height: 20px;
+    .am-checkbox input[type="checkbox"] + label:before,
+    .am-radio input[type="checkbox"] + label:before,
+    .am-checkbox input[type="radio"] + label:before,
+    .am-radio input[type="radio"] + label:before {
+        content: "";
+        width: 22px;
+        height: 22px;
+        display: inline-block;
+        border: 2px solid #eaeaea;
+        margin-right: 5px;
+        font-size: 18px;
+        font-family: 'Stroke 7';
+        font-weight: normal;
+        line-height: 19px;
+        vertical-align: bottom;
+        text-align: center;
+        background-color: transparent;
+        cursor: pointer;
         border-radius: 6px;
+        margin-right: 12px;
         border: solid 1px #00c5a3;
-        margin-bottom: -18px;
-        margin-left: 25px;
+    }
+    .Create-your-profile {
+        font-weight: bold;
+        margin-left: 36px;
     }
     .div-hover:hover {
         background-color: #f0f0f0;
@@ -46,32 +53,52 @@
                 <div class="div-center">
                     <div class="Rectangle">
                         <div class="div-hover" style=" padding: 10px;">
-                            <p class="inner-rect"></p>
-                            <p class="Create-your-profile">Create your profile.</p>
-                            <p class="text-paragraph">Parents need to know what you offer. This <br />helps us match parents to your program.</p>
+                            <div class="am-checkbox">
+                                <input type="checkbox"
+                                       style="border-radius:6px"
+                                       name="createprofile"
+                                       id="createprofile" />
+                                <label for="createprofile" class="Create-your-profile">Create your profile.</label>
+                                <p class="text-paragraph">Parents need to know what you offer. This <br />helps us match parents to your program.</p>
+                            </div>
                         </div>
                     </div><br />
                     <div class="Rectangle">
                         <div class="div-hover" style=" padding: 10px;">
-                            <p class="inner-rect"></p>
-                            <p class="Create-your-profile">Create your first activity.</p>
-                            <p class="text-paragraph">Adding your first activity informs parents of<br /> your program’s offerings and enables them<br /> to register online immediately.</p>
+                            <div class="am-checkbox">
+                                <input type="checkbox"
+                                       style="border-radius:6px"
+                                       name="createactivity"
+                                       id="createactivity" />
+                                <label for="createactivity" class="Create-your-profile">Create your first activity.</label>
+                                <p class="text-paragraph">Adding your first activity informs parents of<br /> your program’s offerings and enables them<br /> to register online immediately.</p>
+                            </div>
                         </div>
                     </div><br />
                     <div class="Rectangle">
                         <div class="div-hover" style=" padding: 10px;">
-                            <p class="inner-rect"></p>
-                            <p class="Create-your-profile">Validate your email.</p>
-                            <p class="text-paragraph">We need to confirm your identity before we<br /> publish your programs and activities.</p>
+                            <div class="am-checkbox">
+                                <input type="checkbox"
+                                       style="border-radius:6px"
+                                       name="validateemail"
+                                       id="validateemail" />
+                                <label for="validateemail" class="Create-your-profile">Validate your email.</label>
+                                <p class="text-paragraph">We need to confirm your identity before we<br /> publish your programs and activities.</p>
+                            </div>
                         </div>
                     </div><br />
                     <div class="Rectangle">
                         <div class="div-hover" style=" padding: 10px;">
-                            <p class="inner-rect"></p>
-                            <p class="Create-your-profile">Accept payments.</p>
-                            <p class="text-paragraph">Let’s get you set up to make payments. This<br /> not only makes it easier for parents to pay,<br /> but you will also receive funds quicker.</p>
+                            <div class="am-checkbox">
+                                <input type="checkbox"
+                                       style="border-radius:6px"
+                                       name="payment"
+                                       id="payment" />
+                                <label for="payment" class="Create-your-profile">Accept payments.</label>
+                                <p class="text-paragraph">Let’s get you set up to make payments. This<br /> not only makes it easier for parents to pay,<br /> but you will also receive funds quicker.</p>
+                            </div>
                         </div>
-                    </div><br />
+                    </div><br />                    
                 </div>
                 <div class="clearfix"></div>
                 <div class="visible-sm visible-xs margin-v-30">
