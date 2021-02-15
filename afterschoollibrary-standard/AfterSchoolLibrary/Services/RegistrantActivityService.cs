@@ -282,22 +282,7 @@ namespace AfterSchoolLibrary.Services
 
         public static Account GetActivityAccount(this RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc =null)
         {
-            var activity = registrantActivity.GetActivity(msgs, dc);
-
-            if (activity.IsNotEmpty())
-                return activity.GetAccount(msgs, dc);
-
-            var activityGroup = registrantActivity.GetActivityGroup(msgs, dc);
-
-            if (activityGroup.IsNotEmpty())
-                return activityGroup.GetAccount(msgs, dc);
-
-            var accountActivityGroup = registrantActivity.GetAccountActivityGroup(msgs, dc);
-
-            if (accountActivityGroup.IsNotEmpty())
-                return accountActivityGroup.GetAccount(msgs, dc);
-
-            return null;
+            return registrantActivity.GetParticipationObject().OwnerAccount;
         }
 
         public static string GetRegistrantName(this RegistrantActivity registrantActivity, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)

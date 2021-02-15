@@ -8,7 +8,7 @@
 
     var manageContactsEnabled = SessionVariables.CurrentAccount.HasFeature(FeatureType.ManageContacts);
     var manageContactsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManageContacts);
-    var isTechSupport = (bool)SessionVariables.LoggedInUser.IsTechSupport(SessionVariables.CurrentAccount);
+    var isTechSupport = (bool)SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
 
     var previousLink = "#";
     var nextLink = "#";
