@@ -2217,14 +2217,14 @@ namespace AfterSchoolLibrary.Services
                             SearchDirectoryResponse response = new SearchDirectoryResponse();
 
                             // ..account
-                            response.AccountName = row["AccountName"].IsNotEmpty() ? row["AccountName"].ToString().MaxChars(30, "... (more)") : "";
+                            response.AccountName = row["AccountName"].IsNotEmpty() ? row["AccountName"].ToString().MaxChars(28, "...") : "";
                             response.AccountUid = new Guid(row["AccountUid"].ToString());
                             response.HomePageUrl = $"{Helpers.Utilities.BaseUrl()}/{row["AccountUniqueName"]}";
 
                             //.. account profile  
                             response.IsOpenDuringCovid = row["IsOpenDuringCovid"].IsNotEmpty() ? Convert.ToBoolean(row["IsOpenDuringCovid"]) : false;
                             response.IsELearningCenter = row["IsELearningCenter"].IsNotEmpty() ? Convert.ToBoolean(row["IsELearningCenter"]) : false;
-                            response.ProfileHeadline = row["Headline"].IsNotEmpty() ? row["Headline"].ToString().MaxChars(70, "... (more)") : "";
+                            response.ProfileHeadline = row["Headline"].IsNotEmpty() ? row["Headline"].ToString().MaxChars(70, "...") : "";
                             response.IsRestrictByGrade = row["AgeStart"].IsEmpty();
                             response.AgeStart = row["AgeStart"].IsNotEmpty() ? row["AgeStart"].ToString() : null;
                             response.AgeEnd = row["AgeEnd"].IsNotEmpty() ? row["AgeEnd"].ToString() : null;
