@@ -384,7 +384,7 @@ namespace AfterSchoolLibrary.Models
 			dq.Criterias.Add(ObjectMap["AccountIsDeleted"], false);
 			dq.Criterias.Add(ObjectMap["AccountIsActive"], true);
 			dq.Criterias.Add(ObjectMap["AccountIsTest"], false);
-			//dq.Criterias.Add(ObjectMap["IsAHQApproved"], true);
+			dq.Criterias.Add(ObjectMap["IsAHQApproved"], true);
 
 			dq.Criterias.Add(ObjectMap["LocationId"], DBNull.Value, DatabaseCriteriaOperatorEnum.IsNot);
 			dq.Criterias.Add(ObjectMap["GradeLevelStart"], DBNull.Value, DatabaseCriteriaOperatorEnum.IsNot);
