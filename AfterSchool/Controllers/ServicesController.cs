@@ -286,23 +286,17 @@ namespace AfterSchool.Controllers
             if (count > 10)
                 count = 10;
 
-            var profiles = AccountProfile.Search(
+            var profiles = AccountProfile.RowSearch(
                             accountTypes: AccountService.CustomerAccountTypes,
-                            isOpenDuringCovid: null,
-                            isELearningCenter: null,
-                            neighborhoods: null,
-                            cities: null,
-                            states: null,
-                            start: 0,
-                            length: count,
-                            getRandomSample: true,
+                            isOpenDuringCovid: null, isELearningCenter: null, neighborhoods: null, cities: null, states: null, start: null, length: null,
                             msgs: msgs);
 
             var profilesObj = new List<object>();
 
             var html = "";
 
-            profiles.ForEach(profile => {
+            profiles.ForEach(profile =>
+            {
                 var result = ViewEngines.Engines.FindPartialView(this.ControllerContext, "~/Views/Shared/Registration/_BrowseProvider.cshtml");
 
                 if (result.View != null)
@@ -321,7 +315,7 @@ namespace AfterSchool.Controllers
                     html += sb.ToString();
                 }
             });
-           
+
 
             //profiles.ForEach(profile => {
             //    var account = profile.GetAccount(msgs);
