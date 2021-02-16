@@ -276,19 +276,16 @@ namespace AfterSchool.Controllers
         #region Profile
 
         [HttpGet]
-        public ActionResult GetProfiles(int count)
+        public ActionResult GetProfiles(int? count)
         {
             if (!IsRequestFromApp())
                 return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
 
-            var msgs = new SystemMessages();
+            var msgs = new SystemMessages();           
 
-            if (count > 10)
-                count = 10;
-
-            var profiles = AccountProfile.RowSearch(
+            var profiles = AccountProfile.Search(
                             accountTypes: AccountService.CustomerAccountTypes,
-                            isOpenDuringCovid: null, isELearningCenter: null, neighborhoods: null, cities: null, states: null, start: null, length: null,
+                            count: count,
                             msgs: msgs);
 
             var profilesObj = new List<object>();

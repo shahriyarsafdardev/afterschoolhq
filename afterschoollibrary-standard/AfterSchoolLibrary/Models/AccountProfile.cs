@@ -369,9 +369,7 @@ namespace AfterSchoolLibrary.Models
 			dq.Connection = dc;
 			dq.UseDistinct = false;
 			dq.Criterias.Add(ObjectMap["ID"], ids.ToArray(), BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.In);
-			var data = dq.Select(msgs).AsEnumerable().ToList();
-			var data2 = data.ConvertAll(LoadObject);
-			return data2;
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
 		public static List<AccountProfile> Search(IEnumerable<AccountType> accountTypes, bool? isOpenDuringCovid = null, bool? isELearningCenter = null, IEnumerable<string> neighborhoods = null, IEnumerable<string> cities = null, IEnumerable<string> states = null, int? start = null, int? length = null, bool getRandomSample = false, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -419,12 +417,16 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<AccountProfile> RowSearch(IEnumerable<AccountType> accountTypes, bool? isOpenDuringCovid = null, bool? isELearningCenter = null, IEnumerable<string> neighborhoods = null, IEnumerable<string> cities = null, IEnumerable<string> states = null, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<AccountProfile> Search(IEnumerable<AccountType> accountTypes, int? count, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
+
+			if (count.IsEmpty())
+				count = 10;
+
 			var sql = $@"
-				select 
+				SELECT
 					ap.[ID],
 					ap.[CreateDate],
 					ap.[CreatedBy],
@@ -457,13 +459,18 @@ namespace AfterSchoolLibrary.Models
 					ap.[AgeStart],
 					ap.[AgeEnd],
 					ap.[IsVirtualProgram]
-				from	
+				FROM	
 					Account a 
-					Inner join AccountProfile ap on ap.AccountId = a.ID
-					LEFT JOIN Activity act ON act.AccountId = a.ID AND act.IsDeleted <> 1 AND act.IsPublished = 1 AND act.IsInviteOnly <> 1
-					LEFT JOIN ActivityRegistrationPeriod arp on arp.ActivityId = act.ID and arp.IsActive = 1
-					LEFT JOIN RegistrationPeriod rp on rp.Id = arp.RegistrationPeriodId
-				where a.IsDeleted <> 1 AND a.IsTest <> 1  and a.IsActive = 1
+					INNER JOIN AccountProfile ap ON ap.AccountId = a.ID
+					LEFT  JOIN Activity act ON act.AccountId = a.ID AND act.IsDeleted <> 1 AND act.IsPublished = 1 AND act.IsInviteOnly <> 1
+					LEFT  JOIN ActivityRegistrationPeriod arp ON arp.ActivityId = act.ID AND arp.IsActive = 1
+					LEFT  JOIN RegistrationPeriod rp ON rp.Id = arp.RegistrationPeriodId
+				WHERE 
+					a.IsDeleted <> 1 AND 
+					a.IsTest <> 1 AND 
+					a.IsActive = 1 AND 
+					ap.IsAHQApproved = 1 AND 
+					a.AccountTypeId in ({ string.Join(",", accountTypes.Select(x => (int)x)) })
 				ORDER BY
 					(CASE WHEN GETDATE() BETWEEN rp.StartDateTime AND rp.EndDateTime THEN 1 ELSE 2 END), 
 					(CASE WHEN rp.EndDateTime IS NULL THEN 2 ELSE 1 END), 
@@ -472,38 +479,7 @@ namespace AfterSchoolLibrary.Models
 						rp.StartDateTime DESC, 
 					a.Name ASC";
 
-			dq.SelectRange.Start = start;
-			dq.SelectRange.Length = length;
-
-			var test = dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-
-			//List<int> ids = new List<int>();
-			//         for (int i = 0; i < test.Count; i++)
-			//         {
-			//	var id = Convert.ToInt32(test[i]["ID"]);
-
-			//             if (!ids.Contains(id))
-			//		ids.Add(id);				
-			//         }
-
-			//var sql2 = $@"
-			//		SELECT * FROM AccountProfile
-			//		WHERE Id IN ({string.Join(",", ids)})";
-
-			//var data = dq.ExecuteSelect(sql2, msgs).AsEnumerable().ToList();
-			//var data2 = data.ConvertAll(LoadObject);
-			//List<AccountProfile> profiles = new List<AccountProfile>();
-			//for (int i = 0; i < test.Count; i++)
-			//{
-			//	var id = Convert.ToInt32(test[i]["ID"]);
-
-			//	if (!profiles.Any(mbox => mbox.ID == id))
-			//		profiles.Add(Load(id, msgs, dc));
-			//}
-
-			//var list = LoadList(ids);
-			//return list;
-			return test.DistinctBy(m => m.Title).ToList();
+			return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList()?.ConvertAll(LoadObject)?.DistinctBy(m => m.Title).Take((int)count).ToList();
         }
 		#endregion
 	}
