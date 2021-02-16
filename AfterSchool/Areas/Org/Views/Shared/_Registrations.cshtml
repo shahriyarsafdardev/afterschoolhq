@@ -10,7 +10,7 @@
     var paging = (PagingModel)ViewData["Paging"];
     var account = (Account)ViewData["Account"];
     var returnUrl = (string)ViewData["ReturnUrl"];
-    var isTechSupport = (bool)SessionVariables.CurrentAccount.IsTechSupport(SessionVariables.CurrentAccount);
+    var isTechSupport = (bool)SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
 
 
 
@@ -46,7 +46,7 @@
                 foreach (var registration in Model)
                 {
                     var editLink = Url.Action(editAction, editController, new { id = registration.Uid.ToString(), returnUrl });
-                    var registrant = registration.ToRegistrant()
+                    var registrant = registration.ToRegistrant();
 
                     <tr>
                         <td>
