@@ -565,6 +565,11 @@ namespace AfterSchoolLibrary.Models
             return copy;
         }
 
+        public string GetFirstNameLastInitial()
+        {
+            return $"{this.FirstName.MaskString(Math.Max(this.FirstName.Length - 3, 3))} {this.LastName.MaskString(1)}.";
+        }
+
         #endregion
     }
 }

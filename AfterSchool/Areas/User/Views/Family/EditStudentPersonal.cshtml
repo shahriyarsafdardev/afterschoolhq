@@ -4,6 +4,8 @@
     var qvms = (List<FormQuestionViewModel>)ViewBag.QuestionViewModels;
     var school = (Location)ViewBag.School;
     Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
+    var isTechSupport = (bool)SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
+    var regName = !isTechSupport ? Model.Name : Model.GetFirstNameLastInitial();
 }
 
 <div class="main-content">
@@ -13,7 +15,7 @@
     <div class="panel panel-default">
 
         <div class="panel-heading">
-            <i class="s7-user"></i> @Model.Name - Personal Info
+            <i class="s7-user"></i> @regName - Personal Info
 
             <div class="pull-right">
                 <a href="@Url.Action("index", (Request["reg"].IsGuid() ? "home" : "family"))" class="btn btn-default">
