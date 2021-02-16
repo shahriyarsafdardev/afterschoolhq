@@ -826,6 +826,33 @@ Public Module Extensions
         Return rtn
 
     End Function
+    <Extension>
+    Public Function MaskString(ByVal aString As String, Optional ByVal unMaskedBeginningLength As Integer = 0, Optional ByVal unMaskedEndLength As Integer = 0) As String
+        Return aString.Substring(0, unMaskedBeginningLength) & New String("*"c, aString.Length - unMaskedBeginningLength - unMaskedEndLength) & aString.Substring(aString.Length - unMaskedEndLength, unMaskedEndLength)
+    End Function
+    <Extension()>
+    Public Function ToMaskedData(ByVal aString As String) As String
+        Dim isEmail As Boolean = aString.IsEmail()
+
+
+        If isEmail Then
+            Return ToMaskedEmail(aString)
+        End If
+
+        Return MaskString(aString)
+    End Function
+
+    <Extension>
+    Public Function ToMaskedEmail(ByVal aString As String) As String
+        Dim rtn As String = aString
+        Dim firstTwoCharacters As String = aString.Substring(0, 2)
+        Dim emailSplit As String() = aString.Split("@")
+        Dim emailName As String = emailSplit.ElementAt(0)
+        emailName = emailName.Substring(0, emailName.Length - 1)
+        Dim domain = "@" & emailSplit.ElementAtOrDefault(1)
+        Dim tldIndex = domain.Length - domain.Split(".").ElementAtOrDefault(0).Length - 1
+        Return MaskString(emailName, 2) & MaskString(domain, 2, tldIndex)
+    End Function
 
     <Extension()>
     Public Function ToInteger(ByVal aString As String) As Integer

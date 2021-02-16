@@ -800,5 +800,10 @@ namespace AfterSchoolLibrary.Services
                     msgs, 
                     dc) > 0;
         }
+
+        public static bool IsTechSupport(this WebUser loggedInUser, Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return loggedInUser.GetUserType(account, msgs, dc) == UserType.TechSupport;
+        }
     }
 }
