@@ -2217,14 +2217,14 @@ namespace AfterSchoolLibrary.Services
                             SearchDirectoryResponse response = new SearchDirectoryResponse();
 
                             // ..account
-                            response.AccountName = row["AccountName"].ToString();
+                            response.AccountName = row["AccountName"].IsNotEmpty() ? row["AccountName"].ToString().MaxChars(28, "...") : "";
                             response.AccountUid = new Guid(row["AccountUid"].ToString());
                             response.HomePageUrl = $"{Helpers.Utilities.BaseUrl()}/{row["AccountUniqueName"]}";
 
                             //.. account profile  
                             response.IsOpenDuringCovid = row["IsOpenDuringCovid"].IsNotEmpty() ? Convert.ToBoolean(row["IsOpenDuringCovid"]) : false;
                             response.IsELearningCenter = row["IsELearningCenter"].IsNotEmpty() ? Convert.ToBoolean(row["IsELearningCenter"]) : false;
-                            response.ProfileHeadline = row["Headline"].IsNotEmpty() ? row["Headline"].ToString().MaxChars(70, "... (more)") : "";
+                            response.ProfileHeadline = row["Headline"].IsNotEmpty() ? row["Headline"].ToString().MaxChars(70, "...") : "";
                             response.IsRestrictByGrade = row["AgeStart"].IsEmpty();
                             response.AgeStart = row["AgeStart"].IsNotEmpty() ? row["AgeStart"].ToString() : null;
                             response.AgeEnd = row["AgeEnd"].IsNotEmpty() ? row["AgeEnd"].ToString() : null;
@@ -2534,19 +2534,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static decimal GetMaxAmountAvailableForPayout(this Account account, string search, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            var achWaitDays = TransactionService.GetWaitPeriodInDays(PaymentType.ACH);
-            var creditWaitDays = TransactionService.GetWaitPeriodInDays(PaymentType.CreditCard);
-            var achEndDate = endDate;
-            var creditEndDate = endDate;
-            var utcNow = DateTime.UtcNow.Date.AddDays(1).AddMilliseconds(-1);
-
-            if (!endDate.HasValue || utcNow.AddDays(achWaitDays * -1).IsBefore(endDate.Value))
-                achEndDate = utcNow.AddDays(achWaitDays * -1);
-
-            if (!endDate.HasValue || utcNow.AddDays(creditWaitDays * -1).IsBefore(endDate.Value))
-                creditEndDate = utcNow.AddDays(creditWaitDays * -1);
-
+        {   
             var totalPayoutAmount = account.GetTotalPayoutAmount(search, null, startDate, endDate, msgs, dc);
             
             var totalAmountBilledACH = account.GetTotalAmountBilledOut(
@@ -2554,7 +2542,7 @@ namespace AfterSchoolLibrary.Services
                                         PaymentSourceType.AfterSchoolPlatform, 
                                         PaymentType.ACH, 
                                         startDate, 
-                                        achEndDate, 
+                                        endDate, 
                                         msgs, 
                                         dc);
 
@@ -2563,17 +2551,18 @@ namespace AfterSchoolLibrary.Services
                                             PaymentSourceType.AfterSchoolPlatform, 
                                             PaymentType.CreditCard, 
                                             startDate, 
-                                            creditEndDate,
+                                            endDate,
                                             msgs, 
                                             dc);
 
-            var totalFeesPaidACH = account.GetTotalFeesPaidAsBiller(search, PaymentType.ACH, startDate, achEndDate, msgs, dc);
-            var totalFeesPaidCredit = account.GetTotalFeesPaidAsBiller(search, PaymentType.CreditCard, startDate, creditEndDate, msgs, dc);
+            var totalFeesPaidACH = account.GetTotalFeesPaidAsBiller(search, PaymentType.ACH, startDate, endDate, msgs, dc);
+            var totalFeesPaidCredit = account.GetTotalFeesPaidAsBiller(search, PaymentType.CreditCard, startDate, endDate, msgs, dc);
             var totalFeesRefunded = account.GetTotalFeesRefunded(search, startDate, endDate, msgs, dc);
 
             var totalRefunds = account.GetTotalAmountRefundedAHQ(search, true, startDate, endDate, msgs, dc);
+            var totalRefundManual = account.GetTotalAmountRefundedManually(search, startDate, endDate, msgs, dc);
             var totalDebits = account.GetTotalAmountDebited(search, startDate, endDate, msgs, dc);
-            var totalCredits = account.GetTotalAmountCredited(search, startDate, endDate, msgs, dc);
+            var totalCredits = account.GetTotalAmountCredited(search, startDate, endDate, msgs, dc);            
 
             return totalAmountBilledACH + 
                     totalAmountBilledCredit +
@@ -2583,6 +2572,7 @@ namespace AfterSchoolLibrary.Services
                     totalFeesPaidCredit - 
                     totalPayoutAmount - 
                     totalRefunds - 
+                    totalRefundManual -
                     totalDebits;
         }
 
@@ -3457,7 +3447,8 @@ namespace AfterSchoolLibrary.Services
 
         public static decimal GetTotalPayoutAmount(this Account account, string search, PayoutStatus? payoutStatus, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Payout.GetTotalAmountByAccountId(account.ID.Value, search, payoutStatus, startDate, endDate, msgs, dc);
+            return Payout.GetTotalAmountByAccountId(account.ID.Value, search, payoutStatus, startDate, endDate, msgs, dc) +
+                Transaction.GetPayoutAmountForBillerAccount(account.ID.Value, msgs, dc);
         }
 
         public static decimal GetTotalAmountBilledOut(this Account account, string search, PaymentSourceType? paymentSourceType = null, PaymentType? paymentType = null, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)

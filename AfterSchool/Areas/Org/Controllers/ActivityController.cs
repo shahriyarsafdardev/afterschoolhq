@@ -1858,6 +1858,9 @@ namespace AfterSchool.Areas.Org.Controllers
                     if (registrationDate.IsNotEmpty() && registrationDate.StartDateTime.IsNotEmpty())
                         body += $"Activity Start Date: {registrationDate.StartDateTime} <br />";
 
+                    if (activity.AccountTimeZone.IsNotEmpty())
+                        body += $"All times are in {activity.AccountTimeZone} <br />";
+
                     EmailHelper.SendEmail(
                         toEmail: AfterSchoolLibrary.Helpers.Email.AppCustomersEmailAddress,
                         subject: $"{account.Name} has published a new Activity: {activity.Name}",

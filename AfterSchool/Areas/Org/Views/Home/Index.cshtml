@@ -45,6 +45,7 @@
                 </div>
             }
             
+            <div class="clearfix"></div>
         </div>
         <div class="panel-body">            
 
@@ -124,12 +125,12 @@
             else
             {
                 <div class="row">
-                    <div class="col-md-8">
+                    <div class="col-lg-8 col-md-12">
                         <div class="col-md-6">
                             <div class="widget widget-tile widget-bordered">
                                 <div class="data-info">
                                     <div data-toggle="counter" data-end="@registrationCount" data-decimals="0" data-suffix="" class="value">@registrationCount</div>
-                                    <div class="desc">Total Registrations (30 days)</div>
+                                    <div class="desc desc-mobile-width">Total Registrations (30 days)</div>
                                 </div>
                                 <div class="icon"><span class="s7-users"></span></div>
                             </div>
@@ -187,7 +188,7 @@
 
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-lg-4 col-md-12">
                         @{ Html.RenderPartial("_Actions", actions, new ViewDataDictionary() { { "account", SessionVariables.CurrentAccount } }); }
                     </div>
 
