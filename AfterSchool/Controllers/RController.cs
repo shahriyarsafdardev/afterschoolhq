@@ -65,13 +65,17 @@ namespace AfterSchool.Controllers
                     ViewBag.Grades = GradeLevel.Load();
                     ViewBag.AccountUniqueName = account.UniqueName;
                     ViewBag.AccountId = account.ID.ToString();
-                    ViewBag.PrimaryColor = profile.PrimaryColor;
 
-                    if (profile.Logo.IsNotBlank())
-                        ViewBag.LogoUrl = ah.GetFileLink(profile.Logo, true, null, true);
+                    if (profile.IsNotEmpty())
+                    {
+                        ViewBag.PrimaryColor = profile.PrimaryColor;
 
-                    if (profile.HeaderImage.IsNotBlank())
-                        ViewBag.HeaderImageUrl = ah.GetFileLink(profile.HeaderImage, true, null, true);
+                        if (profile.Logo.IsNotBlank())
+                            ViewBag.LogoUrl = ah.GetFileLink(profile.Logo, true, null, true);
+
+                        if (profile.HeaderImage.IsNotBlank())
+                            ViewBag.HeaderImageUrl = ah.GetFileLink(profile.HeaderImage, true, null, true);
+                    }
 
                     return View("search");
                 }
