@@ -1,11 +1,13 @@
 ﻿@{ 
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
-    ViewBag.Title = ViewBag.AccountUniqueName;
+    var accountUniqueName = ViewBag.AccountUniqueName;
+    ViewBag.Title = accountUniqueName;
     var msgs = (SystemMessages)ViewBag.Messages;
-    var accountId = ViewBag.AccountId;
+    var accountId = ViewBag.AccountId != null ? Convert.ToInt32(ViewBag.AccountId) : 0;
     var primaryColor = (string)ViewBag.PrimaryColor;
     var logoUrl = (string)ViewBag.LogoUrl;
     var headerImageUrl = (string)ViewBag.HeaderImageUrl;
+    var joiningUrl = $@"/join{accountUniqueName}.html";
 
     if (!logoUrl.IsNotEmpty())
     {
@@ -56,9 +58,13 @@
                     </div>
                 </div>
 
-                <div class="col-lg-2 col-md-9">
-                    <a href="~/isyp.html" class="btn btn-search-register btn-md btn-center join-directory-btn"> Join Directory </a>
-                </div>
+                @if (accountId > 0)
+                {
+                    //.. we shoultn't have this button in case of global search                    
+                    <div class="col-lg-2 col-md-9">
+                        <a href="@joiningUrl" class="btn btn-search-register btn-md btn-center join-directory-btn"> Join Directory </a>
+                    </div>
+                }
             </div>
 
             <div class="clearfix"></div>

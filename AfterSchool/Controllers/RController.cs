@@ -56,14 +56,14 @@ namespace AfterSchool.Controllers
                 var profile = account.GetAccountProfile(msgs);
                 var ah = AfterSchoolLibrary.Helpers.Utilities.GetNewAmazonHelper();
 
-                if (account.AccountTypeId == AccountType.Directory)
+                if (account.AccountTypeId.In(new List<AccountType>() { AccountType.Directory, AccountType.SchoolDistrict }))
                 {
                     var neighborhoodList = Location.LoadNeighborhoodsByHostAccount(hostAccountId: account.ID.ToString(), msgs: msgs).ToList();
 
                     ViewBag.Messages = msgs;
                     ViewBag.Neighborhoods = neighborhoodList;
                     ViewBag.Grades = GradeLevel.Load();
-                    ViewBag.AccountUniqueName = accountname;
+                    ViewBag.AccountUniqueName = account.UniqueName;
                     ViewBag.AccountId = account.ID.ToString();
                     ViewBag.PrimaryColor = profile.PrimaryColor;
 
