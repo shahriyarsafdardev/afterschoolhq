@@ -25,7 +25,7 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Index()
         {
-            return RedirectToAction("ProgramInfo");
+            return RedirectToAction("GettingStarted");
         }
 
         [HttpGet]
@@ -51,6 +51,18 @@ namespace AfterSchool.Areas.Org.Controllers
             account.OnboardingStepDone = OnboardingStepType.AccountType;
             msgs.AddRange(account.Save());
 
+            return RedirectToAction("ProgramInfo");
+        }
+
+        [HttpGet]
+        public ActionResult GettingStarted()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult GettingStarted(string[] GettingStartedSelection)
+        {
             return RedirectToAction("ProgramInfo");
         }
 

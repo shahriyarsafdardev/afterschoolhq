@@ -280,7 +280,7 @@
 }
 
 .register-thankyou-2 {
-    font-size: 22px;
+    font-size: 30px;
     font-weight: 600;
     font-stretch: normal;
     font-style: normal;
@@ -467,4 +467,28 @@
 
 .footer-extended {
     background: #212a2d
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.btn-free-profile {
+    width: 292px;
+    height: 53px;
+    border-radius: 6px;
+    background-color: #00c5a3;
+    padding: 12px 16px;
+    font-size: 18px;
+}
+
+.font-styling-18 {
+    font-size: 18px;
+    letter-spacing: 0.32px;
+}
+
+.getting-started-info {
+    margin-left: 32px;
+    font-size: 16px;
+    letter-spacing: 0.28px;
 }
