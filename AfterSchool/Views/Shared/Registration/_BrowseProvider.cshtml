@@ -112,13 +112,13 @@
 
             <div style="margin-top: 20px; height: 75px;display: table-cell; vertical-align: middle;">
                 <h3>
-                    <strong title="@Model.Title">@Model.Title</strong>
+                    <strong title="@Model.Title">@Model.Title.MaxChars(28, "...")</strong>
                 </h3>
             </div>
 
             <div class="" style="height: 40px;">
                 <span class="text-medium-small">
-                    @Model.Headline.MaxChars(70, "... (more)")
+                    @Model.Headline.MaxChars(70, "...")
                 </span>
             </div>
 
