@@ -22,7 +22,7 @@
         organizationLabel = "Program";
         headerText = "Let's get some info about your organization.";
         organizationExampleNames = "Ex. Math Club, Chess Club, Elite Track &amp; Field";
-    }
+    } 
 }
 
 <div class="row main-content main-content-welcome-pages">
@@ -92,6 +92,27 @@
                     </div>
                     <div class="clearfix"></div>
 
+                    <div class="clearfix"></div>
+                    <div class="col-md-12 onboarding-form-group">
+                        <label class="onboarding-lable"> TIMEZONE </label>
+                        <div class="clearfix"></div>
+                        <div style="padding: 0;">
+                            <select id="select-program-timezone" class="form-control onboarding-input" name="timezone" style="height: 44px;" required>
+                                @foreach (var zone in new string[] { "Eastern - EST", "Central - CST", "Mountain - MST", "Pacific - PST", "Alaska - AKST", "Hawaii - HAST" })
+                                {
+                                    var selected = "";
+                                    if (zone == Model.TimeZone.IfEmpty(""))
+                                    {
+                                        selected = " selected=\"selected\" ";
+                                    }
+
+                                    <option value="@zone" @selected>@zone</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+
                     <div class="visible-sm visible-xs margin-v-30">
                         <button type="submit" class="btn-save-claims btn btn-primary btn-lg pull-right col-xs-12 register-continue">Save and Continue</button>
 
@@ -118,21 +139,19 @@
 <script type="text/javascript">
      PageEvent.add(
         PageEvent.AFTER_INIT,
-         function () {
-            var hdnClientTimeZone = $("#hdnClientTimeZone");
+         function () {             
+            var selectClientTimeZone = $("#select-program-timezone");
             var modelTimeZone = '@Model.TimeZone';
 
             if (!modelTimeZone) {
                 var clientTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
                 if (appTimezones[clientTimeZone]) {
-                    hdnClientTimeZone.val(appTimezones[clientTimeZone]);
+                    selectClientTimeZone.val(appTimezones[clientTimeZone]);
                 } else {
                     // TODO: if user is outside of USA & creates account, what should be the default timezone?
-                    hdnClientTimeZone.val(appTimezones["America/New_York"]);
+                    selectClientTimeZone.val(appTimezones["America/New_York"]);
                 }
-            } else {
-                hdnClientTimeZone.val(modelTimeZone);
             }
         });
 </script>

@@ -2057,3 +2057,9 @@ type: Enum
 name: PlanPaymentStartType
 values: NotSet, WhenActivityStarts, OnCheckout
 [end]
+
+[begin]
+type: Enum
+name: GettingStartedOptions
+values: NotSet, CreateProfile, CreateFirstActivity, ValidateEmail, AcceptPayments
+[end]

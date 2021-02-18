@@ -18,7 +18,7 @@ namespace AfterSchoolLibrary
         private const string TwilioPhoneNumber = "+13176444332";
         private const string UpdateStatusCallbackUrl = "/webhooks/twilio/updatestatus";
 
-        private static void InitializeTwilioClientService()
+        public static void InitializeTwilioClientService()
         {
            TwilioClient.Init(AccountSID, AuthToken);
         }
@@ -37,7 +37,7 @@ namespace AfterSchoolLibrary
                 Uri statusCallback = null;
 
                 if (!Helpers.Utilities.IsLocalHost && messageUid.IsNotBlank() && registrantUid.IsNotBlank())
-                    statusCallback = new Uri($"{Helpers.Utilities.BaseUrl()}{UpdateStatusCallbackUrl}/{messageUid}/{registrantUid}");
+                    statusCallback = new Uri($"{Helpers.Utilities.BaseUrl()}{UpdateStatusCallbackUrl}/{messageUid}/{registrantUid}");                
 
                 resource = MessageResource.Create(
                     body: body,

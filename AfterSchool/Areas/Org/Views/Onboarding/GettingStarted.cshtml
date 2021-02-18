@@ -1,0 +1,95 @@
+﻿@{ 
+    Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml"; 
+    var gettingStartedOptions = (List<GettingStartedOptions>)ViewBag.GettingStartedOptions;
+}
+
+<style>
+    .am-checkbox input[type="checkbox"] + label:before {
+        margin-right: 10px;
+    }
+</style>
+
+<div class="row main-content main-content-welcome-pages">
+    <div class="welcome-box-width">
+        <div class="welcome-outer-ring">
+            <div class="onboarding-inner-ring">
+                <form class="form form-horizontal" method="post" action="@Url.Action("GettingStarted", "onboarding")">
+                    <div class="col-md-12 onboarding-form-group text-center">
+                        <img src="~/img/tempsnip.png" class="img-responsive" style="display: initial;" />
+                        <h1 class="text-center register-thankyou-2" style=" font-size: 30px; letter-spacing: 0.53px;">Awesome!</h1>
+                    </div>
+
+                    <div class="clearfix"></div>
+                    <div class="text-medium-small text-center">
+                        <p class="padding-v-10 font-styling-18">
+                            You have taken the first steps to completing @AfterSchoolLibrary.Helpers.Utilities.AppName() profile. We just have a few more questions so we can create a profile for your incredible program.
+                        </p>
+                        <p class="padding-v-10 font-styling-18">
+                            Here's what's next:
+                        </p>
+                    </div>
+                    <div class="clearfix"></div>
+
+                    <table class="table table-hover">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="am-checkbox">
+                                        <input id="chk-getting-started-profile" name="GettingStartedSelection" type="checkbox" 
+                                               value="@GettingStartedOptions.CreateProfile"
+                                               @(gettingStartedOptions.Contains(GettingStartedOptions.CreateProfile) ? "checked=\"checked\"" : "")>
+                                        <label for="chk-getting-started-profile" class="font-styling-18 text-bold cursor-pointer">Create your profile.</label>
+                                        <p class="getting-started-info">Parent need to know what you offer. This helps us match parents to your program.</p>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <div class="am-checkbox">
+                                        <input id="chk-getting-started-activity" name="GettingStartedSelection" type="checkbox"
+                                               value="@GettingStartedOptions.CreateFirstActivity" 
+                                               @(gettingStartedOptions.Contains(GettingStartedOptions.CreateFirstActivity) ? "checked=\"checked\"" : "")>
+                                        <label for="chk-getting-started-activity" class="font-styling-18 text-bold cursor-pointer">Create your first activity.</label>
+                                        <p class="getting-started-info">Adding your first activity informs parents of your program's offerings and enables them to register online immediately.</p>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <div class="am-checkbox">
+                                        <input id="chk-getting-started-email" name="GettingStartedSelection" type="checkbox"
+                                                value="@GettingStartedOptions.ValidateEmail"
+                                               @(gettingStartedOptions.Contains(GettingStartedOptions.ValidateEmail) ? "checked=\"checked\"" : "")>
+                                        <label for="chk-getting-started-email" class="font-styling-18 text-bold cursor-pointer">Validate your email.</label>
+                                        <p class="getting-started-info">We need to confirm your identity before we publish your programs and activities.</p>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <div class="am-checkbox">
+                                        <input id="chk-getting-started-payments" name="GettingStartedSelection" type="checkbox"
+                                               value="@GettingStartedOptions.AcceptPayments"
+                                               @(gettingStartedOptions.Contains(GettingStartedOptions.AcceptPayments) ? "checked=\"checked\"" : "")>
+                                        <label for="chk-getting-started-payments" class="font-styling-18 text-bold cursor-pointer">Accept payments.</label>
+                                        <p class="getting-started-info">Let's get you set up to make payments. This not only makes it easier for payments to pay, but you will also receive funds quicker.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="clearfix"></div>
+
+                    <div class="margin-v-30 text-center">
+                        <button href="#" class="btn btn-primary btn-free-profile" type="submit">Create Your Free Profile</button>
+                    </div>
+                    <div class="clearfix"></div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
