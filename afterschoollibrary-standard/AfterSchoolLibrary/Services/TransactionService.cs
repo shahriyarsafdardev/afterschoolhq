@@ -4,6 +4,7 @@ using System.Linq;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Billing;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -76,7 +77,7 @@ namespace AfterSchoolLibrary.Services
                 return transaction.Amount.Value;
             }
 
-            return Math.Max(transaction.Amount.Value - transaction.GetFees(),0);
+            return transaction.Amount.Value - transaction.GetFees() - transaction.GetRefundedAmountAHQ(msgs, dc);
         }
 
         public static decimal GetPayerAmount(this Transaction transaction)
@@ -310,17 +311,16 @@ namespace AfterSchoolLibrary.Services
                         dc) > 0;
         }
 
-        public static bool IsTotallyRefunded(this Transaction transaction, Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool IsTotallyRefunded(this Transaction transaction, bool includeFees, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (transaction.IsCharge())
             {
-                var refundedAmount = transaction.GetRefundedAmount(msgs, dc);
-                var totalAmount = transaction.Amount.Value;
+                var amount = transaction.GetPayerAmount();
 
-                if (account.IsAdminAccount || account.AccountTypeId == AccountType.Registrant)
-                    return refundedAmount >= totalAmount;
+                if (!includeFees)
+                    amount = transaction.GetBillerAmount(msgs, dc);
 
-                return refundedAmount >= (totalAmount - transaction.PaymentTypeFeeCharged.Value);
+                return transaction.GetRefundedAmount(msgs, dc) >= amount;
             }
 
             return false;
@@ -338,7 +338,7 @@ namespace AfterSchoolLibrary.Services
                 if (allowFullAmountRefund)
                     return transaction.GetPayerAmount() - transaction.GetRefundedAmountAHQ(msgs, dc);
 
-                return transaction.Amount.Value - transaction.PaymentTypeFeeCharged.Value;
+                return transaction.GetBillerPayout(msgs, dc) + transaction.GetFeesChargedToBiller();
             }
 
             return 0;
@@ -368,6 +368,11 @@ namespace AfterSchoolLibrary.Services
 
             if (!transaction.CanRefundTransactionFee())
                 amount -= transaction.PaymentTypeFeeCharged.Value;
+
+            //partial refund, if any then deduct that too.
+            var refunded = transaction.GetRefundedAmount();
+            if (refunded.IsNotEmpty())
+                amount -= refunded;
 
             return amount;
         }
@@ -452,8 +457,8 @@ namespace AfterSchoolLibrary.Services
             if (!transaction.IsCharge())
                 return "Processed";
 
-            if (transaction.PlatformPercentFee.HasValue)
-                return "Paid";
+            //if (transaction.PlatformPercentFee.HasValue)
+            //    return "Paid";
 
             if (!transaction.HasRefundableAmount(false, msgs, dc))
                 return "Refunded";
@@ -479,6 +484,10 @@ namespace AfterSchoolLibrary.Services
 
             if (transaction.HasRefundsManual(msgs, dc))
                 return "Manual Refund / Ready For Payout";
+
+            var billerAccount = transaction.GetBillerAccount(msgs, dc);
+            if (billerAccount.IsNotEmpty() && billerAccount.HasStripeConnectedAccount)
+                return "Payout Completed";
 
             return "Ready For Payout";
         }
@@ -604,16 +613,34 @@ namespace AfterSchoolLibrary.Services
                 string stripeRefundId = null;
 
                 if (paymentSourceType == PaymentSourceType.AfterSchoolPlatform)
-                {
+                {                    
+                    //.. when refunding, platform will pay all the amount to parent first
+                    //.. then based on that and after deducting fee, we will charge remaining amount to provider
+                    //.. lets say activity charge is 100$, and convenience charge is 6$, then parent pays 110$ (106$ + 4$ cc fee).
+                    //.. so while refunding, parent can refund only 106$(cc fee is not refundable),
+
                     var stripeRefund = Billing.StripeHelper.CreateRefund(
                                     chargeId: transaction.StripeChargeOrRefundId,
                                     totalAmount: refundAmount,
                                     reason: Billing.StripeRefundReason.RequestedByCustomer.ToString().SplitByUpperCase().Replace(" ", "_").ToLower(),
-                                    reverseTransfer: transaction.GetBillerAccount(msgs, dc).HasStripeConnectedAccount,
-                                    msgs: msgs); 
+                                    reverseTransfer: false,
+                                    msgs: msgs);
 
                     if (stripeRefund.IsNotEmpty())
-                        stripeRefundId = stripeRefund.Id;
+                    {
+                        // get stripe transfer from original payment
+                        var stripeOriginalPaymentChargeId = stripeRefund.ChargeId;
+                        var stripeOriginalCharge = Billing.StripeHelper.GetCharge(stripeOriginalPaymentChargeId, msgs);
+                        var stripeTransferId = stripeOriginalCharge.TransferId;
+
+                        // create transfer reversal
+                        // calculate amount to reverse
+                        var billerPayout = transaction.GetBillerPayout(msgs, dc);
+                        var amountToReverse = Math.Min(billerPayout, refundAmount);
+
+                       var transferReversal = Billing.StripeHelper.CreateTransferReversal(stripeTransferId, amountToReverse, msgs);
+
+                    }
                     else
                         msgs.Add("Error creating refund", MessageType.UserError);
                 }

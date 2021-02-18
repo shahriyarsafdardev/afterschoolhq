@@ -1,6 +1,7 @@
 ﻿@model List<Transaction>
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
+    var isTechSupport = (bool)SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
 }
 
 @{ Html.RenderPartial("_UserAccountHeader"); }
@@ -100,7 +101,7 @@
                                         {
                                             if (registrant.IsNotEmpty())
                                             {
-                                                @registrant.DisplayName
+                                                @(!isTechSupport ? registrant.Name : registrant.GetFirstNameLastInitial())
                                             }
                                             else
                                             {

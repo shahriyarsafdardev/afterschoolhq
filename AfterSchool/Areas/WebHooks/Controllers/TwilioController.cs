@@ -1,4 +1,5 @@
-﻿using AfterSchoolLibrary.Models;
+﻿using AfterSchoolLibrary;
+using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
@@ -6,6 +7,7 @@ using Newtonsoft.Json;
 using Stripe;
 using System;
 using System.Web.Http;
+using Twilio;
 using Twilio.AspNet.Common;
 using Twilio.Rest.Api.V2010.Account;
 
@@ -18,7 +20,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
         {
             var msgs = new SystemMessages();
 
-            if (request.IsNotEmpty() && request.MessageStatus.In(new string[] { "failed", "undelivered" }) && id.IsGuid() && id2.IsGuid())
+            if (request.IsNotEmpty() && request.MessageStatus.IsNotEmpty() && id.IsGuid() && id2.IsGuid())
             {
                 try
                 {
@@ -27,6 +29,10 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
                     if (activityMessage.IsNotEmpty() && registrant.IsNotEmpty())
                     {
+                        UpdateTwilioSMSStatus(activityMessageId: activityMessage.ID.Value, registrantId: registrant.ID.Value, status: request.MessageStatus);
+
+                        TwilioHelper.InitializeTwilioClientService();
+
                         var resource = MessageResource.Fetch(request.SmsSid);
 
                         if (resource.IsNotEmpty() && resource.ErrorCode.HasValue)
@@ -45,13 +51,15 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             return ReturnOK(msgs);
         }
 
-        private void SendLogEmail(SystemMessages msgs)
+        private void UpdateTwilioSMSStatus(int activityMessageId, int registrantId, string status)
         {
-            string toEmail = "darye+twilio+errors@afterschoolhq.com";
-            string subject = $"Twilio Webhook Errors - {AfterSchoolLibrary.Helpers.Utilities.HostName}";
-            string body = msgs.RenderMessageList(MessageOutputType.Html);
+            var smsRecord = TwilioSMS.LoadByRegistrantIdByActivityMessageId(RegistrantId: registrantId, ActivityMessageId: activityMessageId);
 
-            AfterSchoolLibrary.Helpers.EmailHelper.SendEmail(toEmail, subject, body, true);
+            if (smsRecord.IsNotEmpty())
+            {
+                smsRecord.TwilioStatus = status;
+                smsRecord.Save();
+            }
         }
 
         private IHttpActionResult ReturnOK(SystemMessages msgs)
@@ -61,7 +69,16 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
         private IHttpActionResult Return500(SystemMessages msgs)
         {
-            SendLogEmail(msgs);
+            if (msgs.IsEmpty())
+                msgs = new SystemMessages();
+
+            msgs.Add(new SystemMessage()
+            {
+                MessageType = MessageType.Error, 
+                Text = $"Twilio Webhook Errors - {AfterSchoolLibrary.Helpers.Utilities.HostName}"
+            });
+
+            AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(msgs);
             return InternalServerError(new Exception(msgs.RenderMessageList(MessageOutputType.Text)));
         }
     }

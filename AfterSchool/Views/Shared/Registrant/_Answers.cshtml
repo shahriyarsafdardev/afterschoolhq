@@ -1,4 +1,7 @@
 ﻿@model List<FormQuestionAnswer>
+@{ 
+    var isTechSupport = (bool)SessionVariables.LoggedInUser.IsTechSupport(SessionVariables.CurrentAccount);
+}
 
 @foreach (var group in Model.Select(x => x.ToFormQuestionGroup()).DistinctBy(x => x.QuestionGroupDataTypeId).OrderBy(x => x.DisplayOrder))
 {
@@ -15,7 +18,11 @@
                     <tr>
                         <td valign="top" width="33%" class="text-right">@answer.FormQuestionText</td>
                         <td valign="top">
-                            @if (answer.FormQuestionQuestionTypeId == QuestionType.Checkbox)
+                            @if (isTechSupport)
+                            {
+                                <span>••••••••</span>
+                            }
+                            else if (answer.FormQuestionQuestionTypeId == QuestionType.Checkbox)
                             {
                                 @answer.Text.IfBlank("0").ToBoolean().ToYesNo();
                             }
