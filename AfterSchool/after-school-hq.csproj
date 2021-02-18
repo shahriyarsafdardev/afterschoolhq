@@ -1833,6 +1833,7 @@
     <Content Include="Views\MccoyDirectory\Index.cshtml" />
     <Content Include="Views\Shared\_DirectoryFilters.cshtml" />
     <Content Include="Views\ISYPDirectory\Index.cshtml" />
+    <Content Include="Views\Shared\_GettingStarted.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

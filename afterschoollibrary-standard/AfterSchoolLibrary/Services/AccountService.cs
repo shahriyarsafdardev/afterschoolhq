@@ -232,6 +232,12 @@ namespace AfterSchoolLibrary.Services
             return account.GetActivityCount(msgs, dc) > 0;
         }
 
+        public static bool IsOnboardingCompleted(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var accountOwner = account.GetAccountOwner(msgs);
+            return account.HasAccountProfile(msgs) && account.HasActivities(msgs) && accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount && account.StripeUserId.IsNotEmpty();
+        }
+
         public static UserType[] AdminUserTypes
         {
             get
