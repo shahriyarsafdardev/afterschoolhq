@@ -1,4 +1,7 @@
-﻿@{ Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml"; }
+﻿@{ 
+    Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml"; 
+    var gettingStartedOptions = (List<GettingStartedOptions>)ViewBag.GettingStartedOptions;
+}
 
 <style>
     .am-checkbox input[type="checkbox"] + label:before {
@@ -32,7 +35,9 @@
                             <tr>
                                 <td>
                                     <div class="am-checkbox">
-                                        <input id="chk-getting-started-profile" name="GettingStartedSelection" value="1" type="checkbox">
+                                        <input id="chk-getting-started-profile" name="GettingStartedSelection" type="checkbox" 
+                                               value="@GettingStartedOptions.CreateProfile"
+                                               @(gettingStartedOptions.Contains(GettingStartedOptions.CreateProfile) ? "checked=\"checked\"" : "")>
                                         <label for="chk-getting-started-profile" class="font-styling-18 text-bold cursor-pointer">Create your profile.</label>
                                         <p class="getting-started-info">Parent need to know what you offer. This helps us match parents to your program.</p>
                                     </div>
@@ -42,7 +47,9 @@
                             <tr>
                                 <td>
                                     <div class="am-checkbox">
-                                        <input id="chk-getting-started-activity" name="GettingStartedSelection" value="2" type="checkbox">
+                                        <input id="chk-getting-started-activity" name="GettingStartedSelection" type="checkbox"
+                                               value="@GettingStartedOptions.CreateFirstActivity" 
+                                               @(gettingStartedOptions.Contains(GettingStartedOptions.CreateFirstActivity) ? "checked=\"checked\"" : "")>
                                         <label for="chk-getting-started-activity" class="font-styling-18 text-bold cursor-pointer">Create your first activity.</label>
                                         <p class="getting-started-info">Adding your first activity informs parents of your program's offerings and enables them to register online immediately.</p>
                                     </div>
@@ -52,7 +59,9 @@
                             <tr>
                                 <td>
                                     <div class="am-checkbox">
-                                        <input id="chk-getting-started-email" name="GettingStartedSelection" value="3" type="checkbox">
+                                        <input id="chk-getting-started-email" name="GettingStartedSelection" type="checkbox"
+                                                value="@GettingStartedOptions.ValidateEmail"
+                                               @(gettingStartedOptions.Contains(GettingStartedOptions.ValidateEmail) ? "checked=\"checked\"" : "")>
                                         <label for="chk-getting-started-email" class="font-styling-18 text-bold cursor-pointer">Validate your email.</label>
                                         <p class="getting-started-info">We need to confirm your identity before we publish your programs and activities.</p>
                                     </div>
@@ -62,7 +71,9 @@
                             <tr>
                                 <td>
                                     <div class="am-checkbox">
-                                        <input id="chk-getting-started-payments" name="GettingStartedSelection" value="4" type="checkbox">
+                                        <input id="chk-getting-started-payments" name="GettingStartedSelection" type="checkbox"
+                                               value="@GettingStartedOptions.AcceptPayments"
+                                               @(gettingStartedOptions.Contains(GettingStartedOptions.AcceptPayments) ? "checked=\"checked\"" : "")>
                                         <label for="chk-getting-started-payments" class="font-styling-18 text-bold cursor-pointer">Accept payments.</label>
                                         <p class="getting-started-info">Let's get you set up to make payments. This not only makes it easier for payments to pay, but you will also receive funds quicker.</p>
                                     </div>

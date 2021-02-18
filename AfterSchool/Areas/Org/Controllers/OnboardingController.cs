@@ -57,11 +57,12 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult GettingStarted()
         {
+            ViewBag.GettingStartedOptions = new List<GettingStartedOptions>() { GettingStartedOptions.CreateProfile };
             return View();
         }
 
         [HttpPost]
-        public ActionResult GettingStarted(string[] GettingStartedSelection)
+        public ActionResult GettingStarted(GettingStartedOptions[] GettingStartedSelection)
         {
             return RedirectToAction("ProgramInfo");
         }
