@@ -20,6 +20,13 @@
 
                 <form class="form form-horizontal" method="post" action="@Url.Action("servicesoffered", "onboarding")">
 
+                    @{ Html.RenderPartial("~/Views/Shared/_Loaders.cshtml",
+                             new ViewDataDictionary() {
+                               { "count", 7 },
+                               { "activeDotNumber", 6 }
+                             });
+                    }
+
                     <div class="col-md-12 onboarding-form-group">
                         <h1 class="text-center register-thankyou-2">Make it easy for parents to find your activity.</h1>
                     </div>
@@ -69,7 +76,7 @@
                     </div>
 
                     <div class="clearfix"></div>
-                     <div class="col-md-12 onboarding-form-group">
+                    <div class="col-md-12 onboarding-form-group">
                         <span><a id="btn-onboarding-advanced-settings" href="#" onclick="return showAdvancedSettings(this)" class="pointer">Show More Options</a></span>
 
                         <div class="visible-lg">
