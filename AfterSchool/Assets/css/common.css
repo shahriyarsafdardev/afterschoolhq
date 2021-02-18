@@ -469,6 +469,24 @@
     background: #212a2d
 }
 
+.dotdark {
+     height: 15px;
+    width: 15px;
+    background-color: #00c5a3;
+    border-radius: 50%;
+    display: inline-block;
+    margin: 0 5px 0 0;
+}
+
+.dotlight {
+    height: 15px;
+    width: 15px;
+    background-color: #c3eae0;
+    border-radius: 50%;
+    display: inline-block;
+    margin: 0 5px 0 0;
+}
+
 .cursor-pointer {
     cursor: pointer;
 }

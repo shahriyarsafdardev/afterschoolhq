@@ -18,7 +18,7 @@
 
 }
 
-<style>
+<style>    
 </style>
 
 <div class="row main-content main-content-welcome-pages">
@@ -279,9 +279,13 @@
         <div class="welcome-outer-ring m-b-20">
             <div class="search-inner-ring p-b-5">
                 <div class="margin-t-35">
-                    @*<div class="text-center">
-                            <div style="width: 15px; height: 15px; margin: 0 5px 0 0; background-color: #00c5a3; border-radius: 7px;"></div>
-                        </div>*@
+                    
+                    @{ Html.RenderPartial("~/Views/Shared/_Loaders.cshtml",
+                           new ViewDataDictionary() {
+                               { "count", 7 },
+                               { "activeDotNumber", 1 }
+                           });
+                     }
 
                     <p class="register-thankyou-1">Thanks for joining our platform to provide learning opportunities for students everywhere.</p>
                     <p class="register-thankyou-2" style="margin-bottom: 20px;">We just need a little information to get started.</p>

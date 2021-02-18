@@ -1834,6 +1834,7 @@
     <Content Include="Views\Shared\_DirectoryFilters.cshtml" />
     <Content Include="Views\ISYPDirectory\Index.cshtml" />
     <Content Include="Views\Shared\_GettingStarted.cshtml" />
+    <Content Include="Views\Shared\_Loaders.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
