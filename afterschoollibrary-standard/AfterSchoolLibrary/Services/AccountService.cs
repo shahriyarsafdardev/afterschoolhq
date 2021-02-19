@@ -238,6 +238,33 @@ namespace AfterSchoolLibrary.Services
             return account.HasAccountProfile(msgs) && account.HasActivities(msgs) && accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount && account.StripeUserId.IsNotEmpty();
         }
 
+        public static GettingStartedOptions OnboardingCompletionStatus(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var accountOwner = account.GetAccountOwner(msgs);
+            var HasAccountProfile = account.HasAccountProfile(msgs);
+            var HasActivities = account.HasActivities(msgs);
+            var VerifiedAccount = accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount;
+            var StripeUserId = account.StripeUserId.IsNotEmpty();
+
+            if (!HasAccountProfile && !HasActivities && !VerifiedAccount && !StripeUserId)
+                return GettingStartedOptions.NotSet;
+
+            if (HasAccountProfile && !HasActivities && !VerifiedAccount && !StripeUserId)
+                return GettingStartedOptions.CreateProfile;
+
+            else if (HasAccountProfile && HasActivities && !VerifiedAccount && !StripeUserId)
+                return GettingStartedOptions.CreateFirstActivity;
+
+            else if (HasAccountProfile && !HasActivities && VerifiedAccount && !StripeUserId)
+                return GettingStartedOptions.ValidateEmail;
+
+            else if (HasAccountProfile && !HasActivities && !VerifiedAccount && StripeUserId)
+                return GettingStartedOptions.AcceptPayments;
+
+            else 
+                return GettingStartedOptions.NotSet;
+        }
+
         public static UserType[] AdminUserTypes
         {
             get
