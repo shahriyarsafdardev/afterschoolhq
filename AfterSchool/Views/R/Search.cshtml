@@ -181,18 +181,20 @@
 
                 </div>
 
-                <div style="margin-top: 20px; height: 75px;display: table-cell; vertical-align: middle;">
+                <div class="text-wrap" style="margin-top: 20px; height: 75px;">
                     <h3>
                         <strong title="<%= searchResult.AccountName %>"><%= searchResult.AccountName %></strong>
                     </h3>
                 </div>
 
-                <div class="" style="height: 40px;">
+                <div class="clearfix"></div>
+                <div class="text-wrap" style="height: 40px;">
                     <span class="text-medium-small">
                         <%= searchResult.ProfileHeadline %>
                     </span>
                 </div>
 
+                <div class="clearfix"></div>
                 <div class="margin-t-20">
                     <a href="javascript:WebPage.navigateIframe('<%= searchResult.HomePageUrl %>')" class="btn btn-register btn-block join-directory-btn">
                         Learn More &raquo;

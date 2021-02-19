@@ -470,6 +470,7 @@ namespace AfterSchoolLibrary.Models
 					a.IsTest <> 1 AND 
 					a.IsActive = 1 AND 
 					ap.IsAHQApproved = 1 AND 
+					(rp.EndDateTime IS NULL OR rp.EndDateTime >= GETDATE()) AND --closed activities filter
 					a.AccountTypeId in ({ string.Join(",", accountTypes.Select(x => (int)x)) })
 				ORDER BY
 					(CASE WHEN GETDATE() BETWEEN rp.StartDateTime AND rp.EndDateTime THEN 1 ELSE 2 END), 

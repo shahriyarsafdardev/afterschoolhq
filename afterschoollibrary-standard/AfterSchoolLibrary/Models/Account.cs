@@ -1179,7 +1179,11 @@ namespace AfterSchoolLibrary.Models
 				LEFT JOIN GradeLevel glStart on glStart.ID = ap.GradeLevelStart
 				LEFT JOIN GradeLevel glEnd on glEnd.ID = ap.GradeLevelEnd
                 OUTER APPLY STRING_SPLIT(@Grades, ',') s
-                WHERE ((@AccountId IS NULL) OR ar.HostAccountId = @AccountId) AND a.IsDeleted <> 1 AND a.IsTest <> 1                     
+                WHERE ((@AccountId IS NULL) OR ar.HostAccountId = @AccountId) AND a.IsDeleted <> 1 AND a.IsTest <> 1 
+                    AND (
+                            rp.EndDateTime IS NULL OR 
+                            rp.EndDateTime >= GETDATE()
+                        ) --closed activities filter
                     AND (
 						    (@SearchTerm = '""""') OR 
 						    CONTAINS((ap.Title, ap.Headline, ap.About), @SearchTerm)  OR 

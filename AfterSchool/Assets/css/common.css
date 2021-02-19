@@ -496,3 +496,7 @@
     background-color: darkgreen;
 }
 
+.text-wrap {
+    display: inline;
+    overflow-wrap: break-word;
+}
