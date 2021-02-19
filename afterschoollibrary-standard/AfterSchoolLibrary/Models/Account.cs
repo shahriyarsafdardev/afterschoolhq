@@ -1133,19 +1133,24 @@ namespace AfterSchoolLibrary.Models
 					ap.AgeEnd,
 					glStart.Abbreviation as GradeLevelStart,
 					glEnd.Abbreviation as GradeLevelEnd
-                FROM AccountRelationship ar
-                INNER JOIN Account a ON a.ID = ar.VisitorAccountId
-                LEFT JOIN Activity act ON act.AccountId = ar.VisitorAccountId AND act.IsDeleted <> 1 AND act.IsPublished = 1 AND act.IsInviteOnly <> 1
-                LEFt JOIN ActivitySchedule acs ON act.ActivityScheduleId = acs.ID
-                LEFT JOIN AccountProfile ap ON ap.AccountId = ar.VisitorAccountId
-                LEFT JOIN Location loc ON ap.LocationId = loc.ID
-                LEFT JOIN AccountProperty properties on properties.AccountId = ar.VisitorAccountId AND properties.AccountPropertyTypeId in (12, 13, 14, 15)    
-                LEFT JOIN AccountProperty specialNeeds on specialNeeds.AccountId = ar.VisitorAccountId AND specialNeeds.AccountPropertyTypeId = 17          
-				LEFT JOIN AccountProperty timing on timing.AccountId = ar.VisitorAccountId AND timing.AccountPropertyTypeId = 10
-				LEFT JOIN GradeLevel glStart on glStart.ID = ap.GradeLevelStart
-				LEFT JOIN GradeLevel glEnd on glEnd.ID = ap.GradeLevelEnd
-                OUTER APPLY STRING_SPLIT(@Grades, ',') s
-                WHERE ar.HostAccountId = {hostAccountId} AND a.IsDeleted <> 1 AND a.IsTest <> 1                     
+                FROM 
+                    AccountRelationship ar
+                    INNER JOIN Account a ON a.ID = ar.VisitorAccountId
+                    LEFT JOIN Activity act ON act.AccountId = ar.VisitorAccountId AND act.IsDeleted <> 1 AND act.IsPublished = 1 AND act.IsInviteOnly <> 1
+                    LEFt JOIN ActivitySchedule acs ON act.ActivityScheduleId = acs.ID
+                    LEFT JOIN AccountProfile ap ON ap.AccountId = ar.VisitorAccountId
+                    LEFT JOIN Location loc ON ap.LocationId = loc.ID
+                    LEFT JOIN AccountProperty properties on properties.AccountId = ar.VisitorAccountId AND properties.AccountPropertyTypeId in (12, 13, 14, 15)    
+                    LEFT JOIN AccountProperty specialNeeds on specialNeeds.AccountId = ar.VisitorAccountId AND specialNeeds.AccountPropertyTypeId = 17          
+				    LEFT JOIN AccountProperty timing on timing.AccountId = ar.VisitorAccountId AND timing.AccountPropertyTypeId = 10
+				    LEFT JOIN GradeLevel glStart on glStart.ID = ap.GradeLevelStart
+				    LEFT JOIN GradeLevel glEnd on glEnd.ID = ap.GradeLevelEnd
+                    OUTER APPLY STRING_SPLIT(@Grades, ',') s
+                WHERE 
+                    ar.HostAccountId = {hostAccountId} 
+                    AND a.IsDeleted <> 1 
+                    AND a.IsTest <> 1  
+                    AND ap.IsAHQApproved = 1
                     AND (
 						    (@SearchTerm = '""""') OR 
 						    CONTAINS((ap.Title, ap.Headline, ap.About), @SearchTerm)  OR 
