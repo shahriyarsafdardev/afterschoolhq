@@ -1,6 +1,19 @@
 ﻿@{
     var gettingStartedOptions = (List<GettingStartedOptions>)ViewBag.GettingStartedOptions;
-    var url = (string)ViewBag.url;    
+    var url = (string)ViewBag.url;
+
+    var test = GettingStartedOptions.CreateProfile;
+
+    var phrase1 = "";
+    if (test == GettingStartedOptions.NotSet)
+    {
+        phrase1 = "Awesome!";
+    }
+    else if (test == GettingStartedOptions.CreateProfile)
+    {
+        phrase1 = "Great Job!";
+    }
+
 }
 
 <style>
@@ -12,7 +25,7 @@
 <form class="form form-horizontal" method="post" action="@url">
     <div class="col-md-12 onboarding-form-group text-center">
         <img src="~/img/tempsnip.png" class="img-responsive" style="display: initial;" />
-        <h1 class="text-center register-thankyou-2" style=" font-size: 22px; letter-spacing: 0.53px;">Awesome!</h1>
+        <h1 class="text-center register-thankyou-2" style=" font-size: 22px; letter-spacing: 0.53px;">@phrase1</h1>
     </div>
 
     <div class="clearfix"></div>
