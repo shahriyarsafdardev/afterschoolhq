@@ -471,3 +471,28 @@
 .footer-extended {
     background: #212a2d
 }
+
+.profile-badge-updated {
+    display: inline-block;
+    margin-bottom: 5px;
+    font-weight: normal;
+    letter-spacing: 0.53px;
+    padding: 5px 8px;
+}
+
+.bg-chocolate {
+    background-color: chocolate;
+}
+
+.bg-crimson {
+    background-color: crimson;
+}
+
+.bg-darkblue {
+    background-color: darkblue;
+}
+
+.bg-darkgreen {
+    background-color: darkgreen;
+}
+

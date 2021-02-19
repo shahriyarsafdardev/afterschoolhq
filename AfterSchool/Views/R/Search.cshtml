@@ -113,8 +113,18 @@
                 <% if(searchResult.IsAccountNowEnrolling) { %>
 
                 <div class="pull-right margin-l-10">
-                    <span class="badge badge-danger profile-badge text-small">
+                    <span class="badge bg-crimson profile-badge-updated">
                         Now Enrolling
+                    </span>
+                </div>
+
+                <% } %>
+
+                <% if(searchResult.IsVirtualProgram) { %>
+
+                <div class="pull-right margin-l-10">
+                    <span class="badge bg-darkblue profile-badge-updated">
+                        Virtual
                     </span>
                 </div>
 
@@ -123,7 +133,7 @@
                 <% if(searchResult.IsOpenDuringCovid) { %>
 
                 <div class="pull-right margin-l-10">
-                    <span class="badge badge-success profile-badge text-small">
+                    <span class="badge bg-darkgreen profile-badge-updated">
                         Open During COVID
                     </span>
                 </div>
@@ -133,7 +143,7 @@
                 <% if(searchResult.IsELearningCenter) { %>
 
                 <div class="pull-right margin-l-10">
-                    <span class="badge badge-success profile-badge text-small">
+                    <span class="badge bg-chocolate profile-badge-updated">
                         E-Learning Center
                     </span>
                 </div>

@@ -1156,6 +1156,7 @@ namespace AfterSchoolLibrary.Models
                     ap.IsOpenDuringCovid,
 					ap.IsELearningCenter,
                     CASE WHEN GETDATE() BETWEEN rp.StartDateTime AND rp.EndDateTime THEN 1 ELSE 0 END as IsAccountNowEnrolling,
+                    ap.IsVirtualProgram,
 					ap.Headline,
                     ap.LocationId,
                     ap.AgeStart,

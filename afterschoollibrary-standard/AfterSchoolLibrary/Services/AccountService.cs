@@ -2225,6 +2225,8 @@ namespace AfterSchoolLibrary.Services
                             response.IsOpenDuringCovid = row["IsOpenDuringCovid"].IsNotEmpty() ? Convert.ToBoolean(row["IsOpenDuringCovid"]) : false;
                             response.IsELearningCenter = row["IsELearningCenter"].IsNotEmpty() ? Convert.ToBoolean(row["IsELearningCenter"]) : false;
                             response.IsAccountNowEnrolling = row["IsAccountNowEnrolling"].IsNotEmpty() ? Convert.ToBoolean(row["IsAccountNowEnrolling"]) : false;
+                            response.IsVirtualProgram = row["IsVirtualProgram"].IsNotEmpty() ? Convert.ToBoolean(row["IsVirtualProgram"]) : false;
+
                             response.ProfileHeadline = row["Headline"].IsNotEmpty() ? row["Headline"].ToString().MaxChars(70, "...") : "";
                             response.IsRestrictByGrade = row["AgeStart"].IsEmpty();
                             response.AgeStart = row["AgeStart"].IsNotEmpty() ? row["AgeStart"].ToString() : null;
