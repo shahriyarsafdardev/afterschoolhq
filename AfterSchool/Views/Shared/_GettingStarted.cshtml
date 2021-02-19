@@ -2,18 +2,47 @@
     var gettingStartedOptions = (List<GettingStartedOptions>)ViewBag.GettingStartedOptions;
     var url = (string)ViewBag.url;
 
-    var test = GettingStartedOptions.CreateProfile;
+    var test = GettingStartedOptions.AcceptPayments;
 
     var phrase1 = "";
+    var phrase2 = "";
+    var phrase3 = "";
+    var phrase4 = "";
+
     if (test == GettingStartedOptions.NotSet)
     {
         phrase1 = "Awesome!";
+        phrase2 = "You have taken the first steps to completing AfterSchool HQ profile. We just have a few more questions so we can create a profile for your incredible program.";
+        phrase3 = "Here’s what’s next:";
+        phrase4 = "Create Your Free Profile";
     }
     else if (test == GettingStartedOptions.CreateProfile)
     {
         phrase1 = "Great Job!";
+        phrase2 = "You have set up your AfterSchool HQ profile, completing the first step in joining our mission to enable education for children everywhere.";
+        phrase3 = "Here’s what’s next:";
+        phrase4 = "Create Your First Activity";
     }
-
+    else if (test == GettingStartedOptions.CreateFirstActivity)
+    {
+        phrase1 = "You’re crushing it!";
+        phrase2 = "Thanks for creating your first activity! This makes it easy for students to find exciting and fulfilling programs that fit their interests and schedule.";
+        phrase3 = "Here’s what’s next:";
+        phrase4 = "Re-Send Validation Email";
+    }
+    else if (test == GettingStartedOptions.ValidateEmail)
+    {
+        phrase1 = "You’re almost done!";
+        phrase2 = "Just one step left to go. Let’s get your payment method setup so that students can start registering right away.";
+        phrase3 = "Here’s what’s next:";
+        phrase4 = "Set Up Payment Methods";
+    }
+    else if (test == GettingStartedOptions.AcceptPayments)
+    {
+        phrase1 = "That’s it, rockstar!";
+        phrase2 = "Your AfterSchool HQ account is all set up and ready to go. Thank you for joining our mission to keep students learning and engaged, in person and online.";
+        phrase4 = "View Profile";
+    }
 }
 
 <style>
@@ -31,10 +60,10 @@
     <div class="clearfix"></div>
     <div class="text-medium-small text-center">
         <p class="padding-v-10 font-styling-18">
-            You have taken the first steps to completing @AfterSchoolLibrary.Helpers.Utilities.AppName() profile. We just have a few more questions so we can create a profile for your incredible program.
+           @phrase2
         </p>
         <p class="padding-v-10 font-styling-18">
-            Here's what's next:
+            @phrase3
         </p>
     </div>
     <div class="clearfix"></div>
@@ -93,7 +122,7 @@
     <div class="clearfix"></div>
 
     <div class="margin-v-30 text-center">
-        <button href="#" class="btn btn-primary btn-free-profile" type="submit">Create Your Free Profile</button>
+        <button href="#" class="btn btn-primary btn-free-profile" type="submit">@phrase4</button>
     </div>
     <div class="clearfix"></div>
 
