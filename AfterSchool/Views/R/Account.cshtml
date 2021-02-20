@@ -532,12 +532,7 @@
         <div class="modal-content">
             <div class="modal-body account-getting-started-padding">
                 @{ 
-                    Html.RenderPartial("~/Views/Shared/_GettingStarted.cshtml",
-                        new ViewDataDictionary() {
-                            { "gettingStartedOptions", null },
-                            { "url", Url.Action("GettingStarted", "onboarding", "") }
-                        }
-                    );
+                    Html.RenderPartial("~/Views/Shared/_GettingStarted.cshtml");
                 }
             </div>
         </div>

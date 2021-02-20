@@ -1,6 +1,5 @@
 ﻿@{ 
-    Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml";
-    var gettingStartedOptions = (List<GettingStartedOptions>)ViewBag.GettingStartedOptions; 
+    Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml";    
 }
 
 <div class="row main-content main-content-welcome-pages">
@@ -8,12 +7,7 @@
         <div class="welcome-outer-ring">
             <div class="onboarding-inner-ring">
                 @{ 
-                    Html.RenderPartial("~/Views/Shared/_GettingStarted.cshtml",
-                        new ViewDataDictionary() {
-                            { "gettingStartedOptions", gettingStartedOptions },
-                            { "url", Url.Action("GettingStarted", "onboarding") }
-                        }
-                    );
+                    Html.RenderPartial("~/Views/Shared/_GettingStarted.cshtml");
                 }
             </div>
         </div>

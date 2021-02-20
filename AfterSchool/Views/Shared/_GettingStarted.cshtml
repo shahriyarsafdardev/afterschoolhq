@@ -1,8 +1,6 @@
 ﻿@{
-    var gettingStartedOptions = (List<GettingStartedOptions>)ViewBag.GettingStartedOptions;
-    var url = (string)ViewBag.url;
     var currentLevel = AccountService.OnboardingCompletionStatus(SessionVariables.CurrentAccount);
-    string phrase1 = "", phrase2 = "", phrase3 = "", phrase4 = "";
+    string phrase1 = "", phrase2 = "", phrase3 = "", phrase4 = "", url = "";
 
     if (currentLevel == GettingStartedOptions.NotSet)
     {
@@ -10,6 +8,7 @@
         phrase2 = "You have taken the first steps to completing AfterSchool HQ profile. We just have a few more questions so we can create a profile for your incredible program.";
         phrase3 = "Here’s what’s next:";
         phrase4 = "Create Your Free Profile";
+        url = Url.Action("programinfo", "onboarding", new { area = "org" });
     }
     else if (currentLevel == GettingStartedOptions.CreateProfile)
     {
@@ -17,6 +16,7 @@
         phrase2 = "You have set up your AfterSchool HQ profile, completing the first step in joining our mission to enable education for children everywhere.";
         phrase3 = "Here’s what’s next:";
         phrase4 = "Create Your First Activity";
+        url = Url.Action("editsetup", "activity", new { area = "org", isnew = 1, type = (int)ActivityType.Activity });
     }
     else if (currentLevel == GettingStartedOptions.CreateFirstActivity)
     {
@@ -24,6 +24,7 @@
         phrase2 = "Thanks for creating your first activity! This makes it easy for students to find exciting and fulfilling programs that fit their interests and schedule.";
         phrase3 = "Here’s what’s next:";
         phrase4 = "Re-Send Validation Email";
+        url = "javascript:AccountSetup.sendVerificationEmail();";
     }
     else if (currentLevel == GettingStartedOptions.ValidateEmail)
     {
@@ -31,6 +32,7 @@
         phrase2 = "Just one step left to go. Let’s get your payment method setup so that students can start registering right away.";
         phrase3 = "Here’s what’s next:";
         phrase4 = "Set Up Payment Methods";
+        url = Url.Action("paymentsoptions", "account", new { area = "org" });
     }
     else if (currentLevel == GettingStartedOptions.AcceptPayments)
     {
@@ -44,85 +46,91 @@
     .am-checkbox input[type="checkbox"] + label:before {
         margin-right: 10px;
     }
+
+    .am-checkbox input[type="checkbox"]:disabled + label {
+        opacity: 1;
+    }
+
+        .am-checkbox input[type="checkbox"]:disabled + label:before {
+            opacity: 0.5;
+        }
 </style>
 
-<form class="form form-horizontal" method="post" action="@url">
-    <div class="col-md-12 onboarding-form-group text-center">
-        <img src="~/img/tempsnip.png" class="img-responsive" style="display: initial;" />
-        <h1 class="text-center register-thankyou-2" style=" font-size: 22px; letter-spacing: 0.53px;">@phrase1</h1>
-    </div>
+<div class="col-md-12 onboarding-form-group text-center">
+    <img src="~/img/tempsnip.png" class="img-responsive" style="display: initial;" />
+    <h1 class="text-center register-thankyou-2" style=" font-size: 22px; letter-spacing: 0.53px;">@phrase1</h1>
+</div>
 
-    <div class="clearfix"></div>
-    <div class="text-medium-small text-center">
+<div class="clearfix"></div>
+<div class="text-medium-small text-center">
+    <p class="padding-v-10 font-styling-18">
+        @phrase2
+    </p>
+
+    @if (phrase3.IsNotEmpty())
+    {
         <p class="padding-v-10 font-styling-18">
-            @phrase2
+            @phrase3
         </p>
+    }
+</div>
+<div class="clearfix"></div>
 
-        @if (phrase3.IsNotEmpty())
-        {
-            <p class="padding-v-10 font-styling-18">
-                @phrase3
-            </p>
-        }
-    </div>
-    <div class="clearfix"></div>
+<table class="table table-hover">
+    <tbody>
+        <tr>
+            <td>
+                <div class="am-checkbox">
+                    <input id="chk-getting-started-profile" name="GettingStartedSelection" type="checkbox" disabled
+                           value="@GettingStartedOptions.CreateProfile"
+                           @(currentLevel.In(new List<GettingStartedOptions>() { GettingStartedOptions.CreateProfile, GettingStartedOptions.CreateFirstActivity, GettingStartedOptions.ValidateEmail, GettingStartedOptions.AcceptPayments }) ? "checked=\"checked\"" : "")>
+                    <label for="chk-getting-started-profile" class="font-styling-18 text-bold">Create your profile.</label>
+                    <p class="getting-started-info">Parent need to know what you offer. This helps us match parents to your program.</p>
+                </div>
+            </td>
+        </tr>
 
-    <table class="table table-hover">
-        <tbody>
-            <tr>
-                <td>
-                    <div class="am-checkbox">
-                        <input id="chk-getting-started-profile" name="GettingStartedSelection" type="checkbox"
-                               value="@GettingStartedOptions.CreateProfile"
-                               @(gettingStartedOptions.IsNotEmpty() && gettingStartedOptions.Contains(GettingStartedOptions.CreateProfile) ? "checked=\"checked\"" : "")>
-                        <label for="chk-getting-started-profile" class="font-styling-18 text-bold cursor-pointer">Create your profile.</label>
-                        <p class="getting-started-info">Parent need to know what you offer. This helps us match parents to your program.</p>
-                    </div>
-                </td>
-            </tr>
+        <tr>
+            <td>
+                <div class="am-checkbox">
+                    <input id="chk-getting-started-activity" name="GettingStartedSelection" type="checkbox" disabled
+                           value="@GettingStartedOptions.CreateFirstActivity"
+                           @(currentLevel.In(new List<GettingStartedOptions>() { GettingStartedOptions.CreateFirstActivity, GettingStartedOptions.ValidateEmail, GettingStartedOptions.AcceptPayments }) ? "checked=\"checked\"" : "")>
+                    <label for="chk-getting-started-activity" class="font-styling-18 text-bold">Create your first activity.</label>
+                    <p class="getting-started-info">Adding your first activity informs parents of your program's offerings and enables them to register online immediately.</p>
+                </div>
+            </td>
+        </tr>
 
-            <tr>
-                <td>
-                    <div class="am-checkbox">
-                        <input id="chk-getting-started-activity" name="GettingStartedSelection" type="checkbox"
-                               value="@GettingStartedOptions.CreateFirstActivity"
-                               @(gettingStartedOptions.IsNotEmpty() && gettingStartedOptions.Contains(GettingStartedOptions.CreateFirstActivity) ? "checked=\"checked\"" : "")>
-                        <label for="chk-getting-started-activity" class="font-styling-18 text-bold cursor-pointer">Create your first activity.</label>
-                        <p class="getting-started-info">Adding your first activity informs parents of your program's offerings and enables them to register online immediately.</p>
-                    </div>
-                </td>
-            </tr>
+        <tr>
+            <td>
+                <div class="am-checkbox">
+                    <input id="chk-getting-started-email" name="GettingStartedSelection" type="checkbox" disabled
+                           value="@GettingStartedOptions.ValidateEmail"
+                           @(currentLevel.In(new List<GettingStartedOptions>() { GettingStartedOptions.ValidateEmail, GettingStartedOptions.AcceptPayments }) ? "checked=\"checked\"" : "")>
+                    <label for="chk-getting-started-email" class="font-styling-18 text-bold">Validate your email.</label>
+                    <p class="getting-started-info">We need to confirm your identity before we publish your programs and activities.</p>
+                </div>
+            </td>
+        </tr>
 
-            <tr>
-                <td>
-                    <div class="am-checkbox">
-                        <input id="chk-getting-started-email" name="GettingStartedSelection" type="checkbox"
-                               value="@GettingStartedOptions.ValidateEmail"
-                               @(gettingStartedOptions.IsNotEmpty() && gettingStartedOptions.Contains(GettingStartedOptions.ValidateEmail) ? "checked=\"checked\"" : "")>
-                        <label for="chk-getting-started-email" class="font-styling-18 text-bold cursor-pointer">Validate your email.</label>
-                        <p class="getting-started-info">We need to confirm your identity before we publish your programs and activities.</p>
-                    </div>
-                </td>
-            </tr>
+        <tr>
+            <td>
+                <div class="am-checkbox">
+                    <input id="chk-getting-started-payments" name="GettingStartedSelection" type="checkbox" disabled
+                           value="@GettingStartedOptions.AcceptPayments"
+                           @(currentLevel == GettingStartedOptions.AcceptPayments ? "checked=\"checked\"" : "")>
+                    <label for="chk-getting-started-payments" class="font-styling-18 text-bold">Accept payments.</label>
+                    <p class="getting-started-info">Let's get you set up to make payments. This not only makes it easier for payments to pay, but you will also receive funds quicker.</p>
+                </div>
+            </td>
+        </tr>
+    </tbody>
+</table>
+<div class="clearfix"></div>
 
-            <tr>
-                <td>
-                    <div class="am-checkbox">
-                        <input id="chk-getting-started-payments" name="GettingStartedSelection" type="checkbox"
-                               value="@GettingStartedOptions.AcceptPayments"
-                               @(gettingStartedOptions.IsNotEmpty() && gettingStartedOptions.Contains(GettingStartedOptions.AcceptPayments) ? "checked=\"checked\"" : "")>
-                        <label for="chk-getting-started-payments" class="font-styling-18 text-bold cursor-pointer">Accept payments.</label>
-                        <p class="getting-started-info">Let's get you set up to make payments. This not only makes it easier for payments to pay, but you will also receive funds quicker.</p>
-                    </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    <div class="clearfix"></div>
+<div class="margin-v-30 text-center">
+    <a href="@url" class="btn btn-primary btn-free-profile">@phrase4</a>
+</div>
+<div class="clearfix"></div>
 
-    <div class="margin-v-30 text-center">
-        <button href="#" class="btn btn-primary btn-free-profile" type="submit">@phrase4</button>
-    </div>
-    <div class="clearfix"></div>
-
-</form>

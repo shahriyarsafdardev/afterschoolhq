@@ -55,36 +55,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult GettingStarted()
-        {
-            var account = SessionVariables.CurrentAccount;
-            var msgs = new SystemMessages();
-            var accountOwner = account.GetAccountOwner(msgs);
-            var startingOptions = new List<GettingStartedOptions>();            
-
-            if (account.HasAccountProfile(msgs))
-                startingOptions.Add(GettingStartedOptions.CreateProfile);
-
-            if (account.HasActivities(msgs))
-                startingOptions.Add(GettingStartedOptions.CreateFirstActivity);   
-            
-            if(accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount)
-                startingOptions.Add(GettingStartedOptions.ValidateEmail);
-
-            if (account.StripeUserId.IsNotEmpty())
-                startingOptions.Add(GettingStartedOptions.AcceptPayments);
-
-            ViewBag.GettingStartedOptions = startingOptions;
-            msgs.AddRange(account.Save());
-
-            return View();
-        }
-
-        [HttpPost]
-        public ActionResult GettingStarted(GettingStartedOptions[] GettingStartedSelection)
-        {
-            return RedirectToAction("ProgramInfo");
-        }
+        public ActionResult GettingStarted() => View();
 
         [HttpGet]
         public ActionResult ProgramInfo()

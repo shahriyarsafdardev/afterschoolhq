@@ -255,10 +255,10 @@ namespace AfterSchoolLibrary.Services
             else if (HasAccountProfile && HasActivities && !VerifiedAccount && !StripeUserId)
                 return GettingStartedOptions.CreateFirstActivity;
 
-            else if (HasAccountProfile && !HasActivities && VerifiedAccount && !StripeUserId)
+            else if (HasAccountProfile && HasActivities && VerifiedAccount && !StripeUserId)
                 return GettingStartedOptions.ValidateEmail;
 
-            else if (HasAccountProfile && !HasActivities && !VerifiedAccount && StripeUserId)
+            else if (HasAccountProfile && HasActivities && VerifiedAccount && StripeUserId)
                 return GettingStartedOptions.AcceptPayments;
 
             else 
