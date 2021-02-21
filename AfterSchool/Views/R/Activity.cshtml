@@ -49,7 +49,7 @@
             { "CanPublishActivity", ViewBag.CanPublishActivity },
             { "ParticipationObject", Model },
             { "Session", session }
-                                }
+                                        }
     );
 }
 
@@ -114,7 +114,7 @@
                                    { "canRegisterFor", ViewBag.CanRegisterFor },
                                    { "session", session },
                                    { "accountprofile", ViewBag.AccountProfile }
-                               }
+               }
                             );
                         }
                     </div>
@@ -269,19 +269,10 @@
     </div>
 </div>
 
-<div id="modal-email-confirmation" class="modal fade" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-body account-getting-started-padding">
-                Before we publish your activity lets confirm your email.
-
-                <div class="margin-v-30 text-center">
-                    <a href="#" class="btn btn-primary btn-free-profile">Re-Send Validation email.</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+@if (Model.IsNotEmpty())
+{
+    Html.RenderPartial("~/Views/Shared/_GettingStartedModal.cshtml", Model.OwnerAccount);
+}
 
 @if (session.IsNotEmpty())
 {
@@ -297,11 +288,15 @@
 }
 
 <script type="text/javascript">
-    PageEvent.add(PageEvent.AFTER_INIT, function () {
+    //PageEvent.add(PageEvent.AFTER_INIT, function () {
 
-        if (true) {
-            //.. show getting started modal options if user misses any of that option
-            $('#modal-email-confirmation').modal('show');
-        }
-    });
+    //    if (true) {
+    //        $('#modal-email-confirmation').modal('show'); //make id dynamic
+    //    }
+    //});
+
+    //function resendValidationEmail() {
+    //    $('#modal-email-confirmation-text').html('An email has been sent to <span style="color: #00b492;">sophiaxlefevre@gmail.com</span> Please check your inbox for next steps.');
+    //    $('#modal-email-confirmation-btn').hide();
+    //}
 </script>
