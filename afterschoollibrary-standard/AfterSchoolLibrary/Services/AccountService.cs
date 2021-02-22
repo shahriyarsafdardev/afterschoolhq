@@ -268,7 +268,7 @@ namespace AfterSchoolLibrary.Services
         {
             get
             {
-                return new AccountType[] { AccountType.CommunityCenter, AccountType.School, AccountType.Church };
+                return new AccountType[] { AccountType.CommunityCenter, AccountType.School, AccountType.Church, AccountType.Directory };
             }
         }
 

@@ -1181,7 +1181,7 @@ namespace AfterSchoolLibrary.Models
 				    LEFT JOIN GradeLevel glEnd on glEnd.ID = ap.GradeLevelEnd
                     OUTER APPLY STRING_SPLIT(@Grades, ',') s
                 WHERE 
-                    ar.HostAccountId = {hostAccountId} 
+                    ((@AccountId IS NULL) OR ar.HostAccountId = @AccountId)
                     AND a.IsDeleted <> 1 
                     AND a.IsTest <> 1  
                     AND ap.IsAHQApproved = 1
