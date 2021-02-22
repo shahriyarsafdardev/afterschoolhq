@@ -234,12 +234,18 @@ namespace AfterSchoolLibrary.Services
 
         public static bool IsOnboardingCompleted(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            if (account.IsEmpty())
+                return false;
+
             var accountOwner = account.GetAccountOwner(msgs);
             return account.HasAccountProfile(msgs) && account.HasActivities(msgs) && accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount && account.StripeUserId.IsNotEmpty();
         }
 
         public static GettingStartedOptions OnboardingCompletionStatus(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            if (account.IsEmpty())
+                return GettingStartedOptions.NotSet;
+
             var accountOwner = account.GetAccountOwner(msgs);
             var HasAccountProfile = account.HasAccountProfile(msgs);
             var HasActivities = account.HasActivities(msgs);

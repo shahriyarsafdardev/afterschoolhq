@@ -37,6 +37,14 @@
             showLocation = true;
         }
     }
+
+    //.. verify this logic, it's for who can see this email and payment models.
+    var isAccountAndLoggedInUserIsOwner = Model.IsNotEmpty() &&
+        Model.OwnerAccount.IsNotEmpty() &&
+        SessionVariables.CurrentAccount.IsNotEmpty() &&
+        SessionVariables.CurrentUser.IsNotEmpty() &&
+        (SessionVariables.CurrentAccount.ID == Model.OwnerAccount.ID) && 
+        (SessionVariables.CurrentUser.HasAccessTo(Model.OwnerAccount));
 }
 
 @{
@@ -269,9 +277,9 @@
     </div>
 </div>
 
-@if (Model.IsNotEmpty())
+@if (isAccountAndLoggedInUserIsOwner)
 {
-    Html.RenderPartial("~/Views/Shared/_GettingStartedModal.cshtml", Model.OwnerAccount);
+    Html.RenderPartial("~/Views/Shared/_GettingStartedModal.cshtml", Model.OwnerAccount, new ViewDataDictionary() { { "ActivityUid", Model.Uid } });
 }
 
 @if (session.IsNotEmpty())
