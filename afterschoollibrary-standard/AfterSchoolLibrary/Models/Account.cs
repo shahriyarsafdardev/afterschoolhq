@@ -1162,7 +1162,9 @@ namespace AfterSchoolLibrary.Models
                     ap.AgeStart,
 					ap.AgeEnd,
 					glStart.Abbreviation as GradeLevelStart,
-					glEnd.Abbreviation as GradeLevelEnd
+					glEnd.Abbreviation as GradeLevelEnd,
+                    rp.StartDateTime as RegistrationPeriodStart, 
+					rp.EndDateTime as RegistrationPeriodEnd          
                 FROM 
                     AccountRelationship ar
                     INNER JOIN Account a ON a.ID = ar.VisitorAccountId
