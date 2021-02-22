@@ -13,23 +13,23 @@
 <div class="visible-lg visible-md">
 
     <div class="row">
-        <div class="reg-header" style="min-height: 100%; background: white;">
+        <div class="reg-header" style="min-height: 100%; background: white; padding: 35px 20px;">
 
             <div class="reg-header-overlay col-md-12">
 
-                <div class="col-lg-3 col-md-6 header-logo" style="margin-top: -50px;">
-                    <img src="~/img/isyp-logo.png" />
+                <div class="col-lg-3 col-md-3 header-logo" style="margin-top: -25px;">
+                    <img src="~/img/isyp-logo.png" style="width: 200px;" />
                 </div>
 
-                <div class="col-lg-7 col-md-6">
+                <div class="col-lg-7 col-md-9">
                     <div class="form-group has-feedback has-search">
                         <span class="glyphicon glyphicon-search form-control-feedback"></span>
                         <input id="txtSearch" name="search" type="text" class="form-control" placeholder="Search" onkeyup="return waitAndFilterSearch(this.value)">
                     </div>
                 </div>
 
-                <div class="col-lg-2 col-md-6">
-                    <a href="~/isyp.html" class="btn btn-default btn-md btn-center join-isyp-btn"> Join the ISYP Directory </a>
+                <div class="col-lg-2 col-md-9">
+                    <a href="~/isyp.html" class="btn btn-search-register btn-md btn-center join-isyp-btn"> Join the ISYP Directory </a>
                 </div>
             </div>
 
@@ -58,7 +58,7 @@
     <div class="clearfix"></div>
 </div>
 
-<div id="filters" class="col-md-3" style="display: none; padding-right: 0; padding-bottom: 120px;padding-top: 10px;">
+<div id="filters" class="col-md-3" style="display: none; padding-right: 0; padding-bottom: 120px;padding-top: 10px; background-color: #F9F9F9;">
     @{ Html.RenderPartial("~/Views/Shared/_DirectoryFilters.cshtml"); }
     <div class="clearfix"></div>
 </div>
@@ -71,7 +71,7 @@
 
     <% _.each(response, function(searchResult){ %>
 
-    <div id="<%= searchResult.AccountUid %>" name="<%= searchResult.AccountName %>" class="col-sm-12 col-md-6 col-lg-4 col-xl-3 participation-object" style="height: 410px;" onclick="WebPage.navigateIframe('<%= searchResult.HomePageUrl %>')">
+    <div id="<%= searchResult.AccountUid %>" name="<%= searchResult.AccountName %>" class="col-xl-12 col-sm-6 col-md-6 col-lg-4 participation-object" style="height: 410px;" onclick="WebPage.navigateIframe('<%= searchResult.HomePageUrl %>')">
 
         <div class="panel" style="overflow: hidden;">
             <div class="reg-header" style="background-image: url(<%= searchResult.ProfileHeaderImageUrl %>); min-height: 100px; height: 150px; padding: 5px 5px; position: relative;">

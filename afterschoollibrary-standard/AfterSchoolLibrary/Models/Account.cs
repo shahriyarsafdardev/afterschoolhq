@@ -1071,68 +1071,100 @@ namespace AfterSchoolLibrary.Models
                 searchTerms = $"\"*{search}*\"";
 
             var sql = $@"
-                DECLARE @SearchTerm NVARCHAR(250),
-                        @Neighborhood NVARCHAR(100),
-                        @Grades NVARCHAR(100),
-                        @Age NVARCHAR(100),
-                        @Gender varchar(10),                        
-                        @Cost varchar(1),
-                        @Starting varchar(1),
-                        @IsELearningCenter BIT = NULL,  
-                        @IsVirtualProgram BIT = NULL, 
-                        @IsOpenDuringCovid BIT = NULL, 
-                        @Timing NVARCHAR(100),
-                        @SpecialNeeds NVARCHAR(100)
-
+                DECLARE @AccountId NVARCHAR(50),
+                    @SearchTerm NVARCHAR(250),
+                    @Neighborhood NVARCHAR(100),
+                    @Grades NVARCHAR(100),
+                    @Age NVARCHAR(100),
+                    @Gender varchar(10),                        
+                    @Cost varchar(1),
+                    @Starting varchar(1),
+                    @IsELearningCenter BIT = NULL,  
+                    @IsVirtualProgram BIT = NULL, 
+                    @IsOpenDuringCovid BIT = NULL, 
+                    @Timing NVARCHAR(100),
+                    @SpecialNeeds NVARCHAR(100)";
+            
+            sql += $@"{Environment.NewLine}
                 SET @SearchTerm = '{searchTerms}'";
 
+            if (hostAccountId.ToInteger() <= 0)
+                sql += $@"
+                SET @AccountId = NULL ";
+            else
+                sql += $@"
+                SET @AccountId = '{hostAccountId}'";
+
             if (neighborhoods.IsNotEmpty())
-                sql += $"SET @Neighborhood = '{neighborhoods}'";
+                sql += $@"
+                SET @Neighborhood = '{neighborhoods}'";
+
+            if (neighborhoods.IsNotEmpty())
+                sql += $@"
+                SET @Neighborhood = '{neighborhoods}'";
 
             if (grades.IsNotEmpty())
-                sql += $"SET @Grades = '{grades}'";
+                sql += $@"
+                SET @Grades = '{grades}'";
 
             if (ages.IsNotEmpty())
-                sql += $"SET @Age = '{ages}'";
+                sql += $@"
+                SET @Age = '{ages}'";
 
             if (gender.IsNotEmpty())
-                sql += $"SET @Gender = '{gender}'";            
+                sql += $@"
+                SET @Gender = '{gender}'";            
 
             if (cost.IsNotEmpty())
-                sql += $"SET @Cost = '1'";
+                sql += $@"
+                SET @Cost = '1'";
 
             if (starting.IsNotEmpty())
-                sql += $"SET @Starting = '1'";
+                sql += $@"
+                SET @Starting = '1'";
 
             if (other.IsNotBlank() && other.Contains("e_learning"))
-                sql += $"SET @IsELearningCenter = 1";
+                sql += $@"
+                SET @IsELearningCenter = 1";
 
             if (other.IsNotBlank() && other.Contains("virtual_programming"))
-                sql += $"SET @IsVirtualProgram = 1";
+                sql += $@"
+                SET @IsVirtualProgram = 1";
 
             if (other.IsNotBlank() && other.Contains("covid_protections"))
-                sql += $"SET @IsOpenDuringCovid = 1";
+                sql += $@"
+                SET @IsOpenDuringCovid = 1";
 
             if (timing.IsNotEmpty())
-                sql += $"SET @Timing = '{timing}'";
+                sql += $@"
+                SET @Timing = '{timing}'";
 
             if (specialNeeds.IsNotEmpty())
-                sql += $"SET @SpecialNeeds = '{specialNeeds}'";
+                sql += $@"
+                SET @SpecialNeeds = '{specialNeeds}'";
+
+            sql += $"\n";
 
             sql += $@"
-                SELECT DISTINCT 
+                SELECT 
+                    --DISTINCT
                     a.Id as AccountId,
+                    act.ID as ActivityId,
                     a.Uid as AccountUid, 
                     a.Name as AccountName,                    
                     a.UniqueName as AccountUniqueName,
                     ap.IsOpenDuringCovid,
 					ap.IsELearningCenter,
+                    CASE WHEN CAST(GETDATE() as date) BETWEEN CAST(rp.StartDateTime as date) AND CAST(rp.EndDateTime as date) THEN 1 ELSE 0 END as IsAccountNowEnrolling,
+                    ap.IsVirtualProgram,
 					ap.Headline,
                     ap.LocationId,
                     ap.AgeStart,
 					ap.AgeEnd,
 					glStart.Abbreviation as GradeLevelStart,
-					glEnd.Abbreviation as GradeLevelEnd
+					glEnd.Abbreviation as GradeLevelEnd,
+                    rp.StartDateTime as RegistrationPeriodStart, 
+					rp.EndDateTime as RegistrationPeriodEnd          
                 FROM 
                     AccountRelationship ar
                     INNER JOIN Account a ON a.ID = ar.VisitorAccountId
@@ -1176,7 +1208,8 @@ namespace AfterSchoolLibrary.Models
 
             if (cost.IsNotEmpty())
             {
-                sql += $@"AND ((@Cost IS NULL)";
+                sql += $@"
+                    AND ((@Cost IS NULL)";
 
                 if (cost.Contains("cost_free"))
                     sql += $@" OR COALESCE(act.CostPerRegistrant, 0) = 0";
@@ -1195,7 +1228,8 @@ namespace AfterSchoolLibrary.Models
 
             if (starting.IsNotEmpty())
             {
-                sql += $@"AND ((@Starting IS NULL)";
+                sql += $@"
+                    AND ((@Starting IS NULL)";
 
                 if (starting.Contains("starting_0_7"))
                     sql += $@" OR acs.StartDate between dateadd(dd, 0, cast(getdate() as date)) AND dateadd(dd, 7, cast(getdate() as date))";
@@ -1209,7 +1243,14 @@ namespace AfterSchoolLibrary.Models
                 sql += $@")";
             }
 
-            sql += $@" Order BY a.Name ASC";
+            sql += $@"
+                ORDER BY
+                    (CASE WHEN GETDATE() BETWEEN rp.StartDateTime AND rp.EndDateTime THEN 1 ELSE 2 END), 
+				    (CASE WHEN rp.EndDateTime IS NULL THEN 2 ELSE 1 END), 
+				        rp.EndDateTime ASC,
+				    (CASE WHEN rp.StartDateTime IS NULL THEN 2 ELSE 1 END), 
+				        rp.StartDateTime DESC, 
+                    a.Name ASC";
 
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;

@@ -2224,6 +2224,9 @@ namespace AfterSchoolLibrary.Services
                             //.. account profile  
                             response.IsOpenDuringCovid = row["IsOpenDuringCovid"].IsNotEmpty() ? Convert.ToBoolean(row["IsOpenDuringCovid"]) : false;
                             response.IsELearningCenter = row["IsELearningCenter"].IsNotEmpty() ? Convert.ToBoolean(row["IsELearningCenter"]) : false;
+                            response.IsAccountNowEnrolling = row["IsAccountNowEnrolling"].IsNotEmpty() ? Convert.ToBoolean(row["IsAccountNowEnrolling"]) : false;
+                            response.IsVirtualProgram = row["IsVirtualProgram"].IsNotEmpty() ? Convert.ToBoolean(row["IsVirtualProgram"]) : false;
+
                             response.ProfileHeadline = row["Headline"].IsNotEmpty() ? row["Headline"].ToString().MaxChars(70, "...") : "";
                             response.IsRestrictByGrade = row["AgeStart"].IsEmpty();
                             response.AgeStart = row["AgeStart"].IsNotEmpty() ? row["AgeStart"].ToString() : null;
@@ -2239,11 +2242,15 @@ namespace AfterSchoolLibrary.Services
                                 response.ProfileHeaderImageUrl = LocationService.GetGoogleMapsImageUrl(location, 1500, 600);
                             }
 
+                            //..registration period
+                            response.RegistrationPeriodStart = row["RegistrationPeriodStart"].IsNotEmpty() ? row["RegistrationPeriodStart"].ToString() : null;
+                            response.RegistrationPeriodEnd = row["RegistrationPeriodEnd"].IsNotEmpty() ? row["RegistrationPeriodEnd"].ToString() : null;
+
                             ListResponse.Add(response);
                         }
                     }
 
-                    return ListResponse;
+                    return ListResponse.DistinctBy(m => m.AccountName).ToList();
                 }
             }
             catch (Exception ex)
