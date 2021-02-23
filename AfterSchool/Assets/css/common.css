@@ -433,13 +433,6 @@
     display: none;
 }
 
-.join-directory-btn {
-    height: 38px;
-    color: darkblue;
-    min-width: 180px;
-    font-size: 12px;
-}
-
 .search-youth {
     float: left;
     font-size: 22px;
@@ -455,13 +448,23 @@
     background-color: #ffffff;
 }
 
-
 .join-isyp-btn {
     height: 38px;
     color: white !important;
     min-width: 180px;
     font-size: 12px;
     background-color: #547bb6 !important;
+}
+
+.btn-search-register {
+    padding: 11px 0px;
+    border-radius: 10px;
+    font-weight: 600;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    word-break: break-word;
+    transition: all 0.3s;
+    border: none;
 }
 
 .btn-isyp {
@@ -473,8 +476,37 @@
     background: #212a2d
 }
 
+.profile-badge-updated {
+    display: inline-block;
+    margin-bottom: 5px;
+    font-weight: normal;
+    letter-spacing: 0.53px;
+    padding: 5px 8px;
+}
+
+.bg-chocolate {
+    background-color: chocolate;
+}
+
+.bg-crimson {
+    background-color: crimson;
+}
+
+.bg-darkblue {
+    background-color: darkblue;
+}
+
+.bg-darkgreen {
+    background-color: darkgreen;
+}
+
+.text-wrap {
+    display: inline;
+    overflow-wrap: break-word;
+}
+
 .dotdark {
-     height: 15px;
+    height: 15px;
     width: 15px;
     background-color: #00c5a3;
     border-radius: 50%;

@@ -9,5 +9,6 @@ public enum AccountType
 	Teacher,
 	CommunityCenter,
 	Business,
-	Church
+	Church,
+	Directory
 }
