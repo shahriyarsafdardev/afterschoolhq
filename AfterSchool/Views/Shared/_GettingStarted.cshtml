@@ -1,6 +1,8 @@
 ﻿@{
     var currentLevel = AccountService.OnboardingCompletionStatus(SessionVariables.CurrentAccount);
+    var currentProgress = AccountService.GetCurrentOnboardingProcess(SessionVariables.CurrentAccount);
     string phrase1 = "", phrase2 = "", phrase3 = "", phrase4 = "", url = "";
+    Activity unpublishActivity = null;
 
     if (currentLevel == GettingStartedOptions.NotSet)
     {
@@ -12,11 +14,20 @@
     }
     else if (currentLevel == GettingStartedOptions.CreateProfile)
     {
+        unpublishActivity = AccountService.GetUnpublishActivity(SessionVariables.CurrentAccount);
+        if (unpublishActivity.IsNotEmpty())
+        {
+            phrase4 = "Publish Your Activity";
+            url = unpublishActivity.ShortHomePageUrl;
+        } else
+        {
+            phrase4 = "Create Your First Activity";
+            url = Url.Action("editsetup", "activity", new { area = "org", isnew = 1, type = (int)ActivityType.Activity });
+        }
+
         phrase1 = "Great Job!";
         phrase2 = "You have set up your AfterSchool HQ profile, completing the first step in joining our mission to enable education for children everywhere.";
         phrase3 = "Here’s what’s next:";
-        phrase4 = "Create Your First Activity";
-        url = Url.Action("editsetup", "activity", new { area = "org", isnew = 1, type = (int)ActivityType.Activity });
     }
     else if (currentLevel == GettingStartedOptions.CreateFirstActivity)
     {
@@ -83,7 +94,7 @@
                 <div class="am-checkbox">
                     <input id="chk-getting-started-profile" name="GettingStartedSelection" type="checkbox" disabled
                            value="@GettingStartedOptions.CreateProfile"
-                           @(currentLevel.In(new List<GettingStartedOptions>() { GettingStartedOptions.CreateProfile, GettingStartedOptions.CreateFirstActivity, GettingStartedOptions.ValidateEmail, GettingStartedOptions.AcceptPayments }) ? "checked=\"checked\"" : "")>
+                           @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.CreateProfile)  ? "checked=\"checked\"" : "")>
                     <label for="chk-getting-started-profile" class="font-styling-18 text-bold">Create your profile.</label>
                     <p class="getting-started-info">Parent need to know what you offer. This helps us match parents to your program.</p>
                 </div>
@@ -91,11 +102,11 @@
         </tr>
 
         <tr>
-            <td>
+            <td style="@(unpublishActivity.IsNotEmpty() ? "color: #ffc870;" : "")">
                 <div class="am-checkbox">
                     <input id="chk-getting-started-activity" name="GettingStartedSelection" type="checkbox" disabled
                            value="@GettingStartedOptions.CreateFirstActivity"
-                           @(currentLevel.In(new List<GettingStartedOptions>() { GettingStartedOptions.CreateFirstActivity, GettingStartedOptions.ValidateEmail, GettingStartedOptions.AcceptPayments }) ? "checked=\"checked\"" : "")>
+                           @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.CreateFirstActivity) ? "checked=\"checked\"" : "")>
                     <label for="chk-getting-started-activity" class="font-styling-18 text-bold">Create your first activity.</label>
                     <p class="getting-started-info">Adding your first activity informs parents of your program's offerings and enables them to register online immediately.</p>
                 </div>
@@ -107,7 +118,7 @@
                 <div class="am-checkbox">
                     <input id="chk-getting-started-email" name="GettingStartedSelection" type="checkbox" disabled
                            value="@GettingStartedOptions.ValidateEmail"
-                           @(currentLevel.In(new List<GettingStartedOptions>() { GettingStartedOptions.ValidateEmail, GettingStartedOptions.AcceptPayments }) ? "checked=\"checked\"" : "")>
+                           @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.ValidateEmail) ? "checked=\"checked\"" : "")>
                     <label for="chk-getting-started-email" class="font-styling-18 text-bold">Validate your email.</label>
                     <p class="getting-started-info">We need to confirm your identity before we publish your programs and activities.</p>
                 </div>
@@ -119,7 +130,7 @@
                 <div class="am-checkbox">
                     <input id="chk-getting-started-payments" name="GettingStartedSelection" type="checkbox" disabled
                            value="@GettingStartedOptions.AcceptPayments"
-                           @(currentLevel == GettingStartedOptions.AcceptPayments ? "checked=\"checked\"" : "")>
+                           @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.AcceptPayments) ? "checked=\"checked\"" : "")>
                     <label for="chk-getting-started-payments" class="font-styling-18 text-bold">Accept payments.</label>
                     <p class="getting-started-info">Let's get you set up to make payments. This not only makes it easier for payments to pay, but you will also receive funds quicker.</p>
                 </div>
@@ -130,7 +141,7 @@
 <div class="clearfix"></div>
 
 <div class="margin-v-30 text-center">
-    <a href="@url" class="btn btn-primary btn-free-profile">@phrase4</a>
+    <a href="@url" class="btn btn-primary btn-free-profile" style="@(unpublishActivity.IsNotEmpty() ? "background-color: #ffc870; border-color: #ffc870;" : "")">@phrase4</a>
 </div>
 <div class="clearfix"></div>
 

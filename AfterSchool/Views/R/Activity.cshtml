@@ -43,10 +43,10 @@
         Model.OwnerAccount.IsNotEmpty() &&
         SessionVariables.CurrentAccount.IsNotEmpty() &&
         SessionVariables.CurrentUser.IsNotEmpty() &&
-        (SessionVariables.CurrentAccount.ID == Model.OwnerAccount.ID) && 
+        (SessionVariables.CurrentAccount.ID == Model.OwnerAccount.ID) &&
         (SessionVariables.CurrentUser.HasAccessTo(Model.OwnerAccount));
 
-    var activity = Model.GetActivity();    
+    var activity = Model.GetActivity();
 }
 
 @{
@@ -59,7 +59,7 @@
             { "CanPublishActivity", ViewBag.CanPublishActivity },
             { "ParticipationObject", Model },
             { "Session", session }
-        }
+                }
     );
 }
 
@@ -124,7 +124,7 @@
                                    { "canRegisterFor", ViewBag.CanRegisterFor },
                                    { "session", session },
                                    { "accountprofile", ViewBag.AccountProfile }
-                               }
+               }
                             );
                         }
                     </div>
@@ -279,24 +279,24 @@
     </div>
 </div>
 
-<div id="footer-activity" class="activity-footer text-center">
-    <span class="span-upgrade-modal-close" onclick="return hideActivityRibbon()">X</span>
-    @if (activity.IsPublished)
-    {
-        <button class="btn btn-default btn-activity-footer">Share</button>
-        <a href="@Url.Action("editsetup", "activity", new { id = Model.Uid, area = "org" })" class="btn btn-default btn-activity-footer">Edit Activity</a>
-    }
-    else
-    {
-        <button class="btn btn-default btn-activity-footer">Share</button>
-        <a href="@Url.Action("editsetup", "activity", new { id = Model.Uid, area = "org" })" class="btn btn-default btn-activity-footer">Return to Edit</a>
-        <a href="@Url.Action("publish", "activity", new { id = Model.Uid, area = "org" })" class="btn btn-default btn-activity-footer">Publish</a>
-    }
-
-</div>
-
 @if (isAccountAndLoggedInUserIsOwner)
 {
+    <div id="footer-activity" class="activity-footer text-center">
+        <span class="span-upgrade-modal-close" onclick="return hideActivityRibbon()">X</span>
+        @if (activity.IsPublished)
+        {
+            <button class="btn btn-default btn-activity-footer">Share</button>
+            <a href="@Url.Action("editsetup", "activity", new { id = Model.Uid, area = "org" })" class="btn btn-default btn-activity-footer">Edit Activity</a>
+        }
+        else
+        {
+            <button class="btn btn-default btn-activity-footer">Share</button>
+            <a href="@Url.Action("editsetup", "activity", new { id = Model.Uid, area = "org" })" class="btn btn-default btn-activity-footer">Return to Edit</a>
+            <a href="@Url.Action("publish", "activity", new { id = Model.Uid, area = "org" })" class="btn btn-default btn-activity-footer">Publish</a>
+        }
+
+    </div>
+
     Html.RenderPartial("~/Views/Shared/_GettingStartedModal.cshtml", Model.OwnerAccount, new ViewDataDictionary() { { "ActivityUid", Model.Uid } });
 }
 
