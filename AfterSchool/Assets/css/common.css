@@ -550,3 +550,11 @@
     color: #00a38a;
     text-decoration: underline;
 }
+
+.btn-activity-footer {
+    box-shadow: 0 0 4px 0px #555555;
+    background-color: #c3eae0;
+    border-color: #c3eae0;
+    padding: 10px 20px;
+    width: 180px;
+}

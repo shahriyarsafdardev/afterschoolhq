@@ -5,48 +5,10 @@
     var supportEmail = AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress;
     var supportEmailHref = $"mailto:{supportEmail}";
     var accountOwner = Model.GetAccountOwner();
-    var ActivityUid = (Guid)ViewBag.ActivityUid;
+    var activityUid = (Guid)ViewBag.ActivityUid;
     var currentLevel = AccountService.OnboardingCompletionStatus(Model);
-
-    if (currentLevel == GettingStartedOptions.NotSet)
-    {
-
-    }
-    else if (currentLevel == GettingStartedOptions.CreateProfile)
-    {
-
-    }
-    else if (currentLevel == GettingStartedOptions.CreateFirstActivity)
-    {
-        // activity created but email not validated. show resend verification modal
-    }
-    else if (currentLevel == GettingStartedOptions.ValidateEmail)
-    {
-
-    }
-    else if (currentLevel == GettingStartedOptions.AcceptPayments)
-    {
-
-    }
+    var isStripeIntegrated = TempData["IsStripeIntegrated"] != null;
 }
-
-<div id="modal-acceptpayment-done" class="modal fade" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content modal-min-width" style="border-radius: 10px; box-shadow: 0 2px 12px 3px rgb(0 0 0 / 30%);">
-            <div class="modal-body account-getting-started-padding">
-                <div class="text-center">
-                    <img src="~/img/email-symbol.png" />
-                </div>
-                <div id="modal-email-confirmation-text" style="margin: 30px 0 38px; font-size: 19px; font-weight: bold; letter-spacing: 1px; text-align: center; color: #4a4a4a; overflow-wrap: break-word;">
-                    Account setup complete!
-                </div>
-                <div id="modal-email-confirmation-btn" class="margin-v-30 text-center">
-                    <a href="#" class="btn btn-primary btn-free-profile" onclick="return resendValidationEmail()">Publish & View Activity.</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
 <div id="modal-email-confirmation" class="modal fade" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
@@ -106,7 +68,7 @@
                                                 <td>
                                                     @if (!account.HasStripeConnectedAccount)
                                                     {
-                                                        var redirectUri = Server.UrlEncode($"{AfterSchoolLibrary.Helpers.Utilities.BaseUrl()}/org/account/oauthstripe/");
+                                                        var redirectUri = Server.UrlEncode($"{AfterSchoolLibrary.Helpers.Utilities.BaseUrl()}/org/account/oauthstripeOnboardingModal/");
                                                         var email = currentUser.Email.IsEmail() ? Server.UrlEncode(currentUser.Email) : Server.UrlEncode(account.Email);
                                                         var website = Server.UrlEncode(account.ShortHomePageUrl);
                                                         var linkUrl = $"https://connect.stripe.com/express/oauth/authorize?redirect_uri={redirectUri}&state={Request["source"]}&client_id={AfterSchoolLibrary.Billing.StripeHelper.PlatformClientId}&stripe_user[email]={email}&stripe_user[url]={website}";
@@ -200,19 +162,41 @@
     </div>
 </div>
 
+<div id="modal-acceptpayment-done" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content modal-min-width" style="border-radius: 10px; box-shadow: 0 2px 12px 3px rgb(0 0 0 / 30%);">
+            <div class="modal-body account-getting-started-padding">
+                <div class="text-center">
+                    <img src="~/img/email-symbol.png" />
+                </div>
+                <div id="modal-email-confirmation-text" style="margin: 30px 0 38px; font-size: 19px; font-weight: bold; letter-spacing: 1px; text-align: center; color: #4a4a4a; overflow-wrap: break-word;">
+                    Account setup complete!
+                </div>
+                <div id="modal-email-confirmation-btn" class="margin-v-30 text-center">
+                    <a href="@Url.Action("publish", "activity", new { id = activityUid, area = "org" })" class="btn btn-primary btn-free-profile" style="padding: 12px 20px;" onclick="return resendValidationEmail()">Publish & View Activity</a>
+                    <div class="clearfix"></div>
+                    <br />
+                    <a href="#" style="text-decoration: underline; font-size: 16px; letter-spacing: 0.84px;" onclick="return hideAcceptPaymentModal()"> Return to activity draft</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script type="text/javascript">
     var currentLevel = @Json.Encode(currentLevel);
     var isEmailToBeValidated = @Json.Encode(GettingStartedOptions.CreateFirstActivity);
     var isPaymentSetupToBeDone = @Json.Encode(GettingStartedOptions.ValidateEmail);
     var isAcceptPaymentDone = @Json.Encode(GettingStartedOptions.AcceptPayments);
+    var isStripeIntegrated = @Json.Encode(isStripeIntegrated);
 
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         if (currentLevel == isEmailToBeValidated) {
-            $('#modal-email-confirmation').modal('show'); //make id dynamic
+            $('#modal-email-confirmation').modal('show');
         } else if (currentLevel == isPaymentSetupToBeDone) {
-            $('#modal-payment-confirmation').modal('show'); //make id dynamic
-        } else if (currentLevel == isAcceptPaymentDone) {
-            $('#modal-acceptpayment-done').modal('show'); //make id dynamic
+            $('#modal-payment-confirmation').modal('show');
+        } else if (currentLevel == isAcceptPaymentDone && isStripeIntegrated) {
+            $('#modal-acceptpayment-done').modal('show');
         }
 
         updateButtonClasses();
@@ -235,5 +219,9 @@
     function resendValidationEmail() {
         $('#modal-email-confirmation-text').html('An email has been sent to <span style="color: #00b492;">@accountOwner.Email</span> Please check your inbox for next steps.');
         $('#modal-email-confirmation-btn').hide();
+    }
+
+    function hideAcceptPaymentModal() {
+        $('#modal-acceptpayment-done').modal('hide');
     }
 </script>

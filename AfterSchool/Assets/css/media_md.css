@@ -80,4 +80,21 @@
     .account-getting-started-padding {
         padding: 50px 145px 50px 145px !important;
     }
+
+    .activity-footer {
+        position: fixed;
+        z-index: 999999;
+        background-color: #00c5a3;
+        width: 100%;
+        min-height: 60px;
+        bottom: 0;
+        padding: 20px 40px;
+        color: white;
+    }
+
+    .btn-activity-footer {
+        font-weight: bold;
+        border-radius: 7px;
+        margin-left: 20px;
+    }
 }

@@ -1528,7 +1528,7 @@ namespace AfterSchool.Areas.Org.Controllers
             return View("PaymentsOptions");
         }
 
-        public ActionResult OAuthStripeForModal()
+        public ActionResult OAuthStripeOnboardingModal()
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
@@ -1550,7 +1550,10 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 var activityUrl = activities.IsNotEmpty() ? activities.FirstOrDefault().ShortHomePageUrl : "";
                 if (activityUrl.IsNotEmpty())
-                    return Redirect(activityUrl);                
+                {
+                    TempData["IsStripeIntegrated"] = true;
+                    return Redirect(activityUrl);
+                }
                 else
                     return View("PaymentsOptions");
             }
