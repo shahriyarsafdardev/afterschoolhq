@@ -30,6 +30,10 @@
     var specialNeedsOffered = accountProperties.Where(item => item.AccountPropertyTypeId.In(specialNeedsTypes));
     var showPhotoGallery = photos.Any() || isInEditMode;
     var isOnboadingCompleted = AccountService.IsOnboardingCompleted(SessionVariables.CurrentAccount, msgs);
+    var isAccountAndLoggedInUserIsOwner = SessionVariables.CurrentAccount.IsNotEmpty() &&
+        SessionVariables.CurrentUser.IsNotEmpty() &&
+        (SessionVariables.CurrentAccount.ID == Model.ID) &&
+        (SessionVariables.CurrentUser.HasAccessTo(Model));
 }
 
 <style>
@@ -54,13 +58,13 @@
 
 @{
     Html.RenderPartial(
-        "~/Views/Shared/Registration/_AccountTopBar.cshtml",
-        Model,
-        new ViewDataDictionary()
-        {
+"~/Views/Shared/Registration/_AccountTopBar.cshtml",
+Model,
+new ViewDataDictionary()
+{
             { "LoginReturnUrl", Model.HomePageUrl }
-                }
-    );
+        }
+);
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -527,7 +531,7 @@
     }
 </div>
 
-@if (SessionVariables.CurrentAccount.IsNotEmpty())
+@if (isAccountAndLoggedInUserIsOwner)
 {
     <div id="modal-getting-started" class="modal fade" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-lg" role="document">
