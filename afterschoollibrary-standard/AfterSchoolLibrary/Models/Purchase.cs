@@ -195,20 +195,12 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<Purchase> LoadByCouponIdByPurchaseAccountId(int CouponId, int PurchaserAccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-		{
-			var dq = DatabaseQuery;
-			dq.Connection = dc;
-			dq.Criterias.Add(ObjectMap["CouponId"], CouponId);
-			dq.Criterias.Add(ObjectMap["PurchaserAccountId"], PurchaserAccountId);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-		}
+		
 
-
-		#endregion
+        #endregion
 
 		#region "UserDefined"
 
 		#endregion
-	}
+    }
 }

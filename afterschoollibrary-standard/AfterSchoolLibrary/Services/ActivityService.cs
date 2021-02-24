@@ -2188,7 +2188,7 @@ namespace AfterSchoolLibrary.Services
 
         public static List<ActivityRegistrationPeriod> GetActivityRegistrationPeriods(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityRegistrationPeriod.LoadByActivityId(activity.ID.Value, true, msgs, dc);
+            return ActivityRegistrationPeriod.LoadByActivityIdByIsActive(activity.ID.Value, true, msgs, dc);
         }
 
         public static List<RegistrationPeriod> GetRegistrationPeriods(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
