@@ -535,6 +535,11 @@ Public Module Extensions
     End Function
 
     <Extension()>
+    Public Function ToGuid(ByVal aObj As Object) As Guid
+        Return New Guid(aObj.ToString())
+    End Function
+
+    <Extension()>
     Public Function ToGuid(ByVal aString As String) As Guid
         Return New Guid(aString)
     End Function

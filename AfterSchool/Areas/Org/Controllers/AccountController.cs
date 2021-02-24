@@ -1500,10 +1500,9 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
 
-            var uri = Request.Url;
-            var query = HttpUtility.ParseQueryString(uri.Query);
-
-            var id = query.Get("id");
+            //.. user is redirected from onbording
+            //.. used session becuase stripe is not allowing multiple redirection at the moment
+            var id = Session["activityUid"];
 
             if (Request["error"].IsEmpty())
                 SessionVariables.CurrentAccount.CompleteStripeConnect(Request["code"], SessionVariables.CurrentUser, msgs);
@@ -1514,51 +1513,17 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 if (id.IsNotEmpty())
                 {
+                    Session["activityUid"] = null;
+                    TempData["IsStripeIntegrated"] = true;
+
                     Activity activity = Activity.LoadByUid(id.ToGuid());
                     return Redirect(activity.ShortHomePageUrl);
                 }
-
+                
                 return RedirectToAction("paymentsdone", new { source = Request["state"], isfullscreen = Request["isfullscreen"] });
             }
 
             ViewBag.Account = SessionVariables.CurrentAccount;
-            ViewBag.IsFullScreen = GetIsFullScreen();
-            ViewBag.Messages = msgs;
-
-            return View("PaymentsOptions");
-        }
-
-        public ActionResult OAuthStripeOnboardingModal()
-        {
-            var msgs = new SystemMessages();
-            var currentAccount = SessionVariables.CurrentAccount;
-
-            //if (Request["error"].IsEmpty())
-            //    SessionVariables.CurrentAccount.CompleteStripeConnect(Request["code"], SessionVariables.CurrentUser, msgs);
-            //else
-            //    msgs.Add("It appears you have canceled your request to connect your Stripe account.", MessageType.Notice);
-
-            if (msgs.HasNoErrors())
-            {
-                var activities = currentAccount.GetActivities(SessionVariables.AccountUserType,
-                    SessionVariables.CurrentUser,
-                    ActivityType.Activity,
-                    false,
-                    false,
-                    SessionVariables.CurrentAccount.AccountTypeId == AccountType.School,
-                    msgs: msgs);
-
-                var activityUrl = activities.IsNotEmpty() ? activities.FirstOrDefault().ShortHomePageUrl : "";
-                if (activityUrl.IsNotEmpty())
-                {
-                    TempData["IsStripeIntegrated"] = true;
-                    return Redirect(activityUrl);
-                }
-                else
-                    return View("PaymentsOptions");
-            }
-
-            ViewBag.Account = currentAccount;
             ViewBag.IsFullScreen = GetIsFullScreen();
             ViewBag.Messages = msgs;
 
