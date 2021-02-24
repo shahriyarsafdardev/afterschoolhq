@@ -2180,8 +2180,8 @@ namespace AfterSchoolLibrary.Services
                             }
 
                             //..registration period
-                            response.RegistrationPeriodStart = row["RegistrationPeriodStart"].IsNotEmpty() ? row["RegistrationPeriodStart"].ToString() : null;
-                            response.RegistrationPeriodEnd = row["RegistrationPeriodEnd"].IsNotEmpty() ? row["RegistrationPeriodEnd"].ToString() : null;
+                            response.RegistrationPeriodStart = row["StartDateTime"].IsNotEmpty() ? row["StartDateTime"].ToString() : null;
+                            response.RegistrationPeriodEnd = row["EndDateTime"].IsNotEmpty() ? row["EndDateTime"].ToString() : null;
 
                             ListResponse.Add(response);
                         }

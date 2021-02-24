@@ -1146,6 +1146,14 @@ namespace AfterSchoolLibrary.Models
             sql += $"\n";
 
             sql += $@"
+                IF(OBJECT_ID('tempdb..#TEMP') IS NOT NULL) BEGIN DROP TABLE #TEMP END";
+
+            sql += $"\n";
+
+            sql += $@"
+            SELECT *
+			INTO #Temp
+			FROM (
                 SELECT 
                     --DISTINCT
                     a.Id as AccountId,
@@ -1163,8 +1171,8 @@ namespace AfterSchoolLibrary.Models
 					ap.AgeEnd,
 					glStart.Abbreviation as GradeLevelStart,
 					glEnd.Abbreviation as GradeLevelEnd,
-                    rp.StartDateTime as RegistrationPeriodStart, 
-					rp.EndDateTime as RegistrationPeriodEnd          
+                    rp.StartDateTime, 
+					rp.EndDateTime
                 FROM 
                     AccountRelationship ar
                     INNER JOIN Account a ON a.ID = ar.VisitorAccountId
@@ -1252,14 +1260,27 @@ namespace AfterSchoolLibrary.Models
                 sql += $@")";
             }
 
+            sql += $@" 
+            ) AS fltData";
+
             sql += $@"
-                ORDER BY
-                    (CASE WHEN GETDATE() BETWEEN rp.StartDateTime AND rp.EndDateTime THEN 1 ELSE 2 END), 
-				    (CASE WHEN rp.EndDateTime IS NULL THEN 2 ELSE 1 END), 
-				        rp.EndDateTime ASC,
-				    (CASE WHEN rp.StartDateTime IS NULL THEN 2 ELSE 1 END), 
-				        rp.StartDateTime DESC, 
-                    a.Name ASC";
+            --this table is for current activities
+			SELECT DISTINCT AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, 1 as IsAccountNowEnrolling, IsELearningCenter, IsVirtualProgram, Headline, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, NULL AS StartDateTime, NULL AS EndDateTime
+			FROM #Temp 
+			WHERE CAST(GETDATE() AS DATE) BETWEEN CAST(StartDateTime AS DATE) AND CAST(EndDateTime AS DATE)
+			UNION ALL
+				
+			--this table will be used to order by				
+			SELECT distinct AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, 0 as IsAccountNowEnrolling, IsELearningCenter, IsVirtualProgram, Headline, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, StartDateTime, EndDateTime
+			FROM #Temp t
+			WHERE
+				AccountId NOT IN (
+					SELECT DISTINCT AccountId FROM #Temp 
+					WHERE CAST(GETDATE() AS DATE) BETWEEN CAST(StartDateTime AS DATE) AND CAST(EndDateTime AS DATE)
+				) 
+			ORDER BY IsAccountNowEnrolling desc, EndDateTime desc, StartDateTime asc
+
+			DROP TABLE #TEMP";
 
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
