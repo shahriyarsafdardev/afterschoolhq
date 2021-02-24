@@ -1071,19 +1071,19 @@ namespace AfterSchoolLibrary.Models
                 searchTerms = $"\"*{search}*\"";
 
             var sql = $@"
-                DECLARE @AccountId NVARCHAR(50),
-                    @SearchTerm NVARCHAR(250),
-                    @Neighborhood NVARCHAR(100),
-                    @Grades NVARCHAR(100),
-                    @Age NVARCHAR(100),
-                    @Gender varchar(10),                        
-                    @Cost varchar(1),
-                    @Starting varchar(1),
-                    @IsELearningCenter BIT = NULL,  
-                    @IsVirtualProgram BIT = NULL, 
-                    @IsOpenDuringCovid BIT = NULL, 
-                    @Timing NVARCHAR(100),
-                    @SpecialNeeds NVARCHAR(100)";
+            DECLARE @AccountId NVARCHAR(50),
+                @SearchTerm NVARCHAR(250),
+                @Neighborhood NVARCHAR(100),
+                @Grades NVARCHAR(100),
+                @Age NVARCHAR(100),
+                @Gender varchar(10),                        
+                @Cost varchar(1),
+                @Starting varchar(1),
+                @IsELearningCenter BIT = NULL,  
+                @IsVirtualProgram BIT = NULL, 
+                @IsOpenDuringCovid BIT = NULL, 
+                @Timing NVARCHAR(100),
+                @SpecialNeeds NVARCHAR(100)";
             
             sql += $@"{Environment.NewLine}
                 SET @SearchTerm = '{searchTerms}'";
@@ -1146,7 +1146,7 @@ namespace AfterSchoolLibrary.Models
             sql += $"\n";
 
             sql += $@"
-                IF(OBJECT_ID('tempdb..#TEMP') IS NOT NULL) BEGIN DROP TABLE #TEMP END";
+            IF(OBJECT_ID('tempdb..#TEMP') IS NOT NULL) BEGIN DROP TABLE #TEMP END";
 
             sql += $"\n";
 
@@ -1155,15 +1155,12 @@ namespace AfterSchoolLibrary.Models
 			INTO #Temp
 			FROM (
                 SELECT 
-                    --DISTINCT
                     a.Id as AccountId,
-                    act.ID as ActivityId,
                     a.Uid as AccountUid, 
                     a.Name as AccountName,                    
                     a.UniqueName as AccountUniqueName,
                     ap.IsOpenDuringCovid,
 					ap.IsELearningCenter,
-                    CASE WHEN CAST(GETDATE() as date) BETWEEN CAST(rp.StartDateTime as date) AND CAST(rp.EndDateTime as date) THEN 1 ELSE 0 END as IsAccountNowEnrolling,
                     ap.IsVirtualProgram,
 					ap.Headline,
                     ap.LocationId,
@@ -1260,15 +1257,18 @@ namespace AfterSchoolLibrary.Models
                 sql += $@")";
             }
 
-            sql += $@" 
+            sql += $@"
             ) AS fltData";
+
+            sql += $"\n";
 
             sql += $@"
             --this table is for current activities
 			SELECT DISTINCT AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, 1 as IsAccountNowEnrolling, IsELearningCenter, IsVirtualProgram, Headline, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, NULL AS StartDateTime, NULL AS EndDateTime
 			FROM #Temp 
 			WHERE CAST(GETDATE() AS DATE) BETWEEN CAST(StartDateTime AS DATE) AND CAST(EndDateTime AS DATE)
-			UNION ALL
+			
+            UNION ALL
 				
 			--this table will be used to order by				
 			SELECT distinct AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, 0 as IsAccountNowEnrolling, IsELearningCenter, IsVirtualProgram, Headline, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, StartDateTime, EndDateTime
