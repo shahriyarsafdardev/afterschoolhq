@@ -2241,7 +2241,7 @@ namespace AfterSchoolLibrary.Services
                 }
                 else
                 {
-                    var item = ActivityRegistrationPeriod.LoadByActivityIdByIsActive(activity.ID.Value, true, msgs, dc);
+                    var item = ActivityRegistrationPeriod.LoadByActivityIdByIsActive(activity.ID.Value, true, msgs, dc).FirstOrDefault();
                     if (item.IsNotEmpty())
                         return item.ToRegistrationPeriod(true, msgs, dc);
                 }
