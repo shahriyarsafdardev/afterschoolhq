@@ -63,7 +63,7 @@ Model,
 new ViewDataDictionary()
 {
             { "LoginReturnUrl", Model.HomePageUrl }
-        }
+                        }
 );
 }
 
@@ -533,6 +533,12 @@ new ViewDataDictionary()
 
 @if (isAccountAndLoggedInUserIsOwner)
 {
+    <div id="footer-account" class="activity-footer text-center">
+        <span class="span-upgrade-modal-close" onclick="return hideActivityRibbon()">X</span>
+        <a href="@Url.Action("style", "account", new { id = Model.Uid, area = "org" })" class="btn btn-default btn-activity-footer">Edit Profile</a>
+        <a href="@Url.Action("editsetup", "activity", new { isnew = 1, type = (int)ActivityType.Activity, area = "org", source = Request["source"]})" class="btn btn-default btn-activity-footer">Add Activity</a>
+    </div>
+
     <div id="modal-getting-started" class="modal fade" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
@@ -560,6 +566,10 @@ new ViewDataDictionary()
             $('#model-claim').click();
         }
     });
+
+    function hideActivityRibbon() {
+        $('#footer-account').fadeOut();
+    };
 
     (function () {
         var url = '@accountProfile.VideoUrl';
@@ -594,7 +604,6 @@ new ViewDataDictionary()
         }
 
         return false;
-
     }
 
     function validateYouTubeVideoUrl(url) {
