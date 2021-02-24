@@ -268,7 +268,7 @@ namespace AfterSchoolLibrary.Services
         {
             get
             {
-                return new AccountType[] { AccountType.CommunityCenter, AccountType.School, AccountType.Church };
+                return new AccountType[] { AccountType.CommunityCenter, AccountType.School, AccountType.Church, AccountType.Directory };
             }
         }
 
@@ -2138,74 +2138,11 @@ namespace AfterSchoolLibrary.Services
                     dc);
         }
 
-        public static string ParseAndLoadGrade(string grades)
-        {
-            var gradeIds = "";
-            List<GradeLevel> ListGrades = GradeLevel.Load();
-
-            if (grades.IsNotEmpty())
-            {
-                var lstGrades = grades.Split(',');
-                foreach (var item in lstGrades)
-                {
-                    var grade = ListGrades.FirstOrDefault(m => m.Name.ToLower().Replace(" ", "_") == item);
-
-                    if (grade.IsNotEmpty())
-                        gradeIds += $"{grade.ID},";
-                }
-            }
-
-            return gradeIds;
-        }
-
-        public static string ParseAndLoadAge(string ages)
-        {
-            var ageIds = "";
-            if (ages.IsNotEmpty())
-            {
-                var lstAges = ages.Split(',');
-                foreach (var item in lstAges)
-                {
-                    if (item.Contains('_'))
-                    {
-                        var age = item.Split('_');
-
-                        if (age.IsNotEmpty())
-                        {
-                            var ageStart = age[0];
-                            var ageEnd = age[1];
-
-                            if (ageStart.IsNotEmpty() && ageEnd.IsNotEmpty())
-                            {
-                                for (int i = ageStart.ToInteger(); i <= ageEnd.ToInteger(); i++)
-                                {
-                                    ageIds += $"{i},";
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            return ageIds;
-        }
-
-        public static string ParseAndLoadGender(string gender)
-        {
-            var genderIds = "";
-            if (gender.IsNotBlank() && gender == GenderRestrictionType.MaleOnly.ToString().ToLower())
-                genderIds = "1,";
-            if (gender.IsNotBlank() && gender == GenderRestrictionType.FemaleOnly.ToString().ToLower())
-                genderIds += "2,";
-
-            return genderIds;
-        }
-
         public static List<SearchDirectoryResponse> SearchDirectoryAccounts(string hostAccountId, string search, string neighborhoods, string grades, string ages, string gender, string timing, string cost, string starting, string other, string specialNeeds, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             try
             {
-                var accountDataTable = Account.SearchVisitorAccountsByHostAccount(hostAccountId, search, neighborhoods, ParseAndLoadGrade(grades), ParseAndLoadAge(ages), ParseAndLoadGender(gender), timing, cost, starting, other, specialNeeds, msgs: msgs);
+                var accountDataTable = Account.SearchVisitorAccountsByHostAccount(hostAccountId, search, neighborhoods, grades, ages, gender, timing, cost, starting, other, specialNeeds, msgs: msgs);
                                 
                 if (accountDataTable.IsNotEmpty() && accountDataTable.Rows.Any())
                 {
@@ -2214,7 +2151,7 @@ namespace AfterSchoolLibrary.Services
                     {
                         if (row.IsNotEmpty())
                         {
-                            SearchDirectoryResponse response = new SearchDirectoryResponse();
+                            var response = new SearchDirectoryResponse();
 
                             // ..account
                             response.AccountName = row["AccountName"].IsNotEmpty() ? row["AccountName"].ToString().MaxChars(28, "...") : "";
@@ -2224,6 +2161,9 @@ namespace AfterSchoolLibrary.Services
                             //.. account profile  
                             response.IsOpenDuringCovid = row["IsOpenDuringCovid"].IsNotEmpty() ? Convert.ToBoolean(row["IsOpenDuringCovid"]) : false;
                             response.IsELearningCenter = row["IsELearningCenter"].IsNotEmpty() ? Convert.ToBoolean(row["IsELearningCenter"]) : false;
+                            response.IsAccountNowEnrolling = row["IsAccountNowEnrolling"].IsNotEmpty() ? Convert.ToBoolean(row["IsAccountNowEnrolling"]) : false;
+                            response.IsVirtualProgram = row["IsVirtualProgram"].IsNotEmpty() ? Convert.ToBoolean(row["IsVirtualProgram"]) : false;
+
                             response.ProfileHeadline = row["Headline"].IsNotEmpty() ? row["Headline"].ToString().MaxChars(70, "...") : "";
                             response.IsRestrictByGrade = row["AgeStart"].IsEmpty();
                             response.AgeStart = row["AgeStart"].IsNotEmpty() ? row["AgeStart"].ToString() : null;
@@ -2243,7 +2183,7 @@ namespace AfterSchoolLibrary.Services
                         }
                     }
 
-                    return ListResponse;
+                    return ListResponse.DistinctBy(m => m.AccountName).ToList();
                 }
             }
             catch (Exception ex)

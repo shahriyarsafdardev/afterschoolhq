@@ -276,33 +276,24 @@ namespace AfterSchool.Controllers
         #region Profile
 
         [HttpGet]
-        public ActionResult GetProfiles(int count)
+        public ActionResult GetProfiles(int? count)
         {
             if (!IsRequestFromApp())
                 return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
 
-            var msgs = new SystemMessages();
-
-            if (count > 10)
-                count = 10;
+            var msgs = new SystemMessages();           
 
             var profiles = AccountProfile.Search(
                             accountTypes: AccountService.CustomerAccountTypes,
-                            isOpenDuringCovid: null,
-                            isELearningCenter: null,
-                            neighborhoods: null,
-                            cities: null,
-                            states: null,
-                            start: 0,
-                            length: count,
-                            getRandomSample: true,
+                            count: count,
                             msgs: msgs);
 
             var profilesObj = new List<object>();
 
             var html = "";
 
-            profiles.ForEach(profile => {
+            profiles.ForEach(profile =>
+            {
                 var result = ViewEngines.Engines.FindPartialView(this.ControllerContext, "~/Views/Shared/Registration/_BrowseProvider.cshtml");
 
                 if (result.View != null)
@@ -321,7 +312,7 @@ namespace AfterSchool.Controllers
                     html += sb.ToString();
                 }
             });
-           
+
 
             //profiles.ForEach(profile => {
             //    var account = profile.GetAccount(msgs);

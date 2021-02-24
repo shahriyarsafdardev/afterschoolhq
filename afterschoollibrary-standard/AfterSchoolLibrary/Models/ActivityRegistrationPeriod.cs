@@ -185,13 +185,13 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static ActivityRegistrationPeriod LoadByRegistrationPeriodIdByActivityId(int RegistrationPeriodId, int ActivityId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<ActivityRegistrationPeriod> LoadByRegistrationPeriodIdByActivityId(int RegistrationPeriodId, int ActivityId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["RegistrationPeriodId"], RegistrationPeriodId);
 			dq.Criterias.Add(ObjectMap["ActivityId"], ActivityId);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
 		
