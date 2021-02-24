@@ -44,8 +44,11 @@ namespace AfterSchool.Controllers
         public JsonResult GetISYPSearch(string search, string neighborhoods, string grades, string ages, string gender, string timing, string cost, string starting, string other, string special)
         {
             var msgs = new SystemMessages();
+            var parsedGrade = ParseAndLoadGrade(grades);
+            var parsedAge = ParseAndLoadAge(ages);
+            var parsedGender = ParseAndLoadGender(gender);
 
-            var searchedAccounts = AccountService.SearchDirectoryAccounts(IsypHostAccountId, search, neighborhoods, grades, ages, gender, timing, cost, starting, other, special, msgs: msgs);
+            var searchedAccounts = AccountService.SearchDirectoryAccounts(IsypHostAccountId, search, neighborhoods, parsedGrade, parsedAge, parsedGender, timing, cost, starting, other, special, msgs: msgs);
 
             if (searchedAccounts.IsNotEmpty() && searchedAccounts.Any())
             {
@@ -61,5 +64,70 @@ namespace AfterSchool.Controllers
             //.. no result found
             return Json(new { success = false, status = "no-result" }, JsonRequestBehavior.AllowGet);
         }
+
+        #region Private Methods
+
+        private static string ParseAndLoadGrade(string grades)
+        {
+            var gradeIds = "";
+            if (grades.IsNotEmpty())
+            {
+                var lstGrades = grades.Split(',');
+                foreach (var item in lstGrades)
+                {
+                    var grade = ListGrades.FirstOrDefault(m => m.Name.ToLower().Replace(" ", "_") == item);
+
+                    if (grade.IsNotEmpty())
+                        gradeIds += $"{grade.ID},";
+                }
+            }
+
+            return gradeIds;
+        }
+
+        private static string ParseAndLoadAge(string ages)
+        {
+            var ageIds = "";
+            if (ages.IsNotEmpty())
+            {
+                var lstAges = ages.Split(',');
+                foreach (var item in lstAges)
+                {
+                    if (item.Contains('_'))
+                    {
+                        var age = item.Split('_');
+
+                        if (age.IsNotEmpty())
+                        {
+                            var ageStart = age[0];
+                            var ageEnd = age[1];
+
+                            if (ageStart.IsNotEmpty() && ageEnd.IsNotEmpty())
+                            {
+                                for (int i = ageStart.ToInteger(); i <= ageEnd.ToInteger(); i++)
+                                {
+                                    ageIds += $"{i},";
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return ageIds;
+        }
+
+        private static string ParseAndLoadGender(string gender)
+        {
+            var genderIds = "";
+            if (gender.IsNotBlank() && gender == GenderRestrictionType.MaleOnly.ToString().ToLower())
+                genderIds = "1,";
+            if (gender.IsNotBlank() && gender == GenderRestrictionType.FemaleOnly.ToString().ToLower())
+                genderIds += "2,";
+
+            return genderIds;
+        }
+
+        #endregion
     }
 }

@@ -2179,10 +2179,6 @@ namespace AfterSchoolLibrary.Services
                                 response.ProfileHeaderImageUrl = LocationService.GetGoogleMapsImageUrl(location, 1500, 600);
                             }
 
-                            //..registration period
-                            response.RegistrationPeriodStart = row["RegistrationPeriodStart"].IsNotEmpty() ? row["RegistrationPeriodStart"].ToString() : null;
-                            response.RegistrationPeriodEnd = row["RegistrationPeriodEnd"].IsNotEmpty() ? row["RegistrationPeriodEnd"].ToString() : null;
-
                             ListResponse.Add(response);
                         }
                     }
