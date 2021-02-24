@@ -1168,8 +1168,17 @@ namespace AfterSchoolLibrary.Models
                 FROM 
                     AccountRelationship ar
                     INNER JOIN Account a ON a.ID = ar.VisitorAccountId
-                    LEFT JOIN Activity act ON act.AccountId = ar.VisitorAccountId AND act.IsDeleted <> 1 AND act.IsPublished = 1 AND act.IsInviteOnly <> 1
-				    LEFT JOIN RegistrationPeriod rp on rp.AccountId = a.ID
+                    LEFT JOIN Activity act ON act.AccountId = ar.VisitorAccountId AND act.IsDeleted <> 1 AND act.IsPublished = 1 AND act.IsInviteOnly <> 1";
+
+            if (starting.IsNotEmpty())
+            {
+                sql += $@"
+                    LEFT JOIN ActivitySchedule acs ON act.ActivityScheduleId = acs.ID --this join will be applied only in case of Starts in filter";
+            }
+            
+            sql += $@"
+					LEFT JOIN ActivityRegistrationPeriod arp on arp.ActivityId = act.ID and arp.IsActive = 1
+				    LEFT JOIN RegistrationPeriod rp on rp.ID = arp.RegistrationPeriodId
                     LEFT JOIN AccountProfile ap ON ap.AccountId = ar.VisitorAccountId
                     LEFT JOIN Location loc ON ap.LocationId = loc.ID
                     LEFT JOIN AccountProperty properties on properties.AccountId = ar.VisitorAccountId AND properties.AccountPropertyTypeId in (12, 13, 14, 15)    
@@ -1182,7 +1191,7 @@ namespace AfterSchoolLibrary.Models
                     ((@AccountId IS NULL) OR ar.HostAccountId = @AccountId)
                     AND a.IsDeleted <> 1 
                     AND a.IsTest <> 1  
-                    AND ap.IsAHQApproved = 1
+                    AND ap.IsAHQApproved = 1                    
                     AND (
 						    (@SearchTerm = '""""') OR 
 						    CONTAINS((ap.Title, ap.Headline, ap.About), @SearchTerm)  OR 
