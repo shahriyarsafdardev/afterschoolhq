@@ -635,7 +635,7 @@ joinproperty: Activity.IsDeleted, int?, Int
 loadmethod: RegistrationPeriodId, List<>
 loadmethod: ActivityId, List<>
 loadmethod: ActivityId|IsActive
-loadmethod: RegistrationPeriodId|ActivityId
+loadmethod: RegistrationPeriodId|ActivityId, List<>
 [end]
 
 [begin]
@@ -1670,6 +1670,7 @@ property: AmountPaid, decimal?, Money
 loadmethod: RegistrationId, List<>
 loadmethod: RegistrantId, List<>
 loadmethod: CouponId, List<>
+loadmethod: CouponId|PurchaserAccountId, List<>
 [end]
 
 [begin]
@@ -1839,7 +1840,7 @@ values: NotSet, Individual, Organization
 [begin]
 type: Enum
 name: FeatureType
-values: NotSet, Attendance, AcceptPayments, EmailMessaging, CustomUrl, TeamAccounts, WaitingList, ManageForms, ManageLocations, ManageActivityGroups, Activities, Participants, AllowApplications, Lottery, TrialDays, ManageContacts, ViewInsights, PaymentsPercentageFee, PaymentsPercentageFlatFee, ManageExternalLeagues, UseStripeConnectedAccount, AcceptACH, ManageLeagues, ManageFieldTrips, ManagePermissionSlips, ManageLearningPods,	TextMessaging, AllowInvites, AllowStudentRegistration, AllowPaymentPlans, AllowSubscriptionPlans, AllowPayLater, StudentCRM
+values: NotSet, Attendance, AcceptPayments, EmailMessaging, CustomUrl, TeamAccounts, WaitingList, ManageForms, ManageLocations, ManageActivityGroups, Activities, Participants, AllowApplications, Lottery, TrialDays, ManageContacts, ViewInsights, PaymentsPercentageFee, PaymentsPercentageFlatFee, ManageExternalLeagues, UseStripeConnectedAccount, AcceptACH, ManageLeagues, ManageFieldTrips, ManagePermissionSlips, ManageLearningPods,	TextMessaging, AllowInvites, AllowStudentRegistration, AllowPaymentPlans, AllowSubscriptionPlans, AllowPayLater, StudentCRM, ManageCoupons
 [end]
 
 [begin]

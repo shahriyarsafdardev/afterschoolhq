@@ -427,6 +427,7 @@ namespace AfterSchoolLibrary.Models
 
 			var sql = $@"
 				SELECT
+					TOP ({count})
 					ap.[ID],
 					ap.[CreateDate],
 					ap.[CreatedBy],
@@ -480,8 +481,8 @@ namespace AfterSchoolLibrary.Models
 						rp.StartDateTime DESC, 
 					a.Name ASC";
 
-			return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList()?.ConvertAll(LoadObject)?.DistinctBy(m => m.Title).Take((int)count).ToList();
+			return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList()?.ConvertAll(LoadObject)?.DistinctBy(m => m.Title).ToList();
         }
 		#endregion
-	}
+    }
 }

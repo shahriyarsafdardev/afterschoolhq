@@ -78,7 +78,7 @@ namespace AfterSchoolLibrary.Services
         public static SystemMessages AddActivity(this RegistrationPeriod registrationPeriod, Activity activity, bool isActive, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            var item = ActivityRegistrationPeriod.LoadByRegistrationPeriodIdByActivityId(registrationPeriod.ID.Value, activity.ID.Value, dc: dc);
+            var item = ActivityRegistrationPeriod.LoadByRegistrationPeriodIdByActivityId(registrationPeriod.ID.Value, activity.ID.Value, dc: dc).FirstOrDefault();
 
             if ((item.IsEmpty() || (item.IsNotEmpty() && !item.IsActive)) && isActive)
             {
