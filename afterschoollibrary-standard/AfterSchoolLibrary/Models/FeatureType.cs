@@ -32,5 +32,6 @@ public enum FeatureType
 	AllowPaymentPlans,
 	AllowSubscriptionPlans,
 	AllowPayLater,
-	StudentCRM
+	StudentCRM,
+	ManageCoupons
 }
