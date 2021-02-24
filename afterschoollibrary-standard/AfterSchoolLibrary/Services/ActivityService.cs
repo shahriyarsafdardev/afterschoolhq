@@ -2188,7 +2188,7 @@ namespace AfterSchoolLibrary.Services
 
         public static List<ActivityRegistrationPeriod> GetActivityRegistrationPeriods(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityRegistrationPeriod.LoadByActivityIdByIsActive(activity.ID.Value, true, msgs, dc);
+            return ActivityRegistrationPeriod.LoadByActivityId(activity.ID.Value, msgs, dc);
         }
 
         public static List<RegistrationPeriod> GetRegistrationPeriods(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -2241,7 +2241,7 @@ namespace AfterSchoolLibrary.Services
                 }
                 else
                 {
-                    var item = ActivityRegistrationPeriod.LoadByActivityIdByIsActive(activity.ID.Value, true, msgs, dc).FirstOrDefault();
+                    var item = ActivityRegistrationPeriod.LoadByActivityIdByIsActive(activity.ID.Value, true, msgs, dc);
                     if (item.IsNotEmpty())
                         return item.ToRegistrationPeriod(true, msgs, dc);
                 }

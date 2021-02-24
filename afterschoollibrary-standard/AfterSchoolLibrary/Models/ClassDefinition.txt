@@ -634,7 +634,7 @@ joinproperty: RegistrationPeriod.RegistrationModeId, RegistrationMode, Int
 joinproperty: Activity.IsDeleted, int?, Int
 loadmethod: RegistrationPeriodId, List<>
 loadmethod: ActivityId, List<>
-loadmethod: ActivityId|IsActive, List<>
+loadmethod: ActivityId|IsActive
 loadmethod: RegistrationPeriodId|ActivityId, List<>
 [end]
 
