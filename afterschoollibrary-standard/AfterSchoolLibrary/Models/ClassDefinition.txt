@@ -1670,7 +1670,7 @@ property: AmountPaid, decimal?, Money
 loadmethod: RegistrationId, List<>
 loadmethod: RegistrantId, List<>
 loadmethod: CouponId, List<>
-loadmethod: CouponId|PurchaseAccountId, List<>
+loadmethod: CouponId|PurchaserAccountId, List<>
 [end]
 
 [begin]
