@@ -243,14 +243,4 @@
     .hidden-xl {
         display: none !important;
     }
-
-    .xl-height-52px {
-        min-height: 52px;
-    }
-
-    .xl-search-desc-height {
-        min-height: 60px;
-        height: 60px;
-        display: block;
-    }
 }
