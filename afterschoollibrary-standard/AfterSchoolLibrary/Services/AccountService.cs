@@ -2171,12 +2171,24 @@ namespace AfterSchoolLibrary.Services
                             response.GradeStart = row["GradeLevelStart"].IsNotEmpty() ? row["GradeLevelStart"].ToString() : null;
                             response.GradeEnd = row["GradeLevelEnd"].IsNotEmpty() ? row["GradeLevelEnd"].ToString() : null;
 
-                            //..Location, ProfileHeaderImageUrl
+                            var accountId = row["AccountId"].IsNotEmpty() ? Convert.ToInt32(row["AccountId"]) : 0;
+                            var headerImageUrl = row["HeaderImage"].IsNotEmpty() ? row["HeaderImage"].ToString() : "";
+                            var photos = AccountProperty.LoadByAccountIdByAccountPropertyTypeId(accountId, AccountPropertyType.Photo, msgs, dc);
+                            var ah = Helpers.Utilities.GetNewAmazonHelper();
+
+                            if (headerImageUrl.IsNotBlank())
+                                response.ProfileHeaderImageUrl = ah.GetFileLink(headerImageUrl, true, null, true);
+                            else if (photos.Any())
+                                response.ProfileHeaderImageUrl = ah.GetFileLink(photos.First().Value, true, null, true);
+
                             if (row["LocationId"].IsNotEmpty())
                             {
+                                //..Location, ProfileHeaderImageUrl
                                 var location = Location.Load(Convert.ToInt32(row["LocationId"]));
                                 response.Location = location.FormatCityState(false);
-                                response.ProfileHeaderImageUrl = LocationService.GetGoogleMapsImageUrl(location, 1500, 600);
+
+                                if (response.ProfileHeaderImageUrl.IsEmpty())
+                                    response.ProfileHeaderImageUrl = LocationService.GetGoogleMapsImageUrl(location, 1500, 600);
                             }
 
                             ListResponse.Add(response);

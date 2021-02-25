@@ -111,7 +111,7 @@
 
     <% _.each(response, function(searchResult){ %>
 
-    <div id="<%= searchResult.AccountUid %>" name="<%= searchResult.AccountName %>" class="col-xl-12 col-sm-6 col-md-6 col-lg-4 participation-object" style="height: 410px;" onclick="WebPage.navigateIframe('<%= searchResult.HomePageUrl %>')">
+    <div id="<%= searchResult.AccountUid %>" name="<%= searchResult.AccountName %>" class="col-xl-12 col-sm-6 col-md-6 col-lg-6 col-xl-4 participation-object" style="height: 410px; margin-bottom: 10px;" onclick="WebPage.navigateIframe('<%= searchResult.HomePageUrl %>')">
 
         <div class="panel" style="overflow: hidden;">
             <div class="reg-header" style="background-image: url(<%= searchResult.ProfileHeaderImageUrl %>); min-height: 100px; height: 150px; padding: 5px 5px; position: relative;">
@@ -188,14 +188,14 @@
                 </div>
 
                 <div class="text-wrap" style="margin-top: 20px; height: 75px;">
-                    <h3>
+                    <h3 style="min-height: 52px;">  
                         <strong title="<%= searchResult.AccountName %>"><%= searchResult.AccountName %></strong>
                     </h3>
                 </div>
 
                 <div class="clearfix"></div>
-                <div class="text-wrap" style="height: 40px;">
-                    <span class="text-medium-small">
+                <div class="text-wrap">
+                    <span class="text-medium-small" style="min-height: 60px; height: 60px; display: block;">
                         <%= searchResult.ProfileHeadline %>
                     </span>
                 </div>
