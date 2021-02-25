@@ -5,6 +5,16 @@
     var description = accountProfile?.Headline;
     var propertyTypes = new List<AccountPropertyType>() { AccountPropertyType.AcademicSubjects, AccountPropertyType.Classifications, AccountPropertyType.PricingOption, AccountPropertyType.ServiceOffered, AccountPropertyType.SoftSkills, AccountPropertyType.TeachingMethods, AccountPropertyType.TimeOffered };
     var keywords = account?.GetAccountProperties(propertyTypes).Select(x => x.Value).ToStringList(", ");
+    var shortHomePageUrl = account?.ShortHomePageUrl;
+    var site = UILabel.ProductName();
+
+    var ah = AfterSchoolLibrary.Helpers.Utilities.GetNewAmazonHelper();
+    string logoUrl = null;
+
+    if (accountProfile.Logo.IsNotBlank())
+    {
+        logoUrl = ah.GetFileLink(accountProfile.Logo, true, null, true);
+    }
 }
 
 <!DOCTYPE html>
@@ -18,7 +28,20 @@
     <meta name="description" content="@description">
     <meta name="author" content="@author">
 
-    <title>@ViewBag.Title - @UILabel.ProductName()</title>
+    <meta property="og:title" content="@author">
+    <meta property="og:description" content="@description">
+    <meta property="og:image" content="@logoUrl">
+    <meta property="og:url" content="@shortHomePageUrl">
+    <meta property="og:site_name" content="@site">
+
+    <meta name="twitter:title" content="@author">
+    <meta name="twitter:description" content="@description">
+    <meta name="twitter:image" content="@logoUrl">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@("@afterschoolhq")">
+    <meta name="twitter:image:alt" content="@author">
+
+    <title>@ViewBag.Title - @site</title>
 
     @{Html.RenderPartial("~/Views/Shared/_HeadIncludes.cshtml");}
     @{Html.RenderPartial("~/Views/Shared/_ZendeskWidget.cshtml");}

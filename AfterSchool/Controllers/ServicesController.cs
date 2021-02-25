@@ -285,7 +285,14 @@ namespace AfterSchool.Controllers
 
             var profiles = AccountProfile.Search(
                             accountTypes: AccountService.CustomerAccountTypes,
-                            count: count,
+                            isOpenDuringCovid: null,
+                            isELearningCenter: null,
+                            neighborhoods: null,
+                            cities: null,
+                            states: null,
+                            start: 0,
+                            length: count,
+                            getRandomSample: true,
                             msgs: msgs);
 
             var profilesObj = new List<object>();
