@@ -127,40 +127,42 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
         private void CheckStripeAccountRequirements(Stripe.Account stripeAccount, AfterSchoolLibrary.Models.Account account, SystemMessages msgs)
         {
             var requirements = stripeAccount.Requirements;
-            if(requirements.PastDue.IsNotEmpty() || requirements.CurrentlyDue.IsNotEmpty() || requirements.EventuallyDue.IsNotEmpty())
+            var requirementStatus = GetStripeRequirementStatus(requirements);
+            if (requirementStatus > StripeRequirementStatus.NotSet)
             {
                 var requirementList = new List<string>();
-                var requirementStatus = GetStripeRequirementStatus(requirements);
                 var mostUrgentRequirements = requirements.PastDue;
 
-                if(requirementStatus > StripeInfo)
+                if (requirementStatus > StripeRequirementStatus.PastDue)
+                    mostUrgentRequirements = requirementStatus == StripeRequirementStatus.CurrentlyDue ? requirements.CurrentlyDue : requirements.EventuallyDue;
 
                 mostUrgentRequirements.ForEach(req =>
                 {
-                    switch (req)
+                    var splitReq = req.Split('.');
+                    switch (splitReq[splitReq.Length - 1])
                     {
-                        case string a when a.Contains("city"):
+                        case "city":
                             requirementList.Add("Address: City");
                             break;
-                        case string b when b.Contains("line1"):
+                        case "line1":
                             requirementList.Add("Address: Line1");
                             break;
-                        case string c when c.Contains("postal_code"):
+                        case "postal_code":
                             requirementList.Add("Address: Postal Code");
                             break;
-                        case string d when d.Contains("state"):
+                        case "state":
                             requirementList.Add("Address: State");
                             break;
-                        case string e when e.Contains("dob.day"):
+                        case "day":
                             requirementList.Add("DOB: Day");
                             break;
-                        case string f when f.Contains("dob.month"):
+                        case "month":
                             requirementList.Add("DOB: Month");
                             break;
-                        case string g when g.Contains("dob.year"):
+                        case "year":
                             requirementList.Add("DOB: Year");
                             break;
-                        case string h when h.Contains("relationship.title"):
+                        case "title":
                             requirementList.Add("Job Title");
                             break;
                         default:
@@ -169,14 +171,23 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                     }
                 });
 
-                AfterSchoolLibrary.Helpers.EmailHelper.SendStripeHasUnfulFilledRequirementsEmail(stripeAccount, requirementList, account, msgs);
+                AfterSchoolLibrary.Helpers.EmailHelper.SendStripeHasUnfulFilledRequirementsEmail(stripeAccount, requirementList, requirementStatus, account, msgs);
             }
 
         }
 
-        private StripeRequirementStatus GetStripeRequirementStatus(Stripe.AccountRequirements)
+        private StripeRequirementStatus GetStripeRequirementStatus(Stripe.AccountRequirements requirements)
         {
+            if (requirements.PastDue.Count > 0)
+                return StripeRequirementStatus.PastDue;
 
+            if (requirements.CurrentlyDue.Count > 0)
+                return StripeRequirementStatus.CurrentlyDue;
+
+            if (requirements.EventuallyDue.Count > 0)
+                return StripeRequirementStatus.EventuallyDue;
+
+            return StripeRequirementStatus.NotSet;
         }
 
         private IHttpActionResult PaymentIntentProcessing(Stripe.Event stripeEvent, SystemMessages msgs)
