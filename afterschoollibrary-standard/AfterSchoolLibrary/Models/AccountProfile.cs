@@ -417,6 +417,15 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
+		/// <summary>
+		/// this code is not in use at the moment, I've created it to get data in order of activity closing soon, opening soon.
+		/// but later we decided to have old logic and not this one.
+		/// </summary>
+		/// <param name="accountTypes"></param>
+		/// <param name="count"></param>
+		/// <param name="msgs"></param>
+		/// <param name="dc"></param>
+		/// <returns></returns>
 		public static List<AccountProfile> Search(IEnumerable<AccountType> accountTypes, int? count, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
 			var dq = DatabaseQuery;
