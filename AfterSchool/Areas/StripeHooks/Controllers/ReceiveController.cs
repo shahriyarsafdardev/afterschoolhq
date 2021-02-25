@@ -129,17 +129,13 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
             var requirements = stripeAccount.Requirements;
             if(requirements.PastDue.IsNotEmpty() || requirements.CurrentlyDue.IsNotEmpty() || requirements.EventuallyDue.IsNotEmpty())
             {
-                var requirementStatus = requirements.PastDue.IsNotEmpty() ? "PastDue" : "";
-
-                if (requirementStatus.IsEmpty())
-                    requirementStatus = requirements.CurrentlyDue.IsNotEmpty() ? "CurrentlyDue" : " EventuallyDue";
-
-                account.UpdateStripeChargesAndPayouts(stripeAccount, msgs);
-
                 var requirementList = new List<string>();
+                var requirementStatus = GetStripeRequirementStatus(requirements);
+                var mostUrgentRequirements = requirements.PastDue;
 
+                if(requirementStatus > StripeInfo)
 
-                requirementList.ForEach(req =>
+                mostUrgentRequirements.ForEach(req =>
                 {
                     switch (req)
                     {
@@ -175,6 +171,11 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
 
                 AfterSchoolLibrary.Helpers.EmailHelper.SendStripeHasUnfulFilledRequirementsEmail(stripeAccount, requirementList, account, msgs);
             }
+
+        }
+
+        private StripeRequirementStatus GetStripeRequirementStatus(Stripe.AccountRequirements)
+        {
 
         }
 
