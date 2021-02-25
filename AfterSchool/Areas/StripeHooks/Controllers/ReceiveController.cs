@@ -127,14 +127,19 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
         private void CheckStripeAccountRequirements(Stripe.Account stripeAccount, AfterSchoolLibrary.Models.Account account, SystemMessages msgs)
         {
             var requirements = stripeAccount.Requirements;
-            if(requirements.PastDue.IsNotEmpty())
+            if(requirements.PastDue.IsNotEmpty() || requirements.CurrentlyDue.IsNotEmpty() || requirements.EventuallyDue.IsNotEmpty())
             {
+                var requirementStatus = requirements.PastDue.IsNotEmpty() ? "PastDue" : "";
+
+                if (requirementStatus.IsEmpty())
+                    requirementStatus = requirements.CurrentlyDue.IsNotEmpty() ? "CurrentlyDue" : " EventuallyDue";
 
                 account.UpdateStripeChargesAndPayouts(stripeAccount, msgs);
 
                 var requirementList = new List<string>();
 
-                requirements.PastDue.ForEach(req =>
+
+                requirementList.ForEach(req =>
                 {
                     switch (req)
                     {
