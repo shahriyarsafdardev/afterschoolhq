@@ -1163,6 +1163,7 @@ namespace AfterSchoolLibrary.Models
 					ap.IsELearningCenter,
                     ap.IsVirtualProgram,
 					ap.Headline,
+                    ap.HeaderImage,
                     ap.LocationId,
                     ap.AgeStart,
 					ap.AgeEnd,
@@ -1264,14 +1265,14 @@ namespace AfterSchoolLibrary.Models
 
             sql += $@"
             --this table is for current activities
-			SELECT DISTINCT AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, 1 as IsAccountNowEnrolling, IsELearningCenter, IsVirtualProgram, Headline, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, NULL AS StartDateTime, NULL AS EndDateTime
+			SELECT DISTINCT AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, 1 as IsAccountNowEnrolling, IsELearningCenter, IsVirtualProgram, Headline, HeaderImage, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, NULL AS StartDateTime, NULL AS EndDateTime
 			FROM #Temp 
 			WHERE CAST(GETDATE() AS DATE) BETWEEN CAST(StartDateTime AS DATE) AND CAST(EndDateTime AS DATE)
 			
             UNION ALL
 				
 			--this table will be used to order by				
-			SELECT distinct AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, 0 as IsAccountNowEnrolling, IsELearningCenter, IsVirtualProgram, Headline, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, StartDateTime, EndDateTime
+			SELECT distinct AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, 0 as IsAccountNowEnrolling, IsELearningCenter, IsVirtualProgram, Headline, HeaderImage, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, StartDateTime, EndDateTime
 			FROM #Temp t
 			WHERE
 				AccountId NOT IN (

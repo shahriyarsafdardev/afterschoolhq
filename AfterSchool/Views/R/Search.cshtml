@@ -1,14 +1,11 @@
-﻿@{ 
-    Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
+﻿@{     
     var accountUniqueName = ViewBag.AccountUniqueName;
-    ViewBag.Title = accountUniqueName;
     var msgs = (SystemMessages)ViewBag.Messages;
     var accountId = ViewBag.AccountId != null ? Convert.ToInt32(ViewBag.AccountId) : 0;
     var primaryColor = (string)ViewBag.PrimaryColor;
     var logoUrl = (string)ViewBag.LogoUrl;
     var headerImageUrl = (string)ViewBag.HeaderImageUrl;
     var joiningUrl = $@"/join{accountUniqueName}.html";
-
     if (!logoUrl.IsNotEmpty())
     {
         logoUrl = "/img/logo-vertical.png";
@@ -18,6 +15,15 @@
     {
         primaryColor = "#547bb6";
     }
+
+    //.. data for layout
+    ViewBag.Title = accountUniqueName;
+    if (accountId > 0)
+    {
+        ViewBag.AccountProfile = AccountProfile.LoadByAccountId(accountId);
+    }
+
+    Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -32,10 +38,8 @@
     }
 
     .join-directory-btn {
-        height: 38px;
         color: white !important;
         min-width: 180px;
-        font-size: 12px;
         background-color: @primaryColor !important;
     }
 </style>
@@ -105,7 +109,7 @@
 
     <% _.each(response, function(searchResult){ %>
 
-    <div id="<%= searchResult.AccountUid %>" name="<%= searchResult.AccountName %>" class="col-xl-12 col-sm-6 col-md-6 col-lg-4 participation-object" style="height: 410px;" onclick="WebPage.navigateIframe('<%= searchResult.HomePageUrl %>')">
+    <div id="<%= searchResult.AccountUid %>" name="<%= searchResult.AccountName %>" class="col-xl-12 col-sm-6 col-md-6 col-lg-6 col-xl-4 participation-object" style="height: 410px; margin-bottom: 10px;" onclick="WebPage.navigateIframe('<%= searchResult.HomePageUrl %>')">
 
         <div class="panel" style="overflow: hidden;">
             <div class="reg-header" style="background-image: url(<%= searchResult.ProfileHeaderImageUrl %>); min-height: 100px; height: 150px; padding: 5px 5px; position: relative;">
@@ -113,7 +117,7 @@
                 <% if(searchResult.IsAccountNowEnrolling) { %>
 
                 <div class="pull-right margin-l-10">
-                    <span class="badge bg-crimson profile-badge-updated">
+                    <span class="badge badge-danger profile-badge text-small">
                         Now Enrolling
                     </span>
                 </div>
@@ -123,7 +127,7 @@
                 <% if(searchResult.IsVirtualProgram) { %>
 
                 <div class="pull-right margin-l-10">
-                    <span class="badge bg-darkblue profile-badge-updated">
+                    <span class="badge profile-badge text-small">
                         Virtual
                     </span>
                 </div>
@@ -133,7 +137,7 @@
                 <% if(searchResult.IsOpenDuringCovid) { %>
 
                 <div class="pull-right margin-l-10">
-                    <span class="badge bg-darkgreen profile-badge-updated">
+                    <span class="badge badge-success profile-badge text-small">
                         Open During COVID
                     </span>
                 </div>
@@ -143,7 +147,7 @@
                 <% if(searchResult.IsELearningCenter) { %>
 
                 <div class="pull-right margin-l-10">
-                    <span class="badge bg-chocolate profile-badge-updated">
+                    <span class="badge badge-success profile-badge text-small">
                         E-Learning Center
                     </span>
                 </div>
@@ -182,14 +186,14 @@
                 </div>
 
                 <div class="text-wrap" style="margin-top: 20px; height: 75px;">
-                    <h3>
+                    <h3 style="min-height: 52px;"> 
                         <strong title="<%= searchResult.AccountName %>"><%= searchResult.AccountName %></strong>
                     </h3>
                 </div>
 
                 <div class="clearfix"></div>
-                <div class="text-wrap" style="height: 40px;">
-                    <span class="text-medium-small">
+                <div class="text-wrap">
+                    <span class="text-medium-small" style="min-height: 60px; height: 60px; display: block;">
                         <%= searchResult.ProfileHeadline %>
                     </span>
                 </div>
