@@ -1,3 +1,4 @@
 ﻿User-agent: MJ12bot
+Allow: /
 
 Sitemap: /sitemap_index.xml
