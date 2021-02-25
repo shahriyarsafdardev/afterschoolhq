@@ -1,4 +1,7 @@
 ﻿User-agent: MJ12bot
+Disallow: /
+
+User-agent: Twitterbot
 Allow: /
 
 Sitemap: /sitemap_index.xml
