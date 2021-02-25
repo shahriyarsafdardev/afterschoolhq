@@ -1,14 +1,11 @@
-﻿@{ 
-    Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
+﻿@{     
     var accountUniqueName = ViewBag.AccountUniqueName;
-    ViewBag.Title = accountUniqueName;
     var msgs = (SystemMessages)ViewBag.Messages;
     var accountId = ViewBag.AccountId != null ? Convert.ToInt32(ViewBag.AccountId) : 0;
     var primaryColor = (string)ViewBag.PrimaryColor;
     var logoUrl = (string)ViewBag.LogoUrl;
     var headerImageUrl = (string)ViewBag.HeaderImageUrl;
     var joiningUrl = $@"/join{accountUniqueName}.html";
-
     if (!logoUrl.IsNotEmpty())
     {
         logoUrl = "/img/logo-vertical.png";
@@ -18,6 +15,15 @@
     {
         primaryColor = "#547bb6";
     }
+
+    //.. data for layout
+    ViewBag.Title = accountUniqueName;
+    if (accountId > 0)
+    {
+        ViewBag.AccountProfile = AccountProfile.LoadByAccountId(accountId);
+    }
+
+    Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
