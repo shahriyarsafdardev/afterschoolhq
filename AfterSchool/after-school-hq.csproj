@@ -661,6 +661,7 @@
   <ItemGroup>
     <Content Include="about.html" />
     <Content Include="Assets\css\common.css" />
+    <Content Include="Assets\css\media_xl.css" />
     <Content Include="Assets\css\media_lg.css" />
     <Content Include="Assets\css\media_md.css" />
     <Content Include="Assets\css\media_sm.css" />
