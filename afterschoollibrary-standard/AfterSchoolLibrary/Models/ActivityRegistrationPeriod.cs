@@ -247,6 +247,15 @@ namespace AfterSchoolLibrary.Models
             return Activity.Load(this.ActivityId.Value, msgs, dc);
         }
 
+        public static List<ActivityRegistrationPeriod> LoadByActivityId(int ActivityId, bool IsActive, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["ActivityId"], ActivityId);
+            dq.Criterias.Add(ObjectMap["IsActive"], IsActive);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
         #endregion
     }
 }

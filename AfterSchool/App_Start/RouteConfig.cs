@@ -55,17 +55,7 @@ namespace AfterSchool
             routes.MapRoute(
                 "Search",
                 "search/{action}/{id}",
-                new { controller = "search", action = "index", id = UrlParameter.Optional });
-
-            routes.MapRoute(
-                "MccoyDirectory",
-                "MccoyDirectory/{action}/{id}",
-                new { controller = "MccoyDirectory", action = "index", id = UrlParameter.Optional });
-
-            routes.MapRoute(
-                "ISYPDirectory",
-                "ISYPDirectory/{action}/{id}",
-                new { controller = "ISYPDirectory", action = "index", id = UrlParameter.Optional });
+                new { controller = "search", action = "index", id = UrlParameter.Optional });            
 
             routes.MapRoute(
                 "Logout",
