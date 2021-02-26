@@ -4,7 +4,7 @@
     var accountId = ViewBag.AccountId != null ? Convert.ToInt32(ViewBag.AccountId) : 0;
     var primaryColor = (string)ViewBag.PrimaryColor;
     var logoUrl = (string)ViewBag.LogoUrl;
-    var headerImageUrl = (string)ViewBag.HeaderImageUrl;
+    var headerImageUrl = (string)ViewBag.HeaderImageUrl;    
     var joiningUrl = $@"/join{accountUniqueName}.html";
     if (!logoUrl.IsNotEmpty())
     {
@@ -29,12 +29,13 @@
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
 <style>
-    .footer-extended {
-        background: #22253a;
-    }
-
     .search-bg {
-        background-image: linear-gradient(rgba(0, 0, 0, .8), rgba(0, 0, 0, .8)), url(@headerImageUrl) !important;
+        background-image: linear-gradient(rgba(0, 0, 0, .8), rgba(0, 0, 0, .8)), url( @headerImageUrl ) !important;
+        background-repeat: no-repeat !important;
+        background-size: cover !important;
+        background-position: center !important;
+        justify-content: center !important;
+        align-items: center !important;
     }
 
     .join-directory-btn {
@@ -47,7 +48,7 @@
 <div class="visible-lg visible-md">
 
     <div class="row">
-        <div class="reg-header @(headerImageUrl.IsNotEmpty() ? "search-bg" : "")" style="min-height: 100%; background: white; padding: 35px 20px;">
+        <div class="@(headerImageUrl.IsNotEmpty() ? "search-bg" : "")" style="min-height: 100%; background: white; padding: 35px 20px;">
 
             <div class="reg-header-overlay col-md-12">
 
