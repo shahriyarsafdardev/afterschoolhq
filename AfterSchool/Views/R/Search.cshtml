@@ -55,20 +55,12 @@
                     <img src="@logoUrl" style="width: 200px;" />
                 </div>
 
-                <div class="col-lg-7 col-md-9">
+                <div class="col-lg-9 col-md-9">
                     <div class="form-group has-feedback has-search">
-                        <span class="glyphicon glyphicon-search form-control-feedback"></span>
+                        <span class="glyphicon glyphicon-search form-control-feedback" style="top: -3px;"></span>
                         <input id="txtSearch" name="search" type="text" class="form-control" placeholder="Search" onkeyup="return waitAndFilterSearch(this.value)">
                     </div>
                 </div>
-
-                @if (accountId > 0)
-                {
-                    //.. we shoultn't have this button in case of global search                    
-                    <div class="col-lg-2 col-md-9">
-                        <a href="@joiningUrl" class="btn btn-search-register btn-md btn-center join-directory-btn"> Join Directory </a>
-                    </div>
-                }
             </div>
 
             <div class="clearfix"></div>
@@ -79,7 +71,7 @@
 <div class="visible-sm visible-xs bg-color">
     <div class="col-xs-10">
         <div class="form-group has-feedback has-search" style="margin-top: 10px;">
-            <span class="glyphicon glyphicon-search form-control-feedback"></span>
+            <span class="glyphicon glyphicon-search form-control-feedback" style="top: -3px;"></span>
             <input id="txtSearch-mobile" name="search" type="text" class="form-control" placeholder="Search ISYP Directory" onkeyup="return waitAndFilterSearch()">
         </div>
     </div>
