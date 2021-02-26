@@ -1060,7 +1060,9 @@ namespace AfterSchoolLibrary.Models
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public static DataTable SearchVisitorAccountsByHostAccount(string hostAccountId, string search, string neighborhoods, string grades, string ages, string gender, string timing, string cost, string starting, string other, string specialNeeds, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static DataTable SearchVisitorAccountsByHostAccount(string hostAccountId, string search, string neighborhoods, string grades, string ages, string gender,
+            string services, string timing, string pricing, string cost, string starting, string other, string specialNeeds, int? start = null, int? length = null, 
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -1082,7 +1084,9 @@ namespace AfterSchoolLibrary.Models
                 @IsELearningCenter BIT = NULL,  
                 @IsVirtualProgram BIT = NULL, 
                 @IsOpenDuringCovid BIT = NULL, 
+                @Services NVARCHAR(100),
                 @Timing NVARCHAR(100),
+                @PricingOptions NVARCHAR(100),
                 @SpecialNeeds NVARCHAR(100)";
             
             sql += $@"{Environment.NewLine}
@@ -1135,9 +1139,17 @@ namespace AfterSchoolLibrary.Models
                 sql += $@"
                 SET @IsOpenDuringCovid = 1";
 
+            if (services.IsNotEmpty())
+                sql += $@"
+                SET @Services = '{services}'";
+
             if (timing.IsNotEmpty())
                 sql += $@"
                 SET @Timing = '{timing}'";
+
+            if (pricing.IsNotEmpty())
+                sql += $@"
+                SET @PricingOptions = '{pricing}'";
 
             if (specialNeeds.IsNotEmpty())
                 sql += $@"
@@ -1188,8 +1200,10 @@ namespace AfterSchoolLibrary.Models
                     LEFT JOIN AccountProfile ap ON ap.AccountId = ar.VisitorAccountId
                     LEFT JOIN Location loc ON ap.LocationId = loc.ID
                     LEFT JOIN AccountProperty properties on properties.AccountId = ar.VisitorAccountId AND properties.AccountPropertyTypeId in (12, 13, 14, 15)    
-                    LEFT JOIN AccountProperty specialNeeds on specialNeeds.AccountId = ar.VisitorAccountId AND specialNeeds.AccountPropertyTypeId = 17          
+                    LEFT JOIN AccountProperty specialNeeds on specialNeeds.AccountId = ar.VisitorAccountId AND specialNeeds.AccountPropertyTypeId = 17
+                    LEFT JOIN AccountProperty servicesOffered on servicesOffered.AccountId = ar.VisitorAccountId AND servicesOffered.AccountPropertyTypeId = 9
 				    LEFT JOIN AccountProperty timing on timing.AccountId = ar.VisitorAccountId AND timing.AccountPropertyTypeId = 10
+                    LEFT JOIN AccountProperty pricingOptions on pricingOptions.AccountId = ar.VisitorAccountId AND pricingOptions.AccountPropertyTypeId = 11
 				    LEFT JOIN GradeLevel glStart on glStart.ID = ap.GradeLevelStart
 				    LEFT JOIN GradeLevel glEnd on glEnd.ID = ap.GradeLevelEnd
                     OUTER APPLY STRING_SPLIT(@Grades, ',') s
@@ -1199,11 +1213,13 @@ namespace AfterSchoolLibrary.Models
                     AND a.IsTest <> 1  
                     AND ap.IsAHQApproved = 1                    
                     AND (
-						    (@SearchTerm = '""""') OR 
-						    CONTAINS((ap.Title, ap.Headline, ap.About), @SearchTerm)  OR 
-                            CONTAINS((properties.Value), @SearchTerm) OR 
-						    CONTAINS((specialNeeds.Value), @SearchTerm) OR 
-							CONTAINS((timing.Value), @SearchTerm) OR 
+						    (@SearchTerm = '""""') OR
+						    CONTAINS((ap.Title, ap.Headline, ap.About), @SearchTerm)  OR
+                            CONTAINS((properties.Value), @SearchTerm) OR
+						    CONTAINS((specialNeeds.Value), @SearchTerm) OR
+                            CONTAINS((servicesOffered.Value), @SearchTerm) OR
+							CONTAINS((timing.Value), @SearchTerm) OR
+                            CONTAINS((pricingOptions.Value), @SearchTerm) OR
                             CONTAINS((loc.Address1, loc.Address2, loc.City, loc.State, loc.PostalCode, loc.Name, loc.StreetNumber, loc.StreetName, loc.Neighborhood, loc.County), @SearchTerm)
 					    )
                     AND ((@Neighborhood IS NULL) OR loc.Neighborhood IN (SELECT value COLLATE Latin1_General_100_CI_AI FROM STRING_SPLIT(@Neighborhood, ',') WHERE RTRIM(value) <> ''))                    
@@ -1212,7 +1228,9 @@ namespace AfterSchoolLibrary.Models
                     AND ((@IsOpenDuringCovid IS NULL) OR ap.IsOpenDuringCovid = @IsOpenDuringCovid)
                     AND ((@Gender IS NULL) OR ap.GenderRestriction In (SELECT value FROM STRING_SPLIT(@Gender, ',') WHERE RTRIM(value) <> ''))
                     AND ((@SpecialNeeds IS NULL) OR specialNeeds.Value In (SELECT value FROM STRING_SPLIT(@SpecialNeeds, ',') WHERE RTRIM(value) <> ''))
+                    AND ((@Services IS NULL) OR servicesOffered.Value In (SELECT value FROM STRING_SPLIT(@Services, ',') WHERE RTRIM(value) <> ''))
 					AND ((@Timing IS NULL) OR timing.Value In (SELECT value FROM STRING_SPLIT(@Timing, ',') WHERE RTRIM(value) <> ''))
+                    AND ((@PricingOptions IS NULL) OR pricingOptions.Value In (SELECT value FROM STRING_SPLIT(@PricingOptions, ',') WHERE RTRIM(value) <> ''))
                     AND ((@Grades IS NULL) OR (s.value) BETWEEN ap.GradeLevelStart AND ap.GradeLevelEnd)
                     AND (
 	                        (@Age IS NULL) OR 

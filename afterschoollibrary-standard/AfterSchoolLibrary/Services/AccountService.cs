@@ -2138,11 +2138,13 @@ namespace AfterSchoolLibrary.Services
                     dc);
         }
 
-        public static List<SearchDirectoryResponse> SearchDirectoryAccounts(string hostAccountId, string search, string neighborhoods, string grades, string ages, string gender, string timing, string cost, string starting, string other, string specialNeeds, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<SearchDirectoryResponse> SearchDirectoryAccounts(string hostAccountId, string search, string neighborhoods, string grades, 
+            string ages, string gender, string services, string timing, string pricing, string cost, string starting, string other, string specialNeeds, 
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             try
             {
-                var accountDataTable = Account.SearchVisitorAccountsByHostAccount(hostAccountId, search, neighborhoods, grades, ages, gender, timing, cost, starting, other, specialNeeds, msgs: msgs);
+                var accountDataTable = Account.SearchVisitorAccountsByHostAccount(hostAccountId, search, neighborhoods, grades, ages, gender, services, timing, pricing, cost, starting, other, specialNeeds, msgs: msgs);
                                 
                 if (accountDataTable.IsNotEmpty() && accountDataTable.Rows.Any())
                 {

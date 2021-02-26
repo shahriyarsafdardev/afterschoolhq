@@ -25,14 +25,14 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public JsonResult GetAccounts(string accountId, string search, string neighborhoods, string grades, string ages, string gender, string timing, string cost, string starting, string other, string special)
+        public JsonResult GetAccounts(string accountId, string search, string neighborhoods, string grades, string ages, string gender, string services, string timing, string pricing, string cost, string starting, string other, string special)
         {
             var msgs = new SystemMessages();
 
             var parsedGrade = ParseAndLoadGrade(grades);
             var parsedAge = ParseAndLoadAge(ages);
             var parsedGender = ParseAndLoadGender(gender);
-            var searchedAccounts = AccountService.SearchDirectoryAccounts(accountId, search, neighborhoods, parsedGrade, parsedAge, parsedGender, timing, cost, starting, other, special, msgs: msgs);
+            var searchedAccounts = AccountService.SearchDirectoryAccounts(accountId, search, neighborhoods, parsedGrade, parsedAge, parsedGender, services, timing, pricing, cost, starting, other, special, msgs: msgs);
 
             if (searchedAccounts.IsNotEmpty() && searchedAccounts.Any())
             {
