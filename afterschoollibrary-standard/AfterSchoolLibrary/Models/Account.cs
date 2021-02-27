@@ -1041,27 +1041,28 @@ namespace AfterSchoolLibrary.Models
             return 0;
         }
 
+
         /// <summary>
-        /// 
+        /// Global search query for accounts with different crieterias
         /// </summary>
-        /// <param name="hostAccountId">mccoy id</param>
-        /// <param name="search">search would be string like m, which will be resulted into '"m*"'</param>
+        /// <param name="hostAccountId">Parent account id</param>
+        /// <param name="search">Search would be string like m, which will be resulted into '"m*"' for full text sql</param>
         /// <param name="neighborhoods"></param>
         /// <param name="grades"></param>
         /// <param name="ages"></param>
         /// <param name="gender"></param>
+        /// <param name="services"></param>
         /// <param name="timing"></param>
+        /// <param name="pricing"></param>
         /// <param name="cost"></param>
         /// <param name="starting"></param>
         /// <param name="other"></param>
         /// <param name="specialNeeds"></param>
-        /// <param name="start"></param>
-        /// <param name="length"></param>
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
         public static DataTable SearchVisitorAccountsByHostAccount(string hostAccountId, string search, string neighborhoods, string grades, string ages, string gender,
-            string services, string timing, string pricing, string cost, string starting, string other, string specialNeeds, int? start = null, int? length = null, 
+            string services, string timing, string pricing, string cost, string starting, string other, string specialNeeds,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
@@ -1158,13 +1159,14 @@ namespace AfterSchoolLibrary.Models
             sql += $"\n";
 
             sql += $@"
-            IF(OBJECT_ID('tempdb..#TEMP') IS NOT NULL) BEGIN DROP TABLE #TEMP END";
+            IF(OBJECT_ID('tempdb..#temp_accounts_1') IS NOT NULL) BEGIN DROP TABLE #temp_accounts_1 END
+			IF(OBJECT_ID('tempdb..#temp_accounts_2') IS NOT NULL) BEGIN DROP TABLE #temp_accounts_2 END";
 
             sql += $"\n";
 
             sql += $@"
             SELECT *
-			INTO #Temp
+			INTO #temp_accounts_1
 			FROM (
                 SELECT 
                     a.Id as AccountId,
@@ -1210,7 +1212,8 @@ namespace AfterSchoolLibrary.Models
                 WHERE 
                     ((@AccountId IS NULL) OR ar.HostAccountId = @AccountId)
                     AND a.IsDeleted <> 1 
-                    AND a.IsTest <> 1  
+                    AND a.IsTest <> 1
+                    AND a.IsActive = 1
                     AND ap.IsAHQApproved = 1                    
                     AND (
 						    (@SearchTerm = '""""') OR
@@ -1282,27 +1285,56 @@ namespace AfterSchoolLibrary.Models
             sql += $"\n";
 
             sql += $@"
-            --this table is for current activities
-			SELECT DISTINCT AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, 1 as IsAccountNowEnrolling, IsELearningCenter, IsVirtualProgram, Headline, HeaderImage, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, NULL AS StartDateTime, NULL AS EndDateTime
-			FROM #Temp 
-			WHERE CAST(GETDATE() AS DATE) BETWEEN CAST(StartDateTime AS DATE) AND CAST(EndDateTime AS DATE)
-			
-            UNION ALL
+            
+			SELECT *
+			INTO #temp_accounts_2
+			FROM (
+				--accounts with current activities
+				SELECT DISTINCT 
+					AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, 1 as IsAccountNowEnrolling, IsELearningCenter, 
+					IsVirtualProgram, Headline, HeaderImage, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, NULL AS StartDateTime, NULL AS EndDateTime, 1 as Priority
+				FROM #temp_accounts_1 
+				WHERE 
+					CAST(GETDATE() AS DATE) BETWEEN CAST(StartDateTime AS DATE) AND CAST(EndDateTime AS DATE)		
 				
-			--this table will be used to order by				
-			SELECT distinct AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, 0 as IsAccountNowEnrolling, IsELearningCenter, IsVirtualProgram, Headline, HeaderImage, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, StartDateTime, EndDateTime
-			FROM #Temp t
-			WHERE
-				AccountId NOT IN (
-					SELECT DISTINCT AccountId FROM #Temp 
-					WHERE CAST(GETDATE() AS DATE) BETWEEN CAST(StartDateTime AS DATE) AND CAST(EndDateTime AS DATE)
-				) 
-			ORDER BY IsAccountNowEnrolling desc, EndDateTime desc, StartDateTime asc
+				UNION ALL
 
-			DROP TABLE #TEMP";
+				--accounts with closing soon or opening soon activities
+				SELECT DISTINCT 
+					AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, 0 as IsAccountNowEnrolling, IsELearningCenter, 
+					IsVirtualProgram, Headline, HeaderImage, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, StartDateTime, EndDateTime, 2 as Priority
+				FROM #temp_accounts_1 
+				WHERE
+					AccountId NOT IN (
+						SELECT DISTINCT AccountId FROM #temp_accounts_1 
+						WHERE CAST(GETDATE() AS DATE) BETWEEN CAST(StartDateTime AS DATE) AND CAST(EndDateTime AS DATE)
+					) AND 
+					StartDateTime IS NOT NULL AND EndDateTime IS NOT NULL
 
-            dq.SelectRange.Start = start;
-            dq.SelectRange.Length = length;
+				UNION ALL
+
+				--accounts with null/closed/deleted activities at last
+				SELECT DISTINCT 
+					AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, 0 as IsAccountNowEnrolling, IsELearningCenter, 
+					IsVirtualProgram, Headline, HeaderImage, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, NULL AS StartDateTime, NULL AS EndDateTime, 3 as Priority
+				FROM #temp_accounts_1
+				WHERE
+					AccountId NOT IN (
+						SELECT DISTINCT AccountId FROM #temp_accounts_1 
+						WHERE CAST(GETDATE() AS DATE) BETWEEN CAST(StartDateTime AS DATE) AND CAST(EndDateTime AS DATE)
+					) and 
+					StartDateTime IS NULL AND EndDateTime IS NULL
+			) as filteredData			
+			ORDER BY EndDateTime desc, StartDateTime asc			
+
+			SELECT DISTINCT
+				AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+				IsVirtualProgram, Headline, HeaderImage, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, Priority
+			FROM #temp_accounts_2
+			ORDER BY Priority asc
+
+			DROP TABLE #temp_accounts_1
+			DROP TABLE #temp_accounts_2";
 
             return dq.ExecuteSelect(sql, msgs);            
         }
