@@ -4,7 +4,7 @@
     var accountId = ViewBag.AccountId != null ? Convert.ToInt32(ViewBag.AccountId) : 0;
     var primaryColor = (string)ViewBag.PrimaryColor;
     var logoUrl = (string)ViewBag.LogoUrl;
-    var headerImageUrl = (string)ViewBag.HeaderImageUrl;    
+    var headerImageUrl = (string)ViewBag.HeaderImageUrl;
     var joiningUrl = $@"/join{accountUniqueName}.html";
     if (!logoUrl.IsNotEmpty())
     {
@@ -14,6 +14,10 @@
     if (!primaryColor.IsNotEmpty())
     {
         primaryColor = "#547bb6";
+    }
+    else
+    {
+        primaryColor = "#00ae85";
     }
 
     //.. data for layout
@@ -102,9 +106,9 @@
 
     <% _.each(response, function(searchResult){ %>
 
-    <div id="<%= searchResult.AccountUid %>" name="<%= searchResult.AccountName %>" class="col-xl-12 col-sm-6 col-md-6 col-lg-6 col-xl-4 participation-object" style="height: 410px; margin-bottom: 10px;" onclick="WebPage.navigateIframe('<%= searchResult.HomePageUrl %>')">
+    <div id="<%= searchResult.AccountUid %>" name="<%= searchResult.AccountName %>" class="col-xl-12 col-sm-6 col-md-6 col-lg-6 col-xl-4 participation-object" style="height: 410px; margin-bottom: 10px;">
 
-        <div class="panel" style="overflow: hidden;">
+        <div class="panel" style="overflow: hidden; cursor: pointer;" onclick="WebPage.navigateIframe('<%= searchResult.HomePageUrl %>')">
             <div class="reg-header" style="background-image: url(<%= searchResult.ProfileHeaderImageUrl %>); min-height: 100px; height: 150px; padding: 5px 5px; position: relative;">
 
                 <% if(searchResult.IsAccountNowEnrolling) { %>
@@ -179,7 +183,7 @@
                 </div>
 
                 <div class="text-wrap" style="margin-top: 20px; height: 75px;">
-                    <h3 style="min-height: 52px;"> 
+                    <h3 style="height: 52px; overflow-y: hidden;">
                         <strong title="<%= searchResult.AccountName %>"><%= searchResult.AccountName %></strong>
                     </h3>
                 </div>
@@ -214,8 +218,18 @@
         var txtSearch = $('#txtSearch');
         var txtSearchMobile = $('#txtSearch-mobile');
         var isMobile = window.innerWidth <= 768;
+        var inCallback = false, page = 0, isFilterApplied = false, isReachedScrollEnd = false;  
 
         $(document).ready(function () {
+            $(window).scroll(function () {
+                if (isReachedScrollEnd == false &&
+                    $(window).scrollTop() >= $('#search-result').offset().top + $('#search-result').outerHeight() - window.innerHeight)
+                {
+                    console.log('search initiated');
+                    loadFiltersAndInitiateSearch();
+                }
+            });
+
             loadFiltersAndInitiateSearch();
 
             if (!isMobile) {
@@ -402,13 +416,21 @@
                 mainUrl += `${comma_delimited_special},`;
             }
 
+            //.. get current scrolltop
+            var scr = $(window).scrollTop();
+
             if (mainUrl) {
                 WebPage.addHash(mainUrl);
                 $('#clear-filters').show();
+                isFilterApplied = true;
             } else {
                 WebPage.addHash('');
+                isFilterApplied = false;
                 $('#clear-filters').hide();
             }
+
+            //..scroll to last known position, because location.href scrolls to top
+            document.documentElement.scrollTop = scr;
 
             // .. call api
             if (!isMobile || applyFilters) {
@@ -428,13 +450,19 @@
         }
 
         function loadAccounts(search, neighborhoods, grades, ages, gender, services, timing, pricing, cost, starting, other, special) {
+            if (inCallback) {
+                return false;
+            }
+
+            console.log('search finalized');
             showLoader();
+            inCallback = true;            
 
             var url = '@Url.Action("GetAccounts", "Search", new { Area = "" })';
             $.ajax({
                 type: "POST",
                 url: url,
-                data: { accountId: '@accountId', search, neighborhoods, grades, ages, gender, services, timing, pricing, cost, starting, other, special },
+                data: { accountId: '@accountId', search, neighborhoods, grades, ages, gender, services, timing, pricing, cost, starting, other, special, pageNum: page },
                 success: function (data) {
                     if (data && data.success == true) {
 
@@ -445,12 +473,42 @@
                         //.. format data as JSON and combine with template
                         var compiledHtml = compiled({
                             response: data.data,
-                        });
+                        });                        
 
                         //.. update html to dom
-                        $('#search-result').html(compiledHtml);
+                        //if (isFilterApplied) {
+                        //    $('#search-result').html(compiledHtml);
+                        //    isReachedScrollEnd = true;
+                        //    page = 0;
+                        //} else {
+                        //    $('#search-result').append(compiledHtml);
 
-                        hideLoader();
+                        //    if (data.data.length < 9) {
+                        //        //..page size is less then the default, then it means no more records present
+                        //        isReachedScrollEnd = true;
+                        //    }
+                        //}
+
+                        if (data.pageNum == 0) {
+                            //..first page, so update whole page
+                            $('#search-result').html(compiledHtml);
+                        } else {
+                            $('#search-result').append(compiledHtml);                            
+                        }
+
+                        if (isFilterApplied) {
+                            page = 0;
+                        } else {
+                            page++;
+                        }
+
+                        if (data.data.length < 9) {
+                            //..page size is less then the default, then it means no more records present
+                            isReachedScrollEnd = true;
+                        }
+
+                        inCallback = false;
+                        hideLoader();                        
                         return;
                     }
                     else {
@@ -469,10 +527,17 @@
                                 success: false
                             });
                         }
-                        else {
+                        else if (isFilterApplied) {
                             $('#search-result').html('<p style="margin-top: 35px; text-align: center; font-size: 16px;">Sorry, there are no results.</p>');
+                            isReachedScrollEnd = true;
+                            page = 0;
+                        }
+                        else {
+                            isReachedScrollEnd = true;
+                            page = 0;
                         }
 
+                        inCallback = false;
                         hideLoader();
                         return false;
                     }

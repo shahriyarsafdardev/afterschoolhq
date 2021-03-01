@@ -2139,12 +2139,12 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static List<SearchDirectoryResponse> SearchDirectoryAccounts(string hostAccountId, string search, string neighborhoods, string grades, 
-            string ages, string gender, string services, string timing, string pricing, string cost, string starting, string other, string specialNeeds, 
+            string ages, string gender, string services, string timing, string pricing, string cost, string starting, string other, string specialNeeds, int PageNum, int PageSize,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             try
             {
-                var accountDataTable = Account.SearchVisitorAccountsByHostAccount(hostAccountId, search, neighborhoods, grades, ages, gender, services, timing, pricing, cost, starting, other, specialNeeds, msgs: msgs);
+                var accountDataTable = Account.SearchVisitorAccountsByHostAccount(hostAccountId, search, neighborhoods, grades, ages, gender, services, timing, pricing, cost, starting, other, specialNeeds, PageNum, PageSize, msgs: msgs);
                                 
                 if (accountDataTable.IsNotEmpty() && accountDataTable.Rows.Any())
                 {
@@ -2156,7 +2156,7 @@ namespace AfterSchoolLibrary.Services
                             var response = new SearchDirectoryResponse();
 
                             // ..account
-                            response.AccountName = row["AccountName"].IsNotEmpty() ? row["AccountName"].ToString().MaxChars(28, "...") : "";
+                            response.AccountName = row["AccountName"].IsNotEmpty() ? row["AccountName"].ToString() : "";
                             response.AccountUid = new Guid(row["AccountUid"].ToString());
                             response.HomePageUrl = $"{Helpers.Utilities.BaseUrl()}/{row["AccountUniqueName"]}";
 
@@ -2175,13 +2175,15 @@ namespace AfterSchoolLibrary.Services
 
                             var accountId = row["AccountId"].IsNotEmpty() ? Convert.ToInt32(row["AccountId"]) : 0;
                             var headerImageUrl = row["HeaderImage"].IsNotEmpty() ? row["HeaderImage"].ToString() : "";
-                            var photos = AccountProperty.LoadByAccountIdByAccountPropertyTypeId(accountId, AccountPropertyType.Photo, msgs, dc);
+                            var logo = row["Logo"].IsNotEmpty() ? row["Logo"].ToString() : "";
+                            //.. reverted photos logic as we will use logo instead. part of AC for https://app.clickup.com/t/nv068a
+                            //..var photos = AccountProperty.LoadByAccountIdByAccountPropertyTypeId(accountId, AccountPropertyType.Photo, msgs, dc);
                             var ah = Helpers.Utilities.GetNewAmazonHelper();
 
                             if (headerImageUrl.IsNotBlank())
                                 response.ProfileHeaderImageUrl = ah.GetFileLink(headerImageUrl, true, null, true);
-                            else if (photos.Any())
-                                response.ProfileHeaderImageUrl = ah.GetFileLink(photos.First().Value, true, null, true);
+                            else if (logo.IsNotBlank())
+                                response.ProfileHeaderImageUrl = ah.GetFileLink(logo, true, null, true);
 
                             if (row["LocationId"].IsNotEmpty())
                             {

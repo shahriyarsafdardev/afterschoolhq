@@ -1058,11 +1058,12 @@ namespace AfterSchoolLibrary.Models
         /// <param name="starting"></param>
         /// <param name="other"></param>
         /// <param name="specialNeeds"></param>
+        /// <param name="currentRowNumber">while user scroll, this will be updated and considered as page size</param>
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
         public static DataTable SearchVisitorAccountsByHostAccount(string hostAccountId, string search, string neighborhoods, string grades, string ages, string gender,
-            string services, string timing, string pricing, string cost, string starting, string other, string specialNeeds,
+            string services, string timing, string pricing, string cost, string starting, string other, string specialNeeds, int PageNum, int PageSize = 9,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
@@ -1178,6 +1179,7 @@ namespace AfterSchoolLibrary.Models
                     ap.IsVirtualProgram,
 					ap.Headline,
                     ap.HeaderImage,
+                    ap.Logo,
                     ap.LocationId,
                     ap.AgeStart,
 					ap.AgeEnd,
@@ -1292,7 +1294,7 @@ namespace AfterSchoolLibrary.Models
 				--accounts with current activities
 				SELECT DISTINCT 
 					AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, 1 as IsAccountNowEnrolling, IsELearningCenter, 
-					IsVirtualProgram, Headline, HeaderImage, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, NULL AS StartDateTime, NULL AS EndDateTime, 1 as Priority
+					IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, NULL AS StartDateTime, NULL AS EndDateTime, 1 as Priority
 				FROM #temp_accounts_1 
 				WHERE 
 					CAST(GETDATE() AS DATE) BETWEEN CAST(StartDateTime AS DATE) AND CAST(EndDateTime AS DATE)		
@@ -1302,7 +1304,7 @@ namespace AfterSchoolLibrary.Models
 				--accounts with closing soon or opening soon activities
 				SELECT DISTINCT 
 					AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, 0 as IsAccountNowEnrolling, IsELearningCenter, 
-					IsVirtualProgram, Headline, HeaderImage, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, StartDateTime, EndDateTime, 2 as Priority
+					IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, StartDateTime, EndDateTime, 2 as Priority
 				FROM #temp_accounts_1 
 				WHERE
 					AccountId NOT IN (
@@ -1316,7 +1318,7 @@ namespace AfterSchoolLibrary.Models
 				--accounts with null/closed/deleted activities at last
 				SELECT DISTINCT 
 					AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, 0 as IsAccountNowEnrolling, IsELearningCenter, 
-					IsVirtualProgram, Headline, HeaderImage, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, NULL AS StartDateTime, NULL AS EndDateTime, 3 as Priority
+					IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, NULL AS StartDateTime, NULL AS EndDateTime, 3 as Priority
 				FROM #temp_accounts_1
 				WHERE
 					AccountId NOT IN (
@@ -1329,9 +1331,12 @@ namespace AfterSchoolLibrary.Models
 
 			SELECT DISTINCT
 				AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
-				IsVirtualProgram, Headline, HeaderImage, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, Priority
+				IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, Priority
 			FROM #temp_accounts_2
 			ORDER BY Priority asc
+            OFFSET {(PageNum * PageSize)} ROWS 
+			FETCH {(PageNum == 0 ? "first" : "next")} {PageSize} ROWS only;
+            
 
 			DROP TABLE #temp_accounts_1
 			DROP TABLE #temp_accounts_2";
