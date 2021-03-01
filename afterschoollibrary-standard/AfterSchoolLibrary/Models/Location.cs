@@ -352,7 +352,9 @@ namespace AfterSchoolLibrary.Models
             dq.Connection = dc;
 
             var sql = $@"
-					SELECT Neighborhood FROM Location
+					SELECT 
+						DISTINCT Neighborhood 
+					FROM Location
 					WHERE Id IN (
 						SELECT LocationId FROM AccountProfile 
 						WHERE AccountId IN (
