@@ -361,7 +361,8 @@ namespace AfterSchoolLibrary.Models
 							SELECT VisitorAccountId 
 							FROM AccountRelationship 
 							WHERE HostAccountId = {hostAccountId})
-						) AND (COALESCE (Neighborhood, '') <> '')";
+						) AND (COALESCE (Neighborhood, '') <> '')
+					ORDER BY Neighborhood ASC";
 
             return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(row => { return row[0].ToString(); });
 		}
