@@ -1185,8 +1185,7 @@ namespace AfterSchoolLibrary.Models
 					ap.AgeEnd,
 					glStart.Abbreviation as GradeLevelStart,
 					glEnd.Abbreviation as GradeLevelEnd,
-                    rp.StartDateTime, 
-					rp.EndDateTime
+                    CASE WHEN CAST(GETDATE() as date) BETWEEN CAST(rp.StartDateTime as date) AND CAST(rp.EndDateTime as date) THEN 1 ELSE 0 END as IsAccountNowEnrolling
                 FROM 
                     AccountRelationship ar
                     INNER JOIN Account a ON a.ID = ar.VisitorAccountId
@@ -1291,53 +1290,50 @@ namespace AfterSchoolLibrary.Models
 			SELECT *
 			INTO #temp_accounts_2
 			FROM (
-				--accounts with current activities
+				--accounts with current activities or now enrolling
 				SELECT DISTINCT 
-					AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, 1 as IsAccountNowEnrolling, IsELearningCenter, 
-					IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, NULL AS StartDateTime, NULL AS EndDateTime, 1 as Priority
+					AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+					IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 1 as Priority
 				FROM #temp_accounts_1 
 				WHERE 
-					CAST(GETDATE() AS DATE) BETWEEN CAST(StartDateTime AS DATE) AND CAST(EndDateTime AS DATE)		
+					IsAccountNowEnrolling = 1
 				
 				UNION ALL
 
-				--accounts with closing soon or opening soon activities
+				-- accounts with header image or logo next
 				SELECT DISTINCT 
-					AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, 0 as IsAccountNowEnrolling, IsELearningCenter, 
-					IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, StartDateTime, EndDateTime, 2 as Priority
+					AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+					IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 2 as Priority
 				FROM #temp_accounts_1 
-				WHERE
+				WHERE 
 					AccountId NOT IN (
 						SELECT DISTINCT AccountId FROM #temp_accounts_1 
-						WHERE CAST(GETDATE() AS DATE) BETWEEN CAST(StartDateTime AS DATE) AND CAST(EndDateTime AS DATE)
-					) AND 
-					StartDateTime IS NOT NULL AND EndDateTime IS NOT NULL
+						WHERE IsAccountNowEnrolling = 1
+					) AND (HeaderImage is not null or Logo is not null)
 
 				UNION ALL
 
-				--accounts with null/closed/deleted activities at last
+				-- all other accounts
 				SELECT DISTINCT 
 					AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, 0 as IsAccountNowEnrolling, IsELearningCenter, 
-					IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, NULL AS StartDateTime, NULL AS EndDateTime, 3 as Priority
+					IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 3 as Priority
 				FROM #temp_accounts_1
 				WHERE
 					AccountId NOT IN (
 						SELECT DISTINCT AccountId FROM #temp_accounts_1 
-						WHERE CAST(GETDATE() AS DATE) BETWEEN CAST(StartDateTime AS DATE) AND CAST(EndDateTime AS DATE)
-					) and 
-					StartDateTime IS NULL AND EndDateTime IS NULL
-			) as filteredData			
-			ORDER BY EndDateTime desc, StartDateTime asc			
+						WHERE IsAccountNowEnrolling = 1		
+					)
+					AND HeaderImage is null and Logo is null --because we already filtered this in second query, so no need of those accounts now
+			) as filteredData							
 
-			SELECT DISTINCT
+			SELECT 
 				AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
 				IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, Priority
 			FROM #temp_accounts_2
-			ORDER BY Priority asc
+			ORDER BY Priority asc, NEWID()
             OFFSET {(PageNum * PageSize)} ROWS 
 			FETCH {(PageNum == 0 ? "first" : "next")} {PageSize} ROWS only;
             
-
 			DROP TABLE #temp_accounts_1
 			DROP TABLE #temp_accounts_2";
 

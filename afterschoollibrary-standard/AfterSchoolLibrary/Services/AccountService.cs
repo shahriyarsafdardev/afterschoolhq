@@ -2172,6 +2172,7 @@ namespace AfterSchoolLibrary.Services
                             response.AgeEnd = row["AgeEnd"].IsNotEmpty() ? row["AgeEnd"].ToString() : null;
                             response.GradeStart = row["GradeLevelStart"].IsNotEmpty() ? row["GradeLevelStart"].ToString() : null;
                             response.GradeEnd = row["GradeLevelEnd"].IsNotEmpty() ? row["GradeLevelEnd"].ToString() : null;
+                            response.Priority = row["Priority"].IsNotEmpty() ? Convert.ToInt32(row["Priority"]) : 0;
 
                             var accountId = row["AccountId"].IsNotEmpty() ? Convert.ToInt32(row["AccountId"]) : 0;
                             var headerImageUrl = row["HeaderImage"].IsNotEmpty() ? row["HeaderImage"].ToString() : "";
@@ -2199,7 +2200,7 @@ namespace AfterSchoolLibrary.Services
                         }
                     }
 
-                    return ListResponse.DistinctBy(m => m.AccountName).ToList();
+                    return ListResponse;
                 }
             }
             catch (Exception ex)

@@ -270,6 +270,9 @@
         }
 
         function prepareSearchParams(applyFilters) {
+            //.. reset scroll flag
+            isReachedScrollEnd = false;
+
             //.. prepare params
             var mainUrl = '';
             var search = '';
@@ -473,21 +476,7 @@
                         //.. format data as JSON and combine with template
                         var compiledHtml = compiled({
                             response: data.data,
-                        });                        
-
-                        //.. update html to dom
-                        //if (isFilterApplied) {
-                        //    $('#search-result').html(compiledHtml);
-                        //    isReachedScrollEnd = true;
-                        //    page = 0;
-                        //} else {
-                        //    $('#search-result').append(compiledHtml);
-
-                        //    if (data.data.length < 9) {
-                        //        //..page size is less then the default, then it means no more records present
-                        //        isReachedScrollEnd = true;
-                        //    }
-                        //}
+                        });        
 
                         if (data.pageNum == 0) {
                             //..first page, so update whole page
@@ -498,13 +487,16 @@
 
                         if (isFilterApplied) {
                             page = 0;
+
+                            //..while filter we load all data so this should be true
+                            isReachedScrollEnd = true;
                         } else {
                             page++;
-                        }
 
-                        if (data.data.length < 9) {
-                            //..page size is less then the default, then it means no more records present
-                            isReachedScrollEnd = true;
+                            if (data.data.length < 9) {
+                                //..page size is less then the default, then it means no more records present
+                                isReachedScrollEnd = true;
+                            }
                         }
 
                         inCallback = false;
@@ -569,7 +561,16 @@
             //..refresh accounts
             if (!isMobile) {
                 loadAccounts();
-            }            
+            }    
+
+            resetFlags();
+        }
+
+        function resetFlags() {
+            isFilterApplied = false;
+            isReachedScrollEnd = false;
+            page = 0;
+            inCallback = false;
         }
     </script>
 }
