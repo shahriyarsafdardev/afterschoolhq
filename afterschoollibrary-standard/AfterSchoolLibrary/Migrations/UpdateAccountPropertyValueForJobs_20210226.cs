@@ -14,7 +14,7 @@ namespace AfterSchoolLibrary.Migrations
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     AccountProperty.Update(updateValues: new Hashtable() { { "value", "Youth Employment" } }, 
-                        criterias: new Hashtable() { { "value", "Jobs" }, { "accountpropertytypeid", AccountPropertyType.ServiceOffered } }, 
+                        criterias: new Hashtable() { { "value", "Jobs" }, { "accountpropertytypeid", (int)AccountPropertyType.ServiceOffered } }, 
                         ObjectMap: AccountProperty.ObjectMap, 
                         dc: adc);   
                 },
