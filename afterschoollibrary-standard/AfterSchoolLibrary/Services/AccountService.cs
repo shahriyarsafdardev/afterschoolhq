@@ -2200,7 +2200,7 @@ namespace AfterSchoolLibrary.Services
                         }
                     }
 
-                    return ListResponse;
+                    return ListResponse.DistinctBy(m => m.AccountName).ToList();
                 }
             }
             catch (Exception ex)
