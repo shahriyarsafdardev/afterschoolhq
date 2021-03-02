@@ -224,8 +224,7 @@
             $(window).scroll(function () {
                 if (isReachedScrollEnd == false &&
                     $(window).scrollTop() >= $('#search-result').offset().top + $('#search-result').outerHeight() - window.innerHeight)
-                {
-                    console.log('search initiated');
+                {                    
                     loadFiltersAndInitiateSearch();
                 }
             });
@@ -456,8 +455,7 @@
             if (inCallback) {
                 return false;
             }
-
-            console.log('search finalized');
+            
             showLoader();
             inCallback = true;            
 
