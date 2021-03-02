@@ -449,7 +449,7 @@
                     return false;
                 }
 
-                if (searchLength > 40) {
+                if (searchLength >= 40) {
                     spanRemainingCharCounter.text(50).css('color', 'red');
                 } else {
                     spanRemainingCharCounter.text(50).css('color', '#777777');
