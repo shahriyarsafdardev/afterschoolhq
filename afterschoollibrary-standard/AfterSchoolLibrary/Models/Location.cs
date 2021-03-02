@@ -352,14 +352,17 @@ namespace AfterSchoolLibrary.Models
             dq.Connection = dc;
 
             var sql = $@"
-					SELECT Neighborhood FROM Location
+					SELECT 
+						DISTINCT Neighborhood 
+					FROM Location
 					WHERE Id IN (
 						SELECT LocationId FROM AccountProfile 
 						WHERE AccountId IN (
 							SELECT VisitorAccountId 
 							FROM AccountRelationship 
 							WHERE HostAccountId = {hostAccountId})
-						) AND (COALESCE (Neighborhood, '') <> '')";
+						) AND (COALESCE (Neighborhood, '') <> '')
+					ORDER BY Neighborhood ASC";
 
             return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(row => { return row[0].ToString(); });
 		}
