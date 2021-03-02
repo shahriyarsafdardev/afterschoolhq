@@ -248,7 +248,9 @@
 
                     <div class="row margin-t-35">
                         <div class="col-md-12">
-                            <label id="signup-search-label"></label>
+                            <label id="signup-search-label"></label>  
+                            <span class="label" style="color: #777777;">(Max character Limit 50)</span> 
+                            <span class="label" style="color: #777777;">(Remaining <span id="remaining-search-char-counter">50</span> characters)</span>
                             <input id="signup-account-search" type="text" class="form-control" autocomplete="off" />
                             <div id="signup-account-search-list" class="border-light-gray pointer hide"></div>
                         </div>
@@ -435,14 +437,35 @@
         var signupListOnMouseOver = "signupListMouseOver";
         var signupListOnMouseOut = "signupListMouseOut";
         var signupListOnClick = "signupListMouseClick";
+        var spanRemainingCharCounter = $('#remaining-search-char-counter');
 
         PageEvent.add(PageEvent.AFTER_INIT, function () {           
-            signupAccountSearch.keyup(function () {
-
-                if (signupAccountSearch.val().length <= 2) {
+            signupAccountSearch.keyup(function (e) {
+                var searchLength = signupAccountSearch.val().length;
+                if (searchLength <= 2) {
                     signupAccountSearchList.html('');
                     signupAccountSearchList.addClass('hide');
                     btnContinue.attr('disabled', 'disabled');
+                    return false;
+                }
+
+                if (searchLength >= 40) {
+                    spanRemainingCharCounter.text(50).css('color', 'red');
+                } else {
+                    spanRemainingCharCounter.text(50).css('color', '#777777');
+                }
+
+                if (searchLength < 50) {
+                    spanRemainingCharCounter.text(50 - searchLength);
+                }
+                else if (searchLength == 50) {
+                    e.preventDefault();
+                    spanRemainingCharCounter.text(0);
+                } else if (searchLength > 50) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.value = this.value.substring(0, 50);                    
+                    spanRemainingCharCounter.text(0);
                     return false;
                 }
 
