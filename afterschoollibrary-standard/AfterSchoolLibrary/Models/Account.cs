@@ -1357,12 +1357,6 @@ namespace AfterSchoolLibrary.Models
             return dq.ExecuteSelect(sql, msgs);            
         }
 
-
-        public string GetSubdomainDirectoryLocation()
-        {
-            return $"{this.Subdomain}/{this.UniqueName}";
-        }
-
         #endregion
     }
 }
