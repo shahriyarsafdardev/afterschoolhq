@@ -377,7 +377,7 @@ namespace AfterSchoolLibrary.Helpers
                     Migrations.AddManageCouponFeatureInPremiumPackage_20201224.Do(amsgs, adc);
                     Migrations.UpdateOldTransactionsFees_20210203.Do(amsgs, adc);
 
-
+                    Migrations.UpdateLocationLatitudeLongitude_20210302.Do(amsgs, adc);
                     // Migrations.AddProfilesToAllAccounts_20200727.Do(amsgs, adc);
 
                     // amsgs.Add("rollback please", MessageType.Error);
