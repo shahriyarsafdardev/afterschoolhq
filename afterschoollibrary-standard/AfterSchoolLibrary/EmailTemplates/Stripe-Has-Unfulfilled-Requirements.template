@@ -5,6 +5,8 @@
 		The Stripe Account, @Model.StripeBusinessName recently connected to your AfterSchoolHQ Account (@Model.AHQAccountName, @Model.AHQAccountEmail) is missing the following required information.
 	</p>
 	<br/>
+	<p> The following are <strong>@Model.RequirementStatus</strong>:</p>
+	<br/>
 	@Model.UnfulfilledRequirements
 	<br/>
 	<p>
