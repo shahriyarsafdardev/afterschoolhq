@@ -2138,7 +2138,7 @@ namespace AfterSchoolLibrary.Services
                     dc);
         }
 
-        public static List<SearchDirectoryResponse> SearchDirectoryAccounts(string hostAccountId, string search, string neighborhoods, string grades, 
+        public static List<SearchDirectoryResponse> SearchDirectoryAccounts(int hostAccountId, string search, string neighborhoods, string grades, 
             string ages, string gender, string services, string timing, string pricing, string cost, string starting, string other, string specialNeeds, int PageNum, int PageSize,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
