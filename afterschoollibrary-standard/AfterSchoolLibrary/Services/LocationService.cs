@@ -170,7 +170,9 @@ namespace AfterSchoolLibrary.Services
             return location;
         }
 
-        public static Location CreateOrUpdateFromGoogle(string locationName, string streetNumber, string streetName, string address2, string neighborhood, string city, string county, string state, string postalCode, string country, string googlePlaceId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Location CreateOrUpdateFromGoogle(string locationName, string streetNumber, string streetName, string address2, string neighborhood, string city, string county, string state, string postalCode, string country, 
+            string googlePlaceId, decimal latitude, decimal longitude,
+            WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var location = Location.LoadByGooglePlaceId(googlePlaceId, msgs, dc);
 
@@ -193,6 +195,8 @@ namespace AfterSchoolLibrary.Services
             location.State = state;
             location.PostalCode = postalCode;
             location.Country = country;
+            location.Latitude = latitude;
+            location.Longitude = longitude;
             location.LastModifiedDate = DateTime.UtcNow;
             location.LastModifiedBy = loggedInUser?.ID;
 

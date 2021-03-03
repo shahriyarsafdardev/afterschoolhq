@@ -23,6 +23,8 @@
 <input type="hidden" id="country" name="country" value="@(Model?.Country)" />
 <input type="hidden" id="placeid" name="placeid" value="@(Model?.GooglePlaceId)" />
 <input type="hidden" id="locationname" name="locationname" value="@(Model?.Name)" />
+<input type="hidden" id="latitude" name="latitude" />
+<input type="hidden" id="longitde" name="longitde" />
 
 <p class="text-muted">
     @description
@@ -46,16 +48,21 @@
 
         autocomplete = new google.maps.places.Autocomplete(input, options);
 
-        autocomplete.setFields(['place_id', 'name', 'address_components']);
+        autocomplete.setFields(['place_id', 'name', 'address_components', 'geometry']);
 
-        autocomplete.addListener('place_changed', function () {
-
+        autocomplete.addListener('place_changed', function () {            
             selected = true
             const place = autocomplete.getPlace();
             const components = place.address_components;
 
             $('#placeid').val(place.place_id);
             $('#locationname').val(place.name);
+
+            const latitude = place?.geometry?.location?.lat();
+            const longitde = place?.geometry?.location?.lng();
+
+            $('#latitude').val(latitude);
+            $('#longitde').val(longitde);
 
             for (component of components) {
 
