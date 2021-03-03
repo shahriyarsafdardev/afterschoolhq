@@ -1041,26 +1041,30 @@ namespace AfterSchoolLibrary.Models
             return 0;
         }
 
+
         /// <summary>
-        /// 
+        /// Global search query for accounts with different crieterias
         /// </summary>
-        /// <param name="hostAccountId">mccoy id</param>
-        /// <param name="search">search would be string like m, which will be resulted into '"m*"'</param>
+        /// <param name="hostAccountId">Parent account id</param>
+        /// <param name="search">Search would be string like m, which will be resulted into '"m*"' for full text sql</param>
         /// <param name="neighborhoods"></param>
         /// <param name="grades"></param>
         /// <param name="ages"></param>
         /// <param name="gender"></param>
+        /// <param name="services"></param>
         /// <param name="timing"></param>
+        /// <param name="pricing"></param>
         /// <param name="cost"></param>
         /// <param name="starting"></param>
         /// <param name="other"></param>
         /// <param name="specialNeeds"></param>
-        /// <param name="start"></param>
-        /// <param name="length"></param>
+        /// <param name="currentRowNumber">while user scroll, this will be updated and considered as page size</param>
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public static DataTable SearchVisitorAccountsByHostAccount(string hostAccountId, string search, string neighborhoods, string grades, string ages, string gender, string timing, string cost, string starting, string other, string specialNeeds, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static DataTable SearchVisitorAccountsByHostAccount(string hostAccountId, string search, string neighborhoods, string grades, string ages, string gender,
+            string services, string timing, string pricing, string cost, string starting, string other, string specialNeeds, int PageNum, int PageSize = 9,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -1082,7 +1086,9 @@ namespace AfterSchoolLibrary.Models
                 @IsELearningCenter BIT = NULL,  
                 @IsVirtualProgram BIT = NULL, 
                 @IsOpenDuringCovid BIT = NULL, 
+                @Services NVARCHAR(100),
                 @Timing NVARCHAR(100),
+                @PricingOptions NVARCHAR(100),
                 @SpecialNeeds NVARCHAR(100)";
             
             sql += $@"{Environment.NewLine}
@@ -1135,9 +1141,17 @@ namespace AfterSchoolLibrary.Models
                 sql += $@"
                 SET @IsOpenDuringCovid = 1";
 
+            if (services.IsNotEmpty())
+                sql += $@"
+                SET @Services = '{services}'";
+
             if (timing.IsNotEmpty())
                 sql += $@"
                 SET @Timing = '{timing}'";
+
+            if (pricing.IsNotEmpty())
+                sql += $@"
+                SET @PricingOptions = '{pricing}'";
 
             if (specialNeeds.IsNotEmpty())
                 sql += $@"
@@ -1146,13 +1160,14 @@ namespace AfterSchoolLibrary.Models
             sql += $"\n";
 
             sql += $@"
-            IF(OBJECT_ID('tempdb..#TEMP') IS NOT NULL) BEGIN DROP TABLE #TEMP END";
+            IF(OBJECT_ID('tempdb..#temp_accounts_1') IS NOT NULL) BEGIN DROP TABLE #temp_accounts_1 END
+			IF(OBJECT_ID('tempdb..#temp_accounts_2') IS NOT NULL) BEGIN DROP TABLE #temp_accounts_2 END";
 
             sql += $"\n";
 
             sql += $@"
             SELECT *
-			INTO #Temp
+			INTO #temp_accounts_1
 			FROM (
                 SELECT 
                     a.Id as AccountId,
@@ -1164,13 +1179,13 @@ namespace AfterSchoolLibrary.Models
                     ap.IsVirtualProgram,
 					ap.Headline,
                     ap.HeaderImage,
+                    ap.Logo,
                     ap.LocationId,
                     ap.AgeStart,
 					ap.AgeEnd,
 					glStart.Abbreviation as GradeLevelStart,
 					glEnd.Abbreviation as GradeLevelEnd,
-                    rp.StartDateTime, 
-					rp.EndDateTime
+                    CASE WHEN CAST(GETDATE() as date) BETWEEN CAST(rp.StartDateTime as date) AND CAST(rp.EndDateTime as date) THEN 1 ELSE 0 END as IsAccountNowEnrolling
                 FROM 
                     AccountRelationship ar
                     INNER JOIN Account a ON a.ID = ar.VisitorAccountId
@@ -1188,22 +1203,27 @@ namespace AfterSchoolLibrary.Models
                     LEFT JOIN AccountProfile ap ON ap.AccountId = ar.VisitorAccountId
                     LEFT JOIN Location loc ON ap.LocationId = loc.ID
                     LEFT JOIN AccountProperty properties on properties.AccountId = ar.VisitorAccountId AND properties.AccountPropertyTypeId in (12, 13, 14, 15)    
-                    LEFT JOIN AccountProperty specialNeeds on specialNeeds.AccountId = ar.VisitorAccountId AND specialNeeds.AccountPropertyTypeId = 17          
+                    LEFT JOIN AccountProperty specialNeeds on specialNeeds.AccountId = ar.VisitorAccountId AND specialNeeds.AccountPropertyTypeId = 17
+                    LEFT JOIN AccountProperty servicesOffered on servicesOffered.AccountId = ar.VisitorAccountId AND servicesOffered.AccountPropertyTypeId = 9
 				    LEFT JOIN AccountProperty timing on timing.AccountId = ar.VisitorAccountId AND timing.AccountPropertyTypeId = 10
+                    LEFT JOIN AccountProperty pricingOptions on pricingOptions.AccountId = ar.VisitorAccountId AND pricingOptions.AccountPropertyTypeId = 11
 				    LEFT JOIN GradeLevel glStart on glStart.ID = ap.GradeLevelStart
 				    LEFT JOIN GradeLevel glEnd on glEnd.ID = ap.GradeLevelEnd
                     OUTER APPLY STRING_SPLIT(@Grades, ',') s
                 WHERE 
                     ((@AccountId IS NULL) OR ar.HostAccountId = @AccountId)
                     AND a.IsDeleted <> 1 
-                    AND a.IsTest <> 1  
+                    AND a.IsTest <> 1
+                    AND a.IsActive = 1
                     AND ap.IsAHQApproved = 1                    
                     AND (
-						    (@SearchTerm = '""""') OR 
-						    CONTAINS((ap.Title, ap.Headline, ap.About), @SearchTerm)  OR 
-                            CONTAINS((properties.Value), @SearchTerm) OR 
-						    CONTAINS((specialNeeds.Value), @SearchTerm) OR 
-							CONTAINS((timing.Value), @SearchTerm) OR 
+						    (@SearchTerm = '""""') OR
+						    CONTAINS((ap.Title, ap.Headline, ap.About), @SearchTerm)  OR
+                            CONTAINS((properties.Value), @SearchTerm) OR
+						    CONTAINS((specialNeeds.Value), @SearchTerm) OR
+                            CONTAINS((servicesOffered.Value), @SearchTerm) OR
+							CONTAINS((timing.Value), @SearchTerm) OR
+                            CONTAINS((pricingOptions.Value), @SearchTerm) OR
                             CONTAINS((loc.Address1, loc.Address2, loc.City, loc.State, loc.PostalCode, loc.Name, loc.StreetNumber, loc.StreetName, loc.Neighborhood, loc.County), @SearchTerm)
 					    )
                     AND ((@Neighborhood IS NULL) OR loc.Neighborhood IN (SELECT value COLLATE Latin1_General_100_CI_AI FROM STRING_SPLIT(@Neighborhood, ',') WHERE RTRIM(value) <> ''))                    
@@ -1212,7 +1232,9 @@ namespace AfterSchoolLibrary.Models
                     AND ((@IsOpenDuringCovid IS NULL) OR ap.IsOpenDuringCovid = @IsOpenDuringCovid)
                     AND ((@Gender IS NULL) OR ap.GenderRestriction In (SELECT value FROM STRING_SPLIT(@Gender, ',') WHERE RTRIM(value) <> ''))
                     AND ((@SpecialNeeds IS NULL) OR specialNeeds.Value In (SELECT value FROM STRING_SPLIT(@SpecialNeeds, ',') WHERE RTRIM(value) <> ''))
+                    AND ((@Services IS NULL) OR servicesOffered.Value In (SELECT value FROM STRING_SPLIT(@Services, ',') WHERE RTRIM(value) <> ''))
 					AND ((@Timing IS NULL) OR timing.Value In (SELECT value FROM STRING_SPLIT(@Timing, ',') WHERE RTRIM(value) <> ''))
+                    AND ((@PricingOptions IS NULL) OR pricingOptions.Value In (SELECT value FROM STRING_SPLIT(@PricingOptions, ',') WHERE RTRIM(value) <> ''))
                     AND ((@Grades IS NULL) OR (s.value) BETWEEN ap.GradeLevelStart AND ap.GradeLevelEnd)
                     AND (
 	                        (@Age IS NULL) OR 
@@ -1264,27 +1286,56 @@ namespace AfterSchoolLibrary.Models
             sql += $"\n";
 
             sql += $@"
-            --this table is for current activities
-			SELECT DISTINCT AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, 1 as IsAccountNowEnrolling, IsELearningCenter, IsVirtualProgram, Headline, HeaderImage, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, NULL AS StartDateTime, NULL AS EndDateTime
-			FROM #Temp 
-			WHERE CAST(GETDATE() AS DATE) BETWEEN CAST(StartDateTime AS DATE) AND CAST(EndDateTime AS DATE)
-			
-            UNION ALL
+            
+			SELECT *
+			INTO #temp_accounts_2
+			FROM (
+				--accounts with current activities or now enrolling
+				SELECT DISTINCT 
+					AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+					IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 1 as Priority
+				FROM #temp_accounts_1 
+				WHERE 
+					IsAccountNowEnrolling = 1
 				
-			--this table will be used to order by				
-			SELECT distinct AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, 0 as IsAccountNowEnrolling, IsELearningCenter, IsVirtualProgram, Headline, HeaderImage, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, StartDateTime, EndDateTime
-			FROM #Temp t
-			WHERE
-				AccountId NOT IN (
-					SELECT DISTINCT AccountId FROM #Temp 
-					WHERE CAST(GETDATE() AS DATE) BETWEEN CAST(StartDateTime AS DATE) AND CAST(EndDateTime AS DATE)
-				) 
-			ORDER BY IsAccountNowEnrolling desc, EndDateTime desc, StartDateTime asc
+				UNION ALL
 
-			DROP TABLE #TEMP";
+				-- accounts with header image or logo next
+				SELECT DISTINCT 
+					AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+					IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 2 as Priority
+				FROM #temp_accounts_1 
+				WHERE 
+					AccountId NOT IN (
+						SELECT DISTINCT AccountId FROM #temp_accounts_1 
+						WHERE IsAccountNowEnrolling = 1
+					) AND (HeaderImage is not null or Logo is not null)
 
-            dq.SelectRange.Start = start;
-            dq.SelectRange.Length = length;
+				UNION ALL
+
+				-- all other accounts
+				SELECT DISTINCT 
+					AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, 0 as IsAccountNowEnrolling, IsELearningCenter, 
+					IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 3 as Priority
+				FROM #temp_accounts_1
+				WHERE
+					AccountId NOT IN (
+						SELECT DISTINCT AccountId FROM #temp_accounts_1 
+						WHERE IsAccountNowEnrolling = 1		
+					)
+					AND HeaderImage is null and Logo is null --because we already filtered this in second query, so no need of those accounts now
+			) as filteredData							
+
+			SELECT 
+				AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+				IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, Priority
+			FROM #temp_accounts_2
+			ORDER BY Priority asc, NEWID()
+            OFFSET {(PageNum * PageSize)} ROWS 
+			FETCH {(PageNum == 0 ? "first" : "next")} {PageSize} ROWS only;
+            
+			DROP TABLE #temp_accounts_1
+			DROP TABLE #temp_accounts_2";
 
             return dq.ExecuteSelect(sql, msgs);            
         }

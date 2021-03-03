@@ -58,7 +58,7 @@ namespace AfterSchool.Controllers
 
                 if (account.AccountTypeId.In(new List<AccountType>() { AccountType.Directory, AccountType.SchoolDistrict }))
                 {
-                    var neighborhoodList = Location.LoadNeighborhoodsByHostAccount(hostAccountId: account.ID.ToString(), msgs: msgs).ToList();
+                    var neighborhoodList = Location.LoadNeighborhoodsByHostAccount(hostAccountId: account.ID.Value, msgs: msgs).ToList();
 
                     ViewBag.Messages = msgs;
                     ViewBag.Neighborhoods = neighborhoodList;

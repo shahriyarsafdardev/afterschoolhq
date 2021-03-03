@@ -5,6 +5,11 @@
     var totalGradeCount = grades.Count;
     var firstHalf = totalGradeCount / 2;
     var secondHalf = totalGradeCount - firstHalf;
+
+    var services = AfterSchoolLibrary.Helpers.ProfileHelper.ServicesOfferings;
+    var timing = AfterSchoolLibrary.Helpers.ProfileHelper.OfferingTimes;
+    var pricingOptions = AfterSchoolLibrary.Helpers.ProfileHelper.PricingOptions;
+    var specialNeeds = AfterSchoolLibrary.Helpers.ProfileHelper.SpecialNeedsOfferings;
 }
 
 <div style="text-align: center; text-decoration: underline;">
@@ -14,7 +19,7 @@
 
 @if (neighborhoods.IsNotEmpty() && neighborhoods.Count > 0)
 {
-    <div>
+    <div id="list-neighborhoods">
         <h4 class="filter-header">Neighborhoods</h4>
 
         @foreach (var item in neighborhoods)
@@ -25,6 +30,12 @@
             </div>
         }
     </div>
+
+    if (neighborhoods.Count > 5)
+    {
+        <p onclick="return loadMore(this, 'list-neighborhoods', '@neighborhoods.Count')" class="show-more">Show more...</p>
+    }
+
     <div class="clearfix"></div>
 
 }
@@ -97,16 +108,35 @@
 </div>
 <div class="clearfix"></div>
 
-<div>
+<div id="list-services">
+    <h4 class="filter-header">Services Offered</h4>
+
+    @foreach (var item in services.OrderBy(m => m))
+    {
+        <div class="am-checkbox" style="padding: 3px 0;">
+            <input id="chk-services-@item.ToLower()" name="services" value="@item" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+            <label for="chk-services-@item.ToLower()" class="margin-h-10 mobile-padding">@item</label>
+        </div>
+    }
+
+    <p onclick="return loadMore(this, 'list-services', '@services.Length')" class="show-more">Show more...</p>
+
+</div>
+<div class="clearfix"></div>
+
+
+<div id="list-timing">
     <h4 class="filter-header">Timing</h4>
 
-    @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.OfferingTimes)
+    @foreach (var item in timing)
     {
         <div class="am-checkbox" style="padding: 3px 0;">
             <input id="chk-timing-@item.ToLower()" name="timing" value="@item" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
             <label for="chk-timing-@item.ToLower()" class="margin-h-10 mobile-padding">@item</label>
         </div>
     }
+
+    <p onclick="return loadMore(this, 'list-timing', '@timing.Length')" class="show-more">Show more...</p>
 
 </div>
 <div class="clearfix"></div>
@@ -133,6 +163,20 @@
         <input id="chk-cost-4" name="cost" value="cost_150_above" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
         <label for="chk-cost-4" class="margin-h-10 mobile-padding">$150 and Above</label>
     </div>
+</div>
+<div class="clearfix"></div>
+
+<div id="list-pricing">
+    <h4 class="filter-header">Pricing options</h4>
+
+    @foreach (var item in pricingOptions.OrderBy(m => m))
+    {
+        <div class="am-checkbox" style="padding: 3px 0;">
+            <input id="chk-pricing-@item.ToLower()" name="pricing" value="@item" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+            <label for="chk-pricing-@item.ToLower()" class="margin-h-10 mobile-padding">@item</label>
+        </div>
+    }
+
 </div>
 <div class="clearfix"></div>
 
@@ -176,15 +220,43 @@
 </div>
 <div class="clearfix"></div>
 
-<div>
+<div id="list-special-needs">
     <h4 class="filter-header">Special Needs</h4>
 
-    @foreach (var item in AfterSchoolLibrary.Helpers.ProfileHelper.SpecialNeedsOfferings)
+    @foreach (var item in specialNeeds)
     {
         <div class="am-checkbox" style="padding: 3px 0;">
             <input id="chk-special-needs-@item.ToLower()" name="special-needs" value="@item" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
             <label for="chk-special-needs-@item.ToLower()" class="margin-h-10 mobile-padding">@item</label>
         </div>
     }
+
+    <p onclick="return loadMore(this, 'list-special-needs', '@specialNeeds.Length')" class="show-more">Show more...</p>
 </div>
 <div class="clearfix"></div>
+
+<script type="text/javascript">
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        Array.from(
+            $("#list-services, #list-timing, #list-special-needs, #list-neighborhoods")
+        ).forEach(elem => {
+            $(elem).find(".am-checkbox").slice(5).hide();
+        });
+    });
+
+    function loadMore(element, listId, length) {
+        var listSelector = $(`#${listId} .am-checkbox`);
+        var isShowMore = $(element).text() == 'Show more...';
+
+        if (isShowMore) {
+            //..show more
+            $(element).text('Show less...');
+            listSelector.slice(0, length).slideDown();
+
+        } else {
+            //..hide
+            $(element).text('Show more...');
+            listSelector.slice(5).slideUp();
+        }
+    }
+</script>
