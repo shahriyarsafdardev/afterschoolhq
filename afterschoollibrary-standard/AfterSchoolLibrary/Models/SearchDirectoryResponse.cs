@@ -22,5 +22,7 @@ namespace AfterSchool.Models
         public string GradeEnd { get; set; }
         public string AgeStart { get; set; }
         public string AgeEnd { get; set; }
+
+        public int Priority { get; set; }
     }
 }

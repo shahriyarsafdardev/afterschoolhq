@@ -492,3 +492,11 @@
     display: inline;
     overflow-wrap: break-word;
 }
+
+.show-more {
+    text-decoration: underline;
+    margin-left: 10px;
+    color: darkblue;
+    font-size: 12px;
+    cursor: pointer;
+}

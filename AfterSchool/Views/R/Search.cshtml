@@ -11,9 +11,13 @@
         logoUrl = "/img/logo-vertical.png";
     }
 
-    if (!primaryColor.IsNotEmpty())
+    if (primaryColor.IsBlank())
     {
         primaryColor = "#547bb6";
+    }
+    else
+    {
+        primaryColor = "#00ae85";
     }
 
     //.. data for layout
@@ -29,12 +33,13 @@
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
 <style>
-    .footer-extended {
-        background: #22253a;
-    }
-
     .search-bg {
-        background-image: linear-gradient(rgba(0, 0, 0, .8), rgba(0, 0, 0, .8)), url(@headerImageUrl) !important;
+        background-image: linear-gradient(rgba(0, 0, 0, .8), rgba(0, 0, 0, .8)), url( @headerImageUrl ) !important;
+        background-repeat: no-repeat !important;
+        background-size: cover !important;
+        background-position: center !important;
+        justify-content: center !important;
+        align-items: center !important;
     }
 
     .join-directory-btn {
@@ -47,7 +52,7 @@
 <div class="visible-lg visible-md">
 
     <div class="row">
-        <div class="reg-header @(headerImageUrl.IsNotEmpty() ? "search-bg" : "")" style="min-height: 100%; background: white; padding: 35px 20px;">
+        <div class="@(headerImageUrl.IsNotEmpty() ? "search-bg" : "")" style="min-height: 100%; background: white; padding: 35px 20px;">
 
             <div class="reg-header-overlay col-md-12">
 
@@ -55,20 +60,12 @@
                     <img src="@logoUrl" style="width: 200px;" />
                 </div>
 
-                <div class="col-lg-7 col-md-9">
+                <div class="col-lg-9 col-md-9">
                     <div class="form-group has-feedback has-search">
-                        <span class="glyphicon glyphicon-search form-control-feedback"></span>
+                        <span class="glyphicon glyphicon-search form-control-feedback" style="top: -3px;"></span>
                         <input id="txtSearch" name="search" type="text" class="form-control" placeholder="Search" onkeyup="return waitAndFilterSearch(this.value)">
                     </div>
                 </div>
-
-                @if (accountId > 0)
-                {
-                    //.. we shoultn't have this button in case of global search                    
-                    <div class="col-lg-2 col-md-9">
-                        <a href="@joiningUrl" class="btn btn-search-register btn-md btn-center join-directory-btn"> Join Directory </a>
-                    </div>
-                }
             </div>
 
             <div class="clearfix"></div>
@@ -79,7 +76,7 @@
 <div class="visible-sm visible-xs bg-color">
     <div class="col-xs-10">
         <div class="form-group has-feedback has-search" style="margin-top: 10px;">
-            <span class="glyphicon glyphicon-search form-control-feedback"></span>
+            <span class="glyphicon glyphicon-search form-control-feedback" style="top: -3px;"></span>
             <input id="txtSearch-mobile" name="search" type="text" class="form-control" placeholder="Search ISYP Directory" onkeyup="return waitAndFilterSearch()">
         </div>
     </div>
@@ -109,10 +106,10 @@
 
     <% _.each(response, function(searchResult){ %>
 
-    <div id="<%= searchResult.AccountUid %>" name="<%= searchResult.AccountName %>" class="col-xl-12 col-sm-6 col-md-6 col-lg-6 col-xl-4 participation-object" style="height: 410px; margin-bottom: 10px;" onclick="WebPage.navigateIframe('<%= searchResult.HomePageUrl %>')">
+    <div id="<%= searchResult.AccountUid %>" name="<%= searchResult.AccountName %>" class="col-xl-12 col-sm-6 col-md-6 col-lg-6 col-xl-4 participation-object" style="height: 410px; margin-bottom: 10px;">
 
-        <div class="panel" style="overflow: hidden;">
-            <div class="reg-header" style="background-image: url(<%= searchResult.ProfileHeaderImageUrl %>); min-height: 100px; height: 150px; padding: 5px 5px; position: relative;">
+        <div class="panel" style="overflow: hidden; cursor: pointer;" onclick="WebPage.navigateIframe('<%= searchResult.HomePageUrl %>')">
+            <div class="reg-header" style="background-image: url('<%= searchResult.ProfileHeaderImageUrl %>'); min-height: 100px; height: 150px; padding: 5px 5px; position: relative;">
 
                 <% if(searchResult.IsAccountNowEnrolling) { %>
 
@@ -186,7 +183,7 @@
                 </div>
 
                 <div class="text-wrap" style="margin-top: 20px; height: 75px;">
-                    <h3 style="min-height: 52px;"> 
+                    <h3 style="height: 52px; overflow-y: hidden;">
                         <strong title="<%= searchResult.AccountName %>"><%= searchResult.AccountName %></strong>
                     </h3>
                 </div>
@@ -221,8 +218,17 @@
         var txtSearch = $('#txtSearch');
         var txtSearchMobile = $('#txtSearch-mobile');
         var isMobile = window.innerWidth <= 768;
+        var inCallback = false, page = 0, isFilterApplied = false, isReachedScrollEnd = false;  
 
         $(document).ready(function () {
+            $(window).scroll(function () {
+                if (isReachedScrollEnd == false &&
+                    $(window).scrollTop() >= $('#search-result').offset().top + $('#search-result').outerHeight() - window.innerHeight)
+                {                    
+                    loadFiltersAndInitiateSearch();
+                }
+            });
+
             loadFiltersAndInitiateSearch();
 
             if (!isMobile) {
@@ -238,7 +244,17 @@
                 if (filter.indexOf('search_') == 0) {
                     $(`input[name="search"]`).val(filter.split('_')[1]);
                 } else {
-                    $(`input[value="${decodeURIComponent(filter.trim())}"]`).attr('checked', 'checked');
+                    var inputToCheck = $(`input[value="${decodeURIComponent(filter.trim())}"]`);
+
+                    if (inputToCheck && inputToCheck.length > 0) {
+                        inputToCheck.attr('checked', 'checked');
+
+                        //..if checkbox is hidden, open that panel
+                        var showMoreElement = inputToCheck.parent().siblings('p');
+                        if (showMoreElement && showMoreElement.length > 0) {
+                            $(showMoreElement).click();
+                        }
+                    }                    
                 }
             });
 
@@ -253,6 +269,9 @@
         }
 
         function prepareSearchParams(applyFilters) {
+            //.. reset scroll flag
+            isReachedScrollEnd = false;
+
             //.. prepare params
             var mainUrl = '';
             var search = '';
@@ -260,7 +279,9 @@
             var comma_delimited_grades = '';
             var comma_delimited_ages = '';
             var comma_delimited_gender = '';
+            var comma_delimited_services = '';
             var comma_delimited_timing = '';
+            var comma_delimited_pricing = '';
             var comma_delimited_cost = '';
             var comma_delimited_starting = '';
             var comma_delimited_other = '';
@@ -304,11 +325,25 @@
                 comma_delimited_gender += $(this).val();
             });
 
+            $('input:checkbox[name=services]:checked').each(function () {
+                if (comma_delimited_services.length > 0) {
+                    comma_delimited_services += ',';
+                }
+                comma_delimited_services += $(this).val();
+            });
+
             $('input:checkbox[name=timing]:checked').each(function () {
                 if (comma_delimited_timing.length > 0) {
                     comma_delimited_timing += ',';
                 }
                 comma_delimited_timing += $(this).val();
+            });
+
+            $('input:checkbox[name=pricing]:checked').each(function () {
+                if (comma_delimited_pricing.length > 0) {
+                    comma_delimited_pricing += ',';
+                }
+                comma_delimited_pricing += $(this).val();
             });
 
             $('input:checkbox[name=cost]:checked').each(function () {
@@ -355,8 +390,16 @@
                 mainUrl += `${comma_delimited_gender},`;
             }
 
+            if (comma_delimited_services.length > 0) {
+                mainUrl += `${comma_delimited_services},`;
+            }
+
             if (comma_delimited_timing.length > 0) {
                 mainUrl += `${comma_delimited_timing},`;
+            }
+
+            if (comma_delimited_pricing.length > 0) {
+                mainUrl += `${comma_delimited_pricing},`;
             }
 
             if (comma_delimited_cost.length > 0) {
@@ -375,13 +418,21 @@
                 mainUrl += `${comma_delimited_special},`;
             }
 
+            //.. get current scrolltop
+            var scr = $(window).scrollTop();
+
             if (mainUrl) {
                 WebPage.addHash(mainUrl);
                 $('#clear-filters').show();
+                isFilterApplied = true;
             } else {
                 WebPage.addHash('');
+                isFilterApplied = false;
                 $('#clear-filters').hide();
             }
+
+            //..scroll to last known position, because location.href scrolls to top
+            document.documentElement.scrollTop = scr;
 
             // .. call api
             if (!isMobile || applyFilters) {
@@ -390,7 +441,9 @@
                     comma_delimited_grades,
                     comma_delimited_ages,
                     comma_delimited_gender,
+                    comma_delimited_services,
                     comma_delimited_timing,
+                    comma_delimited_pricing,
                     comma_delimited_cost,
                     comma_delimited_starting,
                     comma_delimited_other,
@@ -398,14 +451,19 @@
             }
         }
 
-        function loadAccounts(search, neighborhoods, grades, ages, gender, timing, cost, starting, other, special) {
+        function loadAccounts(search, neighborhoods, grades, ages, gender, services, timing, pricing, cost, starting, other, special) {
+            if (inCallback) {
+                return false;
+            }
+            
             showLoader();
+            inCallback = true;            
 
             var url = '@Url.Action("GetAccounts", "Search", new { Area = "" })';
             $.ajax({
                 type: "POST",
                 url: url,
-                data: { accountId: '@accountId', search, neighborhoods, grades, ages, gender, timing, cost, starting, other, special },
+                data: { accountId: '@accountId', search, neighborhoods, grades, ages, gender, services, timing, pricing, cost, starting, other, special, pageNum: page },
                 success: function (data) {
                     if (data && data.success == true) {
 
@@ -416,12 +474,31 @@
                         //.. format data as JSON and combine with template
                         var compiledHtml = compiled({
                             response: data.data,
-                        });
+                        });        
 
-                        //.. update html to dom
-                        $('#search-result').html(compiledHtml);
+                        if (data.pageNum == 0) {
+                            //..first page, so update whole page
+                            $('#search-result').html(compiledHtml);
+                        } else {
+                            $('#search-result').append(compiledHtml);                            
+                        }
 
-                        hideLoader();
+                        if (isFilterApplied) {
+                            page = 0;
+
+                            //..while filter we load all data so this should be true
+                            isReachedScrollEnd = true;
+                        } else {
+                            page++;
+
+                            if (data.data.length < 9) {
+                                //..page size is less then the default, then it means no more records present
+                                isReachedScrollEnd = true;
+                            }
+                        }
+
+                        inCallback = false;
+                        hideLoader();                        
                         return;
                     }
                     else {
@@ -440,10 +517,17 @@
                                 success: false
                             });
                         }
-                        else {
+                        else if (isFilterApplied) {
                             $('#search-result').html('<p style="margin-top: 35px; text-align: center; font-size: 16px;">Sorry, there are no results.</p>');
+                            isReachedScrollEnd = true;
+                            page = 0;
+                        }
+                        else {
+                            isReachedScrollEnd = true;
+                            page = 0;
                         }
 
+                        inCallback = false;
                         hideLoader();
                         return false;
                     }
@@ -466,7 +550,7 @@
 
         function clearFilters() {
             //..clear all checkbox
-            $(`input:checkbox[name=neighborhoods],[name=grades],[name=ages],[name=gender],[name=timing],[name=cost],[name=starting],[name=other],[name=special-needs]`).prop('checked', false);
+            $(`input:checkbox[name=neighborhoods],[name=grades],[name=ages],[name=gender],[name=services],[name=timing],[name=pricing],[name=cost],[name=starting],[name=other],[name=special-needs]`).prop('checked', false);
 
             //..clear web link and hide clear filter link
             WebPage.addHash('');
@@ -475,7 +559,16 @@
             //..refresh accounts
             if (!isMobile) {
                 loadAccounts();
-            }            
+            }    
+
+            resetFlags();
+        }
+
+        function resetFlags() {
+            isFilterApplied = false;
+            isReachedScrollEnd = false;
+            page = 0;
+            inCallback = false;
         }
     </script>
 }

@@ -96,7 +96,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        account.Name = title;
+                        account.Name = title.MaxChars(50);
                         account.UniqueName = AccountService.GenerateUniqueName(title, account.ID, amsgs, adc);
                         account.OnboardingStepDone = OnboardingStepType.ProgramInfo;
                         account.TimeZone = timeZone.IsNotEmpty() ? timeZone : null;

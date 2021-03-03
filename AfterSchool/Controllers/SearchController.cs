@@ -25,24 +25,35 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public JsonResult GetAccounts(string accountId, string search, string neighborhoods, string grades, string ages, string gender, string timing, string cost, string starting, string other, string special)
+        public JsonResult GetAccounts(string accountId, string search, string neighborhoods, string grades, string ages, string gender, string services, 
+            string timing, string pricing, string cost, string starting, string other, string special, int pageNum = 0)
         {
             var msgs = new SystemMessages();
 
             var parsedGrade = ParseAndLoadGrade(grades);
             var parsedAge = ParseAndLoadAge(ages);
             var parsedGender = ParseAndLoadGender(gender);
-            var searchedAccounts = AccountService.SearchDirectoryAccounts(accountId, search, neighborhoods, parsedGrade, parsedAge, parsedGender, timing, cost, starting, other, special, msgs: msgs);
+            var pageSize = 9;
+
+            //.. if filter applied, we will load all records. kind of stuck on this for a while, so leave this as it is for now.
+            if (search.IsNotEmpty() || neighborhoods.IsNotEmpty() || grades.IsNotEmpty() || ages.IsNotEmpty() || gender.IsNotEmpty() || services.IsNotEmpty() || timing.IsNotEmpty() || pricing.IsNotEmpty() || cost.IsNotEmpty()
+                || starting.IsNotEmpty() || other.IsNotEmpty() || special.IsNotEmpty())
+            {
+                pageNum = 0;
+                pageSize = 100;
+            }
+
+            var searchedAccounts = AccountService.SearchDirectoryAccounts(accountId, search, neighborhoods, parsedGrade, parsedAge, parsedGender, services, timing, pricing, cost, starting, other, special, pageNum, pageSize, msgs: msgs);
 
             if (searchedAccounts.IsNotEmpty() && searchedAccounts.Any())
             {
                 //.. call success and records found
-                return Json(new { success = true, status = "ok", data = searchedAccounts }, JsonRequestBehavior.AllowGet);
+                return Json(new { success = true, status = "ok", data = searchedAccounts, pageNum, pageSize }, JsonRequestBehavior.AllowGet);
             }
             else if (msgs.IsNotEmpty() && msgs.Count > 0)
             {
                 //.. something went wrong, error occured
-                return Json(new { success = false, status = "error", data = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
+                return Json(new { success = false, status = "error", data = msgs.ToList().Select(msg => new { msg.Text }), pageNum, pageSize }, JsonRequestBehavior.AllowGet);
             }
 
             //.. no result found
