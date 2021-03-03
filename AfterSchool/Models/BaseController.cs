@@ -32,6 +32,8 @@ namespace AfterSchool.Models
                     origin.StartsWith("https://qa.afterschoolhq.com") ||
                     origin.StartsWith("https://ci.afterschoolhq.com") ||
                     origin.StartsWith("https://staging.afterschoolhq.com") ||
+                    origin.StartsWith("https://directory.afterschoolhq.com") ||
+                    origin.StartsWith("https://programs.indysummeryouthprograms.org") ||
                     origin.StartsWith("http://localhost:54849"))
                 {
                     return true;
@@ -62,8 +64,7 @@ namespace AfterSchool.Models
             {
                 SessionVariables.VisitorSession.LastActivity = DateTime.UtcNow;
                 SessionVariables.VisitorSession.Save();
-            }
-                    
+            }           
         }
 
         protected void UpdateSession(SessionActionType sat, int? accountId = null, int? activityId = null, int? webUserId = null, int? registrantId = null, int? registrationId = null, int? registrationPeriodId = null, int? activityGroupId = null, DatabaseConnection dc = null)
@@ -95,6 +96,19 @@ namespace AfterSchool.Models
         {
             if (!IsLoggedIn())
                 requestContext.Response.Redirect($"/login?returnurl={requestContext.Request.Url.PathAndQuery}");
+        }
+
+        protected void HandleSubdomainRedirect(HttpContextBase requestContext)
+        {
+            if (Request.UrlReferrer.IsNotEmpty())
+            {
+                var subdomainAccount = AccountService.CheckSubDomainForRedirect(Request.UrlReferrer.ToString());
+                if (subdomainAccount.IsNotEmpty())
+                {
+                    requestContext.Response.Redirect($"/{subdomainAccount.UniqueName}");
+                }
+                    
+            }
         }
 
         protected void WriteOutput(object obj, ResponseType rt)
