@@ -195,7 +195,7 @@ namespace AfterSchoolLibrary.Helpers
                 emailTemplateId: SendGridHelper.GetGenericTemplateId()));
         }
 
-        public static void SendStripeHasUnfulFilledRequirementsEmail(Stripe.Account stripeAccount, List<string> requirementList, Account account, SystemMessages msgs)
+        public static void SendStripeHasUnfulFilledRequirementsEmail(Stripe.Account stripeAccount, List<string> requirementList, StripeRequirementStatus requirementStatus, Account account, SystemMessages msgs)
         {
             var unFulfilledRequirements = "<ul>";
 
@@ -209,6 +209,7 @@ namespace AfterSchoolLibrary.Helpers
             var model = new NameValueCollection()
             {
                 { "UnfulfilledRequirements", unFulfilledRequirements },
+                { "RequirementStatus", requirementStatus.ToString().SplitByUpperCase() },
                 { "StripeBusinessName", stripeAccount.BusinessProfile.Name },
                 { "StripeAccountEmail", stripeAccount.Email },
                 { "AHQAccountName", account.Name },
@@ -221,7 +222,7 @@ namespace AfterSchoolLibrary.Helpers
             var body = ProcessTemplate(
                 EmailTemplates.Stripe_Has_Unfulfilled_Requirements,
                 model,
-                "StripeHasUnfulfilledRequirements",
+                "StripeHasUnfulfilledRequirements-1.0",
                 msgs);
 
             var mailMsgs = new SystemMessages();
