@@ -94,7 +94,15 @@
 
 <div id="filters" class="col-md-3" style="display: none; padding-right: 0; padding-bottom: 120px;padding-top: 10px; background-color: #F9F9F9;">
     @{ Html.RenderPartial("~/Views/Shared/_DirectoryFilters.cshtml"); }
+</div>
+
+<div id="search-container" class="col-md-9" style="padding-bottom: 20px;">
+    <div id="search-result"> </div>
+
     <div class="clearfix"></div>
+    <div id="ProgressBar" style="z-index: 100001; text-align: center; display: none;">
+        <img src="~/img/lod_bg.gif">
+    </div>
 </div>
 
 <div id="search-result" class="col-md-9"> </div>
@@ -217,7 +225,7 @@
         var txtSearch = $('#txtSearch');
         var txtSearchMobile = $('#txtSearch-mobile');
         var isMobile = window.innerWidth <= 768;
-        var inCallback = false, page = 0, isFilterApplied = false, isReachedScrollEnd = false;  
+        var inCallback = false, page = 0, isFilterApplied = false, isReachedScrollEnd = false;
 
         $(document).ready(function () {
             $(window).scroll(function () {
@@ -455,7 +463,7 @@
                 return false;
             }
 
-            showProgressBar();
+            showLoader();
             inCallback = true;
 
             var url = '@Url.Action("GetAccounts", "Search", new { Area = "" })';
@@ -497,7 +505,7 @@
                         }
 
                         inCallback = false;
-                        hideProgressBar();
+                        hideLoader();
                         return;
                     }
                     else {
@@ -527,7 +535,7 @@
                         }
 
                         inCallback = false;
-                        hideProgressBar();
+                        hideLoader();
                         return false;
                     }
                 }
