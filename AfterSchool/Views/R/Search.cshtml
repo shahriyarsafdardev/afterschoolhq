@@ -1,4 +1,4 @@
-﻿@{     
+﻿@{
     var accountUniqueName = ViewBag.AccountUniqueName;
     var msgs = (SystemMessages)ViewBag.Messages;
     var accountId = ViewBag.AccountId != null ? Convert.ToInt32(ViewBag.AccountId) : 0;
@@ -27,8 +27,7 @@
         ViewBag.AccountProfile = AccountProfile.LoadByAccountId(accountId);
     }
 
-    Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
-}
+    Layout = "~/Views/Shared/_LayoutRegistration.cshtml"; }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
@@ -95,10 +94,16 @@
 
 <div id="filters" class="col-md-3" style="display: none; padding-right: 0; padding-bottom: 120px;padding-top: 10px; background-color: #F9F9F9;">
     @{ Html.RenderPartial("~/Views/Shared/_DirectoryFilters.cshtml"); }
-    <div class="clearfix"></div>
 </div>
 
-<div id="search-result" class="col-md-9"> </div>
+<div id="search-container" class="col-md-9" style="padding-bottom: 20px;">
+    <div id="search-result"> </div>
+
+    <div class="clearfix"></div>
+    <div id="ProgressBar" style="z-index: 100001; text-align: center; display: none;">
+        <img src="~/img/lod_bg.gif">
+    </div>
+</div>
 
 <div class="clearfix"></div>
 
@@ -219,13 +224,13 @@
         var txtSearchMobile = $('#txtSearch-mobile');
         var txtZip = $('#txtZipCode');
         var isMobile = window.innerWidth <= 768;
-        var inCallback = false, page = 0, isFilterApplied = false, isReachedScrollEnd = false;  
+        var inCallback = false, page = 0, isFilterApplied = false, isReachedScrollEnd = false;
 
         $(document).ready(function () {
             $(window).scroll(function () {
                 if (isReachedScrollEnd == false &&
-                    $(window).scrollTop() >= $('#search-result').offset().top + $('#search-result').outerHeight() - window.innerHeight)
-                {                    
+                    $(window).scrollTop() >= $('#search-container').offset().top + $('#search-container').outerHeight() - window.innerHeight)
+                {
                     loadFiltersAndInitiateSearch();
                 }
             });
@@ -257,7 +262,7 @@
                         if (showMoreElement && showMoreElement.length > 0) {
                             $(showMoreElement).click();
                         }
-                    }                    
+                    }
                 }
             });
 
@@ -474,7 +479,7 @@
                 isReachedScrollEnd = true;
             }
 
-            showLoader();
+            showProgressBar();
             inCallback = true;            
 
             var url = '@Url.Action("GetAccounts", "Search", new { Area = "" })';
@@ -492,13 +497,13 @@
                         //.. format data as JSON and combine with template
                         var compiledHtml = compiled({
                             response: data.data,
-                        });        
+                        });
 
                         if (data.pageNum == 0) {
                             //..first page, so update whole page
                             $('#search-result').html(compiledHtml);
                         } else {
-                            $('#search-result').append(compiledHtml);                            
+                            $('#search-result').append(compiledHtml);
                         }
 
                         if (!isFilterApplied) {                            
@@ -511,7 +516,7 @@
                         }
 
                         inCallback = false;
-                        hideLoader();                        
+                        hideProgressBar();
                         return;
                     }
                     else {
@@ -541,7 +546,7 @@
                         }
 
                         inCallback = false;
-                        hideLoader();
+                        hideProgressBar();
                         return false;
                     }
                 }
@@ -573,7 +578,7 @@
             //..refresh accounts
             if (!isMobile) {
                 loadAccounts();
-            }    
+            }
 
             resetFlags();
         }
