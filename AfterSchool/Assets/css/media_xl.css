@@ -243,11 +243,4 @@
     .hidden-xl {
         display: none !important;
     }
-
-    .progress-icon {
-        top: 45%;
-        left: 45%;
-        position: fixed;
-        z-index: 1000001;
-    }
 }

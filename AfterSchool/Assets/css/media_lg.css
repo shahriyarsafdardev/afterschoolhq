@@ -67,11 +67,4 @@
     .process-back {      
         margin-left: 170px;
     }
-
-    .progress-icon {
-        top: 45%;
-        left: 45%;
-        position: fixed;
-        z-index: 1000001;
-    }
 }

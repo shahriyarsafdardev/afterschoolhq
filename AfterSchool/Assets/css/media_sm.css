@@ -99,11 +99,4 @@
         padding-top: 10px;
         padding-bottom: 10px;
     }
-
-    .progress-icon {
-        top: 37%;
-        left: 37%;
-        position: fixed;
-        z-index: 1000001;
-    }
 }
