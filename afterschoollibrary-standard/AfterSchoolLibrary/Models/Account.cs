@@ -1326,11 +1326,11 @@ namespace AfterSchoolLibrary.Models
 					AND HeaderImage is null and Logo is null --because we already filtered this in second query, so no need of those accounts now
 			) as filteredData							
 
-			SELECT 
+			SELECT DISTINCT
 				AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
 				IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, Priority
 			FROM #temp_accounts_2
-			ORDER BY Priority asc, NEWID()
+			ORDER BY Priority asc
             OFFSET {(PageNum * PageSize)} ROWS 
 			FETCH {(PageNum == 0 ? "first" : "next")} {PageSize} ROWS only;
             
