@@ -2200,7 +2200,10 @@ namespace AfterSchoolLibrary.Services
                         }
                     }
 
-                    return ListResponse.OrderBy(m => m.Priority).ThenBy(m => Guid.NewGuid()).ToList();
+                    if (distance.IsNotEmpty() && distance > 0)
+                        return ListResponse.DistinctBy(m => m.AccountName).ToList();
+                    else
+                        return ListResponse.OrderBy(m => m.Priority).ThenBy(m => Guid.NewGuid()).ToList();
                 }
             }
             catch (Exception ex)
