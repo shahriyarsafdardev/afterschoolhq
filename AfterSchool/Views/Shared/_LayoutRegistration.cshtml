@@ -61,6 +61,17 @@
             font-style: italic;
             font-family: 'Montserrat', sans-serif;
         }
+
+        .Progressdiv {
+            background-color: White;
+            background-repeat: no-repeat;
+            height: 100%;
+            opacity: 0.5;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000000;
+        }
     </style>
 </head>
 
@@ -82,7 +93,7 @@
                 </ul>
             </div>
         </div>
-    </div>    
+    </div>
 
     @{Html.RenderPartial("~/Views/Shared/_JavascriptIncludes.cshtml");}
 
