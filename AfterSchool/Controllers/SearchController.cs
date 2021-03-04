@@ -43,7 +43,7 @@ namespace AfterSchool.Controllers
 
             //.. if filter applied, we will load all records. kind of stuck on this for a while, so leave this as it is for now.
             if (search.IsNotEmpty() || neighborhoods.IsNotEmpty() || grades.IsNotEmpty() || ages.IsNotEmpty() || gender.IsNotEmpty() || services.IsNotEmpty() || timing.IsNotEmpty() || pricing.IsNotEmpty() || cost.IsNotEmpty()
-                || starting.IsNotEmpty() || other.IsNotEmpty() || special.IsNotEmpty())
+                || starting.IsNotEmpty() || other.IsNotEmpty() || special.IsNotEmpty() || zipcode > 0)
             {
                 pageNum = 0;
                 pageSize = 100;
