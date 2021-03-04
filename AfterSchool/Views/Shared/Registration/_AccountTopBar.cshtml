@@ -1,6 +1,6 @@
 ﻿@model Account
 
-@{ 
+@{
     var currentUser = SessionVariables.CurrentUser;
     var currentAccount = SessionVariables.CurrentAccount;
     var accountOrDashboard = "Account";
@@ -10,6 +10,8 @@
     var session = (ParticipationObject)ViewData["session"];
     var isDuringProfileSetup = false;
     var returnUrl = SessionVariables.RegistrationStartPageAccount?.HomePageUrl;
+    string directoryName = TempData["DirectoryName"] != null ? TempData["DirectoryName"].ToString() : null;
+    string directoryHomePageUrl = TempData["DirectoryHomePageUrl"] != null ? TempData["DirectoryHomePageUrl"].ToString() : null;
 
     if (currentAccount.IsNotEmpty() && currentAccount.AccountTypeId != AccountType.Registrant)
     {
@@ -28,12 +30,18 @@
     }
 }
 
-@helper RenderReturnToHomeUrl(ParticipationObject session)
+@helper RenderReturnToHomeUrl(ParticipationObject session, string directoryName, string directoryHomePageUrl)
 {
     if (session.IsNotEmpty() && !Request.Url.ToString().ToLower().Contains(session.GetHomePageUrl().ToLower()))
     {
         <a href="@session.GetBrowseUrl()" class="btn btn-link">
             &laquo; Return to @session.Name Home
+        </a>
+    }
+    else if (directoryName.IsNotEmpty() && directoryHomePageUrl.IsNotEmpty())
+    {
+        <a href="@directoryHomePageUrl" class="btn btn-link">
+            &laquo; Return To <span style="text-transform: uppercase;"> @directoryName </span>
         </a>
     }
     else if (Model.IsNotEmpty() && !(Model.HomePageUrl.ToLower().Contains(Request.Url.AbsolutePath.ToLower())))
@@ -44,7 +52,7 @@
     }
 }
 
-<div class="reg-login-bar">    
+<div class="reg-login-bar">
     @if (Model.IsNotEmpty() && Model.ID.HasValue)
     {
         <div class="row">
@@ -65,11 +73,11 @@
 
             @if (!isDuringProfileSetup)
             {
-                <div class="col-md-6 col-sm-6 col-xs-12">                
+                <div class="col-md-6 col-sm-6 col-xs-12">
                     <div class="btn-group pull-right">
                         <div>
 
-                            @RenderReturnToHomeUrl(session)
+                            @RenderReturnToHomeUrl(session, directoryName, directoryHomePageUrl)
 
                             @if (currentUser.IsNotEmpty())
                             {
@@ -124,13 +132,13 @@
                     </div>
                 </div>
             }
-        </div>        
+        </div>
     }
     else
     {
         <div class="row">
             <div class="pull-right">
-                @RenderReturnToHomeUrl(session)
+                @RenderReturnToHomeUrl(session, directoryName, directoryHomePageUrl)
             </div>
         </div>
         <div>
