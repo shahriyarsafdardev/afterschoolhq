@@ -39,18 +39,6 @@ namespace AfterSchool.Controllers
                 SessionVariables.Cart = null;
         }
 
-        //[HttpGet]
-        //public ActionResult AccountWithDirecotry(string accountname, string directoryname)
-        //{
-        //    if (isUnsupportedBrowser())
-        //        return RedirectUnsupportedBrowser();
-
-        //    if (accountname.IsNotEmpty())
-        //        return RedirectToRoute("AccountHome", new { controller = "r", action = "account", accountname });
-
-        //    return HttpNotFound();
-        //}
-
         [HttpGet]
         public ActionResult Account(string accountname, string directoryname)
         {
@@ -71,7 +59,7 @@ namespace AfterSchool.Controllers
                 if (directoryname.IsNotEmpty())
                 {
                     var directoryAccount = AfterSchoolLibrary.Models.Account.LoadByUniqueName(directoryname, msgs);
-                    if (directoryAccount.AccountTypeId.In(new List<AccountType>() { AccountType.Directory, AccountType.SchoolDistrict }))
+                    if (directoryAccount.IsNotEmpty() && directoryAccount.AccountTypeId.In(new List<AccountType>() { AccountType.Directory, AccountType.SchoolDistrict }))
                     {
                         //.. user is coming from search directory.
                         TempData["DirectoryName"] = directoryAccount.Name;
