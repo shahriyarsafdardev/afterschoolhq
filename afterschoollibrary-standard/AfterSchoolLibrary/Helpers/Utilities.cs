@@ -376,7 +376,7 @@ namespace AfterSchoolLibrary.Helpers
                     Migrations.UpdateOldTransactionsFees_20210203.Do(amsgs, adc);
                     Migrations.UpdateAccountPropertyValueForJobs_20210226.Do(amsgs, adc);
 
-
+                    Migrations.UpdateLocationLatitudeLongitude_20210302.Do(amsgs, adc);
                     // Migrations.AddProfilesToAllAccounts_20200727.Do(amsgs, adc);
 
                     // amsgs.Add("rollback please", MessageType.Error);
