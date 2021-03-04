@@ -107,4 +107,11 @@
     .desc-mobile-width {
         width: 116px;
     }
+
+    .progress-icon {
+        top: 37%;
+        left: 37%;
+        position: fixed;
+        z-index: 1000001;
+    }
 }
