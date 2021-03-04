@@ -1062,7 +1062,7 @@ namespace AfterSchoolLibrary.Models
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public static DataTable SearchVisitorAccountsByHostAccount(string hostAccountId, string search, string neighborhoods, string grades, string ages, string gender,
+        public static DataTable SearchVisitorAccountsByHostAccount(int hostAccountId, string search, string neighborhoods, string grades, string ages, string gender,
             string services, string timing, string pricing, string cost, string starting, string other, string specialNeeds, decimal distance, int PageNum, int PageSize = 9,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -1098,7 +1098,7 @@ namespace AfterSchoolLibrary.Models
             sql += $@"{Environment.NewLine}
                 SET @SearchTerm = '{searchTerms}'";
 
-            if (hostAccountId.ToInteger() <= 0)
+            if (hostAccountId <= 0)
                 sql += $@"
                 SET @AccountId = NULL ";
             else
