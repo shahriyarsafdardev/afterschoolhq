@@ -47,7 +47,7 @@
     else if (Model.IsNotEmpty() && !(Model.HomePageUrl.ToLower().Contains(Request.Url.AbsolutePath.ToLower())))
     {
         <a href="@Model.HomePageUrl" class="btn btn-link">
-            &laquo; Return Home
+            &laquo; Return To Profile
         </a>
     }
 }
@@ -58,7 +58,11 @@
         <div class="row">
             <div class="col-md-6 col-sm-6 col-xs-12">
 
-                @if (currentUser.IsNotEmpty())
+                @if (directoryName.IsNotEmpty())
+                {
+                    <span class="reg-login-bar-title">@directoryName</span>
+                }
+                else if (currentUser.IsNotEmpty())
                 {
                     if (currentAccount.IsNotEmpty())
                     {
