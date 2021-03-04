@@ -483,15 +483,6 @@
                 return false;
             }
 
-            if (!isFilterApplied) {
-                page++;
-
-                if (data.data.length < 9) {
-                    //..page size is less then the default, then it means no more records present
-                    isReachedScrollEnd = true;
-                }
-            }
-
             showLoader();
             inCallback = true;
 
@@ -499,7 +490,7 @@
             $.ajax({
                 type: "POST",
                 url: url,
-                data: { accountId: '@accountId', search, neighborhoods, grades, ages, gender, services, timing, pricing, cost, starting, other, special, pageNum: page },
+                data: { accountId: '@accountId', search, neighborhoods, grades, ages, gender, services, timing, pricing, cost, starting, other, special, zipcode: zip, pageNum: page },
                 success: function (data) {
                     if (data && data.success == true) {
 
