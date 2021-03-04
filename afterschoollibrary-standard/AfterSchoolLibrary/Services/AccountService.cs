@@ -69,11 +69,6 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(account.Save(dc));
         }
 
-        public static Account CheckSubDomainForRedirect(String urlReferrer)
-        {
-            return Account.LoadBySubdomain(urlReferrer);
-        }
-
         public static void SetIsTest(this Account account, bool isTest, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             account.IsTest = isTest;
