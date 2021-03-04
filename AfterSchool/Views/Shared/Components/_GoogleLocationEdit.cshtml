@@ -23,8 +23,8 @@
 <input type="hidden" id="country" name="country" value="@(Model?.Country)" />
 <input type="hidden" id="placeid" name="placeid" value="@(Model?.GooglePlaceId)" />
 <input type="hidden" id="locationname" name="locationname" value="@(Model?.Name)" />
-<input type="hidden" id="latitude" name="latitude" />
-<input type="hidden" id="longitde" name="longitde" />
+<input type="hidden" id="latitude" name="latitude" value="@(Model?.Latitude)" />
+<input type="hidden" id="longitude" name="longitude" value="@(Model?.Longitude)" />
 
 <p class="text-muted">
     @description
@@ -39,6 +39,10 @@
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         var input = document.getElementById('location');
 
+        console.log('Latitude: ' + '@Model.Latitude');
+        console.log('Longitude: ' + '@Model.Longitude');
+        console.log('DistanceFromOrigin: ' + '@Model.DistanceFromOrigin');
+
         var options = {
             @if (types.IsNotEmpty())
             {
@@ -50,7 +54,7 @@
 
         autocomplete.setFields(['place_id', 'name', 'address_components', 'geometry']);
 
-        autocomplete.addListener('place_changed', function () {            
+        autocomplete.addListener('place_changed', function () {
             selected = true
             const place = autocomplete.getPlace();
             const components = place.address_components;
@@ -59,10 +63,10 @@
             $('#locationname').val(place.name);
 
             const latitude = place?.geometry?.location?.lat();
-            const longitde = place?.geometry?.location?.lng();
+            const longitude = place?.geometry?.location?.lng();
 
             $('#latitude').val(latitude);
-            $('#longitde').val(longitde);
+            $('#longitude').val(longitude);
 
             for (component of components) {
 

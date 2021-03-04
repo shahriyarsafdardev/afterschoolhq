@@ -466,7 +466,14 @@
             if (inCallback) {
                 return false;
             }
-            
+
+            if (isFilterApplied) {
+                page = 0;
+
+                //..while filter we load all data so this should be true
+                isReachedScrollEnd = true;
+            }
+
             showLoader();
             inCallback = true;            
 
@@ -494,12 +501,7 @@
                             $('#search-result').append(compiledHtml);                            
                         }
 
-                        if (isFilterApplied) {
-                            page = 0;
-
-                            //..while filter we load all data so this should be true
-                            isReachedScrollEnd = true;
-                        } else {
+                        if (!isFilterApplied) {                            
                             page++;
 
                             if (data.data.length < 9) {

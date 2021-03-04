@@ -21,7 +21,7 @@
     <h4 class="filter-header">Postal Code</h4>    
     <div class="input-group" style="width: 250px;">        
         <input id="txtZipCode" type="text" class="form-control" name="zipcode" style="height: 35px;" />
-        <div class="input-group-addon" style="cursor: pointer;" onclick="return  prepareSearchParams(true);">
+        <div class="input-group-addon" style="cursor: pointer;" onclick="return validatePostalCodeAndSearch();">
             <span class="input-group-text s7-map-marker"></span>
         </div>
     </div>
@@ -270,5 +270,26 @@
             $(element).text('Show more...');
             listSelector.slice(5).slideUp();
         }
+    }
+
+    function validatePostalCodeAndSearch() {
+        var isValid = checkZip($('#txtZipCode').val());
+        if (isValid) {
+            return prepareSearchParams(true);
+        } else {
+            Notifications.showBar({
+                title: 'Error',
+                message: 'Postal code is not in a proper format.',
+                success: false
+            });
+        }
+    }
+
+    function checkZip(value) {
+        //.. this is global regex to verify/sanity check postal code format but this is not or validating zip code precisly per country.
+        //.. https://stackoverflow.com/a/7185241/5816119
+        //.. (in order) US, IN, UK
+        var zipCodePatternList = [/^\d{5}([\-]?\d{4})?$/, /^\d{6}$/, /^(GIR|[A-Z]\d[A-Z\d]??|[A-Z]{2}\d[A-Z\d]??)[ ]??(\d[A-Z]{2})$/]
+        return zipCodePatternList.some(function (rx) { return rx.test(value); });
     }
 </script>

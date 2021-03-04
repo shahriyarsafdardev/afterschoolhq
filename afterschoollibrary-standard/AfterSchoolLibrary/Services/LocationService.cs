@@ -7,6 +7,7 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
 using System.Web;
+using AfterSchoolLibrary.Helpers;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -182,7 +183,7 @@ namespace AfterSchoolLibrary.Services
                     GooglePlaceId = googlePlaceId,
                     CreateDate = DateTime.UtcNow,
                     CreatedBy = loggedInUser?.ID,
-                };
+                };            
 
             location.Name = locationName;
             location.StreetNumber = streetNumber;
@@ -199,6 +200,14 @@ namespace AfterSchoolLibrary.Services
             location.Longitude = longitude;
             location.LastModifiedDate = DateTime.UtcNow;
             location.LastModifiedBy = loggedInUser?.ID;
+
+            //..co-ordiantes can be negative
+            if (longitude.IsNotEmpty() && latitude.IsNotEmpty())
+            {
+                var distance = DistanceAlgorithm.DistanceBetweenPlaces(Convert.ToDouble(longitude), Convert.ToDouble(latitude), 0, 0);
+                if (distance.IsNotEmpty())
+                    location.DistanceFromOrigin = Convert.ToDecimal(distance);
+            }
 
             msgs.AddRange(location.Save(dc));
 

@@ -1,5 +1,4 @@
-﻿using AfterSchoolLibrary.Helpers;
-using AfterSchoolLibrary.Models;
+﻿using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using System;
@@ -7,6 +6,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Web.Mvc;
+using static AfterSchoolLibrary.Helpers.GoogleGeoCode;
 
 namespace AfterSchool.Controllers
 {
@@ -38,7 +38,7 @@ namespace AfterSchool.Controllers
             var pageSize = 9;
             decimal distance = 0;
     
-            if (zipcode.IsNotEmpty())
+            if (zipcode.IsNotEmpty() && zipcode > 0)
                 distance = GetDistanceFromOrigin(zipcode);
 
             //.. if filter applied, we will load all records. kind of stuck on this for a while, so leave this as it is for now.
@@ -129,17 +129,6 @@ namespace AfterSchool.Controllers
                 genderIds += "2,";
 
             return genderIds;
-        }
-
-        private static decimal GetDistanceFromOrigin(decimal zipcode)
-        {
-            //.. this should be come from zipcode and google geo location api, not working at the moment
-            //.. https://maps.googleapis.com/maps/api/geocode/json?key=AIzaSyBq47Ro2O69sQhVLEW4_2L0ClOBSW_Srmc&address=362001
-            var latitude = 21.5197;
-            var longitude = 70.4598;
-
-            var distanceFromOrigin = DistanceAlgorithm.DistanceBetweenPlaces(longitude, latitude, 0, 0);
-            return Convert.ToDecimal(distanceFromOrigin);
         }
 
         #endregion
