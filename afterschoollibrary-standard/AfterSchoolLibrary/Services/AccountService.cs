@@ -2139,12 +2139,12 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static List<SearchDirectoryResponse> SearchDirectoryAccounts(int hostAccountId, string search, string neighborhoods, string grades, 
-            string ages, string gender, string services, string timing, string pricing, string cost, string starting, string other, string specialNeeds, int PageNum, int PageSize,
+            string ages, string gender, string services, string timing, string pricing, string cost, string starting, string other, string specialNeeds, decimal distance, int PageNum, int PageSize,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             try
             {
-                var accountDataTable = Account.SearchVisitorAccountsByHostAccount(hostAccountId, search, neighborhoods, grades, ages, gender, services, timing, pricing, cost, starting, other, specialNeeds, PageNum, PageSize, msgs: msgs);
+                var accountDataTable = Account.SearchVisitorAccountsByHostAccount(hostAccountId, search, neighborhoods, grades, ages, gender, services, timing, pricing, cost, starting, other, specialNeeds, distance, PageNum, PageSize, msgs: msgs);
                                 
                 if (accountDataTable.IsNotEmpty() && accountDataTable.Rows.Any())
                 {
@@ -2200,7 +2200,10 @@ namespace AfterSchoolLibrary.Services
                         }
                     }
 
-                    return ListResponse.OrderBy(m => m.Priority).ThenBy(m => Guid.NewGuid()).ToList();
+                    if (distance.IsNotEmpty() && distance > 0)
+                        return ListResponse.DistinctBy(m => m.AccountName).ToList();
+                    else
+                        return ListResponse.OrderBy(m => m.Priority).ThenBy(m => Guid.NewGuid()).ToList();
                 }
             }
             catch (Exception ex)

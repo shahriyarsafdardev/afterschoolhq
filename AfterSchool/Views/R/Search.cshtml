@@ -220,8 +220,9 @@
     <script type="text/javascript">
 
         var delayTimer;
-        var txtSearch = $('#txtSearch');
+        var txtSearch = $('#txtSearch');        
         var txtSearchMobile = $('#txtSearch-mobile');
+        var txtZip = $('#txtZipCode');
         var isMobile = window.innerWidth <= 768;
         var inCallback = false, page = 0, isFilterApplied = false, isReachedScrollEnd = false;
 
@@ -248,6 +249,8 @@
             _.each(filters, function (filter) {
                 if (filter.indexOf('search_') == 0) {
                     $(`input[name="search"]`).val(filter.split('_')[1]);
+                } else if (filter.indexOf('zip_') == 0) {
+                    $(`input[name="zipcode"]`).val(filter.split('_')[1]);
                 } else {
                     var inputToCheck = $(`input[value="${decodeURIComponent(filter.trim())}"]`);
 
@@ -280,6 +283,7 @@
             //.. prepare params
             var mainUrl = '';
             var search = '';
+            var zip = 0;
             var comma_delimited_neighborhoods = '';
             var comma_delimited_grades = '';
             var comma_delimited_ages = '';
@@ -297,9 +301,14 @@
             } else {
                 search = txtSearch.val();
             }
-
+            
             if (search && search.length > 0) {
                 mainUrl += `search_${search},`;
+            }
+
+            zip = txtZip.val() || 0;
+            if (zip && zip.length > 0) {
+                mainUrl += `zip_${zip},`;
             }
 
             $('input:checkbox[name=neighborhoods]:checked').each(function () {
@@ -452,23 +461,32 @@
                     comma_delimited_cost,
                     comma_delimited_starting,
                     comma_delimited_other,
-                    comma_delimited_special);
+                    comma_delimited_special,
+                    zip
+                );
             }
         }
 
-        function loadAccounts(search, neighborhoods, grades, ages, gender, services, timing, pricing, cost, starting, other, special) {
+        function loadAccounts(search, neighborhoods, grades, ages, gender, services, timing, pricing, cost, starting, other, special, zip = 0) {
             if (inCallback) {
                 return false;
             }
 
+            if (isFilterApplied) {
+                page = 0;
+
+                //..while filter we load all data so this should be true
+                isReachedScrollEnd = true;
+            }
+
             showProgressBar();
-            inCallback = true;
+            inCallback = true;            
 
             var url = '@Url.Action("GetAccounts", "Search", new { Area = "" })';
             $.ajax({
                 type: "POST",
                 url: url,
-                data: { accountId: '@accountId', search, neighborhoods, grades, ages, gender, services, timing, pricing, cost, starting, other, special, pageNum: page },
+                data: { accountId: '@accountId', search, neighborhoods, grades, ages, gender, services, timing, pricing, cost, starting, other, special, zipcode: zip, pageNum: page },
                 success: function (data) {
                     if (data && data.success == true) {
 
@@ -488,12 +506,7 @@
                             $('#search-result').append(compiledHtml);
                         }
 
-                        if (isFilterApplied) {
-                            page = 0;
-
-                            //..while filter we load all data so this should be true
-                            isReachedScrollEnd = true;
-                        } else {
+                        if (!isFilterApplied) {                            
                             page++;
 
                             if (data.data.length < 9) {
@@ -557,6 +570,7 @@
             //..clear all checkbox
             $(`input:checkbox[name=neighborhoods],[name=grades],[name=ages],[name=gender],[name=services],[name=timing],[name=pricing],[name=cost],[name=starting],[name=other],[name=special-needs]`).prop('checked', false);
 
+            txtZip.val('');
             //..clear web link and hide clear filter link
             WebPage.addHash('');
             $('#clear-filters').hide();

@@ -1,10 +1,12 @@
 ﻿using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Web.Mvc;
+using static AfterSchoolLibrary.Helpers.GoogleGeoCode;
 
 namespace AfterSchool.Controllers
 {
@@ -26,7 +28,7 @@ namespace AfterSchool.Controllers
 
         [HttpPost]
         public JsonResult GetAccounts(string accountId, string search, string neighborhoods, string grades, string ages, string gender, string services, 
-            string timing, string pricing, string cost, string starting, string other, string special, int pageNum = 0)
+            string timing, string pricing, string cost, string starting, string other, string special, decimal zipcode, int pageNum = 0)
         {
             var msgs = new SystemMessages();
 
@@ -34,16 +36,20 @@ namespace AfterSchool.Controllers
             var parsedAge = ParseAndLoadAge(ages);
             var parsedGender = ParseAndLoadGender(gender);
             var pageSize = 9;
+            decimal distance = 0;
+    
+            if (zipcode.IsNotEmpty() && zipcode > 0)
+                distance = GetDistanceFromOrigin(zipcode);
 
             //.. if filter applied, we will load all records. kind of stuck on this for a while, so leave this as it is for now.
             if (search.IsNotEmpty() || neighborhoods.IsNotEmpty() || grades.IsNotEmpty() || ages.IsNotEmpty() || gender.IsNotEmpty() || services.IsNotEmpty() || timing.IsNotEmpty() || pricing.IsNotEmpty() || cost.IsNotEmpty()
-                || starting.IsNotEmpty() || other.IsNotEmpty() || special.IsNotEmpty())
+                || starting.IsNotEmpty() || other.IsNotEmpty() || special.IsNotEmpty() || zipcode > 0)
             {
                 pageNum = 0;
                 pageSize = 100;
             }
 
-            var searchedAccounts = AccountService.SearchDirectoryAccounts(accountId.ToInteger(), search, neighborhoods, parsedGrade, parsedAge, parsedGender, services, timing, pricing, cost, starting, other, special, pageNum, pageSize, msgs: msgs);
+            var searchedAccounts = AccountService.SearchDirectoryAccounts(accountId.ToInteger(), search, neighborhoods, parsedGrade, parsedAge, parsedGender, services, timing, pricing, cost, starting, other, special, distance, pageNum, pageSize, msgs: msgs);
 
             if (searchedAccounts.IsNotEmpty() && searchedAccounts.Any())
             {

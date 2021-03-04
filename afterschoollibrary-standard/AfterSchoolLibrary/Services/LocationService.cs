@@ -7,6 +7,7 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
 using System.Web;
+using AfterSchoolLibrary.Helpers;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -170,7 +171,9 @@ namespace AfterSchoolLibrary.Services
             return location;
         }
 
-        public static Location CreateOrUpdateFromGoogle(string locationName, string streetNumber, string streetName, string address2, string neighborhood, string city, string county, string state, string postalCode, string country, string googlePlaceId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Location CreateOrUpdateFromGoogle(string locationName, string streetNumber, string streetName, string address2, string neighborhood, string city, string county, string state, string postalCode, string country, 
+            string googlePlaceId, decimal latitude, decimal longitude,
+            WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var location = Location.LoadByGooglePlaceId(googlePlaceId, msgs, dc);
 
@@ -180,7 +183,7 @@ namespace AfterSchoolLibrary.Services
                     GooglePlaceId = googlePlaceId,
                     CreateDate = DateTime.UtcNow,
                     CreatedBy = loggedInUser?.ID,
-                };
+                };            
 
             location.Name = locationName;
             location.StreetNumber = streetNumber;
@@ -193,8 +196,18 @@ namespace AfterSchoolLibrary.Services
             location.State = state;
             location.PostalCode = postalCode;
             location.Country = country;
+            location.Latitude = latitude;
+            location.Longitude = longitude;
             location.LastModifiedDate = DateTime.UtcNow;
             location.LastModifiedBy = loggedInUser?.ID;
+
+            //..co-ordiantes can be negative
+            if (longitude.IsNotEmpty() && latitude.IsNotEmpty())
+            {
+                var distance = DistanceAlgorithm.DistanceBetweenPlaces(Convert.ToDouble(longitude), Convert.ToDouble(latitude), 0, 0);
+                if (distance.IsNotEmpty())
+                    location.DistanceFromOrigin = Convert.ToDecimal(distance);
+            }
 
             msgs.AddRange(location.Save(dc));
 
