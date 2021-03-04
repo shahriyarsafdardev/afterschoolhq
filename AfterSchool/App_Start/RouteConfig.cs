@@ -289,12 +289,17 @@ namespace AfterSchool
                     accountname = UrlParameter.Optional,
                     activitytype = UrlParameter.Optional,
                     activityname = UrlParameter.Optional
-                });
+                });            
 
             routes.MapRoute(
                 "AccountHome",
-                "{accountname}",
-                new { controller = "r", action = "account", accountname = UrlParameter.Optional });
+                "{accountname}/{directoryname}",
+                new { controller = "r", action = "account", accountname = UrlParameter.Optional, directoryname = UrlParameter.Optional });
+
+            //routes.MapRoute(
+            //    "AccountWithDirectory",
+            //    "{accountname}/{directoryname}",
+            //    new { controller = "r", action = "accountwithdirecotry", accountname = UrlParameter.Optional, directoryname = UrlParameter.Optional });
 
             routes.MapRoute(
                 "AccountBrowse",
