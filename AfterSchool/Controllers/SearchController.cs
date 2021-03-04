@@ -43,7 +43,7 @@ namespace AfterSchool.Controllers
                 pageSize = 100;
             }
 
-            var searchedAccounts = AccountService.SearchDirectoryAccounts(accountId, search, neighborhoods, parsedGrade, parsedAge, parsedGender, services, timing, pricing, cost, starting, other, special, pageNum, pageSize, msgs: msgs);
+            var searchedAccounts = AccountService.SearchDirectoryAccounts(accountId.ToInteger(), search, neighborhoods, parsedGrade, parsedAge, parsedGender, services, timing, pricing, cost, starting, other, special, pageNum, pageSize, msgs: msgs);
 
             if (searchedAccounts.IsNotEmpty() && searchedAccounts.Any())
             {
