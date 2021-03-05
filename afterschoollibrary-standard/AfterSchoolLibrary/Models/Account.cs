@@ -1063,7 +1063,7 @@ namespace AfterSchoolLibrary.Models
         /// <param name="dc"></param>
         /// <returns></returns>
         public static DataTable SearchVisitorAccountsByHostAccount(int hostAccountId, string search, string neighborhoods, string grades, string ages, string gender,
-            string services, string timing, string pricing, string cost, string starting, string other, string specialNeeds, int PageNum, int PageSize = 9,
+            string services, string timing, string pricing, string cost, string starting, string other, string specialNeeds, decimal distance, int PageNum, int PageSize = 9,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
@@ -1090,6 +1090,10 @@ namespace AfterSchoolLibrary.Models
                 @Timing NVARCHAR(100),
                 @PricingOptions NVARCHAR(100),
                 @SpecialNeeds NVARCHAR(100)";
+
+            if (distance.IsNotEmpty() && distance > 0)
+                sql += $@"{Environment.NewLine}
+            DECLARE @Distance decimal(10,2)";
             
             sql += $@"{Environment.NewLine}
                 SET @SearchTerm = '{searchTerms}'";
@@ -1157,6 +1161,10 @@ namespace AfterSchoolLibrary.Models
                 sql += $@"
                 SET @SpecialNeeds = '{specialNeeds}'";
 
+            if (distance.IsNotEmpty() && distance > 0)
+                sql += $@"
+                SET @Distance = {distance}";
+
             sql += $"\n";
 
             sql += $@"
@@ -1185,6 +1193,7 @@ namespace AfterSchoolLibrary.Models
 					ap.AgeEnd,
 					glStart.Abbreviation as GradeLevelStart,
 					glEnd.Abbreviation as GradeLevelEnd,
+                    {(distance.IsNotEmpty() && distance > 0 ? "ABS(DistanceFromOrigin - @Distance) as TotalDifference," : "")}
                     CASE WHEN CAST(GETDATE() as date) BETWEEN CAST(rp.StartDateTime as date) AND CAST(rp.EndDateTime as date) THEN 1 ELSE 0 END as IsAccountNowEnrolling
                 FROM 
                     AccountRelationship ar
@@ -1285,6 +1294,67 @@ namespace AfterSchoolLibrary.Models
 
             sql += $"\n";
 
+            if (distance.IsNotEmpty() && distance > 0)
+            {
+
+            sql += $@"
+            
+            SELECT *
+			INTO #temp_accounts_2
+			FROM (
+				--accounts with distance radius of 5 miles
+				SELECT DISTINCT 
+					AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+					IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, TotalDifference, 1 as Priority
+				FROM #temp_accounts_1 
+				WHERE 
+					TotalDifference <= 5
+				
+				UNION ALL
+
+				--accounts with distance radius of 5-10 miles
+				SELECT DISTINCT 
+					AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+					IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, TotalDifference, 2 as Priority
+				FROM #temp_accounts_1 
+				WHERE 
+					TotalDifference > 5 and TotalDifference  <= 10
+
+				UNION ALL
+
+				--accounts with distance radius of 10-25 miles
+				SELECT DISTINCT 
+					AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+					IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, TotalDifference, 3 as Priority
+				FROM #temp_accounts_1 
+				WHERE 
+					TotalDifference > 10 and TotalDifference  <= 25
+
+				UNION ALL
+
+				--all other accounts
+				SELECT DISTINCT 
+					AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+					IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, TotalDifference, 4 as Priority
+				FROM #temp_accounts_1 
+				WHERE 
+					TotalDifference > 25
+			) as filteredData							
+
+			SELECT 
+				AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+				IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, TotalDifference, Priority
+			FROM #temp_accounts_2
+			ORDER BY Priority asc, TotalDifference asc
+            OFFSET {(PageNum * PageSize)} ROWS 
+			FETCH {(PageNum == 0 ? "first" : "next")} {PageSize} ROWS only;
+            
+			DROP TABLE #temp_accounts_1
+			DROP TABLE #temp_accounts_2";            
+
+            } 
+            else { 
+            
             sql += $@"
             
 			SELECT *
@@ -1326,16 +1396,18 @@ namespace AfterSchoolLibrary.Models
 					AND HeaderImage is null and Logo is null --because we already filtered this in second query, so no need of those accounts now
 			) as filteredData							
 
-			SELECT 
+			SELECT DISTINCT
 				AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
 				IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, Priority
 			FROM #temp_accounts_2
-			ORDER BY Priority asc, NEWID()
+			ORDER BY Priority asc
             OFFSET {(PageNum * PageSize)} ROWS 
 			FETCH {(PageNum == 0 ? "first" : "next")} {PageSize} ROWS only;
             
 			DROP TABLE #temp_accounts_1
 			DROP TABLE #temp_accounts_2";
+
+            }
 
             return dq.ExecuteSelect(sql, msgs);            
         }

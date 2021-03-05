@@ -28,6 +28,9 @@ namespace AfterSchoolLibrary.Models
 		public string StreetName { get { return (string)MDV["StreetName"].Value; } set { MDV["StreetName"].Value = value; } }
 		public string Neighborhood { get { return (string)MDV["Neighborhood"].Value; } set { MDV["Neighborhood"].Value = value; } }
 		public string County { get { return (string)MDV["County"].Value; } set { MDV["County"].Value = value; } }
+		public decimal? Latitude { get { return (decimal?)MDV["Latitude"].Value; } set { MDV["Latitude"].Value = value; } }
+		public decimal? Longitude { get { return (decimal?)MDV["Longitude"].Value; } set { MDV["Longitude"].Value = value; } }
+		public decimal? DistanceFromOrigin { get { return (decimal?)MDV["DistanceFromOrigin"].Value; } set { MDV["DistanceFromOrigin"].Value = value; } }
 		
 
         public Location()
@@ -57,6 +60,9 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "StreetName", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "Neighborhood", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "County", System.Data.SqlDbType.NVarChar , "100");
+				_dp.Add(className, "Latitude", System.Data.SqlDbType.Decimal , "10,2");
+				_dp.Add(className, "Longitude", System.Data.SqlDbType.Decimal , "10,2");
+				_dp.Add(className, "DistanceFromOrigin", System.Data.SqlDbType.Decimal , "10,2");
 				
                 return _dp;
             }
@@ -170,6 +176,18 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["County"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["Latitude"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["Longitude"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["DistanceFromOrigin"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
