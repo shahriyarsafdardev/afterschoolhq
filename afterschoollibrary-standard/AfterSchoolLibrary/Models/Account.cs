@@ -1107,11 +1107,7 @@ namespace AfterSchoolLibrary.Models
 
             if (neighborhoods.IsNotEmpty())
                 sql += $@"
-                SET @Neighborhood = '{neighborhoods}'";
-
-            if (neighborhoods.IsNotEmpty())
-                sql += $@"
-                SET @Neighborhood = '{neighborhoods}'";
+                SET @Neighborhood = '{neighborhoods.Replace("'", "''")}'";
 
             if (grades.IsNotEmpty())
                 sql += $@"

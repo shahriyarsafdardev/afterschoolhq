@@ -18,9 +18,9 @@
 </div>
 
 <div>
-    <h4 class="filter-header">Postal Code</h4>    
+    <h4 class="filter-header">Find programs nearby</h4>    
     <div class="input-group" style="width: 250px;">        
-        <input id="txtZipCode" type="text" class="form-control" name="zipcode" style="height: 35px;" />
+        <input id="txtZipCode" type="text" class="form-control" name="zipcode" style="height: 35px;" placeholder="Enter your Zip Code" />
         <div class="input-group-addon" style="cursor: pointer;" onclick="return validatePostalCodeAndSearch();">
             <span class="input-group-text s7-map-marker"></span>
         </div>
@@ -275,6 +275,9 @@
     function validatePostalCodeAndSearch() {
         var isValid = checkZip($('#txtZipCode').val());
         if (isValid) {
+            if (isMobile && isMobileFilterWindowOpened) {
+                mobileFilter();
+            }
             return prepareSearchParams(true);
         } else {
             Notifications.showBar({
