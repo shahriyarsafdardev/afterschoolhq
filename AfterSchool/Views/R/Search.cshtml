@@ -436,7 +436,7 @@
             var scr = $(window).scrollTop();
 
             if (mainUrl) {
-                WebPage.addHash(mainUrl);
+                WebPage.addHash(encodeURI(mainUrl));
                 $('#clear-filters').show();
                 isFilterApplied = true;
             } else {
@@ -446,7 +446,7 @@
             }
 
             //..scroll to last known position, because location.href scrolls to top
-            document.documentElement.scrollTop = scr;
+            document.documentElement.scrollTop = isFilterApplied ? 0 : scr;
 
             // .. call api
             if (!isMobile || applyFilters) {
