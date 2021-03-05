@@ -40,7 +40,7 @@ namespace AfterSchool.Controllers
         }
 
         [HttpGet]
-        public ActionResult Account(string accountname)
+        public ActionResult Account(string accountname, string directoryname)
         {
             if (isUnsupportedBrowser())
                 return RedirectUnsupportedBrowser();
@@ -55,6 +55,17 @@ namespace AfterSchool.Controllers
 
                 var profile = account.GetAccountProfile(msgs);
                 var ah = AfterSchoolLibrary.Helpers.Utilities.GetNewAmazonHelper();
+
+                if (directoryname.IsNotEmpty())
+                {
+                    var directoryAccount = AfterSchoolLibrary.Models.Account.LoadByUniqueName(directoryname, msgs);
+                    if (directoryAccount.IsNotEmpty() && directoryAccount.AccountTypeId.In(new List<AccountType>() { AccountType.Directory, AccountType.SchoolDistrict }))
+                    {
+                        //.. user is coming from search directory.
+                        TempData["DirectoryName"] = directoryAccount.Name;
+                        TempData["DirectoryHomePageUrl"] = directoryAccount.HomePageUrl;
+                    }
+                }
 
                 if (account.AccountTypeId.In(new List<AccountType>() { AccountType.Directory, AccountType.SchoolDistrict }))
                 {
