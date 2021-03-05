@@ -37,8 +37,9 @@ namespace AfterSchool.Controllers
             var parsedGender = ParseAndLoadGender(gender);
             var pageSize = 9;
             decimal distance = 0;
-    
-            if (zipcode.IsNotEmpty() && zipcode > 0)
+            var showDistance = zipcode.IsNotEmpty() && zipcode > 0;
+
+            if (showDistance)
                 distance = GetDistanceFromOrigin(zipcode);
 
             //.. if filter applied, we will load all records. kind of stuck on this for a while, so leave this as it is for now.
@@ -54,12 +55,12 @@ namespace AfterSchool.Controllers
             if (searchedAccounts.IsNotEmpty() && searchedAccounts.Any())
             {
                 //.. call success and records found
-                return Json(new { success = true, status = "ok", data = searchedAccounts, pageNum, pageSize }, JsonRequestBehavior.AllowGet);
+                return Json(new { success = true, status = "ok", data = searchedAccounts, pageNum, pageSize, showDistance }, JsonRequestBehavior.AllowGet);
             }
             else if (msgs.IsNotEmpty() && msgs.Count > 0)
             {
                 //.. something went wrong, error occured
-                return Json(new { success = false, status = "error", data = msgs.ToList().Select(msg => new { msg.Text }), pageNum, pageSize }, JsonRequestBehavior.AllowGet);
+                return Json(new { success = false, status = "error", data = msgs.ToList().Select(msg => new { msg.Text }), pageNum, pageSize, showDistance }, JsonRequestBehavior.AllowGet);
             }
 
             //.. no result found

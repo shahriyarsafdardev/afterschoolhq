@@ -38,7 +38,7 @@
         background-size: cover !important;
         background-position: center !important;
         justify-content: center !important;
-        align-items: center !important;
+        align-items: center !important;        
     }
 
     .join-directory-btn {
@@ -80,7 +80,7 @@
         </div>
     </div>
     <div class="col-xs-2" style="padding: 0; text-align: center;">
-        <img src="~/img/filter.png" class="filter" onclick="return mobileFilter()" />
+        <img id="img-mobile-filter" src="~/img/filter.png" class="filter" isOpen="0" onclick="return mobileFilter()" />
     </div>
 
     <div class="clearfix"></div>
@@ -115,6 +115,14 @@
 
         <div class="panel" style="overflow: hidden; cursor: pointer;" onclick="WebPage.navigateIframe('<%= searchResult.HomePageUrl %>/@accountUniqueName')">
             <div class="reg-header" style="background-image: url('<%= searchResult.ProfileHeaderImageUrl %>'); min-height: 100px; height: 150px; padding: 5px 5px; position: relative;">
+
+                <% if(showDistance) { %>
+
+                <div class="distance-lable">
+                    <%= searchResult.TotalDifference %> mi
+                </div>
+
+                <% } %>
 
                 <% if(searchResult.IsAccountNowEnrolling) { %>
 
@@ -225,10 +233,12 @@
         var txtZip = $('#txtZipCode');
         var isMobile = window.innerWidth <= 768;
         var inCallback = false, page = 0, isFilterApplied = false, isReachedScrollEnd = false;
+        var isMobileFilterWindowOpened = false;
 
         $(document).ready(function () {
             $(window).scroll(function () {
                 if (isReachedScrollEnd == false &&
+                    isMobileFilterWindowOpened == false &&
                     $(window).scrollTop() >= $('#search-container').offset().top + $('#search-container').outerHeight() - window.innerHeight)
                 {
                     loadFiltersAndInitiateSearch();
@@ -266,17 +276,17 @@
                 }
             });
 
-            prepareSearchParams(true);
+            prepareSearchParams();
         }
 
         function waitAndFilterSearch(search) {
             clearTimeout(delayTimer);
             delayTimer = setTimeout(function () {
-                prepareSearchParams(true);
+                prepareSearchParams();
             }, 1000); //1 second wait
         }
 
-        function prepareSearchParams(applyFilters) {
+        function prepareSearchParams() {
             //.. reset scroll flag
             isReachedScrollEnd = false;
 
@@ -446,10 +456,10 @@
             }
 
             //..scroll to last known position, because location.href scrolls to top
-            document.documentElement.scrollTop = isFilterApplied ? 0 : scr;
+            document.documentElement.scrollTop = isFilterApplied && !isMobile ? 0 : scr;
 
             // .. call api
-            if (!isMobile || applyFilters) {
+            if (!isMobile || !isMobileFilterWindowOpened) {
                 loadAccounts(search,
                     comma_delimited_neighborhoods,
                     comma_delimited_grades,
@@ -472,6 +482,7 @@
                 return false;
             }
 
+            showLoader();
             showProgressBar();
             inCallback = true;
 
@@ -495,6 +506,7 @@
                         //.. format data as JSON and combine with template
                         var compiledHtml = compiled({
                             response: data.data,
+                            showDistance: data.showDistance
                         });
 
                         if (data.pageNum == 0) {
@@ -514,6 +526,7 @@
                         }
 
                         inCallback = false;
+                        hideLoader();
                         hideProgressBar();
                         return;
                     }
@@ -544,6 +557,7 @@
                         }
 
                         inCallback = false;
+                        hideLoader();
                         hideProgressBar();
                         return false;
                     }
@@ -552,16 +566,49 @@
         }
 
         function mobileFilter() {
-            $('#search-result').toggle();
-            $('#filters').toggle();
-            $('#mobile-filter-footer').toggle();
-            $('#footerShowHide').hide();
+            var isOpen = $('#img-mobile-filter').attr('isOpen');
+            if (isOpen == '0') {                
+                $('#filters').show();
+                $('#mobile-filter-footer').show();
+
+                $('#search-result').hide();
+                $('#footerShowHide').hide();
+
+                $('#img-mobile-filter').attr('isOpen', "1");
+                isMobileFilterWindowOpened = true;
+            }
+            else {                
+                $('#filters').hide();
+                $('#mobile-filter-footer').hide();
+
+                $('#search-result').show();
+                $('#footerShowHide').show();
+
+                $('#img-mobile-filter').attr('isOpen', "0");
+                isMobileFilterWindowOpened = false;
+            }            
         }
 
-        function applyMobileFilter() {
-            prepareSearchParams(true);
-            mobileFilter();
-            $('#footerShowHide').show();
+        function applyMobileFilter() { 
+            if (txtZip.val()?.length > 0) {
+                //.. validate postal code first
+                var isValid = checkZip($('#txtZipCode').val());
+                if (isValid) {
+                    mobileFilter();
+                    return prepareSearchParams(true);
+                } else {
+                    $('#clear-filters').show();
+
+                    Notifications.showBar({
+                        title: 'Error',
+                        message: 'Postal code is not in a proper format.',
+                        success: false
+                    });
+                }                
+            } else {               
+                mobileFilter();
+                prepareSearchParams();            
+            }            
         }
 
         function clearFilters() {
@@ -574,10 +621,11 @@
             $('#clear-filters').hide();
 
             //..refresh accounts
-            if (!isMobile) {
-                loadAccounts();
+            if (isMobile) {
+                mobileFilter();                
             }
 
+            loadAccounts();
             resetFlags();
         }
 
