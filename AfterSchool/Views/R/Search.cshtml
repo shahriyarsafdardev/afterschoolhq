@@ -266,12 +266,6 @@
 
                     if (inputToCheck && inputToCheck.length > 0) {
                         inputToCheck.attr('checked', 'checked');
-
-                        //..if checkbox is hidden, open that panel
-                        var showMoreElement = inputToCheck.parent().siblings('p');
-                        if (showMoreElement && showMoreElement.length > 0) {
-                            $(showMoreElement).click();
-                        }
                     }
                 }
             });
@@ -458,6 +452,8 @@
             //..scroll to last known position, because location.href scrolls to top
             document.documentElement.scrollTop = isFilterApplied && !isMobile ? 0 : scr;
 
+            openSeeMorePanelsForSelectedCheckboxes();
+
             // .. call api
             if (!isMobile || !isMobileFilterWindowOpened) {
                 loadAccounts(search,
@@ -475,6 +471,26 @@
                     zip
                 );
             }
+        }
+
+        function openSeeMorePanelsForSelectedCheckboxes() {
+            var hashUrl = WebPage.getHash();
+            var filters = hashUrl.split(',');
+
+            _.each(filters, function (filter) {
+                if (filter.indexOf('search_') != 0 && filter.indexOf('zip_') != 0) {
+                    var inputToCheck = $(`input[value="${decodeURIComponent(filter.trim())}"]`);
+
+                    if (inputToCheck && inputToCheck.length > 0) {                           
+
+                        //..if checkbox is hidden, open that panel
+                        var showMoreElement = inputToCheck.parent().siblings('p');
+                        if (showMoreElement && showMoreElement.length > 0 && showMoreElement.text() == 'Show more...') {
+                            $(showMoreElement).click();
+                        }
+                    }
+                }
+            });
         }
 
         function loadAccounts(search, neighborhoods, grades, ages, gender, services, timing, pricing, cost, starting, other, special, zip = 0) {
