@@ -24,5 +24,6 @@ namespace AfterSchool.Models
         public string AgeEnd { get; set; }
 
         public int Priority { get; set; }
+        public decimal TotalDifference { get; set; }
     }
 }
