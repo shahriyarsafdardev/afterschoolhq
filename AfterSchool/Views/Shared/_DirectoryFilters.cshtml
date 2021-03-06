@@ -59,7 +59,7 @@
         @foreach (var item in grades.Take(firstHalf))
         {
             <div class="am-checkbox" style="padding: 3px 0;">
-                <input id="chk-grades-@(item.ID)" name="grades" value="@(item.Name.ToLower().Replace(" ", "_"))" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+                <input id="chk-grades-@(item.ID)" name="grades" value="@(item.Name.ToLower().Replace(" ", "_"))" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
                 <label for="chk-grades-@(item.ID)" class="margin-h-10 mobile-padding">@item.Name</label>
             </div>
         }
@@ -69,7 +69,7 @@
         @foreach (var item in grades.Skip(firstHalf).Take(secondHalf))
         {
             <div class="am-checkbox" style="padding: 3px 0;">
-                <input id="chk-grades-@(item.ID)" name="grades" value="@(item.Name.ToLower().Replace(" ", "_"))" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+                <input id="chk-grades-@(item.ID)" name="grades" value="@(item.Name.ToLower().Replace(" ", "_"))" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
                 <label for="chk-grades-@(item.ID)" class="margin-h-10 mobile-padding">@item.Name</label>
             </div>
         }
@@ -82,22 +82,22 @@
 
     <div class="col-md-6 col-sm-6 col-xs-6 no-padding">
         <div class="am-checkbox" style="padding: 3px 0;">
-            <input id="chk-ages-1" name="ages" value="0_4" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+            <input id="chk-ages-1" name="ages" value="0_4" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
             <label for="chk-ages-1" class="margin-h-10 mobile-padding">0 - 4 yrs</label>
         </div>
         <div class="am-checkbox" style="padding: 3px 0;">
-            <input id="chk-ages-2" name="ages" value="5_9" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+            <input id="chk-ages-2" name="ages" value="5_9" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
             <label for="chk-ages-2" class="margin-h-10 mobile-padding">5 - 9 yrs</label>
         </div>
     </div>
 
     <div class="col-md-6 col-sm-6 col-xs-6 no-padding">
         <div class="am-checkbox" style="padding: 3px 0;">
-            <input id="chk-ages-3" name="ages" value="10_14" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+            <input id="chk-ages-3" name="ages" value="10_14" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
             <label for="chk-ages-3" class="margin-h-10 mobile-padding">10 - 14 yrs</label>
         </div>
         <div class="am-checkbox" style="padding: 3px 0;">
-            <input id="chk-ages-4" name="ages" value="15_18" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+            <input id="chk-ages-4" name="ages" value="15_18" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
             <label for="chk-ages-4" class="margin-h-10 mobile-padding">15 - 18 yrs</label>
         </div>
     </div>
@@ -112,7 +112,7 @@
         if (item != GenderRestrictionType.None)
         {
             <div class="am-checkbox" style="padding: 3px 0;">
-                <input id="chk-gender-@((int)item)" name="gender" value="@(item.ToString().ToLower())" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+                <input id="chk-gender-@((int)item)" name="gender" value="@(item.ToString().ToLower())" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
                 <label for="chk-gender-@((int)item)" class="margin-h-10 mobile-padding"> @item.ToString().SplitByUpperCase() </label>
             </div>
         }
@@ -126,7 +126,7 @@
     @foreach (var item in services.OrderBy(m => m))
     {
         <div class="am-checkbox" style="padding: 3px 0;">
-            <input id="chk-services-@item.ToLower()" name="services" value="@item" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+            <input id="chk-services-@item.ToLower()" name="services" value="@item" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
             <label for="chk-services-@item.ToLower()" class="margin-h-10 mobile-padding">@item</label>
         </div>
     }
@@ -143,7 +143,7 @@
     @foreach (var item in timing)
     {
         <div class="am-checkbox" style="padding: 3px 0;">
-            <input id="chk-timing-@item.ToLower()" name="timing" value="@item" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+            <input id="chk-timing-@item.ToLower()" name="timing" value="@item" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
             <label for="chk-timing-@item.ToLower()" class="margin-h-10 mobile-padding">@item</label>
         </div>
     }
@@ -157,22 +157,22 @@
     <h4 class="filter-header">Cost</h4>
 
     <div class="am-checkbox" style="padding: 3px 0;">
-        <input id="chk-cost-1" name="cost" value="cost_free" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+        <input id="chk-cost-1" name="cost" value="cost_free" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
         <label for="chk-cost-1" class="margin-h-10 mobile-padding">Free</label>
     </div>
 
     <div class="am-checkbox" style="padding: 3px 0;">
-        <input id="chk-cost-2" name="cost" value="cost_0_50" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+        <input id="chk-cost-2" name="cost" value="cost_0_50" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
         <label for="chk-cost-2" class="margin-h-10 mobile-padding">Less than $50</label>
     </div>
 
     <div class="am-checkbox" style="padding: 3px 0;">
-        <input id="chk-cost-3" name="cost" value="cost_50_150" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+        <input id="chk-cost-3" name="cost" value="cost_50_150" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
         <label for="chk-cost-3" class="margin-h-10 mobile-padding">Between $50 and $150</label>
     </div>
 
     <div class="am-checkbox" style="padding: 3px 0;">
-        <input id="chk-cost-4" name="cost" value="cost_150_above" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+        <input id="chk-cost-4" name="cost" value="cost_150_above" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
         <label for="chk-cost-4" class="margin-h-10 mobile-padding">$150 and Above</label>
     </div>
 </div>
@@ -184,7 +184,7 @@
     @foreach (var item in pricingOptions.OrderBy(m => m))
     {
         <div class="am-checkbox" style="padding: 3px 0;">
-            <input id="chk-pricing-@item.ToLower()" name="pricing" value="@item" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+            <input id="chk-pricing-@item.ToLower()" name="pricing" value="@item" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
             <label for="chk-pricing-@item.ToLower()" class="margin-h-10 mobile-padding">@item</label>
         </div>
     }
@@ -196,17 +196,17 @@
     <h4 class="filter-header">Starts in</h4>
 
     <div class="am-checkbox" style="padding: 3px 0;">
-        <input id="chk-startingIn-1" name="starting" value="starting_0_7" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+        <input id="chk-startingIn-1" name="starting" value="starting_0_7" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
         <label for="chk-startingIn-1" class="margin-h-10 mobile-padding">1 Week or less</label>
     </div>
 
     <div class="am-checkbox" style="padding: 3px 0;">
-        <input id="chk-startingIn-2" name="starting" value="starting_7_28" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+        <input id="chk-startingIn-2" name="starting" value="starting_7_28" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
         <label for="chk-startingIn-2" class="margin-h-10 mobile-padding">1 to 4 weeks</label>
     </div>
 
     <div class="am-checkbox" style="padding: 3px 0;">
-        <input id="chk-startingIn-3" name="starting" value="starting_30_90" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+        <input id="chk-startingIn-3" name="starting" value="starting_30_90" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
         <label for="chk-startingIn-3" class="margin-h-10 mobile-padding">30 - 90 days</label>
     </div>
 </div>
@@ -216,17 +216,17 @@
     <h4 class="filter-header">Other</h4>
 
     <div class="am-checkbox" style="padding: 3px 0;">
-        <input id="chk-other-1" name="other" value="e_learning" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+        <input id="chk-other-1" name="other" value="e_learning" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
         <label for="chk-other-1" class="margin-h-10 mobile-padding">E-learning center</label>
     </div>
 
     <div class="am-checkbox" style="padding: 3px 0;">
-        <input id="chk-other-2" name="other" value="virtual_programming" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+        <input id="chk-other-2" name="other" value="virtual_programming" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
         <label for="chk-other-2" class="margin-h-10 mobile-padding">Virtual Programming</label>
     </div>
 
     <div class="am-checkbox" style="padding: 3px 0;">
-        <input id="chk-other-3" name="other" value="covid_protections" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+        <input id="chk-other-3" name="other" value="covid_protections" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
         <label for="chk-other-3" class="margin-h-10 mobile-padding">COVID Protections</label>
     </div>
 </div>
@@ -238,7 +238,7 @@
     @foreach (var item in specialNeeds)
     {
         <div class="am-checkbox" style="padding: 3px 0;">
-            <input id="chk-special-needs-@item.ToLower()" name="special-needs" value="@item" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+            <input id="chk-special-needs-@item.ToLower()" name="special-needs" value="@item" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
             <label for="chk-special-needs-@item.ToLower()" class="margin-h-10 mobile-padding">@item</label>
         </div>
     }
@@ -272,12 +272,19 @@
         }
     }
 
+    function checkAndSearch(elem) {
+        page = 0;
+        prepareSearchParams()
+    }
+
     function validatePostalCodeAndSearch() {
         var isValid = checkZip($('#txtZipCode').val());
         if (isValid) {
             if (isMobile && isMobileFilterWindowOpened) {
                 mobileFilter();
             }
+
+            page = 0;
             return prepareSearchParams(true);
         } else {
             Notifications.showBar({
