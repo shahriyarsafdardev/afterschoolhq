@@ -1785,8 +1785,10 @@ property: SessionId, int?, Int, required
 property: ActorId, int?, Int
 property: ActivityId, int?, Int
 property: AccountId, int?, Int, required
+property: ActionTypeId, WebSessionActionType, Int
+property: ObjectTypeId, ObjectType, Int
 property: ObjectId, int?, Int
-property: IndirectObjectId, int?, Int
+property: IndirectObjectId, ObjectType, Int
 property: ActionStringFormat, string, NVarChar
 property: ActionString, string, NVarChar
 join: WebUser.ID, WebUserId, LeftOuterJoin
@@ -1809,10 +1811,14 @@ loadmethod: WebUserId, List<>
 loadmethod: Id|WebUserId, List<>
 loadmethod: Id|AccountId, List<>
 loadmethod: Id|WebUserId|AccountId, List<>
+loadmethod: ActionTypeId, List<>
+loadmethod: ActionTypeId|ObjectTypeId, List<>
 loadmethod: ObjectId, List<>
 loadmethod: ObjectId|ActionId, List<>
+loadmethod: ObjectId|IndirectObjectId, List<>
 loadmethod: IndirectObjectId, List<>
-loadmethod: WebUserId|ObjectId, List<>
+loadmethod: ObjectId|ObjectTypeId, List<>
+loadmethod: WebUserId|ObjectId|ObjectTypeId, List<>
 [end]
 
 [begin]
@@ -1834,6 +1840,17 @@ loadmethod: AccountId, List<>
 type: Enum
 name: WebSessionActionType
 values: NotSet, Created, Updated, Published, Unpublished, Sent, Registered, Paid, Refunded, Requested, Invited, Archived, Deleted, ManuallyRegistered, ManuallyPaid, ManuallyRefunded, Approved, Verified, Viewed, Moved, Navigated, Searched, Paged, Connected, LoggedIn, LoggedOut
+[end]
+
+[begin]
+type: Enum
+name: ObjectType
+values: NotSet, Account, AccountActivityGroup, AccountPackage, AccountPackageFeature, AccountProfile, AccountProperty, AccountRelationship, AccountRelationshipLocation, AccountWebUser, Activity, ActivityDay, ActivityFile, ActivityForm, ActivityGradeLevel,
+ActivityGroup, ActivityInstance, ActivityMessage, ActivityMessageRegistrant, ActivityPayment, ActivityRegistrationPeriod, ActivitySchedule, ActivitySection, ActivityWebUser, AssignedCoupon, AttachedCoupon, Attendance, AttendanceRegistrant,
+BankPaymentAccount, Cart, CartItem, CheckPaymentAccount, ContactList, ContactListRegistrant, Coupon, File, Form, FormQuestion, FormQuestionAnswer, FormQuestionGroup, GradeLevel, Location, Match, Migration, ObjectTag, Package, PackageFeature,
+PasswordResetToken, PaymentPlan, Payout, Product, ProductOffering, ProductPurchase, Purchase, PurchaseableObjectCoupon, RefundRequest, Registrant, RegistrantActivity, RegistrantActivityGroup, RegistrantPaymentPlan, RegistrantSubscriptionPlan
+RegistrantWebUser, Registration, RegistrationActivity, RegistrationPeriod, Session, SessionAction, StripeAccount, Subscriber, SubscriptionPlan, SubscriptionPlanPrePayment, Tag, TeamMatch, Transaction, TwilioBlockedPhone, TwilioSMS, WebUser,
+AggregatedCounter, Counter, Hash, Job, JobParameter, JobQueue, List, Schema, Server, Set, State
 [end]
 
 [begin]

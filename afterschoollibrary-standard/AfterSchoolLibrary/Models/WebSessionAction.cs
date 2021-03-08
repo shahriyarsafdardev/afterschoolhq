@@ -28,8 +28,10 @@ namespace AfterSchoolLibrary.Models
 		/// Required.
 		/// </summary>
 		public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
+		public WebSessionActionType ActionTypeId { get { return (WebSessionActionType)MDV["ActionTypeId"].Value; } set { MDV["ActionTypeId"].Value = value; } }
+		public ObjectType ObjectTypeId { get { return (ObjectType)MDV["ObjectTypeId"].Value; } set { MDV["ObjectTypeId"].Value = value; } }
 		public int? ObjectId { get { return (int?)MDV["ObjectId"].Value; } set { MDV["ObjectId"].Value = value; } }
-		public int? IndirectObjectId { get { return (int?)MDV["IndirectObjectId"].Value; } set { MDV["IndirectObjectId"].Value = value; } }
+		public ObjectType IndirectObjectId { get { return (ObjectType)MDV["IndirectObjectId"].Value; } set { MDV["IndirectObjectId"].Value = value; } }
 		public string ActionStringFormat { get { return (string)MDV["ActionStringFormat"].Value; } set { MDV["ActionStringFormat"].Value = value; } }
 		public string ActionString { get { return (string)MDV["ActionString"].Value; } set { MDV["ActionString"].Value = value; } }
 		public string WebUserUsername { get { return (string)MDV["WebUserUsername"].Value; } }
@@ -50,6 +52,9 @@ namespace AfterSchoolLibrary.Models
         {
             this.Config(ObjectMap, DatabaseQuery, typeof(WebSessionAction).Name, "ID");
             this.LoadObjectValues(ObjectMap);
+			this.ActionTypeId = WebSessionActionType.NotSet;
+			this.ObjectTypeId = ObjectType.NotSet;
+			this.IndirectObjectId = ObjectType.NotSet;
 			
         }
 
@@ -64,6 +69,8 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "ActorId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ActivityId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "ActionTypeId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "ObjectTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ObjectId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "IndirectObjectId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ActionStringFormat", System.Data.SqlDbType.NVarChar);
@@ -177,6 +184,14 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ActionTypeId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ObjectTypeId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["ObjectId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
@@ -246,6 +261,23 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
+		public static List<WebSessionAction> LoadByActionTypeId(WebSessionActionType ActionTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["ActionTypeId"], ActionTypeId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<WebSessionAction> LoadByActionTypeIdByObjectTypeId(WebSessionActionType ActionTypeId, ObjectType ObjectTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["ActionTypeId"], ActionTypeId);
+			dq.Criterias.Add(ObjectMap["ObjectTypeId"], ObjectTypeId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
 		public static List<WebSessionAction> LoadByObjectId(int ObjectId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
@@ -263,7 +295,16 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<WebSessionAction> LoadByIndirectObjectId(int IndirectObjectId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<WebSessionAction> LoadByObjectIdByIndirectObjectId(int ObjectId, ObjectType IndirectObjectId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["ObjectId"], ObjectId);
+			dq.Criterias.Add(ObjectMap["IndirectObjectId"], IndirectObjectId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<WebSessionAction> LoadByIndirectObjectId(ObjectType IndirectObjectId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
@@ -271,12 +312,22 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<WebSessionAction> LoadByWebUserIdByObjectId(string WebUserId, int ObjectId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<WebSessionAction> LoadByObjectIdByObjectTypeId(int ObjectId, ObjectType ObjectTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["ObjectId"], ObjectId);
+			dq.Criterias.Add(ObjectMap["ObjectTypeId"], ObjectTypeId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<WebSessionAction> LoadByWebUserIdByObjectIdByObjectTypeId(string WebUserId, int ObjectId, ObjectType ObjectTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["WebUserId"], WebUserId);
 			dq.Criterias.Add(ObjectMap["ObjectId"], ObjectId);
+			dq.Criterias.Add(ObjectMap["ObjectTypeId"], ObjectTypeId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
