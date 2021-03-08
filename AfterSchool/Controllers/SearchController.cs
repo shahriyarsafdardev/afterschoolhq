@@ -42,25 +42,17 @@ namespace AfterSchool.Controllers
             if (showDistance)
                 distance = GetDistanceFromOrigin(zipcode);
 
-            //.. if filter applied, we will load all records. kind of stuck on this for a while, so leave this as it is for now.
-            if (search.IsNotEmpty() || neighborhoods.IsNotEmpty() || grades.IsNotEmpty() || ages.IsNotEmpty() || gender.IsNotEmpty() || services.IsNotEmpty() || timing.IsNotEmpty() || pricing.IsNotEmpty() || cost.IsNotEmpty()
-                || starting.IsNotEmpty() || other.IsNotEmpty() || special.IsNotEmpty() || zipcode > 0)
-            {
-                pageNum = 0;
-                pageSize = 100;
-            }
-
             var searchedAccounts = AccountService.SearchDirectoryAccounts(accountId.ToInteger(), search, neighborhoods, parsedGrade, parsedAge, parsedGender, services, timing, pricing, cost, starting, other, special, distance, pageNum, pageSize, msgs: msgs);
 
             if (searchedAccounts.IsNotEmpty() && searchedAccounts.Any())
             {
                 //.. call success and records found
-                return Json(new { success = true, status = "ok", data = searchedAccounts, pageNum, pageSize, showDistance }, JsonRequestBehavior.AllowGet);
+                return Json(new { success = true, status = "ok", data = searchedAccounts, pageNum, showDistance }, JsonRequestBehavior.AllowGet);
             }
             else if (msgs.IsNotEmpty() && msgs.Count > 0)
             {
                 //.. something went wrong, error occured
-                return Json(new { success = false, status = "error", data = msgs.ToList().Select(msg => new { msg.Text }), pageNum, pageSize, showDistance }, JsonRequestBehavior.AllowGet);
+                return Json(new { success = false, status = "error", data = msgs.ToList().Select(msg => new { msg.Text }), pageNum, showDistance }, JsonRequestBehavior.AllowGet);
             }
 
             //.. no result found
