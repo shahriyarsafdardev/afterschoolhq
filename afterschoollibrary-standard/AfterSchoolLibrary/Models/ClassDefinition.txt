@@ -137,6 +137,9 @@ property: StreetNumber, string, NVarChar "50"
 property: StreetName, string, NVarChar "50"
 property: Neighborhood, string, NVarChar "50"
 property: County, string, NVarChar "100"
+property: Latitude, decimal?, Decimal "10,2"
+property: Longitude, decimal?, Decimal "10,2"
+property: DistanceFromOrigin, decimal?, Decimal "10,2"
 baseproperty: State, required
 loadmethod: HostAccountId, List<>
 loadmethod: HostAccountId|IsDefault
@@ -2059,4 +2062,10 @@ values: NotSet, ActivityCancellationNotice, AttendanceNotice, BehaviorNotice, Ge
 type: Enum
 name: PlanPaymentStartType
 values: NotSet, WhenActivityStarts, OnCheckout
+[end]
+
+[begin]
+type: Enum
+name: StripeRequirementStatus
+values: NotSet, PastDue, CurrentlyDue, EventuallyDue
 [end]

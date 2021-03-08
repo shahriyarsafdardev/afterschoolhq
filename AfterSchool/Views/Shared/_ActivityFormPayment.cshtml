@@ -727,8 +727,7 @@
         $('#haspaymentplan').prop('disabled', true);
         $('#allowtopaylater').prop('disabled', true);
         $('#cost').prop('disabled', true);
-        $('#isparentpricecost').prop('checked', false);
-        $('#isparentpricecost').prop('disabled', true);
+        setChkParentPriceCost(false);
     }
 
     function postPayEnableOtherOptions() {
@@ -736,6 +735,17 @@
         paymentPlansDisabledDefault();
         payLaterDisabledDefault();
         $('#cost').prop('disabled', false);
+        setChkParentPriceCost(true);
+    }
+
+    function setChkParentPriceCost(enable) {
+        if (enable) {
+            $('#isparentpricecost').prop('checked', false);
+            $('#isparentpricecost').prop('disabled', false);
+        } else {
+            $('#isparentpricecost').prop('checked', false);
+            $('#isparentpricecost').prop('disabled', true);
+        }
     }
 
     function updatePaymentPlanStartText() {

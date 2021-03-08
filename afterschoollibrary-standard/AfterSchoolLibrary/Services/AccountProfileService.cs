@@ -462,9 +462,11 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        public static Location AddNewLocation(this AccountProfile profile, string locationName, string streetNumber, string streetName, string address2, string neighborhood, string city, string county, string state, string postalCode, string country, string googlePlaceId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Location AddNewLocation(this AccountProfile profile, string locationName, string streetNumber, string streetName, string address2, string neighborhood, string city, string county, string state, string postalCode, string country, 
+            string googlePlaceId, decimal latitude, decimal longitude,
+            WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var location = LocationService.CreateOrUpdateFromGoogle(locationName, streetNumber, streetName, address2, neighborhood, city, county, state, postalCode, country, googlePlaceId, loggedInUser, msgs, dc);
+            var location = LocationService.CreateOrUpdateFromGoogle(locationName, streetNumber, streetName, address2, neighborhood, city, county, state, postalCode, country, googlePlaceId, latitude, longitude, loggedInUser, msgs, dc);
 
             profile.SetLocation(location, loggedInUser, msgs, dc);
 
