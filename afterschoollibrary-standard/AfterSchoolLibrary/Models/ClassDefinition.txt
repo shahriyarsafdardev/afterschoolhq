@@ -137,6 +137,9 @@ property: StreetNumber, string, NVarChar "50"
 property: StreetName, string, NVarChar "50"
 property: Neighborhood, string, NVarChar "50"
 property: County, string, NVarChar "100"
+property: Latitude, decimal?, Decimal "10,2"
+property: Longitude, decimal?, Decimal "10,2"
+property: DistanceFromOrigin, decimal?, Decimal "10,2"
 baseproperty: State, required
 loadmethod: HostAccountId, List<>
 loadmethod: HostAccountId|IsDefault
@@ -635,7 +638,7 @@ joinproperty: Activity.IsDeleted, int?, Int
 loadmethod: RegistrationPeriodId, List<>
 loadmethod: ActivityId, List<>
 loadmethod: ActivityId|IsActive
-loadmethod: RegistrationPeriodId|ActivityId
+loadmethod: RegistrationPeriodId|ActivityId, List<>
 [end]
 
 [begin]
@@ -1670,6 +1673,7 @@ property: AmountPaid, decimal?, Money
 loadmethod: RegistrationId, List<>
 loadmethod: RegistrantId, List<>
 loadmethod: CouponId, List<>
+loadmethod: CouponId|PurchaserAccountId, List<>
 [end]
 
 [begin]
@@ -1997,7 +2001,7 @@ values: NotSet, Invited, Accepted, Declined
 [begin]
 type: Enum
 name: AccountType
-values: NotSet, ActivityProvider, School, SchoolDistrict, AfterSchool, Registrant, Teacher, CommunityCenter, Business, Church
+values: NotSet, ActivityProvider, School, SchoolDistrict, AfterSchool, Registrant, Teacher, CommunityCenter, Business, Church, Directory
 [end]
 
 [begin]
@@ -2136,4 +2140,10 @@ values: NotSet, ActivityCancellationNotice, AttendanceNotice, BehaviorNotice, Ge
 type: Enum
 name: PlanPaymentStartType
 values: NotSet, WhenActivityStarts, OnCheckout
+[end]
+
+[begin]
+type: Enum
+name: StripeRequirementStatus
+values: NotSet, PastDue, CurrentlyDue, EventuallyDue
 [end]

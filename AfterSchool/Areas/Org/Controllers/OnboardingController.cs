@@ -96,7 +96,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        account.Name = title;
+                        account.Name = title.MaxChars(50);
                         account.UniqueName = AccountService.GenerateUniqueName(title, account.ID, amsgs, adc);
                         account.OnboardingStepDone = OnboardingStepType.ProgramInfo;
                         account.TimeZone = timeZone.IsNotEmpty() ? timeZone : null;
@@ -226,7 +226,9 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult ContactInfo(string email, string publicemail, string phone, string publicphone, string locationname, string streetnumber, string streetname, string address2, string neighborhood, string city, string state, string postalcode, string county, string country, string placeid)
+        public ActionResult ContactInfo(string email, string publicemail, string phone, string publicphone, string locationname, 
+            string streetnumber, string streetname, string address2, string neighborhood, string city, string state, string postalcode, 
+            string county, string country, string placeid, decimal latitude, decimal longitude)
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
@@ -276,6 +278,8 @@ namespace AfterSchool.Areas.Org.Controllers
                             postalcode,
                             country,
                             placeid,
+                            latitude,
+                            longitude,
                             currentUser,
                             amsgs,
                             adc);

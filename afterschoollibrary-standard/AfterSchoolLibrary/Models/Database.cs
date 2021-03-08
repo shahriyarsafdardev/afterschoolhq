@@ -650,6 +650,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Purchase_RegistrationId ON [Purchase] (RegistrationId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Purchase_RegistrantId ON [Purchase] (RegistrantId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Purchase_CouponId ON [Purchase] (CouponId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Purchase_CouponId_PurchaserAccountId ON [Purchase] (CouponId,PurchaserAccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_TwilioSMS_TwilioResourceId ON [TwilioSMS] (TwilioResourceId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_TwilioSMS_ActivityMessageId_RegistrantId ON [TwilioSMS] (RegistrantId,ActivityMessageId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_TwilioSMS_RegistrantId ON [TwilioSMS] (RegistrantId)"));

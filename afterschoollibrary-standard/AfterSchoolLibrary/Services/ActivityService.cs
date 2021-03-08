@@ -790,6 +790,8 @@ namespace AfterSchoolLibrary.Services
             var postalcode = values.GetValueOrDefault("postalcode");
             var country = values.GetValueOrDefault("country");
             var placeid = values.GetValueOrDefault("placeid");
+            var latitude = values.GetValueOrDefault("latitude");
+            var longitude = values.GetValueOrDefault("longitude");
             var ismylocation = values.GetValueOrDefault("mylocation");
             var locationtype = values.GetValueOrDefault("locationtype");
             var activitylocationtype = values.GetValueOrDefault("activitylocationtype");
@@ -1186,6 +1188,8 @@ namespace AfterSchoolLibrary.Services
                                             postalcode.IfEmpty(""),
                                             country.IfEmpty(""),
                                             placeid.IfEmpty(""),
+                                            latitude.IsNotEmpty() ? latitude.ToString().ToDecimal() : 0,
+                                            longitude.IsNotEmpty() ? longitude.ToString().ToDecimal() : 0,
                                             locationdetails.IfEmpty(""),
                                             ismylocation.IfEmpty(""),
                                             locationtype.IfEmpty(""),
@@ -1555,7 +1559,8 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
-        private static SystemMessages SetupLocation(this Activity activity, string location, string locationName, string address1, string streetNumber, string streetName, string address2, string neighborhood, string city, string county, string state, string postalCode, string country, string googlePlaceId, string locationdetails, string ismylocation, string locationtype, int loggedInUserId, DatabaseConnection dc = null)
+        private static SystemMessages SetupLocation(this Activity activity, string location, string locationName, string address1, string streetNumber, string streetName, string address2, string neighborhood, string city, string county, string state, string postalCode, string country, string googlePlaceId, 
+            decimal latitude, decimal longitude, string locationdetails, string ismylocation, string locationtype, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
 
@@ -1570,7 +1575,9 @@ namespace AfterSchoolLibrary.Services
                                     state, 
                                     postalCode, 
                                     country, 
-                                    googlePlaceId, 
+                                    googlePlaceId,
+                                    latitude,
+                                    longitude,
                                     new WebUser() { ID = loggedInUserId }, 
                                     msgs, 
                                     dc);
@@ -2188,7 +2195,7 @@ namespace AfterSchoolLibrary.Services
 
         public static List<ActivityRegistrationPeriod> GetActivityRegistrationPeriods(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityRegistrationPeriod.LoadByActivityId(activity.ID.Value, msgs, dc);
+            return ActivityRegistrationPeriod.LoadByActivityId(activity.ID.Value, true, msgs, dc);
         }
 
         public static List<RegistrationPeriod> GetRegistrationPeriods(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)

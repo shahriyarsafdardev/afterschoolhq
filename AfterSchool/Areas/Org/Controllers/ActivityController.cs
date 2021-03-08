@@ -797,7 +797,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult EditLocation(string id, string location, string locationname, string locationdetails,string address1, string streetnumber, string streetname, string address2, string neighborhood, string city, string county, string state, string postalcode, string country, string placeid, string mylocation, string locationtype, string cmd, string activitylocationtype, string virtuallocation, string hidepreciselocation = "0")
+        public ActionResult EditLocation(string id, string location, string locationname, string locationdetails,string address1, string streetnumber, string streetname, string address2, string neighborhood, string city, string county, string state, 
+            string postalcode, string country, string placeid, decimal latitude, decimal longitude, string mylocation, string locationtype, string cmd, string activitylocationtype, string virtuallocation, string hidepreciselocation = "0")
         {
             var msgs = new SystemMessages();
             Activity activity = Activity.LoadByUid(id.ToGuid());
@@ -823,6 +824,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "postalcode", postalcode},
                     { "country", country},
                     { "placeid", placeid},
+                    { "latitude", latitude },
+                    { "longitude", longitude },
                     { "mylocation", mylocation },
                     { "locationtype", locationtype },
                     { "activitylocationtype", activitylocationtype },
@@ -1857,6 +1860,9 @@ namespace AfterSchool.Areas.Org.Controllers
                     var registrationDate = activity.GetActiveRegistrationPeriod();
                     if (registrationDate.IsNotEmpty() && registrationDate.StartDateTime.IsNotEmpty())
                         body += $"Activity Start Date: {registrationDate.StartDateTime} <br />";
+
+                    if (activity.AccountTimeZone.IsNotEmpty())
+                        body += $"All times are in {activity.AccountTimeZone} <br />";
 
                     EmailHelper.SendEmail(
                         toEmail: AfterSchoolLibrary.Helpers.Email.AppCustomersEmailAddress,

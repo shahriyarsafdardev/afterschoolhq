@@ -3,6 +3,8 @@
     var msgs = (SystemMessages)ViewBag.Messages;
     var qvms = (List<FormQuestionViewModel>)ViewBag.QuestionViewModels;
     Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
+    var isTechSupport = (bool)SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
+    var regName = !isTechSupport ? Model.Name : Model.GetFirstNameLastInitial();
 }
 
 <div class="main-content">
@@ -12,7 +14,7 @@
     <div class="panel panel-default">
 
         <div class="panel-heading">
-            <i class="s7-user"></i> @Model.Name - Home Address
+            <i class="s7-user"></i> @regName - Home Address
 
             <div class="pull-right">
                 <a href="@Url.Action("index", (Request["reg"].IsGuid() ? "home" : "family"))" class="btn btn-default">

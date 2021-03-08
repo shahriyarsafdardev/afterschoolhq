@@ -279,5 +279,18 @@ namespace AfterSchoolLibrary.Services
         {
             return Helpers.EmailHelper.SendPaymentReminder(registrantActivity);
         }
+
+        public static Account GetActivityAccount(this RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc =null)
+        {
+            return registrantActivity.GetParticipationObject().OwnerAccount;
+        }
+
+        public static string GetRegistrantName(this RegistrantActivity registrantActivity, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (loggedInUser.GetUserType(registrantActivity.GetActivityAccount(msgs, dc), msgs, dc) != UserType.TechSupport)
+                return registrantActivity.RegistrantName.IfBlank(registrantActivity.RegistrantEmail);
+
+            return registrantActivity.RegistrantUid.ToString();
+        }
     }
 }
