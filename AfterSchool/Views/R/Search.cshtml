@@ -11,13 +11,9 @@
         logoUrl = "/img/logo-vertical.png";
     }
 
-    if (primaryColor.IsBlank())
+    if (!primaryColor.IsNotEmpty() || primaryColor.IsBlank())
     {
-        primaryColor = "#547bb6";
-    }
-    else
-    {
-        primaryColor = "#00ae85";
+        primaryColor = "#00ae85"; 
     }
 
     //.. data for layout
