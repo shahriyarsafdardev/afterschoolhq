@@ -37,7 +37,7 @@
         @foreach (var item in neighborhoods)
         {
             <div class="am-checkbox" style="padding: 3px 0;">
-                <input id="chk-neighborhoods-@(item.ToLower())" name="neighborhoods" value="@(item.ToLower())" type="checkbox" class="schedulerepeat-checkbox" onclick="return prepareSearchParams()" />
+                <input id="chk-neighborhoods-@(item.ToLower())" name="neighborhoods" value="@(item.ToLower())" type="checkbox" class="schedulerepeat-checkbox" onclick="return checkAndSearch(this)" />
                 <label for="chk-neighborhoods-@(item.ToLower())" class="margin-h-10 mobile-padding">@item</label>
             </div>
         }
