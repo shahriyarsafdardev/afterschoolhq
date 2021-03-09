@@ -14,6 +14,8 @@ namespace AfterSchool.Controllers
         // GET: Home
         public ActionResult Index()
         {
+            WebSessionUtilities.InitializeWebSession(Request);
+
             if (Models.Utilities.IsAfterSchool())
             {
                 return Redirect("/");

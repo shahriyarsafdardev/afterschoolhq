@@ -1,8 +1,8 @@
-﻿using System.Web;
+﻿using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using AfterSchoolLibrary.Models;
-using AfterSchoolLibrary.Services;
+using System.Web;
 
 namespace AfterSchool.Models
 {
@@ -107,6 +107,15 @@ namespace AfterSchool.Models
             var id = (string)HttpContext.Current.Session["VisitorSession"];
             if (id.IsNotEmpty())
                 return Session.Load(id.ToInteger(), msgs, dc);
+
+            return null;
+        }
+
+        public static WebSession GetWebSession(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var id = (string)HttpContext.Current.Session["WebSession"];
+            if (id.IsNotEmpty())
+                return WebSession.Load(id.ToInteger(), msgs, dc);
 
             return null;
         }
