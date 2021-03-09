@@ -1074,7 +1074,7 @@ namespace AfterSchoolLibrary.Models
                 SqlCommand command = new SqlCommand(sql, connection);
                 command.Parameters.AddWithValue("@AccountId", hostAccountId <= 0 ? Convert.DBNull : hostAccountId);
                 command.Parameters.AddWithValue("@SearchTerm", search.IsNotBlank() ? $"\"*{search}*\"" : $"\"\"");
-                command.Parameters.AddWithValue("@Neighborhood", neighborhoods.IsNotEmpty() ? neighborhoods.Replace("'", "''") : Convert.DBNull);
+                command.Parameters.AddWithValue("@Neighborhood", neighborhoods.IsNotEmpty() ? neighborhoods : Convert.DBNull);
                 command.Parameters.AddWithValue("@Grades", grades.IsNotEmpty() ? grades : Convert.DBNull);
                 command.Parameters.AddWithValue("@Age", ages.IsNotEmpty() ? ages : Convert.DBNull);
                 command.Parameters.AddWithValue("@Gender", gender.IsNotEmpty() ? gender : Convert.DBNull);
