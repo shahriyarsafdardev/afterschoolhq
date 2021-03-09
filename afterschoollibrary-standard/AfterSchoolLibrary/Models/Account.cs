@@ -1425,6 +1425,15 @@ namespace AfterSchoolLibrary.Models
             return dq.ExecuteSelect(sql, msgs);            
         }
 
+        public static List<string> LoadAllSubdomains(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["Subdomain"], null, DatabaseCriteriaOperatorEnum.IsNot);
+
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).Select(a => a.Subdomain).ToList();
+        }
+
         #endregion
     }
 }

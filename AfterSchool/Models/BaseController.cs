@@ -33,8 +33,9 @@ namespace AfterSchool.Models
                     origin.StartsWith("https://ci.afterschoolhq.com") ||
                     origin.StartsWith("https://staging.afterschoolhq.com") ||
                     origin.StartsWith("https://directory.afterschoolhq.com") ||
-                    origin.StartsWith("https://programs.indysummeryouthprograms.org") ||
-                    origin.StartsWith("http://localhost:54849"))
+                    origin.StartsWith("http://localhost:54849") ||
+                    Account.LoadAllSubdomains().Contains(origin)
+                    )
                 {
                     return true;
                 }
@@ -108,8 +109,6 @@ namespace AfterSchool.Models
             {
                 RedirectToAction($"/{subdomainAccount.UniqueName}");
             }
-                    
-          
         }
 
         protected void WriteOutput(object obj, ResponseType rt)
