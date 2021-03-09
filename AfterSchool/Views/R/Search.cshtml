@@ -115,7 +115,7 @@
                 <% if(showDistance) { %>
 
                 <div class="distance-lable">
-                    <%= searchResult.TotalDifference %> mi
+                    <%= Math.round(searchResult.TotalDifference * 100) / 100 %> mi
                 </div>
 
                 <% } %>
