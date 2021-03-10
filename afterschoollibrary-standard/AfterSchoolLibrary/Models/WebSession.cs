@@ -43,7 +43,7 @@ namespace AfterSchoolLibrary.Models
                 string className = typeof(WebSession).Name;
                 _dp = BasicObjectWithModified.get_BaseObjectMap(className);
 				_dp.Add(className, "IPAddress", System.Data.SqlDbType.NVarChar , "50");
-				_dp.Add(className, "IPAddressTimeZone", System.Data.SqlDbType.NVarChar);
+				_dp.Add(className, "IPAddressTimeZone", System.Data.SqlDbType.NVarChar , "400");
 				_dp.Add(className, "UserAgent", System.Data.SqlDbType.NVarChar , "400");
 				_dp.Add(className, "UserLocation", System.Data.SqlDbType.NVarChar , "400");
 				_dp.Add(className, "UrlReferrer", System.Data.SqlDbType.NVarChar , "400");
@@ -183,11 +183,11 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-
+		
 
         #endregion
 
-        #region "UserDefined"
+		#region "UserDefined"
 
         #endregion
     }

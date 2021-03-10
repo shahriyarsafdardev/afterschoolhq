@@ -54,12 +54,12 @@ namespace AfterSchool.Controllers
                 msgs.Add("Username is required", MessageType.UserError);
 
             if (password.IsEmpty())
-                msgs.Add("Password is required", MessageType.UserError);            
+                msgs.Add("Password is required", MessageType.UserError);
 
+            WebUser user = null;
+            
             if (msgs.HasNoErrors())
             {
-                WebUser user = null;
-
                 if (username.IsMatch(BasicLibrary.Utilities.EmailRegEx))
                     user = WebUserService.LoginByEmail(username, password);
                 else if (username.IsMatch(BasicLibrary.Utilities.PhoneRegEx))
@@ -78,6 +78,9 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
+                if (user.IsNotEmpty())
+                    WebSessionUtilities.LogActivity(actor: user, activityId: null, actionType: WebSessionActionType.LoggedIn);
+
                 // select account
                 if (SessionVariables.CurrentAccount.IsEmpty())
                     return RedirectToAction("select", "login", new {  returnurl });

@@ -25,5 +25,7 @@ public enum WebSessionActionType
 	Paged,
 	Connected,
 	LoggedIn,
-	LoggedOut
+	LoggedOut,
+	Copied,
+	Restored
 }

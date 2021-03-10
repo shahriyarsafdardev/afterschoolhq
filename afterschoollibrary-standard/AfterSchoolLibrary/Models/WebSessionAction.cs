@@ -24,9 +24,6 @@ namespace AfterSchoolLibrary.Models
 		public int? SessionId { get { return (int?)MDV["SessionId"].Value; } set { MDV["SessionId"].Value = value; } }
 		public int? ActorId { get { return (int?)MDV["ActorId"].Value; } set { MDV["ActorId"].Value = value; } }
 		public int? ActivityId { get { return (int?)MDV["ActivityId"].Value; } set { MDV["ActivityId"].Value = value; } }
-		/// <summary>
-		/// Required.
-		/// </summary>
 		public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
 		public WebSessionActionType ActionTypeId { get { return (WebSessionActionType)MDV["ActionTypeId"].Value; } set { MDV["ActionTypeId"].Value = value; } }
 		public ObjectType ObjectTypeId { get { return (ObjectType)MDV["ObjectTypeId"].Value; } set { MDV["ObjectTypeId"].Value = value; } }
@@ -45,7 +42,7 @@ namespace AfterSchoolLibrary.Models
 		public string CreatedByLastName { get { return (string)MDV["CreatedByLastName"].Value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
 		public string AccountTimeZone { get { return (string)MDV["AccountTimeZone"].Value; } }
-		public AccountType AccountAccountTypeId { get { return (AccountType)MDV["AccountAccountTypeId"].Value; } }
+		public int? AccountAccountTypeId { get { return (int?)MDV["AccountAccountTypeId"].Value; } }
 		
 
         public WebSessionAction()
@@ -73,8 +70,8 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "ObjectTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ObjectId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "IndirectObjectId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "ActionStringFormat", System.Data.SqlDbType.NVarChar);
-				_dp.Add(className, "ActionString", System.Data.SqlDbType.NVarChar);
+				_dp.Add(className, "ActionStringFormat", System.Data.SqlDbType.NVarChar , "400");
+				_dp.Add(className, "ActionString", System.Data.SqlDbType.NVarChar , "400");
 				_dp.Add(className, "WebUserUsername", typeof(WebUser).Name, "Username", System.Data.SqlDbType.NVarChar, "WebUser");
 				_dp.Add(className, "WebUserEmail", typeof(WebUser).Name, "Email", System.Data.SqlDbType.NVarChar, "WebUser");
 				_dp.Add(className, "WebUserFirstName", typeof(WebUser).Name, "FirstName", System.Data.SqlDbType.NVarChar, "WebUser");
@@ -143,8 +140,6 @@ namespace AfterSchoolLibrary.Models
 
 			if (this.SessionId.IsEmpty())
 				msgs.Add("SessionId is required on WebSessionAction object", MessageType.Error);
-			if (this.AccountId.IsEmpty())
-				msgs.Add("AccountId is required on WebSessionAction object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(WebSessionAction).Name));

@@ -22,7 +22,7 @@ namespace AfterSchool.Controllers
             if (SessionVariables.OriginalLoggedInUser.IsNotEmpty())
             {
                 var remember = CookieVariables.CurrentUser.IsGuid();
-                var user = SessionVariables.OriginalLoggedInUser;
+                var user = SessionVariables.OriginalLoggedInUser;                    
 
                 ClearCookies();
                 LoadSessionInfo(user, null, remember, msgs);
@@ -30,6 +30,9 @@ namespace AfterSchool.Controllers
 
                 return LoginRedirect();
             }
+
+            if (SessionVariables.CurrentUser.IsNotEmpty())
+                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, activityId: null, actionType: WebSessionActionType.LoggedOut);
 
             return Logout(returnurl);
         }

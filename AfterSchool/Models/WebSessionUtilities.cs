@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using BasicLibrary;
+using AfterSchoolLibrary.Services;
 
 namespace AfterSchool.Models
 {
@@ -23,8 +24,8 @@ namespace AfterSchool.Models
                 session.IPAddressTimeZone = null;
                 session.UserLocation = null;
                 session.PreviousId = null; //not sure what data will be here
-                session.WebUserId = SessionVariables.CurrentUser.ID;
-                session.AccountId = SessionVariables.CurrentAccount.ID;
+                session.WebUserId = SessionVariables.CurrentUser?.ID;
+                session.AccountId = SessionVariables.CurrentAccount?.ID;
             }
             else
             {
@@ -44,29 +45,44 @@ namespace AfterSchool.Models
 
         public static void LogActivity(WebUser actor, int? activityId, WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet, ObjectType indirectObject = ObjectType.NotSet)
         {
-            //.. actor should not be null 
+            try
+            {
+                //.. actor should not be null 
+                var action = new WebSessionAction();
+                action.SessionId = SessionVariables.WebSession.ID;
+                action.ActorId = actor.ID;
+                action.ActivityId = activityId.HasValue ? activityId.Value : (int?)null;
+                action.AccountId = SessionVariables.CurrentAccount.IsNotEmpty() ? SessionVariables.CurrentAccount.ID : null;
+                action.ActionTypeId = actionType;
+                action.ObjectTypeId = objectType;
+                action.ObjectId = null; //not sure what data will be here
+                action.IndirectObjectId = ObjectType.NotSet;//not sure what data will be here
 
-            var action = new WebSessionAction();
-            action.SessionId = SessionVariables.WebSession.ID;
-            action.ActorId = actor.ID;
-            action.ActivityId = activityId.HasValue ? activityId.Value : (int?)null;
-            action.AccountId = SessionVariables.CurrentAccount.IsNotEmpty() ? SessionVariables.CurrentAccount.ID : null;
-            action.ActionTypeId = actionType;
-            action.ObjectTypeId = objectType;
-            action.ObjectId = null; //not sure what data will be here
-            action.IndirectObjectId = ObjectType.NotSet;//not sure what data will be here
+                string actionString = null;
+                if (activityId.IsNotEmpty() && activityId > 0)
+                {
+                    var activity = Activity.Load(activityId.Value);
+                    actionString = $"{actor.FirstName} {actionType} {activity.Name}";
+                }
+                else
+                {
+                    actionString = $"{actor.FirstName} {actionType}";
+                    action.ActionStringFormat = actionString;
 
-            var actionString = $"{actor.FirstName} {actionType}";
-            action.ActionStringFormat = actionString;
+                    if (objectType != ObjectType.NotSet)
+                        actionString += $"{objectType}";
 
-            if (objectType != ObjectType.NotSet)
-                actionString += $"{objectType}";
+                    if (indirectObject != ObjectType.NotSet)
+                        actionString += $"{indirectObject}";
+                }
 
-            if (indirectObject != ObjectType.NotSet)
-                actionString += $"{indirectObject}";
+                action.ActionString = actionString;
+                action.Save();
+            }
+            catch (Exception ex)
+            {
 
-            action.ActionString = actionString;
-            action.Save();
+            }            
         }
     }
 }

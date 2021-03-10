@@ -1763,7 +1763,7 @@ serializable: true
 description: keeps track of a user session where a user is hitting our system and taking actions, basically data analytics inside of our system. Not sure if we should keep this, but good for keeping some basic updates of what is happening in the system.
 inherits: BasicObjectWithModified
 property: IPAddress, string, NVarChar "50"
-property: IPAddressTimeZone, string, NVarChar
+property: IPAddressTimeZone, string, NVarChar "400"
 property: UserAgent, string, NVarChar "400"
 property: UserLocation, string, NVarChar "400"
 property: UrlReferrer, string, NVarChar "400"
@@ -1784,13 +1784,13 @@ inherits: BasicObject
 property: SessionId, int?, Int, required
 property: ActorId, int?, Int
 property: ActivityId, int?, Int
-property: AccountId, int?, Int, required
+property: AccountId, int?, Int
 property: ActionTypeId, WebSessionActionType, Int
 property: ObjectTypeId, ObjectType, Int
 property: ObjectId, int?, Int
 property: IndirectObjectId, ObjectType, Int
-property: ActionStringFormat, string, NVarChar
-property: ActionString, string, NVarChar
+property: ActionStringFormat, string, NVarChar "400"
+property: ActionString, string, NVarChar "400"
 join: WebUser.ID, WebUserId, LeftOuterJoin
 join: WebUser.ID, CreatedBy, LeftOuterJoin, CreatedBy
 join: Account.ID, AccountId, InnerJoin
@@ -1805,7 +1805,7 @@ joinproperty: CreatedBy.FirstName, string, NVarChar
 joinproperty: CreatedBy.LastName, string, NVarChar
 joinproperty: Account.Name, string, NVarChar
 joinproperty: Account.TimeZone, string, NVarChar
-joinproperty: Account.AccountTypeId, AccountType, Int
+joinproperty: Account.AccountTypeId, int?, Int
 loadmethod: Id, List<>
 loadmethod: WebUserId, List<>
 loadmethod: Id|WebUserId, List<>
@@ -1839,7 +1839,7 @@ loadmethod: AccountId, List<>
 [begin]
 type: Enum
 name: WebSessionActionType
-values: NotSet, Created, Updated, Published, Unpublished, Sent, Registered, Paid, Refunded, Requested, Invited, Archived, Deleted, ManuallyRegistered, ManuallyPaid, ManuallyRefunded, Approved, Verified, Viewed, Moved, Navigated, Searched, Paged, Connected, LoggedIn, LoggedOut
+values: NotSet, Created, Updated, Published, Unpublished, Sent, Registered, Paid, Refunded, Requested, Invited, Archived, Deleted, ManuallyRegistered, ManuallyPaid, ManuallyRefunded, Approved, Verified, Viewed, Moved, Navigated, Searched, Paged, Connected, LoggedIn, LoggedOut, Copied, Restored
 [end]
 
 [begin]
