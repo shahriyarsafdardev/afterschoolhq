@@ -228,7 +228,7 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpPost]
         public ActionResult ContactInfo(string email, string publicemail, string phone, string publicphone, string locationname, 
             string streetnumber, string streetname, string address2, string neighborhood, string city, string state, string postalcode, 
-            string county, string country, string placeid, decimal latitude, decimal longitude)
+            string county, string country, string placeid, string latitude, string longitude)
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
@@ -278,8 +278,8 @@ namespace AfterSchool.Areas.Org.Controllers
                             postalcode,
                             country,
                             placeid,
-                            latitude,
-                            longitude,
+                            Convert.ToDecimal(latitude),
+                            Convert.ToDecimal(longitude),
                             currentUser,
                             amsgs,
                             adc);

@@ -573,8 +573,11 @@ namespace AfterSchool.Controllers
                             amsgs,
                             adc);
 
-                        if (amsgs.HasNoErrors())
+                        if (amsgs.HasNoErrors() && user.IsNotEmpty())
+                        {
                             account = CreateOrUpdateAccount(user, amsgs, adc);
+                            WebSessionUtilities.LogActivity(actor: user, activityId: null, actionType: WebSessionActionType.Created); //..todo: new parent user created
+                        }
 
                         if (amsgs.HasNoErrors())
                             registrant = CreateOrUpdateRegistrant(account, user, amsgs, adc);
@@ -1132,6 +1135,9 @@ namespace AfterSchool.Controllers
                             msgs: amsgs,
                             dc: adc);
 
+                        if (student.IsNotEmpty() && amsgs.HasNoErrors())
+                            WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, activityId: null, actionType: WebSessionActionType.Created); //..todo: added a student
+
                         // add answers to parent registrant record
                         // will be used later to copy information over to student records
                         qvms.ForEach(qvm =>
@@ -1609,6 +1615,7 @@ namespace AfterSchool.Controllers
                 if (!participationObject.ShouldParentPay())
                     return RedirectToAction("finalizeregistration", new { id = registration.Uid });
 
+                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, activityId: null, actionType: WebSessionActionType.Registered); //..todo: student registered
                 return RedirectToAction("payment", new { id = registration.Uid });
             }
 
@@ -1829,7 +1836,10 @@ namespace AfterSchool.Controllers
             }
 
             if (msgs.HasNoErrors())
+            {
+                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, activityId: null, actionType: WebSessionActionType.Paid); //todo: parent paid
                 return RedirectToAction("thankyou", new { id = registration.Uid });
+            }
 
             return View();
         }
