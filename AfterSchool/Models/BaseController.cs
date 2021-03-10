@@ -107,7 +107,9 @@ namespace AfterSchool.Models
             var subdomainAccount = Account.LoadBySubdomain(url);
             if (subdomainAccount.IsNotEmpty())
             {
-                RedirectToAction($"/{subdomainAccount.UniqueName}");
+                // not sure how to redirect to the right way
+                var actionResult = RedirectToAction("account", "r", new { accountname = subdomainAccount.UniqueName, directoryname = subdomainAccount.UniqueName  });
+                actionResult.
             }
         }
 
