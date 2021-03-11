@@ -106,7 +106,7 @@ namespace AfterSchool.Models
         {
             var subdomainAccount = Account.LoadBySubdomain(Request.Url.Host);
             if (subdomainAccount.IsNotEmpty())
-               Response.Redirect(subdomainAccount.HomePageUrl);
+               Response.Redirect($"https://{Request.Url.Host}/{subdomainAccount.UniqueName}");
         }
 
         protected void WriteOutput(object obj, ResponseType rt)
