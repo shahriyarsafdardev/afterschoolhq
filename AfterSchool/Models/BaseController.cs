@@ -65,10 +65,9 @@ namespace AfterSchool.Models
             {
                 SessionVariables.VisitorSession.LastActivity = DateTime.UtcNow;
                 SessionVariables.VisitorSession.Save();
-            }
-
-            if (Request.UrlReferrer.IsNotEmpty())
-                HandleSubdomainRedirect(Request.UrlReferrer.ToString());
+            }            
+            
+            HandleSubdomainRedirect();
         }
 
         protected void UpdateSession(SessionActionType sat, int? accountId = null, int? activityId = null, int? webUserId = null, int? registrantId = null, int? registrationId = null, int? registrationPeriodId = null, int? activityGroupId = null, DatabaseConnection dc = null)
@@ -102,15 +101,11 @@ namespace AfterSchool.Models
                 requestContext.Response.Redirect($"/login?returnurl={requestContext.Request.Url.PathAndQuery}");
         }
 
-        protected void HandleSubdomainRedirect(string url)
+        protected void HandleSubdomainRedirect()
         {
-            var subdomainAccount = Account.LoadBySubdomain(url);
+            var subdomainAccount = Account.LoadBySubdomain(Request.Url.Host);
             if (subdomainAccount.IsNotEmpty())
-            {
-                // not sure how to redirect to the right way
-                var actionResult = RedirectToAction("account", "r", new { accountname = subdomainAccount.UniqueName, directoryname = subdomainAccount.UniqueName  });
-                actionResult.
-            }
+               Response.Redirect(subdomainAccount.HomePageUrl);
         }
 
         protected void WriteOutput(object obj, ResponseType rt)
