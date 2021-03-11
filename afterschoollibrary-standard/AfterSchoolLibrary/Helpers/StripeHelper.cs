@@ -338,6 +338,11 @@ namespace AfterSchoolLibrary.Billing
             return new TransferService(StripeClient);
         }
 
+        private static TransferReversalService GetTranferReversalService()
+        {
+            return new TransferReversalService(StripeClient);
+        }
+
         public static Transfer CreateTransfer(decimal amount, string description, string transferIdentifier, string destinationId, Dictionary<string, string> metaData, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -365,6 +370,30 @@ namespace AfterSchoolLibrary.Billing
             }
 
             return transfer;
+        }
+
+
+        internal static TransferReversal CreateTransferReversal(string stripeTransferId, decimal amountToReverse, SystemMessages msgs)
+        {
+
+            var options = new TransferReversalCreateOptions
+            {
+                Amount = (long)(amountToReverse * 100),
+            };
+
+            TransferReversal transferReversal = null;
+
+            try
+            {
+                transferReversal = GetTranferReversalService().Create(stripeTransferId, options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Transfer Reversal was not created", MessageType.UserError);
+            }
+
+            return transferReversal;
         }
 
         #endregion
@@ -1800,6 +1829,23 @@ namespace AfterSchoolLibrary.Billing
             return charge;
         }
 
+        public static Stripe.Charge GetCharge(string stripeChargeId, SystemMessages msgs)
+        {
+            Stripe.Charge charge = null;
+
+            try
+            {
+                charge = GetChargeService().Get(stripeChargeId);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Error charging payment source", MessageType.UserError);
+            }
+
+            return charge;
+        }
+
         public static List<Stripe.Charge> GetCharges(string customerId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -1846,6 +1892,88 @@ namespace AfterSchoolLibrary.Billing
             }
 
             return charges;
+        }
+
+        /// <summary>
+        /// This method will be used to charge connected account for refund
+        /// Right now, while refund we refund all the amount from platform to parent
+        /// and then platform will collec the actiivty amount from provider
+        /// </summary>
+        /// <param name="totalAmount"></param>
+        /// <param name="connectedAccountId"></param>
+        /// <param name="msgs"></param>
+        /// <returns></returns>
+        public static Stripe.Charge CreateRefundChargeOnConnectedAccount(decimal totalAmount, string connectedAccountId, Dictionary<string,string> metaData, SystemMessages msgs = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var options = new ChargeCreateOptions
+            {
+                Amount = (totalAmount * 100).ToInteger(),
+                Currency = "usd",
+                Source = connectedAccountId,
+                Metadata = metaData,
+            };
+
+            Stripe.Charge charge = null;
+
+            try
+            {
+                charge = GetChargeService().Create(options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Error charging connected account while refund", MessageType.UserError);
+            }
+
+            return charge;
+        }
+        #endregion
+
+        #region Stripe Payment Intent
+
+        private static Stripe.PaymentIntentService GetPaymentIntentService()
+        {
+            return new Stripe.PaymentIntentService(StripeClient);
+        }
+
+        //..TODO: 
+        //..Intialized payment intent to check if refund works properly for below task.
+        //..I've kept this code as this will be usefull in future.
+        //..Review Refund Process(https://app.clickup.com/t/k50ay4)
+
+        public static Stripe.PaymentIntent CreatePaymentIntent(string fromCustomerId, string destinationAccountId, string tokenOrSourceId, decimal totalAmount, decimal? platformFee, string description, string statementDescriptor, Dictionary<string, string> metaData, SystemMessages msgs)
+        {
+            var createOptions = new PaymentIntentCreateOptions
+            {
+                Amount = (totalAmount * 100).ToInteger(),
+                ApplicationFeeAmount = (platformFee.Value * 100).ToInteger(),
+                Currency = "usd",
+                Customer = fromCustomerId,
+                Description = description,
+                Source = tokenOrSourceId,
+                StatementDescriptorSuffix = statementDescriptor.Replace("'", "").MaxChars(22),
+                TransferData = new PaymentIntentTransferDataOptions
+                {
+                    Destination = destinationAccountId,
+                },
+            };
+
+            Stripe.PaymentIntent charge = null;
+
+            try
+            {
+                charge = GetPaymentIntentService().Create(createOptions);
+                GetPaymentIntentService().Confirm(charge.Id);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Error charging payment source", MessageType.UserError);
+            }
+
+            return charge;
         }
 
         #endregion
@@ -1895,7 +2023,7 @@ namespace AfterSchoolLibrary.Billing
             return new Stripe.RefundService(StripeClient);
         }
 
-        public static Stripe.Refund CreateRefund(string chargeId, decimal totalAmount, string reason, SystemMessages msgs)
+        public static Stripe.Refund CreateRefund(string chargeId, decimal totalAmount, string reason, bool reverseTransfer = true, SystemMessages msgs = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -1903,8 +2031,9 @@ namespace AfterSchoolLibrary.Billing
             {
                 Amount = (totalAmount * 100).ToInteger(),
                 Reason = reason,
-                // ReverseTransfer = true,
-                Charge = chargeId
+                ReverseTransfer = reverseTransfer,
+                // RefundApplicationFee = true,
+                Charge = chargeId,                
             };
 
             Refund refund = null;

@@ -75,38 +75,45 @@
                     </div>
                 }
 
-                <div>
-                    @if (!currentUser.IsRegistered)
-                    {
-                        <hr />
+            <div>
+                @if (!currentUser.IsRegistered)
+                {
+                    <hr />
+                    <p>
+                        Thank you for your interest! We've helped thousands of parents find activities for their children and we'd love to do the same for you.  Click the link below to join the @UILabel.ProductName() family.
+                    </p>
+                    <p>
+                        <a href="@AfterSchoolLibrary.Helpers.Utilities.CompleteSignUpUrl(currentUser.Uid)">
+                            Complete Account Sign Up &raquo;
+                        </a>
+                    </p>
+                }
+                else if (participationObject.IsInviteOnly)
+                {
+                    <hr />
+                    <div class="margin-v-20">
                         <p>
-                            Thank you for your interest! We've helped thousands of parents find activities for their children and we'd love to do the same for you.  Click the link below to join the @UILabel.ProductName() family.
+                            <a href="@participationObject.GetHomePageUrl()" class="@(assignmentType != RegistrationAssignmentType.Interested ? "btn btn-xl btn-register-primary btn-register-xl" : "")">Register another child</a>
                         </p>
+                    </div>
+                }
+                else
+                {
+                    <hr />
+                     Html.RenderPartial(
+                            "~/Views/Shared/Registration/_RegisterButton.cshtml",
+                            participationObject,
+                            new ViewDataDictionary()
+                            {
+                                { "anotherChild", true }
+                            }); 
+                    <div class="margin-v-20">
                         <p>
-                            <a href="@AfterSchoolLibrary.Helpers.Utilities.CompleteSignUpUrl(currentUser.Uid)">
-                                Complete Account Sign Up &raquo;
-                            </a>
+                            <a href="@account.HomePageUrl" class="@(assignmentType != RegistrationAssignmentType.Interested ? "btn btn-xl btn-register-primary btn-register-xl" : "")">Find another activity</a>
                         </p>
-                    }
-                    else if (participationObject.IsInviteOnly)
-                    {                        
-                        <hr />
-                        <div class="margin-v-20">
-                            <p>
-                                <a href="@participationObject.GetHomePageUrl()" class="@(assignmentType != RegistrationAssignmentType.Interested ? "btn btn-xl btn-register-primary btn-register-xl" : "")">Register another child</a>
-                            </p>
-                        </div>
-                    }
-                    else
-                    {
-                        <hr />
-                        <div class="margin-v-20">
-                            <p>
-                                <a href="@account.HomePageUrl" class="@(assignmentType != RegistrationAssignmentType.Interested ? "btn btn-xl btn-register-primary btn-register-xl" : "")">Find another activity</a>
-                            </p>
-                        </div>
-                    }
-                </div>
+                    </div>
+                }
+            </div>
 
             </div>
         </div>

@@ -4,6 +4,7 @@ using System.Linq;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Billing;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -76,7 +77,7 @@ namespace AfterSchoolLibrary.Services
                 return transaction.Amount.Value;
             }
 
-            return transaction.Amount.Value - transaction.GetFees();
+            return transaction.Amount.Value - transaction.GetFees() - transaction.GetRefundedAmountAHQ(msgs, dc);
         }
 
         public static decimal GetPayerAmount(this Transaction transaction)
@@ -368,6 +369,11 @@ namespace AfterSchoolLibrary.Services
             if (!transaction.CanRefundTransactionFee())
                 amount -= transaction.PaymentTypeFeeCharged.Value;
 
+            //partial refund, if any then deduct that too.
+            var refunded = transaction.GetRefundedAmount();
+            if (refunded.IsNotEmpty())
+                amount -= refunded;
+
             return amount;
         }
 
@@ -607,15 +613,34 @@ namespace AfterSchoolLibrary.Services
                 string stripeRefundId = null;
 
                 if (paymentSourceType == PaymentSourceType.AfterSchoolPlatform)
-                {
+                {                    
+                    //.. when refunding, platform will pay all the amount to parent first
+                    //.. then based on that and after deducting fee, we will charge remaining amount to provider
+                    //.. lets say activity charge is 100$, and convenience charge is 6$, then parent pays 110$ (106$ + 4$ cc fee).
+                    //.. so while refunding, parent can refund only 106$(cc fee is not refundable),
+
                     var stripeRefund = Billing.StripeHelper.CreateRefund(
                                     chargeId: transaction.StripeChargeOrRefundId,
                                     totalAmount: refundAmount,
                                     reason: Billing.StripeRefundReason.RequestedByCustomer.ToString().SplitByUpperCase().Replace(" ", "_").ToLower(),
+                                    reverseTransfer: false,
                                     msgs: msgs);
 
                     if (stripeRefund.IsNotEmpty())
-                        stripeRefundId = stripeRefund.Id;
+                    {
+                        // get stripe transfer from original payment
+                        var stripeOriginalPaymentChargeId = stripeRefund.ChargeId;
+                        var stripeOriginalCharge = Billing.StripeHelper.GetCharge(stripeOriginalPaymentChargeId, msgs);
+                        var stripeTransferId = stripeOriginalCharge.TransferId;
+
+                        // create transfer reversal
+                        // calculate amount to reverse
+                        var billerPayout = transaction.GetBillerPayout(msgs, dc);
+                        var amountToReverse = Math.Min(billerPayout, refundAmount);
+
+                       var transferReversal = Billing.StripeHelper.CreateTransferReversal(stripeTransferId, amountToReverse, msgs);
+
+                    }
                     else
                         msgs.Add("Error creating refund", MessageType.UserError);
                 }

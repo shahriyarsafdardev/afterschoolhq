@@ -55,17 +55,7 @@ namespace AfterSchool
             routes.MapRoute(
                 "Search",
                 "search/{action}/{id}",
-                new { controller = "search", action = "index", id = UrlParameter.Optional });
-
-            routes.MapRoute(
-                "MccoyDirectory",
-                "MccoyDirectory/{action}/{id}",
-                new { controller = "MccoyDirectory", action = "index", id = UrlParameter.Optional });
-
-            routes.MapRoute(
-                "ISYPDirectory",
-                "ISYPDirectory/{action}/{id}",
-                new { controller = "ISYPDirectory", action = "index", id = UrlParameter.Optional });
+                new { controller = "search", action = "index", id = UrlParameter.Optional });            
 
             routes.MapRoute(
                 "Logout",
@@ -302,11 +292,6 @@ namespace AfterSchool
                 });
 
             routes.MapRoute(
-                "AccountHome",
-                "{accountname}",
-                new { controller = "r", action = "account", accountname = UrlParameter.Optional });
-
-            routes.MapRoute(
                 "AccountBrowse",
                 "{accountname}/browse",
                 new { controller = "r", action = "browse", accountname = UrlParameter.Optional });
@@ -315,6 +300,11 @@ namespace AfterSchool
                 "AccountContact",
                 "{accountname}/contact",
                 new { controller = "r", action = "contact", accountname = UrlParameter.Optional });
+
+            routes.MapRoute(
+                "AccountHome",
+                "{accountname}/{directoryname}",
+                new { controller = "r", action = "account", accountname = UrlParameter.Optional, directoryname = UrlParameter.Optional });
 
             routes.MapRoute(
                 "ActivityHome",

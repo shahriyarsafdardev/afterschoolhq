@@ -268,7 +268,7 @@ namespace AfterSchoolLibrary.Services
         {
             get
             {
-                return new AccountType[] { AccountType.CommunityCenter, AccountType.School, AccountType.Church };
+                return new AccountType[] { AccountType.CommunityCenter, AccountType.School, AccountType.Church, AccountType.Directory };
             }
         }
 
@@ -2138,74 +2138,13 @@ namespace AfterSchoolLibrary.Services
                     dc);
         }
 
-        public static string ParseAndLoadGrade(string grades)
-        {
-            var gradeIds = "";
-            List<GradeLevel> ListGrades = GradeLevel.Load();
-
-            if (grades.IsNotEmpty())
-            {
-                var lstGrades = grades.Split(',');
-                foreach (var item in lstGrades)
-                {
-                    var grade = ListGrades.FirstOrDefault(m => m.Name.ToLower().Replace(" ", "_") == item);
-
-                    if (grade.IsNotEmpty())
-                        gradeIds += $"{grade.ID},";
-                }
-            }
-
-            return gradeIds;
-        }
-
-        public static string ParseAndLoadAge(string ages)
-        {
-            var ageIds = "";
-            if (ages.IsNotEmpty())
-            {
-                var lstAges = ages.Split(',');
-                foreach (var item in lstAges)
-                {
-                    if (item.Contains('_'))
-                    {
-                        var age = item.Split('_');
-
-                        if (age.IsNotEmpty())
-                        {
-                            var ageStart = age[0];
-                            var ageEnd = age[1];
-
-                            if (ageStart.IsNotEmpty() && ageEnd.IsNotEmpty())
-                            {
-                                for (int i = ageStart.ToInteger(); i <= ageEnd.ToInteger(); i++)
-                                {
-                                    ageIds += $"{i},";
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            return ageIds;
-        }
-
-        public static string ParseAndLoadGender(string gender)
-        {
-            var genderIds = "";
-            if (gender.IsNotBlank() && gender == GenderRestrictionType.MaleOnly.ToString().ToLower())
-                genderIds = "1,";
-            if (gender.IsNotBlank() && gender == GenderRestrictionType.FemaleOnly.ToString().ToLower())
-                genderIds += "2,";
-
-            return genderIds;
-        }
-
-        public static List<SearchDirectoryResponse> SearchDirectoryAccounts(string hostAccountId, string search, string neighborhoods, string grades, string ages, string gender, string timing, string cost, string starting, string other, string specialNeeds, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<SearchDirectoryResponse> SearchDirectoryAccounts(int hostAccountId, string search, string neighborhoods, string grades, 
+            string ages, string gender, string services, string timing, string pricing, string cost, string starting, string other, string specialNeeds, decimal distance, int PageNum, int PageSize,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             try
             {
-                var accountDataTable = Account.SearchVisitorAccountsByHostAccount(hostAccountId, search, neighborhoods, ParseAndLoadGrade(grades), ParseAndLoadAge(ages), ParseAndLoadGender(gender), timing, cost, starting, other, specialNeeds, msgs: msgs);
+                var accountDataTable = Account.SearchVisitorAccountsByHostAccount(hostAccountId, search, neighborhoods, grades, ages, gender, services, timing, pricing, cost, starting, other, specialNeeds, distance, PageNum, PageSize, msgs: msgs);
                                 
                 if (accountDataTable.IsNotEmpty() && accountDataTable.Rows.Any())
                 {
@@ -2214,36 +2153,59 @@ namespace AfterSchoolLibrary.Services
                     {
                         if (row.IsNotEmpty())
                         {
-                            SearchDirectoryResponse response = new SearchDirectoryResponse();
+                            var response = new SearchDirectoryResponse();
 
                             // ..account
-                            response.AccountName = row["AccountName"].ToString();
+                            response.AccountName = row["AccountName"].IsNotEmpty() ? row["AccountName"].ToString() : "";
                             response.AccountUid = new Guid(row["AccountUid"].ToString());
                             response.HomePageUrl = $"{Helpers.Utilities.BaseUrl()}/{row["AccountUniqueName"]}";
 
                             //.. account profile  
                             response.IsOpenDuringCovid = row["IsOpenDuringCovid"].IsNotEmpty() ? Convert.ToBoolean(row["IsOpenDuringCovid"]) : false;
                             response.IsELearningCenter = row["IsELearningCenter"].IsNotEmpty() ? Convert.ToBoolean(row["IsELearningCenter"]) : false;
-                            response.ProfileHeadline = row["Headline"].IsNotEmpty() ? row["Headline"].ToString().MaxChars(70, "... (more)") : "";
+                            response.IsAccountNowEnrolling = row["IsAccountNowEnrolling"].IsNotEmpty() ? Convert.ToBoolean(row["IsAccountNowEnrolling"]) : false;
+                            response.IsVirtualProgram = row["IsVirtualProgram"].IsNotEmpty() ? Convert.ToBoolean(row["IsVirtualProgram"]) : false;
+
+                            response.ProfileHeadline = row["Headline"].IsNotEmpty() ? row["Headline"].ToString().MaxChars(70, "...") : "";
                             response.IsRestrictByGrade = row["AgeStart"].IsEmpty();
                             response.AgeStart = row["AgeStart"].IsNotEmpty() ? row["AgeStart"].ToString() : null;
                             response.AgeEnd = row["AgeEnd"].IsNotEmpty() ? row["AgeEnd"].ToString() : null;
                             response.GradeStart = row["GradeLevelStart"].IsNotEmpty() ? row["GradeLevelStart"].ToString() : null;
                             response.GradeEnd = row["GradeLevelEnd"].IsNotEmpty() ? row["GradeLevelEnd"].ToString() : null;
+                            
+                            response.Priority = row["Priority"].IsNotEmpty() ? Convert.ToInt32(row["Priority"]) : 0;
+                            response.TotalDifference = accountDataTable.Columns.Contains("TotalDifference") && row["TotalDifference"].IsNotEmpty() ? Convert.ToDecimal(row["TotalDifference"]) : 0;
 
-                            //..Location, ProfileHeaderImageUrl
+                            var accountId = row["AccountId"].IsNotEmpty() ? Convert.ToInt32(row["AccountId"]) : 0;
+                            var headerImageUrl = row["HeaderImage"].IsNotEmpty() ? row["HeaderImage"].ToString() : "";
+                            var logo = row["Logo"].IsNotEmpty() ? row["Logo"].ToString() : "";
+                            //.. reverted photos logic as we will use logo instead. part of AC for https://app.clickup.com/t/nv068a
+                            //..var photos = AccountProperty.LoadByAccountIdByAccountPropertyTypeId(accountId, AccountPropertyType.Photo, msgs, dc);
+                            var ah = Helpers.Utilities.GetNewAmazonHelper();
+
+                            if (headerImageUrl.IsNotBlank())
+                                response.ProfileHeaderImageUrl = ah.GetFileLink(headerImageUrl, true, null, true);
+                            else if (logo.IsNotBlank())
+                                response.ProfileHeaderImageUrl = ah.GetFileLink(logo, true, null, true);
+
                             if (row["LocationId"].IsNotEmpty())
                             {
+                                //..Location, ProfileHeaderImageUrl
                                 var location = Location.Load(Convert.ToInt32(row["LocationId"]));
                                 response.Location = location.FormatCityState(false);
-                                response.ProfileHeaderImageUrl = LocationService.GetGoogleMapsImageUrl(location, 1500, 600);
+
+                                if (response.ProfileHeaderImageUrl.IsEmpty())
+                                    response.ProfileHeaderImageUrl = LocationService.GetGoogleMapsImageUrl(location, 1500, 600);
                             }
 
                             ListResponse.Add(response);
                         }
                     }
 
-                    return ListResponse;
+                    if (distance.IsNotEmpty() && distance > 0)
+                        return ListResponse.DistinctBy(m => m.AccountName).ToList();
+                    else
+                        return ListResponse.OrderBy(m => m.Priority).ThenBy(m => Guid.NewGuid()).ToList();
                 }
             }
             catch (Exception ex)

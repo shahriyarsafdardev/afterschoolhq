@@ -8,6 +8,7 @@ using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
 using System;
 using System.Text.RegularExpressions;
+using System.Web.Routing;
 
 namespace AfterSchool.Controllers
 {
@@ -39,7 +40,7 @@ namespace AfterSchool.Controllers
         }
 
         [HttpGet]
-        public ActionResult Account(string accountname)
+        public ActionResult Account(string accountname, string directoryname)
         {
             if (isUnsupportedBrowser())
                 return RedirectUnsupportedBrowser();
@@ -52,16 +53,52 @@ namespace AfterSchool.Controllers
                 if (account.IsEmpty() || account.IsDeleted)
                     return HttpNotFound();
 
-                RestartRegistrationSession();
-                SetRegistrationStartPage(account, true);
-
                 var profile = account.GetAccountProfile(msgs);
+                var ah = AfterSchoolLibrary.Helpers.Utilities.GetNewAmazonHelper();
+
+                if (directoryname.IsNotEmpty())
+                {
+                    var directoryAccount = AfterSchoolLibrary.Models.Account.LoadByUniqueName(directoryname, msgs);
+                    if (directoryAccount.IsNotEmpty() && directoryAccount.AccountTypeId.In(new List<AccountType>() { AccountType.Directory, AccountType.SchoolDistrict }))
+                    {
+                        //.. user is coming from search directory.
+                        TempData["DirectoryName"] = directoryAccount.Name;
+                        TempData["DirectoryHomePageUrl"] = directoryAccount.HomePageUrl;
+                    }
+                }
+
+                if (account.AccountTypeId.In(new List<AccountType>() { AccountType.Directory, AccountType.SchoolDistrict }))
+                {
+                    var neighborhoodList = Location.LoadNeighborhoodsByHostAccount(hostAccountId: account.ID.Value, msgs: msgs).ToList();
+
+                    ViewBag.Messages = msgs;
+                    ViewBag.Neighborhoods = neighborhoodList;
+                    ViewBag.Grades = GradeLevel.Load();
+                    ViewBag.AccountUniqueName = account.UniqueName;
+                    ViewBag.AccountId = account.ID.ToString();
+
+                    if (profile.IsNotEmpty())
+                    {
+                        ViewBag.PrimaryColor = profile.PrimaryColor;
+
+                        if (profile.Logo.IsNotBlank())
+                            ViewBag.LogoUrl = ah.GetFileLink(profile.Logo, true, null, true);
+
+                        if (profile.HeaderImage.IsNotBlank())
+                            ViewBag.HeaderImageUrl = ah.GetFileLink(profile.HeaderImage, true, null, true);
+                    }
+
+                    return View("search");
+                }
+                    
+
+                RestartRegistrationSession();
+                SetRegistrationStartPage(account, true);                
 
                 if (profile.IsEmpty())
                     return Redirect(account.BrowseUrl);
 
-                var photos = profile.GetPhotos(msgs);
-                var ah = AfterSchoolLibrary.Helpers.Utilities.GetNewAmazonHelper();
+                var photos = profile.GetPhotos(msgs);                
 
                 photos.ForEach(photo => photo.Value = ah.GetFileLink(photo.Value, true, null, true));
 

@@ -596,11 +596,9 @@
     <Compile Include="Controllers\FaqController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\IndianapolisController.cs" />
-    <Compile Include="Controllers\IsypDirectoryController.cs" />
     <Compile Include="Controllers\LegalController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
     <Compile Include="Controllers\LogoutController.cs" />
-    <Compile Include="Controllers\MccoyDirectoryController.cs" />
     <Compile Include="Controllers\MsgController.cs" />
     <Compile Include="Controllers\OAuthController.cs" />
     <Compile Include="Controllers\RController.cs" />
@@ -663,6 +661,7 @@
   <ItemGroup>
     <Content Include="about.html" />
     <Content Include="Assets\css\common.css" />
+    <Content Include="Assets\css\media_xl.css" />
     <Content Include="Assets\css\media_lg.css" />
     <Content Include="Assets\css\media_md.css" />
     <Content Include="Assets\css\media_sm.css" />
@@ -731,6 +730,7 @@
     <Content Include="img\IPS.png" />
     <Content Include="img\lawrence.png" />
     <Content Include="img\lazyload-ph.png" />
+    <Content Include="img\lod_bg.gif" />
     <Content Include="img\logo-white.png" />
     <Content Include="img\logo.png" />
     <Content Include="img\parent-icon.png" />
@@ -750,7 +750,7 @@
     <Content Include="img\texture-geometry-shapes.png" />
     <Content Include="index-profiles.html" />
     <Content Include="index.html" />
-    <Content Include="ips.html" />
+    <Content Include="joinips.html" />
     <Content Include="joinisyp.html" />
     <Content Include="iyi-providers.html" />
     <Content Include="js\blocs.min.js" />
@@ -759,7 +759,7 @@
     <Content Include="js\lazysizes.min.js" />
     <Content Include="js\scrollFX.js" />
     <Content Include="manage-programs.html" />
-    <Content Include="mccoy.html" />
+    <Content Include="joinmccoy.html" />
     <Content Include="new-programs.html" />
     <Content Include="parent-faq.html" />
     <Content Include="parents.html" />
@@ -1825,9 +1825,8 @@
     <Content Include="Views\Shared\Components\_GoogleLocationEdit.cshtml" />
     <Content Include="Views\Shared\_GradeRestrictions.cshtml" />
     <Content Include="Views\SignUp\IndexNew.cshtml" />
-    <Content Include="Views\MccoyDirectory\Index.cshtml" />
     <Content Include="Views\Shared\_DirectoryFilters.cshtml" />
-    <Content Include="Views\ISYPDirectory\Index.cshtml" />
+    <Content Include="Views\R\Search.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

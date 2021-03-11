@@ -68,13 +68,16 @@
                 </div>
             }
 
-            <div style="position: absolute; bottom: 0; right: 0; background-color: #fff; color: #333;">
-                <div class="padding-h-10">
-                    <span class="text-small">
-                        @location.FormatCityState(false)
-                    </span>
+            @if (location.IsNotEmpty())
+            {
+                <div style="position: absolute; bottom: 0; right: 0; background-color: #fff; color: #333;">
+                    <div class="padding-h-10">
+                        <span class="text-small">
+                            @location.FormatCityState(false)
+                        </span>
+                    </div>
                 </div>
-            </div>
+            }
 
         </div>
         <div class="panel-body" style="position: relative;">
@@ -109,13 +112,13 @@
 
             <div style="margin-top: 20px; height: 75px;display: table-cell; vertical-align: middle;">
                 <h3>
-                    <strong title="@Model.Title">@Model.Title</strong>
+                    <strong title="@Model.Title">@Model.Title.MaxChars(28, "...")</strong>
                 </h3>
             </div>
 
             <div class="" style="height: 40px;">
                 <span class="text-medium-small">
-                    @Model.Headline.MaxChars(70, "... (more)")
+                    @Model.Headline.MaxChars(70, "...")
                 </span>
             </div>
 
