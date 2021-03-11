@@ -27,5 +27,11 @@ public enum WebSessionActionType
 	LoggedIn,
 	LoggedOut,
 	Copied,
-	Restored
+	Restored,
+	Browsed,
+	Followed,
+	Unfollowed,
+	Shared,
+	Contacted,
+	Interested
 }

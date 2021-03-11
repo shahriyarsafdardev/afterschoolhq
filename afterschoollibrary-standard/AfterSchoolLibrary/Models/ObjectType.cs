@@ -35,6 +35,7 @@ public enum ObjectType
 	ContactList,
 	ContactListRegistrant,
 	Coupon,
+	DirectoryAccount,
 	File,
 	Form,
 	FormQuestion,

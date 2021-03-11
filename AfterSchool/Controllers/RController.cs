@@ -65,6 +65,9 @@ namespace AfterSchool.Controllers
                         TempData["DirectoryName"] = directoryAccount.Name;
                         TempData["DirectoryHomePageUrl"] = directoryAccount.HomePageUrl;
                     }
+
+                    WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, actionType: WebSessionActionType.Navigated, objectType: ObjectType.DirectoryAccount,
+                        objectId: account.ID, objectText: account.Name, indirectObjectId: directoryAccount.ID, indirectObjectText: directoryAccount.Name);
                 }
 
                 if (account.AccountTypeId.In(new List<AccountType>() { AccountType.Directory, AccountType.SchoolDistrict }))
@@ -88,12 +91,15 @@ namespace AfterSchool.Controllers
                             ViewBag.HeaderImageUrl = ah.GetFileLink(profile.HeaderImage, true, null, true);
                     }
 
+                    WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: account.ID, text: account.Name, actionType: WebSessionActionType.Viewed, objectType: ObjectType.DirectoryAccount);
                     return View("search");
                 }
                     
 
                 RestartRegistrationSession();
-                SetRegistrationStartPage(account, true);                
+                SetRegistrationStartPage(account, true);
+
+                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: account.ID, text: account.Name, actionType: WebSessionActionType.Viewed, objectType: ObjectType.Account);
 
                 if (profile.IsEmpty())
                     return Redirect(account.BrowseUrl);
@@ -129,7 +135,7 @@ namespace AfterSchool.Controllers
                                                 AccountPropertyType.TimeOffered,
                                                 AccountPropertyType.SpecialNeedsOffering,
                                                 AccountPropertyType.PricingOption,
-                                                }, msgs);
+                                                }, msgs);                
             }
             catch (Exception ex)
             {
@@ -186,6 +192,8 @@ namespace AfterSchool.Controllers
                 regOpened = participationObjects.Where(po => po.RegistrationPeriod.IsOpen(account, msgs)).ToList();
                 regWillOpen = participationObjects.Where(po => po.RegistrationPeriod.WillOpen(account, msgs)).ToList();
                 regClosed = participationObjects.Where(po => po.NotIn(regWillOpen) && po.RegistrationPeriod.IsClosed(account, msgs)).ToList();
+
+                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: account.ID, text: account.Name, actionType: WebSessionActionType.Browsed, objectType: ObjectType.Account);
             }
             else
             {
@@ -212,7 +220,7 @@ namespace AfterSchool.Controllers
             ViewBag.Cart = SessionVariables.Cart;
             ViewBag.Locations = locations;
             ViewBag.ParticipationObjects = participationObjects;
-            ViewBag.AccountProfile = account.GetAccountProfile(msgs);
+            ViewBag.AccountProfile = account.GetAccountProfile(msgs);           
 
             return View(account);
         }
@@ -309,6 +317,8 @@ namespace AfterSchool.Controllers
                 if (activity.IsEmpty())
                     return HttpNotFound();
 
+                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: activity.ID, text: activity.Name, actionType: WebSessionActionType.Viewed, objectType: ObjectType.Activity);
+
                 participationObject = activity.GetParticipationObject(msgs);
 
                 if (activity.ActivityGroupId.HasValue)
@@ -351,7 +361,7 @@ namespace AfterSchool.Controllers
             ViewBag.CanPublishActivity = canPublishActivity;
             ViewBag.CanRegisterFor = true;
             ViewBag.Session = session;
-            ViewBag.AccountProfile = accountProfile;
+            ViewBag.AccountProfile = accountProfile;           
 
             return View(participationObject);
         }

@@ -14,7 +14,7 @@ namespace AfterSchool.Models
         {
             var session = new WebSession();
             if (SessionVariables.WebSession.IsEmpty())
-            {                
+            {
                 session.LastModifiedDate = DateTime.UtcNow;
                 session.LastModifiedBy = session.CreatedBy = 0;
                 session.UrlReferrer = request.UrlReferrer.IsNotEmpty() ? request.UrlReferrer.ToString() : null;
@@ -36,53 +36,117 @@ namespace AfterSchool.Models
                     session.WebUserId = SessionVariables.CurrentUser.ID;
 
                 if (SessionVariables.WebSession.AccountId.IsEmpty() && SessionVariables.CurrentAccount.IsNotEmpty())
-                    session.AccountId = SessionVariables.CurrentAccount.ID;                
+                    session.AccountId = SessionVariables.CurrentAccount.ID;
             }
 
             session.Save();
             SessionVariables.WebSession = session;
         }
 
-        public static void LogActivity(WebUser actor, int? activityId, WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet, ObjectType indirectObject = ObjectType.NotSet)
+        public static void LogActivity(WebUser actor, WebSessionActionType actionType = WebSessionActionType.NotSet)
         {
-            try
+            SaveLog(actorName: (actor.IsNotEmpty() ? actor.FirstName : "Someone"),
+                    actionStringFormat: "{actor} {action}",
+                    actionString: $"{actor.FirstName} {actionType}",
+                    actorId: actor.IsNotEmpty() ? actor.ID : null,
+                    accountId: SessionVariables.CurrentAccount.IsNotEmpty() ? SessionVariables.CurrentAccount.ID : null,
+                    actionType: actionType,
+                    objectType: ObjectType.NotSet,
+                    objectId: null,
+                    indirectObjectId: null);
+        }
+
+        public static void LogActivity(WebUser actor, int? Id = (int?)null, string text = "", WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet)
+        {
+            string actionString = null, actionStringFormat = null, actorName = (actor.IsNotEmpty() ? actor.FirstName : "Someone");
+
+            switch (objectType)
             {
-                //.. actor should not be null 
-                var action = new WebSessionAction();
-                action.SessionId = SessionVariables.WebSession.ID;
-                action.ActorId = actor.ID;
-                action.ActivityId = activityId.HasValue ? activityId.Value : (int?)null;
-                action.AccountId = SessionVariables.CurrentAccount.IsNotEmpty() ? SessionVariables.CurrentAccount.ID : null;
-                action.ActionTypeId = actionType;
-                action.ObjectTypeId = objectType;
-                action.ObjectId = null; //not sure what data will be here
-                action.IndirectObjectId = ObjectType.NotSet;//not sure what data will be here
+                case ObjectType.Activity:
+                    actionStringFormat = "{actor} {action} Activity {objecttype}";
+                    actionString = $"{actorName} {actionType} Activity {text}";
+                    break;
 
-                string actionString = null;
-                if (activityId.IsNotEmpty() && activityId > 0)
-                {
-                    var activity = Activity.Load(activityId.Value);
-                    actionString = $"{actor.FirstName} {actionType} {activity.Name}";
-                }
-                else
-                {
-                    actionString = $"{actor.FirstName} {actionType}";
-                    action.ActionStringFormat = actionString;
+                case ObjectType.Account:
+                    actionStringFormat = "{actor} {action} Account {objecttype}";
+                    actionString = $"{actorName} {actionType} Account {text}";
+                    break;
 
-                    if (objectType != ObjectType.NotSet)
-                        actionString += $"{objectType}";
+                case ObjectType.Registrant:
+                    actionStringFormat = "{actor} {action} Registrant {objecttype}";
+                    actionString = $"{actorName} {actionType} Registrant {text}";
+                    break;
 
-                    if (indirectObject != ObjectType.NotSet)
-                        actionString += $"{indirectObject}";
-                }
+                case ObjectType.DirectoryAccount:
+                    actionStringFormat = "{actor} {action} Directory Account {objecttype}";
+                    actionString = $"{actorName} {actionType} Directory Account {text}";
+                    break;
 
-                action.ActionString = actionString;
-                action.Save();
+                default:
+                    actionStringFormat = "{actor} {action}";
+                    actionString = $"{actorName} {actionType}";
+                    break;
             }
-            catch (Exception ex)
-            {
 
-            }            
+            SaveLog(actorName: actorName,
+                    actionStringFormat: actionStringFormat,
+                    actionString: actionString,
+                    actorId: actor.IsNotEmpty() ? actor.ID : null,
+                    accountId: SessionVariables.CurrentAccount.IsNotEmpty() ? SessionVariables.CurrentAccount.ID : null,
+                    actionType: actionType,
+                    objectType: objectType,
+                    objectId: Id,
+                    indirectObjectId: null);
+        }
+
+        public static void LogActivity(WebUser actor, WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet,
+            int? objectId = (int?)null, string objectText = "",
+            int? indirectObjectId = (int?)null, string indirectObjectText = "")
+        {
+            //..actor	action		    Object		            ObjectType	        IndirectObjectId
+            //..Bharat  Navigated to    FIRST SAMUEL CHURCH(W)  DirectoryAccount   ISYP
+
+            string actionString = null, actionStringFormat = null, actorName = (actor.IsNotEmpty() ? actor.FirstName : "Someone");
+
+            switch (objectType)
+            {
+                case ObjectType.DirectoryAccount:
+                    actionStringFormat = "{actor} {action} To {primaryObject} FROM {objectType} {indirectObject}";
+                    actionString = $"{actorName} {actionType} TO {objectText} FROM {objectType} {indirectObjectText}";
+                    break;
+
+                default:
+                    actionStringFormat = "{actor} {action}";
+                    actionString = $"{actorName} {actionType}";
+                    break;
+            }
+
+            SaveLog(actorName: (actor.IsNotEmpty() ? actor.FirstName : "Someone"),
+                actionStringFormat: actionStringFormat,
+                actionString: actionString,
+                actorId: actor.IsNotEmpty() ? actor.ID : null,
+                accountId: SessionVariables.CurrentAccount.IsNotEmpty() ? SessionVariables.CurrentAccount.ID : null,
+                actionType: actionType,
+                objectType: objectType,
+                objectId: objectId,
+                indirectObjectId: indirectObjectId);
+        }
+
+        public static void SaveLog(string actorName, string actionStringFormat, string actionString, int? actorId = (int?)null, int? accountId = (int?)null,
+            WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet,
+            int? objectId = (int?)null, int? indirectObjectId = (int?)null)
+        {
+            var action = new WebSessionAction();
+            action.SessionId = SessionVariables.WebSession.ID;
+            action.ActorId = actorId;
+            action.AccountId = accountId; //.. logged in account id
+            action.ActionTypeId = actionType;
+            action.ObjectTypeId = objectType;
+            action.ObjectId = objectId;
+            action.IndirectObjectId = indirectObjectId;
+            action.ActionStringFormat = actionStringFormat;
+            action.ActionString = actionString;
+            action.Save();
         }
     }
 }

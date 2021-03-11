@@ -277,7 +277,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     activityGroup = activity.GetActivityGroup();
 
                     if (msgs.HasNoErrors())
-                        WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, activityId: activity.ID.Value, actionType: WebSessionActionType.Updated);
+                        WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: activity.ID.Value, text: activity.Name, actionType: WebSessionActionType.Updated, objectType: ObjectType.Activity);
                 }
                 else
                 {
@@ -313,7 +313,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     if (msgs.HasNoErrors())
                     {
                         UpdateSession(SessionActionType.ActivityCreate, currentAccount.ID, activity.ID);
-                        WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, activityId: activity.ID.Value, actionType: WebSessionActionType.Created);
+                        WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: activity.ID.Value, text: activity.Name, actionType: WebSessionActionType.Created, objectType: ObjectType.Activity);
                     }
                 }
 
@@ -451,7 +451,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add(string.Format("{0} Saved", UILabel.ActivityLabel(activity.ActivityTypeId)), MessageType.Success);
-                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, activityId: activity.ID.Value, actionType: WebSessionActionType.Updated);                
+                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: activity.ID.Value, text: activity.Name, actionType: WebSessionActionType.Updated, objectType: ObjectType.Activity);
             }
 
             ViewBag.Messages = msgs;
@@ -534,7 +534,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
-                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, activityId: activity.ID.Value, actionType: WebSessionActionType.Updated);
+                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: activity.ID.Value, text: activity.Name, actionType: WebSessionActionType.Updated, objectType: ObjectType.Activity);
             }
 
             ViewBag.Messages = msgs;
@@ -617,7 +617,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add(string.Format("{0} Saved", UILabel.ActivityLabel(activity.ActivityTypeId)), MessageType.Success);
-                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, activityId: activity.ID.Value, actionType: WebSessionActionType.Updated);
+                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: activity.ID.Value, text: activity.Name, actionType: WebSessionActionType.Updated, objectType: ObjectType.Activity);
             }
 
             ViewBag.Messages = msgs;
@@ -751,7 +751,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add(string.Format("{0} Schedule Saved", UILabel.ActivityLabel(activity.ActivityTypeId)), MessageType.Success);
-                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, activityId: activity.ID.Value, actionType: WebSessionActionType.Updated);
+                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: activity.ID.Value, text: activity.Name, actionType: WebSessionActionType.Updated, objectType: ObjectType.Activity);
             }
             
             ActivitySchedule sched = null;
@@ -863,7 +863,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add(string.Format("{0} Saved", UILabel.ActivityLabel(activity.ActivityTypeId)), MessageType.Success);
-                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, activityId: activity.ID.Value, actionType: WebSessionActionType.Updated);
+                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: activity.ID.Value, text: activity.Name, actionType: WebSessionActionType.Updated, objectType: ObjectType.Activity);
             }
 
             ViewBag.Messages = msgs;
@@ -981,7 +981,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
-                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, activityId: activity.ID.Value, actionType: WebSessionActionType.Updated);
+                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: activity.ID.Value, text: activity.Name, actionType: WebSessionActionType.Updated, objectType: ObjectType.Activity);
             }
 
             ViewBag.Messages = msgs;
@@ -1052,7 +1052,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
-                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, activityId: activity.ID.Value, actionType: WebSessionActionType.Updated);
+                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: activity.ID.Value, text: activity.Name, actionType: WebSessionActionType.Updated, objectType: ObjectType.Activity);
             }
 
             ViewBag.Messages = msgs;
@@ -1106,7 +1106,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, activityId: activity.ID.Value, actionType: WebSessionActionType.Copied);
+                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: activity.ID.Value, text: activity.Name, actionType: WebSessionActionType.Copied, objectType: ObjectType.Activity);                
                 return RedirectToAction("editsetup", new { id = activity.Uid, isnew = 1, source = Request["source"] });
             }
 
@@ -1127,7 +1127,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add(string.Format("{0} has been deleted", activity.Name), MessageType.Success);
-                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, activityId: activity.ID.Value, actionType: WebSessionActionType.Deleted);
+                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: activity.ID.Value, text: activity.Name, actionType: WebSessionActionType.Deleted, objectType: ObjectType.Activity);
             }
 
             if (Request.UrlReferrer.IsNotEmpty())
@@ -1149,7 +1149,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, activityId: activity.ID.Value, actionType: WebSessionActionType.Archived);
+                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: activity.ID.Value, text: activity.Name, actionType: WebSessionActionType.Archived, objectType: ObjectType.Activity);                
                 msgs.Add(string.Format("{0} has been archived", activity.Name), MessageType.Success);
             }
 
@@ -1172,7 +1172,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, activityId: activity.ID.Value, actionType: WebSessionActionType.Restored);
+                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: activity.ID.Value, text: activity.Name, actionType: WebSessionActionType.Restored, objectType: ObjectType.Activity);                
                 msgs.Add(string.Format("{0} has been restored", activity.Name), MessageType.Success);
             }
 
@@ -1912,7 +1912,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 msgs.Add(string.Format("{0} has been published", activity.Name), MessageType.Success);
                 UpdateSession(SessionActionType.ActivityPublish, SessionVariables.CurrentAccount.ID, activity.ID);
-                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, activityId: activity.ID.Value, actionType: WebSessionActionType.Published);
+                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: activity.ID.Value, text: activity.Name, actionType: WebSessionActionType.Published, objectType: ObjectType.Activity);                
             }
 
             ViewBag.Messages = msgs;
@@ -1946,8 +1946,8 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add(string.Format("{0} has been unpublished", activity.Name), MessageType.Success);
-                UpdateSession(SessionActionType.ActivityUnpublish, SessionVariables.CurrentAccount.ID, activity.ID);
-                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, activityId: activity.ID.Value, actionType: WebSessionActionType.Unpublished);
+                UpdateSession(SessionActionType.ActivityUnpublish, SessionVariables.CurrentAccount.ID, activity.ID);                
+                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: activity.ID.Value, text: activity.Name, actionType: WebSessionActionType.Unpublished, objectType: ObjectType.Activity);
             }
 
             ViewBag.Messages = msgs;

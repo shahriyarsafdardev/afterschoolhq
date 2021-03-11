@@ -38,12 +38,11 @@ namespace AfterSchoolLibrary.Services
                 var action = new WebSessionAction();
                 //action.SessionId = SessionVariables.WebSession.ID;
                 action.ActorId = actor.ID;
-                action.ActivityId = activityId.HasValue ? activityId.Value : (int?)null;
                 //action.AccountId = SessionVariables.CurrentAccount.IsNotEmpty() ? SessionVariables.CurrentAccount.ID : null;
                 action.ActionTypeId = actionType;
                 action.ObjectTypeId = objectType;
                 action.ObjectId = null; //not sure what data will be here
-                action.IndirectObjectId = ObjectType.NotSet;//not sure what data will be here
+                action.IndirectObjectId = null;//not sure what data will be here
 
                 var actionString = $"{actor.FirstName} {actionType}";
                 action.ActionStringFormat = actionString;

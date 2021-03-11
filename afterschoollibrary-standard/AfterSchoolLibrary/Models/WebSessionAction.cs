@@ -23,12 +23,11 @@ namespace AfterSchoolLibrary.Models
 		/// </summary>
 		public int? SessionId { get { return (int?)MDV["SessionId"].Value; } set { MDV["SessionId"].Value = value; } }
 		public int? ActorId { get { return (int?)MDV["ActorId"].Value; } set { MDV["ActorId"].Value = value; } }
-		public int? ActivityId { get { return (int?)MDV["ActivityId"].Value; } set { MDV["ActivityId"].Value = value; } }
 		public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
 		public WebSessionActionType ActionTypeId { get { return (WebSessionActionType)MDV["ActionTypeId"].Value; } set { MDV["ActionTypeId"].Value = value; } }
 		public ObjectType ObjectTypeId { get { return (ObjectType)MDV["ObjectTypeId"].Value; } set { MDV["ObjectTypeId"].Value = value; } }
 		public int? ObjectId { get { return (int?)MDV["ObjectId"].Value; } set { MDV["ObjectId"].Value = value; } }
-		public ObjectType IndirectObjectId { get { return (ObjectType)MDV["IndirectObjectId"].Value; } set { MDV["IndirectObjectId"].Value = value; } }
+		public int? IndirectObjectId { get { return (int?)MDV["IndirectObjectId"].Value; } set { MDV["IndirectObjectId"].Value = value; } }
 		public string ActionStringFormat { get { return (string)MDV["ActionStringFormat"].Value; } set { MDV["ActionStringFormat"].Value = value; } }
 		public string ActionString { get { return (string)MDV["ActionString"].Value; } set { MDV["ActionString"].Value = value; } }
 		public string WebUserUsername { get { return (string)MDV["WebUserUsername"].Value; } }
@@ -51,7 +50,6 @@ namespace AfterSchoolLibrary.Models
             this.LoadObjectValues(ObjectMap);
 			this.ActionTypeId = WebSessionActionType.NotSet;
 			this.ObjectTypeId = ObjectType.NotSet;
-			this.IndirectObjectId = ObjectType.NotSet;
 			
         }
 
@@ -64,7 +62,6 @@ namespace AfterSchoolLibrary.Models
                 _dp = BasicObject.get_BaseObjectMap(className);
 				_dp.Add(className, "SessionId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ActorId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "ActivityId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ActionTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ObjectTypeId", System.Data.SqlDbType.Int);
@@ -168,10 +165,6 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["ActorId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["ActivityId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
@@ -290,7 +283,7 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<WebSessionAction> LoadByObjectIdByIndirectObjectId(int ObjectId, ObjectType IndirectObjectId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<WebSessionAction> LoadByObjectIdByIndirectObjectId(int ObjectId, int IndirectObjectId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
@@ -299,7 +292,7 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<WebSessionAction> LoadByIndirectObjectId(ObjectType IndirectObjectId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<WebSessionAction> LoadByIndirectObjectId(int IndirectObjectId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;

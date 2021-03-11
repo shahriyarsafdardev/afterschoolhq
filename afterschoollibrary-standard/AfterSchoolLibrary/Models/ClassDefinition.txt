@@ -1783,12 +1783,11 @@ description: An action taken during a particular user session.
 inherits: BasicObject
 property: SessionId, int?, Int, required
 property: ActorId, int?, Int
-property: ActivityId, int?, Int
 property: AccountId, int?, Int
 property: ActionTypeId, WebSessionActionType, Int
 property: ObjectTypeId, ObjectType, Int
 property: ObjectId, int?, Int
-property: IndirectObjectId, ObjectType, Int
+property: IndirectObjectId, int?, Int
 property: ActionStringFormat, string, NVarChar "400"
 property: ActionString, string, NVarChar "400"
 join: WebUser.ID, WebUserId, LeftOuterJoin
@@ -1839,13 +1838,13 @@ loadmethod: AccountId, List<>
 [begin]
 type: Enum
 name: WebSessionActionType
-values: NotSet, Created, Updated, Published, Unpublished, Sent, Registered, Paid, Refunded, Requested, Invited, Archived, Deleted, ManuallyRegistered, ManuallyPaid, ManuallyRefunded, Approved, Verified, Viewed, Moved, Navigated, Searched, Paged, Connected, LoggedIn, LoggedOut, Copied, Restored
+values: NotSet, Created, Updated, Published, Unpublished, Sent, Registered, Paid, Refunded, Requested, Invited, Archived, Deleted, ManuallyRegistered, ManuallyPaid, ManuallyRefunded, Approved, Verified, Viewed, Moved, Navigated, Searched, Paged, Connected, LoggedIn, LoggedOut, Copied, Restored, Browsed, Followed, Unfollowed, Shared, Contacted, Interested
 [end]
 
 [begin]
 type: Enum
 name: ObjectType
-values: NotSet, Account, AccountActivityGroup, AccountPackage, AccountPackageFeature, AccountProfile, AccountProperty, AccountRelationship, AccountRelationshipLocation, AccountWebUser, Activity, ActivityDay, ActivityFile, ActivityForm, ActivityGradeLevel, ActivityGroup, ActivityInstance, ActivityMessage, ActivityMessageRegistrant, ActivityPayment, ActivityRegistrationPeriod, ActivitySchedule, ActivitySection, ActivityWebUser, AssignedCoupon, AttachedCoupon, Attendance, AttendanceRegistrant, BankPaymentAccount, Cart, CartItem, CheckPaymentAccount, ContactList, ContactListRegistrant, Coupon, File, Form, FormQuestion, FormQuestionAnswer, FormQuestionGroup, GradeLevel, Location, Match, Migration, ObjectTag, Package, PackageFeature, PasswordResetToken, PaymentPlan, Payout, Product, ProductOffering, ProductPurchase, Purchase, PurchaseableObjectCoupon, RefundRequest, Registrant, RegistrantActivity, RegistrantActivityGroup, RegistrantPaymentPlan, RegistrantSubscriptionPlan, RegistrantWebUser, Registration, RegistrationActivity, RegistrationPeriod, Session, SessionAction, StripeAccount, Subscriber, SubscriptionPlan, SubscriptionPlanPrePayment, Tag, TeamMatch, Transaction, TwilioBlockedPhone, TwilioSMS, WebUser, AggregatedCounter, Counter, Hash, Job, JobParameter, JobQueue, List, Schema, Server, Set, State
+values: NotSet, Account, AccountActivityGroup, AccountPackage, AccountPackageFeature, AccountProfile, AccountProperty, AccountRelationship, AccountRelationshipLocation, AccountWebUser, Activity, ActivityDay, ActivityFile, ActivityForm, ActivityGradeLevel, ActivityGroup, ActivityInstance, ActivityMessage, ActivityMessageRegistrant, ActivityPayment, ActivityRegistrationPeriod, ActivitySchedule, ActivitySection, ActivityWebUser, AssignedCoupon, AttachedCoupon, Attendance, AttendanceRegistrant, BankPaymentAccount, Cart, CartItem, CheckPaymentAccount, ContactList, ContactListRegistrant, Coupon, DirectoryAccount, File, Form, FormQuestion, FormQuestionAnswer, FormQuestionGroup, GradeLevel, Location, Match, Migration, ObjectTag, Package, PackageFeature, PasswordResetToken, PaymentPlan, Payout, Product, ProductOffering, ProductPurchase, Purchase, PurchaseableObjectCoupon, RefundRequest, Registrant, RegistrantActivity, RegistrantActivityGroup, RegistrantPaymentPlan, RegistrantSubscriptionPlan, RegistrantWebUser, Registration, RegistrationActivity, RegistrationPeriod, Session, SessionAction, StripeAccount, Subscriber, SubscriptionPlan, SubscriptionPlanPrePayment, Tag, TeamMatch, Transaction, TwilioBlockedPhone, TwilioSMS, WebUser, AggregatedCounter, Counter, Hash, Job, JobParameter, JobQueue, List, Schema, Server, Set, State
 [end]
 
 [begin]
