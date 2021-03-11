@@ -105,7 +105,7 @@ namespace AfterSchool.Models
         protected void HandleSubdomainRedirect()
         {
             var subdomainAccount = Account.LoadBySubdomain(Request.Url.Host);
-            if (subdomainAccount.IsNotEmpty())
+            if (subdomainAccount.IsNotEmpty() && Request.Url.AbsolutePath.IsEmpty())
                Response.Redirect($"https://{Request.Url.Host}/{subdomainAccount.UniqueName}");
         }
 
