@@ -60,13 +60,14 @@ namespace AfterSchool.Models
                 session.UserAgent = Request.UserAgent;
                 session.Save();
                 SessionVariables.VisitorSession = session;
+
             }
             else
             {
                 SessionVariables.VisitorSession.LastActivity = DateTime.UtcNow;
                 SessionVariables.VisitorSession.Save();
-            }            
-            
+            }
+
             HandleSubdomainRedirect();
         }
 
@@ -104,7 +105,7 @@ namespace AfterSchool.Models
         protected void HandleSubdomainRedirect()
         {
             var subdomainAccount = Account.LoadBySubdomain(Request.Url.Host);
-            if (subdomainAccount.IsNotEmpty())
+            if (subdomainAccount.IsNotEmpty() && Request.Url.AbsolutePath.IsEmpty())
                Response.Redirect(subdomainAccount.HomePageUrl);
         }
 
