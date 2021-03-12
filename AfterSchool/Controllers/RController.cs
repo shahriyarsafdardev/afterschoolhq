@@ -40,7 +40,7 @@ namespace AfterSchool.Controllers
         }
 
         [HttpGet]
-        public ActionResult Account(string accountname, string directoryname)
+        public ActionResult Account(string accountname, string dir)
         {
             if (isUnsupportedBrowser())
                 return RedirectUnsupportedBrowser();
@@ -55,17 +55,19 @@ namespace AfterSchool.Controllers
 
                 var profile = account.GetAccountProfile(msgs);
                 var ah = AfterSchoolLibrary.Helpers.Utilities.GetNewAmazonHelper();
+                var regStartPageAccount = account;
 
-                if (directoryname.IsNotEmpty())
+                if (dir.IsNotEmpty())
                 {
-                    var directoryAccount = AfterSchoolLibrary.Models.Account.LoadByUniqueName(directoryname, msgs);
+                    var directoryAccount = AfterSchoolLibrary.Models.Account.LoadByUniqueName(dir, msgs);
                     if (directoryAccount.IsNotEmpty() && directoryAccount.AccountTypeId.In(new List<AccountType>() { AccountType.Directory, AccountType.SchoolDistrict }))
                     {
-                        //.. user is coming from search directory.
-                        TempData["DirectoryName"] = directoryAccount.Name;
-                        TempData["DirectoryHomePageUrl"] = directoryAccount.HomePageUrl;
+                        regStartPageAccount = directoryAccount;
                     }
                 }
+
+                RestartRegistrationSession();
+                SetRegistrationStartPage(regStartPageAccount, true);
 
                 if (account.AccountTypeId.In(new List<AccountType>() { AccountType.Directory, AccountType.SchoolDistrict }))
                 {
@@ -90,10 +92,7 @@ namespace AfterSchool.Controllers
 
                     return View("search");
                 }
-                    
-
-                RestartRegistrationSession();
-                SetRegistrationStartPage(account, true);                
+                              
 
                 if (profile.IsEmpty())
                     return Redirect(account.BrowseUrl);

@@ -109,7 +109,7 @@
 
     <div id="<%= searchResult.AccountUid %>" name="<%= searchResult.AccountName %>" class="col-xl-12 col-sm-6 col-md-6 col-lg-6 col-xl-4 participation-object" style="height: 410px; margin-bottom: 10px;">
 
-        <div class="panel" style="overflow: hidden; cursor: pointer;" onclick="WebPage.navigateIframe('<%= searchResult.HomePageUrl %>/@accountUniqueName')">
+        <div class="panel" style="overflow: hidden; cursor: pointer;" onclick="WebPage.navigateIframe('<%= searchResult.HomePageUrl %>?dir=@accountUniqueName')">
             <div class="reg-header" style="background-image: url('<%= searchResult.ProfileHeaderImageUrl %>'); min-height: 100px; height: 150px; padding: 5px 5px; position: relative;">
 
                 <% if(showDistance) { %>

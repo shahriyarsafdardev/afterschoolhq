@@ -9,9 +9,8 @@
     var dashboardUrl = Url.Action("index", "home", new { area = "user" });
     var session = (ParticipationObject)ViewData["session"];
     var isDuringProfileSetup = false;
-    var returnUrl = SessionVariables.RegistrationStartPageAccount?.HomePageUrl;
-    string directoryName = TempData["DirectoryName"] != null ? TempData["DirectoryName"].ToString() : null;
-    string directoryHomePageUrl = TempData["DirectoryHomePageUrl"] != null ? TempData["DirectoryHomePageUrl"].ToString() : null;
+    var returnUrl = SessionVariables.RegistrationStartPageAccount?.HomePageUrl;    
+    var registrationStartPage = SessionVariables.RegistrationStartPageAccount;
 
     if (currentAccount.IsNotEmpty() && currentAccount.AccountTypeId != AccountType.Registrant)
     {
@@ -30,18 +29,12 @@
     }
 }
 
-@helper RenderReturnToHomeUrl(ParticipationObject session, string directoryName, string directoryHomePageUrl)
+@helper RenderReturnToHomeUrl(ParticipationObject session, Account registrationStartPage)
 {
     if (session.IsNotEmpty() && !Request.Url.ToString().ToLower().Contains(session.GetHomePageUrl().ToLower()))
     {
         <a href="@session.GetBrowseUrl()" class="btn btn-link">
             &laquo; Return to @session.Name Home
-        </a>
-    }
-    else if (directoryName.IsNotEmpty() && directoryHomePageUrl.IsNotEmpty())
-    {
-        <a href="@directoryHomePageUrl" class="btn btn-link">
-            &laquo; Return To <span style="text-transform: uppercase;"> @directoryName </span>
         </a>
     }
     else if (Model.IsNotEmpty() && !(Model.HomePageUrl.ToLower().Contains(Request.Url.AbsolutePath.ToLower())))
@@ -58,9 +51,9 @@
         <div class="row">
             <div class="col-md-6 col-sm-6 col-xs-12">
 
-                @if (directoryName.IsNotEmpty())
+                @if (registrationStartPage.IsNotEmpty())
                 {
-                    <span class="reg-login-bar-title">@directoryName</span>
+                    <a href="@registrationStartPage.HomePageUrl"><span class="reg-login-bar-title">@registrationStartPage.Name</span></a>
                 }
                 else if (currentUser.IsNotEmpty())
                 {
