@@ -373,6 +373,7 @@ property: IsClaimed, bool, Bit
 property: OnboardingStepDone, OnboardingStepType, Int
 property: ContactFormId, int?, Int, , Enables account to set contact form to be used on main page
 property: ClaimEmailDomain, string, NVarChar "50", , The main domain for the email to validate against during the claim process
+property: Subdomain, string, NVarChar "100", , Subdomain associated to account used to redirect to accounts directory
 baseproperty: Name, required
 loadmethod: OwnerId, List<>
 loadmethod: UniqueName
@@ -382,6 +383,7 @@ loadmethod: AccountTypeId, List<>
 loadmethod: StripeUserId
 loadmethod: StripeCustomerId
 loadmethod: InviteCodeToShare
+loadmethod: Subdomain
 [end]
 
 [begin]

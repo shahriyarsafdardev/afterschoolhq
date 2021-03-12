@@ -63,6 +63,10 @@ namespace AfterSchoolLibrary.Models
 		/// The main domain for the email to validate against during the claim process
 		/// </summary>
 		public string ClaimEmailDomain { get { return (string)MDV["ClaimEmailDomain"].Value; } set { MDV["ClaimEmailDomain"].Value = value; } }
+		/// <summary>
+		/// Subdomain associated to account used to redirect to accounts directory
+		/// </summary>
+		public string Subdomain { get { return (string)MDV["Subdomain"].Value; } set { MDV["Subdomain"].Value = value; } }
 		
 
         public Account()
@@ -125,6 +129,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "OnboardingStepDone", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ContactFormId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ClaimEmailDomain", System.Data.SqlDbType.NVarChar , "50");
+				_dp.Add(className, "Subdomain", System.Data.SqlDbType.NVarChar , "100");
 				
                 return _dp;
             }
@@ -330,6 +335,10 @@ namespace AfterSchoolLibrary.Models
 			dps.Add(ObjectMap["ClaimEmailDomain"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["Subdomain"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -401,6 +410,14 @@ namespace AfterSchoolLibrary.Models
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["InviteCodeToShare"], InviteCodeToShare);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
+
+		public static Account LoadBySubdomain(string Subdomain, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["Subdomain"], Subdomain);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
@@ -477,6 +494,9 @@ namespace AfterSchoolLibrary.Models
         {
             get
             {
+                if (Subdomain.IsNotEmpty())
+                    return $"http{(Helpers.Utilities.UseSSL() ? "s" : "")}://{Subdomain}";
+
                 return $"{Helpers.Utilities.BaseUrl()}/{this.UniqueName}";
             }
 
@@ -1107,6 +1127,15 @@ namespace AfterSchoolLibrary.Models
 
                 return null;
             }
+        }
+
+        public static List<string> LoadAllSubdomains(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["Subdomain"], null, DatabaseCriteriaOperatorEnum.IsNot);
+
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).Select(a => a.Subdomain).ToList();
         }
 
         #endregion
