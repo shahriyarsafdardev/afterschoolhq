@@ -66,8 +66,11 @@ namespace AfterSchool.Controllers
                     }
                 }
 
-                RestartRegistrationSession();
-                SetRegistrationStartPage(regStartPageAccount, true);
+                if (SessionVariables.RegistrationStartPageAccount.IsEmpty() || SessionVariables.RegistrationStartPageAccount.AccountTypeId != AccountType.Directory)
+                {
+                    RestartRegistrationSession();
+                    SetRegistrationStartPage(regStartPageAccount, true);
+                }
 
                 if (account.AccountTypeId.In(new List<AccountType>() { AccountType.Directory, AccountType.SchoolDistrict }))
                 {
