@@ -60,14 +60,15 @@ namespace AfterSchool.Models
                 session.UserAgent = Request.UserAgent;
                 session.Save();
                 SessionVariables.VisitorSession = session;
+
             }
             else
             {
                 SessionVariables.VisitorSession.LastActivity = DateTime.UtcNow;
                 SessionVariables.VisitorSession.Save();
-            }            
-            
-            HandleSubdomainRedirect();
+            }
+
+           // HandleSubdomainRedirect();
         }
 
         protected void UpdateSession(SessionActionType sat, int? accountId = null, int? activityId = null, int? webUserId = null, int? registrantId = null, int? registrationId = null, int? registrationPeriodId = null, int? activityGroupId = null, DatabaseConnection dc = null)
@@ -104,8 +105,8 @@ namespace AfterSchool.Models
         protected void HandleSubdomainRedirect()
         {
             var subdomainAccount = Account.LoadBySubdomain(Request.Url.Host);
-            if (subdomainAccount.IsNotEmpty())
-               Response.Redirect(subdomainAccount.HomePageUrl);
+            if (subdomainAccount.IsNotEmpty() && Request.Url.AbsolutePath.IsEmpty())
+               Response.Redirect($"https://{Request.Url.Host}/{subdomainAccount.UniqueName}");
         }
 
         protected void WriteOutput(object obj, ResponseType rt)
