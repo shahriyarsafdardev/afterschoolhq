@@ -74,7 +74,7 @@
                     <div class="btn-group pull-right">
                         <div>
 
-                            @RenderReturnToHomeUrl(session, directoryName, directoryHomePageUrl)
+                            @RenderReturnToHomeUrl(session, registrationStartPage)
 
                             @if (currentUser.IsNotEmpty())
                             {
@@ -135,7 +135,7 @@
     {
         <div class="row">
             <div class="pull-right">
-                @RenderReturnToHomeUrl(session, directoryName, directoryHomePageUrl)
+                @RenderReturnToHomeUrl(session, registrationStartPage)
             </div>
         </div>
         <div>
