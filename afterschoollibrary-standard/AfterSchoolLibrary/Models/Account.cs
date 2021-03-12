@@ -493,6 +493,9 @@ namespace AfterSchoolLibrary.Models
         {
             get
             {
+                if (Subdomain.IsNotEmpty())
+                    return $"http{(Helpers.Utilities.UseSSL() ? "s" : "")}://{Subdomain}";
+
                 return $"{Helpers.Utilities.BaseUrl()}/{this.UniqueName}";
             }
 
