@@ -694,7 +694,6 @@
     <Content Include="img\darye.png" />
     <Content Include="img\david.png" />
     <Content Include="img\fee.png" />
-    <Content Include="img\filter.png" />
     <Content Include="img\frank-mckenna-LhOjrOlcLx4-unsplash.jpg" />
     <Content Include="img\gabriel-baranski-vGICUyYW2CE-unsplash.jpg" />
     <Content Include="img\handshake-icon.png" />
@@ -731,7 +730,6 @@
     <Content Include="img\image-3-1800x900-1.png" />
     <Content Include="img\image-9.png" />
     <Content Include="img\IPS.png" />
-    <Content Include="img\isyp-logo.png" />
     <Content Include="img\lawrence.png" />
     <Content Include="img\lazyload-ph.png" />
     <Content Include="img\lod_bg.gif" />
@@ -750,10 +748,8 @@
     <Content Include="img\search.png" />
     <Content Include="img\smiling-group.png" />
     <Content Include="img\sophie.png" />
-    <Content Include="img\tempsnip.png" />
     <Content Include="img\texture-fabric.png" />
     <Content Include="img\texture-geometry-shapes.png" />
-    <Content Include="img\welcome-back-arrow.PNG" />
     <Content Include="index-profiles.html" />
     <Content Include="index.html" />
     <Content Include="joinips.html" />
