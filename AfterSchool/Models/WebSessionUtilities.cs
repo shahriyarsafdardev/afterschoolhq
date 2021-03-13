@@ -82,6 +82,19 @@ namespace AfterSchool.Models
                     actionString = $"{actorName} {actionType} Directory Account {text}";
                     break;
 
+                case ObjectType.ContactList:
+                    actionStringFormat = "{actor} Tried to {action} Account {objecttype}";
+                    actionString = $"{actorName} Tried to Contact Account {text}";
+                    break;
+
+                case ObjectType.Registration:
+                    if (actionType == WebSessionActionType.Interested)
+                    {
+                        actionStringFormat = "{actor} Has Registered {action} For The Activity {objecttype}";
+                        actionString = $"{actorName} Has Registered Interest For The Activity {text}";
+                    }                    
+                    break;
+
                 default:
                     actionStringFormat = "{actor} {action}";
                     actionString = $"{actorName} {actionType}";
@@ -113,6 +126,11 @@ namespace AfterSchool.Models
                 case ObjectType.DirectoryAccount:
                     actionStringFormat = "{actor} {action} To {primaryObject} FROM {objectType} {indirectObject}";
                     actionString = $"{actorName} {actionType} TO {objectText} FROM {objectType} {indirectObjectText}";
+                    break;
+
+                case ObjectType.Payout:
+                    actionStringFormat = "{actor} {action} {primaryObject} To {indirectObject}";
+                    actionString = $"{actorName} {actionType} {objectText} To {indirectObjectText}";
                     break;
 
                 default:

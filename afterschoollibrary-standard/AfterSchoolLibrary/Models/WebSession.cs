@@ -183,12 +183,27 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		
 
-        #endregion
+
+		#endregion
 
 		#region "UserDefined"
 
-        #endregion
-    }
+		public static DataTable GetLogs(SystemMessages msgs = null, DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+
+			var sql = $@"
+				SELECT TOP 100
+				w.IPAddress, w.UrlReferrer, ws.ActionStringFormat, ws.ActionString 
+				FROM WebSession w 
+				JOIN WebSessionAction ws ON ws.SessionId = w.ID 
+				ORDER BY ws.ID desc";
+
+			return dq.ExecuteSelect(sql, msgs);
+		}
+		
+		#endregion
+	}
 }
