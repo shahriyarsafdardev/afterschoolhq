@@ -12,32 +12,49 @@ namespace AfterSchool.Models
     {
         public static void InitializeWebSession(HttpRequestBase request)
         {
+            var user = SessionVariables.CurrentUser;
+            var account = SessionVariables.CurrentAccount;
             var session = new WebSession();
+            WebSession lastSession = new WebSession();
+
+            if (user.IsNotEmpty())
+                lastSession = WebSession.LoadByWebUserId(WebUserId: user.ID.Value).OrderByDescending(m => m.ID).FirstOrDefault();
+
+            if (lastSession.IsEmpty() && account.IsNotEmpty())
+                lastSession = WebSession.LoadByAccountId(AccountId: account.ID.Value).OrderByDescending(m => m.ID).FirstOrDefault();
+
+
             if (SessionVariables.WebSession.IsEmpty())
             {
+                session.CreateDate = DateTime.UtcNow;
+                session.CreatedBy = user.IsNotEmpty() && user.ID.IsNotEmpty() ? user.ID : 0;
                 session.LastModifiedDate = DateTime.UtcNow;
                 session.LastModifiedBy = session.CreatedBy = 0;
                 session.UrlReferrer = request.UrlReferrer.IsNotEmpty() ? request.UrlReferrer.ToString() : null;
-                session.IPAddress = request.ServerVariables["HTTP_X_FORWARDED_FOR"]; //Request.UserHostAddress;
+                session.IPAddress = request.ServerVariables["HTTP_X_FORWARDED_FOR"];
                 session.UserAgent = request.UserAgent;
                 //.. need to retrieve this both from user location
                 session.IPAddressTimeZone = null;
                 session.UserLocation = null;
-                session.PreviousId = null; //not sure what data will be here
-                session.WebUserId = SessionVariables.CurrentUser?.ID;
-                session.AccountId = SessionVariables.CurrentAccount?.ID;
+                
+                session.WebUserId = user.IsNotEmpty() ? user.ID : null;
+                session.AccountId = account.IsNotEmpty() ? account.ID : null;
             }
             else
             {
                 session = WebSession.Load(SessionVariables.WebSession.ID.Value);
                 session.LastModifiedDate = DateTime.UtcNow;
+                session.LastModifiedBy = user.IsNotEmpty() && user.ID.IsNotEmpty() ? user.ID : 0;
 
-                if (SessionVariables.WebSession.WebUserId.IsEmpty() && SessionVariables.CurrentUser.IsNotEmpty())
-                    session.WebUserId = SessionVariables.CurrentUser.ID;
+                if (session.WebUserId.IsEmpty() && user.IsNotEmpty())
+                    session.WebUserId = user.ID;
 
-                if (SessionVariables.WebSession.AccountId.IsEmpty() && SessionVariables.CurrentAccount.IsNotEmpty())
-                    session.AccountId = SessionVariables.CurrentAccount.ID;
+                if (session.AccountId.IsEmpty() && account.IsNotEmpty())
+                    session.AccountId = account.ID;
             }
+
+            if (session.PreviousId.IsEmpty() && lastSession.IsNotEmpty() && lastSession.ID.IsNotEmpty())
+                session.PreviousId = lastSession.ID;
 
             session.Save();
             SessionVariables.WebSession = session;
