@@ -1656,6 +1656,16 @@ namespace AfterSchool.Areas.Org.Controllers
             return View("Registrants", activity);
         }
 
+        [HttpPost]
+        public JsonResult WithdrawRegistrant(string registrantActivityUId, string registrantUId)
+        {
+            var msgs = new SystemMessages();
+            return Json(new { success = true, status = "ok", data = 1 }, JsonRequestBehavior.AllowGet);
+
+            ////.. something went wrong, error occured
+            //return Json(new { success = false, status = "error", data = msgs.ToList().Select(msg => new { msg.Text }), pageNum, showDistance }, JsonRequestBehavior.AllowGet);
+        }
+
         private List<AttachedCoupon> GetAttachedCoupons(RegistrantActivity registrantActivity)
         {
             var masterRegistrant = registrantActivity.GetRegistrant().GetMasterRegistrant();

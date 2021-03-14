@@ -91,6 +91,8 @@
                             </select>
                         </td>
                         <td>
+                            <button class="btn btn-danger btn-sm" onclick="return processWithdraw('@ra.Uid', '@ra.RegistrantUid', '@ra.RegistrantFirstName');">Withdraw</button>
+
                             @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView) && participationObject.IsNotFreeAndCanAcceptPayments && ra.GetAmountPaid() == 0 && ra.GetRegistrant().ParentRegistrantId.HasValue)
                             {
                                 var showButton = true;
@@ -114,7 +116,7 @@
                                         Send Invoice
                                     </button>
                                 }
-                            }
+                            }                            
                         </td>
                     </tr>
                 }
@@ -181,6 +183,31 @@
     </form>
 </div>
 
+<div id="withdraw-modal-container"></div>
+<script id="script-withdraw-template" type="text/template">
+
+    <div id="modal-withdraw-registrant-<%= registrantActivityId %>" class="modal colored-header fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+                    <h3 class="modal-title">Withdraw</h3>
+                </div>
+
+                <div class="modal-body">
+                    Are you sure you want to withdraw <strong><%= registrantName %></strong> from <strong><%= activityName %></strong> ?
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+                    <button type="button" id="btn-manual-withdraw" class="btn btn-primary" onclick="return withdraw('<%= registrantActivityId %>', '<%= registrantId %>')">Withdraw &raquo;</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</script>
+
 <script>
 
     function moveRegistrantAssignment(registrant, registrantName, selectBox) {
@@ -237,5 +264,56 @@
                 $(obj).prop('disabled', false);
             }
         );
+    }
+
+    function processWithdraw(registrantActivityId, registrantId, registrantName) {
+        //.. prepare source and template
+        var source = $("#script-withdraw-template").html();
+        var compiled = _.template(source);
+
+        //.. format data as JSON and combine with template
+        var compiledHtml = compiled({
+            registrantActivityId: registrantActivityId,
+            registrantId: registrantId,
+            registrantName: registrantName,
+            activityName: '@activity.Name',
+        });
+
+        //.. update html to dom
+        $('#withdraw-modal-container').html(compiledHtml);
+        $('#modal-withdraw-registrant-' + registrantActivityId).modal('show');
+
+        return false;
+    }
+
+    function withdraw(registrantActivityId, registrantId) {
+        if (registrantActivityId && registrantId) {
+            var url = '@Url.Action("WithdrawRegistrant", "Activity", new { Area = "Org" })';
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: { registrantActivityUId: registrantActivityId, registrantUId: registrantId },
+                success: function (data) {
+                    if (data && data.success == true) {
+                    } else {
+                        if (data && data.status == 'error') {
+                            $('#search-result').html('');
+
+                            var error = '';
+
+                            _.each(data.data, function (msg) {
+                                error += msg?.Text + '<br />';
+                            });
+
+                            Notifications.showBar({
+                                title: 'Error',
+                                message: error,
+                                success: false
+                            });
+                        }
+                    }
+                }
+            });
+        }
     }
 </script>
