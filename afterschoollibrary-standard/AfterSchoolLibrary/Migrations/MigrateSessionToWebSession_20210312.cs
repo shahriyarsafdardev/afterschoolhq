@@ -48,7 +48,7 @@ namespace AfterSchoolLibrary.Migrations
                     }                   
 
                 },
-                uniqueIdenfier: "MigrateSessionToWebSession-20210312",
+                uniqueIdenfier: "MigrateSessionToWebSession_20210312",
                 msgs: msgs,
                 dc: dc
             );
