@@ -22,6 +22,7 @@ namespace AfterSchoolLibrary.Migrations
 
                         var dq = WebSession.get_DatabaseQuery(WebSession.ObjectMap, typeof(WebSession).Name);
                         dq.Connection = adc;
+                        dq.Timeout = 0;
                         var dt = dq.ExecuteSelect($@"
                             SET IDENTITY_INSERT WebSession ON
 
