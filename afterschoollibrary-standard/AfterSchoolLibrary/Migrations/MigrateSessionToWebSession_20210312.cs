@@ -18,81 +18,25 @@ namespace AfterSchoolLibrary.Migrations
                     //.. we have to go with raw sql query as we have lots of data in session table
                     try
                     {
-                        Helpers.Utilities.SystemLog("Session migration started");
-
-                        //var sessions = Session.Load(msgs: amsgs, dc: adc);
-
-                        //foreach (var item in sessions)
-                        //{
-                        //    WebSession webSession = new WebSession();
-                        //    webSession.CreateDate = item.CreateDate;
-                        //    webSession.CreatedBy = item.CreatedBy;
-                        //    webSession.LastModifiedDate = item.LastModifiedDate;
-                        //    webSession.LastModifiedBy = item.LastModifiedBy;
-                        //    webSession.IPAddress = item.IPAddress;
-                        //    webSession.IPAddressTimeZone = null;
-                        //    webSession.UserAgent = item.UserAgent;
-                        //    webSession.UserLocation = null;
-                        //    webSession.UrlReferrer = item.UrlReferrer;
-                        //    webSession.PreviousId = null;
-                        //    webSession.WebUserId = null;
-                        //    webSession.AccountId = null;
-
-                        //    webSession.Save(adc);
-
-                        //    var action = SessionAction.LoadBySessionId(item.ID.Value, amsgs, adc).FirstOrDefault();
-
-                        //    if (action.IsNotEmpty())
-                        //    {
-                        //        WebSessionAction sessionAction = new WebSessionAction();
-                        //        sessionAction.CreateDate = action.CreateDate;
-                        //        sessionAction.CreatedBy = action.CreatedBy;
-                        //        sessionAction.SessionId = webSession.ID;
-                        //        sessionAction.ActorId = action.WebUserId;
-                        //        sessionAction.AccountId = action.AccountId;
-                        //        sessionAction.ActionTypeId = 0;
-                        //        sessionAction.ObjectTypeId = 0;
-                        //        sessionAction.ObjectId = action.ActivityId.IsNotEmpty() ? action.ActivityId : action.ActivityGroupId;
-                        //        sessionAction.IndirectObjectId = null;
-                        //        sessionAction.ActionStringFormat = "{objecttype} Updated";
-                        //        sessionAction.ActionString = action.ActivityId.IsNotEmpty() ? "Activity Updated" : "ActivityGroup Updated";
-
-                        //        sessionAction.Save(adc);
-                        //    }                            
-                        //}
+                        Helpers.Utilities.SystemLog("Session migration started");                        
 
                         var dq = WebSession.get_DatabaseQuery(WebSession.ObjectMap, typeof(WebSession).Name);
                         dq.Connection = adc;
                         var dt = dq.ExecuteSelect($@"
-                            DECLARE @MAXID INT, @Counter INT
+                            SET IDENTITY_INSERT WebSession ON
 
-                            SET @COUNTER = 1
-                            SELECT @MAXID = COUNT(*) FROM SESSION
+                            INSERT INTO WebSession (ID, CreateDate, CreatedBy, LastModifiedDate, LastModifiedBy, IPAddress, IPAddressTimeZone, UserAgent, UserLocation, UrlReferrer, PreviousId, WebUserId, AccountId)
+                            SELECT ID, CreateDate, CreatedBy, LastModifiedDate, LastModifiedBy, IPAddress, NULL AS IPAddressTimeZone, UserAgent, NULL AS UserLocation, UrlReferrer, NULL AS PreviousId, NULL AS WebUserId, NULL AS AccountId
+                            FROM SESSION	                            
 
-                            WHILE (@COUNTER <= @MAXID)
-                            BEGIN
-	                            DECLARE @SessionId INT
-	                            SET @SessionId = (SELECT ID FROM (
-			                            SELECT ROW_NUMBER() OVER (ORDER BY ID ASC) AS  'Row_Number', ID
-			                            FROM SESSION		
-		                            ) AS s
-		                            WHERE s.Row_Number = @Counter)
+                            SET IDENTITY_INSERT WebSession OFF
 
-	                            INSERT INTO WebSession (CreateDate, CreatedBy, LastModifiedDate, LastModifiedBy, IPAddress, IPAddressTimeZone, UserAgent, UserLocation, UrlReferrer, PreviousId, WebUserId, AccountId)
-                                SELECT CreateDate, CreatedBy, LastModifiedDate, LastModifiedBy, IPAddress, NULL AS IPAddressTimeZone, UserAgent, NULL AS UserLocation, UrlReferrer, NULL AS PreviousId, NULL AS WebUserId, NULL AS AccountId
-                                FROM SESSION 
-	                            Where ID = @SessionId
-
-	                            INSERT INTO WebSessionAction (CreateDate, CreatedBy, SessionId, ActorId, AccountId, ActionTypeId, ObjectTypeId, ObjectId, IndirectObjectId, ActionStringFormat, ActionString)
-                                SELECT CreateDate, CreatedBy, SCOPE_IDENTITY(), WebUserId, AccountId, 0, 0, 
-	                                CASE WHEN ActivityId IS NULL THEN ActivityGroupId ELSE ActivityId END AS ObjectId, NULL, 
-	                                '{{objecttype}} Updated' AS ActionStringFormat, 
-	                                CASE WHEN ActivityId IS NULL THEN 'ActivityGroup Updated' ELSE 'Activity Updated' END AS ActionString
-                                FROM SessionAction
-	                            where SessionId = @SessionId
-
-                                SET @COUNTER = @COUNTER + 1
-                            END",
+                            INSERT INTO WebSessionAction (CreateDate, CreatedBy, SessionId, ActorId, AccountId, ActionTypeId, ObjectTypeId, ObjectId, IndirectObjectId, ActionStringFormat, ActionString)
+                            SELECT CreateDate, CreatedBy, SessionId, WebUserId, AccountId, NULL, NULL, 
+	                            CASE WHEN ActivityId IS NULL THEN ActivityGroupId ELSE ActivityId END AS ObjectId, NULL, 
+	                            '{{objecttype}} Updated' AS ActionStringFormat, 
+	                            CASE WHEN ActivityId IS NULL THEN 'ActivityGroup Updated' ELSE 'Activity Updated' END AS ActionString
+                            FROM SessionAction",
                             amsgs);
 
                         Helpers.Utilities.SystemLog("Session migration completed");
