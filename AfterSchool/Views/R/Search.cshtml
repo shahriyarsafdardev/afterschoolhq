@@ -13,7 +13,7 @@
 
     if (!primaryColor.IsNotEmpty() || primaryColor.IsBlank())
     {
-        primaryColor = "#00ae85"; 
+        primaryColor = "#00ae85";
     }
 
     //.. data for layout
@@ -34,13 +34,35 @@
         background-size: cover !important;
         background-position: center !important;
         justify-content: center !important;
-        align-items: center !important;        
+        align-items: center !important;
     }
 
     .join-directory-btn {
         color: white !important;
         min-width: 180px;
         background-color: @primaryColor !important;
+    }
+
+    .isyp-modal-header {
+        padding: 0;
+        background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(/img/image-3-1800x900-1.png);
+        background-repeat: no-repeat;
+        background-size: cover !important;
+        background-position: center !important;
+        justify-content: center !important;
+        align-items: center !important;
+        height: 200px;
+    }
+
+    .blur-bg {
+        background-color: White;
+        background-repeat: no-repeat;
+        height: 100%;
+        opacity: 0.5;
+        position: fixed;
+        top: 0;
+        width: 100%;
+        z-index: 1000000;
     }
 </style>
 
@@ -102,6 +124,37 @@
 </div>
 
 <div class="clearfix"></div>
+
+<div>
+    <div id="blured-bg"></div>
+    <div style="position: fixed; z-index: 1000001;">
+        <div id="modal-isyp-intro" class="md-modal md-show">
+            <div class="md-content modal-lg">
+                <div class="modal-header isyp-modal-header text-center">
+                    <img src="@logoUrl" style="width: 200px; margin-top: 40px;" />
+                </div>
+                <div class="modal-body" style="color: black;">
+                    <h1 style="margin: 0;">Learn, explore, and play this summer!</h1>
+                    <br />
+                    <div style="overflow-wrap: break-word;">
+                        From sports to science to arts and culture, Indy Summer Youth Programs offer a wide variety of programs to ensure there’s something for everyone. 
+                        Many programs provide healthy meals and snacks, 
+                        and free and low-cost enrollment options,
+                        as well as scholarships, are available to help cover the costs of attendance.  
+                        Find the right summer program for your child.
+                    </div>
+
+                    <div style="padding: 15px; text-align: center;">
+                        <button class="btn btn-register" style="width: 180px; border-color: @primaryColor; background-color: @primaryColor; transition: none;" onclick="return closeModalIsyp();"> Get Started</button>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script id="script-search-result-list" type="text/template">
 
@@ -231,6 +284,11 @@
         var inCallback = false, page = 0, isReachedScrollEnd = false, isMobileFilterWindowOpened = false;
 
         $(document).ready(function () {
+            var isIsyp =  @Json.Encode(accountUniqueName.Contains("isyp"));
+            if (isIsyp) {
+                $('#blured-bg').addClass('blur-bg');
+            }
+
             $(window).scroll(function () {
                 if (isReachedScrollEnd == false &&
                     isMobileFilterWindowOpened == false &&
@@ -246,6 +304,11 @@
                 $('#filters').show();
             }
         })
+
+        function closeModalIsyp() {
+            $('#modal-isyp-intro').removeClass('md-show');
+            $('#blured-bg').removeClass('blur-bg');
+        }
 
         function loadFiltersAndInitiateSearch() {
             var hashUrl = WebPage.getHash();
@@ -301,7 +364,7 @@
             } else {
                 search = txtSearch.val();
             }
-            
+
             if (search && search.length > 0) {
                 mainUrl += `search_${search},`;
             }
@@ -541,11 +604,11 @@
                     return false;
                 }
             });
-        }        
+        }
 
         function mobileFilter() {
             var isOpen = $('#img-mobile-filter').attr('isOpen');
-            if (isOpen == '0') {                
+            if (isOpen == '0') {
                 $('#filters').show();
                 $('#mobile-filter-footer').show();
 
@@ -555,7 +618,7 @@
                 $('#img-mobile-filter').attr('isOpen', "1");
                 isMobileFilterWindowOpened = true;
             }
-            else {                
+            else {
                 $('#filters').hide();
                 $('#mobile-filter-footer').hide();
 
@@ -564,10 +627,10 @@
 
                 $('#img-mobile-filter').attr('isOpen', "0");
                 isMobileFilterWindowOpened = false;
-            }            
+            }
         }
 
-        function applyMobileFilter() { 
+        function applyMobileFilter() {
             if (txtZip.val()?.length > 0) {
                 //.. validate postal code first
                 var isValid = checkZip($('#txtZipCode').val());
@@ -583,12 +646,12 @@
                         message: 'Postal code is not in a proper format.',
                         success: false
                     });
-                }                
-            } else {               
+                }
+            } else {
                 mobileFilter();
                 page = 0;
-                prepareSearchParams();            
-            }            
+                prepareSearchParams();
+            }
         }
 
         function openSeeMorePanelsForSelectedCheckboxes() {
@@ -622,11 +685,11 @@
 
             //..refresh accounts
             if (isMobile) {
-                mobileFilter();                
+                mobileFilter();
             }
 
             resetFlags();
-            loadAccounts();            
+            loadAccounts();
         }
 
         function resetFlags() {
