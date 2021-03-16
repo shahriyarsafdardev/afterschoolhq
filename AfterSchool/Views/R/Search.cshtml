@@ -6,6 +6,7 @@
     var logoUrl = (string)ViewBag.LogoUrl;
     var headerImageUrl = (string)ViewBag.HeaderImageUrl;
     var joiningUrl = $@"/join{accountUniqueName}.html";
+
     if (!logoUrl.IsNotEmpty())
     {
         logoUrl = "/img/logo-vertical.png";
@@ -128,7 +129,7 @@
 <div>
     <div id="blured-bg"></div>
     <div style="position: fixed; z-index: 1000001;">
-        <div id="modal-isyp-intro" class="md-modal md-show">
+        <div id="modal-isyp-intro" class="md-modal">
             <div class="md-content modal-lg">
                 <div class="modal-header isyp-modal-header text-center">
                     <img src="@logoUrl" style="width: 200px; margin-top: 40px;" />
@@ -284,9 +285,10 @@
         var inCallback = false, page = 0, isReachedScrollEnd = false, isMobileFilterWindowOpened = false;
 
         $(document).ready(function () {
-            var isIsyp =  @Json.Encode(accountUniqueName.Contains("isyp"));
+            var isIsyp =  @Json.Encode(accountUniqueName.Contains("isyp")) && @Json.Encode(CookieVariables.ShowISYPModal.IsBlank());
             if (isIsyp) {
-                $('#blured-bg').addClass('blur-bg');
+                showModalIsyp();
+                @(CookieVariables.ShowISYPModal = "false")
             }
 
             $(window).scroll(function () {
@@ -304,6 +306,11 @@
                 $('#filters').show();
             }
         })
+
+        function showModalIsyp() {
+            $('#modal-isyp-intro').addClass('md-show');
+            $('#blured-bg').addClass('blur-bg');
+        }
 
         function closeModalIsyp() {
             $('#modal-isyp-intro').removeClass('md-show');
