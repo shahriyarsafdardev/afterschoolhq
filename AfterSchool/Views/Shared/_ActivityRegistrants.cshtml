@@ -91,7 +91,10 @@
                             </select>
                         </td>
                         <td>
-                            <button class="btn btn-danger btn-sm" onclick="return processWithdraw('@ra.Uid', '@ra.RegistrantUid', '@ra.RegistrantFirstName');">Withdraw</button>
+                            @if (ra.AssignmentTypeId.NotIn(new List<RegistrationAssignmentType>() { RegistrationAssignmentType.NotSet, RegistrationAssignmentType.Withdrawn, RegistrationAssignmentType.Declined }))
+                            {
+                                <button class="btn btn-danger btn-sm" onclick="return processWithdraw('@ra.Uid', '@ra.ID', '@ra.RegistrantUid', '@ra.ParticipationObjectId', '@ra.ParticipationObjectTypeId', '@ra.RegistrantFirstName');">Withdraw</button>
+                            }                       
 
                             @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView) && participationObject.IsNotFreeAndCanAcceptPayments && ra.GetAmountPaid() == 0 && ra.GetRegistrant().ParentRegistrantId.HasValue)
                             {
@@ -186,7 +189,7 @@
 <div id="withdraw-modal-container"></div>
 <script id="script-withdraw-template" type="text/template">
 
-    <div id="modal-withdraw-registrant-<%= registrantActivityId %>" class="modal colored-header fade" tabindex="-1" role="dialog">
+    <div id="modal-withdraw-registrant-<%= registrantActivityUId %>" class="modal colored-header fade" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -200,7 +203,7 @@
 
                 <div class="modal-footer">
                     <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-                    <button type="button" id="btn-manual-withdraw" class="btn btn-primary" onclick="return withdraw('<%= registrantActivityId %>', '<%= registrantId %>')">Withdraw &raquo;</button>
+                    <button type="button" id="btn-manual-withdraw" class="btn btn-primary" onclick="return withdraw('<%= participationObjectId %>', '<%= registrantId %>', '<%= type %>', '<%= registrantActivityUId %>', '<%= registrantActivityId %>')">Withdraw &raquo;</button>
                 </div>
             </div>
         </div>
@@ -266,16 +269,19 @@
         );
     }
 
-    function processWithdraw(registrantActivityId, registrantId, registrantName) {
+    function processWithdraw(registrantActivityUId, registrantActivityId, registrantId, participationObjectId, type, registrantName) {
         //.. prepare source and template
         var source = $("#script-withdraw-template").html();
         var compiled = _.template(source);
 
         //.. format data as JSON and combine with template
         var compiledHtml = compiled({
+            registrantActivityUId: registrantActivityUId,
             registrantActivityId: registrantActivityId,
             registrantId: registrantId,
+            participationObjectId: participationObjectId,
             registrantName: registrantName,
+            type: type,
             activityName: '@activity.Name',
         });
 
@@ -286,15 +292,26 @@
         return false;
     }
 
-    function withdraw(registrantActivityId, registrantId) {
-        if (registrantActivityId && registrantId) {
+    function withdraw(participationObjectId, registrantId, type, registrantActivityUId, registrantActivityId) {
+        if (participationObjectId && registrantId) {
             var url = '@Url.Action("WithdrawRegistrant", "Activity", new { Area = "Org" })';
             $.ajax({
                 type: "POST",
                 url: url,
-                data: { registrantActivityUId: registrantActivityId, registrantUId: registrantId },
+                data: { participationObjectId: participationObjectId, registrantUId: registrantId, type },
                 success: function (data) {
                     if (data && data.success == true) {
+
+                        $('#modal-withdraw-registrant-' + registrantActivityId).modal('hide');
+
+                        var withdrawn = '@Json.Encode(RegistrationAssignmentType.Withdrawn)';
+                        $('#newassignmenttype-' + registrantActivityId).val(withdrawn); //status udpate to withdrawn
+
+                        Notifications.showBar({
+                            title: 'Success',
+                            message: 'Registrant Withdrawn successfully.',
+                            success: true
+                        });
                     } else {
                         if (data && data.status == 'error') {
                             $('#search-result').html('');

@@ -63,7 +63,8 @@ namespace AfterSchool.Areas.User.Controllers
             registrant.WithdrawRegistration(
                 participationObjectId: po.ToInteger(), 
                 participationObjectType: (ParticipationObjectType)type.ToInteger(), 
-                loggedInUser: SessionVariables.CurrentUser, 
+                loggedInUser: SessionVariables.CurrentUser,
+                account: SessionVariables.CurrentAccount,
                 msgs: msgs);
 
             if (returnurl.IsNotBlank())
