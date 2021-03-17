@@ -93,7 +93,7 @@
                         <td>
                             @if (ra.AssignmentTypeId.NotIn(new List<RegistrationAssignmentType>() { RegistrationAssignmentType.NotSet, RegistrationAssignmentType.Withdrawn, RegistrationAssignmentType.Declined }))
                             {
-                                <button class="btn btn-danger btn-sm" onclick="return processWithdraw('@ra.Uid', '@ra.ID', '@ra.RegistrantUid', '@ra.ParticipationObjectId', '@ra.ParticipationObjectTypeId', '@ra.RegistrantFirstName');">Withdraw</button>
+                                <button id="btn-withdraw-@ra.Uid" class="btn btn-danger btn-sm" onclick="return processWithdraw('@ra.Uid', '@ra.ID', '@ra.RegistrantUid', '@ra.ParticipationObjectId', '@ra.ParticipationObjectTypeId', '@ra.RegistrantFirstName');">Withdraw</button>
                             }                       
 
                             @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView) && participationObject.IsNotFreeAndCanAcceptPayments && ra.GetAmountPaid() == 0 && ra.GetRegistrant().ParentRegistrantId.HasValue)
@@ -308,6 +308,7 @@
 
                         var withdrawn = '@Json.Encode(RegistrationAssignmentType.Withdrawn)';
                         $('#newassignmenttype-' + registrantActivityId).val(withdrawn); //status udpate to withdrawn
+                        $('#btn-withdraw-' + registrantActivityUId).attr('disabled', 'disabled');
                         hideLoader();
 
                         Notifications.showBar({
