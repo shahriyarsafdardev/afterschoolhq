@@ -582,7 +582,7 @@ namespace AfterSchool.Controllers
                         if (amsgs.HasNoErrors() && user.IsNotEmpty())
                         {
                             account = CreateOrUpdateAccount(user, amsgs, adc);
-                            WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: account.ID.Value, text: account.Name, actionType: WebSessionActionType.Created, objectType: ObjectType.Account); //..todo: new parent user created                            
+                            WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: account.ID.Value, text: account.Name, actionType: WebSessionActionType.Created, objectType: ObjectType.Account);
                         }
 
                         if (amsgs.HasNoErrors())
@@ -1142,7 +1142,7 @@ namespace AfterSchool.Controllers
                             dc: adc);
 
                         if (student.IsNotEmpty() && amsgs.HasNoErrors())
-                            WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: student.ID.Value, text: student.Name, actionType: WebSessionActionType.Created, objectType: ObjectType.Registrant); //..todo: added a student                        
+                            WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: student.ID.Value, text: student.Name, actionType: WebSessionActionType.Created, objectType: ObjectType.Registrant);
 
                         // add answers to parent registrant record
                         // will be used later to copy information over to student records
@@ -1621,7 +1621,7 @@ namespace AfterSchool.Controllers
                 if (!participationObject.ShouldParentPay())
                     return RedirectToAction("finalizeregistration", new { id = registration.Uid });
 
-                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: currentRegistrant.ID.Value, text: currentRegistrant.Name, actionType: WebSessionActionType.Registered, objectType: ObjectType.Registrant); //..todo: student registered                
+                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: currentRegistrant.ID.Value, text: currentRegistrant.Name, actionType: WebSessionActionType.Registered, objectType: ObjectType.Registrant);
                 return RedirectToAction("payment", new { id = registration.Uid });
             }
 

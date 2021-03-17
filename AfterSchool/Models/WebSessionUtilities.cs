@@ -62,7 +62,7 @@ namespace AfterSchool.Models
 
         public static void LogActivity(WebUser actor, WebSessionActionType actionType = WebSessionActionType.NotSet)
         {
-            SaveLog(actorName: (actor.IsNotEmpty() ? actor.FirstName : "Someone"),
+            SaveLog(actorName: (actor.IsNotEmpty() ? actor.DisplayName  : "Someone"),
                     actionStringFormat: "{actor} {action}",
                     actionString: $"{actor.FirstName} {actionType}",
                     actorId: actor.IsNotEmpty() ? actor.ID : null,
@@ -75,7 +75,7 @@ namespace AfterSchool.Models
 
         public static void LogActivity(WebUser actor, int? Id = (int?)null, string text = "", WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet)
         {
-            string actionString = null, actionStringFormat = null, actorName = (actor.IsNotEmpty() ? actor.FirstName : "Someone");
+            string actionString = null, actionStringFormat = null, actorName = (actor.IsNotEmpty() ? actor.DisplayName : "Someone");
 
             switch (objectType)
             {
@@ -102,6 +102,11 @@ namespace AfterSchool.Models
                 case ObjectType.ContactList:
                     actionStringFormat = "{actor} Tried to {action} Account {objecttype}";
                     actionString = $"{actorName} Tried to Contact Account {text}";
+                    break;
+
+                case ObjectType.WebUser:
+                    actionStringFormat = "{actor} Signed up";
+                    actionString = $"{actorName} Signed up";
                     break;
 
                 case ObjectType.Registration:
@@ -136,7 +141,7 @@ namespace AfterSchool.Models
             //..actor	action		    Object		            ObjectType	        IndirectObjectId
             //..Bharat  Navigated to    FIRST SAMUEL CHURCH(W)  DirectoryAccount   ISYP
 
-            string actionString = null, actionStringFormat = null, actorName = (actor.IsNotEmpty() ? actor.FirstName : "Someone");
+            string actionString = null, actionStringFormat = null, actorName = (actor.IsNotEmpty() ? actor.DisplayName : "Someone");
 
             switch (objectType)
             {
