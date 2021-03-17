@@ -139,7 +139,7 @@
 <script type="text/javascript">
      PageEvent.add(
         PageEvent.AFTER_INIT,
-         function () {             
+         function (){             
             var selectClientTimeZone = $("#select-program-timezone");
             var modelTimeZone = '@Model.TimeZone';
 
@@ -153,5 +153,27 @@
                     selectClientTimeZone.val(appTimezones["America/New_York"]);
                 }
             }
-        });
+
+             $('#title').keyup(function (e) {
+                 var titleLength = $('#title').val().length;
+
+                 if (titleLength > 50) {
+                     e.preventDefault();
+                     e.stopPropagation();
+                     this.value = this.value.substring(0, 50);
+                     return false;
+                 }
+             });
+
+             $('#headline').keyup(function (e) {
+                 var headlineLength = $('#headline').val().length;
+
+                 if (headlineLength > 100) {
+                     e.preventDefault();
+                     e.stopPropagation();
+                     this.value = this.value.substring(0, 100);
+                     return false;
+                 }
+             });
+         });
 </script>

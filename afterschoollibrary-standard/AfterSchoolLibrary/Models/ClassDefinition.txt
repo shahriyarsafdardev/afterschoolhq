@@ -137,6 +137,9 @@ property: StreetNumber, string, NVarChar "50"
 property: StreetName, string, NVarChar "50"
 property: Neighborhood, string, NVarChar "50"
 property: County, string, NVarChar "100"
+property: Latitude, decimal?, Decimal "10,2"
+property: Longitude, decimal?, Decimal "10,2"
+property: DistanceFromOrigin, decimal?, Decimal "10,2"
 baseproperty: State, required
 loadmethod: HostAccountId, List<>
 loadmethod: HostAccountId|IsDefault
@@ -370,6 +373,7 @@ property: IsClaimed, bool, Bit
 property: OnboardingStepDone, OnboardingStepType, Int
 property: ContactFormId, int?, Int, , Enables account to set contact form to be used on main page
 property: ClaimEmailDomain, string, NVarChar "50", , The main domain for the email to validate against during the claim process
+property: Subdomain, string, NVarChar "100", , Subdomain associated to account used to redirect to accounts directory
 baseproperty: Name, required
 loadmethod: OwnerId, List<>
 loadmethod: UniqueName
@@ -379,6 +383,7 @@ loadmethod: AccountTypeId, List<>
 loadmethod: StripeUserId
 loadmethod: StripeCustomerId
 loadmethod: InviteCodeToShare
+loadmethod: Subdomain
 [end]
 
 [begin]
@@ -635,7 +640,7 @@ joinproperty: Activity.IsDeleted, int?, Int
 loadmethod: RegistrationPeriodId, List<>
 loadmethod: ActivityId, List<>
 loadmethod: ActivityId|IsActive
-loadmethod: RegistrationPeriodId|ActivityId
+loadmethod: RegistrationPeriodId|ActivityId, List<>
 [end]
 
 [begin]
@@ -1670,6 +1675,7 @@ property: AmountPaid, decimal?, Money
 loadmethod: RegistrationId, List<>
 loadmethod: RegistrantId, List<>
 loadmethod: CouponId, List<>
+loadmethod: CouponId|PurchaserAccountId, List<>
 [end]
 
 [begin]
@@ -1839,7 +1845,7 @@ values: NotSet, Individual, Organization
 [begin]
 type: Enum
 name: FeatureType
-values: NotSet, Attendance, AcceptPayments, EmailMessaging, CustomUrl, TeamAccounts, WaitingList, ManageForms, ManageLocations, ManageActivityGroups, Activities, Participants, AllowApplications, Lottery, TrialDays, ManageContacts, ViewInsights, PaymentsPercentageFee, PaymentsPercentageFlatFee, ManageExternalLeagues, UseStripeConnectedAccount, AcceptACH, ManageLeagues, ManageFieldTrips, ManagePermissionSlips, ManageLearningPods,	TextMessaging, AllowInvites, AllowStudentRegistration, AllowPaymentPlans, AllowSubscriptionPlans, AllowPayLater, StudentCRM
+values: NotSet, Attendance, AcceptPayments, EmailMessaging, CustomUrl, TeamAccounts, WaitingList, ManageForms, ManageLocations, ManageActivityGroups, Activities, Participants, AllowApplications, Lottery, TrialDays, ManageContacts, ViewInsights, PaymentsPercentageFee, PaymentsPercentageFlatFee, ManageExternalLeagues, UseStripeConnectedAccount, AcceptACH, ManageLeagues, ManageFieldTrips, ManagePermissionSlips, ManageLearningPods,	TextMessaging, AllowInvites, AllowStudentRegistration, AllowPaymentPlans, AllowSubscriptionPlans, AllowPayLater, StudentCRM, ManageCoupons
 [end]
 
 [begin]
@@ -2056,6 +2062,13 @@ values: NotSet, ActivityCancellationNotice, AttendanceNotice, BehaviorNotice, Ge
 type: Enum
 name: PlanPaymentStartType
 values: NotSet, WhenActivityStarts, OnCheckout
+[end]
+
+[begin]
+type: Enum
+name: StripeRequirementStatus
+values: NotSet, PastDue, CurrentlyDue, EventuallyDue
+[end]
 [end]
 
 [begin]

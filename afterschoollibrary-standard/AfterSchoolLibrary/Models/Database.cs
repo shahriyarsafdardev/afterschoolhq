@@ -424,6 +424,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Account_StripeUserId ON [Account] (StripeUserId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Account_StripeCustomerId ON [Account] (StripeCustomerId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Account_InviteCodeToShare ON [Account] (InviteCodeToShare)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Account_Subdomain ON [Account] (Subdomain)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountProfile_AccountId ON [AccountProfile] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_CheckPaymentAccount_AccountId ON [CheckPaymentAccount] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_BankPaymentAccount_AccountId ON [BankPaymentAccount] (AccountId)"));
@@ -644,6 +645,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Purchase_RegistrationId ON [Purchase] (RegistrationId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Purchase_RegistrantId ON [Purchase] (RegistrantId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Purchase_CouponId ON [Purchase] (CouponId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Purchase_CouponId_PurchaserAccountId ON [Purchase] (CouponId,PurchaserAccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_TwilioSMS_TwilioResourceId ON [TwilioSMS] (TwilioResourceId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_TwilioSMS_ActivityMessageId_RegistrantId ON [TwilioSMS] (RegistrantId,ActivityMessageId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_TwilioSMS_RegistrantId ON [TwilioSMS] (RegistrantId)"));

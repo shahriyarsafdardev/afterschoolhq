@@ -40,7 +40,7 @@ namespace AfterSchool.Controllers
         }
 
         [HttpGet]
-        public ActionResult Account(string accountname)
+        public ActionResult Account(string accountname, string dir)
         {
             if (isUnsupportedBrowser())
                 return RedirectUnsupportedBrowser();
@@ -55,10 +55,26 @@ namespace AfterSchool.Controllers
 
                 var profile = account.GetAccountProfile(msgs);
                 var ah = AfterSchoolLibrary.Helpers.Utilities.GetNewAmazonHelper();
+                var regStartPageAccount = account;
+
+                if (dir.IsNotEmpty())
+                {
+                    var directoryAccount = AfterSchoolLibrary.Models.Account.LoadByUniqueName(dir, msgs);
+                    if (directoryAccount.IsNotEmpty() && directoryAccount.AccountTypeId.In(new List<AccountType>() { AccountType.Directory, AccountType.SchoolDistrict }))
+                    {
+                        regStartPageAccount = directoryAccount;
+                    }
+                }
+
+                if (SessionVariables.RegistrationStartPageAccount.IsEmpty() || SessionVariables.RegistrationStartPageAccount.AccountTypeId != AccountType.Directory)
+                {
+                    RestartRegistrationSession();
+                    SetRegistrationStartPage(regStartPageAccount, true);
+                }
 
                 if (account.AccountTypeId.In(new List<AccountType>() { AccountType.Directory, AccountType.SchoolDistrict }))
                 {
-                    var neighborhoodList = Location.LoadNeighborhoodsByHostAccount(hostAccountId: account.ID.ToString(), msgs: msgs).ToList();
+                    var neighborhoodList = Location.LoadNeighborhoodsByHostAccount(hostAccountId: account.ID.Value, msgs: msgs).ToList();
 
                     ViewBag.Messages = msgs;
                     ViewBag.Neighborhoods = neighborhoodList;
@@ -79,10 +95,7 @@ namespace AfterSchool.Controllers
 
                     return View("search");
                 }
-                    
-
-                RestartRegistrationSession();
-                SetRegistrationStartPage(account, true);                
+                              
 
                 if (profile.IsEmpty())
                     return Redirect(account.BrowseUrl);

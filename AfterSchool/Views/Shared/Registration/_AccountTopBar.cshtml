@@ -1,6 +1,5 @@
 ﻿@model Account
-
-@{ 
+@{
     var currentUser = SessionVariables.CurrentUser;
     var currentAccount = SessionVariables.CurrentAccount;
     var accountOrDashboard = "Account";
@@ -28,43 +27,6 @@
     }
 }
 
-<style>
-    .meter {
-        width: 25%;
-        background: #00c5a3;
-        border-radius: 25px;
-        padding: 3px;
-        box-shadow: inset 0 -1px 1px rgba(255, 255, 255, 0.3);
-    }
-
-    .Rectangle {
-        width: 105px;
-        height: 36px;
-        margin: 0 53px 2px 0;
-        padding: 3px 4px 8px;
-        border-radius: 5.7px;
-        border: solid 1px #ffad49;
-        background-color: #424e52;
-        float: left;
-        margin-left: 10px;
-    }
-
-    .Finish-Setup {
-        width: 65px;
-        height: 13px;
-        margin: 0 8px 5px;
-        font-family: Montserrat;
-        font-size: 10px;
-        font-weight: normal;
-        font-stretch: normal;
-        font-style: normal;
-        line-height: normal;
-        letter-spacing: 0.23px;
-        text-align: center;
-        color: #dfdfdf;
-    }
-</style>
-
 @helper RenderReturnToHomeUrl(ParticipationObject session)
 {
     if (session.IsNotEmpty() && !Request.Url.ToString().ToLower().Contains(session.GetHomePageUrl().ToLower()))
@@ -81,102 +43,87 @@
     }
 }
 
-<div class="reg-login-bar">    
+<div class="reg-login-bar">
     @if (Model.IsNotEmpty() && Model.ID.HasValue)
     {
-    <div class="row">
-        <div class="col-md-6 col-sm-6 col-xs-12">
+        <div class="row">
+            <div class="col-md-6 col-sm-6 col-xs-12">
 
-            @if (currentUser.IsNotEmpty())
-            {
-                if (currentAccount.IsNotEmpty())
+                @if (currentUser.IsNotEmpty())
                 {
-                    <span class="reg-login-bar-title" style="float:left">@currentAccount.Name</span>
+                    if (currentAccount.IsNotEmpty())
+                    {
+                        <span class="reg-login-bar-title">@currentAccount.Name</span>
+                    }
+                    else
+                    {
+                        <span class="reg-login-bar-title">@currentUser.DisplayName</span>
+                    }
                 }
-                else
-                {
-                    <span class="reg-login-bar-title">@currentUser.DisplayName</span>
-                }
-            }
-
-        <div class="Rectangle">
-            <span class="Finish-Setup">finish Setup</span>
-            <div class="meter">
-                <span style="width: 25%"></span>
             </div>
 
-            <p class="Rectangle" style=" height: 78px; width: 129px; margin-left: -9px; margin-top: 10px;">
-                <input style="display:block" type="checkbox" name="box1" />
-                <input style="display:block" type="checkbox" name="box2" />
-                <input style="display:block" type="checkbox" name="box3" />
-                <input style="display:block" type="checkbox" name="box4" />
-            </p>
+            @if (!isDuringProfileSetup)
+            {
+                <div class="col-md-6 col-sm-6 col-xs-12">
+                    <div class="btn-group pull-right">
+                        <div>
 
-        </div>
-        </div>        
+                            @RenderReturnToHomeUrl(session)
 
-        @if (!isDuringProfileSetup)
-        {
-            <div class="col-md-6 col-sm-6 col-xs-12">
-                <div class="btn-group pull-right">
-                    <div>
-
-                        @RenderReturnToHomeUrl(session)
-
-                        @if (currentUser.IsNotEmpty())
-                        {
-                            if (canPublishActivity && participationObject.IsNotEmpty())
+                            @if (currentUser.IsNotEmpty())
                             {
-                                <a href="@Url.Action("publishdetail", "activity", new { Area = "org", id = participationObject.Uid })"
-                                   class="btn btn-primary btn-sm">
-                                    Approve &amp; Publish Activity &raquo;
-                                </a>
-                            }
-
-                            if (currentUser.IsActive)
-                            {
-                                <a href="@dashboardUrl" class="btn btn-link">@accountOrDashboard</a>
-                            }
-                            else if (!currentUser.IsRegistered)
-                            {
-                                <a href="@AfterSchoolLibrary.Helpers.Utilities.CompleteSignUpUrl(currentUser.Uid, Request.Url.ToString())" class="btn btn-link">Complete account setup &raquo;</a>
-                            }
-
-                            if (Model.HasAccountProfile() && currentUser.HasAccessTo(Model))
-                            {
-                                var editModeUrl = Model.HomePageUrl;
-                                var isInEditMode = Request["edit"] == "1";
-
-                                if (!isInEditMode)
+                                if (canPublishActivity && participationObject.IsNotEmpty())
                                 {
-                                    if (editModeUrl.Contains("?"))
-                                    {
-                                        editModeUrl += "&";
-                                    }
-                                    else
-                                    {
-                                        editModeUrl += "?";
-                                    }
+                                    <a href="@Url.Action("publishdetail", "activity", new { Area = "org", id = participationObject.Uid })"
+                                       class="btn btn-primary btn-sm">
+                                        Approve &amp; Publish Activity &raquo;
+                                    </a>
                                 }
 
-                                <a href="@(editModeUrl)@(!isInEditMode ? "edit=1" : "")" class="btn btn-link">Toggle Edit Mode</a>
-                            }
+                                if (currentUser.IsActive)
+                                {
+                                    <a href="@dashboardUrl" class="btn btn-link">@accountOrDashboard</a>
+                                }
+                                else if (!currentUser.IsRegistered)
+                                {
+                                    <a href="@AfterSchoolLibrary.Helpers.Utilities.CompleteSignUpUrl(currentUser.Uid, Request.Url.ToString())" class="btn btn-link">Complete account setup &raquo;</a>
+                                }
 
-                            if (currentUser.HasMultipleAccounts())
-                            {
-                                <a href="@Url.Action("switch", "logout", new { returnurl = returnUrl })" class="btn btn-link">Switch Accounts</a>
+                                if (Model.HasAccountProfile() && currentUser.HasAccessTo(Model))
+                                {
+                                    var editModeUrl = Model.HomePageUrl;
+                                    var isInEditMode = Request["edit"] == "1";
+
+                                    if (!isInEditMode)
+                                    {
+                                        if (editModeUrl.Contains("?"))
+                                        {
+                                            editModeUrl += "&";
+                                        }
+                                        else
+                                        {
+                                            editModeUrl += "?";
+                                        }
+                                    }
+
+                                    <a href="@(editModeUrl)@(!isInEditMode ? "edit=1" : "")" class="btn btn-link">Toggle Edit Mode</a>
+                                }
+
+                                if (currentUser.HasMultipleAccounts())
+                                {
+                                    <a href="@Url.Action("switch", "logout", new { returnurl = returnUrl })" class="btn btn-link">Switch Accounts</a>
+                                }
+                                <a href="@Url.Action("index", "logout", new { returnurl = returnUrl })" class="btn btn-link">Logout</a>
                             }
-                            <a href="@Url.Action("index", "logout", new { returnurl = returnUrl })" class="btn btn-link">Logout</a>
-                        }
-                        else
-                        {
-                            <button type="button" class="btn btn-link md-trigger" data-modal="modal-login">Login to Account</button>
-                        }
+                            else
+                            {
+                                <button type="button" class="btn btn-link md-trigger" data-modal="modal-login">Login to Account</button>
+                            }
+                        </div>
                     </div>
                 </div>
-            </div>
-        }
-    </div>        
+            }
+        </div>
     }
     else
     {

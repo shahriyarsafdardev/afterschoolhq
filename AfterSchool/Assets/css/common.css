@@ -448,14 +448,6 @@
     background-color: #ffffff;
 }
 
-.join-isyp-btn {
-    height: 38px;
-    color: white !important;
-    min-width: 180px;
-    font-size: 12px;
-    background-color: #547bb6 !important;
-}
-
 .btn-search-register {
     padding: 11px 0px;
     border-radius: 10px;
@@ -557,4 +549,24 @@
     border-color: #c3eae0;
     padding: 10px 20px;
     width: 180px;
+}
+
+.show-more {
+    text-decoration: underline;
+    margin-left: 10px;
+    color: darkblue;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.distance-lable {
+    background-color: white;
+    color: black;
+    border-radius: 8px;
+    font-size: 14px;
+    padding: 8px;
+    text-align: center;
+    font-weight: 600;
+    margin-left: 10px;
+    float: left;
 }

@@ -134,7 +134,7 @@ namespace AfterSchoolLibrary.Services
                     }
 
                     if (title != null)
-                        profile.Title = title.MaxChars(400);
+                        profile.Title = title.MaxChars(50);
 
                     if (headline != null)
                         profile.Headline = headline.MaxChars(400);
@@ -302,7 +302,7 @@ namespace AfterSchoolLibrary.Services
 
         public static void UpdateProfileProgramInfo(this AccountProfile profile, string title = null, string headline = null, string genderrestriction = null, WebUser loggedInUser = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {    
-            profile.Title = title.MaxChars(400);
+            profile.Title = title.MaxChars(50);
             profile.Headline = headline.MaxChars(400);
             profile.GenderRestriction = (GenderRestrictionType)genderrestriction.ToInteger();
             profile.LastModifiedBy = loggedInUser.ID.Value;
@@ -462,9 +462,11 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        public static Location AddNewLocation(this AccountProfile profile, string locationName, string streetNumber, string streetName, string address2, string neighborhood, string city, string county, string state, string postalCode, string country, string googlePlaceId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Location AddNewLocation(this AccountProfile profile, string locationName, string streetNumber, string streetName, string address2, string neighborhood, string city, string county, string state, string postalCode, string country, 
+            string googlePlaceId, decimal latitude, decimal longitude,
+            WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var location = LocationService.CreateOrUpdateFromGoogle(locationName, streetNumber, streetName, address2, neighborhood, city, county, state, postalCode, country, googlePlaceId, loggedInUser, msgs, dc);
+            var location = LocationService.CreateOrUpdateFromGoogle(locationName, streetNumber, streetName, address2, neighborhood, city, county, state, postalCode, country, googlePlaceId, latitude, longitude, loggedInUser, msgs, dc);
 
             profile.SetLocation(location, loggedInUser, msgs, dc);
 

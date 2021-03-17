@@ -4,7 +4,6 @@ namespace AfterSchool.Models
 {
     public class SearchDirectoryResponse
     {
-        //.. we are retrieiving account and activity id but we are not sending it back to ui so no property here for those both
         public Guid AccountUid { get; set; }
         public string AccountName { get; set; }
         public string HomePageUrl { get; set; }
@@ -24,7 +23,7 @@ namespace AfterSchool.Models
         public string AgeStart { get; set; }
         public string AgeEnd { get; set; }
 
-        public string RegistrationPeriodStart { get; set; }
-        public string RegistrationPeriodEnd { get; set; }
+        public int Priority { get; set; }
+        public decimal TotalDifference { get; set; }
     }
 }
