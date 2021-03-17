@@ -9,6 +9,7 @@
     var session = (ParticipationObject)ViewData["session"];
     var isDuringProfileSetup = false;
     var returnUrl = SessionVariables.RegistrationStartPageAccount?.HomePageUrl;
+    var registrationStartPage = SessionVariables.RegistrationStartPageAccount;
 
     if (currentAccount.IsNotEmpty() && currentAccount.AccountTypeId != AccountType.Registrant)
     {
@@ -27,7 +28,7 @@
     }
 }
 
-@helper RenderReturnToHomeUrl(ParticipationObject session)
+@helper RenderReturnToHomeUrl(ParticipationObject session, Account registrationStartPage)
 {
     if (session.IsNotEmpty() && !Request.Url.ToString().ToLower().Contains(session.GetHomePageUrl().ToLower()))
     {
@@ -38,7 +39,7 @@
     else if (Model.IsNotEmpty() && !(Model.HomePageUrl.ToLower().Contains(Request.Url.AbsolutePath.ToLower())))
     {
         <a href="@Model.HomePageUrl" class="btn btn-link">
-            &laquo; Return Home
+            &laquo; Return To Profile
         </a>
     }
 }
@@ -49,7 +50,55 @@
         <div class="row">
             <div class="col-md-6 col-sm-6 col-xs-12">
 
-                @if (currentUser.IsNotEmpty())
+                <div class="dropdown open"  style="float: left;  margin: 5px 53px 2px 0; padding: 3px 12px 8px; border-radius: 5.7px; border: solid 1px #ffad49; background-color: #4a4a4a;">
+                    <a class="dropdown-toggle" style="cursor:pointer; width: 65px; height: 13px; margin: 0 8px 5px; font-family: Montserrat; font-size: 10px; font-weight: normal; font-stretch: normal; font-style: normal; line-height: normal; letter-spacing: 0.23px; text-align: center; color: #dfdfdf;" 
+                           id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">                        
+                        Finish Setup                        
+                        <span style="width: 41px; height: 2px; border: solid 5px #00c5a3;"></span>
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                        <li>
+                            <a href="#">
+                                <div class="am-checkbox">
+                                    <input id="chk-getting-started-profile" name="GettingStartedSelection" type="checkbox" disabled value="1" checked="checked" />
+                                    <label for="chk-getting-started-profile" class="">Create Profile</label>
+                                </div>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <div class="am-checkbox">
+                                    <input id="chk-getting-started-profile" name="GettingStartedSelection" type="checkbox" disabled value="1" checked="checked" />
+                                    <label for="chk-getting-started-profile" class="">Create First Activity</label>
+                                </div>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <div class="am-checkbox">
+                                    <input id="chk-getting-started-profile" name="GettingStartedSelection" type="checkbox" disabled value="1" checked="checked" />
+                                    <label for="chk-getting-started-profile" class="">Validate Email</label>
+                                </div>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <div class="am-checkbox">
+                                    <input id="chk-getting-started-profile" name="GettingStartedSelection" type="checkbox" disabled value="1" checked="checked" />
+                                    <label for="chk-getting-started-profile" class="">Accept Payments</label>
+                                </div>
+                            </a>
+                        </li>                        
+                    </ul>
+                </div>
+
+                @if (registrationStartPage.IsNotEmpty())
+                {
+                    <a href="@registrationStartPage.HomePageUrl" style="float: left; margin-left: 10px; margin-right: 10px;">
+                        <span class="reg-login-bar-title">@registrationStartPage.Name</span>
+                    </a>
+                }
+                else if (currentUser.IsNotEmpty())
                 {
                     if (currentAccount.IsNotEmpty())
                     {
@@ -60,6 +109,7 @@
                         <span class="reg-login-bar-title">@currentUser.DisplayName</span>
                     }
                 }
+
             </div>
 
             @if (!isDuringProfileSetup)
@@ -68,7 +118,7 @@
                     <div class="btn-group pull-right">
                         <div>
 
-                            @RenderReturnToHomeUrl(session)
+                            @RenderReturnToHomeUrl(session, registrationStartPage)
 
                             @if (currentUser.IsNotEmpty())
                             {
@@ -129,7 +179,7 @@
     {
         <div class="row">
             <div class="pull-right">
-                @RenderReturnToHomeUrl(session)
+                @RenderReturnToHomeUrl(session, registrationStartPage)
             </div>
         </div>
         <div>
