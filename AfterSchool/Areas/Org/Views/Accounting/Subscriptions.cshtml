@@ -151,24 +151,21 @@
                                     <td class="text-center">
                                         @nextPaymentDate
                                     </td>
-                                    <td class="hide">
+                                    <td>
                                         @if (regStatus != RegistrationStatus.Past)
-                                        {
-                                            if (!plan.DateCancelled.HasValue)
+                                        {                                            
+                                            if (!plan.DateCancelled.HasValue && 
+                                                registrantActivity.AssignmentTypeId.NotIn(new List<RegistrationAssignmentType>() { RegistrationAssignmentType.NotSet, RegistrationAssignmentType.Withdrawn, RegistrationAssignmentType.Declined }))
                                             {
                                                 <button 
-                                                        class="btn btn-default btn-sm md-trigger"
+                                                        class="btn btn-danger btn-sm md-trigger"
                                                         data-modal="modal-withdraw"
                                                         onclick="withdraw('@registrant.Uid', '@participationObject.ObjectID', '@((int)participationObject.ObjectType)', '@UI.JavascriptSafeString(registrant.FirstName)', '@UI.JavascriptSafeString(participationObject.Name)', '@UI.JavascriptSafeString(participationObject.ContactName)')"
                                                         >
                                                     Withdraw &amp; Cancel Payments
                                                 </button>
                                             }
-                                            else if (registrantActivity.AssignmentTypeId == RegistrationAssignmentType.Withdrawn && registrantActivity.AssignmentTypeId.NotIn(Registration.ReservedStatuses))
-                                            {
-                                                @:-
-                                            }
-                                        }
+                                        }                                        
                                     </td>
                                 </tr>
                             }
@@ -220,10 +217,11 @@
 
 <script>
     function withdraw(registrant, po, type, registrantName, activityName, providerName, returnUrl) {
+        var url = returnUrl ? encodeURI(returnUrl) : '';
         $('#withdraw-name').html(registrantName);
         $('#withdraw-activity').html(activityName);
         $('#withdraw-provider').html(providerName);
 
-        $('#btn-confirm-withdraw').attr('href', `@Url.Action("withdrawandcancel", "accounting")?reg=${registrant}?po=${po}&type=${type}&returnurl=${encodeURI(returnUrl)}`);
+        $('#btn-confirm-withdraw').attr('href', `@Url.Action("withdrawandcancel", "accounting")?id=${registrant}&po=${po}&type=${type}&returnurl=${url}`);
     }
 </script>

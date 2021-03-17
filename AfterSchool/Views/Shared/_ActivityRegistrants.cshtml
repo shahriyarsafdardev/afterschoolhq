@@ -194,7 +194,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
-                    <h3 class="modal-title">Withdraw</h3>
+                    <h3 class="modal-title"><i class="s7-attention"></i> Withdrawal Confirmation</h3>
                 </div>
 
                 <div class="modal-body">
@@ -203,7 +203,7 @@
 
                 <div class="modal-footer">
                     <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-                    <button type="button" id="btn-manual-withdraw" class="btn btn-primary" onclick="return withdraw('<%= participationObjectId %>', '<%= registrantId %>', '<%= type %>', '<%= registrantActivityUId %>', '<%= registrantActivityId %>')">Withdraw &raquo;</button>
+                    <button type="button" id="btn-manual-withdraw" class="btn btn-danger padding-h-20" onclick="return withdraw('<%= participationObjectId %>', '<%= registrantId %>', '<%= type %>', '<%= registrantActivityUId %>', '<%= registrantActivityId %>')">Withdraw &amp; Cancel Payments &raquo;</button>
                 </div>
             </div>
         </div>
@@ -287,13 +287,15 @@
 
         //.. update html to dom
         $('#withdraw-modal-container').html(compiledHtml);
-        $('#modal-withdraw-registrant-' + registrantActivityId).modal('show');
+        $('#modal-withdraw-registrant-' + registrantActivityUId).modal('show');
 
         return false;
     }
 
     function withdraw(participationObjectId, registrantId, type, registrantActivityUId, registrantActivityId) {
         if (participationObjectId && registrantId) {
+            showLoader();
+
             var url = '@Url.Action("WithdrawRegistrant", "Activity", new { Area = "Org" })';
             $.ajax({
                 type: "POST",
@@ -302,10 +304,11 @@
                 success: function (data) {
                     if (data && data.success == true) {
 
-                        $('#modal-withdraw-registrant-' + registrantActivityId).modal('hide');
+                        $('#modal-withdraw-registrant-' + registrantActivityUId).modal('hide');
 
                         var withdrawn = '@Json.Encode(RegistrationAssignmentType.Withdrawn)';
                         $('#newassignmenttype-' + registrantActivityId).val(withdrawn); //status udpate to withdrawn
+                        hideLoader();
 
                         Notifications.showBar({
                             title: 'Success',
@@ -321,6 +324,8 @@
                             _.each(data.data, function (msg) {
                                 error += msg?.Text + '<br />';
                             });
+
+                            hideLoader();
 
                             Notifications.showBar({
                                 title: 'Error',
