@@ -285,7 +285,7 @@
         var inCallback = false, page = 0, isReachedScrollEnd = false, isMobileFilterWindowOpened = false;
 
         $(document).ready(function () {
-            var isIsyp =  @Json.Encode(accountUniqueName.Contains("isyp")) && @Json.Encode(CookieVariables.ShowISYPModal.IsBlank());
+            var isIsyp =  @Json.Encode(accountUniqueName.ToUpper().Contains("ISYP")) && @Json.Encode(CookieVariables.ShowISYPModal.IsBlank());
             if (isIsyp) {
                 showModalIsyp();
                 @(CookieVariables.ShowISYPModal = "false")
