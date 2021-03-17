@@ -1656,6 +1656,36 @@ namespace AfterSchool.Areas.Org.Controllers
             return View("Registrants", activity);
         }
 
+        [HttpPost]
+        public JsonResult WithdrawRegistrant(string participationObjectId, string registrantUId, string type)
+        {
+            var msgs = new SystemMessages();
+            if (participationObjectId.IsEmpty() || registrantUId.IsEmpty() || type.IsEmpty())
+                return Json(new { success = false, status = "error" }, JsonRequestBehavior.AllowGet);
+            
+            var registrant = Registrant.LoadByUid(registrantUId.ToGuid());
+
+            if (registrant.IsNotEmpty())
+            {
+                registrant.WithdrawRegistration(
+                    participationObjectId: participationObjectId.ToInteger(),
+                    participationObjectType: (ParticipationObjectType)Enum.Parse(typeof(ParticipationObjectType), type),
+                    loggedInUser: SessionVariables.CurrentUser,
+                    account: SessionVariables.CurrentAccount,
+                    msgs: msgs);
+            }
+
+            if (msgs.HasNoErrors())
+            {
+                return Json(new { success = true, status = "ok" }, JsonRequestBehavior.AllowGet);
+            }
+            else
+            {
+                //.. something went wrong, error occured
+                return Json(new { success = false, status = "error", data = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
         private List<AttachedCoupon> GetAttachedCoupons(RegistrantActivity registrantActivity)
         {
             var masterRegistrant = registrantActivity.GetRegistrant().GetMasterRegistrant();
