@@ -80,6 +80,18 @@ namespace AfterSchool.Models
             }
         }
 
+        public static string ShowISYPModal
+        {
+            get
+            {
+                return GetCookie("ShowISYPModal");
+            }
+            set
+            {
+                SetCookie("ShowISYPModal", value);
+            }
+        }
+
         private static string GetCookie(string key)
         {
             if (HttpContext.Current.Request.Cookies[key].IsNotEmpty())

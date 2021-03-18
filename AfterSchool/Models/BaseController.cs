@@ -49,6 +49,7 @@ namespace AfterSchool.Models
             base.Initialize(requestContext);
 
             Utilities.DetectAfterSchool();
+            WebSessionUtilities.InitializeWebSession(Request);
 
             if (SessionVariables.VisitorSession.IsEmpty())
             {

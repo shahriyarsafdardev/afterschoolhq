@@ -1150,11 +1150,12 @@ namespace AfterSchoolLibrary.Services
             );
         }
 
-        public static void WithdrawRegistration(this Registrant registrant, int participationObjectId, ParticipationObjectType participationObjectType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void WithdrawRegistration(this Registrant registrant, int participationObjectId, ParticipationObjectType participationObjectType, WebUser loggedInUser, Account account, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var masterRegistrant = registrant.GetMasterRegistrant(msgs, dc);
 
-            if (!loggedInUser.HasAccessToRegistrant(masterRegistrant, msgs, dc))
+            if (!loggedInUser.IsTechSupport(account, msgs, dc) && 
+                !loggedInUser.HasAccessToRegistrant(masterRegistrant, msgs, dc))
             {
                 msgs.Add("You don't have permission to modify this registration", MessageType.UserError);
                 return;

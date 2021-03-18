@@ -8,6 +8,7 @@ using BasicLibrary.DataAccess;
 using AfterSchoolLibrary;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
+using System.Data;
 
 namespace AfterSchool.Areas.Admin.Controllers
 {
@@ -68,12 +69,13 @@ namespace AfterSchool.Areas.Admin.Controllers
             else if (price.ToDecimal() < 0)
             {
                 msgs.Add("Price / Year must be greater than or equal to 0", MessageType.UserError);
-            }            
+            }
 
             if (msgs.HasNoErrors())
             {
                 Database.ExecuteTransaction(
-                    action: (SystemMessages amsgs, DatabaseConnection adc) => {
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
 
                         if (id.IsEmpty())
                         {
@@ -124,13 +126,15 @@ namespace AfterSchool.Areas.Admin.Controllers
                             }
                         }
                     },
-                    onSuccess: (SystemMessages smsgs) => {
+                    onSuccess: (SystemMessages smsgs) =>
+                    {
                         msgs.AddRange(smsgs);
 
                         features = package.GetFeatures(msgs);
                         msgs.Add("Package Saved", MessageType.Success);
                     },
-                    onFailure: (SystemMessages fmsgs) => {
+                    onFailure: (SystemMessages fmsgs) =>
+                    {
                         msgs.AddRange(fmsgs);
                     }
                 );
@@ -139,6 +143,33 @@ namespace AfterSchool.Areas.Admin.Controllers
             ViewBag.Features = features;
             ViewBag.Messages = msgs;
             return View(package);
+        }
+
+        [HttpGet]
+        public ActionResult Logs()
+        {
+            var msgs = new SystemMessages();
+            var logDataTable = WebSession.GetLogs(msgs: msgs);
+            List<LogViewModel> ListResponse = new List<LogViewModel>();
+
+            if (logDataTable.IsNotEmpty() && logDataTable.Rows.Any())
+            {                
+                foreach (DataRow row in logDataTable.Rows)
+                {
+                    if (row.IsNotEmpty())
+                    {
+                        var response = new LogViewModel();
+                        response.IPAddress = row["IPAddress"].IsNotEmpty() ? row["IPAddress"].ToString() : "";
+                        response.UrlReferrer = row["UrlReferrer"].IsNotEmpty() ? row["UrlReferrer"].ToString() : "";
+                        response.ActionString = row["ActionString"].IsNotEmpty() ? row["ActionString"].ToString() : "";
+                        response.ActionStringFormat = row["ActionStringFormat"].IsNotEmpty() ? row["ActionStringFormat"].ToString() : "";
+
+                        ListResponse.Add(response);
+                    }
+                }
+            }
+
+            return View(ListResponse);
         }
     }
 }
