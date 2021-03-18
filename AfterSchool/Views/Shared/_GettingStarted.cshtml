@@ -94,7 +94,7 @@
                 <div class="am-checkbox">
                     <input id="chk-getting-started-profile" name="GettingStartedSelection" type="checkbox" disabled
                            value="@GettingStartedOptions.CreateProfile"
-                           @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.CreateProfile)  ? "checked=\"checked\"" : "")>
+                           @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.CreateProfile)  ? "checked=\"checked\"" : "") />
                     <label for="chk-getting-started-profile" class="font-styling-18 text-bold">Create your profile.</label>
                     <p class="getting-started-info">Parent need to know what you offer. This helps us match parents to your program.</p>
                 </div>
@@ -106,7 +106,7 @@
                 <div class="am-checkbox">
                     <input id="chk-getting-started-activity" name="GettingStartedSelection" type="checkbox" disabled
                            value="@GettingStartedOptions.CreateFirstActivity"
-                           @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.CreateFirstActivity) ? "checked=\"checked\"" : "")>
+                           @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.CreateFirstActivity) ? "checked=\"checked\"" : "") />
                     <label for="chk-getting-started-activity" class="font-styling-18 text-bold">Create your first activity.</label>
                     <p class="getting-started-info">Adding your first activity informs parents of your program's offerings and enables them to register online immediately.</p>
                 </div>
@@ -118,7 +118,7 @@
                 <div class="am-checkbox">
                     <input id="chk-getting-started-email" name="GettingStartedSelection" type="checkbox" disabled
                            value="@GettingStartedOptions.ValidateEmail"
-                           @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.ValidateEmail) ? "checked=\"checked\"" : "")>
+                           @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.ValidateEmail) ? "checked=\"checked\"" : "") />
                     <label for="chk-getting-started-email" class="font-styling-18 text-bold">Validate your email.</label>
                     <p class="getting-started-info">We need to confirm your identity before we publish your programs and activities.</p>
                 </div>
@@ -130,7 +130,7 @@
                 <div class="am-checkbox">
                     <input id="chk-getting-started-payments" name="GettingStartedSelection" type="checkbox" disabled
                            value="@GettingStartedOptions.AcceptPayments"
-                           @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.AcceptPayments) ? "checked=\"checked\"" : "")>
+                           @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.AcceptPayments) ? "checked=\"checked\"" : "") />
                     <label for="chk-getting-started-payments" class="font-styling-18 text-bold">Accept payments.</label>
                     <p class="getting-started-info">Let's get you set up to make payments. This not only makes it easier for payments to pay, but you will also receive funds quicker.</p>
                 </div>

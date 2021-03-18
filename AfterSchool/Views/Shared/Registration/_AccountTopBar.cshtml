@@ -26,6 +26,14 @@
     {
         isDuringProfileSetup = ViewData["IsDuringProfileSetup"].ToString().ToBoolean();
     }
+
+    var currentLevel = AccountService.OnboardingCompletionStatus(SessionVariables.CurrentAccount);
+    var currentProgress = AccountService.GetCurrentOnboardingProcess(SessionVariables.CurrentAccount);
+    var progressPercentage = currentProgress.Count * 25;
+    var isAccountAndLoggedInUserIsOwner = SessionVariables.CurrentAccount.IsNotEmpty() &&
+        SessionVariables.CurrentUser.IsNotEmpty() &&
+        (SessionVariables.CurrentAccount.ID == Model.ID) &&
+        (SessionVariables.CurrentUser.HasAccessTo(Model));
 }
 
 @helper RenderReturnToHomeUrl(ParticipationObject session, Account registrationStartPage)
@@ -44,53 +52,111 @@
     }
 }
 
+<style>
+    .dropdown-label {
+        cursor: pointer;
+        width: 65px;
+        height: 13px;
+        margin: 0 8px 5px;
+        font-family: Montserrat;
+        font-size: 10px;
+        font-weight: normal;
+        font-stretch: normal;
+        font-style: normal;
+        line-height: normal;
+        letter-spacing: 0.23px;
+        text-align: center;
+        color: #dfdfdf;
+    }
+
+        .dropdown-label:hover {
+            color: #00c5a3 !important;
+        }
+
+    .dropdown-menu > li > a {
+        color: #b3b3b3;
+        cursor: pointer;
+    }
+
+    .dropdown-menu > li > a:hover {
+        background-color: #434e52;
+        color: #ffffff !important;
+    }
+
+    .dropdown-label-topbar {
+        cursor: pointer;
+    }
+
+    .checkbox-override {
+        padding: 0;       
+    }
+
+        .checkbox-override input[type="checkbox"]:checked + label:before {
+            content: "\e6cd" !important;
+            color: #00b492 !important;
+            border-color: #00b492 !important;
+        }
+</style>
+
 <div class="reg-login-bar">
     @if (Model.IsNotEmpty() && Model.ID.HasValue)
     {
         <div class="row">
             <div class="col-md-6 col-sm-6 col-xs-12">
-
-                <div class="dropdown open"  style="float: left;  margin: 5px 53px 2px 0; padding: 3px 12px 8px; border-radius: 5.7px; border: solid 1px #ffad49; background-color: #4a4a4a;">
-                    <a class="dropdown-toggle" style="cursor:pointer; width: 65px; height: 13px; margin: 0 8px 5px; font-family: Montserrat; font-size: 10px; font-weight: normal; font-stretch: normal; font-style: normal; line-height: normal; letter-spacing: 0.23px; text-align: center; color: #dfdfdf;" 
-                           id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">                        
-                        Finish Setup                        
-                        <span style="width: 41px; height: 2px; border: solid 5px #00c5a3;"></span>
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-                        <li>
-                            <a href="#">
-                                <div class="am-checkbox">
-                                    <input id="chk-getting-started-profile" name="GettingStartedSelection" type="checkbox" disabled value="1" checked="checked" />
-                                    <label for="chk-getting-started-profile" class="">Create Profile</label>
+                @if (isAccountAndLoggedInUserIsOwner && progressPercentage != 100)
+                {
+                    <div class="dropdown open" style="float: left;  margin: 2px 0 2px 0; padding: 2px 12px 0; border-radius: 5.7px; border: solid 1px #ffad49; background-color: #4a4a4a; width: 105px; height: 35px;">
+                        <a id="myDropdown" class="dropdown-toggle dropdown-label" onclick="return toggleList();">
+                            Finish Setup
+                            <div class="progress" style="height: 4px; margin-bottom: 0;">
+                                <div class="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" style="width:@progressPercentage%; background-color: #00AE83;">                                    
                                 </div>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#">
-                                <div class="am-checkbox">
-                                    <input id="chk-getting-started-profile" name="GettingStartedSelection" type="checkbox" disabled value="1" checked="checked" />
-                                    <label for="chk-getting-started-profile" class="">Create First Activity</label>
-                                </div>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#">
-                                <div class="am-checkbox">
-                                    <input id="chk-getting-started-profile" name="GettingStartedSelection" type="checkbox" disabled value="1" checked="checked" />
-                                    <label for="chk-getting-started-profile" class="">Validate Email</label>
-                                </div>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#">
-                                <div class="am-checkbox">
-                                    <input id="chk-getting-started-profile" name="GettingStartedSelection" type="checkbox" disabled value="1" checked="checked" />
-                                    <label for="chk-getting-started-profile" class="">Accept Payments</label>
-                                </div>
-                            </a>
-                        </li>                        
-                    </ul>
-                </div>
+                            </div>
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" style="background-color: #434e52;">
+                            <li>
+                                <a href="#" style="color: #b3b3b3; padding: 8px 22px 9px 14px;">
+                                    <div class="am-checkbox checkbox-override" onclick="return redirectUser('@GettingStartedOptions.CreateProfile');">
+                                        <input id="chk-TopBar-getting-started-profile" name="GettingStartedSelection-TopBar" type="checkbox"
+                                               value="@GettingStartedOptions.CreateProfile"
+                                               @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.CreateProfile) ? "checked=\"checked\" disabled" : "") />
+                                        <label for="chk-TopBar-getting-started-profile" class="dropdown-label-topbar">Create Profile</label>
+                                    </div>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" style="color: #b3b3b3; padding: 8px 22px 9px 14px;">
+                                    <div class="am-checkbox checkbox-override" onclick="return redirectUser('@GettingStartedOptions.CreateFirstActivity');">
+                                        <input id="chk-TopBar-getting-started-first-activity" name="GettingStartedSelection-TopBar" type="checkbox"
+                                               value="@GettingStartedOptions.CreateFirstActivity"
+                                               @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.CreateFirstActivity) ? "checked=\"checked\" disabled" : "") />
+                                        <label for="chk-TopBar-getting-started-first-activity" class="dropdown-label-topbar">Create First Activity</label>
+                                    </div>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" style="color: #b3b3b3; padding: 8px 22px 9px 14px;">
+                                    <div class="am-checkbox checkbox-override" onclick="return redirectUser('@GettingStartedOptions.ValidateEmail');">
+                                        <input id="chk-TopBar-getting-started-email" name="GettingStartedSelection-TopBar" type="checkbox"
+                                               value="@GettingStartedOptions.ValidateEmail"
+                                               @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.ValidateEmail) ? "checked=\"checked\" disabled" : "") />
+                                        <label for="chk-TopBar-getting-started-email" class="dropdown-label-topbar">Validate Email</label>
+                                    </div>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" style="color: #b3b3b3; padding: 8px 22px 9px 14px;">
+                                    <div class="am-checkbox checkbox-override" onclick="return redirectUser('@GettingStartedOptions.AcceptPayments');">
+                                        <input id="chk-TopBar-getting-started-payments" name="GettingStartedSelection-TopBar" type="checkbox"
+                                               value="@GettingStartedOptions.AcceptPayments"
+                                               @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.AcceptPayments) ? "checked=\"checked\" disabled" : "") />
+                                        <label for="chk-TopBar-getting-started-payments" class="dropdown-label-topbar">Accept Payments</label>
+                                    </div>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                }
 
                 @if (registrationStartPage.IsNotEmpty())
                 {
@@ -199,3 +265,24 @@
 </div>
 
 @{ Html.RenderPartial("~/Views/Shared/Registration/_LoginModal.cshtml", null, new ViewDataDictionary() { { "ReturnUrl", ViewData["LoginReturnUrl"] } }); }
+
+<script type="text/javascript">
+    function toggleList() {
+        var itm = $('#myDropdown');
+        $(itm).parent().toggleClass('open');
+    }
+
+    function redirectUser(item) {
+        showLoader()
+
+        if (item == '@GettingStartedOptions.CreateProfile') {
+            location.href = '@Url.Action("programinfo", "onboarding", new { area = "org" })';
+        } else if (item == '@GettingStartedOptions.CreateFirstActivity') {
+            location.href = '@Url.Action("editsetup", "activity", new { area = "org", isnew = 1, type = 1 })';
+        } else if (item == '@GettingStartedOptions.ValidateEmail') {
+           javascript:AccountSetup.sendVerificationEmail();
+        } else if (item == '@GettingStartedOptions.AcceptPayments') {
+           location.href = '@Url.Action("paymentsoptions", "account", new { area = "org" })';
+        }
+    }
+</script>
