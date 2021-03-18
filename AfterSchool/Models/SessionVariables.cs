@@ -180,5 +180,21 @@ namespace AfterSchool.Models
             }
         }
 
+
+        public static WebSession WebSession
+        {
+            get
+            {
+                return SessionHelper.GetWebSession();
+            }
+            set
+            {
+                if (value.IsNotEmpty())
+                    SessionHelper.AddToSession("WebSession", value.ID.Value.ToString());
+                else
+                    SessionHelper.RemoveFromSession("WebSession");
+            }
+        }
+
     }
 }

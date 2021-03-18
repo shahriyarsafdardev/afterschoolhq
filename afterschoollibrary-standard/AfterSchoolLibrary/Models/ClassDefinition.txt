@@ -1759,6 +1759,97 @@ loadmethod: ObjectId|ObjectTypeId|SubscriberStatusId, List<>
 [end]
 
 [begin]
+type: Class
+name: WebSession
+serializable: true
+description: keeps track of a user session where a user is hitting our system and taking actions, basically data analytics inside of our system. Not sure if we should keep this, but good for keeping some basic updates of what is happening in the system.
+inherits: BasicObjectWithModified
+property: IPAddress, string, NVarChar "50"
+property: IPAddressTimeZone, string, NVarChar "400"
+property: UserAgent, string, NVarChar "400"
+property: UserLocation, string, NVarChar "400"
+property: UrlReferrer, string, NVarChar "400"
+property: PreviousId, int?, Int
+property: WebUserId, int?, Int
+property: AccountId, int?, Int
+join: WebUser.ID, WebUserId, LeftOuterJoin
+join: WebUser.ID, CreatedBy, LeftOuterJoin, CreatedBy
+loadmethod: WebUserId, List<>
+loadmethod: AccountId, List<>
+[end]
+
+[begin]
+type: Class
+name: WebSessionAction
+description: An action taken during a particular user session.
+inherits: BasicObject
+property: SessionId, int?, Int, required
+property: ActorId, int?, Int
+property: AccountId, int?, Int
+property: ActionTypeId, WebSessionActionType, Int
+property: ObjectTypeId, ObjectType, Int
+property: ObjectId, int?, Int
+property: IndirectObjectId, int?, Int
+property: ActionStringFormat, string, NVarChar "400"
+property: ActionString, string, NVarChar "400"
+join: WebUser.ID, WebUserId, LeftOuterJoin
+join: WebUser.ID, CreatedBy, LeftOuterJoin, CreatedBy
+join: Account.ID, AccountId, InnerJoin
+joinproperty: WebUser.Username, string, NVarChar
+joinproperty: WebUser.Email, string, NVarChar
+joinproperty: WebUser.FirstName, string, NVarChar
+joinproperty: WebUser.LastName, string, NVarChar
+joinproperty: WebUser.TimeZone, string, NVarChar
+joinproperty: CreatedBy.Username, string, NVarChar
+joinproperty: CreatedBy.Email, string, NVarChar
+joinproperty: CreatedBy.FirstName, string, NVarChar
+joinproperty: CreatedBy.LastName, string, NVarChar
+joinproperty: Account.Name, string, NVarChar
+joinproperty: Account.TimeZone, string, NVarChar
+joinproperty: Account.AccountTypeId, int?, Int
+loadmethod: Id, List<>
+loadmethod: WebUserId, List<>
+loadmethod: Id|WebUserId, List<>
+loadmethod: Id|AccountId, List<>
+loadmethod: Id|WebUserId|AccountId, List<>
+loadmethod: ActionTypeId, List<>
+loadmethod: ActionTypeId|ObjectTypeId, List<>
+loadmethod: ObjectId, List<>
+loadmethod: ObjectId|ActionId, List<>
+loadmethod: ObjectId|IndirectObjectId, List<>
+loadmethod: IndirectObjectId, List<>
+loadmethod: ObjectId|ObjectTypeId, List<>
+loadmethod: WebUserId|ObjectId|ObjectTypeId, List<>
+[end]
+
+[begin]
+type: Class
+name: WebSessionObjectSnapshot
+serializable: true
+description: Copy of each instance of a WebSessionObject each time it is changed so that things can be restored to any point in time
+inherits: BasicObjectWithModified
+property: Action, int?, Int
+property: ObjectBlob, string, NVarChar "MAX"
+property: ParentObjectSnapshotId, int?, Int
+join: WebUser.ID, WebUserId, LeftOuterJoin
+join: WebUser.ID, CreatedBy, LeftOuterJoin, CreatedBy
+loadmethod: WebUserId, List<>
+loadmethod: AccountId, List<>
+[end]
+
+[begin]
+type: Enum
+name: WebSessionActionType
+values: NotSet, Created, Updated, Published, Unpublished, Sent, Registered, Paid, Refunded, Requested, Invited, Archived, Deleted, ManuallyRegistered, ManuallyPaid, ManuallyRefunded, Approved, Verified, Viewed, Moved, Navigated, Searched, Paged, Connected, LoggedIn, LoggedOut, Copied, Restored, Browsed, Followed, Unfollowed, Shared, Contacted, Interested
+[end]
+
+[begin]
+type: Enum
+name: ObjectType
+values: NotSet, Account, AccountActivityGroup, AccountPackage, AccountPackageFeature, AccountProfile, AccountProperty, AccountRelationship, AccountRelationshipLocation, AccountWebUser, Activity, ActivityDay, ActivityFile, ActivityForm, ActivityGradeLevel, ActivityGroup, ActivityInstance, ActivityMessage, ActivityMessageRegistrant, ActivityPayment, ActivityRegistrationPeriod, ActivitySchedule, ActivitySection, ActivityWebUser, AssignedCoupon, AttachedCoupon, Attendance, AttendanceRegistrant, BankPaymentAccount, Cart, CartItem, CheckPaymentAccount, ContactList, ContactListRegistrant, Coupon, DirectoryAccount, File, Form, FormQuestion, FormQuestionAnswer, FormQuestionGroup, GradeLevel, Location, Match, Migration, ObjectTag, Package, PackageFeature, PasswordResetToken, PaymentPlan, Payout, Product, ProductOffering, ProductPurchase, Purchase, PurchaseableObjectCoupon, RefundRequest, Registrant, RegistrantActivity, RegistrantActivityGroup, RegistrantPaymentPlan, RegistrantSubscriptionPlan, RegistrantWebUser, Registration, RegistrationActivity, RegistrationPeriod, Session, SessionAction, StripeAccount, Subscriber, SubscriptionPlan, SubscriptionPlanPrePayment, Tag, TeamMatch, Transaction, TwilioBlockedPhone, TwilioSMS, WebUser, AggregatedCounter, Counter, Hash, Job, JobParameter, JobQueue, List, Schema, Server, Set, State
+[end]
+
+[begin]
 type: Enum
 name: AHQObjectType
 values: NotSet, Account, Activity, ActivityGroup, AccountActivityGroup
