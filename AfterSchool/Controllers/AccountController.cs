@@ -203,6 +203,12 @@ namespace AfterSchool.Controllers
                                 msgs: amsgs,
                                 dc: adc);
 
+                        if (amsgs.HasNoErrors())
+                        {
+                            var activity = participationObject.GetActivity();
+                            WebSessionUtilities.LogActivity(actor: user, Id: participationObject.ObjectID, text: activity.IsNotEmpty() ? activity.Name : "",
+                                actionType: WebSessionActionType.Interested, objectType: ObjectType.Registration);
+                        }
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
@@ -573,8 +579,11 @@ namespace AfterSchool.Controllers
                             amsgs,
                             adc);
 
-                        if (amsgs.HasNoErrors())
+                        if (amsgs.HasNoErrors() && user.IsNotEmpty())
+                        {
                             account = CreateOrUpdateAccount(user, amsgs, adc);
+                            WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: account.ID.Value, text: account.Name, actionType: WebSessionActionType.Created, objectType: ObjectType.Account);
+                        }
 
                         if (amsgs.HasNoErrors())
                             registrant = CreateOrUpdateRegistrant(account, user, amsgs, adc);
@@ -1132,6 +1141,9 @@ namespace AfterSchool.Controllers
                             msgs: amsgs,
                             dc: adc);
 
+                        if (student.IsNotEmpty() && amsgs.HasNoErrors())
+                            WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: student.ID.Value, text: student.Name, actionType: WebSessionActionType.Created, objectType: ObjectType.Registrant);
+
                         // add answers to parent registrant record
                         // will be used later to copy information over to student records
                         qvms.ForEach(qvm =>
@@ -1606,9 +1618,13 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
+                var activity = participationObject.GetActivity();
+                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, actionType: WebSessionActionType.Registered, objectType: ObjectType.Registrant,
+                    objectId: currentRegistrant.ID, objectText: currentRegistrant.Name, indirectObjectId: activity.ID, indirectObjectText: activity.Name);
+
                 if (!participationObject.ShouldParentPay())
                     return RedirectToAction("finalizeregistration", new { id = registration.Uid });
-
+                
                 return RedirectToAction("payment", new { id = registration.Uid });
             }
 
@@ -1826,10 +1842,30 @@ namespace AfterSchool.Controllers
                     },
                     loggedInUser: SessionVariables.CurrentUser,
                     msgs: msgs);
-            }
 
-            if (msgs.HasNoErrors())
-                return RedirectToAction("thankyou", new { id = registration.Uid });
+                if (msgs.HasNoErrors())
+                {                    
+                    var activity = participationObject.GetActivity();
+
+                    if (participationObject.SubscriptionPlans.IsNotEmpty() && participationObject.SubscriptionPlans.Count > 0)
+                    {
+                        var plan = participationObject.SubscriptionPlans.FirstOrDefault();
+                        var amount = paymentType == PaymentType.ACH ? plan?.GetTotalCostWithConvenienceFee(billingAccount).ToCurrency() : plan?.GetTotalCostWithFees(billingAccount).ToCurrency();
+                        var phrase = $@"{amount}/{plan.BillingPeriodTypeId} via {(paymentType == PaymentType.ACH ? "Bank Account" : "Credit Card")}";
+                        
+                        WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, actionType: WebSessionActionType.Paid, objectType: ObjectType.SubscriptionPlan,
+                                objectId: participationObject.ObjectID, objectText: phrase, indirectObjectId: activity.ID, indirectObjectText: activity.Name);
+                    } else
+                    {
+                        var phrase = $@"{participationObject.GetCheckoutCostWithConvenienceFee().ToCurrency()} via {(paymentType == PaymentType.ACH ? "Bank Account" : "Credit Card")}";
+
+                        WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, actionType: WebSessionActionType.Paid, objectType: ObjectType.Payout,
+                                objectId: participationObject.ObjectID, objectText: phrase, indirectObjectId: activity.ID, indirectObjectText: activity.Name);
+                    }
+
+                    return RedirectToAction("thankyou", new { id = registration.Uid });
+                }
+            }
 
             return View();
         }
@@ -1884,7 +1920,7 @@ namespace AfterSchool.Controllers
             if (ccsource.IsEmpty() && stripetoken.IsEmpty() && plaidtoken.IsEmpty() && banksource.IsEmpty())
                 msgs.Add("Please enter your payment information", MessageType.UserError);
             
-            var billingAccount = Account.LoadByUid(id.ToGuid(), msgs);
+            var billingAccount = Account.LoadByUid(id.ToGuid(), msgs);            
 
             if (msgs.HasNoErrors())
             {
@@ -1922,6 +1958,7 @@ namespace AfterSchool.Controllers
                     overrideAmount += ccFee;
                 }
 
+                var masterRegistrant = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant(msgs);
                 AccountService.ProcessPayment(
                     checkoutObject: new CheckoutObject()
                     {
@@ -1937,15 +1974,21 @@ namespace AfterSchool.Controllers
                         PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
                         ConvenienceFeePayer = convenienceFeePayer,
                         CreditCardFeePayer = creditCardFeePayer,
-                        MasterRegistrant = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant(msgs),
+                        MasterRegistrant = masterRegistrant,
                         Description = description,
                     },
                     loggedInUser: SessionVariables.CurrentUser,
                     msgs: msgs);
-            }
 
-            if (msgs.HasNoErrors())
-                return RedirectToAction("paymentthankyou", new { id = billingAccount.Uid });
+                if (msgs.HasNoErrors())
+                {
+                    var phrase = $@"{overrideAmount.ToCurrency()} via {(bankAccountPurchaseObject.IsNotEmpty() ? "Bank Account" : "Credit Card")}";
+                    WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, actionType: WebSessionActionType.Paid, objectType: ObjectType.Payout,
+                        objectId: payingAccount.ID, objectText: phrase, indirectObjectId: billingAccount.ID, indirectObjectText: billingAccount.Name);
+                    
+                    return RedirectToAction("paymentthankyou", new { id = billingAccount.Uid });
+                }
+            }
 
             return View();
         }

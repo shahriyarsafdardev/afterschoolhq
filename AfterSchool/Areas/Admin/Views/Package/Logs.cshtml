@@ -1,0 +1,49 @@
+﻿@model List<LogViewModel>
+@{
+    ViewBag.Title = "Logs";
+}
+
+<div class="page-head">
+    <h2>Logs</h2>
+</div>
+
+<div class="main-content">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="table-responsive">
+
+                <table class="table table-responsive table-striped">
+                    <thead>
+                        <tr>
+                            <th>IPAddress</th>
+                            <th>UrlReferrer</th>
+                            <th>ActionStringFormat</th>
+                            <th>ActionString</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.IsNotEmpty())
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@item.IPAddress</td>
+                                    <td>@item.UrlReferrer</td>
+                                    <td>@item.ActionStringFormat</td>
+                                    <td>@item.ActionString</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="4">No Logs Found.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+</div>

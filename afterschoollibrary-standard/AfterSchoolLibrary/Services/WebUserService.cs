@@ -805,5 +805,11 @@ namespace AfterSchoolLibrary.Services
         {
             return loggedInUser.GetUserType(account, msgs, dc) == UserType.TechSupport;
         }
+
+        public static bool IsTechSupportOrOwner(this WebUser loggedInUser, Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var userType = loggedInUser.GetUserType(account, msgs, dc);
+            return userType.In(new List<UserType>() { UserType.TechSupport, UserType.Owner });
+        }
     }
 }

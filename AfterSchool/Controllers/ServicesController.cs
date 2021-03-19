@@ -462,7 +462,10 @@ namespace AfterSchool.Controllers
                         msgs);
 
                     if (msgs.HasNoErrors())
+                    {
+                        WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: account.ID.Value, text: account.Name, actionType: WebSessionActionType.Contacted, objectType: ObjectType.ContactList);
                         EmailHelper.SendContactProviderEmail(account, contact, msgs);
+                    }
                 }
 
                 return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
@@ -499,7 +502,10 @@ namespace AfterSchool.Controllers
                 account.AddOrUpdateSubscriber(SessionVariables.CurrentUser, SubscriberStatus.Subscribed, SessionVariables.CurrentUser, msgs);
 
                 if (msgs.HasNoErrors())
+                {
+                    WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: account.ID.Value, text: account.Name, actionType: WebSessionActionType.Followed, objectType: ObjectType.Account);
                     return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
+                }
             }
 
             return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
@@ -534,7 +540,10 @@ namespace AfterSchool.Controllers
                 account.AddOrUpdateSubscriber(SessionVariables.CurrentUser, SubscriberStatus.Unsubscribed, SessionVariables.CurrentUser, msgs);
 
                 if (msgs.HasNoErrors())
+                {
+                    WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: account.ID.Value, text: account.Name, actionType: WebSessionActionType.Unfollowed, objectType: ObjectType.Account);
                     return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
+                }
             }
 
             return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
