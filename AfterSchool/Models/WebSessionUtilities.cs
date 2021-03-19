@@ -160,6 +160,11 @@ namespace AfterSchool.Models
                     actionString = $"{actorName} Subscribed {objectText} For Activity {indirectObjectText}";
                     break;
 
+                case ObjectType.Registrant:
+                    actionStringFormat = "{actor} {action} {object} For Activity {indirectObject}";
+                    actionString = $"{actorName} {actionType} {objectText} For Activity {indirectObjectText}";
+                    break;
+
                 default:
                     actionStringFormat = "{actor} {action}";
                     actionString = $"{actorName} {actionType}";
