@@ -62,7 +62,7 @@ namespace AfterSchool.Models
 
         public static void LogActivity(WebUser actor, WebSessionActionType actionType = WebSessionActionType.NotSet)
         {
-            SaveLog(actorName: (actor.IsNotEmpty() ? actor.DisplayName  : "Someone"),
+            SaveLog(actorName: (actor.IsNotEmpty() ? actor.FirstName  : "Someone"),
                     actionStringFormat: "{actor} {action}",
                     actionString: $"{actor.FirstName} {actionType}",
                     actorId: actor.IsNotEmpty() ? actor.ID : null,
@@ -75,7 +75,7 @@ namespace AfterSchool.Models
 
         public static void LogActivity(WebUser actor, int? Id = (int?)null, string text = "", WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet)
         {
-            string actionString = null, actionStringFormat = null, actorName = (actor.IsNotEmpty() ? actor.DisplayName : "Someone");
+            string actionString = null, actionStringFormat = null, actorName = (actor.IsNotEmpty() ? actor.FirstName : "Someone");
 
             switch (objectType)
             {
@@ -141,18 +141,23 @@ namespace AfterSchool.Models
             //..actor	action		    Object		            ObjectType	        IndirectObjectId
             //..Bharat  Navigated to    FIRST SAMUEL CHURCH(W)  DirectoryAccount   ISYP
 
-            string actionString = null, actionStringFormat = null, actorName = (actor.IsNotEmpty() ? actor.DisplayName : "Someone");
+            string actionString = null, actionStringFormat = null, actorName = (actor.IsNotEmpty() ? actor.FirstName : "Someone");
 
             switch (objectType)
             {
                 case ObjectType.DirectoryAccount:
-                    actionStringFormat = "{actor} {action} To {primaryObject} FROM {objectType} {indirectObject}";
+                    actionStringFormat = "{actor} {action} To {object} FROM {objectType} {indirectObject}";
                     actionString = $"{actorName} {actionType} TO {objectText} FROM {objectType} {indirectObjectText}";
                     break;
 
                 case ObjectType.Payout:
-                    actionStringFormat = "{actor} {action} {primaryObject} To {indirectObject}";
-                    actionString = $"{actorName} {actionType} {objectText} To {indirectObjectText}";
+                    actionStringFormat = "{actor} {action} {object} For Activity {indirectObject}";
+                    actionString = $"{actorName} {actionType} {objectText} For Activity {indirectObjectText}";
+                    break;
+
+                case ObjectType.SubscriptionPlan:
+                    actionStringFormat = "{actor} {action} {object} For Activity {indirectObject}";
+                    actionString = $"{actorName} Subscribed {objectText} For Activity {indirectObjectText}";
                     break;
 
                 default:
