@@ -57,14 +57,10 @@
 </style>
 
 @{
-    Html.RenderPartial(
-"~/Views/Shared/Registration/_AccountTopBar.cshtml",
-Model,
-new ViewDataDictionary()
-{
-            { "LoginReturnUrl", Model.HomePageUrl }
-                        }
-);
+    Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", Model, new ViewDataDictionary() {
+        { "LoginReturnUrl", Model.HomePageUrl },
+        { "IsAccount", true }
+    });
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }

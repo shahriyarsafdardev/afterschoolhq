@@ -10,6 +10,7 @@
     var isDuringProfileSetup = false;
     var returnUrl = SessionVariables.RegistrationStartPageAccount?.HomePageUrl;
     var registrationStartPage = SessionVariables.RegistrationStartPageAccount;
+    var isAccount = ViewData["IsAccount"] != null ? (bool)ViewData["IsAccount"] : false;
 
     if (currentAccount.IsNotEmpty() && currentAccount.AccountTypeId != AccountType.Registrant)
     {
@@ -103,7 +104,7 @@
     {
         <div class="row">
             <div class="col-md-6 col-sm-6 col-xs-12">
-                @if (isAccountAndLoggedInUserIsOwner && progressPercentage != 100)
+                @if (isAccount && isAccountAndLoggedInUserIsOwner && progressPercentage != 100)
                 {
                     <div class="dropdown open" style="float: left;  margin: 2px 0 2px 0; padding: 2px 12px 0; border-radius: 5.7px; border: solid 1px #ffad49; background-color: #4a4a4a; width: 105px; height: 35px;">
                         <a id="myDropdown" class="dropdown-toggle dropdown-label" onclick="return toggleList();">

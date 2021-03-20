@@ -50,17 +50,12 @@
 }
 
 @{
-    Html.RenderPartial(
-        "~/Views/Shared/Registration/_AccountTopBar.cshtml",
-        account,
-        new ViewDataDictionary()
-        {
-            { "LoginReturnUrl", Model.GetHomePageUrl() },
-            { "CanPublishActivity", ViewBag.CanPublishActivity },
-            { "ParticipationObject", Model },
-            { "Session", session }
-                }
-    );
+    Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", account, new ViewDataDictionary() {
+        { "LoginReturnUrl", Model.GetHomePageUrl() },
+        { "CanPublishActivity", ViewBag.CanPublishActivity },
+        { "ParticipationObject", Model },
+        { "Session", session }
+    });
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }

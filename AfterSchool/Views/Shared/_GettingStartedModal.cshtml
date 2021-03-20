@@ -39,8 +39,9 @@
                                 <h3 class="text-center text-bold">Last Step:</h3>
                                 <h3 class="text-center text-bold">Please choose how you want us to pay you.</h3>
                             </div>
+
                        <div class="row">                                
-                                <div class="col-xl-12 col-sm-12 col-md-6">
+                                <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
                                     <table class="table table-bordered">
                                         <thead>
                                             <tr class="bg-success">
@@ -75,7 +76,7 @@
                                                         var website = Server.UrlEncode(account.ShortHomePageUrl);
                                                         var linkUrl = $"https://connect.stripe.com/express/oauth/authorize?redirect_uri={redirectUri}&state={Request["source"]}&client_id={AfterSchoolLibrary.Billing.StripeHelper.PlatformClientId}&stripe_user[email]={email}&stripe_user[url]={website}";
 
-                                                        <a id="link-dd" href="@linkUrl" class="btn btn-alt5 btn-xl btn-block">
+                                                        <a id="link-dd" href="@linkUrl" class="btn btn-alt5">
                                                             @if (account.CanReceiveACHDeposits())
                                                             {
                                                                 @:Upgrade to Automated Deposits
@@ -88,7 +89,7 @@
                                                     }
                                                     else
                                                     {
-                                                        <button class="btn btn-alt5 btn-xl btn-block" disabled="disabled">
+                                                        <button class="btn btn-alt5" disabled="disabled">
                                                             <i class="s7-check-circle"></i> Connected
                                                         </button>
                                                     }
@@ -97,7 +98,7 @@
                                         </tbody>
                                     </table>
                                 </div>
-                                <div class="col-xl-12 col-sm-12 col-md-6">
+                                <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
                                     <table class="table table-bordered">
                                         <thead>
                                             <tr class="bg-success">
@@ -127,20 +128,20 @@
                                                     {
                                                         if (account.GetCheckPaymentAccount().IsEmpty())
                                                         {
-                                                            <a id="link-check" href="@Url.Action("checksetup", "account", new { isnew = 1 })" class="btn btn-default btn-xl btn-block">
+                                                            <a id="link-check" href="@Url.Action("checksetup", "account", new { isnew = 1 })" class="btn btn-default">
                                                                 Choose Checks &raquo;
                                                             </a>
                                                         }
                                                         else
                                                         {
-                                                            <a id="link-check" href="@Url.Action("checksetup", "account")" class="btn btn-default btn-xl btn-block">
+                                                            <a id="link-check" href="@Url.Action("checksetup", "account")" class="btn btn-default">
                                                                 Update Payout Details &raquo;
                                                             </a>
                                                         }
                                                     }
                                                     else
                                                     {
-                                                        <a id="link-check" class="btn btn-default btn-xl btn-block" disabled>
+                                                        <a id="link-check" class="btn btn-default" disabled>
                                                             Must be a school, community center, or church
                                                         </a>
                                                     }
@@ -210,11 +211,11 @@
     function updateButtonClasses() {
         var screen = $(window);
         if (screen.width() <= 768) {
-            $('#link-dd').removeClass('btn btn-alt5 btn-xl btn-block').addClass('mobile-payment-btn');
-            $('#link-check').removeClass('btn btn-default btn-xl btn-block').addClass('mobile-payment-btn');
+            $('#link-dd').removeClass('btn btn-alt5').addClass('mobile-payment-btn');
+            $('#link-check').removeClass('btn btn-default').addClass('mobile-payment-btn');
         } else {
-            $('#link-dd').removeClass('mobile-payment-btn').addClass('btn btn-alt5 btn-xl btn-block');
-            $('#link-check').removeClass('mobile-payment-btn').addClass('btn btn-default btn-xl btn-block');
+            $('#link-dd').removeClass('mobile-payment-btn').addClass('btn btn-alt5');
+            $('#link-check').removeClass('mobile-payment-btn').addClass('btn btn-default');
         }
     }
 

@@ -23,9 +23,12 @@ namespace AfterSchool.Areas.Org.Controllers
 
         // GET: Org/Onboarding
         [HttpGet]
-        public ActionResult Index()
+        public ActionResult Index(bool showGettingStarted = false)
         {
-            return RedirectToAction("GettingStarted");
+            if (showGettingStarted)
+                return RedirectToAction("GettingStarted");
+            
+            return RedirectToAction("ProgramInfo");            
         }
 
         [HttpGet]

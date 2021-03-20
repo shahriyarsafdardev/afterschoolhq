@@ -272,13 +272,12 @@ namespace AfterSchoolLibrary.Services
             var VerifiedAccount = accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount;
             var StripeUserId = account.StripeUserId.IsNotEmpty();
 
+            //..Note: key point here is UI will be one step ahead so if not set, UI will render controls to create profile, same way if enum is set to CreateProfile, UI will react as a profile created and next step is to create activity
+
             if (!HasAccountProfile && !HasActivities && !VerifiedAccount && !StripeUserId)
                 return GettingStartedOptions.NotSet;
 
-            if (HasAccountProfile && !HasActivities && !VerifiedAccount && !StripeUserId)
-                return GettingStartedOptions.CreateProfile;
-
-            if (HasAccountProfile && !HasActivities && VerifiedAccount && StripeUserId)
+            if ((HasAccountProfile && !HasActivities && !VerifiedAccount && !StripeUserId) || (HasAccountProfile && !HasActivities && VerifiedAccount && StripeUserId))
                 return GettingStartedOptions.CreateProfile;
 
             else if (HasAccountProfile && HasActivities && !VerifiedAccount && !StripeUserId)
@@ -289,6 +288,9 @@ namespace AfterSchoolLibrary.Services
 
             else if (HasAccountProfile && HasActivities && VerifiedAccount && StripeUserId)
                 return GettingStartedOptions.AcceptPayments;
+
+            else if (!HasActivities)
+                return GettingStartedOptions.CreateProfile;
 
             else 
                 return GettingStartedOptions.NotSet;
