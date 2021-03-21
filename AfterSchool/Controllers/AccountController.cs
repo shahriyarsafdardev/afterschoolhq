@@ -1618,10 +1618,13 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
+                var activity = participationObject.GetActivity();
+                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, actionType: WebSessionActionType.Registered, objectType: ObjectType.Registrant,
+                    objectId: currentRegistrant.ID, objectText: currentRegistrant.Name, indirectObjectId: activity.ID, indirectObjectText: activity.Name);
+
                 if (!participationObject.ShouldParentPay())
                     return RedirectToAction("finalizeregistration", new { id = registration.Uid });
-
-                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: currentRegistrant.ID.Value, text: currentRegistrant.Name, actionType: WebSessionActionType.Registered, objectType: ObjectType.Registrant);
+                
                 return RedirectToAction("payment", new { id = registration.Uid });
             }
 
@@ -1841,10 +1844,24 @@ namespace AfterSchool.Controllers
                     msgs: msgs);
 
                 if (msgs.HasNoErrors())
-                {
-                    var phrase = $@"{participationObject.GetCheckoutCostWithConvenienceFee().ToCurrency()} via {(paymentType == PaymentType.ACH ? "Bank Account" : "Credit Card")}";
-                    WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, actionType: WebSessionActionType.Paid, objectType: ObjectType.Payout,
-                        objectId: participationObject.ObjectID, objectText: phrase, indirectObjectId: billingAccount.ID, indirectObjectText: billingAccount.Name);
+                {                    
+                    var activity = participationObject.GetActivity();
+
+                    if (participationObject.SubscriptionPlans.IsNotEmpty() && participationObject.SubscriptionPlans.Count > 0)
+                    {
+                        var plan = participationObject.SubscriptionPlans.FirstOrDefault();
+                        var amount = paymentType == PaymentType.ACH ? plan?.GetTotalCostWithConvenienceFee(billingAccount).ToCurrency() : plan?.GetTotalCostWithFees(billingAccount).ToCurrency();
+                        var phrase = $@"{amount}/{plan.BillingPeriodTypeId} via {(paymentType == PaymentType.ACH ? "Bank Account" : "Credit Card")}";
+                        
+                        WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, actionType: WebSessionActionType.Paid, objectType: ObjectType.SubscriptionPlan,
+                                objectId: participationObject.ObjectID, objectText: phrase, indirectObjectId: activity.ID, indirectObjectText: activity.Name);
+                    } else
+                    {
+                        var phrase = $@"{participationObject.GetCheckoutCostWithConvenienceFee().ToCurrency()} via {(paymentType == PaymentType.ACH ? "Bank Account" : "Credit Card")}";
+
+                        WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, actionType: WebSessionActionType.Paid, objectType: ObjectType.Payout,
+                                objectId: participationObject.ObjectID, objectText: phrase, indirectObjectId: activity.ID, indirectObjectText: activity.Name);
+                    }
 
                     return RedirectToAction("thankyou", new { id = registration.Uid });
                 }
