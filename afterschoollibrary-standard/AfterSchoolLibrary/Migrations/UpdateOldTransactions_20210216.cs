@@ -16,12 +16,14 @@ namespace AfterSchoolLibrary.Migrations
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    var oldTransactions = Transaction.LoadByDate(new DateTime(2017, 01, 01), new DateTime(2019, 7, 1), false, null, null, amsgs, adc);
+                var oldTransactions = Transaction.LoadByDate(new DateTime(2017, 01, 01), new DateTime(2019, 7, 1), false, null, null, amsgs, adc);
 
-                    foreach( var transaction in oldTransactions)
-                    {
-                        decimal paymentTypeFeeCharged = 0M;
-                        var cost = transaction.Amount.IfEmpty(0) + transaction.ConvenienceFeeCharged.IfEmpty(0);
+                foreach (var transaction in oldTransactions)
+                {
+                    decimal paymentTypeFeeCharged = 0M;
+                    //(Platform Flat fee +(Cost * Platform Percent fee)) -Stripe Fee) = Convenience Fee
+                    transaction.ConvenienceFeeCharged = (transaction.PlatformFlatFee.IfEmpty(0) + (transaction.Amount.IfEmpty(0) * transaction.PlatformPercentFee.IfEmpty(0))) - StripeHelper.GetStripeFee(transaction.Amount.IfEmpty(0), transaction.GetBillerAccount(amsgs, adc).IsCreditCardFeeTakenOutOfCost);
+                    var cost = transaction.Amount.IfEmpty(0) + transaction.ConvenienceFeeCharged.IfEmpty(0);
 
                         if (cost <= 0 || transaction.PlatformFlatFee.IsEmpty() || transaction.PlatformPercentFee.IsEmpty())
                             continue;
