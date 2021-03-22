@@ -283,6 +283,19 @@
                                 @BillingPeriodOptions(subscriptionPlan)
                             </select>
                         </div>
+                        
+                        <div class="am-checkbox">
+                            <input type="checkbox" name="isongoingsubscription" id="isOngoingSubscription" value="1" checked="checked" />
+                            <label for="isOngoingSubscription">Is Ongoing Subscription</label>
+                        </div>
+
+                        <div id="container-subscription-period" class="input-group input-group-lg xs-mb-15 hide">
+                            <span class="input-group-addon"># of Payments</span>
+                            <input type="number" class="form-control" id="subscriptionPlanPeriodNumber"
+                                    name="subscriptionPlanPeriodNumber" onfocus="this.select()"
+                                    value="@(subscriptionPlan.IsNotEmpty() ? subscriptionPlan.TotalPeriods.ToString() : "0")"
+                                    required min="0" step="1" @paymentdisabled />
+                        </div>
                         @*
                         <p class="text-muted subscription-plan-cost-split">
                             <em>The parent will be charged <span class="subscription-range">between</span> <span class="text-bold">$<span id="finalsubscriptionplancost-1">0.00</span></span> <span class="subscription-range"> and <span class="text-bold">$<span id="finalsubscriptionplancost-2" class="text-bold">0.00</span></span></span> every <span class="subscription-period-text text-bold"></span></em>
@@ -492,6 +505,10 @@
             showTuitionCosts();
             $('#cost').val(0);
         })
+
+        $('#isOngoingSubscription').click(function () {
+            $('#container-subscription-period').toggleClass('hide');
+        });
 
         if ('@Model.IsFree' == '@false') {
             $('#do-parents-pay-yes').prop('checked', true);
