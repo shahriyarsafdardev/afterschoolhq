@@ -785,7 +785,7 @@ namespace AfterSchool.Controllers
                     case QuestionDataType.RegistrantHomePhone:
                     case QuestionDataType.RegistrantWorkPhone:
                     case QuestionDataType.RegistrantMobilePhone:
-                        if (answer.IsNotEmpty() && !answer.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                        if (answer.IsNotEmpty() && !answer.Trim().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
                             msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
                         break;
 
@@ -817,7 +817,7 @@ namespace AfterSchool.Controllers
                                  firstName: firstName,
                                  lastName: lastName,
                                  email: email,
-                                 phone: phone,
+                                 phone: phone.Trim(),
                                  message: null,
                                  userType: UserType.Student,
                                  loggedInUser: SessionVariables.CurrentUser,
@@ -922,7 +922,7 @@ namespace AfterSchool.Controllers
                 {
                     case QuestionDataType.EmergencyContact1Phone:
                     case QuestionDataType.EmergencyContact2Phone:
-                        if (answer.IsNotEmpty() && !answer.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                        if (answer.IsNotEmpty() && !answer.Trim().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
                             msgs.Add($"{question.FormQuestionGroupQuestionGroupDataTypeId.ToString().SplitByUpperCase()} {question.Text} must be a valid phone number", MessageType.UserError);
 
                         if (answer.IsNotEmpty())
@@ -1077,7 +1077,7 @@ namespace AfterSchool.Controllers
                     case QuestionDataType.RegistrantHomePhone:
                     case QuestionDataType.RegistrantWorkPhone:
                     case QuestionDataType.RegistrantMobilePhone:
-                        if (answer.IsNotEmpty() && !answer.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                        if (answer.IsNotEmpty() && !answer.Trim().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
                             msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
                         break;
 
@@ -1334,7 +1334,7 @@ namespace AfterSchool.Controllers
                 switch (question.QuestionDataTypeId)
                 {
                     case QuestionDataType.RegistrantDoctorPhone:
-                        if (answer.IsNotEmpty() && !answer.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                        if (answer.IsNotEmpty() && !answer.Trim().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
                             msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
                         break;
 
