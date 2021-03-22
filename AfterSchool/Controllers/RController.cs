@@ -8,6 +8,7 @@ using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
 using System;
 using System.Text.RegularExpressions;
+using System.Web.Routing;
 
 namespace AfterSchool.Controllers
 {
@@ -39,7 +40,7 @@ namespace AfterSchool.Controllers
         }
 
         [HttpGet]
-        public ActionResult Account(string accountname)
+        public ActionResult Account(string accountname, string dir)
         {
             if (isUnsupportedBrowser())
                 return RedirectUnsupportedBrowser();
@@ -52,16 +53,60 @@ namespace AfterSchool.Controllers
                 if (account.IsEmpty() || account.IsDeleted)
                     return HttpNotFound();
 
-                RestartRegistrationSession();
-                SetRegistrationStartPage(account, true);
-
                 var profile = account.GetAccountProfile(msgs);
+                var ah = AfterSchoolLibrary.Helpers.Utilities.GetNewAmazonHelper();
+                var regStartPageAccount = account;
+
+                if (dir.IsNotEmpty())
+                {
+                    var directoryAccount = AfterSchoolLibrary.Models.Account.LoadByUniqueName(dir, msgs);
+                    if (directoryAccount.IsNotEmpty() && directoryAccount.AccountTypeId.In(new List<AccountType>() { AccountType.Directory, AccountType.SchoolDistrict }))
+                    {
+                        regStartPageAccount = directoryAccount;
+                    }
+
+                    WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, actionType: WebSessionActionType.Navigated, objectType: ObjectType.DirectoryAccount,
+                         objectId: account.ID, objectText: account.Name, indirectObjectId: directoryAccount.ID, indirectObjectText: directoryAccount.Name);                
+                }
+
+                if (SessionVariables.RegistrationStartPageAccount.IsEmpty() || SessionVariables.RegistrationStartPageAccount.AccountTypeId != AccountType.Directory)
+                {
+                    RestartRegistrationSession();
+                    SetRegistrationStartPage(regStartPageAccount, true);
+                }
+
+                if (account.AccountTypeId.In(new List<AccountType>() { AccountType.Directory, AccountType.SchoolDistrict }))
+                {
+                    var neighborhoodList = Location.LoadNeighborhoodsByHostAccount(hostAccountId: account.ID.Value, msgs: msgs).ToList();
+
+                    ViewBag.Messages = msgs;
+                    ViewBag.Neighborhoods = neighborhoodList;
+                    ViewBag.Grades = GradeLevel.Load();
+                    ViewBag.AccountUniqueName = account.UniqueName;
+                    ViewBag.AccountId = account.ID.ToString();
+
+                    if (profile.IsNotEmpty())
+                    {
+                        ViewBag.PrimaryColor = profile.PrimaryColor;
+
+                        if (profile.Logo.IsNotBlank())
+                            ViewBag.LogoUrl = ah.GetFileLink(profile.Logo, true, null, true);
+
+                        if (profile.HeaderImage.IsNotBlank())
+                            ViewBag.HeaderImageUrl = ah.GetFileLink(profile.HeaderImage, true, null, true);
+                    }
+
+                    WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: account.ID, text: account.Name, actionType: WebSessionActionType.Viewed, objectType: ObjectType.DirectoryAccount);
+                    return View("search");
+                }
+
+                if (dir.IsEmpty())
+                    WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: account.ID, text: account.Name, actionType: WebSessionActionType.Viewed, objectType: ObjectType.Account);
 
                 if (profile.IsEmpty())
                     return Redirect(account.BrowseUrl);
 
-                var photos = profile.GetPhotos(msgs);
-                var ah = AfterSchoolLibrary.Helpers.Utilities.GetNewAmazonHelper();
+                var photos = profile.GetPhotos(msgs);                
 
                 photos.ForEach(photo => photo.Value = ah.GetFileLink(photo.Value, true, null, true));
 
@@ -92,7 +137,7 @@ namespace AfterSchool.Controllers
                                                 AccountPropertyType.TimeOffered,
                                                 AccountPropertyType.SpecialNeedsOffering,
                                                 AccountPropertyType.PricingOption,
-                                                }, msgs);
+                                                }, msgs);                
             }
             catch (Exception ex)
             {
@@ -149,6 +194,8 @@ namespace AfterSchool.Controllers
                 regOpened = participationObjects.Where(po => po.RegistrationPeriod.IsOpen(account, msgs)).ToList();
                 regWillOpen = participationObjects.Where(po => po.RegistrationPeriod.WillOpen(account, msgs)).ToList();
                 regClosed = participationObjects.Where(po => po.NotIn(regWillOpen) && po.RegistrationPeriod.IsClosed(account, msgs)).ToList();
+
+                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: account.ID, text: account.Name, actionType: WebSessionActionType.Browsed, objectType: ObjectType.Account);
             }
             else
             {
@@ -175,7 +222,7 @@ namespace AfterSchool.Controllers
             ViewBag.Cart = SessionVariables.Cart;
             ViewBag.Locations = locations;
             ViewBag.ParticipationObjects = participationObjects;
-            ViewBag.AccountProfile = account.GetAccountProfile(msgs);
+            ViewBag.AccountProfile = account.GetAccountProfile(msgs);           
 
             return View(account);
         }
@@ -272,6 +319,8 @@ namespace AfterSchool.Controllers
                 if (activity.IsEmpty())
                     return HttpNotFound();
 
+                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: activity.ID, text: activity.Name, actionType: WebSessionActionType.Viewed, objectType: ObjectType.Activity);
+
                 participationObject = activity.GetParticipationObject(msgs);
 
                 if (activity.ActivityGroupId.HasValue)
@@ -314,7 +363,7 @@ namespace AfterSchool.Controllers
             ViewBag.CanPublishActivity = canPublishActivity;
             ViewBag.CanRegisterFor = true;
             ViewBag.Session = session;
-            ViewBag.AccountProfile = accountProfile;
+            ViewBag.AccountProfile = accountProfile;           
 
             return View(participationObject);
         }

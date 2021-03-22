@@ -1,0 +1,714 @@
+﻿@{
+    var accountUniqueName = ViewBag.AccountUniqueName;
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var accountId = ViewBag.AccountId != null ? Convert.ToInt32(ViewBag.AccountId) : 0;
+    var primaryColor = (string)ViewBag.PrimaryColor;
+    var logoUrl = (string)ViewBag.LogoUrl;
+    var headerImageUrl = (string)ViewBag.HeaderImageUrl;
+    var joiningUrl = $@"/join{accountUniqueName}.html";
+
+    if (!logoUrl.IsNotEmpty())
+    {
+        logoUrl = "/img/logo-vertical.png";
+    }
+
+    if (!primaryColor.IsNotEmpty() || primaryColor.IsBlank())
+    {
+        primaryColor = "#00ae85";
+    }
+
+    //.. data for layout
+    ViewBag.Title = accountUniqueName;
+    if (accountId > 0)
+    {
+        ViewBag.AccountProfile = AccountProfile.LoadByAccountId(accountId);
+    }
+
+    Layout = "~/Views/Shared/_LayoutRegistration.cshtml"; }
+
+@{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+<style>
+    .search-bg {
+        background-image: linear-gradient(rgba(0, 0, 0, .8), rgba(0, 0, 0, .8)), url( @headerImageUrl ) !important;
+        background-repeat: no-repeat !important;
+        background-size: cover !important;
+        background-position: center !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }
+
+    .join-directory-btn {
+        color: white !important;
+        min-width: 180px;
+        background-color: @primaryColor !important;
+    }
+
+    .isyp-modal-header {
+        padding: 0;
+        background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(/img/image-3-1800x900-1.png);
+        background-repeat: no-repeat;
+        background-size: cover !important;
+        background-position: center !important;
+        justify-content: center !important;
+        align-items: center !important;
+        height: 200px;
+    }
+
+    .blur-bg {
+        background-color: White;
+        background-repeat: no-repeat;
+        height: 100%;
+        opacity: 0.5;
+        position: fixed;
+        top: 0;
+        width: 100%;
+        z-index: 1000000;
+    }
+</style>
+
+<div class="visible-lg visible-md">
+
+    <div class="row">
+        <div class="@(headerImageUrl.IsNotEmpty() ? "search-bg" : "")" style="min-height: 100%; background: white; padding: 35px 20px;">
+
+            <div class="reg-header-overlay col-md-12">
+
+                <div class="col-lg-3 col-md-3 header-logo" style="margin-top: -25px;">
+                    <img src="@logoUrl" style="width: 200px;" />
+                </div>
+
+                <div class="col-lg-9 col-md-9">
+                    <div class="form-group has-feedback has-search">
+                        <span class="glyphicon glyphicon-search form-control-feedback" style="top: -3px;"></span>
+                        <input id="txtSearch" name="search" type="text" class="form-control" placeholder="Type here to search - STEM, Science, Karate, Football, etc" onkeyup="return waitAndFilterSearch(this.value)">
+                    </div>
+                </div>
+            </div>
+
+            <div class="clearfix"></div>
+        </div>
+    </div>
+</div>
+
+<div class="visible-sm visible-xs bg-color">
+    <div class="col-xs-10">
+        <div class="form-group has-feedback has-search" style="margin-top: 10px;">
+            <span class="glyphicon glyphicon-search form-control-feedback" style="top: -3px;"></span>
+            <input id="txtSearch-mobile" name="search" type="text" class="form-control" placeholder="Type here to search - STEM, Science, Karate, Football, etc" onkeyup="return waitAndFilterSearch()">
+        </div>
+    </div>
+    <div class="col-xs-2" style="padding: 0; text-align: center;">
+        <img id="img-mobile-filter" src="~/img/filter.png" class="filter" isOpen="0" onclick="return mobileFilter()" />
+    </div>
+
+    <div class="clearfix"></div>
+
+    <div id="mobile-filter-footer" class="filter-footer-container">
+        <button type="button" class="btn btn-default btn-lg btn-center" style="border-color: steelblue; color:blue" onclick="return applyMobileFilter()">Apply Filters</button>
+    </div>
+
+    <div class="clearfix"></div>
+</div>
+
+<div id="filters" class="col-md-3" style="display: none; padding-right: 0; padding-bottom: 120px;padding-top: 10px; background-color: #F9F9F9;">
+    @{ Html.RenderPartial("~/Views/Shared/_DirectoryFilters.cshtml"); }
+</div>
+
+<div id="search-container" class="col-md-9" style="padding-bottom: 20px;">
+    <div id="search-result"> </div>
+
+    <div class="clearfix"></div>
+    <div id="ProgressBar" style="z-index: 100001; text-align: center; display: none;">
+        <img src="~/img/lod_bg.gif">
+    </div>
+</div>
+
+<div class="clearfix"></div>
+
+<div>
+    <div id="blured-bg"></div>
+    <div style="position: fixed; z-index: 1000001;">
+        <div id="modal-isyp-intro" class="md-modal">
+            <div class="md-content modal-lg">
+                <div class="modal-header isyp-modal-header text-center">
+                    <img src="@logoUrl" style="width: 200px; margin-top: 40px;" />
+                </div>
+                <div class="modal-body" style="color: black;">
+                    <h1 style="margin: 0;">Learn, explore, and play this summer!</h1>
+                    <br />
+                    <div style="overflow-wrap: break-word;">
+                        From sports to science to arts and culture, Indy Summer Youth Programs offer a wide variety of programs to ensure there’s something for everyone. 
+                        Many programs provide healthy meals and snacks, 
+                        and free and low-cost enrollment options,
+                        as well as scholarships, are available to help cover the costs of attendance.  
+                        Find the right summer program for your child.
+                    </div>
+
+                    <div style="padding: 15px; text-align: center;">
+                        <button class="btn btn-register" style="width: 180px; border-color: @primaryColor; background-color: @primaryColor; transition: none;" onclick="return closeModalIsyp();"> Get Started</button>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script id="script-search-result-list" type="text/template">
+
+    <% _.each(response, function(searchResult){ %>
+
+    <style>
+        #dynamicLogo-<%=searchResult.AccountUid%> {
+            background-image: url("<%= searchResult.ProfileHeaderImageUrl %>");
+        }
+    </style>
+    
+    <div id="<%= searchResult.AccountUid %>" name="<%= searchResult.AccountName %>" class="col-xl-12 col-sm-6 col-md-6 col-lg-6 col-xl-4 participation-object" style="height: 410px; margin-bottom: 10px;">
+
+        <div class="panel" style="overflow: hidden; cursor: pointer;" onclick="WebPage.navigateIframe('<%= searchResult.HomePageUrl %>?dir=@accountUniqueName')">
+            <div id="dynamicLogo-<%= searchResult.AccountUid %>" class="reg-header" style="min-height: 100px; height: 150px; padding: 5px 5px; position: relative;">
+
+                <% if(showDistance) { %>
+
+                <div class="distance-lable">
+                    <%= Math.round(searchResult.TotalDifference * 100) / 100 %> mi
+                </div>
+
+                <% } %>
+
+                <% if(searchResult.IsAccountNowEnrolling) { %>
+
+                <div class="pull-right margin-l-10">
+                    <span class="badge badge-danger profile-badge text-small">
+                        Now Enrolling
+                    </span>
+                </div>
+
+                <% } %>
+
+                <% if(searchResult.IsVirtualProgram) { %>
+
+                <div class="pull-right margin-l-10">
+                    <span class="badge profile-badge text-small">
+                        Virtual
+                    </span>
+                </div>
+
+                <% } %>
+
+                <% if(searchResult.IsOpenDuringCovid) { %>
+
+                <div class="pull-right margin-l-10">
+                    <span class="badge badge-success profile-badge text-small">
+                        Open During COVID
+                    </span>
+                </div>
+
+                <% } %>
+
+                <% if(searchResult.IsELearningCenter) { %>
+
+                <div class="pull-right margin-l-10">
+                    <span class="badge badge-success profile-badge text-small">
+                        E-Learning Center
+                    </span>
+                </div>
+
+                <% } %>
+
+                <div style="position: absolute; bottom: 0; right: 0; background-color: #fff; color: #333;">
+                    <div class="padding-h-10">
+                        <span class="text-small">
+                            <%= searchResult.Location %>
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+            <div class="panel-body" style="position: relative;">
+
+                <div class="" style="position: absolute; top: 10px; left: 15px; overflow: hidden; height: 20px;">
+
+                    <div class="pull-left margin-l-5">
+                        <% if(searchResult.IsRestrictByGrade) { %>
+
+                        <span class="badge badge-gray profile-badge text-small">
+                            <%= searchResult.GradeStart %> - <%= searchResult.GradeEnd %> Grade
+                        </span>
+
+                        <% } else { %>
+
+                        <span class="badge badge-gray profile-badge text-small">
+                            Ages <%= searchResult.AgeStart %> - <%= searchResult.AgeEnd %>
+                        </span>
+
+                        <% } %>
+                    </div>
+
+                </div>
+
+                <div class="text-wrap" style="margin-top: 20px; height: 75px;">
+                    <h3 style="height: 51px; overflow-y: hidden;">
+                        <strong title="<%= searchResult.AccountName %>"><%= searchResult.AccountName %></strong>
+                    </h3>
+                </div>
+
+                <div class="clearfix"></div>
+                <div class="text-wrap">
+                    <span class="text-medium-small" style="min-height: 60px; height: 60px; display: block;">
+                        <%= searchResult.ProfileHeadline %>
+                    </span>
+                </div>
+
+                <div class="clearfix"></div>
+                <div class="margin-t-20">
+                    <a href="javascript:WebPage.navigateIframe('<%= searchResult.HomePageUrl %>?dir=@accountUniqueName')" class="btn btn-register btn-block join-directory-btn">
+                        Learn More &raquo;
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <% }) %>
+
+</script>
+
+@section Scripts
+{
+    <script type="text/javascript">
+
+        var delayTimer;
+        var txtSearch = $('#txtSearch');
+        var txtSearchMobile = $('#txtSearch-mobile');
+        var txtZip = $('#txtZipCode');
+        var isMobile = window.innerWidth <= 768;
+        var inCallback = false, page = 0, isReachedScrollEnd = false, isMobileFilterWindowOpened = false;
+
+        $(document).ready(function () {
+            var isIsyp =  @Json.Encode(accountUniqueName.ToUpper().Contains("ISYP")) && @Json.Encode(CookieVariables.ShowISYPModal.IsBlank());
+            if (isIsyp) {
+                showModalIsyp();
+                @(CookieVariables.ShowISYPModal = "false")
+            }
+
+            $(window).scroll(function () {
+                if (isReachedScrollEnd == false &&
+                    isMobileFilterWindowOpened == false &&
+                    $(window).scrollTop() >= $('#search-container').offset().top + $('#search-container').outerHeight() - window.innerHeight)
+                {
+                    loadFiltersAndInitiateSearch();
+                }
+            });
+
+            loadFiltersAndInitiateSearch();
+
+            if (!isMobile) {
+                $('#filters').show();
+            }
+        })
+
+        function showModalIsyp() {
+            $('#modal-isyp-intro').addClass('md-show');
+            $('#blured-bg').addClass('blur-bg');
+        }
+
+        function closeModalIsyp() {
+            $('#modal-isyp-intro').removeClass('md-show');
+            $('#blured-bg').removeClass('blur-bg');
+        }
+
+        function loadFiltersAndInitiateSearch() {
+            var hashUrl = WebPage.getHash();
+            var filters = hashUrl.split(',');
+
+            _.each(filters, function (filter) {
+                if (filter.indexOf('search_') == 0) {
+                    $(`input[name="search"]`).val(filter.split('_')[1]);
+                } else if (filter.indexOf('zip_') == 0) {
+                    $(`input[name="zipcode"]`).val(filter.split('_')[1]);
+                } else {
+                    var inputToCheck = $(`input[value="${decodeURIComponent(filter.trim())}"]`);
+
+                    if (inputToCheck && inputToCheck.length > 0) {
+                        inputToCheck.attr('checked', 'checked');
+                    }
+                }
+            });
+
+            prepareSearchParams();
+        }
+
+        function waitAndFilterSearch(search) {
+            clearTimeout(delayTimer);
+            delayTimer = setTimeout(function () {
+                page = 0;
+                prepareSearchParams();
+            }, 1000); //1 second wait
+        }
+
+        function prepareSearchParams() {
+            //.. reset scroll flag
+            isReachedScrollEnd = false;
+
+            //.. prepare params
+            var mainUrl = '';
+            var search = '';
+            var zip = 0;
+            var comma_delimited_neighborhoods = '';
+            var comma_delimited_grades = '';
+            var comma_delimited_ages = '';
+            var comma_delimited_gender = '';
+            var comma_delimited_services = '';
+            var comma_delimited_timing = '';
+            var comma_delimited_pricing = '';
+            var comma_delimited_cost = '';
+            var comma_delimited_starting = '';
+            var comma_delimited_other = '';
+            var comma_delimited_special = '';
+
+            if (isMobile) {
+                search = txtSearchMobile.val();
+            } else {
+                search = txtSearch.val();
+            }
+
+            if (search && search.length > 0) {
+                mainUrl += `search_${search},`;
+            }
+
+            zip = txtZip.val() || 0;
+            if (zip && zip.length > 0) {
+                mainUrl += `zip_${zip},`;
+            }
+
+            $('input:checkbox[name=neighborhoods]:checked').each(function () {
+                if (comma_delimited_neighborhoods.length > 0) {
+                    comma_delimited_neighborhoods += ',';
+                }
+                comma_delimited_neighborhoods += $(this).val();
+            });
+
+            $('input:checkbox[name=grades]:checked').each(function () {
+                if (comma_delimited_grades.length > 0) {
+                    comma_delimited_grades += ',';
+                }
+                comma_delimited_grades += $(this).val();
+            });
+
+            $('input:checkbox[name=ages]:checked').each(function () {
+                if (comma_delimited_ages.length > 0) {
+                    comma_delimited_ages += ',';
+                }
+                comma_delimited_ages += $(this).val();
+            });
+
+            $('input:checkbox[name=gender]:checked').each(function () {
+                if (comma_delimited_gender.length > 0) {
+                    comma_delimited_gender += ',';
+                }
+                comma_delimited_gender += $(this).val();
+            });
+
+            $('input:checkbox[name=services]:checked').each(function () {
+                if (comma_delimited_services.length > 0) {
+                    comma_delimited_services += ',';
+                }
+                comma_delimited_services += $(this).val();
+            });
+
+            $('input:checkbox[name=timing]:checked').each(function () {
+                if (comma_delimited_timing.length > 0) {
+                    comma_delimited_timing += ',';
+                }
+                comma_delimited_timing += $(this).val();
+            });
+
+            $('input:checkbox[name=pricing]:checked').each(function () {
+                if (comma_delimited_pricing.length > 0) {
+                    comma_delimited_pricing += ',';
+                }
+                comma_delimited_pricing += $(this).val();
+            });
+
+            $('input:checkbox[name=cost]:checked').each(function () {
+                if (comma_delimited_cost.length > 0) {
+                    comma_delimited_cost += ',';
+                }
+                comma_delimited_cost += $(this).val();
+            });
+
+            $('input:checkbox[name=starting]:checked').each(function () {
+                if (comma_delimited_starting.length > 0) {
+                    comma_delimited_starting += ',';
+                }
+                comma_delimited_starting += $(this).val();
+            });
+
+            $('input:checkbox[name=other]:checked').each(function () {
+                if (comma_delimited_other.length > 0) {
+                    comma_delimited_other += ',';
+                }
+                comma_delimited_other += $(this).val();
+            });
+
+            $('input:checkbox[name=special-needs]:checked').each(function () {
+                if (comma_delimited_special.length > 0) {
+                    comma_delimited_special += ',';
+                }
+                comma_delimited_special += $(this).val();
+            });
+
+            if (comma_delimited_neighborhoods.length > 0) {
+                mainUrl += `${comma_delimited_neighborhoods},`;
+            }
+
+            if (comma_delimited_grades.length > 0) {
+                mainUrl += `${comma_delimited_grades},`;
+            }
+
+            if (comma_delimited_ages.length > 0) {
+                mainUrl += `${comma_delimited_ages},`;
+            }
+
+            if (comma_delimited_gender.length > 0) {
+                mainUrl += `${comma_delimited_gender},`;
+            }
+
+            if (comma_delimited_services.length > 0) {
+                mainUrl += `${comma_delimited_services},`;
+            }
+
+            if (comma_delimited_timing.length > 0) {
+                mainUrl += `${comma_delimited_timing},`;
+            }
+
+            if (comma_delimited_pricing.length > 0) {
+                mainUrl += `${comma_delimited_pricing},`;
+            }
+
+            if (comma_delimited_cost.length > 0) {
+                mainUrl += `${comma_delimited_cost},`;
+            }
+
+            if (comma_delimited_starting.length > 0) {
+                mainUrl += `${comma_delimited_starting},`;
+            }
+
+            if (comma_delimited_other.length > 0) {
+                mainUrl += `${comma_delimited_other},`;
+            }
+
+            if (comma_delimited_special.length > 0) {
+                mainUrl += `${comma_delimited_special},`;
+            }
+
+            //.. get current scrolltop
+            var scr = $(window).scrollTop();
+
+            if (mainUrl) {
+                WebPage.addHash(encodeURI(mainUrl));
+                $('#clear-filters').show();
+            } else {
+                WebPage.addHash('');
+                $('#clear-filters').hide();
+            }
+
+            //..scroll to last known position, because location.href scrolls to top
+            document.documentElement.scrollTop = page == 0 ? 0 : scr;
+
+            openSeeMorePanelsForSelectedCheckboxes();
+
+            // .. call api
+            if (!isMobile || !isMobileFilterWindowOpened) {
+                loadAccounts(search,
+                    comma_delimited_neighborhoods,
+                    comma_delimited_grades,
+                    comma_delimited_ages,
+                    comma_delimited_gender,
+                    comma_delimited_services,
+                    comma_delimited_timing,
+                    comma_delimited_pricing,
+                    comma_delimited_cost,
+                    comma_delimited_starting,
+                    comma_delimited_other,
+                    comma_delimited_special,
+                    zip
+                );
+            }
+        }
+
+        function loadAccounts(search, neighborhoods, grades, ages, gender, services, timing, pricing, cost, starting, other, special, zip = 0) {
+            if (inCallback) {
+                return false;
+            }
+
+            showLoader();
+            showProgressBar();
+            inCallback = true;
+
+            var url = '@Url.Action("GetAccounts", "Search", new { Area = "" })';
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: { accountId: '@accountId', search, neighborhoods, grades, ages, gender, services, timing, pricing, cost, starting, other, special, zipcode: zip, pageNum: page },
+                success: function (data) {
+                    if (data && data.success == true) {
+
+                        //.. prepare source and template
+                        var source = $("#script-search-result-list").html();
+                        var compiled = _.template(source);
+
+                        //.. format data as JSON and combine with template
+                        var compiledHtml = compiled({
+                            response: data.data,
+                            showDistance: data.showDistance
+                        });
+
+                        if (data.pageNum == 0) {
+                            //..first page, so update whole page
+                            $('#search-result').html(compiledHtml);
+                        } else {
+                            $('#search-result').append(compiledHtml);
+                        }
+
+                        page++;
+
+                        if (data.data.length < 9) {
+                            //..page size is less then the default, then it means no more records present
+                            isReachedScrollEnd = true;
+                        }
+                    }
+                    else {
+                        if (data && data.status == 'error') {
+                            $('#search-result').html('');
+
+                            var error = '';
+
+                            _.each(data.data, function (msg) {
+                                error += msg?.Text + '<br />';
+                            });
+
+                            Notifications.showBar({
+                                title: 'Error',
+                                message: error,
+                                success: false
+                            });
+                        }
+                        else if (data && data.status == "no-result" && page <= 0) {
+                            $('#search-result').html('<p style="margin-top: 35px; text-align: center; font-size: 16px;">Sorry, there are no results.</p>');
+                            isReachedScrollEnd = true;
+                            page = 0;
+                        }
+                        else {
+                            isReachedScrollEnd = true;
+                            page = 0;
+                        }
+                    }
+
+                    inCallback = false;
+                    hideLoader();
+                    hideProgressBar();
+                    return false;
+                }
+            });
+        }
+
+        function mobileFilter() {
+            var isOpen = $('#img-mobile-filter').attr('isOpen');
+            if (isOpen == '0') {
+                $('#filters').show();
+                $('#mobile-filter-footer').show();
+
+                $('#search-result').hide();
+                $('#footerShowHide').hide();
+
+                $('#img-mobile-filter').attr('isOpen', "1");
+                isMobileFilterWindowOpened = true;
+            }
+            else {
+                $('#filters').hide();
+                $('#mobile-filter-footer').hide();
+
+                $('#search-result').show();
+                $('#footerShowHide').show();
+
+                $('#img-mobile-filter').attr('isOpen', "0");
+                isMobileFilterWindowOpened = false;
+            }
+        }
+
+        function applyMobileFilter() {
+            if (txtZip.val()?.length > 0) {
+                //.. validate postal code first
+                var isValid = checkZip($('#txtZipCode').val());
+                if (isValid) {
+                    mobileFilter();
+                    page = 0;
+                    return prepareSearchParams(true);
+                } else {
+                    $('#clear-filters').show();
+
+                    Notifications.showBar({
+                        title: 'Error',
+                        message: 'Postal code is not in a proper format.',
+                        success: false
+                    });
+                }
+            } else {
+                mobileFilter();
+                page = 0;
+                prepareSearchParams();
+            }
+        }
+
+        function openSeeMorePanelsForSelectedCheckboxes() {
+            var hashUrl = WebPage.getHash();
+            var filters = hashUrl.split(',');
+
+            _.each(filters, function (filter) {
+                if (filter.indexOf('search_') != 0 && filter.indexOf('zip_') != 0) {
+                    var inputToCheck = $(`input[value="${decodeURIComponent(filter.trim())}"]`);
+
+                    if (inputToCheck && inputToCheck.length > 0) {
+
+                        //..if checkbox is hidden, open that panel
+                        var showMoreElement = inputToCheck.parent().siblings('p');
+                        if (showMoreElement && showMoreElement.length > 0 && showMoreElement.text() == 'Show more...') {
+                            $(showMoreElement).click();
+                        }
+                    }
+                }
+            });
+        }
+
+        function clearFilters() {
+            //..clear all checkbox
+            $(`input:checkbox[name=neighborhoods],[name=grades],[name=ages],[name=gender],[name=services],[name=timing],[name=pricing],[name=cost],[name=starting],[name=other],[name=special-needs]`).prop('checked', false);
+
+            txtZip.val('');
+            //..clear web link and hide clear filter link
+            WebPage.addHash('');
+            $('#clear-filters').hide();
+
+            //..refresh accounts
+            if (isMobile) {
+                mobileFilter();
+            }
+
+            resetFlags();
+            loadAccounts();
+        }
+
+        function resetFlags() {
+            isReachedScrollEnd = false;
+            page = 0;
+            inCallback = false;
+        }
+    </script>
+}

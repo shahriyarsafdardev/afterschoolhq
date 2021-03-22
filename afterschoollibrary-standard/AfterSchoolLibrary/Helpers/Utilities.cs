@@ -367,18 +367,18 @@ namespace AfterSchoolLibrary.Helpers
                     Migrations.AddUsedStripeConnectToTransactions_20200705.Do(amsgs, adc);
                     Migrations.SetExistingAccountsToOnboarded_20200724.Do(amsgs, adc);
                     Migrations.SubscriberToPolymorphicRelationship_20200726.Do(amsgs, adc);
-
                     Migrations.UpdateActivityMessageRegistrants_20201012.Do(amsgs, adc);
                     Migrations.MigratePackagesToUseStripePricesAPI_20201021.Do(amsgs, adc);
                     Migrations.UpdateAccountPackagesForSaasify_20201028.Do(amsgs, adc);
                     Migrations.UpdateAccountOnboardingStepDone_20201106.Do(amsgs, adc);
                     Migrations.AddPayerIdsToRegistrations_20201116.Do(amsgs, adc);
-
                     Migrations.AddManageCouponFeatureInPremiumPackage_20201224.Do(amsgs, adc);
                     Migrations.UpdateOldTransactionsFees_20210203.Do(amsgs, adc);
+                    Migrations.UpdateAccountPropertyValueForJobs_20210226.Do(amsgs, adc);
                     Migrations.UpdateOldTransactions_20210216.Do(amsgs, adc);
 
-
+                    Migrations.UpdateLocationLatitudeLongitude_20210302.Do(amsgs, adc);
+                    Migrations.MigrateSessionToWebSession_20210312.Do(amsgs, adc);
                     // Migrations.AddProfilesToAllAccounts_20200727.Do(amsgs, adc);
 
                     // amsgs.Add("rollback please", MessageType.Error);

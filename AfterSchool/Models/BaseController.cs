@@ -32,7 +32,10 @@ namespace AfterSchool.Models
                     origin.StartsWith("https://qa.afterschoolhq.com") ||
                     origin.StartsWith("https://ci.afterschoolhq.com") ||
                     origin.StartsWith("https://staging.afterschoolhq.com") ||
-                    origin.StartsWith("http://localhost:54849"))
+                    origin.StartsWith("https://directory.afterschoolhq.com") ||
+                    origin.StartsWith("http://localhost:54849") ||
+                    Account.LoadAllSubdomains().Contains(origin)
+                    )
                 {
                     return true;
                 }
@@ -46,6 +49,7 @@ namespace AfterSchool.Models
             base.Initialize(requestContext);
 
             Utilities.DetectAfterSchool();
+            WebSessionUtilities.InitializeWebSession(Request);
 
             if (SessionVariables.VisitorSession.IsEmpty())
             {
@@ -57,13 +61,15 @@ namespace AfterSchool.Models
                 session.UserAgent = Request.UserAgent;
                 session.Save();
                 SessionVariables.VisitorSession = session;
+
             }
             else
             {
                 SessionVariables.VisitorSession.LastActivity = DateTime.UtcNow;
                 SessionVariables.VisitorSession.Save();
             }
-                    
+
+           // HandleSubdomainRedirect();
         }
 
         protected void UpdateSession(SessionActionType sat, int? accountId = null, int? activityId = null, int? webUserId = null, int? registrantId = null, int? registrationId = null, int? registrationPeriodId = null, int? activityGroupId = null, DatabaseConnection dc = null)
@@ -95,6 +101,13 @@ namespace AfterSchool.Models
         {
             if (!IsLoggedIn())
                 requestContext.Response.Redirect($"/login?returnurl={requestContext.Request.Url.PathAndQuery}");
+        }
+
+        protected void HandleSubdomainRedirect()
+        {
+            var subdomainAccount = Account.LoadBySubdomain(Request.Url.Host);
+            if (subdomainAccount.IsNotEmpty() && Request.Url.AbsolutePath.IsEmpty())
+               Response.Redirect($"https://{Request.Url.Host}/{subdomainAccount.UniqueName}");
         }
 
         protected void WriteOutput(object obj, ResponseType rt)

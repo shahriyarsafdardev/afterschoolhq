@@ -298,6 +298,37 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(subscriptions);
         }
 
+        [HttpGet]
+        public ActionResult WithdrawAndCancel(string id, string po, string type, string returnurl)
+        {
+            var msgs = new SystemMessages();
+            if (po.IsEmpty() || id.IsEmpty() || type.IsEmpty())
+                msgs.Add("Validation error", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                var registrant = Registrant.LoadByUid(id.ToGuid());
+
+                if (registrant.IsNotEmpty())
+                {
+                    registrant.WithdrawRegistration(
+                        participationObjectId: po.ToInteger(),
+                        participationObjectType: (ParticipationObjectType)type.ToInteger(),
+                        loggedInUser: SessionVariables.CurrentUser,
+                        account: SessionVariables.CurrentAccount,
+                        msgs: msgs);
+                }
+            }
+
+            ViewBag.Messages = msgs;
+
+            if (msgs.HasNoErrors() && returnurl.IsNotBlank())
+                return Redirect(returnurl);
+
+            return RedirectToAction("Subscriptions");
+        }
+
+
         #endregion
 
         #region Refunds

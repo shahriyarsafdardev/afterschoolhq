@@ -276,15 +276,12 @@ namespace AfterSchool.Controllers
         #region Profile
 
         [HttpGet]
-        public ActionResult GetProfiles(int count)
+        public ActionResult GetProfiles(int? count)
         {
             if (!IsRequestFromApp())
                 return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
 
-            var msgs = new SystemMessages();
-
-            if (count > 10)
-                count = 10;
+            var msgs = new SystemMessages();           
 
             var profiles = AccountProfile.Search(
                             accountTypes: AccountService.CustomerAccountTypes,
@@ -302,7 +299,8 @@ namespace AfterSchool.Controllers
 
             var html = "";
 
-            profiles.ForEach(profile => {
+            profiles.ForEach(profile =>
+            {
                 var result = ViewEngines.Engines.FindPartialView(this.ControllerContext, "~/Views/Shared/Registration/_BrowseProvider.cshtml");
 
                 if (result.View != null)
@@ -321,7 +319,7 @@ namespace AfterSchool.Controllers
                     html += sb.ToString();
                 }
             });
-           
+
 
             //profiles.ForEach(profile => {
             //    var account = profile.GetAccount(msgs);
@@ -464,7 +462,10 @@ namespace AfterSchool.Controllers
                         msgs);
 
                     if (msgs.HasNoErrors())
+                    {
+                        WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: account.ID.Value, text: account.Name, actionType: WebSessionActionType.Contacted, objectType: ObjectType.ContactList);
                         EmailHelper.SendContactProviderEmail(account, contact, msgs);
+                    }
                 }
 
                 return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
@@ -501,7 +502,10 @@ namespace AfterSchool.Controllers
                 account.AddOrUpdateSubscriber(SessionVariables.CurrentUser, SubscriberStatus.Subscribed, SessionVariables.CurrentUser, msgs);
 
                 if (msgs.HasNoErrors())
+                {
+                    WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: account.ID.Value, text: account.Name, actionType: WebSessionActionType.Followed, objectType: ObjectType.Account);
                     return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
+                }
             }
 
             return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
@@ -536,7 +540,10 @@ namespace AfterSchool.Controllers
                 account.AddOrUpdateSubscriber(SessionVariables.CurrentUser, SubscriberStatus.Unsubscribed, SessionVariables.CurrentUser, msgs);
 
                 if (msgs.HasNoErrors())
+                {
+                    WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: account.ID.Value, text: account.Name, actionType: WebSessionActionType.Unfollowed, objectType: ObjectType.Account);
                     return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
+                }
             }
 
             return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);

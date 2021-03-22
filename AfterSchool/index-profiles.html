@@ -94,7 +94,6 @@
     <script src="/assets/js/main-mods.js?v=1.0.15" type="text/javascript"></script>
 
     <script>
-        console.log('getprofiles');
         $(document).ready(function () {
 
             var count = WebPage.getUrlParamValue('count');
@@ -102,7 +101,6 @@
             $.get(
                 '/services/getprofiles?count=' + count,
                 function (data) {
-                    console.log(data);
                     if (data && data.status == 'ok') {
                         $('#ahq-profiles').html(data.html);
                     }

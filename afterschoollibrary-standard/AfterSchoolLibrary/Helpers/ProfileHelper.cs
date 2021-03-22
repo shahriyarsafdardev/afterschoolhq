@@ -10,7 +10,7 @@ namespace AfterSchoolLibrary.Helpers
         {
             get
             {
-                return new string[] { "Classes", "Events", "Camps", "Field Trips", "Workshops", "Virtual Learning", "Tutoring", "Mentoring", "Jobs", "Counseling", "Resources", "Curriculum" };
+                return new string[] { "Classes", "Events", "Camps", "Field Trips", "Workshops", "Virtual Learning", "Tutoring", "Mentoring", "Youth Employment", "Counseling", "Resources", "Curriculum" };
             }
         }
         
