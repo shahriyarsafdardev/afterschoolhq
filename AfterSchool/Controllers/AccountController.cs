@@ -529,7 +529,7 @@ namespace AfterSchool.Controllers
                     case QuestionDataType.RegistrantMobilePhone:
                     case QuestionDataType.RegistrantHomePhone:
                     case QuestionDataType.RegistrantWorkPhone:
-                        if (qvm.Value.IsNotEmpty() && !qvm.Value.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                        if (qvm.Value.IsNotEmpty() && !qvm.Value.Trim().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
                             msgs.Add($"{qvm.Question.Text} must be a valid phone number", MessageType.UserError);
                         break;
 
@@ -570,10 +570,10 @@ namespace AfterSchool.Controllers
                     {
                         user = CreateOrUpdateUser(
                             currentUser,
-                            firstName.Value,
-                            lastName.Value,
-                            email.Value,
-                            phone.Value,
+                            firstName.Value.Trim(),
+                            lastName.Value.Trim(),
+                            email.Value.Trim(),
+                            phone.Value.Trim(),
                             password1,
                             textnotifications.IfBlank("0").ToBoolean(),
                             amsgs,
