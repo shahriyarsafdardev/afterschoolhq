@@ -927,7 +927,10 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditCost(string id, string cost, string costdescription, string acceptpaypal, string acceptcreditcard, string allowtopaylater, string cmd, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, string paymentplanpaymentstarttype, string splitcostevenly, string regfeedownpayment, string haspostpayplan, string postpaycost, string isparentpricepostpay, string isparentpricecost, string isparentpricepaymentplan, string isparentpricesubscription, string prepaidperiodspostpay)
+        public ActionResult EditCost(string id, string cost, string costdescription, string acceptpaypal, string acceptcreditcard, string allowtopaylater, string cmd, 
+            string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string isongoingsubscription, string subscriptionPlanPeriodNumber, string subscriptionPaymentStartType,
+            string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, string paymentplanpaymentstarttype, string splitcostevenly, string regfeedownpayment, 
+            string haspostpayplan, string postpaycost, string isparentpricepostpay, string isparentpricecost, string isparentpricepaymentplan, string isparentpricesubscription, string prepaidperiodspostpay)
         {
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid());
@@ -953,6 +956,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "hassubscriptionplan", hassubscriptionplan.IfBlank("0") },
                     { "subscriptionplancost", subscriptionplancost },
                     { "subscriptionplanperiod", subscriptionplanperiod },
+                    { "subscriptionPlanPeriodNumber", subscriptionPlanPeriodNumber },
+                    { "subscriptionPaymentStartType", subscriptionPaymentStartType },
                     { "haspaymentplan", haspaymentplan.IfBlank("0") },
                     { "paymentplancost", paymentplancost },
                     { "paymentplanperiod", paymentplanperiod },

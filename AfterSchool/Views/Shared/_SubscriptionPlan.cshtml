@@ -1,0 +1,162 @@
+﻿@model Activity
+
+@{
+    var subscriptionPlan = (SubscriptionPlan)ViewBag.SubscriptionPlan;
+    var paymentdisabled = (string)ViewBag.paymentdisabled;
+
+    var accountPackage = (AccountPackage)ViewBag.accountPackage;
+    var showAllowSubscriptionPlans = accountPackage.HasFeature(FeatureType.AllowSubscriptionPlans);
+    var showAllowSubscriptionPlansPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowSubscriptionPlans);
+}
+
+<div class="panel-heading">
+    Subscription Options
+</div>
+
+<div class="panel-body">
+
+    <div class="form-group">
+
+        <div class="row">
+            <label class="col-sm-3 control-label">Subscription</label>
+            <div class="col-sm-1" @if (!showAllowSubscriptionPlans) { <text> onclick="return showUpgradeMyPlan('@(showAllowSubscriptionPlansPackage.Name)','@(showAllowSubscriptionPlansPackage.ID)')" </text> }>
+                @{
+                    Html.RenderPartial(
+                      "~/Views/Shared/_SwitchButton.cshtml",
+                      showAllowSubscriptionPlans ? Model.HasSubscriptionPlan() : false,
+                      new ViewDataDictionary() {
+                          { "checkboxname", "hassubscriptionplan" },
+                          { "checkboxid", "hassubscriptionplan" },
+                          { "disabled", !showAllowSubscriptionPlans }
+                      });
+                }
+            </div>
+        </div>
+
+        <br />
+
+        <div id="" class="row subscriptionplansection">
+            <div class="col-md-3"></div>
+            <div class="col-sm-6 col-md-9">
+                <div class="input-group input-group-lg xs-mb-15">
+                    <span class="input-group-addon">Payment Amt $</span>
+                    <input type="number" class="form-control" id="subscriptionplancost"
+                           name="subscriptionplancost" placeholder="Amount" onfocus="this.select()"
+                           value="@(subscriptionPlan.IsNotEmpty() && subscriptionPlan.CostPerPeriod.HasValue ? subscriptionPlan.CostPerPeriod.Value.ToString("0.00") : "0.00")"
+                           required min="0.00" step=".01" @paymentdisabled />
+                </div>
+            </div>
+
+            <div class="col-md-3"></div>
+            <div class="col-sm-6 col-md-9">
+                <div class="input-group input-group-lg xs-mb-15">
+                    <span class="input-group-addon">Every</span>
+                    <select name="subscriptionplanperiod" id="subscriptionplanperiod" class="form-control" required>
+                        @BillingPeriodOptions(subscriptionPlan)
+                    </select>
+                </div>
+
+                <div class="am-checkbox">
+                    <input type="checkbox" name="isongoingsubscription" id="isOngoingSubscription" value="1" checked="checked" />
+                    <label for="isOngoingSubscription">Is Ongoing Subscription</label>
+                </div>
+
+                <div id="container-subscription-period" class="input-group input-group-lg xs-mb-15 hide">
+                    <span class="input-group-addon"># of Payments</span>
+                    <input type="number" class="form-control" id="subscriptionPlanPeriodNumber"
+                           name="subscriptionPlanPeriodNumber"
+                           value="@(subscriptionPlan.IsNotEmpty() ? subscriptionPlan.TotalPeriods.ToString() : "0")"
+                           required min="0" step="1" @paymentdisabled />
+                </div>
+
+                <br />
+            </div>
+
+            <div class="row">
+                <label class="col-sm-3 control-label">When should payments start?</label>
+                <div class="col-sm-9">
+                    <select name="subscriptionPaymentStartType" id="subscriptionPaymentStartType" class="form-control" required="required">
+                        @foreach (var item in Enum.GetValues(typeof(PlanPaymentStartType)).Cast<PlanPaymentStartType>().Except(PlanPaymentStartType.NotSet.AsList()))
+                        {
+                            var selected = (PlanPaymentStartType.WhenActivityStarts == item) ? "selected=\"selected\"" : "";
+
+                            if (subscriptionPlan.IsNotEmpty())
+                            {
+                                selected = item == subscriptionPlan.PaymentStartTypeId ? "selected=\"selected\"" : "";
+                            }
+
+                            <option value="@((int)item)" @selected>@item.ToString().SplitByUpperCase()</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-3"></div>
+            <div class="col-sm-6 col-md-9">
+                <p class="text-muted text-medium-small">
+                    <span id="pricetoparent-subscription-span">
+                        <em>The total cost will be <span class="text-bold">$<span id="pricetoparent-subscription">0.00</span></span> at checkout</em>.
+                    </span>
+                    <span id="amounttoprovider-subscription-span">
+                        <em>The total amount you will receive is <span class="text-bold">$<span id="amounttoprovider-subscription">0.00</span></span></em>.
+                    </span>
+                </p>
+                <div>
+                    <div class="am-checkbox">
+                        <input type="checkbox" name="isparentpricesubscription" id="isparentpricesubscription" value="1" @(subscriptionPlan.IsNotEmpty() && subscriptionPlan.IsConvenienceFeeTakenOutOfCost ? "checked=\"checked\"" : "") />
+                        <label for="isparentpricesubscription">Price is the amount the parent pays</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (Model.ActivityTypeId == ActivityType.LearningPod && false)
+        {
+            <div class="row subscriptionplansection">
+                <label class="col-sm-3 control-label">Parents split cost evenly</label>
+                <div class="col-sm-6 col-sm-9">
+                    @{Html.RenderPartial("~/Views/Shared/_SwitchButton.cshtml", subscriptionPlan?.SplitCostEvenly ?? false,
+                              new ViewDataDictionary() {
+                              { "checkboxname", "splitcostevenly" },
+                              { "checkboxid", "splitcostevenly" },
+                              { "disabled", false }
+                              });
+                    }
+                </div>
+            </div>
+        }
+
+        <div class="row">
+            <div class="col-sm-3"></div>
+            <div class="col-sm-6 col-sm-9">
+                <p class="text-muted padding-v-10">Subscriptions are used to bill users at specified intervals for ongoing participation.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@helper BillingPeriodOptions(SubscriptionPlan plan)
+{
+    var exceptions = new List<BillingPeriodType> { BillingPeriodType.NotSet };
+
+    if (AfterSchoolLibrary.Helpers.Utilities.IsProduction)
+    {
+        exceptions = new List<BillingPeriodType> { BillingPeriodType.NotSet, BillingPeriodType.Day, BillingPeriodType.Year };
+    }
+
+    foreach (var billingPeriodType in Enum.GetValues(typeof(BillingPeriodType)).Cast<BillingPeriodType>().Where(x => x.NotIn(exceptions)))
+    {
+        var selected = "";
+        if (plan.IsEmpty() && billingPeriodType == BillingPeriodType.Month)
+        {
+            selected = " selected=\"selected\" ";
+        }
+        else if (plan.IsNotEmpty() && billingPeriodType == plan.BillingPeriodTypeId)
+        {
+            selected = " selected=\"selected\" ";
+        }
+
+        <option value="@((int)billingPeriodType)" @selected>@billingPeriodType.ToString().SplitByUpperCase()</option>
+    }
+}

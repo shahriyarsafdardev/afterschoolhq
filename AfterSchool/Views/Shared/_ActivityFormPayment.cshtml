@@ -19,9 +19,6 @@
 
     var showAllowPaymentPlans = accountPackage.HasFeature(FeatureType.AllowPaymentPlans);
     var showAllowPaymentPlansPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowPaymentPlans);
-
-    var showAllowSubscriptionPlans = accountPackage.HasFeature(FeatureType.AllowSubscriptionPlans);
-    var showAllowSubscriptionPlansPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowSubscriptionPlans);
 }
 
 <div class="panel panel-default panel-small-padding">
@@ -132,7 +129,7 @@
             <div class="form-group">
                 <div class="row">
                     <label class="col-sm-3 control-label">Registration Payment Plan</label>
-                    <div class="col-sm-1" @if (!showAllowPaymentPlans) { <text> onclick="return showUpgradeMyPlan('@(showAllowPaymentPlansPackage.Name)','@(showAllowPaymentPlansPackage.ID)')"</text> }>
+                    <div class="col-sm-1" @if (!showAllowPaymentPlans) { <text> onclick="return showUpgradeMyPlan('@(showAllowPaymentPlansPackage.Name)','@(showAllowPaymentPlansPackage.ID)')" </text> }>
                         @{
                             Html.RenderPartial(
                             "~/Views/Shared/_SwitchButton.cshtml",
@@ -142,7 +139,7 @@
                                 { "checkboxname", "haspaymentplan" },
                                 { "checkboxid", "haspaymentplan" },
                                 { "disabled", !showAllowPaymentPlans }
-                            });
+            });
                         }
                     </div>
                 </div>
@@ -237,141 +234,13 @@
 
         </div>
 
-        <div class="panel-heading">
-            Subscription Options
-        </div>
-
-        <div class="panel-body">
-
-            <div class="form-group">
-
-                <div class="row">
-                    <label class="col-sm-3 control-label">Subscription</label>
-                    <div class="col-sm-1" @if (!showAllowSubscriptionPlans) { <text> onclick="return showUpgradeMyPlan('@(showAllowSubscriptionPlansPackage.Name)','@(showAllowSubscriptionPlansPackage.ID)')"</text> }>
-                        @{
-                            Html.RenderPartial(
-                              "~/Views/Shared/_SwitchButton.cshtml",
-                              showAllowSubscriptionPlans ? Model.HasSubscriptionPlan() : false,
-                              new ViewDataDictionary()
-                              {
-                                { "checkboxname", "hassubscriptionplan" },
-                                { "checkboxid", "hassubscriptionplan" },
-                                { "disabled", !showAllowSubscriptionPlans }
-                              });
-                        }
-                    </div>
-                </div>
-
-                <br />
-
-                <div id="" class="row subscriptionplansection">
-                    <div class="col-md-3"></div>
-                    <div class="col-sm-6 col-md-9">
-                        <div class="input-group input-group-lg xs-mb-15">
-                            <span class="input-group-addon">Payment Amt $</span>
-                            <input type="number" class="form-control" id="subscriptionplancost"
-                                   name="subscriptionplancost" placeholder="Amount" onfocus="this.select()"
-                                   value="@(subscriptionPlan.IsNotEmpty() && subscriptionPlan.CostPerPeriod.HasValue ? subscriptionPlan.CostPerPeriod.Value.ToString("0.00") : "0.00")"
-                                   required min="0.00" step=".01" @paymentdisabled />
-                        </div>
-                    </div>
-                    <div class="col-md-3"></div>
-                    <div class="col-sm-6 col-md-9">
-                        <div class="input-group input-group-lg xs-mb-15">
-                            <span class="input-group-addon">Every</span>
-                            <select name="subscriptionplanperiod" id="subscriptionplanperiod" class="form-control" required>
-                                @BillingPeriodOptions(subscriptionPlan)
-                            </select>
-                        </div>
-                        
-                        <div class="am-checkbox">
-                            <input type="checkbox" name="isongoingsubscription" id="isOngoingSubscription" value="1" checked="checked" />
-                            <label for="isOngoingSubscription">Is Ongoing Subscription</label>
-                        </div>
-
-                        <div id="container-subscription-period" class="input-group input-group-lg xs-mb-15 hide">
-                            <span class="input-group-addon"># of Payments</span>
-                            <input type="number" class="form-control" id="subscriptionPlanPeriodNumber"
-                                    name="subscriptionPlanPeriodNumber" onfocus="this.select()"
-                                    value="@(subscriptionPlan.IsNotEmpty() ? subscriptionPlan.TotalPeriods.ToString() : "0")"
-                                    required min="0" step="1" @paymentdisabled />
-                        </div>
-                        @*
-                        <p class="text-muted subscription-plan-cost-split">
-                            <em>The parent will be charged <span class="subscription-range">between</span> <span class="text-bold">$<span id="finalsubscriptionplancost-1">0.00</span></span> <span class="subscription-range"> and <span class="text-bold">$<span id="finalsubscriptionplancost-2" class="text-bold">0.00</span></span></span> every <span class="subscription-period-text text-bold"></span></em>
-                        </p>
-                        <p class="text-muted subscription-plan-cost-split">
-                            <em>If registration was closed now the parent would be charged <span class="text-bold">$<span id="finalsubscriptionplancost-3">0.00</span></span> every <span class="subscription-period-text text-bold"></span></em>
-                        </p>
-                        *@
-                        <p class="text-muted text-medium-small">
-                            <span id="pricetoparent-subscription-span">
-                                <em>The total cost will be <span class="text-bold">$<span id="pricetoparent-subscription">0.00</span></span> at checkout</em>.
-                            </span>
-                            <span id="amounttoprovider-subscription-span">
-                                <em>The total amount you will receive is <span class="text-bold">$<span id="amounttoprovider-subscription">0.00</span></span></em>.
-                            </span>
-                        </p>
-                        <div>
-                            <div class="am-checkbox">
-                                <input type="checkbox" name="isparentpricesubscription" id="isparentpricesubscription" value="1" @(subscriptionPlan.IsNotEmpty() && subscriptionPlan.IsConvenienceFeeTakenOutOfCost ? "checked=\"checked\"" : "") />
-                                <label for="isparentpricesubscription">Price is the amount the parent pays</label>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-                @*
-                    <div class="row subscriptionplansection">
-                        <label class="col-sm-3 control-label">Apply Registration fee to subscription fees</label>
-                        <div class="col-sm-6 col-sm-9">
-                            @{Html.RenderPartial
-                                (
-                                    "~/Views/Shared/_SwitchButton.cshtml",
-                                    subscriptionPlan?.RegFeeAsDownPayment ?? false,
-                                    new ViewDataDictionary()
-                                    {
-                                    { "checkboxname", "regfeedownpayment" },
-                                    { "checkboxid", "regfeedownpayment" },
-                                    { "disabled", false }
-                                    }
-                                );
-                            }
-                        </div>
-                    </div>
-                *@
-
-                @if (Model.ActivityTypeId == ActivityType.LearningPod && false)
-                {
-                    <div class="row subscriptionplansection">
-                        <label class="col-sm-3 control-label">Parents split cost evenly</label>
-                        <div class="col-sm-6 col-sm-9">
-                            @{Html.RenderPartial
-                                      (
-                                          "~/Views/Shared/_SwitchButton.cshtml",
-                                          subscriptionPlan?.SplitCostEvenly ?? false,
-                                          new ViewDataDictionary()
-                                          {
-                                        { "checkboxname", "splitcostevenly" },
-                                        { "checkboxid", "splitcostevenly" },
-                                        { "disabled", false }
-          }
-                                      );
-                            }
-                        </div>
-                    </div>
-                }
-
-
-                <div class="row">
-                    <div class="col-sm-3"></div>
-                    <div class="col-sm-6 col-sm-9">
-                        <p class="text-muted padding-v-10">Subscriptions are used to bill users at specified intervals for ongoing participation.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+        @{Html.RenderPartial("~/Views/Shared/_SubscriptionPlan.cshtml", Model, 
+              new ViewDataDictionary() {
+                  { "subscriptionPlan", subscriptionPlan },
+                  { "accountPackage", accountPackage },
+                  { "paymentdisabled", paymentdisabled }
+              });
+        }
 
         <div class="panel-heading">
             Post Payment Options
@@ -384,15 +253,15 @@
                     <label class="col-sm-3 control-label">Post Pay Option</label>
                     <div class="col-sm-1">
                         @{Html.RenderPartial
-                                (
-                                    "~/Views/Shared/_SwitchButton.cshtml",
-                                    Model.HasPostPayPlan(),
-                                    new ViewDataDictionary()
-                                    {
+                                  (
+                                      "~/Views/Shared/_SwitchButton.cshtml",
+                                      Model.HasPostPayPlan(),
+                                      new ViewDataDictionary()
+                                      {
                                 { "checkboxname", "haspostpayplan" },
                                 { "checkboxid", "haspostpayplan" }
 }
-                                );
+                                  );
                         }
                     </div>
                 </div>
