@@ -57,11 +57,11 @@
                 </div>
 
                 <div class="am-checkbox">
-                    <input type="checkbox" name="isongoingsubscription" id="isOngoingSubscription" value="1" checked="checked" />
+                    <input type="checkbox" name="isongoingsubscription" id="isOngoingSubscription" value="1" @(subscriptionPlan.IsNotEmpty() && subscriptionPlan.IsOngoingSubscription ? "checked=\"checked\"" : "") />
                     <label for="isOngoingSubscription">Is Ongoing Subscription</label>
                 </div>
 
-                <div id="container-subscription-period" class="input-group input-group-lg xs-mb-15 hide">
+                <div id="container-subscription-period" class="input-group input-group-lg xs-mb-15 @(subscriptionPlan.IsNotEmpty() && subscriptionPlan.IsOngoingSubscription ? "hide" : "")">
                     <span class="input-group-addon"># of Payments</span>
                     <input type="number" class="form-control" id="subscriptionPlanPeriodNumber"
                            name="subscriptionPlanPeriodNumber"
@@ -160,3 +160,12 @@
         <option value="@((int)billingPeriodType)" @selected>@billingPeriodType.ToString().SplitByUpperCase()</option>
     }
 }
+
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('#isOngoingSubscription').click(function () {
+            $('#container-subscription-period').toggleClass('hide');
+        });
+    });
+
+</script>

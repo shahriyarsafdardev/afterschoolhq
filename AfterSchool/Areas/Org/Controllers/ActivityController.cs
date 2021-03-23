@@ -958,6 +958,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "subscriptionplanperiod", subscriptionplanperiod },
                     { "subscriptionPlanPeriodNumber", subscriptionPlanPeriodNumber },
                     { "subscriptionPaymentStartType", subscriptionPaymentStartType },
+                    { "isongoingsubscription", isongoingsubscription },
                     { "haspaymentplan", haspaymentplan.IfBlank("0") },
                     { "paymentplancost", paymentplancost },
                     { "paymentplanperiod", paymentplanperiod },

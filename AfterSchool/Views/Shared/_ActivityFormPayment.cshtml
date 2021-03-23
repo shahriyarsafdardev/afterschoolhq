@@ -375,10 +375,6 @@
             $('#cost').val(0);
         })
 
-        $('#isOngoingSubscription').click(function () {
-            $('#container-subscription-period').toggleClass('hide');
-        });
-
         if ('@Model.IsFree' == '@false') {
             $('#do-parents-pay-yes').prop('checked', true);
             $('#do-parents-pay-yes').trigger('click');

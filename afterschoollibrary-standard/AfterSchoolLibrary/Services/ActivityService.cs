@@ -830,6 +830,7 @@ namespace AfterSchoolLibrary.Services
             var subscriptionplanperiod = values.GetValueOrDefault("subscriptionplanperiod");
             var subscriptionPlanPeriodNumber = values.GetValueOrDefault("subscriptionPlanPeriodNumber");
             var subscriptionPaymentStartType = values.GetValueOrDefault("subscriptionPaymentStartType");
+            var isongoingsubscription = values.GetValueOrDefault("isongoingsubscription"); 
             var haspaymentplan = values.GetValueOrDefault("haspaymentplan");
             var paymentplancost = values.GetValueOrDefault("paymentplancost");
             var paymentplanperiod = values.GetValueOrDefault("paymentplanperiod");
@@ -1227,6 +1228,7 @@ namespace AfterSchoolLibrary.Services
                                 subscriptionplanperiod.IfEmpty(""),
                                 subscriptionPlanPeriodNumber.IfEmpty(""),
                                 subscriptionPaymentStartType.IfEmpty(""),
+                                isongoingsubscription.IfEmpty(""),
                                 splitcostevenly.IfEmpty(""),
                                 regfeedownpayment.IfEmpty(""),
                                 isparentpricesubscription.IfEmpty("0"),
@@ -1358,11 +1360,11 @@ namespace AfterSchoolLibrary.Services
         }
 
         private static SystemMessages SetupSubscriptionPlan(this Activity activity, Account account, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string subscriptionPlanPeriodNumber, 
-            string subscriptionPaymentStartType, string splitcostevenly, string regfeedownpayment, string isparentpricesubscription, int loggedInUserId, DatabaseConnection dc = null)
+            string subscriptionPaymentStartType, string isongoingsubscription, string splitcostevenly, string regfeedownpayment, string isparentpricesubscription, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
             var hasStripeChanges = true;
-            var planStartType = subscriptionPaymentStartType.ToInteger().ToEnum<PlanPaymentStartType>();
+            var paymentStartType = subscriptionPaymentStartType.ToInteger().ToEnum<PlanPaymentStartType>();
             var isParentPrice = isparentpricesubscription.ToBoolean();
 
             // first: desactivate the current plan if there are any changes
@@ -1373,7 +1375,8 @@ namespace AfterSchoolLibrary.Services
                 hasStripeChanges = plan.CostPerPeriod.Value != subscriptionplancost.ToDecimal() ||
                                     plan.BillingPeriodTypeId != (BillingPeriodType)subscriptionplanperiod.ToInteger() ||
                                     plan.TotalPeriods.Value != subscriptionPlanPeriodNumber.ToInteger() ||
-                                    plan.PaymentStartTypeId != planStartType ||
+                                    plan.PaymentStartTypeId != paymentStartType ||
+                                    plan.IsOngoingSubscription != isongoingsubscription.ToBoolean() ||
                                     plan.IsConvenienceFeeTakenOutOfCost != isParentPrice;
 
                 // if has stripe changes or subscription option has been turned off
@@ -1395,8 +1398,9 @@ namespace AfterSchoolLibrary.Services
                     participationObjectId: activity.ID.Value,
                     costPerPeriod: subscriptionplancost.ToDecimal(),
                     billingPeriodType: (BillingPeriodType)subscriptionplanperiod.ToInteger(),
-                    subscriptionPlanPeriodNumber.ToInteger(),
-                    planStartType,
+                    totalPeriods: isongoingsubscription.ToBoolean() ? 0 : subscriptionPlanPeriodNumber.ToInteger(),
+                    paymentStartType: paymentStartType,
+                    isongoingsubscription: isongoingsubscription.ToBoolean(),
                     doesAutoRenew: true,
                     splitCostEvenly: splitcostevenly.ToBoolean(),
                     regFeeAsDownPayment: regfeedownpayment.ToBoolean(),
