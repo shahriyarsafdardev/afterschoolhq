@@ -481,6 +481,11 @@ namespace AfterSchoolLibrary.Services
             return AccountPackage.LoadByAccountIdByIsActive(account.ID.Value, true, msgs, dc);
         }
 
+        public static AccountPackage GetActiveAccountPackageWithCreatedDate(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return AccountPackage.LoadByAccountId(account.ID.Value, true, "CreateDate", OrderByDirectionEnum.Descending, msgs, dc);
+        }
+
         public static List<AccountPackage> GetAccountPackages(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return AccountPackage.LoadByAccountId(account.ID.Value, msgs, dc);
@@ -1531,7 +1536,7 @@ namespace AfterSchoolLibrary.Services
                 action: (SystemMessages amsgs, BasicLibrary.DataAccess.DatabaseConnection adc) =>
                 {
                     package = Package.Load(packageId, amsgs, adc);
-                    currentPackage = account.GetActiveAccountPackage(amsgs, adc);
+                    currentPackage = account.GetActiveAccountPackageWithCreatedDate(amsgs, adc);
 
                     var trialDayCount = 0;
 
