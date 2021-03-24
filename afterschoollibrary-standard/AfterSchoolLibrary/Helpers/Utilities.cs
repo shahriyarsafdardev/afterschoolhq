@@ -377,6 +377,7 @@ namespace AfterSchoolLibrary.Helpers
                     Migrations.UpdateAccountPropertyValueForJobs_20210226.Do(amsgs, adc);
 
                     Migrations.UpdateLocationLatitudeLongitude_20210302.Do(amsgs, adc);
+
                     Migrations.MigrateSessionToWebSession_20210312.Do(amsgs, adc);
                     // Migrations.AddProfilesToAllAccounts_20200727.Do(amsgs, adc);
 
