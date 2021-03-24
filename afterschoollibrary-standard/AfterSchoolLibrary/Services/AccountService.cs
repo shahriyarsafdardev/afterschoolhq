@@ -1484,7 +1484,7 @@ namespace AfterSchoolLibrary.Services
                     signupType = SignUpType.NewAccountSignUp;
 
                 // could be downgrading to a free account
-                else if (activePackage.PackageId != p.ID)
+                else
                     signupType = SignUpType.ChangePackage;
             }
             else
