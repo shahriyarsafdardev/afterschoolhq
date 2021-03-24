@@ -188,12 +188,12 @@
 
 <script type="text/javascript">
     var currentLevel = @Json.Encode(currentLevel);
-    var isEmailToBeValidated = @Json.Encode(GettingStartedOptions.CreateFirstActivity);
+    var isEmailToBeValidated = @Json.Encode(GettingStartedOptions.CreateProfile);
     var isPaymentSetupToBeDone = @Json.Encode(GettingStartedOptions.ValidateEmail);
     var isAcceptPaymentDone = @Json.Encode(GettingStartedOptions.AcceptPayments);
     var isStripeIntegrated = @Json.Encode(isStripeIntegrated);
 
-    PageEvent.add(PageEvent.AFTER_INIT, function () {
+    PageEvent.add(PageEvent.AFTER_INIT, function () {        
         if (currentLevel == isEmailToBeValidated) {
             $('#modal-email-confirmation').modal('show');
         } else if (currentLevel == isPaymentSetupToBeDone) {
