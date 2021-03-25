@@ -17,7 +17,7 @@ namespace AfterSchoolLibrary.Migrations
                 {
                     //.. we have to go with raw sql query as we have lots of data in session table
                     try
-                    {                        
+                    {
                         var count = WebSession.GetCount(null, amsgs, adc);
                         if (count <= 0)
                         {

@@ -74,7 +74,7 @@
             </div>
         </div>
 
-        @if (activity.CostPerRegistrant > 0 && Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView))
+        @if (!activity.IsFree  && Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView))
         {
             <div class="panel panel-default">
                 <div class="panel-heading">

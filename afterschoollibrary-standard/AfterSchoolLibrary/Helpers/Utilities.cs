@@ -375,8 +375,10 @@ namespace AfterSchoolLibrary.Helpers
                     Migrations.AddManageCouponFeatureInPremiumPackage_20201224.Do(amsgs, adc);
                     Migrations.UpdateOldTransactionsFees_20210203.Do(amsgs, adc);
                     Migrations.UpdateAccountPropertyValueForJobs_20210226.Do(amsgs, adc);
+                    Migrations.UpdateOldTransactions_20210216.Do(amsgs, adc);
 
                     Migrations.UpdateLocationLatitudeLongitude_20210302.Do(amsgs, adc);
+
                     Migrations.MigrateSessionToWebSession_20210312.Do(amsgs, adc);
                     // Migrations.AddProfilesToAllAccounts_20200727.Do(amsgs, adc);
 
