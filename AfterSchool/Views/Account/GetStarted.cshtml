@@ -8,6 +8,7 @@
     var currentUser = SessionVariables.CurrentUser;
     var savedEmail = Model.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail)?.Value;
     var showStep1 = currentUser.IsEmpty() && savedEmail.IsBlank();
+    var isDuringProfileSetup = currentUser.IsNotEmpty() || savedEmail.IsNotBlank();
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -19,7 +20,7 @@
         new ViewDataDictionary()
         {
             { "ParticipationObject", participationObject },
-            { "isDuringProfileSetup", currentUser.IsNotEmpty() || savedEmail.IsNotBlank() }
+            { "isDuringProfileSetup", isDuringProfileSetup }
         }
     );
 }
@@ -139,7 +140,7 @@
                             }
                         }
 
-                        @if (showStep1)
+                        @if (currentUser.IsEmpty())
                         {
                             <div class="form-group new-account">
                                 <label for="password1" class="control-label col-md-3">
@@ -161,7 +162,7 @@
                         }
 
 
-                        @if (showStep1)
+                        @if (currentUser.IsEmpty())
                         {
                             <div class="row padding-v-20">
                                 <div class="form-group text-center">
