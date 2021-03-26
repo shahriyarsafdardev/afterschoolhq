@@ -356,21 +356,53 @@ namespace AfterSchoolLibrary.Services
         {
             var initialDate = DateTime.UtcNow;
 
-            if (plan.PlanTypeId == SubscriptionPlanType.Subscription || plan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts)
+            if (plan.PlanTypeId == SubscriptionPlanType.Subscription )
             {
-                // find existing cancelled plans and make new plan start the day after it ends.
-                // for a person restarting a plan after cancellation
-                if (plan.PlanTypeId == SubscriptionPlanType.Subscription)
+                //.. TODO: check this logic change, earlier this was in OR condition but now it's in AND.
+                //.. motive here is if plan is subscription then divide each logic furhter based on PaymentStartTypeId
+                //.. will it have any affect in payment plan logic, due to or logic? ask darye
+
+                if (plan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts)
                 {
-                    var rsps = registrant.GetUnexpiredCancelledRegistrantSubscriptionPlans(participationObject, msgs, dc);
+                    // find existing cancelled plans and make new plan start the day after it ends.
+                    // for a person restarting a plan after cancellation
+                    if (plan.PlanTypeId == SubscriptionPlanType.Subscription)
+                    {
+                        var rsps = registrant.GetUnexpiredCancelledRegistrantSubscriptionPlans(participationObject, msgs, dc);
 
-                    if (rsps.Any(rsp => rsp.ValidUntil.HasValue))
-                        return rsps.Last().ValidUntil.Value.AddDays(1);
+                        if (rsps.Any(rsp => rsp.ValidUntil.HasValue))
+                            return rsps.Last().ValidUntil.Value.AddDays(1);
+                    }
+
+                    // can't start in the past
+                    if (participationObject.StartDate.HasValue && participationObject.StartDate.Value.IsAfter(initialDate))
+                        return participationObject.StartDate.Value;
+
                 }
+                else if (plan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout)
+                {
+                    //..If the subscription starts on checkout  and/or there is no activity schedule, then make it so billing starts on the next Sunday
+                    //..This logic will return the next sunday to occur, or today if it's already sunday
+                    int daysUntilNextSunday = ((int)DayOfWeek.Sunday - (int)initialDate.DayOfWeek + 7) % 7;
+                    var nextSunday = initialDate.AddDays(daysUntilNextSunday);
+                    return nextSunday;
+                }
+                else if (plan.PaymentStartTypeId == PlanPaymentStartType.OnPeriodStart)
+                {
+                    // find existing cancelled plans and make new plan start the day after it ends.
+                    // for a person restarting a plan after cancellation
+                    if (plan.PlanTypeId == SubscriptionPlanType.Subscription)
+                    {
+                        var rsps = registrant.GetUnexpiredCancelledRegistrantSubscriptionPlans(participationObject, msgs, dc);
 
-                // can't start in the past
-                if (participationObject.StartDate.HasValue && participationObject.StartDate.Value.IsAfter(initialDate))
-                    return participationObject.StartDate.Value;
+                        if (rsps.Any(rsp => rsp.ValidUntil.HasValue))
+                            return rsps.Last().ValidUntil.Value.AddDays(1);
+                    }
+
+                    // can't start in the past
+                    if (participationObject.StartDate.HasValue && participationObject.StartDate.Value.IsAfter(initialDate))
+                        return participationObject.StartDate.Value;
+                }
             }
 
             return initialDate;
