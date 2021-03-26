@@ -319,7 +319,10 @@ namespace AfterSchoolLibrary.Models
 
         public string GetNickName(string participationObjectName)
         {
-            return $"{participationObjectName} Plan {this.CostPerPeriod.ToCurrency()} / {this.BillingPeriodTypeId} for {this.TotalPeriods} {this.BillingPeriodTypeId}";
+            if (this.IsOngoingSubscription)
+				return $"{participationObjectName} Plan {this.CostPerPeriod.ToCurrency()} / {this.BillingPeriodTypeId}";
+			else 
+				return $"{participationObjectName} Plan {this.CostPerPeriod.ToCurrency()} / {this.BillingPeriodTypeId} for {this.TotalPeriods} {this.BillingPeriodTypeId}";
         }
 
         public decimal GetStripeFeeAmountWithConnectedAccount()

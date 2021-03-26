@@ -486,6 +486,17 @@ namespace AfterSchoolLibrary.Models
             return null;
         }
 
+        public ActivityInstance GetUpcomingActivityInstance(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (IsActivity())
+            {
+                var instances = Schedule.GetUpcomingInstance(msgs, dc);
+                return instances.FirstOrDefault();
+            }
+
+            return null;
+        }
+
         public bool IsInSession(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (IsActivity())

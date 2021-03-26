@@ -25,8 +25,9 @@
         @if (subPlan.IsNotEmpty() && subPlan.IsOngoingSubscription)
         {
             <li>
-                1 payment of
-                @ParticipationObjectUI.PrintPlanFee(subPlan, Model.OwnerAccount, displayCheckoutPrice)
+                Payment of @ParticipationObjectUI.PrintPlanFee(subPlan, Model.OwnerAccount, displayCheckoutPrice) 
+                every 
+                @subPlan.BillingPeriodTypeId.ToString().ToLower()@(subPlan.ID != Model.SubscriptionPlans.Last().ID ? ", or " : "")
             </li>
         }
         else

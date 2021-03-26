@@ -1253,10 +1253,10 @@ namespace AfterSchoolLibrary.Billing
                 Coupon = stripeCouponId,
                 Items = new List<SubscriptionItemOptions>() { new SubscriptionItemOptions() { Plan = planId, Quantity = 1 } },
                 Metadata = metaData,
-                Prorate = false,
+                Prorate = true,
             };
 
-            if (startDate.Value.AddDays(-1).IsAfter(DateTime.UtcNow))
+            if (startDate.Value.Date.AddDays(-1).IsAfter(DateTime.UtcNow.Date))
                 options.TrialEnd = startDate.Value.AddDays(-1);
 
             if (stripeAccountId.IsNotEmpty())

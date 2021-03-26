@@ -3,6 +3,7 @@
 @{
     var subscriptionPlan = (SubscriptionPlan)ViewBag.SubscriptionPlan;
     var paymentdisabled = (string)ViewBag.paymentdisabled;
+    var schedule = Model.GetSchedule();
 
     var accountPackage = (AccountPackage)ViewBag.accountPackage;
     var showAllowSubscriptionPlans = accountPackage.HasFeature(FeatureType.AllowSubscriptionPlans);
@@ -57,16 +58,27 @@
                 </div>
 
                 <div class="am-checkbox">
-                    <input type="checkbox" name="isongoingsubscription" id="isOngoingSubscription" value="1" @(subscriptionPlan.IsNotEmpty() && subscriptionPlan.IsOngoingSubscription ? "checked=\"checked\"" : "") />
+                    <input type="checkbox" name="isongoingsubscription" id="isOngoingSubscription" value="1" @(subscriptionPlan.IsNotEmpty() && subscriptionPlan.IsOngoingSubscription == false ? "" : "checked=\"checked\"") />
                     <label for="isOngoingSubscription">Is Ongoing Subscription</label>
                 </div>
 
-                <div id="container-subscription-period" class="input-group input-group-lg xs-mb-15 @(subscriptionPlan.IsNotEmpty() && subscriptionPlan.IsOngoingSubscription ? "hide" : "")">
-                    <span class="input-group-addon"># of Payments</span>
-                    <input type="number" class="form-control" id="subscriptionPlanPeriodNumber"
-                           name="subscriptionPlanPeriodNumber"
-                           value="@(subscriptionPlan.IsNotEmpty() ? subscriptionPlan.TotalPeriods.ToString() : "0")"
-                           required min="0" step="1" @paymentdisabled />
+                <div id="container-subscription-period" class="@(subscriptionPlan.IsNotEmpty() && subscriptionPlan.IsOngoingSubscription == false ? "" : "hide")">
+                    <div class="input-group input-group-lg xs-mb-15">
+                        <span class="input-group-addon"># of Payments</span>
+                        <input type="number" class="form-control" id="subscriptionPlanPeriodNumber"
+                               name="subscriptionPlanPeriodNumber"
+                               value="@(subscriptionPlan.IsNotEmpty() && subscriptionPlan.TotalPeriods > 2 ? subscriptionPlan.TotalPeriods.ToString() : "2")"
+                               onKeyUp="if(this.value>99){this.value=99;}else if(this.value<2){this.value=2;}" />
+                    </div>
+
+                    @if (Model.HasSchedule && schedule.IsNotEmpty() && schedule.EndDate.IsNotEmpty() && schedule.IsOngoing == false)
+                    {
+                        <p class="text-muted text-medium-small">
+                            <span id="pricetoparent-subscription-span">
+                                <em>Payments will automatically end after @(subscriptionPlan.TotalPeriods > 2 ? subscriptionPlan.TotalPeriods.ToString() : "2") payments or activity end date: @schedule.EndDate.ToShortDateString(), whichever comes first.</em>.
+                            </span>
+                        </p>
+                    }
                 </div>
 
                 <br />

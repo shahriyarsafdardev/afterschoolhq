@@ -389,19 +389,9 @@ namespace AfterSchoolLibrary.Services
                 }
                 else if (plan.PaymentStartTypeId == PlanPaymentStartType.OnPeriodStart)
                 {
-                    // find existing cancelled plans and make new plan start the day after it ends.
-                    // for a person restarting a plan after cancellation
-                    if (plan.PlanTypeId == SubscriptionPlanType.Subscription)
-                    {
-                        var rsps = registrant.GetUnexpiredCancelledRegistrantSubscriptionPlans(participationObject, msgs, dc);
-
-                        if (rsps.Any(rsp => rsp.ValidUntil.HasValue))
-                            return rsps.Last().ValidUntil.Value.AddDays(1);
-                    }
-
-                    // can't start in the past
-                    if (participationObject.StartDate.HasValue && participationObject.StartDate.Value.IsAfter(initialDate))
-                        return participationObject.StartDate.Value;
+                    var upcomingPeriod = participationObject.GetUpcomingActivityInstance(msgs, dc); //.. this will be upcoming period
+                    if (upcomingPeriod.IsNotEmpty() && upcomingPeriod.StartDateTime.HasValue)
+                        return DateTime.SpecifyKind(upcomingPeriod.StartDateTime.Value, DateTimeKind.Utc);
                 }
             }
 
