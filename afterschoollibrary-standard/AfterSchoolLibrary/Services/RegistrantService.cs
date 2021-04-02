@@ -356,12 +356,8 @@ namespace AfterSchoolLibrary.Services
         {
             var initialDate = DateTime.UtcNow;
 
-            if (plan.PlanTypeId == SubscriptionPlanType.Subscription )
+            if (plan.PlanTypeId == SubscriptionPlanType.Subscription)
             {
-                //.. TODO: check this logic change, earlier this was in OR condition but now it's in AND.
-                //.. motive here is if plan is subscription then divide each logic furhter based on PaymentStartTypeId
-                //.. will it have any affect in payment plan logic, due to or logic? ask darye
-
                 if (plan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts)
                 {
                     // find existing cancelled plans and make new plan start the day after it ends.
@@ -381,17 +377,37 @@ namespace AfterSchoolLibrary.Services
                 }
                 else if (plan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout)
                 {
-                    //..If the subscription starts on checkout  and/or there is no activity schedule, then make it so billing starts on the next Sunday
-                    //..This logic will return the next sunday to occur, or today if it's already sunday
-                    int daysUntilNextSunday = ((int)DayOfWeek.Sunday - (int)initialDate.DayOfWeek + 7) % 7;
-                    var nextSunday = initialDate.AddDays(daysUntilNextSunday);
-                    return nextSunday;
+                    //..If the subscription starts on checkout  and/or there is no activity schedule, then make it so billing starts on the prior Sunday
+                    //..This logic will return the prior sunday, or today if it's already sunday
+                    int daysUntilLastSunday = ((int)DayOfWeek.Sunday - (int)initialDate.DayOfWeek + 7) % 7;
+                    var previousSunday = initialDate.AddDays(daysUntilLastSunday);
+                    return previousSunday.IsAfter(DateTime.UtcNow) ? previousSunday : DateTime.UtcNow;
                 }
                 else if (plan.PaymentStartTypeId == PlanPaymentStartType.OnPeriodStart)
                 {
+                    // if a class is on Tuesdays and Thursdays, On Period start (if weekly) would mean every Sunday (prior to the Tuesday)
+                    // Or if activity start is on Oct 5th, but is monthly, and the person wants on period start, it would be Oct 1st
+
                     var upcomingPeriod = participationObject.GetUpcomingActivityInstance(msgs, dc); //.. this will be upcoming period
                     if (upcomingPeriod.IsNotEmpty() && upcomingPeriod.StartDateTime.HasValue)
-                        return DateTime.SpecifyKind(upcomingPeriod.StartDateTime.Value, DateTimeKind.Utc);
+                    {
+                        var upcomingPeriodDateUTC = DateTime.SpecifyKind(upcomingPeriod.StartDateTime.Value, DateTimeKind.Utc);
+                        if (plan.BillingPeriodTypeId == BillingPeriodType.Week || plan.BillingPeriodTypeId == BillingPeriodType.TwoWeeks)
+                        {
+                            int daysUntilLastSunday = ((int)DayOfWeek.Sunday - (int)upcomingPeriodDateUTC.DayOfWeek - 7) % 7;
+                            var previousSunday = upcomingPeriodDateUTC.AddDays(daysUntilLastSunday);
+                            return previousSunday.IsAfter(DateTime.UtcNow) ? previousSunday : DateTime.UtcNow;
+                        }
+                        else if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
+                        {
+                            var monthStartDate = new DateTime(upcomingPeriodDateUTC.Year, upcomingPeriodDateUTC.Month, 1);
+                            return monthStartDate.IsAfter(DateTime.UtcNow) ? monthStartDate : DateTime.UtcNow;
+                        }
+                        else
+                            return initialDate;
+                    }
+
+                    return initialDate;
                 }
             }
 
