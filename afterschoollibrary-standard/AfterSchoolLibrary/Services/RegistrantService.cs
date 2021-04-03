@@ -160,6 +160,7 @@ namespace AfterSchoolLibrary.Services
                 var (customer, sourceId) = GetCustomerAndSourceForSubscription(checkoutObject, msgs);
                 // var stripeCouponId = plan.DoesCouponApply(checkoutObject.Coupon) ? checkoutObject.Coupon.StripeCouponId : null;
                 var startDateTime = submittedRecord.GetPlanStartDate(plan, checkoutObject.ParticipationObject, msgs, dc);
+                var endDateTime = submittedRecord.GetPlanEndDate(plan, checkoutObject.ParticipationObject, msgs, dc);
                 var platformFeePercent = new decimal?();
                 string stripeAccountId = null;
                 string stripeCouponId = null;
@@ -183,6 +184,7 @@ namespace AfterSchoolLibrary.Services
                                     platformFeePercent: platformFeePercent,
                                     stripeAccountId: stripeAccountId,
                                     startDate: startDateTime,
+                                    endDate: endDateTime,
                                     stripeCouponId: stripeCouponId,
                                     metaData: new Dictionary<string, string>()
                                     {
@@ -379,7 +381,7 @@ namespace AfterSchoolLibrary.Services
                 {
                     //..If the subscription starts on checkout  and/or there is no activity schedule, then make it so billing starts on the prior Sunday
                     //..This logic will return the prior sunday, or today if it's already sunday
-                    int daysUntilLastSunday = ((int)DayOfWeek.Sunday - (int)initialDate.DayOfWeek + 7) % 7;
+                    int daysUntilLastSunday = ((int)DayOfWeek.Sunday - (int)initialDate.DayOfWeek - 7) % 7;
                     var previousSunday = initialDate.AddDays(daysUntilLastSunday);
                     return previousSunday.IsAfter(DateTime.UtcNow) ? previousSunday : DateTime.UtcNow;
                 }
@@ -412,6 +414,15 @@ namespace AfterSchoolLibrary.Services
             }
 
             return initialDate;
+        }
+
+        public static DateTime? GetPlanEndDate(this Registrant registrant, SubscriptionPlan plan, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (plan.PlanTypeId == SubscriptionPlanType.Subscription &&
+                participationObject.Schedule.IsNotEmpty() && !participationObject.Schedule.IsOngoing && participationObject.Schedule.EndDate.HasValue)
+                return participationObject.Schedule.EndDate.Value;
+
+            return null;
         }
 
         private static PlanFeeObject GetFeeObject(CheckoutObject checkoutObject, Account billingAccount, SubscriptionPlan plan, SystemMessages msgs, DatabaseConnection dc = null)

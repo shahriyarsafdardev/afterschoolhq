@@ -67,8 +67,7 @@
                         <span class="input-group-addon"># of Payments</span>
                         <input type="number" class="form-control" id="subscriptionPlanPeriodNumber"
                                name="subscriptionPlanPeriodNumber"
-                               value="@(subscriptionPlan.IsNotEmpty() && subscriptionPlan.TotalPeriods > 2 ? subscriptionPlan.TotalPeriods.ToString() : "2")"
-                               onKeyUp="if(this.value>99){this.value=99;}else if(this.value<2){this.value=2;}" />
+                               value="@(subscriptionPlan.IsNotEmpty() && subscriptionPlan.TotalPeriods > 2 ? subscriptionPlan.TotalPeriods.ToString() : "2")"/>
                     </div>
                 </div>
 
