@@ -294,7 +294,15 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public SystemMessages Deactivate(int loggedInUserId, DatabaseConnection dc = null)
+		public static SubscriptionPlan LoadByStripePlanId(string StripePlanId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["StripePlanId"], StripePlanId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
+
+		public SystemMessages Deactivate(int loggedInUserId, DatabaseConnection dc = null)
         {
             this.IsActive = false;
             this.LastModifiedDate = DateTime.UtcNow;

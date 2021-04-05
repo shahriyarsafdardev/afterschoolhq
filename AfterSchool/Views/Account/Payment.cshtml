@@ -12,7 +12,7 @@
     var paymentAccount = participationObject.PaymentAccount;
     var subscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault();
     var postPayPlan = participationObject.PostPayPlans.FirstOrDefault();
-    var registrant = registration.GetRegistrant();
+    var registrant = registration.GetRegistrant();    
     var readyToAcceptPayment = subscriptionPlan.IsEmpty() || !subscriptionPlan.SplitCostEvenly || participationObject.RegistrationFinalized;
 }
 
@@ -34,9 +34,22 @@
                 startDateText = planStartDate.ToLongDateString();
             }
 
-            <span>
-                @(includePlus ? "plus a" : "") subscription of <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong> every <strong>@plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong> starting <strong>@startDateText</strong>
-            </span>
+            if(plan.TotalPeriods > 1)
+            {
+                var TotalPeriodsToPayAfterDiscount = participationObject.GetNumberOfRemainingPayments(plan.TotalPeriods.Value);
+                var price = plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency();
+                <span>
+                    @(includePlus ? "plus a" : "") subscription of <strong> @price </strong> today and 
+                    <strong>@(TotalPeriodsToPayAfterDiscount - 1)</strong> more payment@(TotalPeriodsToPayAfterDiscount > 2 ? "s" : "") of
+                    <strong>@price </strong> every
+                    <strong>@plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong>
+                </span>
+            } 
+            else { 
+                <span>
+                    @(includePlus ? "plus a" : "") subscription of <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong> every <strong>@plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong> starting <strong>@startDateText</strong>
+                </span>
+            }
         }
         else if (plan.RegFeeAsDownPayment)
         {
@@ -129,7 +142,7 @@
                                             planStartDate = poStartDate.Value.Date;
                                         }
 
-                                        var startToday = plan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout || planStartDate.IsOnOrBefore(today);
+                                        var startToday = plan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout || planStartDate.IsOnOrBefore(today);                                        
 
                                         <div class="am-radio">
                                             <input type="radio" name="paymentoption" id="paymentoption-@plan.ID" class="payment-option-radio" value="@plan.ID" />
@@ -140,9 +153,11 @@
 
                                                 @if (plan.TotalPeriods > 1)
                                                 {
+                                                    var TotalPeriodsToPayAfterDiscount = participationObject.GetNumberOfRemainingPayments(plan.TotalPeriods.Value, msgs);
+
                                                     <span>
                                                         and
-                                                        <strong>@(plan.TotalPeriods - 1)</strong> more payment@(plan.TotalPeriods > 2 ? "s" : "") of
+                                                        <strong>@(TotalPeriodsToPayAfterDiscount - 1)</strong> more payment@(TotalPeriodsToPayAfterDiscount > 2 ? "s" : "") of
                                                         <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong>
                                                         @if (plan.TotalPeriods > 2)
                                                         {
@@ -183,7 +198,7 @@
                                         </p>
                                     }
                                     else
-                                    {
+                                    { 
                                         <p>Pay @PrintSubscriptionCost(subscriptionPlan, participationObject, false)</p>
                                     }
                                     <hr />

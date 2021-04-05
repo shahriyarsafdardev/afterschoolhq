@@ -52,6 +52,8 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                         return InvoicePaymentFailed(stripeEvent, msgs);
                     case "payment_intent.processing":
                         return PaymentIntentProcessing(stripeEvent, msgs);
+                    case "customer.subscription.deleted":
+                        return SubscriptionCompleted(stripeEvent, msgs);
                     default:
                         return ReturnOK(msgs);
                 }
@@ -323,6 +325,20 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
 
             if (msgs.HasErrors())
                 return Return500(msgs);
+
+            return ReturnOK(msgs);
+        }
+
+        private IHttpActionResult SubscriptionCompleted(Stripe.Event stripeEvent, SystemMessages msgs)
+        {            
+            var subscription = (Stripe.Subscription)stripeEvent.Data.Object;
+
+            if (subscription.Plan.IsNotEmpty() && subscription.Plan.Id.IsNotEmpty())
+            {
+                var dbSubscription = SubscriptionPlan.LoadByStripePlanId(subscription.Plan.Id, msgs);
+                dbSubscription.IsActive = false;
+                dbSubscription.Save();
+            }            
 
             return ReturnOK(msgs);
         }

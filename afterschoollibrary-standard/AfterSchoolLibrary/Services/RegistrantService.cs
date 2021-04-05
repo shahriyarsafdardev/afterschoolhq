@@ -220,12 +220,14 @@ namespace AfterSchoolLibrary.Services
 
                 var purchase = checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc);
                 var feeObject = GetFeeObject(checkoutObject, billingAccount, plan, msgs, dc);
-
+                var totalPeriods = plan.TotalPeriods.HasValue ? participationObject.GetNumberOfRemainingPayments(plan.TotalPeriods.Value, msgs, dc) : (int?)null;
+                
                 checkoutObject.RegistrantSubscriptionPlan = plan.AddRegistrant(
                                                                 submittedRecord,
                                                                 startDateTime,
                                                                 purchase,
                                                                 subscription.Id,
+                                                                totalPeriods,
                                                                 feeObject,
                                                                 loggedInUser,
                                                                 msgs,

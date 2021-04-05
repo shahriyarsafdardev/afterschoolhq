@@ -501,6 +501,21 @@ namespace AfterSchoolLibrary.Services
                     dc);
         }
 
+        public static RegistrantSubscriptionPlan AddRegistrant(this SubscriptionPlan plan, Registrant registrant, DateTime? startDateTime, Purchase purchase, string stripeSubscriptionId, int? TotalPeriods, PlanFeeObject feeObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RegistrantSubscriptionPlanService.CreateNew(
+                    registrant,
+                    plan,
+                    startDateTime.IfEmpty(DateTime.UtcNow),
+                    purchase.ID,
+                    stripeSubscriptionId,
+                    TotalPeriods,
+                    feeObject,
+                    loggedInUser,
+                    msgs,
+                    dc);
+        }
+
         public static List<RegistrantSubscriptionPlan> GetRegistrantSubscriptionPlans(this SubscriptionPlan plan, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return RegistrantSubscriptionPlan.LoadBySubscriptionPlanId(plan.ID.Value, msgs, dc);

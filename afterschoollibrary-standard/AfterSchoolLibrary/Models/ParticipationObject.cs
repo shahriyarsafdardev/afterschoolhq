@@ -917,6 +917,29 @@ namespace AfterSchoolLibrary.Models
             return 0;
         }
 
+        /// <summary>
+        /// use-case: simple scenario is classes are from Oct 1 - Dec 31, and someone signs up Nov 1, they should only have to pay for Nov 1 - Dec 31st.
+        /// We'd have to calculate the # of payments based on total periods and total activity instances 
+        /// </summary>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
+        public int? GetNumberOfRemainingPayments(int totalPeriods, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty())
+                msgs = new SystemMessages();
+
+            if (totalPeriods > 0 && Schedule.IsNotEmpty() && Schedule.ID.HasValue)
+            {
+                var activityInstances =  ActivityInstance.LoadByActivityScheduleId(Schedule.ID.Value, msgs);
+                var upcomingInstances = Schedule.GetUpcomingInstance(msgs);
+
+                var numberofPeriodsToBePaid = (upcomingInstances.Count * totalPeriods) / activityInstances.Count;
+                return Convert.ToInt32(Math.Ceiling(numberofPeriodsToBePaid.ToDecimal()));
+            }
+
+            return null;
+        }
+
         #endregion
 
         #region DemoObjects
