@@ -4,19 +4,20 @@ using AfterSchoolLibrary.Models;
 
 namespace AfterSchoolLibraryTests.Factories
 {
-    public class RegistrantActivityFactory
+    public class RefundRequestFactory
     {
-        public static RegistrantActivity Create(Activity activity, Registrant registrant, SystemMessages msgs, DatabaseConnection dc)
+        public static RefundRequest Create(decimal amount, Transaction transaction, Account billingAccount, string reason, WebUser creator, SystemMessages msgs, DatabaseConnection dc)
         {
-            var obj = new RegistrantActivity()
+            var obj = new RefundRequest()
             {
-                ParticipationObjectId = activity.ID,
-                ParticipationObjectTypeId = ParticipationObjectType.Activity,
-                RegistrantId = registrant.ID
+                Amount = amount,
+                TransactionId = transaction.ID.Value,
+                AccountId = billingAccount.ID.Value,
+                RequestReason = reason,
+                CreatedBy = creator.ID.Value
             };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
-
-     
+    }
 }

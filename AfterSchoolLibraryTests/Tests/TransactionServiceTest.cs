@@ -183,6 +183,7 @@ namespace AfterSchoolLibraryTests.Tests
 
         [Theory]
         [InlineData(25, 2.49, 2.18)]
+        [InlineData(50, 3.49, 4.18)]
         public void IsTotallyRefundedTest(decimal amount, decimal paymentTypeFee, decimal convenienceFee)
         {
             var transaction = TransactionFactory.Create(
@@ -202,8 +203,8 @@ namespace AfterSchoolLibraryTests.Tests
 
             var refund = transaction.RefundPayerFullAmount(BillerAccountOwner, msgs, dc);
 
-            Assert.True(refund.IsTotallyRefunded(BillerAccount, msgs, dc));
-            Assert.False(refund.IsTotallyRefunded(PayerAccount, msgs, dc));
+            Assert.True(refund.IsTotallyRefunded(true, msgs, dc));
+            Assert.True(refund.IsTotallyRefunded(false, msgs, dc));
         }
 
     }

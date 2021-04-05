@@ -9,29 +9,89 @@ using BasicLibrary.DataAccess;
 
 namespace AfterSchoolLibraryTests.Tests
 {
-    public class RefundRequest : BaseTest
+    public class RefundRequestTest : BaseTest
     {
         private WebUser BillingWebUser { get; set; }
         private WebUser PayingWebUser { get; set; }
         private Account BillingAccount { get; set; }
         private Account PayingAccount { get; set; }
         private Transaction TestTransaction { get; set; }
-        private RefundRequest TestRefundRequest { get; set; }
 
-        public RefundRequest(ITestOutputHelper output) : base(output)
+        public RefundRequestTest(ITestOutputHelper output) : base(output)
         {
             BillingWebUser = WebUserFactory.Create(msgs, dc);
             BillingAccount = AccountFactory.Create(BillingWebUser, msgs, dc);
             PayingWebUser = WebUserFactory.Create(msgs, dc);
             PayingAccount = AccountFactory.Create(PayingWebUser, msgs, dc);
             TestTransaction = TransactionFactory.Create(BillingAccount, PayingAccount, PaymentType.ACH, 50, msgs, dc);
-            TestRefundRequest = Refun
         }
 
         [Fact(DisplayName = "LoadTest")]
         public void LoadTest()
         {
-            TestTransaction.R
+            var amount = 25;
+            var refundRequest = RefundRequestFactory.Create(amount, TestTransaction, BillingAccount, "i want my money back", PayingWebUser, msgs, dc);
+
+            Assert.True(RefundRequest.Load(refundRequest.ID.Value, msgs, dc).IsNotEmpty());
+        }
+
+        /// <summary>
+        /// Gets number of transactions in the database
+        /// </summary>
+        /// <param name="numberToCreate"></param>
+        [Theory]
+        [InlineData(8)]
+        [InlineData(2)]
+        public void GetCountTest(int numberToCreate)
+        {
+            for (var i = 0; i < numberToCreate; i++)
+            {
+                var amount = 25;
+                var transaction = TransactionFactory.Create(BillingAccount, PayingAccount, PaymentType.ACH, msgs, dc);
+                var refundRequest = RefundRequestFactory.Create(amount, transaction, BillingAccount, "i want my money back", PayingWebUser, msgs, dc);
+            }
+
+            Assert.Equal(numberToCreate, RefundRequest.GetCount(msgs: msgs, dc: dc));
+        }
+
+
+        /// <summary>
+        /// saves the plan to the DB
+        /// </summary>
+        [Fact]
+        public void SaveTest()
+        {
+            var amount = 25;
+            var refundRequest = RefundRequestFactory.Create(amount, TestTransaction, BillingAccount, "it sitnks", PayingWebUser, msgs, dc);
+
+            refundRequest.LastModifiedBy = 1;
+            msgs.AddRange(refundRequest.Save(dc));
+
+            Assert.True(msgs.HasNoErrors());
+        }
+
+        /// <summary>
+        /// removes the plan from the DB
+        /// </summary>
+        [Fact]
+        public void DeleteTest()
+        {
+            var amount = 25;
+            var refundRequest = RefundRequestFactory.Create(amount, TestTransaction, BillingAccount,"it sitnks", PayingWebUser, msgs, dc);
+
+            msgs.AddRange(refundRequest.Delete(dc));
+
+            Assert.Equal(0, RefundRequest.GetCount(msgs: msgs, dc: dc));
+        }
+
+        [Fact]
+        public void LoadByTransactionTest()
+        {
+            var amount = 25;
+            var refundRequest = RefundRequestFactory.Create(amount, TestTransaction, BillingAccount, "it sitnks", PayingWebUser, msgs, dc);
+            refundRequest.UpdateStatus(RefundRequestStatus.Completed, BillingWebUser, msgs, dc);
+
+            Assert.Equal(RefundRequestStatus.Completed,refundRequest.RefundRequestStatusId);
         }
     }
 }
