@@ -50,11 +50,8 @@ namespace AfterSchoolLibraryTests.Tests
             var amount = 25;
             var refundRequest = RefundRequestFactory.Create(amount, TestTransaction, BillingAccount, "i want my money back", PayingWebUser, msgs, dc);
             refundRequest.ApproveAndProcessRequest(true, true, true, PaymentSourceType.AfterSchoolPlatform, BillingWebUser, msgs, dc);
-            var refundTransaction = Transaction.LoadByOriginalTransactionIdByIsDeleted(TestTransaction.ID.Value, false, msgs, dc);
 
             Assert.Equal(RefundRequestStatus.Completed, refundRequest.RefundRequestStatusId);
-            Assert.Single(refundTransaction);
-            Assert.Single(RefundRequest.LoadByTransactionId(refundTransaction[0].ID.Value));
         }   
 
         [Fact(DisplayName = "UpdateStatusTest")]

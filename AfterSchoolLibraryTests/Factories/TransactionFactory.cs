@@ -14,7 +14,8 @@ namespace AfterSchoolLibraryTests.Factories
                 BillerAccountId = billerAccount.ID,
                 PayerAccountId = payerAccount.ID,
                 PaymentTypeId = paymentType,
-                Description = "User purchase"
+                Description = "User purchase",
+                TransactionTypeId = TransactionType.Charge
             };
             msgs.AddRange(obj.Save(dc));
             return obj;
@@ -28,7 +29,8 @@ namespace AfterSchoolLibraryTests.Factories
                 BillerAccountId = billerAccount.ID,
                 PayerAccountId = payerAccount.ID,
                 PaymentTypeId = paymentType,
-                Description = "User purchase"
+                Description = "User purchase",
+                TransactionTypeId = TransactionType.Charge
             };
             msgs.AddRange(obj.Save(dc));
             return obj;
@@ -50,6 +52,7 @@ namespace AfterSchoolLibraryTests.Factories
                 PaymentTypeFeeCharged = paymentTypeFeeCharged,
                 PaymentTypeFeePayerAccountId = paymentTypeFeePayerAccountId,
                 TransactionTypeId = transactionType,
+                PaymentSourceTypeId = PaymentSourceType.AfterSchoolPlatform,
             };
             msgs.AddRange(obj.Save(dc));
             return obj;
@@ -73,7 +76,8 @@ namespace AfterSchoolLibraryTests.Factories
                 ConvenienceFeeCharged = (amount * platformPecrentFee) + platformFlatFee,
                 ConvenienceFeePayerAccountId = billerAccount.ID.Value,
                 PaymentTypeFeeCharged = paymentType == PaymentType.CreditCard ? new FeeCalculationObject(amount, billerAccount, msgs, dc).GetCreditCardFee() : 0,
-                PaymentTypeFeePayerAccountId = payerAccount.ID.Value
+                PaymentTypeFeePayerAccountId = payerAccount.ID.Value,
+                TransactionTypeId = TransactionType.Charge
             };
 
              msgs.AddRange(obj.Save(dc));

@@ -152,7 +152,7 @@ namespace AfterSchoolLibraryTests.Tests
                  TransactionType.NotSet
              );
 
-            Assert.Equal(amount - paymentTypeFee, transaction1.GetRefundableAmount(false, msgs, dc));
+            Assert.Equal(Math.Max(amount - paymentTypeFee,paymentTypeFee), transaction1.GetRefundableAmount(false, msgs, dc));
             Assert.Equal(amount, transaction1.GetRefundableAmount(true, msgs, dc));
 
             Assert.Equal(0, transaction2.GetRefundableAmount(false, msgs, dc));
@@ -201,10 +201,22 @@ namespace AfterSchoolLibraryTests.Tests
                 dc
             );
 
-            var refund = transaction.RefundPayerFullAmount(BillerAccountOwner, msgs, dc);
+            var refund = transaction.CreateNewRefund(
+                        fullAmount: transaction.GetPayerAmount(),
+                        convenienceFeeAmount: convenienceFee,
+                        paymentTypeFeeAmount: paymentTypeFee,
+                        refundId: null,
+                        transactionType: TransactionType.Refund,
+                        paymentType: PaymentType.CreditCard,
+                        paymentSourceType: transaction.PaymentSourceTypeId,
+                        refundingAccount: transaction.GetBillerAccount(msgs, dc),
+                        refundedAccount: transaction.GetPayerAccount(msgs, dc),
+                        loggedInUser: PayerAccountOwner,
+                        msgs: msgs,
+                        dc: dc);
 
-            Assert.True(refund.IsTotallyRefunded(true, msgs, dc));
-            Assert.True(refund.IsTotallyRefunded(false, msgs, dc));
+            Assert.True(refund.IsNotEmpty());
+            Assert.True(transaction.IsTotallyRefunded(true, msgs, dc));
         }
 
     }

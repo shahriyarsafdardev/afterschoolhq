@@ -2,6 +2,7 @@
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
+using System.Linq;
 
 namespace AfterSchoolLibraryTests.Factories
 {
@@ -15,7 +16,9 @@ namespace AfterSchoolLibraryTests.Factories
                 AccountId = account.ID,
                 SeatsAvailable = 4,
                 Name = name,
-                UniqueName = ActivityService.GenerateUniqueName(name, null, account.ID, msgs, dc)
+                UniqueName = ActivityService.GenerateUniqueName(name, null, account.ID, msgs, dc),
+                GradeLevelStart = GradeLevel.Load(msgs: msgs, dc: dc).First().ID,
+                GradeLevelEnd = GradeLevel.Load(msgs: msgs, dc: dc).Last().ID
             };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;

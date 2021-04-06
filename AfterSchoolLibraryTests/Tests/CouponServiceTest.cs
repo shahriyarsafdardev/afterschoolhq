@@ -37,15 +37,15 @@ namespace AfterSchoolLibraryTests.Tests
         {
             var couponCode = CouponService.GenerateCouponCode(CouponAccount.ID.Value, msgs, dc);
 
-            Assert.True(couponCode.IsGuid());
+            Assert.True(couponCode.IsNotEmpty());
         }
 
         [Fact(DisplayName = "GetAccountTest")]
         public void GetAccountTest()
         {
             var coupon = CouponFactory.Create(CouponAccount, msgs, dc);
-
-            Assert.Equal(coupon.GetAccount(msgs, dc), CouponAccount);
+            
+            Assert.Equal(CouponAccount.ID.Value, coupon.GetAccount(msgs, dc).ID.Value);
         }
     }
 }

@@ -1218,7 +1218,7 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["PaymentSourceTypeId"], (int)paymentSourceType);
 
             var results = dq.Select(msgs);
-            if (results.Rows.Any())
+            if (results.IsNotEmpty() && results.Rows.Any())
                 return results.Rows[0][0].ToString().ToDecimal();
 
             return 0;
