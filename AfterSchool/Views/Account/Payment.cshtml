@@ -142,7 +142,7 @@
                                             planStartDate = poStartDate.Value.Date;
                                         }
 
-                                        var startToday = plan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout || planStartDate.IsOnOrBefore(today);                                        
+                                        var startToday = plan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout || planStartDate.IsOnOrBefore(today);
 
                                         <div class="am-radio">
                                             <input type="radio" name="paymentoption" id="paymentoption-@plan.ID" class="payment-option-radio" value="@plan.ID" />
