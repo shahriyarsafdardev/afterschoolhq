@@ -5,7 +5,6 @@
     var schedule = (ActivitySchedule)ViewData["schedule"];
     var controller = (string)ViewData["controller"];
     var isTechSupport = (bool)SessionVariables.LoggedInUser.IsTechSupport(SessionVariables.CurrentAccount);
-    isTechSupport = false;
 }
 
 <form method="post" action="@Url.Action("trackattendance", controller, new { id = Model.ActivityUid, att = Model.ID })" class="form-horizontal">
@@ -30,12 +29,12 @@
                             <option value="">Select...</option>
                             @foreach (var instance in schedule.GetInSessionInstances().DistinctBy(instance => instance.ID))
                             {
-                                //if (instance.StartDateTime <= account.ConvertToAccountTimeZone(DateTime.UtcNow))
-                                //{
+                                if (instance.StartDateTime <= account.ConvertToAccountTimeZone(DateTime.UtcNow))
+                                {
                                     <option value="@instance.ID" @(Model.ActivityInstanceId == instance.ID ? " selected=\"selected\" " : "")>
                                         @instance.StartDateTime.ToShortTimeString(), @instance.StartDateTime.Value.ToLongDateString()
                                     </option>
-                                //}
+                                }
                             }
                         </select>
                         @*

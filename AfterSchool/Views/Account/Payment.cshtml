@@ -12,7 +12,7 @@
     var paymentAccount = participationObject.PaymentAccount;
     var subscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault();
     var postPayPlan = participationObject.PostPayPlans.FirstOrDefault();
-    var registrant = registration.GetRegistrant();    
+    var registrant = registration.GetRegistrant();
     var readyToAcceptPayment = subscriptionPlan.IsEmpty() || !subscriptionPlan.SplitCostEvenly || participationObject.RegistrationFinalized;
 }
 
@@ -153,11 +153,9 @@
 
                                                 @if (plan.TotalPeriods > 1)
                                                 {
-                                                    var TotalPeriodsToPayAfterDiscount = participationObject.GetNumberOfRemainingPayments(plan.TotalPeriods.Value, msgs);
-
                                                     <span>
                                                         and
-                                                        <strong>@(TotalPeriodsToPayAfterDiscount - 1)</strong> more payment@(TotalPeriodsToPayAfterDiscount > 2 ? "s" : "") of
+                                                        <strong>@(plan.TotalPeriods - 1)</strong> more payment@(plan.TotalPeriods > 2 ? "s" : "") of
                                                         <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong>
                                                         @if (plan.TotalPeriods > 2)
                                                         {
@@ -198,7 +196,7 @@
                                         </p>
                                     }
                                     else
-                                    { 
+                                    {
                                         <p>Pay @PrintSubscriptionCost(subscriptionPlan, participationObject, false)</p>
                                     }
                                     <hr />
