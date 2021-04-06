@@ -338,7 +338,7 @@ namespace AfterSchoolLibrary.Services
                 if (allowFullAmountRefund)
                     return transaction.GetPayerAmount() - transaction.GetRefundedAmountAHQ(msgs, dc);
 
-                return transaction.GetBillerPayout(msgs, dc) + transaction.GetFeesChargedToBiller();
+                return transaction.GetBillerPayout(msgs, dc) + transaction.GetFeesChargedToBiller() - transaction.GetRefundedAmountAHQ(msgs, dc);
             }
 
             return 0;
