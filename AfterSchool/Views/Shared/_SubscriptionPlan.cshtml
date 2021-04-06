@@ -2,8 +2,7 @@
 
 @{
     var subscriptionPlan = (SubscriptionPlan)ViewBag.SubscriptionPlan;
-    var paymentdisabled = (string)ViewBag.paymentdisabled;
-    var schedule = Model.GetSchedule();
+    var paymentdisabled = (string)ViewBag.paymentdisabled;    
 
     var accountPackage = (AccountPackage)ViewBag.accountPackage;
     var showAllowSubscriptionPlans = accountPackage.HasFeature(FeatureType.AllowSubscriptionPlans);
@@ -57,21 +56,26 @@
                     </select>
                 </div>
 
-                <div class="am-checkbox">
-                    <input type="checkbox" name="isongoingsubscription" id="isOngoingSubscription" value="1" @(subscriptionPlan.IsNotEmpty() && subscriptionPlan.IsOngoingSubscription == false ? "" : "checked=\"checked\"") />
-                    <label for="isOngoingSubscription">Is Ongoing Subscription</label>
-                </div>
-
-                <div id="container-subscription-period" class="@(subscriptionPlan.IsNotEmpty() && subscriptionPlan.IsOngoingSubscription == false ? "" : "hide")">
-                    <div class="input-group input-group-lg xs-mb-15">
-                        <span class="input-group-addon"># of Payments</span>
-                        <input type="number" class="form-control" id="subscriptionPlanPeriodNumber"
-                               name="subscriptionPlanPeriodNumber"
-                               value="@(subscriptionPlan.IsNotEmpty() && subscriptionPlan.TotalPeriods > 2 ? subscriptionPlan.TotalPeriods.ToString() : "2")"/>
+                @if (Model.HasSchedule)
+                {
+                    <div class="am-checkbox">
+                        <input type="checkbox" name="isongoingsubscription" id="isOngoingSubscription"
+                               @(subscriptionPlan.IsNotEmpty() && subscriptionPlan.IsOngoingSubscription == false ? "" : "checked=\"checked\"") />
+                        <label for="isOngoingSubscription">Is Ongoing Subscription </label>
                     </div>
-                </div>
 
-                <br />
+                    <div id="container-subscription-period" class="@(subscriptionPlan.IsNotEmpty() && subscriptionPlan.IsOngoingSubscription == false ? "" : "hide")">
+                        <div class="input-group input-group-lg xs-mb-15">
+                            <span class="input-group-addon"># of Payments</span>
+                            <input type="number" class="form-control" id="subscriptionPlanPeriodNumber"
+                                   name="subscriptionPlanPeriodNumber"
+                                   value="@(subscriptionPlan.IsNotEmpty() && subscriptionPlan.TotalPeriods > 2 ? subscriptionPlan.TotalPeriods.ToString() : "2")" />
+                        </div>
+                    </div>
+
+                    <br />
+                }
+
             </div>
 
             <div class="row">
@@ -130,8 +134,14 @@
 
         <div class="row">
             <div class="col-sm-3"></div>
-            <div class="col-sm-6 col-sm-9">
-                <p class="text-muted padding-v-10">Subscriptions are used to bill users at specified intervals for ongoing participation.</p>
+            <div class="col-sm-9">
+                <br />
+                <p class="text-muted">Subscriptions are used to bill users at specified intervals for ongoing participation.</p>
+
+                @if (!Model.HasSchedule)
+                {
+                    <p class="text-muted">Want more subscription options, please add a schedule.</p>
+                }
             </div>
         </div>
     </div>
