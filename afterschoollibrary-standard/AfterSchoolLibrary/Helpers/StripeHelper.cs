@@ -1260,7 +1260,7 @@ namespace AfterSchoolLibrary.Billing
                 options.TrialEnd = startDate.Value.AddDays(-1);
 
             // please make sure that billing ends when the program ends.
-            if (endDate.HasValue && endDate.IsNotEmpty())
+            if (endDate.HasValue && endDate.IsNotEmpty() && endDate.Value.Date.AddDays(-1).IsAfter(DateTime.UtcNow.Date))
                 options.CancelAt = endDate.Value;        
 
             if (stripeAccountId.IsNotEmpty())
@@ -1272,6 +1272,7 @@ namespace AfterSchoolLibrary.Billing
 
             try
             {
+                //.. todo: don't create subscription if it's not ongoing and end date is of today or of past, since we can;t control the ending of those subscription
                 subscription = GetSubscriptionService().Create(options);
             }
             catch (StripeException ex)

@@ -1398,7 +1398,7 @@ namespace AfterSchoolLibrary.Services
                     participationObjectId: activity.ID.Value,
                     costPerPeriod: subscriptionplancost.ToDecimal(),
                     billingPeriodType: (BillingPeriodType)subscriptionplanperiod.ToInteger(),
-                    totalPeriods: isongoingsubscription.ToBoolean() ? 0 : subscriptionPlanPeriodNumber.ToInteger(),
+                    totalPeriods: isongoingsubscription.ToBoolean() ? 0 : (subscriptionPlanPeriodNumber.IsInteger() ? subscriptionPlanPeriodNumber.ToInteger() : 0),
                     paymentStartType: paymentStartType,
                     isongoingsubscription: isongoingsubscription.ToBoolean(),
                     doesAutoRenew: true,

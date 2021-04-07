@@ -199,6 +199,19 @@
                                     {
                                         <p>Pay @PrintSubscriptionCost(subscriptionPlan, participationObject, false)</p>
                                     }
+
+                                    @if (participationObject.Schedule.IsNotEmpty() && participationObject.Schedule.EndDate.HasValue)
+                                    {
+                                        if (subscriptionPlan.TotalPeriods >= 2)
+                                        {
+                                            <p>Payments will automatically end after <strong> @subscriptionPlan.TotalPeriods </strong>(# of) Payments or <strong> @participationObject.Schedule.EndDate.ToShortDateString() (Activity End Date) </strong> whichever comes first.</p>
+                                        }
+                                        else if (subscriptionPlan.TotalPeriods <= 2)
+                                        {
+                                            <p>Payments will automatically end after <strong> @participationObject.Schedule.EndDate.ToShortDateString() (Activity End Date) </strong>.</p>
+                                        }
+                                    }
+
                                     <hr />
                                 </div>
                             </div>

@@ -59,7 +59,7 @@
                 @if (Model.HasSchedule)
                 {
                     <div class="am-checkbox">
-                        <input type="checkbox" name="isongoingsubscription" id="isOngoingSubscription"
+                        <input type="checkbox" name="isongoingsubscription" id="isOngoingSubscription" value="1"
                                @(subscriptionPlan.IsNotEmpty() && subscriptionPlan.IsOngoingSubscription == false ? "" : "checked=\"checked\"") />
                         <label for="isOngoingSubscription">Is Ongoing Subscription </label>
                     </div>
@@ -150,11 +150,11 @@
 
 @helper BillingPeriodOptions(SubscriptionPlan plan)
 {
-    var exceptions = new List<BillingPeriodType> { BillingPeriodType.NotSet };
+    var exceptions = new List<BillingPeriodType> { BillingPeriodType.NotSet, BillingPeriodType.TwoWeeks };
 
     if (AfterSchoolLibrary.Helpers.Utilities.IsProduction)
     {
-        exceptions = new List<BillingPeriodType> { BillingPeriodType.NotSet, BillingPeriodType.Day, BillingPeriodType.Year };
+        exceptions = new List<BillingPeriodType> { BillingPeriodType.NotSet, BillingPeriodType.Day, BillingPeriodType.Year, BillingPeriodType.TwoWeeks };
     }
 
     foreach (var billingPeriodType in Enum.GetValues(typeof(BillingPeriodType)).Cast<BillingPeriodType>().Where(x => x.NotIn(exceptions)))
