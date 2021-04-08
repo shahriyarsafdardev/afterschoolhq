@@ -75,9 +75,9 @@ namespace AfterSchoolLibrary.Services
                     return originalBillerAmount;
 
                 return transaction.Amount.Value;
-            }
+            };
 
-            return transaction.Amount.Value - transaction.GetFees() - transaction.GetRefundedAmountAHQ(msgs, dc);
+            return Math.Max(transaction.Amount.Value - transaction.GetFees() - transaction.GetRefundedAmountAHQ(msgs, dc),0);
         }
 
         public static decimal GetPayerAmount(this Transaction transaction)
@@ -338,7 +338,7 @@ namespace AfterSchoolLibrary.Services
                 if (allowFullAmountRefund)
                     return transaction.GetPayerAmount() - transaction.GetRefundedAmountAHQ(msgs, dc);
 
-                return transaction.GetBillerPayout(msgs, dc) + transaction.GetFeesChargedToBiller();
+                return transaction.GetBillerPayout(msgs, dc) + transaction.GetFeesChargedToBiller() - transaction.GetRefundedAmountAHQ(msgs, dc);
             }
 
             return 0;
