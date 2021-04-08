@@ -2567,5 +2567,29 @@ namespace AfterSchoolLibrary.Services
         {
             return activity.AgeStart.IsEmpty();
         }
+
+        public static DateTime? FinalizeEndDateForSubscription(this Activity activity, BillingPeriodType billingPeriodType, DayOfWeek dayOfWeek, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (!activity.HasSchedule)
+                return null;
+
+            var schedule = activity.GetSchedule(msgs, dc);
+            var endDate = schedule.EndDate.Value;
+
+            if (billingPeriodType == BillingPeriodType.Week)
+            {
+                //.. if activity schedule ends on 1st dec and it's thursday and provide choose weekly billing every sunday, 
+                //.. that would mean, parent will be charged on last sunday of november.
+                int daysUntilLastSunday = ((int)dayOfWeek - (int)endDate.DayOfWeek - 7) % 7;
+                var previousSunday = endDate.AddDays(daysUntilLastSunday);
+                return previousSunday.IsAfter(DateTime.UtcNow) ? previousSunday : DateTime.UtcNow;
+            }
+            else if (billingPeriodType == BillingPeriodType.Month)
+            {
+
+            }
+
+            return null;
+        }
     }
 }

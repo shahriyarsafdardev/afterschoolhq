@@ -421,7 +421,14 @@
         updatePaymentPlanStartText();
 
         $('#subscriptionplanperiod').change(function () {
-            updateSubscriptionPeriodText();
+            updateSubscriptionPeriodText();      
+
+            if (this.value == "3") {                
+                Array.from($("#container-subscription-week, #container-subscription-enddate-label")).forEach(elem => { $(elem).removeClass("hide") });
+                LoadEndDate();
+            } else {
+                Array.from($("#container-subscription-week, #container-subscription-enddate-label")).forEach(elem => { $(elem).addClass("hide") });
+            }
         });
 
         $('#splitcostevenly').click(function () {
@@ -436,6 +443,9 @@
             updatePrePayDays();
         });
 
+        $('#subscriptionperiodstartweekday').change(function () {
+            LoadEndDate();
+        });
     });
 
     function calculateFinalPriceCost() {

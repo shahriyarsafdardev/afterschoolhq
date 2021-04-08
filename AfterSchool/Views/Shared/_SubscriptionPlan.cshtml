@@ -7,6 +7,10 @@
     var accountPackage = (AccountPackage)ViewBag.accountPackage;
     var showAllowSubscriptionPlans = accountPackage.HasFeature(FeatureType.AllowSubscriptionPlans);
     var showAllowSubscriptionPlansPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowSubscriptionPlans);
+
+    var lstPlanPaymentStartType = Model.HasSchedule ? 
+        Enum.GetValues(typeof(PlanPaymentStartType)).Cast<PlanPaymentStartType>().Except(new List<PlanPaymentStartType>() { PlanPaymentStartType.NotSet }) : 
+        Enum.GetValues(typeof(PlanPaymentStartType)).Cast<PlanPaymentStartType>().Except(new List<PlanPaymentStartType>() { PlanPaymentStartType.NotSet, PlanPaymentStartType.WhenActivityStarts });
 }
 
 <div class="panel-heading">
@@ -45,60 +49,7 @@
                            value="@(subscriptionPlan.IsNotEmpty() && subscriptionPlan.CostPerPeriod.HasValue ? subscriptionPlan.CostPerPeriod.Value.ToString("0.00") : "0.00")"
                            required min="0.00" step=".01" @paymentdisabled />
                 </div>
-            </div>
 
-            <div class="col-md-3"></div>
-            <div class="col-sm-6 col-md-9">
-                <div class="input-group input-group-lg xs-mb-15">
-                    <span class="input-group-addon">Every</span>
-                    <select name="subscriptionplanperiod" id="subscriptionplanperiod" class="form-control" required>
-                        @BillingPeriodOptions(subscriptionPlan)
-                    </select>
-                </div>
-
-                @if (Model.HasSchedule)
-                {
-                    <div class="am-checkbox">
-                        <input type="checkbox" name="isongoingsubscription" id="isOngoingSubscription" value="1"
-                               @(subscriptionPlan.IsNotEmpty() && subscriptionPlan.IsOngoingSubscription == false ? "" : "checked=\"checked\"") />
-                        <label for="isOngoingSubscription">Is Ongoing Subscription </label>
-                    </div>
-
-                    <div id="container-subscription-period" class="@(subscriptionPlan.IsNotEmpty() && subscriptionPlan.IsOngoingSubscription == false ? "" : "hide")">
-                        <div class="input-group input-group-lg xs-mb-15">
-                            <span class="input-group-addon"># of Payments</span>
-                            <input type="number" class="form-control" id="subscriptionPlanPeriodNumber"
-                                   name="subscriptionPlanPeriodNumber"
-                                   value="@(subscriptionPlan.IsNotEmpty() && subscriptionPlan.TotalPeriods > 2 ? subscriptionPlan.TotalPeriods.ToString() : "2")" />
-                        </div>
-                    </div>
-
-                    <br />
-                }
-
-            </div>
-
-            <div class="row">
-                <label class="col-sm-3 control-label">When should payments start?</label>
-                <div class="col-sm-9">
-                    <select name="subscriptionPaymentStartType" id="subscriptionPaymentStartType" class="form-control" required="required">
-                        @foreach (var item in Enum.GetValues(typeof(PlanPaymentStartType)).Cast<PlanPaymentStartType>().Except(PlanPaymentStartType.NotSet.AsList()))
-                        {
-                            var selected = (PlanPaymentStartType.WhenActivityStarts == item) ? "selected=\"selected\"" : "";
-
-                            if (subscriptionPlan.IsNotEmpty())
-                            {
-                                selected = item == subscriptionPlan.PaymentStartTypeId ? "selected=\"selected\"" : "";
-                            }
-
-                            <option value="@((int)item)" @selected>@item.ToString().SplitByUpperCase()</option>
-                        }
-                    </select>
-                </div>
-            </div>
-
-            <div class="col-md-3"></div>
-            <div class="col-sm-6 col-md-9">
                 <p class="text-muted text-medium-small">
                     <span id="pricetoparent-subscription-span">
                         <em>The total cost will be <span class="text-bold">$<span id="pricetoparent-subscription">0.00</span></span> at checkout</em>.
@@ -113,6 +64,83 @@
                         <label for="isparentpricesubscription">Price is the amount the parent pays</label>
                     </div>
                 </div>
+            </div>
+            <div class="clearfix"></div>
+            <br />
+
+            <div class="">
+                <label class="col-sm-3 control-label">When should payments start?</label>
+                <div class="col-sm-9">
+                    <select name="subscriptionPaymentStartType" id="subscriptionPaymentStartType" class="form-control" required="required">
+
+                        @foreach (var item in lstPlanPaymentStartType)
+                        {
+                            var selected = (PlanPaymentStartType.WhenActivityStarts == item) ? "selected=\"selected\"" : "";
+
+                            if (subscriptionPlan.IsNotEmpty())
+                            {
+                                selected = item == subscriptionPlan.PaymentStartTypeId ? "selected=\"selected\"" : "";
+                            }
+
+                            <option value="@((int)item)" @selected>@item.ToString().SplitByUpperCase()</option>
+                        }
+
+                    </select>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+            <br />
+
+            <div class="col-md-3"></div>
+            <div class="col-sm-6 col-md-9">
+                <div class="input-group input-group-lg xs-mb-15">
+                    <span class="input-group-addon">Every</span>
+                    <select name="subscriptionplanperiod" id="subscriptionplanperiod" class="form-control" required>
+                        @BillingPeriodOptions(subscriptionPlan)
+                    </select>
+                </div>
+                
+                <div id="container-subscription-week" class="input-group input-group-lg xs-mb-15 hide">
+                    <span class="input-group-addon">Day of week for period start</span>
+                    <select name="subscriptionperiodstartweekday" id="subscriptionperiodstartweekday" class="form-control" required>
+                        @foreach (var item in Enum.GetValues(typeof(DayOfWeek)).Cast<DayOfWeek>())
+                        {
+                            <option value="@item.ToString()">
+                                @item.ToString()
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <p id="container-subscription-enddate-label" class="text-muted text-medium-small hide">
+                    <span>
+                        As per the subscription configuration, payment will end on <strong id="calculatedEnddate"></strong>.
+                    </span>                    
+                </p>
+
+                @if (Model.HasSchedule)
+                {
+                    @*<div class="am-checkbox">
+                        <input type="checkbox" name="isongoingsubscription" id="isOngoingSubscription" value="1"
+                               @(subscriptionPlan.IsNotEmpty() && subscriptionPlan.IsOngoingSubscription == false ? "" : "checked=\"checked\"") />
+                        <label for="isOngoingSubscription">Is Ongoing Subscription </label>
+                    </div>*@
+
+                    <input type="checkbox" name="isongoingsubscription" id="isOngoingSubscription" value="0" class="hide" />
+                    <div id="container-subscription-period" class="@(subscriptionPlan.IsNotEmpty() && subscriptionPlan.IsOngoingSubscription == false ? "" : "hide")">
+                        <div class="input-group input-group-lg xs-mb-15">
+                            <span class="input-group-addon"># of Payments</span>
+                            <input type="number" class="form-control" id="subscriptionPlanPeriodNumber"
+                                   name="subscriptionPlanPeriodNumber"
+                                   value="@(subscriptionPlan.IsNotEmpty() && subscriptionPlan.TotalPeriods > 2 ? subscriptionPlan.TotalPeriods.ToString() : "2")" />
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <input type="checkbox" name="isongoingsubscription" id="isOngoingSubscription" value="1" checked="checked" class="hide" />
+                }
+
             </div>
         </div>
 
@@ -177,7 +205,26 @@
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         $('#isOngoingSubscription').click(function () {
             $('#container-subscription-period').toggleClass('hide');
-        });
+        });        
     });
+
+    function LoadEndDate() {
+        var billingTypeId = $('#subscriptionplanperiod').val();
+        var dayOfWeek = $('#subscriptionperiodstartweekday').val();
+        var endDateInput = $('#calculatedEnddate');
+
+        var url = '@Url.Action("getcalculatedenddateforsubscription", "activity", new { Area = "org" })';
+        $.ajax({
+            type: "GET",
+            url: url,
+            data: { activityId: '@Model.ID', billingPeriodType: billingTypeId, dayOfWeek },
+            success: function (data) {                
+                if (data && data.success == true) {
+                    endDateInput.html(`${data.day}, ${data.endDate}`);
+                    return false;
+                }          
+            }
+        });
+    }
 
 </script>

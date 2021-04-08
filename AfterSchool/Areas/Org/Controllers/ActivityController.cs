@@ -723,19 +723,19 @@ namespace AfterSchool.Areas.Org.Controllers
                     if (msgs.HasNoErrors())
                     {
                         values = new Dictionary<string, object>()
-                    {
-                        { "scheduledetails", scheduledetails},
-                        { "days", days.Select(x => (int)x).ToStrings().ToStringList() },
-                        { "repeatsweekly", repeatsweekly.IfBlank("0") },
-                        { "startdate", startdate },
-                        { "enddate", enddate },
-                        { "dailystarttime", dailystarttime },
-                        { "dailyendtime", dailyendtime },
-                        { "scheduledates", inSessionDates },
-                        { "scheduledatesclosed", outOfSessionDates },
-                        { "schedule", schedule },
-                        { "isongoing", isongoing }
-                    };
+                        {
+                            { "scheduledetails", scheduledetails},
+                            { "days", days.Select(x => (int)x).ToStrings().ToStringList() },
+                            { "repeatsweekly", repeatsweekly.IfBlank("0") },
+                            { "startdate", startdate },
+                            { "enddate", enddate },
+                            { "dailystarttime", dailystarttime },
+                            { "dailyendtime", dailyendtime },
+                            { "scheduledates", inSessionDates },
+                            { "scheduledatesclosed", outOfSessionDates },
+                            { "schedule", schedule },
+                            { "isongoing", isongoing }
+                        };
 
                         activity = ActivityService.EditExisting(
                             loggedInUserId: SessionVariables.CurrentUser.ID.Value,
@@ -2458,6 +2458,22 @@ namespace AfterSchool.Areas.Org.Controllers
         private bool ShowCopyButtonOnPublishDetail(Activity activity)
         {
             return activity.AccountId == SessionVariables.CurrentAccount.ID || !IsExternallyProvided(activity);
+        }
+
+        [HttpGet]
+        public virtual JsonResult GetCalculatedEndDateForSubscription(string activityId, string billingPeriodType, string dayOfWeek)
+        {
+            if (!IsRequestFromApp() || activityId.IsEmpty())
+                return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
+
+            var msgs = new SystemMessages();
+            var activity = Activity.Load(activityId.ToInteger(), msgs);
+            var endDate = ActivityService.FinalizeEndDateForSubscription(activity, (BillingPeriodType)billingPeriodType.ToInteger(), dayOfWeek.ToEnum<DayOfWeek>());
+
+            if (endDate.IsNotEmpty() && endDate.HasValue)
+                return Json(new { success = true, endDate = endDate.Value.ToShortDateString(), day = endDate.Value.DayOfWeek.ToString() }, JsonRequestBehavior.AllowGet);
+
+            return Json(new { success = false }, JsonRequestBehavior.AllowGet);
         }
     }
 }
