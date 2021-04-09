@@ -2568,28 +2568,37 @@ namespace AfterSchoolLibrary.Services
             return activity.AgeStart.IsEmpty();
         }
 
-        public static DateTime? FinalizeEndDateForSubscription(this Activity activity, BillingPeriodType billingPeriodType, DayOfWeek dayOfWeek, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static (DateTime? paymentStart, DateTime? paymentEnd) FinalizeStartAndEndDateForSubscription(this Activity activity, BillingPeriodType billingPeriodType, DayOfWeek dayOfWeek, DateTime dayOfMonth, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (!activity.HasSchedule)
-                return null;
+                return (null, null);
 
             var schedule = activity.GetSchedule(msgs, dc);
+            var startDate = schedule.StartDate.Value;
             var endDate = schedule.EndDate.Value;
 
             if (billingPeriodType == BillingPeriodType.Week)
             {
-                //.. if activity schedule ends on 1st dec and it's thursday and provide choose weekly billing every sunday, 
-                //.. that would mean, parent will be charged on last sunday of november.
-                int daysUntilLastSunday = ((int)dayOfWeek - (int)endDate.DayOfWeek - 7) % 7;
-                var previousSunday = endDate.AddDays(daysUntilLastSunday);
-                return previousSunday.IsAfter(DateTime.UtcNow) ? previousSunday : DateTime.UtcNow;
+                //.. if activity schedule starts on November 1st, 2021(Monday) ends on December 1st, 2021(Thursday) and provide choose weekly billing every sunday, 
+                //.. that would mean the parent would be first billed on Sunday Oct 31st and last billed on Sunday Nov 27th.
+                int daysUntilFirstPayment = ((int)dayOfWeek - (int)startDate.DayOfWeek - 7) % 7;
+                var startingDay = startDate.AddDays(daysUntilFirstPayment);
+
+                int daysUntilLastPayment = ((int)dayOfWeek - (int)endDate.DayOfWeek - 7) % 7;
+                var endingDay = endDate.AddDays(daysUntilLastPayment);
+                return (paymentStart: startingDay.IsAfter(DateTime.UtcNow) ? startingDay : DateTime.UtcNow, paymentEnd: endingDay.IsAfter(DateTime.UtcNow) ? endingDay : DateTime.UtcNow);
             }
             else if (billingPeriodType == BillingPeriodType.Month)
             {
+                //.. if provider chooses monthly payment cycle in this case with date November 5th,
+                //.. that would mean the parent would be first billed on November 5th and last billed on Dec 5th.
+                var startingDay = dayOfMonth;
+                var endingDay = new DateTime(endDate.Year, endDate.Month, dayOfMonth.Day);
 
+                return (paymentStart: startingDay.IsAfter(DateTime.UtcNow) ? startingDay : DateTime.UtcNow, paymentEnd: endingDay.IsAfter(DateTime.UtcNow) ? endingDay : DateTime.UtcNow);
             }
 
-            return null;
+            return (null, null);
         }
     }
 }

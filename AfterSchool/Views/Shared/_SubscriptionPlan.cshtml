@@ -10,7 +10,7 @@
 
     var lstPlanPaymentStartType = Model.HasSchedule ? 
         Enum.GetValues(typeof(PlanPaymentStartType)).Cast<PlanPaymentStartType>().Except(new List<PlanPaymentStartType>() { PlanPaymentStartType.NotSet }) : 
-        Enum.GetValues(typeof(PlanPaymentStartType)).Cast<PlanPaymentStartType>().Except(new List<PlanPaymentStartType>() { PlanPaymentStartType.NotSet, PlanPaymentStartType.WhenActivityStarts });
+        Enum.GetValues(typeof(PlanPaymentStartType)).Cast<PlanPaymentStartType>().Except(new List<PlanPaymentStartType>() { PlanPaymentStartType.NotSet, PlanPaymentStartType.WhenActivityStarts, PlanPaymentStartType.OnPeriodStart });
 }
 
 <div class="panel-heading">
@@ -99,32 +99,51 @@
                         @BillingPeriodOptions(subscriptionPlan)
                     </select>
                 </div>
-                
-                <div id="container-subscription-week" class="input-group input-group-lg xs-mb-15 hide">
-                    <span class="input-group-addon">Day of week for period start</span>
-                    <select name="subscriptionperiodstartweekday" id="subscriptionperiodstartweekday" class="form-control" required>
-                        @foreach (var item in Enum.GetValues(typeof(DayOfWeek)).Cast<DayOfWeek>())
-                        {
-                            <option value="@item.ToString()">
-                                @item.ToString()
-                            </option>
-                        }
-                    </select>
-                </div>
 
-                <p id="container-subscription-enddate-label" class="text-muted text-medium-small hide">
-                    <span>
-                        As per the subscription configuration, payment will end on <strong id="calculatedEnddate"></strong>.
-                    </span>                    
-                </p>
+
 
                 @if (Model.HasSchedule)
                 {
+                    var schedule = Model.GetSchedule();
+                    var startDate = schedule.StartDate;
+                    var days = Enumerable.Range(1, DateTime.DaysInMonth(startDate.Value.Year, startDate.Value.Month))  // Days: 1, 2 ... 31 etc.
+                    .Select(day => new DateTime(startDate.Value.Year, startDate.Value.Month, day)) // Map each day to a date
+                    .ToList();  
+
+                    <div id="container-subscription-week" class="input-group input-group-lg xs-mb-15 hide">
+                        <span class="input-group-addon">Day of week for period start</span>
+                        <select name="subscriptionperiodstartweekday" id="subscriptionperiodstartweekday" class="form-control" required>
+                            @foreach (var item in Enum.GetValues(typeof(DayOfWeek)).Cast<DayOfWeek>())
+                            {
+                                <option value="@item.ToString()">
+                                    @item.ToString()
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <div id="container-subscription-month" class="input-group input-group-lg xs-mb-15">
+                        <span class="input-group-addon">Day of month for period start</span>
+                        <select name="subscriptionperiodstartmonthday" id="subscriptionperiodstartmonthday" class="form-control" required>
+                            @foreach (var item in days)
+                            {
+                                <option value="@item.ToString()">@(item.ToString("MMMM dd"))</option>
+                            }
+                        </select>
+                    </div>
+
+                    <p id="container-subscription-enddate-label" class="text-muted text-medium-small hide">
+                        <span>
+                            As per the activity schedule and subscription configuration, <strong id="calculatedEnddate"></strong>.
+                        </span>
+                    </p>
+
+
                     @*<div class="am-checkbox">
-                        <input type="checkbox" name="isongoingsubscription" id="isOngoingSubscription" value="1"
-                               @(subscriptionPlan.IsNotEmpty() && subscriptionPlan.IsOngoingSubscription == false ? "" : "checked=\"checked\"") />
-                        <label for="isOngoingSubscription">Is Ongoing Subscription </label>
-                    </div>*@
+                <input type="checkbox" name="isongoingsubscription" id="isOngoingSubscription" value="1"
+                       @(subscriptionPlan.IsNotEmpty() && subscriptionPlan.IsOngoingSubscription == false ? "" : "checked=\"checked\"") />
+                <label for="isOngoingSubscription">Is Ongoing Subscription </label>
+            </div>*@
 
                     <input type="checkbox" name="isongoingsubscription" id="isOngoingSubscription" value="0" class="hide" />
                     <div id="container-subscription-period" class="@(subscriptionPlan.IsNotEmpty() && subscriptionPlan.IsOngoingSubscription == false ? "" : "hide")">
@@ -211,16 +230,17 @@
     function LoadEndDate() {
         var billingTypeId = $('#subscriptionplanperiod').val();
         var dayOfWeek = $('#subscriptionperiodstartweekday').val();
+        var dayOfMonth = $('#subscriptionperiodstartmonthday').val();
         var endDateInput = $('#calculatedEnddate');
 
-        var url = '@Url.Action("getcalculatedenddateforsubscription", "activity", new { Area = "org" })';
+        var url = '@Url.Action("GetCalculatedStartingAndEndDateForSubscription", "activity", new { Area = "org" })';
         $.ajax({
             type: "GET",
             url: url,
-            data: { activityId: '@Model.ID', billingPeriodType: billingTypeId, dayOfWeek },
+            data: { activityId: '@Model.ID', billingPeriodType: billingTypeId, dayOfWeek, dayOfMonth },
             success: function (data) {                
                 if (data && data.success == true) {
-                    endDateInput.html(`${data.day}, ${data.endDate}`);
+                    endDateInput.html(`payment will start on ${data.startDate} and it will end on ${data.endDate}`);
                     return false;
                 }          
             }

@@ -2461,17 +2461,21 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public virtual JsonResult GetCalculatedEndDateForSubscription(string activityId, string billingPeriodType, string dayOfWeek)
+        public virtual JsonResult GetCalculatedStartingAndEndDateForSubscription(string activityId, string billingPeriodType, string dayOfWeek, string dayOfMonth)
         {
             if (!IsRequestFromApp() || activityId.IsEmpty())
                 return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
 
             var msgs = new SystemMessages();
             var activity = Activity.Load(activityId.ToInteger(), msgs);
-            var endDate = ActivityService.FinalizeEndDateForSubscription(activity, (BillingPeriodType)billingPeriodType.ToInteger(), dayOfWeek.ToEnum<DayOfWeek>());
+            var dates = ActivityService.FinalizeStartAndEndDateForSubscription(activity, (BillingPeriodType)billingPeriodType.ToInteger(), dayOfWeek.ToEnum<DayOfWeek>(), dayOfMonth.ToDateTime());
 
-            if (endDate.IsNotEmpty() && endDate.HasValue)
-                return Json(new { success = true, endDate = endDate.Value.ToShortDateString(), day = endDate.Value.DayOfWeek.ToString() }, JsonRequestBehavior.AllowGet);
+            if (dates.paymentStart.IsNotEmpty() && dates.paymentStart.HasValue && dates.paymentEnd.IsNotEmpty() && dates.paymentEnd.HasValue)
+                return Json(new { 
+                    success = true, 
+                    startDate = dates.paymentStart.Value.ToString("dddd, MMMM d, yyyy"), 
+                    endDate = dates.paymentEnd.Value.ToString("dddd, MMMM d, yyyy")
+                }, JsonRequestBehavior.AllowGet);
 
             return Json(new { success = false }, JsonRequestBehavior.AllowGet);
         }
