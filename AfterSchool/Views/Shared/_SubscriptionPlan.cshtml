@@ -108,7 +108,7 @@
                     var startDate = schedule.StartDate;
                     var days = Enumerable.Range(1, DateTime.DaysInMonth(startDate.Value.Year, startDate.Value.Month))  // Days: 1, 2 ... 31 etc.
                     .Select(day => new DateTime(startDate.Value.Year, startDate.Value.Month, day)) // Map each day to a date
-                    .ToList();  
+                    .ToList();
 
                     <div id="container-subscription-week" class="input-group input-group-lg xs-mb-15 hide">
                         <span class="input-group-addon">Day of week for period start</span>
@@ -137,6 +137,9 @@
                             As per the activity schedule and subscription configuration, <strong id="calculatedEnddate"></strong>.
                         </span>
                     </p>
+
+                    <input id="subscriptionStartDate" name="subscriptionStartDate" type="hidden" />
+                    <input id="subscriptionEndDate" name="subscriptionEndDate" type="hidden" />
 
 
                     @*<div class="am-checkbox">
@@ -240,9 +243,13 @@
             data: { activityId: '@Model.ID', billingPeriodType: billingTypeId, dayOfWeek, dayOfMonth },
             success: function (data) {                
                 if (data && data.success == true) {
+                    $('#subscriptionStartDate').val(data.startDate);
+                    $('#subscriptionEndDate').val(data.endDate);
                     endDateInput.html(`payment will start on ${data.startDate} and it will end on ${data.endDate}`);
                     return false;
-                }          
+                } else {
+                    clearSubscriptionPaymentHiddenInputs();
+                }        
             }
         });
     }

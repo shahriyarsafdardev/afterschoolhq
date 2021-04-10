@@ -928,7 +928,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [HttpPost]
         public ActionResult EditCost(string id, string cost, string costdescription, string acceptpaypal, string acceptcreditcard, string allowtopaylater, string cmd, 
-            string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string isongoingsubscription, string subscriptionPlanPeriodNumber, string subscriptionPaymentStartType,
+            string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string isongoingsubscription, string subscriptionPlanPeriodNumber, string subscriptionPaymentStartType, string subscriptionStartDate, string subscriptionEndDate,
             string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, string paymentplanpaymentstarttype, string splitcostevenly, string regfeedownpayment, 
             string haspostpayplan, string postpaycost, string isparentpricepostpay, string isparentpricecost, string isparentpricepaymentplan, string isparentpricesubscription, string prepaidperiodspostpay)
         {

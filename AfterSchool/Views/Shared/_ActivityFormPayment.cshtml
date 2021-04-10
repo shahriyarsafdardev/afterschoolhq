@@ -458,15 +458,28 @@
             if ($('#subscriptionplanperiod').val() == "1") {
                 Array.from($("#container-subscription-month, #container-subscription-enddate-label")).forEach(elem => { $(elem).removeClass("hide") });
                 $("#container-subscription-week").addClass("hide");
+                LoadEndDate();
             } else if ($('#subscriptionplanperiod').val() == "3") {
                 Array.from($("#container-subscription-week, #container-subscription-enddate-label")).forEach(elem => { $(elem).removeClass("hide") });
                 $("#container-subscription-month").addClass("hide");
+                LoadEndDate();
+            } else {
+                clearSubscriptionPaymentHiddenInputs();
+                hideWeekMonthContainers();
             }
-            
-            LoadEndDate();
         } else {
-            Array.from($("#container-subscription-month, #container-subscription-week, #container-subscription-enddate-label")).forEach(elem => { $(elem).addClass("hide") });            
+            clearSubscriptionPaymentHiddenInputs();
+            hideWeekMonthContainers();
         }
+    }
+
+    function hideWeekMonthContainers() {
+        Array.from($("#container-subscription-month, #container-subscription-week, #container-subscription-enddate-label")).forEach(elem => { $(elem).addClass("hide") });     
+    }
+
+    function clearSubscriptionPaymentHiddenInputs() {
+        $('#subscriptionStartDate').val('');
+        $('#subscriptionEndDate').val('');
     }
 
     function calculateFinalPriceCost() {
