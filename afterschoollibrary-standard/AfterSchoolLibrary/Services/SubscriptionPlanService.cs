@@ -49,7 +49,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static SubscriptionPlan CreateNewSubscriptionPlan(Account planOwner, ParticipationObjectType participationObjectType, int participationObjectId, decimal costPerPeriod, BillingPeriodType billingPeriodType, 
-            int totalPeriods, PlanPaymentStartType paymentStartType, bool isongoingsubscription, bool doesAutoRenew, bool splitCostEvenly, bool regFeeAsDownPayment, bool isConvenienceFeeTakenOutOfCost, int? loggedInUserId, 
+            int totalPeriods, PlanPaymentStartType paymentStartType, DateTime? subscriptionStartDate, DateTime? subscriptionEndDate, bool isongoingsubscription, bool doesAutoRenew, bool splitCostEvenly, bool regFeeAsDownPayment, bool isConvenienceFeeTakenOutOfCost, int? loggedInUserId, 
             SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -74,6 +74,8 @@ namespace AfterSchoolLibrary.Services
                 PlanTypeId = SubscriptionPlanType.Subscription,
                 RegFeeAsDownPayment = regFeeAsDownPayment,
                 IsConvenienceFeeTakenOutOfCost = isConvenienceFeeTakenOutOfCost,
+                StartDate = subscriptionStartDate,
+                EndDate = subscriptionEndDate
             };
 
             msgs.AddRange(plan.SaveWithStripe(dc));

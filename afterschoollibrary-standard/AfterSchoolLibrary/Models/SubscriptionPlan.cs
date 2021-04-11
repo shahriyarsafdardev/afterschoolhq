@@ -53,6 +53,8 @@ namespace AfterSchoolLibrary.Models
 		public bool IsConvenienceFeeTakenOutOfCost { get { return (bool)MDV["IsConvenienceFeeTakenOutOfCost"].Value; } set { MDV["IsConvenienceFeeTakenOutOfCost"].Value = value; } }
 		public int? NumberOfPeriodsPrePaid { get { return (int?)MDV["NumberOfPeriodsPrePaid"].Value; } set { MDV["NumberOfPeriodsPrePaid"].Value = value; } }
 		public bool IsOngoingSubscription { get { return (bool)MDV["IsOngoingSubscription"].Value; } set { MDV["IsOngoingSubscription"].Value = value; } }
+		public DateTime? StartDate { get { return (DateTime?)MDV["StartDate"].Value; } set { MDV["StartDate"].Value = value; } }
+		public DateTime? EndDate { get { return (DateTime?)MDV["EndDate"].Value; } set { MDV["EndDate"].Value = value; } }
 		
 
         public SubscriptionPlan()
@@ -96,6 +98,8 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "IsConvenienceFeeTakenOutOfCost", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "NumberOfPeriodsPrePaid", System.Data.SqlDbType.Int);
 				_dp.Add(className, "IsOngoingSubscription", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "StartDate", System.Data.SqlDbType.DateTime);
+				_dp.Add(className, "EndDate", System.Data.SqlDbType.DateTime);
 				
                 return _dp;
             }
@@ -243,6 +247,14 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["IsOngoingSubscription"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["StartDate"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["EndDate"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
