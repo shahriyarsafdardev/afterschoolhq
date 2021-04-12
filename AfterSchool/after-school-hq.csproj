@@ -773,7 +773,6 @@
     <Content Include="Assets\bootstrap3-wysiwyg\bootstrap3-wysihtml5.min.css" />
     <Content Include="Assets\css\font-awesome-4.6.3\css\font-awesome.css" />
     <Content Include="Assets\css\font-awesome-4.6.3\css\font-awesome.min.css" />
-    <Content Include="Assets\css\font-awesome-4.6.3\fonts\fontawesome-webfont.svg" />
     <Content Include="Assets\css\font-awesome-4.6.3\HELP-US-OUT.txt" />
     <Content Include="Assets\css\style-mods.css" />
     <Content Include="Assets\css\style-public.css" />
