@@ -1311,10 +1311,6 @@
     <Content Include="Areas\Org\Views\Registration\MessageDetail.cshtml" />
     <Content Include="Areas\Org\Views\Registration\Messages.cshtml" />
     <Content Include="Areas\Org\Views\Shared\_RegistrationSearchBar.cshtml" />
-    <Content Include="fonts\fontawesome-webfont.eot" />
-    <Content Include="fonts\fontawesome-webfont.ttf" />
-    <Content Include="fonts\fontawesome-webfont.woff" />
-    <Content Include="fonts\fontawesome-webfont.woff2" />
     <Content Include="fonts\FontAwesome.otf" />
     <Content Include="fonts\ionicons.eot" />
     <Content Include="fonts\ionicons.ttf" />
