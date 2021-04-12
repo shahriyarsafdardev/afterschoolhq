@@ -726,7 +726,6 @@
     <Content Include="img\IPS.png" />
     <Content Include="img\lawrence.png" />
     <Content Include="img\lazyload-ph.png" />
-    <Content Include="img\lod_bg.gif" />
     <Content Include="img\logo-white.png" />
     <Content Include="img\logo.png" />
     <Content Include="img\parent-icon.png" />
