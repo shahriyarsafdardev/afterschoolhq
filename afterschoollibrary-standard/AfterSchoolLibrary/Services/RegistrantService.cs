@@ -392,29 +392,29 @@ namespace AfterSchoolLibrary.Services
                 }
                 else if (plan.PaymentStartTypeId == PlanPaymentStartType.OnPeriodStart)
                 {
+                    return plan.StartDate.HasValue && plan.StartDate.Value.IsAfter(initialDate) ? plan.StartDate.Value : initialDate;
+
                     // if a class is on Tuesdays and Thursdays, On Period start (if weekly) would mean every Sunday (prior to the Tuesday)
                     // Or if activity start is on Oct 5th, but is monthly, and the person wants on period start, it would be Oct 1st
 
-                    var upcomingPeriod = participationObject.GetUpcomingActivityInstance(msgs, dc); //.. this will be upcoming period
-                    if (upcomingPeriod.IsNotEmpty() && upcomingPeriod.StartDateTime.HasValue)
-                    {
-                        var upcomingPeriodDateUTC = DateTime.SpecifyKind(upcomingPeriod.StartDateTime.Value, DateTimeKind.Utc);
-                        if (plan.BillingPeriodTypeId == BillingPeriodType.Week || plan.BillingPeriodTypeId == BillingPeriodType.TwoWeeks)
-                        {
-                            int daysUntilLastSunday = ((int)DayOfWeek.Sunday - (int)upcomingPeriodDateUTC.DayOfWeek - 7) % 7;
-                            var previousSunday = upcomingPeriodDateUTC.AddDays(daysUntilLastSunday);
-                            return previousSunday.IsAfter(DateTime.UtcNow) ? previousSunday : DateTime.UtcNow;
-                        }
-                        else if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
-                        {
-                            var monthStartDate = new DateTime(upcomingPeriodDateUTC.Year, upcomingPeriodDateUTC.Month, 1);
-                            return monthStartDate.IsAfter(DateTime.UtcNow) ? monthStartDate : DateTime.UtcNow;
-                        }
-                        else
-                            return initialDate;
-                    }
-
-                    return initialDate;
+                    //var upcomingPeriod = participationObject.GetUpcomingActivityInstance(msgs, dc); //.. this will be upcoming period
+                    //if (upcomingPeriod.IsNotEmpty() && upcomingPeriod.StartDateTime.HasValue)
+                    //{
+                    //    var upcomingPeriodDateUTC = DateTime.SpecifyKind(upcomingPeriod.StartDateTime.Value, DateTimeKind.Utc);
+                    //    if (plan.BillingPeriodTypeId == BillingPeriodType.Week || plan.BillingPeriodTypeId == BillingPeriodType.TwoWeeks)
+                    //    {
+                    //        int daysUntilLastSunday = ((int)DayOfWeek.Sunday - (int)upcomingPeriodDateUTC.DayOfWeek - 7) % 7;
+                    //        var previousSunday = upcomingPeriodDateUTC.AddDays(daysUntilLastSunday);
+                    //        return previousSunday.IsAfter(DateTime.UtcNow) ? previousSunday : DateTime.UtcNow;
+                    //    }
+                    //    else if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
+                    //    {
+                    //        var monthStartDate = new DateTime(upcomingPeriodDateUTC.Year, upcomingPeriodDateUTC.Month, 1);
+                    //        return monthStartDate.IsAfter(DateTime.UtcNow) ? monthStartDate : DateTime.UtcNow;
+                    //    }
+                    //    else
+                    //        return initialDate;
+                    //}
                 }
             }
 
@@ -423,9 +423,15 @@ namespace AfterSchoolLibrary.Services
 
         public static DateTime? GetPlanEndDate(this Registrant registrant, SubscriptionPlan plan, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (plan.PlanTypeId == SubscriptionPlanType.Subscription &&
-                participationObject.Schedule.IsNotEmpty() && !participationObject.Schedule.IsOngoing && participationObject.Schedule.EndDate.HasValue)
-                return participationObject.Schedule.EndDate.Value;
+            if (plan.PlanTypeId == SubscriptionPlanType.Subscription)
+            {
+                if (plan.EndDate.HasValue)
+                    return plan.EndDate.Value;
+                else if (participationObject.Schedule.IsNotEmpty() && !participationObject.Schedule.IsOngoing && participationObject.Schedule.EndDate.HasValue)
+                    return participationObject.Schedule.EndDate.Value;
+                else
+                    return null;
+            }
 
             return null;
         }

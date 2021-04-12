@@ -2583,7 +2583,7 @@ namespace AfterSchoolLibrary.Services
                 return (null, null);
 
             var schedule = activity.GetSchedule(msgs, dc);
-            var startDate = schedule.StartDate.Value;
+            var startDate = schedule.GetUpcomingInstance(msgs, dc).FirstOrDefault().StartDateTime.Value;
             var endDate = schedule.EndDate.Value;
 
             if (billingPeriodType == BillingPeriodType.Week)

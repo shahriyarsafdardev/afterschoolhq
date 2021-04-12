@@ -960,7 +960,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "subscriptionPaymentStartType", subscriptionPaymentStartType },
                     { "subscriptionStartDate", subscriptionStartDate },
                     { "subscriptionEndDate", subscriptionEndDate },
-                    { "isongoingsubscription", isongoingsubscription },
+                    { "isongoingsubscription", !activity.HasSchedule },
                     { "haspaymentplan", haspaymentplan.IfBlank("0") },
                     { "paymentplancost", paymentplancost },
                     { "paymentplanperiod", paymentplanperiod },
