@@ -101,6 +101,11 @@ Public Module Extensions
     End Function
 
     <Extension>
+    Public Function LastDateOfMonth(ByVal aDate As Date) As Date
+        Return New DateTime(aDate.Year, aDate.Month, DateTime.DaysInMonth(aDate.Year, aDate.Month))
+    End Function
+
+    <Extension>
     Public Function AsList(Of T)(ByVal aObj As T) As List(Of T)
         Dim x As New List(Of T)
         x.Add(aObj)

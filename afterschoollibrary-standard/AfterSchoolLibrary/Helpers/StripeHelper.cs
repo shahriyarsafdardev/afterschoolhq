@@ -1239,7 +1239,8 @@ namespace AfterSchoolLibrary.Billing
             return new Stripe.SubscriptionService(StripeClient);
         }
 
-        public static Stripe.Subscription CreateRegistrantSubscription(string customerId, string planId, string sourceId, decimal? platformFeePercent, DateTime? startDate, DateTime? endDate, string stripeAccountId, string stripeCouponId, Dictionary<string, string> metaData, SystemMessages msgs)
+        public static Stripe.Subscription CreateRegistrantSubscription(string customerId, string planId, string sourceId, decimal? platformFeePercent, 
+            DateTime? startDate, DateTime? endDate, DateTime? billingCycleAnchor, string stripeAccountId, string stripeCouponId, Dictionary<string, string> metaData, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -1255,6 +1256,14 @@ namespace AfterSchoolLibrary.Billing
                 Metadata = metaData,
                 Prorate = true,
             };
+
+            //.. You can set the billing cycle anchor as the last date of current cycle. for example if monthly and month is of 30th. set 30th.
+            //.. Same way for weekly, only change would be weekly cycle would end on sunday
+            //.. it'll get a prorated invoice for the shorter amount of time on the first month.
+            //.. Then the customer will be invoiced normally after that https://stripe.com/docs/billing/subscriptions/billing-cycle#new-subscriptions
+            if (billingCycleAnchor.HasValue)
+                options.BillingCycleAnchor = billingCycleAnchor.Value;
+            
 
             if (startDate.Value.Date.AddDays(-1).IsAfter(DateTime.UtcNow.Date))
                 options.TrialEnd = startDate.Value.AddDays(-1);
@@ -1385,7 +1394,7 @@ namespace AfterSchoolLibrary.Billing
         /// <returns></returns>
         public static Stripe.Subscription CreateSubscription(Stripe.Customer customer, Stripe.Plan plan, string sourceId, decimal? platformFeePercent, DateTime? startDate, string stripeAccountId, string stripeCouponId, Dictionary<string, string> metaData, SystemMessages msgs)
         {
-            return CreateRegistrantSubscription(customer.Id, plan.Id, sourceId, platformFeePercent, startDate, null, stripeAccountId, stripeCouponId, metaData, msgs);
+            return CreateRegistrantSubscription(customer.Id, plan.Id, sourceId, platformFeePercent, startDate, null, null, stripeAccountId, stripeCouponId, metaData, msgs);
         }
 
         public static Stripe.Subscription UpdateSubscription(string subscriptionId, string priceId, bool? billingCycleAnchorNow, bool? billingCycleAnchorUnchanged, bool? endTrialNow, bool? prorate, string stripeAccountId, SystemMessages msgs)

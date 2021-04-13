@@ -176,6 +176,12 @@ namespace AfterSchoolLibrary.Services
                 else
                     stripeCouponId = GetACHCoupon(checkoutObject, billingAccount, plan, null, msgs, dc);
 
+                DateTime? billingCycleAnchor = null;
+                if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
+                    billingCycleAnchor = startDateTime.LastDateOfMonth();
+                else if (plan.BillingPeriodTypeId == BillingPeriodType.Week)
+                    billingCycleAnchor = startDateTime.LastDateOfWeek();
+
                 // create the subscription on the stripe account (could be added to main account or connected account)
                 var subscription = Billing.StripeHelper.CreateRegistrantSubscription(
                                     customerId: customer.Id,
@@ -185,6 +191,7 @@ namespace AfterSchoolLibrary.Services
                                     stripeAccountId: stripeAccountId,
                                     startDate: startDateTime,
                                     endDate: endDateTime,
+                                    billingCycleAnchor: billingCycleAnchor,
                                     stripeCouponId: stripeCouponId,
                                     metaData: new Dictionary<string, string>()
                                     {
@@ -369,13 +376,10 @@ namespace AfterSchoolLibrary.Services
                 {
                     // find existing cancelled plans and make new plan start the day after it ends.
                     // for a person restarting a plan after cancellation
-                    if (plan.PlanTypeId == SubscriptionPlanType.Subscription)
-                    {
-                        var rsps = registrant.GetUnexpiredCancelledRegistrantSubscriptionPlans(participationObject, msgs, dc);
+                    var rsps = registrant.GetUnexpiredCancelledRegistrantSubscriptionPlans(participationObject, msgs, dc);
 
-                        if (rsps.Any(rsp => rsp.ValidUntil.HasValue))
-                            return rsps.Last().ValidUntil.Value.AddDays(1);
-                    }
+                    if (rsps.Any(rsp => rsp.ValidUntil.HasValue))
+                        return rsps.Last().ValidUntil.Value.AddDays(1);
 
                     // can't start in the past
                     if (participationObject.StartDate.HasValue && participationObject.StartDate.Value.IsAfter(initialDate))
