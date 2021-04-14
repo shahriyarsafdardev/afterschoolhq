@@ -1257,16 +1257,16 @@ namespace AfterSchoolLibrary.Billing
                 Prorate = true,
             };
 
-            //.. You can set the billing cycle anchor as the last date of current cycle. for example if monthly and month is of 30th. set 30th.
-            //.. Same way for weekly, only change would be weekly cycle would end on sunday
-            //.. it'll get a prorated invoice for the shorter amount of time on the first month.
-            //.. Then the customer will be invoiced normally after that https://stripe.com/docs/billing/subscriptions/billing-cycle#new-subscriptions
-            if (billingCycleAnchor.HasValue)
-                options.BillingCycleAnchor = billingCycleAnchor.Value;
-            
-
             if (startDate.Value.Date.AddDays(-1).IsAfter(DateTime.UtcNow.Date))
                 options.TrialEnd = startDate.Value.AddDays(-1);
+            else if (billingCycleAnchor.HasValue)
+            {
+                //.. If registrant joins mid-period then we can set the billing cycle anchor as the last date of current cycle. for example if monthly and month is of 30th. set 30th.
+                //.. Same way for weekly, only change would be weekly cycle would end on sunday
+                //.. it'll get a prorated invoice for the shorter amount of time on the first month.
+                //.. Then the customer will be invoiced normally after that https://stripe.com/docs/billing/subscriptions/billing-cycle#new-subscriptions            
+                options.BillingCycleAnchor = billingCycleAnchor.Value;
+            }
 
             // please make sure that billing ends when the program ends.
             if (endDate.HasValue && endDate.IsNotEmpty() && endDate.Value.Date.AddDays(-1).IsAfter(DateTime.UtcNow.Date))

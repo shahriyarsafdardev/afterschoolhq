@@ -177,10 +177,15 @@ namespace AfterSchoolLibrary.Services
                     stripeCouponId = GetACHCoupon(checkoutObject, billingAccount, plan, null, msgs, dc);
 
                 DateTime? billingCycleAnchor = null;
-                if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
-                    billingCycleAnchor = startDateTime.LastDateOfMonth();
-                else if (plan.BillingPeriodTypeId == BillingPeriodType.Week)
-                    billingCycleAnchor = startDateTime.LastDateOfWeek();
+
+                //.. Ongoing activity
+                if (participationObject.Schedule.IsEmpty())
+                {
+                    if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
+                        billingCycleAnchor = startDateTime.LastDateOfMonth();
+                    else if (plan.BillingPeriodTypeId == BillingPeriodType.Week)
+                        billingCycleAnchor = startDateTime.LastDateOfWeek();
+                }
 
                 // create the subscription on the stripe account (could be added to main account or connected account)
                 var subscription = Billing.StripeHelper.CreateRegistrantSubscription(

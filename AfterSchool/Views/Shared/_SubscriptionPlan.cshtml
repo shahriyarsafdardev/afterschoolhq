@@ -142,11 +142,12 @@
                     <input id="subscriptionEndDate" name="subscriptionEndDate" type="hidden" />
 
 
-                    @*<div class="am-checkbox">
-                <input type="checkbox" name="isongoingsubscription" id="isOngoingSubscription" value="1"
-                       @(subscriptionPlan.IsNotEmpty() && subscriptionPlan.IsOngoingSubscription == false ? "" : "checked=\"checked\"") />
-                <label for="isOngoingSubscription">Is Ongoing Subscription </label>
-            </div>*@
+                    @*
+                    <div class="am-checkbox">
+                        <input type="checkbox" name="isongoingsubscription" id="isOngoingSubscription" value="1"
+                               @(subscriptionPlan.IsNotEmpty() && subscriptionPlan.IsOngoingSubscription == false ? "" : "checked=\"checked\"") />
+                        <label for="isOngoingSubscription">Is Ongoing Subscription </label>
+                    </div>
 
                     <input type="checkbox" name="isongoingsubscription" id="isOngoingSubscription" value="0" class="hide" />
                     <div id="container-subscription-period" class="@(subscriptionPlan.IsNotEmpty() && subscriptionPlan.IsOngoingSubscription == false ? "" : "hide")">
@@ -156,11 +157,7 @@
                                    name="subscriptionPlanPeriodNumber"
                                    value="@(subscriptionPlan.IsNotEmpty() && subscriptionPlan.TotalPeriods > 2 ? subscriptionPlan.TotalPeriods.ToString() : "2")" />
                         </div>
-                    </div>
-                }
-                else
-                {
-                    <input type="checkbox" name="isongoingsubscription" id="isOngoingSubscription" value="1" checked="checked" class="hide" />
+                    </div>*@
                 }
 
             </div>
