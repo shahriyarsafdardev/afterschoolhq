@@ -174,17 +174,23 @@ namespace AfterSchoolLibrary.Services
                 if (plan.SplitCostEvenly)
                     stripeCouponId = GetSplitEvenlyCoupon(plan, checkoutObject, billingAccount, msgs, dc);
                 else
-                    stripeCouponId = GetACHCoupon(checkoutObject, billingAccount, plan, null, msgs, dc);
-
-                DateTime? billingCycleAnchor = null;
+                    stripeCouponId = GetACHCoupon(checkoutObject, billingAccount, plan, null, msgs, dc);                
 
                 //.. Ongoing activity
+                DateTime? billingCycleAnchor = null;
                 if (participationObject.Schedule.IsEmpty())
                 {
                     if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
                         billingCycleAnchor = startDateTime.LastDateOfMonth();
                     else if (plan.BillingPeriodTypeId == BillingPeriodType.Week)
                         billingCycleAnchor = startDateTime.LastDateOfWeek();
+                }
+
+                //.. charge parent if they tries to join mid-period
+                if (participationObject.Schedule.IsNotEmpty() && participationObject.StartDate.HasValue && participationObject.StartDate.Value.IsBefore(DateTime.Now))
+                {
+                    ChargeRegistrantMidPeriod(submittedRecord, checkoutObject, subscriptionPlanType, loggedInUser, msgs, dc);
+                    startDateTime = DateTime.Now.LastDateOfMonth(); // we will update starting of subscription for this registrant to next month(new cycle)
                 }
 
                 // create the subscription on the stripe account (could be added to main account or connected account)
@@ -253,6 +259,55 @@ namespace AfterSchoolLibrary.Services
                 var ra = checkoutObject.Registration.GetRegistrantActivity(participationObject, msgs, dc);
                 ra.ChangeSeatAssignment(RegistrationAssignmentType.ReservedPendingPayment, loggedInUser, msgs, dc);
             }
+        }
+
+        private static void ChargeRegistrantMidPeriod(this Registrant submittedRecord, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            var participationObject = checkoutObject.ParticipationObject;
+            var plan = subscriptionPlanType == SubscriptionPlanType.PaymentPlan ? checkoutObject.PaymentPlan : checkoutObject.SubscriptionPlan;
+            var billingAccount = checkoutObject.BillingAccount;
+            var useStripeConnectedAccount = billingAccount.HasAccountPackageFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
+            var (customer, sourceId) = GetCustomerAndSourceForSubscription(checkoutObject, msgs);
+
+            //get the total number of periods for current month x
+            var classesInCurrentMonth = participationObject.GetNumberOfClassesOfCurrentMonth(msgs, dc);
+
+            //get the total remaining periods in current month y
+            var classesRemainingInCurrentMonth = participationObject.GetNumberOfRemainingClassesOfCurrentMonth(msgs, dc);
+
+            //get total price per month z
+            var price = plan.GetTotalCostWithConvenienceFee(billingAccount, msgs, dc);
+            var ccFee = plan.GetCreditCardFee(billingAccount, msgs, dc);
+
+            //per class price p = (z/x)
+            var pricePerClass = price / classesInCurrentMonth;
+
+            //charge user for p* y for current cycle
+            var amount = pricePerClass * classesRemainingInCurrentMonth;
+            var platformFeeAmount = checkoutObject.CalculatePlatformFeeAmount(msgs, dc);
+
+            var charge = Billing.StripeHelper.CreateCharge(
+                            fromCustomerId: customer.Id,
+                            destinationAccountId: useStripeConnectedAccount ? checkoutObject.BillingAccount.StripeUserId : null,
+                            platformFee: useStripeConnectedAccount ? platformFeeAmount : new decimal?(),
+                            tokenOrSourceId: checkoutObject.StripeSourceId,
+                            totalAmount: amount,
+                            description: checkoutObject.Description,
+                            statementDescriptor: $"{checkoutObject.BillingAccount.Name}",
+                            metaData: new Dictionary<string, string>()
+                            {
+                                    { "ActivityUid", checkoutObject.ParticipationObject?.Uid.ToString() },
+                                    { "BillingAccountUid", checkoutObject.BillingAccount.Uid.ToString() },
+                                    { "PayingAccountUid", checkoutObject.PayingAccount.Uid.ToString() },
+                                    { "RegistrationUid", checkoutObject.Registration?.Uid.ToString() },
+                                    { "CreditCardFeePayer", checkoutObject.CreditCardFeePayer.Uid.ToString() },
+                                    { "ConvenienceFeePayer", checkoutObject.ConvenienceFeePayer.Uid.ToString() },
+                                    { "PurchasedBy", checkoutObject.MasterRegistrant?.DisplayName },
+                                    { "BilledBy", checkoutObject.BillingAccount.Name }
+                            },
+                            msgs: msgs
+                        );
         }
 
         private static string GetSplitEvenlyCoupon(SubscriptionPlan plan, CheckoutObject checkoutObject, Account billingAccount, SystemMessages msgs, DatabaseConnection dc = null)

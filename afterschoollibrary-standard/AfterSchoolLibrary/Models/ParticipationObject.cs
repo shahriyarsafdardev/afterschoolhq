@@ -940,6 +940,24 @@ namespace AfterSchoolLibrary.Models
             return null;
         }
 
+        public int GetNumberOfClassesOfCurrentMonth(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var classes = 0;
+            if (Schedule.IsNotEmpty() && Schedule.ID.HasValue)
+                return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now.FirstDateOfMonth(), DateTime.Now.LastDateOfMonth(),  msgs).Count;
+
+            return classes;
+        }
+
+        public int GetNumberOfRemainingClassesOfCurrentMonth(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var classes = 0;
+            if (Schedule.IsNotEmpty() && Schedule.ID.HasValue)
+                return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now, DateTime.Now.LastDateOfMonth(), msgs).Count;
+
+            return classes;
+        }
+
         #endregion
 
         #region DemoObjects
