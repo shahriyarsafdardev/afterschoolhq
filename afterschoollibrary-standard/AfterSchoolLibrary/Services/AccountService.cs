@@ -3246,8 +3246,8 @@ namespace AfterSchoolLibrary.Services
                     AccountService.ProcessPaymentWithStripe(checkoutObject, amsgs, adc);
 
                     // must wait until after charges happen to know what card id is charged for sure
-                    if (msgs.HasNoErrors())
-                        AccountService.CreatePurchaseTransactionPayment(checkoutObject, loggedInUser, msgs, dc);
+                    if (amsgs.HasNoErrors())
+                        AccountService.CreatePurchaseTransactionPayment(checkoutObject, loggedInUser, amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {

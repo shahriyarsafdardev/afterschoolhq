@@ -267,8 +267,8 @@ namespace AfterSchoolLibrary.Services
             var participationObject = checkoutObject.ParticipationObject;
             var plan = subscriptionPlanType == SubscriptionPlanType.PaymentPlan ? checkoutObject.PaymentPlan : checkoutObject.SubscriptionPlan;
             var billingAccount = checkoutObject.BillingAccount;
-            var useStripeConnectedAccount = billingAccount.HasAccountPackageFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
-            var (customer, sourceId) = GetCustomerAndSourceForSubscription(checkoutObject, msgs);
+            //var useStripeConnectedAccount = billingAccount.HasAccountPackageFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
+            //var (customer, sourceId) = GetCustomerAndSourceForSubscription(checkoutObject, msgs);
 
             //get the total number of periods for current month x
             var classesInCurrentMonth = participationObject.GetNumberOfClassesOfCurrentMonth(msgs, dc);
@@ -276,38 +276,79 @@ namespace AfterSchoolLibrary.Services
             //get the total remaining periods in current month y
             var classesRemainingInCurrentMonth = participationObject.GetNumberOfRemainingClassesOfCurrentMonth(msgs, dc);
 
-            //get total price per month z
-            var price = plan.GetTotalCostWithConvenienceFee(billingAccount, msgs, dc);
-            var ccFee = plan.GetCreditCardFee(billingAccount, msgs, dc);
+            //(y * costperperiod)/ x
+            var pricePerClass = classesRemainingInCurrentMonth * plan.CostPerPeriod.Value / classesInCurrentMonth;
+            var calcObj = new FeeCalculationObject(pricePerClass, billingAccount, msgs);
+            var convenienceFee = calcObj.GetConvenienceFee();
+            var ccFee = 0M;
+            if (checkoutObject.PaymentType == PaymentType.CreditCard)
+                ccFee = calcObj.GetCreditCardFee();
 
-            //per class price p = (z/x)
-            var pricePerClass = price / classesInCurrentMonth;
+            var amount = calcObj.GetFinalTotalCost(paymentType: checkoutObject.PaymentType);
+            BankAccountPurchaseObject bankAccountPurchaseObject = null;
+            CreditCardPurchaseObject creditCardPurchaseObject = null;            
 
-            //charge user for p* y for current cycle
-            var amount = pricePerClass * classesRemainingInCurrentMonth;
-            var platformFeeAmount = checkoutObject.CalculatePlatformFeeAmount(msgs, dc);
+            if (checkoutObject.PaymentType == PaymentType.ACH)
+            {
+                bankAccountPurchaseObject = new BankAccountPurchaseObject()
+                {
+                    StripeSourceId = checkoutObject.StripeSourceId
+                };
+            }
+            else if (checkoutObject.PaymentType == PaymentType.CreditCard)
+            {
+                creditCardPurchaseObject = new CreditCardPurchaseObject()
+                {
+                    StripeSourceId = checkoutObject.StripeSourceId
+                };
+            }
 
-            var charge = Billing.StripeHelper.CreateCharge(
-                            fromCustomerId: customer.Id,
-                            destinationAccountId: useStripeConnectedAccount ? checkoutObject.BillingAccount.StripeUserId : null,
-                            platformFee: useStripeConnectedAccount ? platformFeeAmount : new decimal?(),
-                            tokenOrSourceId: checkoutObject.StripeSourceId,
-                            totalAmount: amount,
-                            description: checkoutObject.Description,
-                            statementDescriptor: $"{checkoutObject.BillingAccount.Name}",
-                            metaData: new Dictionary<string, string>()
-                            {
-                                    { "ActivityUid", checkoutObject.ParticipationObject?.Uid.ToString() },
-                                    { "BillingAccountUid", checkoutObject.BillingAccount.Uid.ToString() },
-                                    { "PayingAccountUid", checkoutObject.PayingAccount.Uid.ToString() },
-                                    { "RegistrationUid", checkoutObject.Registration?.Uid.ToString() },
-                                    { "CreditCardFeePayer", checkoutObject.CreditCardFeePayer.Uid.ToString() },
-                                    { "ConvenienceFeePayer", checkoutObject.ConvenienceFeePayer.Uid.ToString() },
-                                    { "PurchasedBy", checkoutObject.MasterRegistrant?.DisplayName },
-                                    { "BilledBy", checkoutObject.BillingAccount.Name }
-                            },
-                            msgs: msgs
-                        );
+            AccountService.ProcessPayment(
+                checkoutObject: new CheckoutObject()
+                {
+                    OverrideAmount = amount,
+                    ConvenienceFeeOverrideAmount = convenienceFee,
+                    PaymentTypeFeeOverrideAmount = ccFee,
+                    PayingAccount = checkoutObject.PayingAccount,
+                    BillingAccount = billingAccount,
+                    CreditCardPurchaseObject = creditCardPurchaseObject,
+                    BankAccountPurchaseObject = bankAccountPurchaseObject,
+                    SavePaymentInfo = false,
+                    PaymentType = checkoutObject.PaymentType,
+                    PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
+                    ConvenienceFeePayer = checkoutObject.ConvenienceFeePayer,
+                    CreditCardFeePayer = checkoutObject.CreditCardFeePayer,
+                    Registration = checkoutObject.Registration,
+                    ParticipationObject = participationObject,
+                    MasterRegistrant = null,
+                    Description = "Pro-rating charge on joing mid-period",                        
+
+                },
+                loggedInUser: loggedInUser,
+                msgs: msgs,
+                dc: dc);
+
+            //var charge = Billing.StripeHelper.CreateCharge(
+            //                fromCustomerId: customer.Id,
+            //                destinationAccountId: useStripeConnectedAccount ? checkoutObject.BillingAccount.StripeUserId : null,
+            //                platformFee: useStripeConnectedAccount ? convenienceFee : new decimal?(),
+            //                tokenOrSourceId: checkoutObject.StripeSourceId,
+            //                totalAmount: amount,
+            //                description: checkoutObject.Description,
+            //                statementDescriptor: $"{checkoutObject.BillingAccount.Name}",
+            //                metaData: new Dictionary<string, string>()
+            //                {
+            //                        { "ActivityUid", checkoutObject.ParticipationObject?.Uid.ToString() },
+            //                        { "BillingAccountUid", checkoutObject.BillingAccount.Uid.ToString() },
+            //                        { "PayingAccountUid", checkoutObject.PayingAccount.Uid.ToString() },
+            //                        { "RegistrationUid", checkoutObject.Registration?.Uid.ToString() },
+            //                        { "CreditCardFeePayer", checkoutObject.CreditCardFeePayer.Uid.ToString() },
+            //                        { "ConvenienceFeePayer", checkoutObject.ConvenienceFeePayer.Uid.ToString() },
+            //                        { "PurchasedBy", checkoutObject.MasterRegistrant?.DisplayName },
+            //                        { "BilledBy", checkoutObject.BillingAccount.Name }
+            //                },
+            //                msgs: msgs
+            //            );
         }
 
         private static string GetSplitEvenlyCoupon(SubscriptionPlan plan, CheckoutObject checkoutObject, Account billingAccount, SystemMessages msgs, DatabaseConnection dc = null)
