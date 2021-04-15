@@ -16,9 +16,9 @@
     else if (Model.SubscriptionPlans.Any())
     {
         Html.RenderPartial(
-            "~/Views/Shared/ParticipationObject/_TuitionAndSubscriptionPlans.cshtml",
-            Model,
-            new ViewDataDictionary() { { "DisplayCheckoutPrice", true } });
+          "~/Views/Shared/ParticipationObject/_SubscriptionPlan.cshtml",
+          Model,
+          new ViewDataDictionary() { { "DisplayCheckoutPrice", true } });
     }
     else if (Model.PaymentPlans.Any())
     {

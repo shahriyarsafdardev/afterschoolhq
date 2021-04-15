@@ -190,7 +190,12 @@ namespace AfterSchoolLibrary.Services
                 if (participationObject.Schedule.IsNotEmpty() && participationObject.StartDate.HasValue && participationObject.StartDate.Value.IsBefore(DateTime.Now))
                 {
                     ChargeRegistrantMidPeriod(submittedRecord, checkoutObject, subscriptionPlanType, loggedInUser, msgs, dc);
-                    startDateTime = DateTime.Now.LastDateOfMonth(); // we will update starting of subscription for this registrant to next month(new cycle)
+
+                    // we will update starting of subscription for this registrant to next cycle
+                    if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
+                        startDateTime = DateTime.Now.LastDateOfMonth().AddDays(2); //2 days for subscription to start on 1st 
+                    else if (plan.BillingPeriodTypeId == BillingPeriodType.Week)
+                        startDateTime = DateTime.Now.LastDateOfWeek().AddDays(2); //2 days for subscription to start on sunday 
                 }
 
                 // create the subscription on the stripe account (could be added to main account or connected account)
@@ -267,18 +272,19 @@ namespace AfterSchoolLibrary.Services
             var participationObject = checkoutObject.ParticipationObject;
             var plan = subscriptionPlanType == SubscriptionPlanType.PaymentPlan ? checkoutObject.PaymentPlan : checkoutObject.SubscriptionPlan;
             var billingAccount = checkoutObject.BillingAccount;
-            //var useStripeConnectedAccount = billingAccount.HasAccountPackageFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
-            //var (customer, sourceId) = GetCustomerAndSourceForSubscription(checkoutObject, msgs);
 
-            //get the total number of periods for current month x
-            var classesInCurrentMonth = participationObject.GetNumberOfClassesOfCurrentMonth(msgs, dc);
+            //get the total number of periods for current cycle x
+            var classesInCurrentCycle = participationObject.GetNumberOfClassesInCurrentCycle(plan.BillingPeriodTypeId, msgs, dc);
 
-            //get the total remaining periods in current month y
-            var classesRemainingInCurrentMonth = participationObject.GetNumberOfRemainingClassesOfCurrentMonth(msgs, dc);
+            //get the total remaining periods in current cycle y
+            var classesRemainingInCurrentCycle = participationObject.GetNumberOfRemainingClassesInCurrentCycle(plan.BillingPeriodTypeId, msgs, dc);
 
-            //(y * costperperiod)/ x
-            var pricePerClass = classesRemainingInCurrentMonth * plan.CostPerPeriod.Value / classesInCurrentMonth;
-            var calcObj = new FeeCalculationObject(pricePerClass, billingAccount, msgs);
+            if (classesInCurrentCycle <= 0 || classesRemainingInCurrentCycle <= 0)
+                return;
+
+            //caluclated price of current cycle to charge p = (y * costperperiod)/ x
+            var currentCycleCharge = classesRemainingInCurrentCycle * plan.CostPerPeriod.Value / classesInCurrentCycle;
+            var calcObj = new FeeCalculationObject(currentCycleCharge, billingAccount, msgs);
             var convenienceFee = calcObj.GetConvenienceFee();
             var ccFee = 0M;
             if (checkoutObject.PaymentType == PaymentType.CreditCard)
@@ -327,28 +333,6 @@ namespace AfterSchoolLibrary.Services
                 loggedInUser: loggedInUser,
                 msgs: msgs,
                 dc: dc);
-
-            //var charge = Billing.StripeHelper.CreateCharge(
-            //                fromCustomerId: customer.Id,
-            //                destinationAccountId: useStripeConnectedAccount ? checkoutObject.BillingAccount.StripeUserId : null,
-            //                platformFee: useStripeConnectedAccount ? convenienceFee : new decimal?(),
-            //                tokenOrSourceId: checkoutObject.StripeSourceId,
-            //                totalAmount: amount,
-            //                description: checkoutObject.Description,
-            //                statementDescriptor: $"{checkoutObject.BillingAccount.Name}",
-            //                metaData: new Dictionary<string, string>()
-            //                {
-            //                        { "ActivityUid", checkoutObject.ParticipationObject?.Uid.ToString() },
-            //                        { "BillingAccountUid", checkoutObject.BillingAccount.Uid.ToString() },
-            //                        { "PayingAccountUid", checkoutObject.PayingAccount.Uid.ToString() },
-            //                        { "RegistrationUid", checkoutObject.Registration?.Uid.ToString() },
-            //                        { "CreditCardFeePayer", checkoutObject.CreditCardFeePayer.Uid.ToString() },
-            //                        { "ConvenienceFeePayer", checkoutObject.ConvenienceFeePayer.Uid.ToString() },
-            //                        { "PurchasedBy", checkoutObject.MasterRegistrant?.DisplayName },
-            //                        { "BilledBy", checkoutObject.BillingAccount.Name }
-            //                },
-            //                msgs: msgs
-            //            );
         }
 
         private static string GetSplitEvenlyCoupon(SubscriptionPlan plan, CheckoutObject checkoutObject, Account billingAccount, SystemMessages msgs, DatabaseConnection dc = null)

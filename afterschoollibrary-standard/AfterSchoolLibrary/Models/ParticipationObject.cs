@@ -940,20 +940,30 @@ namespace AfterSchoolLibrary.Models
             return null;
         }
 
-        public int GetNumberOfClassesOfCurrentMonth(SystemMessages msgs = null, DatabaseConnection dc = null)
+        public int GetNumberOfClassesInCurrentCycle(BillingPeriodType billingPeriodTypeId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var classes = 0;
             if (Schedule.IsNotEmpty() && Schedule.ID.HasValue)
-                return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now.FirstDateOfMonth(), DateTime.Now.LastDateOfMonth(),  msgs).Count;
+            {
+                if (billingPeriodTypeId == BillingPeriodType.Month)
+                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now.FirstDateOfMonth(), DateTime.Now.LastDateOfMonth(), msgs).Count;
+                else if (billingPeriodTypeId == BillingPeriodType.Week)
+                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now.FirstDateOfWeek(), DateTime.Now.LastDateOfWeek(), msgs).Count;
+            }
 
             return classes;
         }
 
-        public int GetNumberOfRemainingClassesOfCurrentMonth(SystemMessages msgs = null, DatabaseConnection dc = null)
+        public int GetNumberOfRemainingClassesInCurrentCycle(BillingPeriodType billingPeriodTypeId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var classes = 0;
             if (Schedule.IsNotEmpty() && Schedule.ID.HasValue)
-                return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now, DateTime.Now.LastDateOfMonth(), msgs).Count;
+            {
+                if (billingPeriodTypeId == BillingPeriodType.Month)
+                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now, DateTime.Now.LastDateOfMonth(), msgs).Count;
+                else if (billingPeriodTypeId == BillingPeriodType.Week)
+                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now, DateTime.Now.LastDateOfWeek(), msgs).Count;
+            }                
 
             return classes;
         }
