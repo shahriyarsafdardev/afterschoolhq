@@ -51,27 +51,35 @@ namespace AfterSchool.Models
             base.Initialize(requestContext);
 
             Utilities.DetectAfterSchool();
-            WebSessionUtilities.InitializeWebSession(Request);
 
-            if (SessionVariables.VisitorSession.IsEmpty())
+            //check if db exisit
+            var result = Account.GetFirstAccount();
+            if (result.Rows.Count > 0)
             {
-                var session = new Session();
-                session.LastModifiedDate = session.CreateDate = session.LastActivity = DateTime.UtcNow;
-                session.LastModifiedBy = session.CreatedBy = 0;
-                session.UrlReferrer = Request.UrlReferrer.IsNotEmpty() ? Request.UrlReferrer.ToString() : null;
-                session.IPAddress = Request.ServerVariables["HTTP_X_FORWARDED_FOR"]; //Request.UserHostAddress;
-                session.UserAgent = Request.UserAgent;
-                session.Save();
-                SessionVariables.VisitorSession = session;
 
-            }
-            else
-            {
-                SessionVariables.VisitorSession.LastActivity = DateTime.UtcNow;
-                SessionVariables.VisitorSession.Save();
-            }
+                WebSessionUtilities.InitializeWebSession(Request);
 
-           // HandleSubdomainRedirect();
+                if (SessionVariables.VisitorSession.IsEmpty())
+                {
+
+                    var session = new Session();
+                    session.LastModifiedDate = session.CreateDate = session.LastActivity = DateTime.UtcNow;
+                    session.LastModifiedBy = session.CreatedBy = 0;
+                    session.UrlReferrer = Request.UrlReferrer.IsNotEmpty() ? Request.UrlReferrer.ToString() : null;
+                    session.IPAddress = Request.ServerVariables["HTTP_X_FORWARDED_FOR"]; //Request.UserHostAddress;
+                    session.UserAgent = Request.UserAgent;
+                    session.Save();
+                    SessionVariables.VisitorSession = session;
+
+                }
+                else
+                {
+                    SessionVariables.VisitorSession.LastActivity = DateTime.UtcNow;
+                    SessionVariables.VisitorSession.Save();
+                }
+
+                HandleSubdomainRedirect();
+            }
         }
 
         protected void UpdateSession(SessionActionType sat, int? accountId = null, int? activityId = null, int? webUserId = null, int? registrantId = null, int? registrationId = null, int? registrationPeriodId = null, int? activityGroupId = null, DatabaseConnection dc = null)
@@ -109,7 +117,7 @@ namespace AfterSchool.Models
         {
             var subdomainAccount = Account.LoadBySubdomain(Request.Url.Host);
             if (subdomainAccount.IsNotEmpty() && Request.Url.AbsolutePath.IsEmpty())
-               Response.Redirect($"https://{Request.Url.Host}/{subdomainAccount.UniqueName}");
+                Response.Redirect($"https://{Request.Url.Host}/{subdomainAccount.UniqueName}");
         }
 
         protected void WriteOutput(object obj, ResponseType rt)
@@ -313,7 +321,7 @@ namespace AfterSchool.Models
             const string registrantPath = "/user/";
             const string districtPath = "/district/";
             const string orgPath = "/org/";
-            if(returnUrl.IsNotEmpty())
+            if (returnUrl.IsNotEmpty())
             {
                 switch (account.AccountTypeId)
                 {
@@ -336,7 +344,7 @@ namespace AfterSchool.Models
 
                 }
             }
-            
+
 
             return actionResult;
         }

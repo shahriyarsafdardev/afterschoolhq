@@ -1138,6 +1138,18 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).Select(a => a.Subdomain).ToList();
         }
 
+        public static DataTable GetFirstAccount(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+
+            var sql = $@"
+				SELECT TOP 1 *				
+				FROM Account";
+
+            return dq.ExecuteSelect(sql, msgs);
+        }
+
         #endregion
     }
 }
