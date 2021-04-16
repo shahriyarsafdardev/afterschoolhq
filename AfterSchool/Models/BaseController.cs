@@ -56,12 +56,10 @@ namespace AfterSchool.Models
             var isTableExist = WebSession.IsTableExists();
             if (isTableExist)
             {
-
                 WebSessionUtilities.InitializeWebSession(Request);
 
                 if (SessionVariables.VisitorSession.IsEmpty())
                 {
-
                     var session = new Session();
                     session.LastModifiedDate = session.CreateDate = session.LastActivity = DateTime.UtcNow;
                     session.LastModifiedBy = session.CreatedBy = 0;
@@ -70,7 +68,6 @@ namespace AfterSchool.Models
                     session.UserAgent = Request.UserAgent;
                     session.Save();
                     SessionVariables.VisitorSession = session;
-
                 }
                 else
                 {
@@ -78,7 +75,7 @@ namespace AfterSchool.Models
                     SessionVariables.VisitorSession.Save();
                 }
 
-                //HandleSubdomainRedirect();
+            //HandleSubdomainRedirect();
             }
         }
 
