@@ -181,9 +181,9 @@ namespace AfterSchoolLibrary.Services
                 if (participationObject.Schedule.IsEmpty())
                 {
                     if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
-                        billingCycleAnchor = startDateTime.LastDateOfMonth();
+                        billingCycleAnchor = startDateTime.LastDateOfMonth().AddDays(2); //2 days for subscription to start on 1st 
                     else if (plan.BillingPeriodTypeId == BillingPeriodType.Week)
-                        billingCycleAnchor = startDateTime.LastDateOfWeek();
+                        billingCycleAnchor = startDateTime.LastDateOfWeek().AddDays(2); //2 days for subscription to start on sunday 
                 }
 
                 //.. charge parent if they tries to join mid-period
