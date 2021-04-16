@@ -58,7 +58,7 @@ namespace AfterSchool.Models
             {
                 WebSessionUtilities.InitializeWebSession(Request);
 
-                if (SessionVariables.VisitorSession.IsEmpty())
+                if(SessionVariables.VisitorSession.IsEmpty())
                 {
                     var session = new Session();
                     session.LastModifiedDate = session.CreateDate = session.LastActivity = DateTime.UtcNow;
@@ -318,7 +318,7 @@ namespace AfterSchool.Models
             const string registrantPath = "/user/";
             const string districtPath = "/district/";
             const string orgPath = "/org/";
-            if (returnUrl.IsNotEmpty())
+            if(returnUrl.IsNotEmpty())
             {
                 switch (account.AccountTypeId)
                 {
@@ -341,7 +341,6 @@ namespace AfterSchool.Models
 
                 }
             }
-
 
             return actionResult;
         }
