@@ -1138,8 +1138,6 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).Select(a => a.Subdomain).ToList();
         }
 
-        
-
         #endregion
     }
 }
