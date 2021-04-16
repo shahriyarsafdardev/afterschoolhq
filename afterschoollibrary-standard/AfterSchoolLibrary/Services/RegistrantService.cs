@@ -181,9 +181,9 @@ namespace AfterSchoolLibrary.Services
                 if (participationObject.Schedule.IsEmpty())
                 {
                     if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
-                        billingCycleAnchor = startDateTime.LastDateOfMonth().AddDays(2); //2 days for subscription to start on 1st 
+                        billingCycleAnchor = startDateTime.LastDateOfMonth().AddDays(1); 
                     else if (plan.BillingPeriodTypeId == BillingPeriodType.Week)
-                        billingCycleAnchor = startDateTime.LastDateOfWeek().AddDays(2); //2 days for subscription to start on sunday 
+                        billingCycleAnchor = startDateTime.LastDateOfWeek().AddDays(1);
                 }
 
                 //.. charge parent if they tries to join mid-period
@@ -193,9 +193,9 @@ namespace AfterSchoolLibrary.Services
 
                     // we will update starting of subscription for this registrant to next cycle
                     if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
-                        startDateTime = DateTime.Now.LastDateOfMonth().AddDays(2); //2 days for subscription to start on 1st 
+                        startDateTime = DateTime.Now.LastDateOfMonth().AddDays(1);
                     else if (plan.BillingPeriodTypeId == BillingPeriodType.Week)
-                        startDateTime = DateTime.Now.LastDateOfWeek().AddDays(2); //2 days for subscription to start on sunday 
+                        startDateTime = DateTime.Now.LastDateOfWeek().AddDays(1);
                 }
 
                 // create the subscription on the stripe account (could be added to main account or connected account)
