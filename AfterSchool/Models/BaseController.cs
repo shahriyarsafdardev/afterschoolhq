@@ -66,7 +66,7 @@ namespace AfterSchool.Models
                     session.LastModifiedDate = session.CreateDate = session.LastActivity = DateTime.UtcNow;
                     session.LastModifiedBy = session.CreatedBy = 0;
                     session.UrlReferrer = Request.UrlReferrer.IsNotEmpty() ? Request.UrlReferrer.ToString() : null;
-                    session.IPAddress = Request.ServerVariables["HTTP_X_FORWARDED_FOR"]; //Request.UserHostAddress;
+                    session.IPAddress = Request.ServerVariables["HTTP_X_FORWARDED_FOR"];
                     session.UserAgent = Request.UserAgent;
                     session.Save();
                     SessionVariables.VisitorSession = session;
