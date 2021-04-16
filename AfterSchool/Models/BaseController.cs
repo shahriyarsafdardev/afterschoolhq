@@ -52,9 +52,9 @@ namespace AfterSchool.Models
 
             Utilities.DetectAfterSchool();
 
-            //check if db exisit
-            var result = Account.GetFirstAccount();
-            if (result.Rows.Count > 0)
+            //check if db exisit then create session
+            var isTableExist = WebSession.IsTableExists();
+            if (isTableExist)
             {
 
                 WebSessionUtilities.InitializeWebSession(Request);
