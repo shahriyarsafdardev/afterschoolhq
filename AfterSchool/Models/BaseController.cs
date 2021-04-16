@@ -77,8 +77,6 @@ namespace AfterSchool.Models
                 }
 
             // HandleSubdomainRedirect();
-
-
             }
         }
 
