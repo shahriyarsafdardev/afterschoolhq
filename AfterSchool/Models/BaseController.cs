@@ -78,7 +78,7 @@ namespace AfterSchool.Models
                     SessionVariables.VisitorSession.Save();
                 }
 
-                HandleSubdomainRedirect();
+                //HandleSubdomainRedirect();
             }
         }
 
