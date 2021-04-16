@@ -1281,7 +1281,6 @@ namespace AfterSchoolLibrary.Billing
 
             try
             {
-                //.. todo: don't create subscription if it's not ongoing and end date is of today or of past, since we can;t control the ending of those subscription
                 subscription = GetSubscriptionService().Create(options);
             }
             catch (StripeException ex)
