@@ -58,16 +58,17 @@ namespace AfterSchool.Models
             {
                 WebSessionUtilities.InitializeWebSession(Request);
 
-                if(SessionVariables.VisitorSession.IsEmpty())
+                if (SessionVariables.VisitorSession.IsEmpty())
                 {
                     var session = new Session();
                     session.LastModifiedDate = session.CreateDate = session.LastActivity = DateTime.UtcNow;
                     session.LastModifiedBy = session.CreatedBy = 0;
                     session.UrlReferrer = Request.UrlReferrer.IsNotEmpty() ? Request.UrlReferrer.ToString() : null;
-                    session.IPAddress = Request.ServerVariables["HTTP_X_FORWARDED_FOR"];
+                    session.IPAddress = Request.ServerVariables["HTTP_X_FORWARDED_FOR"]; //Request.UserHostAddress;
                     session.UserAgent = Request.UserAgent;
                     session.Save();
                     SessionVariables.VisitorSession = session;
+
                 }
                 else
                 {
@@ -76,6 +77,7 @@ namespace AfterSchool.Models
                 }
 
             //HandleSubdomainRedirect();
+
             }
         }
 
@@ -114,7 +116,7 @@ namespace AfterSchool.Models
         {
             var subdomainAccount = Account.LoadBySubdomain(Request.Url.Host);
             if (subdomainAccount.IsNotEmpty() && Request.Url.AbsolutePath.IsEmpty())
-                Response.Redirect($"https://{Request.Url.Host}/{subdomainAccount.UniqueName}");
+               Response.Redirect($"https://{Request.Url.Host}/{subdomainAccount.UniqueName}");
         }
 
         protected void WriteOutput(object obj, ResponseType rt)
