@@ -473,11 +473,21 @@ namespace AfterSchoolLibrary.Services
                 }
                 else if (plan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout)
                 {
-                    //..If the subscription starts on checkout  and/or there is no activity schedule, then make it so billing starts on the prior Sunday
-                    //..This logic will return the prior sunday, or today if it's already sunday
-                    int daysUntilLastSunday = ((int)DayOfWeek.Sunday - (int)initialDate.DayOfWeek - 7) % 7;
-                    var previousSunday = initialDate.AddDays(daysUntilLastSunday);
-                    return previousSunday.IsAfter(DateTime.UtcNow) ? previousSunday : DateTime.UtcNow;
+                    //.. if activity is in future and provider opt for oncheckout, payment will only began for when activity starts. 
+                    //.. becuase in this  case parent can join earlier, and we can't start payment before activity schedule.
+                    if (participationObject.Schedule.IsNotEmpty() && participationObject.Schedule.StartDate.Value.IsAfter(DateTime.UtcNow))
+                    {
+                        return participationObject.Schedule.StartDate.Value;
+                    } else
+                    {
+                        // if activity is active, and provider opt for oncheckout, payment will began when parent registers
+                        // pro - rating charge will be for first cycle.
+                        return DateTime.UtcNow;
+                    }
+                    
+                    //int daysUntilLastSunday = ((int)DayOfWeek.Sunday - (int)initialDate.DayOfWeek - 7) % 7;
+                    //var previousSunday = initialDate.AddDays(daysUntilLastSunday);
+                    //return previousSunday.IsAfter(DateTime.UtcNow) ? previousSunday : DateTime.UtcNow;
                 }
                 else if (plan.PaymentStartTypeId == PlanPaymentStartType.OnPeriodStart)
                 {
@@ -516,7 +526,7 @@ namespace AfterSchoolLibrary.Services
             {
                 if (plan.EndDate.HasValue)
                     return plan.EndDate.Value;
-                else if (participationObject.Schedule.IsNotEmpty() && !participationObject.Schedule.IsOngoing && participationObject.Schedule.EndDate.HasValue)
+                else if (participationObject.Schedule.IsNotEmpty() && participationObject.Schedule.EndDate.HasValue)
                     return participationObject.Schedule.EndDate.Value;
                 else
                     return null;

@@ -2,14 +2,14 @@
 
 @{
     var subscriptionPlan = (SubscriptionPlan)ViewBag.SubscriptionPlan;
-    var paymentdisabled = (string)ViewBag.paymentdisabled;    
+    var paymentdisabled = (string)ViewBag.paymentdisabled;
 
     var accountPackage = (AccountPackage)ViewBag.accountPackage;
     var showAllowSubscriptionPlans = accountPackage.HasFeature(FeatureType.AllowSubscriptionPlans);
     var showAllowSubscriptionPlansPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowSubscriptionPlans);
 
-    var lstPlanPaymentStartType = Model.HasSchedule ? 
-        Enum.GetValues(typeof(PlanPaymentStartType)).Cast<PlanPaymentStartType>().Except(new List<PlanPaymentStartType>() { PlanPaymentStartType.NotSet }) : 
+    var lstPlanPaymentStartType = Model.HasSchedule ?
+        Enum.GetValues(typeof(PlanPaymentStartType)).Cast<PlanPaymentStartType>().Except(new List<PlanPaymentStartType>() { PlanPaymentStartType.NotSet }) :
         Enum.GetValues(typeof(PlanPaymentStartType)).Cast<PlanPaymentStartType>().Except(new List<PlanPaymentStartType>() { PlanPaymentStartType.NotSet, PlanPaymentStartType.WhenActivityStarts, PlanPaymentStartType.OnPeriodStart });
 }
 
@@ -105,9 +105,9 @@
                 @if (Model.HasSchedule)
                 {
                     var schedule = Model.GetSchedule();
-                    var startDate = schedule.StartDate;
-                    var days = Enumerable.Range(1, DateTime.DaysInMonth(startDate.Value.Year, startDate.Value.Month))  // Days: 1, 2 ... 31 etc.
-                    .Select(day => new DateTime(startDate.Value.Year, startDate.Value.Month, day)) // Map each day to a date
+                    var startDate = schedule.StartDate.Value.IsOnOrBefore(DateTime.UtcNow) ? DateTime.UtcNow : schedule.StartDate.Value;
+                    var days = Enumerable.Range(1, DateTime.DaysInMonth(startDate.Year, startDate.Month))  // Days: 1, 2 ... 31 etc.
+                    .Select(day => new DateTime(startDate.Year, startDate.Month, day)) // Map each day to a date
                     .ToList();
 
                     <div id="container-subscription-week" class="input-group input-group-lg xs-mb-15 hide">
@@ -127,7 +127,14 @@
                         <select name="subscriptionperiodstartmonthday" id="subscriptionperiodstartmonthday" class="form-control" required>
                             @foreach (var item in days)
                             {
-                                <option value="@item.ToString()">@(item.ToString("MMMM dd"))</option>
+                                if (item.IsOnOrBefore(DateTime.UtcNow))
+                                {
+                                    <option value="@item.ToString()" style="color: #ccc;" disabled="disabled">@(item.ToString("MMMM dd"))</option>
+                                }
+                                else
+                                {
+                                    <option value="@item.ToString()">@(item.ToString("MMMM dd"))</option>
+                                }
                             }
                         </select>
                     </div>
@@ -136,6 +143,9 @@
                         <span>
                             As per the activity schedule and subscription configuration, <strong id="calculatedEnddate"></strong>.
                         </span>
+                    </p>
+                    <p>
+                        In case if registrant joins mid-class or mid of activity, AHQ will do pro-rate.
                     </p>
 
                     <input id="subscriptionStartDate" name="subscriptionStartDate" type="hidden" />
@@ -169,15 +179,15 @@
                 <label class="col-sm-3 control-label">Parents split cost evenly</label>
                 <div class="col-sm-6 col-sm-9">
                     @{Html.RenderPartial("~/Views/Shared/_SwitchButton.cshtml", subscriptionPlan?.SplitCostEvenly ?? false,
-                              new ViewDataDictionary() {
+              new ViewDataDictionary() {
                               { "checkboxname", "splitcostevenly" },
                               { "checkboxid", "splitcostevenly" },
                               { "disabled", false }
-                              });
+              });
                     }
                 </div>
             </div>
-        }
+                        }
 
         <div class="row">
             <div class="col-sm-3"></div>
@@ -222,10 +232,22 @@
 
 <script>
     PageEvent.add(PageEvent.AFTER_INIT, function () {
+        LoadDatesForActivityEditMode();
         $('#isOngoingSubscription').click(function () {
             $('#container-subscription-period').toggleClass('hide');
-        });        
+        });
     });
+
+    function LoadDatesForActivityEditMode() {
+        var billingTypeId = $('#subscriptionplanperiod').val();
+
+        if (billingTypeId == "1") { //month
+            $('#subscriptionperiodstartmonthday').val('@subscriptionPlan.StartDate');
+        } else if (billingTypeId == "3") { //weekly
+            var weekDay = '@(subscriptionPlan.StartDate.HasValue ? subscriptionPlan.StartDate.Value.DayOfWeek : DayOfWeek.Sunday)'
+            $('#subscriptionperiodstartweekday').val(weekDay)
+        }
+    }
 
     function LoadEndDate() {
         var billingTypeId = $('#subscriptionplanperiod').val();
@@ -238,15 +260,15 @@
             type: "GET",
             url: url,
             data: { activityId: '@Model.ID', billingPeriodType: billingTypeId, dayOfWeek, dayOfMonth },
-            success: function (data) {                
+            success: function (data) {
                 if (data && data.success == true) {
-                    $('#subscriptionStartDate').val(data.startDate);
-                    $('#subscriptionEndDate').val(data.endDate);
-                    endDateInput.html(`payment will start on ${data.startDate} and it will end on ${data.endDate}`);
+                    $('#subscriptionStartDate').val(data.startDateFormated);
+                    $('#subscriptionEndDate').val(data.endDateFormated);
+                    endDateInput.html(`payment will start on ${data.startDateFormated} and it will end on ${data.endDateFormated}`);
                     return false;
                 } else {
                     clearSubscriptionPaymentHiddenInputs();
-                }        
+                }
             }
         });
     }

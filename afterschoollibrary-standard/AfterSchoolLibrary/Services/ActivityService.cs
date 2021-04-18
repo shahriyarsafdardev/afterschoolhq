@@ -1378,8 +1378,7 @@ namespace AfterSchoolLibrary.Services
                 var plan = activity.GetSubscriptionPlan(msgs, dc);
 
                 hasStripeChanges = plan.CostPerPeriod.Value != subscriptionplancost.ToDecimal() ||
-                                    plan.BillingPeriodTypeId != (BillingPeriodType)subscriptionplanperiod.ToInteger() ||
-                                    plan.TotalPeriods.Value != subscriptionPlanPeriodNumber.ToInteger() ||
+                                    plan.BillingPeriodTypeId != (BillingPeriodType)subscriptionplanperiod.ToInteger() ||                                    
                                     plan.PaymentStartTypeId != paymentStartType ||
                                     plan.IsOngoingSubscription != isongoingsubscription.ToBoolean() ||
                                     (subscriptionStartDate.HasValue && subscriptionStartDate.Value != plan.StartDate) ||
@@ -2583,6 +2582,11 @@ namespace AfterSchoolLibrary.Services
                 return (null, null);
 
             var schedule = activity.GetSchedule(msgs, dc);
+            var subscriptionPlan = activity.GetSubscriptionPlan(msgs, dc);
+
+            //if (subscriptionPlan.IsNotEmpty() && subscriptionPlan.StartDate.HasValue && subscriptionPlan.EndDate.HasValue)
+            //    return (paymentStart: subscriptionPlan.StartDate.Value, paymentEnd: subscriptionPlan.EndDate.Value);
+
             var startDate = schedule.GetUpcomingInstance(msgs, dc).FirstOrDefault().StartDateTime.Value;
             var endDate = schedule.EndDate.Value;
 
@@ -2590,12 +2594,12 @@ namespace AfterSchoolLibrary.Services
             {
                 //.. if activity schedule starts on November 1st, 2021(Monday) ends on December 1st, 2021(Thursday) and provide choose weekly billing every sunday, 
                 //.. that would mean the parent would be first billed on Sunday Oct 31st and last billed on Sunday Nov 27th.
-                int daysUntilFirstPayment = ((int)dayOfWeek - (int)startDate.DayOfWeek - 7) % 7;
-                var startingDay = startDate.AddDays(daysUntilFirstPayment);
+                //.. but if start date is of today or past, we will find next sunday or user's choosen day                
+                var startingDay = startDate.AddDays(-1).IsOnOrBefore(DateTime.UtcNow) ? startDate.AddDays(((int)dayOfWeek - (int)startDate.DayOfWeek + 7) % 7) : startDate.AddDays(((int)dayOfWeek - (int)startDate.DayOfWeek - 7) % 7);
 
                 int daysUntilLastPayment = ((int)dayOfWeek - (int)endDate.DayOfWeek - 7) % 7;
                 var endingDay = endDate.AddDays(daysUntilLastPayment);
-                return (paymentStart: startingDay.IsAfter(DateTime.UtcNow) ? startingDay : DateTime.UtcNow, paymentEnd: endingDay.IsAfter(DateTime.UtcNow) ? endingDay : DateTime.UtcNow);
+                return (paymentStart: startingDay, paymentEnd: endingDay);
             }
             else if (billingPeriodType == BillingPeriodType.Month)
             {
@@ -2604,7 +2608,7 @@ namespace AfterSchoolLibrary.Services
                 var startingDay = dayOfMonth;
                 var endingDay = new DateTime(endDate.Year, endDate.Month, dayOfMonth.Day);
 
-                return (paymentStart: startingDay.IsAfter(DateTime.UtcNow) ? startingDay : DateTime.UtcNow, paymentEnd: endingDay.IsAfter(DateTime.UtcNow) ? endingDay : DateTime.UtcNow);
+                return (paymentStart: startingDay.IsAfter(DateTime.UtcNow) ? startingDay : DateTime.UtcNow, paymentEnd: endingDay);
             }
 
             return (null, null);

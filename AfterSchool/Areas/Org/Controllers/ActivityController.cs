@@ -2475,8 +2475,10 @@ namespace AfterSchool.Areas.Org.Controllers
             if (dates.paymentStart.IsNotEmpty() && dates.paymentStart.HasValue && dates.paymentEnd.IsNotEmpty() && dates.paymentEnd.HasValue)
                 return Json(new { 
                     success = true, 
-                    startDate = dates.paymentStart.Value.ToString("dddd, MMMM d, yyyy"), 
-                    endDate = dates.paymentEnd.Value.ToString("dddd, MMMM d, yyyy")
+                    startDate = dates.paymentStart.Value.ToString(),
+                    startDateFormated = dates.paymentStart.Value.ToString("dddd, MMMM d, yyyy"), 
+                    endDate = dates.paymentEnd.Value.ToString(),
+                    endDateFormated = dates.paymentEnd.Value.ToString("dddd, MMMM d, yyyy"),
                 }, JsonRequestBehavior.AllowGet);
 
             return Json(new { success = false }, JsonRequestBehavior.AllowGet);
