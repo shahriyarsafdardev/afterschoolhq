@@ -353,7 +353,10 @@ namespace AfterSchoolLibrary.Services
                 {
                     var stripeSubscription = Billing.StripeHelper.GetSubscription(rsp.StripeSubscriptionId, null, msgs);
 
-                    if (stripeSubscription.IsNotEmpty())
+                    if (stripeSubscription.IsNotEmpty() && !stripeSubscription.CanceledAt.HasValue)
+
+                        Helpers.Utilities.SystemLog("cancel hit");
+
                         msgs.AddRange(Billing.StripeHelper.CancelSubscription(
                             rsp.StripeSubscriptionId,
                             null
