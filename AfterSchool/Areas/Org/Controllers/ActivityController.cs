@@ -2470,7 +2470,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var msgs = new SystemMessages();
             var activity = Activity.Load(activityId.ToInteger(), msgs);
-            var dates = ActivityService.FinalizeStartAndEndDateForSubscription(activity, (BillingPeriodType)billingPeriodType.ToInteger(), dayOfWeek.ToEnum<DayOfWeek>(), dayOfMonth.ToDateTime());
+            var dates = ActivityService.FinalizeStartAndEndDateForSubscription(activity, (BillingPeriodType)billingPeriodType.ToInteger(), dayOfWeek.IsNotEmpty() ? dayOfWeek.ToEnum<DayOfWeek>() : DayOfWeek.Sunday, dayOfMonth.IsNotEmpty() ? dayOfMonth.ToDateTime() : DateTime.Now.AddDays(1));
 
             if (dates.paymentStart.IsNotEmpty() && dates.paymentStart.HasValue && dates.paymentEnd.IsNotEmpty() && dates.paymentEnd.HasValue)
                 return Json(new { 
