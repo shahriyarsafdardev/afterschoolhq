@@ -164,6 +164,7 @@ namespace AfterSchoolLibrary.Services
                 var platformFeePercent = new decimal?();
                 string stripeAccountId = null;
                 string stripeCouponId = null;
+                var isSubscriptionRequired = true; //.. in some case, we will only charge.
 
                 if (useStripeConnectedAccount)
                 {
@@ -189,17 +190,28 @@ namespace AfterSchoolLibrary.Services
                 //.. charge parent if they tries to join mid-period
                 if (participationObject.Schedule.IsNotEmpty() && participationObject.StartDate.HasValue && participationObject.StartDate.Value.IsBefore(DateTime.Now))
                 {
-                    ChargeRegistrantMidPeriod(submittedRecord, checkoutObject, subscriptionPlanType, loggedInUser, msgs, dc);
+                    if (startDateTime.IsNotEmpty() && endDateTime.IsNotEmpty())
+                    {
+                        var dateSpan = DateTimeSpan.CompareDates(startDateTime, endDateTime.Value);
+                        if (plan.BillingPeriodTypeId == BillingPeriodType.Month && dateSpan.Months <= 1)
+                            isSubscriptionRequired = false;
+                        else if (plan.BillingPeriodTypeId == BillingPeriodType.Week && dateSpan.Days <= 7)
+                            isSubscriptionRequired = false;
+                    }
+
+                    ChargeRegistrantMidPeriod(submittedRecord, checkoutObject, subscriptionPlanType, isSubscriptionRequired, loggedInUser, msgs, dc);
 
                     // we will update starting of subscription for this registrant to next cycle
                     if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
-                        startDateTime = DateTime.Now.LastDateOfMonth().AddDays(1);
+                        startDateTime = DateTime.Now.LastDateOfMonth().AddDays(1);                        
                     else if (plan.BillingPeriodTypeId == BillingPeriodType.Week)
                         startDateTime = DateTime.Now.LastDateOfWeek().AddDays(1);
                 }
 
                 // create the subscription on the stripe account (could be added to main account or connected account)
-                var subscription = Billing.StripeHelper.CreateRegistrantSubscription(
+                if (isSubscriptionRequired)
+                {
+                    var subscription = Billing.StripeHelper.CreateRegistrantSubscription(
                                     customerId: customer.Id,
                                     planId: plan.StripePlanId,
                                     sourceId: sourceId,
@@ -220,16 +232,16 @@ namespace AfterSchoolLibrary.Services
                                     },
                                     msgs: msgs);
 
-                if (msgs.HasErrors())
-                    return;
+                    if (msgs.HasErrors())
+                        return;
 
-                if (plan.RegFeeAsDownPayment && submittedRecord.GetAmountPaid(msgs, dc) > 0)
-                    Billing.StripeHelper.CreateCustomerBalanceTransaction(
-                        subscription.CustomerId,
-                        participationObject.GetCheckoutCostWithConvenienceFee() * -1,
-                        "Credit for registration fee payment",
-                        new Dictionary<string, string>()
-                        {
+                    if (plan.RegFeeAsDownPayment && submittedRecord.GetAmountPaid(msgs, dc) > 0)
+                        Billing.StripeHelper.CreateCustomerBalanceTransaction(
+                            subscription.CustomerId,
+                            participationObject.GetCheckoutCostWithConvenienceFee() * -1,
+                            "Credit for registration fee payment",
+                            new Dictionary<string, string>()
+                            {
                             { "Subscription Id", subscription.Id },
                             { "Plan Id", subscription.Plan.Id },
                             { "BillingAccountUid", billingAccount.Uid.ToString() },
@@ -238,26 +250,28 @@ namespace AfterSchoolLibrary.Services
                             { "PayingAccountName", purchasingAccount.Name.ToString() },
                             { "ParticipationObjectType", checkoutObject.ParticipationObject.ObjectType.ToString() },
                             { "ParticipationObjectName", checkoutObject.ParticipationObject.Name },
-                        },
-                        msgs);
+                            },
+                            msgs);
 
-                var purchase = checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc);
-                var feeObject = GetFeeObject(checkoutObject, billingAccount, plan, msgs, dc);
-                var totalPeriods = plan.TotalPeriods.HasValue ? plan.TotalPeriods : (int?)null;
+                    var purchase = checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc);
+                    var feeObject = GetFeeObject(checkoutObject, billingAccount, plan, msgs, dc);
+                    var totalPeriods = plan.TotalPeriods.HasValue ? plan.TotalPeriods : (int?)null;
 
-                if (subscriptionPlanType == SubscriptionPlanType.Subscription)
-                    totalPeriods = plan.TotalPeriods.HasValue ? participationObject.GetNumberOfRemainingPayments(plan.TotalPeriods.Value, msgs, dc) : (int?)null;
+                    if (subscriptionPlanType == SubscriptionPlanType.Subscription)
+                        totalPeriods = plan.TotalPeriods.HasValue ? participationObject.GetNumberOfRemainingPayments(plan.TotalPeriods.Value, msgs, dc) : (int?)null;
+
+                    checkoutObject.RegistrantSubscriptionPlan = plan.AddRegistrant(
+                                                                    submittedRecord,
+                                                                    startDateTime,
+                                                                    purchase,
+                                                                    subscription.Id,
+                                                                    totalPeriods,
+                                                                    feeObject,
+                                                                    loggedInUser,
+                                                                    msgs,
+                                                                    dc);
+                }
                 
-                checkoutObject.RegistrantSubscriptionPlan = plan.AddRegistrant(
-                                                                submittedRecord,
-                                                                startDateTime,
-                                                                purchase,
-                                                                subscription.Id,
-                                                                totalPeriods,
-                                                                feeObject,
-                                                                loggedInUser,
-                                                                msgs,
-                                                                dc);
             }
             else
             {
@@ -266,7 +280,7 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
-        private static void ChargeRegistrantMidPeriod(this Registrant submittedRecord, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        private static void ChargeRegistrantMidPeriod(this Registrant submittedRecord, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType, bool isSubscriptionRequired, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             var participationObject = checkoutObject.ParticipationObject;
@@ -284,6 +298,20 @@ namespace AfterSchoolLibrary.Services
 
             //caluclated price of current cycle to charge p = (y * costperperiod)/ x
             var currentCycleCharge = classesRemainingInCurrentCycle * plan.CostPerPeriod.Value / classesInCurrentCycle;
+
+            if (!isSubscriptionRequired)
+            {
+                //.. if there will be subscrition, we will calculate next cycle also just in case if we miss any classes
+                //.. bascially this will be just adding a cost directly as we will charge whole for next cycle
+                var classesRemainingInNextCycle = participationObject.GetNumberOfRemainingClassesInNextCycle(plan.BillingPeriodTypeId, msgs, dc);
+
+                if (classesRemainingInNextCycle > 1)
+                {
+                    var nextCycleCharge = classesRemainingInNextCycle * plan.CostPerPeriod.Value / classesRemainingInNextCycle;
+                    currentCycleCharge += nextCycleCharge;
+                }
+            }
+
             var calcObj = new FeeCalculationObject(currentCycleCharge, billingAccount, msgs);
             var convenienceFee = calcObj.GetConvenienceFee();
             var ccFee = 0M;

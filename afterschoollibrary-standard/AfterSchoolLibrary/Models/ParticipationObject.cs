@@ -968,6 +968,20 @@ namespace AfterSchoolLibrary.Models
             return classes;
         }
 
+        public int GetNumberOfRemainingClassesInNextCycle(BillingPeriodType billingPeriodTypeId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var classes = 0;
+            if (Schedule.IsNotEmpty() && Schedule.ID.HasValue)
+            {
+                if (billingPeriodTypeId == BillingPeriodType.Month)
+                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now.AddMonths(1).FirstDateOfMonth(), DateTime.Now.AddMonths(1).LastDateOfMonth(), msgs).Count;
+                else if (billingPeriodTypeId == BillingPeriodType.Week)
+                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now.AddWeeks(1).FirstDateOfWeek(), DateTime.Now.AddWeeks(1).LastDateOfWeek(), msgs).Count;
+            }
+
+            return classes;
+        }
+
         #endregion
 
         #region DemoObjects
