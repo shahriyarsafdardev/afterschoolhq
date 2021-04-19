@@ -39,17 +39,22 @@ body.registration {
 .reg-header-overlay {
 }
 
-.reg-header-logo{
+.reg-header-logo {
     margin: auto;
+    background: #fff;
+    padding: 20px;
+    display: flex;
+    border-radius: 5px;
+    margin-top: 25px;
 }
 
 @media screen and (min-width: 1200px) {
     .reg-header-logo > img {
         display: block;
         margin: auto;
-        margin-top: 25px;
         width: 100%;
         max-width: 400px;
+        border-radius: 50%;
     }
 }
 
@@ -57,9 +62,9 @@ body.registration {
     .reg-header-logo > img {
         display: block;
         margin: auto;
-        margin-top: 25px;
         max-width: 100%;
         max-height: 200px;
+        border-radius: 50%;
     }
 }
 
