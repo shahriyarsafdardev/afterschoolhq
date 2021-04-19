@@ -355,12 +355,12 @@ namespace AfterSchoolLibrary.Services
 
                     if (stripeSubscription.IsNotEmpty() && !stripeSubscription.CanceledAt.HasValue)
 
-                        Helpers.Utilities.SystemLog("cancel hit");
+                        //Helpers.Utilities.SystemLog("cancel hit");
 
-                        msgs.AddRange(Billing.StripeHelper.CancelSubscription(
-                            rsp.StripeSubscriptionId,
-                            null
-                        ));
+                        //msgs.AddRange(Billing.StripeHelper.CancelSubscription(
+                        //    rsp.StripeSubscriptionId,
+                        //    null
+                        //));
 
                     if (msgs.HasNoErrors())
                         return true;
