@@ -2590,18 +2590,24 @@ namespace AfterSchoolLibrary.Services
                 //.. but if start date is of today or past, we will find next sunday or user's choosen day                
                 var startingDay = startDate.AddDays(-1).IsOnOrBefore(DateTime.UtcNow) ? startDate.AddDays(((int)dayOfWeek - (int)startDate.DayOfWeek + 7) % 7) : startDate.AddDays(((int)dayOfWeek - (int)startDate.DayOfWeek - 7) % 7);
 
-                int daysUntilLastPayment = ((int)dayOfWeek - (int)endDate.DayOfWeek - 7) % 7;
-                var endingDay = endDate.AddDays(daysUntilLastPayment);
-                return (paymentStart: startingDay, paymentEnd: endingDay);
+                //int daysUntilLastPayment = ((int)dayOfWeek - (int)endDate.DayOfWeek - 7) % 7;
+                //var endingDay = endDate.AddDays(daysUntilLastPayment);
+                return (paymentStart: startingDay, paymentEnd: endDate);
             }
             else if (billingPeriodType == BillingPeriodType.Month)
             {
                 //.. if provider chooses monthly payment cycle in this case with date November 5th,
-                //.. that would mean the parent would be first billed on November 5th and last billed on Dec 5th.
-                var startingDay = dayOfMonth;
-                var endingDay = new DateTime(endDate.Year, endDate.Month, dayOfMonth.Day);
+                //.. that would mean the parent would be first billed on November 5th.                
 
-                return (paymentStart: startingDay.IsAfter(DateTime.UtcNow) ? startingDay : DateTime.UtcNow, paymentEnd: endingDay);
+                //.. if activity is in future
+                //var endingMonth = endDate.Month;
+                //if (schedule.StartDate.Value.IsAfter(DateTime.Now))
+                //    endingMonth += 1;
+
+                var startingDay = new DateTime(endDate.Year, startDate.Month, dayOfMonth.Day);
+                //var endingDay = new DateTime(endDate.Year, endingMonth, dayOfMonth.Day);
+
+                return (paymentStart: startingDay.IsAfter(DateTime.UtcNow) ? startingDay : DateTime.UtcNow, paymentEnd: endDate);
             }
 
             return (null, null);

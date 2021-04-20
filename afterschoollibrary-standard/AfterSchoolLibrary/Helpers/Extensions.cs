@@ -118,8 +118,9 @@ namespace AfterSchoolLibrary
         public int Minutes { get; }
         public int Seconds { get; }
         public int Milliseconds { get; }
+        public int TotalDays { get; }
 
-        public DateTimeSpan(int years, int months, int days, int hours, int minutes, int seconds, int milliseconds)
+        public DateTimeSpan(int years, int months, int days, int hours, int minutes, int seconds, int milliseconds, int totalDays)
         {
             Years = years;
             Months = months;
@@ -128,6 +129,7 @@ namespace AfterSchoolLibrary
             Minutes = minutes;
             Seconds = seconds;
             Milliseconds = milliseconds;
+            TotalDays = totalDays;
         }
 
         enum Phase { Years, Months, Days, Done }
@@ -145,6 +147,7 @@ namespace AfterSchoolLibrary
             int years = 0;
             int months = 0;
             int days = 0;
+            int totalDays = (date2.Date - date1.Date).Days;
 
             Phase phase = Phase.Years;
             DateTimeSpan span = new DateTimeSpan();
@@ -183,7 +186,7 @@ namespace AfterSchoolLibrary
                         {
                             current = current.AddDays(days);
                             var timespan = date2 - current;
-                            span = new DateTimeSpan(years, months, days, timespan.Hours, timespan.Minutes, timespan.Seconds, timespan.Milliseconds);
+                            span = new DateTimeSpan(years, months, days, timespan.Hours, timespan.Minutes, timespan.Seconds, timespan.Milliseconds, totalDays);
                             phase = Phase.Done;
                         }
                         else

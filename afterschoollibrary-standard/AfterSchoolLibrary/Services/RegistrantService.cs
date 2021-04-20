@@ -475,7 +475,7 @@ namespace AfterSchoolLibrary.Services
 
         public static DateTime GetPlanStartDate(this Registrant registrant, SubscriptionPlan plan, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var initialDate = DateTime.UtcNow;
+            var initialDate = DateTime.UtcNow.AddDays(1);
 
             if (plan.PlanTypeId == SubscriptionPlanType.Subscription)
             {
@@ -490,7 +490,7 @@ namespace AfterSchoolLibrary.Services
 
                     // can't start in the past
                     if (participationObject.StartDate.HasValue && participationObject.StartDate.Value.IsAfter(initialDate))
-                        return participationObject.StartDate.Value;
+                        return participationObject.StartDate.Value.AddDays(1);
 
                 }
                 else if (plan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout)
@@ -499,17 +499,12 @@ namespace AfterSchoolLibrary.Services
                     //.. becuase in this  case parent can join earlier, and we can't start payment before activity schedule.
                     if (participationObject.Schedule.IsNotEmpty() && participationObject.Schedule.StartDate.Value.IsAfter(DateTime.UtcNow))
                     {
-                        return participationObject.Schedule.StartDate.Value;
-                    } else
-                    {
-                        // if activity is active, and provider opt for oncheckout, payment will began when parent registers
-                        // pro - rating charge will be for first cycle.
-                        return DateTime.UtcNow;
+                        return participationObject.Schedule.StartDate.Value.AddDays(1);
                     }
                 }
                 else if (plan.PaymentStartTypeId == PlanPaymentStartType.OnPeriodStart)
                 {
-                    return plan.StartDate.HasValue && plan.StartDate.Value.IsAfter(initialDate) ? plan.StartDate.Value : initialDate;                    
+                    return plan.StartDate.HasValue && plan.StartDate.Value.IsAfter(initialDate) ? plan.StartDate.Value.AddDays(1) : initialDate;
                 }
             }
 
@@ -521,9 +516,9 @@ namespace AfterSchoolLibrary.Services
             if (plan.PlanTypeId == SubscriptionPlanType.Subscription)
             {
                 if (plan.EndDate.HasValue)
-                    return plan.EndDate.Value;
+                    return plan.EndDate.Value.AddDays(1);
                 else if (participationObject.Schedule.IsNotEmpty() && participationObject.Schedule.EndDate.HasValue)
-                    return participationObject.Schedule.EndDate.Value;
+                    return participationObject.Schedule.EndDate.Value.AddDays(1);
                 else
                     return null;
             }
