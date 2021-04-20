@@ -6,6 +6,7 @@ public enum WebSessionActionType
 	Published,
 	Unpublished,
 	Sent,
+	BeganRegistration,
 	Registered,
 	Paid,
 	Refunded,

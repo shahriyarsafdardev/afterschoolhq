@@ -51,7 +51,7 @@ namespace AfterSchool.Models
             base.Initialize(requestContext);
 
             Utilities.DetectAfterSchool();
-            WebSessionUtilities.InitializeWebSession(Request);
+            SessionVariables.WebSession = WebSessionUtilities.InitializeWebSession(Request, SessionVariables.LoggedInUser, SessionVariables.CurrentAccount);
 
             if (SessionVariables.VisitorSession.IsEmpty())
             {

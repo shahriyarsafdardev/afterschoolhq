@@ -65,7 +65,7 @@ namespace AfterSchool.Controllers
                         regStartPageAccount = directoryAccount;
                     }
 
-                    WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, actionType: WebSessionActionType.Navigated, objectType: ObjectType.DirectoryAccount,
+                    WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, webSessionId: SessionVariables.WebSession.ID.Value, actionType: WebSessionActionType.Navigated, objectType: ObjectType.DirectoryAccount,
                          objectId: account.ID, objectText: account.Name, indirectObjectId: directoryAccount.ID, indirectObjectText: directoryAccount.Name);                
                 }
 
@@ -101,7 +101,7 @@ namespace AfterSchool.Controllers
                 }
 
                 if (dir.IsEmpty())
-                    WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: account.ID, text: account.Name, actionType: WebSessionActionType.Viewed, objectType: ObjectType.Account);
+                    WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, webSessionId: SessionVariables.WebSession.ID.Value, Id: account.ID, text: account.Name, actionType: WebSessionActionType.Viewed, objectType: ObjectType.Account);
 
                 if (profile.IsEmpty())
                     return Redirect(account.BrowseUrl);
@@ -195,7 +195,7 @@ namespace AfterSchool.Controllers
                 regWillOpen = participationObjects.Where(po => po.RegistrationPeriod.WillOpen(account, msgs)).ToList();
                 regClosed = participationObjects.Where(po => po.NotIn(regWillOpen) && po.RegistrationPeriod.IsClosed(account, msgs)).ToList();
 
-                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: account.ID, text: account.Name, actionType: WebSessionActionType.Browsed, objectType: ObjectType.Account);
+                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, webSessionId: SessionVariables.WebSession.ID.Value, Id: account.ID, text: account.Name, actionType: WebSessionActionType.Browsed, objectType: ObjectType.Account);
             }
             else
             {
@@ -319,7 +319,7 @@ namespace AfterSchool.Controllers
                 if (activity.IsEmpty())
                     return HttpNotFound();
 
-                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: activity.ID, text: activity.Name, actionType: WebSessionActionType.Viewed, objectType: ObjectType.Activity);
+                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, webSessionId: SessionVariables.WebSession.ID.Value, Id: activity.ID, text: activity.Name, actionType: WebSessionActionType.Viewed, objectType: ObjectType.Activity);
 
                 participationObject = activity.GetParticipationObject(msgs);
 
@@ -363,7 +363,10 @@ namespace AfterSchool.Controllers
             ViewBag.CanPublishActivity = canPublishActivity;
             ViewBag.CanRegisterFor = true;
             ViewBag.Session = session;
-            ViewBag.AccountProfile = accountProfile;           
+            ViewBag.AccountProfile = accountProfile;
+
+            WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, webSessionId: SessionVariables.WebSession.ID.Value, actionType: WebSessionActionType.Navigated, objectType: ObjectType.ParticipationObject,
+                objectId: participationObject.ObjectID.Value, objectText: activityname);
 
             return View(participationObject);
         }
@@ -387,6 +390,8 @@ namespace AfterSchool.Controllers
             if (session.IsEmpty())
                 return HttpNotFound();
 
+            var participationObject = session.GetParticipationObject();
+
             LoadSessionInvite(session, invite, decline, msgs);
 
             SetRegistrationStartPage(account);
@@ -401,7 +406,10 @@ namespace AfterSchool.Controllers
             ViewBag.CanRegisterFor = canRegisterFor;
             ViewBag.AccountProfile = account.GetAccountProfile(msgs);
 
-            return View("activity", session.GetParticipationObject());
+            WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, webSessionId: SessionVariables.WebSession.ID.Value, actionType: WebSessionActionType.Navigated, objectType: ObjectType.ParticipationObject,
+                objectId: participationObject.ObjectID.Value, objectText: sessionname);
+
+            return View("activity", participationObject);
         }
 
         [HttpGet]
@@ -449,6 +457,9 @@ namespace AfterSchool.Controllers
             ViewBag.Messages = msgs;
             ViewBag.Account = account;
             ViewBag.AccountProfile = account.GetAccountProfile(msgs);
+
+            WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, webSessionId: SessionVariables.WebSession.ID.Value, actionType: WebSessionActionType.Navigated, objectType: ObjectType.ParticipationObject,
+                objectId: participationObject.ObjectID.Value, objectText: leaguename);
 
             return View("activity", participationObject);
         }
@@ -622,6 +633,9 @@ namespace AfterSchool.Controllers
         private ActionResult RedirectToRegistration(Account account, ParticipationObject participationObject, string reg, SystemMessages msgs)
         {
             SetRegistrationStartPage(account);
+
+            WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, webSessionId: SessionVariables.WebSession.ID.Value, actionType: WebSessionActionType.BeganRegistration, objectType: ObjectType.ParticipationObject,
+                objectId: participationObject.ObjectID.Value, objectText: participationObject.Name);
 
             if (participationObject.IsEmpty())
                 return HttpNotFound();

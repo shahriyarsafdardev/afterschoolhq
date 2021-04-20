@@ -5,31 +5,29 @@ using System.Linq;
 using System.Web;
 using BasicLibrary;
 using AfterSchoolLibrary.Services;
+using AfterSchool.Helpers;
 
 namespace AfterSchool.Models
 {
     public static class WebSessionUtilities
     {
-        public static void InitializeWebSession(HttpRequestBase request)
+        public static WebSession InitializeWebSession(HttpRequestBase request, WebUser user = null, Account account = null)
         {
-            var user = SessionVariables.CurrentUser;
-            var account = SessionVariables.CurrentAccount;
             var session = new WebSession();
             WebSession lastSession = new WebSession();
 
             if (user.IsNotEmpty())
-                lastSession = WebSession.LoadByWebUserId(WebUserId: user.ID.Value).OrderByDescending(m => m.ID).FirstOrDefault();
+                lastSession = WebSession.LoadMostRecentByUserId(webUserId: user.ID.Value);
 
             if (lastSession.IsEmpty() && account.IsNotEmpty())
-                lastSession = WebSession.LoadByAccountId(AccountId: account.ID.Value).OrderByDescending(m => m.ID).FirstOrDefault();
+                lastSession = WebSession.LoadMostRecentByAccountId(accountId: account.ID.Value);
 
 
             if (SessionVariables.WebSession.IsEmpty())
             {
                 session.CreateDate = DateTime.UtcNow;
-                session.CreatedBy = user.IsNotEmpty() && user.ID.IsNotEmpty() ? user.ID : 0;
                 session.LastModifiedDate = DateTime.UtcNow;
-                session.LastModifiedBy = session.CreatedBy = 0;
+                session.LastModifiedBy = session.CreatedBy = user?.ID;
                 session.UrlReferrer = request.UrlReferrer.IsNotEmpty() ? request.UrlReferrer.ToString() : null;
                 session.IPAddress = request.ServerVariables["HTTP_X_FORWARDED_FOR"];
                 session.UserAgent = request.UserAgent;
@@ -37,34 +35,35 @@ namespace AfterSchool.Models
                 session.IPAddressTimeZone = null;
                 session.UserLocation = null;
                 
-                session.WebUserId = user.IsNotEmpty() ? user.ID : null;
-                session.AccountId = account.IsNotEmpty() ? account.ID : null;
+                session.WebUserId = user?.ID;
+                session.AccountId = account?.ID;
             }
             else
             {
                 session = WebSession.Load(SessionVariables.WebSession.ID.Value);
                 session.LastModifiedDate = DateTime.UtcNow;
-                session.LastModifiedBy = user.IsNotEmpty() && user.ID.IsNotEmpty() ? user.ID : 0;
+                session.LastModifiedBy = user?.ID;
 
-                if (session.WebUserId.IsEmpty() && user.IsNotEmpty())
-                    session.WebUserId = user.ID;
+                if (session.WebUserId.IsEmpty())
+                    session.WebUserId = user?.ID;
 
-                if (session.AccountId.IsEmpty() && account.IsNotEmpty())
-                    session.AccountId = account.ID;
+                if (session.AccountId.IsEmpty())
+                    session.AccountId = account?.ID;
             }
 
             if (session.PreviousId.IsEmpty() && lastSession.IsNotEmpty() && lastSession.ID.IsNotEmpty())
                 session.PreviousId = lastSession.ID;
 
             session.Save();
-            SessionVariables.WebSession = session;
+            return session;
         }
 
-        public static void LogActivity(WebUser actor, WebSessionActionType actionType = WebSessionActionType.NotSet)
+        public static void LogActivity(WebUser actor, int webSessionId, WebSessionActionType actionType = WebSessionActionType.NotSet)
         {
             SaveLog(actorName: (actor.IsNotEmpty() ? actor.FirstName  : "Someone"),
                     actionStringFormat: "{actor} {action}",
                     actionString: $"{actor.FirstName} {actionType}",
+                    webSessionId: webSessionId,
                     actorId: actor.IsNotEmpty() ? actor.ID : null,
                     accountId: SessionVariables.CurrentAccount.IsNotEmpty() ? SessionVariables.CurrentAccount.ID : null,
                     actionType: actionType,
@@ -73,7 +72,7 @@ namespace AfterSchool.Models
                     indirectObjectId: null);
         }
 
-        public static void LogActivity(WebUser actor, int? Id = (int?)null, string text = "", WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet)
+        public static void LogActivity(WebUser actor, int webSessionId, int? Id = (int?)null, string text = "", WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet)
         {
             string actionString = null, actionStringFormat = null, actorName = (actor.IsNotEmpty() ? actor.FirstName : "Someone");
 
@@ -126,6 +125,7 @@ namespace AfterSchool.Models
             SaveLog(actorName: actorName,
                     actionStringFormat: actionStringFormat,
                     actionString: actionString,
+                    webSessionId: webSessionId,
                     actorId: actor.IsNotEmpty() ? actor.ID : null,
                     accountId: SessionVariables.CurrentAccount.IsNotEmpty() ? SessionVariables.CurrentAccount.ID : null,
                     actionType: actionType,
@@ -134,7 +134,7 @@ namespace AfterSchool.Models
                     indirectObjectId: null);
         }
 
-        public static void LogActivity(WebUser actor, WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet,
+        public static void LogActivity(WebUser actor, int webSessionId, WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet,
             int? objectId = (int?)null, string objectText = "",
             int? indirectObjectId = (int?)null, string indirectObjectText = "")
         {
@@ -143,37 +143,12 @@ namespace AfterSchool.Models
 
             string actionString = null, actionStringFormat = null, actorName = (actor.IsNotEmpty() ? actor.FirstName : "Someone");
 
-            switch (objectType)
-            {
-                case ObjectType.DirectoryAccount:
-                    actionStringFormat = "{actor} {action} To {object} FROM {objectType} {indirectObject}";
-                    actionString = $"{actorName} {actionType} TO {objectText} FROM {objectType} {indirectObjectText}";
-                    break;
-
-                case ObjectType.Payout:
-                    actionStringFormat = "{actor} {action} {object} For Activity {indirectObject}";
-                    actionString = $"{actorName} {actionType} {objectText} For Activity {indirectObjectText}";
-                    break;
-
-                case ObjectType.SubscriptionPlan:
-                    actionStringFormat = "{actor} {action} {object} For Activity {indirectObject}";
-                    actionString = $"{actorName} Subscribed {objectText} For Activity {indirectObjectText}";
-                    break;
-
-                case ObjectType.Registrant:
-                    actionStringFormat = "{actor} {action} {object} For Activity {indirectObject}";
-                    actionString = $"{actorName} {actionType} {objectText} For Activity {indirectObjectText}";
-                    break;
-
-                default:
-                    actionStringFormat = "{actor} {action}";
-                    actionString = $"{actorName} {actionType}";
-                    break;
-            }
+            var actionStringObject = WebSessionHelper.GetActionString()
 
             SaveLog(actorName: (actor.IsNotEmpty() ? actor.FirstName : "Someone"),
                 actionStringFormat: actionStringFormat,
                 actionString: actionString,
+                webSessionId: webSessionId, 
                 actorId: actor.IsNotEmpty() ? actor.ID : null,
                 accountId: SessionVariables.CurrentAccount.IsNotEmpty() ? SessionVariables.CurrentAccount.ID : null,
                 actionType: actionType,
@@ -182,12 +157,12 @@ namespace AfterSchool.Models
                 indirectObjectId: indirectObjectId);
         }
 
-        public static void SaveLog(string actorName, string actionStringFormat, string actionString, int? actorId = (int?)null, int? accountId = (int?)null,
+        public static void SaveLog(string actorName, string actionStringFormat, string actionString, int webSessionId, int? actorId = (int?)null, int? accountId = (int?)null,
             WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet,
             int? objectId = (int?)null, int? indirectObjectId = (int?)null)
         {
             var action = new WebSessionAction();
-            action.SessionId = SessionVariables.WebSession.ID;
+            action.SessionId = webSessionId;
             action.ActorId = actorId;
             action.AccountId = accountId; //.. logged in account id
             action.ActionTypeId = actionType;

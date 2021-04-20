@@ -196,7 +196,7 @@ namespace AfterSchool.Controllers
                             dc: adc);
 
                         if (user.IsNotEmpty() && amsgs.HasNoErrors())
-                            WebSessionUtilities.LogActivity(actor: user, Id: user.ID.Value, text: user.DisplayName, actionType: WebSessionActionType.Created, objectType: ObjectType.WebUser);                        
+                            WebSessionUtilities.LogActivity(actor: user, webSessionId: SessionVariables.WebSession.ID.Value, Id: user.ID.Value, text: user.DisplayName, actionType: WebSessionActionType.Created, objectType: ObjectType.WebUser);                        
 
                         account = user.AddNewAccount(
                                orgName: model.OrgName,
@@ -206,7 +206,7 @@ namespace AfterSchool.Controllers
                                dc: adc);
 
                         if (account.IsNotEmpty() && amsgs.HasNoErrors())
-                            WebSessionUtilities.LogActivity(actor: user, Id: account.ID.Value, text: account.Name, actionType: WebSessionActionType.Created, objectType: ObjectType.Account);
+                            WebSessionUtilities.LogActivity(actor: user, webSessionId: SessionVariables.WebSession.ID.Value, Id: account.ID.Value, text: account.Name, actionType: WebSessionActionType.Created, objectType: ObjectType.Account);
 
                         if (invitingAccount.IsNotEmpty())
                         {

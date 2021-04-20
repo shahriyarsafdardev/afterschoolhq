@@ -32,7 +32,7 @@ namespace AfterSchool.Controllers
             }
 
             if (SessionVariables.CurrentUser.IsNotEmpty())
-                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, actionType: WebSessionActionType.LoggedOut);
+                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, webSessionId: SessionVariables.WebSession.ID.Value, actionType: WebSessionActionType.LoggedOut);
 
             return Logout(returnurl);
         }

@@ -463,7 +463,7 @@ namespace AfterSchool.Controllers
 
                     if (msgs.HasNoErrors())
                     {
-                        WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: account.ID.Value, text: account.Name, actionType: WebSessionActionType.Contacted, objectType: ObjectType.ContactList);
+                        WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, webSessionId: SessionVariables.WebSession.ID.Value, Id: account.ID.Value, text: account.Name, actionType: WebSessionActionType.Contacted, objectType: ObjectType.ContactList);
                         EmailHelper.SendContactProviderEmail(account, contact, msgs);
                     }
                 }
@@ -503,7 +503,7 @@ namespace AfterSchool.Controllers
 
                 if (msgs.HasNoErrors())
                 {
-                    WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: account.ID.Value, text: account.Name, actionType: WebSessionActionType.Followed, objectType: ObjectType.Account);
+                    WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, webSessionId: SessionVariables.WebSession.ID.Value, Id: account.ID.Value, text: account.Name, actionType: WebSessionActionType.Followed, objectType: ObjectType.Account);
                     return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
                 }
             }
@@ -541,7 +541,7 @@ namespace AfterSchool.Controllers
 
                 if (msgs.HasNoErrors())
                 {
-                    WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: account.ID.Value, text: account.Name, actionType: WebSessionActionType.Unfollowed, objectType: ObjectType.Account);
+                    WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, webSessionId: SessionVariables.WebSession.ID.Value, Id: account.ID.Value, text: account.Name, actionType: WebSessionActionType.Unfollowed, objectType: ObjectType.Account);
                     return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
                 }
             }

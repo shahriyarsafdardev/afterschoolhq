@@ -206,7 +206,7 @@ namespace AfterSchool.Controllers
                         if (amsgs.HasNoErrors())
                         {
                             var activity = participationObject.GetActivity();
-                            WebSessionUtilities.LogActivity(actor: user, Id: participationObject.ObjectID, text: activity.IsNotEmpty() ? activity.Name : "",
+                            WebSessionUtilities.LogActivity(actor: user, webSessionId: SessionVariables.WebSession.ID.Value, Id: participationObject.ObjectID, text: activity.IsNotEmpty() ? activity.Name : "",
                                 actionType: WebSessionActionType.Interested, objectType: ObjectType.Registration);
                         }
                     },
@@ -582,7 +582,7 @@ namespace AfterSchool.Controllers
                         if (amsgs.HasNoErrors() && user.IsNotEmpty())
                         {
                             account = CreateOrUpdateAccount(user, amsgs, adc);
-                            WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: account.ID.Value, text: account.Name, actionType: WebSessionActionType.Created, objectType: ObjectType.Account);
+                            WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, webSessionId: SessionVariables.WebSession.ID.Value, Id: account.ID.Value, text: account.Name, actionType: WebSessionActionType.Created, objectType: ObjectType.Account);
                         }
 
                         if (amsgs.HasNoErrors())
@@ -1142,7 +1142,7 @@ namespace AfterSchool.Controllers
                             dc: adc);
 
                         if (student.IsNotEmpty() && amsgs.HasNoErrors())
-                            WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: student.ID.Value, text: student.Name, actionType: WebSessionActionType.Created, objectType: ObjectType.Registrant);
+                            WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, webSessionId: SessionVariables.WebSession.ID.Value, Id: student.ID.Value, text: student.Name, actionType: WebSessionActionType.Created, objectType: ObjectType.Registrant);
 
                         // add answers to parent registrant record
                         // will be used later to copy information over to student records
@@ -1619,7 +1619,7 @@ namespace AfterSchool.Controllers
             if (msgs.HasNoErrors())
             {
                 var activity = participationObject.GetActivity();
-                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, actionType: WebSessionActionType.Registered, objectType: ObjectType.Registrant,
+                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, webSessionId: SessionVariables.WebSession.ID.Value, actionType: WebSessionActionType.Registered, objectType: ObjectType.Registrant,
                     objectId: currentRegistrant.ID, objectText: currentRegistrant.Name, indirectObjectId: activity.ID, indirectObjectText: activity.Name);
 
                 if (!participationObject.ShouldParentPay())
@@ -1853,13 +1853,13 @@ namespace AfterSchool.Controllers
                         var amount = paymentType == PaymentType.ACH ? plan?.GetTotalCostWithConvenienceFee(billingAccount).ToCurrency() : plan?.GetTotalCostWithFees(billingAccount).ToCurrency();
                         var phrase = $@"{amount}/{plan.BillingPeriodTypeId} via {(paymentType == PaymentType.ACH ? "Bank Account" : "Credit Card")}";
                         
-                        WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, actionType: WebSessionActionType.Paid, objectType: ObjectType.SubscriptionPlan,
+                        WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, webSessionId: SessionVariables.WebSession.ID.Value, actionType: WebSessionActionType.Paid, objectType: ObjectType.SubscriptionPlan,
                                 objectId: participationObject.ObjectID, objectText: phrase, indirectObjectId: activity.ID, indirectObjectText: activity.Name);
                     } else
                     {
                         var phrase = $@"{participationObject.GetCheckoutCostWithConvenienceFee().ToCurrency()} via {(paymentType == PaymentType.ACH ? "Bank Account" : "Credit Card")}";
 
-                        WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, actionType: WebSessionActionType.Paid, objectType: ObjectType.Payout,
+                        WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, webSessionId: SessionVariables.WebSession.ID.Value, actionType: WebSessionActionType.Paid, objectType: ObjectType.Payout,
                                 objectId: participationObject.ObjectID, objectText: phrase, indirectObjectId: activity.ID, indirectObjectText: activity.Name);
                     }
 
@@ -1983,7 +1983,7 @@ namespace AfterSchool.Controllers
                 if (msgs.HasNoErrors())
                 {
                     var phrase = $@"{overrideAmount.ToCurrency()} via {(bankAccountPurchaseObject.IsNotEmpty() ? "Bank Account" : "Credit Card")}";
-                    WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, actionType: WebSessionActionType.Paid, objectType: ObjectType.Payout,
+                    WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, webSessionId: SessionVariables.WebSession.ID.Value, actionType: WebSessionActionType.Paid, objectType: ObjectType.Payout,
                         objectId: payingAccount.ID, objectText: phrase, indirectObjectId: billingAccount.ID, indirectObjectText: billingAccount.Name);
                     
                     return RedirectToAction("paymentthankyou", new { id = billingAccount.Uid });
