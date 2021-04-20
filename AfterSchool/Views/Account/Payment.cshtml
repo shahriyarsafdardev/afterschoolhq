@@ -32,24 +32,11 @@
             if (planStartDate.Date != DateTime.UtcNow.Date)
             {
                 startDateText = planStartDate.ToLongDateString();
-            }
-
-            @*if(plan.TotalPeriods > 1)
-            {
-                var TotalPeriodsToPayAfterDiscount = participationObject.GetNumberOfRemainingPayments(plan.TotalPeriods.Value);
-                var price = plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency();
-                <span>
-                    @(includePlus ? "plus a" : "") subscription of <strong> @price </strong> today and 
-                    <strong>@(TotalPeriodsToPayAfterDiscount - 1)</strong> more payment@(TotalPeriodsToPayAfterDiscount > 2 ? "s" : "") of
-                    <strong>@price </strong> every
-                    <strong>@plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong>
-                </span>
             } 
-            else {*@ 
-                <span>
-                    @(includePlus ? "plus a" : "") subscription of <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong> every <strong>@plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong> starting <strong>@startDateText</strong>
-                </span>
-            //}
+
+            <span>
+                @(includePlus ? "plus a" : "") subscription of <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong> every <strong>@plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong> starting <strong>@startDateText</strong>
+            </span>
         }
         else if (plan.RegFeeAsDownPayment)
         {
@@ -202,14 +189,7 @@
 
                                     @if (participationObject.Schedule.IsNotEmpty() && participationObject.Schedule.EndDate.HasValue)
                                     {
-                                        @*if (subscriptionPlan.TotalPeriods >= 2)
-                                        {
-                                            <p>Payments will automatically end after <strong> @subscriptionPlan.TotalPeriods </strong>(# of) Payments or <strong> @participationObject.Schedule.EndDate.ToShortDateString() (Activity End Date) </strong> whichever comes first.</p>
-                                        }
-                                        else if (subscriptionPlan.TotalPeriods <= 2)
-                                        {*@
-                                            <p>Payments will automatically end after <strong> @participationObject.Schedule.EndDate.ToShortDateString() (Activity End Date) </strong>.</p>
-                                        //}
+                                        <p>Payments will automatically end after <strong> @participationObject.Schedule.EndDate.ToShortDateString() (Activity End Date) </strong>.</p>
                                     }
 
                                     <hr />

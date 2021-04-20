@@ -49,8 +49,8 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static SubscriptionPlan CreateNewSubscriptionPlan(Account planOwner, ParticipationObjectType participationObjectType, int participationObjectId, decimal costPerPeriod, BillingPeriodType billingPeriodType, 
-            int totalPeriods, PlanPaymentStartType paymentStartType, DateTime? subscriptionStartDate, DateTime? subscriptionEndDate, bool isongoingsubscription, bool doesAutoRenew, bool splitCostEvenly, bool regFeeAsDownPayment, bool isConvenienceFeeTakenOutOfCost, int? loggedInUserId, 
-            SystemMessages msgs, DatabaseConnection dc = null)
+            PlanPaymentStartType paymentStartType, DateTime? subscriptionStartDate, DateTime? subscriptionEndDate, bool isongoingsubscription, bool doesAutoRenew, bool splitCostEvenly, bool regFeeAsDownPayment, 
+            bool isConvenienceFeeTakenOutOfCost, int? loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -66,7 +66,6 @@ namespace AfterSchoolLibrary.Services
                 IsActive = true,
                 ParticipationObjectId = participationObjectId,
                 ParticipationObjectTypeId = participationObjectType,
-                TotalPeriods = totalPeriods,
                 PaymentStartTypeId = paymentStartType,
                 IsOngoingSubscription = isongoingsubscription,
                 DoesAutoRenew = doesAutoRenew,
@@ -346,6 +345,8 @@ namespace AfterSchoolLibrary.Services
         {
             if (rsp.TotalPeriods.HasValue || plan.TotalPeriods.HasValue)
             {
+                //.. refactor this logic, since we are not using total periods.
+                //.. right now we don't need to cancel the subsctiption, so not calling this methods.
                 var totalPayments = rsp.GetPaymentCount(msgs, dc);
                 var totalPeriods = rsp.TotalPeriods ?? plan.TotalPeriods.Value;
 
@@ -354,13 +355,10 @@ namespace AfterSchoolLibrary.Services
                     var stripeSubscription = Billing.StripeHelper.GetSubscription(rsp.StripeSubscriptionId, null, msgs);
 
                     if (stripeSubscription.IsNotEmpty() && !stripeSubscription.CanceledAt.HasValue)
-
-                        //Helpers.Utilities.SystemLog("cancel hit");
-
-                        //msgs.AddRange(Billing.StripeHelper.CancelSubscription(
-                        //    rsp.StripeSubscriptionId,
-                        //    null
-                        //));
+                        msgs.AddRange(Billing.StripeHelper.CancelSubscription(
+                            rsp.StripeSubscriptionId,
+                            null
+                        ));
 
                     if (msgs.HasNoErrors())
                         return true;
@@ -500,21 +498,6 @@ namespace AfterSchoolLibrary.Services
                     startDateTime.IfEmpty(DateTime.UtcNow),
                     purchase.ID,
                     stripeSubscriptionId,
-                    feeObject,
-                    loggedInUser,
-                    msgs,
-                    dc);
-        }
-
-        public static RegistrantSubscriptionPlan AddRegistrant(this SubscriptionPlan plan, Registrant registrant, DateTime? startDateTime, Purchase purchase, string stripeSubscriptionId, int? TotalPeriods, PlanFeeObject feeObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return RegistrantSubscriptionPlanService.CreateNew(
-                    registrant,
-                    plan,
-                    startDateTime.IfEmpty(DateTime.UtcNow),
-                    purchase.ID,
-                    stripeSubscriptionId,
-                    TotalPeriods,
                     feeObject,
                     loggedInUser,
                     msgs,

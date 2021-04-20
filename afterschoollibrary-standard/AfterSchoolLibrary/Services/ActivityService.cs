@@ -1379,8 +1379,7 @@ namespace AfterSchoolLibrary.Services
 
                 hasStripeChanges = plan.CostPerPeriod.Value != subscriptionplancost.ToDecimal() ||
                                     plan.BillingPeriodTypeId != (BillingPeriodType)subscriptionplanperiod.ToInteger() ||                                    
-                                    plan.PaymentStartTypeId != paymentStartType ||
-                                    plan.IsOngoingSubscription != isongoingsubscription.ToBoolean() ||
+                                    plan.PaymentStartTypeId != paymentStartType ||                                    
                                     (subscriptionStartDate.HasValue && subscriptionStartDate.Value != plan.StartDate) ||
                                     (subscriptionEndDate.HasValue && subscriptionEndDate.Value != plan.EndDate) ||
                                     plan.IsConvenienceFeeTakenOutOfCost != isParentPrice;
@@ -1404,7 +1403,6 @@ namespace AfterSchoolLibrary.Services
                     participationObjectId: activity.ID.Value,
                     costPerPeriod: subscriptionplancost.ToDecimal(),
                     billingPeriodType: (BillingPeriodType)subscriptionplanperiod.ToInteger(),
-                    totalPeriods: isongoingsubscription.ToBoolean() ? 0 : (subscriptionPlanPeriodNumber.IsInteger() ? subscriptionPlanPeriodNumber.ToInteger() : 0),
                     paymentStartType: paymentStartType,
                     subscriptionStartDate: subscriptionStartDate,
                     subscriptionEndDate: subscriptionEndDate,
@@ -2581,12 +2579,7 @@ namespace AfterSchoolLibrary.Services
             if (!activity.HasSchedule)
                 return (null, null);
 
-            var schedule = activity.GetSchedule(msgs, dc);
-            var subscriptionPlan = activity.GetSubscriptionPlan(msgs, dc);
-
-            //if (subscriptionPlan.IsNotEmpty() && subscriptionPlan.StartDate.HasValue && subscriptionPlan.EndDate.HasValue)
-            //    return (paymentStart: subscriptionPlan.StartDate.Value, paymentEnd: subscriptionPlan.EndDate.Value);
-
+            var schedule = activity.GetSchedule(msgs, dc);            
             var startDate = schedule.GetUpcomingInstance(msgs, dc).FirstOrDefault().StartDateTime.Value;
             var endDate = schedule.EndDate.Value;
 
