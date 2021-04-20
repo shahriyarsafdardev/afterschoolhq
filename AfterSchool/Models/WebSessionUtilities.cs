@@ -157,8 +157,8 @@ namespace AfterSchool.Models
                 indirectObjectId: indirectObjectId);
         }
 
-        public static void SaveLog(string actorName, string actionStringFormat, string actionString, int webSessionId, int? actorId = (int?)null, int? accountId = (int?)null,
-            WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet,
+        public static void SaveLog(string actorName, string actionStringFormat, string actionString, int? actorId = (int?)null, int? accountId = (int?)null,
+            WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet, ObjectType indirectObjectType = ObjectType.NotSet,
             int? objectId = (int?)null, int? indirectObjectId = (int?)null)
         {
             var action = new WebSessionAction();
@@ -169,6 +169,7 @@ namespace AfterSchool.Models
             action.ObjectTypeId = objectType;
             action.ObjectId = objectId;
             action.IndirectObjectId = indirectObjectId;
+            action.IndirectObjectType = indirectObjectType;
             action.ActionStringFormat = actionStringFormat;
             action.ActionString = actionString;
             action.Save();
