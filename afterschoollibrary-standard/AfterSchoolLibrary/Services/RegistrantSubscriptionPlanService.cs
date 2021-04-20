@@ -39,36 +39,6 @@ namespace AfterSchoolLibrary.Services
             return rpp;
         }
 
-        public static RegistrantSubscriptionPlan CreateNew(Registrant registrant, SubscriptionPlan plan, DateTime startDate, int? purchaseId, string stripeSubscriptionId, int? TotalPeriods, PlanFeeObject feeObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-            var rpp = new RegistrantSubscriptionPlan()
-            {
-                CreateDate = DateTime.UtcNow,
-                CreatedBy = loggedInUser?.ID.IfEmpty(0),
-                LastModifiedDate = DateTime.UtcNow,
-                LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
-                SubscriptionPlanId = plan.ID,
-                RegistrantId = registrant.ID,
-                StartDate = startDate,
-                PurchaseId = purchaseId,
-                StripeSubscriptionId = stripeSubscriptionId,
-                ConvenienceFee = feeObject.ConvenienceFee,
-                PaymentTypeFee = feeObject.PaymentTypeFee,
-                ConvenienceFeesPaidBy = feeObject.ConvenienceFeesPaidBy,
-                PaymentTypeFeesPaidBy = feeObject.PaymentTypeFeesPaidBy,
-                Amount = feeObject.Amount,
-                TotalPeriods = TotalPeriods,
-                PaymentTypeId = feeObject.PaymentType,
-                BillingPeriodTypeId = feeObject.BillingPeriodType
-            };
-
-            msgs.AddRange(rpp.Save(dc));
-
-            return rpp;
-        }
-
         public static List<ActivityPayment> GetPayments(this RegistrantSubscriptionPlan registrantSubscriptionPlan, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return ActivityPayment.LoadByRegistrantSubscriptionPlanIdByIsDeleted(
