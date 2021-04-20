@@ -1618,9 +1618,9 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
-                var activity = participationObject.GetActivity();
-                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, actionType: WebSessionActionType.Registered, objectType: ObjectType.Registrant,
-                    objectId: currentRegistrant.ID, objectText: currentRegistrant.Name, indirectObjectId: activity.ID, indirectObjectText: activity.Name);
+                //var activity = participationObject.GetActivity();
+                //WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, actionType: WebSessionActionType.Registered, objectType: ObjectType.Registrant,
+                //    objectId: currentRegistrant.ID, objectText: currentRegistrant.Name, indirectObjectId: activity.ID, indirectObjectText: activity.Name);
 
                 if (!participationObject.ShouldParentPay())
                     return RedirectToAction("finalizeregistration", new { id = registration.Uid });
