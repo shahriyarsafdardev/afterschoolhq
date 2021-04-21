@@ -419,6 +419,16 @@ namespace AfterSchoolLibrary.Models
             return msgs;
         }
 
+        public static AccountPackage LoadByAccountId(int AccountId, bool IsActive, string OrderByProperty, OrderByDirectionEnum orderByDirection, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+            dq.Criterias.Add(ObjectMap["IsActive"], IsActive);
+            dq.OrderBys.Add(OrderByProperty, orderByDirection);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
+
         #endregion
     }
 }

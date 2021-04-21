@@ -23,6 +23,9 @@ namespace AfterSchoolLibraryTests.Factories
                 StartDate = DateTime.UtcNow.AddMonths(-1)
             };
             msgs.AddRange(obj.Save(dc));
+
+            package.CopyFeaturesToAccountPackage(obj, 0, msgs, dc);
+
             return obj;
         }
     }

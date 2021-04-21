@@ -96,7 +96,7 @@ namespace AfterSchool.Controllers
                             ViewBag.HeaderImageUrl = ah.GetFileLink(profile.HeaderImage, true, null, true);
                     }
 
-                    WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: account.ID, text: account.Name, actionType: WebSessionActionType.Viewed, objectType: ObjectType.DirectoryAccount);
+                   // WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: account.ID, text: account.Name, actionType: WebSessionActionType.Viewed, objectType: ObjectType.DirectoryAccount);
                     return View("search");
                 }
 

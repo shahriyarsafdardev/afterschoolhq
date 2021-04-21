@@ -6,6 +6,9 @@
     var participationObject = (ParticipationObject)ViewBag.ParticipationObject;
     var registrationAccount = (Account)ViewBag.RegistrationAccount;
     var currentUser = SessionVariables.CurrentUser;
+    var savedEmail = Model.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail)?.Value;
+    var showStep1 = currentUser.IsEmpty() && savedEmail.IsBlank();
+    var isDuringProfileSetup = currentUser.IsNotEmpty() || savedEmail.IsNotBlank();
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -17,7 +20,7 @@
         new ViewDataDictionary()
         {
             { "ParticipationObject", participationObject },
-            { "isDuringProfileSetup", currentUser.IsNotEmpty() }
+            { "isDuringProfileSetup", isDuringProfileSetup }
         }
     );
 }
@@ -46,7 +49,7 @@
                 <div>
                     <form class="form-horizontal" id="signup-form" method="post" action="@Url.Action("getstarted", "account")">
 
-                        @if (currentUser.IsEmpty())
+                        @if (showStep1)
                         {
                             <div class="row" id="email-check-container">
                                 
@@ -98,7 +101,7 @@
                             </div>                            
                         }
 
-                    <div id="account-registration" class="@(currentUser.IsEmpty() ? "hide" : "")">
+                    <div id="account-registration" class="@(showStep1 ? "hide" : "")">
 
                         <div class="row">
                             <div class="col-md-6 col-md-offset-3">
