@@ -758,7 +758,7 @@ namespace AfterSchoolLibrary.Models
         #region "PostPayPlan"
         public decimal GetPostPayCost()
         {
-            if (this.PostPayPlans.Any() && this.PostPayPlans.First().CostPerPeriod.HasValue)
+            if (this.PostPayPlans.IsNotEmpty() && this.PostPayPlans.Any() && this.PostPayPlans.First().CostPerPeriod.HasValue)
                 return this.PostPayPlans.First().CostPerPeriod.Value;
 
             return 0;
