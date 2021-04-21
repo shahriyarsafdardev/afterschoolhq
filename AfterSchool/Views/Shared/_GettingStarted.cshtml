@@ -14,20 +14,11 @@
     }
     else if (currentLevel == GettingStartedOptions.CreateFirstActivity)
     {
-        unpublishActivity = AccountService.GetUnpublishActivity(SessionVariables.CurrentAccount);
-        if (unpublishActivity.IsNotEmpty())
-        {
-            phrase4 = "Publish Your Activity";
-            url = unpublishActivity.ShortHomePageUrl;
-        } else
-        {
-            phrase4 = "Create Your First Activity";
-            url = Url.Action("editsetup", "activity", new { area = "org", isnew = 1, type = (int)ActivityType.Activity });
-        }
-
         phrase1 = "Great Job!";
         phrase2 = "You have set up your AfterSchool HQ profile, completing the first step in joining our mission to enable education for children everywhere.";
         phrase3 = "Here’s what’s next:";
+        phrase4 = "Create Your First Activity";
+        url = Url.Action("editsetup", "activity", new { area = "org", isnew = 1, type = (int)ActivityType.Activity });
     }
     else if (currentLevel == GettingStartedOptions.ValidateEmail)
     {
@@ -37,13 +28,26 @@
         phrase4 = "Re-Send Verification Email";
         url = "javascript:AccountSetup.sendVerificationEmail();";
     }
+    else if (currentLevel == GettingStartedOptions.PublishActivity)
+    {
+        unpublishActivity = AccountService.GetUnpublishActivity(SessionVariables.CurrentAccount);
+        if (unpublishActivity.IsNotEmpty())
+        {
+            url = unpublishActivity.ShortHomePageUrl;
+        }
+
+        phrase1 = "Perfect!";
+        phrase2 = "You have created your activity and validated email, but you still have to publish your activity.";
+        phrase3 = "Let's do that.";
+        phrase4 = "Publish Your Activity";
+    }
     else if (currentLevel == GettingStartedOptions.AcceptPayments)
     {
         phrase1 = "You’re almost done!";
         phrase2 = "Just one step left to go. Let’s get your payment method setup so that students can start registering right away.";
         phrase3 = "Here’s what’s next:";
         phrase4 = "Set Up Payment Methods";
-        url = Url.Action("paymentsoptions", "account", new { area = "org" });
+        url = "javascript:LoadPaymentModal();";
     }
     else if (currentLevel == GettingStartedOptions.ProcessCompleted)
     {
