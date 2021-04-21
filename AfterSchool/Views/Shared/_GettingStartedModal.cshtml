@@ -193,9 +193,10 @@
     var isProcessCompleted = @Json.Encode(GettingStartedOptions.ProcessCompleted);
     var isStripeIntegrated = @Json.Encode(isStripeIntegrated);
 
-    PageEvent.add(PageEvent.AFTER_INIT, function () {        
+    PageEvent.add(PageEvent.AFTER_INIT, function () {       
         if (currentLevel == isEmailToBeValidated) {
             $('#modal-email-confirmation').modal('show');
+            $('#footer-activity').fadeOut();
         } else if (currentLevel == isPaymentSetupToBeDone) {
             $('#modal-payment-confirmation').modal('show');
         } else if (currentLevel == isProcessCompleted) {

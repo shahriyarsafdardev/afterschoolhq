@@ -237,6 +237,16 @@ namespace AfterSchoolLibrary.Services
             }, msgs, dc);
         }
 
+        public static int GetActiveAndNonPublishedActivityCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Activity.GetCount(new Hashtable() {
+                { "AccountId", account.ID.Value },
+                { "IsPublished", false },
+                { "IsDeleted", false },
+                { "isArchived", false }
+            }, msgs, dc);
+        }
+
         public static Activity GetUnpublishActivity(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Activity.LoadByAccountIdByIsPublished(account.ID.Value, false, msgs, dc).FirstOrDefault();
@@ -269,7 +279,7 @@ namespace AfterSchoolLibrary.Services
             var accountOwner = account.GetAccountOwner(msgs);
             var HasAccountProfile = account.HasAccountProfile(msgs);
             var HasActivities = account.HasActiveActivities(msgs);
-            var activitycount= account.GetActivityCount(msgs);
+            var activitycount= account.GetActiveAndNonPublishedActivityCount(msgs);
             var VerifiedAccount = accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount;
             var StripeUserId = account.StripeUserId.IsNotEmpty();
            
