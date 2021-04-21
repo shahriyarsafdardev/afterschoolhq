@@ -144,7 +144,7 @@ namespace AfterSchoolLibraryTests.Tests
         {
             var transaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, msgs, dc);
 
-            Assert.Single(Transaction.LoadByPayoutIdByIsDeleted(PayerAccount.ID.Value, false, msgs, dc));
+            Assert.Single(Transaction.LoadByPayerAccountId(PayerAccount.ID.Value, null, null, null, null, false, null, null, msgs, dc));
         }
 
         [Fact]
