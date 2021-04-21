@@ -188,9 +188,9 @@
 
 <script type="text/javascript">
     var currentLevel = @Json.Encode(currentLevel);
-    var isEmailToBeValidated = @Json.Encode(GettingStartedOptions.CreateProfile);
-    var isPaymentSetupToBeDone = @Json.Encode(GettingStartedOptions.ValidateEmail);
-    var isAcceptPaymentDone = @Json.Encode(GettingStartedOptions.AcceptPayments);
+    var isEmailToBeValidated = @Json.Encode(GettingStartedOptions.ValidateEmail);
+    var isPaymentSetupToBeDone = @Json.Encode(GettingStartedOptions.AcceptPayments);
+    var isProcessCompleted = @Json.Encode(GettingStartedOptions.ProcessCompleted);
     var isStripeIntegrated = @Json.Encode(isStripeIntegrated);
 
     PageEvent.add(PageEvent.AFTER_INIT, function () {        
@@ -198,7 +198,7 @@
             $('#modal-email-confirmation').modal('show');
         } else if (currentLevel == isPaymentSetupToBeDone) {
             $('#modal-payment-confirmation').modal('show');
-        } else if (currentLevel == isAcceptPaymentDone && isStripeIntegrated) {
+        } else if (currentLevel == isProcessCompleted) {
             $('#modal-acceptpayment-done').modal('show');
         }
 

@@ -3,6 +3,8 @@
     NotSet = 0,
     CreateProfile,
     CreateFirstActivity,
+    PublishActivity,
     ValidateEmail,
-    AcceptPayments
+    AcceptPayments,
+    ProcessCompleted
 }
