@@ -7,7 +7,6 @@
     var accountOwner = Model.GetAccountOwner();
     var activityUid = (Guid)ViewBag.ActivityUid;
     var currentLevel = AccountService.OnboardingCompletionStatus(Model);
-    var isStripeIntegrated = TempData["IsStripeIntegrated"] != null;
 }
 
 <div id="modal-email-confirmation" class="modal fade" tabindex="-1" role="dialog">
@@ -56,7 +55,6 @@
     var isEmailToBeValidated = @Json.Encode(GettingStartedOptions.ValidateEmail);
     var isPaymentSetupToBeDone = @Json.Encode(GettingStartedOptions.AcceptPayments);
     var isProcessCompleted = @Json.Encode(GettingStartedOptions.ProcessCompleted);
-    var isStripeIntegrated = @Json.Encode(isStripeIntegrated);
 
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         if (currentLevel == isEmailToBeValidated) {

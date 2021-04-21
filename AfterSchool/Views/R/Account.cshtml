@@ -544,6 +544,10 @@
             </div>
         </div>
     </div>
+
+    <div id="modal-payment-confirmation-accountView" class="hide">
+        @{ Html.RenderPartial("~/Views/Shared/_ModalPaymentConfirmation.cshtml", Model, new ViewDataDictionary() { { "ActivityUid", Model.Uid } }); };
+    </div>
 }
 
 <script type="text/javascript">
@@ -569,6 +573,11 @@
 
     function LoadPaymentModal() {
         $('#modal-getting-started').modal('hide');
+        $('#modal-payment-confirmation-accountView').removeClass('hide');
+
+        setTimeout(function () {
+            $('#modal-payment-confirmation').modal('show');
+        }, 100);
     }
 
     (function () {

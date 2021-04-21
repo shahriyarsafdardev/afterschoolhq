@@ -1520,10 +1520,12 @@ namespace AfterSchool.Areas.Org.Controllers
                 if (id.IsNotEmpty())
                 {
                     Session["activityUid"] = null;
-                    TempData["IsStripeIntegrated"] = true;
 
                     Activity activity = Activity.LoadByUid(id.ToGuid());
-                    return Redirect(activity.ShortHomePageUrl);
+                    if (activity.IsNotEmpty() && activity.ShortHomePageUrl.IsNotEmpty())
+                        return Redirect(activity.ShortHomePageUrl);
+                    else
+                        return Redirect(SessionVariables.CurrentAccount.ShortHomePageUrl);
                 }
                 
                 return RedirectToAction("paymentsdone", new { source = Request["state"], isfullscreen = Request["isfullscreen"] });
