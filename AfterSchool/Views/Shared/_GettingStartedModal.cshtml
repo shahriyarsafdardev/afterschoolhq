@@ -40,7 +40,7 @@
                     Account setup complete!
                 </div>
                 <div id="modal-email-confirmation-btn" class="margin-v-30 text-center">
-                    <a href="@Url.Action("publish", "activity", new { id = activityUid, area = "org" })" class="btn btn-primary btn-free-profile" style="padding: 12px 20px;" onclick="return resendValidationEmail()">Publish & View Activity</a>
+                    <a href="@Url.Action("editsetup", "activity", new { id = activityUid, area = "org" })" class="btn btn-primary btn-free-profile" style="padding: 12px 20px;" onclick="return resendValidationEmail()">View Activity Setup</a>
                     <div class="clearfix"></div>
                     <br />
                     <a href="#" style="text-decoration: underline; font-size: 16px; letter-spacing: 0.84px;" onclick="return hideAcceptPaymentModal()"> Return to activity draft</a>
@@ -65,7 +65,9 @@
         } else if (currentLevel == isPaymentSetupToBeDone) {
             $('#modal-payment-confirmation').modal('show');             
         } else if (currentLevel == isProcessCompleted) {
-            $('#modal-acceptpayment-done').modal('show');           
+            $('#modal-acceptpayment-done').modal({
+                backdrop: 'static'
+            });   
         }       
 
         updateButtonClasses();

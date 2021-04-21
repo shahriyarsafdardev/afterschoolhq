@@ -287,7 +287,7 @@
         {
             <button class="btn btn-default btn-activity-footer" disabled>Share</button>
             <a href="@Url.Action("editsetup", "activity", new { id = Model.Uid, area = "org" })" class="btn btn-default btn-activity-footer">Return to Edit</a>
-            <a href="@Url.Action("publish", "activity", new { id = Model.Uid, area = "org" })" class="btn btn-default btn-activity-footer">Publish</a>
+            <a href="@Url.Action("publish", "activity", new { id = Model.Uid, isFromActivityHome = true, area = "org" })" class="btn btn-default btn-activity-footer">Publish</a>
         }
 
     </div>

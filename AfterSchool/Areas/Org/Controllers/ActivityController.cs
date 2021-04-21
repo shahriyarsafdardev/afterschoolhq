@@ -1899,7 +1899,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Publish(string id)
+        public ActionResult Publish(string id, bool isFromActivityHome = false)
         {
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid());
@@ -1957,6 +1957,9 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 SendGridHelper.AddOrUpdateContact(account, user, msgs);
             }
+
+            if (isFromActivityHome)
+                return Redirect(activity.ShortHomePageUrl);
 
             return View("publishdetail", activity);
         }
