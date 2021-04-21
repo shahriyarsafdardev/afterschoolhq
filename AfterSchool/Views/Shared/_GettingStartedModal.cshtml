@@ -53,18 +53,20 @@
 <script type="text/javascript">
     var currentLevel = @Json.Encode(currentLevel);
     var isEmailToBeValidated = @Json.Encode(GettingStartedOptions.ValidateEmail);
+    var isActivityToBePublished = @Json.Encode(GettingStartedOptions.PublishActivity);
     var isPaymentSetupToBeDone = @Json.Encode(GettingStartedOptions.AcceptPayments);
     var isProcessCompleted = @Json.Encode(GettingStartedOptions.ProcessCompleted);
 
-    PageEvent.add(PageEvent.AFTER_INIT, function () {
+    PageEvent.add(PageEvent.AFTER_INIT, function () {        
         if (currentLevel == isEmailToBeValidated) {
-            $('#modal-email-confirmation').modal('show');
-            $('#footer-activity').fadeOut();
+            $('#modal-email-confirmation').modal('show');           
+        } else if (currentLevel == isActivityToBePublished) {
+            $('#footer-activity').removeClass('hide');
         } else if (currentLevel == isPaymentSetupToBeDone) {
-            $('#modal-payment-confirmation').modal('show');
+            $('#modal-payment-confirmation').modal('show');             
         } else if (currentLevel == isProcessCompleted) {
-            $('#modal-acceptpayment-done').modal('show');
-        }
+            $('#modal-acceptpayment-done').modal('show');           
+        }       
 
         updateButtonClasses();
         $(window).on('resize', function () {
@@ -86,9 +88,10 @@
     function resendValidationEmail() {
         $('#modal-email-confirmation-text').html('An email has been sent to <span style="color: #00b492;">@accountOwner.Email</span> Please check your inbox for next steps.');
         $('#modal-email-confirmation-btn').hide();
+        $('#footer-activity').removeClass('hide');
     }
 
     function hideAcceptPaymentModal() {
-        $('#modal-acceptpayment-done').modal('hide');
+        $('#modal-acceptpayment-done').modal('hide');        
     }
 </script>
