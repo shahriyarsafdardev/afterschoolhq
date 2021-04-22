@@ -17,7 +17,8 @@ namespace AfterSchoolLibraryTests.Tests
         {
             LoggedInUser = WebUserFactory.Create(msgs, dc);
             AccountOwner = WebUserFactory.Create(msgs, dc);
-            PlanOwner = AccountFactory.Create(AccountOwner, msgs, dc);
+            //PlanOwner = AccountFactory.Create(AccountOwner , msgs, dc);
+            PlanOwner = AccountFactory.CreateAccount(AccountOwner , msgs, dc);
         }
 
         [Fact]
@@ -90,5 +91,18 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.Equal(expectedResult, paymentPlan.CheckAndCancelPlan(registrantSubscriptionPlan, PlanOwner, msgs, dc));
         }
+
+        [Fact]
+        public void CreateNewSubscriptionPlan()
+        {
+            var activity = ActivityFactory.Create(PlanOwner, msgs, dc);
+
+            var plan = SubscriptionPlanService.CreateNewSubscriptionPlan(PlanOwner, ParticipationObjectType.Activity,3008 ,100, BillingPeriodType.Month,
+            PlanPaymentStartType.OnCheckout, null, null, true, true, false, false,
+            true, 1004, msgs, dc);
+
+            Assert.True(plan.ID.HasValue);
+        }
+
     }
 }
