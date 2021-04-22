@@ -629,6 +629,14 @@ namespace AfterSchoolLibrary.Models
             return ActivityGroup.Load(this.ActivityGroupId.Value, msgs, dc);
         }
 
+        public List<ActivityInstance> GetUpcomingInstance(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return GetInSessionInstances(msgs, dc)
+                .Where(x => x.StartDateTime.Value > DateTime.UtcNow)
+                .OrderBy(x => x.StartDateTime.Value)
+                .ToList();
+        }
+
         #endregion
     }
 }

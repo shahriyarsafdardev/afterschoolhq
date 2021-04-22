@@ -828,6 +828,11 @@ namespace AfterSchoolLibrary.Services
             var hassubscriptionplan = values.GetValueOrDefault("hassubscriptionplan");
             var subscriptionplancost = values.GetValueOrDefault("subscriptionplancost");
             var subscriptionplanperiod = values.GetValueOrDefault("subscriptionplanperiod");
+            var subscriptionPlanPeriodNumber = values.GetValueOrDefault("subscriptionPlanPeriodNumber");
+            var subscriptionPaymentStartType = values.GetValueOrDefault("subscriptionPaymentStartType");
+            var subscriptionStartDate = values.GetValueOrDefault("subscriptionStartDate");
+            var subscriptionEndDate = values.GetValueOrDefault("subscriptionEndDate");
+            var isongoingsubscription = values.GetValueOrDefault("isongoingsubscription"); 
             var haspaymentplan = values.GetValueOrDefault("haspaymentplan");
             var paymentplancost = values.GetValueOrDefault("paymentplancost");
             var paymentplanperiod = values.GetValueOrDefault("paymentplanperiod");
@@ -1223,6 +1228,11 @@ namespace AfterSchoolLibrary.Services
                                 hassubscriptionplan.IfEmpty(""),
                                 subscriptionplancost.IfEmpty(""),
                                 subscriptionplanperiod.IfEmpty(""),
+                                subscriptionPlanPeriodNumber.IfEmpty(""),
+                                subscriptionPaymentStartType.IfEmpty(""),
+                                subscriptionStartDate.IsNotEmpty() ? Convert.ToDateTime(subscriptionStartDate) : (DateTime?)null,
+                                subscriptionEndDate.IsNotEmpty() ? Convert.ToDateTime(subscriptionEndDate) : (DateTime?)null,
+                                isongoingsubscription.IfEmpty(""),
                                 splitcostevenly.IfEmpty(""),
                                 regfeedownpayment.IfEmpty(""),
                                 isparentpricesubscription.IfEmpty("0"),
@@ -1353,10 +1363,13 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
-        private static SystemMessages SetupSubscriptionPlan(this Activity activity, Account account, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string splitcostevenly, string regfeedownpayment, string isparentpricesubscription, int loggedInUserId, DatabaseConnection dc = null)
+        private static SystemMessages SetupSubscriptionPlan(this Activity activity, Account account, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string subscriptionPlanPeriodNumber, 
+            string subscriptionPaymentStartType, DateTime? subscriptionStartDate, DateTime? subscriptionEndDate, string isongoingsubscription, string splitcostevenly, string regfeedownpayment, string isparentpricesubscription, 
+            int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
             var hasStripeChanges = true;
+            var paymentStartType = subscriptionPaymentStartType.ToInteger().ToEnum<PlanPaymentStartType>();
             var isParentPrice = isparentpricesubscription.ToBoolean();
 
             // first: desactivate the current plan if there are any changes
@@ -1365,7 +1378,10 @@ namespace AfterSchoolLibrary.Services
                 var plan = activity.GetSubscriptionPlan(msgs, dc);
 
                 hasStripeChanges = plan.CostPerPeriod.Value != subscriptionplancost.ToDecimal() ||
-                                    plan.BillingPeriodTypeId != (BillingPeriodType)subscriptionplanperiod.ToInteger() ||
+                                    plan.BillingPeriodTypeId != (BillingPeriodType)subscriptionplanperiod.ToInteger() ||                                    
+                                    plan.PaymentStartTypeId != paymentStartType ||                                    
+                                    (subscriptionStartDate.HasValue && subscriptionStartDate.Value != plan.StartDate) ||
+                                    (subscriptionEndDate.HasValue && subscriptionEndDate.Value != plan.EndDate) ||
                                     plan.IsConvenienceFeeTakenOutOfCost != isParentPrice;
 
                 // if has stripe changes or subscription option has been turned off
@@ -1387,6 +1403,10 @@ namespace AfterSchoolLibrary.Services
                     participationObjectId: activity.ID.Value,
                     costPerPeriod: subscriptionplancost.ToDecimal(),
                     billingPeriodType: (BillingPeriodType)subscriptionplanperiod.ToInteger(),
+                    paymentStartType: paymentStartType,
+                    subscriptionStartDate: subscriptionStartDate,
+                    subscriptionEndDate: subscriptionEndDate,
+                    isongoingsubscription: isongoingsubscription.ToBoolean(),
                     doesAutoRenew: true,
                     splitCostEvenly: splitcostevenly.ToBoolean(),
                     regFeeAsDownPayment: regfeedownpayment.ToBoolean(),
@@ -2552,6 +2572,45 @@ namespace AfterSchoolLibrary.Services
         public static bool RestrictByGrade(this Activity activity)
         {
             return activity.AgeStart.IsEmpty();
+        }
+
+        public static (DateTime? paymentStart, DateTime? paymentEnd) FinalizeStartAndEndDateForSubscription(this Activity activity, BillingPeriodType billingPeriodType, DayOfWeek dayOfWeek, DateTime dayOfMonth, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (!activity.HasSchedule)
+                return (null, null);
+
+            var schedule = activity.GetSchedule(msgs, dc);            
+            var startDate = schedule.GetUpcomingInstance(msgs, dc).FirstOrDefault().StartDateTime.Value;
+            var endDate = schedule.EndDate.Value;
+
+            if (billingPeriodType == BillingPeriodType.Week)
+            {
+                //.. if activity schedule starts on November 1st, 2021(Monday) ends on December 1st, 2021(Thursday) and provide choose weekly billing every sunday, 
+                //.. that would mean the parent would be first billed on Sunday Oct 31st and last billed on Sunday Nov 27th.
+                //.. but if start date is of today or past, we will find next sunday or user's choosen day                
+                var startingDay = startDate.AddDays(-1).IsOnOrBefore(DateTime.UtcNow) ? startDate.AddDays(((int)dayOfWeek - (int)startDate.DayOfWeek + 7) % 7) : startDate.AddDays(((int)dayOfWeek - (int)startDate.DayOfWeek - 7) % 7);
+
+                //int daysUntilLastPayment = ((int)dayOfWeek - (int)endDate.DayOfWeek - 7) % 7;
+                //var endingDay = endDate.AddDays(daysUntilLastPayment);
+                return (paymentStart: startingDay, paymentEnd: endDate);
+            }
+            else if (billingPeriodType == BillingPeriodType.Month)
+            {
+                //.. if provider chooses monthly payment cycle in this case with date November 5th,
+                //.. that would mean the parent would be first billed on November 5th.                
+
+                //.. if activity is in future
+                //var endingMonth = endDate.Month;
+                //if (schedule.StartDate.Value.IsAfter(DateTime.Now))
+                //    endingMonth += 1;
+
+                var startingDay = new DateTime(endDate.Year, startDate.Month, dayOfMonth.Day);
+                //var endingDay = new DateTime(endDate.Year, endingMonth, dayOfMonth.Day);
+
+                return (paymentStart: startingDay.IsAfter(DateTime.UtcNow) ? startingDay : DateTime.UtcNow, paymentEnd: endDate);
+            }
+
+            return (null, null);
         }
     }
 }
