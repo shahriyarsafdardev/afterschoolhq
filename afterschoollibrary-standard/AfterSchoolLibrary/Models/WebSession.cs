@@ -204,7 +204,7 @@ namespace AfterSchoolLibrary.Models
 			return dq.ExecuteSelect(sql, msgs);
 		}
 
-		public static bool IsTableExists(SystemMessages msgs = null, DatabaseConnection dc = null)
+		public static bool DoesTableExists(SystemMessages msgs = null, DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
