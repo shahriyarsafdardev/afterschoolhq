@@ -38,8 +38,8 @@
 
                     @{ Html.RenderPartial("~/Views/Shared/_Loaders.cshtml",
                              new ViewDataDictionary() {
-                               { "count", 7 },
-                               { "activeDotNumber", 2 }
+                               { "count", 6 },
+                               { "activeDotNumber", 1 }
                              });
                     }
 
@@ -116,16 +116,16 @@
                     <div class="visible-sm visible-xs margin-v-30">
                         <button type="submit" class="btn-save-claims btn btn-primary btn-lg pull-right col-xs-12 register-continue">Save and Continue</button>
 
-                        <div class="clearfix"></div>
+                        @*<div class="clearfix"></div>
                         <div class="text-center margin-v-30">
                             <a href="@Url.Action("index", "onboarding")" class="text-muted">Back</a>
-                        </div>
+                        </div>*@
                     </div>
 
                     <div class="visible-md visible-lg margin-v-30">
-                        <a href="@Url.Action("index", "onboarding")" class="process-back">
+                        @*<a href="@Url.Action("index", "onboarding")" class="process-back">
                             <img src="~/img/welcome-back-arrow.PNG" />
-                        </a>
+                        </a>*@
                         <button type="submit" class="btn-save-claims btn btn-primary btn-lg pull-right register-continue">Save and Continue</button>
                     </div>
 
