@@ -51,27 +51,33 @@ namespace AfterSchool.Models
             base.Initialize(requestContext);
 
             Utilities.DetectAfterSchool();
-            WebSessionUtilities.InitializeWebSession(Request);
 
-            if (SessionVariables.VisitorSession.IsEmpty())
+            //check if db exisit then create session
+            var isTableExist = WebSession.IsTableExists();
+            if (isTableExist)
             {
-                var session = new Session();
-                session.LastModifiedDate = session.CreateDate = session.LastActivity = DateTime.UtcNow;
-                session.LastModifiedBy = session.CreatedBy = 0;
-                session.UrlReferrer = Request.UrlReferrer.IsNotEmpty() ? Request.UrlReferrer.ToString() : null;
-                session.IPAddress = Request.ServerVariables["HTTP_X_FORWARDED_FOR"]; //Request.UserHostAddress;
-                session.UserAgent = Request.UserAgent;
-                session.Save();
-                SessionVariables.VisitorSession = session;
+                WebSessionUtilities.InitializeWebSession(Request);
 
-            }
-            else
-            {
-                SessionVariables.VisitorSession.LastActivity = DateTime.UtcNow;
-                SessionVariables.VisitorSession.Save();
-            }
+                if (SessionVariables.VisitorSession.IsEmpty())
+                {
+                    var session = new Session();
+                    session.LastModifiedDate = session.CreateDate = session.LastActivity = DateTime.UtcNow;
+                    session.LastModifiedBy = session.CreatedBy = 0;
+                    session.UrlReferrer = Request.UrlReferrer.IsNotEmpty() ? Request.UrlReferrer.ToString() : null;
+                    session.IPAddress = Request.ServerVariables["HTTP_X_FORWARDED_FOR"]; //Request.UserHostAddress;
+                    session.UserAgent = Request.UserAgent;
+                    session.Save();
+                    SessionVariables.VisitorSession = session;
 
-           // HandleSubdomainRedirect();
+                }
+                else
+                {
+                    SessionVariables.VisitorSession.LastActivity = DateTime.UtcNow;
+                    SessionVariables.VisitorSession.Save();
+                }
+
+            // HandleSubdomainRedirect();
+            }
         }
 
         protected void UpdateSession(SessionActionType sat, int? accountId = null, int? activityId = null, int? webUserId = null, int? registrantId = null, int? registrationId = null, int? registrationPeriodId = null, int? activityGroupId = null, DatabaseConnection dc = null)
@@ -336,7 +342,7 @@ namespace AfterSchool.Models
 
                 }
             }
-            
+
 
             return actionResult;
         }
