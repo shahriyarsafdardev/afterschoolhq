@@ -1520,6 +1520,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 if (id.IsNotEmpty())
                 {
                     Session["activityUid"] = null;
+                    TempData["IsStripeIntegrated"] = true;
 
                     Activity activity = Activity.LoadByUid(id.ToGuid());
                     if (activity.IsNotEmpty() && activity.ShortHomePageUrl.IsNotEmpty())

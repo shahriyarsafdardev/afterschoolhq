@@ -7,6 +7,7 @@
     var accountOwner = Model.GetAccountOwner();
     var activityUid = (Guid)ViewBag.ActivityUid;
     var currentLevel = AccountService.OnboardingCompletionStatus(Model);
+    var isStripeIntegrated = TempData["IsStripeIntegrated"] != null;
 }
 
 <div id="modal-email-confirmation" class="modal fade" tabindex="-1" role="dialog">
@@ -40,10 +41,10 @@
                     Account setup complete!
                 </div>
                 <div id="modal-email-confirmation-btn" class="margin-v-30 text-center">
-                    <a href="@Url.Action("editsetup", "activity", new { id = activityUid, area = "org" })" class="btn btn-primary btn-free-profile" style="padding: 12px 20px;" onclick="return resendValidationEmail()">View Activity Setup</a>
+                    <a href="@Url.Action("editsetup", "activity", new { id = activityUid, area = "org" })" class="btn btn-primary btn-free-profile" style="padding: 12px 20px;"> Return to activity draft</a>
                     <div class="clearfix"></div>
                     <br />
-                    <a href="#" style="text-decoration: underline; font-size: 16px; letter-spacing: 0.84px;" onclick="return hideAcceptPaymentModal()"> Return to activity draft</a>
+                    <a href="#" style="text-decoration: underline; font-size: 16px; letter-spacing: 0.84px;" onclick="return hideAcceptPaymentModal()">View Activity</a>
                 </div>
             </div>
         </div>
@@ -56,19 +57,26 @@
     var isActivityToBePublished = @Json.Encode(GettingStartedOptions.PublishActivity);
     var isPaymentSetupToBeDone = @Json.Encode(GettingStartedOptions.AcceptPayments);
     var isProcessCompleted = @Json.Encode(GettingStartedOptions.ProcessCompleted);
+    var isStripeIntegrated = @Json.Encode(isStripeIntegrated);
 
-    PageEvent.add(PageEvent.AFTER_INIT, function () {        
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
         if (currentLevel == isEmailToBeValidated) {
-            $('#modal-email-confirmation').modal('show');           
+            $('#modal-email-confirmation').modal({
+                backdrop: 'static'
+            });
         } else if (currentLevel == isActivityToBePublished) {
             $('#footer-activity').removeClass('hide');
         } else if (currentLevel == isPaymentSetupToBeDone) {
-            $('#modal-payment-confirmation').modal('show');             
-        } else if (currentLevel == isProcessCompleted) {
+            $('#modal-payment-confirmation').modal({
+                backdrop: 'static'
+            });
+        } else if (currentLevel == isProcessCompleted && isStripeIntegrated) {
             $('#modal-acceptpayment-done').modal({
                 backdrop: 'static'
-            });   
-        }       
+            });
+        } else if (currentLevel == isProcessCompleted) {
+            $('#footer-activity').removeClass('hide');
+        }
 
         updateButtonClasses();
         $(window).on('resize', function () {
@@ -94,6 +102,6 @@
     }
 
     function hideAcceptPaymentModal() {
-        $('#modal-acceptpayment-done').modal('hide');        
+        $('#modal-acceptpayment-done').modal('hide');
     }
 </script>

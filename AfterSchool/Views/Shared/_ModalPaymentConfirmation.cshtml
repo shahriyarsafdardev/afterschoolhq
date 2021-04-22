@@ -46,8 +46,7 @@
                                             <td>
                                                 @if (!account.HasStripeConnectedAccount)
                                                 {
-                                                    Session["activityUid"] = activityUid;
-                                                    //TempData["activityUid"] = activityUid;
+                                                    Session["activityUid"] = activityUid;                                                    
                                                     var redirectUri = Server.UrlEncode($"{AfterSchoolLibrary.Helpers.Utilities.BaseUrl()}/org/account/oauthstripe/");
                                                     var email = currentUser.Email.IsEmail() ? Server.UrlEncode(currentUser.Email) : Server.UrlEncode(account.Email);
                                                     var website = Server.UrlEncode(account.ShortHomePageUrl);
