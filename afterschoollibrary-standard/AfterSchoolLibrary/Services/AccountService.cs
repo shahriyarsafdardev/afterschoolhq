@@ -307,8 +307,12 @@ namespace AfterSchoolLibrary.Services
 
         public static List<GettingStartedOptions> GetCurrentOnboardingProcess(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var accountOwner = account.GetAccountOwner(msgs);
             var startingOptions = new List<GettingStartedOptions>();
+
+            if (account.IsEmpty())
+                return startingOptions;
+
+            var accountOwner = account.GetAccountOwner(msgs);            
 
             if (account.HasAccountProfile(msgs))
                 startingOptions.Add(GettingStartedOptions.CreateProfile);

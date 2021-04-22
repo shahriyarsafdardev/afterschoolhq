@@ -556,7 +556,9 @@
         var isOnboadingCompleted  = @Json.Encode(isOnboadingCompleted);
         if (!isOnboadingCompleted) {
             //.. show getting started modal options if user misses any of that option
-            $('#modal-getting-started').modal('show')
+            $('#modal-getting-started').modal({
+                backdrop: 'static'
+            });   
         }
 
         //$('#btn-welcome-user').click(); leaving out of this release, needs more design
@@ -576,7 +578,9 @@
         $('#modal-payment-confirmation-accountView').removeClass('hide');
 
         setTimeout(function () {
-            $('#modal-payment-confirmation').modal('show');
+            $('#modal-payment-confirmation').modal({
+                backdrop: 'static'
+            });
         }, 100);
     }
 
