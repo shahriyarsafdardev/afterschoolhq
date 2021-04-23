@@ -223,7 +223,7 @@
             $("#contactscontainer").find("a").on("click", function (e) {
                 e.preventDefault();
             });
-            showUpgradeMyPlan('@(manageContactsPackage.Name)','@(manageContactsPackage.ID)',true)
+            showUpgradeMyPlan('@(manageContactsPackage?.Name)', '@(manageContactsPackage?.ID)', true)
             
         }
     });
