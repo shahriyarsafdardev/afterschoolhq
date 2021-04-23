@@ -2989,7 +2989,8 @@ namespace AfterSchoolLibrary.Services
                     );
 
                     // cancel stripe subscription at end of term
-                    plan.CheckAndCancelPlan(registrantSubscriptionPlan, billingAccount, amsgs, adc);
+                    // this logic is based on total periods, we don't need it anymore since we used subscription cancellation via CancelAt property
+                    // plan.CheckAndCancelPlan(registrantSubscriptionPlan, billingAccount, amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
@@ -3343,8 +3344,8 @@ namespace AfterSchoolLibrary.Services
                     AccountService.ProcessPaymentWithStripe(checkoutObject, amsgs, adc);
 
                     // must wait until after charges happen to know what card id is charged for sure
-                    if (msgs.HasNoErrors())
-                        AccountService.CreatePurchaseTransactionPayment(checkoutObject, loggedInUser, msgs, dc);
+                    if (amsgs.HasNoErrors())
+                        AccountService.CreatePurchaseTransactionPayment(checkoutObject, loggedInUser, amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {

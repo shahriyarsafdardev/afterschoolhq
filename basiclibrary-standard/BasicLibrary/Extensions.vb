@@ -99,6 +99,15 @@ Public Module Extensions
         Dim day As Integer = Convert.ToInt32(aDate.DayOfWeek)
         Return aDate.AddDays(6 - day)
     End Function
+    <Extension>
+    Public Function FirstDateOfMonth(ByVal aDate As Date) As Date
+        Return New DateTime(aDate.Year, aDate.Month, 1)
+    End Function
+
+    <Extension>
+    Public Function LastDateOfMonth(ByVal aDate As Date) As Date
+        Return New DateTime(aDate.Year, aDate.Month, aDate.DaysInMonth(aDate.Year, aDate.Month))
+    End Function
 
     <Extension>
     Public Function AsList(Of T)(ByVal aObj As T) As List(Of T)

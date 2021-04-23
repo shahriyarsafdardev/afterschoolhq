@@ -1,0 +1,54 @@
+﻿@model ParticipationObject
+
+@{
+    var displayCheckoutPrice = false;
+
+    if (ViewData["DisplayCheckoutPrice"] != null && ViewData["DisplayCheckoutPrice"].ToString().IsBoolean())
+    {
+        displayCheckoutPrice = ViewData["DisplayCheckoutPrice"].ToString().ToBoolean();
+    }
+
+    var subPlan = Model.SubscriptionPlans.FirstOrDefault();
+}
+
+<p>
+    Registration Fee payment options:
+    <ul>
+        @if (!Model.IsRegistrationFree)
+        {
+            <li>
+                1 payment of
+                @ParticipationObjectUI.PrintRegistrationFee(Model, displayCheckoutPrice)@(Model.SubscriptionPlans.Any() ? ", or " : "")
+            </li>
+        }
+
+        @if (subPlan.IsNotEmpty() && subPlan.IsOngoingSubscription)
+        {
+            <li>
+                Payment of @ParticipationObjectUI.PrintPlanFee(subPlan, Model.OwnerAccount, displayCheckoutPrice) 
+                every 
+                @subPlan.BillingPeriodTypeId.ToString().ToLower()@(subPlan.ID != Model.SubscriptionPlans.Last().ID ? ", or " : "")
+            </li>
+        }
+        else
+        {
+            foreach (var plan in Model.SubscriptionPlans)
+            {
+                <li>
+                    @plan.TotalPeriods payments of
+                    @ParticipationObjectUI.PrintPlanFee(plan, Model.OwnerAccount, displayCheckoutPrice)
+                    each
+                    @plan.BillingPeriodTypeId.ToString().ToLower()@(plan.ID != Model.SubscriptionPlans.Last().ID ? ", or " : "")
+                </li>
+            }
+        }
+    </ul>
+</p>
+
+@*<p>
+    @{ Html.RenderPartial(
+          "~/Views/Shared/ParticipationObject/_SubscriptionPlan.cshtml",
+          Model,
+          new ViewDataDictionary() { { "DisplayCheckoutPrice", displayCheckoutPrice } });
+    }
+</p>*@

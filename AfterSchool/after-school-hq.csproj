@@ -1818,6 +1818,8 @@
     <Content Include="Views\SignUp\IndexNew.cshtml" />
     <Content Include="Views\Shared\_DirectoryFilters.cshtml" />
     <Content Include="Views\R\Search.cshtml" />
+    <Content Include="Views\Shared\_SubscriptionPlan.cshtml" />
+    <Content Include="Views\Shared\ParticipationObject\_TuitionAndSubscriptionPlans.cshtml" />
     <Content Include="Views\Shared\_GettingStarted.cshtml" />
     <Content Include="Views\Shared\_Loaders.cshtml" />
     <Content Include="Views\Shared\_GettingStartedModal.cshtml" />

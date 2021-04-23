@@ -52,6 +52,9 @@ namespace AfterSchoolLibrary.Models
 		public bool RegFeeAsDownPayment { get { return (bool)MDV["RegFeeAsDownPayment"].Value; } set { MDV["RegFeeAsDownPayment"].Value = value; } }
 		public bool IsConvenienceFeeTakenOutOfCost { get { return (bool)MDV["IsConvenienceFeeTakenOutOfCost"].Value; } set { MDV["IsConvenienceFeeTakenOutOfCost"].Value = value; } }
 		public int? NumberOfPeriodsPrePaid { get { return (int?)MDV["NumberOfPeriodsPrePaid"].Value; } set { MDV["NumberOfPeriodsPrePaid"].Value = value; } }
+		public bool IsOngoingSubscription { get { return (bool)MDV["IsOngoingSubscription"].Value; } set { MDV["IsOngoingSubscription"].Value = value; } }
+		public DateTime? StartDate { get { return (DateTime?)MDV["StartDate"].Value; } set { MDV["StartDate"].Value = value; } }
+		public DateTime? EndDate { get { return (DateTime?)MDV["EndDate"].Value; } set { MDV["EndDate"].Value = value; } }
 		
 
         public SubscriptionPlan()
@@ -67,6 +70,7 @@ namespace AfterSchoolLibrary.Models
 			this.SplitCostEvenly = false;
 			this.RegFeeAsDownPayment = false;
 			this.IsConvenienceFeeTakenOutOfCost = false;
+			this.IsOngoingSubscription = false;
 			
         }
 
@@ -93,6 +97,9 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "RegFeeAsDownPayment", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "IsConvenienceFeeTakenOutOfCost", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "NumberOfPeriodsPrePaid", System.Data.SqlDbType.Int);
+				_dp.Add(className, "IsOngoingSubscription", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "StartDate", System.Data.SqlDbType.DateTime);
+				_dp.Add(className, "EndDate", System.Data.SqlDbType.DateTime);
 				
                 return _dp;
             }
@@ -238,6 +245,18 @@ namespace AfterSchoolLibrary.Models
 			dps.Add(ObjectMap["NumberOfPeriodsPrePaid"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsOngoingSubscription"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["StartDate"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["EndDate"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -287,7 +306,15 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public SystemMessages Deactivate(int loggedInUserId, DatabaseConnection dc = null)
+		public static SubscriptionPlan LoadByStripePlanId(string StripePlanId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["StripePlanId"], StripePlanId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
+
+		public SystemMessages Deactivate(int loggedInUserId, DatabaseConnection dc = null)
         {
             this.IsActive = false;
             this.LastModifiedDate = DateTime.UtcNow;
@@ -312,7 +339,7 @@ namespace AfterSchoolLibrary.Models
 
         public string GetNickName(string participationObjectName)
         {
-            return $"{participationObjectName} Plan {this.CostPerPeriod.ToCurrency()} / {this.BillingPeriodTypeId} for {this.TotalPeriods} {this.BillingPeriodTypeId}";
+			return $"{participationObjectName} Plan {this.CostPerPeriod.ToCurrency()} / {this.BillingPeriodTypeId}";
         }
 
         public decimal GetStripeFeeAmountWithConnectedAccount()

@@ -723,19 +723,19 @@ namespace AfterSchool.Areas.Org.Controllers
                     if (msgs.HasNoErrors())
                     {
                         values = new Dictionary<string, object>()
-                    {
-                        { "scheduledetails", scheduledetails},
-                        { "days", days.Select(x => (int)x).ToStrings().ToStringList() },
-                        { "repeatsweekly", repeatsweekly.IfBlank("0") },
-                        { "startdate", startdate },
-                        { "enddate", enddate },
-                        { "dailystarttime", dailystarttime },
-                        { "dailyendtime", dailyendtime },
-                        { "scheduledates", inSessionDates },
-                        { "scheduledatesclosed", outOfSessionDates },
-                        { "schedule", schedule },
-                        { "isongoing", isongoing }
-                    };
+                        {
+                            { "scheduledetails", scheduledetails},
+                            { "days", days.Select(x => (int)x).ToStrings().ToStringList() },
+                            { "repeatsweekly", repeatsweekly.IfBlank("0") },
+                            { "startdate", startdate },
+                            { "enddate", enddate },
+                            { "dailystarttime", dailystarttime },
+                            { "dailyendtime", dailyendtime },
+                            { "scheduledates", inSessionDates },
+                            { "scheduledatesclosed", outOfSessionDates },
+                            { "schedule", schedule },
+                            { "isongoing", isongoing }
+                        };
 
                         activity = ActivityService.EditExisting(
                             loggedInUserId: SessionVariables.CurrentUser.ID.Value,
@@ -927,7 +927,10 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditCost(string id, string cost, string costdescription, string acceptpaypal, string acceptcreditcard, string allowtopaylater, string cmd, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, string paymentplanpaymentstarttype, string splitcostevenly, string regfeedownpayment, string haspostpayplan, string postpaycost, string isparentpricepostpay, string isparentpricecost, string isparentpricepaymentplan, string isparentpricesubscription, string prepaidperiodspostpay)
+        public ActionResult EditCost(string id, string cost, string costdescription, string acceptpaypal, string acceptcreditcard, string allowtopaylater, string cmd, 
+            string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string isongoingsubscription, string subscriptionPlanPeriodNumber, string subscriptionPaymentStartType, string subscriptionStartDate, string subscriptionEndDate,
+            string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, string paymentplanpaymentstarttype, string splitcostevenly, string regfeedownpayment, 
+            string haspostpayplan, string postpaycost, string isparentpricepostpay, string isparentpricecost, string isparentpricepaymentplan, string isparentpricesubscription, string prepaidperiodspostpay)
         {
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid());
@@ -953,6 +956,11 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "hassubscriptionplan", hassubscriptionplan.IfBlank("0") },
                     { "subscriptionplancost", subscriptionplancost },
                     { "subscriptionplanperiod", subscriptionplanperiod },
+                    { "subscriptionPlanPeriodNumber", subscriptionPlanPeriodNumber },
+                    { "subscriptionPaymentStartType", subscriptionPaymentStartType },
+                    { "subscriptionStartDate", subscriptionStartDate },
+                    { "subscriptionEndDate", subscriptionEndDate },
+                    { "isongoingsubscription", !activity.HasSchedule },
                     { "haspaymentplan", haspaymentplan.IfBlank("0") },
                     { "paymentplancost", paymentplancost },
                     { "paymentplanperiod", paymentplanperiod },
@@ -2456,6 +2464,28 @@ namespace AfterSchool.Areas.Org.Controllers
         private bool ShowCopyButtonOnPublishDetail(Activity activity)
         {
             return activity.AccountId == SessionVariables.CurrentAccount.ID || !IsExternallyProvided(activity);
+        }
+
+        [HttpGet]
+        public virtual JsonResult GetCalculatedStartingAndEndDateForSubscription(string activityId, string billingPeriodType, string dayOfWeek, string dayOfMonth)
+        {
+            if (!IsRequestFromApp() || activityId.IsEmpty())
+                return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
+
+            var msgs = new SystemMessages();
+            var activity = Activity.Load(activityId.ToInteger(), msgs);
+            var dates = ActivityService.FinalizeStartAndEndDateForSubscription(activity, (BillingPeriodType)billingPeriodType.ToInteger(), dayOfWeek.IsNotEmpty() ? dayOfWeek.ToEnum<DayOfWeek>() : DayOfWeek.Sunday, dayOfMonth.IsNotEmpty() ? dayOfMonth.ToDateTime() : DateTime.Now.AddDays(1));
+
+            if (dates.paymentStart.IsNotEmpty() && dates.paymentStart.HasValue && dates.paymentEnd.IsNotEmpty() && dates.paymentEnd.HasValue)
+                return Json(new { 
+                    success = true, 
+                    startDate = dates.paymentStart.Value.ToString(),
+                    startDateFormated = dates.paymentStart.Value.ToString("dddd, MMMM d, yyyy"), 
+                    endDate = dates.paymentEnd.Value.ToString(),
+                    endDateFormated = dates.paymentEnd.Value.ToString("dddd, MMMM d, yyyy"),
+                }, JsonRequestBehavior.AllowGet);
+
+            return Json(new { success = false }, JsonRequestBehavior.AllowGet);
         }
     }
 }
