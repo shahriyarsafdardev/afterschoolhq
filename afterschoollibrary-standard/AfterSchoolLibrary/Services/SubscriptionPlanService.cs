@@ -48,6 +48,40 @@ namespace AfterSchoolLibrary.Services
             return plan;
         }
 
+        public static SubscriptionPlan CreateNewSubscriptionPlan(Account planOwner, ParticipationObjectType participationObjectType, int participationObjectId, decimal costPerPeriod, BillingPeriodType billingPeriodType, 
+            PlanPaymentStartType paymentStartType, DateTime? subscriptionStartDate, DateTime? subscriptionEndDate, bool isongoingsubscription, bool doesAutoRenew, bool splitCostEvenly, bool regFeeAsDownPayment, 
+            bool isConvenienceFeeTakenOutOfCost, int? loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var plan = new SubscriptionPlan()
+            {
+                PlanOwnerAccountId = planOwner.ID,
+                BillingPeriodTypeId = billingPeriodType,
+                CostPerPeriod = costPerPeriod,
+                CreateDate = DateTime.UtcNow,
+                CreatedBy = loggedInUserId,
+                LastModifiedDate = DateTime.UtcNow,
+                LastModifiedBy = loggedInUserId,
+                IsActive = true,
+                ParticipationObjectId = participationObjectId,
+                ParticipationObjectTypeId = participationObjectType,
+                PaymentStartTypeId = paymentStartType,
+                IsOngoingSubscription = isongoingsubscription,
+                DoesAutoRenew = doesAutoRenew,
+                SplitCostEvenly = splitCostEvenly,
+                PlanTypeId = SubscriptionPlanType.Subscription,
+                RegFeeAsDownPayment = regFeeAsDownPayment,
+                IsConvenienceFeeTakenOutOfCost = isConvenienceFeeTakenOutOfCost,
+                StartDate = subscriptionStartDate,
+                EndDate = subscriptionEndDate
+            };
+
+            msgs.AddRange(plan.SaveWithStripe(dc));
+
+            return plan;
+        }
+
         public static SubscriptionPlan CreateNewPaymentPlan(Account planOwner, Activity activity, decimal costPerPeriod, BillingPeriodType billingPeriodType, int totalPeriods, bool isConvenienceFeeTakenOutOfCost, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return CreateNewPaymentPlan(planOwner, ParticipationObjectType.Activity, activity.ID.Value, costPerPeriod, billingPeriodType, totalPeriods, PlanPaymentStartType.WhenActivityStarts, isConvenienceFeeTakenOutOfCost, loggedInUser?.ID.IfEmpty(0), msgs, dc);
@@ -311,6 +345,8 @@ namespace AfterSchoolLibrary.Services
         {
             if (rsp.TotalPeriods.HasValue || plan.TotalPeriods.HasValue)
             {
+                //.. refactor this logic, since we are not using total periods.
+                //.. right now we don't need to cancel the subsctiption, so not calling this methods.
                 var totalPayments = rsp.GetPaymentCount(msgs, dc);
                 var totalPeriods = rsp.TotalPeriods ?? plan.TotalPeriods.Value;
 

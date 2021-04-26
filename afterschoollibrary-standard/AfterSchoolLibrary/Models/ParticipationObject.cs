@@ -486,6 +486,17 @@ namespace AfterSchoolLibrary.Models
             return null;
         }
 
+        public ActivityInstance GetUpcomingActivityInstance(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (IsActivity())
+            {
+                var instances = Schedule.GetUpcomingInstance(msgs, dc);
+                return instances.FirstOrDefault();
+            }
+
+            return null;
+        }
+
         public bool IsInSession(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (IsActivity())
@@ -902,6 +913,70 @@ namespace AfterSchoolLibrary.Models
                                 OwnerAccount,
                                 this)
                             .GetConvenienceFee();
+
+            return 0;
+        }
+
+        /// <summary>
+        /// use-case: simple scenario is classes are from Oct 1 - Dec 31, and someone signs up Nov 1, they should only have to pay for Nov 1 - Dec 31st.
+        /// We'd have to calculate the # of payments based on total periods and total activity instances 
+        /// </summary>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
+        public int? GetNumberOfRemainingPayments(int totalPeriods, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty())
+                msgs = new SystemMessages();
+
+            if (totalPeriods > 0 && Schedule.IsNotEmpty() && Schedule.ID.HasValue)
+            {
+                var activityInstances =  ActivityInstance.LoadByActivityScheduleId(Schedule.ID.Value, msgs);
+                var upcomingInstances = Schedule.GetUpcomingInstance(msgs);
+
+                var numberofPeriodsToBePaid = (upcomingInstances.Count * totalPeriods) / activityInstances.Count;
+                return Convert.ToInt32(Math.Ceiling(numberofPeriodsToBePaid.ToDecimal()));
+            }
+
+            return null;
+        }
+
+        public int GetNumberOfClassesInCurrentCycle(BillingPeriodType billingPeriodTypeId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var classes = 0;
+            if (Schedule.IsNotEmpty() && Schedule.ID.HasValue)
+            {
+                if (billingPeriodTypeId == BillingPeriodType.Month)
+                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now.FirstDateOfMonth(), DateTime.Now.LastDateOfMonth(), msgs).Count;
+                else if (billingPeriodTypeId == BillingPeriodType.Week)
+                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now.FirstDateOfWeek(), DateTime.Now.LastDateOfWeek(), msgs).Count;
+            }
+
+            return classes;
+        }
+
+        public int GetNumberOfRemainingClassesInCurrentCycle(BillingPeriodType billingPeriodTypeId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var classes = 0;
+            if (Schedule.IsNotEmpty() && Schedule.ID.HasValue)
+            {
+                if (billingPeriodTypeId == BillingPeriodType.Month)
+                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now, DateTime.Now.LastDateOfMonth(), msgs).Count;
+                else if (billingPeriodTypeId == BillingPeriodType.Week)
+                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now, DateTime.Now.LastDateOfWeek(), msgs).Count;
+            }                
+
+            return classes;
+        }
+
+        public int GetNumberOfRemainingClassesInNextCycle(BillingPeriodType billingPeriodTypeId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (Schedule.IsNotEmpty() && Schedule.ID.HasValue)
+            {
+                if (billingPeriodTypeId == BillingPeriodType.Month)
+                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now.AddMonths(1).FirstDateOfMonth(), DateTime.Now.AddMonths(1).LastDateOfMonth(), msgs).Count;
+                else if (billingPeriodTypeId == BillingPeriodType.Week)
+                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now.AddWeeks(1).FirstDateOfWeek(), DateTime.Now.AddWeeks(1).LastDateOfWeek(), msgs).Count;
+            }
 
             return 0;
         }
