@@ -1934,9 +1934,12 @@ namespace AfterSchool.Areas.Org.Controllers
                             $"Url: {activity.HomePageUrl}<br />" +
                             $"User: {currentUser.FirstName} {currentUser.LastName}<br />";
 
-                    var registrationDate = activity.GetActiveRegistrationPeriod();
-                    if (registrationDate.IsNotEmpty() && registrationDate.StartDateTime.IsNotEmpty())
-                        body += $"Activity Start Date: {registrationDate.StartDateTime} <br />";
+                var registrationDate = activity.GetActiveRegistrationPeriod();
+                if (registrationDate.IsNotEmpty() && registrationDate.StartDateTime.IsNotEmpty())
+                    body += $"Registration Start Date: {registrationDate.StartDateTime} <br />";
+
+                if(activity.HasSchedule)
+                    body += $"Activity Start Date: {activity.GetSchedule(msgs).StartDate.ToShortDateString()} <br />";
 
                     if (activity.AccountTimeZone.IsNotEmpty())
                         body += $"All times are in {activity.AccountTimeZone} <br />";
