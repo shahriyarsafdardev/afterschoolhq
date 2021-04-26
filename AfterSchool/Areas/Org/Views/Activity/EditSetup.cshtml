@@ -70,7 +70,7 @@
         var endDate = moment($('#registrationclosedate').val());
         var beginningTime = moment($('#registrationopentime').val(), 'h:mma');
         var endingTime = moment($('#registrationclosetime').val(), 'h:mma');
-        var isActivityGroup = @Json.Encode(Model.ActivityGroupId.IsNotEmpty());
+        var isActivityGroup = @Json.Encode(group.IsNotEmpty());
 
         if (isActivityGroup)
             return ActivitySetup.navigateActivity(url);
