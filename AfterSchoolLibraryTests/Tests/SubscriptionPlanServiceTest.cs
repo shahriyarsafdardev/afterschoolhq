@@ -93,7 +93,7 @@ namespace AfterSchoolLibraryTests.Tests
         }
 
         [Fact]
-        public void CreateNewSubscriptionPlan()
+        public void CreateNewSubscriptionPlanTest()
         {
             var activity = ActivityFactory.Create(PlanOwner, msgs, dc);
 

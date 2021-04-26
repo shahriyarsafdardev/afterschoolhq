@@ -93,6 +93,23 @@ namespace AfterSchoolLibraryTests.Factories
             };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
+        }     
+        
+        public static Activity Create(Account account, ActivitySchedule schedule, ActivityGroup activityGroup, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var name = "Test Activity";
+            var obj = new Activity()
+            {
+                AccountId = 4033,
+                SeatsAvailable = 4,
+                //ActivityScheduleId = schedule.ID,
+                ActivityScheduleId = 2027,
+                ActivityGroupId = 15,
+                Name = name,
+                UniqueName = ActivityService.GenerateUniqueName(name, null, account.ID, msgs, dc)
+            };
+            msgs.AddRange(obj.Save(dc: dc));
+            return obj;
         }
     }
 }

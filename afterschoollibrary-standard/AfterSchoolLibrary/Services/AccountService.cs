@@ -2233,7 +2233,7 @@ namespace AfterSchoolLibrary.Services
             adminEmail = adminEmail.IfBlank("darye@reborncode.com");
             adminPassword = adminPassword.IfBlank("aDm1n1906");
             accountName = accountName.IfBlank("AfterSchool Admin");
-            adminPhone = adminPhone.IfBlank("317-316-0596");
+            adminPhone = adminPhone.IfBlank("317-316-1596");
 
             if (WebUser.LoadByEmail(adminEmail, msgs, dc) != null)
                 throw new Exception("User with the same email address already exists.");
