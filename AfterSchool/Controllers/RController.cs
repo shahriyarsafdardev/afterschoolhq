@@ -84,6 +84,7 @@ namespace AfterSchool.Controllers
                     ViewBag.Grades = GradeLevel.Load();
                     ViewBag.AccountUniqueName = account.UniqueName;
                     ViewBag.AccountId = account.ID.ToString();
+                   
 
                     if (profile.IsNotEmpty())
                     {
@@ -94,9 +95,12 @@ namespace AfterSchool.Controllers
 
                         if (profile.HeaderImage.IsNotBlank())
                             ViewBag.HeaderImageUrl = ah.GetFileLink(profile.HeaderImage, true, null, true);
+
+                        if (profile.Website.IsNotBlank())
+                            ViewBag.Website = profile.Website;
                     }
 
-                   // WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: account.ID, text: account.Name, actionType: WebSessionActionType.Viewed, objectType: ObjectType.DirectoryAccount);
+                    WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: account.ID, text: account.Name, actionType: WebSessionActionType.Viewed, objectType: ObjectType.DirectoryAccount);
                     return View("search");
                 }
 
