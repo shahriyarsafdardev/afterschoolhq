@@ -84,8 +84,7 @@ namespace AfterSchool.Controllers
                     ViewBag.Grades = GradeLevel.Load();
                     ViewBag.AccountUniqueName = account.UniqueName;
                     ViewBag.AccountId = account.ID.ToString();
-                   
-
+                  
                     if (profile.IsNotEmpty())
                     {
                         ViewBag.PrimaryColor = profile.PrimaryColor;
@@ -100,7 +99,7 @@ namespace AfterSchool.Controllers
                             ViewBag.Website = profile.Website;
                     }
 
-                    WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: account.ID, text: account.Name, actionType: WebSessionActionType.Viewed, objectType: ObjectType.DirectoryAccount);
+                    // WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: account.ID, text: account.Name, actionType: WebSessionActionType.Viewed, objectType: ObjectType.DirectoryAccount);
                     return View("search");
                 }
 
