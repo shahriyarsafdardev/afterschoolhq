@@ -769,7 +769,7 @@ namespace AfterSchoolLibrary.Models
         #region "PostPayPlan"
         public decimal GetPostPayCost()
         {
-            if (this.PostPayPlans.Any() && this.PostPayPlans.First().CostPerPeriod.HasValue)
+            if (this.PostPayPlans.IsNotEmpty() && this.PostPayPlans.Any() && this.PostPayPlans.First().CostPerPeriod.HasValue)
                 return this.PostPayPlans.First().CostPerPeriod.Value;
 
             return 0;
@@ -970,7 +970,6 @@ namespace AfterSchoolLibrary.Models
 
         public int GetNumberOfRemainingClassesInNextCycle(BillingPeriodType billingPeriodTypeId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var classes = 0;
             if (Schedule.IsNotEmpty() && Schedule.ID.HasValue)
             {
                 if (billingPeriodTypeId == BillingPeriodType.Month)
@@ -979,7 +978,7 @@ namespace AfterSchoolLibrary.Models
                     return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now.AddWeeks(1).FirstDateOfWeek(), DateTime.Now.AddWeeks(1).LastDateOfWeek(), msgs).Count;
             }
 
-            return classes;
+            return 0;
         }
 
         #endregion
