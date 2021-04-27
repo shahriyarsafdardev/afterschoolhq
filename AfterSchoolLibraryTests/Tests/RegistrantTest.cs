@@ -82,8 +82,7 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.Equal(registrant.ID, registrant.Reload(msgs, dc).ID);
         }
-        
-
+      
     }
 
 }

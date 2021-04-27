@@ -141,6 +141,23 @@ namespace AfterSchoolLibraryTests.Tests
             var (paymentStart, paymentEnd) = ActivityService.FinalizeStartAndEndDateForSubscription(activity, BillingPeriodType.Month, System.DayOfWeek.Monday, dayOfMonth, msgs,dc);
 
             Assert.True(paymentStart == dayOfMonth);
+        }    
+        
+        [Fact(DisplayName = "FinalizeStartAndEndDateForWeekSubscriptionTest")]
+        public void FinalizeStartAndEndDateForOneWeekSubscriptionTest()
+        {
+            DateTime dayOfMonth = new DateTime();
+
+            var activityGroup = ActivityGroupFactory.Create(ActivityOwnerAccount, ActivityGroupType.Session, msgs, dc);
+
+            var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, msgs, dc);
+            
+            var activity = ActivityFactory.Create(ActivityOwnerAccount, schedule, activityGroup, msgs, dc);
+
+            var (paymentStart, paymentEnd) = ActivityService.FinalizeStartAndEndDateForSubscription(activity, BillingPeriodType.Week, System.DayOfWeek.Monday, dayOfMonth, msgs,dc);
+
+
+            Assert.True(paymentStart.HasValue && paymentEnd.HasValue);
         }
         
         
