@@ -542,7 +542,7 @@ namespace AfterSchoolLibrary.Models
         {
             get
             {
-                return $"{Helpers.Utilities.BaseUrl()}/signup?invite={this.InviteCodeToShare}";
+                return $"{Helpers.Utilities.BaseUrl()}/signup/welcome?invite={this.InviteCodeToShare}";
             }
         }
 
@@ -550,7 +550,7 @@ namespace AfterSchoolLibrary.Models
         {
             get
             {
-                return $"{Helpers.Utilities.ShortBaseUrl()}/signup?invite={this.InviteCodeToShare}";
+                return $"{Helpers.Utilities.ShortBaseUrl()}/signup/welcome?invite={this.InviteCodeToShare}";
             }
         }
 
