@@ -79,7 +79,19 @@
     .table-getting-started-options tr td {
         border-top: none !important;
     }
+
+    .close-icon {
+        position: fixed;
+        right: 3px;
+        top: 3px;
+    }
 </style>
+
+<div class="close-icon" onclick="return closeModalAndOpenDropDown();">
+    <a class="close" style="padding: 2px; font-size: 28px; cursor: pointer !important;">
+        <span aria-hidden="true">&times;</span>
+    </a>
+</div>
 
 <div class="col-md-12 onboarding-form-group text-center">
     <img src="~/img/tempsnip.png" class="img-responsive" style="display: initial;" />
@@ -158,4 +170,11 @@
     <a href="@url" class="btn btn-primary btn-free-profile">@phrase4</a>
 </div>
 <div class="clearfix"></div>
+
+<script type="text/javascript">
+    function closeModalAndOpenDropDown() {
+        $('#modal-getting-started').modal('hide');
+        toggleList();
+    }
+</script>
 
