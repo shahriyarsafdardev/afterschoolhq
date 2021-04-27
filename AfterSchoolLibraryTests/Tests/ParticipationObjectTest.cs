@@ -5,6 +5,7 @@ using BasicLibrary;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using AfterSchoolLibraryTests.Factories;
+using System.Collections.Generic;
 
 namespace AfterSchoolLibraryTests.Tests
 {
@@ -26,23 +27,41 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void GetNumberOfClassesInCurrentCycleTest()
         {
-            var activity = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
+            //var activity = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
 
-            var plan = SubscriptionPlanService.CreateNewSubscriptionPlan(PlanOwner, ParticipationObjectType.Activity, 3008, 100, BillingPeriodType.Month,
-            PlanPaymentStartType.OnCheckout, null, null, true, true, false, false,
-            true, 1004, msgs, dc);
+            //var plan = SubscriptionPlanService.CreateNewSubscriptionPlan(PlanOwner, ParticipationObjectType.Activity, 3008, 100, BillingPeriodType.Month,
+            //PlanPaymentStartType.OnCheckout, null, null, true, true, false, false,
+            //true, 1004, msgs, dc);
 
-            var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, msgs, dc);
+            //var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, msgs, dc);
 
-            schedule.AccountId = 3008;
-            schedule.ID = 2027;
-            schedule.ActivityGroupId = 15;
+            //schedule.AccountId = 3008;
+            //schedule.ID = 2027;
+            //schedule.ActivityGroupId = 15;
 
-            ParticipationObject participationObject = new ParticipationObject(plan.ParticipationObjectId.Value, ParticipationObjectType.Activity, msgs,dc)
-            {
-                Schedule = schedule
-            };
+            var activityGroup = ActivityGroupFactory.Create(ActivityOwnerAccount, ActivityGroupType.Session, msgs, dc);
+            var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount,activityGroup, DateTime.UtcNow.FirstDateOfMonth(), msgs, dc);
+            var location = LocationFactory.Create(ActivityOwnerAccount, msgs, dc);
+            var activity = ActivityFactory.Create(ActivityOwnerAccount, schedule, activityGroup, location, msgs, dc);
+            var instances = new List<ActivityInstance>();
 
+            for (var i = -30; i < 30; i++)
+                instances.Add(Factories.ActivityInstanceFactory.Create(
+                    activity,
+                    schedule,
+                    DateTime.UtcNow.AddDays(i),
+                    DateTime.UtcNow.AddDays(i).AddHours(2),
+                    msgs,
+                    dc));
+            var period = RegistrationPeriodFactory.Create(ActivityOwnerAccount, msgs, dc);
+            var package = PackageFactory.Create(100,1200,msgs, dc);
+            var accountPackage = AccountPackageFactory.Create(ActivityOwnerAccount, package, msgs, dc);
+            //ParticipationObject participationObject = new ParticipationObject(plan.ParticipationObjectId.Value, ParticipationObjectType.Activity, msgs,dc)
+            //{
+            //    Schedule = schedule
+            //};
+
+            ParticipationObject participationObject = new ParticipationObject(activity, msgs, dc);
             var classes = participationObject.GetNumberOfClassesInCurrentCycle(BillingPeriodType.Month, msgs, dc);
 
             Assert.True(classes.IsNotEmpty());
