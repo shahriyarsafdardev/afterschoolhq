@@ -51,13 +51,16 @@ namespace AfterSchoolLibrary.Helpers
 				    LEFT JOIN RegistrationPeriod rp on rp.ID = arp.RegistrationPeriodId
                     LEFT JOIN AccountProfile ap ON ap.AccountId = ar.VisitorAccountId
                     LEFT JOIN Location loc ON ap.LocationId = loc.ID
-                    LEFT JOIN AccountProperty properties on properties.AccountId = ar.VisitorAccountId AND properties.AccountPropertyTypeId in (12, 13, 14, 15)    
-                    LEFT JOIN AccountProperty specialNeeds on specialNeeds.AccountId = ar.VisitorAccountId AND specialNeeds.AccountPropertyTypeId = 17
-                    LEFT JOIN AccountProperty servicesOffered on servicesOffered.AccountId = ar.VisitorAccountId AND servicesOffered.AccountPropertyTypeId = 9
-				    LEFT JOIN AccountProperty timing on timing.AccountId = ar.VisitorAccountId AND timing.AccountPropertyTypeId = 10
-                    LEFT JOIN AccountProperty pricingOptions on pricingOptions.AccountId = ar.VisitorAccountId AND pricingOptions.AccountPropertyTypeId = 11
-				    LEFT JOIN GradeLevel glStart on glStart.ID = ap.GradeLevelStart
+                   
+                   -- LEFT JOIN AccountProperty properties on properties.AccountId = ar.VisitorAccountId AND properties.AccountPropertyTypeId in (12, 13, 14, 15)    
+                   -- LEFT JOIN AccountProperty specialNeeds on specialNeeds.AccountId = ar.VisitorAccountId AND specialNeeds.AccountPropertyTypeId = 17
+                   -- LEFT JOIN AccountProperty servicesOffered on servicesOffered.AccountId = ar.VisitorAccountId AND servicesOffered.AccountPropertyTypeId = 9
+				   -- LEFT JOIN AccountProperty timing on timing.AccountId = ar.VisitorAccountId AND timing.AccountPropertyTypeId = 10
+                   -- LEFT JOIN AccountProperty pricingOptions on pricingOptions.AccountId = ar.VisitorAccountId AND pricingOptions.AccountPropertyTypeId = 11
+				    
+                    LEFT JOIN GradeLevel glStart on glStart.ID = ap.GradeLevelStart
 				    LEFT JOIN GradeLevel glEnd on glEnd.ID = ap.GradeLevelEnd
+
                     OUTER APPLY STRING_SPLIT(@Grades, ',') s
                 WHERE 
                     ((@AccountId IS NULL) OR ar.HostAccountId = @AccountId)
@@ -68,11 +71,11 @@ namespace AfterSchoolLibrary.Helpers
                     AND (
 						    (@SearchTerm = '""""') OR
 						    CONTAINS((ap.Title, ap.Headline, ap.About), @SearchTerm)  OR
-                            CONTAINS((properties.Value), @SearchTerm) OR
-						    CONTAINS((specialNeeds.Value), @SearchTerm) OR
-                            CONTAINS((servicesOffered.Value), @SearchTerm) OR
-							CONTAINS((timing.Value), @SearchTerm) OR
-                            CONTAINS((pricingOptions.Value), @SearchTerm) OR
+                            -- CONTAINS((properties.Value), @SearchTerm) OR
+						    -- CONTAINS((specialNeeds.Value), @SearchTerm) OR
+                            -- CONTAINS((servicesOffered.Value), @SearchTerm) OR
+							-- CONTAINS((timing.Value), @SearchTerm) OR
+                            -- CONTAINS((pricingOptions.Value), @SearchTerm) OR
                             CONTAINS((loc.Address1, loc.Address2, loc.City, loc.State, loc.PostalCode, loc.Name, loc.StreetNumber, loc.StreetName, loc.Neighborhood, loc.County), @SearchTerm)
 					    )
                     AND ((@Neighborhood IS NULL) OR loc.Neighborhood IN (SELECT value COLLATE Latin1_General_100_CI_AI FROM STRING_SPLIT(@Neighborhood, ',') WHERE RTRIM(value) <> ''))                    
@@ -80,10 +83,10 @@ namespace AfterSchoolLibrary.Helpers
                     AND ((@IsVirtualProgram IS NULL) OR ap.IsVirtualProgram = @IsVirtualProgram)
                     AND ((@IsOpenDuringCovid IS NULL) OR ap.IsOpenDuringCovid = @IsOpenDuringCovid)
                     AND ((@Gender IS NULL) OR ap.GenderRestriction In (SELECT value FROM STRING_SPLIT(@Gender, ',') WHERE RTRIM(value) <> ''))
-                    AND ((@SpecialNeeds IS NULL) OR specialNeeds.Value In (SELECT value FROM STRING_SPLIT(@SpecialNeeds, ',') WHERE RTRIM(value) <> ''))
-                    AND ((@Services IS NULL) OR servicesOffered.Value In (SELECT value FROM STRING_SPLIT(@Services, ',') WHERE RTRIM(value) <> ''))
-					AND ((@Timing IS NULL) OR timing.Value In (SELECT value FROM STRING_SPLIT(@Timing, ',') WHERE RTRIM(value) <> ''))
-                    AND ((@PricingOptions IS NULL) OR pricingOptions.Value In (SELECT value FROM STRING_SPLIT(@PricingOptions, ',') WHERE RTRIM(value) <> ''))
+                    -- AND ((@SpecialNeeds IS NULL) OR specialNeeds.Value In (SELECT value FROM STRING_SPLIT(@SpecialNeeds, ',') WHERE RTRIM(value) <> ''))
+                    -- AND ((@Services IS NULL) OR servicesOffered.Value In (SELECT value FROM STRING_SPLIT(@Services, ',') WHERE RTRIM(value) <> ''))
+					-- AND ((@Timing IS NULL) OR timing.Value In (SELECT value FROM STRING_SPLIT(@Timing, ',') WHERE RTRIM(value) <> ''))
+                    -- AND ((@PricingOptions IS NULL) OR pricingOptions.Value In (SELECT value FROM STRING_SPLIT(@PricingOptions, ',') WHERE RTRIM(value) <> ''))
                     AND ((@Grades IS NULL) OR (s.value) BETWEEN ap.GradeLevelStart AND ap.GradeLevelEnd)
                     AND (
 	                        (@Age IS NULL) OR 
