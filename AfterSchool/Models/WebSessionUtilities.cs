@@ -6,6 +6,7 @@ using System.Web;
 using BasicLibrary;
 using AfterSchoolLibrary.Services;
 using AfterSchool.Helpers;
+using AfterSchoolLibrary.Helpers;
 
 namespace AfterSchool.Models
 {
@@ -134,7 +135,7 @@ namespace AfterSchool.Models
                     indirectObjectId: null);
         }
 
-        public static void LogActivity(WebUser actor, int webSessionId, WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet,
+        public static void LogActivity(WebUser actor, int webSessionId, WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet, ObjectType indirectObjectType = ObjectType.NotSet,
             int? objectId = (int?)null, string objectText = "",
             int? indirectObjectId = (int?)null, string indirectObjectText = "")
         {
@@ -143,10 +144,10 @@ namespace AfterSchool.Models
 
             string actionString = null, actionStringFormat = null, actorName = (actor.IsNotEmpty() ? actor.FirstName : "Someone");
 
-            var actionStringObject = WebSessionHelper.GetActionString()
+            var actionStringObject = WebSessionHelper.GetActionString(objectType, actorName, actionType, objectText, indirectObjectType, indirectObjectText);
 
             SaveLog(actorName: (actor.IsNotEmpty() ? actor.FirstName : "Someone"),
-                actionStringFormat: actionStringFormat,
+                actionStringFormat: actionStringObject.,
                 actionString: actionString,
                 webSessionId: webSessionId, 
                 actorId: actor.IsNotEmpty() ? actor.ID : null,
@@ -157,7 +158,7 @@ namespace AfterSchool.Models
                 indirectObjectId: indirectObjectId);
         }
 
-        public static void SaveLog(string actorName, string actionStringFormat, string actionString, int? actorId = (int?)null, int? accountId = (int?)null,
+        public static void SaveLog(string actorName, int webSessionId, string actionStringFormat, string actionString, int? actorId = (int?)null, int? accountId = (int?)null,
             WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet, ObjectType indirectObjectType = ObjectType.NotSet,
             int? objectId = (int?)null, int? indirectObjectId = (int?)null)
         {
@@ -169,7 +170,7 @@ namespace AfterSchool.Models
             action.ObjectTypeId = objectType;
             action.ObjectId = objectId;
             action.IndirectObjectId = indirectObjectId;
-            action.IndirectObjectType = indirectObjectType;
+            action.IndirectObjectTypeId = indirectObjectType;
             action.ActionStringFormat = actionStringFormat;
             action.ActionString = actionString;
             action.Save();

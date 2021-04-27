@@ -175,7 +175,6 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		
 		public static List<WebSession> LoadByAccountId(int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
@@ -184,9 +183,9 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
+		
 
-
-		#endregion
+        #endregion
 
 		#region "UserDefined"
 
@@ -250,5 +249,5 @@ namespace AfterSchoolLibrary.Models
 		}
 
 		#endregion
-	}
+    }
 }
