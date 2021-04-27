@@ -1430,6 +1430,9 @@ property: SplitCostEvenly, bool, Bit, , Split cost evenly amongst all parents si
 property: RegFeeAsDownPayment, bool, Bit, , Count the registration fee as a down payment
 property: IsConvenienceFeeTakenOutOfCost, bool, Bit
 property: NumberOfPeriodsPrePaid, int?, Int
+property: IsOngoingSubscription, bool, Bit
+property: StartDate, DateTime?, DateTime
+property: EndDate, DateTime?, DateTime
 loadmethod: ParticipationObjectId|ParticipationObjectTypeId|PlanTypeId, List<>, LoadByParticipationObject
 loadmethod: PlanOwnerAccountId, List<>
 [end]
@@ -2152,7 +2155,7 @@ values: NotSet, ActivityCancellationNotice, AttendanceNotice, BehaviorNotice, Ge
 [begin]
 type: Enum
 name: PlanPaymentStartType
-values: NotSet, WhenActivityStarts, OnCheckout
+values: NotSet, WhenActivityStarts, OnCheckout, OnPeriodStart
 [end]
 
 [begin]

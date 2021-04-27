@@ -1046,7 +1046,7 @@ namespace AfterSchoolLibrary.Helpers
             var billingAccount = checkoutObject.BillingAccount;
             var billingAccountOwner = billingAccount.GetAccountOwner(msgs, dc);
             var masterRegistrant = checkoutObject.MasterRegistrant;
-            var parentOrGuardian = masterRegistrant.GetParentOrGuardian(msgs, dc);
+            var parentOrGuardian = masterRegistrant?.GetParentOrGuardian(msgs, dc);
             var canAccountAcceptPayments = billingAccount.CanProcessPayments(msgs, dc);
             var registration = checkoutObject.Registration;
             var totalCostWithFees = checkoutObject.GetStripeAmount(msgs, dc);

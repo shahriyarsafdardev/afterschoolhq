@@ -228,6 +228,27 @@ namespace AfterSchoolLibrary.Models
 		}
 
 
+
+		public static bool DoesTableExists(SystemMessages msgs = null, DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+
+			var sql = $@"
+				SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_SCHEMA = 'dbo' 
+                 AND  TABLE_NAME = 'WebSession'";
+
+			var result = dq.ExecuteSelect(sql, msgs);
+			if (result != null && result.Rows.Count > 0)
+			{
+				return true;
+			}
+			else
+				return false;
+		}
+
 		#endregion
 	}
 }
