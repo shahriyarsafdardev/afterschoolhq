@@ -13,12 +13,19 @@ namespace AfterSchoolLibraryTests.Tests
         private WebUser AccountOwner { get; set; }
         private Account PlanOwner { get; set; }
 
+        private Package Package { get; }
+        private Account ActivityOwnerAccount { get; }
+        private Account Account { get; }
+
         public SubscriptionPlanServiceTest(ITestOutputHelper output) : base(output)
         {
             LoggedInUser = WebUserFactory.Create(msgs, dc);
             AccountOwner = WebUserFactory.Create(msgs, dc);
-            //PlanOwner = AccountFactory.Create(AccountOwner , msgs, dc);
-            PlanOwner = AccountFactory.CreateAccount(AccountOwner , msgs, dc);
+            PlanOwner = AccountFactory.Create(AccountOwner , msgs, dc);
+            Package = PackageFactory.Create(msgs, dc);
+            ActivityOwnerAccount = AccountFactory.Create(AccountOwner, msgs, dc);
+            Account = AccountFactory.Create(AccountOwner, msgs, dc);
+            // PlanOwner = AccountFactory.CreateAccount(AccountOwner , msgs, dc);
         }
 
         [Fact]
@@ -95,11 +102,27 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void CreateNewSubscriptionPlanTest()
         {
-            var activity = ActivityFactory.Create(PlanOwner, msgs, dc);
-
-            var plan = SubscriptionPlanService.CreateNewSubscriptionPlan(PlanOwner, ParticipationObjectType.Activity,3008 ,100, BillingPeriodType.Month,
-            PlanPaymentStartType.OnCheckout, null, null, true, true, false, false,
-            true, 1004, msgs, dc);
+            var activity = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
+          
+            var accountPackage = AccountPackageFactory.Create(ActivityOwnerAccount, Package, msgs, dc);
+         
+            var plan = SubscriptionPlanService.CreateNewSubscriptionPlan(
+                               PlanOwner, 
+                               ParticipationObjectType.Activity,
+                               activity.ID.Value,
+                               100, 
+                               BillingPeriodType.Month,
+                               PlanPaymentStartType.OnCheckout, 
+                               null, 
+                               null, 
+                               true, 
+                               true, 
+                               false,
+                               false,
+                               true,
+                               LoggedInUser.ID.Value,
+                               msgs, 
+                               dc);
 
             Assert.True(plan.ID.HasValue);
         }
