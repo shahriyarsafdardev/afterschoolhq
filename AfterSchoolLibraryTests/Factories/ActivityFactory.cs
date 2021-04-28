@@ -100,11 +100,10 @@ namespace AfterSchoolLibraryTests.Factories
             var name = "Test Activity";
             var obj = new Activity()
             {
-                AccountId = 4033,
+                AccountId = account.ID,
                 SeatsAvailable = 4,
-                //ActivityScheduleId = schedule.ID,
-                ActivityScheduleId = 2027,
-                ActivityGroupId = 15,
+                ActivityScheduleId = schedule.ID,                
+                ActivityGroupId = activityGroup.ID,
                 Name = name,
                 UniqueName = ActivityService.GenerateUniqueName(name, null, account.ID, msgs, dc)
             };
