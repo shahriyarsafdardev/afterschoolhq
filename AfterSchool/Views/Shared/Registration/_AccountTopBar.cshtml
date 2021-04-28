@@ -97,150 +97,244 @@
             color: #00b492 !important;
             border-color: #00b492 !important;
         }
+
+    .popover {
+        display: inline-block;
+        position: relative;
+        border-radius: 50%;
+        padding: 28px 20px;
+    }
+
+        .popover.popover-active {
+            background-color: rgba(255, 255, 255, 1);
+        }
+
+    .drop {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .popover-menu {
+        border-radius: 4px;
+        border-top: 2px solid #49c5b6;
+        background: #fff;
+        list-style-type: none;
+        margin: 8px 0;
+        min-width: 100%;
+        /* padding: 0.5rem 0; */
+        padding: 0px;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        box-shadow: 0 2px 3px 0 rgba(63, 63, 68, 0.2);
+        transition-property: transform, opacity;
+        transition-duration: 200ms;
+        transition-timing-function: ease;
+        transform: scale(0.9);
+        transform-origin: top left;
+        display: block;
+        opacity: 0;
+    }
+
+        .popover-menu:after {
+            bottom: 101%;
+            left: 0.5rem;
+            border: solid transparent;
+            content: " ";
+            height: 0;
+            width: 0;
+            position: absolute;
+            pointer-events: none;
+            border-color: rgba(255, 255, 255, 0);
+            border-bottom-color: #49c5b6;
+            border-width: 7px;
+        }
+
+    .popover-menu-item {
+        white-space: nowrap;
+    }
+
+        .popover-menu-item button {
+            border: 0;
+            border-radius: 0;
+            width: 100%;
+            text-align: left;
+        }
+
+            .popover-menu-item button:hover,
+            .popover-menu-item button:focus {
+                background-color: #f1f1f1;
+            }
+
+    .popover-active .popover-menu {
+        transform: scale(1);
+        display: block;
+        opacity: 1;
+    }
+
+
+    button {
+        border-color: #ccc;
+        border-radius: 4px;
+        cursor: pointer;
+        padding: 0.6rem 1rem;
+    }
 </style>
 
 <div class="reg-login-bar">
     @if (Model.IsNotEmpty() && Model.ID.HasValue)
     {
-        <div class="row">
-            <div class="col-md-6 col-sm-6 col-xs-12">
-                @if (isAccount && isAccountAndLoggedInUserIsOwner && progressPercentage != 100)
-                {
-                    <div class="dropdown" style="float: left;  margin: 2px 0 2px 0; padding: 2px 12px 0; border-radius: 5.7px; border: solid 1px #ffad49; background-color: #4a4a4a; width: 105px; height: 35px;">
-                        <a id="myDropdown" class="dropdown-toggle dropdown-label" onclick="return toggleList();">
-                            Finish Setup
-                            <div class="progress" style="height: 4px; margin-bottom: 0;">
-                                <div class="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" style="width:@progressPercentage%; background-color: #00AE83;">                                    
-                                </div>
-                            </div>
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" style="background-color: #434e52;">
-                            <li>
-                                <a href="#" style="color: #b3b3b3; padding: 8px 22px 9px 14px;">
-                                    <div class="am-checkbox checkbox-override" onclick="return redirectUser('@GettingStartedOptions.CreateProfile');">
-                                        <input id="chk-TopBar-getting-started-profile" name="GettingStartedSelection-TopBar" type="checkbox"
-                                               value="@GettingStartedOptions.CreateProfile"
-                                               @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.CreateProfile) ? "checked=\"checked\" disabled" : "") />
-                                        <label for="chk-TopBar-getting-started-profile" class="dropdown-label-topbar">Create Profile</label>
-                                    </div>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#" style="color: #b3b3b3; padding: 8px 22px 9px 14px;">
-                                    <div class="am-checkbox checkbox-override" onclick="return redirectUser('@GettingStartedOptions.CreateFirstActivity');">
-                                        <input id="chk-TopBar-getting-started-first-activity" name="GettingStartedSelection-TopBar" type="checkbox"
-                                               value="@GettingStartedOptions.CreateFirstActivity"
-                                               @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.CreateFirstActivity) ? "checked=\"checked\" disabled" : "") />
-                                        <label for="chk-TopBar-getting-started-first-activity" class="dropdown-label-topbar">Create First Activity</label>
-                                    </div>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#" style="color: #b3b3b3; padding: 8px 22px 9px 14px;">
-                                    <div class="am-checkbox checkbox-override" onclick="return redirectUser('@GettingStartedOptions.ValidateEmail');">
-                                        <input id="chk-TopBar-getting-started-email" name="GettingStartedSelection-TopBar" type="checkbox"
-                                               value="@GettingStartedOptions.ValidateEmail"
-                                               @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.ValidateEmail) ? "checked=\"checked\" disabled" : "") />
-                                        <label for="chk-TopBar-getting-started-email" class="dropdown-label-topbar">Validate Email</label>
-                                    </div>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#" style="color: #b3b3b3; padding: 8px 22px 9px 14px;">
-                                    <div class="am-checkbox checkbox-override" onclick="return redirectUser('@GettingStartedOptions.AcceptPayments');">
-                                        <input id="chk-TopBar-getting-started-payments" name="GettingStartedSelection-TopBar" type="checkbox"
-                                               value="@GettingStartedOptions.AcceptPayments"
-                                               @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.AcceptPayments) ? "checked=\"checked\" disabled" : "") />
-                                        <label for="chk-TopBar-getting-started-payments" class="dropdown-label-topbar">Accept Payments</label>
-                                    </div>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                }
+    <div class="row">
+        <div class="col-md-6 col-sm-6 col-xs-12">
 
-                @if (registrationStartPage.IsNotEmpty())
-                {
-                    <a href="@registrationStartPage.HomePageUrl" style="float: left; margin-left: 10px; margin-right: 10px;">
-                        <span class="reg-login-bar-title">@registrationStartPage.Name</span>
-                    </a>
-                }
-                else if (currentUser.IsNotEmpty())
-                {
-                    if (currentAccount.IsNotEmpty())
-                    {
-                        <span class="reg-login-bar-title">@currentAccount.Name</span>
-                    }
-                    else
-                    {
-                        <span class="reg-login-bar-title">@currentUser.DisplayName</span>
-                    }
-                }
-
-            </div>
-
-            @if (!isDuringProfileSetup)
+            @*@if (isAccount && isAccountAndLoggedInUserIsOwner && progressPercentage != 100)
             {
-                <div class="col-md-6 col-sm-6 col-xs-12">
-                    <div class="btn-group pull-right">
-                        <div>
-
-                            @RenderReturnToHomeUrl(session, registrationStartPage)
-
-                            @if (currentUser.IsNotEmpty())
-                            {
-                                if (canPublishActivity && participationObject.IsNotEmpty())
-                                {
-                                    <a href="@Url.Action("publishdetail", "activity", new { Area = "org", id = participationObject.Uid })"
-                                       class="btn btn-primary btn-sm">
-                                        Approve &amp; Publish Activity &raquo;
-                                    </a>
-                                }
-
-                                if (currentUser.IsActive)
-                                {
-                                    <a href="@dashboardUrl" class="btn btn-link">@accountOrDashboard</a>
-                                }
-                                else if (!currentUser.IsRegistered)
-                                {
-                                    <a href="@AfterSchoolLibrary.Helpers.Utilities.CompleteSignUpUrl(currentUser.Uid, Request.Url.ToString())" class="btn btn-link">Complete account setup &raquo;</a>
-                                }
-
-                                if (Model.HasAccountProfile() && currentUser.HasAccessTo(Model))
-                                {
-                                    var editModeUrl = Model.HomePageUrl;
-                                    var isInEditMode = Request["edit"] == "1";
-
-                                    if (!isInEditMode)
-                                    {
-                                        if (editModeUrl.Contains("?"))
-                                        {
-                                            editModeUrl += "&";
-                                        }
-                                        else
-                                        {
-                                            editModeUrl += "?";
-                                        }
-                                    }
-
-                                    <a href="@(editModeUrl)@(!isInEditMode ? "edit=1" : "")" class="btn btn-link">Toggle Edit Mode</a>
-                                }
-
-                                if (currentUser.HasMultipleAccounts())
-                                {
-                                    <a href="@Url.Action("switch", "logout", new { returnurl = returnUrl })" class="btn btn-link">Switch Accounts</a>
-                                }
-                                <a href="@Url.Action("index", "logout", new { returnurl = returnUrl })" class="btn btn-link">Logout</a>
-                            }
-                            else
-                            {
-                                <button type="button" class="btn btn-link md-trigger" data-modal="modal-login">Login to Account</button>
-                            }
+                <div class="dropdown" style="float: left;  margin: 2px 0 2px 0; padding: 2px 12px 0; border-radius: 5.7px; border: solid 1px #ffad49; background-color: #4a4a4a; width: 105px; height: 35px;">
+                    <a id="myDropdown" class="dropdown-toggle dropdown-label" onclick="return toggleList();">
+                        Finish Setup
+                        <div class="progress" style="height: 4px; margin-bottom: 0;">
+                            <div class="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" style="width:@progressPercentage%; background-color: #00AE83;">
+                            </div>
                         </div>
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" style="background-color: #434e52;">
+                        <li>
+                            <a href="#" style="color: #b3b3b3; padding: 8px 22px 9px 14px;">
+                                <div class="am-checkbox checkbox-override" onclick="return redirectUser('@GettingStartedOptions.CreateProfile');">
+                                    <input id="chk-TopBar-getting-started-profile" name="GettingStartedSelection-TopBar" type="checkbox"
+                                           value="@GettingStartedOptions.CreateProfile"
+                                           @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.CreateProfile) ? "checked=\"checked\" disabled" : "") />
+                                    <label for="chk-TopBar-getting-started-profile" class="dropdown-label-topbar">Create Profile</label>
+                                </div>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" style="color: #b3b3b3; padding: 8px 22px 9px 14px;">
+                                <div class="am-checkbox checkbox-override" onclick="return redirectUser('@GettingStartedOptions.CreateFirstActivity');">
+                                    <input id="chk-TopBar-getting-started-first-activity" name="GettingStartedSelection-TopBar" type="checkbox"
+                                           value="@GettingStartedOptions.CreateFirstActivity"
+                                           @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.CreateFirstActivity) ? "checked=\"checked\" disabled" : "") />
+                                    <label for="chk-TopBar-getting-started-first-activity" class="dropdown-label-topbar">Create First Activity</label>
+                                </div>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" style="color: #b3b3b3; padding: 8px 22px 9px 14px;">
+                                <div class="am-checkbox checkbox-override" onclick="return redirectUser('@GettingStartedOptions.ValidateEmail');">
+                                    <input id="chk-TopBar-getting-started-email" name="GettingStartedSelection-TopBar" type="checkbox"
+                                           value="@GettingStartedOptions.ValidateEmail"
+                                           @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.ValidateEmail) ? "checked=\"checked\" disabled" : "") />
+                                    <label for="chk-TopBar-getting-started-email" class="dropdown-label-topbar">Validate Email</label>
+                                </div>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" style="color: #b3b3b3; padding: 8px 22px 9px 14px;">
+                                <div class="am-checkbox checkbox-override" onclick="return redirectUser('@GettingStartedOptions.AcceptPayments');">
+                                    <input id="chk-TopBar-getting-started-payments" name="GettingStartedSelection-TopBar" type="checkbox"
+                                           value="@GettingStartedOptions.AcceptPayments"
+                                           @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.AcceptPayments) ? "checked=\"checked\" disabled" : "") />
+                                    <label for="chk-TopBar-getting-started-payments" class="dropdown-label-topbar">Accept Payments</label>
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            }*@
+
+            @if (registrationStartPage.IsNotEmpty())
+            {
+                <a href="@registrationStartPage.HomePageUrl" style="float: left; margin-left: 10px; margin-right: 10px;">
+                    <span class="reg-login-bar-title">@registrationStartPage.Name</span>
+                </a>
+            }
+            else if (currentUser.IsNotEmpty())
+            {
+                if (currentAccount.IsNotEmpty())
+                {
+                    <span class="reg-login-bar-title">@currentAccount.Name</span>
+                }
+                else
+                {
+                    <span class="reg-login-bar-title">@currentUser.DisplayName</span>
+                }
+            }
+
+        </div>
+
+        <div class="popover popover-active">
+            <button class="popover-trigger">plus</button>
+            <ul class="popover-menu">
+                <li class="popover-menu-item"><button>Action with a long title</button></li>
+                <li class="popover-menu-item"><button>Delete</button></li>
+            </ul>
+        </div>
+
+        @if (!isDuringProfileSetup)
+        {
+            <div class="col-md-6 col-sm-6 col-xs-12">
+                <div class="btn-group pull-right">
+                    <div>
+
+                        @RenderReturnToHomeUrl(session, registrationStartPage)
+
+                        @if (currentUser.IsNotEmpty())
+                        {
+                            if (canPublishActivity && participationObject.IsNotEmpty())
+                            {
+                                <a href="@Url.Action("publishdetail", "activity", new { Area = "org", id = participationObject.Uid })"
+                                   class="btn btn-primary btn-sm">
+                                    Approve &amp; Publish Activity &raquo;
+                                </a>
+                            }
+
+                            if (currentUser.IsActive)
+                            {
+                                <a href="@dashboardUrl" class="btn btn-link">@accountOrDashboard</a>
+                            }
+                            else if (!currentUser.IsRegistered)
+                            {
+                                <a href="@AfterSchoolLibrary.Helpers.Utilities.CompleteSignUpUrl(currentUser.Uid, Request.Url.ToString())" class="btn btn-link">Complete account setup &raquo;</a>
+                            }
+
+                            if (Model.HasAccountProfile() && currentUser.HasAccessTo(Model))
+                            {
+                                var editModeUrl = Model.HomePageUrl;
+                                var isInEditMode = Request["edit"] == "1";
+
+                                if (!isInEditMode)
+                                {
+                                    if (editModeUrl.Contains("?"))
+                                    {
+                                        editModeUrl += "&";
+                                    }
+                                    else
+                                    {
+                                        editModeUrl += "?";
+                                    }
+                                }
+
+                                <a href="@(editModeUrl)@(!isInEditMode ? "edit=1" : "")" class="btn btn-link">Toggle Edit Mode</a>
+                            }
+
+                            if (currentUser.HasMultipleAccounts())
+                            {
+                                <a href="@Url.Action("switch", "logout", new { returnurl = returnUrl })" class="btn btn-link">Switch Accounts</a>
+                            }
+                            <a href="@Url.Action("index", "logout", new { returnurl = returnUrl })" class="btn btn-link">Logout</a>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-link md-trigger" data-modal="modal-login">Login to Account</button>
+                        }
                     </div>
                 </div>
-            }
-        </div>
+            </div>
+        }
+    </div>
     }
     else
     {
@@ -268,6 +362,29 @@
 @{ Html.RenderPartial("~/Views/Shared/Registration/_LoginModal.cshtml", null, new ViewDataDictionary() { { "ReturnUrl", ViewData["LoginReturnUrl"] } }); }
 
 <script type="text/javascript">
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        var popovers = document.querySelectorAll('.popover');
+        var popoverTriggers = document.querySelectorAll('.popover-trigger');
+
+        for (var i = 0; i < popoverTriggers.length; i++) {
+            popoverTriggers[i].addEventListener('click', function (event) {
+                closeAllOthers(this.parentElement);
+                this.parentElement.classList.toggle('popover-active');
+            });
+        }
+        $('.popover-active').click(function () {
+            $('body').toggleClass('drop');
+        });
+        function closeAllOthers(ignore) {
+            for (var i = 0; i < popovers.length; i++) {
+                if (popovers[i] !== ignore) {
+                    popovers[i].classList.remove('popover-active');
+
+                }
+            }
+        }
+    });
+
     function toggleList() {
         var itm = $('#myDropdown');
         $(itm).parent().toggleClass('open');
