@@ -65,7 +65,7 @@ namespace AfterSchoolLibrary.Helpers
 		                    9, -- servicesOffered
 		                    10, -- timing
 		                    11, -- pricingOptions
-		                    12, 13, 14, 15, --Services offered i.e. Classifications, SoftSkills, AcademicSubjects, TeachingMethods
+		                    12, 13, 14, 15, --Classifications, SoftSkills, AcademicSubjects, TeachingMethods, this cannot be filtered but only searched.
 		                    17) -- SpecialNeedsOffering
                    
                     LEFT JOIN GradeLevel glStart on glStart.ID = ap.GradeLevelStart
@@ -97,14 +97,10 @@ namespace AfterSchoolLibrary.Helpers
                     AND ((@IsOpenDuringCovid IS NULL) OR ap.IsOpenDuringCovid = @IsOpenDuringCovid)
                     AND ((@Gender IS NULL) OR ap.GenderRestriction In (SELECT value FROM STRING_SPLIT(@Gender, ',') WHERE RTRIM(value) <> ''))
                     AND ( -- filter AccountProperties
-						((@SpecialNeeds IS NULL) 
-						  OR (properties.AccountPropertyTypeId = 17 AND properties.Value In (SELECT value FROM STRING_SPLIT(@SpecialNeeds, ',') WHERE RTRIM(value) <> '')))
-						AND ((@Services IS NULL) 
-						  OR (properties.AccountPropertyTypeId in (12,13,14,15) AND properties.Value In (SELECT value FROM STRING_SPLIT(@Services, ',') WHERE RTRIM(value) <> '')))
-						AND ((@Timing IS NULL)
-							OR (properties.AccountPropertyTypeId = 10 AND properties.Value In (SELECT value FROM STRING_SPLIT(@Timing, ',') WHERE RTRIM(value) <> '')))
-						AND ((@PricingOptions IS NULL) 
-							OR (properties.AccountPropertyTypeId =  11 AND properties.Value In (SELECT value FROM STRING_SPLIT(@PricingOptions, ',') WHERE RTRIM(value) <> '')))
+						((@Services IS NULL) OR (properties.AccountPropertyTypeId = 9 AND properties.Value In (SELECT value FROM STRING_SPLIT(@Services, ',') WHERE RTRIM(value) <> '')))
+						AND ((@Timing IS NULL) OR (properties.AccountPropertyTypeId = 10 AND properties.Value In (SELECT value FROM STRING_SPLIT(@Timing, ',') WHERE RTRIM(value) <> '')))
+						AND ((@PricingOptions IS NULL) OR (properties.AccountPropertyTypeId =  11 AND properties.Value In (SELECT value FROM STRING_SPLIT(@PricingOptions, ',') WHERE RTRIM(value) <> '')))
+						AND ((@SpecialNeeds IS NULL) OR (properties.AccountPropertyTypeId = 17 AND properties.Value In (SELECT value FROM STRING_SPLIT(@SpecialNeeds, ',') WHERE RTRIM(value) <> '')))						
 					) -- end filter AccountProperties
                     AND ((@Grades IS NULL) OR (s.value) BETWEEN ap.GradeLevelStart AND ap.GradeLevelEnd)
                     AND (
