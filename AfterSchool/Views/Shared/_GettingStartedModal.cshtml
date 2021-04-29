@@ -12,17 +12,17 @@
 
 <div id="modal-email-confirmation" class="modal fade" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
-        <div class="modal-content modal-min-width" style="border-radius: 10px; box-shadow: 0 2px 12px 3px rgb(0 0 0 / 30%);">
+        <div class="modal-content modal-min-width modal-box">
             <div class="modal-body account-getting-started-padding">
                 <div class="close-icon" onclick="return $('#modal-email-confirmation').modal('hide');">
-                    <a class="close" style="padding: 2px; font-size: 28px; cursor: pointer !important; top: 3px; position: absolute; right: 5px;">
+                    <a class="close close-icon-position">
                         <span aria-hidden="true">&times;</span>
                     </a>
                 </div>
                 <div class="text-center">
                     <img src="~/img/email-symbol.png" />
                 </div>
-                <div id="modal-email-confirmation-text" style="margin: 30px 0 38px; font-size: 19px; font-weight: bold; letter-spacing: 1px; text-align: center; color: #4a4a4a; overflow-wrap: break-word;">
+                <div id="modal-email-confirmation-text" class="modal-box-body">
                     Before we publish your activity lets confirm your email.
                 </div>
                 <div id="modal-email-confirmation-btn" class="margin-v-30 text-center">
@@ -37,10 +37,10 @@
 
 <div id="modal-acceptpayment-done" class="modal fade" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
-        <div class="modal-content modal-min-width" style="border-radius: 10px; box-shadow: 0 2px 12px 3px rgb(0 0 0 / 30%);">
+        <div class="modal-content modal-min-width modal-box">
             <div class="modal-body account-getting-started-padding">
                 <div class="close-icon" onclick="return $('#modal-acceptpayment-done').modal('hide');">
-                    <a class="close" style="padding: 2px; font-size: 28px; cursor: pointer !important; top: 3px; position: absolute; right: 5px;">
+                    <a class="close close-icon-position">
                         <span aria-hidden="true">&times;</span>
                     </a>
                 </div>
@@ -48,14 +48,14 @@
                 <div class="text-center">
                     <img src="~/img/email-symbol.png" />
                 </div>
-                <div id="modal-email-confirmation-text" style="margin: 30px 0 38px; font-size: 19px; font-weight: bold; letter-spacing: 1px; text-align: center; color: #4a4a4a; overflow-wrap: break-word;">
+                <div id="modal-email-confirmation-text" class="modal-box-body">
                     Account setup complete!
                 </div>
                 <div id="modal-email-confirmation-btn" class="margin-v-30 text-center">
                     <a href="@Url.Action("editsetup", "activity", new { id = activityUid, area = "org" })" class="btn btn-primary btn-free-profile" style="padding: 12px 20px;"> Return to activity draft</a>
                     <div class="clearfix"></div>
                     <br />
-                    <a href="#" style="text-decoration: underline; font-size: 16px; letter-spacing: 0.84px;" onclick="return hideAcceptPaymentModal()">View Activity</a>
+                    <a href="#" class="view-activity-text" onclick="return hideAcceptPaymentModal()">View Activity</a>
                 </div>
             </div>
         </div>

@@ -65,132 +65,11 @@
 }
 
 <style>
-    .dropdown-label {
-        cursor: pointer;
-        width: 65px;
-        height: 13px;
-        margin: 0 8px 5px;
-        font-family: Montserrat;
-        font-size: 10px;
-        font-weight: normal;
-        font-stretch: normal;
-        font-style: normal;
-        line-height: normal;
-        letter-spacing: 0.23px;
-        text-align: center;
-        color: #dfdfdf;
-    }
-
-        .dropdown-label:hover {
-            color: #00c5a3 !important;
-        }
-
-    .dropdown-menu > li > a {
+    .dropdown-menu > li > a:focus, .dropdown-menu > li > a:active {
         color: #b3b3b3;
-        cursor: pointer;
-    }
-
-    .dropdown-menu > li > .active-item:hover {
-        color: #ffffff !important;
-    }
-
-        .dropdown-menu > li > a:hover {
-            background-color: #434e52;
-        }
-
-    .checkbox-override {
-        padding: 0;       
-    }
-
-        .checkbox-override input[type="checkbox"]:checked + label:before {
-            content: "\e6cd" !important;
-            color: #00b492 !important;
-            border-color: #00b492 !important;
-        }
-
-    .popover {
-        display: inline-block;
-        position: relative;
-        border-radius: 50%;
-        padding: 28px 20px;
-    }
-
-    .popover-menu {
-        border-radius: 4px;
-        border: 2px solid #49c5b6;
-        background: #fff;
-        list-style-type: none;
-        margin: 180px 33px;
-        min-width: 100%;
-        padding: 0px;
-        position: absolute;
-        top: 100%;
-        left: 0;
-        box-shadow: 0 2px 3px 0 rgba(63, 63, 68, 0.2);
-        transition-property: transform, opacity;
-        transition-duration: 200ms;
-        transition-timing-function: ease;
-        transform: scale(0.9);
-        transform-origin: top left;
-        display: block;
-        opacity: 0;
-    }
-
-        .popover-menu:after {
-            bottom: 101%;
-            left: 0.5rem;
-            border: solid transparent;
-            content: " ";
-            height: 0;
-            width: 0;
-            position: absolute;
-            pointer-events: none;
-            border-color: rgba(255, 255, 255, 0);
-            border-bottom-color: #49c5b6;
-            border-width: 7px;
-        }
-
-    .popover-menu-item {
-        white-space: nowrap;
-    }
-
-    .popover-active .popover-menu {
-        transform: scale(1);
-        display: block;
-        opacity: 1;
-    }
-
-    .blur-bg {
-        display: none;
-        background-color: White;
-        background-repeat: no-repeat;
-        height: 100%;
-        opacity: 0.5;
-        position: fixed;
-        top: 0;
-        width: 100%;
-        z-index: 1000000;
-    }
-
-    .popover-dropdown {
-        float: left;
-        margin: 2px 0 2px 0;
-        padding: 2px 12px 0;
-        border-radius: 5.7px;
-        border: solid 1px #ffad49;
-        background-color: #4a4a4a;
-        width: 105px;
-        height: 35px;
-    }
-
-    .full-z-index {
-        z-index: 1000001;
-    }
-
-    .hidden-overflow {
-        overflow: hidden;
     }
 </style>
+
 <div class="blur-bg"></div>
 
 <div class="reg-login-bar">
@@ -205,15 +84,14 @@
                     <a id="ddl-finish-setup" class="dropdown-toggle dropdown-label" onclick="return toggleList();">
                         Finish Setup
                         <div class="progress" style="height: 4px; margin-bottom: 0;">
-                            <div class="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" style="width:@progressPercentage%; background-color: #00AE83;">
-                            </div>
+                            <div class="progress-bar" style="width:@progressPercentage%; background-color: #00AE83;"></div>
                         </div>
                     </a>
                     <ul class="dropdown-menu" style="background-color: #434e52;">
                         <li>
                             @if (currentLevel == GettingStartedOptions.CreateProfile)
                             {
-                                <a class="active-item" href="#" style="color: #b3b3b3; padding: 8px 22px 9px 14px;" >
+                                <a class="active-item finish-setup-anchor" href="#">
                                     <div class="am-checkbox checkbox-override" onclick="return redirectUser('@GettingStartedOptions.CreateProfile');">
                                         <input id="chk-TopBar-getting-started-profile" name="GettingStartedSelection-TopBar" type="checkbox"
                                                value="@GettingStartedOptions.CreateProfile"
@@ -224,7 +102,7 @@
                             }
                             else
                             {
-                                <a href="#" style="color: #b3b3b3; padding: 8px 22px 9px 14px; cursor: no-drop;">
+                                <a href="#" class="finish-setup-anchor cursor-no-drop">
                                     <div class="am-checkbox checkbox-override">
                                         <input id="chk-TopBar-getting-started-profile" name="GettingStartedSelection-TopBar" type="checkbox" disabled="disabled"
                                                @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.CreateProfile) ? "checked=\"checked\"" : "") />
@@ -236,7 +114,7 @@
                         <li>
                             @if (currentLevel == GettingStartedOptions.CreateFirstActivity || currentLevel == GettingStartedOptions.PublishActivity)
                             {
-                                <a class="active-item" href="#" style="color: #b3b3b3; padding: 8px 22px 9px 14px;">
+                                <a class="active-item finish-setup-anchor" href="#">
                                     <div class="am-checkbox checkbox-override" onclick="return redirectUser('@currentLevel');">
                                         <input id="chk-TopBar-getting-started-first-activity" name="GettingStartedSelection-TopBar" type="checkbox"
                                                value="@GettingStartedOptions.CreateFirstActivity"
@@ -247,7 +125,7 @@
                             }
                             else
                             {
-                                <a href="#" style="color: #b3b3b3; padding: 8px 22px 9px 14px; cursor: no-drop;">
+                                <a href="#" class="finish-setup-anchor cursor-no-drop">
                                     <div class="am-checkbox checkbox-override">
                                         <input id="chk-TopBar-getting-started-first-activity" name="GettingStartedSelection-TopBar" type="checkbox" disabled="disabled" 
                                             @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.CreateFirstActivity) ? "checked=\"checked\"" : "") />
@@ -259,7 +137,7 @@
                         <li>
                             @if (currentLevel == GettingStartedOptions.ValidateEmail)
                             {
-                                <a class="active-item" href="#" style="color: #b3b3b3; padding: 8px 22px 9px 14px;">
+                                <a class="active-item finish-setup-anchor" href="#">
                                     <div class="am-checkbox checkbox-override" onclick="return redirectUser('@GettingStartedOptions.ValidateEmail');">
                                         <input id="chk-TopBar-getting-started-email" name="GettingStartedSelection-TopBar" type="checkbox"
                                                value="@GettingStartedOptions.ValidateEmail"
@@ -270,7 +148,7 @@
                             }
                             else
                             {
-                                <a href="#" style="color: #b3b3b3; padding: 8px 22px 9px 14px; cursor: no-drop;">
+                                <a href="#" class="finish-setup-anchor cursor-no-drop">
                                     <div class="am-checkbox checkbox-override">
                                         <input id="chk-TopBar-getting-started-email" name="GettingStartedSelection-TopBar" type="checkbox" disabled="disabled"
                                                @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.ValidateEmail) ? "checked=\"checked\"" : "") />
@@ -282,7 +160,7 @@
                         <li>
                             @if (currentLevel == GettingStartedOptions.AcceptPayments)
                             {
-                                <a class="active-item" href="#" style="color: #b3b3b3; padding: 8px 22px 9px 14px;">
+                                <a class="active-item finish-setup-anchor" href="#">
                                     <div class="am-checkbox checkbox-override" onclick="return redirectUser('@GettingStartedOptions.AcceptPayments');">
                                         <input id="chk-TopBar-getting-started-payments" name="GettingStartedSelection-TopBar" type="checkbox"
                                                value="@GettingStartedOptions.AcceptPayments"
@@ -293,7 +171,7 @@
                             }
                             else
                             {
-                                <a href="#" style="color: #b3b3b3; padding: 8px 22px 9px 14px; cursor: no-drop;">
+                                <a href="#" class="finish-setup-anchor cursor-no-drop">
                                     <div class="am-checkbox checkbox-override">
                                         <input id="chk-TopBar-getting-started-payments" name="GettingStartedSelection-TopBar" type="checkbox" disabled="disabled"
                                                @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.AcceptPayments) ? "checked=\"checked\"" : "") />
@@ -305,12 +183,12 @@
                         </li>
                     </ul>
 
-                    <ul class="popover-menu" style="z-index: 10000000; background: white;">
-                        <li class="popover-menu-item" style="padding: 10px;">
-                        You can complete remaining process from here.
+                    <ul class="popover-menu">
+                        <li class="popover-menu-item">
+                            You can complete remaining process from here.
                             <br />
                             <br />
-                            <button class="btn btn-success btn-xs" style="" onclick="return popOverButton()">Got It.</button>
+                            <button class="btn btn-success btn-xs" onclick="return popOverButton()">Got It.</button>
                             <br />
                             <div class="clearfix"></div>
                         </li>                    
@@ -320,7 +198,7 @@
 
             @if (registrationStartPage.IsNotEmpty())
             {
-                <a href="@registrationStartPage.HomePageUrl" style="float: left; margin-left: 10px; margin-right: 10px;">
+                <a href="@registrationStartPage.HomePageUrl" class="reg-login-bar-homepage">
                     <span class="reg-login-bar-title">@registrationStartPage.Name</span>
                 </a>
             }
@@ -428,13 +306,13 @@
 
 <script type="text/javascript">
     function popOverButton() {
-        if ($("#popover-container").hasClass("popover")) {
-            $("#popover-container").removeClass("popover popover-active full-z-index");
+        if ($("#popover-container").hasClass("popover-setup")) {
+            $("#popover-container").removeClass("popover-setup popover-active full-z-index");
             $('.blur-bg').hide()
             $('body').removeClass('hidden-overflow');
         }
         else {
-            $("#popover-container").addClass("popover popover-active full-z-index");
+            $("#popover-container").addClass("popover-setup popover-active full-z-index");
             $('.blur-bg').show();
             $('body').addClass('hidden-overflow');
             toggleList();
