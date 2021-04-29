@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
 <url>
 	<loc>https://afterschoolhq.com/home-old.html</loc>
-	<lastmod>2021-04-13</lastmod>
+	<lastmod>2021-04-26</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
@@ -64,7 +64,7 @@
 </url>
 <url>
 	<loc>https://afterschoolhq.com/manage-programs.html</loc>
-	<lastmod>2021-04-13</lastmod>
+	<lastmod>2021-04-26</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
@@ -154,7 +154,7 @@
 </url>
 <url>
 	<loc>https://afterschoolhq.com/new-programs.html</loc>
-	<lastmod>2021-04-13</lastmod>
+	<lastmod>2021-04-26</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
@@ -239,74 +239,8 @@
 	</image:image>
 </url>
 <url>
-	<loc>https://afterschoolhq.com/providers-old.html</loc>
-	<lastmod>2021-04-13</lastmod>
-	<changefreq>Weekly</changefreq>
-	<priority>0.5</priority>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/ahq-logo.png</image:loc>
-	<image:title>logo</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/icon-ideagarden.png</image:loc>
-	<image:title>icon%20ideabubble-1</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/icon-handsreach.png</image:loc>
-	<image:title>icon%20connectedhands-1</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/icon-chatbubbles-1.png</image:loc>
-	<image:title>icon%20chatbubbles-1</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/icon-chart-1.png</image:loc>
-	<image:title>icon%20chart-1</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/icon-thumbsup.png</image:loc>
-	<image:title>icon%20thumbsup</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/icon-webui.png</image:loc>
-	<image:title>icon%20webui</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/icon-speaker.png</image:loc>
-	<image:title>icon%20speaker</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/image-2.png</image:loc>
-	<image:title>image%202</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/icon-rocket.png</image:loc>
-	<image:title>icon%20rocket</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/IPS.png</image:loc>
-	<image:title>IPS</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/BCALogo.jpg</image:loc>
-	<image:title>BCALogo</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/logo.png</image:loc>
-	<image:title>logo</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/ian-logo.png</image:loc>
-	<image:title>ian%20logo</image:title>
-	</image:image>
-	<image:image>
-	<image:loc>https://afterschoolhq.com/img/AMA-Partial-White.png</image:loc>
-	<image:title>AMA%20Partial-White</image:title>
-	</image:image>
-</url>
-<url>
 	<loc>https://afterschoolhq.com/tos.html</loc>
-	<lastmod>2021-04-13</lastmod>
+	<lastmod>2021-04-26</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
@@ -316,7 +250,7 @@
 </url>
 <url>
 	<loc>https://afterschoolhq.com/privacy.html</loc>
-	<lastmod>2021-04-13</lastmod>
+	<lastmod>2021-04-26</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
@@ -326,7 +260,7 @@
 </url>
 <url>
 	<loc>https://afterschoolhq.com/copyright.html</loc>
-	<lastmod>2021-04-13</lastmod>
+	<lastmod>2021-04-26</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
@@ -336,7 +270,7 @@
 </url>
 <url>
 	<loc>https://afterschoolhq.com/parent-faq.html</loc>
-	<lastmod>2021-04-13</lastmod>
+	<lastmod>2021-04-26</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
@@ -346,7 +280,7 @@
 </url>
 <url>
 	<loc>https://afterschoolhq.com/contact.html</loc>
-	<lastmod>2021-04-13</lastmod>
+	<lastmod>2021-04-26</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
@@ -356,7 +290,7 @@
 </url>
 <url>
 	<loc>https://afterschoolhq.com/teachers.html</loc>
-	<lastmod>2021-04-13</lastmod>
+	<lastmod>2021-04-26</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
@@ -426,7 +360,7 @@
 </url>
 <url>
 	<loc>https://afterschoolhq.com/provider-faq.html</loc>
-	<lastmod>2021-04-13</lastmod>
+	<lastmod>2021-04-26</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
@@ -436,7 +370,7 @@
 </url>
 <url>
 	<loc>https://afterschoolhq.com/case-study-cfi70.html</loc>
-	<lastmod>2021-04-13</lastmod>
+	<lastmod>2021-04-26</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
@@ -470,7 +404,7 @@
 </url>
 <url>
 	<loc>https://afterschoolhq.com/about.html</loc>
-	<lastmod>2021-04-13</lastmod>
+	<lastmod>2021-04-26</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
@@ -504,7 +438,7 @@
 </url>
 <url>
 	<loc>https://afterschoolhq.com/ips.html</loc>
-	<lastmod>2021-04-13</lastmod>
+	<lastmod>2021-04-26</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
@@ -542,7 +476,7 @@
 </url>
 <url>
 	<loc>https://afterschoolhq.com/404.html</loc>
-	<lastmod>2021-04-13</lastmod>
+	<lastmod>2021-04-26</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
@@ -552,7 +486,7 @@
 </url>
 <url>
 	<loc>https://afterschoolhq.com/error.html</loc>
-	<lastmod>2021-04-13</lastmod>
+	<lastmod>2021-04-26</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
@@ -562,7 +496,7 @@
 </url>
 <url>
 	<loc>https://afterschoolhq.com/unsupportedbrowser.html</loc>
-	<lastmod>2021-04-13</lastmod>
+	<lastmod>2021-04-26</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
@@ -572,7 +506,7 @@
 </url>
 <url>
 	<loc>https://afterschoolhq.com/parents.html</loc>
-	<lastmod>2021-04-13</lastmod>
+	<lastmod>2021-04-26</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
@@ -582,7 +516,7 @@
 </url>
 <url>
 	<loc>https://afterschoolhq.com/mccoy.html</loc>
-	<lastmod>2021-04-13</lastmod>
+	<lastmod>2021-04-26</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
@@ -620,13 +554,13 @@
 </url>
 <url>
 	<loc>https://afterschoolhq.com/pricing.html</loc>
-	<lastmod>2021-04-13</lastmod>
+	<lastmod>2021-04-26</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 </url>
 <url>
 	<loc>https://afterschoolhq.com/team.html</loc>
-	<lastmod>2021-04-13</lastmod>
+	<lastmod>2021-04-26</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
@@ -672,7 +606,7 @@
 </url>
 <url>
 	<loc>https://afterschoolhq.com/providers.html</loc>
-	<lastmod>2021-04-13</lastmod>
+	<lastmod>2021-04-26</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
@@ -734,7 +668,7 @@
 </url>
 <url>
 	<loc>https://afterschoolhq.com/tpf4y.html</loc>
-	<lastmod>2021-04-13</lastmod>
+	<lastmod>2021-04-26</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
@@ -760,7 +694,7 @@
 </url>
 <url>
 	<loc>https://afterschoolhq.com/iyi.html</loc>
-	<lastmod>2021-04-13</lastmod>
+	<lastmod>2021-04-26</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
@@ -786,7 +720,7 @@
 </url>
 <url>
 	<loc>https://afterschoolhq.com/press-kit.html</loc>
-	<lastmod>2021-04-13</lastmod>
+	<lastmod>2021-04-26</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
@@ -816,7 +750,7 @@
 </url>
 <url>
 	<loc>https://afterschoolhq.com/joinisyp.html</loc>
-	<lastmod>2021-04-13</lastmod>
+	<lastmod>2021-04-26</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
@@ -854,7 +788,7 @@
 </url>
 <url>
 	<loc>https://afterschoolhq.com/</loc>
-	<lastmod>2021-04-13</lastmod>
+	<lastmod>2021-04-26</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>1.0</priority>
 	<image:image>
@@ -916,7 +850,7 @@
 </url>
 <url>
 	<loc>https://afterschoolhq.com/ambassadors.html</loc>
-	<lastmod>2021-04-13</lastmod>
+	<lastmod>2021-04-26</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
@@ -930,7 +864,7 @@
 </url>
 <url>
 	<loc>https://afterschoolhq.com/esser.html</loc>
-	<lastmod>2021-04-13</lastmod>
+	<lastmod>2021-04-26</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
@@ -968,7 +902,7 @@
 </url>
 <url>
 	<loc>https://afterschoolhq.com/eans.html</loc>
-	<lastmod>2021-04-13</lastmod>
+	<lastmod>2021-04-26</lastmod>
 	<changefreq>Weekly</changefreq>
 	<priority>0.5</priority>
 	<image:image>
@@ -994,6 +928,24 @@
 	<image:image>
 	<image:loc>https://afterschoolhq.com/img/girls-with-impact.png</image:loc>
 	<image:title>girls%20with-impact</image:title>
+	</image:image>
+	<image:image>
+	<image:loc>https://afterschoolhq.com/img/</image:loc>
+	<image:title>Twitter Social Card Image</image:title>
+	</image:image>
+	<image:image>
+	<image:loc>https://afterschoolhq.com/img/</image:loc>
+	<image:title>Facebook Social Card Image</image:title>
+	</image:image>
+</url>
+<url>
+	<loc>https://afterschoolhq.com/sales-development-representative.html</loc>
+	<lastmod>2021-04-26</lastmod>
+	<changefreq>Weekly</changefreq>
+	<priority>0.5</priority>
+	<image:image>
+	<image:loc>https://afterschoolhq.com/img/ahq-logo.png</image:loc>
+	<image:title>logo</image:title>
 	</image:image>
 	<image:image>
 	<image:loc>https://afterschoolhq.com/img/</image:loc>

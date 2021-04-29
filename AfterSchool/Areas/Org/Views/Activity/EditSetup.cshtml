@@ -70,10 +70,12 @@
         var endDate = moment($('#registrationclosedate').val());
         var beginningTime = moment($('#registrationopentime').val(), 'h:mma');
         var endingTime = moment($('#registrationclosetime').val(), 'h:mma');
-        var isActivityGroup = @Json.Encode(Model.ActivityGroupId.IsNotEmpty());
+        var isActivityGroup = @Json.Encode(group.IsNotEmpty());
 
-        if (!isActivityGroup && endDate.isBefore(startDate) ||
-            (endDate.isSame(startDate) && (endingTime.isSame(beginningTime) || endingTime.isBefore(beginningTime))))
+        if (isActivityGroup)
+            return ActivitySetup.navigateActivity(url);
+
+        if (endDate.isBefore(startDate) || (endDate.isSame(startDate) && (endingTime.isSame(beginningTime) || endingTime.isBefore(beginningTime))))
         {
             Notifications.showBar({
                 title: 'Error',

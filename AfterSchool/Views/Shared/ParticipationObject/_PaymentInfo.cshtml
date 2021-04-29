@@ -6,21 +6,21 @@
 
 @if (!Model.IsFree)
 {
-    if (Model.PostPayPlans.Any())
+    if (Model.PostPayPlans.IsNotEmpty() && Model.PostPayPlans.Any())
     {
         Html.RenderPartial(
             "~/Views/Shared/ParticipationObject/_TuitionAndPostPayPlans.cshtml",
             Model,
             new ViewDataDictionary() { { "DisplayCheckoutPrice", true } });
     }
-    else if (Model.SubscriptionPlans.Any())
+    else if (Model.SubscriptionPlans.IsNotEmpty() && Model.SubscriptionPlans.Any())
     {
         Html.RenderPartial(
           "~/Views/Shared/ParticipationObject/_SubscriptionPlan.cshtml",
           Model,
           new ViewDataDictionary() { { "DisplayCheckoutPrice", true } });
     }
-    else if (Model.PaymentPlans.Any())
+    else if (Model.PaymentPlans.IsNotEmpty() && Model.PaymentPlans.Any())
     {
         Html.RenderPartial(
             "~/Views/Shared/ParticipationObject/_TuitionAndPaymentPlans.cshtml",
