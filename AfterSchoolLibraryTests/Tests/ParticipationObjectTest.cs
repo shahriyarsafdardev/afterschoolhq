@@ -90,6 +90,7 @@ namespace AfterSchoolLibraryTests.Tests
             var classes = participationObject.GetNumberOfRemainingClassesInNextCycle(BillingPeriodType.Month, msgs, dc);
 
             Assert.True(classes.IsNotEmpty());
+            Assert.True(msgs.HasNoErrors());
 
         }  
         
@@ -123,6 +124,7 @@ namespace AfterSchoolLibraryTests.Tests
             var classes = participationObject.GetNumberOfRemainingClassesInCurrentCycle(BillingPeriodType.Month, msgs, dc);
 
             Assert.True(classes.IsNotEmpty());
+            Assert.True(msgs.HasNoErrors());
 
         }
     }
