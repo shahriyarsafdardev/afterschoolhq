@@ -1089,7 +1089,7 @@ namespace AfterSchoolLibrary.Models
         {
             using (SqlConnection connection = new SqlConnection(Utilities.ConnectionString))
             {
-                var sql = Helpers.SearchQuery.LoadAccountSearchQuery(cost, starting, distance, PageNum, PageSize);            
+                var sql = Helpers.SearchQuery.LoadAccountSearchQuery(cost, starting, distance, PageNum, PageSize, hostAccountId > 0);            
 
                 SqlCommand command = new SqlCommand(sql, connection);
                 command.Parameters.AddWithValue("@AccountId", hostAccountId <= 0 ? Convert.DBNull : hostAccountId);

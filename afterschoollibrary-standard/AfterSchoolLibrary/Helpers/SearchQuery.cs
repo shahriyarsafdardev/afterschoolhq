@@ -5,7 +5,7 @@ namespace AfterSchoolLibrary.Helpers
 {
     public static class SearchQuery
     {
-        public static string LoadAccountSearchQuery(string cost, string starting, decimal distance, int PageNum, int PageSize = 9)
+        public static string LoadAccountSearchQuery(string cost, string starting, decimal distance, int PageNum, int PageSize = 9, bool searchHostAccount = false)
         {
             var sql = $@"
             IF(OBJECT_ID('tempdb..#temp_accounts_1') IS NOT NULL) BEGIN DROP TABLE #temp_accounts_1 END
@@ -36,9 +36,16 @@ namespace AfterSchoolLibrary.Helpers
                     {(distance.IsNotEmpty() && distance > 0 ? "ABS(DistanceFromOrigin - @Distance) as TotalDifference," : "")}
                     CASE WHEN CAST(GETDATE() as date) BETWEEN CAST(rp.StartDateTime as date) AND CAST(rp.EndDateTime as date) THEN 1 ELSE 0 END as IsAccountNowEnrolling
                 FROM 
-                    AccountRelationship ar
-                    INNER JOIN Account a ON a.ID = ar.VisitorAccountId
-                    LEFT JOIN Activity act ON act.AccountId = ar.VisitorAccountId AND act.IsDeleted <> 1 AND act.IsPublished = 1 AND act.IsInviteOnly <> 1";
+                    Account a ";
+            if (searchHostAccount)
+            {
+                sql += $@"
+                    INNER JOIN AccountRelationship ar ON a.ID = ar.VisitorAccountId ";
+            }
+                    
+                    
+            sql +=  $@"
+                    LEFT JOIN Activity act ON act.AccountId = a.ID AND act.IsDeleted <> 1 AND act.IsPublished = 1 AND act.IsInviteOnly <> 1";
 
             if (starting.IsNotEmpty())
             {
@@ -49,19 +56,32 @@ namespace AfterSchoolLibrary.Helpers
             sql += $@"
 					LEFT JOIN ActivityRegistrationPeriod arp on arp.ActivityId = act.ID and arp.IsActive = 1
 				    LEFT JOIN RegistrationPeriod rp on rp.ID = arp.RegistrationPeriodId
-                    LEFT JOIN AccountProfile ap ON ap.AccountId = ar.VisitorAccountId
+                    LEFT JOIN AccountProfile ap ON ap.AccountId = a.ID
                     LEFT JOIN Location loc ON ap.LocationId = loc.ID
-                    LEFT JOIN AccountProperty properties on properties.AccountId = ar.VisitorAccountId AND properties.AccountPropertyTypeId in (12, 13, 14, 15)    
-                    LEFT JOIN AccountProperty specialNeeds on specialNeeds.AccountId = ar.VisitorAccountId AND specialNeeds.AccountPropertyTypeId = 17
-                    LEFT JOIN AccountProperty servicesOffered on servicesOffered.AccountId = ar.VisitorAccountId AND servicesOffered.AccountPropertyTypeId = 9
-				    LEFT JOIN AccountProperty timing on timing.AccountId = ar.VisitorAccountId AND timing.AccountPropertyTypeId = 10
-                    LEFT JOIN AccountProperty pricingOptions on pricingOptions.AccountId = ar.VisitorAccountId AND pricingOptions.AccountPropertyTypeId = 11
-				    LEFT JOIN GradeLevel glStart on glStart.ID = ap.GradeLevelStart
+
+                    LEFT JOIN AccountProperty properties 
+	                    ON properties.AccountId = a.ID 
+	                    AND properties.AccountPropertyTypeId in (
+		                    9, -- servicesOffered
+		                    10, -- timing
+		                    11, -- pricingOptions
+		                    12, 13, 14, 15, --Classifications, SoftSkills, AcademicSubjects, TeachingMethods, this cannot be filtered but only searched.
+		                    17) -- SpecialNeedsOffering
+                   
+                    LEFT JOIN GradeLevel glStart on glStart.ID = ap.GradeLevelStart
 				    LEFT JOIN GradeLevel glEnd on glEnd.ID = ap.GradeLevelEnd
+
                     OUTER APPLY STRING_SPLIT(@Grades, ',') s
-                WHERE 
-                    ((@AccountId IS NULL) OR ar.HostAccountId = @AccountId)
-                    AND a.IsDeleted <> 1 
+                WHERE";
+
+            if (searchHostAccount)
+            {
+                sql += $@"
+                        ((@AccountId IS NULL) OR ar.HostAccountId = @AccountId) AND";
+            }
+                   
+            sql += $@"
+                    a.IsDeleted <> 1 
                     AND a.IsTest <> 1
                     AND a.IsActive = 1
                     AND ap.IsAHQApproved = 1                    
@@ -69,10 +89,6 @@ namespace AfterSchoolLibrary.Helpers
 						    (@SearchTerm = '""""') OR
 						    CONTAINS((ap.Title, ap.Headline, ap.About), @SearchTerm)  OR
                             CONTAINS((properties.Value), @SearchTerm) OR
-						    CONTAINS((specialNeeds.Value), @SearchTerm) OR
-                            CONTAINS((servicesOffered.Value), @SearchTerm) OR
-							CONTAINS((timing.Value), @SearchTerm) OR
-                            CONTAINS((pricingOptions.Value), @SearchTerm) OR
                             CONTAINS((loc.Address1, loc.Address2, loc.City, loc.State, loc.PostalCode, loc.Name, loc.StreetNumber, loc.StreetName, loc.Neighborhood, loc.County), @SearchTerm)
 					    )
                     AND ((@Neighborhood IS NULL) OR loc.Neighborhood IN (SELECT value COLLATE Latin1_General_100_CI_AI FROM STRING_SPLIT(@Neighborhood, ',') WHERE RTRIM(value) <> ''))                    
@@ -80,10 +96,12 @@ namespace AfterSchoolLibrary.Helpers
                     AND ((@IsVirtualProgram IS NULL) OR ap.IsVirtualProgram = @IsVirtualProgram)
                     AND ((@IsOpenDuringCovid IS NULL) OR ap.IsOpenDuringCovid = @IsOpenDuringCovid)
                     AND ((@Gender IS NULL) OR ap.GenderRestriction In (SELECT value FROM STRING_SPLIT(@Gender, ',') WHERE RTRIM(value) <> ''))
-                    AND ((@SpecialNeeds IS NULL) OR specialNeeds.Value In (SELECT value FROM STRING_SPLIT(@SpecialNeeds, ',') WHERE RTRIM(value) <> ''))
-                    AND ((@Services IS NULL) OR servicesOffered.Value In (SELECT value FROM STRING_SPLIT(@Services, ',') WHERE RTRIM(value) <> ''))
-					AND ((@Timing IS NULL) OR timing.Value In (SELECT value FROM STRING_SPLIT(@Timing, ',') WHERE RTRIM(value) <> ''))
-                    AND ((@PricingOptions IS NULL) OR pricingOptions.Value In (SELECT value FROM STRING_SPLIT(@PricingOptions, ',') WHERE RTRIM(value) <> ''))
+                    AND ( -- filter AccountProperties
+						((@Services IS NULL) OR (properties.AccountPropertyTypeId = 9 AND properties.Value In (SELECT value FROM STRING_SPLIT(@Services, ',') WHERE RTRIM(value) <> '')))
+						AND ((@Timing IS NULL) OR (properties.AccountPropertyTypeId = 10 AND properties.Value In (SELECT value FROM STRING_SPLIT(@Timing, ',') WHERE RTRIM(value) <> '')))
+						AND ((@PricingOptions IS NULL) OR (properties.AccountPropertyTypeId =  11 AND properties.Value In (SELECT value FROM STRING_SPLIT(@PricingOptions, ',') WHERE RTRIM(value) <> '')))
+						AND ((@SpecialNeeds IS NULL) OR (properties.AccountPropertyTypeId = 17 AND properties.Value In (SELECT value FROM STRING_SPLIT(@SpecialNeeds, ',') WHERE RTRIM(value) <> '')))						
+					) -- end filter AccountProperties
                     AND ((@Grades IS NULL) OR (s.value) BETWEEN ap.GradeLevelStart AND ap.GradeLevelEnd)
                     AND (
 	                        (@Age IS NULL) OR 
