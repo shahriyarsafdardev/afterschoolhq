@@ -103,8 +103,8 @@ namespace AfterSchoolLibraryTests.Tests
         public void CreateNewSubscriptionPlanTest()
         {
             var activity = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
-          
-            var accountPackage = AccountPackageFactory.Create(ActivityOwnerAccount, Package, msgs, dc);
+            var package = PackageFactory.CreateFreePackage(msgs, dc);
+            var accountPackage = AccountPackageFactory.Create(ActivityOwnerAccount, package, msgs, dc);
          
             var plan = SubscriptionPlanService.CreateNewSubscriptionPlan(
                                PlanOwner, 
