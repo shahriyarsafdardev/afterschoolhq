@@ -9,6 +9,12 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content modal-min-width" style="border-radius: 10px; box-shadow: 0 2px 12px 3px rgb(0 0 0 / 30%);">
             <div class="modal-body">
+                <div class="close-icon" onclick="return closePaymentModal();">
+                    <a class="close" style="padding: 2px; font-size: 28px; cursor: pointer !important;">
+                        <span aria-hidden="true">&times;</span>
+                    </a>
+                </div>
+
                 <div style="margin: 30px 0 38px; font-size: 19px; font-weight: bold; letter-spacing: 1px; text-align: center; color: #4a4a4a; overflow-wrap: break-word;">
 
                     <div class="col-md-12">
@@ -46,7 +52,7 @@
                                             <td>
                                                 @if (!account.HasStripeConnectedAccount)
                                                 {
-                                                    Session["activityUid"] = activityUid;                                                    
+                                                    Session["activityUid"] = activityUid;
                                                     var redirectUri = Server.UrlEncode($"{AfterSchoolLibrary.Helpers.Utilities.BaseUrl()}/org/account/oauthstripe/");
                                                     var email = currentUser.Email.IsEmail() ? Server.UrlEncode(currentUser.Email) : Server.UrlEncode(account.Email);
                                                     var website = Server.UrlEncode(account.ShortHomePageUrl);
@@ -137,3 +143,11 @@
         </div>
     </div>
 </div>
+
+<script type="text/javascript">
+    function closePaymentModal() {
+        $('#modal-payment-confirmation').modal('hide');
+        $('#modal-payment-confirmation-accountView').addClass('hide');
+        return false;
+    }
+</script>

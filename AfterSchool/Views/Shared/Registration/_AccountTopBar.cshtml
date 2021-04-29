@@ -105,10 +105,6 @@
         padding: 28px 20px;
     }
 
-        .popover.popover-active {
-            background-color: rgba(255, 255, 255, 1);
-        }
-
     .drop {
         position: absolute;
         top: 0;
@@ -119,12 +115,11 @@
 
     .popover-menu {
         border-radius: 4px;
-        border-top: 2px solid #49c5b6;
+        border: 2px solid #49c5b6;
         background: #fff;
         list-style-type: none;
-        margin: 8px 0;
+        margin: 180px 33px;
         min-width: 100%;
-        /* padding: 0.5rem 0; */
         padding: 0px;
         position: absolute;
         top: 100%;
@@ -157,32 +152,44 @@
         white-space: nowrap;
     }
 
-        .popover-menu-item button {
-            border: 0;
-            border-radius: 0;
-            width: 100%;
-            text-align: left;
-        }
-
-            .popover-menu-item button:hover,
-            .popover-menu-item button:focus {
-                background-color: #f1f1f1;
-            }
-
     .popover-active .popover-menu {
         transform: scale(1);
         display: block;
         opacity: 1;
     }
 
+    .blur-bg {
+        display: none;
+        background-color: White;
+        background-repeat: no-repeat;
+        height: 100%;
+        opacity: 0.5;
+        position: fixed;
+        top: 0;
+        width: 100%;
+        z-index: 1000000;
+    }
 
-    button {
-        border-color: #ccc;
-        border-radius: 4px;
-        cursor: pointer;
-        padding: 0.6rem 1rem;
+    .popover-dropdown {
+        float: left;
+        margin: 2px 0 2px 0;
+        padding: 2px 12px 0;
+        border-radius: 5.7px;
+        border: solid 1px #ffad49;
+        background-color: #4a4a4a;
+        width: 105px;
+        height: 35px;
+    }
+
+    .full-z-index {
+        z-index: 1000001;
+    }
+
+    .hidden-overflow {
+        overflow: hidden;
     }
 </style>
+<div class="blur-bg"></div>
 
 <div class="reg-login-bar">
     @if (Model.IsNotEmpty() && Model.ID.HasValue)
@@ -190,9 +197,9 @@
     <div class="row">
         <div class="col-md-6 col-sm-6 col-xs-12">
 
-            @*@if (isAccount && isAccountAndLoggedInUserIsOwner && progressPercentage != 100)
-            {
-                <div class="dropdown" style="float: left;  margin: 2px 0 2px 0; padding: 2px 12px 0; border-radius: 5.7px; border: solid 1px #ffad49; background-color: #4a4a4a; width: 105px; height: 35px;">
+            @if (isAccount && isAccountAndLoggedInUserIsOwner && progressPercentage != 100)
+            {                
+                <div id="popover-container" class="dropdown popover-dropdown">
                     <a id="myDropdown" class="dropdown-toggle dropdown-label" onclick="return toggleList();">
                         Finish Setup
                         <div class="progress" style="height: 4px; margin-bottom: 0;">
@@ -242,8 +249,19 @@
                             </a>
                         </li>
                     </ul>
+
+                    <ul class="popover-menu" style="z-index: 10000000; background: white;">
+                        <li class="popover-menu-item" style="padding: 10px;">
+                        You can complete remaining process from here.
+                            <br />
+                            <br />
+                            <button class="btn btn-success btn-xs" style="" onclick="return popOverButton()">Got It.</button>
+                            <br />
+                            <div class="clearfix"></div>
+                        </li>                    
+                    </ul>
                 </div>
-            }*@
+            }
 
             @if (registrationStartPage.IsNotEmpty())
             {
@@ -263,14 +281,6 @@
                 }
             }
 
-        </div>
-
-        <div class="popover popover-active">
-            <button class="popover-trigger">plus</button>
-            <ul class="popover-menu">
-                <li class="popover-menu-item"><button>Action with a long title</button></li>
-                <li class="popover-menu-item"><button>Delete</button></li>
-            </ul>
         </div>
 
         @if (!isDuringProfileSetup)
@@ -362,28 +372,19 @@
 @{ Html.RenderPartial("~/Views/Shared/Registration/_LoginModal.cshtml", null, new ViewDataDictionary() { { "ReturnUrl", ViewData["LoginReturnUrl"] } }); }
 
 <script type="text/javascript">
-    PageEvent.add(PageEvent.AFTER_INIT, function () {
-        var popovers = document.querySelectorAll('.popover');
-        var popoverTriggers = document.querySelectorAll('.popover-trigger');
-
-        for (var i = 0; i < popoverTriggers.length; i++) {
-            popoverTriggers[i].addEventListener('click', function (event) {
-                closeAllOthers(this.parentElement);
-                this.parentElement.classList.toggle('popover-active');
-            });
+    function popOverButton() {
+        if ($("#popover-container").hasClass("popover")) {
+            $("#popover-container").removeClass("popover popover-active full-z-index");
+            $('.blur-bg').hide()
+            $('body').removeClass('hidden-overflow');
         }
-        $('.popover-active').click(function () {
-            $('body').toggleClass('drop');
-        });
-        function closeAllOthers(ignore) {
-            for (var i = 0; i < popovers.length; i++) {
-                if (popovers[i] !== ignore) {
-                    popovers[i].classList.remove('popover-active');
-
-                }
-            }
+        else {
+            $("#popover-container").addClass("popover popover-active full-z-index");
+            $('.blur-bg').show();
+            $('body').addClass('hidden-overflow');
+            toggleList();
         }
-    });
+    }
 
     function toggleList() {
         var itm = $('#myDropdown');
@@ -400,7 +401,8 @@
         } else if (item == '@GettingStartedOptions.ValidateEmail') {
            javascript:AccountSetup.sendVerificationEmail();
         } else if (item == '@GettingStartedOptions.AcceptPayments') {
-           location.href = '@Url.Action("paymentsoptions", "account", new { area = "org" })';
+            hideLoader();
+            LoadPaymentModal();
         }
     }
 </script>
