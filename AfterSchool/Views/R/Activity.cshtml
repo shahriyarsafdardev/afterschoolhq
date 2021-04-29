@@ -37,8 +37,7 @@
             showLocation = true;
         }
     }
-
-    //.. verify this logic, it's for who can see this email and payment models.
+    
     var isAccountAndLoggedInUserIsOwner = Model.IsNotEmpty() &&
         Model.OwnerAccount.IsNotEmpty() &&
         SessionVariables.CurrentAccount.IsNotEmpty() &&
