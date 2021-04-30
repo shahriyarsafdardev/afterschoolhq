@@ -34,8 +34,6 @@
 
                 <form class="form form-horizontal" method="post" action="@Url.Action("programinfo", "onboarding")">
 
-                    <input id="hdnClientTimeZone" name="timeZone" type="hidden" />
-
                     @{ Html.RenderPartial("~/Views/Shared/_Loaders.cshtml",
                              new ViewDataDictionary() {
                                { "count", 6 },
@@ -97,7 +95,7 @@
                         <label class="onboarding-lable"> TIMEZONE </label>
                         <div class="clearfix"></div>
                         <div style="padding: 0;">
-                            <select id="select-program-timezone" class="form-control onboarding-input" name="timezone" style="height: 44px;" required>
+                            <select id="select-program-timezone" class="form-control onboarding-input" name="timeZone" style="height: 44px;" required>
                                 @foreach (var zone in new string[] { "Eastern - EST", "Central - CST", "Mountain - MST", "Pacific - PST", "Alaska - AKST", "Hawaii - HAST" })
                                 {
                                     var selected = "";

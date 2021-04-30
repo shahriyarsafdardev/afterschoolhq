@@ -439,12 +439,6 @@
         PageEvent.add(PageEvent.AFTER_INIT, function () {           
             signupAccountSearch.keyup(function (e) {
                 var searchLength = signupAccountSearch.val().length;
-                if (searchLength <= 2) {
-                    signupAccountSearchList.html('');
-                    signupAccountSearchList.addClass('hide');
-                    btnContinue.attr('disabled', 'disabled');
-                    return false;
-                }
 
                 if (searchLength >= 40) {
                     spanRemainingCharCounter.text(50).css('color', 'red');
@@ -461,10 +455,17 @@
                 } else if (searchLength > 50) {
                     e.preventDefault();
                     e.stopPropagation();
-                    this.value = this.value.substring(0, 50);                    
+                    this.value = this.value.substring(0, 50);
                     spanRemainingCharCounter.text(0);
                     return false;
                 }
+
+                if (searchLength <= 2) {
+                    signupAccountSearchList.html('');
+                    signupAccountSearchList.addClass('hide');
+                    btnContinue.attr('disabled', 'disabled');
+                    return false;
+                }                
 
                 signupAccountSearchList.removeClass('hide');
                 signupAccountSearchList.html('');
