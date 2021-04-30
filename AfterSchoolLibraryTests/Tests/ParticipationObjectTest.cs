@@ -16,116 +16,84 @@ namespace AfterSchoolLibraryTests.Tests
         private Account ActivityOwnerAccount { get; }
         private Account PlanOwner { get; }
 
+        private ActivityGroup ActivityGroup { get; }
+        private ActivitySchedule Schedule { get; }
+        private Activity Activity { get; }
+        private List<ActivityInstance> Instances { get; }
+        private Location Location { get; }
+        private Package Package { get; }
+        private AccountPackage AccountPackage { get; }
+
         public PartcipationObjectTest(ITestOutputHelper output) : base(output)
         {
             LoggedInUser = WebUserFactory.Create(msgs, dc);
             AccountOwner = WebUserFactory.Create(msgs, dc);
             ActivityOwnerAccount = AccountFactory.Create(AccountOwner, msgs, dc);
             PlanOwner = AccountFactory.CreateAccount(AccountOwner, msgs, dc);
+            ActivityGroup = ActivityGroupFactory.Create(ActivityOwnerAccount, ActivityGroupType.Session, msgs, dc);
+            Schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, ActivityGroup, DateTime.UtcNow.FirstDateOfMonth(), msgs, dc);
+            Location = LocationFactory.Create(ActivityOwnerAccount, msgs, dc);
+            Activity = ActivityFactory.Create(ActivityOwnerAccount, Schedule, ActivityGroup, Location, msgs, dc);
+            Instances = new List<ActivityInstance>();
+            Package = PackageFactory.Create(100, 1200, msgs, dc);
+            AccountPackage = AccountPackageFactory.Create(ActivityOwnerAccount, Package, msgs, dc);
+            createInstances();
         }
 
-        [Fact]
-        public void GetNumberOfClassesInCurrentCycleTest()
-        {            
-
-            var activityGroup = ActivityGroupFactory.Create(ActivityOwnerAccount, ActivityGroupType.Session, msgs, dc);
-            var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount,activityGroup, DateTime.UtcNow.FirstDateOfMonth(), msgs, dc);
-            var location = LocationFactory.Create(ActivityOwnerAccount, msgs, dc);
-            var activity = ActivityFactory.Create(ActivityOwnerAccount, schedule, activityGroup, location, msgs, dc);
-            var instances = new List<ActivityInstance>();
+        private void createInstances()
+        {
             var firstDayOfMonth = DateTime.UtcNow.FirstDateOfMonth();
-            var lastDateOfMonth = DateTime.UtcNow.LastDateOfMonth();
-            var instance = Factories.ActivityInstanceFactory.Create(activity, schedule, msgs, dc);
-           
-            for (var i= firstDayOfMonth ; i < lastDateOfMonth; i=i.AddDays(1))
+            var lastDateOfMonth = DateTime.UtcNow.AddMonths(2).LastDateOfMonth();
+            for (var i = firstDayOfMonth; i < lastDateOfMonth; i = i.AddDays(1))
             {
-                instances.Add(Factories.ActivityInstanceFactory.Create(
-                    activityGroup,
-                    schedule,
+                Instances.Add(Factories.ActivityInstanceFactory.Create(
+                    ActivityGroup,
+                    Schedule,
                     i,
                     i.AddHours(2),
                     msgs,
                     dc));
             }
-                
-            var period = RegistrationPeriodFactory.Create(ActivityOwnerAccount, msgs, dc);
-            var package = PackageFactory.Create(100,1200,msgs, dc);
-            var accountPackage = AccountPackageFactory.Create(ActivityOwnerAccount, package, msgs, dc); 
+        }
+
+        [Fact]
+        public void GetNumberOfClassesInCurrentCycleTest()
+        {     
             
-            ParticipationObject participationObject = new ParticipationObject(activity, msgs, dc);
+            var firstDayOfMonth = DateTime.UtcNow.FirstDateOfMonth();            
+            var remainingDays = DateTime.UtcNow.LastDateOfMonth().Day - firstDayOfMonth.Day;
+
+            ParticipationObject participationObject = new ParticipationObject(Activity, msgs, dc);
             var classes = participationObject.GetNumberOfClassesInCurrentCycle(BillingPeriodType.Month, msgs, dc);
 
             Assert.True(classes.IsNotEmpty());
+            Assert.True(classes.Equals(remainingDays));
 
         }
         
         [Fact]
         public void GetNumberOfRemainingClassesInNextCycleTest()
         {
-            var activityGroup = ActivityGroupFactory.Create(ActivityOwnerAccount, ActivityGroupType.Session, msgs, dc);
-            var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, activityGroup, DateTime.UtcNow.FirstDateOfMonth(), msgs, dc);
-            var location = LocationFactory.Create(ActivityOwnerAccount, msgs, dc);
-            var activity = ActivityFactory.Create(ActivityOwnerAccount, schedule, activityGroup, location, msgs, dc);
-            var instances = new List<ActivityInstance>();
-            var firstDayOfMonth = DateTime.UtcNow.FirstDateOfMonth();
-            var lastDateOfMonth = DateTime.UtcNow.LastDateOfMonth();            
-          
-            for (var i = firstDayOfMonth; i < lastDateOfMonth; i = i.AddDays(1))
-            {
-                instances.Add(Factories.ActivityInstanceFactory.Create(
-                    activityGroup,
-                    schedule,
-                    i,
-                    i.AddHours(2),
-                    msgs,
-                    dc));
-            }
-
-            var period = RegistrationPeriodFactory.Create(ActivityOwnerAccount, msgs, dc);
-            var package = PackageFactory.Create(100, 1200, msgs, dc);
-            var accountPackage = AccountPackageFactory.Create(ActivityOwnerAccount, package, msgs, dc);
-
-            ParticipationObject participationObject = new ParticipationObject(activity, msgs, dc);
-
+            
+            var remainingDays = DateTime.UtcNow.AddMonths(1).LastDateOfMonth().Day - DateTime.UtcNow.AddMonths(1).FirstDateOfMonth().Day;
+            
+            ParticipationObject participationObject = new ParticipationObject(Activity, msgs, dc);
             var classes = participationObject.GetNumberOfRemainingClassesInNextCycle(BillingPeriodType.Month, msgs, dc);
 
             Assert.True(classes.IsNotEmpty());
-            Assert.True(msgs.HasNoErrors());
-
+            Assert.True(classes.Equals(remainingDays));
         }  
         
         [Fact]
         public void GetNumberOfRemainingClassesInCurrentCycleTest()
         {
-            var activityGroup = ActivityGroupFactory.Create(ActivityOwnerAccount, ActivityGroupType.Session, msgs, dc);
-            var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, activityGroup, DateTime.UtcNow.FirstDateOfMonth(), msgs, dc);
-            var location = LocationFactory.Create(ActivityOwnerAccount, msgs, dc);
-            var activity = ActivityFactory.Create(ActivityOwnerAccount, schedule, activityGroup, location, msgs, dc);
-            var instances = new List<ActivityInstance>();
-            var firstDayOfMonth = DateTime.UtcNow.FirstDateOfMonth();
-            var lastDateOfMonth = DateTime.UtcNow.LastDateOfMonth();
+            var remainingDays = DateTime.UtcNow.LastDateOfMonth().Day - DateTime.UtcNow.Day;
             
-            for (var i = firstDayOfMonth; i < lastDateOfMonth; i = i.AddDays(1))
-            {
-                instances.Add(Factories.ActivityInstanceFactory.Create(
-                    activityGroup,
-                    schedule,
-                    i,
-                    i.AddHours(2),
-                    msgs,
-                    dc));
-            }
-
-            var period = RegistrationPeriodFactory.Create(ActivityOwnerAccount, msgs, dc);
-            var package = PackageFactory.Create(100, 1200, msgs, dc);
-            var accountPackage = AccountPackageFactory.Create(ActivityOwnerAccount, package, msgs, dc);
-
-            ParticipationObject participationObject = new ParticipationObject(activity, msgs, dc);
+            ParticipationObject participationObject = new ParticipationObject(Activity, msgs, dc);
             var classes = participationObject.GetNumberOfRemainingClassesInCurrentCycle(BillingPeriodType.Month, msgs, dc);
-
+            
             Assert.True(classes.IsNotEmpty());
-            Assert.True(msgs.HasNoErrors());
-
+            Assert.True(classes.Equals(remainingDays));
         }
     }
 }
