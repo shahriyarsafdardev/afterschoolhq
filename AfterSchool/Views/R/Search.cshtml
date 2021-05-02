@@ -698,11 +698,14 @@
             txtZip.val('');
             //..clear web link and hide clear filter link
             WebPage.addHash('');
-            $('#clear-filters').hide();
+            $('#clear-filters').hide();            
 
             //..refresh accounts
             if (isMobile) {
                 mobileFilter();
+                $('#txtSearch-mobile').val('');
+            } else {
+                $('#txtSearch').val('');
             }
 
             resetFlags();

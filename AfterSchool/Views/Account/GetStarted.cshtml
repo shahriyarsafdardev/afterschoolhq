@@ -47,7 +47,7 @@
                 </div>
 
                 <div>
-                    <form class="form-horizontal" id="signup-form" method="post" action="@Url.Action("getstarted", "account")">
+                    <form class="form-horizontal" id="signup-form" method="post" action="@Url.Action("getstarted", "account")" onkeydown="return checkAndPostSignupForm(event, '@Json.Encode(showStep1)')">
 
                         @if (showStep1)
                         {
@@ -203,6 +203,19 @@
     </div>
 </div>
 
+
+@if (participationObject.IsActivityGroup() && participationObject.GetActivityGroup().ActivityGroupTypeId == ActivityGroupType.Session)
+{
+    Html.RenderPartial(
+        "~/Views/Shared/Registration/_BrowseCart.cshtml",
+        participationObject,
+        new ViewDataDictionary()
+        {
+            { "IsDuringCheckout", true }
+        }
+    );
+}
+
 <script>
 
     function sendAccountConfirmation(email) {
@@ -272,16 +285,12 @@
             );
         });
     });
-</script>
 
-@if (participationObject.IsActivityGroup() && participationObject.GetActivityGroup().ActivityGroupTypeId == ActivityGroupType.Session)
-{
-    Html.RenderPartial(
-        "~/Views/Shared/Registration/_BrowseCart.cshtml",
-        participationObject,
-        new ViewDataDictionary()
-        {
-            { "IsDuringCheckout", true }
+    function checkAndPostSignupForm(event, isFirstStep) {        
+        if (isFirstStep && event.keyCode == 13) {
+            event.preventDefault();            
+            $('#btn-check-email').click();            
+            return false;
         }
-    );
-}
+    }
+</script>
