@@ -29,7 +29,7 @@
                             <option value="">Select...</option>
                             @foreach (var instance in schedule.GetInSessionInstances().DistinctBy(instance => instance.ID))
                             {
-                                if (instance.StartDateTime.HasValue && instance.StartDateTime.Value.AddHours(-1) <= account.ConvertToAccountTimeZone(DateTime.Now))
+                                if (instance.StartDateTime.HasValue && account.ConvertToAccountTimeZone(instance.StartDateTime.Value.AddHours(-1).ToUniversalTime()) <= account.ConvertToAccountTimeZone(DateTime.UtcNow))
                                 {
                                     <option value="@instance.ID" @(Model.ActivityInstanceId == instance.ID ? " selected=\"selected\" " : "")>
                                         @instance.StartDateTime.ToShortTimeString(), @instance.StartDateTime.Value.ToLongDateString()
