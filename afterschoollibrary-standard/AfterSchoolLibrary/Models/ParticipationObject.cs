@@ -595,6 +595,25 @@ namespace AfterSchoolLibrary.Models
             return true;
         }
 
+        public ObjectType GetWebSessionObjectType()
+        {
+            switch (ObjectType)
+            {
+                case ParticipationObjectType.AccountActivityGroup:
+                    return global::ObjectType.AccountActivityGroup;
+
+                case ParticipationObjectType.Activity:
+                    return global::ObjectType.Activity;
+
+                case ParticipationObjectType.ActivityGroup:
+                    return global::ObjectType.ActivityGroup;
+
+                default:
+                    return global::ObjectType.NotSet;
+            }
+                
+        }
+
         #endregion
 
         #region GetObjects

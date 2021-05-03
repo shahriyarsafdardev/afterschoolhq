@@ -63,10 +63,7 @@ namespace AfterSchool.Controllers
                     if (directoryAccount.IsNotEmpty() && directoryAccount.AccountTypeId.In(new List<AccountType>() { AccountType.Directory, AccountType.SchoolDistrict }))
                     {
                         regStartPageAccount = directoryAccount;
-                    }
-
-                    WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, webSessionId: SessionVariables.WebSession.ID.Value, actionType: WebSessionActionType.Navigated, objectType: ObjectType.DirectoryAccount,
-                         objectId: account.ID, objectText: account.Name, indirectObjectId: directoryAccount.ID, indirectObjectText: directoryAccount.Name);                
+                    }              
                 }
 
                 if (SessionVariables.RegistrationStartPageAccount.IsEmpty() || SessionVariables.RegistrationStartPageAccount.AccountTypeId != AccountType.Directory)
@@ -99,12 +96,32 @@ namespace AfterSchool.Controllers
                             ViewBag.Website = profile.Website;
                     }
 
-                    WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, SessionVariables.WebSession.ID.Value, Id: account.ID, text: account.Name, actionType: WebSessionActionType.Viewed, objectType: ObjectType.DirectoryAccount);
+                    // LOG: Someone Viewed Directory Account DirectoryName
+                    WebSessionUtilities.LogActivity(
+                        webSessionId: SessionVariables.WebSession.ID.Value,
+                        actor: SessionVariables.CurrentUser,
+                        actionType: WebSessionActionType.Viewed,
+                        objectType: ObjectType.DirectoryAccount,
+                        objectId: account.ID, 
+                        objectText: account.Name
+                    );
+
                     return View("search");
                 }
 
                 if (dir.IsEmpty())
-                    WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, webSessionId: SessionVariables.WebSession.ID.Value, Id: account.ID, text: account.Name, actionType: WebSessionActionType.Viewed, objectType: ObjectType.Account);
+                {
+                    // LOG: Somone Viewed Account AccountName
+                    WebSessionUtilities.LogActivity(
+                       actor: SessionVariables.CurrentUser,
+                       webSessionId: SessionVariables.WebSession.ID.Value,
+                       objectId: account.ID,
+                       objectText: account.Name,
+                       actionType: WebSessionActionType.Viewed,
+                       objectType: ObjectType.Account
+                    );
+
+                }
 
                 if (profile.IsEmpty())
                     return Redirect(account.BrowseUrl);
@@ -207,7 +224,15 @@ namespace AfterSchool.Controllers
                 regWillOpen = participationObjects.Where(po => po.RegistrationPeriod.WillOpen(account, msgs)).ToList();
                 regClosed = participationObjects.Where(po => po.NotIn(regWillOpen) && po.RegistrationPeriod.IsClosed(account, msgs)).ToList();
 
-                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, webSessionId: SessionVariables.WebSession.ID.Value, Id: account.ID, text: account.Name, actionType: WebSessionActionType.Browsed, objectType: ObjectType.Account);
+                // LOG: Someone Browsed Account AccountName's Programs
+                WebSessionUtilities.LogActivity(
+                    webSessionId: SessionVariables.WebSession.ID.Value,
+                    actor: SessionVariables.CurrentUser,
+                    actionType: WebSessionActionType.Browsed,
+                    objectType: ObjectType.Account,
+                    objectId: account.ID,
+                    objectText: account.Name
+                 );
             }
             else
             {
@@ -333,8 +358,6 @@ namespace AfterSchool.Controllers
                 if (activity.IsEmpty())
                     return RedirectToProfile(account.UniqueName, "Activity not found", MessageType.Error);
 
-                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, webSessionId: SessionVariables.WebSession.ID.Value, Id: activity.ID, text: activity.Name, actionType: WebSessionActionType.Viewed, objectType: ObjectType.Activity);
-
                 participationObject = activity.GetParticipationObject(msgs);
 
                 if (activity.ActivityGroupId.HasValue)
@@ -366,8 +389,18 @@ namespace AfterSchool.Controllers
             ViewBag.Session = session;
             ViewBag.AccountProfile = accountProfile;
 
-            WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, webSessionId: SessionVariables.WebSession.ID.Value, actionType: WebSessionActionType.Navigated, objectType: ObjectType.ParticipationObject,
-                objectId: participationObject.ObjectID.Value, objectText: activityname);
+            // LOG: Someone Viewed ParticipationObjectType ParticipationObjectName by Account AccountName
+            WebSessionUtilities.LogActivity(
+                webSessionId: SessionVariables.WebSession.ID.Value,
+                actor: SessionVariables.CurrentUser,
+                actionType: WebSessionActionType.Viewed,
+                objectType: participationObject.GetWebSessionObjectType(),
+                objectId: participationObject.ObjectID.Value, 
+                objectText: participationObject.Name,
+                indirectObjectType: ObjectType.Account,
+                indirectObjectId: participationObject.OwnerAccount.ID.Value,
+                indirectObjectText: participationObject.OwnerAccount.Name
+            );
 
             return View(participationObject);
         }
@@ -407,8 +440,18 @@ namespace AfterSchool.Controllers
             ViewBag.CanRegisterFor = canRegisterFor;
             ViewBag.AccountProfile = account.GetAccountProfile(msgs);
 
-            WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, webSessionId: SessionVariables.WebSession.ID.Value, actionType: WebSessionActionType.Navigated, objectType: ObjectType.ParticipationObject,
-                objectId: participationObject.ObjectID.Value, objectText: sessionname);
+            // LOG: Somone Viewed Session SessionName by Account AccountName
+            WebSessionUtilities.LogActivity(
+                actor: SessionVariables.CurrentUser, 
+                webSessionId: SessionVariables.WebSession.ID.Value,
+                actionType: WebSessionActionType.Viewed, 
+                objectType: participationObject.GetWebSessionObjectType(),
+                objectId: participationObject.ObjectID.Value, 
+                objectText: sessionname,
+                indirectObjectType: ObjectType.Account,
+                indirectObjectId: participationObject.OwnerAccount.ID.Value,
+                indirectObjectText: participationObject.OwnerAccount.Name
+             );
 
             return View("activity", participationObject);
         }
@@ -459,8 +502,18 @@ namespace AfterSchool.Controllers
             ViewBag.Account = account;
             ViewBag.AccountProfile = account.GetAccountProfile(msgs);
 
-            WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, webSessionId: SessionVariables.WebSession.ID.Value, actionType: WebSessionActionType.Navigated, objectType: ObjectType.ParticipationObject,
-                objectId: participationObject.ObjectID.Value, objectText: leaguename);
+            // LOG: Somone Viewed League LeagueName by Account AccountName
+            WebSessionUtilities.LogActivity(
+                actor: SessionVariables.CurrentUser,
+                webSessionId: SessionVariables.WebSession.ID.Value,
+                actionType: WebSessionActionType.Viewed,
+                objectType: participationObject.GetWebSessionObjectType(),
+                objectId: participationObject.ObjectID.Value,
+                objectText: leaguename,
+                indirectObjectType: ObjectType.Account,
+                indirectObjectId: participationObject.OwnerAccount.ID.Value,
+                indirectObjectText: participationObject.OwnerAccount.Name
+             );
 
             return View("activity", participationObject);
         }
@@ -635,9 +688,6 @@ namespace AfterSchool.Controllers
         {
             SetRegistrationStartPage(account);
 
-            WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, webSessionId: SessionVariables.WebSession.ID.Value, actionType: WebSessionActionType.BeganRegistration, objectType: ObjectType.ParticipationObject,
-                objectId: participationObject.ObjectID.Value, objectText: participationObject.Name);
-
             if (participationObject.IsEmpty())
                 return RedirectToProfile(account.UniqueName, "Activity not found", MessageType.Error);
 
@@ -658,7 +708,23 @@ namespace AfterSchool.Controllers
             var masterRegistrant = SessionVariables.CurrentUser.GetMasterRegistrant();
 
             if (masterRegistrant.IsParentOrGuardian)
+            {
+                // LOG: Somone Began Registration for ParticipationObjectType ParticipationObjectName by Account AccountName
+                WebSessionUtilities.LogActivity(
+                    actor: SessionVariables.CurrentUser,
+                    webSessionId: SessionVariables.WebSession.ID.Value,
+                    actionType: WebSessionActionType.Viewed,
+                    objectType: participationObject.GetWebSessionObjectType(),
+                    objectId: participationObject.ObjectID.Value,
+                    objectText: participationObject.Name,
+                    indirectObjectType: ObjectType.Account,
+                    indirectObjectId: participationObject.OwnerAccount.ID.Value,
+                    indirectObjectText: participationObject.OwnerAccount.Name
+                 );
+
                 return RedirectToAction("register", "account", new { area = "", regaccount = account.Uid });
+
+            }
 
             return RedirectToAction("registerstudent", "account", new { area = "", regaccount = account.Uid });
         }

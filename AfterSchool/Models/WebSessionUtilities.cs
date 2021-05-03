@@ -59,82 +59,6 @@ namespace AfterSchool.Models
             return session;
         }
 
-        public static void LogActivity(WebUser actor, int webSessionId, WebSessionActionType actionType = WebSessionActionType.NotSet)
-        {
-            SaveLog(actorName: (actor.IsNotEmpty() ? actor.FirstName  : "Someone"),
-                    actionStringFormat: "{actor} {action}",
-                    actionString: $"{actor.FirstName} {actionType}",
-                    webSessionId: webSessionId,
-                    actorId: actor.IsNotEmpty() ? actor.ID : null,
-                    accountId: SessionVariables.CurrentAccount.IsNotEmpty() ? SessionVariables.CurrentAccount.ID : null,
-                    actionType: actionType,
-                    objectType: ObjectType.NotSet,
-                    objectId: null,
-                    indirectObjectId: null);
-        }
-
-        public static void LogActivity(WebUser actor, int webSessionId, int? Id = (int?)null, string text = "", WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet)
-        {
-            string actionString = null, actionStringFormat = null, actorName = (actor.IsNotEmpty() ? actor.FirstName : "Someone");
-
-            switch (objectType)
-            {
-                case ObjectType.Activity:
-                    actionStringFormat = "{actor} {action} Activity {objecttype}";
-                    actionString = $"{actorName} {actionType} Activity {text}";
-                    break;
-
-                case ObjectType.Account:
-                    actionStringFormat = "{actor} {action} Account {objecttype}";
-                    actionString = $"{actorName} {actionType} Account {text}";
-                    break;
-
-                case ObjectType.Registrant:
-                    actionStringFormat = "{actor} {action} Registrant {objecttype}";
-                    actionString = $"{actorName} {actionType} Registrant {text}";
-                    break;
-
-                case ObjectType.DirectoryAccount:
-                    actionStringFormat = "{actor} {action} Directory Account {objecttype}";
-                    actionString = $"{actorName} {actionType} Directory Account {text}";
-                    break;
-
-                case ObjectType.ContactList:
-                    actionStringFormat = "{actor} Tried to {action} Account {objecttype}";
-                    actionString = $"{actorName} Tried to Contact Account {text}";
-                    break;
-
-                case ObjectType.WebUser:
-                    actionStringFormat = "{actor} Signed up";
-                    actionString = $"{actorName} Signed up";
-                    break;
-
-                case ObjectType.Registration:
-                    if (actionType == WebSessionActionType.Interested)
-                    {
-                        actionStringFormat = "{actor} Has Registered {action} For The Activity {objecttype}";
-                        actionString = $"{actorName} Has Registered Interest For The Activity {text}";
-                    }                    
-                    break;
-
-                default:
-                    actionStringFormat = "{actor} {action}";
-                    actionString = $"{actorName} {actionType}";
-                    break;
-            }
-
-            SaveLog(actorName: actorName,
-                    actionStringFormat: actionStringFormat,
-                    actionString: actionString,
-                    webSessionId: webSessionId,
-                    actorId: actor.IsNotEmpty() ? actor.ID : null,
-                    accountId: SessionVariables.CurrentAccount.IsNotEmpty() ? SessionVariables.CurrentAccount.ID : null,
-                    actionType: actionType,
-                    objectType: objectType,
-                    objectId: Id,
-                    indirectObjectId: null);
-        }
-
         public static void LogActivity(WebUser actor, int webSessionId, WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet, ObjectType indirectObjectType = ObjectType.NotSet,
             int? objectId = (int?)null, string objectText = "",
             int? indirectObjectId = (int?)null, string indirectObjectText = "")
@@ -142,13 +66,13 @@ namespace AfterSchool.Models
             //..actor	action		    Object		            ObjectType	        IndirectObjectId
             //..Bharat  Navigated to    FIRST SAMUEL CHURCH(W)  DirectoryAccount   ISYP
 
-            string actionString = null, actionStringFormat = null, actorName = (actor.IsNotEmpty() ? actor.FirstName : "Someone");
+            string actionString = null, actionStringFormat = null, actorName = (actor.IsNotEmpty() ? actor.FullName : "Someone");
 
-            var actionStringObject = WebSessionHelper.GetActionString(objectType, actorName, actionType, objectText, indirectObjectType, indirectObjectText);
+            var actionStringDict = AfterSchoolLibrary.Helpers.WebSessionHelper.GetActionString(objectType, actorName, actionType, objectText, indirectObjectType, indirectObjectText);
 
             SaveLog(actorName: (actor.IsNotEmpty() ? actor.FirstName : "Someone"),
-                actionStringFormat: actionStringObject.,
-                actionString: actionString,
+                actionStringFormat: actionStringDict.SingleOrDefault(kp => kp.Key == "ActionStringFormat").Value,
+                actionString: actionStringDict.SingleOrDefault(kp => kp.Key == "ActionString").Value,
                 webSessionId: webSessionId, 
                 actorId: actor.IsNotEmpty() ? actor.ID : null,
                 accountId: SessionVariables.CurrentAccount.IsNotEmpty() ? SessionVariables.CurrentAccount.ID : null,

@@ -608,7 +608,6 @@
     <Compile Include="Controllers\SitemapController.cs" />
     <Compile Include="Helpers\ActivitySetupHelper.cs" />
     <Compile Include="Helpers\RecaptchaHelper.cs" />
-    <Compile Include="Helpers\WebSessionHelper.cs" />
     <Compile Include="Models\ActionFilters\EnvironmentRestrictionAttribute.cs" />
     <Compile Include="Models\ActivityScheduleUI.cs" />
     <Compile Include="Models\AddressViewModel.cs" />

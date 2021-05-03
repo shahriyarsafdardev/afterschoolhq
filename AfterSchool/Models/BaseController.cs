@@ -80,6 +80,7 @@ namespace AfterSchool.Models
             }
         }
 
+        // Old code
         protected void UpdateSession(SessionActionType sat, int? accountId = null, int? activityId = null, int? webUserId = null, int? registrantId = null, int? registrationId = null, int? registrationPeriodId = null, int? activityGroupId = null, DatabaseConnection dc = null)
         {
             if (SessionVariables.VisitorSession.IsNotEmpty())

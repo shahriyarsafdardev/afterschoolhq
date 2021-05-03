@@ -196,7 +196,18 @@ namespace AfterSchool.Controllers
                             dc: adc);
 
                         if (user.IsNotEmpty() && amsgs.HasNoErrors())
-                            WebSessionUtilities.LogActivity(actor: user, webSessionId: SessionVariables.WebSession.ID.Value, Id: user.ID.Value, text: user.DisplayName, actionType: WebSessionActionType.Created, objectType: ObjectType.WebUser);                        
+                        {
+                            // LOG: WebUserName SignedUp
+                            WebSessionUtilities.LogActivity(
+                               webSessionId: SessionVariables.WebSession.ID.Value,
+                               actor: user,
+                               actionType: WebSessionActionType.SignedUp,
+                               objectType: ObjectType.WebUser,
+                               objectId: user.ID.Value, 
+                               objectText: user.DisplayName 
+                            );
+
+                        }
 
                         account = user.AddNewAccount(
                                orgName: model.OrgName,
@@ -206,7 +217,18 @@ namespace AfterSchool.Controllers
                                dc: adc);
 
                         if (account.IsNotEmpty() && amsgs.HasNoErrors())
-                            WebSessionUtilities.LogActivity(actor: user, webSessionId: SessionVariables.WebSession.ID.Value, Id: account.ID.Value, text: account.Name, actionType: WebSessionActionType.Created, objectType: ObjectType.Account);
+                        {
+                            // LOG: WebUserName Created Account Account
+                            WebSessionUtilities.LogActivity(
+                                webSessionId: SessionVariables.WebSession.ID.Value,
+                                actor: user,
+                                actionType: WebSessionActionType.Created,
+                                objectType: ObjectType.Account,
+                                objectId: account.ID.Value,
+                                objectText: account.Name
+                            );
+                        }
+                            
 
                         if (invitingAccount.IsNotEmpty())
                         {

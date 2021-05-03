@@ -79,7 +79,15 @@ namespace AfterSchool.Controllers
             if (msgs.HasNoErrors())
             {
                 if (user.IsNotEmpty())
-                    WebSessionUtilities.LogActivity(actor: user, webSessionId: SessionVariables.WebSession.ID.Value, actionType: WebSessionActionType.LoggedIn);
+                {
+                    // LOG: WebUserName LoggedIn
+                    WebSessionUtilities.LogActivity(
+                        webSessionId: SessionVariables.WebSession.ID.Value,
+                        actor: user,
+                        actionType: WebSessionActionType.LoggedIn
+                    );
+                }
+                    
 
                 // select account
                 if (SessionVariables.CurrentAccount.IsEmpty())
