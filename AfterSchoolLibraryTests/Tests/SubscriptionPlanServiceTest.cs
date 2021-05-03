@@ -12,12 +12,14 @@ namespace AfterSchoolLibraryTests.Tests
         private WebUser LoggedInUser { get; set; }
         private WebUser AccountOwner { get; set; }
         private Account PlanOwner { get; set; }
-
+        private Package Package { get; }
+        
         public SubscriptionPlanServiceTest(ITestOutputHelper output) : base(output)
         {
             LoggedInUser = WebUserFactory.Create(msgs, dc);
             AccountOwner = WebUserFactory.Create(msgs, dc);
             PlanOwner = AccountFactory.Create(AccountOwner, msgs, dc);
+            Package = PackageFactory.CreateFreePackage(msgs, dc);                         
         }
 
         [Fact]
@@ -90,5 +92,34 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.Equal(expectedResult, paymentPlan.CheckAndCancelPlan(registrantSubscriptionPlan, PlanOwner, msgs, dc));
         }
+
+        [Fact]
+        public void CreateNewSubscriptionPlanTest()
+        {
+            var activity = ActivityFactory.Create(PlanOwner, msgs, dc);            
+            var accountPackage = AccountPackageFactory.Create(PlanOwner, Package, msgs, dc);
+         
+            var plan = SubscriptionPlanService.CreateNewSubscriptionPlan(
+                               PlanOwner, 
+                               ParticipationObjectType.Activity,
+                               activity.ID.Value,
+                               100, 
+                               BillingPeriodType.Month,
+                               PlanPaymentStartType.OnCheckout, 
+                               null, 
+                               null, 
+                               true, 
+                               true, 
+                               false,
+                               false,
+                               true,
+                               LoggedInUser.ID.Value,
+                               msgs, 
+                               dc);
+
+            Assert.True(plan.ID.HasValue);
+            Assert.True(msgs.HasNoErrors());
+        }
+
     }
 }

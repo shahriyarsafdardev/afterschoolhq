@@ -946,9 +946,9 @@ namespace AfterSchoolLibrary.Models
             if (Schedule.IsNotEmpty() && Schedule.ID.HasValue)
             {
                 if (billingPeriodTypeId == BillingPeriodType.Month)
-                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now.FirstDateOfMonth(), DateTime.Now.LastDateOfMonth(), msgs).Count;
+                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now.FirstDateOfMonth(), DateTime.Now.LastDateOfMonth(), msgs,dc).Count;
                 else if (billingPeriodTypeId == BillingPeriodType.Week)
-                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now.FirstDateOfWeek(), DateTime.Now.LastDateOfWeek(), msgs).Count;
+                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now.FirstDateOfWeek(), DateTime.Now.LastDateOfWeek(), msgs,dc).Count;
             }
 
             return classes;
@@ -960,9 +960,9 @@ namespace AfterSchoolLibrary.Models
             if (Schedule.IsNotEmpty() && Schedule.ID.HasValue)
             {
                 if (billingPeriodTypeId == BillingPeriodType.Month)
-                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now, DateTime.Now.LastDateOfMonth(), msgs).Count;
+                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now, DateTime.Now.LastDateOfMonth(), msgs,dc).Count;
                 else if (billingPeriodTypeId == BillingPeriodType.Week)
-                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now, DateTime.Now.LastDateOfWeek(), msgs).Count;
+                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now, DateTime.Now.LastDateOfWeek(), msgs,dc).Count;
             }                
 
             return classes;
@@ -973,9 +973,9 @@ namespace AfterSchoolLibrary.Models
             if (Schedule.IsNotEmpty() && Schedule.ID.HasValue)
             {
                 if (billingPeriodTypeId == BillingPeriodType.Month)
-                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now.AddMonths(1).FirstDateOfMonth(), DateTime.Now.AddMonths(1).LastDateOfMonth(), msgs).Count;
+                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now.AddMonths(1).FirstDateOfMonth(), DateTime.Now.AddMonths(1).LastDateOfMonth(), msgs,dc).Count;
                 else if (billingPeriodTypeId == BillingPeriodType.Week)
-                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now.AddWeeks(1).FirstDateOfWeek(), DateTime.Now.AddWeeks(1).LastDateOfWeek(), msgs).Count;
+                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now.AddWeeks(1).FirstDateOfWeek(), DateTime.Now.AddWeeks(1).LastDateOfWeek(), msgs,dc).Count;
             }
 
             return 0;

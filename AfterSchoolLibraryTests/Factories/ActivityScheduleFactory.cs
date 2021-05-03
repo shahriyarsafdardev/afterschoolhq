@@ -20,6 +20,21 @@ namespace AfterSchoolLibraryTests.Factories
                 EndDate = DateTime.UtcNow.AddDays(35),
                 DailyStartTime = DateTime.UtcNow,
                 DailyEndTime = DateTime.UtcNow.AddHours(2),
+                AccountId =account.ID 
+                
+            };
+            msgs.AddRange(obj.Save(dc));
+            return obj;
+        }
+        
+        public static ActivitySchedule CreateIsClosing(Account account, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var obj = new ActivitySchedule()
+            {
+                Name = "Session 4 Schedule",
+                EndDate = DateTime.UtcNow,
+                DailyStartTime = DateTime.UtcNow,
+                DailyEndTime = DateTime.UtcNow.AddHours(2),
                 AccountId = account.ID               
             };
             msgs.AddRange(obj.Save(dc));
@@ -40,6 +55,27 @@ namespace AfterSchoolLibraryTests.Factories
                 EndDate = DateTime.UtcNow.AddMonths(2),
                 DailyStartTime = null,
                 DailyEndTime = null
+            };
+
+            msgs.AddRange(activitySchedule.Save(dc));
+            return activitySchedule;
+
+        }
+
+        public static ActivitySchedule Create(Account account, ActivityGroup activityGroup, DateTime startDate, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var activitySchedule = new ActivitySchedule()
+            {
+                Name = "Test Activity Schedule",
+                AccountId = account.ID.Value,
+                ActivityGroupId = activityGroup?.ID.Value,
+                ScheduleDetails = "Test Schedule Details",
+                RepeatsWeekly = false,
+                IsOngoing = true,
+                StartDate = startDate,
+                EndDate = DateTime.UtcNow.AddMonths(2),
+                DailyStartTime = DateTime.UtcNow,
+                DailyEndTime = DateTime.UtcNow.AddHours(2)
             };
 
             msgs.AddRange(activitySchedule.Save(dc));
