@@ -4,7 +4,7 @@
     var account = SessionVariables.CurrentAccount;
     var schedule = (ActivitySchedule)ViewData["schedule"];
     var controller = (string)ViewData["controller"];
-    var isTechSupport = (bool)SessionVariables.LoggedInUser.IsTechSupport(SessionVariables.CurrentAccount);    
+    var isTechSupport = (bool)SessionVariables.LoggedInUser.IsTechSupport(SessionVariables.CurrentAccount);
 }
 
 <form method="post" action="@Url.Action("trackattendance", controller, new { id = Model.ActivityUid, att = Model.ID })" class="form-horizontal">
@@ -27,13 +27,21 @@
                     <div class="col-md-10">
                         <select name="activityinstance" id="activityinstance" class="form-control">
                             <option value="">Select...</option>
-                            @foreach (var instance in schedule.GetInSessionInstances().DistinctBy(instance => instance.ID))
-                            {
-                                if (instance.StartDateTime.HasValue && instance.StartDateTime.Value.AddHours(-1) <= DateTime.Now)
+                            @{
+                                var accountsCurrentUTCDateTime = account.ConvertToAccountTimeZone(DateTime.UtcNow);
+                                foreach (var instance in schedule.GetInSessionInstances().DistinctBy(instance => instance.ID))
                                 {
-                                    <option value="@instance.ID" @(Model.ActivityInstanceId == instance.ID ? " selected=\"selected\" " : "")>
-                                        @instance.StartDateTime.ToShortTimeString(), @instance.StartDateTime.Value.ToLongDateString()
-                                    </option>
+                                    if (instance.StartDateTime.HasValue)
+                                    {
+                                        var currentUTCScheduleWithOneHourPast = account.ConvertToAccountTimeZone(instance.StartDateTime.Value.ToUniversalTime().AddHours(-1));
+
+                                        if (currentUTCScheduleWithOneHourPast <= accountsCurrentUTCDateTime)
+                                        {
+                                            <option value="@instance.ID" @(Model.ActivityInstanceId == instance.ID ? " selected=\"selected\" " : "")>
+                                                @instance.StartDateTime.ToShortTimeString(), @instance.StartDateTime.Value.ToLongDateString()
+                                            </option>
+                                        }
+                                    }
                                 }
                             }
                         </select>
