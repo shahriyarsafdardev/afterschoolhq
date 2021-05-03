@@ -687,7 +687,6 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionAction_ActionId_ObjectId ON [WebSessionAction] (ObjectId,ActionId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionAction_IndirectObjectId_ObjectId ON [WebSessionAction] (ObjectId,IndirectObjectId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionAction_IndirectObjectId_IndirectObjectTypeId ON [WebSessionAction] (IndirectObjectId,IndirectObjectTypeId)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionAction_ObjectId_ObjectTypeId ON [WebSessionAction] (ObjectId,ObjectTypeId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionAction_ObjectId_ObjectTypeId_WebUserId ON [WebSessionAction] (WebUserId,ObjectId,ObjectTypeId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionAction_IndirectObjectId_IndirectObjectTypeId_ObjectId_ObjectTypeId_WebUserId ON [WebSessionAction] (WebUserId,ObjectId,ObjectTypeId,IndirectObjectId,IndirectObjectTypeId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionObjectSnapshot_WebUserId ON [WebSessionObjectSnapshot] (WebUserId)"));

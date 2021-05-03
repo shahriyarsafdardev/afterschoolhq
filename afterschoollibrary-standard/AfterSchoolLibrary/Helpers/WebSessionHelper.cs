@@ -72,6 +72,7 @@ namespace AfterSchoolLibrary.Helpers
                 case WebSessionActionType.LoggedOut:
                 case WebSessionActionType.SignedUp:
                     var actorActionFormat = "{actorName} {actionType}";
+                    var formattest = string.Format(actorActionFormat, formatParams);
                     return new Dictionary<string, string>
                     {
                         {"ActionString", string.Format(actorActionFormat, formatParams) },

@@ -309,15 +309,6 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<WebSessionAction> LoadByObjectIdByObjectTypeId(int ObjectId, ObjectType ObjectTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-		{
-			var dq = DatabaseQuery;
-			dq.Connection = dc;
-			dq.Criterias.Add(ObjectMap["ObjectId"], ObjectId);
-			dq.Criterias.Add(ObjectMap["ObjectTypeId"], ObjectTypeId);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-		}
-
 		public static List<WebSessionAction> LoadByWebUserIdByObjectIdByObjectTypeId(string WebUserId, int ObjectId, ObjectType ObjectTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;

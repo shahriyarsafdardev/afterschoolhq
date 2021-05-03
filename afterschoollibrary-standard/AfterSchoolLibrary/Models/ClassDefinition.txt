@@ -1822,7 +1822,6 @@ loadmethod: ObjectId|ObjectTypeId, List<>
 loadmethod: ObjectId|ActionId, List<>
 loadmethod: ObjectId|IndirectObjectId, List<>
 loadmethod: IndirectObjectId|IndirectObjectTypeId, List<>
-loadmethod: ObjectId|ObjectTypeId, List<>
 loadmethod: WebUserId|ObjectId|ObjectTypeId, List<>
 loadmethod: WebUserId|ObjectId|ObjectTypeId|IndirectObjectId|IndirectObjectTypeId, List<>
 [end]
