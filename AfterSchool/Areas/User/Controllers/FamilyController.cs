@@ -66,7 +66,7 @@ namespace AfterSchool.Areas.User.Controllers
         }
 
         [HttpGet]
-        public ActionResult EditStudentPersonal(string id)
+        public ActionResult EditStudentPersonal(string id, string returntocheckout)
         {
             var msgs = new SystemMessages();
             Registrant registrant = null;
@@ -90,13 +90,14 @@ namespace AfterSchool.Areas.User.Controllers
             }
 
             ViewBag.Messages = msgs;
+            ViewBag.ReturnToCheckout = returntocheckout.IsNotEmpty();
 
             return View(registrant);
         }
 
         [HttpPost]
         public ActionResult EditStudentPersonal(string id, string reg, string student, string locationname, string streetnumber, string streetname, string address2, string neighborhood, string city, string county, string state, 
-            string postalcode, string country, string placeid, decimal latitude, decimal longitude)
+            string postalcode, string country, string placeid, decimal latitude, decimal longitude, string returntocheckout)
         {
             var msgs = new SystemMessages();
             Registrant registrant = null;
@@ -168,9 +169,15 @@ namespace AfterSchool.Areas.User.Controllers
             }
 
             if (msgs.HasNoErrors())
+            {
+                if(returntocheckout.IsNotEmpty())
+                    return RedirectToAction("Register", "Account", new { Area = "" });
+                
                 return RedirectToAction("EditHealth", new { id = registrant.Uid, reg, student });
+            }
 
             ViewBag.Messages = msgs;
+            ViewBag.ReturnToCheckout = returntocheckout.IsNotEmpty();
 
             return View(registrant);
         }
