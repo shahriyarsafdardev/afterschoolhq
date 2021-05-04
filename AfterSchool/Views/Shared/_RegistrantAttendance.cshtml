@@ -28,14 +28,19 @@
                         <select name="activityinstance" id="activityinstance" class="form-control">
                             <option value="">Select...</option>
                             @{
+
+                                string logs = "";
+                                logs += "Current Time: " + DateTime.Now.ToShortDateTimeString();
+                                logs += "\n";
+
                                 foreach (var instance in schedule.GetInSessionInstances().DistinctBy(instance => instance.ID))
                                 {
                                     if (instance.StartDateTime.HasValue)
                                     {
                                         var currentUTCScheduleWithOneHourPast = instance.StartDateTime.Value.AddHours(-1);
 
-                                        AfterSchoolLibrary.Helpers.Utilities.SystemLog("Current Time: " + DateTime.Now.ToShortDateTimeString());
-                                        AfterSchoolLibrary.Helpers.Utilities.SystemLog("Schdule Time: " + currentUTCScheduleWithOneHourPast.ToShortDateTimeString());
+                                        logs += "Schdule Time: " + currentUTCScheduleWithOneHourPast.ToShortDateTimeString();
+                                        logs += "\n";
 
                                         if (currentUTCScheduleWithOneHourPast <= DateTime.Now)
                                         {
@@ -45,6 +50,8 @@
                                         }
                                     }
                                 }
+
+                                AfterSchoolLibrary.Helpers.Utilities.SystemLog(logs);
                             }
                         </select>
                         @*
