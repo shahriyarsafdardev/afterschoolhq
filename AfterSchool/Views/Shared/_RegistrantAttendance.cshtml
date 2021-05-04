@@ -5,6 +5,8 @@
     var schedule = (ActivitySchedule)ViewData["schedule"];
     var controller = (string)ViewData["controller"];
     var isTechSupport = (bool)SessionVariables.LoggedInUser.IsTechSupport(SessionVariables.CurrentAccount);
+    var activity = Model.GetActivity();
+    var provider = activity.GetProvider(null);
 }
 
 <form method="post" action="@Url.Action("trackattendance", controller, new { id = Model.ActivityUid, att = Model.ID })" class="form-horizontal">
@@ -31,7 +33,7 @@
 
                                 string logs = "";
                                 var currentTime = account.ConvertToAccountTimeZone(DateTime.UtcNow);
-                                logs += "Current Time: " + currentTime.ToShortDateTimeString();
+                                logs += "Current Time: " + currentTime.ToShortDateTimeString() + ": Kind: " + currentTime.Kind;
                                 logs += "\n";
 
                                 foreach (var instance in schedule.GetInSessionInstances().DistinctBy(instance => instance.ID))
@@ -41,7 +43,7 @@
                                         var scheduleWithOneHourPast = instance.StartDateTime.Value.AddHours(-1);
                                         var utcSchedule = TimeZoneInfo.ConvertTimeToUtc(scheduleWithOneHourPast);
                                         var comparison = DateTime.Compare(utcSchedule, currentTime);
-                                        logs += "Schdule Time: " + utcSchedule.ToShortDateTimeString();
+                                        logs += "Schdule Time: " + utcSchedule.ToShortDateTimeString() + ": Kind: " + utcSchedule.Kind;
                                         logs += "\n";
 
                                         if (comparison <= 0 || (currentTime.IsOnOrAfter(utcSchedule) && currentTime.IsOnOrBefore(instance.EndDateTime.Value)))
