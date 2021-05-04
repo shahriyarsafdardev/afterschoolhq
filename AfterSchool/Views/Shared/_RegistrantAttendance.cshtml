@@ -38,7 +38,7 @@
                                 {
                                     if (instance.StartDateTime.HasValue)
                                     {
-                                        var currentUTCScheduleWithOneHourPast = instance.StartDateTime.Value.AddHours(-1);
+                                        var currentUTCScheduleWithOneHourPast = instance.StartDateTime.Value.AddHours(-1).ToUniversalTime();
                                         var comparison = DateTime.Compare(currentUTCScheduleWithOneHourPast, accountTime);
                                         logs += "Schdule Time: " + currentUTCScheduleWithOneHourPast.ToShortDateTimeString();
                                         logs += "\n";
