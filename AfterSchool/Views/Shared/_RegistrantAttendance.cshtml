@@ -32,7 +32,7 @@
                             @{
 
                                 string logs = "";
-                                var currentTime = account.ConvertToAccountTimeZone(DateTime.UtcNow);
+                                var currentTime = DateTime.UtcNow;
                                 logs += "Current Time: " + currentTime.ToShortDateTimeString() + ": Kind: " + currentTime.Kind;
                                 logs += "\n";
 
