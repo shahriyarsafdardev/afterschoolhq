@@ -3,6 +3,7 @@
     var msgs = (SystemMessages)ViewBag.Messages;
     var qvms = (List<FormQuestionViewModel>)ViewBag.QuestionViewModels;
     var school = (Location)ViewBag.School;
+    var returnToCheckout = (bool)ViewBag.ReturnToCheckout;
     Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
     var isTechSupport = (bool)SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
     var regName = !isTechSupport ? Model.Name : Model.GetFirstNameLastInitial();
@@ -43,7 +44,7 @@
             <form class="form-horizontal" 
                   id="form-save-personal" 
                   method="post" 
-                  action="@Url.Action("editstudentpersonal", "family", new { id = Model.Uid, reg = Request["reg"], student = Request["student"] })">
+                  action="@Url.Action("editstudentpersonal", "family", new { id = Model.Uid, reg = Request["reg"], student = Request["student"], returnToCheckout = returnToCheckout.ToString() })">
 
                 @foreach (var qvm in qvms)
                 {
