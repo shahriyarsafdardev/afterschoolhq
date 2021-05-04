@@ -30,7 +30,8 @@
                             @{
 
                                 string logs = "";
-                                logs += "Current Time: " + DateTime.Now.ToShortDateTimeString();
+                                var accountTime = account.ConvertToAccountTimeZone(DateTime.UtcNow);                                
+                                logs += "Current Time: " + accountTime.ToShortDateTimeString();
                                 logs += "\n";
 
                                 foreach (var instance in schedule.GetInSessionInstances().DistinctBy(instance => instance.ID))
@@ -38,11 +39,11 @@
                                     if (instance.StartDateTime.HasValue)
                                     {
                                         var currentUTCScheduleWithOneHourPast = instance.StartDateTime.Value.AddHours(-1);
-
+                                        var comparison = DateTime.Compare(currentUTCScheduleWithOneHourPast, accountTime);
                                         logs += "Schdule Time: " + currentUTCScheduleWithOneHourPast.ToShortDateTimeString();
                                         logs += "\n";
 
-                                        if (currentUTCScheduleWithOneHourPast <= DateTime.Now)
+                                        if (comparison <= 0)
                                         {
                                             <option value="@instance.ID" @(Model.ActivityInstanceId == instance.ID ? " selected=\"selected\" " : "")>
                                                 @instance.StartDateTime.ToShortTimeString(), @instance.StartDateTime.Value.ToLongDateString()
