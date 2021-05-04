@@ -30,20 +30,20 @@
                             @{
 
                                 string logs = "";
-                                var accountTime = account.ConvertToAccountTimeZone(DateTime.UtcNow);                                
-                                logs += "Current Time: " + accountTime.ToShortDateTimeString();
+                                var currentTime = account.ConvertToAccountTimeZone(DateTime.Now);
+                                logs += "Current Time: " + currentTime.ToShortDateTimeString();
                                 logs += "\n";
 
                                 foreach (var instance in schedule.GetInSessionInstances().DistinctBy(instance => instance.ID))
                                 {
                                     if (instance.StartDateTime.HasValue)
                                     {
-                                        var currentUTCScheduleWithOneHourPast = instance.StartDateTime.Value.AddHours(-1).ToUniversalTime();
-                                        var comparison = DateTime.Compare(currentUTCScheduleWithOneHourPast, accountTime);
-                                        logs += "Schdule Time: " + currentUTCScheduleWithOneHourPast.ToShortDateTimeString();
+                                        var scheduleWithOneHourPast = instance.StartDateTime.Value.AddHours(-1);
+                                        var comparison = DateTime.Compare(scheduleWithOneHourPast, currentTime);
+                                        logs += "Schdule Time: " + scheduleWithOneHourPast.ToShortDateTimeString();
                                         logs += "\n";
 
-                                        if (comparison <= 0)
+                                        if (comparison <= 0 || (currentTime.IsOnOrAfter(scheduleWithOneHourPast) && currentTime.IsOnOrBefore(instance.EndDateTime.Value)))
                                         {
                                             <option value="@instance.ID" @(Model.ActivityInstanceId == instance.ID ? " selected=\"selected\" " : "")>
                                                 @instance.StartDateTime.ToShortTimeString(), @instance.StartDateTime.Value.ToLongDateString()
