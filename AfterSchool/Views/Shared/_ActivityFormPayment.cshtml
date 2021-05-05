@@ -665,8 +665,10 @@
     }
 
     function setChkParentPriceCost(enable) {
+        var isParentPricecostChecked = $('#isparentpricecost').prop('checked');
+        
         if (enable) {
-            $('#isparentpricecost').prop('checked', false);
+            $('#isparentpricecost').prop('checked', isParentPricecostChecked);
             $('#isparentpricecost').prop('disabled', false);
         } else {
             $('#isparentpricecost').prop('checked', false);
