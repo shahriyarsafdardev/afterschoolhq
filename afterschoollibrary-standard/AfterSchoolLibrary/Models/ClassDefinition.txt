@@ -2163,3 +2163,10 @@ type: Enum
 name: StripeRequirementStatus
 values: NotSet, PastDue, CurrentlyDue, EventuallyDue
 [end]
+[end]
+
+[begin]
+type: Enum
+name: GettingStartedOptions
+values: NotSet, CreateProfile, CreateFirstActivity, ValidateEmail, AcceptPayments
+[end]

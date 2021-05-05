@@ -14,6 +14,13 @@
 
                 <form class="form form-horizontal" method="post" action="@Url.Action("logo", "onboarding")" enctype="multipart/form-data">
 
+                    @{ Html.RenderPartial("~/Views/Shared/_Loaders.cshtml",
+                            new ViewDataDictionary() {
+                                { "count", 6 },
+                                { "activeDotNumber", 4 }
+                            });
+                    }
+
                     <div class="col-md-12 onboarding-form-group">
                         <h1 class="text-center register-thankyou-2">Customize your profile images.</h1>
                     </div>

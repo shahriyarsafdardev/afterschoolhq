@@ -1,0 +1,11 @@
+﻿@{ 
+    int count = (int)ViewData["count"]; //.. number of dots that need to be display
+    var activeDotNumber = (int)ViewData["activeDotNumber"]; ; //.. postion of dot which needs to be active
+}
+
+<div style="text-align:center">
+    @for (int i = 0; i < count; i++)
+    {
+        <span class="@(i+1 == activeDotNumber ? "dotdark" : "dotlight")"></span>
+    }   
+</div>
