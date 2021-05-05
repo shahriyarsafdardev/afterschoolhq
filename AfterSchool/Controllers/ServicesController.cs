@@ -38,7 +38,10 @@ namespace AfterSchool.Controllers
 
                 participationObjects.ForEach(participationObject => {
                     if ( participationObject.RestrictByGrade() && !participationObject.IsStudentGradeInRange(registrant, msgs))
+                    {
                         ineligibleActivities.Add($"Grades {participationObject.Name}: {participationObject.GetMinGradeLevel(msgs).Abbreviation} - {participationObject.GetMaxGradeLevel(msgs).Abbreviation}");
+                        msgs.Add($"You might need to update {registrant.Name}'s grade in order to register them", MessageType.Warning);
+                    }
 
                     if (!participationObject.RestrictByGrade() && !participationObject.IsStudentAgeInRange(registrant, msgs))
                         ineligibleActivities.Add($"Ages {participationObject.Name}: {participationObject.AgeStart} - {participationObject.AgeEnd}");
