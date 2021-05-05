@@ -66,7 +66,7 @@ namespace AfterSchool.Areas.User.Controllers
         }
 
         [HttpGet]
-        public ActionResult EditStudentPersonal(string id, string returntocheckout, string forceupdategrade)
+        public ActionResult EditStudentPersonal(string id, string returntocheckout)
         {
             var msgs = new SystemMessages();
             Registrant registrant = null;
@@ -91,7 +91,6 @@ namespace AfterSchool.Areas.User.Controllers
 
             ViewBag.Messages = msgs;
             ViewBag.ReturnToCheckout = returntocheckout.IsNotEmpty();
-            ViewBag.ForceUpdateGrade = forceupdategrade.IsNotEmpty();
 
             return View(registrant);
         }
