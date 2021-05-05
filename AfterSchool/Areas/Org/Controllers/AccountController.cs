@@ -1522,7 +1522,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     Session["activityUid"] = null;
                     TempData["IsStripeIntegrated"] = true;
 
-                    Activity activity = Activity.LoadByUid(id.ToGuid());
+                    var activity = Activity.LoadByUid(id.ToGuid());
+
                     if (activity.IsNotEmpty() && activity.ShortHomePageUrl.IsNotEmpty())
                         return Redirect(activity.ShortHomePageUrl);
                     else

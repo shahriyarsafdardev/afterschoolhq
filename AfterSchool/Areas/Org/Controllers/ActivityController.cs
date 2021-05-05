@@ -1084,7 +1084,10 @@ namespace AfterSchool.Areas.Org.Controllers
                             return View("EditLocation", activity);
                         }
                     case "publish":
-                        return Redirect(activity.ShortHomePageUrl);                        
+                        return Redirect(activity.ShortHomePageUrl);
+
+                    default:
+                        return RedirectToAction("requesttopublish", new { id = activity.Uid, isnew = Request["isnew"], source = Request["source"] });
                 }
             }
 
