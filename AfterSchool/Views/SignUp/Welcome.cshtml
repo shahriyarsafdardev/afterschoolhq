@@ -18,7 +18,7 @@
 
 }
 
-<style>    
+<style>
 </style>
 
 <div class="row main-content main-content-welcome-pages">
@@ -281,6 +281,9 @@
         <div class="welcome-outer-ring m-b-20">
             <div class="search-inner-ring p-b-5">
                 <div class="margin-t-35">
+                    @*<div class="text-center">
+                            <div style="width: 15px; height: 15px; margin: 0 5px 0 0; background-color: #00c5a3; border-radius: 7px;"></div>
+                        </div>*@
 
                     <p class="register-thankyou-1">Thanks for joining our platform to provide learning opportunities for students everywhere.</p>
                     <p class="register-thankyou-2" style="margin-bottom: 20px;">We just need a little information to get started.</p>
@@ -439,6 +442,12 @@
         PageEvent.add(PageEvent.AFTER_INIT, function () {           
             signupAccountSearch.keyup(function (e) {
                 var searchLength = signupAccountSearch.val().length;
+                if (searchLength <= 2) {
+                    signupAccountSearchList.html('');
+                    signupAccountSearchList.addClass('hide');
+                    btnContinue.attr('disabled', 'disabled');
+                    return false;
+                }
 
                 if (searchLength >= 40) {
                     spanRemainingCharCounter.text(50).css('color', 'red');
@@ -455,17 +464,10 @@
                 } else if (searchLength > 50) {
                     e.preventDefault();
                     e.stopPropagation();
-                    this.value = this.value.substring(0, 50);
+                    this.value = this.value.substring(0, 50);                    
                     spanRemainingCharCounter.text(0);
                     return false;
                 }
-
-                if (searchLength <= 2) {
-                    signupAccountSearchList.html('');
-                    signupAccountSearchList.addClass('hide');
-                    btnContinue.attr('disabled', 'disabled');
-                    return false;
-                }                
 
                 signupAccountSearchList.removeClass('hide');
                 signupAccountSearchList.html('');

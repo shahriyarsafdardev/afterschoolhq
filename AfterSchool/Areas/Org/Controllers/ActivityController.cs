@@ -1084,9 +1084,9 @@ namespace AfterSchool.Areas.Org.Controllers
                             return View("EditLocation", activity);
                         }
                     case "publish":
-                        return Redirect(activity.ShortHomePageUrl);
+                        if (!MustRequestToPublish(activity))
+                            return RedirectToAction("publish", new { id = activity.Uid, isnew = Request["isnew"], source = Request["source"] });
 
-                    default:
                         return RedirectToAction("requesttopublish", new { id = activity.Uid, isnew = Request["isnew"], source = Request["source"] });
                 }
             }
@@ -1906,7 +1906,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Publish(string id, bool isFromActivityHome = false)
+        public ActionResult Publish(string id)
         {
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid());
@@ -1964,9 +1964,6 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 SendGridHelper.AddOrUpdateContact(account, user, msgs);
             }
-
-            if (isFromActivityHome)
-                return Redirect(activity.ShortHomePageUrl);
 
             return View("publishdetail", activity);
         }

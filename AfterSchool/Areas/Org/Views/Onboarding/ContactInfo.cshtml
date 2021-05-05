@@ -19,13 +19,6 @@
 
                 <form class="form form-horizontal" method="post" action="@Url.Action("contactinfo", "onboarding")">
 
-                    @{ Html.RenderPartial("~/Views/Shared/_Loaders.cshtml",
-                            new ViewDataDictionary() {
-                               { "count", 6 },
-                               { "activeDotNumber", 3 }
-                            });
-                    }
-
                     <div class="col-md-12 onboarding-form-group">
                         <h1 class="text-center register-thankyou-2">Enter your contact information.</h1>
                     </div>
@@ -81,7 +74,7 @@
                             <img src="~/img/welcome-back-arrow.PNG" />
                         </a>
                         <button type="submit" class="btn-save-claims btn btn-primary btn-lg pull-right register-continue">Save and Continue</button>
-                    </div>
+                    </div>                    
 
                 </form>
 
