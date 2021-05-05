@@ -1506,32 +1506,13 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
 
-            //.. user is redirected from onbording
-            //.. used session becuase stripe is not allowing multiple redirection at the moment
-            var id = Session["activityUid"];
-
             if (Request["error"].IsEmpty())
                 SessionVariables.CurrentAccount.CompleteStripeConnect(Request["code"], SessionVariables.CurrentUser, msgs);
             else
                 msgs.Add("It appears you have canceled your request to connect your Stripe account.", MessageType.Notice);
 
             if (msgs.HasNoErrors())
-            {
-                if (id.IsNotEmpty())
-                {
-                    Session["activityUid"] = null;
-                    TempData["IsStripeIntegrated"] = true;
-
-                    var activity = Activity.LoadByUid(id.ToGuid());
-
-                    if (activity.IsNotEmpty() && activity.ShortHomePageUrl.IsNotEmpty())
-                        return Redirect(activity.ShortHomePageUrl);
-                    else
-                        return Redirect(SessionVariables.CurrentAccount.ShortHomePageUrl);
-                }
-                
                 return RedirectToAction("paymentsdone", new { source = Request["state"], isfullscreen = Request["isfullscreen"] });
-            }
 
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.IsFullScreen = GetIsFullScreen();
