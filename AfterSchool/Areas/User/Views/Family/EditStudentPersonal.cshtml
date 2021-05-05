@@ -3,8 +3,7 @@
     var msgs = (SystemMessages)ViewBag.Messages;
     var qvms = (List<FormQuestionViewModel>)ViewBag.QuestionViewModels;
     var school = (Location)ViewBag.School;
-    var returnToCheckout = (bool)ViewBag.ReturnToCheckout;
-    var forceUpdateGrade = (bool)ViewBag.ForceUpdateGrade;
+    var returnToCheckout = (bool)ViewBag.ReturnToCheckout;  
     Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
     var isTechSupport = (bool)SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
     var regName = !isTechSupport ? Model.Name : Model.GetFirstNameLastInitial();
@@ -86,7 +85,7 @@
             $('#btn-save-personal').prop('disabled', true);
         });
 
-        if (@forceUpdateGrade) {
+        if (@returnToCheckout) {
             $('#@gradeFormId').val(null);
         }
 

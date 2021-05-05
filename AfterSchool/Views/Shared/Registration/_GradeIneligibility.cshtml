@@ -89,7 +89,7 @@
 
     function redirectToChildProfile(event) {
         console.log("registrantUid", event.data.registrantUid);
-        var action = '@Url.Action("editstudentpersonal", "Family", new { Area = "user", id = "registrantUid", returnToCheckout = true.ToString(), forceupdategrade = true.ToString() })'.replace("registrantUid", event.data.registrantUid);
+        var action = '@Url.Action("editstudentpersonal", "Family", new { Area = "user", id = "registrantUid", returnToCheckout = "1", forceupdategrade = "1" })'.replace("registrantUid", event.data.registrantUid);
         console.log(action);
         location.href = action;
     }
