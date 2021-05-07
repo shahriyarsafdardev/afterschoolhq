@@ -12,13 +12,13 @@
         }
         else
         {
-            <a href="#" class="btn btn-alt6@(actionName == "index" ? "-active" : "")" onclick="return showUpgradeMyPlan('@(manageContactsPackage.Name)'S,@(manageContactsPackage.ID))"><i class="s7-users"></i> Contacts</a>
+            <a href="#" class="btn btn-alt6@(actionName == "index" ? "-active" : "")" onclick="return showUpgradeMyPlan('@(manageContactsPackage?.Name)'S,@(manageContactsPackage?.ID))"><i class="s7-users"></i> Contacts</a>
         }
 
         <a href="@Url.Action("lists", "contact")" class="btn btn-alt6@(actionName == "lists" ? "-active" : "")"><i class="s7-lists"></i> Contact Lists</a>
     </div>
     <div class="hidden-lg hidden-sm hidden-md">
-        <select class="form-control" onchange="this.value == '#' ? showUpgradeMyPlan('@(manageContactsPackage.Name)',@(manageContactsPackage.ID)) : location.href = this.value;">
+        <select class="form-control" onchange="this.value == '#' ? showUpgradeMyPlan('@(manageContactsPackage?.Name)',@(manageContactsPackage?.ID)) : location.href = this.value;">
             <option value="">Navigation</option>
             @if (manageContacts)
             {

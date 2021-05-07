@@ -240,7 +240,7 @@ namespace AfterSchool.Controllers
             }
 
             if (msgs.HasNoErrors())
-                return RedirectToAction("index", "onboarding", new { area = "org" });
+                return RedirectToAction("index", "onboarding", new { area = "org", showGettingStarted = true });
 
             ViewBag.Messages = msgs;
 
