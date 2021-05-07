@@ -332,7 +332,7 @@ namespace AfterSchool.Controllers
                     AddNoCacheHeaders();
                 }
 
-                if (!activity.IsPublished && activity.GetLocation().HostAccountId != activity.AccountId)
+                if (!activity.IsPublished && activity.GetLocation().IsNotEmpty() && activity.GetLocation().HostAccountId != activity.AccountId)
                 {
                     var accountOwnerId = activity.GetLocation().GetHostAccount().OwnerId;
 

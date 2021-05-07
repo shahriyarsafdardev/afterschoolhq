@@ -227,9 +227,106 @@ namespace AfterSchoolLibrary.Services
             return Activity.GetCount(new Hashtable() { { "AccountId", account.ID.Value } }, msgs, dc);
         }
 
+        public static int GetActiveAndPublishedActivityCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Activity.GetCount(new Hashtable() { 
+                { "AccountId", account.ID.Value }, 
+                { "IsPublished", true }, 
+                { "IsDeleted", false }, 
+                { "isArchived", false } 
+            }, msgs, dc);
+        }
+
+        public static int GetActiveAndNonPublishedActivityCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Activity.GetCount(new Hashtable() {
+                { "AccountId", account.ID.Value },
+                { "IsPublished", false },
+                { "IsDeleted", false },
+                { "isArchived", false }
+            }, msgs, dc);
+        }
+
+        public static Activity GetUnpublishActivity(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Activity.LoadByAccountIdByIsPublished(account.ID.Value, false, msgs, dc).FirstOrDefault();
+        }
+
         public static bool HasActivities(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return account.GetActivityCount(msgs, dc) > 0;
+        }
+
+        public static bool HasActiveActivities(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.GetActiveAndPublishedActivityCount(msgs, dc) > 0;
+        }
+
+        public static bool IsOnboardingCompleted(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (account.IsEmpty())
+                return false;
+
+            var accountOwner = account.GetAccountOwner(msgs);
+            return account.HasAccountProfile(msgs) && account.HasActiveActivities(msgs) && accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount && account.StripeUserId.IsNotEmpty();
+        }
+
+        public static GettingStartedOptions OnboardingCompletionStatus(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (account.IsEmpty())
+                return GettingStartedOptions.NotSet;
+
+            var accountOwner = account.GetAccountOwner(msgs);
+            var HasAccountProfile = account.HasAccountProfile(msgs);
+            var HasActivities = account.HasActiveActivities(msgs);
+            var activitycount= account.GetActiveAndNonPublishedActivityCount(msgs);
+            var VerifiedAccount = accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount;
+            var StripeUserId = account.StripeUserId.IsNotEmpty();
+           
+            if (!HasAccountProfile)
+                return GettingStartedOptions.CreateProfile;
+
+            else if (!HasActivities && activitycount < 1)
+                return GettingStartedOptions.CreateFirstActivity;
+            
+            else if (!VerifiedAccount)
+                return GettingStartedOptions.ValidateEmail;
+
+            else if (activitycount >= 1 && !HasActivities)
+                return GettingStartedOptions.PublishActivity;           
+
+            else if (!StripeUserId)
+                return GettingStartedOptions.AcceptPayments;
+
+            else if (StripeUserId)
+                return GettingStartedOptions.ProcessCompleted;
+
+            else
+                return GettingStartedOptions.NotSet;
+        }
+
+        public static List<GettingStartedOptions> GetCurrentOnboardingProcess(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var startingOptions = new List<GettingStartedOptions>();
+
+            if (account.IsEmpty())
+                return startingOptions;
+
+            var accountOwner = account.GetAccountOwner(msgs);            
+
+            if (account.HasAccountProfile(msgs))
+                startingOptions.Add(GettingStartedOptions.CreateProfile);
+
+            if (account.HasActiveActivities(msgs))
+                startingOptions.Add(GettingStartedOptions.CreateFirstActivity);
+
+            if (accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount)
+                startingOptions.Add(GettingStartedOptions.ValidateEmail);
+
+            if (account.StripeUserId.IsNotEmpty())
+                startingOptions.Add(GettingStartedOptions.AcceptPayments);
+
+            return startingOptions;
         }
 
         public static UserType[] AdminUserTypes

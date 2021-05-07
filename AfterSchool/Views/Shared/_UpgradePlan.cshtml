@@ -19,6 +19,10 @@
         if(id)
             featureId = id;
 
+        if (name == '' || id == '') {
+            $('.gain-access').html('This feature is not accessible. contact admin for more information.');
+        }
+
         if (preventClose)
             $('.span-upgrade-modal-close').hide();
 
