@@ -88,10 +88,16 @@
                             </div>
                             <div class="col-md-6">
                                 @{ Html.RenderPartial(
-                                       "~/Views/Shared/Components/_GoogleLocationEdit.cshtml", 
-                                       new Location() { }, 
-                                       new ViewDataDictionary() { { "types", "establishment" }, { "description", "Enter your school name" } }); 
-                                }
+                                        "~/Views/Shared/Components/_GoogleLocationEdit.cshtml",
+                                        new Location() { },
+                                        new ViewDataDictionary() { { "types", "establishment" }, { "description", "Enter your school name" } });
+                                }                                
+                                <div class="am-checkbox">
+                                    <input type="checkbox" id="schoolnotfound" name="schoolnotfound" value="true"/>
+                                    <label for="schoolnotfound">
+                                        I can’t find my child’s school or my child is homeschooled
+                                    </label>
+                                </div>
                             </div>
                         </div>
                         

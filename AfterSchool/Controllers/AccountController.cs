@@ -1053,8 +1053,8 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public ActionResult AddStudent(string id, string samehomeaddress, string createuseraccount, string locationname, string streetnumber, string streetname, string address2, string neighborhood, 
-            string city, string county, string state, string postalcode, string country, string placeid, decimal latitude, decimal longitude)
+        public ActionResult AddStudent(string id, string samehomeaddress, string createuseraccount, string locationname = null, string streetnumber = null, string streetname = null, string address2 = null, string neighborhood = null, 
+            string city = null, string county = null, string state = null, string postalcode = null, string country = null, string placeid = null, decimal? latitude = null, decimal? longitude = null)
         {
             var results = CheckRedirect(checkForEmptyCart: true);
             if (results.IsNotEmpty()) return results;
@@ -1103,7 +1103,7 @@ namespace AfterSchool.Controllers
                         Location school = null;
                         
                         if (placeid.IsNotEmpty())
-                            school = LocationService.CreateOrUpdateFromGoogle(locationname, streetnumber, streetname, address2, neighborhood, city, county, state, postalcode, country, placeid, latitude, longitude, SessionVariables.CurrentUser, amsgs, adc);
+                            school = LocationService.CreateOrUpdateFromGoogle(locationname, streetnumber, streetname, address2, neighborhood, city, county, state, postalcode, country, placeid, latitude??0, longitude??0, SessionVariables.CurrentUser, amsgs, adc);
 
 
                         // create student account if requested by parent
