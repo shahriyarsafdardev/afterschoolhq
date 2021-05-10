@@ -92,7 +92,7 @@
                             @if (currentLevel == GettingStartedOptions.CreateProfile)
                             {
                                 <a class="active-item finish-setup-anchor" href="#">
-                                    <div class="am-checkbox checkbox-override" onclick="return redirectUser('@GettingStartedOptions.CreateProfile');">
+                                    <div class="am-checkbox checkbox-override"  onclick="redirectUser('@GettingStartedOptions.CreateProfile');">
                                         <input id="chk-TopBar-getting-started-profile" name="GettingStartedSelection-TopBar" type="checkbox"
                                                value="@GettingStartedOptions.CreateProfile"
                                                @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.CreateProfile) ? "checked=\"checked\"" : "") />
@@ -102,7 +102,7 @@
                             }
                             else
                             {
-                                <a href="#" class="finish-setup-anchor cursor-no-drop">
+                                <a href="@Url.Action("programinfo", "onboarding", new { area = "org" })" class="finish-setup-anchor cursor-no-drop">
                                     <div class="am-checkbox checkbox-override">
                                         <input id="chk-TopBar-getting-started-profile" name="GettingStartedSelection-TopBar" type="checkbox" disabled="disabled"
                                                @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.CreateProfile) ? "checked=\"checked\"" : "") />
@@ -114,8 +114,8 @@
                         <li>
                             @if (currentLevel == GettingStartedOptions.CreateFirstActivity || currentLevel == GettingStartedOptions.PublishActivity)
                             {
-                                <a class="active-item finish-setup-anchor" href="#">
-                                    <div class="am-checkbox checkbox-override" onclick="return redirectUser('@currentLevel');">
+                                <a class="active-item finish-setup-anchor" href="@Url.Action("editsetup", "activity", new { area = "org", isnew = "1", type = (int)ActivityType.Activity })">
+                                    <div class="am-checkbox checkbox-override"  >
                                         <input id="chk-TopBar-getting-started-first-activity" name="GettingStartedSelection-TopBar" type="checkbox"
                                                value="@GettingStartedOptions.CreateFirstActivity"
                                                @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.CreateFirstActivity) ? "checked=\"checked\"" : "") />
@@ -137,8 +137,8 @@
                         <li>
                             @if (currentLevel == GettingStartedOptions.ValidateEmail)
                             {
-                                <a class="active-item finish-setup-anchor" href="#">
-                                    <div class="am-checkbox checkbox-override" onclick="return redirectUser('@GettingStartedOptions.ValidateEmail');">
+                                <a class="active-item finish-setup-anchor" href="#" >
+                                    <div class="am-checkbox checkbox-override" onclick="javascript: AccountSetup.sendVerificationEmail();">
                                         <input id="chk-TopBar-getting-started-email" name="GettingStartedSelection-TopBar" type="checkbox"
                                                value="@GettingStartedOptions.ValidateEmail"
                                                @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.ValidateEmail) ? "checked=\"checked\"" : "") />
@@ -150,7 +150,7 @@
                             {
                                 <a href="#" class="finish-setup-anchor cursor-no-drop">
                                     <div class="am-checkbox checkbox-override">
-                                        <input id="chk-TopBar-getting-started-email" name="GettingStartedSelection-TopBar" type="checkbox" disabled="disabled"
+                                        <input id="chk-TopBar-getting-started-email" name="GettingStartedSelection-TopBar" type="checkbox" disabled="disabled" href="@url"
                                                @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.ValidateEmail) ? "checked=\"checked\"" : "") />
                                         <label for="chk-TopBar-getting-started-email">Validate Email</label>
                                     </div>
@@ -161,7 +161,7 @@
                             @if (currentLevel == GettingStartedOptions.AcceptPayments)
                             {
                                 <a class="active-item finish-setup-anchor" href="#">
-                                    <div class="am-checkbox checkbox-override" onclick="return redirectUser('@GettingStartedOptions.AcceptPayments');">
+                                    <div class="am-checkbox checkbox-override" onclick="acceptPayments()">
                                         <input id="chk-TopBar-getting-started-payments" name="GettingStartedSelection-TopBar" type="checkbox"
                                                value="@GettingStartedOptions.AcceptPayments"
                                                @(currentProgress.IsNotEmpty() && currentProgress.Contains(GettingStartedOptions.AcceptPayments) ? "checked=\"checked\"" : "") />
@@ -277,7 +277,7 @@
                 </div>
             </div>
         }
-    </div>
+        </div>
     }
     else
     {
@@ -324,13 +324,17 @@
         $(itm).parent().toggleClass('open');
     }
 
-    function redirectUser(item) {
-        showLoader()
+    function acceptPayments() {
+        hideLoader();
+        LoadPaymentModal();
+    }
 
+    function redirectUser(item) {
+        showLoader();
         if (item == '@GettingStartedOptions.CreateProfile') {
             location.href = '@Url.Action("programinfo", "onboarding", new { area = "org" })';
         } else if (item == '@GettingStartedOptions.CreateFirstActivity') {
-            location.href = '@Url.Action("editsetup", "activity", new { area = "org", isnew = 1, type = 1 })';
+            location.href = '@Url.Action("editsetup", "activity", new { area = "org", isnew = 1, type = (int)ActivityType.Activity })';
         } else if (item == '@GettingStartedOptions.PublishActivity') {
             location.href = '@url';
         } else if (item == '@GettingStartedOptions.ValidateEmail') {
