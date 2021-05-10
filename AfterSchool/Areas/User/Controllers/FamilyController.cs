@@ -95,8 +95,8 @@ namespace AfterSchool.Areas.User.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditStudentPersonal(string id, string reg, string student, string locationname, string streetnumber, string streetname, string address2, string neighborhood, string city, string county, string state, 
-            string postalcode, string country, string placeid, decimal latitude, decimal longitude)
+        public ActionResult EditStudentPersonal(string id, string reg, string student, string locationname = null, string streetnumber = null, string streetname = null, string address2 = null, string neighborhood = null, string city = null, string county = null, string state = null, 
+            string postalcode = null, string country = null, string placeid = null, decimal? latitude = null, decimal? longitude = null, bool schoolnotfound = false)
         {
             var msgs = new SystemMessages();
             Registrant registrant = null;
@@ -129,6 +129,11 @@ namespace AfterSchool.Areas.User.Controllers
                     }
                 });
 
+                if (placeid.IsEmpty() && schoolnotfound == false)
+                {
+                    msgs.Add($"Location is required", MessageType.UserError);
+                }
+
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
 
                 if (msgs.HasNoErrors())
@@ -140,7 +145,7 @@ namespace AfterSchool.Areas.User.Controllers
                             Location school = null;
 
                             if (placeid.IsNotEmpty())
-                                school = LocationService.CreateOrUpdateFromGoogle(locationname, streetnumber, streetname, address2, neighborhood, city, county, state, postalcode, country, placeid, latitude, longitude, SessionVariables.CurrentUser, amsgs, adc);
+                                school = LocationService.CreateOrUpdateFromGoogle(locationname, streetnumber, streetname, address2, neighborhood, city, county, state, postalcode, country, placeid, latitude??0, longitude??0, SessionVariables.CurrentUser, amsgs, adc);
 
                             registrant.SchoolLocationId = school.IsNotEmpty() ? school.ID : new int?();
                             registrant.LastModifiedBy = SessionVariables.CurrentUser.ID;

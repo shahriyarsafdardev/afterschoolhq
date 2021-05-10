@@ -61,7 +61,7 @@
                                  new ViewDataDictionary() { { "types", "establishment" }, { "description", "Enter your school name" } });
                         }                        
                         <div class="am-checkbox">
-                            <input type="checkbox" id="schoolnotfound" name="schoolnotfound" />
+                            <input type="checkbox" id="schoolnotfound" name="schoolnotfound" value="true"/>
                             <label for="schoolnotfound">
                                 I can’t find my child’s school or my child is homeschooled
                             </label>
@@ -96,6 +96,7 @@
         $('#schoolnotfound').click(function () {
             if ($(this).prop("checked") == true) {
                 $('#location').val('');
+                $('#placeid').val('');
             }
         });
     });

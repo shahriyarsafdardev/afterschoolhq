@@ -1054,7 +1054,7 @@ namespace AfterSchool.Controllers
 
         [HttpPost]
         public ActionResult AddStudent(string id, string samehomeaddress, string createuseraccount, string locationname = null, string streetnumber = null, string streetname = null, string address2 = null, string neighborhood = null, 
-            string city = null, string county = null, string state = null, string postalcode = null, string country = null, string placeid = null, decimal? latitude = null, decimal? longitude = null)
+            string city = null, string county = null, string state = null, string postalcode = null, string country = null, string placeid = null, decimal? latitude = null, decimal? longitude = null, bool schoolnotfound = false)
         {
             var results = CheckRedirect(checkForEmptyCart: true);
             if (results.IsNotEmpty()) return results;
@@ -1072,6 +1072,7 @@ namespace AfterSchool.Controllers
                 if (question.IsRequired && answer.IsEmpty())
                     msgs.Add($"{question.Text} is required", MessageType.UserError);
 
+
                 switch (question.QuestionDataTypeId)
                 {
                     case QuestionDataType.RegistrantHomePhone:
@@ -1083,6 +1084,11 @@ namespace AfterSchool.Controllers
 
                 }
             });
+
+            if (placeid.IsEmpty() && schoolnotfound == false)
+            {
+                msgs.Add($"Location is required", MessageType.UserError);
+            }
 
             var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
             var email = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail).Value;
