@@ -212,8 +212,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (name.IsEmpty())
                 msgs.Add("Activity name is required.", MessageType.UserError);
-            else if (name.Length > 75)
-                msgs.Add("Activity name must not be greater then 75 chanracters.", MessageType.UserError);
+            else if (name.Length > 50)
+                msgs.Add("Activity name must not be greater then 50 chanracters.", MessageType.UserError);
 
             if (form.IsEmpty() && (isAdvanceSettingEnabled.IsEmpty() || !isAdvanceSettingEnabled.ToBoolean()))
             {
@@ -1084,9 +1084,9 @@ namespace AfterSchool.Areas.Org.Controllers
                             return View("EditLocation", activity);
                         }
                     case "publish":
-                        if (!MustRequestToPublish(activity))
-                            return RedirectToAction("publish", new { id = activity.Uid, isnew = Request["isnew"], source = Request["source"] });
+                        return Redirect(activity.ShortHomePageUrl);
 
+                    default:
                         return RedirectToAction("requesttopublish", new { id = activity.Uid, isnew = Request["isnew"], source = Request["source"] });
                 }
             }
@@ -1906,7 +1906,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Publish(string id)
+        public ActionResult Publish(string id, bool isFromActivityHome = false)
         {
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid());
@@ -1964,6 +1964,9 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 SendGridHelper.AddOrUpdateContact(account, user, msgs);
             }
+
+            if (isFromActivityHome)
+                return Redirect(activity.ShortHomePageUrl);
 
             return View("publishdetail", activity);
         }

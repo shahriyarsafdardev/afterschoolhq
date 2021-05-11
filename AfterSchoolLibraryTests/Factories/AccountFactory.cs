@@ -18,6 +18,13 @@ namespace AfterSchoolLibraryTests.Factories
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
+        
+        public static Account CreateAccount(WebUser user, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var obj = new Account() { OwnerId = user.ID, Name = "Test Account", Email = "test@test.com", AccountTypeId = AccountType.Business, ConvenienceFeesPaidBy = FeesPaidByType.Parent, CreditCardFeesPaidBy = FeesPaidByType.Parent };
+            msgs.AddRange(obj.Save(dc: dc));
+            return obj;
+        }
 
         public static Account CreateWithFreePackage(WebUser user, AccountType accountType, SystemMessages msgs, DatabaseConnection dc)
         {

@@ -29,6 +29,12 @@
     var servicesOffered = accountProperties.Where(item => item.AccountPropertyTypeId.In(serviceTypes));
     var specialNeedsOffered = accountProperties.Where(item => item.AccountPropertyTypeId.In(specialNeedsTypes));
     var showPhotoGallery = photos.Any() || isInEditMode;
+    var isOnboadingCompleted = AccountService.IsOnboardingCompleted(SessionVariables.CurrentAccount, msgs);
+    var isStripeIntegrated = TempData["IsStripeIntegrated"] != null;
+    var isAccountAndLoggedInUserIsOwner = SessionVariables.CurrentAccount.IsNotEmpty() &&
+        SessionVariables.CurrentUser.IsNotEmpty() &&
+        (SessionVariables.CurrentAccount.ID == Model.ID) &&
+        (SessionVariables.CurrentUser.HasAccessTo(Model));
 }
 
 <style>
@@ -52,14 +58,10 @@
 </style>
 
 @{
-    Html.RenderPartial(
-        "~/Views/Shared/Registration/_AccountTopBar.cshtml",
-        Model,
-        new ViewDataDictionary()
-        {
-            { "LoginReturnUrl", Model.HomePageUrl }
-                                                                                                                                        }
-        );
+    Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", Model, new ViewDataDictionary() {
+        { "LoginReturnUrl", Model.HomePageUrl },
+        { "IsAccount", true }
+    });
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -510,10 +512,10 @@
 </div>
 
 
- @*Leaving out of this Release, needs more design*@
+@*Leaving out of this Release, needs more design*@
 @*<button id="btn-welcome-user" type="button" class="btn btn-default btn-space md-trigger hide" data-modal="modal-welcome-user">
-    welcome user
-</button>*@
+        welcome user
+    </button>*@
 
 <div>
     @{
@@ -526,15 +528,64 @@
     }
 </div>
 
+@if (isAccountAndLoggedInUserIsOwner)
+{
+    <div id="footer-account" class="activity-footer text-center hide">
+        <span class="span-upgrade-modal-close" onclick="return hideActivityRibbon()">X</span>
+        <a href="@Url.Action("style", "account", new { id = Model.Uid, area = "org" })" class="btn btn-default btn-activity-footer">Edit Profile</a>
+        <a href="@Url.Action("editsetup", "activity", new { isnew = 1, type = (int)ActivityType.Activity, area = "org", source = Request["source"]})" class="btn btn-default btn-activity-footer">Add Activity</a>
+    </div>
+
+    <div id="modal-getting-started" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body account-getting-started-padding">
+                    @{ Html.RenderPartial("~/Views/Shared/_GettingStarted.cshtml"); }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-payment-confirmation-accountView" class="hide">
+        @{ Html.RenderPartial("~/Views/Shared/_ModalPaymentConfirmation.cshtml", Model, new ViewDataDictionary() { { "ActivityUid", Model.Uid } }); };
+    </div>
+}
+
 <script type="text/javascript">
-    PageEvent.add(PageEvent.AFTER_INIT, function () {        
-        //$('#btn-welcome-user').click(); leaving out of this release, needs more design           
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+
+        var isOnboadingCompleted = @Json.Encode(isOnboadingCompleted);
+        var isStripeIntegrated = @Json.Encode(isStripeIntegrated);
+
+        if (!isOnboadingCompleted || isStripeIntegrated) {
+            //.. show getting started modal options if user misses any of that option
+            $('#modal-getting-started').modal({
+                backdrop: 'static'
+            });
+        }
+
+        //$('#btn-welcome-user').click(); leaving out of this release, needs more design
         var url = new URL(window.location.href);
         var claimprofile = url.searchParams.get("claimprofile");
         if (claimprofile) {
             $('#model-claim').click();
-        }        
+        }
     });
+
+    function hideActivityRibbon() {
+        $('#footer-account').fadeOut();
+    };
+
+    function LoadPaymentModal() {
+        $('#modal-getting-started').modal('hide');
+        $('#modal-payment-confirmation-accountView').removeClass('hide');
+
+        setTimeout(function () {
+            $('#modal-payment-confirmation').modal({
+                backdrop: 'static'
+            });
+        }, 100);
+    }
 
     (function () {
         var url = '@accountProfile.VideoUrl';
@@ -569,7 +620,6 @@
         }
 
         return false;
-
     }
 
     function validateYouTubeVideoUrl(url) {
