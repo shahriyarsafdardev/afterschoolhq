@@ -40,13 +40,13 @@
                                 {
                                     if (instance.StartDateTime.HasValue)
                                     {
-                                        var scheduleWithOneHourPast = instance.StartDateTime.Value.AddHours(-1);
-                                        var utcSchedule = TimeZoneInfo.ConvertTimeToUtc(scheduleWithOneHourPast);
+                                        var scheduleWithOneHourPast = instance.StartDateTime.Value;
+                                        var utcSchedule = TimeZoneInfo.ConvertTimeToUtc(instance.StartDateTime.Value);
                                         var comparison = DateTime.Compare(utcSchedule, currentTime);
                                         logs += "Schdule Time: " + utcSchedule.ToShortDateTimeString() + ": Kind: " + utcSchedule.Kind;
                                         logs += "\n";
 
-                                        if (comparison <= 0 || (currentTime.IsOnOrAfter(utcSchedule) && currentTime.IsOnOrBefore(instance.EndDateTime.Value)))
+                                        if (currentTime.Day >= utcSchedule.Day)
                                         {
                                             <option value="@instance.ID" @(Model.ActivityInstanceId == instance.ID ? " selected=\"selected\" " : "")>
                                                 @instance.StartDateTime.ToShortTimeString(), @instance.StartDateTime.Value.ToLongDateString()
