@@ -127,6 +127,13 @@
             $('#btn-add-student').prop('disabled', true);
         });
     });
+
+    $('#schoolnotfound').click(function () {
+        if ($(this).prop("checked") == true) {
+            $('#location').val('');
+            $('#placeid').val('');
+        }
+    });
 </script>
 
 @if (participationObject.IsActivityGroup() && participationObject.GetActivityGroup().ActivityGroupTypeId == ActivityGroupType.Session)
