@@ -28,21 +28,13 @@
                         <select name="activityinstance" id="activityinstance" class="form-control">
                             <option value="">Select...</option>
                             @{
-
-                                string logs = "";
                                 var currentTime = DateTime.UtcNow;
-                                logs += "Current Time: " + currentTime.ToShortDateTimeString() + ": Kind: " + currentTime.Kind;
-                                logs += "\n";
 
                                 foreach (var instance in schedule.GetInSessionInstances().DistinctBy(instance => instance.ID))
                                 {
                                     if (instance.StartDateTime.HasValue)
                                     {
-                                        var scheduleWithOneHourPast = instance.StartDateTime.Value;
                                         var utcSchedule = TimeZoneInfo.ConvertTimeToUtc(instance.StartDateTime.Value);
-                                        var comparison = DateTime.Compare(utcSchedule, currentTime);
-                                        logs += "Schdule Time: " + utcSchedule.ToShortDateTimeString() + ": Kind: " + utcSchedule.Kind;
-                                        logs += "\n";
 
                                         if (currentTime.Day >= utcSchedule.Day)
                                         {
@@ -52,8 +44,6 @@
                                         }
                                     }
                                 }
-
-                                AfterSchoolLibrary.Helpers.Utilities.SystemLog(logs);
                             }
                         </select>                       
                     </div>
