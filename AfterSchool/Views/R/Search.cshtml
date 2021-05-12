@@ -103,7 +103,7 @@
         </div>
     </div>
     <div class="col-xs-2" style="padding: 0; text-align: center;">
-        <img id="img-mobile-filter" src="~/img/filter.png" class="filter" isOpen="0" onclick="return mobileFilter()" />
+        <img id="img-mobile-filter" src="~/img/filter.png" class="filter hide" isOpen="0"  onclick="return mobileFilter()" />
     </div>
 
     <div class="clearfix"></div>
@@ -300,6 +300,9 @@
                 showModalIsyp();
                 @(CookieVariables.ShowISYPModal = "false")
             }
+
+            // we need to show the filter button, once js will get loaded, to avoid any js related error
+            $("#img-mobile-filter").removeClass("hide");
 
             $(window).scroll(function () {
                 if (isReachedScrollEnd == false &&
@@ -638,10 +641,8 @@
             else {
                 $('#filters').hide();
                 $('#mobile-filter-footer').hide();
-
                 $('#search-result').show();
                 $('#footerShowHide').show();
-
                 $('#img-mobile-filter').attr('isOpen', "0");
                 isMobileFilterWindowOpened = false;
             }
