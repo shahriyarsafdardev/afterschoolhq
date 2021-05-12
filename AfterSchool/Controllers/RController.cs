@@ -332,13 +332,13 @@ namespace AfterSchool.Controllers
                     AddNoCacheHeaders();
                 }
 
-                if (!activity.IsPublished && activity.GetLocation().IsNotEmpty() && activity.GetLocation().HostAccountId != activity.AccountId)
-                {
-                    var accountOwnerId = activity.GetLocation().GetHostAccount().OwnerId;
+                //if (!activity.IsPublished && activity.GetLocation().IsNotEmpty() && activity.GetLocation().HostAccountId != activity.AccountId)
+                //{
+                //    var accountOwnerId = activity.GetLocation().GetHostAccount().OwnerId;
 
-                    if (SessionVariables.CurrentUser.ID == accountOwnerId)
-                        canPublishActivity = true;
-                }
+                //    if (SessionVariables.CurrentUser.ID == accountOwnerId)
+                //        canPublishActivity = true;
+                //}
             }
             else
             {
