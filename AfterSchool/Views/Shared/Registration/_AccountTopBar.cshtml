@@ -330,7 +330,7 @@
         if (item == '@GettingStartedOptions.CreateProfile') {
             location.href = '@Url.Action("programinfo", "onboarding", new { area = "org" })';
         } else if (item == '@GettingStartedOptions.CreateFirstActivity') {
-            location.href = '@Url.Action("editsetup", "activity", new { area = "org", isnew = 1, type = 1 })';
+            location.href = '@Html.Raw(Url.Action("editsetup", "activity", new { area = "org", isnew = 1, type = (int)ActivityType.Activity }))';
         } else if (item == '@GettingStartedOptions.PublishActivity') {
             location.href = '@url';
         } else if (item == '@GettingStartedOptions.ValidateEmail') {
