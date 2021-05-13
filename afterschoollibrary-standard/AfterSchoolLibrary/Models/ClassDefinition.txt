@@ -686,6 +686,7 @@ loadmethod: AccountId|IsPublished|IsArchived, List<>
 loadmethod: AccountId|IsPublished|IsInviteOnly, List<>
 loadmethod: AccountId|UniqueName
 loadmethod: Uid
+loadmethod: Uid|AccountId
 loadmethod: Uid|IsPublished
 loadmethod: Uid|IsPublished|IsArchived
 loadmethod: Uid|IsPublished|IsInviteOnly
