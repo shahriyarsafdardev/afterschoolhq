@@ -54,7 +54,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 var currentAccount = SessionVariables.CurrentAccount;
-                var activity = Activity.LoadByUid(activityUid.ToGuid(), currentAccount.ID.Value, msgs);
+                var activity = Activity.LoadByUidByAccountId(activityUid.ToGuid(), currentAccount.ID.Value, msgs);
                 var calcObject = new FeeCalculationObject(
                                     cost.ToDecimal(), 
                                     currentAccount, 
@@ -106,7 +106,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult MoveRegistrantAssignment(string id, string registrant, string assignmenttype)
         {
             var msgs = new SystemMessages();
-            var activity = Activity.LoadByUid(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+            var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
             var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
                 activity.ID.Value, 
                 ParticipationObjectType.Activity, 
@@ -167,7 +167,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (id.IsGuid())
             {
-                var activity = Activity.LoadByUid(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+                var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
                 var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
                     activity.ID.Value, 
                     ParticipationObjectType.Activity, 
@@ -225,7 +225,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (SessionVariables.CurrentAccount.IsNotEmpty() && id.IsNumber())
             {
-                var schedule = ActivitySchedule.LoadByIdByAccountId(id.ToInteger(), SessionVariables.CurrentAccount.ID.Value);
+                var schedule = ActivitySchedule.LoadByIdByAccountId(id, SessionVariables.CurrentAccount.ID.Value, msgs);
                 var activities = schedule.GetActivities();
 
                 WriteOutput(new { status = "ok", activities = activities.Select(x => new { x.ID, x.Name }) }, ResponseType.JSON);
@@ -263,7 +263,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        var schedule = ActivitySchedule.LoadByIdByAccountId(id.ToInteger(), SessionVariables.CurrentAccount.ID.Value, amsgs, adc);
+                        var schedule = ActivitySchedule.LoadByIdByAccountId(id, SessionVariables.CurrentAccount.ID.Value, amsgs, adc);
                         var currentActivities = schedule.GetActivities(amsgs, adc);
                         var activities = schedule.GetActivityGroup(amsgs, adc).GetActivities(amsgs, adc);
 
@@ -304,8 +304,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (id.IsGuid() && schedule.IsNumber())
             {
-                var activity = Activity.LoadByUid(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
-                var sched = ActivitySchedule.LoadByIdByAccountId(schedule.ToInteger(), SessionVariables.CurrentAccount.ID.Value, msgs);
+                var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+                var sched = ActivitySchedule.LoadByIdByAccountId(schedule, SessionVariables.CurrentAccount.ID.Value, msgs);
 
                 if (activity.AccountId != SessionVariables.CurrentAccount.ID || sched.AccountId != SessionVariables.CurrentAccount.ID)
                     msgs.Add("Invalid data", MessageType.ApiUsageError);

@@ -114,6 +114,7 @@ loadmethod: AccountId, List<>
 loadmethod: AccountId|IsPublished, List<>
 loadmethod: LocationId, List<>
 loadmethod: Uid
+loadmethod: Uid|AccountId
 -loadmethod: ParentActivityId, List<>
 loadmethod: ActivityGroupId, List<>
 loadmethod: AccountActivityGroupId, List<>
@@ -212,6 +213,7 @@ loadmethod: AccountId, List<>
 loadmethod: ActivityGroupId, List<>
 loadmethod: AccountId|IsOngoing, List<>
 loadmethod: ActivityGroupId|IsOngoing, List<>
+loadmethod: Id|AccountId
 [end]
 
 [begin]
@@ -2168,5 +2170,5 @@ values: NotSet, PastDue, CurrentlyDue, EventuallyDue
 [begin]
 type: Enum
 name: GettingStartedOptions
-values: NotSet, CreateProfile, CreateFirstActivity, ValidateEmail, AcceptPayments
+values: NotSet, CreateProfile, CreateFirstActivity, PublishActivity, ValidateEmail, AcceptPayments, ProcessCompleted
 [end]
