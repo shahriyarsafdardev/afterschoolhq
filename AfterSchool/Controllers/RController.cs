@@ -64,8 +64,17 @@ namespace AfterSchool.Controllers
                     {
                         regStartPageAccount = directoryAccount;
 
-                        WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, actionType: WebSessionActionType.Navigated, objectType: ObjectType.DirectoryAccount,
-                             objectId: account.ID, objectText: account.Name, indirectObjectId: directoryAccount.ID, indirectObjectText: directoryAccount.Name);
+                        // LOG: Someone Navigated to Account AccountName from Directory DirectoryAccountName
+                        WebSessionUtilities.LogActivity(
+                            webSessionId: SessionVariables.WebSession.ID.Value,
+                            actor: SessionVariables.CurrentUser, 
+                            actionType: WebSessionActionType.Navigated, 
+                            objectType: ObjectType.DirectoryAccount,
+                            objectId: account.ID, 
+                            objectText: account.Name, 
+                            indirectObjectId: directoryAccount.ID, 
+                            indirectObjectText: directoryAccount.Name
+                        );
                     }               
                 }
 
