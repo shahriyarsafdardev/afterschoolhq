@@ -107,4 +107,20 @@
     .desc-mobile-width {
         width: 116px;
     }
+
+    .activity-footer {
+        position: fixed;
+        z-index: 999999;
+        background-color: #00c5a3;
+        width: 100%;
+        bottom: 0;
+        color: white;
+        padding: 10px 0;
+    }
+
+    .btn-activity-footer {
+        margin: 10px;
+        font-weight: bold;
+        border-radius: 7px;
+    }
 }

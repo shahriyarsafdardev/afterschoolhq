@@ -357,6 +357,8 @@ var ActivitySetup = {
         $('#form1').attr('action', url);
     },
     setCopyActivity: function (name, url) {
+        if (name.length > 43)
+            name = name.substring(0, 43); // to adjust [copy] suffix within limit of 50 characters for activity name
         $('#activitynamecopy').val(name + ' [copy]');
         $('#form-copy').attr('action', url);
     }

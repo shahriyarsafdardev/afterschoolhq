@@ -67,4 +67,33 @@
     .process-back {      
         margin-left: 170px;
     }
+
+    .search-bg {
+        background-image: linear-gradient(rgba(0, 0, 0, .8), rgba(0, 0, 0, .8)), url(https://afterschoolhq-prod.s3.us-east-2.amazonaws.com/McCoyYouth/headerimage/120221640_10157669465950893_7044339041890392902_n.png) !important;
+    }
+
+    .account-getting-started-padding {
+        padding: 50px 145px 50px 145px !important;
+    }
+
+    .modal-min-width {
+        min-width: 742px;
+    }
+
+    .activity-footer {
+        position: fixed;
+        z-index: 999999;
+        background-color: #00c5a3;
+        width: 100%;
+        min-height: 60px;
+        bottom: 0;
+        padding: 20px 40px;
+        color: white;
+    }
+
+    .btn-activity-footer {
+        font-weight: bold;
+        border-radius: 7px;
+        margin-left: 20px;
+    }
 }

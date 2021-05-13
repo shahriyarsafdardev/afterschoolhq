@@ -240,12 +240,11 @@ namespace AfterSchoolLibrary.Models
                  AND  TABLE_NAME = 'WebSession'";
 
 			var result = dq.ExecuteSelect(sql, msgs);
+
 			if (result != null && result.Rows.Count > 0)
-			{
 				return true;
-			}
-			else
-				return false;
+			
+		return false;
 		}
 
 		#endregion

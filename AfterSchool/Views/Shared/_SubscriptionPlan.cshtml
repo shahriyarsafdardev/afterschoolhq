@@ -112,7 +112,7 @@
 
                     <div id="container-subscription-week" class="input-group input-group-lg xs-mb-15 hide">
                         <span class="input-group-addon">Day of week for period start</span>
-                        <select name="subscriptionperiodstartweekday" id="subscriptionperiodstartweekday" class="form-control" required>
+                        <select name="subscriptionperiodstartweekday" id="subscriptionperiodstartweekday" class="form-control" >
                             @foreach (var item in Enum.GetValues(typeof(DayOfWeek)).Cast<DayOfWeek>())
                             {
                                 <option value="@item.ToString()">
@@ -124,7 +124,7 @@
 
                     <div id="container-subscription-month" class="input-group input-group-lg xs-mb-15">
                         <span class="input-group-addon">Day of month for period start</span>
-                        <select name="subscriptionperiodstartmonthday" id="subscriptionperiodstartmonthday" class="form-control" required>
+                        <select name="subscriptionperiodstartmonthday" id="subscriptionperiodstartmonthday" class="form-control" >
                             @foreach (var item in days)
                             {
                                 if (item.IsOnOrBefore(DateTime.UtcNow))
