@@ -380,6 +380,7 @@ namespace AfterSchoolLibrary.Helpers
                     Migrations.UpdateLocationLatitudeLongitude_20210302.Do(amsgs, adc);
 
                     Migrations.MigrateSessionToWebSession_20210312.Do(amsgs, adc);
+                    Migrations.UpdateWebSessionAction_20210513.Do(amsgs, adc);
                     // Migrations.AddProfilesToAllAccounts_20200727.Do(amsgs, adc);
 
                     // amsgs.Add("rollback please", MessageType.Error);

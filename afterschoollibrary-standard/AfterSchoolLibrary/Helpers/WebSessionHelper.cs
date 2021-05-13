@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace AfterSchoolLibrary.Helpers
 {
@@ -21,94 +22,80 @@ namespace AfterSchoolLibrary.Helpers
             return actionStringDict;
         }
 
+        private static string ReplaceParams(string template, Dictionary<string, string> formatParams)
+        {
+            return formatParams.Aggregate(template, (args, pair) => args.Replace($"{{{pair.Key}}}", pair.Value));
+        }
+
+        private static Dictionary<string, string> FormatTemplate(string template, Dictionary<string, string> formatParams)
+        {
+            return new Dictionary<string, string>()
+            {
+                { "ActionString", ReplaceParams(template, formatParams)  },
+                {"ActionStringFormat", template }
+            };
+        }
+
         private static Dictionary<string, string> CreateActionString(string actorName, WebSessionActionType actionType, ObjectType objectType, string objectText)
         {
-            var formatParams = new object[] { objectType, actorName, actionType, objectText };
+            var formatParams = new Dictionary<string, string>
+            {
+                { "actorName", actorName },
+                { "actionType", actionType.ToString() },
+                { "objectType", objectType.ToString() },
+                {"objectText", objectText }
+            };
 
             switch (actionType)
             {
                 case WebSessionActionType.NotSet:
                     // this way we only have to change one string, no chance of there being discrepancy between the ActionString and ActionStringFormat
-                    var notSetFormat = "{actorName} ACTION NOT SET  {objectType} {objectText}";
-                    return new Dictionary<string, string>
-                    {
-                        {"ActionString", string.Format(notSetFormat, formatParams) },
-                        {"ActionStringFormat", notSetFormat }
-                    };
+                    var notSetTemplate = "{actorName} ACTION NOT SET  {objectType} {objectText}";
+                    return FormatTemplate(notSetTemplate, formatParams);
+
                 case WebSessionActionType.BeganRegistration:
-                    var actorActionOfObjectFormat = "{actorName} {actionType} of {objectType} {objectText}";
-                    return new Dictionary<string, string>
-                    {
-                        {"ActionString", string.Format(actorActionOfObjectFormat, formatParams) },
-                        {"ActionStringFormat", actorActionOfObjectFormat }
-                    };
+                    var actorActionOfObjectTemplate = "{actorName} {actionType} of {objectType} {objectText}";
+                    return FormatTemplate(actorActionOfObjectTemplate, formatParams);
+
                 case WebSessionActionType.Refunded:
                     var actorWasActionObjectTextFormat = "{actorName} was {actionType} {objectText}";
-                    return new Dictionary<string, string>
-                    {
-                        {"ActionString", string.Format(actorWasActionObjectTextFormat, formatParams) },
-                        {"ActionStringFormat", actorWasActionObjectTextFormat }
-                    };
+                    return FormatTemplate(actorWasActionObjectTextFormat, formatParams);
+
                 case WebSessionActionType.Requested:
                     if (objectType == ObjectType.RefundRequest)
                     {
-                        var refundamountFormat = "{actorName} {actionType} refund amount {objectText}";
-                        return new Dictionary<string, string>
-                        {
-                            {"ActionString", string.Format(refundamountFormat, formatParams) },
-                            {"ActionStringFormat", refundamountFormat }
-                        };
+                        var refundAmountTemplate = "{actorName} {actionType} refund amount {objectText}";
+                        return FormatTemplate(refundAmountTemplate, formatParams);
                     }
                     else
                     {
-                        var accessToFormat = "{actorName} {actionType} access to {objectType} {objectText}";
-                        return new Dictionary<string, string>
-                        {
-                            {"ActionString", string.Format(accessToFormat, formatParams) },
-                            {"ActionStringFormat", accessToFormat }
-                        };
+                        var accessToTemplate = "{actorName} {actionType} access to {objectType} {objectText}";
+                        return FormatTemplate(accessToTemplate, formatParams);
                     }
+
                 case WebSessionActionType.LoggedIn:
                 case WebSessionActionType.LoggedOut:
                 case WebSessionActionType.SignedUp:
-                    var actorActionFormat = "{actorName} {actionType}";
-                    var formattest = string.Format(actorActionFormat, formatParams);
-                    return new Dictionary<string, string>
-                    {
-                        {"ActionString", string.Format(actorActionFormat, formatParams) },
-                        {"ActionStringFormat", actorActionFormat }
-                    };
+                    var actorActionTemplate = "{actorName} {actionType}";
+                    return FormatTemplate(actorActionTemplate, formatParams);
+
                 case WebSessionActionType.Interested:
-                    var actorIsActionInObject = "{actorName} is {actionType} In {objectType} {objectText}";
-                    return new Dictionary<string, string>
-                    {
-                        {"ActionString", string.Format(actorIsActionInObject, formatParams) },
-                        {"ActionStringFormat", actorIsActionInObject }
-                    };
+                    var actorIsActionInObjectTemplate = "{actorName} is {actionType} In {objectType} {objectText}";
+                    return FormatTemplate(actorIsActionInObjectTemplate, formatParams); 
+
                 case WebSessionActionType.Moved:
                 case WebSessionActionType.Navigated:
-                    var actorActionObjectTo = "{actorName} {actionType} to {objectType} {objectText} ";
-                    return new Dictionary<string, string>
-                    {
-                        {"ActionString", string.Format(actorActionObjectTo, formatParams) },
-                        {"ActionStringFormat", actorActionObjectTo }
-                    };
+                    var actorActionObjectToTemplate = "{actorName} {actionType} to {objectType} {objectText} ";
+                    return FormatTemplate(actorActionObjectToTemplate, formatParams);
+
                 case WebSessionActionType.Registered:
                 case WebSessionActionType.Paid:
-                    var actorActionObjectText = "{actorName} {actionType} {objectText} ";
-                    return new Dictionary<string, string>
-                    {
-                        {"ActionString", string.Format(actorActionObjectText, formatParams) },
-                        {"ActionStringFormat", actorActionObjectText }
-                    };
+                    var actorActionObjectTextTemplate = "{actorName} {actionType} {objectText} ";
+                    return FormatTemplate(actorActionObjectTextTemplate, formatParams);
 
                 case WebSessionActionType.Browsed:
-                    var browseFormat = "{actorName} {actionType} {objectText}'s Programs ";
-                    return new Dictionary<string, string>
-                    {
-                        {"ActionString", string.Format(browseFormat, formatParams) },
-                        {"ActionStringFormat", browseFormat }
-                    };
+                    var browsedTemplate = "{actorName} {actionType} {objectText}'s Programs ";
+                    return FormatTemplate(browsedTemplate, formatParams);
 
                 //  --- Remaining ActionTypes ---
                 //  case WebSessionActionType.Created:
@@ -136,35 +123,42 @@ namespace AfterSchoolLibrary.Helpers
                 //  case WebSessionActionType.Shared:
                 //  case WebSessionActionType.Contacted:
                 default:
-                    var actorActionObjectTypeTextFormat = "{actorName} {actionType} {objectType} {objectText}";
-                    return new Dictionary<string, string>
-                    {
-                        {"ActionString", string.Format(actorActionObjectTypeTextFormat, formatParams) },
-                        {"ActionStringFormat", actorActionObjectTypeTextFormat }
-                    };
+                    var actorActionObjectTypeTextTemplate = "{actorName} {actionType} {objectType} {objectText}";
+                    return FormatTemplate(actorActionObjectTypeTextTemplate, formatParams);
             }
 
         }
 
+        private static Dictionary<string, string> AppendFormatTemplate(Dictionary<string, string> actionStringDict, string template, Dictionary<string, string> formatParams)
+        {
+            return new Dictionary<string, string>
+            {
+                { "ActionString",  actionStringDict.GetValueOrDefault("ActionString") + ReplaceParams(template, formatParams) },
+                { "ActionStringFormat", actionStringDict.GetValueOrDefault("ActionStringFormat") + template  }
+            };
+        }
+
         private static Dictionary<string, string> AppendIndirectObjectText(Dictionary<string, string> actionStringDict, WebSessionActionType actionType, ObjectType indirectObjectType, string indirectObjectText)
         {
-            var formatParams = new object[] { indirectObjectType, indirectObjectText };
+            var formatParams = new Dictionary<string, string>
+            {
+                { "indirectObjectType", indirectObjectType.ToString() },
+                { "indirectObjectText", indirectObjectText }
+            };
 
-            // shared formats
-            var toFormat = " to {indirectObjectType {indirectObjectText}";
-            var forFormat = " for {indirectObjectType} {indirectObjectText}";
+
+            // shared templates
+            var toTemplate = " to {indirectObjectType {indirectObjectText}";
+            var forTemplate = " for {indirectObjectType} {indirectObjectText}";
 
             switch (actionType)
             {
                 case WebSessionActionType.NotSet:
                     //  this way we only have to change one string
                     //  no chance of there being discrepancy between the ActionString and ActionStringFormat
-                    var notSetFormat = " --- {indirectObjectType} {indirectObjectText}";
-                    return new Dictionary<string, string>
-                    { 
-                        {"ActionString", actionStringDict.GetValueOrDefault("ActionString") + string.Format(notSetFormat, formatParams) },
-                        {"ActionStringFormat", actionStringDict.GetValueOrDefault("ActionStringFormat") + notSetFormat }
-                    };
+                    var notSetTemplate = " --- Action Not Set --- {indirectObjectType} {indirectObjectText}";
+                    return AppendFormatTemplate(actionStringDict, notSetTemplate, formatParams);
+
                 case WebSessionActionType.BeganRegistration:
                 case WebSessionActionType.Refunded:
                 case WebSessionActionType.Requested:
@@ -176,22 +170,14 @@ namespace AfterSchoolLibrary.Helpers
                 case WebSessionActionType.ManuallyRefunded:
                 case WebSessionActionType.Approved:
                 case WebSessionActionType.Searched:
-                    return new Dictionary<string, string>
-                    {
-                        {"ActionString", actionStringDict.GetValueOrDefault("ActionString") + string.Format(forFormat, formatParams) },
-                        {"ActionStringFormat", actionStringDict.GetValueOrDefault("ActionStringFormat") + forFormat }
-                    };
+                    return AppendFormatTemplate(actionStringDict, forTemplate, formatParams);
 
                 case WebSessionActionType.Followed:
                 case WebSessionActionType.Unfollowed:
-                    var ofFormat = " of {indirectObjectType} {indirectObjectText}";
-                    return new Dictionary<string, string>
-                    {
-                        {"ActionString", actionStringDict.GetValueOrDefault("ActionString") + string.Format(ofFormat, formatParams) },
-                        {"ActionStringFormat", actionStringDict.GetValueOrDefault("ActionStringFormat") + ofFormat }
-                    };
-                
-       
+                    var ofTemplate = " of {indirectObjectType} {indirectObjectText}";
+                    return AppendFormatTemplate(actionStringDict, ofTemplate, formatParams);
+
+
                 case WebSessionActionType.LoggedIn:
                 case WebSessionActionType.LoggedOut:
                 case WebSessionActionType.SignedUp:
@@ -199,14 +185,10 @@ namespace AfterSchoolLibrary.Helpers
 
                 case WebSessionActionType.Viewed:
                 case WebSessionActionType.Interested:
-                    var byFormat = " by {indirectObjectType {indirectObjectText}";
-                    return new Dictionary<string, string>
-                    {
-                        {"ActionString", actionStringDict.GetValueOrDefault("ActionString") + string.Format(byFormat, formatParams) },
-                        {"ActionStringFormat", actionStringDict.GetValueOrDefault("ActionStringFormat") + byFormat }
-                    };
+                    var byTemplate = " by {indirectObjectType {indirectObjectText}";
+                    return AppendFormatTemplate(actionStringDict, byTemplate, formatParams);
 
-                
+
                 case WebSessionActionType.Updated:
                 case WebSessionActionType.Published:
                 case WebSessionActionType.Sent:
@@ -214,41 +196,24 @@ namespace AfterSchoolLibrary.Helpers
                 case WebSessionActionType.Connected:
                 case WebSessionActionType.Copied:
                 case WebSessionActionType.Restored:
-                   
-                    return new Dictionary<string, string>
-                    {
-                        {"ActionString", actionStringDict.GetValueOrDefault("ActionString") + string.Format(toFormat, formatParams) },
-                        {"ActionStringFormat", actionStringDict.GetValueOrDefault("ActionStringFormat") + toFormat }
-                    };
+                    return AppendFormatTemplate(actionStringDict, toTemplate, formatParams);
 
                 case WebSessionActionType.Unpublished:
                 case WebSessionActionType.Navigated:
                 case WebSessionActionType.Browsed:
                 case WebSessionActionType.Moved:
-                    var fromFormat = " from {indirectObjectType {indirectObjectText}";
-                    return new Dictionary<string, string>
-                    {
-                        {"ActionString", actionStringDict.GetValueOrDefault("ActionString") + string.Format(fromFormat, formatParams) },
-                        {"ActionStringFormat", actionStringDict.GetValueOrDefault("ActionStringFormat") + fromFormat }
-                    };
+                    var fromTemplate = " from {indirectObjectType {indirectObjectText}";
+                    return AppendFormatTemplate(actionStringDict, fromTemplate, formatParams);
 
                 case WebSessionActionType.Paid:
                     // to Account
                     if(indirectObjectType == ObjectType.Account)
                     {
-                        return new Dictionary<string, string>
-                        {
-                            {"ActionString", actionStringDict.GetValueOrDefault("ActionString") + string.Format(toFormat, formatParams) },
-                            {"ActionStringFormat", actionStringDict.GetValueOrDefault("ActionStringFormat") + toFormat }
-                        };
+                        return AppendFormatTemplate(actionStringDict, toTemplate, formatParams);
                     } 
                     else // for Object
                     {
-                        return new Dictionary<string, string>
-                        {
-                            {"ActionString", actionStringDict.GetValueOrDefault("ActionString") + string.Format(forFormat, formatParams) },
-                            {"ActionStringFormat", actionStringDict.GetValueOrDefault("ActionStringFormat") + forFormat }
-                        };
+                        return AppendFormatTemplate(actionStringDict, forTemplate, formatParams);
                     }
                     
                 //  --- remaining ActionTypes ---
@@ -256,12 +221,8 @@ namespace AfterSchoolLibrary.Helpers
                 //  case WebSessionActionType.Shared:
                 //  case WebSessionActionType.Contacted:
                 default:
-                    var actorActionObjectTypeTextFormat = " {indirectObjectType {indirectObjectText";
-                    return new Dictionary<string, string>
-                    {
-                        {"ActionString",  actionStringDict.GetValueOrDefault("ActionString") + string.Format(actorActionObjectTypeTextFormat, formatParams) },
-                        {"ActionStringFormat",  actionStringDict.GetValueOrDefault("ActionStringFormat") + actorActionObjectTypeTextFormat }
-                    };
+                    var actorActionObjectTypeTextTemplate = " {indirectObjectType {indirectObjectText";
+                    return AppendFormatTemplate(actionStringDict, actorActionObjectTypeTextTemplate, formatParams);
             }
         }
 

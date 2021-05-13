@@ -66,11 +66,11 @@ namespace AfterSchool.Models
             //..actor	action		    Object		            ObjectType	        IndirectObjectId
             //..Bharat  Navigated to    FIRST SAMUEL CHURCH(W)  DirectoryAccount   ISYP
 
-            string actionString = null, actionStringFormat = null, actorName = (actor.IsNotEmpty() ? actor.FullName : "Someone");
+            string actorName = (actor.IsNotEmpty() ? actor.FullName : "Someone");
 
             var actionStringDict = AfterSchoolLibrary.Helpers.WebSessionHelper.GetActionString(objectType, actorName, actionType, objectText, indirectObjectType, indirectObjectText);
 
-            SaveLog(actorName: (actor.IsNotEmpty() ? actor.FirstName : "Someone"),
+            SaveLog(actor: actor,
                 actionStringFormat: actionStringDict.SingleOrDefault(kp => kp.Key == "ActionStringFormat").Value,
                 actionString: actionStringDict.SingleOrDefault(kp => kp.Key == "ActionString").Value,
                 webSessionId: webSessionId, 
@@ -82,13 +82,13 @@ namespace AfterSchool.Models
                 indirectObjectId: indirectObjectId);
         }
 
-        public static void SaveLog(string actorName, int webSessionId, string actionStringFormat, string actionString, int? actorId = (int?)null, int? accountId = (int?)null,
+        public static void SaveLog(WebUser actor, int webSessionId, string actionStringFormat, string actionString, int? actorId = (int?)null, int? accountId = (int?)null,
             WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet, ObjectType indirectObjectType = ObjectType.NotSet,
             int? objectId = (int?)null, int? indirectObjectId = (int?)null)
         {
+            var msgs = new SystemMessages();
             var action = new WebSessionAction();
             action.SessionId = webSessionId;
-            action.ActorId = actorId;
             action.AccountId = accountId; //.. logged in account id
             action.ActionTypeId = actionType;
             action.ObjectTypeId = objectType;
@@ -97,7 +97,9 @@ namespace AfterSchool.Models
             action.IndirectObjectTypeId = indirectObjectType;
             action.ActionStringFormat = actionStringFormat;
             action.ActionString = actionString;
-            action.Save();
+            action.CreateDate = DateTime.UtcNow;
+            action.CreatedBy = actor?.ID.Value;
+            msgs.AddRange(action.Save());
         }
     }
 }
