@@ -264,10 +264,10 @@ namespace AfterSchool.Areas.Org.Controllers
                     msgs: msgs
                 );
 
-                if (msgs.HasNoErrors())
-                {
-                    UpdateSession(SessionActionType.ActivityCreate, SessionVariables.CurrentAccount.ID, activity.ID);
-                }
+                //if (msgs.HasNoErrors())
+                //{
+                //    UpdateSession(SessionActionType.ActivityCreate, SessionVariables.CurrentAccount.ID, activity.ID);
+                //}
             }
 
 
@@ -1633,7 +1633,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add(string.Format("{0} has been published", activity.Name), MessageType.Success);
-                UpdateSession(SessionActionType.ActivityPublish, SessionVariables.CurrentAccount.ID, activity.ID);
+               // UpdateSession(SessionActionType.ActivityPublish, SessionVariables.CurrentAccount.ID, activity.ID);
             }
 
             ViewBag.Messages = msgs;
@@ -1651,7 +1651,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add(string.Format("{0} has been unpublished", activity.Name), MessageType.Success);
-                UpdateSession(SessionActionType.ActivityUnpublish, SessionVariables.CurrentAccount.ID, activity.ID);
+                // UpdateSession(SessionActionType.ActivityUnpublish, SessionVariables.CurrentAccount.ID, activity.ID);
             }
 
             ViewBag.Messages = msgs;

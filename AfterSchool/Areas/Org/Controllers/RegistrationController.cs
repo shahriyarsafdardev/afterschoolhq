@@ -326,7 +326,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 selectedRegistration.WasUpdated(msgs);
 
-                UpdateSession(sat, SessionVariables.CurrentAccount.ID, registrantActivity.GetActivityId(), null, selectedRegistration.RegistrantId, selectedRegistration.ID, selectedRegistration.RegistrationPeriodId, registrantActivity.GetActivityGroupId());
+                //UpdateSession(sat, SessionVariables.CurrentAccount.ID, registrantActivity.GetActivityId(), null, selectedRegistration.RegistrantId, selectedRegistration.ID, selectedRegistration.RegistrationPeriodId, registrantActivity.GetActivityGroupId());
 
                 msgs.Add(string.Format("{0} has been moved to {1} for {2}", selectedRegistration.ToRegistrant().Name, ratTo.ToString().SplitByUpperCase(), registrantActivity.GetParticipationObject(msgs).Name), MessageType.Success);
             }

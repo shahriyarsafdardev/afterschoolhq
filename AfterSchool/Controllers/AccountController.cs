@@ -214,7 +214,7 @@ namespace AfterSchool.Controllers
                         WebSessionUtilities.LogActivity(
                            webSessionId: SessionVariables.WebSession.ID.Value,
                            actor: currentUser,
-                           actionType: WebSessionActionType.Published,
+                           actionType: WebSessionActionType.Interested,
                            objectType: participationObject.GetWebSessionObjectType(),
                            objectId: participationObject.ObjectID.Value,
                            objectText: participationObject.Name,
@@ -587,8 +587,20 @@ namespace AfterSchool.Controllers
                             amsgs,
                             adc);
 
+
                         if (amsgs.HasNoErrors() && user.IsNotEmpty())
                         {
+                            // LOG: Someone Created
+                            WebSessionUtilities.LogActivity(
+                               webSessionId: SessionVariables.WebSession.ID.Value,
+                               actor: currentUser,
+                               actionType: WebSessionActionType.SignedUp,
+                               objectType: ObjectType.WebUser,
+                               objectId: user.ID.Value,
+                               objectText: user.FullName
+                           );
+
+
                             account = CreateOrUpdateAccount(user, amsgs, adc);
                             // LOG: Someone Created Account AccountName
                             WebSessionUtilities.LogActivity(
@@ -597,7 +609,7 @@ namespace AfterSchool.Controllers
                                actionType: WebSessionActionType.Created,
                                objectType: ObjectType.Account,
                                objectId: account.ID.Value,
-                               objectText: participationObject.Name
+                               objectText: account.Name
                            );
                         }
 

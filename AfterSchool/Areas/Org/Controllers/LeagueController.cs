@@ -493,7 +493,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 if (msgs.HasNoErrors())
                 {
                     msgs.Add($"{UILabel.ActivityGroupLabel(league.ActivityGroupTypeId)} Saved", MessageType.Success);
-                    UpdateSession(sat: SessionActionType.ActivityGroupCreate, accountId: SessionVariables.CurrentAccount.ID, activityGroupId: league.ID);
+                    // UpdateSession(sat: SessionActionType.ActivityGroupCreate, accountId: SessionVariables.CurrentAccount.ID, activityGroupId: league.ID);
                 }
             }
 
@@ -620,7 +620,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add(string.Format("{0} has been published", activityGroup.Name), MessageType.Success);
-                UpdateSession(SessionActionType.ActivityGroupPublish, SessionVariables.CurrentAccount.ID, activityGroup.ID);
+                // UpdateSession(SessionActionType.ActivityGroupPublish, SessionVariables.CurrentAccount.ID, activityGroup.ID);
             }
 
             ViewBag.AccountActivityGroup = accountActivityGroup;
@@ -648,7 +648,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add(string.Format("{0} has been unpublished", activityGroup.Name), MessageType.Success);
-                UpdateSession(SessionActionType.ActivityGroupUnpublish, SessionVariables.CurrentAccount.ID, activityGroup.ID);
+                // UpdateSession(SessionActionType.ActivityGroupUnpublish, SessionVariables.CurrentAccount.ID, activityGroup.ID);
             }
 
             ViewBag.AccountActivityGroup = accountActivityGroup;

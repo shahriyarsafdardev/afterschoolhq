@@ -433,7 +433,7 @@ namespace AfterSchool.Areas.District.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add($"{UILabel.ActivityGroupLabel(league.ActivityGroupTypeId)} Saved", MessageType.Success);
-                UpdateSession(sat: SessionActionType.ActivityGroupCreate, accountId: SessionVariables.CurrentAccount.ID, activityGroupId: league.ID);
+               // UpdateSession(sat: SessionActionType.ActivityGroupCreate, accountId: SessionVariables.CurrentAccount.ID, activityGroupId: league.ID);
             }
 
             ViewBag.Messages = msgs;

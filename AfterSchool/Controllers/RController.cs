@@ -64,11 +64,11 @@ namespace AfterSchool.Controllers
                     {
                         regStartPageAccount = directoryAccount;
 
-                        // LOG: Someone Navigated to Account AccountName from Directory DirectoryAccountName
+                        // LOG: Someone Viewed Account AccountName from Directory DirectoryAccountName
                         WebSessionUtilities.LogActivity(
                             webSessionId: SessionVariables.WebSession.ID.Value,
                             actor: SessionVariables.CurrentUser, 
-                            actionType: WebSessionActionType.Navigated, 
+                            actionType: WebSessionActionType.Viewed, 
                             objectType: ObjectType.DirectoryAccount,
                             objectId: account.ID, 
                             objectText: account.Name, 
@@ -232,7 +232,7 @@ namespace AfterSchool.Controllers
                 WebSessionUtilities.LogActivity(
                     webSessionId: SessionVariables.WebSession.ID.Value,
                     actor: SessionVariables.CurrentUser,
-                    actionType: WebSessionActionType.Browsed,
+                    actionType: WebSessionActionType.BrowsedAllActivities,
                     objectType: ObjectType.Account,
                     objectId: account.ID,
                     objectText: account.Name
@@ -600,7 +600,7 @@ namespace AfterSchool.Controllers
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
 
             if (account.IsEmpty() || account.IsDeleted)
-                return HttpNotFound(); ;
+                return HttpNotFound();
 
             var session = ActivityGroup.LoadByAccountIdByUniqueName(account.ID.Value, sessionname, msgs);
 
@@ -719,7 +719,7 @@ namespace AfterSchool.Controllers
                 WebSessionUtilities.LogActivity(
                     actor: SessionVariables.CurrentUser,
                     webSessionId: SessionVariables.WebSession.ID.Value,
-                    actionType: WebSessionActionType.Viewed,
+                    actionType: WebSessionActionType.BeganRegistration,
                     objectType: participationObject.GetWebSessionObjectType(),
                     objectId: participationObject.ObjectID.Value,
                     objectText: participationObject.Name,
