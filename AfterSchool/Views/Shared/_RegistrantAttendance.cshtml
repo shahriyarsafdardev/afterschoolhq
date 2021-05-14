@@ -28,15 +28,11 @@
                         <select name="activityinstance" id="activityinstance" class="form-control">
                             <option value="">Select...</option>
                             @{
-                                var currentTime = DateTime.UtcNow;
-
                                 foreach (var instance in schedule.GetInSessionInstances().DistinctBy(instance => instance.ID))
                                 {
                                     if (instance.StartDateTime.HasValue)
                                     {
-                                        var utcSchedule = TimeZoneInfo.ConvertTimeToUtc(instance.StartDateTime.Value);
-
-                                        if (currentTime.Day >= utcSchedule.Day)
+                                        if (DateTime.Now.Day >= instance.StartDateTime.Value.Day)
                                         {
                                             <option value="@instance.ID" @(Model.ActivityInstanceId == instance.ID ? " selected=\"selected\" " : "")>
                                                 @instance.StartDateTime.ToShortTimeString(), @instance.StartDateTime.Value.ToLongDateString()
