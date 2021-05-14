@@ -126,13 +126,13 @@
             $('#btn-add-student').html('Saving Student Info...');
             $('#btn-add-student').prop('disabled', true);
         });
-    });
 
-    $('#schoolnotfound').click(function () {
-        if ($(this).prop("checked") == true) {
-            $('#location').val('');
-            $('#placeid').val('');
-        }
+        $('#schoolnotfound').click(function () {
+            if ($(this).prop("checked") == true) {
+                $('#location').val('');
+                $('#placeid').val('');
+            }
+        });
     });
 </script>
 
@@ -145,6 +145,6 @@
         {
             { "IsDuringCheckout", true },
             { "AllowToModifyCart", false }
-                    }
+        }
     );
 }

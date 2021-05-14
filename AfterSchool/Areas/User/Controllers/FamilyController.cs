@@ -51,10 +51,10 @@ namespace AfterSchool.Areas.User.Controllers
                     case QuestionDataType.RegistrantLastName:
                     case QuestionDataType.RegistrantGrade:
                     case QuestionDataType.RegistrantDateOfBirth:
-                    case QuestionDataType.RegistrantGender:
-                    case QuestionDataType.RegistrantTShirtSize:
+                    case QuestionDataType.RegistrantGender:                    
                         question.IsRequired = true;
                         break;
+                    case QuestionDataType.RegistrantTShirtSize:
                     case QuestionDataType.RegistrantHomePhone:
                     case QuestionDataType.RegistrantEmail:
                         question.IsRequired = false;
@@ -145,7 +145,7 @@ namespace AfterSchool.Areas.User.Controllers
                             Location school = null;
 
                             if (placeid.IsNotEmpty())
-                                school = LocationService.CreateOrUpdateFromGoogle(locationname, streetnumber, streetname, address2, neighborhood, city, county, state, postalcode, country, placeid, latitude??0, longitude??0, SessionVariables.CurrentUser, amsgs, adc);
+                                school = LocationService.CreateOrUpdateFromGoogle(locationname, streetnumber, streetname, address2, neighborhood, city, county, state, postalcode, country, placeid, latitude, longitude, SessionVariables.CurrentUser, amsgs, adc);
 
                             registrant.SchoolLocationId = school.IsNotEmpty() ? school.ID : new int?();
                             registrant.LastModifiedBy = SessionVariables.CurrentUser.ID;

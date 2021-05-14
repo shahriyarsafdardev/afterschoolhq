@@ -1109,7 +1109,7 @@ namespace AfterSchool.Controllers
                         Location school = null;
                         
                         if (placeid.IsNotEmpty())
-                            school = LocationService.CreateOrUpdateFromGoogle(locationname, streetnumber, streetname, address2, neighborhood, city, county, state, postalcode, country, placeid, latitude??0, longitude??0, SessionVariables.CurrentUser, amsgs, adc);
+                            school = LocationService.CreateOrUpdateFromGoogle(locationname, streetnumber, streetname, address2, neighborhood, city, county, state, postalcode, country, placeid, latitude, longitude, SessionVariables.CurrentUser, amsgs, adc);
 
 
                         // create student account if requested by parent
