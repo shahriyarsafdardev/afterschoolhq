@@ -3212,7 +3212,7 @@ namespace AfterSchoolLibrary.Services
             );
         }
 
-        public static void ProcessRegistrationWithPayment(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static CheckoutObject ProcessRegistrationWithPayment(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
             (
@@ -3296,6 +3296,7 @@ namespace AfterSchoolLibrary.Services
                 dc: dc
             );
 
+            return checkoutObject;
         }
 
         public static void ProcessPostPayPlan(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
@@ -3335,7 +3336,7 @@ namespace AfterSchoolLibrary.Services
                 dc);
         }
 
-        public static void ProcessPayment(CheckoutObject checkoutObject, WebUser loggedInUser, bool isAttendanceCharge = false, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static CheckoutObject ProcessPayment(CheckoutObject checkoutObject, WebUser loggedInUser, bool isAttendanceCharge = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
             (
@@ -3357,6 +3358,7 @@ namespace AfterSchoolLibrary.Services
                 dc: dc
             );
 
+            return checkoutObject;
         }
 
         public static CheckPaymentAccount CreateOrUpdateCheckPaymentAccount(this Account account, LegalEntityType legalEntityType, string name, string address1, string address2, string city, string state, string postalCode, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
