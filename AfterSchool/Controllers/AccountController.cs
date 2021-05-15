@@ -1665,7 +1665,7 @@ namespace AfterSchool.Controllers
                 WebSessionUtilities.LogActivity(
                     webSessionId: SessionVariables.WebSession.ID.Value,
                     actor: currentUser,
-                    actionType: WebSessionActionType.Created,
+                    actionType: WebSessionActionType.Registered,
                     objectType: ObjectType.Registrant,
                     objectId: currentRegistrant.ID.Value,
                     objectText: currentRegistrant.FullName,
