@@ -2465,6 +2465,14 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
+        public static ActivityGroup GetActivityGroup(this Activity activity, int AccountId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (activity.ActivityGroupId.HasValue)
+                return ActivityGroup.LoadByIdByAccountId(activity.ActivityGroupId.Value.ToString(), AccountId, msgs, dc: dc);
+
+            return null;
+        }
+
         public static ActivitySchedule GetSchedule(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (activity.ActivityScheduleId.HasValue)

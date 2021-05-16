@@ -382,6 +382,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Activity_LocationId ON [Activity] (LocationId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Activity_Uid ON [Activity] (Uid)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Activity_AccountId_Uid ON [Activity] (Uid,AccountId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Activity_AccountId_Id ON [Activity] (Id,AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Activity_ActivityGroupId ON [Activity] (ActivityGroupId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Activity_AccountActivityGroupId ON [Activity] (AccountActivityGroupId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Activity_ActivityScheduleId ON [Activity] (ActivityScheduleId)"));
@@ -423,6 +424,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityMessage_ActivityId ON [ActivityMessage] (ActivityId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityMessage_ActivityGroupId ON [ActivityMessage] (ActivityGroupId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityMessage_Uid ON [ActivityMessage] (Uid)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityMessage_AccountId_Uid ON [ActivityMessage] (Uid,AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityMessage_AccountId ON [ActivityMessage] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityMessageRegistrant_ActivityMessageId ON [ActivityMessageRegistrant] (ActivityMessageId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityMessageRegistrant_RegistrantId ON [ActivityMessageRegistrant] (RegistrantId)"));
@@ -484,6 +486,8 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityGroup_AccountId_IsInviteOnly_IsPublished ON [ActivityGroup] (AccountId,IsPublished,IsInviteOnly)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityGroup_AccountId_UniqueName ON [ActivityGroup] (AccountId,UniqueName)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityGroup_Uid ON [ActivityGroup] (Uid)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityGroup_AccountId_Uid ON [ActivityGroup] (Uid,AccountId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityGroup_AccountId_Id ON [ActivityGroup] (Id,AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityGroup_IsPublished_Uid ON [ActivityGroup] (Uid,IsPublished)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityGroup_IsArchived_IsPublished_Uid ON [ActivityGroup] (Uid,IsPublished,IsArchived)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityGroup_IsInviteOnly_IsPublished_Uid ON [ActivityGroup] (Uid,IsPublished,IsInviteOnly)"));
@@ -498,6 +502,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registrant_AccountId_IsDeleted_RegistrantTypeId ON [Registrant] (AccountId,RegistrantTypeId,IsDeleted)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registrant_AccountId_IsContactOnly_IsDeleted ON [Registrant] (AccountId,IsContactOnly,IsDeleted)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registrant_Uid ON [Registrant] (Uid)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registrant_AccountId_Uid ON [Registrant] (Uid,AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registrant_IsDeleted_WebUserId ON [Registrant] (WebUserId,IsDeleted)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registrant_IsDeleted_IsMaster_WebUserId ON [Registrant] (WebUserId,IsMaster,IsDeleted)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registrant_FirstRegistrantId ON [Registrant] (FirstRegistrantId)"));
