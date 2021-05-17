@@ -23,12 +23,6 @@ namespace AfterSchoolLibrary.Migrations
                             wba.CreatedBy = wba.ActorId;
                             amsgs.AddRange(wba.Save(adc));
                         }
-
-                        if (wba.IndirectObjectTypeId.IsEmpty())
-                        {
-                            wba.IndirectObjectTypeId = ObjectType.NotSet;
-                            amsgs.AddRange(wba.Save(dc: adc));
-                        }
                     });
                 },
                 uniqueIdenfier: "UpdateWebSessionAction_20210513",
