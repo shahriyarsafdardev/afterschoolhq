@@ -115,6 +115,7 @@ loadmethod: AccountId|IsPublished, List<>
 loadmethod: LocationId, List<>
 loadmethod: Uid
 loadmethod: Uid|AccountId
+loadmethod: Id|AccountId
 -loadmethod: ParentActivityId, List<>
 loadmethod: ActivityGroupId, List<>
 loadmethod: AccountActivityGroupId, List<>
@@ -308,6 +309,7 @@ joinproperty: Account.Name, string, NVarChar
 loadmethod: ActivityId, List<>
 loadmethod: ActivityGroupId, List<>
 loadmethod: Uid
+loadmethod: Uid|AccountId
 loadmethod: AccountId, List<>
 [end]
 
@@ -687,6 +689,7 @@ loadmethod: AccountId|IsPublished, List<>
 loadmethod: AccountId|IsPublished|IsArchived, List<>
 loadmethod: AccountId|IsPublished|IsInviteOnly, List<>
 loadmethod: AccountId|UniqueName
+loadmethod: Id|AccountId
 loadmethod: Uid
 loadmethod: Uid|AccountId
 loadmethod: Uid|IsPublished
@@ -751,6 +754,7 @@ loadmethod: ParentRegistrantId, List<>
 loadmethod: AccountId|RegistrantTypeId|IsDeleted, List<>
 loadmethod: AccountId|IsContactOnly|IsDeleted, List<>
 loadmethod: Uid
+loadmethod: Uid|AccountId
 loadmethod: WebUserId|IsDeleted, List<>
 loadmethod: WebUserId|IsMaster|IsDeleted, List<>
 loadmethod: FirstRegistrantId, List<>
@@ -1564,6 +1568,7 @@ loadmethod: AccountId, List<>
 loadmethod: AccountId|PayoutStatusId, List<>
 loadmethod: PayoutStatusId, List<>
 loadmethod: Uid
+loadmethod: Uid|AccountId
 [end]
 
 [begin]
@@ -1635,6 +1640,7 @@ baseproperty: Name, required
 loadmethod: AccountId, List<>
 loadmethod: AccountId|CouponCode
 loadmethod: Uid
+loadmethod: Uid|AccountId
 [end]
 
 [begin]
@@ -1738,6 +1744,7 @@ property: DeniedDate, DateTime?, DateTime
 property: RequestedRefundTypeId, RefundType, Int, Required
 property: ApprovedRefundTypeId, RefundType, Int, Required
 loadmethod: Uid
+loadmethod: Uid|AccountId
 loadmethod: TransactionId, List<>
 loadmethod: AccountId, List<>
 loadmethod: AccountId|RefundRequestStatusId, List<>

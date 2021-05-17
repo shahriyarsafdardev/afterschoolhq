@@ -137,12 +137,15 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult PayoutTransactions(string id)
         {
+            if (SessionVariables.CurrentAccount.IsEmpty())
+                return HttpNotFound();
+
             var transactions = new List<Transaction>();
 
             if (id.IsGuid())
             {
                 var msgs = new SystemMessages();
-                var payout = Payout.LoadByUid(id.ToGuid(), msgs);
+                var payout = Payout.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
 
                 transactions = payout.GetTransactions(msgs);
 
@@ -301,13 +304,16 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult WithdrawAndCancel(string id, string po, string type, string returnurl)
         {
+            if (SessionVariables.CurrentAccount.IsEmpty())
+                return HttpNotFound();
+
             var msgs = new SystemMessages();
             if (po.IsEmpty() || id.IsEmpty() || type.IsEmpty())
                 msgs.Add("Validation error", MessageType.UserError);
 
             if (msgs.HasNoErrors())
             {
-                var registrant = Registrant.LoadByUid(id.ToGuid());
+                var registrant = Registrant.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
 
                 if (registrant.IsNotEmpty())
                 {
@@ -384,11 +390,14 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult ApproveRefundRequest(string uid)
         {
+            if (SessionVariables.CurrentAccount.IsEmpty())
+                return HttpNotFound();
+
             var msgs = new SystemMessages();
 
             if (uid.IsGuid())
             {
-                var request = RefundRequest.LoadByUid(uid.ToGuid(), msgs);
+                var request = RefundRequest.LoadByUidByAccountId(uid.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
 
                 if (request.IsNotEmpty())
                     request.ApproveRequestAsProvider(null, SessionVariables.CurrentUser, msgs);
@@ -404,11 +413,14 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult ApproveManualRefundRequest(string uid)
         {
+            if (SessionVariables.CurrentAccount.IsEmpty())
+                return HttpNotFound();
+
             var msgs = new SystemMessages();
 
             if (uid.IsGuid())
             {
-                var request = RefundRequest.LoadByUid(uid.ToGuid(), msgs);
+                var request = RefundRequest.LoadByUidByAccountId(uid.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
 
                 if (request.IsNotEmpty())
                     request.UpdateStatus(RefundRequestStatus.ApprovedManualRefund, SessionVariables.CurrentUser, msgs);
@@ -424,11 +436,14 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpPost]
         public ActionResult DenyRefundRequest(string uid, string reason)
         {
+            if (SessionVariables.CurrentAccount.IsEmpty())
+                return HttpNotFound();
+
             var msgs = new SystemMessages();
 
             if (uid.IsGuid())
             {
-                var request = RefundRequest.LoadByUid(uid.ToGuid(), msgs);
+                var request = RefundRequest.LoadByUidByAccountId(uid.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
 
                 if (request.IsNotEmpty())
                     request.DenyRequestAsProvider(reason, SessionVariables.CurrentUser, msgs);
@@ -459,12 +474,15 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult EditCoupon(string id)
         {
+            if (SessionVariables.CurrentAccount.IsEmpty())
+                return HttpNotFound();
+
             var msgs = new SystemMessages();
             Coupon coupon = null;
 
             if (id.IsNotBlank() && id.IsGuid())
             {
-                coupon = AfterSchoolLibrary.Models.Coupon.LoadByUid(id.ToGuid(), msgs);
+                coupon = AfterSchoolLibrary.Models.Coupon.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
                 ViewBag.Activities = GetActivityIdsForCoupon(coupon.ID.Value);
             }
             else {
@@ -513,11 +531,14 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpPost]
         public ActionResult SaveCoupon(string id)
         {
+            if (SessionVariables.CurrentAccount.IsEmpty())
+                return HttpNotFound();
+
             var msgs = new SystemMessages();
             Coupon coupon = null;
 
             if (id.IsNotBlank() && id.IsGuid())
-                coupon = AfterSchoolLibrary.Models.Coupon.LoadByUid(id.ToGuid(), msgs);
+                coupon = AfterSchoolLibrary.Models.Coupon.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
             
             if(coupon.IsEmpty())
                 coupon = CouponService.CreateBlank(SessionVariables.CurrentAccount, SessionVariables.LoggedInUser);
