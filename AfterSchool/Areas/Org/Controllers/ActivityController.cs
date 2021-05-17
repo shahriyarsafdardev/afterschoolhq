@@ -276,8 +276,24 @@ namespace AfterSchool.Areas.Org.Controllers
                     );
                     activityGroup = activity.GetActivityGroup();
 
+                    // Show Success Message
+                    // LOG: Someone Updated Activity ActivityName for Account AccountName
                     if (msgs.HasNoErrors())
-                        WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: activity.ID.Value, text: activity.Name, actionType: WebSessionActionType.Updated, objectType: ObjectType.Activity);
+                    {
+                        msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
+                        WebSessionUtilities.LogActivity(
+                            webSessionId: SessionVariables.WebSession.ID.Value,
+                            actor: currentUser,
+                            actionType: WebSessionActionType.Updated,
+                            objectType: ObjectType.Activity,
+                            objectId: activity.ID.Value,
+                            objectText: activity.Name,
+                            indirectObjectType: ObjectType.Account,
+                            indirectObjectId: currentAccount.ID.Value,
+                            indirectObjectText: currentAccount.Name
+                        );
+                    }
+                    
                 }
                 else
                 {
@@ -310,10 +326,22 @@ namespace AfterSchool.Areas.Org.Controllers
                         msgs: msgs
                     );
 
+                    // Show Success Message
+                    // LOG: Someone Updated Activity ActivityName for Account AccountName
                     if (msgs.HasNoErrors())
                     {
-                        UpdateSession(SessionActionType.ActivityCreate, currentAccount.ID, activity.ID);
-                        WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: activity.ID.Value, text: activity.Name, actionType: WebSessionActionType.Created, objectType: ObjectType.Activity);
+                        msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
+                        WebSessionUtilities.LogActivity(
+                            webSessionId: SessionVariables.WebSession.ID.Value,
+                            actor: currentUser,
+                            actionType: WebSessionActionType.Updated,
+                            objectType: ObjectType.Activity,
+                            objectId: activity.ID.Value,
+                            objectText: activity.Name,
+                            indirectObjectType: ObjectType.Account,
+                            indirectObjectId: currentAccount.ID.Value,
+                            indirectObjectText: currentAccount.Name
+                        );
                     }
                 }
 
@@ -407,6 +435,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             Activity activity = null;
             var accountPackage = SessionVariables.AccountPackage;
+            var currentUser = SessionVariables.CurrentUser;
+            var currentAccount = SessionVariables.CurrentAccount;
 
             activity = Activity.LoadByUid(id.ToGuid());
             if (activity.IsNotEmpty())
@@ -440,18 +470,30 @@ namespace AfterSchool.Areas.Org.Controllers
                 };
 
                 activity = ActivityService.EditExisting(
-                        loggedInUserId: SessionVariables.CurrentUser.ID.Value,
-                        account: SessionVariables.CurrentAccount,
+                        loggedInUserId: currentUser.ID.Value,
+                        account: currentAccount,
                         activityId: activity.ID.Value.ToString(),
                         values: values,
                         msgs: msgs
                     );
             }
 
+            // Show Success Message
+            // LOG: Someone Updated Activity ActivityName for Account AccountName
             if (msgs.HasNoErrors())
             {
-                msgs.Add(string.Format("{0} Saved", UILabel.ActivityLabel(activity.ActivityTypeId)), MessageType.Success);
-                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: activity.ID.Value, text: activity.Name, actionType: WebSessionActionType.Updated, objectType: ObjectType.Activity);
+                msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
+                WebSessionUtilities.LogActivity(
+                    webSessionId: SessionVariables.WebSession.ID.Value,
+                    actor: currentUser,
+                    actionType: WebSessionActionType.Updated,
+                    objectType: ObjectType.Activity,
+                    objectId: activity.ID.Value,
+                    objectText: activity.Name,
+                    indirectObjectType: ObjectType.Account,
+                    indirectObjectId: currentAccount.ID.Value,
+                    indirectObjectText: currentAccount.Name
+                );
             }
 
             ViewBag.Messages = msgs;
@@ -500,6 +542,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             Activity activity = null;
             var beforeProviderAccountId = new int?();
+            var currentUser = SessionVariables.CurrentUser;
+            var currentAccount = SessionVariables.CurrentAccount;
 
             var values = new Dictionary<string, object>()
             {
@@ -525,16 +569,28 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (activity.IsNotEmpty())
                 activity = ActivityService.EditExisting(
-                    loggedInUserId: SessionVariables.CurrentUser.ID.Value,
-                    account: SessionVariables.CurrentAccount,
+                    loggedInUserId: currentUser.ID.Value,
+                    account: currentAccount,
                     activityId: activity.ID.Value.ToString(),
                     values: values,
                     msgs: msgs);
 
+            // Show Success Message
+            // LOG: Someone Updated Activity ActivityName for Account AccountName
             if (msgs.HasNoErrors())
             {
                 msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
-                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: activity.ID.Value, text: activity.Name, actionType: WebSessionActionType.Updated, objectType: ObjectType.Activity);
+                WebSessionUtilities.LogActivity(
+                    webSessionId: SessionVariables.WebSession.ID.Value,
+                    actor: currentUser,
+                    actionType: WebSessionActionType.Updated,
+                    objectType: ObjectType.Activity,
+                    objectId: activity.ID.Value,
+                    objectText: activity.Name,
+                    indirectObjectType: ObjectType.Account,
+                    indirectObjectId: currentAccount.ID.Value,
+                    indirectObjectText: currentAccount.Name
+                );
             }
 
             ViewBag.Messages = msgs;
@@ -545,7 +601,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                if (msgs.HasNoErrors() && beforeProviderAccountId != activity.ProviderAccountId)
+                if (beforeProviderAccountId != activity.ProviderAccountId)
                     ActivityService.NotifyProviderOfNewActivity(activity, SessionVariables.CurrentUser, msgs);
 
                 switch (cmd)
@@ -591,6 +647,8 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult EditDetails(string id, string description, string details, string cmd)
         {
             var msgs = new SystemMessages();
+            var currentUser = SessionVariables.CurrentUser;
+            var currentAccount = SessionVariables.CurrentAccount;
             Activity activity = null;
 
             if (details.IsEmpty())
@@ -606,22 +664,34 @@ namespace AfterSchool.Areas.Org.Controllers
                 };
 
                 activity = ActivityService.EditExisting(
-                    loggedInUserId: SessionVariables.CurrentUser.ID.Value,
-                    account: SessionVariables.CurrentAccount,
+                    loggedInUserId: currentUser.ID.Value,
+                    account: currentAccount,
                     activityId: activity.ID.Value.ToString(),
                     values: values,
                     msgs: msgs
                 );
             }
 
+            // Show Success Message
+            // LOG: Someone Updated Activity ActivityName for Account AccountName
             if (msgs.HasNoErrors())
             {
-                msgs.Add(string.Format("{0} Saved", UILabel.ActivityLabel(activity.ActivityTypeId)), MessageType.Success);
-                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: activity.ID.Value, text: activity.Name, actionType: WebSessionActionType.Updated, objectType: ObjectType.Activity);
+                msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
+                WebSessionUtilities.LogActivity(
+                    webSessionId: SessionVariables.WebSession.ID.Value,
+                    actor: currentUser,
+                    actionType: WebSessionActionType.Updated,
+                    objectType: ObjectType.Activity,
+                    objectId: activity.ID.Value,
+                    objectText: activity.Name,
+                    indirectObjectType: ObjectType.Account,
+                    indirectObjectId: currentAccount.ID.Value,
+                    indirectObjectText: currentAccount.Name
+                );
             }
 
             ViewBag.Messages = msgs;
-            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.Account = currentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.IsFullScreen = GetIsFullScreen(activity);
 
@@ -636,7 +706,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         return View("EditSchedule", activity);
                     case "next":
                         ViewBag.ActiveMenu = "EditContact";
-                        ViewBag.Instructors = SessionVariables.CurrentAccount.GetUsers(msgs: msgs);
+                        ViewBag.Instructors = currentAccount.GetUsers(msgs: msgs);
                         return View("EditContact", activity);
                 }
             }
@@ -693,6 +763,9 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var inSessionDates = new List<DateRange>();
+            var currentUser = SessionVariables.CurrentUser;
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentAccountPackage = SessionVariables.AccountPackage;
             Activity activity = null;
             List<DateTime> outOfSessionDates = null;
             Dictionary<string, object> values = null;
@@ -738,8 +811,8 @@ namespace AfterSchool.Areas.Org.Controllers
                         };
 
                         activity = ActivityService.EditExisting(
-                            loggedInUserId: SessionVariables.CurrentUser.ID.Value,
-                            account: SessionVariables.CurrentAccount,
+                            loggedInUserId: currentUser.ID.Value,
+                            account: currentAccount,
                             activityId: activity.ID.Value.ToString(),
                             values: values,
                             msgs: msgs
@@ -748,12 +821,24 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
             }
 
+            // Show Success Message
+            // LOG: Someone Updated Activity ActivityName for Account AccountName
             if (msgs.HasNoErrors())
             {
-                msgs.Add(string.Format("{0} Schedule Saved", UILabel.ActivityLabel(activity.ActivityTypeId)), MessageType.Success);
-                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: activity.ID.Value, text: activity.Name, actionType: WebSessionActionType.Updated, objectType: ObjectType.Activity);
+                msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
+                WebSessionUtilities.LogActivity(
+                    webSessionId: SessionVariables.WebSession.ID.Value,
+                    actor: currentUser,
+                    actionType: WebSessionActionType.Updated,
+                    objectType: ObjectType.Activity,
+                    objectId: activity.ID.Value,
+                    objectText: activity.Name,
+                    indirectObjectType: ObjectType.Account,
+                    indirectObjectId: currentAccount.ID.Value,
+                    indirectObjectText: currentAccount.Name
+                );
             }
-            
+
             ActivitySchedule sched = null;
 
             if (msgs.HasNoErrors())
@@ -762,11 +847,11 @@ namespace AfterSchool.Areas.Org.Controllers
                 sched = ActivitySchedule.GetNewDefaultSchedule(inSessionDates);
 
             ViewBag.Messages = msgs;
-            ViewBag.Account = SessionVariables.CurrentAccount;
-            ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.Account = currentAccount;
+            ViewBag.AccountPackage = currentAccountPackage;
             ViewBag.Schedule = sched;
-            ViewBag.Schedules = SessionVariables.CurrentAccount.GetActivitySchedules();
-            ViewBag.ShowScheduleList = SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups);
+            ViewBag.Schedules = currentAccount.GetActivitySchedules();
+            ViewBag.ShowScheduleList = currentAccountPackage.HasFeature(FeatureType.ManageActivityGroups);
             ViewBag.IsFullScreen = GetIsFullScreen(activity);
 
             if (msgs.HasNoErrors())
@@ -785,7 +870,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         else
                         {
                             ViewBag.ActiveMenu = "EditContact";
-                            ViewBag.Instructors = SessionVariables.CurrentAccount.GetUsers(msgs: msgs);
+                            ViewBag.Instructors = currentAccount.GetUsers(msgs: msgs);
                             return View("editcontact", activity);
                         }
                 }
@@ -819,6 +904,8 @@ namespace AfterSchool.Areas.Org.Controllers
             string postalcode, string country, string placeid, decimal latitude, decimal longitude, string mylocation, string locationtype, string cmd, string activitylocationtype, string virtuallocation, string hidepreciselocation = "0")
         {
             var msgs = new SystemMessages();
+            var currentUser = SessionVariables.CurrentUser;
+            var currentAccount = SessionVariables.CurrentAccount;
             Activity activity = Activity.LoadByUid(id.ToGuid());
 
             if (location.IsEmpty())
@@ -852,22 +939,34 @@ namespace AfterSchool.Areas.Org.Controllers
                 };
 
                 activity = ActivityService.EditExisting(
-                    loggedInUserId: SessionVariables.CurrentUser.ID.Value,
-                    account: SessionVariables.CurrentAccount,
+                    loggedInUserId: currentUser.ID.Value,
+                    account: currentAccount,
                     activityId: activity.ID.Value.ToString(),
                     values: values,
                     msgs: msgs
                 );
             }
 
+            // Show Success Message
+            // LOG: Someone Updated Activity ActivityName for Account AccountName
             if (msgs.HasNoErrors())
             {
-                msgs.Add(string.Format("{0} Saved", UILabel.ActivityLabel(activity.ActivityTypeId)), MessageType.Success);
-                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: activity.ID.Value, text: activity.Name, actionType: WebSessionActionType.Updated, objectType: ObjectType.Activity);
+                msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
+                WebSessionUtilities.LogActivity(
+                    webSessionId: SessionVariables.WebSession.ID.Value,
+                    actor: currentUser,
+                    actionType: WebSessionActionType.Updated,
+                    objectType: ObjectType.Activity,
+                    objectId: activity.ID.Value,
+                    objectText: activity.Name,
+                    indirectObjectType: ObjectType.Account,
+                    indirectObjectId: currentAccount.ID.Value,
+                    indirectObjectText: currentAccount.Name
+                );
             }
 
             ViewBag.Messages = msgs;
-            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.Account = currentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.IsFullScreen = GetIsFullScreen(activity);
 
@@ -877,7 +976,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 {
                     case "prev":
                         ViewBag.ActiveMenu = "EditContact";
-                        ViewBag.Instructors = SessionVariables.CurrentAccount.GetUsers(msgs: msgs);
+                        ViewBag.Instructors = currentAccount.GetUsers(msgs: msgs);
                         return View("EditContact", activity);
                     case "next":
                         if (SessionVariables.AccountPackage.HasFeature(FeatureType.AcceptPayments))
@@ -934,6 +1033,8 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid());
+            var currentUser = SessionVariables.CurrentUser;
+            var currentAccount = SessionVariables.CurrentAccount;
 
             if (id.IsGuid())
             {
@@ -978,22 +1079,34 @@ namespace AfterSchool.Areas.Org.Controllers
                 };
 
                 activity = ActivityService.EditExisting(
-                    loggedInUserId: SessionVariables.CurrentUser.ID.Value,
-                    account: SessionVariables.CurrentAccount,
+                    loggedInUserId: currentUser.ID.Value,
+                    account: currentAccount,
                     activityId: activity.ID.Value.ToString(),
                     values: values,
                     msgs: msgs
                 );
             }
 
+            // Show Success Message
+            // LOG: Someone Updated Activity ActivityName for Account AccountName
             if (msgs.HasNoErrors())
             {
                 msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
-                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: activity.ID.Value, text: activity.Name, actionType: WebSessionActionType.Updated, objectType: ObjectType.Activity);
+                WebSessionUtilities.LogActivity(
+                    webSessionId: SessionVariables.WebSession.ID.Value,
+                    actor: currentUser,
+                    actionType: WebSessionActionType.Updated,
+                    objectType: ObjectType.Activity,
+                    objectId: activity.ID.Value,
+                    objectText: activity.Name,
+                    indirectObjectType: ObjectType.Account,
+                    indirectObjectId: currentAccount.ID.Value,
+                    indirectObjectText: currentAccount.Name
+                );
             }
 
             ViewBag.Messages = msgs;
-            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.Account = currentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.IsFullScreen = GetIsFullScreen(activity);
 
@@ -1037,6 +1150,8 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult EditConfirmation(string id, string registrationthankyouemail, string applicationthankyouemail, string interestthankyouemail, string cmd)
         {
             var msgs = new SystemMessages();
+            var currentUser = SessionVariables.CurrentUser;
+            var currentAccount = SessionVariables.CurrentAccount;
             Activity activity = Activity.LoadByUid(id.ToGuid());
 
             if (id.IsGuid())
@@ -1049,22 +1164,34 @@ namespace AfterSchool.Areas.Org.Controllers
                 };
 
                 activity = ActivityService.EditExisting(
-                    loggedInUserId: SessionVariables.CurrentUser.ID.Value,
-                    account: SessionVariables.CurrentAccount,
+                    loggedInUserId: currentUser.ID.Value,
+                    account: currentAccount,
                     activityId: activity.ID.Value.ToString(),
                     values: values,
                     msgs: msgs
                 );
             }
 
+            // Show Success Message
+            // LOG: Someone Updated Activity ActivityName for Account AccountName
             if (msgs.HasNoErrors())
             {
                 msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
-                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: activity.ID.Value, text: activity.Name, actionType: WebSessionActionType.Updated, objectType: ObjectType.Activity);
+                WebSessionUtilities.LogActivity(
+                    webSessionId: SessionVariables.WebSession.ID.Value,
+                    actor: currentUser,
+                    actionType: WebSessionActionType.Updated,
+                    objectType: ObjectType.Activity,
+                    objectId: activity.ID.Value,
+                    objectText: activity.Name,
+                    indirectObjectType: ObjectType.Account,
+                    indirectObjectId: currentAccount.ID.Value,
+                    indirectObjectText: currentAccount.Name
+                );
             }
 
             ViewBag.Messages = msgs;
-            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.Account = currentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.IsFullScreen = GetIsFullScreen(activity);
 
@@ -1084,9 +1211,9 @@ namespace AfterSchool.Areas.Org.Controllers
                             return View("EditLocation", activity);
                         }
                     case "publish":
-                        if (!MustRequestToPublish(activity))
-                            return RedirectToAction("publish", new { id = activity.Uid, isnew = Request["isnew"], source = Request["source"] });
+                        return Redirect(activity.ShortHomePageUrl);
 
+                    default:
                         return RedirectToAction("requesttopublish", new { id = activity.Uid, isnew = Request["isnew"], source = Request["source"] });
                 }
             }
@@ -1103,18 +1230,35 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var activityToCopy = Activity.LoadByUid(id.ToGuid());
+            var currentUser = SessionVariables.CurrentUser;
+            var currentAccount = SessionVariables.CurrentAccount;
 
             var activity = activityToCopy.Copy(
                             activitynamecopy,
                             true,
-                            SessionVariables.CurrentUser.ID.Value,
+                            currentUser.ID.Value,
                             msgs);
 
             ViewBag.Messages = msgs;
 
+            // Show Success Message
+            // LOG: Someone Updated Activity ActivityName for Account AccountName
+            // Redirect to New Copied Activity Edit
             if (msgs.HasNoErrors())
             {
-                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: activity.ID.Value, text: activity.Name, actionType: WebSessionActionType.Copied, objectType: ObjectType.Activity);                
+                msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Copied", MessageType.Success);
+                WebSessionUtilities.LogActivity(
+                    webSessionId: SessionVariables.WebSession.ID.Value,
+                    actor: currentUser,
+                    actionType: WebSessionActionType.Copied,
+                    objectType: ObjectType.Activity,
+                    objectId: activity.ID.Value,
+                    objectText: activity.Name,
+                    indirectObjectType: ObjectType.Account,
+                    indirectObjectId: currentAccount.ID.Value,
+                    indirectObjectText: currentAccount.Name
+                );
+
                 return RedirectToAction("editsetup", new { id = activity.Uid, isnew = 1, source = Request["source"] });
             }
 
@@ -1126,16 +1270,30 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid());
+            var currentUser = SessionVariables.CurrentUser;
+            var currentAccount = SessionVariables.CurrentAccount;
 
             if (activity.IsNotEmpty())
-                msgs.AddRange(activity.MarkAsDeleted(SessionVariables.CurrentUser.ID.Value));
+                msgs.AddRange(activity.MarkAsDeleted(currentUser.ID.Value));
 
             ViewBag.Messages = msgs;
 
+            // Show Success Message
+            // LOG: Someone has Deleted Activity ActivityName for Account AccountName
             if (msgs.HasNoErrors())
             {
                 msgs.Add(string.Format("{0} has been deleted", activity.Name), MessageType.Success);
-                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: activity.ID.Value, text: activity.Name, actionType: WebSessionActionType.Deleted, objectType: ObjectType.Activity);
+                WebSessionUtilities.LogActivity(
+                   webSessionId: SessionVariables.WebSession.ID.Value,
+                   actor: currentUser,
+                   actionType: WebSessionActionType.Deleted,
+                   objectType: ObjectType.Activity,
+                   objectId: activity.ID.Value,
+                   objectText: activity.Name,
+                   indirectObjectType: ObjectType.Account,
+                   indirectObjectId: currentAccount.ID.Value,
+                   indirectObjectText: currentAccount.Name
+               );
             }
 
             if (Request.UrlReferrer.IsNotEmpty())
@@ -1149,16 +1307,30 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid());
+            var currentUser = SessionVariables.CurrentUser;
+            var currentAccount = SessionVariables.CurrentAccount;
 
             if (activity.IsNotEmpty())
-                msgs.AddRange(activity.MoveToArchive(SessionVariables.CurrentUser.ID.Value));
+                msgs.AddRange(activity.MoveToArchive(currentUser.ID.Value));
 
             ViewBag.Messages = msgs;
 
+            // Show Success Message
+            // LOG: Someone Archived Activity ActivityName for Account AccountName
             if (msgs.HasNoErrors())
-            {
-                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: activity.ID.Value, text: activity.Name, actionType: WebSessionActionType.Archived, objectType: ObjectType.Activity);                
+            {           
                 msgs.Add(string.Format("{0} has been archived", activity.Name), MessageType.Success);
+                WebSessionUtilities.LogActivity(
+                   webSessionId: SessionVariables.WebSession.ID.Value,
+                   actor: currentUser,
+                   actionType: WebSessionActionType.Archived,
+                   objectType: ObjectType.Activity,
+                   objectId: activity.ID.Value,
+                   objectText: activity.Name,
+                   indirectObjectType: ObjectType.Account,
+                   indirectObjectId: currentAccount.ID.Value,
+                   indirectObjectText: currentAccount.Name
+               );
             }
 
             if (Request.UrlReferrer.IsNotEmpty())
@@ -1172,16 +1344,30 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid());
+            var currentUser = SessionVariables.CurrentUser;
+            var currentAccount = SessionVariables.CurrentAccount;
 
             if (activity.IsNotEmpty())
-                msgs.AddRange(activity.MoveFromArchive(SessionVariables.CurrentUser.ID.Value));
+                msgs.AddRange(activity.MoveFromArchive(currentUser.ID.Value));
 
             ViewBag.Messages = msgs;
 
+            // Show Success Message
+            // LOG: Someone Restored Activity ActivityName for Account AccountName
             if (msgs.HasNoErrors())
             {
-                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: activity.ID.Value, text: activity.Name, actionType: WebSessionActionType.Restored, objectType: ObjectType.Activity);                
                 msgs.Add(string.Format("{0} has been restored", activity.Name), MessageType.Success);
+                WebSessionUtilities.LogActivity(
+                   webSessionId: SessionVariables.WebSession.ID.Value,
+                   actor: currentUser,
+                   actionType: WebSessionActionType.Restored,
+                   objectType: ObjectType.Activity,
+                   objectId: activity.ID.Value,
+                   objectText: activity.Name,
+                   indirectObjectType: ObjectType.Account,
+                   indirectObjectId: currentAccount.ID.Value,
+                   indirectObjectText: currentAccount.Name
+               );
             }
 
             if (Request.UrlReferrer.IsNotEmpty())
@@ -1906,12 +2092,12 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Publish(string id)
+        public ActionResult Publish(string id, bool isFromActivityHome = false)
         {
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid());
             var mustRequestToPublish = MustRequestToPublish(activity);
-            var account = SessionVariables.CurrentAccount;
+            var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
 
             if (mustRequestToPublish)
@@ -1928,8 +2114,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 if (!activity.ActivityGroupId.HasValue)
                 {
                     //.. send support email for AHQ just to notifiy the team a new profile has been completed
-                    var body = $"<p>Account: {account.Name}<br />" +
-                            $"Account Profile Url: {account.HomePageUrl}<br />" +
+                    var body = $"<p>Account: {currentAccount.Name}<br />" +
+                            $"Account Profile Url: {currentAccount.HomePageUrl}<br />" +
                             $"Activity: {activity.Name}<br />" +
                             $"Url: {activity.HomePageUrl}<br />" +
                             $"User: {currentUser.FirstName} {currentUser.LastName}<br />";
@@ -1943,14 +2129,25 @@ namespace AfterSchool.Areas.Org.Controllers
 
                     EmailHelper.SendEmail(
                         toEmail: AfterSchoolLibrary.Helpers.Email.AppCustomersEmailAddress,
-                        subject: $"{account.Name} has published a new Activity: {activity.Name}",
+                        subject: $"{currentAccount.Name} has published a new Activity: {activity.Name}",
                         body,
                         isAfterSchool: true);
                 }
 
+                // Show Succes Message
+                // LOG: Someone Published Activity ActivityName for Account AccountName
                 msgs.Add(string.Format("{0} has been published", activity.Name), MessageType.Success);
-                UpdateSession(SessionActionType.ActivityPublish, SessionVariables.CurrentAccount.ID, activity.ID);
-                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: activity.ID.Value, text: activity.Name, actionType: WebSessionActionType.Published, objectType: ObjectType.Activity);                
+                WebSessionUtilities.LogActivity(
+                   webSessionId: SessionVariables.WebSession.ID.Value,
+                   actor: currentUser,
+                   actionType: WebSessionActionType.Published,
+                   objectType: ObjectType.Activity,
+                   objectId: activity.ID.Value,
+                   objectText: activity.Name,
+                   indirectObjectType: ObjectType.Account,
+                   indirectObjectId: currentAccount.ID.Value,
+                   indirectObjectText: currentAccount.Name
+               );
             }
 
             ViewBag.Messages = msgs;
@@ -1959,11 +2156,14 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.ShowCopyButton = ShowCopyButtonOnPublishDetail(activity);
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
 
-            var user = account.GetAccountOwner(msgs);
-            if (user.IsNotEmpty() && account.IsNotEmpty())
+            var user = currentAccount.GetAccountOwner(msgs);
+            if (user.IsNotEmpty() && currentAccount.IsNotEmpty())
             {
-                SendGridHelper.AddOrUpdateContact(account, user, msgs);
+                SendGridHelper.AddOrUpdateContact(currentAccount, user, msgs);
             }
+
+            if (isFromActivityHome)
+                return Redirect(activity.ShortHomePageUrl);
 
             return View("publishdetail", activity);
         }
@@ -1974,18 +2174,31 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid());
             var mustRequestToPublish = MustRequestToPublish(activity);
+            var currentUser = SessionVariables.CurrentUser;
+            var currentAccount = SessionVariables.CurrentAccount;
 
             if (mustRequestToPublish)
                 msgs.Add("You do not have permissions to unpublish", MessageType.UserError);
 
             if (msgs.HasNoErrors())
-                activity.Unpublish(SessionVariables.CurrentUser, msgs);
+                activity.Unpublish(currentUser, msgs);
 
+            // Show Success Message
+            // LOG: Someon Unpublished Activity ActivityName for Account AccountName
             if (msgs.HasNoErrors())
             {
                 msgs.Add(string.Format("{0} has been unpublished", activity.Name), MessageType.Success);
-                UpdateSession(SessionActionType.ActivityUnpublish, SessionVariables.CurrentAccount.ID, activity.ID);                
-                WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: activity.ID.Value, text: activity.Name, actionType: WebSessionActionType.Unpublished, objectType: ObjectType.Activity);
+                WebSessionUtilities.LogActivity(
+                    webSessionId: SessionVariables.WebSession.ID.Value,
+                    actor: currentUser,
+                    actionType: WebSessionActionType.Unpublished,
+                    objectType: ObjectType.Activity,
+                    objectId: activity.ID.Value,
+                    objectText: activity.Name,
+                    indirectObjectType: ObjectType.Account,
+                    indirectObjectId: currentAccount.ID.Value,
+                    indirectObjectText: currentAccount.Name
+                );
             }
 
             ViewBag.Messages = msgs;

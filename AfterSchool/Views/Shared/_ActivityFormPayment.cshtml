@@ -458,10 +458,14 @@
             if ($('#subscriptionplanperiod').val() == "1") {
                 Array.from($("#container-subscription-month, #container-subscription-enddate-label")).forEach(elem => { $(elem).removeClass("hide") });
                 $("#container-subscription-week").addClass("hide");
+                $("#subscriptionperiodstartmonthday").prop('required', true);    
+                $("#subscriptionperiodstartweekday").prop('required', false);
                 LoadEndDate();
             } else if ($('#subscriptionplanperiod').val() == "3") {
                 Array.from($("#container-subscription-week, #container-subscription-enddate-label")).forEach(elem => { $(elem).removeClass("hide") });
                 $("#container-subscription-month").addClass("hide");
+                $("#subscriptionperiodstartweekday").prop('required', true);
+                $("#subscriptionperiodstartmonthday").prop('required', false); 
                 LoadEndDate();
             } else {
                 clearSubscriptionPaymentHiddenInputs();
@@ -474,7 +478,9 @@
     }
 
     function hideWeekMonthContainers() {
-        Array.from($("#container-subscription-month, #container-subscription-week, #container-subscription-enddate-label")).forEach(elem => { $(elem).addClass("hide") });     
+        Array.from($("#container-subscription-month, #container-subscription-week, #container-subscription-enddate-label")).forEach(elem => { $(elem).addClass("hide") }); 
+        $("#subscriptionperiodstartweekday").prop('required', false);
+        $("#subscriptionperiodstartmonthday").prop('required', false); 
     }
 
     function clearSubscriptionPaymentHiddenInputs() {
@@ -665,8 +671,10 @@
     }
 
     function setChkParentPriceCost(enable) {
+        var isParentPricecostChecked = $('#isparentpricecost').prop('checked');
+        
         if (enable) {
-            $('#isparentpricecost').prop('checked', false);
+            $('#isparentpricecost').prop('checked', isParentPricecostChecked);
             $('#isparentpricecost').prop('disabled', false);
         } else {
             $('#isparentpricecost').prop('checked', false);

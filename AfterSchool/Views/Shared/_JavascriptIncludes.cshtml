@@ -36,7 +36,7 @@
 
 <script src="/assets/js/main-mods.js?v=1.0.15" type="text/javascript"></script>
 
-@if (AfterSchoolLibrary.Helpers.Utilities.IsProduction && SessionVariables.OriginalLoggedInUser.IsEmpty() && (SessionVariables.CurrentAccount.IsEmpty() || SessionVariables.CurrentAccount.AccountTypeId != AccountType.AfterSchool))
+@if (AfterSchoolLibrary.Helpers.Utilities.IsProduction && (SessionVariables.CurrentAccount.IsEmpty() || SessionVariables.CurrentAccount.AccountTypeId != AccountType.AfterSchool))
 {
 <script>
         @if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentAccount.IsNotEmpty())

@@ -189,7 +189,7 @@ namespace AfterSchoolLibrary.Services
             var allowtopaylater = values.GetValueOrDefault("allowtopaylater");
             var requiresparentalconsent = values.GetValueOrDefault("requiresparentalconsent");
 
-            var group = ActivityGroup.LoadByUid(activityGroupUid.ToGuid(), msgs, dc);
+            var group = ActivityGroup.LoadByUidByAccountId(activityGroupUid.ToGuid(), account.ID.Value, msgs, dc);
             var isNew = false;
 
             if (group.IsEmpty())

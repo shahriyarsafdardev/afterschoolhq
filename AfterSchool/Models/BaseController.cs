@@ -56,7 +56,7 @@ namespace AfterSchool.Models
             var DoesTableExist = WebSession.DoesTableExists();
             if (DoesTableExist)
             {
-                WebSessionUtilities.InitializeWebSession(Request);
+                SessionVariables.WebSession = WebSessionUtilities.InitializeWebSession(Request, SessionVariables.LoggedInUser, SessionVariables.CurrentAccount);
 
                 if (SessionVariables.VisitorSession.IsEmpty())
                 {
@@ -80,6 +80,7 @@ namespace AfterSchool.Models
             }
         }
 
+        // Old code
         protected void UpdateSession(SessionActionType sat, int? accountId = null, int? activityId = null, int? webUserId = null, int? registrantId = null, int? registrationId = null, int? registrationPeriodId = null, int? activityGroupId = null, DatabaseConnection dc = null)
         {
             if (SessionVariables.VisitorSession.IsNotEmpty())
