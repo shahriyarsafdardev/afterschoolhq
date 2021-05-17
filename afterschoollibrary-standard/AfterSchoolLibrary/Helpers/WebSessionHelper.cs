@@ -148,7 +148,7 @@ namespace AfterSchoolLibrary.Helpers
 
 
             // shared templates
-            var toTemplate = " to {indirectObjectType {indirectObjectText}";
+            var toTemplate = " to {indirectObjectType} {indirectObjectText}";
             var forTemplate = " for {indirectObjectType} {indirectObjectText}";
 
             switch (actionType)
