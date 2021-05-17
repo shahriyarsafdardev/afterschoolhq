@@ -15,15 +15,11 @@ namespace AfterSchoolLibrary.Migrations
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    var webSessionActions = WebSessionAction.Load(null, null, null, msgs: amsgs, dc: adc);
-                    webSessionActions.ForEach(wba =>
-                    {
-                        if (wba.IndirectObjectTypeId.IsEmpty())
-                        {
-                            wba.IndirectObjectTypeId = ObjectType.NotSet;
-                            amsgs.AddRange(wba.Save(dc: adc));
-                        }
-                    });
+                    amsgs.AddRange(WebSessionAction.Update(
+                        updateValues: new Hashtable() { { "IndirectObjectTypeId", 0 } },
+                        criterias: new Hashtable() { { "IndirectObjectTypeId", DBNull.Value } },
+                        ObjectMap: WebSessionAction.ObjectMap,
+                        dc: adc));
                 },
                 uniqueIdenfier: "UpdateWebSessionActionIndirectObjectType_20210517",
                 msgs: msgs,
