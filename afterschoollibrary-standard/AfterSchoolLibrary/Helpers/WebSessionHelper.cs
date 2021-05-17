@@ -122,6 +122,7 @@ namespace AfterSchoolLibrary.Helpers
                 //  case WebSessionActionType.Unfollowed:
                 //  case WebSessionActionType.Shared:
                 //  case WebSessionActionType.Contacted:
+                // case WebSessionActionType.Added:
                 default:
                     var actorActionObjectTypeTextTemplate = "{actorName} {actionType} {objectType} {objectText}";
                     return FormatTemplate(actorActionObjectTypeTextTemplate, formatParams);
@@ -170,6 +171,7 @@ namespace AfterSchoolLibrary.Helpers
                 case WebSessionActionType.ManuallyRefunded:
                 case WebSessionActionType.Approved:
                 case WebSessionActionType.Searched:
+                case WebSessionActionType.Updated:
                     return AppendFormatTemplate(actionStringDict, forTemplate, formatParams);
 
                 case WebSessionActionType.Followed:
@@ -188,14 +190,13 @@ namespace AfterSchoolLibrary.Helpers
                     var byTemplate = " by {indirectObjectType {indirectObjectText}";
                     return AppendFormatTemplate(actionStringDict, byTemplate, formatParams);
 
-
-                case WebSessionActionType.Updated:
                 case WebSessionActionType.Published:
                 case WebSessionActionType.Sent:
                 case WebSessionActionType.Paged:
                 case WebSessionActionType.Connected:
                 case WebSessionActionType.Copied:
                 case WebSessionActionType.Restored:
+                case WebSessionActionType.Added:
                     return AppendFormatTemplate(actionStringDict, toTemplate, formatParams);
 
                 case WebSessionActionType.Unpublished:

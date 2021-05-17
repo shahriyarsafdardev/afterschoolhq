@@ -58,27 +58,6 @@ namespace AfterSchool.Models
                 SessionVariables.WebSession = WebSessionUtilities.InitializeWebSession(Request, SessionVariables.LoggedInUser, SessionVariables.CurrentAccount);
         }
 
-        // Old code
-        //protected void UpdateSession(SessionActionType sat, int? accountId = null, int? activityId = null, int? webUserId = null, int? registrantId = null, int? registrationId = null, int? registrationPeriodId = null, int? activityGroupId = null, DatabaseConnection dc = null)
-        //{
-        //    if (SessionVariables.VisitorSession.IsNotEmpty())
-        //    {
-        //        new SessionAction
-        //        {
-        //            ActivityId = activityId,
-        //            AccountId = accountId,
-        //            SessionActionTypeId = sat,
-        //            WebUserId = webUserId,
-        //            SessionId = SessionVariables.VisitorSession.ID,
-        //            RegistrantId = registrantId,
-        //            RegistrationPeriodId = registrationPeriodId,
-        //            ActivityGroupId = activityGroupId,
-        //            CreateDate = DateTime.UtcNow,
-        //            CreatedBy = SessionVariables.CurrentUser.IsNotEmpty() ? SessionVariables.CurrentUser.ID : 0
-        //        }.Save(dc: dc);
-        //    }
-        //}
-
         protected bool IsLoggedIn()
         {
             return !SessionVariables.CurrentUser.IsEmpty() && SessionVariables.CurrentUser.IsActive;

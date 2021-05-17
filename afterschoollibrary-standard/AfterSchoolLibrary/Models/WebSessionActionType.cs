@@ -36,5 +36,6 @@ public enum WebSessionActionType
 	Shared,
 	Contacted,
 	Interested,
-	BrowsedAllActivities
+	BrowsedAllActivities,
+	Added
 }
