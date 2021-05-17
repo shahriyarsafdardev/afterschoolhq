@@ -1797,20 +1797,18 @@ property: IndirectObjectId, int?, Int
 property: IndirectObjectTypeId, ObjectType, Int
 property: ActionStringFormat, string, NVarChar "400"
 property: ActionString, string, NVarChar "400"
-join: WebUser.ID, WebUserId, LeftOuterJoin
+join: WebUser.ID, ActorId, LeftOuterJoin
 join: WebUser.ID, CreatedBy, LeftOuterJoin, CreatedBy
-join: Account.ID, AccountId, InnerJoin
+join: Account.ID, AccountId, LeftOuterJoin
 joinproperty: WebUser.Username, string, NVarChar
 joinproperty: WebUser.Email, string, NVarChar
 joinproperty: WebUser.FirstName, string, NVarChar
 joinproperty: WebUser.LastName, string, NVarChar
-joinproperty: WebUser.TimeZone, string, NVarChar
 joinproperty: CreatedBy.Username, string, NVarChar
 joinproperty: CreatedBy.Email, string, NVarChar
 joinproperty: CreatedBy.FirstName, string, NVarChar
 joinproperty: CreatedBy.LastName, string, NVarChar
 joinproperty: Account.Name, string, NVarChar
-joinproperty: Account.TimeZone, string, NVarChar
 joinproperty: Account.AccountTypeId, int?, Int
 loadmethod: Id, List<>
 loadmethod: WebUserId, List<>
