@@ -212,8 +212,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (name.IsEmpty())
                 msgs.Add("Activity name is required.", MessageType.UserError);
-            else if (name.Length > 50)
-                msgs.Add("Activity name must not be greater then 50 chanracters.", MessageType.UserError);
+            else if (name.Length > 75)
+                msgs.Add("Activity name must not be greater then 75 chanracters.", MessageType.UserError);
 
             if (form.IsEmpty() && (isAdvanceSettingEnabled.IsEmpty() || !isAdvanceSettingEnabled.ToBoolean()))
             {
