@@ -513,7 +513,7 @@ namespace AfterSchoolLibrary.Services
                 {
                     var account = activity.GetAccount(amsgs, adc);
 
-                    newName = newName.MaxChars(50);
+                    newName = newName.MaxChars(75);
 
                     copy = activity.CopyFields();
                     copy.Name = newName;
