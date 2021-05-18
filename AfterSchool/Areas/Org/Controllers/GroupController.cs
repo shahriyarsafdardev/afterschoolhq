@@ -111,6 +111,8 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Edit(string id, string name, string description, string regmode, string form, string isinviteonly, string genderrestrictions, string mingrade, string maxgrade, string schedule, string scheduledetails, string requiresalldays, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime, string isongoing, string contactname, string contactemail, string contactphone, string seatsavailable, string waitinglistseats)
         {
             var msgs = new SystemMessages();
+            var currentWebUser = SessionVariables.CurrentUser;
+            var currentAccount = SessionVariables.CurrentAccount;
             // var inSessionDates = new List<DateRange>();
             // var outOfSessionDates = new List<DateTime>();
 
@@ -148,17 +150,23 @@ namespace AfterSchool.Areas.Org.Controllers
             //values.Add("schedule", schedule);
             //values.Add("isongoing", isongoing);
 
-            var group = ActivityGroupService.SaveSession(SessionVariables.CurrentUser, SessionVariables.CurrentAccount, id, values, msgs);
+            var group = ActivityGroupService.SaveSession(currentWebUser, currentAccount, id, values, msgs);
 
             if (msgs.HasNoErrors())
             {
                 msgs.Add($"{UILabel.ActivityGroupLabel(group.ActivityGroupTypeId)} Saved", MessageType.Success);
 
-                if (id.IsEmpty())
-                    UpdateSession(
-                        sat: SessionActionType.ActivityGroupCreate, 
-                        accountId: SessionVariables.CurrentAccount.ID, 
-                        activityGroupId: group.ID);
+                // LOG: CurrentUser Saved ActivityGroup ActivityGroupName for Account AccountName
+                WebSessionUtilities.LogActivity(
+                    webSessionId: SessionVariables.WebSession.ID.Value,
+                    actor: currentWebUser,
+                    actionType: WebSessionActionType.Updated,
+                    objectId: group.ID.Value,
+                    objectType: ObjectType.ActivityGroup,
+                    objectText: group.Name,
+                    indirectObjectId: currentAccount.ID.Value,
+                    indirectObjectType: ObjectType.Account,
+                    indirectObjectText: currentAccount.Name);
             }
 
             ViewBag.Messages = msgs;
@@ -612,7 +620,18 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add(string.Format("{0} has been published", group.Name), MessageType.Success);
-                UpdateSession(sat: SessionActionType.ActivityGroupPublish, accountId: SessionVariables.CurrentAccount.ID, activityGroupId: group.ID);
+                var currentAccount = SessionVariables.CurrentAccount;
+                // LOG: CurrentUSer published ActivityGroup ActivityGroupName from AccountAccountName's Profile
+                WebSessionUtilities.LogActivity(
+                    webSessionId: SessionVariables.WebSession.ID.Value,
+                    actor: SessionVariables.CurrentUser,
+                    actionType: WebSessionActionType.Published,
+                    objectId: group.ID.Value,
+                    objectType: ObjectType.ActivityGroup,
+                    objectText: group.Name,
+                    indirectObjectId: currentAccount.ID.Value,
+                    indirectObjectType: ObjectType.Account,
+                    indirectObjectText: $"{currentAccount}'s Profile");
             }
 
             ViewBag.Messages = msgs;
@@ -630,7 +649,18 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add(string.Format("{0} has been unpublished", group.Name), MessageType.Success);
-                UpdateSession(sat: SessionActionType.ActivityGroupPublish, accountId: SessionVariables.CurrentAccount.ID, activityGroupId: group.ID);
+                var currentAccount = SessionVariables.CurrentAccount;
+                // LOG: CurrentUSer unpublished ActivityGroup ActivityGroupName from AccountAccountName's Profile
+                WebSessionUtilities.LogActivity(
+                    webSessionId: SessionVariables.WebSession.ID.Value,
+                    actor: SessionVariables.CurrentUser,
+                    actionType: WebSessionActionType.Unpublished,
+                    objectId: group.ID.Value,
+                    objectType: ObjectType.ActivityGroup,
+                    objectText: group.Name,
+                    indirectObjectId: currentAccount.ID.Value,
+                    indirectObjectType: ObjectType.Account,
+                    indirectObjectText: $"{currentAccount}'s Profile");
             }
 
             ViewBag.Messages = msgs;

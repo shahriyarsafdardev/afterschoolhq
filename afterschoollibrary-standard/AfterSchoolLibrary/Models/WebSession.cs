@@ -211,7 +211,7 @@ namespace AfterSchoolLibrary.Models
 			dq.Criterias.Add(ObjectMap["WebUserId"], webUserId);
 			dq.SelectRange.Start = 0;
 			dq.SelectRange.Length = 1;
-			dq.OrderBys.Add("CreatedAt", OrderByDirectionEnum.Descending);
+			dq.OrderBys.Add("CreateDate", OrderByDirectionEnum.Descending);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
@@ -222,7 +222,7 @@ namespace AfterSchoolLibrary.Models
 			dq.Criterias.Add(ObjectMap["AccountId"], accountId);
 			dq.SelectRange.Start = 0;
 			dq.SelectRange.Length = 1;
-			dq.OrderBys.Add("CreatedAt", OrderByDirectionEnum.Descending);
+			dq.OrderBys.Add("CreateDate", OrderByDirectionEnum.Descending);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 

@@ -15,7 +15,7 @@ namespace AfterSchoolLibrary.Migrations
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    var webSessionActions = WebSessionAction.Load(msgs: amsgs, dc: adc);
+                    var webSessionActions = WebSessionAction.Load(null, null, null, msgs: amsgs, dc: adc);
                     webSessionActions.ForEach(wba =>
                     {
                         if (wba.CreatedBy.IsEmpty() && wba.ActorId.IsNotEmpty())
