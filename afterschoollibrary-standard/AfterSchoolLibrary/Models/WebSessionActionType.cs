@@ -6,6 +6,7 @@ public enum WebSessionActionType
 	Published,
 	Unpublished,
 	Sent,
+	BeganRegistration,
 	Registered,
 	Paid,
 	Refunded,
@@ -24,6 +25,7 @@ public enum WebSessionActionType
 	Searched,
 	Paged,
 	Connected,
+	SignedUp,
 	LoggedIn,
 	LoggedOut,
 	Copied,
@@ -33,5 +35,7 @@ public enum WebSessionActionType
 	Unfollowed,
 	Shared,
 	Contacted,
-	Interested
+	Interested,
+	BrowsedAllActivities,
+	Added
 }

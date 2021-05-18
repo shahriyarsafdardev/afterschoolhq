@@ -360,7 +360,7 @@ namespace AfterSchoolLibrary.Models
 			Subscriber.Update(new Hashtable(){{"SubscriberStatusId",0}}, new Hashtable(){{"SubscriberStatusId", DBNull.Value}}, Subscriber.ObjectMap, dc);
 			WebSessionAction.Update(new Hashtable(){{"ActionTypeId",0}}, new Hashtable(){{"ActionTypeId", DBNull.Value}}, WebSessionAction.ObjectMap, dc);
 			WebSessionAction.Update(new Hashtable(){{"ObjectTypeId",0}}, new Hashtable(){{"ObjectTypeId", DBNull.Value}}, WebSessionAction.ObjectMap, dc);
-			WebSessionAction.Update(new Hashtable(){{"IndirectObjectId",0}}, new Hashtable(){{"IndirectObjectId", DBNull.Value}}, WebSessionAction.ObjectMap, dc);
+			WebSessionAction.Update(new Hashtable(){{"IndirectObjectTypeId",0}}, new Hashtable(){{"IndirectObjectTypeId", DBNull.Value}}, WebSessionAction.ObjectMap, dc);
 			
 			//**ENDUPDATES**//
 
@@ -482,6 +482,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityGroup_AccountId_IsInviteOnly_IsPublished ON [ActivityGroup] (AccountId,IsPublished,IsInviteOnly)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityGroup_AccountId_UniqueName ON [ActivityGroup] (AccountId,UniqueName)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityGroup_Uid ON [ActivityGroup] (Uid)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityGroup_AccountId_Uid ON [ActivityGroup] (Uid,AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityGroup_IsPublished_Uid ON [ActivityGroup] (Uid,IsPublished)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityGroup_IsArchived_IsPublished_Uid ON [ActivityGroup] (Uid,IsPublished,IsArchived)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityGroup_IsInviteOnly_IsPublished_Uid ON [ActivityGroup] (Uid,IsPublished,IsInviteOnly)"));
@@ -683,12 +684,12 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionAction_AccountId_Id_WebUserId ON [WebSessionAction] (Id,WebUserId,AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionAction_ActionTypeId ON [WebSessionAction] (ActionTypeId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionAction_ActionTypeId_ObjectTypeId ON [WebSessionAction] (ActionTypeId,ObjectTypeId)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionAction_ObjectId ON [WebSessionAction] (ObjectId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionAction_ObjectId_ObjectTypeId ON [WebSessionAction] (ObjectId,ObjectTypeId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionAction_ActionId_ObjectId ON [WebSessionAction] (ObjectId,ActionId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionAction_IndirectObjectId_ObjectId ON [WebSessionAction] (ObjectId,IndirectObjectId)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionAction_IndirectObjectId ON [WebSessionAction] (IndirectObjectId)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionAction_ObjectId_ObjectTypeId ON [WebSessionAction] (ObjectId,ObjectTypeId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionAction_IndirectObjectId_IndirectObjectTypeId ON [WebSessionAction] (IndirectObjectId,IndirectObjectTypeId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionAction_ObjectId_ObjectTypeId_WebUserId ON [WebSessionAction] (WebUserId,ObjectId,ObjectTypeId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionAction_IndirectObjectId_IndirectObjectTypeId_ObjectId_ObjectTypeId_WebUserId ON [WebSessionAction] (WebUserId,ObjectId,ObjectTypeId,IndirectObjectId,IndirectObjectTypeId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionObjectSnapshot_WebUserId ON [WebSessionObjectSnapshot] (WebUserId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebSessionObjectSnapshot_AccountId ON [WebSessionObjectSnapshot] (AccountId)"));
 			

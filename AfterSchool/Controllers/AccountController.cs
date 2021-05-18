@@ -202,18 +202,26 @@ namespace AfterSchool.Controllers
                                 loggedInUser: user,
                                 msgs: amsgs,
                                 dc: adc);
-
-                        if (amsgs.HasNoErrors())
-                        {
-                            var activity = participationObject.GetActivity();
-                            WebSessionUtilities.LogActivity(actor: user, Id: participationObject.ObjectID, text: activity.IsNotEmpty() ? activity.Name : "",
-                                actionType: WebSessionActionType.Interested, objectType: ObjectType.Registration);
-                        }
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
                         msgs.AddRange(smsgs);
                         LoadSessionInfo(user, account);
+
+                        // Show Succes Message
+                        // LOG: Someone is Interested in Activity ActivityName for Account AccountName
+                        msgs.Add(string.Format("Your Interest in {0} has been recorded", participationObject.Name), MessageType.Success);
+                        WebSessionUtilities.LogActivity(
+                           webSessionId: SessionVariables.WebSession.ID.Value,
+                           actor: currentUser,
+                           actionType: WebSessionActionType.Interested,
+                           objectType: participationObject.GetWebSessionObjectType(),
+                           objectId: participationObject.ObjectID.Value,
+                           objectText: participationObject.Name,
+                           indirectObjectType: ObjectType.Account,
+                           indirectObjectId: account.ID.Value,
+                           indirectObjectText: account.Name
+                       );
                     },
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                     onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
@@ -579,10 +587,30 @@ namespace AfterSchool.Controllers
                             amsgs,
                             adc);
 
+
                         if (amsgs.HasNoErrors() && user.IsNotEmpty())
                         {
+                            // LOG: Someone Created
+                            WebSessionUtilities.LogActivity(
+                               webSessionId: SessionVariables.WebSession.ID.Value,
+                               actor: currentUser,
+                               actionType: WebSessionActionType.SignedUp,
+                               objectType: ObjectType.WebUser,
+                               objectId: user.ID.Value,
+                               objectText: user.FullName
+                           );
+
+
                             account = CreateOrUpdateAccount(user, amsgs, adc);
-                            WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: account.ID.Value, text: account.Name, actionType: WebSessionActionType.Created, objectType: ObjectType.Account);
+                            // LOG: Someone Created Account AccountName
+                            WebSessionUtilities.LogActivity(
+                               webSessionId: SessionVariables.WebSession.ID.Value,
+                               actor: currentUser,
+                               actionType: WebSessionActionType.Created,
+                               objectType: ObjectType.Account,
+                               objectId: account.ID.Value,
+                               objectText: account.Name
+                           );
                         }
 
                         if (amsgs.HasNoErrors())
@@ -1064,6 +1092,8 @@ namespace AfterSchool.Controllers
             var parentRegistrant = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant(msgs);
             var parentRegistrant2 = SessionVariables.CurrentAccount.GetSecondParentOrGuardianRegistrant(msgs);
             var questions = AddStudentViewBag(adminAccountForm, msgs);
+            var currentUser = SessionVariables.CurrentUser;
+            var currentAccount = SessionVariables.CurrentAccount;
 
             questions.ForEach(question =>
             {
@@ -1099,7 +1129,7 @@ namespace AfterSchool.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        var canBeAccessedBy = SessionVariables.CurrentUser.AsList();
+                        var canBeAccessedBy = currentUser.AsList();
                         Location school = null;
                         
                         if (placeid.IsNotEmpty())
@@ -1113,14 +1143,14 @@ namespace AfterSchool.Controllers
                             var lastName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).Value;
                             // var phone = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone).Value;
 
-                            studentUser = SessionVariables.CurrentAccount.CreateAndInviteUser(
+                            studentUser = currentAccount.CreateAndInviteUser(
                                  firstName: firstName,
                                  lastName: lastName,
                                  email: email,
                                  phone: null,
-                                 message: $"Your parent/guardian ({SessionVariables.CurrentUser.DisplayName}) has invited you to sign up for {AfterSchoolLibrary.Helpers.Utilities.AppName()} to register for activities",
+                                 message: $"Your parent/guardian ({currentUser.DisplayName}) has invited you to sign up for {AfterSchoolLibrary.Helpers.Utilities.AppName()} to register for activities",
                                  userType: UserType.Student,
-                                 loggedInUser: SessionVariables.CurrentUser,
+                                 loggedInUser: currentUser,
                                  msgs: amsgs,
                                  dc: adc);
 
@@ -1137,13 +1167,26 @@ namespace AfterSchool.Controllers
                             allowTextMessages: false,
                             schoolLocationId: school.IsNotEmpty() ? school.ID : new int?(),
                             profileStatus: RegistrantProfileStatus.Started,
-                            loggedInUser: SessionVariables.CurrentUser,
+                            loggedInUser: currentUser,
                             msgs: amsgs,
                             dc: adc);
 
+                        // LOG: Someone Created Registrant RegistrantName for Account AccountName
                         if (student.IsNotEmpty() && amsgs.HasNoErrors())
-                            WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, Id: student.ID.Value, text: student.Name, actionType: WebSessionActionType.Created, objectType: ObjectType.Registrant);
-
+                        {
+                            WebSessionUtilities.LogActivity(
+                                webSessionId: SessionVariables.WebSession.ID.Value,
+                                actor: currentUser,
+                               actionType: WebSessionActionType.Created,
+                               objectType: ObjectType.Registrant,
+                               objectId: student.ID.Value,
+                               objectText: student.FullName,
+                               indirectObjectType: ObjectType.Account,
+                               indirectObjectId: currentAccount.ID.Value,
+                               indirectObjectText: currentAccount.Name
+                           );
+                        }
+                            
                         // add answers to parent registrant record
                         // will be used later to copy information over to student records
                         qvms.ForEach(qvm =>
@@ -1618,9 +1661,18 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
-                //var activity = participationObject.GetActivity();
-                //WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, actionType: WebSessionActionType.Registered, objectType: ObjectType.Registrant,
-                //    objectId: currentRegistrant.ID, objectText: currentRegistrant.Name, indirectObjectId: activity.ID, indirectObjectText: activity.Name);
+                // LOG: Someone Registered RegistrantName for ParticipationObjectType ParticipationObjectName
+                WebSessionUtilities.LogActivity(
+                    webSessionId: SessionVariables.WebSession.ID.Value,
+                    actor: currentUser,
+                    actionType: WebSessionActionType.Registered,
+                    objectType: ObjectType.Registrant,
+                    objectId: currentRegistrant.ID.Value,
+                    objectText: currentRegistrant.FullName,
+                    indirectObjectType: participationObject.GetWebSessionObjectType(),
+                    indirectObjectId: participationObject.ObjectID.Value,
+                    indirectObjectText: participationObject.Name
+                );
 
                 if (!participationObject.ShouldParentPay())
                     return RedirectToAction("finalizeregistration", new { id = registration.Uid });
@@ -1761,6 +1813,7 @@ namespace AfterSchool.Controllers
             var participationObject = GetParticipationObjectFromCart();
             var coupon = new Coupon();
             var currentRegistrant = SessionVariables.CurrentRegistrant;
+            CheckoutObject checkoutObject = null;
 
             if (couponCode.IsNotEmpty())
                 coupon = SessionVariables.CurrentAccount.ValidateCoupon(participationObject, couponCode, msgs);
@@ -1818,7 +1871,7 @@ namespace AfterSchool.Controllers
                 else if (creditCardPurchaseObject.IsNotEmpty())
                     paymentType = PaymentType.CreditCard;
 
-                AccountService.ProcessRegistrationWithPayment(
+                checkoutObject = AccountService.ProcessRegistrationWithPayment(
                     checkoutObject: new CheckoutObject()
                     {
                         Coupon = coupon,
@@ -1846,22 +1899,33 @@ namespace AfterSchool.Controllers
                 if (msgs.HasNoErrors())
                 {                    
                     var activity = participationObject.GetActivity();
+                    var phrase = "";
 
                     if (participationObject.SubscriptionPlans.IsNotEmpty() && participationObject.SubscriptionPlans.Count > 0)
                     {
                         var plan = participationObject.SubscriptionPlans.FirstOrDefault();
                         var amount = paymentType == PaymentType.ACH ? plan?.GetTotalCostWithConvenienceFee(billingAccount).ToCurrency() : plan?.GetTotalCostWithFees(billingAccount).ToCurrency();
-                        var phrase = $@"{amount}/{plan.BillingPeriodTypeId} via {(paymentType == PaymentType.ACH ? "Bank Account" : "Credit Card")}";
-                        
-                        WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, actionType: WebSessionActionType.Paid, objectType: ObjectType.SubscriptionPlan,
-                                objectId: participationObject.ObjectID, objectText: phrase, indirectObjectId: activity.ID, indirectObjectText: activity.Name);
-                    } else
+                        phrase = $@"{amount}/{plan.BillingPeriodTypeId} via {(paymentType == PaymentType.ACH ? "Bank Account" : "Credit Card")}";
+                    } 
+                    else
                     {
-                        var phrase = $@"{participationObject.GetCheckoutCostWithConvenienceFee().ToCurrency()} via {(paymentType == PaymentType.ACH ? "Bank Account" : "Credit Card")}";
-
-                        WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, actionType: WebSessionActionType.Paid, objectType: ObjectType.Payout,
-                                objectId: participationObject.ObjectID, objectText: phrase, indirectObjectId: activity.ID, indirectObjectText: activity.Name);
+                        phrase = $@"{participationObject.GetCheckoutCostWithConvenienceFee().ToCurrency()} via {(paymentType == PaymentType.ACH ? "Bank Account" : "Credit Card")}";
                     }
+
+                    // LOG: Someone Paid amount/billing period via paymentType for participationObjectType participationObjectName
+                    // or
+                    // LOG: Someone Paid amount via PaymentType for participationObjectType participationObjectName
+                    WebSessionUtilities.LogActivity(
+                           webSessionId: SessionVariables.WebSession.ID.Value,
+                           actor: SessionVariables.CurrentUser,
+                           actionType: WebSessionActionType.Paid,
+                           objectType: ObjectType.Transaction,
+                           objectId: checkoutObject.Transaction.ID.Value,
+                           objectText: phrase,
+                           indirectObjectType: participationObject.GetWebSessionObjectType(),
+                           indirectObjectId: participationObject.ObjectID.Value,
+                           indirectObjectText: activity.Name
+                        );
 
                     return RedirectToAction("thankyou", new { id = registration.Uid });
                 }
@@ -1936,6 +2000,7 @@ namespace AfterSchool.Controllers
 
                 BankAccountPurchaseObject bankAccountPurchaseObject = null;
                 CreditCardPurchaseObject creditCardPurchaseObject = null;
+                CheckoutObject checkoutObject = null;
 
                 if (plaidtoken.IsNotEmpty() || banksource.IsNotEmpty())
                 {
@@ -1959,7 +2024,7 @@ namespace AfterSchool.Controllers
                 }
 
                 var masterRegistrant = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant(msgs);
-                AccountService.ProcessPayment(
+                checkoutObject = AccountService.ProcessPayment(
                     checkoutObject: new CheckoutObject()
                     {
                         OverrideAmount = overrideAmount,
@@ -1983,9 +2048,20 @@ namespace AfterSchool.Controllers
                 if (msgs.HasNoErrors())
                 {
                     var phrase = $@"{overrideAmount.ToCurrency()} via {(bankAccountPurchaseObject.IsNotEmpty() ? "Bank Account" : "Credit Card")}";
-                    WebSessionUtilities.LogActivity(actor: SessionVariables.CurrentUser, actionType: WebSessionActionType.Paid, objectType: ObjectType.Payout,
-                        objectId: payingAccount.ID, objectText: phrase, indirectObjectId: billingAccount.ID, indirectObjectText: billingAccount.Name);
-                    
+
+                    // LOG: Someone Paid amount via PaymentType to participationObjectType participationObjectName
+                    WebSessionUtilities.LogActivity(
+                           webSessionId: SessionVariables.WebSession.ID.Value,
+                           actor: SessionVariables.CurrentUser,
+                           actionType: WebSessionActionType.Paid,
+                           objectType: ObjectType.Transaction,
+                           objectId: checkoutObject.Transaction.ID.Value,
+                           objectText: phrase,
+                           indirectObjectType: ObjectType.Account,
+                           indirectObjectId: billingAccount.ID.Value,
+                           indirectObjectText: billingAccount.Name
+                        );
+
                     return RedirectToAction("paymentthankyou", new { id = billingAccount.Uid });
                 }
             }
