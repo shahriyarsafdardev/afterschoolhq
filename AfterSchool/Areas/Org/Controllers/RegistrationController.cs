@@ -311,14 +311,14 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 selectedRegistration.WasUpdated(msgs);
 
-                // LOG: Someone Updated RegistrantActivity {registrant.Name} seat to {ratTo} for Activty ActivityName
+                // LOG: Someone Updated RegistrantActivity {registrant.Name} assignment type to {ratTo} for Activty ActivityName
                 WebSessionUtilities.LogActivity(
                     webSessionId: SessionVariables.WebSession.ID.Value,
                     actor: SessionVariables.CurrentUser,
                     actionType: WebSessionActionType.Updated,
                     objectId: registrantActivity.ID,
                     objectType: ObjectType.RegistrantActivity,
-                    objectText: $"{registration.GetRegistrant().GetFirstNameLastInitial()}'s assignmentType to {ratTo}",
+                    objectText: $"{registration.GetRegistrant().GetFirstNameLastInitial()}'s assignment type to {ratTo}",
                     indirectObjectId: registrantActivity.GetActivityId(),
                     indirectObjectType: ObjectType.Activity,
                     indirectObjectText: registrantActivity.GetActivity().Name);
