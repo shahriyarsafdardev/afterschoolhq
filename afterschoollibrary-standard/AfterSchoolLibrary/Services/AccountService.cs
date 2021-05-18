@@ -3099,7 +3099,7 @@ namespace AfterSchoolLibrary.Services
                 AccountService.CreatePurchaseTransactionPayment(checkoutObject, loggedInUser, msgs, dc);
         }
 
-        public static void ProcessStudentRegistration(CheckoutObject checkoutObject, bool sendConfirmationEmail, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static CheckoutObject ProcessStudentRegistration(CheckoutObject checkoutObject, bool sendConfirmationEmail, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
             (
@@ -3132,6 +3132,8 @@ namespace AfterSchoolLibrary.Services
                 onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
+
+            return checkoutObject;
         }
 
         public static void ProcessInterestRegistration(CheckoutObject checkoutObject, bool sendConfirmationEmail, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)

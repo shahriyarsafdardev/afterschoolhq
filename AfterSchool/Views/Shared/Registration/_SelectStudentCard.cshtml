@@ -82,7 +82,7 @@
         else if (participationObject.IsNotEmpty() && participationObject.RestrictByGrade() && !participationObject.IsStudentGradeInRange(Model))
         {
             btnText = "Ineligible - Grade";
-            disabledText = " disabled=\"disabled\" ";
+           // disabledText = " disabled=\"disabled\" ";
            // btnUrl = "#";
         }
         else if (participationObject.IsNotEmpty() && !participationObject.RestrictByGrade() && !participationObject.IsStudentAgeInRange(Model))

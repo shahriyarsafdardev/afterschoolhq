@@ -85,7 +85,7 @@
             $('#btn-save-personal').prop('disabled', true);
         });
 
-        if (@returnToCheckout) {
+        if (@Json.Encode(returnToCheckout)) {
             $('#@gradeFormId').val(null);
         }
 
