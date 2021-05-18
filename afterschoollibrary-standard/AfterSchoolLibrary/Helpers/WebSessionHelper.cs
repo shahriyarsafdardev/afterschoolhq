@@ -187,7 +187,7 @@ namespace AfterSchoolLibrary.Helpers
 
                 case WebSessionActionType.Viewed:
                 case WebSessionActionType.Interested:
-                    var byTemplate = " by {indirectObjectType {indirectObjectText}";
+                    var byTemplate = " by {indirectObjectType} {indirectObjectText}";
                     return AppendFormatTemplate(actionStringDict, byTemplate, formatParams);
 
                 case WebSessionActionType.Published:
@@ -203,7 +203,7 @@ namespace AfterSchoolLibrary.Helpers
                 case WebSessionActionType.Navigated:
                 case WebSessionActionType.Browsed:
                 case WebSessionActionType.Moved:
-                    var fromTemplate = " from {indirectObjectType {indirectObjectText}";
+                    var fromTemplate = " from {indirectObjectType} {indirectObjectText}";
                     return AppendFormatTemplate(actionStringDict, fromTemplate, formatParams);
 
                 case WebSessionActionType.Paid:
@@ -222,7 +222,7 @@ namespace AfterSchoolLibrary.Helpers
                 //  case WebSessionActionType.Shared:
                 //  case WebSessionActionType.Contacted:
                 default:
-                    var actorActionObjectTypeTextTemplate = " {indirectObjectType {indirectObjectText";
+                    var actorActionObjectTypeTextTemplate = " {indirectObjectType} {indirectObjectText";
                     return AppendFormatTemplate(actionStringDict, actorActionObjectTypeTextTemplate, formatParams);
             }
         }
