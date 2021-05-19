@@ -12,7 +12,7 @@ namespace AfterSchool.Models
 {
     public static class WebSessionUtilities
     {
-        public static WebSession InitializeWebSession(HttpRequestBase request = null, WebUser user = null, Account account = null)
+        public static WebSession InitializeWebSession(HttpRequestBase request, WebUser user = null, Account account = null)
         {
             var session = new WebSession();
             WebSession lastSession = new WebSession();
@@ -60,7 +60,7 @@ namespace AfterSchool.Models
         }
 
 
-        public static void LogActivity(WebUser actor, WebSession webSession, WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet, ObjectType indirectObjectType = ObjectType.NotSet,
+        public static void LogActivity(HttpRequestBase request, WebUser actor, WebSession webSession, WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet, ObjectType indirectObjectType = ObjectType.NotSet,
              int? objectId = (int?)null, string objectText = "",
              int? indirectObjectId = (int?)null, string indirectObjectText = "")
         {
@@ -68,7 +68,7 @@ namespace AfterSchool.Models
             //if webSession is null then try to create it here
             if (webSession.IsEmpty())
             {
-                webSession = InitializeWebSession(null, SessionVariables.LoggedInUser, SessionVariables.CurrentAccount);
+                webSession = InitializeWebSession(request, SessionVariables.LoggedInUser, SessionVariables.CurrentAccount);
                 SessionVariables.WebSession = webSession;
             }
 

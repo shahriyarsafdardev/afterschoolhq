@@ -67,6 +67,7 @@ namespace AfterSchool.Controllers
                         // LOG: Someone Viewed Account AccountName from Directory DirectoryAccountName
                         // pass in the SessionVariables.WebSession object instead of trying to pass the ID
                         WebSessionUtilities.LogActivity(
+                            request: Request,
                             webSession: SessionVariables.WebSession,
                             actor: SessionVariables.CurrentUser,
                             actionType: WebSessionActionType.Viewed,
@@ -111,6 +112,7 @@ namespace AfterSchool.Controllers
 
                     // LOG: Someone Viewed Directory Account DirectoryName
                     WebSessionUtilities.LogActivity(
+                        request: Request,
                         webSession: SessionVariables.WebSession,
                         actor: SessionVariables.CurrentUser,
                         actionType: WebSessionActionType.Viewed,
@@ -126,6 +128,7 @@ namespace AfterSchool.Controllers
                 {
                     // LOG: Somone Viewed Account AccountName
                     WebSessionUtilities.LogActivity(
+                       request: Request,
                        webSession: SessionVariables.WebSession,
                        actor: SessionVariables.CurrentUser,
                        objectId: account.ID,
