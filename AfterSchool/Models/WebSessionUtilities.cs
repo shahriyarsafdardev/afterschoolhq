@@ -64,7 +64,6 @@ namespace AfterSchool.Models
              int? objectId = (int?)null, string objectText = "",
              int? indirectObjectId = (int?)null, string indirectObjectText = "")
         {
-
             //if webSession is null then try to create it here
             if (webSession.IsEmpty())
             {
@@ -72,18 +71,20 @@ namespace AfterSchool.Models
                 SessionVariables.WebSession = webSession;
             }
 
-
             //LogActivity with websession id
-            LogActivity(
-                webSession.ID.Value,
-                actor,
-                actionType,
-                objectType,
-                indirectObjectType,
-                objectId,
-                objectText,
-                indirectObjectId,
-                indirectObjectText);
+            if (webSession.IsNotEmpty())
+            {
+                LogActivity(
+                    webSession.ID.Value,
+                    actor,
+                    actionType,
+                    objectType,
+                    indirectObjectType,
+                    objectId,
+                    objectText,
+                    indirectObjectId,
+                    indirectObjectText);
+            }
         }
 
         public static void LogActivity(int webSessionId, WebUser actor, WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet, ObjectType indirectObjectType = ObjectType.NotSet,
@@ -108,7 +109,6 @@ namespace AfterSchool.Models
                 objectId: objectId,
                 indirectObjectId: indirectObjectId);
         }
-
 
         public static void SaveLog(WebUser actor, int webSessionId, string actionStringFormat, string actionString, int? actorId = (int?)null, int? accountId = (int?)null,
             WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet, ObjectType indirectObjectType = ObjectType.NotSet,
