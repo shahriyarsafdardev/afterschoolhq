@@ -351,7 +351,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         WebSessionUtilities.LogActivity(
                             webSessionId: SessionVariables.WebSession.ID.Value,
                             actor: currentUser,
-                            actionType: WebSessionActionType.Updated,
+                            actionType: WebSessionActionType.Created,
                             objectType: ObjectType.Activity,
                             objectId: activity.ID.Value,
                             objectText: activity.Name,

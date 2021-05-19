@@ -122,6 +122,7 @@ namespace AfterSchoolLibrary.Helpers
                 //  case WebSessionActionType.Unfollowed:
                 //  case WebSessionActionType.Shared:
                 //  case WebSessionActionType.Contacted:
+                // case WebSessionActionType.Added:
                 default:
                     var actorActionObjectTypeTextTemplate = "{actorName} {actionType} {objectType} {objectText}";
                     return FormatTemplate(actorActionObjectTypeTextTemplate, formatParams);
@@ -148,7 +149,7 @@ namespace AfterSchoolLibrary.Helpers
 
 
             // shared templates
-            var toTemplate = " to {indirectObjectType {indirectObjectText}";
+            var toTemplate = " to {indirectObjectType} {indirectObjectText}";
             var forTemplate = " for {indirectObjectType} {indirectObjectText}";
 
             switch (actionType)
@@ -170,6 +171,7 @@ namespace AfterSchoolLibrary.Helpers
                 case WebSessionActionType.ManuallyRefunded:
                 case WebSessionActionType.Approved:
                 case WebSessionActionType.Searched:
+                case WebSessionActionType.Updated:
                     return AppendFormatTemplate(actionStringDict, forTemplate, formatParams);
 
                 case WebSessionActionType.Followed:
@@ -185,24 +187,23 @@ namespace AfterSchoolLibrary.Helpers
 
                 case WebSessionActionType.Viewed:
                 case WebSessionActionType.Interested:
-                    var byTemplate = " by {indirectObjectType {indirectObjectText}";
+                    var byTemplate = " by {indirectObjectType} {indirectObjectText}";
                     return AppendFormatTemplate(actionStringDict, byTemplate, formatParams);
 
-
-                case WebSessionActionType.Updated:
                 case WebSessionActionType.Published:
                 case WebSessionActionType.Sent:
                 case WebSessionActionType.Paged:
                 case WebSessionActionType.Connected:
                 case WebSessionActionType.Copied:
                 case WebSessionActionType.Restored:
+                case WebSessionActionType.Added:
                     return AppendFormatTemplate(actionStringDict, toTemplate, formatParams);
 
                 case WebSessionActionType.Unpublished:
                 case WebSessionActionType.Navigated:
                 case WebSessionActionType.Browsed:
                 case WebSessionActionType.Moved:
-                    var fromTemplate = " from {indirectObjectType {indirectObjectText}";
+                    var fromTemplate = " from {indirectObjectType} {indirectObjectText}";
                     return AppendFormatTemplate(actionStringDict, fromTemplate, formatParams);
 
                 case WebSessionActionType.Paid:
@@ -221,7 +222,7 @@ namespace AfterSchoolLibrary.Helpers
                 //  case WebSessionActionType.Shared:
                 //  case WebSessionActionType.Contacted:
                 default:
-                    var actorActionObjectTypeTextTemplate = " {indirectObjectType {indirectObjectText";
+                    var actorActionObjectTypeTextTemplate = " {indirectObjectType} {indirectObjectText";
                     return AppendFormatTemplate(actionStringDict, actorActionObjectTypeTextTemplate, formatParams);
             }
         }
