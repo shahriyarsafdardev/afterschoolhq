@@ -721,7 +721,11 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult FormEdit(string id, string qg)
         {
-            var form = Form.Load(id.ToInteger());
+            if (SessionVariables.CurrentAccount.IsEmpty() || id.IsEmpty())
+                return HttpNotFound();
+
+            var msgs = new SystemMessages();
+            var form = Form.LoadByIdByAccountId(id, SessionVariables.CurrentAccount.ID.Value, msgs);
             var questionGroups = form.GetQuestionGroups();
             var individualGroups = questionGroups
                 .Where(x => x.RegistrantTypeId == RegistrantType.Individual)
@@ -769,6 +773,9 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpPost]
         public ActionResult FormEdit(string id, string copyfrom, string qg, string name, string description, string cmd)
         {
+            if (SessionVariables.CurrentAccount.IsEmpty() || id.IsEmpty() || copyfrom.IsEmpty())
+                return HttpNotFound();
+
             var msgs = new SystemMessages();
             Form form = null;
             FormQuestionGroup questionGroup = null;
@@ -776,14 +783,13 @@ namespace AfterSchool.Areas.Org.Controllers
             if (name.IsEmpty() && qg.IsBlank())
                 msgs.Add("Name is required", MessageType.UserError);
 
-            if (description.IsEmpty() && qg.IsBlank() && false)
+            if (description.IsEmpty() && qg.IsBlank())
                 msgs.Add("Description is required", MessageType.UserError);
-
 
             if (id.ToInteger() == 0)
             {
                 if (copyfrom.IsNumber())
-                    form = Form.Load(copyfrom.ToInteger(), msgs)
+                    form = Form.LoadByIdByAccountId(copyfrom, SessionVariables.CurrentAccount.ID.Value, msgs)
                         .Copy(SessionVariables.CurrentUser.ID.Value, SessionVariables.CurrentAccount.ID.Value, null, msgs);
                 else
                     form = SessionVariables.CurrentAccount
@@ -791,10 +797,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         .Copy(SessionVariables.CurrentUser.ID.Value, SessionVariables.CurrentAccount.ID.Value, null, msgs);
             }
             else
-            {
-                form = Form.Load(id.ToInteger(), msgs);
-            }
-
+                form = Form.LoadByIdByAccountId(id, SessionVariables.CurrentAccount.ID.Value, msgs);
 
             if (msgs.HasNoErrors())
             {
@@ -1396,6 +1399,9 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpPost]
         public ActionResult NewPayment(string selectedpackage, string stripetoken, string cardId)
         {
+            if (SessionVariables.CurrentAccount.IsEmpty())
+                return HttpNotFound();
+
             var msgs = new SystemMessages();
 
             Package package = null;
@@ -1447,7 +1453,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             
             if (newlyAddedPackage.IsNotEmpty())
-                SessionVariables.AccountPackage = AccountPackage.LoadByUid(newlyAddedPackage.Uid);
+                SessionVariables.AccountPackage = AccountPackage.LoadByUidByAccountId(newlyAddedPackage.Uid, SessionVariables.CurrentAccount.ID.Value, msgs);
             
             if (msgs.HasNoErrors())
             {
@@ -1504,6 +1510,9 @@ namespace AfterSchool.Areas.Org.Controllers
 
         public ActionResult OAuthStripe()
         {
+            if (SessionVariables.CurrentAccount.IsEmpty())
+                return HttpNotFound();
+
             var msgs = new SystemMessages();
 
             //.. user is redirected from onbording
@@ -1522,7 +1531,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     Session["activityUid"] = null;
                     TempData["IsStripeIntegrated"] = true;
 
-                    var activity = Activity.LoadByUid(id.ToGuid());
+                    var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
 
                     if (activity.IsNotEmpty() && activity.ShortHomePageUrl.IsNotEmpty())
                         return Redirect(activity.ShortHomePageUrl);

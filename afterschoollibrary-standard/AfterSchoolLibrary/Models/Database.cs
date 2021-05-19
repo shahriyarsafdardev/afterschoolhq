@@ -540,6 +540,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityForm_IsPublished_Uid ON [ActivityForm] (Uid,IsPublished)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Form_AccountId ON [Form] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Form_Uid ON [Form] (Uid)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Form_AccountId_Id ON [Form] (Id,AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_FormQuestion_FormId ON [FormQuestion] (FormId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_FormQuestion_FormId_IsActive ON [FormQuestion] (FormId,IsActive)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_FormQuestion_FormQuestionGroupId ON [FormQuestion] (FormQuestionGroupId)"));
@@ -585,6 +586,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountPackage_AccountId ON [AccountPackage] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountPackage_AccountId_IsActive ON [AccountPackage] (AccountId,IsActive)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountPackage_Uid ON [AccountPackage] (Uid)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountPackage_AccountId_Uid ON [AccountPackage] (Uid,AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_PackageFeature_PackageId ON [PackageFeature] (PackageId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_PackageFeature_FeatureTypeId_PackageId ON [PackageFeature] (PackageId,FeatureTypeId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountPackageFeature_AccountPackageId ON [AccountPackageFeature] (AccountPackageId)"));
