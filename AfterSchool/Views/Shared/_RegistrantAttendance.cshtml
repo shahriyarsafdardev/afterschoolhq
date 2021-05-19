@@ -28,27 +28,17 @@
                         <select name="activityinstance" id="activityinstance" class="form-control">
                             <option value="">Select...</option>
                             @{
-                                string logs = "";
-                                logs += "Current Time: " + DateTime.UtcNow.ToShortDateTimeString();
-                                logs += "\n";
-
                                 foreach (var instance in schedule.GetInSessionInstances().DistinctBy(instance => instance.ID))
                                 {
                                     if (instance.StartDateTime.HasValue)
                                     {
-                                        logs += "Schdule Time: " + account.ConvertFromAccountTimeZone(instance.StartDateTime.Value).AddDays(-1);
-                                        logs += "\n";
-
                                         if (DateTime.UtcNow >= account.ConvertFromAccountTimeZone(instance.StartDateTime.Value).AddDays(-1))
                                         {
                                             <option value="@instance.ID" @(Model.ActivityInstanceId == instance.ID ? " selected=\"selected\" " : "")>
-                                                @instance.StartDateTime.ToShortTimeString(), @instance.StartDateTime.Value.ToLongDateString()
-                                            </option>
+                                                @instance.StartDateTime.ToShortTimeString(), @instance.StartDateTime.Value.ToLongDateString()                                            </option>
                                         }
                                     }
                                 }
-
-                                AfterSchoolLibrary.Helpers.Utilities.SystemLog(logs);
                             }
                         </select>                       
                     </div>
