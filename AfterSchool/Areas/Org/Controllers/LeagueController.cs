@@ -417,6 +417,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var league = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
             var aag = league.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentWebUser = SessionVariables.CurrentUser;
 
             if (aag.IsNotEmpty())
             {
@@ -446,10 +448,10 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         if (form.ToString().ToInteger() == 0)
                         {
-                            var defaultForm = SessionVariables.CurrentAccount.GetOrCreateDefaultForm(SessionVariables.CurrentUser, amsgs, adc);
+                            var defaultForm = currentAccount.GetOrCreateDefaultForm(currentWebUser, amsgs, adc);
                             var newForm = defaultForm.Copy(
-                                SessionVariables.CurrentUser.ID.Value,
-                                SessionVariables.CurrentAccount.ID.Value,
+                                currentWebUser.ID.Value,
+                                currentAccount.ID.Value,
                                 (league.Name + " Form").MaxChars(100, "..."),
                                 amsgs,
                                 adc);
@@ -488,12 +490,23 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "maxgrade", maxgrade }
                 };
 
-                league = ActivityGroupService.SaveLeague(SessionVariables.CurrentUser, SessionVariables.CurrentAccount, id, values, msgs);
+                league = ActivityGroupService.SaveLeague(currentWebUser, currentAccount, id, values, msgs);
 
                 if (msgs.HasNoErrors())
                 {
                     msgs.Add($"{UILabel.ActivityGroupLabel(league.ActivityGroupTypeId)} Saved", MessageType.Success);
-                    UpdateSession(sat: SessionActionType.ActivityGroupCreate, accountId: SessionVariables.CurrentAccount.ID, activityGroupId: league.ID);
+
+                    // LOG: CurrentUser Updated ActivityGroup ActivityGroupName for Account AccountName
+                    WebSessionUtilities.LogActivity(
+                        webSessionId: SessionVariables.WebSession.ID.Value,
+                        actor: currentWebUser,
+                        actionType: WebSessionActionType.Updated,
+                        objectId: league.ID.Value,
+                        objectType: ObjectType.ActivityGroup,
+                        objectText: league.Name,
+                        indirectObjectId: currentAccount.ID.Value,
+                        indirectObjectType: ObjectType.Account,
+                        indirectObjectText: currentAccount.Name);
                 }
             }
 
@@ -606,21 +619,30 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             SystemMessages msgs = new SystemMessages();
             var activityGroup = ActivityGroup.LoadByUid(id.ToGuid());
-            var account = SessionVariables.CurrentAccount;
-            var accountActivityGroup = activityGroup.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentWebUser = SessionVariables.CurrentUser;
+            var accountActivityGroup = activityGroup.GetAccountActivityGroup(currentAccount, msgs);
 
             if (accountActivityGroup.IsNotEmpty())
             {
-                msgs.AddRange(accountActivityGroup.SetIsPublished(true, SessionVariables.CurrentUser.ID.Value));
+                msgs.AddRange(accountActivityGroup.SetIsPublished(true, currentWebUser.ID.Value));
                 ViewBag.aagRegistrationURL = accountActivityGroup.GetHomePageUrl(SessionVariables.IsAfterSchool.Value);
             }
             else
-                msgs.AddRange(activityGroup.SetIsPublished(true, SessionVariables.CurrentUser.ID.Value));
+                msgs.AddRange(activityGroup.SetIsPublished(true, currentWebUser.ID.Value));
 
             if (msgs.HasNoErrors())
             {
                 msgs.Add(string.Format("{0} has been published", activityGroup.Name), MessageType.Success);
-                UpdateSession(SessionActionType.ActivityGroupPublish, SessionVariables.CurrentAccount.ID, activityGroup.ID);
+
+                // LOG: CurrentWebUser published ActivityGroup ActivityGroupName to Account AccountName's Profile
+                WebSessionUtilities.LogActivity(
+                    webSessionId: SessionVariables.WebSession.ID.Value,
+                    actor: currentWebUser,
+                    actionType: WebSessionActionType.Published,
+                    objectId: activityGroup.ID.Value,
+                    objectType: ObjectType.ActivityGroup,
+                    objectText: $"{currentAccount}'s Profile");
             }
 
             ViewBag.AccountActivityGroup = accountActivityGroup;
@@ -634,21 +656,29 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var activityGroup = ActivityGroup.LoadByUid(id.ToGuid());
-            var account = SessionVariables.CurrentAccount;
-            var accountActivityGroup = activityGroup.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentWebUser = SessionVariables.CurrentUser;
+            var accountActivityGroup = activityGroup.GetAccountActivityGroup(currentAccount, msgs);
 
             if (accountActivityGroup.IsNotEmpty())
             {
                 ViewBag.aagRegistrationURL = accountActivityGroup.GetHomePageUrl(SessionVariables.IsAfterSchool.Value);
-                msgs.AddRange(accountActivityGroup.SetIsPublished(false, SessionVariables.CurrentUser.ID.Value));
+                msgs.AddRange(accountActivityGroup.SetIsPublished(false, currentWebUser.ID.Value));
             }
             else
-                msgs.AddRange(activityGroup.SetIsPublished(false, SessionVariables.CurrentUser.ID.Value));
+                msgs.AddRange(activityGroup.SetIsPublished(false, currentWebUser.ID.Value));
 
             if (msgs.HasNoErrors())
             {
                 msgs.Add(string.Format("{0} has been unpublished", activityGroup.Name), MessageType.Success);
-                UpdateSession(SessionActionType.ActivityGroupUnpublish, SessionVariables.CurrentAccount.ID, activityGroup.ID);
+                // LOG: CurrentWebUser unpublished ActivityGroup ActivityGroupName to Account AccountName's Profile
+                WebSessionUtilities.LogActivity(
+                    webSessionId: SessionVariables.WebSession.ID.Value,
+                    actor: currentWebUser,
+                    actionType: WebSessionActionType.Unpublished,
+                    objectId: activityGroup.ID.Value,
+                    objectType: ObjectType.ActivityGroup,
+                    objectText: $"{currentAccount}'s Profile");
             }
 
             ViewBag.AccountActivityGroup = accountActivityGroup;
