@@ -89,9 +89,8 @@
             $('#btn-save-personal').prop('disabled', true);
         });
 
-        if ($('#location').val().trim() == '') {           
-            $('#schoolnotfound').prop('checked', true);
-        }
+        if (@Json.Encode(school.IsEmpty())) 
+            $('#schoolnotfound').prop('checked', true);        
 
         $('#schoolnotfound').click(function () {
             if ($(this).prop("checked") == true) {
