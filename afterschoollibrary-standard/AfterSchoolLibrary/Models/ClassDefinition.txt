@@ -118,6 +118,7 @@ loadmethod: Uid|AccountId
 loadmethod: Id|AccountId
 -loadmethod: ParentActivityId, List<>
 loadmethod: ActivityGroupId, List<>
+loadmethod: ActivityGroupId|AccountId, List<>
 loadmethod: AccountActivityGroupId, List<>
 loadmethod: ActivityScheduleId, List<>
 loadmethod: ProviderAccountId, List<>
@@ -621,7 +622,9 @@ baseproperty: StartDateTime, required
 baseproperty: EndDateTime, required
 loadmethod: AccountId, List<>
 loadmethod: Uid
+loadmethod: Id|AccountId
 loadmethod: ActivityGroupId, List<>
+loadmethod: ActivityGroupId|AccountId, List<>
 loadmethod: AccountActivityGroupId, List<>
 [end]
 

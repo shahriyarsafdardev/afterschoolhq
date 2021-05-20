@@ -224,7 +224,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var defaultOpenDateTime = string.Format("{0} {1}", SessionVariables.CurrentAccount.ConvertToAccountTimeZone(DateTime.UtcNow).ToShortDateString(), "8:00 AM").ToDateTime();
             var defaultCloseDateTime = string.Format("{0} {1}", SessionVariables.CurrentAccount.ConvertToAccountTimeZone(DateTime.UtcNow).AddWeeks(1).ToShortDateString(), "12:00 AM").ToDateTime();
 
-            ViewBag.Periods = RegistrationPeriod.LoadByActivityGroupId(group.ID.Value).OrderBy(x => x.StartDateTime.Value).ToList();
+            ViewBag.Periods = RegistrationPeriod.LoadByActivityGroupIdByAccountId(group.ID.Value, SessionVariables.CurrentAccount.ID.Value, msgs).OrderBy(x => x.StartDateTime.Value).ToList();
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.DefaultOpenDateTime = defaultOpenDateTime;
@@ -249,9 +249,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var regperiod = new RegistrationPeriod();
 
             if (period.IsInteger())
-            {
-                regperiod = RegistrationPeriod.Load(period.ToInteger());                
-            }
+                regperiod = RegistrationPeriod.LoadByIdByAccountId(period, SessionVariables.CurrentAccount.ID.Value, msgs);                
             else
             {
                 regperiod.CreatedBy = SessionVariables.CurrentUser.ID.Value;
@@ -280,17 +278,13 @@ namespace AfterSchool.Areas.Org.Controllers
             var isArchived = group.IsArchived;
 
             if (pn.IsNumber() && pn.ToInteger() > 0)
-            {
                 pageNumber = pn.ToInteger();
-            }
+            
             if (rpp.IsNumber() && rpp.ToInteger() > 0)
-            {
                 recordsPerPage = rpp.ToInteger();
-            }
+            
             if (archive.IsBoolean())
-            {
                 isArchived = archive.ToInteger().ToBoolean();
-            }
 
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
@@ -327,13 +321,10 @@ namespace AfterSchool.Areas.Org.Controllers
             int recordsPerPage = 10;
 
             if (pn.IsNumber() && pn.ToInteger() > 0)
-            {
                 pageNumber = pn.ToInteger();
-            }
+            
             if (rpp.IsNumber() && rpp.ToInteger() > 0)
-            {
                 recordsPerPage = rpp.ToInteger();
-            }
 
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
@@ -345,9 +336,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
 
             if (emailed.IsBoolean() && emailed.ToBoolean())
-            {
                 msgs.Add("An email will be sent shortly", MessageType.Success);
-            }
 
             ViewBag.Messages = msgs;
             LoadRegistrationsViewBag(group, registrations);
@@ -433,13 +422,10 @@ namespace AfterSchool.Areas.Org.Controllers
             int recordsPerPage = 10;
 
             if (pn.IsNumber() && pn.ToInteger() > 0)
-            {
                 pageNumber = pn.ToInteger();
-            }
+            
             if (rpp.IsNumber() && rpp.ToInteger() > 0)
-            {
                 recordsPerPage = rpp.ToInteger();
-            }
 
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
@@ -474,21 +460,12 @@ namespace AfterSchool.Areas.Org.Controllers
             int recordsPerPage = 10;
 
             if (pn.IsNumber() && pn.ToInteger() > 0)
-            {
                 pageNumber = pn.ToInteger();
-            }
+            
             if (rpp.IsNumber() && rpp.ToInteger() > 0)
-            {
                 recordsPerPage = rpp.ToInteger();
-            }
 
-            var start = recordsPerPage * (pageNumber - 1);
-            var length = recordsPerPage;
-            var totalCount = 0;
-
-            var contacts = group.GetInvitedContacts(start, length);
-            totalCount = group.GetInvitedContactCount();
-
+            var totalCount = group.GetInvitedContactCount();
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
 
             ViewBag.PagingModel = new PagingModel()
@@ -508,7 +485,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult MessageDetail(string id)
         {
             var msgs = new SystemMessages();
-            var am = ActivityMessage.LoadByUid(id.ToGuid(), msgs);
+            var am = ActivityMessage.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
             ViewBag.Messages = msgs;
             ViewBag.Registrants = am.GetActivityMessageRegistrants(msgs);
             return View(am);
@@ -579,8 +556,11 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult MessagesResend(string id)
         {
+            if (SessionVariables.CurrentAccount.IsEmpty())
+                return HttpNotFound();
+
             var msgs = new SystemMessages();
-            var am = ActivityMessage.LoadByUid(id.ToGuid(), msgs);
+            var am = ActivityMessage.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
             var group = am.GetActivityGroup(msgs);
 
             BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, SessionVariables.CurrentUser.ID.Value, null, null));
@@ -603,7 +583,7 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult PublishDetail(string id)
         {
-            var group = ActivityGroup.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value);
+            var group = ActivityGroup.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
             ViewBag.Messages = new SystemMessages();
             ViewBag.Account = SessionVariables.CurrentAccount;
             return View(group);
@@ -613,7 +593,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Publish(string id)
         {
             SystemMessages msgs = new SystemMessages();
-            var group = ActivityGroup.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value);
+            var group = ActivityGroup.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
 
             msgs.AddRange(group.SetIsPublished(true, SessionVariables.CurrentUser.ID.Value));
 
@@ -642,7 +622,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Unpublish(string id, string qg)
         {
             SystemMessages msgs = new SystemMessages();
-            var group = ActivityGroup.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value);
+            var group = ActivityGroup.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
 
             msgs.AddRange(group.SetIsPublished(false, SessionVariables.CurrentUser.ID.Value));
 
@@ -671,7 +651,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Archive(string id)
         {
             var msgs = new SystemMessages();
-            var group = ActivityGroup.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value);
+            var group = ActivityGroup.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
 
             if (group.IsNotEmpty())
                 msgs.AddRange(group.MoveToArchive(SessionVariables.CurrentUser.ID.Value));
@@ -691,7 +671,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Restore(string id)
         {
             var msgs = new SystemMessages();
-            var group = ActivityGroup.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value);
+            var group = ActivityGroup.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
 
             if (group.IsNotEmpty())
                 group.MoveFromArchive(SessionVariables.CurrentUser.ID.Value, msgs);
@@ -711,7 +691,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Delete(string id)
         {
             var msgs = new SystemMessages();
-            var group = ActivityGroup.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value);
+            var group = ActivityGroup.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
 
             if (group.IsNotEmpty())
                 group.SetIsDeleted(SessionVariables.CurrentUser.ID.Value, true, msgs);
@@ -731,7 +711,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Schedules(string id)
         {
             var msgs = new SystemMessages();
-            var group = ActivityGroup.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value);
+            var group = ActivityGroup.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
 
             ViewBag.Messages = msgs;
             ViewBag.Schedules = group.GetSchedules();
@@ -745,7 +725,8 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Copy(string id, string groupnamecopy, string usesameformcopy)
         {
             var msgs = new SystemMessages();
-            var group = ActivityGroup.LoadByUid(id.ToGuid()).Copy(groupnamecopy, true, SessionVariables.CurrentUser.ID.Value, msgs);
+            var group = ActivityGroup.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs)
+                .Copy(groupnamecopy, true, SessionVariables.CurrentUser.ID.Value, msgs);
 
             ViewBag.Messages = msgs;
 
@@ -781,7 +762,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult AddRegistration(string id)
         {
             var msgs = new SystemMessages();
-            var session = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
+            var session = ActivityGroup.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
             var form = session.GetForm(msgs);
             var questions = GetAddRegistrationQuestions(form, msgs).OrderBy(question => question.DisplayOrder).ToList();
 
@@ -796,7 +777,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult AddRegistration(string id, string parentsig)
         {
             var msgs = new SystemMessages();
-            var session = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
+            var session = ActivityGroup.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
             var form = session.GetForm(msgs);
             var questions = GetAddRegistrationQuestions(form, msgs);
             var activities = session.GetActivities(ActivityType.Activity, false, false, null, null, false, msgs);
@@ -831,10 +812,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 var postedValue = Request[$"activity-preference-{i}"];
                 if (postedValue.IsGuid())
                 {
-                    var activity = Activity.LoadByUid(postedValue.ToGuid(), msgs);
+                    var activity = Activity.LoadByUidByAccountId(postedValue.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
                     activitiesAndPreferences.Add((activity, i));
                 }
-
             }
 
             if (msgs.HasNoErrors())
@@ -860,13 +840,11 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Placement(string id, string step, string period)
         {
             var msgs = new SystemMessages();
-            var group = ActivityGroup.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value);
+            var group = ActivityGroup.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
             var nextStep = 1;
 
             if (step.IsNumber())
-            {
                 nextStep = step.ToInteger();
-            }
 
             switch (nextStep)
             {
@@ -904,7 +882,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult ResetPlacement(string id)
         {
             var msgs = new SystemMessages();
-            var group = ActivityGroup.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value);
+            var group = ActivityGroup.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
 
             if (group.RegistrationModeId == RegistrationMode.Apply)
             {
@@ -926,12 +904,10 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Placement(string id, string step, string period, string assignmentsJSON)
         {
             var msgs = new SystemMessages();
-            var group = ActivityGroup.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value);
+            var group = ActivityGroup.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
             var nextStep = 1;
             if (step.IsNumber())
-            {
                 nextStep = step.ToInteger();
-            }
 
             var regperiod = period.IsNumber() ? RegistrationPeriod.Load(period.ToInteger()) : null;
             var registrantAssignments = new JavaScriptSerializer() { MaxJsonLength = 50000000 }.Deserialize<List<RegistrantAssignment>>(assignmentsJSON);
@@ -1011,9 +987,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ActivityGroup league = null;
 
             if (id.IsGuid())
-            {
-                league = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
-            }
+                league = ActivityGroup.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
             else
             {
                 league = SessionVariables.CurrentAccount.GetDefaultNewLeague();
@@ -1082,7 +1056,8 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult EditRestrictions(string id)
         {
-            var league = ActivityGroup.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value);
+            var msgs = new SystemMessages();
+            var league = ActivityGroup.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
 
             ViewBag.Messages = new SystemMessages();
             ViewBag.Account = SessionVariables.CurrentAccount;
@@ -1142,7 +1117,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult EditContact(string id)
         {
             var msgs = new SystemMessages();
-            var league = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
+            var league = ActivityGroup.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
 
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
@@ -1188,7 +1163,8 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult EditDetails(string id)
         {
-            var league = ActivityGroup.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value);
+            var msgs = new SystemMessages();
+            var league = ActivityGroup.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
 
             ViewBag.Messages = new SystemMessages();
             ViewBag.Account = SessionVariables.CurrentAccount;
@@ -1206,7 +1182,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (details.IsEmpty())
                 msgs.Add($"{UILabel.ActivityGroupLabel(ActivityGroupType.League)} Details is required", MessageType.UserError);
-
 
             var values = new Dictionary<string, object>()
             {
@@ -1256,7 +1231,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult EditCost(string id)
         {
             var msgs = new SystemMessages();
-            var league = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
+            var league = ActivityGroup.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
             LoadEditCostViewBag(league, msgs);
             return View(league);
         }
@@ -1304,7 +1279,8 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult EditConfirmation(string id)
         {
-            var league = ActivityGroup.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value);
+            var msgs = new SystemMessages();
+            var league = ActivityGroup.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
 
             ViewBag.Messages = new SystemMessages();
             ViewBag.Account = SessionVariables.CurrentAccount;
@@ -1371,9 +1347,9 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult TeamQuickAdd(string id, string teamname, string seatsavailable)
         {
             var msgs = new SystemMessages();
-            var league = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
+            var league = ActivityGroup.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
             Activity activity = null;
-            var otherActivities = Activity.LoadByActivityGroupId(league.ID.Value);
+            var otherActivities = Activity.LoadByActivityGroupIdByAccountId(league.ID.Value, SessionVariables.CurrentAccount.ID.Value, msgs);
 
             otherActivities.ForEach((oa) =>
             {
