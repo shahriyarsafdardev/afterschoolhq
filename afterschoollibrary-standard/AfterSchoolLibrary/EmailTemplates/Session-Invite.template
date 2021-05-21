@@ -8,10 +8,21 @@
   <p>
     @Model.SenderDisplayName at @Model.AccountName has invited you to register for @Model.SessionName! @Model.RegistrationOpenText
   </p>
-  
-  <a href="@Model.AcceptLink" style="background:#008B6A;color:#fff;font-family:Montserrat;border:3px solid #fff;border-radius:10px;height:180px;max-width:450px;padding:5px 50px;font-size:28px;font-weight:800;text-decoration:none;margin: auto;display: flex;text-align: center;justify-content: center;
-    align-items: center;">Accept and Register Now</a>
-  
+
+  <table cellspacing="0" cellpadding="0" style="margin:auto">
+    <tr>
+      <td align="center" width="500" height="150" bgcolor="#008B6A" style="-webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px; color: #ffffff; display: block;">
+        <a href="@Model.AcceptLink" style="font-size:26px; font-weight: bold; font-family: Helvetica, Arial, sans-serif; text-decoration: none; line-height:40px; width:100%; display:inline-block;">
+          <span style="color: #FFFFFF">Accept and Register Now</span>
+        </a>
+      </td>
+    </tr>
+  </table>
+
+  <p style="text-align: center;">If you are unable to click the button above, you can accept the invitation by copying the link below into your browser</p>
+
+  <a style="margin-bottom:10px" href="@Model.AcceptLink">Accept And Register</a>
+
   <ul>
     <li>
       To <strong>decline</strong> this invite, please click the following link: <a href="@Model.DeclineLink">@Model.DeclineLink</a>
