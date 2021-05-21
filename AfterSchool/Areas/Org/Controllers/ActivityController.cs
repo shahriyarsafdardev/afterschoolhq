@@ -942,7 +942,12 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult EditLocation(string id)
         {
             var currentAccount = SessionVariables.CurrentAccount;
-            var activity = Activity.LoadByUid(id.ToGuid());
+            var msgs = new SystemMessages();
+
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+
+            var activity = Activity.LoadByUidByAccountId(id.ToGuid(), currentAccount.ID.Value, msgs);
 
             ViewBag.Messages = new SystemMessages();
             ViewBag.Account = currentAccount;
