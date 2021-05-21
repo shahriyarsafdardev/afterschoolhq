@@ -213,7 +213,6 @@ loadmethod: AccountId, List<>
 loadmethod: ActivityGroupId, List<>
 loadmethod: AccountId|IsOngoing, List<>
 loadmethod: ActivityGroupId|IsOngoing, List<>
-loadmethod: Id|AccountId
 [end]
 
 [begin]
