@@ -583,8 +583,10 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult PublishDetail(string id)
         {
+            var msgs = new SystemMessages();
+
             var group = ActivityGroup.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
-            ViewBag.Messages = new SystemMessages();
+            ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
             return View(group);
         }
