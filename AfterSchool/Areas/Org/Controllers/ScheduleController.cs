@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 using BasicLibrary;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
@@ -18,11 +17,15 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Copy(string id, string activity)
         {
-            var schedule = ActivitySchedule.Load(id.ToInteger());
-            var copy = schedule.GetCopy();
-            
+            var currentAccount = SessionVariables.CurrentAccount;
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
 
-            ViewBag.Messages = new SystemMessages();
+            var msgs = new SystemMessages();
+            var schedule = ActivitySchedule.LoadByIdByAccountId(id, currentAccount.ID.Value, msgs);
+            var copy = schedule.GetCopy();            
+
+            ViewBag.Messages = msgs;
             ViewBag.ShowScheduleList = false;
             ViewBag.ActivityId = activity;
             return View("edit", copy);
@@ -31,16 +34,18 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Edit(string id, string activity, string group)
         {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+
             var schedule = new ActivitySchedule();
             if (id.ToInteger() > 0)
-            {
-                schedule = ActivitySchedule.Load(id.ToInteger());
-            }
+                schedule = ActivitySchedule.LoadByIdByAccountId(id, currentAccount.ID.Value, msgs);
             else
-            {
                 schedule = ActivitySchedule.GetNewDefaultSchedule();
-            }
-            ViewBag.Messages = new SystemMessages();
+
+            ViewBag.Messages = msgs;
             ViewBag.ShowScheduleList = false;
             ViewBag.ActivityId = activity;
             ViewBag.ActivityGroupUid = group;
@@ -50,19 +55,20 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult EditForActivity(string id, string activity)
         {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+
             var schedule = new ActivitySchedule();
-            var act = Activity.LoadByUid(activity.ToGuid());
+            var act = Activity.LoadByUidByAccountId(activity.ToGuid(), currentAccount.ID.Value, msgs);
 
             if (id.ToInteger() > 0)
-            {
-                schedule = ActivitySchedule.Load(id.ToInteger());
-            }
+                schedule = ActivitySchedule.LoadByIdByAccountId(id, currentAccount.ID.Value, msgs);
             else
-            {
                 schedule = ActivitySchedule.GetNewDefaultSchedule();
-            }
 
-            ViewBag.Messages = new SystemMessages();
+            ViewBag.Messages = msgs;
             ViewBag.ShowScheduleList = true;
             ViewBag.Schedules = ActivitySchedule.LoadByAccountId(act.AccountId.Value);
             ViewBag.ActivityId = activity;
@@ -73,9 +79,14 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpPost]
         public ActionResult Edit(string id, string name, string scheduledetails, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime, string scheduledates, string isongoing, string activity, string group)
         {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
-            var schedule = new ActivitySchedule();
 
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+
+            var schedule = new ActivitySchedule();
             var scheduleRepeat = Request.Form.Filter("schedulerepeat-");
             var meetingOpenInfo = Request.Form.Filter("meeting-open-");
             var meetingClosedInfo = Request.Form.Filter("meeting-closed-");
@@ -84,20 +95,16 @@ namespace AfterSchool.Areas.Org.Controllers
             var scheduleDatesClosed = ActivityScheduleUI.PrepScheduleDatesClosed(meetingClosedInfo);
 
             if (id.ToInteger() > 0)
-            {
-                schedule = ActivitySchedule.EditExisting(id, name, scheduledetails, repeatsweekly.IsBoolean() ? repeatsweekly.ToBoolean() : false, isongoing.IsBoolean() ? isongoing.ToBoolean() : false, startdate.ToDateTime(), enddate.ToDateTime(), dailystarttime.ToDateTime(), dailyendtime.ToDateTime(), scheduleDates, scheduleDatesClosed, SessionVariables.CurrentUser.ID.Value, msgs);
-            }
+                schedule = ActivitySchedule.EditExisting(id, name, scheduledetails, repeatsweekly.IsBoolean() && repeatsweekly.ToBoolean(), isongoing.IsBoolean() && isongoing.ToBoolean(), startdate.ToDateTime(), enddate.ToDateTime(), dailystarttime.ToDateTime(), dailyendtime.ToDateTime(), scheduleDates, scheduleDatesClosed, currentUser.ID.Value, msgs);
             else
             {
-                var groupId = group.IsGuid() ? ActivityGroup.LoadByUid(group.ToGuid()).ID : null;
+                var groupId = group.IsGuid() ? ActivityGroup.LoadByUidByAccountId(group.ToGuid(), currentAccount.ID.Value, msgs).ID : null;
 
-                schedule = ActivityScheduleService.CreateNew(name, scheduledetails, repeatsweekly.IsBoolean() ? repeatsweekly.ToBoolean() : false, isongoing.IsBoolean() ? isongoing.ToBoolean() : false, startdate.ToDateTime(), enddate.ToDateTime(), dailystarttime.ToDateTime(), dailyendtime.ToDateTime(), scheduleDates, scheduleDatesClosed, SessionVariables.CurrentAccount.ID.Value, groupId, SessionVariables.CurrentUser.ID.Value, msgs);
+                schedule = ActivityScheduleService.CreateNew(name, scheduledetails, repeatsweekly.IsBoolean() && repeatsweekly.ToBoolean(), isongoing.IsBoolean() && isongoing.ToBoolean(), startdate.ToDateTime(), enddate.ToDateTime(), dailystarttime.ToDateTime(), dailyendtime.ToDateTime(), scheduleDates, scheduleDatesClosed, currentAccount.ID.Value, groupId, currentUser.ID.Value, msgs);
             }
 
             if (msgs.HasNoErrors())
-            {
                 msgs.Add(string.Format("{0} Schedule Saved", UILabel.ActivityLabel(ActivityType.Activity)), MessageType.Success);
-            }
 
             ViewBag.Messages = msgs;
             ViewBag.ShowScheduleList = false;
@@ -107,13 +114,9 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 if (activity.IsGuid())
-                {
                     return RedirectToAction("editschedule", "activity", new { id = activity, schedule = schedule.ID });
-                }
                 else if (group.IsGuid())
-                {
                     return RedirectToAction("schedules", "group", new { id = group });
-                }
             }
 
             return View(schedule);
