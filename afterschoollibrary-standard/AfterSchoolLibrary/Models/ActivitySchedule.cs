@@ -263,7 +263,7 @@ namespace AfterSchoolLibrary.Models
             return GetInstances(msgs: msgs, dc: dc).Where(instance => instance.InstanceTypeId == InstanceType.OutOfSession).ToList();
         }
 
-        public static ActivitySchedule LoadByidByAccountId(int id, int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static ActivitySchedule LoadByIdByAccountId(int id, int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
