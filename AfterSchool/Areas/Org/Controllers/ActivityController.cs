@@ -346,10 +346,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
 
                 if (group.IsGuid())
-                    activityGroup = ActivityGroup.LoadByUid(group.ToGuid());                
-
-                if (msgs.HasNoErrors())
-                    msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
+                    activityGroup = ActivityGroup.LoadByUid(group.ToGuid());
 
                 switch (cmd)
                 {
