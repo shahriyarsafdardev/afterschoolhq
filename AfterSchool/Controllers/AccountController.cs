@@ -1115,10 +1115,8 @@ namespace AfterSchool.Controllers
                 }
             });
 
-            if (placeid.IsEmpty() && schoolnotfound == false)
-            {
+            if (placeid.IsEmpty() && !schoolnotfound)
                 msgs.Add($"Location is required", MessageType.UserError);
-            }
 
             var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
             var email = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail).Value;
