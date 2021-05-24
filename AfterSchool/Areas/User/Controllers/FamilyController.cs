@@ -51,10 +51,11 @@ namespace AfterSchool.Areas.User.Controllers
                     case QuestionDataType.RegistrantLastName:
                     case QuestionDataType.RegistrantGrade:
                     case QuestionDataType.RegistrantDateOfBirth:
-                    case QuestionDataType.RegistrantGender:                    
+                    case QuestionDataType.RegistrantGender:
+                    case QuestionDataType.RegistrantTShirtSize:
                         question.IsRequired = true;
                         break;
-                    case QuestionDataType.RegistrantTShirtSize:
+
                     case QuestionDataType.RegistrantHomePhone:
                     case QuestionDataType.RegistrantEmail:
                         question.IsRequired = false;
@@ -129,10 +130,8 @@ namespace AfterSchool.Areas.User.Controllers
                     }
                 });
 
-                if (placeid.IsEmpty() && schoolnotfound == false)
-                {
+                if (placeid.IsEmpty() && !schoolnotfound)
                     msgs.Add($"Location is required", MessageType.UserError);
-                }
 
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
 
