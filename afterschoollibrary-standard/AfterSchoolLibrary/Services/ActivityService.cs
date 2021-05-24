@@ -2311,6 +2311,18 @@ namespace AfterSchoolLibrary.Services
             return activity.Save(dc);
         }
 
+        public static SystemMessages UpdateActivitySchedule(this Activity activity, int? ScheduleId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            activity.ActivityScheduleId = ScheduleId;
+            activity.LastModifiedDate = DateTime.UtcNow;
+            activity.LastModifiedBy = loggedInUserId;
+
+            msgs.AddRange(activity.Save(dc: dc));
+            return msgs;
+        }
+
         public static AccountProperty AddOrUpdateActivityProperty(this Activity activity, AccountPropertyType type, string value, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();

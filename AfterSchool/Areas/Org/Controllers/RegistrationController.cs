@@ -309,24 +309,19 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                var sat = SessionActionType.NotSet;
-                switch (ratTo)
-                {
-                    case RegistrationAssignmentType.Applied:
-                        sat = SessionActionType.ActivityMoveToApplication;
-                        break;
-                    case RegistrationAssignmentType.Reserved:
-                        sat = SessionActionType.ActivityMoveToReserved;
-                        break;
-                    case RegistrationAssignmentType.WaitingList:
-                        sat = SessionActionType.ActivityMoveToWaitingList;
-                        break;
-                }
-
-
                 selectedRegistration.WasUpdated(msgs);
 
-                UpdateSession(sat, SessionVariables.CurrentAccount.ID, registrantActivity.GetActivityId(), null, selectedRegistration.RegistrantId, selectedRegistration.ID, selectedRegistration.RegistrationPeriodId, registrantActivity.GetActivityGroupId());
+                // LOG: Someone Updated RegistrantActivity {registrant.Name} assignment type to {ratTo} for Activty ActivityName
+                WebSessionUtilities.LogActivity(
+                    webSessionId: SessionVariables.WebSession.ID.Value,
+                    actor: SessionVariables.CurrentUser,
+                    actionType: WebSessionActionType.Updated,
+                    objectId: registrantActivity.ID,
+                    objectType: ObjectType.RegistrantActivity,
+                    objectText: $"{registration.GetRegistrant().GetFirstNameLastInitial()}'s assignment type to {ratTo}",
+                    indirectObjectId: registrantActivity.GetActivityId(),
+                    indirectObjectType: ObjectType.Activity,
+                    indirectObjectText: registrantActivity.GetActivity().Name);
 
                 msgs.Add(string.Format("{0} has been moved to {1} for {2}", selectedRegistration.ToRegistrant().Name, ratTo.ToString().SplitByUpperCase(), registrantActivity.GetParticipationObject(msgs).Name), MessageType.Success);
             }
@@ -408,7 +403,17 @@ namespace AfterSchool.Areas.Org.Controllers
                         true,
                         msgs);
 
-                // UpdateSession(SessionActionType.RegistrationAddActivity, SessionVariables.CurrentAccount.ID, act.ID, null, selectedRegistration.RegistrantId, selectedRegistration.ID, selectedRegistration.RegistrationPeriodId);
+                // LOG:  CurrentWebUser added Registrant RegistrantName to Activity ActivityName
+                WebSessionUtilities.LogActivity(
+                    webSessionId: SessionVariables.WebSession.ID.Value,
+                    actor: SessionVariables.CurrentUser,
+                    actionType: WebSessionActionType.Added,
+                    objectId: registrant.ID.Value,
+                    objectType: ObjectType.Registrant,
+                    objectText: registrant.GetFirstNameLastInitial(),
+                    indirectObjectId: act.ID.Value,
+                    indirectObjectType: ObjectType.Activity,
+                    indirectObjectText: act.Name);
 
                 msgs.Add($"{act.Name} has been added for {registrant.Name}", MessageType.Success);
             }

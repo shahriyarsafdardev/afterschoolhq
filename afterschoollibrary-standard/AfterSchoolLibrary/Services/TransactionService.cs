@@ -638,8 +638,8 @@ namespace AfterSchoolLibrary.Services
                         var billerPayout = transaction.GetBillerPayout(msgs, dc);
                         var amountToReverse = Math.Min(billerPayout, refundAmount);
 
-                       var transferReversal = Billing.StripeHelper.CreateTransferReversal(stripeTransferId, amountToReverse, msgs);
-
+                        if (stripeTransferId.IsNotEmpty() && amountToReverse > 0)
+                           StripeHelper.CreateTransferReversal(stripeTransferId, amountToReverse, msgs);
                     }
                     else
                         msgs.Add("Error creating refund", MessageType.UserError);
