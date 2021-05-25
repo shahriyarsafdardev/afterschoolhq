@@ -773,7 +773,7 @@ namespace AfterSchool.Areas.Org.Controllers
             // changing schedule
             if (scheduleId.IsNumber())
             {
-                schedule = ActivitySchedule.LoadByIdByAccountId(scheduleId, currentAccount.ID.Value, msgs);
+                schedule = ActivitySchedule.LoadByIdByAccountId(scheduleId.ToInteger(), currentAccount.ID.Value, msgs);
                 if (schedule.AccountId != currentAccount.ID)
                     schedule = null;
             }
@@ -2072,7 +2072,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 return HttpNotFound();
             
             var registrantActivity = RegistrantActivity.LoadByUid(id.ToGuid());
-            var activity = Activity.LoadByIdByAccountId(registrantActivity.ParticipationObjectId.Value.ToString(), currentAccount.ID.Value, msgs);
+            var activity = Activity.LoadByIdByAccountId(registrantActivity.ParticipationObjectId.Value, currentAccount.ID.Value, msgs);
 
             ViewBag.Messages = msgs;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
@@ -2558,7 +2558,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 return HttpNotFound();
             
             var am = ActivityMessage.LoadByUidByAccountId(id.ToGuid(), currentAccount.ID.Value, msgs);
-            var activity = Activity.LoadByIdByAccountId(am.ActivityId.Value.ToString(), currentAccount.ID.Value, msgs);
+            var activity = Activity.LoadByIdByAccountId(am.ActivityId.Value, currentAccount.ID.Value, msgs);
             ViewBag.Messages = msgs;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.Registrants = am.GetActivityMessageRegistrants();
@@ -2883,7 +2883,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (!IsRequestFromApp() || activityId.IsEmpty() || currentAccount.IsEmpty())
                 return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
             
-            var activity = Activity.LoadByIdByAccountId(activityId, currentAccount.ID.Value, msgs);
+            var activity = Activity.LoadByIdByAccountId(activityId.ToInteger(), currentAccount.ID.Value, msgs);
             var dates = ActivityService.FinalizeStartAndEndDateForSubscription(activity, 
                 (BillingPeriodType)billingPeriodType.ToInteger(), 
                 dayOfWeek.IsNotEmpty() ? dayOfWeek.ToEnum<DayOfWeek>() : DayOfWeek.Sunday, 
