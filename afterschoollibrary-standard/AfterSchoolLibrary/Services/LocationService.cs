@@ -172,7 +172,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static Location CreateOrUpdateFromGoogle(string locationName, string streetNumber, string streetName, string address2, string neighborhood, string city, string county, string state, string postalCode, string country, 
-            string googlePlaceId, decimal latitude, decimal longitude,
+            string googlePlaceId, decimal? latitude, decimal? longitude,
             WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var location = Location.LoadByGooglePlaceId(googlePlaceId, msgs, dc);

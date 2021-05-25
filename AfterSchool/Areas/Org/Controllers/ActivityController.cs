@@ -212,8 +212,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (name.IsEmpty())
                 msgs.Add("Activity name is required.", MessageType.UserError);
-            else if (name.Length > 50)
-                msgs.Add("Activity name must not be greater then 50 chanracters.", MessageType.UserError);
+            else if (name.Length > 75)
+                msgs.Add("Activity name must not be greater than 75 characters.", MessageType.UserError);
 
             if (form.IsEmpty() && (isAdvanceSettingEnabled.IsEmpty() || !isAdvanceSettingEnabled.ToBoolean()))
             {
@@ -346,10 +346,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
 
                 if (group.IsGuid())
-                    activityGroup = ActivityGroup.LoadByUid(group.ToGuid());                
-
-                if (msgs.HasNoErrors())
-                    msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
+                    activityGroup = ActivityGroup.LoadByUid(group.ToGuid());
 
                 switch (cmd)
                 {
@@ -2120,9 +2117,12 @@ namespace AfterSchool.Areas.Org.Controllers
                             $"Url: {activity.HomePageUrl}<br />" +
                             $"User: {currentUser.FirstName} {currentUser.LastName}<br />";
 
-                    var registrationDate = activity.GetActiveRegistrationPeriod();
-                    if (registrationDate.IsNotEmpty() && registrationDate.StartDateTime.IsNotEmpty())
-                        body += $"Activity Start Date: {registrationDate.StartDateTime} <br />";
+                var registrationDate = activity.GetActiveRegistrationPeriod();
+                if (registrationDate.IsNotEmpty() && registrationDate.StartDateTime.IsNotEmpty())
+                    body += $"Registration Start Date: {registrationDate.StartDateTime} <br />";
+
+                if(activity.HasSchedule)
+                    body += $"Activity Start Date: {activity.GetSchedule(msgs).StartDate.ToShortDateString()} <br />";
 
                     if (activity.AccountTimeZone.IsNotEmpty())
                         body += $"All times are in {activity.AccountTimeZone} <br />";
