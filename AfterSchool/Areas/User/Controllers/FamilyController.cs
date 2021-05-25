@@ -55,6 +55,7 @@ namespace AfterSchool.Areas.User.Controllers
                     case QuestionDataType.RegistrantTShirtSize:
                         question.IsRequired = true;
                         break;
+
                     case QuestionDataType.RegistrantHomePhone:
                     case QuestionDataType.RegistrantEmail:
                         question.IsRequired = false;
