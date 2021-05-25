@@ -82,7 +82,32 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.Equal(registrant.ID, registrant.Reload(msgs, dc).ID);
         }
-      
+
+        [Fact]
+        public void LoadByUidByAccountIdTest()
+        {
+            try
+            {
+                // Arrange
+                var user = WebUserFactory.Create(msgs: msgs, dc: dc);
+                var account = AccountFactory.Create(user: user, msgs: msgs, dc: dc);
+                var registrant = RegistrantFactory.Create(account, msgs, dc);
+
+                // Act                
+                var expected = Registrant.LoadByUidByAccountId(Uid: registrant.Uid, AccountId: account.ID.Value, msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.Equal(expected: expected.ID, actual: registrant.ID);
+                Assert.Equal(expected: expected.Uid, actual: registrant.Uid);
+                Assert.Equal(expected: expected.Email, actual: registrant.Email);                
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
     }
 
 }

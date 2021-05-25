@@ -35,7 +35,26 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(IsClosingInTwoDays);
         }
 
+        [Fact]
+        public void LoadByIdByAccountIdTest()
+        {
+            try
+            {
+                // Arrange
+                var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, msgs, dc);
 
+                // Act
+                var expected = ActivitySchedule.LoadByIdByAccountId(Id: schedule.ID.Value, AccountId: ActivityOwnerAccount.ID.Value, msgs: msgs, dc: dc);
 
+                // Assert
+                Assert.Equal(expected: expected.ID, actual: schedule.ID);                
+                Assert.Equal(expected: expected.Name, actual: schedule.Name);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
     }
 }

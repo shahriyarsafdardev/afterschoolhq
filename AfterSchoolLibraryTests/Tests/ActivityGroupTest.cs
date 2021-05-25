@@ -3,6 +3,7 @@ using Xunit;
 using Xunit.Abstractions;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
+using AfterSchoolLibraryTests.Factories;
 
 namespace AfterSchoolLibraryTests.Tests
 {
@@ -104,6 +105,29 @@ namespace AfterSchoolLibraryTests.Tests
             var output = ActivityGroup.GenerateUniqueName(input, null, ActivityGroupOwner.ID, msgs, dc);
 
             Assert.Equal(expectedOutput, output);
+        }
+
+        [Fact]
+        public void LoadByIdByAccountIdTest()
+        {
+            try
+            {
+                // Arrange
+                var activityGroup = ActivityGroupFactory.Create(ActivityGroupOwner, ActivityGroupType.Session, msgs, dc);
+
+                // Act
+                var expected = ActivityGroup.LoadByIdByAccountId(Id: activityGroup.ID.Value, AccountId: ActivityGroupOwner.ID.Value, msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.Equal(expected: expected.ID, actual: activityGroup.ID);
+                Assert.Equal(expected: expected.Uid, actual: activityGroup.Uid);
+                Assert.Equal(expected: expected.Name, actual: activityGroup.Name);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
         }
     }
 }
