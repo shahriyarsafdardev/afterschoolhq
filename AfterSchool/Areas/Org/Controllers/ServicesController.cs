@@ -223,7 +223,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             Response.Clear();
 
-            if (SessionVariables.CurrentAccount.IsNotEmpty() && id.IsNumber())
+            if (SessionVariables.CurrentAccount.IsNotEmpty() && id.IsInteger())
             {
                 var schedule = ActivitySchedule.LoadByIdByAccountId(id.ToInteger(), SessionVariables.CurrentAccount.ID.Value, msgs);
                 var activities = schedule.GetActivities();
@@ -257,7 +257,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (SessionVariables.CurrentAccount.IsEmpty() || !SessionVariables.CurrentAccount.ID.HasValue)
                 msgs.Add("Account is empty.", MessageType.UserError);
 
-            if (msgs.HasNoErrors() && id.IsNumber())
+            if (msgs.HasNoErrors() && id.IsInteger())
             {
                 Database.ExecuteTransaction
                 (
@@ -302,7 +302,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             Response.Clear();
 
-            if (id.IsGuid() && schedule.IsNumber())
+            if (id.IsGuid() && schedule.IsInteger())
             {
                 var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
                 var sched = ActivitySchedule.LoadByIdByAccountId(schedule.ToInteger(), SessionVariables.CurrentAccount.ID.Value, msgs);

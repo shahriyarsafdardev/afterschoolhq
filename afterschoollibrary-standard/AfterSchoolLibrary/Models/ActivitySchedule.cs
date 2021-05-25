@@ -236,9 +236,7 @@ namespace AfterSchoolLibrary.Models
 			dq.Criterias.Add(ObjectMap["ActivityGroupId"], ActivityGroupId);
 			dq.Criterias.Add(ObjectMap["IsOngoing"], IsOngoing);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-		}
-
-		
+		}		
 
         #endregion
 
