@@ -263,11 +263,11 @@ namespace AfterSchoolLibrary.Models
             return GetInstances(msgs: msgs, dc: dc).Where(instance => instance.InstanceTypeId == InstanceType.OutOfSession).ToList();
         }
 
-        public static ActivitySchedule LoadByIdByAccountId(int id, int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static ActivitySchedule LoadByIdByAccountId(int Id, int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
-            dq.Criterias.Add(ObjectMap["id"], id);
+            dq.Criterias.Add(ObjectMap["Id"], Id);
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
