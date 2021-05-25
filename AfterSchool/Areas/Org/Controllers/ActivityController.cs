@@ -152,7 +152,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add("Error creating copy", MessageType.Error);
 
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.Messages = new SystemMessages();
+            ViewBag.Messages = msgs;
             ViewBag.Groups = currentAccount.GetSessions();
             ViewBag.Group = activityGroup;
             ViewBag.NeedToUpgrade = totalActivityCount >= SessionVariables.AccountPackage.GetFeature(FeatureType.Activities).GetMaxValue();
@@ -241,15 +241,11 @@ namespace AfterSchool.Areas.Org.Controllers
             if (form.IsEmpty() && (isAdvanceSettingEnabled.IsEmpty() || !isAdvanceSettingEnabled.ToBoolean()))
             {
                 if (activity.IsNotEmpty())
-                {
                     //.. edit activity
                     activeForm = activity.GetActiveActivityForm(msgs);
-                }
                 else
-                {
                     //.. create activity
                     activeForm = currentAccount.GetDefaultActivityForm(msgs);
-                }
 
                 if (activeForm.IsEmpty())
                 {
@@ -328,13 +324,9 @@ namespace AfterSchool.Areas.Org.Controllers
                         if (msgs.HasNoErrors())
                         {
                             if (values.Any(m => m.Key == "form"))
-                            {
                                 values["form"] = newForm.ID.Value.ToString();
-                            }
                             else
-                            {
                                 values.Add("form", newForm.ID.Value.ToString());
-                            }
                         }
                     }
 
@@ -449,7 +441,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUidByAccountId(id.ToGuid(), currentAccount.ID.Value, msgs);
 
-            ViewBag.Messages = new SystemMessages();
+            ViewBag.Messages = msgs;
             ViewBag.Account = currentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.ActiveMenu = "EditRestrictions";
@@ -574,13 +566,13 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpPost]
         public ActionResult EditContact(string id, string leadertype, string contactname, string contactphone, string contactemail, string instructor, string instructorfirstname, string instructorlastname, string instructoremail, string instructorphone, string cmd, string provider, string providername, string providerfirstname, string providerlastname, string provideremail, string providerphone)
         {
+            var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
 
             if (currentAccount.IsEmpty())
                 return HttpNotFound();
-
-            var msgs = new SystemMessages();
+            
             Activity activity = null;
             var beforeProviderAccountId = new int?();
 
@@ -949,7 +941,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var activity = Activity.LoadByUidByAccountId(id.ToGuid(), currentAccount.ID.Value, msgs);
 
-            ViewBag.Messages = new SystemMessages();
+            ViewBag.Messages = msgs;
             ViewBag.Account = currentAccount;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
@@ -1215,7 +1207,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUidByAccountId(id.ToGuid(), currentAccount.ID.Value, msgs);
 
-            ViewBag.Messages = new SystemMessages();
+            ViewBag.Messages = msgs;
             ViewBag.Account = currentAccount;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
@@ -1676,8 +1668,6 @@ namespace AfterSchool.Areas.Org.Controllers
             return RedirectToAction("Attendance");
         }
 
-
-
         [HttpPost]
         public ActionResult ChargeAttendanceFeeDone()
         {
@@ -2030,7 +2020,7 @@ namespace AfterSchool.Areas.Org.Controllers
             Response.BinaryWrite(filebytes);
             Response.End();
 
-            ViewBag.Messages = new SystemMessages();
+            ViewBag.Messages = msgs;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             return View("Registrants", activity);
         }
@@ -2084,7 +2074,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var registrantActivity = RegistrantActivity.LoadByUid(id.ToGuid());
             var activity = Activity.LoadByIdByAccountId(registrantActivity.ParticipationObjectId.Value.ToString(), currentAccount.ID.Value, msgs);
 
-            ViewBag.Messages = new SystemMessages();
+            ViewBag.Messages = msgs;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.AttachedCoupons = GetAttachedCoupons(registrantActivity);
             return View(registrantActivity);
@@ -2403,7 +2393,7 @@ namespace AfterSchool.Areas.Org.Controllers
             else
                 questionGroup = questionGroups.First();
 
-            ViewBag.Messages = new SystemMessages();
+            ViewBag.Messages = msgs;
             ViewBag.QuestionGroups = questionGroups;
             ViewBag.IndividualGroups = individualGroups;
             ViewBag.OrganizationGroups = organizationGroups;
@@ -2569,7 +2559,7 @@ namespace AfterSchool.Areas.Org.Controllers
             
             var am = ActivityMessage.LoadByUidByAccountId(id.ToGuid(), currentAccount.ID.Value, msgs);
             var activity = Activity.LoadByIdByAccountId(am.ActivityId.Value.ToString(), currentAccount.ID.Value, msgs);
-            ViewBag.Messages = new SystemMessages();
+            ViewBag.Messages = msgs;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.Registrants = am.GetActivityMessageRegistrants();
             return View(am);
@@ -2707,7 +2697,7 @@ namespace AfterSchool.Areas.Org.Controllers
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) => {
 
-                    activity = Activity.LoadByUidByAccountId(id.ToGuid(), currentAccount.ID.Value, msgs, adc);
+                    activity = Activity.LoadByUidByAccountId(id.ToGuid(), currentAccount.ID.Value, amsgs, adc);
                     account = activity.GetAccount(amsgs, adc);
                     users = account.GetUsers(msgs: amsgs, dc: adc);
 
@@ -2867,13 +2857,9 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             return false;
-
         }
 
-        private bool MustRequestToPublish(Activity activity)
-        {
-            return !SessionVariables.CurrentUser.CanPublishActivity(SessionVariables.CurrentAccount, activity);
-        }
+        private bool MustRequestToPublish(Activity activity) => !SessionVariables.CurrentUser.CanPublishActivity(SessionVariables.CurrentAccount, activity);
 
         private bool IsExternallyProvided(Activity activity)
         {
@@ -2886,10 +2872,7 @@ namespace AfterSchool.Areas.Org.Controllers
             return false;
         }
 
-        private bool ShowCopyButtonOnPublishDetail(Activity activity)
-        {
-            return activity.AccountId == SessionVariables.CurrentAccount.ID || !IsExternallyProvided(activity);
-        }
+        private bool ShowCopyButtonOnPublishDetail(Activity activity) => activity.AccountId == SessionVariables.CurrentAccount.ID || !IsExternallyProvided(activity);
 
         [HttpGet]
         public virtual JsonResult GetCalculatedStartingAndEndDateForSubscription(string activityId, string billingPeriodType, string dayOfWeek, string dayOfMonth)
@@ -2898,10 +2881,13 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
 
             if (!IsRequestFromApp() || activityId.IsEmpty() || currentAccount.IsEmpty())
-                return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
+                return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
             
             var activity = Activity.LoadByIdByAccountId(activityId, currentAccount.ID.Value, msgs);
-            var dates = ActivityService.FinalizeStartAndEndDateForSubscription(activity, (BillingPeriodType)billingPeriodType.ToInteger(), dayOfWeek.IsNotEmpty() ? dayOfWeek.ToEnum<DayOfWeek>() : DayOfWeek.Sunday, dayOfMonth.IsNotEmpty() ? dayOfMonth.ToDateTime() : DateTime.Now.AddDays(1));
+            var dates = ActivityService.FinalizeStartAndEndDateForSubscription(activity, 
+                (BillingPeriodType)billingPeriodType.ToInteger(), 
+                dayOfWeek.IsNotEmpty() ? dayOfWeek.ToEnum<DayOfWeek>() : DayOfWeek.Sunday, 
+                dayOfMonth.IsNotEmpty() ? dayOfMonth.ToDateTime() : DateTime.Now.AddDays(1));
 
             if (dates.paymentStart.IsNotEmpty() && dates.paymentStart.HasValue && dates.paymentEnd.IsNotEmpty() && dates.paymentEnd.HasValue)
                 return Json(new { 
