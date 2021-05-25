@@ -2,6 +2,8 @@
 using Xunit;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Support.UI;
+using AfterSchoolAutomationTests.Helpers.Extensions;
 
 namespace AfterSchoolAutomationTests.UITests
 {
@@ -9,7 +11,7 @@ namespace AfterSchoolAutomationTests.UITests
     {
         private readonly IWebDriver _driver;
         private readonly Helper _helper;
-        protected IWebDriver WebDriver { get; set; }
+        protected IWebDriver WebDriver;
 
         public AutomationTest()
         {
@@ -32,17 +34,46 @@ namespace AfterSchoolAutomationTests.UITests
         public void AccountSignUpTest()
         {
             _driver.Navigate().GoToUrl("https://qa.afterschoolhq.com/signup/Welcome");
+            //_driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
+            //_driver.WaitToBeDisplayed(By.XPath("//div[@class='text-center margin-v-40']//button[text()='Get Started']"));
+            _driver.WaitInSeconds(5);
             _helper.ClickSignUp();
-            //WebDriver.WaitInSeconds(5);
+
+            //_driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
+            //_driver.WaitToBeDisplayed(By.XPath("(//div[@class='row margin-t-35']//button[text()='Create an Individual Account'])[1]"));
+            _driver.WaitInSeconds(5);
             _helper.ClickIndividualAccount();
+
+            //_driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
+            //_driver.WaitToBeDisplayed(By.XPath("(//div[@class='row margin-t-35']//button[text()='Provide programs for students'])[1]"));
+            _driver.WaitInSeconds(5);
             _helper.ProvideProgramsForStudents();
-            _helper.PopulateProgramName("Writing Classes");
+
+            _driver.WaitInSeconds(2);
+            _helper.PopulateProgramName("Writing Classes 2");
+            //_driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
+            //_driver.WaitToBeDisplayed(By.XPath("//div[@class='visible-md visible-lg']//button[text()='Continue']"));
+            _driver.WaitInSeconds(10);
             _helper.ClickProgramSubmit();
+
+            //_driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
             _helper.PopulateFirstName("Alex");
+            _driver.WaitInSeconds(2);
             _helper.PopulateLasttName("Stuart");
+            _driver.WaitInSeconds(2);
             _helper.PopulateEmail("writingclasses@yopmail.com");
+            _driver.WaitInSeconds(2);
             _helper.PopulateUserPassword("123456789");
+            _driver.WaitInSeconds(2);
             _helper.PopulateUserPassword2("123456789");
+            _driver.WaitInSeconds(30);
+            //_helper.CheckCaptcha();
+            _helper.ClickBasicInfoSubmit();
+            _driver.WaitInSeconds(3);
+            _helper.SelectTimeZone();
+            _driver.WaitInSeconds(2);
+            _helper.SaveAndContinueSubmit();
+
 
 
             Assert.Equal("Passed", "Passed");
