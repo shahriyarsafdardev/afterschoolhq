@@ -2558,7 +2558,7 @@ namespace AfterSchoolLibrary.Services
             var location = activity.GetLocation(msgs, dc);
             var locationOwner = location.GetHostAccount(msgs, dc);
 
-            if (locationOwner.HasAccountOwner)
+            if (locationOwner.IsNotEmpty() && locationOwner.HasAccountOwner)
             {
                 var accountOwner = locationOwner.GetAccountOwner(msgs, dc);
                 msgs.AddRange(Helpers.EmailHelper.SendPublishRequestNotification(activity, locationOwner, accountOwner, loggedInUser));
