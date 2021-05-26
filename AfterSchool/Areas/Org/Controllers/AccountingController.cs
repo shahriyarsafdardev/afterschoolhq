@@ -22,7 +22,7 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Index(string pn, string rpp, string sdate, string edate, string poId, string poTypeId, string q)
         {
-            var currentAccount = SessionVariables.CurrentAccount;          
+            var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
             int pageNumber = 1;
             int recordsPerPage = 25;
@@ -78,6 +78,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 RecordsPerPage = recordsPerPage,
                 TotalPages = totalPages
             };
+
             return View(allTransactions);
         }
 
@@ -133,6 +134,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 RecordsPerPage = recordsPerPage,
                 TotalPages = totalPages
             };
+
             return View(payouts);
         }
 
@@ -154,6 +156,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 ViewBag.TotalPayout = transactions.Sum(p => p.GetBillerPayout()).ToCurrency();
             }
+
             return View(transactions);
         }
 
@@ -176,6 +179,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 return View(transactions);
             }
+
             return null;
         }
 
@@ -237,8 +241,10 @@ namespace AfterSchool.Areas.Org.Controllers
             );
             // sort transactions
             allTransactions = allTransactions.OrderByDescending(x => x.ID).ToList();
+
             var table = new List<List<string>>();
             var row = new List<string>();
+
             row.Add("ID");
             row.Add("CreatedOn");
             row.Add("Payer");
@@ -250,7 +256,9 @@ namespace AfterSchool.Areas.Org.Controllers
             row.Add("Your Amount");
             row.Add("Status");
             row.Add("Type");
+
             table.Add(row);
+
             foreach (var t in allTransactions)
             {
                 var registrant = t.GetPurchase()?.GetRegistrant();
@@ -271,6 +279,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 row.Add(t.PaymentTypeId.ToString().SplitByUpperCase()); // Type
                 table.Add(row);
             }
+
             string csv = CsvFile.Create(table);
 
             Response.Clear();
@@ -281,6 +290,7 @@ namespace AfterSchool.Areas.Org.Controllers
             Response.AddHeader("Content-Length", filebytes.Length.ToString());
             Response.BinaryWrite(filebytes);
             Response.End();
+
             return null;
         }
 
@@ -390,7 +400,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 if (msgs.HasNoErrors())
                     return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
-
             }
 
             return new JsonResult { Data = new { status = "error", messages = msgs }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
@@ -414,7 +423,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 if (msgs.HasNoErrors())
                     return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
-
             }
 
             return new JsonResult { Data = new { status = "error", messages = msgs }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
@@ -438,7 +446,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 if (msgs.HasNoErrors())
                     return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
-
             }
 
             return new JsonResult { Data = new { status = "error", messages = msgs }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
@@ -606,7 +613,6 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 var ids = new List<int>();
                 var loggedInUser = SessionVariables.CurrentUser;
-                var account = currentAccount;
 
                 if (activityIds.IsNotBlank())
                     ids = activityIds.Split(',').Select(p => Convert.ToInt32(p)).ToList();
@@ -615,7 +621,7 @@ namespace AfterSchool.Areas.Org.Controllers
                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
                    {
                        // create new coupon
-                       coupon = account.CreateorUpdateCoupon(
+                       coupon = currentAccount.CreateorUpdateCoupon(
                             coupon: coupon,
                             amount: amount.ToDecimal(),
                             expirationDate: hasExpirationDate ? expirationDate.ToDateTime() : new DateTime?(),
@@ -658,7 +664,6 @@ namespace AfterSchool.Areas.Org.Controllers
             }
             else
             {
-
                 ViewBag.Messages = msgs;
                 ViewBag.Activities = activityIds;
 
