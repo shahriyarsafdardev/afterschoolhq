@@ -55,50 +55,7 @@ namespace AfterSchool.Models
             //check if db exisit then create session
             var DoesTableExist = WebSession.DoesTableExists();
             if (DoesTableExist)
-            {
                 SessionVariables.WebSession = WebSessionUtilities.InitializeWebSession(Request, SessionVariables.LoggedInUser, SessionVariables.CurrentAccount);
-
-                if (SessionVariables.VisitorSession.IsEmpty())
-                {
-                    var session = new Session();
-                    session.LastModifiedDate = session.CreateDate = session.LastActivity = DateTime.UtcNow;
-                    session.LastModifiedBy = session.CreatedBy = 0;
-                    session.UrlReferrer = Request.UrlReferrer.IsNotEmpty() ? Request.UrlReferrer.ToString() : null;
-                    session.IPAddress = Request.ServerVariables["HTTP_X_FORWARDED_FOR"]; //Request.UserHostAddress;
-                    session.UserAgent = Request.UserAgent;
-                    session.Save();
-                    SessionVariables.VisitorSession = session;
-
-                }
-                else
-                {
-                    SessionVariables.VisitorSession.LastActivity = DateTime.UtcNow;
-                    SessionVariables.VisitorSession.Save();
-                }
-
-            // HandleSubdomainRedirect();
-            }
-        }
-
-        // Old code
-        protected void UpdateSession(SessionActionType sat, int? accountId = null, int? activityId = null, int? webUserId = null, int? registrantId = null, int? registrationId = null, int? registrationPeriodId = null, int? activityGroupId = null, DatabaseConnection dc = null)
-        {
-            if (SessionVariables.VisitorSession.IsNotEmpty())
-            {
-                new SessionAction
-                {
-                    ActivityId = activityId,
-                    AccountId = accountId,
-                    SessionActionTypeId = sat,
-                    WebUserId = webUserId,
-                    SessionId = SessionVariables.VisitorSession.ID,
-                    RegistrantId = registrantId,
-                    RegistrationPeriodId = registrationPeriodId,
-                    ActivityGroupId = activityGroupId,
-                    CreateDate = DateTime.UtcNow,
-                    CreatedBy = SessionVariables.CurrentUser.IsNotEmpty() ? SessionVariables.CurrentUser.ID : 0
-                }.Save(dc: dc);
-            }
         }
 
         protected bool IsLoggedIn()

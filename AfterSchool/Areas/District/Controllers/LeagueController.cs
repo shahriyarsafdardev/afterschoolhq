@@ -398,6 +398,8 @@ namespace AfterSchool.Areas.District.Controllers
             var msgs = new SystemMessages();
             var inSessionDates = new List<DateRange>();
             var outOfSessionDates = new List<DateTime>();
+            var currentWebUser = SessionVariables.CurrentUser;
+            var currentAccount = SessionVariables.CurrentAccount;
 
             var values = new Dictionary<string, object>()
             {
@@ -428,12 +430,23 @@ namespace AfterSchool.Areas.District.Controllers
             values.Add("schedule", schedule);
             values.Add("isongoing", isongoing);
 
-            var league = ActivityGroupService.SaveLeague(SessionVariables.CurrentUser, SessionVariables.CurrentAccount, id, values, msgs);
+            var league = ActivityGroupService.SaveLeague(currentWebUser, currentAccount, id, values, msgs);
 
             if (msgs.HasNoErrors())
             {
                 msgs.Add($"{UILabel.ActivityGroupLabel(league.ActivityGroupTypeId)} Saved", MessageType.Success);
-                UpdateSession(sat: SessionActionType.ActivityGroupCreate, accountId: SessionVariables.CurrentAccount.ID, activityGroupId: league.ID);
+
+                // LOG: CurrentUser Updated ActivityGroup ActivityGroupName for Account AccountName
+                WebSessionUtilities.LogActivity(
+                    webSessionId: SessionVariables.WebSession.ID.Value,
+                    actor: currentWebUser,
+                    actionType: WebSessionActionType.Updated,
+                    objectId: league.ID.Value,
+                    objectType: ObjectType.ActivityGroup,
+                    objectText: league.Name,
+                    indirectObjectId: currentAccount.ID.Value,
+                    indirectObjectType: ObjectType.Account,
+                    indirectObjectText: currentAccount.Name);         
             }
 
             ViewBag.Messages = msgs;

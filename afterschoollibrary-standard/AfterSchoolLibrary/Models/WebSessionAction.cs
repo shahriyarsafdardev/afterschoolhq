@@ -35,13 +35,11 @@ namespace AfterSchoolLibrary.Models
 		public string WebUserEmail { get { return (string)MDV["WebUserEmail"].Value; } }
 		public string WebUserFirstName { get { return (string)MDV["WebUserFirstName"].Value; } }
 		public string WebUserLastName { get { return (string)MDV["WebUserLastName"].Value; } }
-		public string WebUserTimeZone { get { return (string)MDV["WebUserTimeZone"].Value; } }
 		public string CreatedByUsername { get { return (string)MDV["CreatedByUsername"].Value; } }
 		public string CreatedByEmail { get { return (string)MDV["CreatedByEmail"].Value; } }
 		public string CreatedByFirstName { get { return (string)MDV["CreatedByFirstName"].Value; } }
 		public string CreatedByLastName { get { return (string)MDV["CreatedByLastName"].Value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
-		public string AccountTimeZone { get { return (string)MDV["AccountTimeZone"].Value; } }
 		public int? AccountAccountTypeId { get { return (int?)MDV["AccountAccountTypeId"].Value; } }
 		
 
@@ -76,13 +74,11 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "WebUserEmail", typeof(WebUser).Name, "Email", System.Data.SqlDbType.NVarChar, "WebUser");
 				_dp.Add(className, "WebUserFirstName", typeof(WebUser).Name, "FirstName", System.Data.SqlDbType.NVarChar, "WebUser");
 				_dp.Add(className, "WebUserLastName", typeof(WebUser).Name, "LastName", System.Data.SqlDbType.NVarChar, "WebUser");
-				_dp.Add(className, "WebUserTimeZone", typeof(WebUser).Name, "TimeZone", System.Data.SqlDbType.NVarChar, "WebUser");
 				_dp.Add(className, "CreatedByUsername", typeof(WebUser).Name, "Username", System.Data.SqlDbType.NVarChar, "CreatedBy");
 				_dp.Add(className, "CreatedByEmail", typeof(WebUser).Name, "Email", System.Data.SqlDbType.NVarChar, "CreatedBy");
 				_dp.Add(className, "CreatedByFirstName", typeof(WebUser).Name, "FirstName", System.Data.SqlDbType.NVarChar, "CreatedBy");
 				_dp.Add(className, "CreatedByLastName", typeof(WebUser).Name, "LastName", System.Data.SqlDbType.NVarChar, "CreatedBy");
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
-				_dp.Add(className, "AccountTimeZone", typeof(Account).Name, "TimeZone", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "AccountAccountTypeId", typeof(Account).Name, "AccountTypeId", System.Data.SqlDbType.Int, "Account");
 				
                 return _dp;
@@ -101,9 +97,9 @@ namespace AfterSchoolLibrary.Models
             get
             {
                 BasicLibrary.DataAccess.DatabaseQuery dq = BaseObject.get_DatabaseQuery(ObjectMap, typeof(WebSessionAction).Name);
-				dq.Joins.Add(WebUser.ObjectMap["ID"], WebSessionAction.ObjectMap["WebUserId"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.LeftOuterJoin, "WebUser");
+				dq.Joins.Add(WebUser.ObjectMap["ID"], WebSessionAction.ObjectMap["ActorId"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.LeftOuterJoin, "WebUser");
 				dq.Joins.Add(WebUser.ObjectMap["ID"], WebSessionAction.ObjectMap["CreatedBy"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.LeftOuterJoin, "CreatedBy");
-				dq.Joins.Add(Account.ObjectMap["ID"], WebSessionAction.ObjectMap["AccountId"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.InnerJoin, "Account");
+				dq.Joins.Add(Account.ObjectMap["ID"], WebSessionAction.ObjectMap["AccountId"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.LeftOuterJoin, "Account");
 				
                 return dq;
             }

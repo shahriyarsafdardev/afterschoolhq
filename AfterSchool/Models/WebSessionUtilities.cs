@@ -24,7 +24,7 @@ namespace AfterSchool.Models
                 lastSession = WebSession.LoadMostRecentByAccountId(accountId: account.ID.Value);
 
 
-            if (SessionVariables.WebSession.IsEmpty())
+            if (SessionVariables.WebSession.IsEmpty() && request.IsNotEmpty())
             {
                 session.CreateDate = DateTime.UtcNow;
                 session.LastModifiedDate = DateTime.UtcNow;
@@ -35,7 +35,7 @@ namespace AfterSchool.Models
                 //.. need to retrieve this both from user location
                 session.IPAddressTimeZone = null;
                 session.UserLocation = null;
-                
+
                 session.WebUserId = user?.ID;
                 session.AccountId = account?.ID;
             }
@@ -59,7 +59,35 @@ namespace AfterSchool.Models
             return session;
         }
 
-        public static void LogActivity(WebUser actor, int webSessionId, WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet, ObjectType indirectObjectType = ObjectType.NotSet,
+
+        public static void LogActivity(HttpRequestBase request, WebUser actor, WebSession webSession, WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet, ObjectType indirectObjectType = ObjectType.NotSet,
+             int? objectId = (int?)null, string objectText = "",
+             int? indirectObjectId = (int?)null, string indirectObjectText = "")
+        {
+            //if webSession is null then try to create it here
+            if (webSession.IsEmpty())
+            {
+                webSession = InitializeWebSession(request, SessionVariables.LoggedInUser, SessionVariables.CurrentAccount);
+                SessionVariables.WebSession = webSession;
+            }
+
+            //LogActivity with websession id
+            if (webSession.IsNotEmpty())
+            {
+                LogActivity(
+                    webSession.ID.Value,
+                    actor,
+                    actionType,
+                    objectType,
+                    indirectObjectType,
+                    objectId,
+                    objectText,
+                    indirectObjectId,
+                    indirectObjectText);
+            }
+        }
+
+        public static void LogActivity(int webSessionId, WebUser actor, WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet, ObjectType indirectObjectType = ObjectType.NotSet,
             int? objectId = (int?)null, string objectText = "",
             int? indirectObjectId = (int?)null, string indirectObjectText = "")
         {
@@ -73,7 +101,7 @@ namespace AfterSchool.Models
             SaveLog(actor: actor,
                 actionStringFormat: actionStringDict.SingleOrDefault(kp => kp.Key == "ActionStringFormat").Value,
                 actionString: actionStringDict.SingleOrDefault(kp => kp.Key == "ActionString").Value,
-                webSessionId: webSessionId, 
+                webSessionId: webSessionId,
                 actorId: actor.IsNotEmpty() ? actor.ID : null,
                 accountId: SessionVariables.CurrentAccount.IsNotEmpty() ? SessionVariables.CurrentAccount.ID : null,
                 actionType: actionType,

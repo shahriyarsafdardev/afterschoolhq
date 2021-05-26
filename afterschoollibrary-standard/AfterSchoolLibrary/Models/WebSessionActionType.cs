@@ -35,5 +35,7 @@ public enum WebSessionActionType
 	Unfollowed,
 	Shared,
 	Contacted,
-	Interested
+	Interested,
+	BrowsedAllActivities,
+	Added
 }

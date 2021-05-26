@@ -382,7 +382,6 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Activity_LocationId ON [Activity] (LocationId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Activity_Uid ON [Activity] (Uid)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Activity_AccountId_Uid ON [Activity] (Uid,AccountId)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Activity_AccountId_Id ON [Activity] (Id,AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Activity_ActivityGroupId ON [Activity] (ActivityGroupId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Activity_AccountActivityGroupId ON [Activity] (AccountActivityGroupId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Activity_ActivityScheduleId ON [Activity] (ActivityScheduleId)"));
@@ -410,7 +409,6 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivitySchedule_ActivityGroupId ON [ActivitySchedule] (ActivityGroupId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivitySchedule_AccountId_IsOngoing ON [ActivitySchedule] (AccountId,IsOngoing)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivitySchedule_ActivityGroupId_IsOngoing ON [ActivitySchedule] (ActivityGroupId,IsOngoing)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivitySchedule_AccountId_Id ON [ActivitySchedule] (Id,AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityInstance_ActivityId ON [ActivityInstance] (ActivityId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityInstance_ActivityGroupId ON [ActivityInstance] (ActivityGroupId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityInstance_ActivityScheduleId ON [ActivityInstance] (ActivityScheduleId)"));

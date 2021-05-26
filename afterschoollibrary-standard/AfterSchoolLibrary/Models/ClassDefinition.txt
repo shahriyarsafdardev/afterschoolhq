@@ -214,7 +214,6 @@ loadmethod: AccountId, List<>
 loadmethod: ActivityGroupId, List<>
 loadmethod: AccountId|IsOngoing, List<>
 loadmethod: ActivityGroupId|IsOngoing, List<>
-loadmethod: Id|AccountId
 [end]
 
 [begin]
@@ -1806,20 +1805,18 @@ property: IndirectObjectId, int?, Int
 property: IndirectObjectTypeId, ObjectType, Int
 property: ActionStringFormat, string, NVarChar "400"
 property: ActionString, string, NVarChar "400"
-join: WebUser.ID, WebUserId, LeftOuterJoin
+join: WebUser.ID, ActorId, LeftOuterJoin
 join: WebUser.ID, CreatedBy, LeftOuterJoin, CreatedBy
-join: Account.ID, AccountId, InnerJoin
+join: Account.ID, AccountId, LeftOuterJoin
 joinproperty: WebUser.Username, string, NVarChar
 joinproperty: WebUser.Email, string, NVarChar
 joinproperty: WebUser.FirstName, string, NVarChar
 joinproperty: WebUser.LastName, string, NVarChar
-joinproperty: WebUser.TimeZone, string, NVarChar
 joinproperty: CreatedBy.Username, string, NVarChar
 joinproperty: CreatedBy.Email, string, NVarChar
 joinproperty: CreatedBy.FirstName, string, NVarChar
 joinproperty: CreatedBy.LastName, string, NVarChar
 joinproperty: Account.Name, string, NVarChar
-joinproperty: Account.TimeZone, string, NVarChar
 joinproperty: Account.AccountTypeId, int?, Int
 loadmethod: Id, List<>
 loadmethod: WebUserId, List<>
@@ -1854,7 +1851,7 @@ loadmethod: AccountId, List<>
 [begin]
 type: Enum
 name: WebSessionActionType
-values: NotSet, Created, Updated, Published, Unpublished, Sent, BeganRegistration, Registered, Paid, Refunded, Requested, Invited, Archived, Deleted, ManuallyRegistered, ManuallyPaid, ManuallyRefunded, Approved, Verified, Viewed, Moved, Navigated, Searched, Paged, Connected, SignedUp, LoggedIn, LoggedOut, Copied, Restored, Browsed, Followed, Unfollowed, Shared, Contacted, Interested
+values: NotSet, Created, Updated, Published, Unpublished, Sent, BeganRegistration, Registered, Paid, Refunded, Requested, Invited, Archived, Deleted, ManuallyRegistered, ManuallyPaid, ManuallyRefunded, Approved, Verified, Viewed, Moved, Navigated, Searched, Paged, Connected, SignedUp, LoggedIn, LoggedOut, Copied, Restored, Browsed, Followed, Unfollowed, Shared, Contacted, Interested, BrowsedAllActivities, Added
 [end]
 
 [begin]

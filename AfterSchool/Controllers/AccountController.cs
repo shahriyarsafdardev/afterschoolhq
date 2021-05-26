@@ -214,7 +214,7 @@ namespace AfterSchool.Controllers
                         WebSessionUtilities.LogActivity(
                            webSessionId: SessionVariables.WebSession.ID.Value,
                            actor: currentUser,
-                           actionType: WebSessionActionType.Published,
+                           actionType: WebSessionActionType.Interested,
                            objectType: participationObject.GetWebSessionObjectType(),
                            objectId: participationObject.ObjectID.Value,
                            objectText: participationObject.Name,
@@ -587,8 +587,20 @@ namespace AfterSchool.Controllers
                             amsgs,
                             adc);
 
+
                         if (amsgs.HasNoErrors() && user.IsNotEmpty())
                         {
+                            // LOG: Someone Created
+                            WebSessionUtilities.LogActivity(
+                               webSessionId: SessionVariables.WebSession.ID.Value,
+                               actor: currentUser,
+                               actionType: WebSessionActionType.SignedUp,
+                               objectType: ObjectType.WebUser,
+                               objectId: user.ID.Value,
+                               objectText: user.FullName
+                           );
+
+
                             account = CreateOrUpdateAccount(user, amsgs, adc);
                             // LOG: Someone Created Account AccountName
                             WebSessionUtilities.LogActivity(
@@ -597,7 +609,7 @@ namespace AfterSchool.Controllers
                                actionType: WebSessionActionType.Created,
                                objectType: ObjectType.Account,
                                objectId: account.ID.Value,
-                               objectText: participationObject.Name
+                               objectText: account.Name
                            );
                         }
 
@@ -1069,8 +1081,8 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public ActionResult AddStudent(string id, string samehomeaddress, string createuseraccount, string locationname, string streetnumber, string streetname, string address2, string neighborhood, 
-            string city, string county, string state, string postalcode, string country, string placeid, decimal latitude, decimal longitude)
+        public ActionResult AddStudent(string id, string samehomeaddress, string createuseraccount, string locationname = null, string streetnumber = null, string streetname = null, string address2 = null, string neighborhood = null, 
+            string city = null, string county = null, string state = null, string postalcode = null, string country = null, string placeid = null, decimal? latitude = null, decimal? longitude = null, bool schoolnotfound = false)
         {
             var results = CheckRedirect(checkForEmptyCart: true);
             if (results.IsNotEmpty()) return results;
@@ -1090,6 +1102,7 @@ namespace AfterSchool.Controllers
                 if (question.IsRequired && answer.IsEmpty())
                     msgs.Add($"{question.Text} is required", MessageType.UserError);
 
+
                 switch (question.QuestionDataTypeId)
                 {
                     case QuestionDataType.RegistrantHomePhone:
@@ -1101,6 +1114,9 @@ namespace AfterSchool.Controllers
 
                 }
             });
+
+            if (placeid.IsEmpty() && !schoolnotfound)
+                msgs.Add($"Location is required", MessageType.UserError);
 
             var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
             var email = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail).Value;
@@ -1653,7 +1669,7 @@ namespace AfterSchool.Controllers
                 WebSessionUtilities.LogActivity(
                     webSessionId: SessionVariables.WebSession.ID.Value,
                     actor: currentUser,
-                    actionType: WebSessionActionType.Created,
+                    actionType: WebSessionActionType.Registered,
                     objectType: ObjectType.Registrant,
                     objectId: currentRegistrant.ID.Value,
                     objectText: currentRegistrant.FullName,
