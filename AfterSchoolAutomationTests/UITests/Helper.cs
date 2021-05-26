@@ -1,4 +1,5 @@
-﻿using OpenQA.Selenium;
+﻿using AfterSchoolAutomationTests.Helpers;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 
 namespace AfterSchoolAutomationTests.UITests
@@ -29,12 +30,31 @@ namespace AfterSchoolAutomationTests.UITests
         private IWebElement Password2Element => _driver.FindElement(By.Name("password2"));
         private IWebElement CaptchaElement => _driver.FindElement(By.Id("recaptcha-anchor"));
         private IWebElement BasicInfoSubmitElement => _driver.FindElement(By.XPath("(//div[@class='visible-md visible-lg margin-v-30']//button[text()='Continue'])[1]"));
+        private IWebElement CreateYourFreeProfileElement => _driver.FindElement(By.LinkText("Create Your Free Profile"));
         private IWebElement ShortDescriptionElement => _driver.FindElement(By.Name("headline"));
         private IWebElement TimeZoneElement => _driver.FindElement(By.Id("select-program-timezone"));
         private IWebElement SaveAndContinueElement => _driver.FindElement(By.XPath("(//div[@class='visible-md visible-lg margin-v-30']//button[text()='Save and Continue'])[1]"));
+        private IWebElement GenderElement => _driver.FindElement(By.XPath("(//div[@class='am-radio program-radio'][2]//label)"));
+        private IWebElement GradeOrAgeElement => _driver.FindElement(By.XPath("(//div[@class='am-radio inline'][1]//label)"));
+        private IWebElement MinGradeElement => _driver.FindElement(By.Id("mingrade"));
+        private IWebElement MaxGradeElement => _driver.FindElement(By.Id("maxgrade"));
+        private IWebElement ShareInfoWithParentsElement => _driver.FindElement(By.XPath("(//div[@class='visible-md visible-lg margin-v-30']//button[text()='Save and Continue'])[1]"));
 
+        private IWebElement PhoneElement => _driver.FindElement(By.Name("phone"));
+        private IWebElement LocationElement => _driver.FindElement(By.Name("location"));
+        private IWebElement ContactInfoElement => _driver.FindElement(By.XPath("(//div[@class='visible-md visible-lg margin-v-30']//button[text()='Save and Continue'])[1]"));
 
-        //------------WebElements-----------
+        private IWebElement UploadProfileElement => _driver.FindElement(By.Name("logo"));
+        private IWebElement HeaderImageElement => _driver.FindElement(By.Name("headerimage"));
+        private IWebElement CustomizeProfileElement => _driver.FindElement(By.XPath("(//div[@class='visible-md visible-lg margin-v-30']//button[text()='Save and Continue'])[1]"));
+
+        private IWebElement ProgramCategoriesElement => _driver.FindElement(By.Name("programCategories"));
+        private IWebElement EasyActivityElement => _driver.FindElement(By.XPath("(//div[@class='visible-md visible-lg margin-v-30']//button[text()='Save and Continue'])[1]"));
+
+        private IWebElement EnterLinksElement => _driver.FindElement(By.XPath("(//div[@class='visible-md visible-lg margin-v-30']//button[text()='Save and Continue'])[1]"));
+
+        private IWebElement GoToProfileElement => _driver.FindElement(By.Id("btnGoProfile"));
+
 
 
 
@@ -57,7 +77,11 @@ namespace AfterSchoolAutomationTests.UITests
         public void PopulateUserPassword2(string name) => Password2Element.SendKeys(name);
         public void CheckCaptcha() => CaptchaElement.Click();
         public void ClickBasicInfoSubmit() => BasicInfoSubmitElement.Click();
+
+        public void CreateYourFreeProfile() => CreateYourFreeProfileElement.Click();
+
         public void PopulateShortDescription(string name) => ShortDescriptionElement.SendKeys(name);
+        public void SelectGender() => GenderElement.Click();
         public void SelectTimeZone()
         {
             var timezone = TimeZoneElement;
@@ -66,7 +90,38 @@ namespace AfterSchoolAutomationTests.UITests
         }
         public void SaveAndContinueSubmit() => SaveAndContinueElement.Click();
 
-        //------------Account Signup Helper Methods-----------
+
+        public void SelectGradeOrAge() => GradeOrAgeElement.Click();
+        public void SelectMinGrade()
+        {
+            var minAge = MinGradeElement;
+            var selectElement = new SelectElement(MinGradeElement);
+            selectElement.SelectByValue("5");
+        }
+        public void SelectMaxAge()
+        {
+            var maxAge = MaxGradeElement;
+            var selectElement = new SelectElement(MaxGradeElement);
+            selectElement.SelectByValue("13");
+        }
+        public void ShareInfoWithParentsSubmit() => ShareInfoWithParentsElement.Click();
+
+        public void PopulatePhone(string name) => PhoneElement.SendKeys(name);
+        public void PopulateLocation(string name) => LocationElement.SendKeys(name);
+        public void ContactInfoSubmit() => ContactInfoElement.Click();
+
+
+        public void UploadProfileImage(string name) => UploadProfileElement.SendKeys(name);
+        public void HeaderImageImage(string name) => HeaderImageElement.SendKeys(name);
+        public void CustomizeProfileSubmit() => CustomizeProfileElement.Click();
+
+        public void PopulateProgramCategories(string name) => ProgramCategoriesElement.SendKeys(name);
+        public void EasyActivitySubmit() => EasyActivityElement.Click();
+
+
+        public void EnterLinksSubmit() => EnterLinksElement.Click();
+
+        public void ClickGoToProfile() => GoToProfileElement.Click();
 
     }
 }

@@ -33,48 +33,92 @@ namespace AfterSchoolAutomationTests.UITests
         [Fact]
         public void AccountSignUpTest()
         {
-            _driver.Navigate().GoToUrl("https://qa.afterschoolhq.com/signup/Welcome");
+            //--Step 1 --Welcome Get Started--
+            _driver.Navigate().GoToUrl("http://localhost:54849/signup/Welcome#");
+            //_driver.Navigate().GoToUrl("https://qa.afterschoolhq.com/signup/Welcome");
+            _driver.Manage().Window.Maximize();
             //_driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
             //_driver.WaitToBeDisplayed(By.XPath("//div[@class='text-center margin-v-40']//button[text()='Get Started']"));
-            _driver.WaitInSeconds(5);
+            _driver.WaitInSeconds(3);
             _helper.ClickSignUp();
 
-            //_driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
-            //_driver.WaitToBeDisplayed(By.XPath("(//div[@class='row margin-t-35']//button[text()='Create an Individual Account'])[1]"));
-            _driver.WaitInSeconds(5);
+            //--Step 2 --Create Individual Account--
+            _driver.WaitInSeconds(3);
             _helper.ClickIndividualAccount();
 
-            //_driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
-            //_driver.WaitToBeDisplayed(By.XPath("(//div[@class='row margin-t-35']//button[text()='Provide programs for students'])[1]"));
-            _driver.WaitInSeconds(5);
+            //--Step 3 --Provide Programs for Students--
+            _driver.WaitInSeconds(3);
             _helper.ProvideProgramsForStudents();
 
+            //--Step 4 --Activity Name--
             _driver.WaitInSeconds(2);
             _helper.PopulateProgramName("Writing Classes 2");
-            //_driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
-            //_driver.WaitToBeDisplayed(By.XPath("//div[@class='visible-md visible-lg']//button[text()='Continue']"));
             _driver.WaitInSeconds(10);
             _helper.ClickProgramSubmit();
 
-            //_driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
+            //--Step 5 
             _helper.PopulateFirstName("Alex");
             _driver.WaitInSeconds(2);
             _helper.PopulateLasttName("Stuart");
             _driver.WaitInSeconds(2);
-            _helper.PopulateEmail("writingclasses@yopmail.com");
+            _helper.PopulateEmail("testemail"+ GetTimestamp(DateTime.Now) + "@yopmail.com");
             _driver.WaitInSeconds(2);
-            _helper.PopulateUserPassword("123456789");
+            _helper.PopulateUserPassword("12345678");
             _driver.WaitInSeconds(2);
-            _helper.PopulateUserPassword2("123456789");
-            _driver.WaitInSeconds(30);
+            _helper.PopulateUserPassword2("12345678");
+            _driver.WaitInSeconds(3);
             //_helper.CheckCaptcha();
             _helper.ClickBasicInfoSubmit();
+
+            //--Step 6 
+            _driver.WaitInSeconds(3);
+            _helper.CreateYourFreeProfile();
+
+            //--Step 7 
+            _driver.WaitInSeconds(3);
+            _helper.PopulateShortDescription("Test Short Desc.");
+            _driver.WaitInSeconds(5);
+            _helper.SelectGender();
             _driver.WaitInSeconds(3);
             _helper.SelectTimeZone();
             _driver.WaitInSeconds(2);
             _helper.SaveAndContinueSubmit();
 
+            //--Step 8 
+            _driver.WaitInSeconds(5);
+            _helper.SelectGradeOrAge();
+            _driver.WaitInSeconds(3);
+            _helper.SelectMinGrade();
+            _driver.WaitInSeconds(2);
+            _helper.SelectMaxAge();
+            _driver.WaitInSeconds(2);
+            _helper.ShareInfoWithParentsSubmit();
 
+            //--Step 9 
+            _driver.WaitInSeconds(2);
+            _helper.PopulatePhone("(202) 555 0155");
+            _driver.WaitInSeconds(2);
+            _helper.PopulateLocation("(New York University, New York, NY, USA");
+            _driver.WaitInSeconds(2);
+            _helper.ContactInfoSubmit();
+
+            //--Step 10 
+            _helper.UploadProfileImage("file:///D:/musical-instruments-english.jpg");
+            _helper.HeaderImageImage("file:///D:/musical-instruments-english.jpg");
+            _helper.CustomizeProfileSubmit();
+
+            //--Step 11 
+            _driver.WaitInSeconds(4);
+            _helper.PopulateProgramCategories("Karate, Sports, Leadership");
+            _helper.EasyActivitySubmit();
+
+            //--Step 12 
+            _driver.WaitInSeconds(4);
+            _helper.EnterLinksSubmit();
+
+            //--Step 13 
+            _driver.WaitInSeconds(4);
+            _helper.ClickGoToProfile();
 
             Assert.Equal("Passed", "Passed");
 
@@ -84,6 +128,11 @@ namespace AfterSchoolAutomationTests.UITests
         {
             _driver.Quit();
             _driver.Dispose();
+        }
+
+        public static String GetTimestamp(DateTime value)
+        {
+            return value.ToString("yyyyMMddHHmmssffff");
         }
     }
 }

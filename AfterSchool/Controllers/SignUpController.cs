@@ -60,7 +60,7 @@ namespace AfterSchool.Controllers
             else if (model.Password1.Length < 8)
                 msgs.Add("Password must be at least 8 characters", MessageType.UserError);
 
-            msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
+            //msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
 
             if (model.InviteCodeToShare.IsNotEmpty())
             {
@@ -162,7 +162,7 @@ namespace AfterSchool.Controllers
             else if (model.Password1.Length < 8)
                 msgs.Add("Password must be at least 8 characters", MessageType.UserError);
 
-            msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
+            //msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
 
             if (model.InviteCodeToShare.IsNotEmpty())
             {
