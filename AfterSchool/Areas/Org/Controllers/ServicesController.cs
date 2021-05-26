@@ -226,20 +226,21 @@ namespace AfterSchool.Areas.Org.Controllers
             if (SessionVariables.CurrentAccount.IsNotEmpty() && id.IsInteger())
             {
                 var schedule = ActivitySchedule.LoadByIdByAccountId(id.ToInteger(), SessionVariables.CurrentAccount.ID.Value, msgs);
-                var activities = schedule.GetActivities();
 
-                WriteOutput(new { status = "ok", activities = activities.Select(x => new { x.ID, x.Name }) }, ResponseType.JSON);
-
+                if (schedule.IsEmpty())
+                    msgs.Add("Invalid data", MessageType.ApiUsageError);
+                else
+                {
+                    var activities = schedule.GetActivities();
+                    WriteOutput(new { status = "ok", activities = activities.Select(x => new { x.ID, x.Name }) }, ResponseType.JSON);
+                }
             }
             else
-            {
                 msgs.Add("Invalid data", MessageType.ApiUsageError);
-            }
 
             if (msgs.HasErrors())
-            {
                 HandleErrors(msgs, ResponseType.JSON);
-            }
+
             Response.End();
 
             return View();
