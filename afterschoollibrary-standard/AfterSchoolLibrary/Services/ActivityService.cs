@@ -2333,7 +2333,7 @@ namespace AfterSchoolLibrary.Services
             activity.LastModifiedDate = DateTime.UtcNow;
             activity.LastModifiedBy = loggedInUserId;
 
-            msgs.AddRange(activity.Save(dc: dc));
+            msgs.AddRange(activity.Save(dc));
             return msgs;
         }
 
