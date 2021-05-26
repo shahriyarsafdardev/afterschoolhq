@@ -115,7 +115,6 @@ loadmethod: AccountId|IsPublished, List<>
 loadmethod: LocationId, List<>
 loadmethod: Uid
 loadmethod: Uid|AccountId
-loadmethod: Id|AccountId
 -loadmethod: ParentActivityId, List<>
 loadmethod: ActivityGroupId, List<>
 loadmethod: AccountActivityGroupId, List<>
@@ -688,7 +687,6 @@ loadmethod: AccountId|IsPublished, List<>
 loadmethod: AccountId|IsPublished|IsArchived, List<>
 loadmethod: AccountId|IsPublished|IsInviteOnly, List<>
 loadmethod: AccountId|UniqueName
-loadmethod: Id|AccountId
 loadmethod: Uid
 loadmethod: Uid|AccountId
 loadmethod: Uid|IsPublished

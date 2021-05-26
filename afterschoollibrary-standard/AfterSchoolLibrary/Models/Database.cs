@@ -483,7 +483,6 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityGroup_AccountId_IsArchived_IsPublished ON [ActivityGroup] (AccountId,IsPublished,IsArchived)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityGroup_AccountId_IsInviteOnly_IsPublished ON [ActivityGroup] (AccountId,IsPublished,IsInviteOnly)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityGroup_AccountId_UniqueName ON [ActivityGroup] (AccountId,UniqueName)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityGroup_AccountId_Id ON [ActivityGroup] (Id,AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityGroup_Uid ON [ActivityGroup] (Uid)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityGroup_AccountId_Uid ON [ActivityGroup] (Uid,AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityGroup_IsPublished_Uid ON [ActivityGroup] (Uid,IsPublished)"));
