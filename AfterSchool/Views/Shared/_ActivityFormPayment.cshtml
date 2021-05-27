@@ -4,6 +4,7 @@
     var subscriptionPlan = (SubscriptionPlan)ViewBag.SubscriptionPlan;
     var paymentPlan = (SubscriptionPlan)ViewBag.PaymentPlan;
     var postPayPlan = (SubscriptionPlan)ViewBag.PostPayPlan;
+    var postPayPlanBillingPeriod = (BillingPeriodType)(postPayPlan.IsNotEmpty() && postPayPlan.BillingPeriodTypeId.IsNotEmpty() ? postPayPlan.BillingPeriodTypeId : BillingPeriodType.Day);
     var canProcessPayments = (bool)ViewBag.CanProcessPayments;
     var accountPackage = (AccountPackage)ViewData["AccountPackage"];
     var paymentdisabled = "";
@@ -277,7 +278,7 @@
                         </div>
                         <p class="text-muted text-medium-small">
                             <span id="pricetoparent-postpay-span">
-                                <em>The parent will be charged <span class="text-bold">$<span id="pricetoparent-postpay">0.00</span></span> per class attended</em>.
+                                <em>The parent will be charged <span class="text-bold">$<span id="pricetoparent-postpay">0.00</span></span> per <span id="pricetoparent-postpaybillingperiod">@(postPayPlanBillingPeriod.ToString().ToLower())</span> attended</em>.
                             </span>
                             <span id="amounttoprovider-postpay-span">
                                 <em>The total amount you will receive is <span class="text-bold">$<span id="amounttoprovider-postpay">0.00</span></span> per class attended</em>.
@@ -300,7 +301,7 @@
                     <div class="col-sm-6 col-md-9">
                         <p></p>
                         <div class="input-group input-group-lg xs-mb-15">
-                            <span class="input-group-addon"># of Days to Pre-pay</span>
+                            <span class="input-group-addon"># of <span id="postpayprepaybillingperiod">@(postPayPlanBillingPeriod.ToString())</span>s to Pre-pay</span>
                             <input type="number" class="form-control" id="prepaidperiodspostpay"
                                    name="prepaidperiodspostpay" onfocus="this.select()"
                                    value="@(postPayPlan.IsNotEmpty() && postPayPlan.NumberOfPeriodsPrePaid.HasValue ? postPayPlan.NumberOfPeriodsPrePaid.ToString() : "0")"
@@ -391,6 +392,13 @@
         $('#do-parents-pay-no').click(function () {
             showTuitionCosts();
             $('#cost').val(0);
+        })
+
+        $('#postpayplanperiod').change(function () {
+            var updatedBillingPeriod = $('#postpayplanperiod :selected').text();
+            $('#pricetoparent-postpaybillingperiod').text(updatedBillingPeriod.toLowerCase());
+            $('#postpayprepaybillingperiod').text(updatedBillingPeriod);
+
         })
 
         if ('@Model.IsFree' == '@false') {
@@ -732,29 +740,33 @@
 
 @helper BillingPeriodOptions(SubscriptionPlan plan, SubscriptionPlanType type)
 {
-    var exceptions = new List<BillingPeriodType> { BillingPeriodType.NotSet };
+var exceptions = new List<BillingPeriodType> { BillingPeriodType.NotSet };
 
-    if (AfterSchoolLibrary.Helpers.Utilities.IsProduction)
+if (AfterSchoolLibrary.Helpers.Utilities.IsProduction)
+{
+    exceptions = new List<BillingPeriodType> { BillingPeriodType.NotSet, BillingPeriodType.Day, BillingPeriodType.Year };
+}
+
+if (type.IsNotEmpty() && type == SubscriptionPlanType.PostPayPlan)
+{
+    exceptions = new List<BillingPeriodType> { BillingPeriodType.NotSet, BillingPeriodType.Month, BillingPeriodType.Year, BillingPeriodType.TwoWeeks };
+}
+
+foreach (var billingPeriodType in Enum.GetValues(typeof(BillingPeriodType)).Cast<BillingPeriodType>().Where(x => x.NotIn(exceptions)))
+{
+    var selected = "";
+    if (plan.IsEmpty() && billingPeriodType == BillingPeriodType.Month)
     {
-        exceptions = new List<BillingPeriodType> { BillingPeriodType.NotSet, BillingPeriodType.Day, BillingPeriodType.Year };
+        selected = " selected=\"selected\" ";
     }
-
-    if (type.IsNotEmpty() && type == SubscriptionPlanType.PostPayPlan)
+    else if (plan.IsNotEmpty() && billingPeriodType == plan.BillingPeriodTypeId)
     {
-        exceptions = new List<BillingPeriodType> { BillingPeriodType.NotSet, BillingPeriodType.Month, BillingPeriodType.Year, BillingPeriodType.TwoWeeks };
+        selected = " selected=\"selected\" ";
     }
-
-    foreach (var billingPeriodType in Enum.GetValues(typeof(BillingPeriodType)).Cast<BillingPeriodType>().Where(x => x.NotIn(exceptions)))
+    else if (type.IsNotEmpty() && type == SubscriptionPlanType.PostPayPlan && plan.IsEmpty() && billingPeriodType == BillingPeriodType.Day)
     {
-        var selected = "";
-        if (plan.IsEmpty() && billingPeriodType == BillingPeriodType.Month)
-        {
-            selected = " selected=\"selected\" ";
-        }
-        else if (plan.IsNotEmpty() && billingPeriodType == plan.BillingPeriodTypeId)
-        {
-            selected = " selected=\"selected\" ";
-        }
+        selected = " selected=\"selected\" ";
+    }
 
         <option value="@((int)billingPeriodType)" @selected>@billingPeriodType.ToString().SplitByUpperCase()</option>
     }

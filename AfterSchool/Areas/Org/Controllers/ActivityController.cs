@@ -1581,8 +1581,9 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(attendance);
         }
 
-        // This returns all uncompleted AttendanceRegistrants by Registrant
-        private Dictionary<RegistrantActivity,List<Attendance>> GetRegistrantActivityAttendances(List<RegistrantActivity> registrantActivities, List<Attendance> attendances, SystemMessages msgs)
+
+        // This returns all unbilled selected Attendancess by Registrant
+        private Dictionary<RegistrantActivity,List<Attendance>> GetDailyAttendancesToBillByRegistrantActivity(List<RegistrantActivity> registrantActivities, List<Attendance> attendances, SystemMessages msgs)
         {
             Dictionary<RegistrantActivity, List<Attendance>> registrantActivityAttendanceCounts = new Dictionary<RegistrantActivity, List<Attendance>>();
 
@@ -1591,14 +1592,47 @@ namespace AfterSchool.Areas.Org.Controllers
                 var attendancesToCharge = attendances.FindAll(attendance =>
                 {
                     var attendanceRegistrant = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(attendance.ID.Value, registrantActivity.RegistrantId.Value, msgs).FirstOrDefault();
-                    if (attendanceRegistrant.IsNotEmpty() && !attendanceRegistrant.IsAlreadyBilled)
-                        return attendanceRegistrant.NumberPresent > 0;        
-
-                    return false;
+                    return attendanceRegistrant.IsNotEmpty() && !attendanceRegistrant.IsAlreadyBilled && attendanceRegistrant.NumberPresent > 0;
                 }).ToList();
 
                 registrantActivityAttendanceCounts.Add(registrantActivity, attendancesToCharge);
 
+            });
+
+            return registrantActivityAttendanceCounts;
+        }
+
+        // This returns all unbilled selected Attendancess by Registrant
+        private Dictionary<RegistrantActivity, List<Attendance>> GetWeeklyAttendancesToBillByRegistrantActivity(List<RegistrantActivity> registrantActivities, List<Attendance> attendances, SystemMessages msgs)
+        {
+            Dictionary<RegistrantActivity, List<Attendance>> registrantActivityAttendanceCounts = new Dictionary<RegistrantActivity, List<Attendance>>();
+
+            registrantActivities.ForEach(registrantActivity =>
+            {
+                var attendedBillingPeriods = new List<DateTime>();
+                var attendancesToCharge = attendances.FindAll(attendance =>
+                {
+                    // get activity instance from attendance
+                    var activityInstance = attendance.GetActivityInstance(msgs);
+                    var attendanceRegistrant = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(attendance.ID.Value, registrantActivity.RegistrantId.Value, msgs).FirstOrDefault();
+                    var chargeForAttendance = false;
+                    if(attendanceRegistrant.IsNotEmpty() && !attendanceRegistrant.IsAlreadyBilled && attendanceRegistrant.NumberPresent > 0)
+                    {
+                        // if activity instance.startDate is in the same week as any attendnedBilling periods
+                        attendedBillingPeriods.ForEach(attendedBillingPeriod =>
+                        {
+                            if (!DatesAreIntheSameWeek(activityInstance.StartDateTime, attendedBillingPeriod))
+                            {
+                                attendedBillingPeriods.Add((DateTime)activityInstance.StartDateTime);
+                                chargeForAttendance = true;
+                            }
+                        });
+                    }
+
+                    return chargeForAttendance;
+                }).ToList();
+
+                registrantActivityAttendanceCounts.Add(registrantActivity, attendancesToCharge);
             });
 
             return registrantActivityAttendanceCounts;
@@ -1645,7 +1679,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (activityId.IsNotEmpty() && activityId.IsGuid())
                 activity = Activity.LoadByUidByAccountId(activityId.ToGuid(), currentAccount.ID.Value, msgs);
 
-            if (attendanceIds.IsNotEmpty() || attendanceIds.IsNotBlank())
+            if (activity.IsNotEmpty() && (attendanceIds.IsNotEmpty() || attendanceIds.IsNotBlank()))
             {
                 // get selected attendances
                 var attendanceIdsList = attendanceIds.Split(',').Select(p => p.ToInteger()).ToList();
@@ -1653,12 +1687,12 @@ namespace AfterSchool.Areas.Org.Controllers
                 var selectedAttendances = attendances.Where(a => attendanceIdsList.Contains(a.ID.Value)).ToList();
 
                 // sum up total cost of all attendances per registrant to display
-                var registrantActivities = RegistrantActivity.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs);
-
-                var registrantActivityAttendances = GetRegistrantActivityAttendances(registrantActivities, selectedAttendances, msgs);                
+                var registrantActivities = RegistrantActivity.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs);           
 
                 ViewBag.AttdanceIds = attendanceIds;
-                ViewBag.RegistrantActivityAttendanceCounts = registrantActivityAttendances;
+                ViewBag.AttendancesToBillRegistrants = activity.GetPostPayPlan(msgs).BillingPeriodTypeId == BillingPeriodType.Day ?
+                    GetDailyAttendancesToBillByRegistrantActivity(registrantActivities, selectedAttendances, msgs)
+                    : GetWeeklyAttendancesToBillByRegistrantActivity(registrantActivities, selectedAttendances, msgs);
                 ViewBag.Messages = msgs;
 
                 return View(activity);
@@ -1688,7 +1722,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (activityId.IsNotEmpty() && activityId.IsGuid())
                 activity = Activity.LoadByUidByAccountId(activityId.ToGuid(), currentAccount.ID.Value, msgs);
 
-            if (attendanceIds.IsNotEmpty() || attendanceIds.IsNotBlank())
+            if (activity.IsNotEmpty() && (attendanceIds.IsNotEmpty() || attendanceIds.IsNotBlank()))
             {
                 // get selected attendances
                 var attendanceIdsList = attendanceIds.Split(',').Select(p => p.ToInteger()).ToList();
@@ -1698,7 +1732,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 // sum up total cost of all attendances per registrant to display
                 var registrantActivities = RegistrantActivity.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs);
 
-                var registrantActivityAttendances = GetRegistrantActivityAttendances(registrantActivities, selectedAttendances, msgs);
+                var registrantActivityAttendances = activity.GetPostPayPlan(msgs).BillingPeriodTypeId == BillingPeriodType.Day ?
+                    GetDailyAttendancesToBillByRegistrantActivity(registrantActivities, selectedAttendances, msgs)
+                    : GetWeeklyAttendancesToBillByRegistrantActivity(registrantActivities, selectedAttendances, msgs);
 
                 foreach (var registrantActivityAttendance in registrantActivityAttendances)
                 {

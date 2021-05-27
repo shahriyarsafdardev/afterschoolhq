@@ -176,6 +176,11 @@ Public Module Extensions
     Public Function FarthestDate(ByVal aList As IEnumerable(Of DateTime), ByVal bDate As DateTime) As DateTime
         Return aList.OrderBy(Function(x) Math.Abs((bDate - x).Ticks)).Last()
     End Function
+    <Extension>
+    Public Function DatesAreInSameWeek(ByVal aDate As DateTime, ByVal bDate As DateTime) As Boolean
+        Return Equals(aDate.AddDays(-1 * aDate.DayOfWeek), bDate.AddDays(-1 * bDate.DayOfWeek))
+    End Function
+
 
     <Extension()>
     Public Function Shuffle(Of T)(ByVal value As IEnumerable(Of T)) As IEnumerable(Of T)

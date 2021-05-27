@@ -5,6 +5,7 @@
     var schedule = (ActivitySchedule)ViewData["schedule"];
     var controller = (string)ViewData["controller"];
     var isTechSupport = (bool)SessionVariables.LoggedInUser.IsTechSupport(SessionVariables.CurrentAccount);
+    const int FUTURE_INSTANCES_TO_SHOW = 8;
 }
 
 <form method="post" action="@Url.Action("trackattendance", controller, new { id = Model.ActivityUid, att = Model.ID })" class="form-horizontal">
@@ -32,7 +33,7 @@
                                 {
                                     if (instance.StartDateTime.HasValue)
                                     {
-                                        if (DateTime.UtcNow >= account.ConvertFromAccountTimeZone(instance.StartDateTime.Value).AddDays(-1))
+                                        if (DateTime.UtcNow >= account.ConvertFromAccountTimeZone(instance.StartDateTime.Value).AddDays(-FUTURE_INSTANCES_TO_SHOW))
                                         {
                                             <option value="@instance.ID" @(Model.ActivityInstanceId == instance.ID ? " selected=\"selected\" " : "")>
                                                 @instance.StartDateTime.ToShortTimeString(), @instance.StartDateTime.Value.ToLongDateString()                                            </option>
