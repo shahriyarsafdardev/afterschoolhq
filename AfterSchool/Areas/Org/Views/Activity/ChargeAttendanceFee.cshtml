@@ -1,7 +1,7 @@
 ﻿@model Activity
 @{
     ViewBag.Title = Model.AccountName;
-    Dictionary<RegistrantActivity, List<Attendance>> registrantActivityAttendanceCounts = ViewBag.RegistrantActivityAttendanceCounts;
+    var attendancesToBillRegistrants = (Dictionary<RegistrantActivity, List<Attendance>>)ViewBag.AttendancesToBillRegistrants;
     SystemMessages msgs = (SystemMessages)ViewBag.Messages;
 }
 
@@ -53,13 +53,13 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @if (registrantActivityAttendanceCounts.Count > 0)
+                        @if (attendancesToBillRegistrants.Count > 0)
                         {
-                            foreach (var registrantActivityAttendanceCount in registrantActivityAttendanceCounts)
+                            foreach (var attendancesToBillRegistrant in attendancesToBillRegistrants)
                             {
-                                var registrant = registrantActivityAttendanceCount.Key.GetRegistrant();
-                                var registration = registrantActivityAttendanceCount.Key.GetRegistration();
-                                var presentCount = registrantActivityAttendanceCount.Value.Count;
+                                var registrant = attendancesToBillRegistrant.Key.GetRegistrant();
+                                var registration = attendancesToBillRegistrant.Key.GetRegistration();
+                                var presentCount = attendancesToBillRegistrant.Value.Count;
                                 var costPerClass = registration.CostPerClass.HasValue ? registration.CostPerClass.Value : 0;
                                 var totalAmount = (decimal)(presentCount * (registration.CostPerClass.HasValue ? registration.CostPerClass.Value : 0));
                                 var couponDiscount = (decimal)(presentCount * (registration.CouponValue.HasValue ? registration.CouponValue.Value : 0));
@@ -76,20 +76,20 @@
                                     @if (totalAmountToCharge > 0)
                                     {
                                         <td style="font-weight: bold;">@totalAmountToCharge.ToCurrency()</td>
-                                    } 
+                                    }
                                     else
                                     {
                                         <td>@totalAmountToCharge.ToCurrency()</td>
                                     }
 
-                                </tr> 
+                                </tr>
                             }
                         }
                         else
                         {
                             <tr>
                                 <td colspan="5">You have not taken attendance yet</td>
-                            </tr>            
+                            </tr>
                         }
                     </tbody>
                 </table>
