@@ -11,7 +11,7 @@
 
   <table cellspacing="0" cellpadding="0" style="margin:20px auto">
     <tr>
-      <td align="center" width="500" height="150" bgcolor="#008B6A" style="-webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px; color: #ffffff; display: block;">
+      <td align="center" width="500" height="150" bgcolor="#008B6A" style="-webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px; color: #ffffff; display: block; padding-left:15px; padding-right:15px;">
         <a href="@Model.AcceptLink" style="font-size:26px; font-weight: bold; font-family: Helvetica, Arial, sans-serif; text-decoration: none; line-height:150px; width:100%; display:inline-block;">
           <span style="color: #FFFFFF; line-height:150px; display: block;">Accept and Register Now</span>
         </a>
