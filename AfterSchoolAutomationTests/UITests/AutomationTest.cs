@@ -4,6 +4,9 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
 using AfterSchoolAutomationTests.Helpers.Extensions;
+using System.IO;
+using System.Reflection;
+using System.Net.Mail;
 
 namespace AfterSchoolAutomationTests.UITests
 {
@@ -11,7 +14,6 @@ namespace AfterSchoolAutomationTests.UITests
     {
         private readonly IWebDriver _driver;
         private readonly Helper _helper;
-        protected IWebDriver WebDriver;
 
         public AutomationTest()
         {
@@ -27,7 +29,6 @@ namespace AfterSchoolAutomationTests.UITests
             _helper.PopulatePassword("123456789");
             _helper.ClickSubmit();
             Assert.Equal("Passed", "Passed");
-
         }
 
         [Fact]
@@ -52,7 +53,7 @@ namespace AfterSchoolAutomationTests.UITests
 
             //--Step 4 --Activity Name--
             _driver.WaitInSeconds(2);
-            _helper.PopulateProgramName("Writing Classes 2");
+            _helper.PopulateProgramName("Writing Classes 3");
             _driver.WaitInSeconds(10);
             _helper.ClickProgramSubmit();
 
@@ -98,13 +99,24 @@ namespace AfterSchoolAutomationTests.UITests
             _driver.WaitInSeconds(2);
             _helper.PopulatePhone("(202) 555 0155");
             _driver.WaitInSeconds(2);
-            _helper.PopulateLocation("(New York University, New York, NY, USA");
-            _driver.WaitInSeconds(2);
+            //_helper.PopulateLocation("New York University, New York, NY, USA");
+            //_driver.WaitInSeconds(5);
+            _helper.SelectAutoComplete("New York, New York, USA");
+            _driver.WaitInSeconds(5);
             _helper.ContactInfoSubmit();
 
             //--Step 10 
-            _helper.UploadProfileImage("file:///D:/musical-instruments-english.jpg");
-            _helper.HeaderImageImage("file:///D:/musical-instruments-english.jpg");
+            //var outPutDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase);
+            //var profileImage = Path.Combine(outPutDirectory, "img\\musical-instruments-english.jpg");
+            //string relLogo = new Uri(profileImage).LocalPath;
+            //var logoImage = new LinkedResource(relLogo);
+
+            //string fileName = "musical-instruments-english.jpg";
+            //string path = Path.Combine(Environment.CurrentDirectory, @"img\", fileName);
+
+            _helper.UploadProfileImage(@"D:\AfterSchool\AfterSchool\img\musical-instruments-english.jpg");
+            _driver.WaitInSeconds(2);
+            _helper.HeaderImageImage(@"D:\AfterSchool\AfterSchool\img\musical-instruments-english.jpg");
             _helper.CustomizeProfileSubmit();
 
             //--Step 11 
@@ -117,8 +129,9 @@ namespace AfterSchoolAutomationTests.UITests
             _helper.EnterLinksSubmit();
 
             //--Step 13 
-            _driver.WaitInSeconds(4);
+            _driver.WaitInSeconds(20);
             _helper.ClickGoToProfile();
+            _driver.WaitInSeconds(10);
 
             Assert.Equal("Passed", "Passed");
 

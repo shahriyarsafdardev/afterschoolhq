@@ -1,6 +1,10 @@
 ﻿using AfterSchoolAutomationTests.Helpers;
 using OpenQA.Selenium;
+using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.Support.UI;
+using System;
+using System.Collections.Generic;
+using System.Threading;
 
 namespace AfterSchoolAutomationTests.UITests
 {
@@ -14,10 +18,12 @@ namespace AfterSchoolAutomationTests.UITests
             _driver = driver;
         }
 
-        //------------WebElements-----------
+        //------------Login WebElements-----------
         private IWebElement UserNameElement => _driver.FindElement(By.Id("username"));
         private IWebElement UserPasswordElement => _driver.FindElement(By.Id("password"));
         private IWebElement SubmitElement => _driver.FindElement(By.ClassName("btn-primary"));
+
+        //------------Individual Account WebElements-----------
         private IWebElement SignUpGetStartedElement => _driver.FindElement(By.XPath("(//button[@id='btn-GetStarted'])[1]"));
         private IWebElement CreateIndividualAccountElement => _driver.FindElement(By.XPath("(//div[@class='row margin-t-35']//button[text()='Create an Individual Account'])[1]"));
         private IWebElement ProvideProgramsForStudentsElement => _driver.FindElement(By.XPath("(//div[@class='row margin-t-35']//button[text()='Provide programs for students'])[1]"));
@@ -42,6 +48,7 @@ namespace AfterSchoolAutomationTests.UITests
 
         private IWebElement PhoneElement => _driver.FindElement(By.Name("phone"));
         private IWebElement LocationElement => _driver.FindElement(By.Name("location"));
+        private IWebElement GoogleMapElement => _driver.FindElement(By.ClassName("pac-container"));
         private IWebElement ContactInfoElement => _driver.FindElement(By.XPath("(//div[@class='visible-md visible-lg margin-v-30']//button[text()='Save and Continue'])[1]"));
 
         private IWebElement UploadProfileElement => _driver.FindElement(By.Name("logo"));
@@ -55,7 +62,7 @@ namespace AfterSchoolAutomationTests.UITests
 
         private IWebElement GoToProfileElement => _driver.FindElement(By.Id("btnGoProfile"));
 
-
+        private IWebElement location => _driver.FindElement(By.XPath(""));
 
 
         //------------Login Helper Methods-----------
@@ -64,7 +71,7 @@ namespace AfterSchoolAutomationTests.UITests
         public void ClickSubmit() => SubmitElement.Click();
 
 
-        //------------Account Signup Helper Methods-----------
+        //------------Individual Account Helper Methods-----------
         public void ClickSignUp() => SignUpGetStartedElement.Click();
         public void ClickIndividualAccount() => CreateIndividualAccountElement.Click();
         public void ProvideProgramsForStudents() => ProvideProgramsForStudentsElement.Click();
@@ -108,6 +115,14 @@ namespace AfterSchoolAutomationTests.UITests
 
         public void PopulatePhone(string name) => PhoneElement.SendKeys(name);
         public void PopulateLocation(string name) => LocationElement.SendKeys(name);
+
+        public void SelectAutoComplete(string name)
+        {
+            LocationElement.SendKeys(name);
+            Thread.Sleep(5000);
+            WebDriverWait wait = new WebDriverWait(_driver, new TimeSpan(0, 0, 5));
+            wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.XPath("(//div[@class='pac-container pac-logo']//div[@class='pac-item'])[1]"))).Click();
+        }
         public void ContactInfoSubmit() => ContactInfoElement.Click();
 
 
