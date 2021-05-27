@@ -118,9 +118,8 @@
                             $<span class="total-fee-ccf">0</span>
                             Transaction Fee
                             @*NOTE: for payment plans and subscriptions should add the text "Per Payment"*@
-                        </strong>
-                        @(savePaymentInfoOnly ? "per class attended" : "")
-                        @(!savePaymentInfoOnly && postPayPlan.IsNotEmpty() ? $"({participationObject.GetPostPayCreditCardFee().ToCurrency()} per {postPayPlan.BillingPeriodTypeId.ToString().ToLower()})" : "")
+                        </strong>                        
+                        @(postPayPlan.IsNotEmpty() ? $"({participationObject.GetPostPayCreditCardFee().ToCurrency()} per {postPayPlan.BillingPeriodTypeId.ToString().ToLower()})" : "per class attended")                        
                     </p>
                     <p class="text-muted text-center">Credit card transaction fees are non-refundable</p>
                 </div>

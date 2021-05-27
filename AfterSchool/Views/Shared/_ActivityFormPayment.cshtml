@@ -175,7 +175,7 @@
                         <div class="input-group input-group-lg xs-mb-15">
                             <span class="input-group-addon">Every</span>
                             <select name="paymentplanperiod" id="paymentplanperiod" class="form-control" required>
-                                @BillingPeriodOptions(paymentPlan)
+                                @BillingPeriodOptions(paymentPlan, SubscriptionPlanType.PaymentPlan)
                             </select>
                         </div>
                     </div>
@@ -252,19 +252,19 @@
                 <div class="row">
                     <label class="col-sm-3 control-label">Post Pay Option</label>
                     <div class="col-sm-1">
-                        @{Html.RenderPartial
-                                  (
-                                      "~/Views/Shared/_SwitchButton.cshtml",
-                                      Model.HasPostPayPlan(),
-                                      new ViewDataDictionary()
-                                      {
-                                { "checkboxname", "haspostpayplan" },
-                                { "checkboxid", "haspostpayplan" }
-}
-                                  );
+                        @{
+                            Html.RenderPartial(
+                                "~/Views/Shared/_SwitchButton.cshtml",
+                                Model.HasPostPayPlan(),
+                                new ViewDataDictionary() {
+                                    { "checkboxname", "haspostpayplan" },
+                                    { "checkboxid", "haspostpayplan" }
+                                });
                         }
                     </div>
                 </div>
+                <br />
+
                 <div id="postpaysection" class="row">
                     <div class="col-md-3"></div>
                     <div class="col-sm-6 col-md-9">
@@ -294,6 +294,8 @@
                             </div>
                         </div>
                     </div>
+                    <div class="clearfix"></div>
+
                     <div class="col-sm-3"></div>
                     <div class="col-sm-6 col-md-9">
                         <p></p>
@@ -313,7 +315,22 @@
                             </span>
                         </p>
                     </div>
+                    <div class="clearfix"></div>
+
+                    <div class="col-md-3">
+                        <label class="control-label">How do you want to charge attendance?</label>
+                    </div>
+                    <div class="col-sm-6 col-md-9">
+                        <div class="input-group input-group-lg xs-mb-15">
+                            <span class="input-group-addon">Every</span>
+                            <select name="postpayplanperiod" id="postpayplanperiod" class="form-control">
+                                @BillingPeriodOptions(postPayPlan, SubscriptionPlanType.PostPayPlan)
+                            </select>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
                 </div>
+
                 <div class="row">
                     <div class="col-sm-3"></div>
                     <div class="col-sm-9">
@@ -713,13 +730,18 @@
 
 </script>
 
-@helper BillingPeriodOptions(SubscriptionPlan plan)
+@helper BillingPeriodOptions(SubscriptionPlan plan, SubscriptionPlanType type)
 {
     var exceptions = new List<BillingPeriodType> { BillingPeriodType.NotSet };
 
     if (AfterSchoolLibrary.Helpers.Utilities.IsProduction)
     {
         exceptions = new List<BillingPeriodType> { BillingPeriodType.NotSet, BillingPeriodType.Day, BillingPeriodType.Year };
+    }
+
+    if (type.IsNotEmpty() && type == SubscriptionPlanType.PostPayPlan)
+    {
+        exceptions = new List<BillingPeriodType> { BillingPeriodType.NotSet, BillingPeriodType.Month, BillingPeriodType.Year, BillingPeriodType.TwoWeeks };
     }
 
     foreach (var billingPeriodType in Enum.GetValues(typeof(BillingPeriodType)).Cast<BillingPeriodType>().Where(x => x.NotIn(exceptions)))
