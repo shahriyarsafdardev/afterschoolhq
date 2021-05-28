@@ -1593,20 +1593,17 @@ namespace AfterSchool.Areas.Org.Controllers
                 {
                     var attendanceRegistrant = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(attendance.ID.Value, registrantActivity.RegistrantId.Value, msgs).FirstOrDefault();
                     var activityInstanceStartTime = attendance.GetActivityInstance(msgs).StartDateTime.Value;
-                    var attendanceRegistrantsAlreadyBilledInSameWeek = attendanceRegistrant.LoadAttendanceRegistrantsInSameBillingPeriod(billingPeriodType, msgs).Where(ar => ar.IsAlreadyBilled).ToList();
+                    var attendanceRegistrantsAlreadyBilledInSameBillingPeriod = attendanceRegistrant.LoadAttendanceRegistrantsInSameBillingPeriod(billingPeriodType, msgs).Where(ar => ar.IsAlreadyBilled).ToList();
 
                     var attendancesAlreadyInExistingBillingPeriod = billingPeriodsAttended.Select(billingPeriod =>
                          billingPeriodType == BillingPeriodType.Day ?
                          billingPeriod == activityInstanceStartTime
                          : billingPeriod.DatesAreInSameWeek(activityInstanceStartTime)).ToList();
 
-                    if((attendancesAlreadyInExistingBillingPeriod.Count < 1
-                        && attendanceRegistrant.IsNotEmpty()
-                        && !attendanceRegistrant.IsAlreadyBilled
-                        && attendanceRegistrant.NumberPresent > 0
-                        ||( billingPeriodsAttended.Count < 1
-                        && attendanceRegistrantsAlreadyBilledInSameWeek.Count < 1)
-                        ))
+                    var isAttendanceRegistrantAlreadyAccountedFor = attendancesAlreadyInExistingBillingPeriod.Count > 0 || attendanceRegistrantsAlreadyBilledInSameBillingPeriod.Count > 0;
+                    var attendanceRegistrantIsPresentAndNotBilled = attendanceRegistrant.IsNotEmpty() && attendanceRegistrant.NumberPresent > 0 && !attendanceRegistrant.IsAlreadyBilled;
+
+                    if ((billingPeriodsAttended.Count < 1 || !isAttendanceRegistrantAlreadyAccountedFor) && attendanceRegistrantIsPresentAndNotBilled)
                     {
                         billingPeriodsAttended.Add(activityInstanceStartTime);
                         return true;
