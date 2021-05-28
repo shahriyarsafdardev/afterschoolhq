@@ -2,6 +2,7 @@
 @{
     ViewBag.Title = Model.AccountName;
     var attendancesToBillRegistrants = (Dictionary<RegistrantActivity, List<Attendance>>)ViewBag.AttendancesToBillRegistrants;
+    var billingPeriodType = ViewBag.BillingPeriodType;
     SystemMessages msgs = (SystemMessages)ViewBag.Messages;
 }
 
@@ -46,7 +47,7 @@
                     <thead>
                         <tr>
                             <th>Student</th>
-                            <th>Days Attended (Not Paid) <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="These are the number of attendances that haven't been charged yet, so it may be less than the number of attendances you selected for each student if you have already charged for some of those selected attendances." data-placement="top"></i></th>
+                            <th>@billingPeriodType Attended (Not Paid) <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="These are the number of attendances that haven't been charged yet, so it may be less than the number of attendances you selected for each student if you have already charged for some of those selected attendances." data-placement="top"></i></th>
                             <th>Total Amount </th>
                             <th>Coupon Discount </th>
                             <th>Total Amount To Charge</th>
@@ -64,6 +65,19 @@
                                 var totalAmount = (decimal)(presentCount * (registration.CostPerClass.HasValue ? registration.CostPerClass.Value : 0));
                                 var couponDiscount = (decimal)(presentCount * (registration.CouponValue.HasValue ? registration.CouponValue.Value : 0));
                                 var totalAmountToCharge = (decimal)totalAmount - couponDiscount;
+                                
+                                if (billingPeriodType == BillingPeriodType.Week)
+                                {
+                                    var isCharged = registrant.CheckRegistrantChargeForWeeklyBillingType(Model);
+                                    if (isCharged)
+                                    {
+                                        presentCount = 0;
+                                        totalAmount = 0;
+                                        couponDiscount = 0;
+                                        totalAmountToCharge = 0;
+                                    }
+                                }
+
                                 <tr>
                                     <td>@registrant.FirstName @registrant.LastName</td>
 

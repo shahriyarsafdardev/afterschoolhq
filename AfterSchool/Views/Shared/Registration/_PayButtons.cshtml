@@ -9,10 +9,19 @@
     var savePaymentInfoOnly = false;
 
     var hasPlans = postPayPlan.IsNotEmpty() || subscriptionPlan.IsNotEmpty();
-
     if (postPayPlan.IsNotEmpty() && !postPayPlan.NumberOfPeriodsPrePaid.IsPositive())
     {
         savePaymentInfoOnly = true;
+    }
+
+    var ccClassAttendedLable = "";
+    if (postPayPlan.IsNotEmpty() && !savePaymentInfoOnly)
+    {
+        ccClassAttendedLable = $"({participationObject.GetPostPayCreditCardFee().ToCurrency()} per {postPayPlan.BillingPeriodTypeId.ToString().ToLower()})";
+    }
+    else if (postPayPlan.IsEmpty() && savePaymentInfoOnly)
+    {
+        ccClassAttendedLable = "per class attended";
     }
 }
 
@@ -118,8 +127,10 @@
                             $<span class="total-fee-ccf">0</span>
                             Transaction Fee
                             @*NOTE: for payment plans and subscriptions should add the text "Per Payment"*@
-                        </strong>                        
-                        @(postPayPlan.IsNotEmpty() ? $"({participationObject.GetPostPayCreditCardFee().ToCurrency()} per {postPayPlan.BillingPeriodTypeId.ToString().ToLower()})" : "per class attended")                        
+                        </strong>
+
+                        @ccClassAttendedLable
+
                     </p>
                     <p class="text-muted text-center">Credit card transaction fees are non-refundable</p>
                 </div>

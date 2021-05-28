@@ -36,7 +36,8 @@
                                         if (DateTime.UtcNow >= account.ConvertFromAccountTimeZone(instance.StartDateTime.Value).AddDays(-FUTURE_INSTANCES_TO_SHOW))
                                         {
                                             <option value="@instance.ID" @(Model.ActivityInstanceId == instance.ID ? " selected=\"selected\" " : "")>
-                                                @instance.StartDateTime.ToShortTimeString(), @instance.StartDateTime.Value.ToLongDateString()                                            </option>
+                                                @instance.StartDateTime.ToShortTimeString(), @instance.StartDateTime.Value.ToLongDateString()
+                                            </option>
                                         }
                                     }
                                 }

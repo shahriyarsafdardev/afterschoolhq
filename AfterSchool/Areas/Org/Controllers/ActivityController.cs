@@ -1636,11 +1636,14 @@ namespace AfterSchool.Areas.Org.Controllers
                     return false;
                 }).Count;
 
-                var billingPeriodAttendance = attendancesPerBillingPeriods.FirstOrDefault(keyPair =>  
+               var billingPeriodAttendance = attendancesPerBillingPeriods.FirstOrDefault(keyPair =>  
                     billingPeriodType == BillingPeriodType.Day ? keyPair.Key == activityInstanceStartTime : keyPair.Key.DatesAreInSameWeek(activityInstanceStartTime));
                 
-                var addOrUpdateKey = billingPeriodAttendance.IsNotEmpty() ? billingPeriodAttendance.Key : activityInstanceStartTime;
-                attendancesPerBillingPeriods[key: addOrUpdateKey] += numberOfRegistrants;
+                var addOrUpdateKey = billingPeriodAttendance.IsNotEmpty() && billingPeriodAttendance.Value > 0 ? billingPeriodAttendance.Key : activityInstanceStartTime;
+                
+                // TODO: billy review this changes, it was giving errors
+                //attendancesPerBillingPeriods[key: addOrUpdateKey] += numberOfRegistrants;
+                attendancesPerBillingPeriods.Add(key: addOrUpdateKey, value: numberOfRegistrants);
 
             });
 
@@ -1677,6 +1680,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 var billingPeriodType = activity.GetPostPayPlan(msgs).BillingPeriodTypeId;
 
                 ViewBag.AttdanceIds = attendanceIds;
+                ViewBag.BillingPeriodType = billingPeriodType;
                 ViewBag.AttendancesToBillRegistrants = GetAttendancesToBillPerRegistrantActivity(registrantActivities, selectedAttendances, billingPeriodType, msgs);
                 ViewBag.Messages = msgs;
 
@@ -1716,19 +1720,23 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 // sum up total cost of all attendances per registrant to display
                 var registrantActivities = RegistrantActivity.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs);
-                var billingPeriodType = activity.GetPostPayPlan(msgs).BillingPeriodTypeId;
-
-                var registrantActivityAttendances = GetAttendancesToBillPerRegistrantActivity(registrantActivities, selectedAttendances, billingPeriodType, msgs);
+                var postPayPlan = activity.GetPostPayPlan(msgs);
+                var billingPeriodType = postPayPlan?.BillingPeriodTypeId;
+                var registrantActivityAttendances = GetAttendancesToBillPerRegistrantActivity(registrantActivities, selectedAttendances, billingPeriodType.HasValue ? billingPeriodType.Value : BillingPeriodType.NotSet, msgs);                
 
                 foreach (var registrantActivityAttendance in registrantActivityAttendances)
                 {
                     // one person multiple attendance dates
-
                     var registrantActivity = registrantActivityAttendance.Key;
                     var registration = registrantActivity.GetRegistration(msgs);
                     var costPerAttendance = registration.CostPerClass.IsNotEmpty() ? registration.CostPerClass.Value : 0;
+                    var registrant = registration.GetRegistrant(msgs);
+                    bool isCharged = false;
 
-                    if (costPerAttendance > 0)
+                    if (postPayPlan.IsNotEmpty() && billingPeriodType == BillingPeriodType.Week)
+                        isCharged = registrant.CheckRegistrantChargeForWeeklyBillingType(activity);
+
+                    if (!isCharged && costPerAttendance > 0)
                     {
                         var masterRegistrant = registration.GetMasterRegistrant(msgs);
                         var raAttendances = registrantActivityAttendance.Value;
@@ -1751,7 +1759,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             else
                                 creditCardPurchaseObject = new CreditCardPurchaseObject { StripeSourceId = registration.StripeSourceId };
 
-                            var postPayPlan = activity.GetPostPayPlan(msgs);
+                            
                             var overrideAmount = costPerAttendance * attendanceDaysToCharge;
 
                             if (postPayPlan.IsNotEmpty())
