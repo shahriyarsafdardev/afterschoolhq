@@ -112,14 +112,13 @@ namespace AfterSchoolLibrary.Services
                 case BillingPeriodType.Week:
                    var thisAttendance = Attendance.Load(attendanceRegistrant.AttendanceId.Value, msgs);
                    var attendancesInSameWeek = Attendance.LoadByActivityId(attendanceRegistrant.AttendanceActivityId.Value, msgs).Where( a => thisAttendance.Date.Value.DatesAreInSameWeek(a.Date.Value)).ToList();
-                   var billAttendanceRegistrants = attendancesInSameWeek.SelectMany(attendancesInSameWeek =>
+                   var billAttendanceRegistrants = new List<AttendanceRegistrant>();
+                   attendancesInSameWeek.ForEach(attendanceInSameWeek =>
                    {
-                       var attenRegInSameWeek = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(attendancesInSameWeek.ID.Value, attendanceRegistrant.RegistrantId.Value, msgs);
+                       var attenRegInSameWeek = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(attendanceInSameWeek.ID.Value, attendanceRegistrant.RegistrantId.Value, msgs).FirstOrDefault();
                        if (attenRegInSameWeek.IsNotEmpty())
-                           return attenRegInSameWeek;
-
-                       return null;
-                   }).ToList();
+                           billAttendanceRegistrants.Add(attenRegInSameWeek);
+                   });
 
                     return billAttendanceRegistrants;
 
