@@ -9,8 +9,8 @@ namespace AfterSchoolAutomationTests.Pages
 {
     public class Page : IDisposable
     {
-        private readonly IWebDriver _driver;
-        private readonly Helper _helper;
+        protected readonly IWebDriver _driver;
+        protected readonly Helper _helper;
         public Page()
         {
             _driver = new ChromeDriver();

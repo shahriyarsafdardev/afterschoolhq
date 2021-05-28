@@ -20,7 +20,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AfterSchoolAutomationTests", "AfterSchoolAutomationTests\AfterSchoolAutomationTests.csproj", "{58A546D2-7332-47BC-ACA5-0569714B0F23}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AfterSchoolAutomationTests", "AfterSchoolAutomationTests\AfterSchoolAutomationTests.csproj", "{58A546D2-7332-47BC-ACA5-0569714B0F23}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AfterSchoolUIAutomationTests", "AfterSchoolUIAutomationTests\AfterSchoolUIAutomationTests.csproj", "{B14557D1-AE31-4325-B36C-7B7D9D94A9E2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -48,6 +50,10 @@ Global
 		{58A546D2-7332-47BC-ACA5-0569714B0F23}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{58A546D2-7332-47BC-ACA5-0569714B0F23}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{58A546D2-7332-47BC-ACA5-0569714B0F23}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B14557D1-AE31-4325-B36C-7B7D9D94A9E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B14557D1-AE31-4325-B36C-7B7D9D94A9E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B14557D1-AE31-4325-B36C-7B7D9D94A9E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B14557D1-AE31-4325-B36C-7B7D9D94A9E2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
