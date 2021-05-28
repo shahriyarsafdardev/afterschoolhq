@@ -13,6 +13,7 @@ namespace AfterSchoolLibraryTests.Factories
         {
             var obj = new Coupon()
             {
+                ID = 1,
                 AccountId = account.ID,
                 ExpirationDate = DateTime.UtcNow.AddMonths(1),
                 CouponCode = CouponService.GenerateCouponCode(account.ID.Value, msgs, dc),
@@ -21,7 +22,9 @@ namespace AfterSchoolLibraryTests.Factories
                 AmountTypeId = CouponAmountType.Percentage,
                 MaxNumberOfUsesAll = 1,
                 MaxNumberOfUsesPerPerson = 1,
-                Name = "Whatever"
+                Name = "Whatever",
+                Description = "test description",
+                IsDisabled = false                
             };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;

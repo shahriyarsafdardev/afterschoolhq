@@ -213,7 +213,6 @@ loadmethod: AccountId, List<>
 loadmethod: ActivityGroupId, List<>
 loadmethod: AccountId|IsOngoing, List<>
 loadmethod: ActivityGroupId|IsOngoing, List<>
-loadmethod: Id|AccountId
 [end]
 
 [begin]
@@ -308,6 +307,7 @@ joinproperty: Account.Name, string, NVarChar
 loadmethod: ActivityId, List<>
 loadmethod: ActivityGroupId, List<>
 loadmethod: Uid
+loadmethod: Uid|AccountId
 loadmethod: AccountId, List<>
 [end]
 
@@ -751,6 +751,7 @@ loadmethod: ParentRegistrantId, List<>
 loadmethod: AccountId|RegistrantTypeId|IsDeleted, List<>
 loadmethod: AccountId|IsContactOnly|IsDeleted, List<>
 loadmethod: Uid
+loadmethod: Uid|AccountId
 loadmethod: WebUserId|IsDeleted, List<>
 loadmethod: WebUserId|IsMaster|IsDeleted, List<>
 loadmethod: FirstRegistrantId, List<>
@@ -1564,6 +1565,7 @@ loadmethod: AccountId, List<>
 loadmethod: AccountId|PayoutStatusId, List<>
 loadmethod: PayoutStatusId, List<>
 loadmethod: Uid
+loadmethod: Uid|AccountId
 [end]
 
 [begin]
@@ -1635,6 +1637,7 @@ baseproperty: Name, required
 loadmethod: AccountId, List<>
 loadmethod: AccountId|CouponCode
 loadmethod: Uid
+loadmethod: Uid|AccountId
 [end]
 
 [begin]
@@ -1738,6 +1741,7 @@ property: DeniedDate, DateTime?, DateTime
 property: RequestedRefundTypeId, RefundType, Int, Required
 property: ApprovedRefundTypeId, RefundType, Int, Required
 loadmethod: Uid
+loadmethod: Uid|AccountId
 loadmethod: TransactionId, List<>
 loadmethod: AccountId, List<>
 loadmethod: AccountId|RefundRequestStatusId, List<>

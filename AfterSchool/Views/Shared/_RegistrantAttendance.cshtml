@@ -27,22 +27,20 @@
                     <div class="col-md-10">
                         <select name="activityinstance" id="activityinstance" class="form-control">
                             <option value="">Select...</option>
-                            @foreach (var instance in schedule.GetInSessionInstances().DistinctBy(instance => instance.ID))
-                            {
-                                if (instance.StartDateTime <= account.ConvertToAccountTimeZone(DateTime.UtcNow))
+                            @{
+                                foreach (var instance in schedule.GetInSessionInstances().DistinctBy(instance => instance.ID))
                                 {
-                                    <option value="@instance.ID" @(Model.ActivityInstanceId == instance.ID ? " selected=\"selected\" " : "")>
-                                        @instance.StartDateTime.ToShortTimeString(), @instance.StartDateTime.Value.ToLongDateString()
-                                    </option>
+                                    if (instance.StartDateTime.HasValue)
+                                    {
+                                        if (DateTime.UtcNow >= account.ConvertFromAccountTimeZone(instance.StartDateTime.Value).AddDays(-1))
+                                        {
+                                            <option value="@instance.ID" @(Model.ActivityInstanceId == instance.ID ? " selected=\"selected\" " : "")>
+                                                @instance.StartDateTime.ToShortTimeString(), @instance.StartDateTime.Value.ToLongDateString()                                            </option>
+                                        }
+                                    }
                                 }
                             }
-                        </select>
-                        @*
-                            <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
-                                <input size="16" type="text" class="form-control" id="date" name="date" onfocus="this.select()" required value="@account.ConvertToAccountTimeZone(Model.Date.Value).ToShortDateString()" />
-                                <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
-                            </div>
-                        *@
+                        </select>                       
                     </div>
                 </div>
             </div>
@@ -70,7 +68,7 @@
                                                 { "checkboxname", "present-" + attendanceRegistrant.ID },
                                                 { "checkboxid", "present-" + attendanceRegistrant.ID },
                                                 { "disabled", attendanceRegistrant.TransactionId.IsNotEmpty().ToString() }
-                        });
+                                            });
                                     }
                                     else
                                     {

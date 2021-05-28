@@ -409,7 +409,6 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivitySchedule_ActivityGroupId ON [ActivitySchedule] (ActivityGroupId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivitySchedule_AccountId_IsOngoing ON [ActivitySchedule] (AccountId,IsOngoing)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivitySchedule_ActivityGroupId_IsOngoing ON [ActivitySchedule] (ActivityGroupId,IsOngoing)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivitySchedule_AccountId_Id ON [ActivitySchedule] (Id,AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityInstance_ActivityId ON [ActivityInstance] (ActivityId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityInstance_ActivityGroupId ON [ActivityInstance] (ActivityGroupId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityInstance_ActivityScheduleId ON [ActivityInstance] (ActivityScheduleId)"));
@@ -423,6 +422,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityMessage_ActivityId ON [ActivityMessage] (ActivityId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityMessage_ActivityGroupId ON [ActivityMessage] (ActivityGroupId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityMessage_Uid ON [ActivityMessage] (Uid)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityMessage_AccountId_Uid ON [ActivityMessage] (Uid,AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityMessage_AccountId ON [ActivityMessage] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityMessageRegistrant_ActivityMessageId ON [ActivityMessageRegistrant] (ActivityMessageId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ActivityMessageRegistrant_RegistrantId ON [ActivityMessageRegistrant] (RegistrantId)"));
@@ -499,6 +499,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registrant_AccountId_IsDeleted_RegistrantTypeId ON [Registrant] (AccountId,RegistrantTypeId,IsDeleted)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registrant_AccountId_IsContactOnly_IsDeleted ON [Registrant] (AccountId,IsContactOnly,IsDeleted)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registrant_Uid ON [Registrant] (Uid)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registrant_AccountId_Uid ON [Registrant] (Uid,AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registrant_IsDeleted_WebUserId ON [Registrant] (WebUserId,IsDeleted)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registrant_IsDeleted_IsMaster_WebUserId ON [Registrant] (WebUserId,IsMaster,IsDeleted)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Registrant_FirstRegistrantId ON [Registrant] (FirstRegistrantId)"));
@@ -636,6 +637,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Payout_AccountId_PayoutStatusId ON [Payout] (AccountId,PayoutStatusId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Payout_PayoutStatusId ON [Payout] (PayoutStatusId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Payout_Uid ON [Payout] (Uid)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Payout_AccountId_Uid ON [Payout] (Uid,AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Product_AccountId ON [Product] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Product_Uid ON [Product] (Uid)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ProductOffering_ParticipationObjectId_ParticipationObjectTypeId ON [ProductOffering] (ParticipationObjectId,ParticipationObjectTypeId)"));
@@ -648,6 +650,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Coupon_AccountId ON [Coupon] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Coupon_AccountId_CouponCode ON [Coupon] (AccountId,CouponCode)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Coupon_Uid ON [Coupon] (Uid)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Coupon_AccountId_Uid ON [Coupon] (Uid,AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AttachedCoupon_CouponId ON [AttachedCoupon] (CouponId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AttachedCoupon_AccountId ON [AttachedCoupon] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AttachedCoupon_AccountId_IsUsed ON [AttachedCoupon] (AccountId,IsUsed)"));
@@ -665,6 +668,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_TwilioBlockedPhone_Phone ON [TwilioBlockedPhone] (Phone)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Migration_UniqueIdentifier ON [Migration] (UniqueIdentifier)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RefundRequest_Uid ON [RefundRequest] (Uid)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RefundRequest_AccountId_Uid ON [RefundRequest] (Uid,AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RefundRequest_TransactionId ON [RefundRequest] (TransactionId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RefundRequest_AccountId ON [RefundRequest] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RefundRequest_AccountId_RefundRequestStatusId ON [RefundRequest] (AccountId,RefundRequestStatusId)"));

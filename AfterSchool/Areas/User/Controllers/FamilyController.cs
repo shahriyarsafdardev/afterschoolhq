@@ -55,6 +55,7 @@ namespace AfterSchool.Areas.User.Controllers
                     case QuestionDataType.RegistrantTShirtSize:
                         question.IsRequired = true;
                         break;
+
                     case QuestionDataType.RegistrantHomePhone:
                     case QuestionDataType.RegistrantEmail:
                         question.IsRequired = false;
@@ -95,8 +96,8 @@ namespace AfterSchool.Areas.User.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditStudentPersonal(string id, string reg, string student, string locationname, string streetnumber, string streetname, string address2, string neighborhood, string city, string county, string state, 
-            string postalcode, string country, string placeid, decimal latitude, decimal longitude)
+        public ActionResult EditStudentPersonal(string id, string reg, string student, string locationname = null, string streetnumber = null, string streetname = null, string address2 = null, string neighborhood = null, string city = null, string county = null, string state = null, 
+            string postalcode = null, string country = null, string placeid = null, decimal? latitude = null, decimal? longitude = null, bool schoolnotfound = false)
         {
             var msgs = new SystemMessages();
             Registrant registrant = null;
@@ -128,6 +129,9 @@ namespace AfterSchool.Areas.User.Controllers
                             break;
                     }
                 });
+
+                if (placeid.IsEmpty() && !schoolnotfound)
+                    msgs.Add($"Location is required", MessageType.UserError);
 
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
 

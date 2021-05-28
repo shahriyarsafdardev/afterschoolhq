@@ -513,7 +513,7 @@ namespace AfterSchoolLibrary.Services
                 {
                     var account = activity.GetAccount(amsgs, adc);
 
-                    newName = newName.MaxChars(50);
+                    newName = newName.MaxChars(75);
 
                     copy = activity.CopyFields();
                     copy.Name = newName;
@@ -1912,11 +1912,25 @@ namespace AfterSchoolLibrary.Services
             var closestActivityInstance = activity.GetClosestPastActivityInstanceToDate(DateTime.UtcNow, msgs, dc);            
             if (closestActivityInstance.IsEmpty())
                 return null;
-
+            
+            
             var closestActivityInstanceAttendance = Attendance.LoadByActivityInstanceId(closestActivityInstance.ID.Value, msgs, dc).FirstOrDefault();
+            
+            if (closestActivityInstanceAttendance.IsNotEmpty())
+            {
+                var registrantActivities = activity.GetRegistrantActivities(msgs, dc);
+                var attendanceRegistrants = AttendanceRegistrant.LoadByAttendanceId(closestActivityInstanceAttendance.ID.Value, msgs, dc);
 
-            if (closestActivityInstanceAttendance.IsNotEmpty() && !activityInstanceId.HasValue)
-                return closestActivityInstanceAttendance;
+                //.. if student registers in between class, it should be listed in attendance
+                //.. for that we need entry of that user in AttendanceRegistrant table
+                if (registrantActivities.Count() > attendanceRegistrants.Count)
+                    return activity.CreateNewAttendance(activityInstanceId.IsEmpty() ? closestActivityInstance.ID.Value : activityInstanceId, loggedInUser, msgs, dc);
+
+                if (!activityInstanceId.HasValue)
+                {
+                    return closestActivityInstanceAttendance;
+                }
+            }
 
             // otherwise create a new attendance if there is no attendance id
             if (!attendanceId.HasValue)
@@ -2465,6 +2479,14 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
+        public static ActivityGroup GetActivityGroup(this Activity activity, int AccountId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (activity.ActivityGroupId.HasValue)
+                return ActivityGroup.LoadByIdByAccountId(activity.ActivityGroupId.Value, AccountId, msgs, dc: dc);
+
+            return null;
+        }
+
         public static ActivitySchedule GetSchedule(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (activity.ActivityScheduleId.HasValue)
@@ -2536,7 +2558,7 @@ namespace AfterSchoolLibrary.Services
             var location = activity.GetLocation(msgs, dc);
             var locationOwner = location.GetHostAccount(msgs, dc);
 
-            if (locationOwner.HasAccountOwner)
+            if (locationOwner.IsNotEmpty() && locationOwner.HasAccountOwner)
             {
                 var accountOwner = locationOwner.GetAccountOwner(msgs, dc);
                 msgs.AddRange(Helpers.EmailHelper.SendPublishRequestNotification(activity, locationOwner, accountOwner, loggedInUser));
