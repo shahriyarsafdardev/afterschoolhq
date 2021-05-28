@@ -104,28 +104,5 @@ namespace AfterSchoolLibrary.Services
 
             return prepayments;
         }
-
-        public static List<AttendanceRegistrant> LoadAttendanceRegistrantsInSameBillingPeriod(this AttendanceRegistrant attendanceRegistrant, BillingPeriodType billingPeriodType, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            switch (billingPeriodType)
-            {
-                case BillingPeriodType.Week:
-                   var thisAttendance = Attendance.Load(attendanceRegistrant.AttendanceId.Value, msgs);
-                   var attendancesInSameWeek = Attendance.LoadByActivityId(attendanceRegistrant.AttendanceActivityId.Value, msgs).Where( a => thisAttendance.Date.Value.DatesAreInSameWeek(a.Date.Value)).ToList();
-                   var billAttendanceRegistrants = attendancesInSameWeek.SelectMany(attendancesInSameWeek =>
-                   {
-                       var attenRegInSameWeek = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(attendancesInSameWeek.ID.Value, attendanceRegistrant.RegistrantId.Value, msgs);
-                       if (attenRegInSameWeek.IsNotEmpty())
-                           return attenRegInSameWeek;
-
-                       return null;
-                   }).ToList();
-
-                    return billAttendanceRegistrants;
-
-                default:
-                    return new List<AttendanceRegistrant>() { attendanceRegistrant };
-            }
-        }
     }
 }

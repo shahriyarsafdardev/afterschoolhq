@@ -65,18 +65,18 @@
                                 var totalAmount = (decimal)(presentCount * (registration.CostPerClass.HasValue ? registration.CostPerClass.Value : 0));
                                 var couponDiscount = (decimal)(presentCount * (registration.CouponValue.HasValue ? registration.CouponValue.Value : 0));
                                 var totalAmountToCharge = (decimal)totalAmount - couponDiscount;
-
-                                //if (billingPeriodType == BillingPeriodType.Week)
-                                //{
-                                //    var isCharged = registrant.CheckRegistrantChargeForWeeklyBillingType(Model);
-                                //    if (isCharged)
-                                //    {
-                                //        presentCount = 0;
-                                //        totalAmount = 0;
-                                //        couponDiscount = 0;
-                                //        totalAmountToCharge = 0;
-                                //    }
-                                //}
+                                
+                                if (billingPeriodType == BillingPeriodType.Week)
+                                {
+                                    var isCharged = registrant.CheckRegistrantChargeForWeeklyBillingType(Model);
+                                    if (isCharged)
+                                    {
+                                        presentCount = 0;
+                                        totalAmount = 0;
+                                        couponDiscount = 0;
+                                        totalAmountToCharge = 0;
+                                    }
+                                }
 
                                 <tr>
                                     <td>@registrant.FirstName @registrant.LastName</td>
