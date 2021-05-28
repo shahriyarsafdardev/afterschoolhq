@@ -1603,7 +1603,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     var isAttendanceRegistrantAlreadyAccountedFor = attendancesAlreadyInExistingBillingPeriod.Count > 0 || attendanceRegistrantsAlreadyBilledInSameBillingPeriod.Count > 0;
                     var attendanceRegistrantIsPresentAndNotBilled = attendanceRegistrant.IsNotEmpty() && attendanceRegistrant.NumberPresent > 0 && !attendanceRegistrant.IsAlreadyBilled;
 
-                    if ((billingPeriodsAttended.Count < 1 || !isAttendanceRegistrantAlreadyAccountedFor) && attendanceRegistrantIsPresentAndNotBilled)
+                    if (!isAttendanceRegistrantAlreadyAccountedFor 
+                    && attendanceRegistrantIsPresentAndNotBilled)
                     {
                         billingPeriodsAttended.Add(activityInstanceStartTime);
                         return true;
