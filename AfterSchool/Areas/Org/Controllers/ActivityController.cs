@@ -1588,6 +1588,13 @@ namespace AfterSchool.Areas.Org.Controllers
     
             registrantActivities.ForEach(registrantActivity =>
             {
+                //.. special case: post pay plan with # of Pre-pay
+                var activity = registrantActivity.GetActivity(msgs);
+                var postPayPlan = activity.GetPostPayPlan(msgs);
+                var count = 0;
+                if (postPayPlan.NumberOfPeriodsPrePaid > 0)
+                    count = 1;
+
                 var billingPeriodsAttended = new List<DateTime>();
                 var attendancesToBill = attendances.FindAll(attendance =>
                 {
@@ -1602,9 +1609,10 @@ namespace AfterSchool.Areas.Org.Controllers
 
                     var isAttendanceRegistrantAlreadyAccountedFor = attendancesAlreadyInExistingBillingPeriod.Count > 0 || attendanceRegistrantsAlreadyBilledInSameBillingPeriod.Count > 0;
                     var attendanceRegistrantIsPresentAndNotBilled = attendanceRegistrant.IsNotEmpty() && attendanceRegistrant.NumberPresent > 0 && !attendanceRegistrant.IsAlreadyBilled;
+                    var isPrepaymentNumberGreaterThenRegistrantPayemnts = attendancesAlreadyInExistingBillingPeriod.Count > count;
 
-                    if (!isAttendanceRegistrantAlreadyAccountedFor 
-                    && attendanceRegistrantIsPresentAndNotBilled)
+                    //if (!isAttendanceRegistrantAlreadyAccountedFor && attendanceRegistrantIsPresentAndNotBilled && isPrepaymentNumberGreaterThenRegistrantPayemnts)
+                    if (!isAttendanceRegistrantAlreadyAccountedFor && attendanceRegistrantIsPresentAndNotBilled)
                     {
                         billingPeriodsAttended.Add(activityInstanceStartTime);
                         return true;
