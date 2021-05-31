@@ -1621,7 +1621,6 @@ type: Class
 name: Coupon
 description: Used to give discounts to parents during the purchase of a registration, product, etc
 inherits: BasicLookUpObject
-property: Description, string, NVarChar "400"
 property: Amount, decimal?, Money, required, Store the amount a percentage or flat amount. If percentage it should be stored as a decimal meaning 100% should be stored as 1.00
 property: AmountTypeId, CouponAmountType, Int, required, Either a percentage or a flat amount
 property: AccountId, int?, Int, required, the account that is the owner

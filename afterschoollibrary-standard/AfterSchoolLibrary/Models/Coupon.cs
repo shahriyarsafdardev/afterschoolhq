@@ -18,7 +18,6 @@ namespace AfterSchoolLibrary.Models
     {
 		#region "ClassGenerator"
 
-		public string Description { get { return (string)MDV["Description"].Value; } set { MDV["Description"].Value = value; } }
 		/// <summary>
 		/// Required.
 		/// Store the amount a percentage or flat amount. If percentage it should be stored as a decimal meaning 100% should be stored as 1.00
@@ -68,7 +67,6 @@ namespace AfterSchoolLibrary.Models
                 BasicLibrary.DataAccess.DatabaseParameters _dp = new BasicLibrary.DataAccess.DatabaseParameters();
                 string className = typeof(Coupon).Name;
                 _dp = BasicLookUpObject.get_BaseObjectMap(className);
-				_dp.Add(className, "Description", System.Data.SqlDbType.NVarChar , "400");
 				_dp.Add(className, "Amount", System.Data.SqlDbType.Money);
 				_dp.Add(className, "AmountTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
@@ -160,10 +158,6 @@ namespace AfterSchoolLibrary.Models
         {
             SystemMessages msgs = new SystemMessages();
             BasicLibrary.DataAccess.DatabaseParameters dps;
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["Description"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["Amount"]);
