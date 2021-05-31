@@ -7,7 +7,6 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
-using System.Data.SqlClient;
 
 namespace AfterSchoolLibrary.Models
 {
@@ -1087,11 +1086,11 @@ namespace AfterSchoolLibrary.Models
             string services, string timing, string pricing, string cost, string starting, string other, string specialNeeds, decimal distance, int PageNum, int PageSize,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            using (SqlConnection connection = new SqlConnection(Utilities.ConnectionString))
+            using (var connection = new System.Data.SqlClient.SqlConnection(Utilities.ConnectionString))
             {
                 var sql = Helpers.SearchQuery.LoadAccountSearchQuery(cost, starting, distance, PageNum, PageSize, hostAccountId > 0);            
 
-                SqlCommand command = new SqlCommand(sql, connection);
+                var command = new System.Data.SqlClient.SqlCommand(sql, connection);
                 command.Parameters.AddWithValue("@AccountId", hostAccountId <= 0 ? Convert.DBNull : hostAccountId);
                 command.Parameters.AddWithValue("@SearchTerm", search.IsNotBlank() ? $"\"*{search}*\"" : $"\"\"");
                 command.Parameters.AddWithValue("@Neighborhood", neighborhoods.IsNotEmpty() ? neighborhoods : Convert.DBNull);
@@ -1112,7 +1111,7 @@ namespace AfterSchoolLibrary.Models
                 try
                 {
                     connection.Open();
-                    using (SqlDataReader dr = command.ExecuteReader())
+                    using (var dr = command.ExecuteReader())
                     {
                         var tb = new DataTable();
                         tb.Load(dr);

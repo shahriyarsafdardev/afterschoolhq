@@ -41,6 +41,7 @@ namespace AfterSchoolLibrary.Models
 		public int? RegistrantAccountId { get { return (int?)MDV["RegistrantAccountId"].Value; } }
 		public int? AttendanceActivityId { get { return (int?)MDV["AttendanceActivityId"].Value; } }
 		public bool AttendanceIsCompleted { get { return (bool)MDV["AttendanceIsCompleted"].Value; } }
+		public DateTime? AttendanceDate { get { return (DateTime?)MDV["AttendanceDate"].Value; } }
 		
 
         public AttendanceRegistrant()
@@ -76,6 +77,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "RegistrantAccountId", typeof(Registrant).Name, "AccountId", System.Data.SqlDbType.Int, "Registrant");
 				_dp.Add(className, "AttendanceActivityId", typeof(Attendance).Name, "ActivityId", System.Data.SqlDbType.Int, "Attendance");
 				_dp.Add(className, "AttendanceIsCompleted", typeof(Attendance).Name, "IsCompleted", System.Data.SqlDbType.Bit, "Attendance");
+				_dp.Add(className, "AttendanceDate", typeof(Attendance).Name, "Date", System.Data.SqlDbType.DateTime, "Attendance");
 				
                 return _dp;
             }
@@ -366,6 +368,17 @@ namespace AfterSchoolLibrary.Models
                 return results.Rows[0][0].ToString().ToInteger();
 
             return 0;
+        }
+
+        public static List<AttendanceRegistrant> LoadByAttendanceIdByRegistrantIdByDateRange(int AttendanceId, int RegistrantId, DateRange dateRange, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["AttendanceId"], AttendanceId);
+            dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
+            dq.Criterias.Add(ObjectMap["AttendanceDate"], dateRange.StartDate, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+            dq.Criterias.Add(ObjectMap["AttendanceDate"], dateRange.EndDate, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
 
