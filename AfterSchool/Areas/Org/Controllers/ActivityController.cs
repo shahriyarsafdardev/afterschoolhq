@@ -1591,26 +1591,29 @@ namespace AfterSchool.Areas.Org.Controllers
                 //.. special case: post pay plan with # of Pre-pay
                 var activity = registrantActivity.GetActivity(msgs);
                 var postPayPlan = activity.GetPostPayPlan(msgs);
-                var count = 0;
-                if (postPayPlan.NumberOfPeriodsPrePaid > 0)
-                    count = 1;
+                var count = postPayPlan.NumberOfPeriodsPrePaid.IfEmpty(0);
 
                 var billingPeriodsAttended = new List<DateTime>();
                 var attendancesToBill = attendances.FindAll(attendance =>
                 {
-                    var attendanceRegistrant = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(attendance.ID.Value, registrantActivity.RegistrantId.Value, msgs).FirstOrDefault();
+                    var attendanceRegistrant = attendance.GetAttendanceRegistrant(registrantActivity.RegistrantId.Value, msgs); 
                     var activityInstanceStartTime = attendance.GetActivityInstance(msgs).StartDateTime.Value;
-                    var attendanceRegistrantsAlreadyBilledInSameBillingPeriod = attendanceRegistrant.LoadAttendanceRegistrantsInSameBillingPeriod(billingPeriodType, msgs).Where(ar => ar.IsAlreadyBilled).ToList();
+                    var alreadyBilledInSameBillingPeriod = attendanceRegistrant.GetAttendanceRegistrantsInSameBillingPeriod(billingPeriodType, msgs)
+                                                                                    .Where(ar => ar.IsAlreadyBilled)
+                                                                                    .ToList();
 
-                    var attendancesAlreadyInExistingBillingPeriod = billingPeriodsAttended.Select(billingPeriod =>
-                         billingPeriodType == BillingPeriodType.Day ?
-                         billingPeriod == activityInstanceStartTime
-                         : billingPeriod.DatesAreInSameWeek(activityInstanceStartTime)).ToList();
+                    var alreadyInExistingBillingPeriod = billingPeriodsAttended
+                                                            .Select(billingPeriod =>
+                                                                     billingPeriodType == BillingPeriodType.Day ?
+                                                                     billingPeriod == activityInstanceStartTime
+                                                                     : billingPeriod.DatesAreInSameWeek(activityInstanceStartTime))
+                                                            .ToList();
 
-                    var isAttendanceRegistrantAlreadyAccountedFor = attendancesAlreadyInExistingBillingPeriod.Count > 0 || attendanceRegistrantsAlreadyBilledInSameBillingPeriod.Count > 0;
+                    var isAttendanceRegistrantAlreadyAccountedFor = alreadyInExistingBillingPeriod.Count > 0 || alreadyBilledInSameBillingPeriod.Count > 0;
                     var attendanceRegistrantIsPresentAndNotBilled = attendanceRegistrant.IsNotEmpty() && attendanceRegistrant.NumberPresent > 0 && !attendanceRegistrant.IsAlreadyBilled;
-                    var isPrepaymentNumberGreaterThenRegistrantPayemnts = attendancesAlreadyInExistingBillingPeriod.Count > count;
+                    var isPrepaymentNumberGreaterThenRegistrantPayments = alreadyInExistingBillingPeriod.Count > count;
 
+                    if (postPayPlan.BillingPeriodTypeId == BillingPeriodType.Day)
                     //if (!isAttendanceRegistrantAlreadyAccountedFor && attendanceRegistrantIsPresentAndNotBilled && isPrepaymentNumberGreaterThenRegistrantPayemnts)
                     if (!isAttendanceRegistrantAlreadyAccountedFor && attendanceRegistrantIsPresentAndNotBilled)
                     {
@@ -1820,7 +1823,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                     && !attendanceRegistrant.IsAlreadyBilled)
                                 {
                                     attendanceRegistrant.TransactionId = checkoutObject.Transaction.ID.Value;
-                                    attendanceRegistrant.LoadAttendanceRegistrantsInSameBillingPeriod(activity.GetPostPayPlan(msgs).BillingPeriodTypeId, msgs).ForEach(ar =>
+                                    attendanceRegistrant.GetAttendanceRegistrantsInSameBillingPeriod(activity.GetPostPayPlan(msgs).BillingPeriodTypeId, msgs).ForEach(ar =>
                                    {
                                        ar.TransactionId = checkoutObject.Transaction.ID.Value;
                                        msgs.AddRange(ar.Save());

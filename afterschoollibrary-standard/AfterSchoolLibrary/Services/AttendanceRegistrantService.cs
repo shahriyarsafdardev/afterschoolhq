@@ -105,13 +105,18 @@ namespace AfterSchoolLibrary.Services
             return prepayments;
         }
 
-        public static List<AttendanceRegistrant> LoadAttendanceRegistrantsInSameBillingPeriod(this AttendanceRegistrant attendanceRegistrant, BillingPeriodType billingPeriodType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<AttendanceRegistrant> GetAttendanceRegistrantsInSameBillingPeriod(this AttendanceRegistrant attendanceRegistrant, BillingPeriodType billingPeriodType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             switch (billingPeriodType)
             {
                 case BillingPeriodType.Week:
-                   var thisAttendance = Attendance.Load(attendanceRegistrant.AttendanceId.Value, msgs);
-                   var attendancesInSameWeek = Attendance.LoadByActivityId(attendanceRegistrant.AttendanceActivityId.Value, msgs).Where( a => thisAttendance.Date.Value.DatesAreInSameWeek(a.Date.Value)).ToList();
+                    var thisAttendance = attendanceRegistrant.GetAttendance(msgs, dc);
+                    var attendancesInSameWeek = Attendance.LoadByActivityIdByDateRange(attendanceRegistrant.AttendanceActivityId.Value,
+                                                                                        thisAttendance.Date.Value.FirstDateOfWeek().Date,
+                                                                                        thisAttendance.Date.Value.LastDateOfWeek().Date,
+                                                                                        msgs,
+                                                                                        dc);
+
                    var billAttendanceRegistrants = new List<AttendanceRegistrant>();
                    attendancesInSameWeek.ForEach(attendanceInSameWeek =>
                    {
@@ -123,7 +128,7 @@ namespace AfterSchoolLibrary.Services
                     return billAttendanceRegistrants;
 
                 default:
-                    return new List<AttendanceRegistrant>() { attendanceRegistrant };
+                    return attendanceRegistrant.AsList();
             }
         }
     }
