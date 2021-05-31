@@ -71,11 +71,11 @@ namespace AfterSchoolUIAutomationTests.Features
         }
         
         [TechTalk.SpecRun.ScenarioAttribute("Try To Login", new string[] {
-                "mytag"}, SourceLine=4)]
+                "Login"}, SourceLine=4)]
         public virtual void TryToLogin()
         {
             string[] tagsOfScenario = new string[] {
-                    "mytag"};
+                    "Login"};
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Try To Login", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
 #line 5
@@ -99,7 +99,7 @@ this.ScenarioInitialize(scenarioInfo);
             {
                 this.ScenarioStart();
 #line 6
- testRunner.Given("Open the browser and navigate to the Invoice App", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+ testRunner.Given("Open the browser and navigate to the Login Page", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
 #line 7
  testRunner.Given("Manage the browser window size", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");

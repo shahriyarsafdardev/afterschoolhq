@@ -83,7 +83,7 @@ namespace AfterSchoolAutomationTests.UITests
             _driver.WaitInSeconds(3);
             _helper.SelectTimeZone();
             _driver.WaitInSeconds(2);
-            _helper.SaveAndContinueSubmit();
+            _helper.SaveAndContinueSubmit();//>>><<<<
 
             //--Step 8 
             _driver.WaitInSeconds(5);

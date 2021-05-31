@@ -6,33 +6,25 @@ namespace AfterSchoolUIAutomationTests.Pages
 {
     public class LoginPage
     {
-        public LoginPage()
-        {
-        }
 
-        //The URL of the calculator to be opened in the browser
-        private const string LoginUrl = "https://qa.afterschoolhq.com/login";
+        private readonly IWebDriver webDriver;
 
-        //The Selenium web driver to automate the browser
-        private readonly IWebDriver _webDriver;
-
-        //The default wait time in seconds for wait.Until
         public const int DefaultWaitInSeconds = 5;
 
         public LoginPage(IWebDriver webDriver)
         {
-            _webDriver = webDriver;
+            webDriver = webDriver;
         }
 
         //------------Finding Login WebElements-----------
-        private IWebElement UserNameElement => _webDriver.FindElement(By.Id("username"));
-        private IWebElement UserPasswordElement => _webDriver.FindElement(By.Id("password"));
-        private IWebElement SubmitElement => _webDriver.FindElement(By.ClassName("btn-primary"));
+        private IWebElement UserNameElement => webDriver.FindElement(By.Id("username"));
+        private IWebElement UserPasswordElement => webDriver.FindElement(By.Id("password"));
+        private IWebElement SubmitElement => webDriver.FindElement(By.ClassName("btn-primary"));
 
         //------------Login Helper Methods-----------
         public void Navigate(string url)
         {
-            _webDriver.Navigate().GoToUrl(url);
+            webDriver.Navigate().GoToUrl(url);
         }
 
         public LoginPage PopulateName(string name)

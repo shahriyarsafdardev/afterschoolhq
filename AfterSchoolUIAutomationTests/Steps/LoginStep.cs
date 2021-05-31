@@ -6,60 +6,69 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TechTalk.SpecFlow;
+using AfterSchoolUIAutomationTests.Helpers.Extensions;
 
 namespace AfterSchoolUIAutomationTests.Steps
 {
     [Binding]
     public sealed class LoginStep
     {
-        // For additional details on SpecFlow step definitions see https://go.specflow.org/doc-stepdef
 
         private readonly ScenarioContext _scenarioContext;
-        private readonly LoginPage _loginPage = new LoginPage();
-        private readonly IWebDriver _driver = new ChromeDriver();
-        private string CurrentURL;
+        private readonly IWebDriver webDriver;
+        private readonly LoginPage loginPage;
+        private string CurrentURL = "http://localhost:54849/login/select";
 
         public LoginStep(ScenarioContext scenarioContext)
         {
             _scenarioContext = scenarioContext;
+            webDriver = new ChromeDriver(AppDomain.CurrentDomain.BaseDirectory);
+            loginPage = new LoginPage(webDriver);
         }
 
-        [Given(@"Open the browser and navigate to the Invoice App")]
+        [Given(@"Open the browser and navigate to the Login Page")]
         public void GivenNavigateToPage()
         {
-            _driver.Navigate().GoToUrl("http://localhost:54849/");
+            webDriver.Navigate().GoToUrl("http://localhost:54849/login");
+            webDriver.WaitInSeconds(3);
         }
 
         [Given(@"Manage the browser window size")]
         public void ManageWindowSize()
         {
-            _driver.Manage().Window.Maximize();
+            webDriver.Manage().Window.Maximize();
+            webDriver.WaitInSeconds(2);
         }
 
         [Given(@"Enter username")]
         public void EnterUserName()
         {
-            _loginPage.PopulateName("parent3_hq@yopmail.com");
+            loginPage.PopulateName("parent3_hq@yopmail.com");
+            webDriver.WaitInSeconds(2);
         }
 
         [Given(@"Enter Password")]
         public void EnterPassword()
         {
-            _loginPage.PopulatePassword("123456789");
+            loginPage.PopulatePassword("123456789");
+            webDriver.WaitInSeconds(2);
         }
 
 
         [When(@"Click on login")]
         public void GivenEnterUserNameAndPassword()
         {
-            _loginPage.ClickSubmit();
+            loginPage.ClickSubmit();
+            webDriver.WaitInSeconds(5);
         }
 
         [Then(@"Verify Navigated URL")]
         public void VerifyNavigatedURL()
         {
-            String currentURL = _driver.Url;
+            String currentURL = webDriver.Url;
             CurrentURL.Equals(currentURL);
+            webDriver.Quit();
+            webDriver.Dispose();
         }
         
     }

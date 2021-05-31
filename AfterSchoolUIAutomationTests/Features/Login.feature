@@ -1,9 +1,9 @@
 ﻿Feature: Login
 	Verify login functionality
 
-@mytag
+@Login
 Scenario: Try To Login
-	Given  Open the browser and navigate to the Invoice App
+	Given  Open the browser and navigate to the Login Page
 	Given  Manage the browser window size
 	Given  Enter username
 	Given  Enter Password
