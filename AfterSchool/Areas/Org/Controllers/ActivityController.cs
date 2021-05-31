@@ -1617,19 +1617,23 @@ namespace AfterSchool.Areas.Org.Controllers
                         attendances.ForEach(attendance =>
                         {
                             var currentWeekPresent = AttendanceRegistrant
-                                                        .LoadByAttendanceIdByRegistrantIdByDateRange(
-                                                            attendance.ID.Value,
+                                                        .LoadByActivityIdRegistrantIdByDateRange(
+                                                            attendance.ActivityId.Value,
                                                             registrantActivity.RegistrantId.Value,
-                                                            new DateRange(attendance.Date.Value.FirstDateOfWeek().Date, attendance.Date.Value.LastDateOfWeek().Date.AddDays(1).AddMilliseconds(-1)),
+                                                            new DateRange(
+                                                                attendance.Date.Value.FirstDateOfWeek().Date, 
+                                                                attendance.Date.Value.LastDateOfWeek().Date.AddDays(1).AddMilliseconds(-1)
+                                                            ),
                                                             msgs)
                                                         .Where(item => item.NumberPresent > 0)
+                                                        .OrderBy(item => item.AttendanceDate.Value)
                                                         .ToList();
 
                             if (currentWeekPresent.Any() && !currentWeekPresent.Any(item => item.IsAlreadyBilled))
                             {
                                 var firstAttendanceOfWeek = currentWeekPresent.First().GetAttendance(msgs);
 
-                                if (firstAttendanceOfWeek.IsNotEmpty() && attendancesToCharge.Find(item => item.ID != firstAttendanceOfWeek.ID).IsEmpty())
+                                if (firstAttendanceOfWeek.IsNotEmpty() && !attendancesToCharge.Any(item => item.ID == firstAttendanceOfWeek.ID))
                                     attendancesToCharge.Add(firstAttendanceOfWeek);
                             }
 
@@ -1843,11 +1847,14 @@ namespace AfterSchool.Areas.Org.Controllers
                                     && !attendanceRegistrant.IsAlreadyBilled)
                                 {
                                     attendanceRegistrant.TransactionId = checkoutObject.Transaction.ID.Value;
-                                    attendanceRegistrant.GetAttendanceRegistrantsInSameBillingPeriod(activity.GetPostPayPlan(msgs).BillingPeriodTypeId, msgs).ForEach(ar =>
-                                   {
-                                       ar.TransactionId = checkoutObject.Transaction.ID.Value;
-                                       msgs.AddRange(ar.Save());
-                                   });
+
+                                    attendanceRegistrant
+                                        .GetAttendanceRegistrantsInSameBillingPeriod(postPayPlan.BillingPeriodTypeId, msgs)
+                                        .ForEach(ar => {
+                                           ar.TransactionId = checkoutObject.Transaction.ID.Value;
+                                           msgs.AddRange(ar.Save());
+                                        });
+
                                     msgs.AddRange(attendanceRegistrant.Save());
                                 }
                             });

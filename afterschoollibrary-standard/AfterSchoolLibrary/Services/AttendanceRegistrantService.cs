@@ -111,19 +111,16 @@ namespace AfterSchoolLibrary.Services
             {
                 case BillingPeriodType.Week:
                     var thisAttendance = attendanceRegistrant.GetAttendance(msgs, dc);
-                    var attendancesInSameWeek = Attendance.LoadByActivityIdByDateRange(attendanceRegistrant.AttendanceActivityId.Value,
-                                                                                        thisAttendance.Date.Value.FirstDateOfWeek().Date,
-                                                                                        thisAttendance.Date.Value.LastDateOfWeek().Date,
-                                                                                        msgs,
-                                                                                        dc);
-
-                   var billAttendanceRegistrants = new List<AttendanceRegistrant>();
-                   attendancesInSameWeek.ForEach(attendanceInSameWeek =>
-                   {
-                       var attenRegInSameWeek = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(attendanceInSameWeek.ID.Value, attendanceRegistrant.RegistrantId.Value, msgs).FirstOrDefault();
-                       if (attenRegInSameWeek.IsNotEmpty())
-                           billAttendanceRegistrants.Add(attenRegInSameWeek);
-                   });
+                    var billAttendanceRegistrants = AttendanceRegistrant.LoadByActivityIdRegistrantIdByDateRange(
+                                                                thisAttendance.ActivityId.Value,
+                                                                attendanceRegistrant.RegistrantId.Value,
+                                                                new DateRange(
+                                                                    thisAttendance.Date.Value.FirstDateOfWeek().Date,
+                                                                    thisAttendance.Date.Value.LastDateOfWeek().Date.AddDays(1).AddMilliseconds(-1)
+                                                                ),
+                                                                msgs)
+                                                            .Where(item => item.NumberPresent > 0)
+                                                            .ToList();
 
                     return billAttendanceRegistrants;
 
