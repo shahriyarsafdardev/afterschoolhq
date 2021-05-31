@@ -373,8 +373,8 @@ namespace AfterSchoolLibrary.Services
             var activityPayments = ActivityPayment.LoadByParticipationObjectByRegistrant(ParticipationObjectId: activity.ID.Value, 
                 ParticipationObjectTypeId: ParticipationObjectType.Activity, 
                 RegistrantId: registrant.ID.Value, 
-                IsDeleted: false, 
-                msgs);
+                IsDeleted: false,
+                msgs: msgs);
 
             //.. special case: post pay plan with # of Pre-pay
             var count = 0;
