@@ -96,6 +96,14 @@ namespace AfterSchoolLibrary.Services
 
         #region ActivityMessages
 
+        public static ActivityMessage GetActivityMessage(this Account account, Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (Uid.IsNotNullOrEmpty() && account.IsNotEmpty())
+                return ActivityMessage.LoadByUidByAccountId(Uid, account.ID.Value, msgs, dc);
+
+            return null;
+        }
+
         public static List<ActivityMessage> GetActivityMessages(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return ActivityMessage.LoadByAccountId(account.ID.Value, msgs, dc);

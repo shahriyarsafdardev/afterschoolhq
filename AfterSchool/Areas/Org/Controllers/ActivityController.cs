@@ -1563,7 +1563,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var presentStudents = new List<int>();
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
-            var attendance = Attendance.Load(att.ToInteger(), msgs);
+            var attendance = AfterSchoolLibrary.Models.Attendance.Load(att.ToInteger(), msgs);
 
             attendance.GetAttendanceRegistrants(msgs).ForEach(attendanceRegistrant => {
                 if (Request.Params[$"present-{attendanceRegistrant.ID.ToString()}"].IsNumber())
@@ -1648,7 +1648,7 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 // get selected attendances
                 var attendanceIdsList = attendanceIds.Split(',').Select(p => p.ToInteger()).ToList();
-                var attendances = Attendance.LoadByActivityId(activity.ID.Value, msgs);
+                var attendances = AfterSchoolLibrary.Models.Attendance.LoadByActivityId(activity.ID.Value, msgs);
                 var selectedAttendances = attendances.Where(a => attendanceIdsList.Contains(a.ID.Value)).ToList();
 
                 // sum up total cost of all attendances per registrant to display
@@ -1685,7 +1685,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var msg = defaultMsg;            
 
             if (activityId.IsNotEmpty() && activityId.IsGuid())
-                activity = Activity.LoadByUidByAccountId(activityId.ToGuid(), currentAccount.ID.Value, msgs);
+                activity = currentAccount.GetActivity(activityId.ToGuid(), msgs);
 
             if (attendanceIds.IsNotEmpty() || attendanceIds.IsNotBlank())
             {
@@ -2551,12 +2551,14 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (currentAccount.IsEmpty())
                 return HttpNotFound();
-            
-            var am = ActivityMessage.LoadByUidByAccountId(id.ToGuid(), currentAccount.ID.Value, msgs);
-            var activity = Activity.LoadByIdByAccountId(am.ActivityId.Value, currentAccount.ID.Value, msgs);
+
+            var am = currentAccount.GetActivityMessage(id.ToGuid(), msgs);
+            var activity = currentAccount.GetActivity(am.ActivityId.Value, msgs);
+
             ViewBag.Messages = msgs;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.Registrants = am.GetActivityMessageRegistrants();
+
             return View(am);
         }
 
@@ -2692,7 +2694,7 @@ namespace AfterSchool.Areas.Org.Controllers
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) => {
 
-                    activity = Activity.LoadByUidByAccountId(id.ToGuid(), currentAccount.ID.Value, amsgs, adc);
+                    activity = currentAccount.GetActivity(id.ToGuid(), amsgs, adc);
                     account = activity.GetAccount(amsgs, adc);
                     users = account.GetUsers(msgs: amsgs, dc: adc);
 
@@ -2878,7 +2880,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (!IsRequestFromApp() || activityId.IsEmpty() || currentAccount.IsEmpty())
                 return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
             
-            var activity = Activity.LoadByIdByAccountId(activityId.ToInteger(), currentAccount.ID.Value, msgs);
+            var activity = currentAccount.GetActivity(activityId.ToInteger(), msgs);
             var dates = ActivityService.FinalizeStartAndEndDateForSubscription(activity, 
                 (BillingPeriodType)billingPeriodType.ToInteger(), 
                 dayOfWeek.IsNotEmpty() ? dayOfWeek.ToEnum<DayOfWeek>() : DayOfWeek.Sunday, 
