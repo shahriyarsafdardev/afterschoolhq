@@ -9,6 +9,14 @@ namespace AfterSchoolLibrary
 {
     public static class Extensions
     {
+        /// <summary>
+        /// Determines if Guid is Guid.Empty
+        /// </summary>
+        public static bool IsNotNullOrEmpty(this Guid guid)
+        {
+            return (guid != Guid.Empty);
+        }
+
         public static Lob.Models.AccountType ToLobAccountType(this LegalEntityType legalEntityType)
         {
             if (legalEntityType == LegalEntityType.Company)
