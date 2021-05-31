@@ -2081,7 +2081,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
-            var registrantActivity = RegistrantActivity.LoadByUid(id.ToGuid());
+            var registrantActivity = RegistrantActivityService.GetRegistrantActivity(id.ToGuid(), msgs);
             var activity = registrantActivity.GetActivity();
 
             if (!datepaid.IsDateTime())
@@ -2137,7 +2137,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult AttachCoupon(string id, decimal couponAmount, CouponAmountType discountType, DateTime? expirationDate, CouponApplyType couponApplyType, StripeCouponDuration duration, int durationInMonths)
         {
             var msgs = new SystemMessages();
-            var registrantActivity = RegistrantActivity.LoadByUid(id.ToGuid());
+            var registrantActivity = RegistrantActivityService.GetRegistrantActivity(id.ToGuid(), msgs);
             var activity = registrantActivity.GetActivity();
             
             // check coupon's minimum amount
@@ -2453,15 +2453,11 @@ namespace AfterSchool.Areas.Org.Controllers
 
                                 question.IsActive = false;
                                 if (Request.Params[string.Format("active-{0}", question.ID)].IsBoolean())
-                                {
                                     question.IsActive = true;
-                                }
 
                                 question.IsRequired = false;
                                 if (Request.Params[string.Format("required-{0}", question.ID)].IsBoolean())
-                                {
                                     question.IsRequired = true;
-                                }
 
                                 amsgs.AddRange(question.Save(adc));
                             }
