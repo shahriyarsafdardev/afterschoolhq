@@ -13,6 +13,7 @@ using Hangfire;
 using AfterSchoolLibrary.Billing;
 using AfterSchoolLibrary;
 using AfterSchoolLibrary.Helpers;
+using ServiceStack.Text;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -1088,7 +1089,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult EditCost(string id, string cost, string costdescription, string acceptpaypal, string acceptcreditcard, string allowtopaylater, string cmd, 
             string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string isongoingsubscription, string subscriptionPlanPeriodNumber, string subscriptionPaymentStartType, string subscriptionStartDate, string subscriptionEndDate,
             string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, string paymentplanpaymentstarttype, string splitcostevenly, string regfeedownpayment, 
-            string haspostpayplan, string postpaycost, string isparentpricepostpay, string isparentpricecost, string isparentpricepaymentplan, string isparentpricesubscription, string prepaidperiodspostpay)
+            string haspostpayplan, string postpaycost, string isparentpricepostpay, string isparentpricecost, string isparentpricepaymentplan, string isparentpricesubscription, string prepaidperiodspostpay, string postpayplanperiod)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
@@ -1139,6 +1140,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "isparentpricepaymentplan", isparentpricepaymentplan},
                     { "isparentpricesubscription", isparentpricesubscription },
                     { "prepaidperiodspostpay", prepaidperiodspostpay },
+                    { "postpayplanperiod", postpayplanperiod },
                 };
 
                 activity = ActivityService.EditExisting(
@@ -1580,53 +1582,124 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(attendance);
         }
 
-        // This returns all uncompleted AttendanceRegistrants by Registrant
-        private Dictionary<RegistrantActivity,List<Attendance>> GetRegistrantActivityAttendances(List<RegistrantActivity> registrantActivities, List<Attendance> attendances, SystemMessages msgs)
+        // This returns all unbilled selected Attendances by Registrant
+        private Dictionary<RegistrantActivity, List<Attendance>> GetAttendancesToBillPerRegistrantActivity(List<RegistrantActivity> registrantActivities, List<Attendance> attendances, BillingPeriodType billingPeriodType, SystemMessages msgs)
         {
             Dictionary<RegistrantActivity, List<Attendance>> registrantActivityAttendanceCounts = new Dictionary<RegistrantActivity, List<Attendance>>();
-
+    
             registrantActivities.ForEach(registrantActivity =>
             {
-                var attendancesToCharge = attendances.FindAll(attendance =>
+                //.. special case: post pay plan with # of Pre-pay
+                var activity = registrantActivity.GetActivity(msgs);
+                var postPayPlan = activity.GetPostPayPlan(msgs);
+                var attendancesToCharge = new List<Attendance>();
+
+                switch (postPayPlan.BillingPeriodTypeId)
                 {
-                    var attendanceRegistrant = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(attendance.ID.Value, registrantActivity.RegistrantId.Value, msgs).FirstOrDefault();
-                    if (attendanceRegistrant.IsNotEmpty() && !attendanceRegistrant.IsAlreadyBilled)
-                        return attendanceRegistrant.NumberPresent > 0;        
+                    case BillingPeriodType.Day:
 
-                    return false;
-                }).ToList();
+                        attendancesToCharge = attendances.FindAll(attendance =>
+                        {
+                            var attendanceRegistrant = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(attendance.ID.Value, registrantActivity.RegistrantId.Value, msgs).FirstOrDefault();
+                            if (attendanceRegistrant.IsNotEmpty() && !attendanceRegistrant.IsAlreadyBilled)
+                                return attendanceRegistrant.NumberPresent > 0;
 
-                registrantActivityAttendanceCounts.Add(registrantActivity, attendancesToCharge);
+                            return false;
 
+                        }).ToList();
+
+                        registrantActivityAttendanceCounts.Add(registrantActivity, attendancesToCharge);
+
+                        break;
+
+                    case BillingPeriodType.Week:
+                       
+                        attendances.ForEach(attendance =>
+                        {
+                            var currentWeekPresent = AttendanceRegistrant
+                                                        .LoadByActivityIdRegistrantIdByDateRange(
+                                                            attendance.ActivityId.Value,
+                                                            registrantActivity.RegistrantId.Value,
+                                                            new DateRange(
+                                                                attendance.Date.Value.FirstDateOfWeek().Date, 
+                                                                attendance.Date.Value.LastDateOfWeek().Date.AddDays(1).AddMilliseconds(-1)
+                                                            ),
+                                                            msgs)
+                                                        .Where(item => item.NumberPresent > 0)
+                                                        .OrderBy(item => item.AttendanceDate.Value)
+                                                        .ToList();
+
+                            if (currentWeekPresent.Any() && !currentWeekPresent.Any(item => item.IsAlreadyBilled))
+                            {
+                                var firstAttendanceOfWeek = currentWeekPresent.First().GetAttendance(msgs);
+
+                                if (firstAttendanceOfWeek.IsNotEmpty() && !attendancesToCharge.Any(item => item.ID == firstAttendanceOfWeek.ID))
+                                    attendancesToCharge.Add(firstAttendanceOfWeek);
+                            }
+
+                        });
+
+                        registrantActivityAttendanceCounts.Add(registrantActivity, attendancesToCharge);
+
+                        break;
+                }                
+
+                
             });
 
             return registrantActivityAttendanceCounts;
         }
 
-        // This returns all completed AttendanceRegistrants by Attendance
-        private Dictionary<Attendance, int> GetAttendanceRegistrantActivityCounts(List<Attendance> attendances, List<RegistrantActivity> registrantActivities,  SystemMessages msgs)
+        // This returns billed Attendances and the count of Registrants Billed for billing period
+        private Dictionary<Attendance, List<int>> GetNumberOfRegistrantsBilledPerAttendance(List<Attendance> attendances, BillingPeriodType billingPeriodType, SystemMessages msgs = null)
         {
-            Dictionary<Attendance, int> attendanceRegistrantActivityCounts = new Dictionary<Attendance, int>();
+            var numberOfRegistrantsBilledPerAttendance = new Dictionary<Attendance, List<int>>();
 
             attendances.ForEach(attendance =>
             {
-                var numberOfRegistrants = registrantActivities.FindAll(registrantActivity =>
+                var registrantIdsBilled = AttendanceRegistrant.LoadByAttendanceId(attendance.ID.Value, msgs).Where(ar => ar.IsAlreadyBilled).Select(rb => rb.RegistrantId.Value).Distinct().ToList();
+
+                switch (billingPeriodType)
                 {
-                    var attendanceRegistrant = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(attendance.ID.Value, registrantActivity.RegistrantId.Value, msgs).First();
-                    if (attendanceRegistrant.IsNotEmpty() && attendanceRegistrant.TransactionId.HasValue)
-                        return attendanceRegistrant.NumberPresent > 0;
+                    case BillingPeriodType.Day:
+                        if (numberOfRegistrantsBilledPerAttendance.ContainsKey(attendance))
+                        {
+                            registrantIdsBilled.ForEach(rbId =>
+                            {
+                                if (!numberOfRegistrantsBilledPerAttendance[attendance].Contains(rbId))
+                                    numberOfRegistrantsBilledPerAttendance[attendance].Add(rbId);
+                            });
+                        }
+                        else
+                            numberOfRegistrantsBilledPerAttendance.Add(attendance, registrantIdsBilled);
+                        
+                        break;
 
-                    return false;
-                }).Count;
+                    case BillingPeriodType.Week:
+                        var attendanceIsInSameWeekAsExisitingAttendanceInList = numberOfRegistrantsBilledPerAttendance.FirstOrDefault(keyPair => keyPair.Key.Date.Value.DatesAreInSameWeek(attendance.Date.Value)).Key;
+                        if (attendanceIsInSameWeekAsExisitingAttendanceInList.IsNotEmpty())
+                        {
+                            registrantIdsBilled.ForEach(rbId =>
+                            {
+                                if (!numberOfRegistrantsBilledPerAttendance[attendanceIsInSameWeekAsExisitingAttendanceInList].Contains(rbId))
+                                    numberOfRegistrantsBilledPerAttendance[attendanceIsInSameWeekAsExisitingAttendanceInList].Add(rbId);
+                            });
+                        }
+                        else
+                            numberOfRegistrantsBilledPerAttendance.Add(attendance, registrantIdsBilled);
 
-                attendanceRegistrantActivityCounts.Add(attendance, numberOfRegistrants);
+                        break;
+
+                    default:
+                        break;
+                }
 
             });
 
-            return attendanceRegistrantActivityCounts;
+            return numberOfRegistrantsBilledPerAttendance;
         }
 
-        [HttpPost]
+            [HttpPost]
         public ActionResult ChargeAttendanceFee()
         {
             var currentAccount = SessionVariables.CurrentAccount;
@@ -1644,7 +1717,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (activityId.IsNotEmpty() && activityId.IsGuid())
                 activity = Activity.LoadByUidByAccountId(activityId.ToGuid(), currentAccount.ID.Value, msgs);
 
-            if (attendanceIds.IsNotEmpty() || attendanceIds.IsNotBlank())
+            if (activity.IsNotEmpty() && (attendanceIds.IsNotEmpty() || attendanceIds.IsNotBlank()))
             {
                 // get selected attendances
                 var attendanceIdsList = attendanceIds.Split(',').Select(p => p.ToInteger()).ToList();
@@ -1653,11 +1726,11 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 // sum up total cost of all attendances per registrant to display
                 var registrantActivities = RegistrantActivity.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs);
-
-                var registrantActivityAttendances = GetRegistrantActivityAttendances(registrantActivities, selectedAttendances, msgs);                
+                var billingPeriodType = activity.GetPostPayPlan(msgs).BillingPeriodTypeId;
 
                 ViewBag.AttdanceIds = attendanceIds;
-                ViewBag.RegistrantActivityAttendanceCounts = registrantActivityAttendances;
+                ViewBag.BillingPeriodType = billingPeriodType;
+                ViewBag.AttendancesToBillRegistrants = GetAttendancesToBillPerRegistrantActivity(registrantActivities, selectedAttendances, billingPeriodType, msgs);
                 ViewBag.Messages = msgs;
 
                 return View(activity);
@@ -1687,7 +1760,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (activityId.IsNotEmpty() && activityId.IsGuid())
                 activity = Activity.LoadByUidByAccountId(activityId.ToGuid(), currentAccount.ID.Value, msgs);
 
-            if (attendanceIds.IsNotEmpty() || attendanceIds.IsNotBlank())
+            if (activity.IsNotEmpty() && (attendanceIds.IsNotEmpty() || attendanceIds.IsNotBlank()))
             {
                 // get selected attendances
                 var attendanceIdsList = attendanceIds.Split(',').Select(p => p.ToInteger()).ToList();
@@ -1696,13 +1769,17 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 // sum up total cost of all attendances per registrant to display
                 var registrantActivities = RegistrantActivity.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs);
-
-                var registrantActivityAttendances = GetRegistrantActivityAttendances(registrantActivities, selectedAttendances, msgs);
+                var postPayPlan = activity.GetPostPayPlan(msgs);
+                var billingPeriodType = postPayPlan?.BillingPeriodTypeId;
+                var registrantActivityAttendances = GetAttendancesToBillPerRegistrantActivity(
+                                                        registrantActivities, 
+                                                        selectedAttendances, 
+                                                        billingPeriodType.HasValue ? billingPeriodType.Value : BillingPeriodType.NotSet, 
+                                                        msgs);                
 
                 foreach (var registrantActivityAttendance in registrantActivityAttendances)
                 {
                     // one person multiple attendance dates
-
                     var registrantActivity = registrantActivityAttendance.Key;
                     var registration = registrantActivity.GetRegistration(msgs);
                     var costPerAttendance = registration.CostPerClass.IsNotEmpty() ? registration.CostPerClass.Value : 0;
@@ -1730,7 +1807,6 @@ namespace AfterSchool.Areas.Org.Controllers
                             else
                                 creditCardPurchaseObject = new CreditCardPurchaseObject { StripeSourceId = registration.StripeSourceId };
 
-                            var postPayPlan = activity.GetPostPayPlan(msgs);
                             var overrideAmount = costPerAttendance * attendanceDaysToCharge;
 
                             if (postPayPlan.IsNotEmpty())
@@ -1780,17 +1856,22 @@ namespace AfterSchool.Areas.Org.Controllers
                                                                 msgs)
                                                             .FirstOrDefault();
 
-                                if (attendanceRegistrant.IsNotEmpty())
+                                // add next available pre payment if available, if not then continue to set the checkoutobject transaction id
+                                if (attendanceRegistrant.IsNotEmpty() 
+                                    && !attendanceRegistrant.AddNextAvailablePrePayment(currentUser, msgs) 
+                                    && (checkoutObject?.Transaction).IsNotEmpty() 
+                                    && !attendanceRegistrant.IsAlreadyBilled)
                                 {
-                                    // add next available pre payment if available, if not then continue to set the checkoutobject transaction id
-                                    if (!attendanceRegistrant.AddNextAvailablePrePayment(currentUser, msgs))
-                                    {
-                                        if ((checkoutObject?.Transaction).IsNotEmpty() && !attendanceRegistrant.IsAlreadyBilled)
-                                        {
-                                            attendanceRegistrant.TransactionId = checkoutObject.Transaction.ID.Value;
-                                            msgs.AddRange(attendanceRegistrant.Save());
-                                        }
-                                    }
+                                    attendanceRegistrant.TransactionId = checkoutObject.Transaction.ID.Value;
+
+                                    attendanceRegistrant
+                                        .GetAttendanceRegistrantsInSameBillingPeriod(postPayPlan.BillingPeriodTypeId, msgs)
+                                        .ForEach(ar => {
+                                           ar.TransactionId = checkoutObject.Transaction.ID.Value;
+                                           msgs.AddRange(ar.Save());
+                                        });
+
+                                    msgs.AddRange(attendanceRegistrant.Save());
                                 }
                             });
 
@@ -1814,13 +1895,16 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
 
                 // Send summary email of charged AttendanceRegistrants to Activity Provider if there were any successful charges
-                var attendanceRegistrantAcitivtyCounts = GetAttendanceRegistrantActivityCounts(selectedAttendances, registrantActivities, msgs);
+                var registrantsBilledPerAttendance = GetNumberOfRegistrantsBilledPerAttendance(
+                        selectedAttendances, 
+                        billingPeriodType.HasValue ? billingPeriodType.Value : BillingPeriodType.NotSet,
+                        msgs);
                 var objRegistration = registrantActivities.First().GetRegistration(msgs);
                 var costPerClass = objRegistration.CostPerClass.HasValue ? objRegistration.CostPerClass.Value : 0;
                 var couponValue = objRegistration.CouponValue.HasValue ? objRegistration.CouponValue.Value : 0;
 
-                if (attendanceRegistrantAcitivtyCounts.Count > 0)
-                    EmailHelper.SendAttendanceChargeConfirmation(attendanceRegistrantAcitivtyCounts, activity, costPerClass, couponValue, null, SessionVariables.CurrentUser, false, msgs);
+                if (registrantsBilledPerAttendance.Count > 0)
+                    EmailHelper.SendAttendanceChargeConfirmation(registrantsBilledPerAttendance, activity, costPerClass, couponValue, null, SessionVariables.CurrentUser, false, msgs);
                     
             }
 

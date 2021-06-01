@@ -357,6 +357,42 @@ namespace AfterSchoolLibrary.Services
                 dc: dc);
         }
 
+        public static bool CheckRegistrantChargeForWeeklyBillingType(this Registrant registrant, Activity activity)
+        {
+            //.. this logic is only for billing type week
+            var msgs = new SystemMessages();
+            var anyTransactionInCurrentWeek = false;
+
+            //attendances.ForEach(attendance => {
+            //    var attendanceRegistrant = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(attendance.ID.Value, registrant.ID.Value, msgs).First();
+
+            //    if (attendanceRegistrant.TransactionId.IsNotEmpty())
+            //        anyTransactionInLastWeek = true;
+            //});
+
+            var activityPayments = ActivityPayment.LoadByParticipationObjectByRegistrant(ParticipationObjectId: activity.ID.Value, 
+                ParticipationObjectTypeId: ParticipationObjectType.Activity, 
+                RegistrantId: registrant.ID.Value, 
+                IsDeleted: false,
+                msgs: msgs);
+
+            //.. special case: post pay plan with # of Pre-pay
+            var count = 0;
+            var postPayPlan = activity.GetPostPayPlan(msgs);
+            if (postPayPlan.NumberOfPeriodsPrePaid > 0)
+                count = 1;
+
+            //.. if registrant has paid for any attendance in last week, don't charge them again.
+            var sunday = DateTime.Now.StartOfWeek(DayOfWeek.Sunday);
+            var saturday = DateTime.Now.EndOfWeek(DayOfWeek.Saturday);
+            var currentWeekPayments = activityPayments.Where(m => m.CreateDate >= sunday && m.CreateDate <= saturday).ToList();
+
+            if (currentWeekPayments.Any() && currentWeekPayments.Count > count)
+                anyTransactionInCurrentWeek = true;
+
+            return anyTransactionInCurrentWeek;
+        }
+
         private static string GetSplitEvenlyCoupon(SubscriptionPlan plan, CheckoutObject checkoutObject, Account billingAccount, SystemMessages msgs, DatabaseConnection dc = null)
         {
             // what's the value of the subscription plan with convenience fees and credit card fees

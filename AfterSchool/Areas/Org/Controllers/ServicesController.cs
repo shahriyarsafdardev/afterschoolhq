@@ -226,20 +226,21 @@ namespace AfterSchool.Areas.Org.Controllers
             if (SessionVariables.CurrentAccount.IsNotEmpty() && id.IsInteger())
             {
                 var schedule = ActivitySchedule.LoadByIdByAccountId(id.ToInteger(), SessionVariables.CurrentAccount.ID.Value, msgs);
-                var activities = schedule.GetActivities();
 
-                WriteOutput(new { status = "ok", activities = activities.Select(x => new { x.ID, x.Name }) }, ResponseType.JSON);
-
+                if (schedule.IsEmpty())
+                    msgs.Add("Invalid data", MessageType.ApiUsageError);
+                else
+                {
+                    var activities = schedule.GetActivities();
+                    WriteOutput(new { status = "ok", activities = activities.Select(x => new { x.ID, x.Name }) }, ResponseType.JSON);
+                }
             }
             else
-            {
                 msgs.Add("Invalid data", MessageType.ApiUsageError);
-            }
 
             if (msgs.HasErrors())
-            {
                 HandleErrors(msgs, ResponseType.JSON);
-            }
+
             Response.End();
 
             return View();
@@ -249,12 +250,14 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult SetScheduleActivities(string id)
         {
             var msgs = new SystemMessages();
+            var currentUser = SessionVariables.CurrentUser;
+            var currentAccount = SessionVariables.CurrentAccount;
             Response.Clear();
 
-            if (SessionVariables.CurrentUser.IsEmpty() || !SessionVariables.CurrentUser.ID.HasValue)
+            if (currentUser.IsEmpty() || !currentUser.ID.HasValue)
                 msgs.Add("User is not logged in.", MessageType.UserError);
 
-            if (SessionVariables.CurrentAccount.IsEmpty() || !SessionVariables.CurrentAccount.ID.HasValue)
+            if (currentAccount.IsEmpty() || !currentAccount.ID.HasValue)
                 msgs.Add("Account is empty.", MessageType.UserError);
 
             if (msgs.HasNoErrors() && id.IsInteger())
@@ -263,26 +266,27 @@ namespace AfterSchool.Areas.Org.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        var schedule = ActivitySchedule.LoadByIdByAccountId(id.ToInteger(), SessionVariables.CurrentAccount.ID.Value, amsgs, adc);
+                        var schedule = ActivitySchedule.LoadByIdByAccountId(id.ToInteger(), currentAccount.ID.Value, amsgs, adc);
                         var currentActivities = schedule.GetActivities(amsgs, adc);
                         var activities = schedule.GetActivityGroup(amsgs, adc).GetActivities(amsgs, adc);
 
                         // remove
                         foreach (var item in currentActivities)
                             if (!Request[$"activity-{item.ID}"].IsNumber())
-                                item.UpdateActivitySchedule(null, SessionVariables.CurrentUser.ID.Value, amsgs, adc);
+                                item.UpdateActivitySchedule(null, currentUser.ID.Value, amsgs, adc);
 
                         // add
                         foreach (var item in activities)
                             if (Request[$"activity-{item.ID}"].IsNumber())
-                                item.UpdateActivitySchedule(schedule.ID, SessionVariables.CurrentUser.ID.Value, amsgs, adc);
+                                item.UpdateActivitySchedule(schedule.ID, currentUser.ID.Value, amsgs, adc);
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
                         msgs.AddRange(smsgs);
                         WriteOutput(new { status = "ok" }, ResponseType.JSON);
                     },
-                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs)
+                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                    onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
                 );
             }
             else

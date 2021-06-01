@@ -859,6 +859,7 @@ namespace AfterSchoolLibrary.Services
             var isparentpricepaymentplan = values.GetValueOrDefault("isparentpricepaymentplan");
             var isparentpricesubscription = values.GetValueOrDefault("isparentpricesubscription");
             var prepaidperiodspostpay = values.GetValueOrDefault("prepaidperiodspostpay");
+            var postpayplanperiod = values.GetValueOrDefault("postpayplanperiod");
 
             var activityType = ActivityType.NotSet;
 
@@ -1235,7 +1236,7 @@ namespace AfterSchoolLibrary.Services
                                 isongoingsubscription.IfEmpty(""),
                                 splitcostevenly.IfEmpty(""),
                                 regfeedownpayment.IfEmpty(""),
-                                isparentpricesubscription.IfEmpty("0"),
+                                isparentpricesubscription.IfEmpty("0"),                                
                                 loggedInUserId,
                                 adc
                             ));
@@ -1262,6 +1263,7 @@ namespace AfterSchoolLibrary.Services
                                 postpaycost.IfEmpty(""),
                                 isparentpricepostpay.IfEmpty("0"),
                                 prepaidperiodspostpay.IfEmpty(""),
+                                postpayplanperiod.IfEmpty(""),
                                 loggedInUserId,
                                 adc
                             ));
@@ -1364,7 +1366,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         private static SystemMessages SetupSubscriptionPlan(this Activity activity, Account account, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string subscriptionPlanPeriodNumber, 
-            string subscriptionPaymentStartType, DateTime? subscriptionStartDate, DateTime? subscriptionEndDate, string isongoingsubscription, string splitcostevenly, string regfeedownpayment, string isparentpricesubscription, 
+            string subscriptionPaymentStartType, DateTime? subscriptionStartDate, DateTime? subscriptionEndDate, string isongoingsubscription, string splitcostevenly, string regfeedownpayment, string isparentpricesubscription,
             int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
@@ -1458,7 +1460,9 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
-        private static SystemMessages SetupPostPayPlan(this Activity activity, Account account, string haspostpayplan, string postpaycost, string isparentpricepostpay, string prepaidperiodspostpay, int loggedInUserId, DatabaseConnection dc = null)
+        private static SystemMessages SetupPostPayPlan(this Activity activity, Account account, 
+            string haspostpayplan, string postpaycost, string isparentpricepostpay, string prepaidperiodspostpay, string postpayplanperiod,
+            int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
             var hasChanges = true;
@@ -1472,7 +1476,8 @@ namespace AfterSchoolLibrary.Services
 
                 hasChanges = plan.CostPerPeriod.Value != postpaycost.ToDecimal() || 
                             isParentPrice != plan.IsConvenienceFeeTakenOutOfCost ||
-                            prepaidPeriods != plan.NumberOfPeriodsPrePaid;
+                            prepaidPeriods != plan.NumberOfPeriodsPrePaid ||
+                            plan.BillingPeriodTypeId != (BillingPeriodType)postpayplanperiod.ToInteger();
 
                 // if has stripe changes or subscription option has been turned off
                 if (hasChanges || !haspostpayplan.ToBoolean())
@@ -1486,7 +1491,7 @@ namespace AfterSchoolLibrary.Services
                     participationObjectType: ParticipationObjectType.Activity,
                     participationObjectId: activity.ID.Value,
                     costPerPeriod: postpaycost.ToDecimal(),
-                    billingPeriodType: BillingPeriodType.Day,
+                    billingPeriodType: (BillingPeriodType)postpayplanperiod.ToInteger(),
                     isConvenienceFeeTakenOutOfCost: isParentPrice,
                     prepaidPeriods: prepaidPeriods,
                     loggedInUserId: loggedInUserId,
@@ -2329,11 +2334,23 @@ namespace AfterSchoolLibrary.Services
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
+            var wasSetToNull = activity.ActivityScheduleId.HasValue && !ScheduleId.HasValue;
+
             activity.ActivityScheduleId = ScheduleId;
             activity.LastModifiedDate = DateTime.UtcNow;
             activity.LastModifiedBy = loggedInUserId;
 
-            msgs.AddRange(activity.Save(dc: dc));
+            msgs.AddRange(activity.Save(dc));
+
+            if (wasSetToNull)
+            {
+                var logs = new SystemMessages();
+                logs.Add(
+                    $"Schedule ID was set to null for: Account ({activity.AccountId}), Activity ({activity.ID}), Logged In User ({loggedInUserId})", 
+                    MessageType.Notice);
+                AfterSchoolLibrary.Helpers.Utilities.SystemLog(logs);
+            }
+
             return msgs;
         }
 
