@@ -84,6 +84,11 @@ namespace AfterSchoolLibrary.Services
             return AttendanceRegistrant.LoadByAttendanceId(attendance.ID.Value, dc: dc);
         }
 
+        public static AttendanceRegistrant GetAttendanceRegistrant(this Attendance attendance, int registrantId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(attendance.ID.Value, registrantId, msgs, dc).LastOrDefault();
+        }
+
         public static int GetAttendanceRegistrantCount(this Attendance attendance, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return AttendanceRegistrant.GetPossibleCount(attendance.ID.Value, dc: dc);

@@ -105,25 +105,27 @@ namespace AfterSchoolLibrary.Services
             return prepayments;
         }
 
-        public static List<AttendanceRegistrant> LoadAttendanceRegistrantsInSameBillingPeriod(this AttendanceRegistrant attendanceRegistrant, BillingPeriodType billingPeriodType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<AttendanceRegistrant> GetAttendanceRegistrantsInSameBillingPeriod(this AttendanceRegistrant attendanceRegistrant, BillingPeriodType billingPeriodType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             switch (billingPeriodType)
             {
                 case BillingPeriodType.Week:
-                   var thisAttendance = Attendance.Load(attendanceRegistrant.AttendanceId.Value, msgs);
-                   var attendancesInSameWeek = Attendance.LoadByActivityId(attendanceRegistrant.AttendanceActivityId.Value, msgs).Where( a => thisAttendance.Date.Value.DatesAreInSameWeek(a.Date.Value)).ToList();
-                   var billAttendanceRegistrants = new List<AttendanceRegistrant>();
-                   attendancesInSameWeek.ForEach(attendanceInSameWeek =>
-                   {
-                       var attenRegInSameWeek = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(attendanceInSameWeek.ID.Value, attendanceRegistrant.RegistrantId.Value, msgs).FirstOrDefault();
-                       if (attenRegInSameWeek.IsNotEmpty())
-                           billAttendanceRegistrants.Add(attenRegInSameWeek);
-                   });
+                    var thisAttendance = attendanceRegistrant.GetAttendance(msgs, dc);
+                    var billAttendanceRegistrants = AttendanceRegistrant.LoadByActivityIdRegistrantIdByDateRange(
+                                                                thisAttendance.ActivityId.Value,
+                                                                attendanceRegistrant.RegistrantId.Value,
+                                                                new DateRange(
+                                                                    thisAttendance.Date.Value.FirstDateOfWeek().Date,
+                                                                    thisAttendance.Date.Value.LastDateOfWeek().Date.AddDays(1).AddMilliseconds(-1)
+                                                                ),
+                                                                msgs)
+                                                            .Where(item => item.NumberPresent > 0)
+                                                            .ToList();
 
                     return billAttendanceRegistrants;
 
                 default:
-                    return new List<AttendanceRegistrant>() { attendanceRegistrant };
+                    return attendanceRegistrant.AsList();
             }
         }
     }
