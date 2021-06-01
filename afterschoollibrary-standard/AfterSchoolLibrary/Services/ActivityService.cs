@@ -2329,11 +2329,23 @@ namespace AfterSchoolLibrary.Services
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
+            var wasSetToNull = activity.ActivityScheduleId.HasValue && !ScheduleId.HasValue;
+
             activity.ActivityScheduleId = ScheduleId;
             activity.LastModifiedDate = DateTime.UtcNow;
             activity.LastModifiedBy = loggedInUserId;
 
-            msgs.AddRange(activity.Save(dc: dc));
+            msgs.AddRange(activity.Save(dc));
+
+            if (wasSetToNull)
+            {
+                var logs = new SystemMessages();
+                logs.Add(
+                    $"Schedule ID was set to null for: Account ({activity.AccountId}), Activity ({activity.ID}), Logged In User ({loggedInUserId})", 
+                    MessageType.Notice);
+                AfterSchoolLibrary.Helpers.Utilities.SystemLog(logs);
+            }
+
             return msgs;
         }
 
