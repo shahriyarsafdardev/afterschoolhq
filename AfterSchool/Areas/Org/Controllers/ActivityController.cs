@@ -1650,58 +1650,53 @@ namespace AfterSchool.Areas.Org.Controllers
             return registrantActivityAttendanceCounts;
         }
 
-        // This returns all billed AttendanceRegistrants by Attendance
-        private Dictionary<Attendance, int> GetBilledAttendancesPerRegistrantActivity(List<Attendance> attendances, List<RegistrantActivity> registrantActivities, SystemMessages msgs)
+        // This returns billed Attendances and the count of Registrants Billed for billing period
+        private Dictionary<Attendance, List<int>> GetNumberOfRegistrantsBilledPerAttendance(List<Attendance> attendances, BillingPeriodType billingPeriodType, SystemMessages msgs = null)
         {
-            var attendancesPerBillingPeriods = new Dictionary<Attendance, int>();
-            var attendancesToCharge = new List<Attendance>();
+            var numberOfRegistrantsBilledPerAttendance = new Dictionary<Attendance, List<int>>();
 
-            registrantActivities.ForEach(registrantActivity =>
+            attendances.ForEach(attendance =>
             {
-                //.. special case: post pay plan with # of Pre-pay
-                var activity = registrantActivity.GetActivity(msgs);
-                var postPayPlan = activity.GetPostPayPlan(msgs);
+                var registrantIdsBilled = AttendanceRegistrant.LoadByAttendanceId(attendance.ID.Value, msgs).Where(ar => ar.IsAlreadyBilled).Select(rb => rb.ID.Value).ToList();
 
-                switch (postPayPlan.BillingPeriodTypeId)
+                switch (billingPeriodType)
                 {
                     case BillingPeriodType.Day:
-                        attendances.ForEach(attendance =>
+                        if (numberOfRegistrantsBilledPerAttendance.ContainsKey(attendance))
                         {
-                            var billedAttendanceRegistrant = AttendanceRegistrant.LoadByAttendanceId(attendance.ID.Value, msgs)?.Where(m => m.IsAlreadyBilled).ToList();
-
-                            if (billedAttendanceRegistrant.IsNotEmpty() && billedAttendanceRegistrant?.Count <= 0)
-                                attendancesPerBillingPeriods.Add(attendance, billedAttendanceRegistrant.Count);
-                        });                      
-
+                            registrantIdsBilled.ForEach(rbId =>
+                            {
+                                if (!numberOfRegistrantsBilledPerAttendance[attendance].Contains(rbId))
+                                    numberOfRegistrantsBilledPerAttendance[attendance].Add(rbId);
+                            });
+                        }
+                        else
+                            numberOfRegistrantsBilledPerAttendance.Add(attendance, registrantIdsBilled);
+                        
                         break;
 
                     case BillingPeriodType.Week:
-                        attendances.ForEach(attendance =>
+                        var attendanceIsInSameWeekAsExisitingAttendanceInList = numberOfRegistrantsBilledPerAttendance.FirstOrDefault(keyPair => keyPair.Key.Date.Value.DatesAreInSameWeek(attendance.Date.Value)).Key;
+                        if (attendanceIsInSameWeekAsExisitingAttendanceInList.IsNotEmpty())
                         {
-                            var currentWeekPresent = AttendanceRegistrant.LoadByActivityIdByDateRange(attendance.ActivityId.Value,
-                                new DateRange(attendance.Date.Value.FirstDateOfWeek().Date, attendance.Date.Value.LastDateOfWeek().Date.AddDays(1).AddMilliseconds(-1)),
-                                msgs)
-                            .Where(item => item.NumberPresent > 0)
-                            .OrderBy(item => item.AttendanceDate.Value)
-                            .ToList();
-
-                            if (currentWeekPresent.Any() && currentWeekPresent.Any(item => item.IsAlreadyBilled))
+                            registrantIdsBilled.ForEach(rbId =>
                             {
-                                var firstAttendanceOfWeek = currentWeekPresent.First().GetAttendance(msgs);
+                                if (!numberOfRegistrantsBilledPerAttendance[attendanceIsInSameWeekAsExisitingAttendanceInList].Contains(rbId))
+                                    numberOfRegistrantsBilledPerAttendance[attendanceIsInSameWeekAsExisitingAttendanceInList].Add(rbId);
+                            });
+                        }
+                        else
+                            numberOfRegistrantsBilledPerAttendance.Add(attendance, registrantIdsBilled);
 
-                                if (firstAttendanceOfWeek.IsNotEmpty() && !attendancesToCharge.Any(item => item.ID == firstAttendanceOfWeek.ID))
-                                    attendancesToCharge.Add(firstAttendanceOfWeek);
-                            }
+                        break;
 
-                            if (attendancesToCharge.IsNotEmpty() && attendancesToCharge.Any())
-                                attendancesPerBillingPeriods.Add(attendance, attendancesToCharge.Count);
-                        });
-                        
+                    default:
                         break;
                 }
+
             });
 
-            return attendancesPerBillingPeriods;
+            return numberOfRegistrantsBilledPerAttendance;
         }
 
             [HttpPost]
@@ -1900,7 +1895,10 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
 
                 // Send summary email of charged AttendanceRegistrants to Activity Provider if there were any successful charges
-                var registrantsBilledPerAttendance = GetBilledAttendancesPerRegistrantActivity(selectedAttendances, registrantActivities, msgs);
+                var registrantsBilledPerAttendance = GetNumberOfRegistrantsBilledPerAttendance(
+                        selectedAttendances, 
+                        billingPeriodType.HasValue ? billingPeriodType.Value : BillingPeriodType.NotSet,
+                        msgs);
                 var objRegistration = registrantActivities.First().GetRegistration(msgs);
                 var costPerClass = objRegistration.CostPerClass.HasValue ? objRegistration.CostPerClass.Value : 0;
                 var couponValue = objRegistration.CouponValue.HasValue ? objRegistration.CouponValue.Value : 0;
