@@ -15,7 +15,7 @@
     }
 
     var ccClassAttendedLable = "";
-    if (postPayPlan.IsNotEmpty() && !savePaymentInfoOnly)
+    if (postPayPlan.IsNotEmpty() && savePaymentInfoOnly)
     {
         ccClassAttendedLable = $"({participationObject.GetPostPayCreditCardFee().ToCurrency()} per {postPayPlan.BillingPeriodTypeId.ToString().ToLower()})";
     }

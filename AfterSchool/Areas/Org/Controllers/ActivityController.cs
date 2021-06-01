@@ -1657,7 +1657,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             attendances.ForEach(attendance =>
             {
-                var registrantIdsBilled = AttendanceRegistrant.LoadByAttendanceId(attendance.ID.Value, msgs).Where(ar => ar.IsAlreadyBilled).Select(rb => rb.ID.Value).ToList();
+                var registrantIdsBilled = AttendanceRegistrant.LoadByAttendanceId(attendance.ID.Value, msgs).Where(ar => ar.IsAlreadyBilled).Select(rb => rb.RegistrantId.Value).Distinct().ToList();
 
                 switch (billingPeriodType)
                 {

@@ -202,7 +202,7 @@
                                 <div class="col-md-6 col-md-offset-3 col-sm-12 text-center text-medium-small">
                                     <p>
                                         The cost will be <span class="text-bold">@participationObject.GetPostPayCostWithConvenienceFee().ToCurrency()</span> per @postPayPlan.BillingPeriodTypeId.ToString().ToLower() attended per student
-                                        @if (participationObject.GetPostPayCheckoutCostWithConvenienceFee() > 0)
+                                        @if (participationObject.GetPostPayCheckoutCostWithConvenienceFee() > 0 && postPayPlan.NumberOfPeriodsPrePaid > 0)
                                         {
                                             <br />
                                             <span>
