@@ -550,5 +550,28 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.True(msgs.HasNoErrors() && msgs.HasNo(new MessageType[] { MessageType.Warning }));
         }
+
+        [Theory(DisplayName="GetTransactionByBillerAccountId")]
+        [InlineData(1)]
+        [InlineData(5)]
+        
+        public void GetTransactionsByBillerAccountId(int numberOfTransactions)
+        {
+            var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
+            var parentUser = Factories.WebUserFactory.Create(msgs, dc);
+            var billeraccount = Factories.AccountFactory.CreateWithFreePackage(loggedInUser, AccountType.ActivityProvider, msgs, dc);
+            var payerAccount = Factories.AccountFactory.CreateWithFreePackage(parentUser, AccountType.Registrant, msgs, dc);
+
+            var transactionIds = new List<int>();
+
+            for (int i = 0; i < numberOfTransactions; i++)
+            {
+                var transaction = Factories.TransactionFactory.Create(billeraccount, payerAccount, PaymentType.ACH, msgs, dc);
+                transactionIds.Add(transaction.ID.Value);
+            }
+
+            Assert.Equal(numberOfTransactions, billeraccount.GetTransactions(transactionIds, msgs, dc).Count);
+        }
+
     }
 }
