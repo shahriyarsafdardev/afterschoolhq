@@ -950,7 +950,7 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
-        public static void SendAttendanceChargeConfirmation(Dictionary<DateTime, int> attendanceRegistrantActivityCounts, Activity activity, decimal costPerClass, decimal couponDiscount, string customMessage, WebUser loggedInUser, bool sendBcc, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void SendAttendanceChargeConfirmation(Dictionary<Attendance, int> attendanceRegistrantActivityCounts, Activity activity, decimal costPerClass, decimal couponDiscount, string customMessage, WebUser loggedInUser, bool sendBcc, SystemMessages msgs, DatabaseConnection dc = null)
         {
             msgs = msgs ?? new SystemMessages();
 

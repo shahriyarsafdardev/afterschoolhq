@@ -1651,39 +1651,60 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         // This returns all billed AttendanceRegistrants by Attendance
-        private Dictionary<DateTime, int> GetRegistrantsBilledPerAttendance(List<Attendance> attendances, List<RegistrantActivity> registrantActivities, BillingPeriodType billingPeriodType, SystemMessages msgs)
+        private Dictionary<Attendance, int> GetBilledAttendancesPerRegistrantActivity(List<Attendance> attendances, List<RegistrantActivity> registrantActivities, SystemMessages msgs)
         {
-            var attendancesPerBillingPeriods = new Dictionary<DateTime, int>();
+            var attendancesPerBillingPeriods = new Dictionary<Attendance, int>();
+            var attendancesToCharge = new List<Attendance>();
 
-            attendances.ForEach(attendance =>
+            registrantActivities.ForEach(registrantActivity =>
             {
-                var activityInstanceStartTime = attendance.GetActivityInstance(msgs).StartDateTime.Value;
+                //.. special case: post pay plan with # of Pre-pay
+                var activity = registrantActivity.GetActivity(msgs);
+                var postPayPlan = activity.GetPostPayPlan(msgs);
 
-                var numberOfRegistrants = registrantActivities.FindAll(registrantActivity =>
+                switch (postPayPlan.BillingPeriodTypeId)
                 {
-                    var attendanceRegistrant = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(attendance.ID.Value, registrantActivity.RegistrantId.Value, msgs).First();
-                   
-                    return attendanceRegistrant.IsNotEmpty() && attendanceRegistrant.TransactionId.HasValue && attendanceRegistrant.NumberPresent > 0;
-                }).Count;
+                    case BillingPeriodType.Day:
+                        attendances.ForEach(attendance =>
+                        {
+                            var billedAttendanceRegistrant = AttendanceRegistrant.LoadByAttendanceId(attendance.ID.Value, msgs)?.Where(m => m.IsAlreadyBilled).ToList();
 
-               var billingPeriodAttendance = attendancesPerBillingPeriods.FirstOrDefault(keyPair =>  
-                    billingPeriodType == BillingPeriodType.Day ? keyPair.Key == activityInstanceStartTime : keyPair.Key.DatesAreInSameWeek(activityInstanceStartTime));
+                            if (billedAttendanceRegistrant.IsNotEmpty() && billedAttendanceRegistrant?.Count <= 0)
+                                attendancesPerBillingPeriods.Add(attendance, billedAttendanceRegistrant.Count);
+                        });                      
 
-                if (billingPeriodAttendance.IsNotEmpty() && billingPeriodAttendance.Value > 0)
-                    attendancesPerBillingPeriods[key: billingPeriodAttendance.Key] += numberOfRegistrants;
-                else
-                    attendancesPerBillingPeriods.Add(activityInstanceStartTime, numberOfRegistrants);
-                // TODO: billy review this changes, it was giving errors
+                        break;
 
+                    case BillingPeriodType.Week:
+                        attendances.ForEach(attendance =>
+                        {
+                            var currentWeekPresent = AttendanceRegistrant.LoadByActivityIdByDateRange(attendance.ActivityId.Value,
+                                new DateRange(attendance.Date.Value.FirstDateOfWeek().Date, attendance.Date.Value.LastDateOfWeek().Date.AddDays(1).AddMilliseconds(-1)),
+                                msgs)
+                            .Where(item => item.NumberPresent > 0)
+                            .OrderBy(item => item.AttendanceDate.Value)
+                            .ToList();
 
-                //attendancesPerBillingPeriods.Add(key: addOrUpdateKey, value: numberOfRegistrants);
+                            if (currentWeekPresent.Any() && currentWeekPresent.Any(item => item.IsAlreadyBilled))
+                            {
+                                var firstAttendanceOfWeek = currentWeekPresent.First().GetAttendance(msgs);
 
+                                if (firstAttendanceOfWeek.IsNotEmpty() && !attendancesToCharge.Any(item => item.ID == firstAttendanceOfWeek.ID))
+                                    attendancesToCharge.Add(firstAttendanceOfWeek);
+                            }
+
+                            if (attendancesToCharge.IsNotEmpty() && attendancesToCharge.Any())
+                                attendancesPerBillingPeriods.Add(attendance, attendancesToCharge.Count);
+                        });
+                        
+                        break;
+                }
             });
 
             return attendancesPerBillingPeriods;
         }
 
-        [HttpPost]
+            [HttpPost]
         public ActionResult ChargeAttendanceFee()
         {
             var currentAccount = SessionVariables.CurrentAccount;
@@ -1879,7 +1900,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
 
                 // Send summary email of charged AttendanceRegistrants to Activity Provider if there were any successful charges
-                var registrantsBilledPerAttendance = GetRegistrantsBilledPerAttendance(selectedAttendances, registrantActivities, activity.GetPostPayPlan(msgs).BillingPeriodTypeId, msgs);
+                var registrantsBilledPerAttendance = GetBilledAttendancesPerRegistrantActivity(selectedAttendances, registrantActivities, msgs);
                 var objRegistration = registrantActivities.First().GetRegistration(msgs);
                 var costPerClass = objRegistration.CostPerClass.HasValue ? objRegistration.CostPerClass.Value : 0;
                 var couponValue = objRegistration.CouponValue.HasValue ? objRegistration.CouponValue.Value : 0;
