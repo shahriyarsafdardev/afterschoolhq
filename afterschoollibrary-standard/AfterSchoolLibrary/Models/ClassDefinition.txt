@@ -1175,6 +1175,7 @@ joinproperty: Registrant.RegistrantTypeId, RegistrantType, Int
 joinproperty: Registrant.AccountId, int?, Int
 joinproperty: Attendance.ActivityId, int?, Int
 joinproperty: Attendance.IsCompleted, bool, Bit
+joinproperty: Attendance.Date, DateTime?, DateTime
 loadmethod: RegistrantId, List<>
 loadmethod: AttendanceId, List<>
 loadmethod: AttendanceId|RegistrantId, List<>

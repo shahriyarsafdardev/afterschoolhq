@@ -1924,7 +1924,7 @@ namespace AfterSchool.Controllers
                            actor: SessionVariables.CurrentUser,
                            actionType: WebSessionActionType.Paid,
                            objectType: ObjectType.Transaction,
-                           objectId: checkoutObject.Transaction.ID.Value,
+                           objectId: checkoutObject.Transaction?.ID.Value,
                            objectText: phrase,
                            indirectObjectType: participationObject.GetWebSessionObjectType(),
                            indirectObjectId: participationObject.ObjectID.Value,
