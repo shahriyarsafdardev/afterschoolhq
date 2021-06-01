@@ -169,7 +169,7 @@ namespace AfterSchoolLibraryTests.Tests
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             activity.ActivityScheduleId = 12;
             activity.Save(dc: dc);
-            Assert.Single(Activity.LoadByActivityScheduleId(activity.ActivityScheduleId.Value, dc: dc));
+            Assert.Single(Activity.LoadByActivityScheduleIdByAccountId(activity.ActivityScheduleId.Value, account.ID.Value, dc: dc));
         }
 
         [Fact]
