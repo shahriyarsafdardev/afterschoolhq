@@ -1538,6 +1538,8 @@ property: CouponValue, decimal?, Decimal "10,2"
 loadmethod: BillerAccountId|IsDeleted, List<>
 loadmethod: PayerAccountId|IsDeleted, List<>
 loadmethod: Uid
+loadmethod: Uid|BillerAccountId
+loadmethod: Uid|PayerAccountId
 loadmethod: BillerAccountId|TransactionTypeId|IsDeleted, List<>
 loadmethod: PayerAccountId|TransactionTypeId|IsDeleted, List<>
 loadmethod: StripeChargeOrRefundId
@@ -1565,6 +1567,7 @@ loadmethod: AccountId, List<>
 loadmethod: AccountId|PayoutStatusId, List<>
 loadmethod: PayoutStatusId, List<>
 loadmethod: Uid
+loadmethod: Uid|AccountId
 [end]
 
 [begin]
@@ -1636,6 +1639,7 @@ baseproperty: Name, required
 loadmethod: AccountId, List<>
 loadmethod: AccountId|CouponCode
 loadmethod: Uid
+loadmethod: Uid|AccountId
 [end]
 
 [begin]
@@ -1739,6 +1743,7 @@ property: DeniedDate, DateTime?, DateTime
 property: RequestedRefundTypeId, RefundType, Int, Required
 property: ApprovedRefundTypeId, RefundType, Int, Required
 loadmethod: Uid
+loadmethod: Uid|AccountId
 loadmethod: TransactionId, List<>
 loadmethod: AccountId, List<>
 loadmethod: AccountId|RefundRequestStatusId, List<>

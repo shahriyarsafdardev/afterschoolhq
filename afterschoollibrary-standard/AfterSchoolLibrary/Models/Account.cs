@@ -8,7 +8,6 @@ using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
 using System.Data.SqlClient;
-
 namespace AfterSchoolLibrary.Models
 {
 	/// <summary>
