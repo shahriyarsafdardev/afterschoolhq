@@ -551,11 +551,11 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(msgs.HasNoErrors() && msgs.HasNo(new MessageType[] { MessageType.Warning }));
         }
 
-        [Theory(DisplayName="GetTransactionByBillerAccountId")]
+        [Theory(DisplayName= "GetBillerAccountTransactionsTest")]
         [InlineData(1)]
         [InlineData(5)]
         
-        public void GetTransactionsByBillerAccountId(int numberOfTransactions)
+        public void GetBillerAccountTransactionsTest(int expectedNumberOfTransactions)
         {
             var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
             var parentUser = Factories.WebUserFactory.Create(msgs, dc);
@@ -564,13 +564,162 @@ namespace AfterSchoolLibraryTests.Tests
 
             var transactionIds = new List<int>();
 
-            for (int i = 0; i < numberOfTransactions; i++)
+            for (int i = 0; i < expectedNumberOfTransactions; i++)
             {
                 var transaction = Factories.TransactionFactory.Create(billeraccount, payerAccount, PaymentType.ACH, msgs, dc);
                 transactionIds.Add(transaction.ID.Value);
             }
 
-            Assert.Equal(numberOfTransactions, billeraccount.GetTransactions(transactionIds, msgs, dc).Count);
+            var actualNumberOfTransactions = billeraccount.GetBillerAccountTransactions(transactionIds, msgs, dc);
+
+            Assert.Equal(expectedNumberOfTransactions, actualNumberOfTransactions.Count);
+        }
+
+        [Theory(DisplayName = "GetPayerAccountTransactionsTest")]
+        [InlineData(1)]
+        [InlineData(5)]
+
+        public void GetPayerAccountTransactionsTest(int expectedNumberOfTransactions)
+        {
+            var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
+            var parentUser = Factories.WebUserFactory.Create(msgs, dc);
+            var billeraccount = Factories.AccountFactory.CreateWithFreePackage(loggedInUser, AccountType.ActivityProvider, msgs, dc);
+            var payerAccount = Factories.AccountFactory.CreateWithFreePackage(parentUser, AccountType.Registrant, msgs, dc);
+
+            var transactionIds = new List<int>();
+
+            for (int i = 0; i < expectedNumberOfTransactions; i++)
+            {
+                var transaction = Factories.TransactionFactory.Create(billeraccount, payerAccount, PaymentType.ACH, msgs, dc);
+                transactionIds.Add(transaction.ID.Value);
+            }
+
+            var actualNumberOfTransactions = payerAccount.GetPayerAccountTransactions(transactionIds, msgs, dc);
+
+            Assert.Equal(expectedNumberOfTransactions, actualNumberOfTransactions.Count);
+        }
+
+
+        [Fact(DisplayName = "GetPayoutTest")]
+        public void GetPayoutTest()
+        {
+            var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.CreateWithFreePackage(loggedInUser, AccountType.ActivityProvider, msgs, dc);
+
+            var expectedPayout = Factories.PayoutFactory.Create(account, msgs, dc);
+            var actualPayout = account.GetPayout(expectedPayout.Uid, msgs, dc);
+
+            Assert.Equal(expectedPayout.ID, actualPayout.ID);
+        }
+
+
+        [Fact(DisplayName = "GetRegistrantTest")]
+        public void GetRegistrantTest()
+        {
+            var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.CreateWithFreePackage(loggedInUser, AccountType.ActivityProvider, msgs, dc);
+            
+            var expectedRegistrant = Factories.RegistrantFactory.Create(account, msgs, dc);
+            var actualRegistrant = account.GetRegistrant(expectedRegistrant.Uid, msgs, dc);
+
+            Assert.Equal(expectedRegistrant.ID, actualRegistrant.ID);
+        }
+
+        [Fact(DisplayName = "GetRefundRequestTest")]
+        public void GetRefundRequestTest()
+        {
+            var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
+            var payingUser = Factories.WebUserFactory.Create(msgs, dc);
+            var billingAccount = Factories.AccountFactory.CreateWithFreePackage(loggedInUser, AccountType.ActivityProvider, msgs, dc);
+            var payingAccount = Factories.AccountFactory.CreateWithFreePackage(payingUser, AccountType.Registrant, msgs, dc);
+            var transaction = Factories.TransactionFactory.Create(billingAccount, payingAccount, PaymentType.ACH, msgs, dc);
+           
+            var expectedRefundRequest = Factories.RefundRequestFactory.Create(transaction.Amount.Value, transaction, billingAccount, "reason", payingUser, msgs, dc);
+            var actualRefundRequest = billingAccount.GetRefundRequest(expectedRefundRequest.Uid, msgs, dc);
+
+            Assert.Equal(expectedRefundRequest.ID, actualRefundRequest.ID);
+        }
+
+        [Fact(DisplayName = "GetBillerTransactionTest")]
+        public void GetBillerTransactionTest()
+        {
+            var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
+            var payingUser = Factories.WebUserFactory.Create(msgs, dc);
+            var billingAccount = Factories.AccountFactory.CreateWithFreePackage(loggedInUser, AccountType.ActivityProvider, msgs, dc);
+            var payingAccount = Factories.AccountFactory.CreateWithFreePackage(payingUser, AccountType.Registrant, msgs, dc);
+
+            var expectedTransaction = Factories.TransactionFactory.Create(billingAccount, payingAccount, PaymentType.ACH, msgs, dc);
+            var actualTransaction = billingAccount.GetBillerTransaction(expectedTransaction.Uid, msgs, dc);
+
+            Assert.Equal(expectedTransaction.ID, actualTransaction.ID);
+        }
+
+
+        [Fact(DisplayName = "GetPayerTransactionTest")]
+        public void GetPayerTransactionTest()
+        {
+            var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
+            var payingUser = Factories.WebUserFactory.Create(msgs, dc);
+            var billingAccount = Factories.AccountFactory.CreateWithFreePackage(loggedInUser, AccountType.ActivityProvider, msgs, dc);
+            var payingAccount = Factories.AccountFactory.CreateWithFreePackage(payingUser, AccountType.Registrant, msgs, dc);
+
+            var expectedTransaction = Factories.TransactionFactory.Create(billingAccount, payingAccount, PaymentType.ACH, msgs, dc);
+            var actualTransaction = payingAccount.GetPayerTransaction(expectedTransaction.Uid, msgs, dc);
+
+            Assert.Equal(expectedTransaction.ID, actualTransaction.ID);
+        }
+
+        [Fact(DisplayName = "GetCouponTest")]
+        public void GetCouponTest()
+        {
+            var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.CreateWithFreePackage(loggedInUser, AccountType.ActivityProvider, msgs, dc);
+
+            var expectedCoupon = Factories.CouponFactory.Create(account, msgs, dc);
+            var actualCoupon = account.GetCoupon(expectedCoupon.Uid, msgs, dc);
+
+            Assert.Equal(expectedCoupon.ID, actualCoupon.ID);
+        }
+
+        [Theory(DisplayName = "GetCouponsTest")]
+        [InlineData(1)]
+        [InlineData(5)]
+        public void GetCouponsTest(int expectedNumberOfCoupons)
+        {
+            var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.CreateWithFreePackage(loggedInUser, AccountType.ActivityProvider, msgs, dc);
+            var expectedCoupons = new List<Coupon>();
+
+            for (int i = 0; i < expectedNumberOfCoupons; i++)
+            {
+                var expectedCoupon = Factories.CouponFactory.Create(account, msgs, dc);
+                expectedCoupons.Add(expectedCoupon);
+            }
+
+            var actualNumberOfCoupons = account.GetCoupons(msgs, dc);
+
+            Assert.Equal(expectedCoupons.Count, actualNumberOfCoupons.Count);
+        }
+
+        [Theory(DisplayName ="GetAllActivitiesForAccountTest")]
+        [InlineData(1)]
+        [InlineData(5)]
+
+        public void GetAllActivitiesForAccountTest(int expectedNumberOfActivities)
+        {
+            var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.CreateWithFreePackage(loggedInUser, AccountType.ActivityProvider, msgs, dc);
+            var expectedActivities = new List<Activity>();
+
+            for (int i = 0; i < expectedNumberOfActivities; i++)
+            {
+                var expectedActivity = Factories.ActivityFactory.Create(account, msgs, dc);
+                expectedActivities.Add(expectedActivity);
+            }
+
+            var actualActivities = account.GetAllActivitiesForAccount(msgs, dc);
+
+            Assert.Equal(expectedActivities.Count, actualActivities.Count);
         }
 
     }

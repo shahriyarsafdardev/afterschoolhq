@@ -13,7 +13,6 @@ namespace AfterSchoolLibraryTests.Factories
         {
             var obj = new Coupon()
             {
-                ID = 1,
                 AccountId = account.ID,
                 ExpirationDate = DateTime.UtcNow.AddMonths(1),
                 CouponCode = CouponService.GenerateCouponCode(account.ID.Value, msgs, dc),
