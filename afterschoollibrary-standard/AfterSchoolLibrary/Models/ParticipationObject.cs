@@ -850,7 +850,7 @@ namespace AfterSchoolLibrary.Models
             if ((plan?.NumberOfPeriodsPrePaid).IsPositive())
                 return GetPostPayCreditCardFee() * plan.NumberOfPeriodsPrePaid.Value;
 
-            return 0;
+            return GetPostPayCreditCardFee();
         }
 
         public decimal GetCheckoutPostPayConvenienceFee()
@@ -860,7 +860,7 @@ namespace AfterSchoolLibrary.Models
             if ((plan?.NumberOfPeriodsPrePaid).IsPositive())
                 return GetPostPayConvenienceFee() * plan.NumberOfPeriodsPrePaid.Value;
 
-            return 0;
+            return GetPostPayConvenienceFee();
         }
 
         public decimal GetPostPayCheckoutCostWithConvenienceFee()
@@ -870,7 +870,7 @@ namespace AfterSchoolLibrary.Models
             if ((plan?.NumberOfPeriodsPrePaid).IsPositive())
                 return plan.NumberOfPeriodsPrePaid.Value * GetPostPayCostWithConvenienceFee();
 
-            return 0;
+            return GetPostPayCostWithConvenienceFee();
         }
 
         public decimal GetPostPayCheckoutCostWithoutConvenienceFee()
