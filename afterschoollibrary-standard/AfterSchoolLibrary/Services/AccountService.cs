@@ -2675,6 +2675,11 @@ namespace AfterSchoolLibrary.Services
             return Transaction.LoadByAccountId(account.ID.Value, search, startDate, endDate, participationObjects, isDeleted, start, length, msgs, dc);
         }
 
+        public static List<Transaction> GetTransactions(this Account account, List<int> ids, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.LoadByIdsByBillerAccountId(ids, account.ID.Value, msgs, dc);
+        }
+
         public static int GetBilledTransactionCount(this Account account, string search, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Transaction.GetCountByBillerAccountId(account.ID.Value, search, startDate, endDate, null, isDeleted, msgs, dc);

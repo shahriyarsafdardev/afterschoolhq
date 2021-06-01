@@ -170,7 +170,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (!string.IsNullOrEmpty(transactionIds))
             {
                 var ids = transactionIds.Split(',').Select(p => Convert.ToInt32(p)).ToList();
-                var transactions = Transaction.LoadList(ids, msgs);
+                var transactions = currentAccount.GetTransactions(ids, msgs);
 
                 ViewBag.TranIds = transactionIds;
                 ViewBag.TotalPayoutAmount = transactions.Sum(transaction => transaction.GetBillerPayout(msgs));

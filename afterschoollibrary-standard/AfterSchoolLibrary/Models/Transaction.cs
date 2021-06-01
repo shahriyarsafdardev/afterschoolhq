@@ -1397,6 +1397,22 @@ namespace AfterSchoolLibrary.Models
             return 0;
         }
 
+        public static List<Transaction> LoadByIdsByBillerAccountId(List<int> ids, int accountId, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var dq = DatabaseQuery;
+            dq.Criterias.Add(ObjectMap["BillerAccountId"], accountId);
+            dq.Criterias.Add(ObjectMap["ID"], ids, DatabaseCriteriaOperatorEnum.In);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<Transaction> LoadByIdsByPayerAccountId(List<int> ids, int accountId, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var dq = DatabaseQuery;
+            dq.Criterias.Add(ObjectMap["BillerAccountId"], accountId);
+            dq.Criterias.Add(ObjectMap["ID"], ids, DatabaseCriteriaOperatorEnum.In);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
         #endregion
     }
 }
