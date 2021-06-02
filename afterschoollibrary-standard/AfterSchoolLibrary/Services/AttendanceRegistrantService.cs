@@ -104,5 +104,29 @@ namespace AfterSchoolLibrary.Services
 
             return prepayments;
         }
+
+        public static List<AttendanceRegistrant> GetAttendanceRegistrantsInSameBillingPeriod(this AttendanceRegistrant attendanceRegistrant, BillingPeriodType billingPeriodType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            switch (billingPeriodType)
+            {
+                case BillingPeriodType.Week:
+                    var thisAttendance = attendanceRegistrant.GetAttendance(msgs, dc);
+                    var billAttendanceRegistrants = AttendanceRegistrant.LoadByActivityIdRegistrantIdByDateRange(
+                                                                thisAttendance.ActivityId.Value,
+                                                                attendanceRegistrant.RegistrantId.Value,
+                                                                new DateRange(
+                                                                    thisAttendance.Date.Value.FirstDateOfWeek().Date,
+                                                                    thisAttendance.Date.Value.LastDateOfWeek().Date.AddDays(1).AddMilliseconds(-1)
+                                                                ),
+                                                                msgs)
+                                                            .Where(item => item.NumberPresent > 0)
+                                                            .ToList();
+
+                    return billAttendanceRegistrants;
+
+                default:
+                    return attendanceRegistrant.AsList();
+            }
+        }
     }
 }

@@ -255,6 +255,11 @@ namespace AfterSchoolLibrary.Services
                     .ToList();
         }
 
+        public static List<Activity> GetAllActivitiesForAccount(this Account account,  SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Activity.LoadByAccountId(account.ID.Value, msgs, dc);  
+        }
+
         public static int GetActivityCount(this Account account, UserType userType, WebUser user, ActivityType? activityType, bool? isArchived, bool? isDeleted, bool? ungroupedOnly, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (user.IsEmpty() || userType.In(AccountService.AdminUserTypes))
@@ -623,11 +628,6 @@ namespace AfterSchoolLibrary.Services
         #region AccountPackage
 
         public static AccountPackage GetActiveAccountPackage(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return AccountPackage.LoadByAccountIdByIsActive(account.ID.Value, true, msgs, dc);
-        }
-
-        public static AccountPackage GetActiveAccountPackageWithCreatedDate(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return AccountPackage.LoadByAccountId(account.ID.Value, true, "CreateDate", OrderByDirectionEnum.Descending, msgs, dc);
         }
@@ -1690,7 +1690,7 @@ namespace AfterSchoolLibrary.Services
                 action: (SystemMessages amsgs, BasicLibrary.DataAccess.DatabaseConnection adc) =>
                 {
                     package = Package.Load(packageId, amsgs, adc);
-                    currentPackage = account.GetActiveAccountPackageWithCreatedDate(amsgs, adc);
+                    currentPackage = account.GetActiveAccountPackage(amsgs, adc);
 
                     var trialDayCount = 0;
 
@@ -2480,6 +2480,11 @@ namespace AfterSchoolLibrary.Services
 
         #region ParentAccounts
 
+        public static Registrant GetRegistrant(this Account account, Guid registrantUid, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Registrant.LoadByUidByAccountId(registrantUid, account.ID.Value, msgs, dc);
+        }
+
         public static Registrant GetFirstParentOrGuardianRegistrant(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Registrant.LoadByAccountIdByIsDeleted(account.ID.Value, false, msgs, dc)
@@ -2644,6 +2649,11 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
+        public static Payout GetPayout(this Account account, Guid payoutUid, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Payout.LoadByUidByAccountId(payoutUid, account.ID.Value, msgs, dc);
+        }
+
         public static List<Payout> GetPayouts(this Account account, PayoutStatus? payoutStatus, DateTime? startDate, DateTime? endDate, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Payout.LoadPayouts(account.ID.Value, payoutStatus, startDate, endDate, start, length, msgs, dc);
@@ -2730,6 +2740,26 @@ namespace AfterSchoolLibrary.Services
         public static List<Transaction> GetTransactions(this Account account, string search, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, bool isDeleted, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Transaction.LoadByAccountId(account.ID.Value, search, startDate, endDate, participationObjects, isDeleted, start, length, msgs, dc);
+        }
+
+        public static Transaction GetBillerTransaction(this Account account, Guid transactionUid, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.LoadByUidByBillerAccountId(transactionUid, account.ID.Value, msgs, dc);
+        }
+
+        public static Transaction GetPayerTransaction(this Account account, Guid transactionUid, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.LoadByUidByPayerAccountId(transactionUid, account.ID.Value, msgs, dc);
+        }
+
+        public static List<Transaction> GetBillerAccountTransactions(this Account account, List<int> ids, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.LoadByIdsByBillerAccountId(ids, account.ID.Value, msgs, dc);
+        }
+
+        public static List<Transaction> GetPayerAccountTransactions(this Account account, List<int> ids, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.LoadByIdsByPayerAccountId(ids, account.ID.Value, msgs, dc);
         }
 
         public static int GetBilledTransactionCount(this Account account, string search, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -3644,6 +3674,11 @@ namespace AfterSchoolLibrary.Services
             return Transaction.GetTotalAmountDebitedFromAccount(account.ID.Value, search, startDate, endDate, false, msgs, dc);
         }
 
+        public static RefundRequest GetRefundRequest(this Account account, Guid refundRequestUid, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RefundRequest.LoadByUidByAccountId(refundRequestUid, account.ID.Value, msgs, dc);
+        }
+
         public static List<RefundRequest> GetRefundRequests(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return RefundRequest.LoadByAccountId(account.ID.Value, msgs, dc);
@@ -3726,6 +3761,11 @@ namespace AfterSchoolLibrary.Services
             return Coupon.LoadByAccountId(account.ID.Value, search, startDate, endDate, participationObjects, isDeleted, start, length, msgs, dc);
         }
 
+        public static List<Coupon> GetCoupons(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Coupon.LoadByAccountId(account.ID.Value, msgs, dc);
+        }
+
         public static AttachedCoupon AttachCoupon(this Account account, Coupon coupon, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (account.AccountTypeId != AccountType.Registrant)
@@ -3787,6 +3827,15 @@ namespace AfterSchoolLibrary.Services
                            ownerAccount.ID.Value,
                            couponCode,
                            msgs);
+        }
+
+        public static Coupon GetCoupon(this Account ownerAccount, Guid couponUid, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Coupon.LoadByUidByAccountId(
+                couponUid,
+                ownerAccount.ID.Value,
+                msgs,
+                dc);
         }
 
         public static Coupon ValidateCoupon(this Account payerAccount, ParticipationObject participationObject, string couponCode, SystemMessages msgs = null, DatabaseConnection dc = null)

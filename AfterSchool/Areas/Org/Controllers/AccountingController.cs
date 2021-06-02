@@ -170,7 +170,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (!string.IsNullOrEmpty(transactionIds))
             {
                 var ids = transactionIds.Split(',').Select(p => Convert.ToInt32(p)).ToList();
-                var transactions = Transaction.LoadList(ids, msgs);
+                var transactions = currentAccount.GetBillerAccountTransactions(ids, msgs);
 
                 ViewBag.TranIds = transactionIds;
                 ViewBag.TotalPayoutAmount = transactions.Sum(transaction => transaction.GetBillerPayout(msgs));
@@ -369,11 +369,12 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult ProcessManualRefund(string uid, string amount, string reason)
         {
+            var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
 
             if (uid.IsGuid() && amount.IsNumber())
             {
-                var transaction = Transaction.LoadByUid(uid.ToGuid(), msgs);
+                var transaction = currentAccount.GetBillerTransaction(uid.ToGuid(), msgs);
 
                 if (transaction.IsNotEmpty())
                     transaction.ManualRefund(amount.ToDecimal(), SessionVariables.CurrentUser, msgs);
@@ -389,11 +390,12 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpPost]
         public ActionResult RequestRefund(string uid, string amount, string reason)
         {
+            var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
 
             if (uid.IsGuid() && amount.IsNumber())
             {
-                var transaction = Transaction.LoadByUid(uid.ToGuid(), msgs);
+                var transaction = currentAccount.GetBillerTransaction(uid.ToGuid(), msgs); 
 
                 if (transaction.IsNotEmpty())
                     transaction.RequestRefund(amount.ToDecimal(), RefundRequestStatus.RequestedByProvider, reason, SessionVariables.CurrentUser, msgs);
