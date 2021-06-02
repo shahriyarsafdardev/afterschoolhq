@@ -1,12 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Web.Mvc;
-using System.Web.Mvc.Ajax;
 using BasicLibrary;
 using AfterSchool.Models;
-using AfterSchoolLibrary;
+using AfterSchoolLibrary.Services;
 
 namespace AfterSchool.Controllers
 {
@@ -19,6 +14,17 @@ namespace AfterSchool.Controllers
         {
             var msgs = new SystemMessages();
 
+            if (SessionVariables.CurrentUser.IsNotEmpty())
+            {
+                // LOG: WebUserName LoggedOut
+                SessionVariables.CurrentAccount.LogActivity(
+                    webSessionId: SessionVariables.WebSession.ID.Value,
+                    actor: SessionVariables.CurrentUser,
+                    actionType: WebSessionActionType.LoggedOut
+
+                );
+            }
+
             if (SessionVariables.OriginalLoggedInUser.IsNotEmpty())
             {
                 var remember = CookieVariables.CurrentUser.IsGuid();
@@ -29,16 +35,6 @@ namespace AfterSchool.Controllers
                 ClearOriginalLoggedInUser();
 
                 return LoginRedirect();
-            }
-
-            if (SessionVariables.CurrentUser.IsNotEmpty())
-            {
-                // LOG: WebUserName LoggedOut
-                WebSessionUtilities.LogActivity(
-                    webSessionId: SessionVariables.WebSession.ID.Value,
-                    actor: SessionVariables.CurrentUser,
-                    actionType: WebSessionActionType.LoggedOut
-                );
             }
 
             return Logout(returnurl);

@@ -1368,6 +1368,18 @@ namespace AfterSchoolLibrary.Services
                 dc: dc);
         }
 
+        public static List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)> GetParticipationObjectsByBillerAccountId(this Account billerAccount,
+            DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.GetParticipationObjectsByBillerOrPayerAccountId(billerAccount.ID, null, startDate, endDate, isDeleted, msgs, dc);
+        }
+
+        public static List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)> GetParticipationObjectsByPayerAccountId(this Account payerAccount,
+            DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.GetParticipationObjectsByBillerOrPayerAccountId(null, payerAccount.ID, startDate, endDate, isDeleted, msgs, dc);
+        }
+
         public static List<Registration> SearchRegistrations(this Account account, string searchText, int? questionId, List<int> participationObjectIds, ParticipationObjectType participationObjectType, RegistrationStatus regStatus, List<RegistrationAssignmentType> rats, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Registration.Search(searchText, account.ID.Value, questionId, participationObjectIds, participationObjectType, regStatus, rats, start, length, msgs: msgs, dc: dc);
@@ -2480,11 +2492,6 @@ namespace AfterSchoolLibrary.Services
 
         #region ParentAccounts
 
-        public static Registrant GetRegistrant(this Account account, Guid registrantUid, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return Registrant.LoadByUidByAccountId(registrantUid, account.ID.Value, msgs, dc);
-        }
-
         public static Registrant GetFirstParentOrGuardianRegistrant(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Registrant.LoadByAccountIdByIsDeleted(account.ID.Value, false, msgs, dc)
@@ -2649,9 +2656,12 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        public static Payout GetPayout(this Account account, Guid payoutUid, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Payout GetPayout(this Account account, Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Payout.LoadByUidByAccountId(payoutUid, account.ID.Value, msgs, dc);
+            if (Uid.IsNotNullOrEmpty() && account.IsNotEmpty())
+                return Payout.LoadByUidByAccountId(Uid, account.ID.Value, msgs, dc);
+
+            return null;
         }
 
         public static List<Payout> GetPayouts(this Account account, PayoutStatus? payoutStatus, DateTime? startDate, DateTime? endDate, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -3672,17 +3682,7 @@ namespace AfterSchoolLibrary.Services
         public static decimal GetTotalAmountDebited(this Account account, string search, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Transaction.GetTotalAmountDebitedFromAccount(account.ID.Value, search, startDate, endDate, false, msgs, dc);
-        }
-
-        public static RefundRequest GetRefundRequest(this Account account, Guid refundRequestUid, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return RefundRequest.LoadByUidByAccountId(refundRequestUid, account.ID.Value, msgs, dc);
-        }
-
-        public static List<RefundRequest> GetRefundRequests(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return RefundRequest.LoadByAccountId(account.ID.Value, msgs, dc);
-        }
+        }        
 
         // TODO: Needs review
         public static decimal GetSubscriptionPlatformFeePercent(this Account billingAccount, SubscriptionPlan plan, PaymentType paymentType, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -3761,11 +3761,6 @@ namespace AfterSchoolLibrary.Services
             return Coupon.LoadByAccountId(account.ID.Value, search, startDate, endDate, participationObjects, isDeleted, start, length, msgs, dc);
         }
 
-        public static List<Coupon> GetCoupons(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return Coupon.LoadByAccountId(account.ID.Value, msgs, dc);
-        }
-
         public static AttachedCoupon AttachCoupon(this Account account, Coupon coupon, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (account.AccountTypeId != AccountType.Registrant)
@@ -3827,15 +3822,6 @@ namespace AfterSchoolLibrary.Services
                            ownerAccount.ID.Value,
                            couponCode,
                            msgs);
-        }
-
-        public static Coupon GetCoupon(this Account ownerAccount, Guid couponUid, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return Coupon.LoadByUidByAccountId(
-                couponUid,
-                ownerAccount.ID.Value,
-                msgs,
-                dc);
         }
 
         public static Coupon ValidateCoupon(this Account payerAccount, ParticipationObject participationObject, string couponCode, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -4163,18 +4149,6 @@ namespace AfterSchoolLibrary.Services
         }
         #endregion
 
-        #region PAYOUT
-
-        public static Payout GetPayout(this Account account, Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (Uid.IsNotNullOrEmpty() && account.IsNotEmpty())
-                return Payout.LoadByUidByAccountId(Uid, account.ID.Value, msgs, dc);
-
-            return null;
-        }
-
-        #endregion
-
         #region REFUND-REQUEST
 
         public static RefundRequest GetRefundRequest(this Account account, Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -4183,6 +4157,66 @@ namespace AfterSchoolLibrary.Services
                 return RefundRequest.LoadByUidByAccountId(Uid, account.ID.Value, msgs, dc);
 
             return null;
+        }
+
+        public static List<RefundRequest> GetRefundRequests(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RefundRequest.LoadByAccountId(account.ID.Value, msgs, dc);
+        }
+
+        #endregion
+
+        #region WEB SESSION LOGS
+
+        public static void LogActivity(this Account account, int webSessionId, 
+            WebUser actor, WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet, ObjectType indirectObjectType = ObjectType.NotSet,
+            int? objectId = (int?)null, string objectText = "",
+            int? indirectObjectId = (int?)null, string indirectObjectText = "",
+            SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            //..actor	action		    Object		            ObjectType	        IndirectObjectId
+            //..Bharat  Navigated to    FIRST SAMUEL CHURCH(W)  DirectoryAccount   ISYP
+
+            string actorName = (actor.IsNotEmpty() ? actor.FullName : "Someone");
+
+            var actionStringDict = AfterSchoolLibrary.Helpers.WebSessionHelper.GetActionString(objectType, actorName, actionType, objectText, indirectObjectType, indirectObjectText);
+
+            SaveLog(actor: actor,
+                actionStringFormat: actionStringDict.SingleOrDefault(kp => kp.Key == "ActionStringFormat").Value,
+                actionString: actionStringDict.SingleOrDefault(kp => kp.Key == "ActionString").Value,
+                webSessionId: webSessionId,
+                actorId: actor.IsNotEmpty() ? actor.ID : null,
+                accountId: account.IsNotEmpty() ? account.ID : null,
+                actionType: actionType,
+                objectType: objectType,
+                objectId: objectId,
+                indirectObjectId: indirectObjectId,
+                msgs: msgs,
+                dc: dc);
+        }
+
+        public static void SaveLog(WebUser actor, int webSessionId, string actionStringFormat, string actionString, int? actorId = (int?)null, int? accountId = (int?)null,
+            WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet, ObjectType indirectObjectType = ObjectType.NotSet,
+            int? objectId = (int?)null, int? indirectObjectId = (int?)null,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty())
+                msgs = new SystemMessages();
+
+            var action = new WebSessionAction();
+            action.SessionId = webSessionId;
+            action.AccountId = accountId;
+            action.ActionTypeId = actionType;
+            action.ObjectTypeId = objectType;
+            action.ObjectId = objectId;
+            action.IndirectObjectId = indirectObjectId;
+            action.IndirectObjectTypeId = indirectObjectType;
+            action.ActionStringFormat = actionStringFormat;
+            action.ActionString = actionString;
+            action.CreateDate = DateTime.UtcNow;
+            action.CreatedBy = actor?.ID.Value;
+
+            msgs.AddRange(action.Save(dc));
         }
 
         #endregion

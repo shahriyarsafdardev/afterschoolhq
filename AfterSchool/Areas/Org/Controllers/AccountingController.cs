@@ -59,7 +59,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 transaction.CreateDate = currentAccount.ConvertToAccountTimeZone(transaction.CreateDate.Value)
             );
 
-            var allPos = Transaction.GetParticipationObjectsByBillerAccountId(currentAccount.ID.Value, null, null, false);
+            var allPos = currentAccount.GetParticipationObjectsByBillerAccountId(null, null, false);
             var allParticipationObjects = allPos.DistinctBy(po => (po.ID, po.ParticipationObjectTypeId, po.Name));
 
             ViewBag.TotalAmountPaid = currentAccount.GetTotalAmountBilledOut(q, null, null, startDate, endDate, msgs);
@@ -195,7 +195,7 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 var ids = transactionIds.Split(',').Select(p => p.ToInteger()).ToList();
 
-                transactions = Transaction.LoadList(ids).ToList();
+                transactions = currentAccount.GetBillerAccountTransactions(ids, msgs);
                 ViewBag.TotalAmount = transactions.Sum(p => p.GetBillerPayout()).ToCurrency();
                 ViewBag.TranIds = transactionIds;
                 ViewBag.TotalPayoutAmount = ViewBag.TotalAmount;
