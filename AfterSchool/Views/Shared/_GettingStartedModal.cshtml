@@ -26,7 +26,7 @@
                     Before we publish your activity lets confirm your email.
                 </div>
                 <div id="modal-email-confirmation-btn" class="margin-v-30 text-center">
-                    <a href="#" class="btn btn-primary btn-free-profile" onclick="return resendValidationEmail()">Re-Send Validation email.</a>
+                    <a href="#" class="btn btn-primary btn-free-profile" onclick="return resendValidationEmail()">Re-send verification email</a>
                 </div>
             </div>
         </div>
@@ -107,9 +107,10 @@
     }
 
     function resendValidationEmail() {
+        AccountSetup.sendVerificationEmail();
         $('#modal-email-confirmation-text').html('An email has been sent to <span style="color: #00b492;">@accountOwner.Email</span> Please check your inbox for next steps.');
         $('#modal-email-confirmation-btn').hide();
-        $('#footer-activity').removeClass('hide');
+        $('#footer-activity').removeClass('hide');      
     }
 
     function hideAcceptPaymentModal() {
