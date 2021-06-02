@@ -9,6 +9,14 @@ namespace AfterSchoolLibrary
 {
     public static class Extensions
     {
+        /// <summary>
+        /// Determines if Guid is Guid.Empty
+        /// </summary>
+        public static bool IsNotNullOrEmpty(this Guid guid)
+        {
+            return (guid != Guid.Empty);
+        }
+
         public static Lob.Models.AccountType ToLobAccountType(this LegalEntityType legalEntityType)
         {
             if (legalEntityType == LegalEntityType.Company)
@@ -198,6 +206,29 @@ namespace AfterSchoolLibrary
             }
 
             return span;
+        }
+    }
+
+    public static class DateTimeExtensions
+    {
+        /// <summary>
+        /// Use to get the DateTime for the start of the week.
+        /// DateTime dt = DateTime.Now.StartOfWeek(DayOfWeek.Monday);
+        /// DateTime dt = DateTime.Now.StartOfWeek(DayOfWeek.Sunday);
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <param name="startOfWeek"></param>
+        /// <returns></returns>
+        public static DateTime StartOfWeek(this DateTime dt, DayOfWeek startOfWeek)
+        {
+            int diff = (7 + (dt.DayOfWeek - startOfWeek)) % 7;
+            return dt.AddDays(-1 * diff).Date;
+        }
+
+        public static DateTime EndOfWeek(this DateTime dt, DayOfWeek startOfWeek)
+        {
+            int diff = (7 - (dt.DayOfWeek - startOfWeek)) % 7;
+            return dt.AddDays(1 * diff).Date;
         }
     }
 }

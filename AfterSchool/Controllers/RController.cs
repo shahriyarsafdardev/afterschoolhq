@@ -233,7 +233,7 @@ namespace AfterSchool.Controllers
                 regClosed = participationObjects.Where(po => po.NotIn(regWillOpen) && po.RegistrationPeriod.IsClosed(account, msgs)).ToList();
 
                 // LOG: Someone Browsed Account AccountName's Programs
-                WebSessionUtilities.LogActivity(
+                account.LogActivity(
                     webSessionId: SessionVariables.WebSession.ID.Value,
                     actor: SessionVariables.CurrentUser,
                     actionType: WebSessionActionType.BrowsedAllActivities,
@@ -400,7 +400,7 @@ namespace AfterSchool.Controllers
             ViewBag.AccountProfile = accountProfile;
 
             // LOG: Someone Viewed ParticipationObjectType ParticipationObjectName by Account AccountName
-            WebSessionUtilities.LogActivity(
+            account.LogActivity(
                 webSessionId: SessionVariables.WebSession.ID.Value,
                 actor: SessionVariables.CurrentUser,
                 actionType: WebSessionActionType.Viewed,
@@ -451,7 +451,7 @@ namespace AfterSchool.Controllers
             ViewBag.AccountProfile = account.GetAccountProfile(msgs);
 
             // LOG: Somone Viewed Session SessionName by Account AccountName
-            WebSessionUtilities.LogActivity(
+            account.LogActivity(
                 actor: SessionVariables.CurrentUser,
                 webSessionId: SessionVariables.WebSession.ID.Value,
                 actionType: WebSessionActionType.Viewed,
@@ -513,7 +513,7 @@ namespace AfterSchool.Controllers
             ViewBag.AccountProfile = account.GetAccountProfile(msgs);
 
             // LOG: Somone Viewed League LeagueName by Account AccountName
-            WebSessionUtilities.LogActivity(
+            account.LogActivity(
                 actor: SessionVariables.CurrentUser,
                 webSessionId: SessionVariables.WebSession.ID.Value,
                 actionType: WebSessionActionType.Viewed,
@@ -720,7 +720,7 @@ namespace AfterSchool.Controllers
             if (masterRegistrant.IsParentOrGuardian)
             {
                 // LOG: Somone Began Registration for ParticipationObjectType ParticipationObjectName by Account AccountName
-                WebSessionUtilities.LogActivity(
+                SessionVariables.CurrentAccount.LogActivity(
                     actor: SessionVariables.CurrentUser,
                     webSessionId: SessionVariables.WebSession.ID.Value,
                     actionType: WebSessionActionType.BeganRegistration,

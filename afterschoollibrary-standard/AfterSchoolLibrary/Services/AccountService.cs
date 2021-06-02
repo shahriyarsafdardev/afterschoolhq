@@ -46,12 +46,7 @@ namespace AfterSchoolLibrary.Services
                 return Form.Load(account.ContactFormId.Value, msgs, dc);
 
             return null;
-        }
-
-        public static List<ActivitySchedule> GetActivitySchedules(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return ActivitySchedule.LoadByAccountId(account.ID.Value, msgs, dc);
-        }
+        }        
 
         public static void MarkAsDeleted(this Account account, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
@@ -85,7 +80,29 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(account.Save(dc));
         }
 
+        #region ActivitySchedule
+
+        public static ActivitySchedule GetActivitySchedule(this Account account, int Id, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return ActivitySchedule.LoadByIdByAccountId(Id, account.ID.Value, msgs, dc);
+        }
+
+        public static List<ActivitySchedule> GetActivitySchedules(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return ActivitySchedule.LoadByAccountId(account.ID.Value, msgs, dc);
+        }
+
+        #endregion
+
         #region ActivityMessages
+
+        public static ActivityMessage GetActivityMessage(this Account account, Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (Uid.IsNotNullOrEmpty() && account.IsNotEmpty())
+                return ActivityMessage.LoadByUidByAccountId(Uid, account.ID.Value, msgs, dc);
+
+            return null;
+        }
 
         public static List<ActivityMessage> GetActivityMessages(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -135,6 +152,22 @@ namespace AfterSchoolLibrary.Services
         #endregion
 
         #region Activities
+
+        public static Activity GetActivity(this Account account, int Id, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (account.IsNotEmpty())
+                return Activity.LoadByIdByAccountId(Id, account.ID.Value, msgs, dc);
+
+            return null;
+        }
+
+        public static Activity GetActivity(this Account account, Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (Uid.IsNotNullOrEmpty() && account.IsNotEmpty())
+                return Activity.LoadByUidByAccountId(Uid, account.ID.Value, msgs, dc);
+
+            return null;
+        }
 
         public static List<ParticipationObject> GetPublishedParticipationObjects(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -204,6 +237,14 @@ namespace AfterSchoolLibrary.Services
             return ActivityForm.LoadByAccountId(account.ID.Value, msgs, dc);
         }
 
+        public static List<Activity> GetActivities(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (account.IsNotEmpty())
+                return Activity.LoadByAccountId(account.ID.Value, msgs, dc);
+
+            return null;
+        }
+
         public static List<Activity> GetActivities(this Account account, UserType userType, WebUser user, ActivityType? activityType, bool? isArchived, bool? isDeleted, bool? ungroupedOnly, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (user.IsEmpty() || userType.In(AccountService.AdminUserTypes))
@@ -212,6 +253,11 @@ namespace AfterSchoolLibrary.Services
             return Activity.LoadByAccountId(account.ID.Value, null, null, activityType, isArchived, isDeleted, ungroupedOnly, start, length, msgs, dc)
                     .Where(activity => user.HasAccessToActivity(activity, msgs, dc))
                     .ToList();
+        }
+
+        public static List<Activity> GetAllActivitiesForAccount(this Account account,  SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Activity.LoadByAccountId(account.ID.Value, msgs, dc);  
         }
 
         public static int GetActivityCount(this Account account, UserType userType, WebUser user, ActivityType? activityType, bool? isArchived, bool? isDeleted, bool? ungroupedOnly, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -444,6 +490,14 @@ namespace AfterSchoolLibrary.Services
         #endregion
 
         #region Sessions
+        
+        public static ActivityGroup GetActivityGroup(this Account account, Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (Uid.IsNotNullOrEmpty() && account.IsNotEmpty())
+                return ActivityGroup.LoadByUidByAccountId(Uid, account.ID.Value, msgs, dc);
+
+            return null;
+        }
 
         public static List<ActivityGroup> GetActivityGroups(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -574,11 +628,6 @@ namespace AfterSchoolLibrary.Services
         #region AccountPackage
 
         public static AccountPackage GetActiveAccountPackage(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return AccountPackage.LoadByAccountIdByIsActive(account.ID.Value, true, msgs, dc);
-        }
-
-        public static AccountPackage GetActiveAccountPackageWithCreatedDate(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return AccountPackage.LoadByAccountId(account.ID.Value, true, "CreateDate", OrderByDirectionEnum.Descending, msgs, dc);
         }
@@ -1131,7 +1180,7 @@ namespace AfterSchoolLibrary.Services
                 return StripeHelper.GetCustomer(account.StripeCustomerId, null, msgs);
 
             return null;
-        }
+        }        
 
         #endregion
 
@@ -1174,6 +1223,14 @@ namespace AfterSchoolLibrary.Services
         public static int GetRegistrantActivityCount(this Account account, DatabaseConnection dc = null)
         {
             return RegistrantActivity.GetCount(new Hashtable() { { "ActivityAccountId", account.ID.Value } });
+        }
+
+        public static Registrant GetRegistrant(this Account account, Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (Uid.IsNotNullOrEmpty() && account.IsNotEmpty())
+                return Registrant.LoadByUidByAccountId(Uid, account.ID.Value, msgs, dc);
+
+            return null;
         }
 
         #endregion
@@ -1309,6 +1366,18 @@ namespace AfterSchoolLibrary.Services
                 },
                 msgs: msgs,
                 dc: dc);
+        }
+
+        public static List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)> GetParticipationObjectsByBillerAccountId(this Account billerAccount,
+            DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.GetParticipationObjectsByBillerOrPayerAccountId(billerAccount.ID, null, startDate, endDate, isDeleted, msgs, dc);
+        }
+
+        public static List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)> GetParticipationObjectsByPayerAccountId(this Account payerAccount,
+            DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.GetParticipationObjectsByBillerOrPayerAccountId(null, payerAccount.ID, startDate, endDate, isDeleted, msgs, dc);
         }
 
         public static List<Registration> SearchRegistrations(this Account account, string searchText, int? questionId, List<int> participationObjectIds, ParticipationObjectType participationObjectType, RegistrationStatus regStatus, List<RegistrationAssignmentType> rats, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -1633,7 +1702,7 @@ namespace AfterSchoolLibrary.Services
                 action: (SystemMessages amsgs, BasicLibrary.DataAccess.DatabaseConnection adc) =>
                 {
                     package = Package.Load(packageId, amsgs, adc);
-                    currentPackage = account.GetActiveAccountPackageWithCreatedDate(amsgs, adc);
+                    currentPackage = account.GetActiveAccountPackage(amsgs, adc);
 
                     var trialDayCount = 0;
 
@@ -2587,6 +2656,14 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
+        public static Payout GetPayout(this Account account, Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (Uid.IsNotNullOrEmpty() && account.IsNotEmpty())
+                return Payout.LoadByUidByAccountId(Uid, account.ID.Value, msgs, dc);
+
+            return null;
+        }
+
         public static List<Payout> GetPayouts(this Account account, PayoutStatus? payoutStatus, DateTime? startDate, DateTime? endDate, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Payout.LoadPayouts(account.ID.Value, payoutStatus, startDate, endDate, start, length, msgs, dc);
@@ -2673,6 +2750,26 @@ namespace AfterSchoolLibrary.Services
         public static List<Transaction> GetTransactions(this Account account, string search, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, bool isDeleted, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Transaction.LoadByAccountId(account.ID.Value, search, startDate, endDate, participationObjects, isDeleted, start, length, msgs, dc);
+        }
+
+        public static Transaction GetBillerTransaction(this Account account, Guid transactionUid, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.LoadByUidByBillerAccountId(transactionUid, account.ID.Value, msgs, dc);
+        }
+
+        public static Transaction GetPayerTransaction(this Account account, Guid transactionUid, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.LoadByUidByPayerAccountId(transactionUid, account.ID.Value, msgs, dc);
+        }
+
+        public static List<Transaction> GetBillerAccountTransactions(this Account account, List<int> ids, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.LoadByIdsByBillerAccountId(ids, account.ID.Value, msgs, dc);
+        }
+
+        public static List<Transaction> GetPayerAccountTransactions(this Account account, List<int> ids, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.LoadByIdsByPayerAccountId(ids, account.ID.Value, msgs, dc);
         }
 
         public static int GetBilledTransactionCount(this Account account, string search, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -3585,12 +3682,7 @@ namespace AfterSchoolLibrary.Services
         public static decimal GetTotalAmountDebited(this Account account, string search, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Transaction.GetTotalAmountDebitedFromAccount(account.ID.Value, search, startDate, endDate, false, msgs, dc);
-        }
-
-        public static List<RefundRequest> GetRefundRequests(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return RefundRequest.LoadByAccountId(account.ID.Value, msgs, dc);
-        }
+        }        
 
         // TODO: Needs review
         public static decimal GetSubscriptionPlatformFeePercent(this Account billingAccount, SubscriptionPlan plan, PaymentType paymentType, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -3647,6 +3739,22 @@ namespace AfterSchoolLibrary.Services
         #endregion
 
         #region Coupons
+
+        public static Coupon GetCoupon(this Account account, Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (Uid.IsNotNullOrEmpty() && account.IsNotEmpty())
+                return Coupon.LoadByUidByAccountId(Uid, account.ID.Value, msgs, dc);
+
+            return null;
+        }
+
+        public static List<Coupon> GetCoupons(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (account.IsNotEmpty())
+                return Coupon.LoadByAccountId(account.ID.Value, msgs, dc);
+
+            return null;
+        }
 
         public static List<Coupon> GetCoupons(this Account account, string search, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, bool isDeleted, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -4039,6 +4147,78 @@ namespace AfterSchoolLibrary.Services
         {
             return account.GetActivityMessageRegistrantsForCurrentMessagePeriod().Where(amr => amr.SentEmail).ToList().Count();
         }
+        #endregion
+
+        #region REFUND-REQUEST
+
+        public static RefundRequest GetRefundRequest(this Account account, Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (Uid.IsNotNullOrEmpty() && account.IsNotEmpty())
+                return RefundRequest.LoadByUidByAccountId(Uid, account.ID.Value, msgs, dc);
+
+            return null;
+        }
+
+        public static List<RefundRequest> GetRefundRequests(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RefundRequest.LoadByAccountId(account.ID.Value, msgs, dc);
+        }
+
+        #endregion
+
+        #region WEB SESSION LOGS
+
+        public static void LogActivity(this Account account, int webSessionId, 
+            WebUser actor, WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet, ObjectType indirectObjectType = ObjectType.NotSet,
+            int? objectId = (int?)null, string objectText = "",
+            int? indirectObjectId = (int?)null, string indirectObjectText = "",
+            SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            //..actor	action		    Object		            ObjectType	        IndirectObjectId
+            //..Bharat  Navigated to    FIRST SAMUEL CHURCH(W)  DirectoryAccount   ISYP
+
+            string actorName = (actor.IsNotEmpty() ? actor.FullName : "Someone");
+
+            var actionStringDict = AfterSchoolLibrary.Helpers.WebSessionHelper.GetActionString(objectType, actorName, actionType, objectText, indirectObjectType, indirectObjectText);
+
+            SaveLog(actor: actor,
+                actionStringFormat: actionStringDict.SingleOrDefault(kp => kp.Key == "ActionStringFormat").Value,
+                actionString: actionStringDict.SingleOrDefault(kp => kp.Key == "ActionString").Value,
+                webSessionId: webSessionId,
+                actorId: actor.IsNotEmpty() ? actor.ID : null,
+                accountId: account.IsNotEmpty() ? account.ID : null,
+                actionType: actionType,
+                objectType: objectType,
+                objectId: objectId,
+                indirectObjectId: indirectObjectId,
+                msgs: msgs,
+                dc: dc);
+        }
+
+        public static void SaveLog(WebUser actor, int webSessionId, string actionStringFormat, string actionString, int? actorId = (int?)null, int? accountId = (int?)null,
+            WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet, ObjectType indirectObjectType = ObjectType.NotSet,
+            int? objectId = (int?)null, int? indirectObjectId = (int?)null,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty())
+                msgs = new SystemMessages();
+
+            var action = new WebSessionAction();
+            action.SessionId = webSessionId;
+            action.AccountId = accountId;
+            action.ActionTypeId = actionType;
+            action.ObjectTypeId = objectType;
+            action.ObjectId = objectId;
+            action.IndirectObjectId = indirectObjectId;
+            action.IndirectObjectTypeId = indirectObjectType;
+            action.ActionStringFormat = actionStringFormat;
+            action.ActionString = actionString;
+            action.CreateDate = DateTime.UtcNow;
+            action.CreatedBy = actor?.ID.Value;
+
+            msgs.AddRange(action.Save(dc));
+        }
+
         #endregion
     }
 }

@@ -115,7 +115,6 @@ loadmethod: AccountId|IsPublished, List<>
 loadmethod: LocationId, List<>
 loadmethod: Uid
 loadmethod: Uid|AccountId
-loadmethod: Id|AccountId
 -loadmethod: ParentActivityId, List<>
 loadmethod: ActivityGroupId, List<>
 loadmethod: AccountActivityGroupId, List<>
@@ -214,7 +213,6 @@ loadmethod: AccountId, List<>
 loadmethod: ActivityGroupId, List<>
 loadmethod: AccountId|IsOngoing, List<>
 loadmethod: ActivityGroupId|IsOngoing, List<>
-loadmethod: Id|AccountId
 [end]
 
 [begin]
@@ -689,7 +687,6 @@ loadmethod: AccountId|IsPublished, List<>
 loadmethod: AccountId|IsPublished|IsArchived, List<>
 loadmethod: AccountId|IsPublished|IsInviteOnly, List<>
 loadmethod: AccountId|UniqueName
-loadmethod: Id|AccountId
 loadmethod: Uid
 loadmethod: Uid|AccountId
 loadmethod: Uid|IsPublished
@@ -1179,6 +1176,7 @@ joinproperty: Registrant.RegistrantTypeId, RegistrantType, Int
 joinproperty: Registrant.AccountId, int?, Int
 joinproperty: Attendance.ActivityId, int?, Int
 joinproperty: Attendance.IsCompleted, bool, Bit
+joinproperty: Attendance.Date, DateTime?, DateTime
 loadmethod: RegistrantId, List<>
 loadmethod: AttendanceId, List<>
 loadmethod: AttendanceId|RegistrantId, List<>
@@ -1543,6 +1541,8 @@ property: CouponValue, decimal?, Decimal "10,2"
 loadmethod: BillerAccountId|IsDeleted, List<>
 loadmethod: PayerAccountId|IsDeleted, List<>
 loadmethod: Uid
+loadmethod: Uid|BillerAccountId
+loadmethod: Uid|PayerAccountId
 loadmethod: BillerAccountId|TransactionTypeId|IsDeleted, List<>
 loadmethod: PayerAccountId|TransactionTypeId|IsDeleted, List<>
 loadmethod: StripeChargeOrRefundId

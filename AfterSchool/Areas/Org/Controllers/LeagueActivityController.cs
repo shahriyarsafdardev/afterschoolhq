@@ -269,7 +269,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 if (msgs.HasNoErrors())
                 {
                     // LOG: CurrentUser created Activity ActivityName for ActiivtyGroup ActivityGroupName
-                    WebSessionUtilities.LogActivity(
+                    currentAccount.LogActivity(
                         webSessionId: SessionVariables.WebSession.ID.Value,
                         actor: currentWebUser,
                         actionType: WebSessionActionType.Created,
@@ -1648,7 +1648,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 var currentAccount = SessionVariables.CurrentAccount;
                 // LOG: CurrentWebUser Published Activity ActivityName to Account AccountName's Profile
-                WebSessionUtilities.LogActivity(
+                currentAccount.LogActivity(
                     webSessionId: SessionVariables.WebSession.ID.Value,
                     actor: SessionVariables.CurrentUser,
                     actionType: WebSessionActionType.Published,
@@ -1677,7 +1677,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add(string.Format("{0} has been unpublished", activity.Name), MessageType.Success);
                 var currentAccount = SessionVariables.CurrentAccount;
                 // LOG: CurrentWebUser Unpublished Activity ActivityName from Account AccountName's Profile
-                WebSessionUtilities.LogActivity(
+                currentAccount.LogActivity(
                     webSessionId: SessionVariables.WebSession.ID.Value,
                     actor: SessionVariables.CurrentUser,
                     actionType: WebSessionActionType.Unpublished,

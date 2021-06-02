@@ -211,7 +211,7 @@ namespace AfterSchool.Controllers
                         // Show Succes Message
                         // LOG: Someone is Interested in Activity ActivityName for Account AccountName
                         msgs.Add(string.Format("Your Interest in {0} has been recorded", participationObject.Name), MessageType.Success);
-                        WebSessionUtilities.LogActivity(
+                        account.LogActivity(
                            webSessionId: SessionVariables.WebSession.ID.Value,
                            actor: currentUser,
                            actionType: WebSessionActionType.Interested,
@@ -590,26 +590,26 @@ namespace AfterSchool.Controllers
 
                         if (amsgs.HasNoErrors() && user.IsNotEmpty())
                         {
-                            // LOG: Someone Created
-                            WebSessionUtilities.LogActivity(
-                               webSessionId: SessionVariables.WebSession.ID.Value,
-                               actor: currentUser,
-                               actionType: WebSessionActionType.SignedUp,
-                               objectType: ObjectType.WebUser,
-                               objectId: user.ID.Value,
-                               objectText: user.FullName
-                           );
-
-
                             account = CreateOrUpdateAccount(user, amsgs, adc);
+
                             // LOG: Someone Created Account AccountName
-                            WebSessionUtilities.LogActivity(
+                            account.LogActivity(
                                webSessionId: SessionVariables.WebSession.ID.Value,
                                actor: currentUser,
                                actionType: WebSessionActionType.Created,
                                objectType: ObjectType.Account,
                                objectId: account.ID.Value,
                                objectText: account.Name
+                           );
+
+                            // LOG: Someone Created User UserName
+                            account.LogActivity(
+                               webSessionId: SessionVariables.WebSession.ID.Value,
+                               actor: currentUser,
+                               actionType: WebSessionActionType.SignedUp,
+                               objectType: ObjectType.WebUser,
+                               objectId: user.ID.Value,
+                               objectText: user.FullName
                            );
                         }
 
@@ -1081,8 +1081,8 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public ActionResult AddStudent(string id, string samehomeaddress, string createuseraccount, string locationname, string streetnumber, string streetname, string address2, string neighborhood, 
-            string city, string county, string state, string postalcode, string country, string placeid, decimal latitude, decimal longitude)
+        public ActionResult AddStudent(string id, string samehomeaddress, string createuseraccount, string locationname = null, string streetnumber = null, string streetname = null, string address2 = null, string neighborhood = null, 
+            string city = null, string county = null, string state = null, string postalcode = null, string country = null, string placeid = null, decimal? latitude = null, decimal? longitude = null, bool schoolnotfound = false)
         {
             var results = CheckRedirect(checkForEmptyCart: true);
             if (results.IsNotEmpty()) return results;
@@ -1102,6 +1102,7 @@ namespace AfterSchool.Controllers
                 if (question.IsRequired && answer.IsEmpty())
                     msgs.Add($"{question.Text} is required", MessageType.UserError);
 
+
                 switch (question.QuestionDataTypeId)
                 {
                     case QuestionDataType.RegistrantHomePhone:
@@ -1113,6 +1114,9 @@ namespace AfterSchool.Controllers
 
                 }
             });
+
+            if (placeid.IsEmpty() && !schoolnotfound)
+                msgs.Add($"Location is required", MessageType.UserError);
 
             var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
             var email = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail).Value;
@@ -1174,16 +1178,16 @@ namespace AfterSchool.Controllers
                         // LOG: Someone Created Registrant RegistrantName for Account AccountName
                         if (student.IsNotEmpty() && amsgs.HasNoErrors())
                         {
-                            WebSessionUtilities.LogActivity(
+                            currentAccount.LogActivity(
                                 webSessionId: SessionVariables.WebSession.ID.Value,
                                 actor: currentUser,
-                               actionType: WebSessionActionType.Created,
-                               objectType: ObjectType.Registrant,
-                               objectId: student.ID.Value,
-                               objectText: student.FullName,
-                               indirectObjectType: ObjectType.Account,
-                               indirectObjectId: currentAccount.ID.Value,
-                               indirectObjectText: currentAccount.Name
+                                actionType: WebSessionActionType.Created,
+                                objectType: ObjectType.Registrant,
+                                objectId: student.ID.Value,
+                                objectText: student.FullName,
+                                indirectObjectType: ObjectType.Account,
+                                indirectObjectId: currentAccount.ID.Value,
+                                indirectObjectText: currentAccount.Name
                            );
                         }
                             
@@ -1662,7 +1666,7 @@ namespace AfterSchool.Controllers
             if (msgs.HasNoErrors())
             {
                 // LOG: Someone Registered RegistrantName for ParticipationObjectType ParticipationObjectName
-                WebSessionUtilities.LogActivity(
+                SessionVariables.CurrentAccount.LogActivity(
                     webSessionId: SessionVariables.WebSession.ID.Value,
                     actor: currentUser,
                     actionType: WebSessionActionType.Registered,
@@ -1915,12 +1919,12 @@ namespace AfterSchool.Controllers
                     // LOG: Someone Paid amount/billing period via paymentType for participationObjectType participationObjectName
                     // or
                     // LOG: Someone Paid amount via PaymentType for participationObjectType participationObjectName
-                    WebSessionUtilities.LogActivity(
+                    SessionVariables.CurrentAccount.LogActivity(
                            webSessionId: SessionVariables.WebSession.ID.Value,
                            actor: SessionVariables.CurrentUser,
                            actionType: WebSessionActionType.Paid,
                            objectType: ObjectType.Transaction,
-                           objectId: checkoutObject.Transaction.ID.Value,
+                           objectId: checkoutObject.Transaction?.ID.Value,
                            objectText: phrase,
                            indirectObjectType: participationObject.GetWebSessionObjectType(),
                            indirectObjectId: participationObject.ObjectID.Value,
@@ -2050,7 +2054,7 @@ namespace AfterSchool.Controllers
                     var phrase = $@"{overrideAmount.ToCurrency()} via {(bankAccountPurchaseObject.IsNotEmpty() ? "Bank Account" : "Credit Card")}";
 
                     // LOG: Someone Paid amount via PaymentType to participationObjectType participationObjectName
-                    WebSessionUtilities.LogActivity(
+                    SessionVariables.CurrentAccount.LogActivity(
                            webSessionId: SessionVariables.WebSession.ID.Value,
                            actor: SessionVariables.CurrentUser,
                            actionType: WebSessionActionType.Paid,

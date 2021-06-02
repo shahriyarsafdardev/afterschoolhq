@@ -464,7 +464,7 @@ namespace AfterSchool.Controllers
                     if (msgs.HasNoErrors())
                     {
                         // LOG: Someone Contacted Account AccountName
-                        WebSessionUtilities.LogActivity(
+                        account.LogActivity(
                             actor: SessionVariables.CurrentUser, 
                             webSessionId: SessionVariables.WebSession.ID.Value,
                             actionType: WebSessionActionType.Contacted,
@@ -513,7 +513,7 @@ namespace AfterSchool.Controllers
                 if (msgs.HasNoErrors())
                 {
                     // LOG: Someone Followed Account AccountName
-                    WebSessionUtilities.LogActivity(
+                    account.LogActivity(
                         webSessionId: SessionVariables.WebSession.ID.Value,
                         actor: SessionVariables.CurrentUser,
                         actionType: WebSessionActionType.Followed,
@@ -560,7 +560,7 @@ namespace AfterSchool.Controllers
                 if (msgs.HasNoErrors())
                 {
                     // LOG: Someone Unfollowed Account AccountName
-                    WebSessionUtilities.LogActivity(
+                    account.LogActivity(
                         webSessionId: SessionVariables.WebSession.ID.Value,
                         actor: SessionVariables.CurrentUser,
                         actionType: WebSessionActionType.Unfollowed,

@@ -157,7 +157,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add($"{UILabel.ActivityGroupLabel(group.ActivityGroupTypeId)} Saved", MessageType.Success);
 
                 // LOG: CurrentUser Saved ActivityGroup ActivityGroupName for Account AccountName
-                WebSessionUtilities.LogActivity(
+                currentAccount.LogActivity(
                     webSessionId: SessionVariables.WebSession.ID.Value,
                     actor: currentWebUser,
                     actionType: WebSessionActionType.Updated,
@@ -622,7 +622,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add(string.Format("{0} has been published", group.Name), MessageType.Success);
                 var currentAccount = SessionVariables.CurrentAccount;
                 // LOG: CurrentUSer published ActivityGroup ActivityGroupName from AccountAccountName's Profile
-                WebSessionUtilities.LogActivity(
+                currentAccount.LogActivity(
                     webSessionId: SessionVariables.WebSession.ID.Value,
                     actor: SessionVariables.CurrentUser,
                     actionType: WebSessionActionType.Published,
@@ -651,7 +651,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add(string.Format("{0} has been unpublished", group.Name), MessageType.Success);
                 var currentAccount = SessionVariables.CurrentAccount;
                 // LOG: CurrentUSer unpublished ActivityGroup ActivityGroupName from AccountAccountName's Profile
-                WebSessionUtilities.LogActivity(
+                currentAccount.LogActivity(
                     webSessionId: SessionVariables.WebSession.ID.Value,
                     actor: SessionVariables.CurrentUser,
                     actionType: WebSessionActionType.Unpublished,

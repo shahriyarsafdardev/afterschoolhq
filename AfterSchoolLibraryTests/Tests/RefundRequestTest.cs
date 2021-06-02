@@ -93,5 +93,30 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.Equal(RefundRequestStatus.Completed,refundRequest.RefundRequestStatusId);
         }
+
+        [Fact]
+        public void LoadByUidByAccountIdTest()
+        {
+            try
+            {
+                // Arrange
+                var refundRequest = RefundRequestFactory.Create(100, TestTransaction, BillingAccount, "it sitnks", PayingWebUser, msgs, dc);
+
+                // Act                
+                var expected = RefundRequest.LoadByUidByAccountId(Uid: refundRequest.Uid, AccountId: BillingAccount.ID.Value, msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.Equal(expected: expected.ID, actual: refundRequest.ID);
+                Assert.Equal(expected: expected.Uid, actual: refundRequest.Uid);
+                Assert.Equal(expected: expected.AccountId, actual: refundRequest.AccountId);
+                Assert.Equal(expected: expected.TransactionId, actual: refundRequest.TransactionId);
+                Assert.Equal(expected: expected.Amount, actual: refundRequest.Amount);                
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
     }
 }
