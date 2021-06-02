@@ -950,7 +950,6 @@ join: Account.ID, AccountId, InnerJoin
 joinproperty: Account.Name, string, NVarChar
 loadmethod: AccountId, List<>
 loadmethod: Uid
-loadmethod: Id|AccountId
 [end]
 
 [begin]

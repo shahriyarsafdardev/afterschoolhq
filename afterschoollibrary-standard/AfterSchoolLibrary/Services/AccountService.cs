@@ -46,7 +46,15 @@ namespace AfterSchoolLibrary.Services
                 return Form.Load(account.ContactFormId.Value, msgs, dc);
 
             return null;
-        }        
+        }
+
+        public static Form GetForm(this Account account, int Id, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (account.IsNotEmpty())
+                return Form.LoadByIdByAccountId(Id, account.ID.Value, msgs, dc);
+
+            return null;
+        }
 
         public static void MarkAsDeleted(this Account account, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
@@ -721,6 +729,14 @@ namespace AfterSchoolLibrary.Services
             return account.GetMembers(start, length, msgs, dc)
                     .Select(x => x.ToWebUser())
                     .ToList();
+        }
+
+        public static AccountWebUser GetAccountWebUser(this Account account, int webUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (account.IsNotEmpty())
+                return AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, webUserId, msgs, dc);
+
+            return null;
         }
 
         public static List<AccountWebUser> GetMembers(this Account account, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -2064,6 +2080,14 @@ namespace AfterSchoolLibrary.Services
         #endregion
 
         #region AccountRelationships
+
+        public static AccountRelationship GetAccountRelationship(this Account account, int Id, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (account.IsNotEmpty())
+                return AccountRelationship.LoadByIdByHostAccountId(Id, account.ID.Value, msgs, dc);
+
+            return null;
+        }
 
         public static List<Account> GetVisitorAccounts(this Account hostAccount, List<AccountType> accountTypes, SystemMessages msgs = null, DatabaseConnection dc = null)
         {

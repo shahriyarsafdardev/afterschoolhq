@@ -528,9 +528,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 isAfterSchool: true);
 
             if (user.IsNotEmpty() && account.IsNotEmpty())
-            {
                 SendGridHelper.AddOrUpdateContact(account, user, msgs);
-            }
 
             return View();
         }
@@ -670,7 +668,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var accountUserType = SessionVariables.AccountUserType;
             var user = WebUser.LoadByUid(id.ToGuid());
-            var awu = AccountWebUser.LoadByAccountIdByWebUserId(currentAccount.ID.Value, user.ID.Value, msgs);
+            var awu = currentAccount.GetAccountWebUser(user.ID.Value, msgs);
 
             if (awu.IsNotEmpty() && currentUser.HasAccessTo(currentAccount, msgs) && accountUserType.In(AccountService.AdminUserTypes))
                 awu.MarkAsDeleted(currentUser, msgs);
@@ -695,7 +693,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult ApproveVisitor(string id)
         {
             var msgs = new SystemMessages();
-            var accountRelationship = AccountRelationship.Load(id.ToInteger(), msgs);
+            var accountRelationship = SessionVariables.CurrentAccount.GetAccountRelationship(id.ToInteger(), msgs);
             msgs.AddRange(accountRelationship.UpdateApprovalStatus(ApprovalStatus.Approved, SessionVariables.CurrentUser));
 
             return RedirectToAction("visitors");
@@ -705,7 +703,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult DenyVisitor(string id)
         {
             var msgs = new SystemMessages();
-            var accountRelationship = AccountRelationship.Load(id.ToInteger(), msgs);
+            var accountRelationship = SessionVariables.CurrentAccount.GetAccountRelationship(id.ToInteger(), msgs);
             msgs.AddRange(accountRelationship.UpdateApprovalStatus(ApprovalStatus.Denied, SessionVariables.CurrentUser));
 
             return RedirectToAction("visitors");
@@ -721,11 +719,12 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult FormEdit(string id, string qg)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty() || id.IsEmpty())
+            var currentAccount = SessionVariables.CurrentAccount;
+            if (currentAccount.IsEmpty() || id.IsEmpty())
                 return HttpNotFound();
 
             var msgs = new SystemMessages();
-            var form = Form.LoadByIdByAccountId(id, SessionVariables.CurrentAccount.ID.Value, msgs);
+            var form = currentAccount.GetForm(id.ToInteger(), msgs);
             var questionGroups = form.GetQuestionGroups();
             var individualGroups = questionGroups
                 .Where(x => x.RegistrantTypeId == RegistrantType.Individual)
@@ -758,9 +757,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     questionGroup = FormQuestionGroup.Load(qg.ToInteger());
             }
             else
-            {
                 questionGroup = null;
-            }
 
             ViewBag.Messages = new SystemMessages();
             ViewBag.QuestionGroups = questionGroups;
@@ -773,7 +770,9 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpPost]
         public ActionResult FormEdit(string id, string copyfrom, string qg, string name, string description, string cmd)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty() || id.IsEmpty() || copyfrom.IsEmpty())
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            if (currentAccount.IsEmpty() || id.IsEmpty() || copyfrom.IsEmpty())
                 return HttpNotFound();
 
             var msgs = new SystemMessages();
@@ -789,15 +788,14 @@ namespace AfterSchool.Areas.Org.Controllers
             if (id.ToInteger() == 0)
             {
                 if (copyfrom.IsNumber())
-                    form = Form.LoadByIdByAccountId(copyfrom, SessionVariables.CurrentAccount.ID.Value, msgs)
-                        .Copy(SessionVariables.CurrentUser.ID.Value, SessionVariables.CurrentAccount.ID.Value, null, msgs);
+                    form = currentAccount.GetForm(id.ToInteger(), msgs)?
+                        .Copy(currentUser.ID.Value, currentAccount.ID.Value, null, msgs);
                 else
-                    form = SessionVariables.CurrentAccount
-                        .GetDefaultForm(msgs)
-                        .Copy(SessionVariables.CurrentUser.ID.Value, SessionVariables.CurrentAccount.ID.Value, null, msgs);
+                    form = currentAccount.GetDefaultForm(msgs)
+                        .Copy(currentUser.ID.Value, currentAccount.ID.Value, null, msgs);
             }
             else
-                form = Form.LoadByIdByAccountId(id, SessionVariables.CurrentAccount.ID.Value, msgs);
+                form = currentAccount.GetForm(id.ToInteger(), msgs);
 
             if (msgs.HasNoErrors())
             {
@@ -819,9 +817,9 @@ namespace AfterSchool.Areas.Org.Controllers
                                 questionGroup = new FormQuestionGroup()
                                 {
                                     CreateDate = DateTime.UtcNow,
-                                    CreatedBy = SessionVariables.CurrentUser.ID,
+                                    CreatedBy = currentUser.ID,
                                     LastModifiedDate = DateTime.UtcNow,
-                                    LastModifiedBy = SessionVariables.CurrentUser.ID,
+                                    LastModifiedBy = currentUser.ID,
                                     DisplayOrder = form.GetQuestionGroupCount(amsgs, adc) + 1,
                                     FormId = form.ID,
                                     QuestionGroupDataTypeId = QuestionGroupDataType.NotSet,
@@ -839,7 +837,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                 if (questionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.NotSet)
                                 {
                                     questionGroup.Name = Request.Params[$"name-{questionGroup.ID}"];
-                                    questionGroup.LastModifiedBy = SessionVariables.CurrentUser.ID;
+                                    questionGroup.LastModifiedBy = currentUser.ID;
                                     questionGroup.LastModifiedDate = DateTime.UtcNow;
                                     amsgs.AddRange(questionGroup.Save(adc));
                                 }
@@ -865,7 +863,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                                     }
 
-                                    question.LastModifiedBy = SessionVariables.CurrentUser.ID;
+                                    question.LastModifiedBy = currentUser.ID;
                                     question.LastModifiedDate = DateTime.UtcNow;
                                     amsgs.AddRange(question.Save(adc));
                                 }
@@ -884,8 +882,8 @@ namespace AfterSchool.Areas.Org.Controllers
                                         FormId = form.ID,
                                         CreateDate = DateTime.UtcNow,
                                         LastModifiedDate = DateTime.UtcNow,
-                                        CreatedBy = SessionVariables.CurrentUser.ID,
-                                        LastModifiedBy = SessionVariables.CurrentUser.ID,
+                                        CreatedBy = currentUser.ID,
+                                        LastModifiedBy = currentUser.ID,
                                         DisplayOrder = questionGroup.GetQuestionCount(amsgs, adc) + 1,
                                         FormQuestionGroupId = questionGroup.ID,
                                         IsTemplate = false,
@@ -1320,29 +1318,26 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult NewBilling(string id, string ReturnUrl, string featureId)
         {
+            var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
 
             if (SessionVariables.AccountPackage.IsEmpty())
             {
-                var accountPackages = SessionVariables.CurrentAccount.GetAccountPackages(msgs).Where(ap => ap.IsActive);
+                var accountPackages = currentAccount.GetAccountPackages(msgs).Where(ap => ap.IsActive);
 
                 if (!accountPackages.Any())
                 {
                     var defaultPackage = Package.Load(msgs: msgs).First();
-                    SessionVariables.AccountPackage = SessionVariables.CurrentAccount.AddPackage(defaultPackage.ID.Value, BillingPeriodType.Month, SessionVariables.LoggedInUser, msgs);
+                    SessionVariables.AccountPackage = currentAccount.AddPackage(defaultPackage.ID.Value, BillingPeriodType.Month, SessionVariables.LoggedInUser, msgs);
                 }
                 else
-                {
-                    SessionVariables.AccountPackage = accountPackages.Where(ap => ap.IsActive).First();
-                }
+                    SessionVariables.AccountPackage = accountPackages.First(ap => ap.IsActive);
 
                 return LoginRedirect();
             }
 
             if (ReturnUrl.IsNotEmpty())
-            {
                 ViewBag.ReturnUrl = ReturnUrl;
-            }
 
              var package = id.IsGuid() ? Package.LoadByUid(id.ToGuid()) : SessionVariables.AccountPackage?.ToPackage();
 
@@ -1399,7 +1394,9 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpPost]
         public ActionResult NewPayment(string selectedpackage, string stripetoken, string cardId)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
+            var currentAccount = SessionVariables.CurrentAccount;
+
+            if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
             var msgs = new SystemMessages();
@@ -1407,7 +1404,7 @@ namespace AfterSchool.Areas.Org.Controllers
             Package package = null;
             AccountPackage newlyAddedPackage = null;
             Stripe.Customer customer = null;
-            var currentAccount = SessionVariables.CurrentAccount;
+            
             var isFromTrialAccount = SessionVariables.AccountPackage?.IsDuringTrial ?? false;
 
             if (stripetoken.IsEmail() || cardId.IsEmpty())
@@ -1510,7 +1507,9 @@ namespace AfterSchool.Areas.Org.Controllers
 
         public ActionResult OAuthStripe()
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
+            var currentAccount = SessionVariables.CurrentAccount;
+
+            if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
             var msgs = new SystemMessages();
@@ -1520,7 +1519,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var id = Session["activityUid"];
 
             if (Request["error"].IsEmpty())
-                SessionVariables.CurrentAccount.CompleteStripeConnect(Request["code"], SessionVariables.CurrentUser, msgs);
+                currentAccount.CompleteStripeConnect(Request["code"], SessionVariables.CurrentUser, msgs);
             else
                 msgs.Add("It appears you have canceled your request to connect your Stripe account.", MessageType.Notice);
 
@@ -1531,7 +1530,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     Session["activityUid"] = null;
                     TempData["IsStripeIntegrated"] = true;
 
-                    var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+                    var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
                     if (activity.IsNotEmpty() && activity.ShortHomePageUrl.IsNotEmpty())
                         return Redirect(activity.ShortHomePageUrl);
