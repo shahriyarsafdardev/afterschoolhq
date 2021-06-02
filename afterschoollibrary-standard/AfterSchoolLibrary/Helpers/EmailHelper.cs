@@ -950,7 +950,7 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
-        public static void SendAttendanceChargeConfirmation(Dictionary<Attendance, int> attendanceRegistrantActivityCounts, Activity activity, decimal costPerClass, decimal couponDiscount, string customMessage, WebUser loggedInUser, bool sendBcc, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void SendAttendanceChargeConfirmation(Dictionary<Attendance, List<int>> attendanceRegistrantActivityCounts, Activity activity, decimal costPerClass, decimal couponDiscount, string customMessage, WebUser loggedInUser, bool sendBcc, SystemMessages msgs, DatabaseConnection dc = null)
         {
             msgs = msgs ?? new SystemMessages();
 
@@ -965,7 +965,7 @@ namespace AfterSchoolLibrary.Helpers
             attendanceRegistrantActivityCounts.ToList().ForEach(attendanceRegistrantActivityCount =>
             {
                 var attendance = attendanceRegistrantActivityCount.Key;
-                var attendanceCount = attendanceRegistrantActivityCount.Value;
+                var attendanceCount = attendanceRegistrantActivityCount.Value.Count();
                 var totalCharge = attendanceCount * costPerClass;
                 var totalDiscount = attendanceCount * couponDiscount;
 
