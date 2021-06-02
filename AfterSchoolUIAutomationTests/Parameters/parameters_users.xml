@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<PARAMETERS>
+  <!--User Login Info-->
+  <Login>
+    <LoginUrl>http://localhost:54849/login</LoginUrl>
+      <UserName>musicschool@yopmail.com</UserName>
+      <Password>123456789</Password>
+  </Login>
+  <!--Individual Account Signup Info-->
+  <AccountSigUp>
+    <SignUpUrl>http://localhost:54849/signup/Welcome</SignUpUrl>
+    <ProgramName>Rock Climbing</ProgramName>
+    <FirstName>Alex</FirstName>
+    <LasttName>Stuart</LasttName>
+    <Email></Email>
+    <UserPassword>12345678</UserPassword>
+    <UserPassword2>12345678</UserPassword2>
+    <ShortDescription>Rock Climbing Short Description</ShortDescription>
+    <Phone>(202) 555 0155</Phone>
+    <AutoComplete>New York, New York, USA</AutoComplete>
+    <ProgramCategories>Karate, Sports, Leadership</ProgramCategories>
+  </AccountSigUp>
+</PARAMETERS>

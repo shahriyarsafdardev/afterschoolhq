@@ -7,16 +7,17 @@ using System.Linq;
 using System.Text;
 using TechTalk.SpecFlow;
 using AfterSchoolUIAutomationTests.Helpers.Extensions;
+using AfterSchoolUIAutomationTests.Parameters;
 
 namespace AfterSchoolUIAutomationTests.Steps
 {
     [Binding]
-    public sealed class LoginStep
+    public sealed class LoginStep : IDisposable
     {
 
         private readonly ScenarioContext _scenarioContext;
-        private readonly IWebDriver webDriver;
-        private readonly LoginPage loginPage;
+        private IWebDriver webDriver;
+        private LoginPage loginPage;
         private string CurrentURL = "http://localhost:54849/login/select";
 
         public LoginStep(ScenarioContext scenarioContext)
@@ -29,7 +30,7 @@ namespace AfterSchoolUIAutomationTests.Steps
         [Given(@"Open the browser and navigate to the Login Page")]
         public void GivenNavigateToPage()
         {
-            webDriver.Navigate().GoToUrl("http://localhost:54849/login");
+            webDriver.Navigate().GoToUrl(Parameter.Get("Login", "LoginUrl"));
             webDriver.WaitInSeconds(3);
         }
 
@@ -43,14 +44,14 @@ namespace AfterSchoolUIAutomationTests.Steps
         [Given(@"Enter username")]
         public void EnterUserName()
         {
-            loginPage.PopulateName("parent3_hq@yopmail.com");
+            loginPage.PopulateName(Parameter.Get("Login", "UserName"));
             webDriver.WaitInSeconds(2);
         }
 
         [Given(@"Enter Password")]
         public void EnterPassword()
         {
-            loginPage.PopulatePassword("123456789");
+            loginPage.PopulatePassword(Parameter.Get("Login", "Password"));
             webDriver.WaitInSeconds(2);
         }
 
@@ -70,6 +71,14 @@ namespace AfterSchoolUIAutomationTests.Steps
             webDriver.Quit();
             webDriver.Dispose();
         }
-        
+
+        public void Dispose()
+        {
+            if (webDriver != null)
+            {
+                webDriver.Dispose();
+                webDriver = null;
+            }
+        }
     }
 }

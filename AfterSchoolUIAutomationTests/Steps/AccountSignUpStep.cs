@@ -1,5 +1,6 @@
 ﻿using AfterSchoolUIAutomationTests.Helpers.Extensions;
 using AfterSchoolUIAutomationTests.Pages;
+using AfterSchoolUIAutomationTests.Parameters;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using System;
@@ -16,9 +17,8 @@ namespace AfterSchoolUIAutomationTests.Steps
     {
 
         private readonly ScenarioContext _scenarioContext;
-        private readonly IWebDriver webDriver;
-        private readonly AccountSignUpPage accountSignUpPage;
-        private string CurrentURL = "http://localhost:54849/sasasasasas?edit=1";
+        private IWebDriver webDriver;
+        private AccountSignUpPage accountSignUpPage;
 
         public AccountSignUpStep(ScenarioContext scenarioContext)
         {
@@ -30,7 +30,7 @@ namespace AfterSchoolUIAutomationTests.Steps
         [Given(@"Open the browser and navigate to the Signup Page")]
         public void NavigateToSignup()
         {
-            webDriver.Navigate().GoToUrl("http://localhost:54849/signup/Welcome");
+            webDriver.Navigate().GoToUrl(Parameter.Get("AccountSigUp", "SignUpUrl"));
             webDriver.WaitInSeconds(3);
         }
 
@@ -56,7 +56,7 @@ namespace AfterSchoolUIAutomationTests.Steps
         public void PopulateProgramName()
         {
             webDriver.WaitInSeconds(2);
-            accountSignUpPage.PopulateProgramName("Rock Climbing");
+            accountSignUpPage.PopulateProgramName(Parameter.Get("AccountSigUp", "ProgramName"));
             webDriver.WaitInSeconds(6);
             accountSignUpPage.ClickProgramSubmit();
         }
@@ -66,15 +66,15 @@ namespace AfterSchoolUIAutomationTests.Steps
         {
             //--Step 5 
             webDriver.WaitInSeconds(10);
-            accountSignUpPage.PopulateFirstName("Alex");
+            accountSignUpPage.PopulateFirstName(Parameter.Get("AccountSigUp", "FirstName"));
             webDriver.WaitInSeconds(2);
-            accountSignUpPage.PopulateLasttName("Stuart");
+            accountSignUpPage.PopulateLasttName(Parameter.Get("AccountSigUp", "LasttName"));
             webDriver.WaitInSeconds(2);
             accountSignUpPage.PopulateEmail("newemail" + DateTime.Now.ToString("yyyyMMddHHmmss") + "@yopmail.com");
             webDriver.WaitInSeconds(2);
-            accountSignUpPage.PopulateUserPassword("12345678");
+            accountSignUpPage.PopulateUserPassword(Parameter.Get("AccountSigUp", "UserPassword"));
             webDriver.WaitInSeconds(2);
-            accountSignUpPage.PopulateUserPassword2("12345678");
+            accountSignUpPage.PopulateUserPassword2(Parameter.Get("AccountSigUp", "UserPassword2"));
             webDriver.WaitInSeconds(3);
             //accountSignUpPage.CheckCaptcha();
             accountSignUpPage.ClickBasicInfoSubmit();
@@ -89,7 +89,7 @@ namespace AfterSchoolUIAutomationTests.Steps
 
             //--Step 7 
             webDriver.WaitInSeconds(3);
-            accountSignUpPage.PopulateShortDescription("Test Short Desc.");
+            accountSignUpPage.PopulateShortDescription(Parameter.Get("AccountSigUp", "ShortDescription"));
             webDriver.WaitInSeconds(5);
             accountSignUpPage.SelectGender();
             webDriver.WaitInSeconds(3);
@@ -117,9 +117,9 @@ namespace AfterSchoolUIAutomationTests.Steps
         {
             //--Step 9 
             webDriver.WaitInSeconds(2);
-            accountSignUpPage.PopulatePhone("(202) 555 0155");
+            accountSignUpPage.PopulatePhone(Parameter.Get("AccountSigUp", "Phone"));
             webDriver.WaitInSeconds(2);
-            accountSignUpPage.SelectAutoComplete("New York, New York, USA");
+            accountSignUpPage.SelectAutoComplete(Parameter.Get("AccountSigUp", "AutoComplete"));
             webDriver.WaitInSeconds(5);
             accountSignUpPage.ContactInfoSubmit();
         }
@@ -128,17 +128,18 @@ namespace AfterSchoolUIAutomationTests.Steps
         public void PopulateCustomizeYourProfleAndClickContinue()
         {
             //--Step 10 
-            //var outPutDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase);
-            //var profileImage = Path.Combine(outPutDirectory, "img\\musical-instruments-english.jpg");
-            //string relLogo = new Uri(profileImage).LocalPath;
-            //var logoImage = new LinkedResource(relLogo);
-
             string fileName = "musical-instruments-english.jpg";
-            string path = Path.Combine(Environment.CurrentDirectory, @"img\", fileName);
 
-            accountSignUpPage.UploadProfileImage(@"D:\AfterSchool\AfterSchool\img\musical-instruments-english.jpg");
+            //returns url of main directory which contains "/bin/Debug"
+            var url = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase);
+
+            //correction in path to point it in Root directory
+            var mainpath = url.Replace("\\bin\\Debug\\netcoreapp3.1", "") + "\\img\\" + fileName;
+            var imagepath = mainpath.Replace("file:\\", "");
+
+            accountSignUpPage.UploadProfileImage(imagepath);
             webDriver.WaitInSeconds(2);
-            accountSignUpPage.HeaderImageImage(@"D:\AfterSchool\AfterSchool\img\musical-instruments-english.jpg");
+            accountSignUpPage.HeaderImageImage(imagepath);
             accountSignUpPage.CustomizeProfileSubmit();
         }
 
@@ -147,7 +148,7 @@ namespace AfterSchoolUIAutomationTests.Steps
         {
             //--Step 11 
             webDriver.WaitInSeconds(4);
-            accountSignUpPage.PopulateProgramCategories("Karate, Sports, Leadership");
+            accountSignUpPage.PopulateProgramCategories(Parameter.Get("AccountSigUp", "ProgramCategories"));
             accountSignUpPage.EasyActivitySubmit();
         }
 
@@ -169,7 +170,7 @@ namespace AfterSchoolUIAutomationTests.Steps
         }
 
         [Then("Match the current url with the expected url")]
-        public void ThenTheResultShouldBe(int result)
+        public void ThenTheResultShouldBe()
         {
             String text1 = accountSignUpPage.GetH1Text();
             string text2 = "Great Job!";
@@ -178,8 +179,12 @@ namespace AfterSchoolUIAutomationTests.Steps
 
         public void Dispose()
         {
-            webDriver.Quit();
-            webDriver.Dispose();
+            if (webDriver != null)
+            {
+                webDriver.Dispose();
+                webDriver = null;
+            }
+            
         }
     }
 }

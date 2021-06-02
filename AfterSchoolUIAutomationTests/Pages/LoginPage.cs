@@ -4,16 +4,16 @@ using OpenQA.Selenium.Support.UI;
 
 namespace AfterSchoolUIAutomationTests.Pages
 {
-    public class LoginPage
+    public class LoginPage : IDisposable
     {
 
-        private readonly IWebDriver webDriver;
+        private IWebDriver webDriver;
 
         public const int DefaultWaitInSeconds = 5;
 
-        public LoginPage(IWebDriver webDriver)
+        public LoginPage(IWebDriver WebDriver)
         {
-            webDriver = webDriver;
+            webDriver = WebDriver;
         }
 
         //------------Finding Login WebElements-----------
@@ -47,5 +47,14 @@ namespace AfterSchoolUIAutomationTests.Pages
             return this;
         }
         //public void ClickSubmit() => SubmitElement.Click();
+
+        public void Dispose()
+        {
+            if (webDriver != null)
+            {
+                webDriver.Dispose();
+                webDriver = null;
+            }
+        }
     }
 }

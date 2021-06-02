@@ -7,59 +7,59 @@ using System.Threading;
 
 namespace AfterSchoolUIAutomationTests.Pages
 {
-    public class AccountSignUpPage
+    public class AccountSignUpPage : IDisposable
     {
         //The Selenium web driver to automate the browser
 
-        private readonly IWebDriver _webDriver;
+        private IWebDriver webDriver;
 
-        public AccountSignUpPage(IWebDriver webDriver)
+        public AccountSignUpPage(IWebDriver WebDriver)
         {
-            _webDriver = webDriver;
+            webDriver = WebDriver;
         }
 
         //------------Individual Account WebElements-----------
 
-        private IWebElement SignUpGetStartedElement => _webDriver.FindElement(By.XPath("(//button[@id='btn-GetStarted'])[1]"));
-        private IWebElement CreateIndividualAccountElement => _webDriver.FindElement(By.XPath("(//div[@class='row margin-t-35']//button[text()='Create an Individual Account'])[1]"));
-        private IWebElement ProvideProgramsForStudentsElement => _webDriver.FindElement(By.XPath("(//div[@class='row margin-t-35']//button[text()='Provide programs for students'])[1]"));
-        private IWebElement SignUpAccountSearchElement => _webDriver.FindElement(By.Id("signup-account-search"));
-        private IWebElement ProgramNameSubmitElement => _webDriver.FindElement(By.XPath("(//div[@class='visible-md visible-lg']//button[text()='Continue'])[1]"));
-        private IWebElement FirstNameElement => _webDriver.FindElement(By.Name("firstname"));
-        private IWebElement LasttNameElement => _webDriver.FindElement(By.Name("lastname"));
-        private IWebElement EmailElement => _webDriver.FindElement(By.Name("email"));
-        private IWebElement PasswordElement => _webDriver.FindElement(By.Name("password1"));
-        private IWebElement Password2Element => _webDriver.FindElement(By.Name("password2"));
-        private IWebElement CaptchaElement => _webDriver.FindElement(By.Id("recaptcha-anchor"));
-        private IWebElement BasicInfoSubmitElement => _webDriver.FindElement(By.XPath("(//div[@class='visible-md visible-lg margin-v-30']//button[text()='Continue'])[1]"));
-        private IWebElement CreateYourFreeProfileElement => _webDriver.FindElement(By.LinkText("Create Your Free Profile"));
-        private IWebElement ShortDescriptionElement => _webDriver.FindElement(By.Name("headline"));
-        private IWebElement TimeZoneElement => _webDriver.FindElement(By.Id("select-program-timezone"));
-        private IWebElement SaveAndContinueElement => _webDriver.FindElement(By.XPath("(//div[@class='visible-md visible-lg margin-v-30']//button[text()='Save and Continue'])[1]"));
-        private IWebElement GenderElement => _webDriver.FindElement(By.XPath("(//div[@class='am-radio program-radio'][2]//label)"));
-        private IWebElement GradeOrAgeElement => _webDriver.FindElement(By.XPath("(//div[@class='am-radio inline'][1]//label)"));
-        private IWebElement MinGradeElement => _webDriver.FindElement(By.Id("mingrade"));
-        private IWebElement MaxGradeElement => _webDriver.FindElement(By.Id("maxgrade"));
-        private IWebElement ShareInfoWithParentsElement => _webDriver.FindElement(By.XPath("(//div[@class='visible-md visible-lg margin-v-30']//button[text()='Save and Continue'])[1]"));
+        private IWebElement SignUpGetStartedElement => webDriver.FindElement(By.XPath("(//button[@id='btn-GetStarted'])[1]"));
+        private IWebElement CreateIndividualAccountElement => webDriver.FindElement(By.XPath("(//div[@class='row margin-t-35']//button[text()='Create an Individual Account'])[1]"));
+        private IWebElement ProvideProgramsForStudentsElement => webDriver.FindElement(By.XPath("(//div[@class='row margin-t-35']//button[text()='Provide programs for students'])[1]"));
+        private IWebElement SignUpAccountSearchElement => webDriver.FindElement(By.Id("signup-account-search"));
+        private IWebElement ProgramNameSubmitElement => webDriver.FindElement(By.XPath("(//div[@class='visible-md visible-lg']//button[text()='Continue'])[1]"));
+        private IWebElement FirstNameElement => webDriver.FindElement(By.Name("firstname"));
+        private IWebElement LasttNameElement => webDriver.FindElement(By.Name("lastname"));
+        private IWebElement EmailElement => webDriver.FindElement(By.Name("email"));
+        private IWebElement PasswordElement => webDriver.FindElement(By.Name("password1"));
+        private IWebElement Password2Element => webDriver.FindElement(By.Name("password2"));
+        private IWebElement CaptchaElement => webDriver.FindElement(By.Id("recaptcha-anchor"));
+        private IWebElement BasicInfoSubmitElement => webDriver.FindElement(By.XPath("(//div[@class='visible-md visible-lg margin-v-30']//button[text()='Continue'])[1]"));
+        private IWebElement CreateYourFreeProfileElement => webDriver.FindElement(By.LinkText("Create Your Free Profile"));
+        private IWebElement ShortDescriptionElement => webDriver.FindElement(By.Name("headline"));
+        private IWebElement TimeZoneElement => webDriver.FindElement(By.Id("select-program-timezone"));
+        private IWebElement SaveAndContinueElement => webDriver.FindElement(By.XPath("(//div[@class='visible-md visible-lg margin-v-30']//button[text()='Save and Continue'])[1]"));
+        private IWebElement GenderElement => webDriver.FindElement(By.XPath("(//div[@class='am-radio program-radio'][2]//label)"));
+        private IWebElement GradeOrAgeElement => webDriver.FindElement(By.XPath("(//div[@class='am-radio inline'][1]//label)"));
+        private IWebElement MinGradeElement => webDriver.FindElement(By.Id("mingrade"));
+        private IWebElement MaxGradeElement => webDriver.FindElement(By.Id("maxgrade"));
+        private IWebElement ShareInfoWithParentsElement => webDriver.FindElement(By.XPath("(//div[@class='visible-md visible-lg margin-v-30']//button[text()='Save and Continue'])[1]"));
 
-        private IWebElement PhoneElement => _webDriver.FindElement(By.Name("phone"));
-        private IWebElement LocationElement => _webDriver.FindElement(By.Name("location"));
-        private IWebElement GoogleMapElement => _webDriver.FindElement(By.ClassName("pac-container"));
-        private IWebElement ContactInfoElement => _webDriver.FindElement(By.XPath("(//div[@class='visible-md visible-lg margin-v-30']//button[text()='Save and Continue'])[1]"));
+        private IWebElement PhoneElement => webDriver.FindElement(By.Name("phone"));
+        private IWebElement LocationElement => webDriver.FindElement(By.Name("location"));
+        private IWebElement GoogleMapElement => webDriver.FindElement(By.ClassName("pac-container"));
+        private IWebElement ContactInfoElement => webDriver.FindElement(By.XPath("(//div[@class='visible-md visible-lg margin-v-30']//button[text()='Save and Continue'])[1]"));
 
-        private IWebElement UploadProfileElement => _webDriver.FindElement(By.Name("logo"));
-        private IWebElement HeaderImageElement => _webDriver.FindElement(By.Name("headerimage"));
-        private IWebElement CustomizeProfileElement => _webDriver.FindElement(By.XPath("(//div[@class='visible-md visible-lg margin-v-30']//button[text()='Save and Continue'])[1]"));
+        private IWebElement UploadProfileElement => webDriver.FindElement(By.Name("logo"));
+        private IWebElement HeaderImageElement => webDriver.FindElement(By.Name("headerimage"));
+        private IWebElement CustomizeProfileElement => webDriver.FindElement(By.XPath("(//div[@class='visible-md visible-lg margin-v-30']//button[text()='Save and Continue'])[1]"));
 
-        private IWebElement ProgramCategoriesElement => _webDriver.FindElement(By.Name("programCategories"));
-        private IWebElement EasyActivityElement => _webDriver.FindElement(By.XPath("(//div[@class='visible-md visible-lg margin-v-30']//button[text()='Save and Continue'])[1]"));
+        private IWebElement ProgramCategoriesElement => webDriver.FindElement(By.Name("programCategories"));
+        private IWebElement EasyActivityElement => webDriver.FindElement(By.XPath("(//div[@class='visible-md visible-lg margin-v-30']//button[text()='Save and Continue'])[1]"));
 
-        private IWebElement EnterLinksElement => _webDriver.FindElement(By.XPath("(//div[@class='visible-md visible-lg margin-v-30']//button[text()='Save and Continue'])[1]"));
+        private IWebElement EnterLinksElement => webDriver.FindElement(By.XPath("(//div[@class='visible-md visible-lg margin-v-30']//button[text()='Save and Continue'])[1]"));
 
-        private IWebElement GoToProfileElement => _webDriver.FindElement(By.Id("btnGoProfile"));
+        private IWebElement GoToProfileElement => webDriver.FindElement(By.Id("btnGoProfile"));
 
-        private IWebElement location => _webDriver.FindElement(By.XPath(""));
-        private IWebElement H1GreatJob => _webDriver.FindElement(By.XPath("//div[@class='col-md-12 onboarding-form-group text-center']//h1[@class='text-center register-thankyou-2 onboarding-phrase-1']"));
+        private IWebElement location => webDriver.FindElement(By.XPath(""));
+        private IWebElement H1GreatJob => webDriver.FindElement(By.XPath("//div[@class='col-md-12 onboarding-form-group text-center']//h1[@class='text-center register-thankyou-2 onboarding-phrase-1']"));
 
         //------------Individual Account Helper Methods-----------
         public void ClickSignUp() => SignUpGetStartedElement.Click();
@@ -110,7 +110,7 @@ namespace AfterSchoolUIAutomationTests.Pages
         {
             LocationElement.SendKeys(name);
             Thread.Sleep(5000);
-            WebDriverWait wait = new WebDriverWait(_webDriver, new TimeSpan(0, 0, 5));
+            WebDriverWait wait = new WebDriverWait(webDriver, new TimeSpan(0, 0, 5));
             wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.XPath("(//div[@class='pac-container pac-logo']//div[@class='pac-item'])[1]"))).Click();
         }
         public void ContactInfoSubmit() => ContactInfoElement.Click();
@@ -131,6 +131,15 @@ namespace AfterSchoolUIAutomationTests.Pages
         public string GetH1Text()
         {
             return H1GreatJob.Text;
+        }
+
+        public void Dispose()
+        {
+            if (webDriver != null)
+            {
+                webDriver.Dispose();
+                webDriver = null;
+            }
         }
     }
 }

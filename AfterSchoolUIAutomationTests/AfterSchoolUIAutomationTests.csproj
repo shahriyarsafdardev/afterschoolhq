@@ -5,6 +5,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Drivers\**" />
+    <Compile Remove="Hooks\**" />
+    <EmbeddedResource Remove="Drivers\**" />
+    <EmbeddedResource Remove="Hooks\**" />
+    <None Remove="Drivers\**" />
+    <None Remove="Hooks\**" />
+    <SpecFlowFeatureFiles Remove="Drivers\**" />
+    <SpecFlowFeatureFiles Remove="Hooks\**" />
+    <SpecFlowObsoleteCodeBehindFiles Remove="Drivers\**" />
+    <SpecFlowObsoleteCodeBehindFiles Remove="Hooks\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="DotNetSeleniumExtras.WaitHelpers" Version="3.11.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
     <PackageReference Include="Selenium.Support" Version="3.141.0" />
@@ -28,8 +41,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Drivers\" />
-    <Folder Include="Hooks\" />
+    <None Update="Parameters\parameters_users.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
