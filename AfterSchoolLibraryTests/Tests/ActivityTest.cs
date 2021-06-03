@@ -82,6 +82,31 @@ namespace AfterSchoolLibraryTests.Tests
         }
 
         [Fact]
+        public void LoadByIdByAccountIdTest()
+        {
+            try
+            {
+                // Arrange
+                var user = WebUserFactory.Create(msgs: msgs, dc: dc);
+                var account = AccountFactory.Create(user: user, msgs: msgs, dc: dc);
+                var activity = ActivityFactory.Create(account: account, msgs: msgs, dc: dc);
+
+                // Act
+                var expected = Activity.LoadByIdByAccountId(Id: activity.ID.Value, AccountId: account.ID.Value, msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.Equal(expected: expected.ID, actual: activity.ID);
+                Assert.Equal(expected: expected.Uid, actual: activity.Uid);
+                Assert.Equal(expected: expected.Name, actual: activity.Name);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }            
+        }
+
+        [Fact]
         public void LoadByAccountIdTest()
         {
             var user = Factories.WebUserFactory.Create(msgs, dc);
@@ -144,7 +169,7 @@ namespace AfterSchoolLibraryTests.Tests
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             activity.ActivityScheduleId = 12;
             activity.Save(dc: dc);
-            Assert.Single(Activity.LoadByActivityScheduleId(activity.ActivityScheduleId.Value, dc: dc));
+            Assert.Single(Activity.LoadByActivityScheduleIdByAccountId(activity.ActivityScheduleId.Value, account.ID.Value, dc: dc));
         }
 
         [Fact]
