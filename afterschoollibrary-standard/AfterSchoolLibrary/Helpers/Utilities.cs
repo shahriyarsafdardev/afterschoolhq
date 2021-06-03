@@ -355,6 +355,7 @@ namespace AfterSchoolLibrary.Helpers
                     Migrations.CleanUpExtraParentAccounts_20200215.Do(amsgs, adc);
                     Migrations.ReattachTransactionsToNonDeletedAccounts_20200216.Do(amsgs, adc);
                     Migrations.FixTransactionsForDeletedAccounts_20200227.Do(amsgs, adc);
+                    Migrations.FixAccountPackageIsActive_20210603.Do(amsgs, adc);
 
                     if (Utilities.IsProduction)
                         Migrations.UpdateTransactionsFromStripe_20200320.Do(amsgs, adc);
