@@ -52,10 +52,11 @@
                     Account setup complete!
                 </div>
                 <div id="modal-email-confirmation-btn" class="margin-v-30 text-center">
-                    <a href="@Url.Action("editsetup", "activity", new { id = activityUid, area = "org" })" class="btn btn-primary btn-free-profile" style="padding: 12px 20px;"> Return to activity draft</a>
+                    @*<a href="@Url.Action("editsetup", "activity", new { id = activityUid, area = "org" })" class="btn btn-primary btn-free-profile" style="padding: 12px 20px;"> Return to activity draft</a>*@
+                    <a href="@Url.Action("publish", "activity", new { id = activityUid, isFromActivityHome=true, area = "org" })" class="btn btn-primary btn-free-profile" style="padding: 12px 20px;"> Publish and View Activity</a>
                     <div class="clearfix"></div>
                     <br />
-                    <a href="#" class="view-activity-text" onclick="return hideAcceptPaymentModal()">View Activity</a>
+                    <a href="#" class="view-activity-text" onclick="return hideAcceptPaymentModal()">Return to activity draft</a>
                 </div>
             </div>
         </div>

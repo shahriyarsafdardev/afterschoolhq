@@ -17,6 +17,8 @@
     {
         canRegiserFor = ViewData["canRegisterFor"].ToString().ToBoolean();
     }
+
+    var IsPublished = Model.GetActivity().IsPublished;
 }
 
 @if (!Model.OwnerAccount.ID.HasValue)
@@ -167,7 +169,7 @@ else
         else {
             var anotherChildString = anotherChild ? $"Again for New Child" : "";
 
-            <a href="@Model.GetRegistrationPageUrl()" class="btn btn-register btn-block">
+            <a href="@(IsPublished? Model.GetRegistrationPageUrl().ToString(): "javascript:void(0)")" class="@(IsPublished?"":"disabled") btn btn-register btn-block"  @IsPublished>
                 @Model.RegistrationMode.ToString() @anotherChildString Now &raquo;
             </a>
         }
