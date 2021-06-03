@@ -36,7 +36,12 @@
 
     <div class="clearfix"></div>
     <div class="text-center onboarding-form-group" style="margin-top: 20px;">
-        captcha
+        @{ 
+            if (AfterSchoolLibrary.Helpers.Utilities.IsProduction)
+            {
+                Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", "");
+            }
+        }
     </div>
 
 </div>

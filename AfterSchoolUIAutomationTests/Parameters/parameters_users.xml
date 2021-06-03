@@ -2,13 +2,13 @@
 <PARAMETERS>
   <!--User Login Info-->
   <Login>
-    <LoginUrl>http://localhost:54849/login</LoginUrl>
+    <LoginUrl>https://qa.afterschoolhq.com/login</LoginUrl>
       <UserName>musicschool@yopmail.com</UserName>
       <Password>123456789</Password>
   </Login>
   <!--Individual Account Signup Info-->
   <AccountSigUp>
-    <SignUpUrl>http://localhost:54849/signup/Welcome</SignUpUrl>
+    <SignUpUrl>https://qa.afterschoolhq.com/signup/Welcome</SignUpUrl>
     <ProgramName>Rock Climbing</ProgramName>
     <FirstName>Alex</FirstName>
     <LasttName>Stuart</LasttName>

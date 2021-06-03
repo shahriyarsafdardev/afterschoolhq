@@ -40,7 +40,7 @@ namespace AfterSchool.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Index(SignUpIndexViewModel model)
-        {
+        {            
             var msgs = new SystemMessages();
             Account invitingAccount = null;
 
@@ -59,10 +59,12 @@ namespace AfterSchool.Controllers
                 msgs.Add("Passwords are required and must match", MessageType.UserError);
             else if (model.Password1.Length < 8)
                 msgs.Add("Password must be at least 8 characters", MessageType.UserError);
+            if (AfterSchoolLibrary.Helpers.Utilities.IsProduction)
+            {
+                msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
+            }
 
-            //msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
-
-            if (model.InviteCodeToShare.IsNotEmpty())
+                if (model.InviteCodeToShare.IsNotEmpty())
             {
                 if (!model.InviteCodeToShare.IsGuid())
                     msgs.Add("Invalid invitation code", MessageType.UserError);
@@ -162,7 +164,11 @@ namespace AfterSchool.Controllers
             else if (model.Password1.Length < 8)
                 msgs.Add("Password must be at least 8 characters", MessageType.UserError);
 
-            //msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
+
+            if (AfterSchoolLibrary.Helpers.Utilities.IsProduction)
+            {
+                msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
+            }
 
             if (model.InviteCodeToShare.IsNotEmpty())
             {
