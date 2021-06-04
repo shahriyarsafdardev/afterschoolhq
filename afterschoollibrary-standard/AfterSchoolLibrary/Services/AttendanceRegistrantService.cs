@@ -105,6 +105,11 @@ namespace AfterSchoolLibrary.Services
             return prepayments;
         }
 
+        public static SubscriptionPlanPrePayment GetPrePayment(this AttendanceRegistrant attendanceRegistrant, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return SubscriptionPlanPrePayment.LoadByAttendanceRegistrantId(attendanceRegistrant.ID.Value,msgs,dc);            
+        }
+
         public static List<AttendanceRegistrant> GetAttendanceRegistrantsInSameBillingPeriod(this AttendanceRegistrant attendanceRegistrant, BillingPeriodType billingPeriodType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             switch (billingPeriodType)
