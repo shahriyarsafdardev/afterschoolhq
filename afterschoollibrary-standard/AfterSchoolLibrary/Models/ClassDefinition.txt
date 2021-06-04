@@ -138,9 +138,9 @@ property: StreetNumber, string, NVarChar "50"
 property: StreetName, string, NVarChar "50"
 property: Neighborhood, string, NVarChar "100"
 property: County, string, NVarChar "100"
-property: Latitude, decimal?, Decimal "10,2"
-property: Longitude, decimal?, Decimal "10,2"
-property: DistanceFromOrigin, decimal?, Decimal "10,2"
+property: Latitude, decimal?, Decimal "30,5"
+property: Longitude, decimal?, Decimal "30,5"
+property: DistanceFromOrigin, decimal?, Decimal "15,10"
 baseproperty: State, required
 loadmethod: HostAccountId, List<>
 loadmethod: HostAccountId|IsDefault
