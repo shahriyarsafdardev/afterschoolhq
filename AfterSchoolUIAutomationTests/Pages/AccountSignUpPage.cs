@@ -1,4 +1,5 @@
-﻿using OpenQA.Selenium;
+﻿using AfterSchoolUIAutomationTests.Helpers.Extensions;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 using System;
 using System.Collections.Generic;
@@ -62,71 +63,233 @@ namespace AfterSchoolUIAutomationTests.Pages
         private IWebElement H1GreatJob => webDriver.FindElement(By.XPath("//div[@class='col-md-12 onboarding-form-group text-center']//h1[@class='text-center register-thankyou-2 onboarding-phrase-1']"));
 
         //------------Individual Account Helper Methods-----------
-        public void ClickSignUp() => SignUpGetStartedElement.Click();
-        public void ClickIndividualAccount() => CreateIndividualAccountElement.Click();
-        public void ProvideProgramsForStudents() => ProvideProgramsForStudentsElement.Click();
-        public void PopulateProgramName(string name) => SignUpAccountSearchElement.SendKeys(name);
-        public void ClickProgramSubmit() => ProgramNameSubmitElement.Click();
-        public void PopulateFirstName(string name) => FirstNameElement.SendKeys(name);
-        public void PopulateLasttName(string name) => LasttNameElement.SendKeys(name);
-        public void PopulateEmail(string name) => EmailElement.SendKeys(name);
-        public void PopulateUserPassword(string name) => PasswordElement.SendKeys(name);
-        public void PopulateUserPassword2(string name) => Password2Element.SendKeys(name);
-        public void CheckCaptcha() => CaptchaElement.Click();
-        public void ClickBasicInfoSubmit() => BasicInfoSubmitElement.Click();
-
-        public void CreateYourFreeProfile() => CreateYourFreeProfileElement.Click();
-
-        public void PopulateShortDescription(string name) => ShortDescriptionElement.SendKeys(name);
-        public void SelectGender() => GenderElement.Click();
-        public void SelectTimeZone()
+        public AccountSignUpPage ClickSignUp()
         {
+            webDriver.WaitInSeconds(2);
+            SignUpGetStartedElement.Click();
+            webDriver.WaitInSeconds(2);
+            return this;
+        }
+        public AccountSignUpPage ClickIndividualAccount()
+        {
+            webDriver.WaitInSeconds(3);
+            CreateIndividualAccountElement.Click();
+            return this;
+        }
+        public AccountSignUpPage ProvideProgramsForStudents()
+        {
+            webDriver.WaitInSeconds(3);
+            ProvideProgramsForStudentsElement.Click();
+            return this;
+        }
+        public AccountSignUpPage PopulateProgramName(string name)
+        {
+            webDriver.WaitInSeconds(2);
+            SignUpAccountSearchElement.SendKeys(name);
+            return this;
+        }
+
+        public AccountSignUpPage ClickProgramSubmit()
+        {
+            webDriver.WaitInSeconds(6);
+            ProgramNameSubmitElement.Click();
+            return this;
+        }
+        public AccountSignUpPage PopulateFirstName(string name)
+        {
+            webDriver.WaitInSeconds(10);
+            FirstNameElement.SendKeys(name);
+            return this;
+        }
+
+        public AccountSignUpPage PopulateLasttName(string name)
+        {
+            webDriver.WaitInSeconds(2);
+            LasttNameElement.SendKeys(name);
+            return this;
+        }
+
+        public AccountSignUpPage PopulateEmail(string name)
+        {
+            webDriver.WaitInSeconds(2);
+            EmailElement.SendKeys(name);
+            return this;
+        }
+
+        public AccountSignUpPage PopulateUserPassword(string name)
+        {
+            webDriver.WaitInSeconds(2);
+            PasswordElement.SendKeys(name);
+            return this;
+        }
+
+        public AccountSignUpPage PopulateUserPassword2(string name)
+        {
+            webDriver.WaitInSeconds(2);
+            Password2Element.SendKeys(name);
+            return this;
+        }
+
+        public AccountSignUpPage CheckCaptcha()
+        {
+            CaptchaElement.Click();
+            return this;
+        }
+
+        public AccountSignUpPage ClickBasicInfoSubmit()
+        {
+            webDriver.WaitInSeconds(2);
+            BasicInfoSubmitElement.Click();
+            return this;
+        }
+
+        public AccountSignUpPage CreateYourFreeProfile()
+        {
+            webDriver.WaitInSeconds(3);
+            CreateYourFreeProfileElement.Click();
+            return this;
+        }
+
+        public AccountSignUpPage PopulateShortDescription(string name)
+        {
+            webDriver.WaitInSeconds(3);
+            ShortDescriptionElement.SendKeys(name);
+            return this;
+        }
+
+        public AccountSignUpPage SelectGender()
+        {
+            webDriver.WaitInSeconds(5);
+            GenderElement.Click();
+            return this;
+        }
+        public AccountSignUpPage SelectTimeZone()
+        {
+            webDriver.WaitInSeconds(2);
             var timezone = TimeZoneElement;
             var selectElement = new SelectElement(TimeZoneElement);
             selectElement.SelectByValue("Alaska - AKST");
+            return this;
         }
-        public void SaveAndContinueSubmit() => SaveAndContinueElement.Click();
 
-
-        public void SelectGradeOrAge() => GradeOrAgeElement.Click();
-        public void SelectMinGrade()
+        public AccountSignUpPage SaveAndContinueSubmit()
         {
+            webDriver.WaitInSeconds(2);
+            SaveAndContinueElement.Click();
+            return this;
+        }
+
+        public AccountSignUpPage SelectGradeOrAge()
+        {
+            webDriver.WaitInSeconds(5);
+            GradeOrAgeElement.Click();
+            return this;
+        }
+
+        public AccountSignUpPage SelectMinGrade()
+        {
+            webDriver.WaitInSeconds(3);
             var minAge = MinGradeElement;
             var selectElement = new SelectElement(MinGradeElement);
             selectElement.SelectByValue("5");
+            return this;
         }
-        public void SelectMaxAge()
+
+        public AccountSignUpPage SelectMaxAge()
         {
+            webDriver.WaitInSeconds(2);
             var maxAge = MaxGradeElement;
             var selectElement = new SelectElement(MaxGradeElement);
             selectElement.SelectByValue("13");
+            return this;
         }
-        public void ShareInfoWithParentsSubmit() => ShareInfoWithParentsElement.Click();
 
-        public void PopulatePhone(string name) => PhoneElement.SendKeys(name);
-        public void PopulateLocation(string name) => LocationElement.SendKeys(name);
-
-        public void SelectAutoComplete(string name)
+        public AccountSignUpPage ShareInfoWithParentsSubmit()
         {
+            webDriver.WaitInSeconds(2);
+            ShareInfoWithParentsElement.Click();
+            return this;
+        }
+
+        public AccountSignUpPage PopulatePhone(string name)
+        {
+            webDriver.WaitInSeconds(2);
+            PhoneElement.SendKeys(name);
+            return this;
+        }
+
+        public AccountSignUpPage PopulateLocation(string name)
+        {
+            LocationElement.SendKeys(name);
+            return this;
+        }
+
+        public AccountSignUpPage SelectAutoComplete(string name)
+        {
+            webDriver.WaitInSeconds(2);
             LocationElement.SendKeys(name);
             Thread.Sleep(5000);
             WebDriverWait wait = new WebDriverWait(webDriver, new TimeSpan(0, 0, 5));
             wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.XPath("(//div[@class='pac-container pac-logo']//div[@class='pac-item'])[1]"))).Click();
+            return this;
         }
-        public void ContactInfoSubmit() => ContactInfoElement.Click();
+
+        public AccountSignUpPage ContactInfoSubmit()
+        {
+            webDriver.WaitInSeconds(5);
+            ContactInfoElement.Click();
+            return this;
+        }
 
 
-        public void UploadProfileImage(string name) => UploadProfileElement.SendKeys(name);
-        public void HeaderImageImage(string name) => HeaderImageElement.SendKeys(name);
-        public void CustomizeProfileSubmit() => CustomizeProfileElement.Click();
+        public AccountSignUpPage UploadProfileImage(string name)
+        {
+            UploadProfileElement.SendKeys(name);
+            return this;
+        }
 
-        public void PopulateProgramCategories(string name) => ProgramCategoriesElement.SendKeys(name);
-        public void EasyActivitySubmit() => EasyActivityElement.Click();
+        public AccountSignUpPage HeaderImageImage(string name)
+        {
+            webDriver.WaitInSeconds(2);
+            HeaderImageElement.SendKeys(name);
+            return this;
+        }
 
+        public AccountSignUpPage CustomizeProfileSubmit()
+        {
+            webDriver.WaitInSeconds(2);
+            CustomizeProfileElement.Click();
+            return this;
+        }
 
-        public void EnterLinksSubmit() => EnterLinksElement.Click();
+        public AccountSignUpPage PopulateProgramCategories(string name)
+        {
+            webDriver.WaitInSeconds(4);
+            ProgramCategoriesElement.SendKeys(name);
+            return this;
+        }
 
-        public void ClickGoToProfile() => GoToProfileElement.Click();
+        public AccountSignUpPage EasyActivitySubmit()
+        {
+            webDriver.WaitInSeconds(2);
+            EasyActivityElement.Click();
+            return this;
+        }
+
+        public AccountSignUpPage EnterLinksSubmit()
+        {
+            webDriver.WaitInSeconds(4);
+            EnterLinksElement.Click();
+            return this;
+        }
+
+        public AccountSignUpPage ClickGoToProfile()
+        {
+            webDriver.WaitInSeconds(20);
+            GoToProfileElement.Click();
+            webDriver.WaitInSeconds(10);
+            return this;
+        }
 
         public string GetH1Text()
         {

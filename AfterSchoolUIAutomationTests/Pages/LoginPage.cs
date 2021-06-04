@@ -1,4 +1,5 @@
 ﻿using System;
+using AfterSchoolUIAutomationTests.Helpers.Extensions;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 
@@ -29,7 +30,9 @@ namespace AfterSchoolUIAutomationTests.Pages
 
         public LoginPage PopulateName(string name)
         {
+            webDriver.WaitInSeconds(2);
             UserNameElement.SendKeys(name);
+            webDriver.WaitInSeconds(2);
             return this;
         }
         //public void PopulateName(string name) => UserNameElement.SendKeys(name);
@@ -37,6 +40,7 @@ namespace AfterSchoolUIAutomationTests.Pages
         public LoginPage PopulatePassword(string name)
         {
             UserPasswordElement.SendKeys(name);
+            webDriver.WaitInSeconds(2);
             return this;
         }
         //public void PopulatePassword(string password) => UserPasswordElement.SendKeys(password);
@@ -44,6 +48,7 @@ namespace AfterSchoolUIAutomationTests.Pages
         public LoginPage ClickSubmit()
         {
             SubmitElement.Click();
+            webDriver.WaitInSeconds(5);
             return this;
         }
         //public void ClickSubmit() => SubmitElement.Click();

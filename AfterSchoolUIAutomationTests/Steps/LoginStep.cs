@@ -38,29 +38,24 @@ namespace AfterSchoolUIAutomationTests.Steps
         public void ManageWindowSize()
         {
             webDriver.Manage().Window.Maximize();
-            webDriver.WaitInSeconds(2);
         }
 
         [Given(@"Enter username")]
         public void EnterUserName()
         {
             loginPage.PopulateName(Parameter.Get("Login", "UserName"));
-            webDriver.WaitInSeconds(2);
         }
 
         [Given(@"Enter Password")]
         public void EnterPassword()
         {
             loginPage.PopulatePassword(Parameter.Get("Login", "Password"));
-            webDriver.WaitInSeconds(2);
         }
-
 
         [When(@"Click on login")]
         public void GivenEnterUserNameAndPassword()
         {
             loginPage.ClickSubmit();
-            webDriver.WaitInSeconds(5);
         }
 
         [Then(@"Verify Navigated URL")]
