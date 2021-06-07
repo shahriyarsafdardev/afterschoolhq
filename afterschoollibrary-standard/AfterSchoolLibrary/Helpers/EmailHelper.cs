@@ -967,7 +967,7 @@ namespace AfterSchoolLibrary.Helpers
                 var attendance = attendanceRegistrantActivityCount.Key;
                 var attendanceCount = attendanceRegistrantActivityCount.Value.Count();
                 var attendanceRegistrant = attendance.GetAttendanceRegistrants().FirstOrDefault();
-                var subscriptionPlan = attendanceRegistrant?.GetPrePayments();
+                var subscriptionPlan = attendanceRegistrant?.GetPrePayment();
                 var totalCharge = subscriptionPlan != null ? 0: attendanceCount * costPerClass;
                 var totalDiscount = attendanceCount * couponDiscount;
                 
