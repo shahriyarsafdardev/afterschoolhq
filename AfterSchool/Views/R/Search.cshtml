@@ -66,6 +66,65 @@
         width: 100%;
         z-index: 1000000;
     }
+    .contactUsBtn{
+        background-color: white;
+        border: 3px solid #00b492;
+        border-radius: 5px;
+        padding: 13px 25px;
+    }
+    .contactSpan{
+        margin-left: 30px;
+        font-weight: bold;
+    }
+    .contactUsModal{
+       background-color:#F7F7F7;
+       padding:45px 75px
+    }
+    .modalHeader{
+        padding-bottom: 30px;
+        font-weight: bold;
+        text-align: center;
+        font-size: 17px;
+    }
+    .modal-dialog {
+    width: 65%;
+
+}
+    .floatNone{
+       float:none;
+    }
+    @@media (max-width: 425px)
+    {
+        .contactUsBtn{
+         padding: 13px 20px;
+         font-size: 11px;
+       }
+       .contactUsModal{
+         padding: 30px 60px;
+       }
+    .modal-dialog {
+    width: auto !important;
+    margin: 30px 15px;
+}
+
+    }
+    .btnContactUsSubmit{
+      padding: 12px 65px;
+      border-radius: 5px;
+      margin-bottom: 30px;
+    }
+
+
+        @@media (max-width: 960px)
+    {
+
+    .modal-dialog {
+    width: auto !important;
+  margin: 30px 15px;
+}
+
+    }
+
 </style>
 
 <div class="visible-lg visible-md">
@@ -119,7 +178,11 @@
     @{ Html.RenderPartial("~/Views/Shared/_DirectoryFilters.cshtml"); }
 </div>
 
-<div id="search-container" class="col-md-9" style="padding-bottom: 20px;">
+<div id="search-container" class="col-md-9" style="padding-bottom: 20px;padding-top:50px">
+
+    <div class="text-center">
+        <button class="btn contactUsBtn" type="button" data-toggle="modal" data-target="#ContactUsModal">Can't find what you are looking for? <span class="contactSpan">CONTACT US</span></button>
+    </div>
     <div id="search-result"> </div>
 
     <div class="clearfix"></div>
@@ -160,7 +223,55 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="ContactUsModal" tabindex="-1" role="dialog" aria-labelledby="ContactUsModal" aria-hidden="true">
+    <div class="modal-dialog contactUsModal" role="document">
+        <div class="">
 
+            <div class="">
+                <div class="modalHeader">Can't find the program you're looking for?</div>
+                <div style="padding-bottom:10px" class="text-center">
+                    We want to help you find the perfect program for your student(s). Let us know what we're missing and we will do our best to connect you with a provider.
+                </div>
+
+                <form id="ContactUsForm" onsubmit="return false">
+                    <div class="text-success submit-contact-success hide">
+                        <p>
+                            Your message has been sent
+                        </p>
+                    </div>
+                    <div class="text-danger submit-contact-error hide">
+                        <p class="d-block">
+                            Error sending message
+                        </p>
+                    </div>
+                   
+                    <div class="col-md-12 onboarding-form-group floatNone">
+                        <label class="onboarding-lable">NAME *</label>
+                        <input type="text" name="name" id="name" required="required" autocomplete="off" class="form-control onboarding-input" value="" />
+                    </div>
+                    <div class="col-md-12 onboarding-form-group floatNone">
+                        <label class="onboarding-lable">EMAIL ADDRESS *</label>
+                        <input type="email" name="email" id="email" required="required" autocomplete="off" class="form-control onboarding-input" value="" />
+                    </div>
+
+                    <div class="col-md-12 onboarding-form-group floatNone">
+                        <label class="onboarding-lable">PHONE NUMBER</label>
+                        <input type="text" name="phone" id="phone" required="required" autocomplete="off" class="form-control onboarding-input" value="" />
+                    </div>
+                    <div class="col-md-12 onboarding-form-group floatNone">
+                        <label class="onboarding-lable">MESSAGE *</label>
+                        <textarea name="message" id="message" required="" autocomplete="off" placeholder="List the type of programs, age range or budget, etc. that you are looking for. If you have specific program in mind, please include the website if available." style="height:200px" class="form-control onboarding-input"></textarea>
+                    </div>
+                    <div class="text-center">
+                        <div clas="formSubmitting"></div>
+                        <button type="submit" class="btn btn-primary btn-lg btnContactUsSubmit">Submit</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
 <script id="script-search-result-list" type="text/template">
 
     <% _.each(response, function(searchResult){ %>
@@ -315,6 +426,66 @@
             if (!isMobile) {
                 $('#filters').show();
             }
+
+            $(".btnContactUsSubmit").on('click', function () {
+                console.log('inside submit');
+
+                if ($('#name').val() && $('#email').val() && $('#message').val()) {
+
+                   
+                    var params = 'name=' + $('#name').val() +
+
+                        '&toEmail=support@afterschoolhq.com' +
+                        '&fromEmail=' + $('#email').val() +
+                        '&message=' + $('#message').val() +
+                        '&MainSubject=Contact form from ' + $('#name').val() + ' - ' + $('#phone').val()+
+                        '&phone=' + $('#phone').val();
+                        
+
+
+                    $('.formSubmitting').html('Submitting...');
+                    $('.btnContactUsSubmit').prop('disabled', true);
+
+                    $.post(
+                        '/services/submitcontactform',
+                        params,
+                        function (data) {
+
+                            $('.formSubmitting').html('Submit');
+                            $('.btnContactUsSubmit').prop('disabled', false);
+
+
+                            if (data && data.status == 'ok') {
+
+                                $('#name').val('');
+                                $('#email').val('');
+                                $('#message').val('');
+                                $('#phone').val('');
+
+                                $('.submit-contact-error').addClass('hide');
+                                $('.submit-contact-success').removeClass('hide');
+
+                            } else {
+
+                                $('.submit-contact-success').addClass('hide');
+                                $('.submit-contact-error').removeClass('hide');
+                                $('.submit-contact-error').html('');
+
+                                for (var message of data.messages) {
+                                    $('.submit-contact-error').append('<p>');
+                                    $('.submit-contact-error').append(message.Text);
+                                    $('.submit-contact-error').append('</p>');
+                                }
+
+                            }
+                        }
+                    );
+
+                    return false; 
+                }
+               
+                return true;
+            })
         })
 
         function showModalIsyp() {

@@ -734,7 +734,7 @@ namespace AfterSchool.Controllers
             return Json(new { status, coupon, amount, calculatedAmountCC, calculatedAmountACH, calculatedCCFee, numberInMonths, subscriptionPlanAmount, postPayPlanAmount, discountString, messages = msgs }, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult SubmitContactForm(string name, string email, string message, string g_recaptcha_response)
+        public ActionResult SubmitContactForm(string name, string fromEmail, string toEmail, string message, string phone, string MainSubject, string g_recaptcha_response)
         {
             if (!IsRequestFromApp())
                 return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
@@ -744,19 +744,28 @@ namespace AfterSchool.Controllers
             if (name.IsBlank())
                 msgs.Add("Please enter your name", MessageType.UserError);
 
-            if (!email.IsMatch(BasicLibrary.Utilities.EmailRegEx))
+            if (!fromEmail.IsMatch(BasicLibrary.Utilities.EmailRegEx))
                 msgs.Add("Please enter your email", MessageType.UserError);
 
             if (message.IsBlank())
                 msgs.Add("Please enter a message", MessageType.UserError);
 
-            msgs.AddRange(RecaptchaHelper.Validate(g_recaptcha_response));
+
+            if (phone.IsNotEmpty() && !phone.IsPhone())
+                msgs.Add("Phone number is not in a valid format", MessageType.UserError);
+
+            if (toEmail != "support@afterschoolhq.com")
+            {
+                msgs.AddRange(RecaptchaHelper.Validate(g_recaptcha_response));
+            }
+
+           
 
             if (msgs.HasNoErrors())
                 msgs.AddRange(EmailHelper.SendEmail(
-                    toEmail: "sales@afterschoolhq.com",
-                    subject: $"WEBSITE FORM FROM: {name}",
-                    body: string.Format("<p>from: <a href=\"mailto:{0}\">{0}</a></p><p>{1}</p>", email, message),
+                    toEmail: toEmail,
+                    subject: MainSubject.IsNotEmpty()? MainSubject: $"WEBSITE FORM FROM: {name}",
+                    body: string.Format("<p>from: <a href=\"mailto:{0}\">{0}</a></p><p>{1}</p>", fromEmail, message),
                     isAfterSchool: true));
 
             var status = msgs.HasNoErrors() ? "ok" : "error";
