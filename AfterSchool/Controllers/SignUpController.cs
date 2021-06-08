@@ -205,8 +205,8 @@ namespace AfterSchool.Controllers
                         if (user.IsNotEmpty() && account.IsNotEmpty() && amsgs.HasNoErrors())
                         {
                             // LOG: WebUserName Created Account Account
-                            account.LogActivity(
-                                webSessionId: SessionVariables.WebSession.ID.Value,
+                            SessionVariables.WebSession.LogActivity(
+                                account: account,
                                 actor: user,
                                 actionType: WebSessionActionType.Created,
                                 objectType: ObjectType.Account,
@@ -215,13 +215,13 @@ namespace AfterSchool.Controllers
                             );
 
                             // LOG: WebUserName SignedUp
-                            account.LogActivity(
-                               webSessionId: SessionVariables.WebSession.ID.Value,
-                               actor: user,
-                               actionType: WebSessionActionType.SignedUp,
-                               objectType: ObjectType.WebUser,
-                               objectId: user.ID.Value,
-                               objectText: user.DisplayName
+                            SessionVariables.WebSession.LogActivity(
+                                account: account,
+                                actor: user,
+                                actionType: WebSessionActionType.SignedUp,
+                                objectType: ObjectType.WebUser,
+                                objectId: user.ID.Value,
+                                objectText: user.DisplayName
                             );
                         }
                             

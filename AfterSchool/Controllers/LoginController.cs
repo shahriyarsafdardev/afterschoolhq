@@ -86,8 +86,8 @@ namespace AfterSchool.Controllers
                 
                 if (user.IsNotEmpty() && currentAccount.IsNotEmpty())
                     // LOG: WebUserName LoggedIn
-                    currentAccount.LogActivity(
-                        webSessionId: SessionVariables.WebSession.ID.Value,
+                    SessionVariables.WebSession.LogActivity(
+                        account: currentAccount,
                         actor: user,
                         actionType: WebSessionActionType.LoggedIn
                     );

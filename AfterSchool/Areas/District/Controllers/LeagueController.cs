@@ -437,8 +437,8 @@ namespace AfterSchool.Areas.District.Controllers
                 msgs.Add($"{UILabel.ActivityGroupLabel(league.ActivityGroupTypeId)} Saved", MessageType.Success);
 
                 // LOG: CurrentUser Updated ActivityGroup ActivityGroupName for Account AccountName
-                currentAccount.LogActivity(
-                    webSessionId: SessionVariables.WebSession.ID.Value,
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
                     actor: currentWebUser,
                     actionType: WebSessionActionType.Updated,
                     objectId: league.ID.Value,

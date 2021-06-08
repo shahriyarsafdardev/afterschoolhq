@@ -157,8 +157,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add($"{UILabel.ActivityGroupLabel(group.ActivityGroupTypeId)} Saved", MessageType.Success);
 
                 // LOG: CurrentUser Saved ActivityGroup ActivityGroupName for Account AccountName
-                currentAccount.LogActivity(
-                    webSessionId: SessionVariables.WebSession.ID.Value,
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
                     actor: currentWebUser,
                     actionType: WebSessionActionType.Updated,
                     objectId: group.ID.Value,
@@ -622,8 +622,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add(string.Format("{0} has been published", group.Name), MessageType.Success);
                 var currentAccount = SessionVariables.CurrentAccount;
                 // LOG: CurrentUSer published ActivityGroup ActivityGroupName from AccountAccountName's Profile
-                currentAccount.LogActivity(
-                    webSessionId: SessionVariables.WebSession.ID.Value,
+
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
                     actor: SessionVariables.CurrentUser,
                     actionType: WebSessionActionType.Published,
                     objectId: group.ID.Value,
@@ -650,9 +651,10 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 msgs.Add(string.Format("{0} has been unpublished", group.Name), MessageType.Success);
                 var currentAccount = SessionVariables.CurrentAccount;
+
                 // LOG: CurrentUSer unpublished ActivityGroup ActivityGroupName from AccountAccountName's Profile
-                currentAccount.LogActivity(
-                    webSessionId: SessionVariables.WebSession.ID.Value,
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
                     actor: SessionVariables.CurrentUser,
                     actionType: WebSessionActionType.Unpublished,
                     objectId: group.ID.Value,
