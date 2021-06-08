@@ -734,13 +734,13 @@ namespace AfterSchool.Controllers
             return Json(new { status, coupon, amount, calculatedAmountCC, calculatedAmountACH, calculatedCCFee, numberInMonths, subscriptionPlanAmount, postPayPlanAmount, discountString, messages = msgs }, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult SubmitContactForm(string name, string fromEmail, string toEmail, string message, string phone, string MainSubject, string g_recaptcha_response)
+        public ActionResult SubmitContactForm(string name, string fromEmail, string pageName, string message, string phone, string MainSubject, string g_recaptcha_response)
         {
             if (!IsRequestFromApp())
                 return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
 
             var msgs = new SystemMessages();
-
+            string toEmail = "";
             if (name.IsBlank())
                 msgs.Add("Please enter your name", MessageType.UserError);
 
@@ -754,12 +754,20 @@ namespace AfterSchool.Controllers
             if (phone.IsNotEmpty() && !phone.IsPhone())
                 msgs.Add("Phone number is not in a valid format", MessageType.UserError);
 
-            if (toEmail != "support@afterschoolhq.com")
+            if (pageName != "search")
             {
                 msgs.AddRange(RecaptchaHelper.Validate(g_recaptcha_response));
             }
 
-           
+            switch(pageName)
+            {
+                case "contact":
+                    toEmail = AfterSchoolLibrary.Helpers.Email.AppSalesEmailAddress;
+                    break;
+                case "search":
+                    toEmail = AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress;
+                    break;
+            }
 
             if (msgs.HasNoErrors())
                 msgs.AddRange(EmailHelper.SendEmail(

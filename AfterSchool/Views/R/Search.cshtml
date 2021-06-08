@@ -432,13 +432,16 @@
 
                 if ($('#name').val() && $('#email').val() && $('#message').val()) {
 
-                   
+                    var subjectLine = 'CONTACT FORM FROM: ' + $('#name').val();
+                    if ($('#phone').val()) {
+                        subjectLine = subjectLine + ' - ' + $('#phone').val();
+                    }
                     var params = 'name=' + $('#name').val() +
 
-                        '&toEmail=support@afterschoolhq.com' +
+                        '&pageName=search' +
                         '&fromEmail=' + $('#email').val() +
                         '&message=' + $('#message').val() +
-                        '&MainSubject=Contact form from ' + $('#name').val() + ' - ' + $('#phone').val()+
+                        '&MainSubject=' + subjectLine+
                         '&phone=' + $('#phone').val();
                         
 
