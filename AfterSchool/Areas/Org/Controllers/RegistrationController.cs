@@ -314,8 +314,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 selectedRegistration.WasUpdated(msgs);
 
                 // LOG: Someone Updated RegistrantActivity {registrant.Name} assignment type to {ratTo} for Activty ActivityName
-                currentAccount.LogActivity(
-                    webSessionId: SessionVariables.WebSession.ID.Value,
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
                     actor: currentUser,
                     actionType: WebSessionActionType.Updated,
                     objectId: registrantActivity.ID,
@@ -408,8 +408,8 @@ namespace AfterSchool.Areas.Org.Controllers
                         msgs);
 
                 // LOG:  CurrentWebUser added Registrant RegistrantName to Activity ActivityName
-                currentAccount.LogActivity(
-                    webSessionId: SessionVariables.WebSession.ID.Value,
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
                     actor: currentUser,
                     actionType: WebSessionActionType.Added,
                     objectId: registrant.ID.Value,

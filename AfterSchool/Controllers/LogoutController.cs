@@ -13,17 +13,15 @@ namespace AfterSchool.Controllers
         public ActionResult Index(string returnurl)
         {
             var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
 
-            if (SessionVariables.CurrentUser.IsNotEmpty())
-            {
-                // LOG: WebUserName LoggedOut
-                SessionVariables.CurrentAccount.LogActivity(
-                    webSessionId: SessionVariables.WebSession.ID.Value,
-                    actor: SessionVariables.CurrentUser,
+            if (currentUser.IsNotEmpty())
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
+                    actor: currentUser,
                     actionType: WebSessionActionType.LoggedOut
-
                 );
-            }
 
             if (SessionVariables.OriginalLoggedInUser.IsNotEmpty())
             {

@@ -301,8 +301,9 @@ namespace AfterSchool.Areas.Org.Controllers
                     if (msgs.HasNoErrors())
                     {
                         msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
-                        currentAccount.LogActivity(
-                            webSessionId: SessionVariables.WebSession.ID.Value,
+
+                        SessionVariables.WebSession.LogActivity(
+                            account: currentAccount,
                             actor: currentUser,
                             actionType: WebSessionActionType.Updated,
                             objectType: ObjectType.Activity,
@@ -347,8 +348,9 @@ namespace AfterSchool.Areas.Org.Controllers
                     if (msgs.HasNoErrors())
                     {
                         msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
-                        currentAccount.LogActivity(
-                            webSessionId: SessionVariables.WebSession.ID.Value,
+
+                        SessionVariables.WebSession.LogActivity(
+                            account: currentAccount,
                             actor: currentUser,
                             actionType: WebSessionActionType.Created,
                             objectType: ObjectType.Activity,
@@ -504,8 +506,9 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
-                currentAccount.LogActivity(
-                    webSessionId: SessionVariables.WebSession.ID.Value,
+
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
                     actor: currentUser,
                     actionType: WebSessionActionType.Updated,
                     objectType: ObjectType.Activity,
@@ -609,8 +612,9 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
-                currentAccount.LogActivity(
-                    webSessionId: SessionVariables.WebSession.ID.Value,
+
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
                     actor: currentUser,
                     actionType: WebSessionActionType.Updated,
                     objectType: ObjectType.Activity,
@@ -715,8 +719,9 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
-                currentAccount.LogActivity(
-                    webSessionId: SessionVariables.WebSession.ID.Value,
+
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
                     actor: currentUser,
                     actionType: WebSessionActionType.Updated,
                     objectType: ObjectType.Activity,
@@ -871,8 +876,9 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
-                currentAccount.LogActivity(
-                    webSessionId: SessionVariables.WebSession.ID.Value,
+
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
                     actor: currentUser,
                     actionType: WebSessionActionType.Updated,
                     objectType: ObjectType.Activity,
@@ -1007,8 +1013,9 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
-                currentAccount.LogActivity(
-                    webSessionId: SessionVariables.WebSession.ID.Value,
+
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
                     actor: currentUser,
                     actionType: WebSessionActionType.Updated,
                     objectType: ObjectType.Activity,
@@ -1157,8 +1164,9 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
-                currentAccount.LogActivity(
-                    webSessionId: SessionVariables.WebSession.ID.Value,
+
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
                     actor: currentUser,
                     actionType: WebSessionActionType.Updated,
                     objectType: ObjectType.Activity,
@@ -1251,8 +1259,9 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
-                currentAccount.LogActivity(
-                    webSessionId: SessionVariables.WebSession.ID.Value,
+
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
                     actor: currentUser,
                     actionType: WebSessionActionType.Updated,
                     objectType: ObjectType.Activity,
@@ -1323,8 +1332,9 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Copied", MessageType.Success);
-                currentAccount.LogActivity(
-                    webSessionId: SessionVariables.WebSession.ID.Value,
+
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
                     actor: currentUser,
                     actionType: WebSessionActionType.Copied,
                     objectType: ObjectType.Activity,
@@ -1363,8 +1373,9 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add(string.Format("{0} has been deleted", activity.Name), MessageType.Success);
-                currentAccount.LogActivity(
-                   webSessionId: SessionVariables.WebSession.ID.Value,
+
+                SessionVariables.WebSession.LogActivity(
+                   account: currentAccount,
                    actor: currentUser,
                    actionType: WebSessionActionType.Deleted,
                    objectType: ObjectType.Activity,
@@ -1404,16 +1415,17 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {           
                 msgs.Add(string.Format("{0} has been archived", activity.Name), MessageType.Success);
-                currentAccount.LogActivity(
-                   webSessionId: SessionVariables.WebSession.ID.Value,
-                   actor: currentUser,
-                   actionType: WebSessionActionType.Archived,
-                   objectType: ObjectType.Activity,
-                   objectId: activity.ID.Value,
-                   objectText: activity.Name,
-                   indirectObjectType: ObjectType.Account,
-                   indirectObjectId: currentAccount.ID.Value,
-                   indirectObjectText: currentAccount.Name
+
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
+                    actor: currentUser,
+                    actionType: WebSessionActionType.Archived,
+                    objectType: ObjectType.Activity,
+                    objectId: activity.ID.Value,
+                    objectText: activity.Name,
+                    indirectObjectType: ObjectType.Account,
+                    indirectObjectId: currentAccount.ID.Value,
+                    indirectObjectText: currentAccount.Name
                );
             }
 
@@ -1445,16 +1457,17 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add(string.Format("{0} has been restored", activity.Name), MessageType.Success);
-                currentAccount.LogActivity(
-                   webSessionId: SessionVariables.WebSession.ID.Value,
-                   actor: currentUser,
-                   actionType: WebSessionActionType.Restored,
-                   objectType: ObjectType.Activity,
-                   objectId: activity.ID.Value,
-                   objectText: activity.Name,
-                   indirectObjectType: ObjectType.Account,
-                   indirectObjectId: currentAccount.ID.Value,
-                   indirectObjectText: currentAccount.Name
+
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
+                    actor: currentUser,
+                    actionType: WebSessionActionType.Restored,
+                    objectType: ObjectType.Activity,
+                    objectId: activity.ID.Value,
+                    objectText: activity.Name,
+                    indirectObjectType: ObjectType.Account,
+                    indirectObjectId: currentAccount.ID.Value,
+                    indirectObjectText: currentAccount.Name
                );
             }
 
@@ -2381,16 +2394,17 @@ namespace AfterSchool.Areas.Org.Controllers
                 // Show Succes Message
                 // LOG: Someone Published Activity ActivityName for Account AccountName
                 msgs.Add(string.Format("{0} has been published", activity.Name), MessageType.Success);
-                currentAccount.LogActivity(
-                   webSessionId: SessionVariables.WebSession.ID.Value,
-                   actor: currentUser,
-                   actionType: WebSessionActionType.Published,
-                   objectType: ObjectType.Activity,
-                   objectId: activity.ID.Value,
-                   objectText: activity.Name,
-                   indirectObjectType: ObjectType.Account,
-                   indirectObjectId: currentAccount.ID.Value,
-                   indirectObjectText: currentAccount.Name
+
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
+                    actor: currentUser,
+                    actionType: WebSessionActionType.Published,
+                    objectType: ObjectType.Activity,
+                    objectId: activity.ID.Value,
+                    objectText: activity.Name,
+                    indirectObjectType: ObjectType.Account,
+                    indirectObjectId: currentAccount.ID.Value,
+                    indirectObjectText: currentAccount.Name
                );
             }
 
@@ -2434,8 +2448,9 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add(string.Format("{0} has been unpublished", activity.Name), MessageType.Success);
-                currentAccount.LogActivity(
-                    webSessionId: SessionVariables.WebSession.ID.Value,
+
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
                     actor: currentUser,
                     actionType: WebSessionActionType.Unpublished,
                     objectType: ObjectType.Activity,

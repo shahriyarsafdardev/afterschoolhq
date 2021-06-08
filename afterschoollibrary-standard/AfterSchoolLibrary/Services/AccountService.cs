@@ -98,7 +98,7 @@ namespace AfterSchoolLibrary.Services
 
         public static ActivityMessage GetActivityMessage(this Account account, Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (Uid.IsNotNullOrEmpty() && account.IsNotEmpty())
+            if (account.IsNotEmpty())
                 return ActivityMessage.LoadByUidByAccountId(Uid, account.ID.Value, msgs, dc);
 
             return null;
@@ -163,7 +163,7 @@ namespace AfterSchoolLibrary.Services
 
         public static Activity GetActivity(this Account account, Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (Uid.IsNotNullOrEmpty() && account.IsNotEmpty())
+            if (account.IsNotEmpty())
                 return Activity.LoadByUidByAccountId(Uid, account.ID.Value, msgs, dc);
 
             return null;
@@ -493,7 +493,7 @@ namespace AfterSchoolLibrary.Services
         
         public static ActivityGroup GetActivityGroup(this Account account, Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (Uid.IsNotNullOrEmpty() && account.IsNotEmpty())
+            if (account.IsNotEmpty())
                 return ActivityGroup.LoadByUidByAccountId(Uid, account.ID.Value, msgs, dc);
 
             return null;
@@ -1227,7 +1227,7 @@ namespace AfterSchoolLibrary.Services
 
         public static Registrant GetRegistrant(this Account account, Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (Uid.IsNotNullOrEmpty() && account.IsNotEmpty())
+            if (account.IsNotEmpty())
                 return Registrant.LoadByUidByAccountId(Uid, account.ID.Value, msgs, dc);
 
             return null;
@@ -2658,7 +2658,7 @@ namespace AfterSchoolLibrary.Services
 
         public static Payout GetPayout(this Account account, Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (Uid.IsNotNullOrEmpty() && account.IsNotEmpty())
+            if (account.IsNotEmpty())
                 return Payout.LoadByUidByAccountId(Uid, account.ID.Value, msgs, dc);
 
             return null;
@@ -3742,7 +3742,7 @@ namespace AfterSchoolLibrary.Services
 
         public static Coupon GetCoupon(this Account account, Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (Uid.IsNotNullOrEmpty() && account.IsNotEmpty())
+            if (account.IsNotEmpty())
                 return Coupon.LoadByUidByAccountId(Uid, account.ID.Value, msgs, dc);
 
             return null;
@@ -4153,7 +4153,7 @@ namespace AfterSchoolLibrary.Services
 
         public static RefundRequest GetRefundRequest(this Account account, Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (Uid.IsNotNullOrEmpty() && account.IsNotEmpty())
+            if (account.IsNotEmpty())
                 return RefundRequest.LoadByUidByAccountId(Uid, account.ID.Value, msgs, dc);
 
             return null;
@@ -4162,61 +4162,6 @@ namespace AfterSchoolLibrary.Services
         public static List<RefundRequest> GetRefundRequests(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return RefundRequest.LoadByAccountId(account.ID.Value, msgs, dc);
-        }
-
-        #endregion
-
-        #region WEB SESSION LOGS
-
-        public static void LogActivity(this Account account, int webSessionId, 
-            WebUser actor, WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet, ObjectType indirectObjectType = ObjectType.NotSet,
-            int? objectId = (int?)null, string objectText = "",
-            int? indirectObjectId = (int?)null, string indirectObjectText = "",
-            SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            //..actor	action		    Object		            ObjectType	        IndirectObjectId
-            //..Bharat  Navigated to    FIRST SAMUEL CHURCH(W)  DirectoryAccount   ISYP
-
-            string actorName = (actor.IsNotEmpty() ? actor.FullName : "Someone");
-
-            var actionStringDict = AfterSchoolLibrary.Helpers.WebSessionHelper.GetActionString(objectType, actorName, actionType, objectText, indirectObjectType, indirectObjectText);
-
-            SaveLog(actor: actor,
-                actionStringFormat: actionStringDict.SingleOrDefault(kp => kp.Key == "ActionStringFormat").Value,
-                actionString: actionStringDict.SingleOrDefault(kp => kp.Key == "ActionString").Value,
-                webSessionId: webSessionId,
-                actorId: actor.IsNotEmpty() ? actor.ID : null,
-                accountId: account.IsNotEmpty() ? account.ID : null,
-                actionType: actionType,
-                objectType: objectType,
-                objectId: objectId,
-                indirectObjectId: indirectObjectId,
-                msgs: msgs,
-                dc: dc);
-        }
-
-        public static void SaveLog(WebUser actor, int webSessionId, string actionStringFormat, string actionString, int? actorId = (int?)null, int? accountId = (int?)null,
-            WebSessionActionType actionType = WebSessionActionType.NotSet, ObjectType objectType = ObjectType.NotSet, ObjectType indirectObjectType = ObjectType.NotSet,
-            int? objectId = (int?)null, int? indirectObjectId = (int?)null,
-            SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (msgs.IsEmpty())
-                msgs = new SystemMessages();
-
-            var action = new WebSessionAction();
-            action.SessionId = webSessionId;
-            action.AccountId = accountId;
-            action.ActionTypeId = actionType;
-            action.ObjectTypeId = objectType;
-            action.ObjectId = objectId;
-            action.IndirectObjectId = indirectObjectId;
-            action.IndirectObjectTypeId = indirectObjectType;
-            action.ActionStringFormat = actionStringFormat;
-            action.ActionString = actionString;
-            action.CreateDate = DateTime.UtcNow;
-            action.CreatedBy = actor?.ID.Value;
-
-            msgs.AddRange(action.Save(dc));
         }
 
         #endregion

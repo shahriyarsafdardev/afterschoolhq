@@ -11,10 +11,7 @@ namespace AfterSchoolLibrary.Services
     {
         public static RegistrantActivity GetRegistrantActivity(Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (Uid.IsNotNullOrEmpty())
-                return RegistrantActivity.LoadByUid(Uid, msgs, dc);
-
-            return null;
+            return RegistrantActivity.LoadByUid(Uid, msgs, dc);
         }
 
         public static ParticipationObject GetParticipationObject(this RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc = null)

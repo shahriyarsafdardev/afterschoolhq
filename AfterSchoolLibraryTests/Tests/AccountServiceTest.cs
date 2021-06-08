@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System;
 using AfterSchoolLibrary.Billing;
 using BasicLibrary;
+using AfterSchool.Models;
 
 namespace AfterSchoolLibraryTests.Tests
 {
@@ -923,7 +924,8 @@ namespace AfterSchoolLibraryTests.Tests
             try
             {
                 // Act 
-                account.LogActivity(webSessionId: 1,
+                SessionVariables.WebSession.LogActivity(
+                    account: account,
                     actor: user,
                     actionType: WebSessionActionType.Navigated,
                     objectType: ObjectType.Account,
@@ -932,7 +934,8 @@ namespace AfterSchoolLibraryTests.Tests
                     objectText: "Test",
                     indirectObjectId: 1,
                     indirectObjectText: "ISYP",
-                    msgs, dc);
+                    msgs: msgs, 
+                    dc: dc);
 
                 var isSaved = msgs.HasNoErrors();
 
