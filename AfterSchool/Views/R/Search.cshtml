@@ -66,65 +66,7 @@
         width: 100%;
         z-index: 1000000;
     }
-    .contactUsBtn{
-        background-color: white;
-        border: 3px solid #00b492;
-        border-radius: 5px;
-        padding: 13px 25px;
-    }
-    .contactSpan{
-        margin-left: 30px;
-        font-weight: bold;
-    }
-    .contactUsModal{
-       background-color:#F7F7F7;
-       padding:45px 75px
-    }
-    .modalHeader{
-        padding-bottom: 30px;
-        font-weight: bold;
-        text-align: center;
-        font-size: 17px;
-    }
-    .modal-dialog {
-    width: 65%;
-
-}
-    .floatNone{
-       float:none;
-    }
-    @@media (max-width: 425px)
-    {
-        .contactUsBtn{
-         padding: 13px 20px;
-         font-size: 11px;
-       }
-       .contactUsModal{
-         padding: 30px 60px;
-       }
-    .modal-dialog {
-    width: auto !important;
-    margin: 30px 15px;
-}
-
-    }
-    .btnContactUsSubmit{
-      padding: 12px 65px;
-      border-radius: 5px;
-      margin-bottom: 30px;
-    }
-
-
-        @@media (max-width: 960px)
-    {
-
-    .modal-dialog {
-    width: auto !important;
-  margin: 30px 15px;
-}
-
-    }
-
+  
 </style>
 
 <div class="visible-lg visible-md">
@@ -178,7 +120,7 @@
     @{ Html.RenderPartial("~/Views/Shared/_DirectoryFilters.cshtml"); }
 </div>
 
-<div id="search-container" class="col-md-9" style="padding-bottom: 20px;padding-top:45px">
+<div id="search-container" class="col-md-9 pt-20 pb-20" style="">
 
     <div class="text-center">
         <button class="btn contactUsBtn" type="button" data-toggle="modal" data-target="#ContactUsModal">Can't find what you are looking for? <span class="contactSpan">CONTACT US</span></button>
@@ -224,7 +166,7 @@
     </div>
 </div>
 <div class="modal fade" id="ContactUsModal" tabindex="-1" role="dialog" aria-labelledby="ContactUsModal" aria-hidden="true">
-    <div class="modal-dialog contactUsModal" role="document">
+    <div class="modal-dialog contactUsModal Contactmodaldialog" role="document">
         <div class="">
 
             <div class="">
@@ -234,17 +176,7 @@
                 </div>
 
                 <form id="ContactUsForm" onsubmit="return false">
-                    <div class="text-success submit-contact-success hide">
-                        <p>
-                            Your message has been sent
-                        </p>
-                    </div>
-                    <div class="text-danger submit-contact-error hide">
-                        <p class="d-block">
-                            Error sending message
-                        </p>
-                    </div>
-                   
+                
                     <div class="col-md-12 onboarding-form-group floatNone">
                         <label class="onboarding-lable">NAME *</label>
                         <input type="text" name="name" id="name" required="required" autocomplete="off" class="form-control onboarding-input" value="" />
@@ -465,21 +397,25 @@
                                 $('#message').val('');
                                 $('#phone').val('');
 
-                                $('.submit-contact-error').addClass('hide');
-                                $('.submit-contact-success').removeClass('hide');
-
+                                Notifications.showBar({
+                                    title: 'Success',
+                                    message: 'Your message has been sent.',
+                                    success: true
+                                });
+                              
                             } else {
 
-                                $('.submit-contact-success').addClass('hide');
-                                $('.submit-contact-error').removeClass('hide');
-                                $('.submit-contact-error').html('');
-
+                             
+                                var text = "";
                                 for (var message of data.messages) {
-                                    $('.submit-contact-error').append('<p>');
-                                    $('.submit-contact-error').append(message.Text);
-                                    $('.submit-contact-error').append('</p>');
+                             
+                                    text = text + message.Text;
                                 }
-
+                                Notifications.showBar({
+                                    title: 'Failed',
+                                    message: text,
+                                    success: false
+                                });
                             }
                         }
                     );
