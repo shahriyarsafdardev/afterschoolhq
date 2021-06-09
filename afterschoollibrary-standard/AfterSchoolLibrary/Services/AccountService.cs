@@ -267,14 +267,29 @@ namespace AfterSchoolLibrary.Services
             return account.GetActiveAndPublishedActivityCount(msgs, dc) > 0;
         }
 
+        public static bool HasAnyPaidActivity(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var activities = account.GetAllActivitiesForAccount(msgs);
+            return activities.IsNotEmpty() && activities.Where(x => x.IsFree == false).Count() > 0;
+        }
+
         public static bool IsOnboardingCompleted(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (account.IsEmpty())
                 return false;
 
-            var accountOwner = account.GetAccountOwner(msgs);
-            return account.HasAccountProfile(msgs) && account.HasActiveActivities(msgs) && accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount && account.StripeUserId.IsNotEmpty();
+            var accountOwner = account.GetAccountOwner(msgs);    
+            if (account.HasAnyPaidActivity())
+            {
+                return account.HasAccountProfile(msgs) && account.HasActiveActivities(msgs) && accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount && account.StripeUserId.IsNotEmpty();
+            }
+            else
+            {
+                return account.HasAccountProfile(msgs) && account.HasActiveActivities(msgs) && accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount;
+            }
+            
         }
+        
 
         public static GettingStartedOptions OnboardingCompletionStatus(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
