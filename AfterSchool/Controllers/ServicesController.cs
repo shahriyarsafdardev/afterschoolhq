@@ -754,13 +754,17 @@ namespace AfterSchool.Controllers
             if (phone.IsNotEmpty() && !phone.IsPhone())
                 msgs.Add("Phone number is not in a valid format", MessageType.UserError);
 
+            
+            if(pageName== "contact")
+            {
+                msgs.AddRange(RecaptchaHelper.Validate(g_recaptcha_response));
+            }
      
 
             switch(pageName)
             {
                 case "contact":
-                    toEmail = AfterSchoolLibrary.Helpers.Email.AppSalesEmailAddress;
-                    msgs.AddRange(RecaptchaHelper.Validate(g_recaptcha_response));
+                    toEmail = AfterSchoolLibrary.Helpers.Email.AppSalesEmailAddress;                    
                     break;
                 case "search":
                     toEmail = AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress;

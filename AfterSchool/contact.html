@@ -176,9 +176,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 					<script>
 
     function submitContactForm() {
-
+        var subjectLine = 'New Sales Contact Form Submission From: ' + $('#contact-form-name').val();
         var params = 'name=' + $('#contact-form-name').val() +
-            '&pageName=contact'  +
+            '&pageName=contact' +
+            '&MainSubject=' + subjectLine +
             '&fromEmail=' + $('#contact-form-email').val() +
             '&message=' + $('#contact-form-message').val() +
             '&g_recaptcha_response=' + $('#g-recaptcha-response').val();
