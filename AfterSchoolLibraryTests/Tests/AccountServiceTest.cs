@@ -22,6 +22,28 @@ namespace AfterSchoolLibraryTests.Tests
             account = AccountFactory.Create(user, msgs, dc);
         }
 
+        [Fact(DisplayName = "Get Account Owner test")]
+        public void GetAccountOwnerTest()
+        {
+            var accountOwner = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(accountOwner, msgs, dc);          
+            var GetOwner = AccountService.GetAccountOwner(account, msgs, dc);
+           
+            Assert.NotNull(GetOwner);
+        }
+
+        [Fact(DisplayName = "HasFeature test")]
+        public void HasFeatureTest()
+        {
+            var accountOwner = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.CreateWithFreePackage(accountOwner, AccountType.Church, msgs, dc);
+            var AccountWithFeature = AccountService.HasFeature(account,FeatureType.AcceptACH, msgs, dc);
+
+            Assert.True(AccountWithFeature);
+        }
+
+
+
         [Fact(DisplayName = "CreateNewTest")]
         public void CreateNewTest()
         {
