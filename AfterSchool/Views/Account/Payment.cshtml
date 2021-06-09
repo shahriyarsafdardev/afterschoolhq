@@ -11,7 +11,7 @@
     var accountCanAcceptPayments = (bool)ViewBag.AccountCanAcceptPayments;
     var paymentAccount = participationObject.PaymentAccount;
     var subscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault();
-    var postPayPlan = participationObject.PostPayPlans.FirstOrDefault();
+    var postPayPlan = participationObject.PostPayPlans?.FirstOrDefault();
     var registrant = registration.GetRegistrant();
     var readyToAcceptPayment = subscriptionPlan.IsEmpty() || !subscriptionPlan.SplitCostEvenly || participationObject.RegistrationFinalized;
 }

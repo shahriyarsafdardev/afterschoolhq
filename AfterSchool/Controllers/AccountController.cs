@@ -1840,7 +1840,7 @@ namespace AfterSchool.Controllers
                 var convenienceFeePayer = billingAccount.IsConvenienceFeeTakenOutOfCost ? billingAccount : payingAccount;
                 var creditCardFeePayer = billingAccount.IsCreditCardFeeTakenOutOfCost ? billingAccount : payingAccount;
 
-                if (participationObject.PostPayPlans.Any())
+                if (participationObject.PostPayPlans.IsNotEmpty() && participationObject.PostPayPlans.Any())
                     convenienceFeePayer = participationObject.PostPayPlans.First().IsConvenienceFeeTakenOutOfCost ? billingAccount : payingAccount;
 
                 // get original cost

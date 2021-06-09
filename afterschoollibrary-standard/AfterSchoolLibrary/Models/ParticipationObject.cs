@@ -60,6 +60,7 @@ namespace AfterSchoolLibrary.Models
         public bool RegistrationFinalized { get; set; }
         public int? SeatsTaken { get; set; }
         public bool HidePreciseLocation { get; set; }
+        public bool IsPublished { get; set; }
 
         public ParticipationObject(int participationObjectId, ParticipationObjectType participationObjectType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -126,6 +127,7 @@ namespace AfterSchoolLibrary.Models
             HidePreciseLocation = activity.HidePreciseLocation;
             AgeStart = activity.AgeStart;
             AgeEnd = activity.AgeEnd;
+            IsPublished = activity.IsPublished;
 
             if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
             {
@@ -887,17 +889,19 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetCheckoutCostWithConvenienceFee()
         {
-            if (this.PostPayPlans.Any())
+            if (this.PostPayPlans.IsNotEmpty() && this.PostPayPlans.Any())
                 return GetPostPayCheckoutCostWithConvenienceFee();
 
             if (this.Cost.HasValue)
             {
-                var activity = this.GetActivity();
-
-                if (activity.IsNotEmpty())
-                    return Cost.Value
-                        + (activity.IsConvenienceFeeTakenOutOfCost ? 0 : GetConvenienceFee());
-
+                if (this.IsActivity())
+                {
+                    var activity = this.GetActivity();
+                
+                    if (activity.IsNotEmpty())
+                        return Cost.Value
+                            + (activity.IsConvenienceFeeTakenOutOfCost ? 0 : GetConvenienceFee());
+                }
                 return Cost.Value + GetConvenienceFee();
             }
 
