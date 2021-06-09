@@ -425,6 +425,23 @@
                
                 return true;
             })
+
+            var inputElement = document.getElementById('phone');
+            inputElement.addEventListener('keydown', enforceFormat);
+            inputElement.addEventListener('keyup', formatToPhone);
+
+            //format phone number when we load
+            if (inputElement && inputElement.value) {
+                var input = inputElement.value.replace(/\D/g, '').substring(0, 10); // First ten digits of input only
+                var zip = input.substring(0, 3);
+                var middle = input.substring(3, 6);
+                var last = input.substring(6, 10);
+
+                if (input.length > 6) { inputElement.value = `(${zip}) ${middle} ${last}`; } //(xxx) xxx xxxx
+                else if (input.length > 3) { inputElement.value = `(${zip}) ${middle}`; }
+                else if (input.length > 0) { inputElement.value = `(${zip}`; }
+            }
+
         })
 
         function showModalIsyp() {
