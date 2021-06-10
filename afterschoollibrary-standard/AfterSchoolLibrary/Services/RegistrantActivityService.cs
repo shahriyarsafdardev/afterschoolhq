@@ -9,6 +9,11 @@ namespace AfterSchoolLibrary.Services
 {
     public static class RegistrantActivityService
     {
+        public static RegistrantActivity GetRegistrantActivity(Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RegistrantActivity.LoadByUid(Uid, msgs, dc);
+        }
+
         public static ParticipationObject GetParticipationObject(this RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             switch (registrantActivity.ParticipationObjectTypeId)

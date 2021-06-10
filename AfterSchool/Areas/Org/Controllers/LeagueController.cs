@@ -497,8 +497,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     msgs.Add($"{UILabel.ActivityGroupLabel(league.ActivityGroupTypeId)} Saved", MessageType.Success);
 
                     // LOG: CurrentUser Updated ActivityGroup ActivityGroupName for Account AccountName
-                    WebSessionUtilities.LogActivity(
-                        webSessionId: SessionVariables.WebSession.ID.Value,
+                    SessionVariables.WebSession.LogActivity(
+                        account: currentAccount,
                         actor: currentWebUser,
                         actionType: WebSessionActionType.Updated,
                         objectId: league.ID.Value,
@@ -636,8 +636,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add(string.Format("{0} has been published", activityGroup.Name), MessageType.Success);
 
                 // LOG: CurrentWebUser published ActivityGroup ActivityGroupName to Account AccountName's Profile
-                WebSessionUtilities.LogActivity(
-                    webSessionId: SessionVariables.WebSession.ID.Value,
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
                     actor: currentWebUser,
                     actionType: WebSessionActionType.Published,
                     objectId: activityGroup.ID.Value,
@@ -671,9 +671,10 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add(string.Format("{0} has been unpublished", activityGroup.Name), MessageType.Success);
+                
                 // LOG: CurrentWebUser unpublished ActivityGroup ActivityGroupName to Account AccountName's Profile
-                WebSessionUtilities.LogActivity(
-                    webSessionId: SessionVariables.WebSession.ID.Value,
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
                     actor: currentWebUser,
                     actionType: WebSessionActionType.Unpublished,
                     objectId: activityGroup.ID.Value,
