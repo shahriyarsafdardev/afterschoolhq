@@ -59,7 +59,7 @@ namespace AfterSchoolLibrary.Services
             }
 
             return package;
-        }        
+        }
 
         public static SystemMessages CreateDefaultPackageFeatures(Package package, WebUser loggedInUser, DatabaseConnection dc = null)
         {
