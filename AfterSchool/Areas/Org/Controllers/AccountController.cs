@@ -107,18 +107,20 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Location()
         {
+            var currentAccount = SessionVariables.CurrentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Messages = new SystemMessages();
-            ViewBag.Location = SessionVariables.CurrentAccount.GetDefaultLocation();
+            ViewBag.Location = currentAccount.GetDefaultLocation();
             ViewBag.IsFullScreen = GetIsFullScreen();
-            return View(SessionVariables.CurrentAccount);
+            return View(currentAccount);
         }
 
         [HttpPost]
         public ActionResult Location(string id, string location, string locationname, string address1, string address2, string city, string state, string postalcode, string country, string mylocation, string locationtype)
         {
             var msgs = new SystemMessages();
-            var account = SessionVariables.CurrentAccount;
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
 
             var locationType = LocationType.NotSet;
             var hostAccountId = new int?();
@@ -127,22 +129,22 @@ namespace AfterSchool.Areas.Org.Controllers
                 locationType = (LocationType)locationtype.ToInteger();
 
             if (mylocation.IsBoolean() && mylocation.ToBoolean())
-                hostAccountId = SessionVariables.CurrentAccount.ID;
+                hostAccountId = currentAccount.ID;
 
             if (location.IsNumber())
             {
                 var currentLocation = AfterSchoolLibrary.Models.Location.Load(location.ToInteger(), msgs);
 
-                if (currentLocation.IsOwnedByOrIsNotOwnedAtAll(SessionVariables.CurrentAccount))
+                if (currentLocation.IsOwnedByOrIsNotOwnedAtAll(currentAccount))
                 {
                     currentLocation.LocationTypeId = locationType;
                     currentLocation.HostAccountId = hostAccountId;
-                    currentLocation.LastModifiedBy = SessionVariables.CurrentUser.ID;
+                    currentLocation.LastModifiedBy = currentUser.ID;
                     currentLocation.LastModifiedDate = DateTime.UtcNow;
                     msgs.AddRange(currentLocation.Save());
                 }
 
-                account.SetDefaultLocation(currentLocation, SessionVariables.CurrentUser, msgs);
+                currentAccount.SetDefaultLocation(currentLocation, currentUser, msgs);
             }
             else
             {
@@ -156,20 +158,20 @@ namespace AfterSchool.Areas.Org.Controllers
                     country: "US",
                     locationType: locationType,
                     hostAccountId: hostAccountId,
-                    visitorAccount: SessionVariables.CurrentAccount,
-                    loggedInUser: SessionVariables.CurrentUser,
+                    visitorAccount: currentAccount,
+                    loggedInUser: currentUser,
                     msgs: msgs
                     );
 
                 if (msgs.HasNoErrors())
-                    account.SetDefaultLocation(newLocation, SessionVariables.CurrentUser, msgs);
+                    currentAccount.SetDefaultLocation(newLocation, currentUser, msgs);
             }
 
             ViewBag.Messages = msgs;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.Location = account.GetDefaultLocation();
+            ViewBag.Location = currentAccount.GetDefaultLocation();
             ViewBag.IsFullScreen = GetIsFullScreen();
-            return View(account);
+            return View(currentAccount);
         }
 
         [HttpGet]
@@ -190,15 +192,17 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult CheckSetup()
         {
-            ViewBag.Account = SessionVariables.CurrentAccount;
+            var currentAccount = SessionVariables.CurrentAccount;
+            ViewBag.Account = currentAccount;
             ViewBag.IsFullScreen = GetIsFullScreen();
             ViewBag.Messages = new SystemMessages();
-            return View(SessionVariables.CurrentAccount.GetCheckPaymentAccount() ?? new CheckPaymentAccount());
+            return View(currentAccount.GetCheckPaymentAccount() ?? new CheckPaymentAccount());
         }
 
         [HttpPost]
         public ActionResult CheckSetup(string entitytype, string name, string address1, string address2, string city, string state, string postalcode)
         {
+            var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
 
             if (!entitytype.IsNumber())
@@ -220,7 +224,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add("Postal Code is required", MessageType.UserError);
 
             if (msgs.HasNoErrors())
-                SessionVariables.CurrentAccount.CreateOrUpdateCheckPaymentAccount(
+                currentAccount.CreateOrUpdateCheckPaymentAccount(
                     entitytype.ToEnum<LegalEntityType>(),
                     name,
                     address1,
@@ -234,25 +238,27 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors() && Request["isnew"] == "1")
                 return RedirectToAction("paymentsdone", new { isnew = 1 });
 
-            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.Account = currentAccount;
             ViewBag.IsFullScreen = GetIsFullScreen();
             ViewBag.Messages = msgs;
-            return View(SessionVariables.CurrentAccount.GetCheckPaymentAccount() ?? new CheckPaymentAccount());
+            return View(currentAccount.GetCheckPaymentAccount() ?? new CheckPaymentAccount());
         }
 
 
         [HttpGet]
         public ActionResult BankSetup()
         {
-            ViewBag.Account = SessionVariables.CurrentAccount;
+            var currentAccount = SessionVariables.CurrentAccount;
+            ViewBag.Account = currentAccount;
             ViewBag.IsFullScreen = GetIsFullScreen();
             ViewBag.Messages = new SystemMessages();
-            return View(BankInfoViewModel.FromBankPaymentAccount(SessionVariables.CurrentAccount.GetBankPaymentAccount() ?? new BankPaymentAccount()));
+            return View(BankInfoViewModel.FromBankPaymentAccount(currentAccount.GetBankPaymentAccount() ?? new BankPaymentAccount()));
         }
 
         [HttpPost]
         public ActionResult BankSetup(BankInfoViewModel bankInfoVM)
         {
+            var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
 
             if (!bankInfoVM.BankAccountType.HasValue || bankInfoVM.BankAccountType.Value == BankAccountType.NotSet)
@@ -286,7 +292,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add("Bank Country is required", MessageType.UserError);
 
             if (msgs.HasNoErrors())
-                SessionVariables.CurrentAccount.CreateOrUpdateBankPaymentAccount(
+                currentAccount.CreateOrUpdateBankPaymentAccount(
                     bankInfoVM.BankName,
                     bankInfoVM.BankAccountType.Value,
                     bankInfoVM.RoutingNumber1,
@@ -300,9 +306,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 return RedirectToAction("paymentsdone", new { isnew = 1 });
 
             if (msgs.HasNoErrors())
-                bankInfoVM = BankInfoViewModel.FromBankPaymentAccount(SessionVariables.CurrentAccount.GetBankPaymentAccount() ?? new BankPaymentAccount());
+                bankInfoVM = BankInfoViewModel.FromBankPaymentAccount(currentAccount.GetBankPaymentAccount() ?? new BankPaymentAccount());
 
-            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.Account = currentAccount;
             ViewBag.IsFullScreen = GetIsFullScreen();
             ViewBag.Messages = msgs;
             return View(bankInfoVM);
@@ -337,7 +343,6 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
-            var user = SessionVariables.CurrentUser;
             var stripeAccount = account.GetStripeCustomAccount(msgs);            
 
             if (paymentsEntityVM.BusinessType == LegalEntityType.NotSet)
@@ -430,13 +435,13 @@ namespace AfterSchool.Areas.Org.Controllers
                     paymentsEntityVM.DocumentBackId = documentBack.Id;
                 }
 
-                if (SessionVariables.CurrentAccount.StripeUserId.IsEmpty())
-                    SessionVariables.CurrentAccount.CreateStripeCustomAccount(
-                        paymentsEntityVM.GetStripeAccountCreateOptions(SessionVariables.CurrentAccount),
+                if (account.StripeUserId.IsEmpty())
+                    account.CreateStripeCustomAccount(
+                        paymentsEntityVM.GetStripeAccountCreateOptions(account),
                         msgs);
                 else
-                    SessionVariables.CurrentAccount.UpdateStripeCustomAccount(
-                        paymentsEntityVM.GetStripeAccountUpdateOptions(SessionVariables.CurrentAccount),
+                    account.UpdateStripeCustomAccount(
+                        paymentsEntityVM.GetStripeAccountUpdateOptions(account),
                         msgs);
             }
 
@@ -452,18 +457,19 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             ViewBag.Messages = msgs;
-            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.Account = account;
             ViewBag.IsFullScreen = GetIsFullScreen();
-            return View(PaymentsEntityViewModel.LoadFromStripeAccount(SessionVariables.CurrentAccount.GetStripeCustomAccount(msgs)));
+            return View(PaymentsEntityViewModel.LoadFromStripeAccount(account.GetStripeCustomAccount(msgs)));
         }
 
         [HttpGet]
         public ActionResult PaymentsBank()
         {
+            var account = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
-            var paymentsEntityVM = PaymentsEntityViewModel.LoadFromStripeAccount(SessionVariables.CurrentAccount.GetStripeCustomAccount(msgs));
+            var paymentsEntityVM = PaymentsEntityViewModel.LoadFromStripeAccount(account.GetStripeCustomAccount(msgs));
 
-            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.Account = account;
             ViewBag.Messages = msgs;
             ViewBag.IsFullScreen = GetIsFullScreen();
             return View(paymentsEntityVM);
@@ -472,6 +478,7 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpPost]
         public ActionResult PaymentsBank(PaymentsEntityViewModel paymentsEntityVM)
         {
+            var account = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
 
             if (paymentsEntityVM.BankRoutingNumber1.IsEmpty())
@@ -489,14 +496,14 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add("Account Numbers must match", MessageType.UserError);
 
             if (msgs.HasNoErrors())
-                SessionVariables.CurrentAccount.UpdateStripeCustomAccount(
-                        paymentsEntityVM.GetStripeAccountUpdateOptions(SessionVariables.CurrentAccount),
+                account.UpdateStripeCustomAccount(
+                        paymentsEntityVM.GetStripeAccountUpdateOptions(account),
                         msgs);
 
             if (msgs.HasNoErrors() && Request["isnew"] == "1")
                 return RedirectToAction("PaymentsDone");
 
-            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.Account = account;
             ViewBag.Messages = msgs;
             ViewBag.IsFullScreen = GetIsFullScreen();
             return View(paymentsEntityVM);
@@ -505,15 +512,16 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult PaymentsDone(string id)
         {
+            var account = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
 
-            ViewBag.HasActivities = SessionVariables.CurrentAccount.HasActivities(msgs);
-            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.HasActivities = account.HasActivities(msgs);
+            ViewBag.Account = account;
             ViewBag.Messages = msgs;
             ViewBag.IsFullScreen = GetIsFullScreen();
 
-            var account = SessionVariables.CurrentAccount;
-            var currentUser = SessionVariables.CurrentUser;
+           
             var user = account.GetAccountOwner(msgs);
 
             //.. send support email to AHQ just to notifiy the team that a payment has been added/updated.
@@ -548,6 +556,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var a = SessionVariables.CurrentAccount;
+            var currentuser = SessionVariables.CurrentUser;
             var accountPackage = a.GetActiveAccountPackage();
 
             Database.ExecuteTransaction(
@@ -562,12 +571,12 @@ namespace AfterSchool.Areas.Org.Controllers
                                 accountFeature = new AccountPackageFeature();
                                 accountFeature.AccountPackageId = accountPackage.ID;
                                 accountFeature.CreateDate = DateTime.UtcNow;
-                                accountFeature.CreatedBy = SessionVariables.CurrentUser.ID;
+                                accountFeature.CreatedBy = currentuser.ID;
                                 accountFeature.FeatureTypeId = type;
                             }
 
                             accountFeature.Max = Request[type.ToString()].ToDecimal();
-                            accountFeature.LastModifiedBy = SessionVariables.CurrentUser.ID;
+                            accountFeature.LastModifiedBy = currentuser.ID;
                             accountFeature.LastModifiedDate = DateTime.UtcNow;
                             msgs.AddRange(accountFeature.Save(adc));
 
