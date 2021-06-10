@@ -42,6 +42,162 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(AccountWithFeature);
         }
 
+        [Fact(DisplayName = "GetActivityCount test")]
+        public void GetActivityCountTest()
+        {
+            var accountOwner = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(accountOwner, msgs, dc);
+            var activityGroup = ActivityGroupFactory.Create(account,ActivityGroupType.Session,msgs,dc);
+
+            var addactivity = ActivityFactory.Create(account, activityGroup, msgs, dc);
+
+            var GetActivityCount = AccountService.GetActivityCount(account,msgs,dc);
+
+            Assert.True(GetActivityCount> 0);
+        }
+
+        [Fact(DisplayName = "GetActiveAndPublishedActivityCount test")]
+        public void GetActiveAndPublishedActivityCountTest()
+        {
+            var accountOwner = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(accountOwner, msgs, dc);
+            var activityGroup = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
+
+            var addactivity = ActivityFactory.Create(account, activityGroup, msgs, dc);
+            addactivity.Publish(accountOwner, msgs, dc);
+
+            var GetActivityCount = AccountService.GetActiveAndPublishedActivityCount(account, msgs, dc);
+
+            Assert.True(GetActivityCount > 0);
+        }
+
+
+        [Fact(DisplayName = "GetActiveAndNonPublishedActivityCount test")]
+        public void GetActiveAndNonPublishedActivityCountTest()
+        {
+            var accountOwner = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(accountOwner, msgs, dc);
+            var activityGroup = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
+
+            var addactivity = ActivityFactory.Create(account, activityGroup, msgs, dc);
+
+            var GetActivityCount = AccountService.GetActiveAndNonPublishedActivityCount(account, msgs, dc);
+
+            Assert.True(GetActivityCount > 0);
+        }
+
+
+        [Fact(DisplayName = "GetUnpublishActivityCount test")]
+        public void GetUnpublishActivityCountTest()
+        {
+            var accountOwner = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(accountOwner, msgs, dc);
+            var activityGroup = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
+
+            var addactivity = ActivityFactory.Create(account, activityGroup, msgs, dc);
+
+            var GetActivityCount = AccountService.GetActiveAndNonPublishedActivityCount(account, msgs, dc);
+
+            Assert.True(GetActivityCount > 0);
+        }
+
+
+
+        [Fact(DisplayName = "HasActivities test")]
+        public void HasActivitiesTest()
+        {
+            var accountOwner = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.CreateWithFreePackage(accountOwner, AccountType.Church, msgs, dc);
+            var activityGroup = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
+
+            var addactivity = ActivityFactory.Create(account, activityGroup, msgs, dc);
+
+            var HasActivity = AccountService.HasActivities(account, msgs, dc);
+
+            Assert.True(HasActivity);
+        }
+
+        [Fact(DisplayName = "HasActiveActivities test")]
+        public void HasActiveActivitiesTest()
+        {
+            var accountOwner = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(accountOwner, msgs, dc);
+            var activityGroup = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
+
+            var addactivity = ActivityFactory.Create(account, activityGroup, msgs, dc);
+            addactivity.Publish(accountOwner, msgs, dc);
+
+            var HasActivity = AccountService.HasActiveActivities(account, msgs, dc);
+
+            Assert.True(HasActivity);
+        }
+
+     
+
+        [Fact(DisplayName = "AddContact test")]
+        public void AddContactTest()
+        {
+            var accountOwner = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(accountOwner, msgs, dc);
+
+            var addContact = AccountService.AddContact(account, "Test", "Lastname", "test@test.com", "123-123-1234", accountOwner, msgs, dc);
+
+            Assert.NotNull(addContact);
+        }
+
+
+        [Fact(DisplayName = "SearchContactCount test")]
+        public void SearchContactTest()
+        {
+            var accountOwner = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(accountOwner, msgs, dc);
+
+            var addContact = AccountService.AddContact(account, "Test", "Lastname", "test@test.com", "123-123-1234", accountOwner, msgs, dc);
+
+            var searchContact=AccountService.SearchContactCount(account,"Test",null, dc);
+
+            Assert.True(searchContact > 0);
+        }
+
+        [Fact(DisplayName = "GetContactCount test")]
+        public void GetContactCountTest()
+        {
+            var accountOwner = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(accountOwner, msgs, dc);
+
+            var addContact = AccountService.AddContact(account, "Test", "Lastname", "test@test.com", "123-123-1234", accountOwner, msgs, dc);
+
+            var GetContactCount = AccountService.GetContactCount(account, dc);
+
+            Assert.True(GetContactCount == 1);
+        }
+
+        [Fact(DisplayName = "DoesContactExist test")]
+        public void DoesContactExistTest()
+        {
+            var accountOwner = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(accountOwner, msgs, dc);
+
+            var addContact = AccountService.AddContact(account, "Test", "Lastname", "test@test.com", "123-123-1234", accountOwner, msgs, dc);
+
+            var GetContact = AccountService.DoesContactExist(account, "Test", "Lastname", "test@test.com",msgs,dc);
+
+            Assert.True(GetContact);
+        }
+
+        [Fact(DisplayName = "GetContacts test")]
+        public void GetContactsTest()
+        {
+            var accountOwner = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(accountOwner, msgs, dc);
+
+            var addContact = AccountService.AddContact(account, "Test", "Lastname", "test@test.com", "123-123-1234", accountOwner, msgs, dc);
+
+            var GetContactsCount = AccountService.GetContacts(account,null,null, dc);
+
+            Assert.True(GetContactsCount.Count == 1);
+        }
+
 
 
         [Fact(DisplayName = "CreateNewTest")]
