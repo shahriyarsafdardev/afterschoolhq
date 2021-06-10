@@ -1539,17 +1539,6 @@ namespace AfterSchoolLibrary.Services
             return uniqueName;
         }
 
-        public enum SignUpType
-        {
-            NotSet = 0,
-            NewAccountSignUp,
-            TrialSignUp,
-            ConvertingFromTrial,
-            ChangePackage,
-            ChangePackageDuringTrial,
-            ChangeBillingPeriodType
-        }
-
         public static SignUpType GetSignUpType(this Account account, Package p, AccountPackage activePackage, BillingPeriodType billingPeriodType, ref int trialDayCount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var signupType = SignUpType.NotSet;
