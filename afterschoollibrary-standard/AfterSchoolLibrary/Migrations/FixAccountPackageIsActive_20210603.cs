@@ -16,13 +16,19 @@ namespace AfterSchoolLibrary.Migrations
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    var groupedAccountPackages = AccountPackage.Load(msgs: amsgs, dc: adc)?.GroupBy(m => m.AccountId).OrderBy(m => m.FirstOrDefault().AccountId).ToList();
+                    var groupedAccountPackages = AccountPackage.Load(
+                        new Hashtable() { { "IsActive", 1 } }, 
+                        msgs: amsgs, 
+                        dc: adc)?
+                    .GroupBy(m => m.AccountId)
+                    .Where(m => m.Count() > 1)
+                    .OrderBy(m => m.FirstOrDefault().AccountId)
+                    .ToList();
 
                     foreach (var accountPackages in groupedAccountPackages)
                     {
-                        var lstActiveAccountPackages = accountPackages.Where(m => m.IsActive).OrderByDescending(m => m.CreateDate);
-
-                        foreach (var accountPackageTobeUpdated in lstActiveAccountPackages.Skip(1))
+                        //skip is needed as we want to make sure that only lastly added package remains active, and all other will be inactive
+                        foreach (var accountPackageTobeUpdated in accountPackages.OrderByDescending(m => m.CreateDate).Skip(1))
                         {
                             accountPackageTobeUpdated.IsActive = false;
                             accountPackageTobeUpdated.LastModifiedDate = DateTime.Now;

@@ -2178,3 +2178,9 @@ type: Enum
 name: GettingStartedOptions
 values: NotSet, CreateProfile, CreateFirstActivity, PublishActivity, ValidateEmail, AcceptPayments, ProcessCompleted
 [end]
+
+[begin]
+type: Enum
+name: SignUpType
+values: NotSet, NewAccountSignUp, TrialSignUp, ConvertingFromTrial, ChangePackage, ChangePackageDuringTrial, ChangeBillingPeriodType
+[end]
