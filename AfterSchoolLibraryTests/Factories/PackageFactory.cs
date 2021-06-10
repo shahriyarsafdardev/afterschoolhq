@@ -1,6 +1,8 @@
 ﻿using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
+using System;
+using System.Linq;
 
 namespace AfterSchoolLibraryTests.Factories
 {
@@ -88,6 +90,87 @@ namespace AfterSchoolLibraryTests.Factories
             PackageFeatureFactory.Create(obj, FeatureType.WaitingList, 1.ToDecimal(), msgs, dc);
 
             return obj;
+        }
+
+        public static Package CreatePackage(string Name, string Description, decimal price, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var package = new Package()
+            {
+                CreateDate = DateTime.UtcNow,
+                CreatedBy = loggedInUser?.ID.IfEmpty(0),
+                Description = Description,
+                IsActive = true,
+                IsAfterSchool = true,
+                IsPopular = true,
+                LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
+                LastModifiedDate = DateTime.UtcNow,
+                Name = Name,
+                Price = price,
+                PricePerYear = price * 10
+            };
+
+            msgs.AddRange(package.SaveWithStripe(dc));
+
+            if (msgs.HasNoErrors())
+                msgs.AddRange(CreatePackageFeatures(package, loggedInUser, dc));
+
+            return package;
+        }
+
+        public static SystemMessages CreatePackageFeatures(Package package, WebUser loggedInUser, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            foreach (var item in Enum.GetValues(typeof(FeatureType)).Cast<FeatureType>())
+            {
+                var maxValue = 1.ToDecimal();
+
+                switch (item)
+                {
+                    case FeatureType.Activities:
+                        maxValue = 1000;
+                        break;
+                    case FeatureType.TrialDays:
+                        maxValue = 120;
+                        break;
+                    case FeatureType.TeamAccounts:
+                    case FeatureType.Participants:
+                        maxValue = 1000;
+                        break;
+                    case FeatureType.PaymentsPercentageFee:
+                        maxValue = .05.ToDecimal(); // means 5 percent
+                        break;
+                    case FeatureType.PaymentsPercentageFlatFee:
+                        maxValue = .99.ToDecimal();
+                        break;
+                }
+
+                AddFeature(package, item, maxValue, loggedInUser, msgs, dc);
+            }
+
+            return msgs;
+        }
+
+        public static PackageFeature AddFeature(Package package, FeatureType featureType, decimal maxValue, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var packageFeature = new PackageFeature()
+            {
+                CreateDate = DateTime.UtcNow,
+                CreatedBy = loggedInUser?.ID.IfEmpty(0),
+                FeatureTypeId = featureType,
+                LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
+                LastModifiedDate = DateTime.UtcNow,
+                Max = maxValue,
+                PackageId = package.ID
+            };
+
+            msgs.AddRange(packageFeature.Save(dc));
+
+            return packageFeature;
         }
     }
 }
