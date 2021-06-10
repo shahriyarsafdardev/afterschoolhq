@@ -231,7 +231,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     ActivityTypeId = ActivityType.Team,
                     ContactEmail = aag.ContactEmail,
                     ContactName = aag.ContactName,
-                    ContactPhone = aag.ContactPhone
+                    ContactPhone = aag.ContactPhone,
+                    UniqueName = ActivityService.GenerateUniqueName(teamname.MaxChars(50), null, SessionVariables.CurrentAccount.ID, msgs)
                 };
                 msgs.AddRange(activity.Save());
             }
