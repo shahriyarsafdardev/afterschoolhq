@@ -2260,7 +2260,7 @@ namespace AfterSchool.Controllers
                         if (amsgs.HasNoErrors())
                         {
                             var location = participationObject?.Location;
-                            if (location.IsNotEmpty() && location.GetHostAccount(amsgs, adc).AccountTypeId != AccountType.School)
+                            if (location.IsNotEmpty() && location.GetHostAccount(amsgs, adc)?.AccountTypeId != AccountType.School)
                                 location = null;
 
                             // create student registrant record
