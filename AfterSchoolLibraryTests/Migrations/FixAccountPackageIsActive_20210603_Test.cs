@@ -32,12 +32,12 @@ namespace AfterSchoolLibraryTests.Migrations
                 AfterSchoolLibrary.Helpers.Utilities.AdditionalData(dc);
 
                 // create package
-                var package1 = PackageService.CreateTestPackage("Test Package 1", "Test Package Description 1", 100m, user, msgs, dc);
-                var package2 = PackageService.CreateTestPackage("Test Package 2", "Test Package Description 2", 50m, user, msgs, dc);
+                var package1 = PackageFactory.CreatePackage("Test Package 1", "Test Package Description 1", 100m, user, msgs, dc);
+                var package2 = PackageFactory.CreatePackage("Test Package 2", "Test Package Description 2", 50m, user, msgs, dc);
 
                 // create multiple active account packages
-                account.AddPackageWithoutDisablingPreviousPackage(package1.ID.Value, BillingPeriodType.Month, user, msgs, dc);
-                account.AddPackageWithoutDisablingPreviousPackage(package2.ID.Value, BillingPeriodType.Month, user, msgs, dc);
+                AccountFactory.AddPackageWithoutDisablingPreviousPackage(account, package1.ID.Value, BillingPeriodType.Month, user, msgs, dc);
+                AccountFactory.AddPackageWithoutDisablingPreviousPackage(account, package2.ID.Value, BillingPeriodType.Month, user, msgs, dc);
 
                 // Act                   
                 //check if account has multiple active packages

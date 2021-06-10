@@ -59,36 +59,7 @@ namespace AfterSchoolLibrary.Services
             }
 
             return package;
-        }
-
-        public static Package CreateTestPackage(string Name, string Description, decimal price, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-            var package = new Package()
-            {
-                CreateDate = DateTime.UtcNow,
-                CreatedBy = loggedInUser?.ID.IfEmpty(0),
-                Description = Description,
-                IsActive = true,
-                IsAfterSchool = true,
-                IsPopular = true,
-                LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
-                LastModifiedDate = DateTime.UtcNow,
-                Name = Name,
-                Price = price,
-                PricePerYear = price * 10
-            };
-
-            msgs.AddRange(package.SaveWithStripe(dc));
-
-            if (msgs.HasNoErrors())
-            {
-                msgs.AddRange(CreateDefaultPackageFeatures(package, loggedInUser, dc));
-            }
-
-            return package;
-        }
+        }        
 
         public static SystemMessages CreateDefaultPackageFeatures(Package package, WebUser loggedInUser, DatabaseConnection dc = null)
         {
