@@ -291,7 +291,7 @@
 
     </div>
 
-    Html.RenderPartial("~/Views/Shared/_GettingStartedModal.cshtml", Model.OwnerAccount, new ViewDataDictionary() { { "ActivityUid", Model.Uid } });
+    Html.RenderPartial("~/Views/Shared/_GettingStartedModal.cshtml", Model.OwnerAccount, new ViewDataDictionary() { { "ActivityUid", Model.Uid }, { "IsActivityFree", activity.IsFree } });
 }
 
 @if (session.IsNotEmpty())
