@@ -1646,7 +1646,14 @@ namespace AfterSchool.Areas.Org.Controllers
                             {
                                 var firstAttendanceOfWeek = currentWeekPresent.First().GetAttendance(msgs);
 
-                                if (firstAttendanceOfWeek.IsNotEmpty() && !attendancesToCharge.Any(item => item.ID == firstAttendanceOfWeek.ID))
+                                var currentUser = SessionVariables.CurrentUser;
+                                var attendanceRegistrant = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(
+                                                                attendance.ID.Value,
+                                                                registrantActivity.GetRegistrant(msgs).ID.Value,
+                                                                msgs)
+                                                            .FirstOrDefault();
+
+                                if (firstAttendanceOfWeek.IsNotEmpty() && !attendanceRegistrant.AddNextAvailablePrePayment(currentUser, msgs)  && !attendancesToCharge.Any(item => item.ID == firstAttendanceOfWeek.ID))
                                     attendancesToCharge.Add(firstAttendanceOfWeek);
                             }
 
