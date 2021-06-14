@@ -23,9 +23,11 @@ namespace AfterSchoolLibraryTests.Tests
         private Location Location { get; }
         private Package Package { get; }
         private AccountPackage AccountPackage { get; }
+        private decimal CostPerRegistrant { get; set; }
 
         public PartcipationObjectTest(ITestOutputHelper output) : base(output)
         {
+            CostPerRegistrant = 20.0;
             LoggedInUser = WebUserFactory.Create(msgs, dc);
             AccountOwner = WebUserFactory.Create(msgs, dc);
             ActivityOwnerAccount = AccountFactory.Create(AccountOwner, msgs, dc);
@@ -33,7 +35,7 @@ namespace AfterSchoolLibraryTests.Tests
             ActivityGroup = ActivityGroupFactory.Create(ActivityOwnerAccount, ActivityGroupType.Session, msgs, dc);
             Schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, ActivityGroup, DateTime.UtcNow.FirstDateOfMonth(), msgs, dc);
             Location = LocationFactory.Create(ActivityOwnerAccount, msgs, dc);
-            Activity = ActivityFactory.Create(ActivityOwnerAccount, Schedule, ActivityGroup, Location, msgs, dc);
+            Activity = ActivityFactory.Create(ActivityOwnerAccount, Schedule, ActivityGroup, Location,20, msgs, dc);
             Instances = new List<ActivityInstance>();
             Package = PackageFactory.Create(100, 1200, msgs, dc);
             AccountPackage = AccountPackageFactory.Create(ActivityOwnerAccount, Package, msgs, dc);
@@ -70,7 +72,22 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(classes.Equals(remainingDays));
 
         }
-        
+
+        [Fact]
+        public void GetCheckoutCostWithConvenienceFeeUsingActivity()
+        {
+
+            var firstDayOfMonth = DateTime.UtcNow.FirstDateOfMonth();
+            var remainingDays = DateTime.UtcNow.LastDateOfMonth().Day - firstDayOfMonth.Day;
+
+            ParticipationObject participationObject = new ParticipationObject(Activity, msgs, dc);
+            var fee = participationObject.GetCheckoutCostWithConvenienceFee();
+
+            Assert.True(fee==CostPerRegistrant);
+            //Assert.True(classes.Equals(remainingDays));
+
+        }
+
         [Fact]
         public void GetNumberOfRemainingClassesInNextCycleTest()
         {
