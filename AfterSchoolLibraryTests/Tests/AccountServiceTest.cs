@@ -1126,5 +1126,96 @@ namespace AfterSchoolLibraryTests.Tests
                 Assert.False(false, ex.Message);
             }
         }
+
+        [Fact]
+        public void GetAccountPackageTest()
+        {
+            try
+            {
+                // Arrange
+                var package = PackageFactory.Create(msgs, dc);
+                var accountPackage = AccountPackageFactory.Create(account, package, msgs, dc);
+
+                // Act                
+                var expected = account.GetAccountPackage(Uid: accountPackage.Uid, msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.Equal(expected: expected.ID, actual: accountPackage.ID);
+                Assert.Equal(expected: expected.Uid, actual: accountPackage.Uid);
+                Assert.Equal(expected: expected.Price, actual: accountPackage.Price);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact]
+        public void GetAccountRelationshipTest()
+        {
+            try
+            {
+                // Arrange
+                var visitorOwner = WebUserFactory.Create(msgs, dc);
+                var visitorAccount = AccountFactory.Create(visitorOwner, msgs, dc);
+                var hostOwner = WebUserFactory.Create(msgs, dc);
+                var hostAccount = AccountFactory.Create(hostOwner, msgs, dc);
+                var accountRelationship = AccountRelationshipService.CreateNew(hostAccount, visitorAccount, ApprovalStatus.Approved, HostPermissionType.Edit, user, msgs, dc);
+                
+                // Act                
+                var expected = hostAccount.GetAccountRelationship(Id: accountRelationship.ID.Value, msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.Equal(expected: expected.ID, actual: accountRelationship.ID);                
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact]
+        public void GetFormTest()
+        {
+            try
+            {
+                // Arrange                
+                var form = FormFactory.Create(account, msgs, dc);
+
+                // Act                
+                var expected = account.GetForm(Id: form.ID.Value, msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.Equal(expected: expected.ID, actual: form.ID);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact]
+        public void GetAccountWebUserTest()
+        {
+            try
+            {
+                // Arrange                
+                var webUser = AccountWebUserFactory.Create(account, user, UserType.Student, true, msgs, dc);
+
+                // Act                
+                var expected = account.GetAccountWebUser(webUserId: user.ID.Value, msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.Equal(expected: expected.ID, actual: webUser.ID);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
     }
 }
