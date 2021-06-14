@@ -752,14 +752,11 @@ namespace AfterSchool.Controllers
 
 
             if (phone.IsNotEmpty() && !phone.IsPhone())
-                msgs.Add("Phone number is not in a valid format", MessageType.UserError);
-
+                msgs.Add("Phone number is not in a valid format", MessageType.UserError);  
             
-            if(pageName== "contact")
-            {
-                msgs.AddRange(RecaptchaHelper.Validate(g_recaptcha_response));
-            }
-     
+           
+            msgs.AddRange(RecaptchaHelper.Validate(g_recaptcha_response));
+                
 
             switch(pageName)
             {
