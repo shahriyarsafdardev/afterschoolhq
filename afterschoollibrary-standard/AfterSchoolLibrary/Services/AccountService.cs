@@ -1624,18 +1624,7 @@ namespace AfterSchoolLibrary.Services
             return uniqueName;
         }
 
-        private enum SignUpType
-        {
-            NotSet = 0,
-            NewAccountSignUp,
-            TrialSignUp,
-            ConvertingFromTrial,
-            ChangePackage,
-            ChangePackageDuringTrial,
-            ChangeBillingPeriodType
-        }
-
-        private static SignUpType GetSignUpType(this Account account, Package p, AccountPackage activePackage, BillingPeriodType billingPeriodType, ref int trialDayCount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static SignUpType GetSignUpType(this Account account, Package p, AccountPackage activePackage, BillingPeriodType billingPeriodType, ref int trialDayCount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var signupType = SignUpType.NotSet;
 
@@ -1664,7 +1653,7 @@ namespace AfterSchoolLibrary.Services
             //    }
             //}
 
-            if (p.IsFree(billingPeriodType) || (activePackage.IsNotEmpty() && activePackage.IsFree))
+            if ((p.IsNotEmpty() && p.IsFree(billingPeriodType)) || (activePackage.IsNotEmpty() && activePackage.IsFree))
             {
                 // new sign up
                 if (activePackage.IsEmpty() || !account.IsClaimed)
@@ -1699,8 +1688,6 @@ namespace AfterSchoolLibrary.Services
                 else if (activePackage.IsNotEmpty() && activePackage.PackageId != p.ID)
                     signupType = SignUpType.ChangePackage;
             }
-
-
 
             return signupType;
         }
@@ -1833,7 +1820,7 @@ namespace AfterSchoolLibrary.Services
             );
 
             return newap;
-        }
+        }        
 
         public static void EnsureDefaultPackageFeatures(this Account account, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
