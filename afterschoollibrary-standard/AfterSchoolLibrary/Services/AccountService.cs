@@ -635,6 +635,14 @@ namespace AfterSchoolLibrary.Services
 
         #region AccountPackage
 
+        public static AccountPackage GetAccountPackage(this Account account, Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (account.IsNotEmpty())
+                return AccountPackage.LoadByUidByAccountId(Uid, account.ID.Value, msgs, dc);
+
+            return null;
+        }
+
         public static AccountPackage GetActiveAccountPackage(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return AccountPackage.LoadByAccountId(account.ID.Value, true, "CreateDate", OrderByDirectionEnum.Descending, msgs, dc);
