@@ -67,7 +67,7 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(attendanceRegistrant.Save(dc));
         }
 
-        public static bool AddNextAvailablePrePayment(this AttendanceRegistrant attendanceRegistrant, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static bool IncludeNextAvailablePrePayment(this AttendanceRegistrant attendanceRegistrant, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var prePayment = attendanceRegistrant.GetAvailablePrePayments(msgs, dc).FirstOrDefault();
 
