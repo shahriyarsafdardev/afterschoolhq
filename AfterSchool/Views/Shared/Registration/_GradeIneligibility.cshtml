@@ -9,7 +9,7 @@
         <div class="modal-body form">
 
             <p>
-                <strong><span id="ineligible-student"></span></strong> is ineligible for the following @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower() due to being too young or too old. Please remove ineligible @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower() ot update your child's info to continue:
+                <strong><span id="ineligible-student"></span></strong> is ineligible for the following @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower() due to being too young or too old. Please remove ineligible @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower() to update your child's info to continue:
             </p>
 
             <div id="ineligibile-activities">
@@ -59,7 +59,7 @@
                         for (let activity of data.ineligibleActivities) {
                             $('#ineligibile-activities').append(activity + '<br />');
                         }
-
+                        console.log("Pop-up appear");
                         $('#modal-grade-ineligibility').addClass('md-show');
 
                         if (statusUpdateId != null) {
