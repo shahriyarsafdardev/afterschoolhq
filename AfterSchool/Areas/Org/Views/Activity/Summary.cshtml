@@ -146,7 +146,7 @@
                                 }
                             </div>
                             <div class="panel-body">
-                                @if (participationObject.PostPayPlans.IsNotEmpty() && participationObject.PostPayPlans.Any())
+                                @if (participationObject.PostPayPlans.Any())
                                 {
                                     Html.RenderPartial("~/Views/Shared/ParticipationObject/_TuitionAndPostPayPlans.cshtml", participationObject);
                                 }

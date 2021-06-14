@@ -120,7 +120,7 @@ namespace AfterSchoolLibrary.Services
                 var isCompletelyFree = participationObject.IsFree;
                 var noPayments = ra.IsEmpty() || participationObject.GetAmountPaidByRegistrant(ra.RegistrantId.Value, msgs, dc) == 0.ToDecimal();
 
-                if (!isCompletelyFree && noPayments && !(participationObject.PostPayPlans.IsNotEmpty() && participationObject.PostPayPlans.Any()))
+                if (!isCompletelyFree && noPayments && ! participationObject.PostPayPlans.Any())
                     return RegistrationAssignmentType.ReservedPendingPayment;
 
                 return RegistrationAssignmentType.Reserved;

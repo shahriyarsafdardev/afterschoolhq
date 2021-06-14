@@ -78,6 +78,9 @@ namespace AfterSchoolLibrary.Models
 
         private void InitObject(int participationObjectId, ParticipationObjectType participationObjectType, bool loadAllDetails, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            this.SubscriptionPlans = new List<SubscriptionPlan>();
+            this.PostPayPlans = new List<SubscriptionPlan>();
+            this.PaymentPlans = new List<SubscriptionPlan>();
             switch (participationObjectType)
             {
                 case ParticipationObjectType.AccountActivityGroup:
