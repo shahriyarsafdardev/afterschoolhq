@@ -314,7 +314,7 @@ namespace AfterSchoolLibrary.Services
                 return false;
 
             var accountOwner = account.GetAccountOwner(msgs);
-            return account.HasAccountProfile(msgs) && account.HasActiveActivities(msgs) && accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount && account.StripeUserId.IsNotEmpty();
+            return account.HasAccountProfile(msgs) && account.HasActiveActivities(msgs) && accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount && account.CanProcessPayments(msgs);
         }
 
         public static GettingStartedOptions OnboardingCompletionStatus(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -327,7 +327,7 @@ namespace AfterSchoolLibrary.Services
             var HasActivities = account.HasActiveActivities(msgs);
             var activitycount= account.GetActiveAndNonPublishedActivityCount(msgs);
             var VerifiedAccount = accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount;
-            var StripeUserId = account.StripeUserId.IsNotEmpty();
+            var HasPaymentConfigured = account.CanProcessPayments(msgs);
            
             if (!HasAccountProfile)
                 return GettingStartedOptions.CreateProfile;
@@ -341,10 +341,10 @@ namespace AfterSchoolLibrary.Services
             else if (activitycount >= 1 && !HasActivities)
                 return GettingStartedOptions.PublishActivity;           
 
-            else if (!StripeUserId)
+            else if (!HasPaymentConfigured)
                 return GettingStartedOptions.AcceptPayments;
 
-            else if (StripeUserId)
+            else if (HasPaymentConfigured)
                 return GettingStartedOptions.ProcessCompleted;
 
             else
@@ -369,7 +369,7 @@ namespace AfterSchoolLibrary.Services
             if (accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount)
                 startingOptions.Add(GettingStartedOptions.ValidateEmail);
 
-            if (account.StripeUserId.IsNotEmpty())
+            if (account.CanProcessPayments(msgs))
                 startingOptions.Add(GettingStartedOptions.AcceptPayments);
 
             return startingOptions;
