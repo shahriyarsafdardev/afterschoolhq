@@ -1596,7 +1596,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         // This returns all unbilled selected Attendances by Registrant
-        private Dictionary<RegistrantActivity, List<Attendance>> GetAttendancesToBillPerRegistrantActivity(List<RegistrantActivity> registrantActivities, List<Attendance> attendances, BillingPeriodType billingPeriodType, SystemMessages msgs)
+        private Dictionary<RegistrantActivity, List<Attendance>> GetAttendancesToBillPerRegistrantActivity(Account currentAccount, List<RegistrantActivity> registrantActivities, List<Attendance> attendances, BillingPeriodType billingPeriodType, SystemMessages msgs)
         {
             Dictionary<RegistrantActivity, List<Attendance>> registrantActivityAttendanceCounts = new Dictionary<RegistrantActivity, List<Attendance>>();
     
@@ -1613,7 +1613,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         attendancesToCharge = attendances.FindAll(attendance =>
                         {
-                            var attendanceRegistrant = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(attendance.ID.Value, registrantActivity.RegistrantId.Value, msgs).FirstOrDefault();
+                            var attendanceRegistrant = currentAccount.GetAttendanceRegistrant(activity, attendance.ID.Value, registrantActivity.RegistrantId.Value, msgs);
                             if (attendanceRegistrant.IsNotEmpty() && !attendanceRegistrant.IsAlreadyBilled)
                                 return attendanceRegistrant.NumberPresent > 0;
 
@@ -1629,15 +1629,13 @@ namespace AfterSchool.Areas.Org.Controllers
                        
                         attendances.ForEach(attendance =>
                         {
-                            var currentWeekPresent = AttendanceRegistrant
-                                                        .LoadByActivityIdRegistrantIdByDateRange(
-                                                            attendance.ActivityId.Value,
-                                                            registrantActivity.RegistrantId.Value,
-                                                            new DateRange(
-                                                                attendance.Date.Value.FirstDateOfWeek().Date, 
-                                                                attendance.Date.Value.LastDateOfWeek().Date.AddDays(1).AddMilliseconds(-1)
-                                                            ),
-                                                            msgs)
+                            var currentWeekPresent = currentAccount.GetAttendanceRegistrantByDateRange(
+                                                        activity, 
+                                                        registrantActivity.RegistrantId.Value, 
+                                                        new DateRange(
+                                                            attendance.Date.Value.FirstDateOfWeek().Date,
+                                                            attendance.Date.Value.LastDateOfWeek().Date.AddDays(1).AddMilliseconds(-1)
+                                                        ) )
                                                         .Where(item => item.NumberPresent > 0)
                                                         .OrderBy(item => item.AttendanceDate.Value)
                                                         .ToList();
@@ -1646,7 +1644,10 @@ namespace AfterSchool.Areas.Org.Controllers
                             {
                                 var firstAttendanceOfWeek = currentWeekPresent.First().GetAttendance(msgs);
 
-                                if (firstAttendanceOfWeek.IsNotEmpty() && !attendancesToCharge.Any(item => item.ID == firstAttendanceOfWeek.ID))
+                                var currentUser = SessionVariables.CurrentUser;
+                                var attendanceRegistrant = currentAccount.GetAttendanceRegistrant(activity, attendance.ID.Value, registrantActivity.RegistrantId.Value, msgs);
+
+                                if (attendanceRegistrant.IsNotEmpty() && firstAttendanceOfWeek.IsNotEmpty() && !attendanceRegistrant.IncludeNextAvailablePrePayment(currentUser, msgs)  && !attendancesToCharge.Any(item => item.ID == firstAttendanceOfWeek.ID))
                                     attendancesToCharge.Add(firstAttendanceOfWeek);
                             }
 
@@ -1743,7 +1744,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 ViewBag.AttdanceIds = attendanceIds;
                 ViewBag.BillingPeriodType = billingPeriodType;
-                ViewBag.AttendancesToBillRegistrants = GetAttendancesToBillPerRegistrantActivity(registrantActivities, selectedAttendances, billingPeriodType, msgs);
+                ViewBag.AttendancesToBillRegistrants = GetAttendancesToBillPerRegistrantActivity(currentAccount, registrantActivities, selectedAttendances, billingPeriodType, msgs);
                 ViewBag.Messages = msgs;
 
                 return View(activity);
@@ -1785,6 +1786,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 var postPayPlan = activity.GetPostPayPlan(msgs);
                 var billingPeriodType = postPayPlan?.BillingPeriodTypeId;
                 var registrantActivityAttendances = GetAttendancesToBillPerRegistrantActivity(
+                                                        currentAccount,
                                                         registrantActivities, 
                                                         selectedAttendances, 
                                                         billingPeriodType.HasValue ? billingPeriodType.Value : BillingPeriodType.NotSet, 
@@ -1871,7 +1873,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                                 // add next available pre payment if available, if not then continue to set the checkoutobject transaction id
                                 if (attendanceRegistrant.IsNotEmpty() 
-                                    && !attendanceRegistrant.AddNextAvailablePrePayment(currentUser, msgs) 
+                                    && !attendanceRegistrant.IncludeNextAvailablePrePayment(currentUser, msgs) 
                                     && (checkoutObject?.Transaction).IsNotEmpty() 
                                     && !attendanceRegistrant.IsAlreadyBilled)
                                 {
