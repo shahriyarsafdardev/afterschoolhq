@@ -8,6 +8,7 @@ using System;
 using AfterSchoolLibrary.Billing;
 using BasicLibrary;
 using AfterSchool.Models;
+using System.Linq;
 
 namespace AfterSchoolLibraryTests.Tests
 {
@@ -1342,6 +1343,88 @@ namespace AfterSchoolLibraryTests.Tests
                 //Assert
                 Assert.False(false, ex.Message);
             }
+        }
+        }
+
+
+        [Fact]
+        public void GetAttendanceRegistrantTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(account, msgs, dc);
+            var attendance = AttendanceFactory.Create(activity, msgs, dc);
+            var registrant = RegistrantFactory.Create(msgs, dc);
+            var attendanceRegistrant = AttendanceRegistrantFactory.Create(attendance, registrant, msgs, dc);
+
+            // Act
+            var expected = account.GetAttendanceRegistrant(activity, attendance.ID.Value, registrant.ID.Value, msgs, dc);
+
+            // Assert
+            Assert.NotNull(expected);
+            Assert.Equal(expected: expected.ID, actual: attendanceRegistrant.ID);
+        }
+
+        [Fact]
+        public void GetAttendanceRegistrantErrorTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(account, msgs, dc);
+            var attendance = AttendanceFactory.Create(activity, msgs, dc);
+            var registrant = RegistrantFactory.Create(msgs, dc);
+            var attendanceRegistrant = AttendanceRegistrantFactory.Create(attendance, registrant, msgs, dc);
+
+            // Act
+            activity.AccountId = -1;
+            msgs.AddRange(activity.Save(dc: dc));
+            var expectedError = account.GetAttendanceRegistrant(activity, attendance.ID.Value, registrant.ID.Value, msgs, dc);
+
+            // Assert
+            Assert.Null(expectedError);
+            Assert.True(msgs.HasErrors());
+        }
+
+        [Fact]
+        public void GetAttendanceRegistrantByDateRangeTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(account, msgs, dc);
+            var attendance = AttendanceFactory.Create(activity, msgs, dc);
+            var registrant = RegistrantFactory.Create(msgs, dc);
+            var attendanceRegistrant = AttendanceRegistrantFactory.Create(attendance, registrant, msgs, dc);
+            var dateRange = new DateRange(
+                    DateTime.UtcNow.AddDays(-1),
+                    DateTime.UtcNow.AddDays(1)
+                );
+
+            // Act
+            var expected = account.GetAttendanceRegistrantByDateRange(activity, registrant.ID.Value, dateRange, msgs, dc);
+
+            // Assert
+            Assert.NotNull(expected);
+            Assert.Equal(expected: expected.FirstOrDefault().ID.Value , actual: attendanceRegistrant.ID);
+        }
+
+        [Fact]
+        public void GetAttendanceRegistrantByDateRangeErrorTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(account, msgs, dc);
+            var attendance = AttendanceFactory.Create(activity, msgs, dc);
+            var registrant = RegistrantFactory.Create(msgs, dc);
+            var attendanceRegistrant = AttendanceRegistrantFactory.Create(attendance, registrant, msgs, dc);
+            var dateRange = new DateRange(
+                    DateTime.UtcNow.AddDays(-1),
+                    DateTime.UtcNow.AddDays(1)
+                );
+
+            // Act
+            activity.AccountId = -1;
+            msgs.AddRange(activity.Save(dc: dc));
+            var expectedError = account.GetAttendanceRegistrantByDateRange(activity, registrant.ID.Value, dateRange, msgs, dc);
+
+            // Assert
+            Assert.Null(expectedError);
+            Assert.True(msgs.HasErrors());
         }
     }
 }
