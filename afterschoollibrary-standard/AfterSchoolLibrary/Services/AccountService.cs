@@ -1347,11 +1347,43 @@ namespace AfterSchoolLibrary.Services
             return Attendance.LoadByAccountIdByDate(account.ID.Value, date, msgs, dc);
         }
 
+        public static AttendanceRegistrant  GetAttendanceRegistrant(this Account account, Activity activity, int attendanceId, int registrantId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            msgs = msgs.IsNotEmpty() ? msgs : new SystemMessages();
+
+            if(activity.AccountId.Value != account.ID.Value)
+            {
+                msgs.Add("Invalid account attempting to get AttendanceRegistrant record", MessageType.ApiUsageError);
+                return null;
+            }
+
+            return AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(
+                    attendanceId,
+                    registrantId,
+                    msgs, 
+                    dc)
+                .FirstOrDefault();
+        }
+
+        public static List<AttendanceRegistrant> GetAttendanceRegistrantByDateRange(this Account account, Activity activity, int registrantId, DateRange dateRange, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            msgs = msgs.IsNotEmpty() ? msgs : new SystemMessages();
+
+            if (activity.AccountId.Value != account.ID.Value)
+            {
+                msgs.Add("Invalid account attempting to get AttendanceRegistrant records", MessageType.ApiUsageError);
+                return null;
+            }
+
+            return AttendanceRegistrant.LoadByActivityIdRegistrantIdByDateRange(activity.ID.Value, registrantId, dateRange, msgs, dc);
+        }
+
+
         #endregion
 
-        #region Registrations
+            #region Registrations
 
-        public static List<Registration> GetRegistrations(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+            public static List<Registration> GetRegistrations(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Registration.LoadByAccountId(account.ID.Value, msgs, dc)
                 .Where(registration => Registration.ValidCompletionStatus.Contains(registration.CompletionStatusId))
