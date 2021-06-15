@@ -96,9 +96,11 @@ namespace AfterSchool.Areas.User.Controllers
             return View(registrant);
         }
 
+        // using FormCollection instead of location parameters, as location parameters where not binding properly
+        // and we also need location parameters like decimal latitude and decimal longitude to be nullable, as placeid can be empty
+        // when user checks 'schoolnotfound', so formcollection is used.
         [HttpPost]
-        public ActionResult EditStudentPersonal(string id, string reg, string student, string locationname, string streetnumber, string streetname, string address2, string neighborhood, string city, string county, string state, 
-            string postalcode, string country, string placeid, decimal latitude, decimal longitude, string returntocheckout)
+        public ActionResult EditStudentPersonal(string id, string reg, string student,  string returntocheckout, FormCollection formCollection)
         {
             var msgs = new SystemMessages();
             Registrant registrant = null;
@@ -141,8 +143,8 @@ namespace AfterSchool.Areas.User.Controllers
                         {
                             Location school = null;
 
-                            if (placeid.IsNotEmpty())
-                                school = LocationService.CreateOrUpdateFromGoogle(locationname, streetnumber, streetname, address2, neighborhood, city, county, state, postalcode, country, placeid, latitude, longitude, SessionVariables.CurrentUser, amsgs, adc);
+                            if (formCollection["placeid"].IsNotEmpty())
+                                school = LocationService.CreateOrUpdateFromGoogle(formCollection["locationname"], formCollection["streetnumber"], formCollection["streetname"] , formCollection["address2"] , formCollection["neighborhood"] , formCollection["city"] , formCollection["county"], formCollection["state"], formCollection["postalcode"], formCollection["country"], formCollection["placeid"], Convert.ToDecimal( formCollection["latitude"]), Convert.ToDecimal(formCollection["longitude"]), SessionVariables.CurrentUser, amsgs, adc);
 
                             registrant.SchoolLocationId = school.IsNotEmpty() ? school.ID : new int?();
                             registrant.LastModifiedBy = SessionVariables.CurrentUser.ID;
