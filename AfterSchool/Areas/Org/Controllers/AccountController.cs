@@ -74,7 +74,7 @@ namespace AfterSchool.Areas.Org.Controllers
                    a.TimeZone = timezone;
                    a.Email = email;
 
-                   if (msgs.HasNoErrors() && amsgs.HasNoErrors())
+                   if (amsgs.HasNoErrors())
                    {
                        if (a.UniqueName.IsEmpty() && uniquename.IsEmpty())
                            a.UniqueName = AccountService.GenerateUniqueName(name, a.ID, amsgs, adc);
@@ -85,8 +85,6 @@ namespace AfterSchool.Areas.Org.Controllers
                        a.LastModifiedBy = SessionVariables.CurrentUser.ID;
                        amsgs.AddRange(a.SaveWithStripe(adc));                       
                    }
-
-                   msgs.AddRange(amsgs);
                },
                onSuccess: (SystemMessages smsgs) => {
                    msgs.AddRange(smsgs);
@@ -591,8 +589,6 @@ namespace AfterSchool.Areas.Org.Controllers
                                 amsgs.AddRange(accountPackage.UpdateTrialDays(accountFeature.Max.Value.ToInteger(), adc));
                         }
                     }
-
-                    msgs.AddRange(amsgs);
                 },
                 onSuccess: (SystemMessages smsgs) => {
                     msgs.AddRange(smsgs);
@@ -809,9 +805,6 @@ namespace AfterSchool.Areas.Org.Controllers
             if (name.IsEmpty() && qg.IsBlank())
                 msgs.Add("Name is required", MessageType.UserError);
 
-            if (description.IsEmpty() && qg.IsBlank())
-                msgs.Add("Description is required", MessageType.UserError);
-
             if (id.ToInteger() == 0)
             {
                 if (copyfrom.IsNumber())
@@ -925,8 +918,6 @@ namespace AfterSchool.Areas.Org.Controllers
                                 }
                             }
                         }
-
-                        msgs.AddRange(amsgs);
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
@@ -1454,8 +1445,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         if (amsgs.HasNoErrors())
                             newlyAddedPackage = currentAccount.AddPackage(package.ID.Value, billingPeriod, SessionVariables.LoggedInUser, amsgs, adc);
-
-                        msgs.AddRange(amsgs);
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
