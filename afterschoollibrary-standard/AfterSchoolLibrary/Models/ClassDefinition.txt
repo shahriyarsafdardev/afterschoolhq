@@ -1228,6 +1228,7 @@ loadmethod: PackageId, List<>
 loadmethod: AccountId, List<>
 loadmethod: AccountId|IsActive
 loadmethod: Uid
+loadmethod: Uid|AccountId
 [end]
 
 [begin]
