@@ -1344,7 +1344,6 @@ namespace AfterSchoolLibraryTests.Tests
                 Assert.False(false, ex.Message);
             }
         }
-        }
 
 
         [Fact]
