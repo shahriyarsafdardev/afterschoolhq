@@ -22,14 +22,10 @@ namespace AfterSchoolLibraryTests.Tests
         private List<ActivityInstance> Instances { get; }
         private Location Location { get; }
         private Package Package { get; }
-        private AccountPackage AccountPackage { get; }
-        private decimal CostPerRegistrant { get; set; }
-        private decimal ConvenienceFee { get; set; }
+        private AccountPackage AccountPackage { get; }        
 
         public PartcipationObjectTest(ITestOutputHelper output) : base(output)
-        {
-            CostPerRegistrant = 20;
-            ConvenienceFee = 0.5M;
+        {            
             LoggedInUser = WebUserFactory.Create(msgs, dc);
             AccountOwner = WebUserFactory.Create(msgs, dc);
             ActivityOwnerAccount = AccountFactory.Create(AccountOwner, msgs, dc);
@@ -75,25 +71,27 @@ namespace AfterSchoolLibraryTests.Tests
 
         }
 
-        [Fact]
-        public void GetCheckoutCostWithConvenienceFeeUsingActivity()
+        [Theory]
+        [InlineData(20,0.5)]
+        public void GetCheckoutCostWithConvenienceFeeUsingActivity(decimal costPerRegistrant, decimal convenienceFee)
         {
             ParticipationObject participationObject = new ParticipationObject(Activity, msgs, dc);
             
             var calculatedFee = participationObject.GetCheckoutCostWithConvenienceFee();
-            var requiredFee = CostPerRegistrant + ConvenienceFee;
+            var requiredFee = costPerRegistrant + convenienceFee;
             
             Assert.True(calculatedFee == requiredFee);
             
         }
 
-        [Fact]
-        public void GetCheckoutCostWithConvenienceFeebyUsingActivityGroup()
+        [Theory]
+        [InlineData(20, 0.5)]
+        public void GetCheckoutCostWithConvenienceFeebyUsingActivityGroup(decimal costPerRegistrant, decimal convenienceFee)
         {
             ParticipationObject participationObject = new ParticipationObject(ActivityGroup, msgs, dc);
 
             var calculatedFee = participationObject.GetCheckoutCostWithConvenienceFee();
-            var requiredFee = CostPerRegistrant + ConvenienceFee;
+            var requiredFee = costPerRegistrant + convenienceFee;
 
             Assert.True(calculatedFee == requiredFee);
         }
