@@ -51,13 +51,13 @@ namespace AfterSchoolLibrary.Services
             return false;
         }
 
-        public static TimeSpan IsOpeningIn(this RegistrationPeriod period, Account ownerAccount = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static TimeSpan WillOpenIn(this RegistrationPeriod period, Account ownerAccount = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var now = (ownerAccount ?? period.GetAccount(msgs, dc)).ConvertToAccountTimeZone(DateTime.UtcNow);
             return period.StartDateTime.Value - now;
         }
 
-        public static TimeSpan IsEndingIn(this RegistrationPeriod period, Account ownerAccount = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static TimeSpan WillCloseIn(this RegistrationPeriod period, Account ownerAccount = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var now = (ownerAccount ?? period.GetAccount(msgs, dc)).ConvertToAccountTimeZone(DateTime.UtcNow);
             return period.EndDateTime.Value - now;

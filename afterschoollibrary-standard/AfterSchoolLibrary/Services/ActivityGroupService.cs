@@ -940,27 +940,27 @@ namespace AfterSchoolLibrary.Services
                     .Any();
         }
 
-        public static TimeSpan IsOpeningIn(this ActivityGroup group, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static TimeSpan WillOpenIn(this ActivityGroup group, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (group.WillOpen(msgs, dc))
             {
                 var period = group.GetNextRegistrationPeriod(msgs, dc);
 
                 if (period.IsNotEmpty())
-                    return period.IsOpeningIn(group.GetAccount(msgs, dc), msgs, dc);
+                    return period.WillOpenIn(group.GetAccount(msgs, dc), msgs, dc);
             }
 
             return new TimeSpan();
         }
 
-        public static TimeSpan IsEndingIn(this ActivityGroup group, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static TimeSpan WillCloseIn(this ActivityGroup group, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (group.IsOpenNow(msgs, dc))
             {
                 var period = group.GetCurrentRegistrationPeriod(msgs, dc);
 
                 if (period.IsNotEmpty())
-                    return period.IsEndingIn(group.GetAccount(msgs, dc), msgs, dc);
+                    return period.WillCloseIn(group.GetAccount(msgs, dc), msgs, dc);
             }
 
             return new TimeSpan();
