@@ -1929,7 +1929,13 @@ namespace AfterSchoolLibrary.Services
                 //.. if student registers in between class, it should be listed in attendance
                 //.. for that we need entry of that user in AttendanceRegistrant table
                 if (registrantActivities.Count() > attendanceRegistrants.Count)
-                    return activity.CreateNewAttendance(activityInstanceId.IsEmpty() ? closestActivityInstance.ID.Value : activityInstanceId, loggedInUser, msgs, dc);
+                {
+                    // if a new student has registered then we do not need to create new Attendance. Instead we just need to add AttendanceRegistrant
+                    //closestActivityInstanceAttendance.InitAttendance(activity, loggedInUser, closestActivityInstance, msgs, dc);
+                    closestActivityInstanceAttendance.UpdateAttendanceRegistrants(registrantActivities, attendanceRegistrants, loggedInUser, msgs, dc);
+                }
+                    
+                    //return activity.CreateNewAttendance(activityInstanceId.IsEmpty() ? closestActivityInstance.ID.Value : activityInstanceId, loggedInUser, msgs, dc);
 
                 if (!activityInstanceId.HasValue)
                 {
