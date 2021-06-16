@@ -8,8 +8,8 @@
     {
         var isOpen = group.IsOpenNow() || adminMode;
         var willOpen = group.WillOpen();
-        var willCloseIn = group.WillCloseIn();
-        var willOpenIn = group.WillOpenIn();
+        var isEndingIn = group.IsEndingIn();
+        var isOpeningIn = group.IsOpeningIn();
         var seatsRemaining = group.GetTotalSeatsLeft();
         var registerButtonText = string.Format("Register for {0} &raquo;", UILabel.ActivityLabel(ActivityType.Activity, true));
         var registerButtonClass = "btn-primary";
@@ -68,18 +68,18 @@
                 <div class="panel-footer">
                     <div id="timer-open-@group.ID" class="@(!group.IsOpenNow() ? "hide" : "")">
                         Closes in
-                        <span class="time-days group-days-@group.ID" id="group-days-open-@group.ID" data-id="@group.ID">@willCloseIn.Days</span> days
-                        <span class="time-hours group-hrs-@group.ID" id="group-hrs-open-@group.ID" data-id="@group.ID">@willCloseIn.Hours</span> hrs
-                        <span class="time-mins group-mins-@group.ID" id="group-mins-open-@group.ID" data-id="@group.ID">@willCloseIn.Minutes</span> mins
-                        <span class="time-secs group-secs-@group.ID" id="group-secs-open-@group.ID" data-id="@group.ID">@willCloseIn.Seconds</span> secs
+                        <span class="time-days group-days-@group.ID" id="group-days-open-@group.ID" data-id="@group.ID">@isEndingIn.Days</span> days
+                        <span class="time-hours group-hrs-@group.ID" id="group-hrs-open-@group.ID" data-id="@group.ID">@isEndingIn.Hours</span> hrs
+                        <span class="time-mins group-mins-@group.ID" id="group-mins-open-@group.ID" data-id="@group.ID">@isEndingIn.Minutes</span> mins
+                        <span class="time-secs group-secs-@group.ID" id="group-secs-open-@group.ID" data-id="@group.ID">@isEndingIn.Seconds</span> secs
                     </div>
 
                     <div id="timer-willopen-@group.ID" class="@(!willOpen ? "hide" : "")">
                         Opens in
-                        <span class="time-days group-days-@group.ID" id="group-days-willopen-@group.ID" data-id="@group.ID">@willOpenIn.Days</span> days
-                        <span class="time-days group-hrs-@group.ID" id="group-hrs-willopen-@group.ID" data-id="@group.ID">@willOpenIn.Hours</span> hrs
-                        <span class="time-mins group-mins-@group.ID" id="group-mins-willopen-@group.ID" data-id="@group.ID">@willOpenIn.Minutes</span> mins
-                        <span class="time-secs group-secs-@group.ID" id="group-secs-willopen-@group.ID" data-id="@group.ID">@willCloseIn.Seconds</span> secs
+                        <span class="time-days group-days-@group.ID" id="group-days-willopen-@group.ID" data-id="@group.ID">@isOpeningIn.Days</span> days
+                        <span class="time-days group-hrs-@group.ID" id="group-hrs-willopen-@group.ID" data-id="@group.ID">@isOpeningIn.Hours</span> hrs
+                        <span class="time-mins group-mins-@group.ID" id="group-mins-willopen-@group.ID" data-id="@group.ID">@isOpeningIn.Minutes</span> mins
+                        <span class="time-secs group-secs-@group.ID" id="group-secs-willopen-@group.ID" data-id="@group.ID">@isOpeningIn.Seconds</span> secs
                     </div>
                 </div>
             </div>
