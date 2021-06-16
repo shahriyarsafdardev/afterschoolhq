@@ -96,5 +96,28 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.Equal(accountPackage.ID, accountPackage.Reload(msgs, dc).ID);
         }
+
+        [Fact]
+        public void LoadByUidByAccountIdTest()
+        {
+            try
+            {
+                // Arrange
+                var accountPackage = AccountPackageFactory.Create(Account, Package, msgs, dc);
+
+                // Act                
+                var expected = AccountPackage.LoadByUidByAccountId(Uid: accountPackage.Uid, AccountId: Account.ID.Value, msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.Equal(expected: expected.ID, actual: accountPackage.ID);
+                Assert.Equal(expected: expected.Uid, actual: accountPackage.Uid);
+                Assert.Equal(expected: expected.Price, actual: accountPackage.Price);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
     }
 }

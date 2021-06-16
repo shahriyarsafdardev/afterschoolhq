@@ -953,7 +953,6 @@ join: Account.ID, AccountId, InnerJoin
 joinproperty: Account.Name, string, NVarChar
 loadmethod: AccountId, List<>
 loadmethod: Uid
-loadmethod: Id|AccountId
 [end]
 
 [begin]
@@ -2182,4 +2181,10 @@ values: NotSet, PastDue, CurrentlyDue, EventuallyDue
 type: Enum
 name: GettingStartedOptions
 values: NotSet, CreateProfile, CreateFirstActivity, PublishActivity, ValidateEmail, AcceptPayments, ProcessCompleted
+[end]
+
+[begin]
+type: Enum
+name: SignUpType
+values: NotSet, NewAccountSignUp, TrialSignUp, ConvertingFromTrial, ChangePackage, ChangePackageDuringTrial, ChangeBillingPeriodType
 [end]

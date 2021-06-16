@@ -59,7 +59,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 transaction.CreateDate = currentAccount.ConvertToAccountTimeZone(transaction.CreateDate.Value)
             );
 
-            var allPos = Transaction.GetParticipationObjectsByBillerAccountId(currentAccount.ID.Value, null, null, false);
+            var allPos = currentAccount.GetParticipationObjectsByBillerAccountId(null, null, false);
             var allParticipationObjects = allPos.DistinctBy(po => (po.ID, po.ParticipationObjectTypeId, po.Name));
 
             ViewBag.TotalAmountPaid = currentAccount.GetTotalAmountBilledOut(q, null, null, startDate, endDate, msgs);
@@ -150,7 +150,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (id.IsGuid())
             {
                 var msgs = new SystemMessages();
-                var payout = currentAccount.GetPayout(id.ToGuid(), msgs);  
+                var payout = currentAccount.GetPayout(id.ToGuid(), msgs);
 
                 transactions = payout.GetTransactions(msgs);
 
@@ -195,7 +195,7 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 var ids = transactionIds.Split(',').Select(p => p.ToInteger()).ToList();
 
-                transactions = Transaction.LoadList(ids).ToList();
+                transactions = currentAccount.GetBillerAccountTransactions(ids, msgs);
                 ViewBag.TotalAmount = transactions.Sum(p => p.GetBillerPayout()).ToCurrency();
                 ViewBag.TranIds = transactionIds;
                 ViewBag.TotalPayoutAmount = ViewBag.TotalAmount;
@@ -331,7 +331,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                var registrant = currentAccount.GetRegistrant(id.ToGuid(), msgs);  
+                var registrant = currentAccount.GetRegistrant(id.ToGuid(), msgs);
 
                 if (registrant.IsNotEmpty())
                 {
@@ -418,7 +418,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (uid.IsGuid())
             {
-                var request = currentAccount.GetRefundRequest(uid.ToGuid(), msgs); 
+                var request = currentAccount.GetRefundRequest(uid.ToGuid(), msgs);
 
                 if (request.IsNotEmpty())
                     request.ApproveRequestAsProvider(null, SessionVariables.CurrentUser, msgs);
@@ -533,13 +533,12 @@ namespace AfterSchool.Areas.Org.Controllers
 
             try
             {
-                var activities = currentAccount.GetAllActivitiesForAccount(msgs)
-                .Where(activity => activity.IsOpenOrUpcoming(msgs) && !activity.IsFree && !activity.HasPostPayPlan() && !activity.HasSubscriptionPlan())
-                .Select(m => new ModalViewModel()
-                {
-                    ID = m.ID.Value.ToString(),
-                    Title = m.Name
-                }).ToList();
+                var activities = currentAccount.GetActivities(msgs)?
+                    .Where(activity => activity.IsOpenOrUpcoming(msgs) && !activity.IsFree && !activity.HasPostPayPlan() && !activity.HasSubscriptionPlan())
+                    .Select(m => new ModalViewModel() {
+                        ID = m.ID.Value.ToString(),
+                        Title = m.Name
+                    }).ToList();
 
                 if (msgs.HasNoErrors())
                     return Json(new { success = true, status = "ok", data = activities }, JsonRequestBehavior.AllowGet);
@@ -564,8 +563,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (id.IsNotBlank() && id.IsGuid())
                 coupon = currentAccount.GetCoupon(id.ToGuid(), msgs);
-            
-            if(coupon.IsEmpty())
+
+            if (coupon.IsEmpty())
                 coupon = CouponService.CreateBlank(currentAccount, SessionVariables.LoggedInUser);
 
             var name = Request.Form["name"];

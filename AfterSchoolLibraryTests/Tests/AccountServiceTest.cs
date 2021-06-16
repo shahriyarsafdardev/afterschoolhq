@@ -7,13 +7,20 @@ using System.Collections.Generic;
 using System;
 using AfterSchoolLibrary.Billing;
 using BasicLibrary;
+using AfterSchool.Models;
+using System.Linq;
 
 namespace AfterSchoolLibraryTests.Tests
 {
     public class AccountServiceTest : BaseTest
     {
+        private WebUser user { get; set; }
+        private Account account { get; set; }
+
         public AccountServiceTest(ITestOutputHelper output) : base(output)
         {
+            user = WebUserFactory.Create(msgs, dc);
+            account = AccountFactory.Create(user, msgs, dc);
         }
 
         [Fact(DisplayName = "CreateNewTest")]
@@ -597,48 +604,7 @@ namespace AfterSchoolLibraryTests.Tests
             var actualNumberOfTransactions = payerAccount.GetPayerAccountTransactions(transactionIds, msgs, dc);
 
             Assert.Equal(expectedNumberOfTransactions, actualNumberOfTransactions.Count);
-        }
-
-
-        [Fact(DisplayName = "GetPayoutTest")]
-        public void GetPayoutTest()
-        {
-            var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.CreateWithFreePackage(loggedInUser, AccountType.ActivityProvider, msgs, dc);
-
-            var expectedPayout = Factories.PayoutFactory.Create(account, msgs, dc);
-            var actualPayout = account.GetPayout(expectedPayout.Uid, msgs, dc);
-
-            Assert.Equal(expectedPayout.ID, actualPayout.ID);
-        }
-
-
-        [Fact(DisplayName = "GetRegistrantTest")]
-        public void GetRegistrantTest()
-        {
-            var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.CreateWithFreePackage(loggedInUser, AccountType.ActivityProvider, msgs, dc);
-            
-            var expectedRegistrant = Factories.RegistrantFactory.Create(account, msgs, dc);
-            var actualRegistrant = account.GetRegistrant(expectedRegistrant.Uid, msgs, dc);
-
-            Assert.Equal(expectedRegistrant.ID, actualRegistrant.ID);
-        }
-
-        [Fact(DisplayName = "GetRefundRequestTest")]
-        public void GetRefundRequestTest()
-        {
-            var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
-            var payingUser = Factories.WebUserFactory.Create(msgs, dc);
-            var billingAccount = Factories.AccountFactory.CreateWithFreePackage(loggedInUser, AccountType.ActivityProvider, msgs, dc);
-            var payingAccount = Factories.AccountFactory.CreateWithFreePackage(payingUser, AccountType.Registrant, msgs, dc);
-            var transaction = Factories.TransactionFactory.Create(billingAccount, payingAccount, PaymentType.ACH, msgs, dc);
-           
-            var expectedRefundRequest = Factories.RefundRequestFactory.Create(transaction.Amount.Value, transaction, billingAccount, "reason", payingUser, msgs, dc);
-            var actualRefundRequest = billingAccount.GetRefundRequest(expectedRefundRequest.Uid, msgs, dc);
-
-            Assert.Equal(expectedRefundRequest.ID, actualRefundRequest.ID);
-        }
+        }        
 
         [Fact(DisplayName = "GetBillerTransactionTest")]
         public void GetBillerTransactionTest()
@@ -669,42 +635,9 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(expectedTransaction.ID, actualTransaction.ID);
         }
 
-        [Fact(DisplayName = "GetCouponTest")]
-        public void GetCouponTest()
-        {
-            var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.CreateWithFreePackage(loggedInUser, AccountType.ActivityProvider, msgs, dc);
-
-            var expectedCoupon = Factories.CouponFactory.Create(account, msgs, dc);
-            var actualCoupon = account.GetCoupon(expectedCoupon.Uid, msgs, dc);
-
-            Assert.Equal(expectedCoupon.ID, actualCoupon.ID);
-        }
-
-        [Theory(DisplayName = "GetCouponsTest")]
-        [InlineData(1)]
-        [InlineData(5)]
-        public void GetCouponsTest(int expectedNumberOfCoupons)
-        {
-            var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.CreateWithFreePackage(loggedInUser, AccountType.ActivityProvider, msgs, dc);
-            var expectedCoupons = new List<Coupon>();
-
-            for (int i = 0; i < expectedNumberOfCoupons; i++)
-            {
-                var expectedCoupon = Factories.CouponFactory.Create(account, msgs, dc);
-                expectedCoupons.Add(expectedCoupon);
-            }
-
-            var actualNumberOfCoupons = account.GetCoupons(msgs, dc);
-
-            Assert.Equal(expectedCoupons.Count, actualNumberOfCoupons.Count);
-        }
-
         [Theory(DisplayName ="GetAllActivitiesForAccountTest")]
         [InlineData(1)]
         [InlineData(5)]
-
         public void GetAllActivitiesForAccountTest(int expectedNumberOfActivities)
         {
             var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
@@ -722,5 +655,776 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(expectedActivities.Count, actualActivities.Count);
         }
 
+        [Fact]
+        public void GetActivityScheduleTest()
+        {
+            // Arrange
+            var schedule = ActivityScheduleFactory.Create(account, msgs, dc);
+
+            // Act
+            var expected = account.GetActivitySchedule(schedule.ID.Value, msgs, dc);
+
+            // Assert
+            Assert.Equal(expected: expected.ID, actual: schedule.ID);
+            Assert.Equal(expected: expected.Name, actual: schedule.Name);
+        }
+
+        [Fact]
+        public void GetActivitySchedulesTest()
+        {
+            // Arrange
+            var schedule = ActivityScheduleFactory.Create(account, msgs, dc);
+            var schedule2 = ActivityScheduleFactory.Create(account, msgs, dc);
+
+            // Act
+            var activitySchedules = account.GetActivitySchedules(msgs, dc);
+
+            // Assert
+            Assert.Equal(expected: 2, actual: activitySchedules.Count);
+            Assert.Equal(expected: schedule.ID, actual: activitySchedules[0].ID);
+            Assert.Equal(expected: schedule2.ID, actual: activitySchedules[1].ID);
+        }
+
+        [Fact]
+        public void GetActivityMessageTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(account: account, msgs: msgs, dc: dc);
+            var activityMessage = ActivityMessageFactory.Create(account, activity, msgs, dc);
+
+            // Act
+            var expected = account.GetActivityMessage(Uid: activityMessage.Uid, msgs: msgs, dc: dc);
+
+            // Assert
+            Assert.Equal(expected: expected.ID, actual: activityMessage.ID);
+            Assert.Equal(expected: expected.Uid, actual: activityMessage.Uid);
+        }
+
+        [Fact]
+        public void GetActivityByIDTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(account, msgs, dc);
+
+            // Act
+            var expected = account.GetActivity(activity.ID.Value, msgs, dc);
+
+            // Assert
+            Assert.Equal(expected: expected.ID, actual: activity.ID);
+            Assert.Equal(expected: expected.Uid, actual: activity.Uid);
+            Assert.Equal(expected: expected.Name, actual: activity.Name);
+        }
+
+        [Fact]
+        public void GetActivityByUIDTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(account, msgs, dc);
+
+            // Act
+            var expected = account.GetActivity(activity.Uid, msgs, dc);
+
+            // Assert
+            Assert.Equal(expected: expected.ID, actual: activity.ID);
+            Assert.Equal(expected: expected.Uid, actual: activity.Uid);
+            Assert.Equal(expected: expected.Name, actual: activity.Name);
+        }
+
+        [Fact]
+        public void GetActivitiesTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(account, msgs, dc);
+            var activity2 = ActivityFactory.Create(account, msgs, dc);
+
+            // Act
+            var activities = account.GetActivities(msgs, dc);
+
+            // Assert
+            Assert.Equal(expected: 2, actual: activities.Count);
+            Assert.Equal(expected: activity.ID, actual: activities[0].ID);
+            Assert.Equal(expected: activity2.ID, actual: activities[1].ID);
+        }
+
+        [Fact]
+        public void GetActivityGroupTest()
+        {
+            try
+            {
+                // Arrange
+                var activityGroup = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
+
+                // Act
+                var expected = account.GetActivityGroup(Uid: activityGroup.Uid, msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.Equal(expected: expected.ID, actual: activityGroup.ID);
+                Assert.Equal(expected: expected.Uid, actual: activityGroup.Uid);
+                Assert.Equal(expected: expected.Name, actual: activityGroup.Name);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact]
+        public void GetRegistrantTest()
+        {
+            try
+            {
+                // Arrange
+                var registrant = RegistrantFactory.Create(account, msgs, dc);
+
+                // Act                
+                var expected = account.GetRegistrant(Uid: registrant.Uid, msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.Equal(expected: expected.ID, actual: registrant.ID);
+                Assert.Equal(expected: expected.Uid, actual: registrant.Uid);
+                Assert.Equal(expected: expected.Email, actual: registrant.Email);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact]
+        public void GetPayoutTest()
+        {
+            try
+            {
+                // Arrange
+                var payout = PayoutFactory.Create(account, msgs, dc);
+
+                // Act                
+                var expected = account.GetPayout(Uid: payout.Uid, msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.Equal(expected: expected.ID, actual: payout.ID);
+                Assert.Equal(expected: expected.Uid, actual: payout.Uid);
+                Assert.Equal(expected: expected.AccountId, actual: payout.AccountId);
+                Assert.Equal(expected: expected.Amount, actual: payout.Amount);
+                Assert.Equal(expected: expected.PayoutStatusId, actual: payout.PayoutStatusId);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact]
+        public void GetCouponTest()
+        {
+            try
+            {
+                // Arrange
+                var coupon = CouponFactory.Create(account, msgs, dc);
+
+                // Act 
+                var expected = account.GetCoupon(coupon.Uid, msgs, dc);
+
+                // Assert
+                Assert.Equal(expected: expected.ID, actual: coupon.ID);
+                Assert.Equal(expected: expected.Uid, actual: coupon.Uid);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Theory]
+        [InlineData(1)]
+        [InlineData(5)]
+        public void GetCouponsTest(int expectedNumberOfCoupons)
+        {
+            try
+            {
+                // Arrange
+                var expected = new List<Coupon>();
+
+                for (int i = 0; i < expectedNumberOfCoupons; i++)
+                {
+                    var expectedCoupon = CouponFactory.Create(account, msgs, dc);
+                    expected.Add(expectedCoupon);
+                }
+
+                // Act 
+                var coupons = account.GetCoupons(msgs, dc);
+
+                // Assert
+                Assert.Equal(expected: expected.Count, actual: coupons.Count);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact]
+        public void GetRefundRequestTest()
+        {
+            try
+            {
+                // Arrange
+                var payingUser = WebUserFactory.Create(msgs, dc);
+                var payingAccount = AccountFactory.CreateWithFreePackage(payingUser, AccountType.Registrant, msgs, dc);
+
+                var transaction = TransactionFactory.Create(account, payingAccount, PaymentType.ACH, msgs, dc);
+                var expectedRefundRequest = RefundRequestFactory.Create(transaction.Amount.Value, transaction, account, "reason", payingUser, msgs, dc);
+
+                // Act 
+                var actualRefundRequest = account.GetRefundRequest(expectedRefundRequest.Uid, msgs, dc);
+
+                // Assert
+                Assert.Equal(expectedRefundRequest.ID, actualRefundRequest.ID);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact]
+        public void GetRefundRequestsTest()
+        {
+            try
+            {
+                // Arrange
+                var payingUser = WebUserFactory.Create(msgs, dc);
+                var payingAccount = AccountFactory.CreateWithFreePackage(payingUser, AccountType.Registrant, msgs, dc);
+
+                var transaction = TransactionFactory.Create(account, payingAccount, PaymentType.ACH, msgs, dc);
+                var expectedRefundRequest = RefundRequestFactory.Create(transaction.Amount.Value, transaction, account, "reason", payingUser, msgs, dc);
+                var expectedRefundRequest2 = RefundRequestFactory.Create(transaction.Amount.Value, transaction, account, "reason", payingUser, msgs, dc);
+
+                // Act 
+                var actualRefundRequest = account.GetRefundRequests(msgs, dc);
+
+                // Assert
+                Assert.Equal(2, actualRefundRequest.Count);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact]
+        public void LogActivityTest()
+        {
+            try
+            {
+                // Act 
+                SessionVariables.WebSession.LogActivity(
+                    account: account,
+                    actor: user,
+                    actionType: WebSessionActionType.Navigated,
+                    objectType: ObjectType.Account,
+                    indirectObjectType: ObjectType.DirectoryAccount,
+                    objectId: 1,
+                    objectText: "Test",
+                    indirectObjectId: 1,
+                    indirectObjectText: "ISYP",
+                    msgs: msgs, 
+                    dc: dc);
+
+                var isSaved = msgs.HasNoErrors();
+
+                // Assert
+                Assert.True(isSaved);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact]
+        public void GetAccountPackageTest()
+        {
+            try
+            {
+                // Arrange
+                var package = PackageFactory.Create(msgs, dc);
+                var accountPackage = AccountPackageFactory.Create(account, package, msgs, dc);
+
+                // Act                
+                var expected = account.GetAccountPackage(Uid: accountPackage.Uid, msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.Equal(expected: expected.ID, actual: accountPackage.ID);
+                Assert.Equal(expected: expected.Uid, actual: accountPackage.Uid);
+                Assert.Equal(expected: expected.Price, actual: accountPackage.Price);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact]
+        public void GetAccountRelationshipTest()
+        {
+            try
+            {
+                // Arrange
+                var visitorOwner = WebUserFactory.Create(msgs, dc);
+                var visitorAccount = AccountFactory.Create(visitorOwner, msgs, dc);
+                var hostOwner = WebUserFactory.Create(msgs, dc);
+                var hostAccount = AccountFactory.Create(hostOwner, msgs, dc);
+                var accountRelationship = AccountRelationshipService.CreateNew(hostAccount, visitorAccount, ApprovalStatus.Approved, HostPermissionType.Edit, user, msgs, dc);
+                
+                // Act                
+                var expected = hostAccount.GetAccountRelationship(Id: accountRelationship.ID.Value, msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.Equal(expected: expected.ID, actual: accountRelationship.ID);                
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact]
+        public void GetFormTest()
+        {
+            try
+            {
+                // Arrange                
+                var form = FormFactory.Create(account, msgs, dc);
+
+                // Act                
+                var expected = account.GetForm(Id: form.ID.Value, msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.Equal(expected: expected.ID, actual: form.ID);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact]
+        public void GetAccountWebUserTest()
+        {
+            try
+            {
+                // Arrange                
+                var webUser = AccountWebUserFactory.Create(account, user, UserType.Student, true, msgs, dc);
+
+                // Act                
+                var expected = account.GetAccountWebUser(webUserId: user.ID.Value, msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.Equal(expected: expected.ID, actual: webUser.ID);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "Get Account Owner test")]
+        public void GetAccountOwnerTest()
+        {
+            try
+            {
+                // Arrange
+                var accountOwner = WebUserFactory.Create(msgs, dc);
+                var account = AccountFactory.Create(accountOwner, msgs, dc);
+
+                // Act
+                var GetOwner = AccountService.GetAccountOwner(account, msgs, dc);
+
+                // Assert
+                Assert.NotNull(GetOwner);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "HasFeature test")]
+        public void HasFeatureTest()
+        {
+            try
+            {
+                // Arrange
+                var accountOwner = WebUserFactory.Create(msgs, dc);
+                var account = AccountFactory.CreateWithFreePackage(accountOwner, AccountType.Church, msgs, dc);
+
+                // Act
+                var AccountWithFeature = AccountService.HasFeature(account, FeatureType.AcceptACH, msgs, dc);
+
+                // Assert
+                Assert.True(AccountWithFeature);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "GetActivityCount test")]
+        public void GetActivityCountTest()
+        {
+            try
+            {
+                // Arrange
+                var accountOwner = WebUserFactory.Create(msgs, dc);
+                var account = AccountFactory.Create(accountOwner, msgs, dc);
+                var activityGroup = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
+
+                // Act
+                var addactivity = ActivityFactory.Create(account, activityGroup, msgs, dc);
+                var GetActivityCount = AccountService.GetActivityCount(account, msgs, dc);
+
+                // Assert
+                Assert.True(GetActivityCount > 0);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "GetActiveAndPublishedActivityCount test")]
+        public void GetActiveAndPublishedActivityCountTest()
+        {
+            try
+            {
+                // Arrange
+                var accountOwner = WebUserFactory.Create(msgs, dc);
+                var account = AccountFactory.Create(accountOwner, msgs, dc);
+                var activityGroup = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
+
+                // Act
+                var addactivity = ActivityFactory.Create(account, activityGroup, msgs, dc);
+                addactivity.Publish(accountOwner, msgs, dc);
+                var GetActivityCount = AccountService.GetActiveAndPublishedActivityCount(account, msgs, dc);
+
+                // Assert
+                Assert.True(GetActivityCount > 0);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "GetActiveAndNonPublishedActivityCount test")]
+        public void GetActiveAndNonPublishedActivityCountTest()
+        {
+            try
+            {
+                // Arrange
+                var accountOwner = WebUserFactory.Create(msgs, dc);
+                var account = AccountFactory.Create(accountOwner, msgs, dc);
+                var activityGroup = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
+
+                // Act
+                var addactivity = ActivityFactory.Create(account, activityGroup, msgs, dc);
+                var GetActivityCount = AccountService.GetActiveAndNonPublishedActivityCount(account, msgs, dc);
+
+                // Assert
+                Assert.True(GetActivityCount > 0);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "GetUnpublishActivityCount test")]
+        public void GetUnpublishActivityCountTest()
+        {
+            try
+            {
+                // Arrange
+                var accountOwner = WebUserFactory.Create(msgs, dc);
+                var account = AccountFactory.Create(accountOwner, msgs, dc);
+                var activityGroup = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
+
+                // Act
+                var addactivity = ActivityFactory.Create(account, activityGroup, msgs, dc);
+                var GetActivityCount = AccountService.GetActiveAndNonPublishedActivityCount(account, msgs, dc);
+
+                // Assert
+                Assert.True(GetActivityCount > 0);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "HasActivities test")]
+        public void HasActivitiesTest()
+        {
+            try
+            {
+                // Arrange
+                var accountOwner = WebUserFactory.Create(msgs, dc);
+                var account = AccountFactory.CreateWithFreePackage(accountOwner, AccountType.Church, msgs, dc);
+                var activityGroup = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
+
+                // Act
+                var addactivity = ActivityFactory.Create(account, activityGroup, msgs, dc);
+                var HasActivity = AccountService.HasActivities(account, msgs, dc);
+
+                // Assert
+                Assert.True(HasActivity);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "HasActiveActivities test")]
+        public void HasActiveActivitiesTest()
+        {
+            try
+            {
+                // Arrange
+                var accountOwner = WebUserFactory.Create(msgs, dc);
+                var account = AccountFactory.Create(accountOwner, msgs, dc);
+                var activityGroup = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
+
+                // Act
+                var addactivity = ActivityFactory.Create(account, activityGroup, msgs, dc);
+                addactivity.Publish(accountOwner, msgs, dc);
+                var HasActivity = AccountService.HasActiveActivities(account, msgs, dc);
+
+                // Assert
+                Assert.True(HasActivity);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "AddContact test")]
+        public void AddContactTest()
+        {
+            try
+            {
+                // Arrange
+                var accountOwner = WebUserFactory.Create(msgs, dc);
+                var account = AccountFactory.Create(accountOwner, msgs, dc);
+
+                // Act
+                var addContact = AccountService.AddContact(account, "Test", "Lastname", "test@test.com", "123-123-1234", accountOwner, msgs, dc);
+
+                // Assert
+                Assert.NotNull(addContact);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "SearchContactCount test")]
+        public void SearchContactTest()
+        {
+            try
+            {
+                // Arrange
+                var accountOwner = WebUserFactory.Create(msgs, dc);
+                var account = AccountFactory.Create(accountOwner, msgs, dc);
+
+                // Act
+                AccountService.AddContact(account, "Test", "Lastname", "test@test.com", "123-123-1234", accountOwner, msgs, dc);
+                var searchContact = AccountService.SearchContactCount(account, "Test", null, dc);
+
+                // Assert
+                Assert.True(searchContact > 0);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "GetContactCount test")]
+        public void GetContactCountTest()
+        {
+            try
+            {
+                // Arrange
+                var accountOwner = WebUserFactory.Create(msgs, dc);
+                var account = AccountFactory.Create(accountOwner, msgs, dc);
+
+                // Act
+                AccountService.AddContact(account, "Test", "Lastname", "test@test.com", "123-123-1234", accountOwner, msgs, dc);
+                var GetContactCount = AccountService.GetContactCount(account, dc);
+
+                // Assert
+                Assert.True(GetContactCount == 1);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "DoesContactExist test")]
+        public void DoesContactExistTest()
+        {
+            try
+            {
+                // Arrange
+                var accountOwner = WebUserFactory.Create(msgs, dc);
+                var account = AccountFactory.Create(accountOwner, msgs, dc);
+
+                // Act
+                AccountService.AddContact(account, "Test", "Lastname", "test@test.com", "123-123-1234", accountOwner, msgs, dc);
+                var GetContact = AccountService.DoesContactExist(account, "Test", "Lastname", "test@test.com", msgs, dc);
+
+                // Assert
+                Assert.True(GetContact);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "GetContacts test")]
+        public void GetContactsTest()
+        {
+            try
+            {
+                // Arrange
+                var accountOwner = WebUserFactory.Create(msgs, dc);
+                var account = AccountFactory.Create(accountOwner, msgs, dc);
+
+                // Act
+                AccountService.AddContact(account, "Test", "Lastname", "test@test.com", "123-123-1234", accountOwner, msgs, dc);
+                var GetContactsCount = AccountService.GetContacts(account, null, null, dc);
+
+                // Assert
+                Assert.True(GetContactsCount.Count == 1);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+        }
+
+
+        [Fact]
+        public void GetAttendanceRegistrantTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(account, msgs, dc);
+            var attendance = AttendanceFactory.Create(activity, msgs, dc);
+            var registrant = RegistrantFactory.Create(msgs, dc);
+            var attendanceRegistrant = AttendanceRegistrantFactory.Create(attendance, registrant, msgs, dc);
+
+            // Act
+            var expected = account.GetAttendanceRegistrant(activity, attendance.ID.Value, registrant.ID.Value, msgs, dc);
+
+            // Assert
+            Assert.NotNull(expected);
+            Assert.Equal(expected: expected.ID, actual: attendanceRegistrant.ID);
+        }
+
+        [Fact]
+        public void GetAttendanceRegistrantErrorTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(account, msgs, dc);
+            var attendance = AttendanceFactory.Create(activity, msgs, dc);
+            var registrant = RegistrantFactory.Create(msgs, dc);
+            var attendanceRegistrant = AttendanceRegistrantFactory.Create(attendance, registrant, msgs, dc);
+
+            // Act
+            activity.AccountId = -1;
+            msgs.AddRange(activity.Save(dc: dc));
+            var expectedError = account.GetAttendanceRegistrant(activity, attendance.ID.Value, registrant.ID.Value, msgs, dc);
+
+            // Assert
+            Assert.Null(expectedError);
+            Assert.True(msgs.HasErrors());
+        }
+
+        [Fact]
+        public void GetAttendanceRegistrantByDateRangeTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(account, msgs, dc);
+            var attendance = AttendanceFactory.Create(activity, msgs, dc);
+            var registrant = RegistrantFactory.Create(msgs, dc);
+            var attendanceRegistrant = AttendanceRegistrantFactory.Create(attendance, registrant, msgs, dc);
+            var dateRange = new DateRange(
+                    DateTime.UtcNow.AddDays(-1),
+                    DateTime.UtcNow.AddDays(1)
+                );
+
+            // Act
+            var expected = account.GetAttendanceRegistrantByDateRange(activity, registrant.ID.Value, dateRange, msgs, dc);
+
+            // Assert
+            Assert.NotNull(expected);
+            Assert.Equal(expected: expected.FirstOrDefault().ID.Value , actual: attendanceRegistrant.ID);
+        }
+
+        [Fact]
+        public void GetAttendanceRegistrantByDateRangeErrorTest()
+        {
+            // Arrange
+            var activity = ActivityFactory.Create(account, msgs, dc);
+            var attendance = AttendanceFactory.Create(activity, msgs, dc);
+            var registrant = RegistrantFactory.Create(msgs, dc);
+            var attendanceRegistrant = AttendanceRegistrantFactory.Create(attendance, registrant, msgs, dc);
+            var dateRange = new DateRange(
+                    DateTime.UtcNow.AddDays(-1),
+                    DateTime.UtcNow.AddDays(1)
+                );
+
+            // Act
+            activity.AccountId = -1;
+            msgs.AddRange(activity.Save(dc: dc));
+            var expectedError = account.GetAttendanceRegistrantByDateRange(activity, registrant.ID.Value, dateRange, msgs, dc);
+
+            // Assert
+            Assert.Null(expectedError);
+            Assert.True(msgs.HasErrors());
+        }
     }
 }
