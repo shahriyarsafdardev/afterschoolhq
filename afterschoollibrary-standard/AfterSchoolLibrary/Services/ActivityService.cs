@@ -1930,13 +1930,10 @@ namespace AfterSchoolLibrary.Services
                 //.. for that we need entry of that user in AttendanceRegistrant table
                 if (registrantActivities.Count() > attendanceRegistrants.Count)
                 {
-                    // if a new student has registered then we do not need to create new Attendance. Instead we just need to add AttendanceRegistrant
-                    //closestActivityInstanceAttendance.InitAttendance(activity, loggedInUser, closestActivityInstance, msgs, dc);
+                    // if a new student has registered then we do not need to create new Attendance. Instead we just need to add AttendanceRegistrant only                    
                     closestActivityInstanceAttendance.UpdateAttendanceRegistrants(registrantActivities, attendanceRegistrants, loggedInUser, msgs, dc);
                 }
-                    
-                    //return activity.CreateNewAttendance(activityInstanceId.IsEmpty() ? closestActivityInstance.ID.Value : activityInstanceId, loggedInUser, msgs, dc);
-
+                  
                 if (!activityInstanceId.HasValue)
                 {
                     return closestActivityInstanceAttendance;
