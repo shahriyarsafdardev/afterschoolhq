@@ -564,6 +564,11 @@ namespace AfterSchoolLibrary.Services
             return RegistrationPeriod.LoadByAccountId(account.ID.Value, msgs, dc);
         }
 
+        public static RegistrationPeriod GetRegistrationPeriod(this Account account, string id, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RegistrationPeriod.LoadByIdByAccountId(id,account.ID.Value, msgs, dc);
+        }
+
         public static bool IsNowEnrolling(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return account.GetPublishedParticipationObjects(msgs, dc)
@@ -578,6 +583,14 @@ namespace AfterSchoolLibrary.Services
         public static int GetRegistrationPeriodCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return RegistrationPeriod.GetCount(new Hashtable() { { "AccountId", account.ID.Value } }, msgs, dc);
+        }
+
+        public static List<RegistrationPeriod> GetRegistrationPeriodsByGroupId(this Account account, int id, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (account.IsNotEmpty())
+                return RegistrationPeriod.LoadByActivityGroupIdByAccountId(id, account.ID.Value, msgs, dc);
+
+            return null;
         }
 
         public static List<RegistrationPeriod> GetUpcomingRegistrationPeriods(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
