@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Services;
 
 namespace AfterSchoolLibraryTests.Factories
 {
@@ -81,6 +82,37 @@ namespace AfterSchoolLibraryTests.Factories
             msgs.AddRange(activitySchedule.Save(dc));
             return activitySchedule;
 
+        }
+
+        public static void Create(Account account, Activity activity, ActivitySchedule schedule, WebUser user, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var startDates = new List<DateRange>()
+                {
+                    new DateRange() {StartDate = $"6/{DateTime.Now.Month}/{DateTime.Now.Year} 3:00:00 PM".ToDateTime(), EndDate = $"6/{DateTime.Now.Month}/{DateTime.Now.Year} 5:00:00 PM".ToDateTime()},
+                    new DateRange() {StartDate = $"7/{DateTime.Now.Month}/{DateTime.Now.Year} 3:00:00 PM".ToDateTime(), EndDate = $"7/{DateTime.Now.Month}/{DateTime.Now.Year} 5:00:00 PM".ToDateTime()},
+                    new DateRange() {StartDate = $"8/{DateTime.Now.Month}/{DateTime.Now.Year} 3:00:00 PM".ToDateTime(), EndDate = $"8/{DateTime.Now.Month}/{DateTime.Now.Year} 5:00:00 PM".ToDateTime()},
+                };
+
+            var endDates = new List<DateTime>() { };
+
+            ActivityScheduleService.SetupSchedule(
+                activity.AccountId.Value,
+                schedule.ID.Value,
+                $"{activity.Name} - Schedule",
+                schedule.ScheduleDetails,
+                schedule.RepeatsWeekly.ToString(),
+                schedule.IsOngoing.ToString(),
+                schedule.StartDate.ToString(),
+                schedule.EndDate.ToString(),
+                schedule.DailyStartTime.ToString(),
+                schedule.DailyEndTime.ToString(),
+                startDates,
+                endDates,
+                account,
+                activity.ActivityGroupId,
+                user.ID.Value,
+                msgs,
+                dc);
         }
     }
 }

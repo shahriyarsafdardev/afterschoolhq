@@ -5,6 +5,8 @@ using AfterSchoolLibrary.Services;
 using AfterSchoolLibraryTests.Factories;
 using System.Linq;
 using System;
+using System.Collections.Generic;
+using BasicLibrary;
 
 namespace AfterSchoolLibraryTests.Tests
 {
@@ -159,7 +161,176 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.True(paymentStart.HasValue && paymentEnd.HasValue);
         }
-        
-        
+
+        #region Activity Copy Functionality
+
+        [Fact]
+        public void ActivityCopyTest()
+        {
+            try
+            {
+                // Arrange                
+                var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, msgs, dc);
+                var package = PackageFactory.Create(msgs, dc);
+                var accountPackage = AccountPackageFactory.Create(ActivityOwnerAccount, package, msgs, dc);
+                var form = ActivityOwnerAccount.GetOrCreateDefaultForm(LoggedInUser, msgs, dc);
+                var activity = ActivityFactory.Create(ActivityOwnerAccount, schedule, msgs, dc);                
+
+                // Act
+                var expected = activity.Copy(newName: activity.Name + "- [copy]", useSameForm: false, loggedInUserId: LoggedInUser.ID.Value, msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.NotNull(expected);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact]
+        public void ActivityCopyScheduleCheckTest()
+        {
+            try
+            {
+                // Arrange                
+                var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, msgs, dc);
+                var package = PackageFactory.Create(msgs, dc);
+                var accountPackage = AccountPackageFactory.Create(ActivityOwnerAccount, package, msgs, dc);
+                var form = ActivityOwnerAccount.GetOrCreateDefaultForm(LoggedInUser, msgs, dc);
+                var activity = ActivityFactory.Create(ActivityOwnerAccount, schedule, msgs, dc);
+                ActivityScheduleFactory.Create(ActivityOwnerAccount, activity, schedule, LoggedInUser, msgs, dc);
+
+                //var firstDayOfMonth = schedule.StartDate.Value;
+                //var lastDateOfMonth = schedule.EndDate;
+                //for (var i = firstDayOfMonth; i < lastDateOfMonth; i = i.AddDays(1))
+                //{
+                //    ActivityInstanceFactory.Create(activity, schedule, i, i.AddHours(2), msgs, dc);
+                //}
+
+                // Act
+                var newName = activity.Name + "- [copy]";
+                var expected = activity.Copy(newName: newName, useSameForm: false, loggedInUserId: LoggedInUser.ID.Value, msgs: msgs, dc: dc);
+                
+                // Assert
+                Assert.Equal(expected.Name, newName);
+
+                var activitySchedule = activity.GetSchedule(msgs, dc);
+                var copiedActivitySchedule = expected.GetSchedule(msgs: msgs, dc: dc);
+
+                //var activitySchedule = ActivitySchedule.LoadByIdByAccountId(Id: activity.ActivityScheduleId.Value, AccountId: ActivityOwnerAccount.ID.Value, msgs: msgs, dc: dc);
+                //var copiedActivitySchedule = ActivitySchedule.LoadByIdByAccountId(Id: expected.ActivityScheduleId.Value, AccountId: ActivityOwnerAccount.ID.Value, msgs: msgs, dc: dc);
+
+                Assert.Equal(activitySchedule.AccountId, copiedActivitySchedule.AccountId);
+                Assert.Equal(activitySchedule.IsOngoing, copiedActivitySchedule.IsOngoing);
+                Assert.Equal(activitySchedule.RepeatsWeekly, copiedActivitySchedule.RepeatsWeekly);
+                Assert.Equal(activitySchedule.StartDate, copiedActivitySchedule.StartDate);
+                Assert.Equal(activitySchedule.EndDate, copiedActivitySchedule.EndDate);
+                Assert.Equal(activitySchedule.DailyStartTime, copiedActivitySchedule.DailyStartTime);
+                Assert.Equal(activitySchedule.DailyEndTime, copiedActivitySchedule.DailyEndTime);
+
+                var scheduleInstances = activitySchedule.GetInstances(msgs: msgs, dc: dc);
+                var copiedScheduleInstances = copiedActivitySchedule.GetInstances(msgs: msgs, dc: dc);
+
+                Assert.Equal(scheduleInstances.Count, copiedScheduleInstances.Count);
+
+                for (int i = 0; i < scheduleInstances.Count; i++)
+                {
+                    var instance = scheduleInstances[i];
+                    var copiedInstance = copiedScheduleInstances[i];
+                    
+                    Assert.Equal(instance.ActivityId, copiedInstance.ActivityId);
+                    Assert.Equal(instance.ActivityGroupId, copiedInstance.ActivityGroupId);
+                    Assert.Equal(instance.Day, copiedInstance.Day);
+                    Assert.Equal(instance.StartDateTime, copiedInstance.StartDateTime); 
+                    Assert.Equal(instance.EndDateTime, copiedInstance.EndDateTime);
+                    Assert.Equal(instance.InstanceTypeId, copiedInstance.InstanceTypeId);
+                }
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact]
+        public void ActivityCopyPropertiesCheckTest()
+        {
+            try
+            {
+                // Arrange
+                var package = PackageFactory.Create(msgs, dc);
+                var accountPackage = AccountPackageFactory.Create(ActivityOwnerAccount, package, msgs, dc);
+                var form = ActivityOwnerAccount.GetOrCreateDefaultForm(LoggedInUser, msgs, dc);
+                var activity = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
+                AccountPropertyFactory.Create(activity, AccountPropertyType.RegistrationThankYouEmail, msgs, dc);
+                AccountPropertyFactory.Create(activity, AccountPropertyType.ApplicationThankYouEmail, msgs, dc);
+                AccountPropertyFactory.Create(activity, AccountPropertyType.InterestThankYouEmail, msgs, dc);
+
+                // Act
+                var expected = activity.Copy(newName: activity.Name + "- [copy]", useSameForm: false, loggedInUserId: LoggedInUser.ID.Value, msgs: msgs, dc: dc);
+
+                // Assert
+                var activityProperties = activity.GetActivityProperties(msgs, dc);
+                var copiedActivityProperties = expected.GetActivityProperties(msgs, dc);
+
+                Assert.Equal(activityProperties.Count, copiedActivityProperties.Count);
+
+                for (int i = 0; i < activityProperties.Count; i++)
+                {
+                    var main = activityProperties[i];
+                    var copied = copiedActivityProperties[i];
+
+                    Assert.Equal(main.ActivityId, activity.ID);
+                    Assert.Equal(copied.ActivityId, expected.ID);
+
+                    Assert.Equal(main.AccountPropertyTypeId, copied.AccountPropertyTypeId);
+                }
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact]
+        public void ActivityCopyFormsCheckTest()
+        {
+            try
+            {
+                // Arrange
+                var package = PackageFactory.Create(msgs, dc);
+                var accountPackage = AccountPackageFactory.Create(ActivityOwnerAccount, package, msgs, dc);
+                var form = FormFactory.Create(ActivityOwnerAccount, msgs, dc);
+                var activity = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
+                var activityForm = ActivityFormWebUserFactory.CreateActiveForm(ActivityOwnerAccount, activity, form, msgs, dc);
+
+                // Act
+                var expected = activity.Copy(newName: activity.Name + "- [copy]", useSameForm: true, loggedInUserId: LoggedInUser.ID.Value, msgs: msgs, dc: dc);
+
+                // Assert
+                var activeActivityForm = activity.GetActiveActivityForm(msgs, dc);
+                var copiedActivityForm = expected.GetActiveActivityForm(msgs, dc);
+
+                Assert.Equal(activeActivityForm.Name, activityForm.Name);
+                Assert.Equal(activeActivityForm.FormId, activityForm.FormId);
+                Assert.Equal(activeActivityForm.ActivityId, activityForm.ActivityId);
+                Assert.Equal(activeActivityForm.AccountId, activityForm.AccountId);
+                
+                Assert.NotNull(copiedActivityForm);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        #endregion
+
+
     }
 }
