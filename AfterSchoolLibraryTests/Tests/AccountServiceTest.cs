@@ -70,7 +70,6 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(expectedOutput, output);
         }
 
-
         /// <summary>
         /// Will see if the RequestAccessToAccountTest() function will return a message with no Errors
         /// need to ask about sending emails and name parameters!
@@ -1344,7 +1343,6 @@ namespace AfterSchoolLibraryTests.Tests
                 Assert.False(false, ex.Message);
             }
         }
-
 
         [Fact]
         public void GetAttendanceRegistrantTest()
