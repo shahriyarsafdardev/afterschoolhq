@@ -747,7 +747,7 @@ namespace AfterSchool.Controllers
             if (name.IsBlank())
                 msgs.Add("Please enter your name", MessageType.UserError);
 
-            if (!fromEmail.IsMatch(BasicLibrary.Utilities.EmailRegEx))
+            if (fromEmail.IsBlank() || !fromEmail.IsMatch(BasicLibrary.Utilities.EmailRegEx))
                 msgs.Add("Please enter your email", MessageType.UserError);
 
             if (message.IsBlank())
