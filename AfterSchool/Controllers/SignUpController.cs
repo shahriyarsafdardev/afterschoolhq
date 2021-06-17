@@ -195,20 +195,6 @@ namespace AfterSchool.Controllers
                             msgs: amsgs,
                             dc: adc);
 
-                        if (user.IsNotEmpty() && amsgs.HasNoErrors())
-                        {
-                            // LOG: WebUserName SignedUp
-                            WebSessionUtilities.LogActivity(
-                               webSessionId: SessionVariables.WebSession.ID.Value,
-                               actor: user,
-                               actionType: WebSessionActionType.SignedUp,
-                               objectType: ObjectType.WebUser,
-                               objectId: user.ID.Value, 
-                               objectText: user.DisplayName 
-                            );
-
-                        }
-
                         account = user.AddNewAccount(
                                orgName: model.OrgName,
                                accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
@@ -216,16 +202,26 @@ namespace AfterSchool.Controllers
                                msgs: amsgs,
                                dc: adc);
 
-                        if (account.IsNotEmpty() && amsgs.HasNoErrors())
+                        if (user.IsNotEmpty() && account.IsNotEmpty() && amsgs.HasNoErrors())
                         {
                             // LOG: WebUserName Created Account Account
-                            WebSessionUtilities.LogActivity(
-                                webSessionId: SessionVariables.WebSession.ID.Value,
+                            SessionVariables.WebSession.LogActivity(
+                                account: account,
                                 actor: user,
                                 actionType: WebSessionActionType.Created,
                                 objectType: ObjectType.Account,
                                 objectId: account.ID.Value,
                                 objectText: account.Name
+                            );
+
+                            // LOG: WebUserName SignedUp
+                            SessionVariables.WebSession.LogActivity(
+                                account: account,
+                                actor: user,
+                                actionType: WebSessionActionType.SignedUp,
+                                objectType: ObjectType.WebUser,
+                                objectId: user.ID.Value,
+                                objectText: user.DisplayName
                             );
                         }
                             

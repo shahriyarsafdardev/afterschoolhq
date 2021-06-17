@@ -464,13 +464,13 @@ namespace AfterSchool.Controllers
                     if (msgs.HasNoErrors())
                     {
                         // LOG: Someone Contacted Account AccountName
-                        WebSessionUtilities.LogActivity(
+                        SessionVariables.WebSession.LogActivity(
+                            account: account,
                             actor: SessionVariables.CurrentUser, 
-                            webSessionId: SessionVariables.WebSession.ID.Value,
                             actionType: WebSessionActionType.Contacted,
                             objectType: ObjectType.Account,
-                            objectId: account.ID.Value, 
-                            objectText: account.Name
+                            objectId: account?.ID.Value, 
+                            objectText: account?.Name
                         );
                         
                         EmailHelper.SendContactProviderEmail(account, contact, msgs);
@@ -513,13 +513,13 @@ namespace AfterSchool.Controllers
                 if (msgs.HasNoErrors())
                 {
                     // LOG: Someone Followed Account AccountName
-                    WebSessionUtilities.LogActivity(
-                        webSessionId: SessionVariables.WebSession.ID.Value,
+                    SessionVariables.WebSession.LogActivity(
+                        account: account,
                         actor: SessionVariables.CurrentUser,
                         actionType: WebSessionActionType.Followed,
                         objectType: ObjectType.Account,
-                        objectId: account.ID.Value,
-                        objectText: account.Name
+                        objectId: account?.ID.Value,
+                        objectText: account?.Name
                     );
 
                     return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
@@ -560,13 +560,13 @@ namespace AfterSchool.Controllers
                 if (msgs.HasNoErrors())
                 {
                     // LOG: Someone Unfollowed Account AccountName
-                    WebSessionUtilities.LogActivity(
-                        webSessionId: SessionVariables.WebSession.ID.Value,
+                    SessionVariables.WebSession.LogActivity(
+                        account: account,
                         actor: SessionVariables.CurrentUser,
                         actionType: WebSessionActionType.Unfollowed,
                         objectType: ObjectType.Account,
-                        objectId: account.ID.Value,
-                        objectText: account.Name
+                        objectId: account?.ID.Value,
+                        objectText: account?.Name
                     );
                     return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
                 }
