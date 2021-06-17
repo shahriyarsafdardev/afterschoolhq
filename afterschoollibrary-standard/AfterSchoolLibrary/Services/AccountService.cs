@@ -252,14 +252,13 @@ namespace AfterSchoolLibrary.Services
             }, msgs, dc);
         }
 
-        public static List<Activity> GetAllActiveAndNonPublishedPaidActivities(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Activity> GetAllActiveAndNonPublishedActivities(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Activity.Load(new Hashtable() {
                 { "AccountId", account.ID.Value },
                 { "IsPublished", false },
                 { "IsDeleted", false },
-                { "isArchived", false },
-                { "IsFree", false }
+                { "isArchived", false }                
             },null,null, msgs, dc);
         }
 
@@ -277,14 +276,18 @@ namespace AfterSchoolLibrary.Services
         {
             return account.GetActiveAndPublishedActivityCount(msgs, dc) > 0;
         }
-       
+
+        public static bool HasPaidActivities(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.GetAllActiveAndNonPublishedActivities(msgs, dc).Any(activity => !activity.IsFree);
+        }
         public static bool IsOnboardingCompleted(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (account.IsEmpty())
                 return false;
 
             var accountOwner = account.GetAccountOwner(msgs);    
-            if (account.GetAllActiveAndNonPublishedPaidActivities().Any())
+            if (account.HasPaidActivities())
             {
                 return account.HasAccountProfile(msgs) && account.HasActiveActivities(msgs) && accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount && account.StripeUserId.IsNotEmpty();
             }
