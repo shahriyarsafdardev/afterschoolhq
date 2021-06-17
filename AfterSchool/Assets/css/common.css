@@ -772,3 +772,50 @@
 .dropdown-menu > li > a:hover {
     background-color: #434e52;
 }
+.pt-20{
+    padding-top:20px
+}
+.pb-20 {
+    padding-bottom: 20px;
+}
+
+.contactUsBtn {
+    background-color: white;
+    border: 3px solid #00b492;
+    border-radius: 5px;
+    padding: 13px 25px;
+}
+
+.contactSpan {
+    margin-left: 30px;
+    font-weight: bold;
+}
+
+.contactUsModal {
+    background-color: #F7F7F7;
+    padding: 45px 75px
+}
+
+.modalHeader {
+    padding-bottom: 30px;
+    font-weight: bold;
+    text-align: center;
+    font-size: 17px;
+}
+
+.Contactmodaldialog {
+    width: 65%;
+}
+
+.floatNone {
+    float: none;
+}
+
+
+
+.btnContactUsSubmit {
+    padding: 12px 65px;
+    border-radius: 5px;
+    margin-bottom: 30px;
+}
+
