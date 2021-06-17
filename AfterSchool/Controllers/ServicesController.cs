@@ -763,11 +763,12 @@ namespace AfterSchool.Controllers
 
             switch(pageName)
             {
-                case "contact":
-                    toEmail = AfterSchoolLibrary.Helpers.Email.AppSalesEmailAddress;                    
-                    break;
                 case "search":
                     toEmail = AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress;
+                    break;
+                // case "contact":
+                default:
+                    toEmail = AfterSchoolLibrary.Helpers.Email.AppSalesEmailAddress;
                     break;
             }
 
