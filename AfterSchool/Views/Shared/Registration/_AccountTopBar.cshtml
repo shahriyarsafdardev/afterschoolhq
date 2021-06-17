@@ -29,13 +29,13 @@
     }
 
     var currentLevel = AccountService.OnboardingCompletionStatus(SessionVariables.CurrentAccount);
-    var currentProgress = AccountService.GetCurrentOnboardingProcess(SessionVariables.CurrentAccount);
-    var progressPercentage = currentProgress.Count * 25;
+    var currentProgress = AccountService.GetCurrentOnboardingProcess(SessionVariables.CurrentAccount);    
+    var totalNumberOfOnboardingSteps = 4;
+    var hasAnyPaidActivity = SessionVariables.CurrentAccount.GetAllActiveAndNonPublishedPaidActivities().Any();
     //If there is no paid activity configured then we should not display Payment Modal and Progressbar to user
-    if (progressPercentage == 75 && AccountService.HasAnyPaidActivity(SessionVariables.CurrentAccount) == false)
-    {
-        progressPercentage = 100;
-    }
+    var totalStepsLeft = hasAnyPaidActivity ? totalNumberOfOnboardingSteps : totalNumberOfOnboardingSteps - 1;
+    var progressPercentage = (currentProgress.Count / totalStepsLeft) * 100;
+    
 
     var isAccountAndLoggedInUserIsOwner = SessionVariables.CurrentAccount.IsNotEmpty() &&
         SessionVariables.CurrentUser.IsNotEmpty() &&
