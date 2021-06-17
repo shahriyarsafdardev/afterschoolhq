@@ -20,6 +20,8 @@
 
     var showAllowPaymentPlans = accountPackage.HasFeature(FeatureType.AllowPaymentPlans);
     var showAllowPaymentPlansPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowPaymentPlans);
+
+    var allowAttendance = accountPackage.HasFeature(FeatureType.Attendance);
 }
 
 <div class="panel panel-default panel-small-padding">
@@ -244,14 +246,14 @@
         }
 
         <div class="panel-heading">
-            Post Payment Options
+            Attendance-Based Billing Options
         </div>
 
         <div class="panel-body">
 
             <div class="form-group">
                 <div class="row">
-                    <label class="col-sm-3 control-label">Post Pay Option</label>
+                    <label class="col-sm-3 control-label">Attendance-Based Billing Option</label>
                     <div class="col-sm-1">
                         @{
                             Html.RenderPartial(
@@ -335,7 +337,7 @@
                 <div class="row">
                     <div class="col-sm-3"></div>
                     <div class="col-sm-9">
-                        <p class="text-muted padding-v-10">Post payment options are used to allow parents to pay based on attendance.</p>
+                        <p class="text-muted padding-v-10">Attendance-based billing options are used to allow parents to pay based on attendance.</p>
                     </div>
                 </div>
             </div>
@@ -382,7 +384,23 @@
         });
 
         $('#haspostpayplan').change(function (cb) {
-            setPostPayPlanSection();
+           @if (!allowAttendance)
+           {
+              <text>
+                if (this.checked) {
+                    showUpgradeMyPlan('@(showAllowPaymentPlansPackage.Name)', '@(showAllowPaymentPlansPackage.ID)');
+                            $(this).removeAttr('checked'); //don't allow checkbox
+                }
+              </text>
+           }
+           else
+           {
+              <text>
+                 setPostPayPlanSection();
+              </text>
+           }
+
+           
         });
 
         $('#do-parents-pay-yes').click(function () {
@@ -447,7 +465,7 @@
         updatePaymentPlanStartText();
 
         $('#subscriptionplanperiod').change(function () {
-            updateSubscriptionPeriodText();      
+            updateSubscriptionPeriodText();
 
             toggleSubscriptionPeriodWeek();
         });
@@ -483,14 +501,14 @@
             if ($('#subscriptionplanperiod').val() == "1") {
                 Array.from($("#container-subscription-month, #container-subscription-enddate-label")).forEach(elem => { $(elem).removeClass("hide") });
                 $("#container-subscription-week").addClass("hide");
-                $("#subscriptionperiodstartmonthday").prop('required', true);    
+                $("#subscriptionperiodstartmonthday").prop('required', true);
                 $("#subscriptionperiodstartweekday").prop('required', false);
                 LoadEndDate();
             } else if ($('#subscriptionplanperiod').val() == "3") {
                 Array.from($("#container-subscription-week, #container-subscription-enddate-label")).forEach(elem => { $(elem).removeClass("hide") });
                 $("#container-subscription-month").addClass("hide");
                 $("#subscriptionperiodstartweekday").prop('required', true);
-                $("#subscriptionperiodstartmonthday").prop('required', false); 
+                $("#subscriptionperiodstartmonthday").prop('required', false);
                 LoadEndDate();
             } else {
                 clearSubscriptionPaymentHiddenInputs();
@@ -503,9 +521,9 @@
     }
 
     function hideWeekMonthContainers() {
-        Array.from($("#container-subscription-month, #container-subscription-week, #container-subscription-enddate-label")).forEach(elem => { $(elem).addClass("hide") }); 
+        Array.from($("#container-subscription-month, #container-subscription-week, #container-subscription-enddate-label")).forEach(elem => { $(elem).addClass("hide") });
         $("#subscriptionperiodstartweekday").prop('required', false);
-        $("#subscriptionperiodstartmonthday").prop('required', false); 
+        $("#subscriptionperiodstartmonthday").prop('required', false);
     }
 
     function clearSubscriptionPaymentHiddenInputs() {
@@ -605,7 +623,7 @@
 
                 if (callback) {
                     callback();
-                }                   
+                }
             }
         );
     }
@@ -697,7 +715,7 @@
 
     function setChkParentPriceCost(enable) {
         var isParentPricecostChecked = $('#isparentpricecost').prop('checked');
-        
+
         if (enable) {
             $('#isparentpricecost').prop('checked', isParentPricecostChecked);
             $('#isparentpricecost').prop('disabled', false);

@@ -1228,6 +1228,7 @@ loadmethod: PackageId, List<>
 loadmethod: AccountId, List<>
 loadmethod: AccountId|IsActive
 loadmethod: Uid
+loadmethod: Uid|AccountId
 [end]
 
 [begin]
@@ -2177,4 +2178,10 @@ values: NotSet, PastDue, CurrentlyDue, EventuallyDue
 type: Enum
 name: GettingStartedOptions
 values: NotSet, CreateProfile, CreateFirstActivity, PublishActivity, ValidateEmail, AcceptPayments, ProcessCompleted
+[end]
+
+[begin]
+type: Enum
+name: SignUpType
+values: NotSet, NewAccountSignUp, TrialSignUp, ConvertingFromTrial, ChangePackage, ChangePackageDuringTrial, ChangeBillingPeriodType
 [end]

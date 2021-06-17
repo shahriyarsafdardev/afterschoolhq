@@ -46,7 +46,12 @@
         (SessionVariables.CurrentUser.HasAccessTo(Model.OwnerAccount));
     
 }
-
+<style>
+    .disabled {
+        cursor:not-allowed !important;
+        pointer-events: unset  !important;
+    }
+</style>
 @{
     Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", account, new ViewDataDictionary() {
         { "LoginReturnUrl", Model.GetHomePageUrl() },

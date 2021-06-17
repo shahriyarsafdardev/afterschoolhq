@@ -635,17 +635,7 @@ namespace AfterSchoolLibrary.Models
             return BuildSearchQuery(BillerAccountId, PayerAccountId, search, startDate, endDate, participationObjects, isDeleted, msgs, dc).GetCount(msgs);
         }
 
-        public static List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)> GetParticipationObjectsByBillerAccountId(int BillerAccountId, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-        {
-            return GetParticipationObjectsByBillerOrPayerAccountId(BillerAccountId, null, startDate, endDate, isDeleted, msgs, dc);
-        }
-
-        public static List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)> GetParticipationObjectsByPayerAccountId(int PayerAccountId, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-        {
-            return GetParticipationObjectsByBillerOrPayerAccountId(null, PayerAccountId, startDate, endDate, isDeleted, msgs, dc);
-        }
-
-        private static List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)> GetParticipationObjectsByBillerOrPayerAccountId(int? billerAccountId, int? payerAccountId, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)> GetParticipationObjectsByBillerOrPayerAccountId(int? billerAccountId, int? payerAccountId, DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
