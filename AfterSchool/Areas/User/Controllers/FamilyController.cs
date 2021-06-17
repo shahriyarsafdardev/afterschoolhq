@@ -67,7 +67,7 @@ namespace AfterSchool.Areas.User.Controllers
         }
 
         [HttpGet]
-        public ActionResult EditStudentPersonal(string id)
+        public ActionResult EditStudentPersonal(string id, string returntocheckout)
         {
             var msgs = new SystemMessages();
             Registrant registrant = null;
@@ -91,13 +91,16 @@ namespace AfterSchool.Areas.User.Controllers
             }
 
             ViewBag.Messages = msgs;
+            ViewBag.ReturnToCheckout = returntocheckout.IsNotEmpty();
 
             return View(registrant);
         }
 
+        // using FormCollection instead of location parameters, as location parameters where not binding properly
+        // and we also need location parameters like decimal latitude and decimal longitude to be nullable, as placeid can be empty
+        // when user checks 'schoolnotfound', so formcollection is used.
         [HttpPost]
-        public ActionResult EditStudentPersonal(string id, string reg, string student, string locationname = null, string streetnumber = null, string streetname = null, string address2 = null, string neighborhood = null, string city = null, string county = null, string state = null, 
-            string postalcode = null, string country = null, string placeid = null, decimal? latitude = null, decimal? longitude = null, bool schoolnotfound = false)
+        public ActionResult EditStudentPersonal(string id, string reg, string student,  string returntocheckout, FormCollection formCollection)
         {
             var msgs = new SystemMessages();
             Registrant registrant = null;
@@ -130,9 +133,6 @@ namespace AfterSchool.Areas.User.Controllers
                     }
                 });
 
-                if (placeid.IsEmpty() && !schoolnotfound)
-                    msgs.Add($"Location is required", MessageType.UserError);
-
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
 
                 if (msgs.HasNoErrors())
@@ -143,8 +143,8 @@ namespace AfterSchool.Areas.User.Controllers
                         {
                             Location school = null;
 
-                            if (placeid.IsNotEmpty())
-                                school = LocationService.CreateOrUpdateFromGoogle(locationname, streetnumber, streetname, address2, neighborhood, city, county, state, postalcode, country, placeid, latitude, longitude, SessionVariables.CurrentUser, amsgs, adc);
+                            if (formCollection["placeid"].IsNotEmpty())
+                                school = LocationService.CreateOrUpdateFromGoogle(formCollection["locationname"], formCollection["streetnumber"], formCollection["streetname"] , formCollection["address2"] , formCollection["neighborhood"] , formCollection["city"] , formCollection["county"], formCollection["state"], formCollection["postalcode"], formCollection["country"], formCollection["placeid"], Convert.ToDecimal( formCollection["latitude"]), Convert.ToDecimal(formCollection["longitude"]), SessionVariables.CurrentUser, amsgs, adc);
 
                             registrant.SchoolLocationId = school.IsNotEmpty() ? school.ID : new int?();
                             registrant.LastModifiedBy = SessionVariables.CurrentUser.ID;
@@ -172,9 +172,15 @@ namespace AfterSchool.Areas.User.Controllers
             }
 
             if (msgs.HasNoErrors())
+            {
+                if(returntocheckout.IsNotEmpty())
+                    return RedirectToAction("select", "Account", new { Area = "" });
+                
                 return RedirectToAction("EditHealth", new { id = registrant.Uid, reg, student });
+            }
 
             ViewBag.Messages = msgs;
+            ViewBag.ReturnToCheckout = returntocheckout.IsNotEmpty();
 
             return View(registrant);
         }
