@@ -2006,6 +2006,15 @@ namespace AfterSchoolLibrary.Helpers
             }
         }
 
+        public static string AppSalesEmailAddress
+        {
+            get
+            {
+                return $"{(Utilities.IsProduction ? "sales" : "dev")}@{ReplyHostName}";
+            }
+        }
+
+
         public static string AppNoReplyEmailAddress
         {
             get
