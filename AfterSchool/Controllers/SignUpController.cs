@@ -453,6 +453,38 @@ namespace AfterSchool.Controllers
                         
                         SendGridHelper.AddOrUpdateContact(account, user, msgs);
                     }
+
+                    TempData["msgs"] = msgs;
+                    switch (account.OnboardingStepDone)
+                    {
+                        case OnboardingStepType.AccountType:
+                           
+                            return RedirectToAction("ProgramInfo", "Onboarding" , new { area="org"});
+                           
+                        case OnboardingStepType.SocialLinks:
+                            return RedirectToAction("Done", "Onboarding", new { area = "org" });
+                            
+                        case OnboardingStepType.ProgramInfo:
+                            return RedirectToAction("AdditionalInfo", "Onboarding", new { area = "org" });
+                            
+                        case OnboardingStepType.AdditionalInfo:
+                            return RedirectToAction("ContactInfo", "Onboarding", new { area = "org" });
+                           
+                        case OnboardingStepType.ContactInfo:
+                            return RedirectToAction("Logo", "Onboarding", new { area = "org" });
+                           
+                        case OnboardingStepType.LogoAndHeader:
+                            return RedirectToAction("ServicesOffered", "Onboarding", new { area = "org" });
+                            
+                        case OnboardingStepType.ServicesOffered:
+                            return RedirectToAction("Links", "Onboarding", new { area = "org" });
+                        case OnboardingStepType.All:
+                            return RedirectToAction("Account", "R", new { accountname = account.UniqueName });
+                        default:
+                            break;
+                    }
+                   
+
                 }
             }
 
