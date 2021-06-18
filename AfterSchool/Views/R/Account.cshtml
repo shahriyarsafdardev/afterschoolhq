@@ -32,6 +32,7 @@
     var isOnboadingCompleted = AccountService.IsOnboardingCompleted(SessionVariables.CurrentAccount, msgs);
     var currentLevel = AccountService.OnboardingCompletionStatus(Model);
     var isStripeIntegrated = TempData["IsStripeIntegrated"] != null;
+    var firstActivity = Model.GetActivities(msgs)?.FirstOrDefault();
     var isAccountAndLoggedInUserIsOwner = SessionVariables.CurrentAccount.IsNotEmpty() &&
         SessionVariables.CurrentUser.IsNotEmpty() &&
         (SessionVariables.CurrentAccount.ID == Model.ID) &&
@@ -548,7 +549,7 @@
     </div>
 
     <div id="modal-payment-confirmation-accountView" class="hide">
-        @{ Html.RenderPartial("~/Views/Shared/_ModalPaymentConfirmation.cshtml", Model, new ViewDataDictionary() { { "ActivityUid", Model.Uid } }); };
+        @{ Html.RenderPartial("~/Views/Shared/_ModalPaymentConfirmation.cshtml", Model, new ViewDataDictionary() { { "ActivityUid", firstActivity?.Uid } }); };
     </div>
 
     <div id="modal-acceptpayment-done" class="modal fade" tabindex="-1" role="dialog">
@@ -571,7 +572,7 @@
                         <a href="#" class="btn btn-primary btn-free-profile" style="padding: 12px 20px;" onclick="return hideAcceptPaymentModal()">View Activity</a>
                         <div class="clearfix"></div>
                         <br />
-                        <a href="@Url.Action("editsetup", "activity", new { id = Model.Uid, area = "org" })" class="view-activity-text">Return to activity draft</a>
+                        <a href="@Url.Action("editsetup", "activity", new { id = firstActivity?.Uid, area = "org" })" class="view-activity-text">Return to activity draft</a>
                     </div>
                 </div>
             </div>
@@ -586,7 +587,7 @@
         var isOnboadingCompleted = @Json.Encode(isOnboadingCompleted);
         var isProcessCompleted = @Json.Encode(GettingStartedOptions.ProcessCompleted);
         var isStripeIntegrated = @Json.Encode(isStripeIntegrated);
-        debugger
+        
         if (currentLevel == isProcessCompleted && isStripeIntegrated) {
             $('#modal-acceptpayment-done').modal({
                 backdrop: 'static'

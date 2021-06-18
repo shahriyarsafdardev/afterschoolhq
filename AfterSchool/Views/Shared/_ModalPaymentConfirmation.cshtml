@@ -2,7 +2,7 @@
 @{
     var account = SessionVariables.CurrentAccount;
     var currentUser = SessionVariables.CurrentUser;
-    var activityUid = (Guid)ViewBag.ActivityUid;
+    var activityUid = ViewBag.ActivityUid != null ? (Guid)ViewBag.ActivityUid : new Guid();
 }
 
 <div id="modal-payment-confirmation" class="modal fade" tabindex="-1" role="dialog">
