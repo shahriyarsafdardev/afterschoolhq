@@ -3280,6 +3280,7 @@ namespace AfterSchoolLibrary.Services
                 onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
+
         }
 
         public static void ProcessInterestRegistration(CheckoutObject checkoutObject, bool sendConfirmationEmail, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
