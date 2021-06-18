@@ -46,7 +46,15 @@ namespace AfterSchoolLibrary.Services
                 return Form.Load(account.ContactFormId.Value, msgs, dc);
 
             return null;
-        }        
+        }
+
+        public static Form GetForm(this Account account, int Id, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (account.IsNotEmpty())
+                return Form.LoadByIdByAccountId(Id, account.ID.Value, msgs, dc);
+
+            return null;
+        }
 
         public static void MarkAsDeleted(this Account account, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
@@ -627,6 +635,14 @@ namespace AfterSchoolLibrary.Services
 
         #region AccountPackage
 
+        public static AccountPackage GetAccountPackage(this Account account, Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (account.IsNotEmpty())
+                return AccountPackage.LoadByUidByAccountId(Uid, account.ID.Value, msgs, dc);
+
+            return null;
+        }
+
         public static AccountPackage GetActiveAccountPackage(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return AccountPackage.LoadByAccountId(account.ID.Value, true, "CreateDate", OrderByDirectionEnum.Descending, msgs, dc);
@@ -721,6 +737,14 @@ namespace AfterSchoolLibrary.Services
             return account.GetMembers(start, length, msgs, dc)
                     .Select(x => x.ToWebUser())
                     .ToList();
+        }
+
+        public static AccountWebUser GetAccountWebUser(this Account account, int webUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (account.IsNotEmpty())
+                return AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, webUserId, msgs, dc);
+
+            return null;
         }
 
         public static List<AccountWebUser> GetMembers(this Account account, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -1323,11 +1347,43 @@ namespace AfterSchoolLibrary.Services
             return Attendance.LoadByAccountIdByDate(account.ID.Value, date, msgs, dc);
         }
 
+        public static AttendanceRegistrant  GetAttendanceRegistrant(this Account account, Activity activity, int attendanceId, int registrantId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            msgs = msgs.IsNotEmpty() ? msgs : new SystemMessages();
+
+            if(activity.AccountId.Value != account.ID.Value)
+            {
+                msgs.Add("Invalid account attempting to get AttendanceRegistrant record", MessageType.ApiUsageError);
+                return null;
+            }
+
+            return AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(
+                    attendanceId,
+                    registrantId,
+                    msgs, 
+                    dc)
+                .FirstOrDefault();
+        }
+
+        public static List<AttendanceRegistrant> GetAttendanceRegistrantByDateRange(this Account account, Activity activity, int registrantId, DateRange dateRange, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            msgs = msgs.IsNotEmpty() ? msgs : new SystemMessages();
+
+            if (activity.AccountId.Value != account.ID.Value)
+            {
+                msgs.Add("Invalid account attempting to get AttendanceRegistrant records", MessageType.ApiUsageError);
+                return null;
+            }
+
+            return AttendanceRegistrant.LoadByActivityIdRegistrantIdByDateRange(activity.ID.Value, registrantId, dateRange, msgs, dc);
+        }
+
+
         #endregion
 
-        #region Registrations
+            #region Registrations
 
-        public static List<Registration> GetRegistrations(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+            public static List<Registration> GetRegistrations(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Registration.LoadByAccountId(account.ID.Value, msgs, dc)
                 .Where(registration => Registration.ValidCompletionStatus.Contains(registration.CompletionStatusId))
@@ -2051,6 +2107,14 @@ namespace AfterSchoolLibrary.Services
         #endregion
 
         #region AccountRelationships
+
+        public static AccountRelationship GetAccountRelationship(this Account account, int Id, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (account.IsNotEmpty())
+                return AccountRelationship.LoadByIdByHostAccountId(Id, account.ID.Value, msgs, dc);
+
+            return null;
+        }
 
         public static List<Account> GetVisitorAccounts(this Account hostAccount, List<AccountType> accountTypes, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -3216,6 +3280,7 @@ namespace AfterSchoolLibrary.Services
                 onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
+
         }
 
         public static void ProcessInterestRegistration(CheckoutObject checkoutObject, bool sendConfirmationEmail, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)

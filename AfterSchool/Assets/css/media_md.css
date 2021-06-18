@@ -97,4 +97,10 @@
         border-radius: 7px;
         margin-left: 20px;
     }
+
+
+    .Contactmodaldialog {
+        width: auto !important;
+        margin: 30px 15px;
+    }
 }
