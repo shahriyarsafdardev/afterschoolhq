@@ -7,6 +7,7 @@ using System.Linq;
 using System;
 using System.Collections.Generic;
 using BasicLibrary;
+using System.Threading.Tasks;
 
 namespace AfterSchoolLibraryTests.Tests
 {
@@ -174,13 +175,15 @@ namespace AfterSchoolLibraryTests.Tests
                 var package = PackageFactory.Create(msgs, dc);
                 var accountPackage = AccountPackageFactory.Create(ActivityOwnerAccount, package, msgs, dc);
                 var form = ActivityOwnerAccount.GetOrCreateDefaultForm(LoggedInUser, msgs, dc);
-                var activity = ActivityFactory.Create(ActivityOwnerAccount, schedule, msgs, dc);                
+                 var activity = ActivityFactory.Create(ActivityOwnerAccount, schedule, msgs, dc);                
 
                 // Act
                 var expected = activity.Copy(newName: activity.Name + "- [copy]", useSameForm: false, loggedInUserId: LoggedInUser.ID.Value, msgs: msgs, dc: dc);
 
                 // Assert
                 Assert.NotNull(expected);
+                Assert.NotEqual(activity.ID, expected.ID);
+                Assert.NotEqual(activity.CreateDate, expected.CreateDate);
             }
             catch (Exception ex)
             {
@@ -190,7 +193,7 @@ namespace AfterSchoolLibraryTests.Tests
         }
 
         [Fact]
-        public void ActivityCopyScheduleCheckTest()
+        public async void ActivityCopyScheduleCheckTest()
         {
             try
             {
@@ -200,28 +203,30 @@ namespace AfterSchoolLibraryTests.Tests
                 var accountPackage = AccountPackageFactory.Create(ActivityOwnerAccount, package, msgs, dc);
                 var form = ActivityOwnerAccount.GetOrCreateDefaultForm(LoggedInUser, msgs, dc);
                 var activity = ActivityFactory.Create(ActivityOwnerAccount, schedule, msgs, dc);
-                ActivityScheduleFactory.Create(ActivityOwnerAccount, activity, schedule, LoggedInUser, msgs, dc);
 
-                //var firstDayOfMonth = schedule.StartDate.Value;
-                //var lastDateOfMonth = schedule.EndDate;
-                //for (var i = firstDayOfMonth; i < lastDateOfMonth; i = i.AddDays(1))
-                //{
-                //    ActivityInstanceFactory.Create(activity, schedule, i, i.AddHours(2), msgs, dc);
-                //}
+                var startDates = new List<DateRange>()
+                {
+                    new DateRange() {StartDate = $"6/{DateTime.Now.Month}/{DateTime.Now.Year} 3:00:00 PM".ToDateTime(), EndDate = $"6/{DateTime.Now.Month}/{DateTime.Now.Year} 5:00:00 PM".ToDateTime()},
+                    new DateRange() {StartDate = $"7/{DateTime.Now.Month}/{DateTime.Now.Year} 3:00:00 PM".ToDateTime(), EndDate = $"7/{DateTime.Now.Month}/{DateTime.Now.Year} 5:00:00 PM".ToDateTime()},
+                    new DateRange() {StartDate = $"8/{DateTime.Now.Month}/{DateTime.Now.Year} 3:00:00 PM".ToDateTime(), EndDate = $"8/{DateTime.Now.Month}/{DateTime.Now.Year} 5:00:00 PM".ToDateTime()},
+                };
+
+                var endDates = new List<DateTime>() { };
+                ActivityScheduleFactory.Create(ActivityOwnerAccount, activity, schedule, startDates, endDates, LoggedInUser, msgs, dc);
 
                 // Act
                 var newName = activity.Name + "- [copy]";
-                var expected = activity.Copy(newName: newName, useSameForm: false, loggedInUserId: LoggedInUser.ID.Value, msgs: msgs, dc: dc);
+                Activity expected = new Activity();
+                await Task.Delay(2000);
+                
+                expected = activity.Copy(newName: newName, useSameForm: false, loggedInUserId: LoggedInUser.ID.Value, msgs: msgs, dc: dc);
                 
                 // Assert
                 Assert.Equal(expected.Name, newName);
 
                 var activitySchedule = activity.GetSchedule(msgs, dc);
                 var copiedActivitySchedule = expected.GetSchedule(msgs: msgs, dc: dc);
-
-                //var activitySchedule = ActivitySchedule.LoadByIdByAccountId(Id: activity.ActivityScheduleId.Value, AccountId: ActivityOwnerAccount.ID.Value, msgs: msgs, dc: dc);
-                //var copiedActivitySchedule = ActivitySchedule.LoadByIdByAccountId(Id: expected.ActivityScheduleId.Value, AccountId: ActivityOwnerAccount.ID.Value, msgs: msgs, dc: dc);
-
+                
                 Assert.Equal(activitySchedule.AccountId, copiedActivitySchedule.AccountId);
                 Assert.Equal(activitySchedule.IsOngoing, copiedActivitySchedule.IsOngoing);
                 Assert.Equal(activitySchedule.RepeatsWeekly, copiedActivitySchedule.RepeatsWeekly);
@@ -229,6 +234,8 @@ namespace AfterSchoolLibraryTests.Tests
                 Assert.Equal(activitySchedule.EndDate, copiedActivitySchedule.EndDate);
                 Assert.Equal(activitySchedule.DailyStartTime, copiedActivitySchedule.DailyStartTime);
                 Assert.Equal(activitySchedule.DailyEndTime, copiedActivitySchedule.DailyEndTime);
+                Assert.NotEqual(activitySchedule.ID, copiedActivitySchedule.ID);
+                Assert.NotEqual(activitySchedule.CreateDate, copiedActivitySchedule.CreateDate);
 
                 var scheduleInstances = activitySchedule.GetInstances(msgs: msgs, dc: dc);
                 var copiedScheduleInstances = copiedActivitySchedule.GetInstances(msgs: msgs, dc: dc);
@@ -246,6 +253,8 @@ namespace AfterSchoolLibraryTests.Tests
                     Assert.Equal(instance.StartDateTime, copiedInstance.StartDateTime); 
                     Assert.Equal(instance.EndDateTime, copiedInstance.EndDateTime);
                     Assert.Equal(instance.InstanceTypeId, copiedInstance.InstanceTypeId);
+                    Assert.NotEqual(instance.ID, copiedInstance.ID);
+                    Assert.NotEqual(instance.CreateDate, copiedInstance.CreateDate);
                 }
             }
             catch (Exception ex)

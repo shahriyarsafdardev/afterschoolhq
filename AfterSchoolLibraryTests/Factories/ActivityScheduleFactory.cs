@@ -84,17 +84,8 @@ namespace AfterSchoolLibraryTests.Factories
 
         }
 
-        public static void Create(Account account, Activity activity, ActivitySchedule schedule, WebUser user, SystemMessages msgs, DatabaseConnection dc)
+        public static void Create(Account account, Activity activity, ActivitySchedule schedule, List<DateRange> startDates, List<DateTime> endDates, WebUser user, SystemMessages msgs, DatabaseConnection dc)
         {
-            var startDates = new List<DateRange>()
-                {
-                    new DateRange() {StartDate = $"6/{DateTime.Now.Month}/{DateTime.Now.Year} 3:00:00 PM".ToDateTime(), EndDate = $"6/{DateTime.Now.Month}/{DateTime.Now.Year} 5:00:00 PM".ToDateTime()},
-                    new DateRange() {StartDate = $"7/{DateTime.Now.Month}/{DateTime.Now.Year} 3:00:00 PM".ToDateTime(), EndDate = $"7/{DateTime.Now.Month}/{DateTime.Now.Year} 5:00:00 PM".ToDateTime()},
-                    new DateRange() {StartDate = $"8/{DateTime.Now.Month}/{DateTime.Now.Year} 3:00:00 PM".ToDateTime(), EndDate = $"8/{DateTime.Now.Month}/{DateTime.Now.Year} 5:00:00 PM".ToDateTime()},
-                };
-
-            var endDates = new List<DateTime>() { };
-
             ActivityScheduleService.SetupSchedule(
                 activity.AccountId.Value,
                 schedule.ID.Value,
