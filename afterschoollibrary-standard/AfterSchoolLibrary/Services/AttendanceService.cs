@@ -47,16 +47,6 @@ namespace AfterSchoolLibrary.Services
             });
         }
 
-        public static void UpdateAttendanceRegistrants(this Attendance attendance, List<RegistrantActivity> registrantActivities, List<AttendanceRegistrant> attendanceRegistrants, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            var newStudents = registrantActivities.Where(registrant => !attendanceRegistrants.Any(attendanceRegistrant => attendanceRegistrant.RegistrantId == registrant.RegistrantId))
-                .ToList();
-            newStudents
-                .ForEach(registrantActivity => {
-                    AttendanceRegistrantService.CreateNew(attendance.ID.Value, registrantActivity.RegistrantId.Value, loggedInUser, msgs, dc);
-                });
-        }
-
         public static void UpdateAttendance(this Attendance attendance, int activityInstanceId, List<int> attendanceRegistrantIds, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
