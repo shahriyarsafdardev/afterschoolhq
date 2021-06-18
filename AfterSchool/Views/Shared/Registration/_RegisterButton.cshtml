@@ -166,7 +166,7 @@ else
                 <span><i class="s7-plus icon-medium"></i><i class="s7-cart icon-medium"></i></span>
             </button>
         }
-        else if (Model.Schedule.IsNotEmpty() && !Model.Schedule.IsOngoing && Model.Schedule.IsClosingInTwoDays(Model.OwnerAccount))
+        else if (Model.Schedule.IsNotEmpty() && !Model.Schedule.IsOngoing && Model.Schedule.IsEndingInTwoDays(Model.OwnerAccount))
         {
             <button type="button" class="btn btn-register btn-block">
                 Registration Closed
