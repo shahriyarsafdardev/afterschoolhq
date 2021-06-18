@@ -24,15 +24,25 @@ namespace AfterSchoolLibraryTests.Tests
             ActivityOwnerAccount = AccountFactory.Create(AccountOwner, msgs, dc);
         }
 
-        [Fact(DisplayName = "IsClosingInTwoDaysTest")]
-        public void IsClosingInTwoDays()
+        [Fact(DisplayName = "IsEndingInTwoDays")]
+        public void IsEndingInTwoDaysTest()
         {
-            
-            var schedule = ActivityScheduleFactory.CreateIsClosing(ActivityOwnerAccount, msgs, dc);
+            try
+            {
+                // Arrange     
+                var schedule = ActivityScheduleFactory.CreateIsClosing(ActivityOwnerAccount, msgs, dc);
 
-            var IsClosingInTwoDays = ActivityScheduleService.IsClosingInTwoDays(schedule, ActivityOwnerAccount);
+                // Act
+                var isEndingInTwoDays = ActivityScheduleService.IsEndingInTwoDays(schedule, ActivityOwnerAccount);
 
-            Assert.True(IsClosingInTwoDays);
+                // Assert
+                Assert.True(isEndingInTwoDays);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
         }
 
         [Fact]
