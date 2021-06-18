@@ -367,24 +367,20 @@
             }
 
             $(".btnContactUsSubmit").on('click', function () {
-                console.log('inside submit');
-
                 if ($('#name').val() && $('#email').val() && $('#message').val()) {
 
                     var subjectLine = 'New Search Page Form Submission From: ' + $('#name').val();
                     if ($('#phone').val()) {
                         subjectLine = subjectLine + ' - ' + $('#phone').val();
                     }
-                    var params = 'name=' + $('#name').val() +
-
+                    var params =
+                        'name=' + encodeURIComponent($('#name').val()) +
                         '&pageName=search' +
-                        '&fromEmail=' + $('#email').val() +
-                        '&message=' + $('#message').val() +
-                        '&MainSubject=' + subjectLine +
-                        '&g_recaptcha_response=' + $('#g-recaptcha-response').val();
+                        '&fromEmail=' + encodeURIComponent($('#email').val()) +
+                        '&message=' + encodeURIComponent($('#message').val()) +
+                        '&MainSubject=' + encodeURIComponent(subjectLine) +
+                        '&g_recaptcha_response=' + $('#g-recaptcha-response').val() +
                         '&phone=' + $('#phone').val();
-
-
 
                     $('.formSubmitting').html('Submitting...');
                     $('.btnContactUsSubmit').prop('disabled', true);

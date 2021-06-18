@@ -177,15 +177,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
     function submitContactForm() {
         var subjectLine = 'New Sales Contact Form Submission From: ' + $('#contact-form-name').val();
-        var params = 'name=' + $('#contact-form-name').val() +
+		var params = 
+            'name=' + encodeURIComponent($('#contact-form-name').val()) +
             '&pageName=contact' +
-            '&MainSubject=' + subjectLine +
-            '&fromEmail=' + $('#contact-form-email').val() +
-            '&message=' + $('#contact-form-message').val() +
-            '&g_recaptcha_response=' + $('#g-recaptcha-response').val();
+            '&MainSubject=' + encodeURIComponent(subjectLine) +
+            '&fromEmail=' + encodeURIComponent($('#contact-form-email').val()) +
+            '&message=' + encodeURIComponent($('#contact-form-message').val()) +
+			'&g_recaptcha_response=' + $('#g-recaptcha-response').val();
+		
 
         $('#btn-contact-form-submit').html('Submitting...');
-        $('#btn-contact-form-submit').prop('disabled', true);
+		$('#btn-contact-form-submit').prop('disabled', true);
 
         $.post(
             '/services/submitcontactform',
