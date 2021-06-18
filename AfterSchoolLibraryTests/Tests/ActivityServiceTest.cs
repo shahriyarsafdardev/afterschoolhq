@@ -264,6 +264,94 @@ namespace AfterSchoolLibraryTests.Tests
             }
         }
 
+        public static IEnumerable<object[]> Data => new List<object[]>() {
+            new object[] { 
+                new List<DateRange>() {
+                    new DateRange() {
+                        StartDate = $"{DateTime.Now.Month}/6/{DateTime.Now.Year} 3:00:00 PM".ToDateTime(),
+                        EndDate = $"{DateTime.Now.Month}/6/{DateTime.Now.Year} 5:00:00 PM".ToDateTime() 
+                    },
+                    new DateRange() {
+                        StartDate =$"{DateTime.Now.Month + 1}/7/{DateTime.Now.Year} 3:00:00 PM".ToDateTime(),
+                        EndDate =$"{DateTime.Now.Month + 1}/7/{DateTime.Now.Year} 5:00:00 PM".ToDateTime(),
+                    },
+                    new DateRange() {
+                        StartDate =$"{DateTime.Now.Month + 1}/8/{DateTime.Now.Year} 3:00:00 PM".ToDateTime(),
+                        EndDate =$"{DateTime.Now.Month + 1}/8/{DateTime.Now.Year} 5:00:00 PM".ToDateTime(),
+                    }
+                }
+            }
+        };
+
+        [Theory]
+        [MemberData(nameof(Data))]        
+        public async void ActivityCopyScheduleCheckTheoryTest(List<DateRange> dates)
+        {
+            try
+            {
+                // Arrange                
+                var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, msgs, dc);
+                var package = PackageFactory.Create(msgs, dc);
+                var accountPackage = AccountPackageFactory.Create(ActivityOwnerAccount, package, msgs, dc);
+                var form = ActivityOwnerAccount.GetOrCreateDefaultForm(LoggedInUser, msgs, dc);
+                var activity = ActivityFactory.Create(ActivityOwnerAccount, schedule, msgs, dc);
+
+                var startDates = new List<DateRange>();
+                startDates.AddRange(dates);
+
+                var endDates = new List<DateTime>() { };
+                ActivityScheduleFactory.Create(ActivityOwnerAccount, activity, schedule, startDates, endDates, LoggedInUser, msgs, dc);
+
+                // Act
+                var newName = activity.Name + "- [copy]";
+                Activity expected = new Activity();
+                await Task.Delay(2000); // this is becuase sometimes createDate assert gets file due to same time of activity and it's copy
+
+                expected = activity.Copy(newName: newName, useSameForm: false, loggedInUserId: LoggedInUser.ID.Value, msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.Equal(expected.Name, newName);
+
+                var activitySchedule = activity.GetSchedule(msgs, dc);
+                var copiedActivitySchedule = expected.GetSchedule(msgs: msgs, dc: dc);
+
+                Assert.Equal(activitySchedule.AccountId, copiedActivitySchedule.AccountId);
+                Assert.Equal(activitySchedule.IsOngoing, copiedActivitySchedule.IsOngoing);
+                Assert.Equal(activitySchedule.RepeatsWeekly, copiedActivitySchedule.RepeatsWeekly);
+                Assert.Equal(activitySchedule.StartDate, copiedActivitySchedule.StartDate);
+                Assert.Equal(activitySchedule.EndDate, copiedActivitySchedule.EndDate);
+                Assert.Equal(activitySchedule.DailyStartTime, copiedActivitySchedule.DailyStartTime);
+                Assert.Equal(activitySchedule.DailyEndTime, copiedActivitySchedule.DailyEndTime);
+                Assert.NotEqual(activitySchedule.ID, copiedActivitySchedule.ID);
+                Assert.NotEqual(activitySchedule.CreateDate, copiedActivitySchedule.CreateDate);
+
+                var scheduleInstances = activitySchedule.GetInstances(msgs: msgs, dc: dc);
+                var copiedScheduleInstances = copiedActivitySchedule.GetInstances(msgs: msgs, dc: dc);
+
+                Assert.Equal(scheduleInstances.Count, copiedScheduleInstances.Count);
+
+                for (int i = 0; i < scheduleInstances.Count; i++)
+                {
+                    var instance = scheduleInstances[i];
+                    var copiedInstance = copiedScheduleInstances[i];
+
+                    Assert.Equal(instance.ActivityId, copiedInstance.ActivityId);
+                    Assert.Equal(instance.ActivityGroupId, copiedInstance.ActivityGroupId);
+                    Assert.Equal(instance.Day, copiedInstance.Day);
+                    Assert.Equal(instance.StartDateTime, copiedInstance.StartDateTime);
+                    Assert.Equal(instance.EndDateTime, copiedInstance.EndDateTime);
+                    Assert.Equal(instance.InstanceTypeId, copiedInstance.InstanceTypeId);
+                    Assert.NotEqual(instance.ID, copiedInstance.ID);
+                    Assert.NotEqual(instance.CreateDate, copiedInstance.CreateDate);
+                }
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
         [Fact]
         public void ActivityCopyPropertiesCheckTest()
         {
