@@ -2218,9 +2218,14 @@ namespace AfterSchoolLibrary.Services
             return Attendance.LoadByActivityId(activity.ID.Value, orderByParam, direction, start, length, msgs, dc);
         }
 
-        public static List<Attendance> GetCompletedAttendance(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Attendance> GetCompletedAttendance(this Activity activity,SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Attendance.LoadByActivityIdByIsCompleted(activity.ID.Value, true, msgs: msgs, dc: dc);
+            return Attendance.LoadByActivityIdByIsCompleted(activity.ID.Value,true, msgs: msgs, dc: dc);
+        }
+
+        public static List<Attendance> GetCompletedAttendanceWithPaging(this Activity activity, string orderByParam, OrderByDirectionEnum direction, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Attendance.LoadByActivityIdByIsCompletedWithPaging(activity.ID.Value, true, orderByParam, direction, start, length, msgs: msgs, dc: dc);
         }
 
         public static int GetAttendancePresentCount(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
