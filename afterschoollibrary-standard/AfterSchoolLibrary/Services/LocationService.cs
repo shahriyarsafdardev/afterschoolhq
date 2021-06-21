@@ -55,7 +55,7 @@ namespace AfterSchoolLibrary.Services
         
         public static Account GetHostAccount(this Location location, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (location.HostAccountId.HasValue)
+            if (location.IsNotEmpty() && location.HostAccountId.HasValue)
                 return Account.Load(location.HostAccountId.Value, msgs, dc);
 
             return null;
