@@ -122,6 +122,7 @@
                                                 <th></th>
                                                 <th>Ask? (<a href="javascript:checkAllActive()">All</a> / <a href="javascript:uncheckAllActive()">None</a>)</th>
                                                 <th>Required? (<a href="javascript:checkAllRequired()">All</a> / <a href="javascript:uncheckAllRequired()">None</a>)</th>
+                                                <th>Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -208,8 +209,6 @@
                                                                id="link-text-@question.ID"
                                                                name="link-text-@question.ID"
                                                                value="@question.Link" />
-                                                        @*-----Added button and hidden input-----*@
-                                                        @*----------------------------------------*@
                                                         <button type="button"
                                                                 class="btn btn-default md-trigger btn-space hide"
                                                                 data-modal="modal-rating"
@@ -225,10 +224,10 @@
 
                                                     <td>
                                                         @{Html.RenderPartial(
-                                                                    "~/Views/Shared/_SwitchButton.cshtml",
-                                                                    question.IsActive,
-                                                                    new ViewDataDictionary()
-                                                                    {
+                                                                      "~/Views/Shared/_SwitchButton.cshtml",
+                                                                      question.IsActive,
+                                                                      new ViewDataDictionary()
+                                                                      {
                                                                             { "checkboxname", "active-" + question.ID },
                                                                             { "checkboxid", "active-" + question.ID },
                                                                             { "disabled", question.IsLocked },
@@ -249,6 +248,9 @@
                                                                             { "classname", "question-isrequired" }
                            });
                                                         }
+                                                    </td>
+                                                    <td>
+                                                        <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteQuestion('', '')"><span class="text-danger"><i class="s7-trash"></i></span></button>
                                                     </td>
                                                 </tr>
                                             }
@@ -430,6 +432,24 @@
     </form>
 </div>
 
+<div id="modal-delete" class="md-modal colored-header custom-width md-effect-9">
+    <div class="md-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+            <h3 class="modal-title">Delete Question</h3>
+        </div>
+        <div class="modal-body form">
+
+            <p>Are you sure you want to delete <strong><span id="delete-activity-name"></span></strong>? </p><p>This action cannot be undone.</p>
+
+        </div>
+        <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+            <a class="btn btn-danger" href="#" id="delete-activity-button">Delete &raquo;</a>
+        </div>
+    </div>
+</div>
+
 <script>
     var selectedQuestion = null;
     var newQuestionNumber = 0;
@@ -516,7 +536,6 @@
         var arr = [@Html.Raw(typesWithOptions.Select(x=> "'" + ((int)x) + "'").ToStringList())];
         var arrRating = [@Html.Raw(typesWithRating.Select(x=> "'" + ((int)x) + "'").ToStringList())];
         var select = $(`#questiontype-${id}`);
-        console.log(arrRating.indexOf(select.val()));
 
         if (arr.indexOf(select.val()) > -1) {
             $(`#btn-setoptions-${id}`).removeClass('hide');
@@ -554,7 +573,6 @@
 
     var selectedLinkQuestion = null;
     function setLink(id) {
-        console.log("Set Link Id ", id);
         selectedLinkQuestion = id;
         $('#question-link-label').html($('#text-' + id).val());
         $('#question-link').val($('#link-text-' + id).val());
@@ -566,24 +584,33 @@
         }
     }
 
+    //called when rating modal is going to display
     function setRating(id) {
-        console.log("Set Rating Id " , id);
         selectedLinkQuestion = id;
         var ratingString = $('#options-text-' + id).val();
-        console.log("Returned String :", ratingString);
         var ratingValues = ratingString.split(",");
-        console.log("ValuesArray :", ratingValues);
         $('#question-rating-label').html($('#text-' + id).val());
-        $('#question-rating-min').val(ratingValues[0]);
-        $('#question-rating-max').val(ratingValues[1])
-        ratingValues.length > 2 ? $('#question-rating-increment').val(ratingValues[2]) : $('#question-rating-increment').val('111');
+        //if question exist then read data from hidden field and populate text fields
+        if (ratingValues.length > 1) {
+            $('#question-rating-min').val(ratingValues[0]);
+            $('#question-rating-max').val(ratingValues[1])
+            ratingValues.length > 2 ? $('#question-rating-increment').val(ratingValues[2]) : $('#question-rating-increment').val('');
+        }
+        //setting default values
+        else {
+            $('#question-rating-min').val('1');
+            $('#question-rating-max').val('5');
+            $('#question-rating-increment').val('1');
+        }
     }
 
     function updateRating() {
-        if (!isNaN(selectedLinkQuestion)) {
             $('#options-text-' + selectedLinkQuestion).val($('#question-rating-min').val() + "," + $('#question-rating-max').val() + "," + $('#question-rating-increment').val());
-            console.log($('#question-rating-min').val() + "," + $('#question-rating-max').val() + "," + $('#question-rating-increment').val());
-        }
+    }
+
+    function deleteQuestion(name, url) {
+        event.preventDefault();
+        //to do for deleteing question.
     }
 
     function navigateForm(url) {
@@ -626,6 +653,29 @@
         $('.questiontype-select').each(function () {
             var id = $(this).attr('id').split('-')[1];
             showEditButton(id);
+        });
+    });
+</script>
+@*<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>*@
+<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/themes/smoothness/jquery-ui.css" />
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/jquery-ui.min.js"></script>
+<script type="text/javascript">
+    $(function () {
+        $("#question-table").sortable({
+            items: 'tr:not(tr:first-child)',
+            cursor: 'pointer',
+            axis: 'y',
+            dropOnEmpty: false,
+            start: function (e, ui) {
+                ui.item.addClass("selected");
+            },
+            stop: function () {
+                var inputs = $('input.currentposition');
+                var nbElems = inputs.length;
+                $('input.currentposition').each(function (idx) {
+                    $(this).val(nbElems - idx);
+                });
+            }
         });
     });
 </script>
