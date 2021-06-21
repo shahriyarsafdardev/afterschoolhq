@@ -45,7 +45,7 @@ namespace AfterSchool.Controllers
             if (isUnsupportedBrowser())
                 return RedirectUnsupportedBrowser();
 
-            var msgs = new SystemMessages();
+            var msgs = TempData["msgs"].IsNotEmpty() ? (SystemMessages)TempData["msgs"] : new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
