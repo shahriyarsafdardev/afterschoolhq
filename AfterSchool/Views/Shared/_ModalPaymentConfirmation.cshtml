@@ -2,7 +2,7 @@
 @{
     var account = SessionVariables.CurrentAccount;
     var currentUser = SessionVariables.CurrentUser;
-    var activityUid = (Guid)ViewBag.ActivityUid;
+    var activityUid = ViewBag.ActivityUid != null ? (Guid)ViewBag.ActivityUid : new Guid();
 }
 
 <div id="modal-payment-confirmation" class="modal fade" tabindex="-1" role="dialog">
@@ -109,13 +109,13 @@
                                                 {
                                                     if (account.GetCheckPaymentAccount().IsEmpty())
                                                     {
-                                                        <a id="link-check" href="@Url.Action("checksetup", "account", new { isnew = 1 })" class="btn btn-default">
+                                                        <a id="link-check" href="@Url.Action("checksetup", "account", new { isnew = 1, area="org", isaccountredirect = 1 })" class="btn btn-default">
                                                             Choose Checks &raquo;
                                                         </a>
                                                     }
                                                     else
                                                     {
-                                                        <a id="link-check" href="@Url.Action("checksetup", "account")" class="btn btn-default">
+                                                        <a id="link-check" href="@Url.Action("checksetup", "account", new { area="org", isaccountredirect = 1 })" class="btn btn-default">
                                                             Update Payout Details &raquo;
                                                         </a>
                                                     }

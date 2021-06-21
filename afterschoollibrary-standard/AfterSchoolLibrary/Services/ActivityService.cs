@@ -2498,7 +2498,7 @@ namespace AfterSchoolLibrary.Services
 
         public static ActivityGroup GetActivityGroup(this Activity activity, int AccountId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (activity.ActivityGroupId.HasValue)
+            if (activity.IsNotEmpty() && activity.ActivityGroupId.HasValue)
                 return ActivityGroup.LoadByIdByAccountId(activity.ActivityGroupId.Value, AccountId, msgs, dc: dc);
 
             return null;

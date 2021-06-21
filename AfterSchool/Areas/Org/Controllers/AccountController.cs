@@ -233,6 +233,12 @@ namespace AfterSchool.Areas.Org.Controllers
                     SessionVariables.CurrentUser,
                     msgs);
 
+            if (msgs.HasNoErrors() && Request["isaccountredirect"] == "1")
+            {
+                TempData["IsStripeIntegrated"] = true;
+                return Redirect(SessionVariables.CurrentAccount.ShortHomePageUrl);
+            }
+
             if (msgs.HasNoErrors() && Request["isnew"] == "1")
                 return RedirectToAction("paymentsdone", new { isnew = 1 });
 
