@@ -48,7 +48,7 @@ namespace AfterSchoolLibraryTests.Tests
             var activityGroup = ActivityGroupFactory.Create(ActivityOwnerAccount, ActivityGroupType.Session, msgs, dc);
             var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, msgs, dc);
             var location = LocationFactory.Create(ActivityOwnerAccount, msgs, dc);
-            var activity = ActivityFactory.Create(ActivityOwnerAccount, schedule, activityGroup, location, msgs, dc);
+            var activity = ActivityFactory.Create(ActivityOwnerAccount, schedule, activityGroup, location,null, msgs, dc);
             var activityInstance = ActivityInstanceFactory.Create(activity, schedule, msgs, dc);
             var period = RegistrationPeriodFactory.Create(ActivityOwnerAccount, msgs, dc);
             var arp = ActivityRegistrationPeriodFactory.Create(activity, period, msgs, dc);

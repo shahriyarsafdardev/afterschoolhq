@@ -55,7 +55,7 @@ namespace AfterSchoolLibrary.Models
             LoadConveniencePercentFee(msgs, dc);
         }
 
-        public bool IsConvenienceFeeTakenOutOfCost 
+        public bool IsConvenienceFeeTakenOutOfCost
         {
             get
             {
@@ -66,7 +66,7 @@ namespace AfterSchoolLibrary.Models
                     return Activity.IsConvenienceFeeTakenOutOfCost;
 
                 return BillingAccount.IsConvenienceFeeTakenOutOfCost;
-            } 
+            }
         }
 
         public bool IsPaymentTypeFeeTakenOutOfCost
@@ -104,7 +104,7 @@ namespace AfterSchoolLibrary.Models
 
             // Because stripe will take their charge out of the total charge with the convenience fee
             var costWithConvenienceFee = Cost;
-            
+
             if (!IsConvenienceFeeTakenOutOfCost)
                 costWithConvenienceFee += GetConvenienceFee();
 
@@ -151,11 +151,16 @@ namespace AfterSchoolLibrary.Models
 
         private void LoadConveniencePercentFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            ConveniencePercentFee = BillingAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue();
+            var accountPackageFeature = BillingAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc);
+            if (accountPackageFeature != null)
+                ConveniencePercentFee = accountPackageFeature.GetMaxValue();
         }
         private void LoadConvenienceFlatFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            ConvenienceFlatFee = BillingAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFlatFee, msgs, dc).GetMaxValue();
+            var accountPackageFeature = BillingAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFlatFee, msgs, dc);
+            if (accountPackageFeature != null)
+                ConveniencePercentFee = accountPackageFeature.GetMaxValue();
+
         }
     }
 }
