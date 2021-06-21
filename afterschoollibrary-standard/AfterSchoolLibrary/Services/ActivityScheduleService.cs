@@ -107,7 +107,7 @@ namespace AfterSchoolLibrary.Services
             return schedule;
         }
 
-        public static bool IsClosingInTwoDays(this ActivitySchedule schedule, Account ownerAccount = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool IsEndingInTwoDays(this ActivitySchedule schedule, Account ownerAccount = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (schedule.IsNotEmpty())
             {
