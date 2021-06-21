@@ -572,9 +572,9 @@ namespace AfterSchoolLibrary.Services
             return RegistrationPeriod.LoadByAccountId(account.ID.Value, msgs, dc);
         }
 
-        public static RegistrationPeriod GetRegistrationPeriod(this Account account, string id, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static RegistrationPeriod GetRegistrationPeriod(this Account account, int id, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return RegistrationPeriod.LoadByIdByAccountId(id,account.ID.Value, msgs, dc);
+            return RegistrationPeriod.LoadByIdByAccountId(id, account.ID.Value, msgs, dc);
         }
 
         public static bool IsNowEnrolling(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)

@@ -620,7 +620,6 @@ baseproperty: StartDateTime, required
 baseproperty: EndDateTime, required
 loadmethod: AccountId, List<>
 loadmethod: Uid
-loadmethod: Id|AccountId
 loadmethod: ActivityGroupId, List<>
 loadmethod: ActivityGroupId|AccountId, List<>
 loadmethod: AccountActivityGroupId, List<>

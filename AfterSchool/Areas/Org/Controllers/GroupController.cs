@@ -229,7 +229,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var regperiod = new RegistrationPeriod();
 
             if (period.IsInteger())
-                regperiod = account.GetRegistrationPeriod(period, msgs);
+                regperiod = account.GetRegistrationPeriod(period.ToInteger(), msgs);
             else
             {
                 regperiod.CreatedBy = CurrentUser.ID.Value;

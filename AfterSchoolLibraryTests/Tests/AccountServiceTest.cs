@@ -1337,7 +1337,7 @@ namespace AfterSchoolLibraryTests.Tests
               
 
                 // Act
-                var RegistrationPeriod = AccountService.GetRegistrationPeriod(account, ResgistrationPeriod.ID.ToString(), msgs, dc);
+                var RegistrationPeriod = AccountService.GetRegistrationPeriod(account, ResgistrationPeriod.ID.Value, msgs, dc);
 
 
                 // Assert
@@ -1428,8 +1428,6 @@ namespace AfterSchoolLibraryTests.Tests
                 Assert.False(false, ex.Message);
             }
         }
-        
-
 
         [Fact]
         public void GetAttendanceRegistrantTest()
@@ -1487,7 +1485,6 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.NotNull(expected);
             Assert.Equal(expected: expected.FirstOrDefault().ID.Value , actual: attendanceRegistrant.ID);
         }
-
 
         [Fact]
         public void GetAttendanceRegistrantByDateRangeErrorTest()
