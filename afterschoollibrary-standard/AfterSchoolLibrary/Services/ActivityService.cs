@@ -1891,6 +1891,15 @@ namespace AfterSchoolLibrary.Services
             return Models.Match.LoadByTeamId(activity.ID.Value, msgs, dc).IsNotEmpty();
         }
 
+        public static bool IsValidActivityInstance(this Activity activity, ActivityInstance activityInstance , SystemMessages msgs = null, DatabaseConnection dc = null)
+        {   
+            if (activityInstance?.ActivityScheduleId == activity.ActivityScheduleId)
+                return true;
+
+            msgs.Add("Invalid record error", MessageType.UserError);
+            return false;
+        }
+
         public static bool HasNoTeamMatches(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Models.Match.LoadByTeamId(activity.ID.Value, msgs, dc).IsEmpty();
@@ -1902,11 +1911,8 @@ namespace AfterSchoolLibrary.Services
             if (activityInstanceId.HasValue)
             {
                 var activityInstance = ActivityInstance.Load(activityInstanceId.Value, msgs, dc);
-                if (activityInstance?.ActivityScheduleId != activity.ActivityScheduleId)
-                {
-                    msgs.Add("Invalid record error", MessageType.UserError);
+                if (!activity.IsValidActivityInstance(activityInstance, msgs, dc))                    
                     return null;
-                }
 
                 var attendance = activityInstance.GetAttendance(msgs, dc);
                 if (attendance.IsNotEmpty())
@@ -1932,20 +1938,11 @@ namespace AfterSchoolLibrary.Services
                 {
                     // if a new student has registered then we do not need to create new Attendance. Instead we just need to add AttendanceRegistrant 
                     // to existing Attendance only   
-                    var newStudents = registrantActivities.Where(registrant => !attendanceRegistrants.Any(attendanceRegistrant => 
-                    attendanceRegistrant.RegistrantId == registrant.RegistrantId)).ToList();
-
-                    newStudents
-                        .ForEach(registrantActivity => {
-                            AttendanceRegistrantService.CreateNew(closestActivityInstanceAttendance.ID.Value, registrantActivity.RegistrantId.Value, 
-                                loggedInUser, msgs, dc);
-                        });
+                    activity.CreateNewAttendanceRegistrantByRegistrantActivities(closestActivityInstanceAttendance, attendanceRegistrants, registrantActivities, loggedInUser, msgs, dc);
                 }
                   
                 if (!activityInstanceId.HasValue)
-                {
-                    return closestActivityInstanceAttendance;
-                }
+                    return closestActivityInstanceAttendance;                
             }
 
             // otherwise create a new attendance if there is no attendance id
@@ -1954,6 +1951,20 @@ namespace AfterSchoolLibrary.Services
 
             // otherwise return the attendance with given id
             return Attendance.Load(attendanceId.Value, msgs, dc);
+        }
+
+        public static List<AttendanceRegistrant> CreateNewAttendanceRegistrantByRegistrantActivities(this Activity activity,Attendance attendance, List<AttendanceRegistrant> attendanceRegistrants, List<RegistrantActivity> registrantActivities, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            List<AttendanceRegistrant> newAttendanceRegistrants = new List<AttendanceRegistrant>();
+            var newStudents = registrantActivities.Where(registrant => !attendanceRegistrants.Any(attendanceRegistrant =>
+                    attendanceRegistrant.RegistrantId == registrant.RegistrantId)).ToList();
+
+            newStudents
+                .ForEach(registrantActivity => {
+                    newAttendanceRegistrants.Add(AttendanceRegistrantService.CreateNew(attendance.ID.Value, registrantActivity.RegistrantId.Value,
+                        loggedInUser, msgs, dc));
+                });
+            return newAttendanceRegistrants;
         }
 
         public static ActivityInstance GetClosestPastActivityInstanceToDate(this Activity activity, DateTime date, SystemMessages msgs, DatabaseConnection dc)
