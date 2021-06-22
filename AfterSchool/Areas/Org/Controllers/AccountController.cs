@@ -181,6 +181,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Account = account;
             ViewBag.IsFullScreen = GetIsFullScreen();
+            ViewBag.SignupType = Request["signuptype"].IsNotEmpty() && Request["signuptype"].IsInteger() ? (SignUpType)Request["signuptype"].ToInteger() : SignUpType.NotSet;
             ViewBag.Messages = new SystemMessages();
             ViewBag.SupportEmail = AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress;
 
