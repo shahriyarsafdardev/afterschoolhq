@@ -63,7 +63,7 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult ProgramInfo()
         {
-            var msgs = TempData["msgs"].IsNotEmpty() ? (SystemMessages)TempData["msgs"] : new SystemMessages();
+            var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var profile = account.GetOrCreateAccountProfile(currentUser, msgs);
@@ -135,7 +135,7 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult AdditionalInfo()
         {
-            var msgs = TempData["msgs"].IsNotEmpty() ? (SystemMessages)TempData["msgs"] : new SystemMessages();
+            var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var profile = account.GetOrCreateAccountProfile(currentUser, msgs);
@@ -218,7 +218,7 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult ContactInfo()
         {
-            var msgs = TempData["msgs"].IsNotEmpty() ? (SystemMessages)TempData["msgs"] : new SystemMessages();
+            var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
             var profile = account.GetAccountProfile(msgs);
             var location = profile.GetLocation();
@@ -317,7 +317,7 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Logo()
         {
-            var msgs = TempData["msgs"].IsNotEmpty() ? (SystemMessages)TempData["msgs"] : new SystemMessages();
+            var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
             var profile = account.GetOrCreateAccountProfile(SessionVariables.CurrentUser, msgs);
             var ah = AfterSchoolLibrary.Helpers.Utilities.GetNewAmazonHelper();
@@ -388,7 +388,7 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult ServicesOffered()
         {
-            var msgs = TempData["msgs"].IsNotEmpty()? (SystemMessages)TempData["msgs"]: new SystemMessages();
+            var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
             var profile = account.GetOrCreateAccountProfile(SessionVariables.CurrentUser, msgs);
 
@@ -451,7 +451,7 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Links()
         {
-            var msgs = TempData["msgs"].IsNotEmpty() ? (SystemMessages)TempData["msgs"] : new SystemMessages();
+            var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
 
             ViewBag.Messages = msgs;
@@ -519,7 +519,7 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Done()
         {
-            var msgs = TempData["msgs"].IsNotEmpty() ? (SystemMessages)TempData["msgs"] : new SystemMessages();
+            var msgs =  new SystemMessages();
             var account = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
 
