@@ -159,7 +159,7 @@ namespace AfterSchoolLibrary.Models
         {
             var accountPackageFeature = BillingAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFlatFee, msgs, dc);
             if (accountPackageFeature != null)
-                ConveniencePercentFee = accountPackageFeature.GetMaxValue();
+                ConvenienceFlatFee = accountPackageFeature.GetMaxValue();
 
         }
     }
