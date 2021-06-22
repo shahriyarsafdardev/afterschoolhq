@@ -26,7 +26,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (account.OnboardingStepDone != OnboardingStepType.All)
                 return HandleOnboardingRedirect();
             else if(account.OnboardingStepDone== OnboardingStepType.All)
-                return RedirectToAction("Account", "R", new { accountname = account.UniqueName });
+                return RedirectToAction("Account", "R", new {area="", accountname = account.UniqueName });
 
             if (!account.CanReceivePaymentDeposits() && SessionVariables.AccountUserType == UserType.Treasurer)
                 return RedirectToAction("getstartedpayments", "account");
