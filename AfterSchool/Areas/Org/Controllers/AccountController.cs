@@ -972,6 +972,43 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(form);
         }
 
+        [HttpGet]
+        public ActionResult Delete(string id)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();
+
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+
+            var questionToDelete = FormQuestion.Load(id.ToInteger(), msgs);
+            questionToDelete.Delete();
+
+            // Show Success Message
+            // LOG: Someone has Deleted Question.
+            if (msgs.HasNoErrors())
+            {
+                msgs.Add(string.Format("{0} has been deleted", questionToDelete.Text), MessageType.Success);
+
+                SessionVariables.WebSession.LogActivity(
+                   account: currentAccount,
+                   actor: currentUser,
+                   actionType: WebSessionActionType.Deleted,
+                   objectType: ObjectType.FormQuestion,
+                   objectId: id.ToInteger(),
+                   objectText: questionToDelete.Text,
+                   indirectObjectType: ObjectType.FormQuestion,  // Need to know about indirectObjectType
+                   indirectObjectId: currentAccount.ID.Value,
+                   indirectObjectText: currentAccount.Name
+               );
+            }
+
+            ViewBag.Messages = msgs;
+
+            return Redirect(Request.UrlReferrer.ToString());
+        }
+
         private AccountProfile StyleViewBag(SystemMessages msgs)
         {
             var account = SessionVariables.CurrentAccount;

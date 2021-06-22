@@ -114,9 +114,10 @@
                             </div>
                             <div class="panel-body">
                                 <div class="table-responsive">
-                                    <table class="table table-striped" id="question-table">
+                                    <table class="table table-striped question-table" id="question-table">
                                         <thead>
                                             <tr>
+                                                <th>Order</th>
                                                 <th>Question Label</th>
                                                 <th></th>
                                                 <th></th>
@@ -129,6 +130,7 @@
                                             @foreach (var question in questions)
                                             {
                                                 <tr>
+                                                    <td>@question.DisplayOrder</td>
                                                     <td>
                                                         @if (question.QuestionTypeId != QuestionType.TextBlock)
                                                         {
@@ -250,7 +252,7 @@
                                                         }
                                                     </td>
                                                     <td>
-                                                        <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteQuestion('', '')"><span class="text-danger"><i class="s7-trash"></i></span></button>
+                                                        <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteQuestion('@question.Text', '@Url.Action("delete","Account", new { id = @question.ID.ToString()})')"><span class="text-danger"><i class="s7-trash"></i></span></button>
                                                     </td>
                                                 </tr>
                                             }
@@ -440,12 +442,12 @@
         </div>
         <div class="modal-body form">
 
-            <p>Are you sure you want to delete <strong><span id="delete-activity-name"></span></strong>? </p><p>This action cannot be undone.</p>
+            <p>Are you sure you want to delete <strong><span id="delete-question-name"></span></strong>? </p><p>This action cannot be undone.</p>
 
         </div>
         <div class="modal-footer">
             <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-            <a class="btn btn-danger" href="#" id="delete-activity-button">Delete &raquo;</a>
+            <a class="btn btn-danger" href="#" id="delete-question-button">Delete &raquo;</a>
         </div>
     </div>
 </div>
@@ -610,7 +612,8 @@
 
     function deleteQuestion(name, url) {
         event.preventDefault();
-        //to do for deleteing question.
+        $('#delete-question-name').html(name);
+        $('#delete-question-button').attr('href', url);
     }
 
     function navigateForm(url) {
@@ -656,7 +659,7 @@
         });
     });
 </script>
-@*<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>*@
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/themes/smoothness/jquery-ui.css" />
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/jquery-ui.min.js"></script>
 <script type="text/javascript">
