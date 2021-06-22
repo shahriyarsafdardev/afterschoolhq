@@ -2183,5 +2183,5 @@ values: NotSet, CreateProfile, CreateFirstActivity, PublishActivity, ValidateEma
 [begin]
 type: Enum
 name: SignUpType
-values: NotSet, NewAccountSignUp, TrialSignUp, ConvertingFromTrial, ChangePackage, ChangePackageDuringTrial, ChangeBillingPeriodType, 1099
+values: NotSet, NewAccountSignUp, TrialSignUp, ConvertingFromTrial, ChangePackage, ChangePackageDuringTrial, ChangeBillingPeriodType, Teacher1099
 [end]

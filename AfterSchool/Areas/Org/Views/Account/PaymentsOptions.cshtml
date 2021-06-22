@@ -6,8 +6,7 @@
     var isFullScreen = (bool)ViewBag.IsFullScreen;
     var supportEmail = (string)ViewBag.SupportEmail;
     var supportEmailHref = $"mailto:{supportEmail}";
-    var signupType = (SignUpType)ViewBag.SignupType;
-    var isTeacher1099Signup = signupType == SignUpType.Teacher1099;
+ 
 
     ViewBag.Title = account.Name;
 
@@ -85,16 +84,11 @@
                 }
                 else
                 {
-                    <div class="margin-20" @(isTeacher1099Signup ? "hidden" : "")>
+                    <div class="margin-20">
                         <h2 class="text-center">Please choose how you want us to pay you.</h2>
                     </div>
                     <div class="row">
                         <div class="col-xl-3 col-lg-2 visible-xl visible-lg"></div>
-                        @* Center Stripe connect card *@
-                        @if (isTeacher1099Signup)
-                        {
-                            <div class="col-xl-3 col-lg-2 visible-xl visible-lg"></div>
-                        }
                         <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
                             <table class="table table-bordered">
                                 <thead>
@@ -150,7 +144,7 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12" @(isTeacher1099Signup ? "hidden" : "")>
+                        <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
                             <table class="table table-bordered">
                                 <thead>
                                     <tr class="bg-success">
