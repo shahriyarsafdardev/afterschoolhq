@@ -1311,8 +1311,7 @@ namespace AfterSchoolLibraryTests.Tests
                 addactivity.Publish(accountOwner, msgs, dc);
 
                 // Act
-                var activityList=AccountService.LoadByActivitiesbyActivityGroupByAccountId(account, addactivity.ID.Value, msgs, dc);
-              
+                var activityList = AccountService.LoadByActivitiesbyActivityGroupByAccountId(account, addactivity.ID.Value, msgs, dc);              
 
                 // Assert
                 Assert.True(activityList.Count() == 1);

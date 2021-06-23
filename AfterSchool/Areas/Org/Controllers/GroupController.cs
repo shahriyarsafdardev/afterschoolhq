@@ -8,6 +8,7 @@ using AfterSchoolLibrary.Services;
 using AfterSchool.Models;
 using Hangfire;
 using System.Web.Script.Serialization;
+using System.Net;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -66,6 +67,10 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
+
+            if (id.IsNotGuid())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             var group = currentAccount.GetActivityGroup(id.ToGuid(), msgs);
             var registrations = group.GetRegistrations(msgs: msgs);
             var actions = SessionAction.LoadByActivityGroupId(
@@ -89,14 +94,17 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
-            var group = new ActivityGroup() {
+            var group = new ActivityGroup()
+            {
                 ID = new int?(),
                 RegistrationModeId = RegistrationMode.Register,
                 ActivityGroupTypeId = ActivityGroupType.Session
             };
 
-            if (id.IsGuid())
-                group = currentAccount.GetActivityGroup(id.ToGuid(), msgs);
+            if (id.IsNotGuid())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
+            group = currentAccount.GetActivityGroup(id.ToGuid(), msgs);
                         
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Forms = currentAccount.GetForms(msgs);
@@ -174,14 +182,18 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult EmailContent(string id, string landingpagetext, string registrationthankyouemail, string applicationthankyouemail, string noactivitiestext)
         {
             var currentAccount = SessionVariables.CurrentAccount;
-            var CurrentUser=SessionVariables.CurrentUser;
+            var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
+
+            if (id.IsNotGuid())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             var group = currentAccount.GetActivityGroup(id.ToGuid(), msgs);
 
-            group.AddOrUpdateGroupProperty(AccountPropertyType.LandingPageText, landingpagetext, CurrentUser.ID.Value, msgs);
-            group.AddOrUpdateGroupProperty(AccountPropertyType.RegistrationThankYouEmail, registrationthankyouemail, CurrentUser.ID.Value, msgs);
-            group.AddOrUpdateGroupProperty(AccountPropertyType.ApplicationThankYouEmail, applicationthankyouemail, CurrentUser.ID.Value, msgs);
-            group.AddOrUpdateGroupProperty(AccountPropertyType.NoActivitiesText, noactivitiestext, CurrentUser.ID.Value, msgs);
+            group.AddOrUpdateGroupProperty(AccountPropertyType.LandingPageText, landingpagetext, currentUser.ID.Value, msgs);
+            group.AddOrUpdateGroupProperty(AccountPropertyType.RegistrationThankYouEmail, registrationthankyouemail, currentUser.ID.Value, msgs);
+            group.AddOrUpdateGroupProperty(AccountPropertyType.ApplicationThankYouEmail, applicationthankyouemail, currentUser.ID.Value, msgs);
+            group.AddOrUpdateGroupProperty(AccountPropertyType.NoActivitiesText, noactivitiestext, currentUser.ID.Value, msgs);
 
             if (msgs.HasNoErrors())
                 msgs.Add($"{UILabel.ActivityGroupLabel(group.ActivityGroupTypeId)} Saved", MessageType.Success);
@@ -210,6 +222,10 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
+
+            if (id.IsNotGuid())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             var group = currentAccount.GetActivityGroup(id.ToGuid(), msgs); 
             
             PeriodViewBag(group, msgs);
@@ -223,8 +239,12 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult PeriodEdit(string id, string period, string opendate, string opentime, string closedate, string closetime)
         {
             var msgs = new SystemMessages();
-            var CurrentUser=SessionVariables.CurrentUser;
+            var currentUser = SessionVariables.CurrentUser;
             var account = SessionVariables.CurrentAccount;
+
+            if (id.IsNotGuid())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             var group = account.GetActivityGroup(id.ToGuid(), msgs);
             var regperiod = new RegistrationPeriod();
 
@@ -232,7 +252,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 regperiod = account.GetRegistrationPeriod(period.ToInteger(), msgs);
             else
             {
-                regperiod.CreatedBy = CurrentUser.ID.Value;
+                regperiod.CreatedBy = currentUser.ID.Value;
                 regperiod.CreateDate = DateTime.UtcNow;
                 regperiod.ActivityGroupId = group.ID;
                 regperiod.AccountId = account.ID;
@@ -240,7 +260,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             regperiod.StartDateTime = string.Format("{0} {1}", opendate, opentime).ToDateTime();
             regperiod.EndDateTime = string.Format("{0} {1}", closedate, closetime).ToDateTime();
-            regperiod.LastModifiedBy = CurrentUser.ID.Value;
+            regperiod.LastModifiedBy = currentUser.ID.Value;
             regperiod.LastModifiedDate = DateTime.UtcNow;
             msgs.AddRange(regperiod.Save());
 
@@ -254,9 +274,13 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs= new SystemMessages();
             var account = SessionVariables.CurrentAccount;
-            var AccountPackage= SessionVariables.AccountPackage;
+            var accountPackage = SessionVariables.AccountPackage;
             int pageNumber = 1;
             int recordsPerPage = 10;
+
+            if (id.IsNotGuid())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             var group = account.GetActivityGroup(id.ToGuid(), msgs);
             var isArchived = group.IsArchived;
 
@@ -277,9 +301,9 @@ namespace AfterSchool.Areas.Org.Controllers
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
             var finalActivities = activities.OrderBy(x => x.Name).ToList();
 
-            ViewBag.AccountPackage = AccountPackage;
+            ViewBag.AccountPackage = accountPackage;
             ViewBag.Activities = finalActivities;
-            ViewBag.NeedToUpgrade = finalActivities.Count >= AccountPackage.GetFeature(FeatureType.Activities, msgs).GetMaxValue();            
+            ViewBag.NeedToUpgrade = finalActivities.Count >= accountPackage.GetFeature(FeatureType.Activities, msgs).GetMaxValue();            
             ViewBag.HasArchivedActivities = group.GetActivityCount(null, true, false, null, msgs) > 0;
             ViewBag.Messages = msgs;
 
@@ -298,6 +322,10 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
+
+            if (id.IsNotGuid())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             var group = account.GetActivityGroup(id.ToGuid(), msgs);            
 
             int pageNumber = 1;
@@ -354,6 +382,10 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
+
+            if (id.IsNotGuid())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             var group = account.GetActivityGroup(id.ToGuid(), msgs);
             var loggedInUserId = SessionVariables.CurrentUser.ID.Value;
             
@@ -369,7 +401,11 @@ namespace AfterSchool.Areas.Org.Controllers
             var account = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
             var activityIds = new List<int>();
-            var questionId = new int?();           
+            var questionId = new int?();
+
+            if (id.IsNotGuid())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             var group = account.GetActivityGroup(id.ToGuid(),msgs);
             var participationObjectType = ParticipationObjectType.Activity;
 
@@ -408,6 +444,10 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs= new SystemMessages();
             var account = SessionVariables.CurrentAccount;
+
+            if (id.IsNotGuid())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             var group = account.GetActivityGroup(id.ToGuid(), msgs);
             int pageNumber = 1;
             int recordsPerPage = 10;
@@ -447,6 +487,10 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs= new SystemMessages();
             var account = SessionVariables.CurrentAccount;
+            
+            if (id.IsNotGuid())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             var group = account.GetActivityGroup(id.ToGuid(), msgs);
 
             int pageNumber = 1;
@@ -479,6 +523,10 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
+
+            if (id.IsNotGuid())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             var am = account.GetActivityMessage(id.ToGuid(), msgs);            
             ViewBag.Registrants = am.GetActivityMessageRegistrants(msgs);
             ViewBag.Messages = msgs;
@@ -490,6 +538,10 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
+
+            if (id.IsNotGuid())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             var group = account.GetActivityGroup(id.ToGuid(), msgs);
             
             ViewBag.Registrants = group.GetRegistrants(msgs)
@@ -507,7 +559,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult MessageAdd(string id, string deliveryMethod, string subject, string body, string sendtostaff)
         {
             var account = SessionVariables.CurrentAccount;
-            var Currentuser = SessionVariables.CurrentUser;
+            var currentuser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
 
             if (subject.IsEmpty())
@@ -516,6 +568,10 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add("Body is required", MessageType.UserError);
 
             ActivityMessage am = null;
+
+            if (id.IsNotGuid())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             var group = account.GetActivityGroup(id.ToGuid(), msgs);
 
             if (msgs.HasNoErrors())
@@ -530,10 +586,10 @@ namespace AfterSchool.Areas.Org.Controllers
                         body, 
                         registrantIds,
                         sendtostaff.IsBoolean(),
-                        Currentuser.ID.Value, 
+                        currentuser.ID.Value, 
                         msgs);
 
-                BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, Currentuser.ID.Value, msgs, null));
+                BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, currentuser.ID.Value, msgs, null));
             }            
 
             if (msgs.HasNoErrors())
@@ -553,10 +609,11 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult MessagesResend(string id)
         {
             var account = SessionVariables.CurrentAccount;
-            if (account.IsEmpty())
+            if (account.IsEmpty() || id.IsNotGuid())
                 return HttpNotFound();
 
             var msgs = new SystemMessages();
+
             var am = account.GetActivityMessage(id.ToGuid(), msgs);
             var group = am.GetActivityGroup(msgs);
 
@@ -580,6 +637,9 @@ namespace AfterSchool.Areas.Org.Controllers
             var account = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
 
+            if (id.IsNotGuid())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             var group = account.GetActivityGroup(id.ToGuid(), msgs);
             ViewBag.Messages = msgs;
             ViewBag.Account = account;
@@ -590,11 +650,15 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Publish(string id)
         {
             var account = SessionVariables.CurrentAccount;
-            var Currentuser = SessionVariables.CurrentUser;
+            var currentuser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
+
+            if (id.IsNotGuid())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             var group = account.GetActivityGroup(id.ToGuid(), msgs);
 
-            msgs.AddRange(group.SetIsPublished(true, Currentuser.ID.Value));
+            msgs.AddRange(group.SetIsPublished(true, currentuser.ID.Value));
 
             if (msgs.HasNoErrors())
             {
@@ -603,7 +667,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 // LOG: CurrentUSer published ActivityGroup ActivityGroupName from AccountAccountName's Profile
                 SessionVariables.WebSession.LogActivity(
                     account: account,
-                    actor: Currentuser,
+                    actor: currentuser,
                     actionType: WebSessionActionType.Published,
                     objectId: group.ID.Value,
                     objectType: ObjectType.ActivityGroup,
@@ -621,11 +685,15 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Unpublish(string id, string qg)
         {
             var currentAccount = SessionVariables.CurrentAccount;
-            var Currentuser = SessionVariables.CurrentUser;
+            var currentuser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
+
+            if (id.IsNotGuid())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             var group = currentAccount.GetActivityGroup(id.ToGuid(), msgs);
 
-            msgs.AddRange(group.SetIsPublished(false, Currentuser.ID.Value));
+            msgs.AddRange(group.SetIsPublished(false, currentuser.ID.Value));
 
             if (msgs.HasNoErrors())
             {
@@ -634,7 +702,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 // LOG: CurrentUSer unpublished ActivityGroup ActivityGroupName from AccountAccountName's Profile
                 SessionVariables.WebSession.LogActivity(
                     account: currentAccount,
-                    actor: Currentuser,
+                    actor: currentuser,
                     actionType: WebSessionActionType.Unpublished,
                     objectId: group.ID.Value,
                     objectType: ObjectType.ActivityGroup,
@@ -653,6 +721,10 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
+
+            if (id.IsNotGuid())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             var group = currentAccount.GetActivityGroup(id.ToGuid(), msgs);
 
             if (group.IsNotEmpty())
@@ -674,6 +746,10 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
+
+            if (id.IsNotGuid())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             var group = currentAccount.GetActivityGroup(id.ToGuid(), msgs);
 
             if (group.IsNotEmpty())
@@ -695,6 +771,10 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
+
+            if (id.IsNotGuid())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             var group = currentAccount.GetActivityGroup(id.ToGuid(), msgs);
 
             if (group.IsNotEmpty())
@@ -716,6 +796,10 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
+
+            if (id.IsNotGuid())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             var group = currentAccount.GetActivityGroup(id.ToGuid(), msgs);
           
             ViewBag.Schedules = group.GetSchedules(msgs);
@@ -731,7 +815,11 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
-            var group = currentAccount.GetActivityGroup(id.ToGuid(), msgs)
+            
+            if (id.IsNotGuid() && groupnamecopy.IsNotEmpty())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
+            var group = currentAccount.GetActivityGroup(id.ToGuid(), msgs)?
                 .Copy(groupnamecopy, true, SessionVariables.CurrentUser.ID.Value, msgs);
 
             ViewBag.Messages = msgs;
@@ -769,6 +857,10 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
+
+            if (id.IsNotGuid())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             var session = currentAccount.GetActivityGroup(id.ToGuid(), msgs);
             var form = session.GetForm(msgs);
             var questions = GetAddRegistrationQuestions(form, msgs).OrderBy(question => question.DisplayOrder).ToList();
@@ -785,6 +877,10 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
+
+            if (id.IsNotGuid())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             var session = currentAccount.GetActivityGroup(id.ToGuid(), msgs);
             var form = session.GetForm(msgs);
             var questions = GetAddRegistrationQuestions(form, msgs);
@@ -849,6 +945,10 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
+
+            if (id.IsNotGuid())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             var group = currentAccount.GetActivityGroup(id.ToGuid(), msgs);
             var nextStep = 1;
 
@@ -892,6 +992,10 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
+
+            if (id.IsNotGuid())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             var group = currentAccount.GetActivityGroup(id.ToGuid(), msgs);
 
             if (group.RegistrationModeId == RegistrationMode.Apply)
@@ -915,6 +1019,10 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
+
+            if (id.IsNotGuid())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             var group = currentAccount.GetActivityGroup(id.ToGuid(), msgs);
             var nextStep = 1;
             if (step.IsNumber())
@@ -1183,6 +1291,10 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
+
+            if (id.IsNotGuid())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             var league = currentAccount.GetActivityGroup(id.ToGuid(), msgs);
 
             ViewBag.Messages = msgs;
@@ -1252,6 +1364,10 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
+
+            if (id.IsNotGuid())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             var league = currentAccount.GetActivityGroup(id.ToGuid(), msgs);
             LoadEditCostViewBag(league, msgs);
             return View(league);
@@ -1272,6 +1388,10 @@ namespace AfterSchool.Areas.Org.Controllers
                 { "paymentplanperiodnumber", paymentplanperiodnumber },
                 { "paymentplanpaymentstarttype", paymentplanpaymentstarttype }
             };
+
+            if (id.IsEmpty())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             var league = SaveLeague(id, values, msgs);
 
             ViewBag.Messages = msgs;
@@ -1303,8 +1423,12 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
-            var league = currentAccount.GetActivityGroup(id.ToGuid(), msgs);
 
+            if (!id.IsGuid())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
+            var league = currentAccount.GetActivityGroup(id.ToGuid(), msgs);
+            
             ViewBag.Messages = msgs;
             ViewBag.Account = currentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
@@ -1335,11 +1459,16 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
+
+            if (id.IsNotGuid())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             var values = new Dictionary<string, object>()
             {
                 { "registrationthankyouemail", registrationthankyouemail },
                 { "applicationthankyouemail", applicationthankyouemail }
             };
+
             var league = SaveLeague(id, values, msgs);
 
             ViewBag.Messages = msgs;
@@ -1373,15 +1502,27 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
-            var league = currentAccount.GetActivityGroup(id.ToGuid(), msgs);
-            Activity activity = null;
-            var otherActivities = currentAccount.LoadByActivitiesbyActivityGroupByAccountId(league.ID.Value, msgs);
 
-            otherActivities.ForEach((oa) =>
+            if (id.IsNotGuid())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
+            var league = currentAccount.GetActivityGroup(id.ToGuid(), msgs);
+
+            if (league.IsEmpty())
+                msgs.Add($"League is required", MessageType.UserError);
+
+            Activity activity = null;
+
+            if (msgs.HasNoErrors())
             {
-                if (oa.Name.IsSameAs(teamname))
-                    msgs.Add("Team name already exists in this League, please use a different name", MessageType.UserError);
-            });
+                var otherActivities = currentAccount.LoadByActivitiesbyActivityGroupByAccountId(league.ID.Value, msgs);
+
+                otherActivities.ForEach((oa) =>
+                {
+                    if (oa.Name.IsSameAs(teamname))
+                        msgs.Add("Team name already exists in this League, please use a different name", MessageType.UserError);
+                });
+            }
 
             if (msgs.HasNoErrors())
             {
