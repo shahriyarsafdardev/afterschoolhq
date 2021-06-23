@@ -1181,6 +1181,10 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
+
+            if (id.IsNotGuid())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             var league = currentAccount.GetActivityGroup(id.ToGuid(), msgs);
 
             ViewBag.Messages = msgs;
@@ -1193,10 +1197,13 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [HttpPost]
         public ActionResult EditRestrictions(string id, string alloworganization, string agerestrictions, string agestart, string ageend, string graderestrictions, string mingrade, string maxgrade, string genderrestrictions, string requiresparentalconsent, string cmd)
-        {
-           
+        {           
             var msgs = new SystemMessages();
             var gradeIds = new List<int>();
+
+            if (id.IsNotGuid())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             var grades = GradeLevel.Load();
 
             grades.ForEach(grade => {
@@ -1243,6 +1250,10 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
+            
+            if (id.IsNotGuid())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             var league = currentAccount.GetActivityGroup(id.ToGuid(), msgs);
 
             ViewBag.Messages = msgs;
@@ -1258,6 +1269,10 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult EditContact(string id, string contactname, string contactphone, string contactemail, string cmd)
         {
             var msgs = new SystemMessages();
+            
+            if (id.IsNotGuid())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             var values = new Dictionary<string, object>()
             {
                 { "contactname", contactname},
@@ -1310,6 +1325,9 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult EditDetails(string id, string description, string details, string cmd)
         {
             var msgs = new SystemMessages();
+
+            if (id.IsNotGuid())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
             if (details.IsEmpty())
                 msgs.Add($"{UILabel.ActivityGroupLabel(ActivityGroupType.League)} Details is required", MessageType.UserError);
