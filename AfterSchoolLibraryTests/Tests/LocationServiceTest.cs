@@ -331,5 +331,23 @@ namespace AfterSchoolLibraryTests.Tests
                 Assert.False(false, ex.Message);
             }
         }
+
+        [Fact(DisplayName = "GetHostAccount Empty Location Test")]
+        public void GetHostAccountWithEmptyLocationTest()
+        {
+            try
+            {
+                // Arrange & Act
+                var hostAccount = LocationService.GetHostAccount(location: null, msgs, dc);
+
+                // Assert
+                Assert.Null(hostAccount);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
     }
 }
