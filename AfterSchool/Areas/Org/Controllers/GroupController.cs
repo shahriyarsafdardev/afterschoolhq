@@ -1424,7 +1424,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
 
-            if (!id.IsGuid())
+            if (id.IsNotGuid())
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
             var league = currentAccount.GetActivityGroup(id.ToGuid(), msgs);
