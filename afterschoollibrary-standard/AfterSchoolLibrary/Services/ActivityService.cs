@@ -1896,7 +1896,7 @@ namespace AfterSchoolLibrary.Services
             if (activityInstance?.ActivityScheduleId == activity.ActivityScheduleId)
                 return true;
 
-            msgs.Add("Invalid record error", MessageType.UserError);
+            msgs.Add("Invalid record error", MessageType.Error);
             return false;
         }
 
