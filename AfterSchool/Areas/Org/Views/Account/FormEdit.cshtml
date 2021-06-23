@@ -129,132 +129,143 @@
                                         <tbody>
                                             @foreach (var question in questions)
                                             {
-                                                <tr>
-                                                    <td>@question.DisplayOrder</td>
-                                                    <td>
-                                                        @if (question.QuestionTypeId != QuestionType.TextBlock)
+                                            <tr class="questionRow">                                                
+                                                <td>
+                                                    <label id="sortlabel-@question.ID">@question.DisplayOrder</label>
+                                                    <input type="hidden"
+                                                           id="sortorder-@question.ID"
+                                                           name="sortId-@question.ID" class="hfSortOrderId"
+                                                           value=" @question.DisplayOrder" />
+                                                    <input type="hidden"
+                                                           id="hfQuestionId"
+                                                           name="questionid-@question.ID"
+                                                           class="displayOrder"
+                                                           value=" @question.ID" />
+                                                </td>
+                                                <td>
+                                                    @if (question.QuestionTypeId != QuestionType.TextBlock)
+                                                    {
+                                                        if (question.QuestionDataTypeId == QuestionDataType.NotSet)
                                                         {
-                                                            if (question.QuestionDataTypeId == QuestionDataType.NotSet)
-                                                            {
-                                                                <input type="text"
-                                                                       id="text-@question.ID"
-                                                                       name="text-@question.ID"
-                                                                       value="@question.Text"
-                                                                       required
-                                                                       class="form-control col-sm-3"
-                                                                       onfocus="this.select()"
-                                                                       data-tooltip-id="text-@question.ID" />
+                                                            <input type="text"
+                                                                   id="text-@question.ID"
+                                                                   name="text-@question.ID"
+                                                                   value="@question.Text"
+                                                                   required
+                                                                   class="form-control col-sm-3"
+                                                                   onfocus="this.select()"
+                                                                   data-tooltip-id="text-@question.ID" />
 
-                                                            }
-                                                            else if (question.IsLocked)
-                                                            {
-                                                                <i class="s7-lock icon-medium"></i> @question.Text
-                                                            }
-                                                            else
-                                                            {
-                                                                @question.Text
-                                                            }
+                                                        }
+                                                        else if (question.IsLocked)
+                                                        {
+                                                            <i class="s7-lock icon-medium"></i> @question.Text
                                                         }
                                                         else
                                                         {
-                                                            <textarea class="form-control" id="description-@question.ID" name="description-@question.ID">@question.Description</textarea>
-
+                                                            @question.Text
                                                         }
-                                                    </td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <textarea class="form-control" id="description-@question.ID" name="description-@question.ID">@question.Description</textarea>
 
-                                                    <td>
-                                                        @if (!question.IsLocked && question.QuestionDataTypeId == QuestionDataType.NotSet && question.QuestionTypeId != QuestionType.TextBlock)
-                                                        {
-                                                            <select class="form-control questiontype-select"
-                                                                    id="questiontype-@question.ID"
-                                                                    name="questiontype-@question.ID"
-                                                                    onchange="showEditButton(@question.ID)"
-                                                                    @(question.QuestionDataTypeId != QuestionDataType.NotSet ? "disabled=\"disabled\"" : "")>
+                                                    }
+                                                </td>
 
-                                                                @foreach (var type in Enum.GetValues(typeof(QuestionType)).Cast<QuestionType>().Where(questionType => !typesUserCannotAdd.Contains(questionType)))
-                                                                {
-                                                                    <option value="@((int)type)" @(type == question.QuestionTypeId ? "selected=\"selected\"" : "")>
-                                                                        @type.ToString().SplitByUpperCase()
-                                                                    </option>
-                                                                }
-                                                            </select>
-                                                        }
-                                                        else if (question.QuestionTypeId == QuestionType.TextBlock)
-                                                        {
-                                                            <input type="hidden"
-                                                                   value="@((int)QuestionType.TextBlock)"
-                                                                   id="questiontype-@question.ID"
-                                                                   name="questiontype-@question.ID" />
-                                                        }
-                                                    </td>
-                                                    <td>
-                                                        <button type="button"
-                                                                class="btn btn-default md-trigger btn-space hide"
-                                                                data-modal="modal-options"
-                                                                onclick="setOptions(@question.ID)"
-                                                                id="btn-setoptions-@question.ID">
-                                                            Edit Options
-                                                        </button>
+                                                <td>
+                                                    @if (!question.IsLocked && question.QuestionDataTypeId == QuestionDataType.NotSet && question.QuestionTypeId != QuestionType.TextBlock)
+                                                    {
+                                                        <select class="form-control questiontype-select"
+                                                                id="questiontype-@question.ID"
+                                                                name="questiontype-@question.ID"
+                                                                onchange="showEditButton(@question.ID)"
+                                                                @(question.QuestionDataTypeId != QuestionDataType.NotSet ? "disabled=\"disabled\"" : "")>
+
+                                                            @foreach (var type in Enum.GetValues(typeof(QuestionType)).Cast<QuestionType>().Where(questionType => !typesUserCannotAdd.Contains(questionType)))
+                                                            {
+                                                                <option value="@((int)type)" @(type == question.QuestionTypeId ? "selected=\"selected\"" : "")>
+                                                                    @type.ToString().SplitByUpperCase()
+                                                                </option>
+                                                            }
+                                                        </select>
+                                                    }
+                                                    else if (question.QuestionTypeId == QuestionType.TextBlock)
+                                                    {
                                                         <input type="hidden"
-                                                               id="options-text-@question.ID"
-                                                               name="options-text-@question.ID"
-                                                               value="@question.Options" />
+                                                               value="@((int)QuestionType.TextBlock)"
+                                                               id="questiontype-@question.ID"
+                                                               name="questiontype-@question.ID" />
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <button type="button"
+                                                            class="btn btn-default md-trigger btn-space hide"
+                                                            data-modal="modal-options"
+                                                            onclick="setOptions(@question.ID)"
+                                                            id="btn-setoptions-@question.ID">
+                                                        Edit Options
+                                                    </button>
+                                                    <input type="hidden"
+                                                           id="options-text-@question.ID"
+                                                           name="options-text-@question.ID"
+                                                           value="@question.Options" />
 
-                                                        <button type="button"
-                                                                class="btn btn-default md-trigger btn-space hide"
-                                                                data-modal="modal-link"
-                                                                onclick="setLink(@question.ID)"
-                                                                id="btn-setlink-@question.ID">
-                                                            Edit Link
-                                                        </button>
-                                                        <input type="hidden"
-                                                               id="link-text-@question.ID"
-                                                               name="link-text-@question.ID"
-                                                               value="@question.Link" />
-                                                        <button type="button"
-                                                                class="btn btn-default md-trigger btn-space hide"
-                                                                data-modal="modal-rating"
-                                                                onclick="setRating(@question.ID)"
-                                                                id="btn-setratings-@question.ID">
-                                                            Edit Ratings
-                                                        </button>
-                                                        <input type="hidden"
-                                                               id="rating-text-@question.ID"
-                                                               name="rating-text-@question.ID"
-                                                               value="@question.Options" />
-                                                    </td>
+                                                    <button type="button"
+                                                            class="btn btn-default md-trigger btn-space hide"
+                                                            data-modal="modal-link"
+                                                            onclick="setLink(@question.ID)"
+                                                            id="btn-setlink-@question.ID">
+                                                        Edit Link
+                                                    </button>
+                                                    <input type="hidden"
+                                                           id="link-text-@question.ID"
+                                                           name="link-text-@question.ID"
+                                                           value="@question.Link" />
+                                                    <button type="button"
+                                                            class="btn btn-default md-trigger btn-space hide"
+                                                            data-modal="modal-rating"
+                                                            onclick="setRating(@question.ID)"
+                                                            id="btn-setratings-@question.ID">
+                                                        Edit Ratings
+                                                    </button>
+                                                    <input type="hidden"
+                                                           id="rating-text-@question.ID"
+                                                           name="rating-text-@question.ID"
+                                                           value="@question.Options" />
+                                                </td>
 
-                                                    <td>
-                                                        @{Html.RenderPartial(
-                                                                      "~/Views/Shared/_SwitchButton.cshtml",
-                                                                      question.IsActive,
-                                                                      new ViewDataDictionary()
-                                                                      {
+                                                <td>
+                                                    @{Html.RenderPartial(
+                                                                    "~/Views/Shared/_SwitchButton.cshtml",
+                                                                    question.IsActive,
+                                                                    new ViewDataDictionary()
+                                                                    {
                                                                             { "checkboxname", "active-" + question.ID },
                                                                             { "checkboxid", "active-" + question.ID },
                                                                             { "disabled", question.IsLocked },
                                                                             { "classname", "question-isactive" }
-                          });}
-                                                    </td>
-                                                    <td>
-                                                        @if (question.QuestionTypeId != QuestionType.TextBlock)
-                                                        {
-                                                            Html.RenderPartial(
-                                                                   "~/Views/Shared/_SwitchButton.cshtml",
-                                                                   question.IsRequired,
-                                                                   new ViewDataDictionary()
-                                                                   {
+});}
+                                                </td>
+                                                <td>
+                                                    @if (question.QuestionTypeId != QuestionType.TextBlock)
+                                                    {
+                                                        Html.RenderPartial(
+                                                               "~/Views/Shared/_SwitchButton.cshtml",
+                                                               question.IsRequired,
+                                                               new ViewDataDictionary()
+                                                               {
                                                                             { "checkboxname", "required-" + question.ID },
                                                                             { "checkboxid", "required-" + question.ID },
                                                                             { "disabled", question.IsLocked },
                                                                             { "classname", "question-isrequired" }
-                           });
-                                                        }
-                                                    </td>
-                                                    <td>
-                                                        <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteQuestion('@question.Text', '@Url.Action("delete","Account", new { id = @question.ID.ToString()})')"><span class="text-danger"><i class="s7-trash"></i></span></button>
-                                                    </td>
-                                                </tr>
+});
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteQuestion('@question.Text', '@Url.Action("delete","Account", new { id = @question.ID.ToString()})')"><span class="text-danger"><i class="s7-trash"></i></span></button>
+                                                </td>
+                                            </tr>
                                             }
 
                                             @if (questionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.NotSet || true)
@@ -466,6 +477,11 @@
     function getLabelTextbox() {
         return `<input type="text" id="text-${getQuestionCount()}" name="new-text-${getQuestionCount()}" value="" required class="form-control col-sm-3" onfocus="this.select()" data-tooltip-id="text-${getQuestionCount()}" placeholder="Enter your question" />`;
     }
+    function getSortOrder() {
+
+        var rowCount = $('#question-table tr').length;
+        return ` <label id="sortlabel-${getQuestionCount()}">${rowCount}</label><input type="hidden" id="hfSortOrderId" name="new-sort-${getQuestionCount()}" value=" ${rowCount} " />`;
+    }
 
     function getShowCheckbox() {
         return `@{Html.RenderPartial(
@@ -502,7 +518,7 @@
     }
 
     function getOptionsLinks() {
-        return `<button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-options" onclick="setOptions(${getQuestionCount()})" id="btn-setoptions-${getQuestionCount()}">Edit Options</button><input type="hidden" id="options-text-${getQuestionCount()}" name="new-options-text-${getQuestionCount()}" value="" /><button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-link" onclick="setLink(${getQuestionCount()})" id="btn-setlink-${getQuestionCount()}">Add/Edit Link</button><input type="hidden" id="link-text-${getQuestionCount()}" name="new-link-text-${getQuestionCount()}" value="" /><button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-rating" onclick="setRating(${getQuestionCount()})" id="btn-setratings-${getQuestionCount()}">Set Rating</button>`;
+        return `<button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-options" onclick="setOptions(${getQuestionCount()})" id="btn-setoptions-${getQuestionCount()}">Edit Options</button><input type="hidden" id="options-text-${getQuestionCount()}" name="new-options-text-${getQuestionCount()}" value="" /><button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-link" onclick="setLink(${getQuestionCount()})" id="btn-setlink-${getQuestionCount()}">Add/Edit Link</button><input type="hidden" id="link-text-${getQuestionCount()}" name="new-link-text-${getQuestionCount()}" value="" /><button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-rating" onclick="setRating(${getQuestionCount()})" id="btn-setratings-${getQuestionCount()}">Set Rating</button><input type="hidden" id="sortId-${getQuestionCount()}" name="sortId-${getQuestionCount()}" value="" />`;
     }
 
     function getDescription() {
@@ -517,7 +533,7 @@
         $('#question-table')
             .find('tr')
             .last()
-            .before(`<tr><td>${getLabelTextbox()}</td><td>${getQuestionTypeList()}</td><td>${getOptionsLinks()}</td><td>${getShowCheckbox()}</td><td>${getRequiredCheckbox()}</td></tr>`);
+            .before(`<tr><td>${getSortOrder()}</td><td>${getLabelTextbox()}</td><td>${getQuestionTypeList()}</td><td>${getOptionsLinks()}</td><td>${getShowCheckbox()}</td><td>${getRequiredCheckbox()}</td></tr>`);
 
         incrementQuestionCount();
         $('.md-trigger').modalEffects();
@@ -664,6 +680,7 @@
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/jquery-ui.min.js"></script>
 <script type="text/javascript">
     $(function () {
+        var selectQuestionId, oldPosition,newPosition;
         $("#question-table").sortable({
             items: 'tr:not(tr:first-child)',
             cursor: 'pointer',
@@ -671,13 +688,46 @@
             dropOnEmpty: false,
             start: function (e, ui) {
                 ui.item.addClass("selected");
+
+                var questionId = $(ui.item).find("#hfQuestionId").val();
+                oldPosition = ui.item.index();
+                console.log("Start Selected Question ID", questionId, oldPosition);
             },
-            stop: function () {
+            stop: function (e, ui) {
                 var inputs = $('input.currentposition');
                 var nbElems = inputs.length;
                 $('input.currentposition').each(function (idx) {
                     $(this).val(nbElems - idx);
                 });
+                //console.log('stop: ', ui.item);
+                var questionId = $(ui.item).find("#hfQuestionId").val();
+                newPosition = ui.item.index();
+                currentSortingPosition = parseInt($("#sortlabel-" + questionId).text());
+
+                currentSortingPosition = currentSortingPosition + (newPosition - oldPosition);
+                console.log("Stop Selected Question ID", questionId, newPosition);
+                $(ui.item).find("#hfSortOrderId").val(currentSortingPosition);
+                $("#sortlabel-" + questionId).text(currentSortingPosition);
+                currentSortingPosition = $("#sortlabel-" + questionId).text();
+                // iterate over next rows and increase their sorting value with 1 more
+                $("tr.questionRow").each(function (i, tr) {
+                    $this = $(this);
+                    if (i > ui.item.index()) {
+                        console.log("QuestionID", $this.find("#hfQuestionId"));
+                        var updatedQuestionId = $this.find("#hfQuestionId").val();                        
+                        
+                        var displayOrder = $this.find("#hfSortOrderId").val();
+                        var increment = ++displayOrder;
+                        $(this).find("#hfSortOrderId").val(increment);
+                        console.log("old value",$("#sortlabel-" + updatedQuestionId).text());
+                        $("#sortlabel-" + updatedQuestionId).text(increment);
+                        
+                        console.log("UpdateQuestionId: " + updatedQuestionId, "displayOrder: " + increment);
+                    }
+                });
+            },
+            update: function (e, ui) {
+                //console.log('update: ' + e);
             }
         });
     });

@@ -878,7 +878,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                         question.Description = Request.Params[$"description-{question.ID}"];
                                         question.Options = Request.Params[$"options-text-{question.ID}"];
                                         question.Link = Request.Params[$"link-text-{question.ID}"];
-
+                                        question.DisplayOrder = Request.Params[$"sortId-{question.ID}"].ToInteger();
                                         question.QuestionTypeId = (QuestionType)Request.Params[$"questiontype-{question.ID}"].ToInteger();
                                     }
 
@@ -902,7 +902,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                         LastModifiedDate = DateTime.UtcNow,
                                         CreatedBy = currentUser.ID,
                                         LastModifiedBy = currentUser.ID,
-                                        DisplayOrder = questionGroup.GetQuestionCount(amsgs, adc) + 1,
+                                        DisplayOrder = Request.Params[string.Format("new-sort-{0}", i)].ToInteger(),//questionGroup.GetQuestionCount(amsgs, adc) + 1,
                                         FormQuestionGroupId = questionGroup.ID,
                                         IsTemplate = false,
                                         QuestionDataTypeId = QuestionDataType.NotSet,
@@ -916,7 +916,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                     };
                                     amsgs.AddRange(question.Save(adc));
                                 }
-                            }
+                            }                            
                         }
                     },
                     onSuccess: (SystemMessages smsgs) =>
