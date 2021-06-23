@@ -53,6 +53,19 @@ namespace AfterSchoolLibraryTests.Factories
             return obj;
         }
 
+         public static ActivityGroup Create(Account account, ActivityGroupType activityGroupType,decimal? cost, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var obj = new ActivityGroup()
+            {
+                Name = "Test Activity Group",
+                AccountId = account.ID,
+                ActivityGroupTypeId = activityGroupType,
+                Cost = cost,
+            };
+            msgs.AddRange(obj.Save(dc: dc));
+            return obj;
+        }
+
         public static ActivityGroup CreateWithSchedule(Account account, ActivityGroupType activityGroupType, SystemMessages msgs, DatabaseConnection dc)
         {
             var gradeLevels = GradeLevel.Load(msgs: msgs, dc: dc);

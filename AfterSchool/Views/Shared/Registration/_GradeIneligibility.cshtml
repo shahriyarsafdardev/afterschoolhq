@@ -9,7 +9,7 @@
         <div class="modal-body form">
 
             <p>
-                <strong><span id="ineligible-student"></span></strong> is ineligible for the following @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower() due to being too young or too old. Please remove ineligible @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower() to continue:
+                <strong><span id="ineligible-student"></span></strong> is ineligible for the following @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower() due to being too young or too old. Please remove ineligible @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower() or update child info to continue:
             </p>
 
             <div id="ineligibile-activities">
@@ -18,9 +18,10 @@
 
         </div>
 
-        <div class="modal-footer">
+        <div class="modal-footer" id="ineligible-modal-footer">
             <button type="button" data-dismiss="modal" class="btn md-close" onclick="closeEligibilityModal(false)">Select Different Child</button>
             <button type="button" data-dismiss="modal" class="btn btn-primary md-close" onclick="closeEligibilityModal(true)">Change Activity Selection(s)</button>
+            <button type="button" id="update-child-info" data-dismiss="modal" class="btn btn-primary md-close">Update Child Info</button>
         </div>
     </div>
 </div>
@@ -37,7 +38,6 @@
     }
 
     function checkEligibility(registrantUid, continueUrl, statusUpdateId) {
-
         var origStatusText = "";
 
         if (statusUpdateId != null) {
@@ -48,7 +48,7 @@
         $.get(
             '@Url.Action("checkeligibility", "services")?uid=' + registrantUid,
             function (data) {
-                
+
                 $('#ineligibile-activities').html('');
 
                 if (data && data.status == 'ok') {
@@ -66,8 +66,10 @@
                             $('#' + statusUpdateId).html(origStatusText);
                         }
 
+                        $('#update-child-info').click({ registrantUid }, redirectToChildProfile)
+
                     } else {
-                        
+
                         if (statusUpdateId != null) {
                             $('#' + statusUpdateId).html('Registering...');
                         }
@@ -83,5 +85,12 @@
 
             }
         )
+    }
+
+    function redirectToChildProfile(event) {
+        console.log("registrantUid", event.data.registrantUid);
+        var action = '@Url.Action("editstudentpersonal", "Family", new { Area = "user", id = "registrantUid", returnToCheckout = "1", forceupdategrade = "1" })'.replace("registrantUid", event.data.registrantUid);
+        console.log(action);
+        location.href = action;
     }
 </script>

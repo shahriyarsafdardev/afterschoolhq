@@ -44,10 +44,14 @@
         SessionVariables.CurrentUser.IsNotEmpty() &&
         (SessionVariables.CurrentAccount.ID == Model.OwnerAccount.ID) &&
         (SessionVariables.CurrentUser.HasAccessTo(Model.OwnerAccount));
-
-    var activity = Model.GetActivity();
+    
 }
-
+<style>
+    .disabled {
+        cursor:not-allowed !important;
+        pointer-events: unset  !important;
+    }
+</style>
 @{
     Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", account, new ViewDataDictionary() {
         { "LoginReturnUrl", Model.GetHomePageUrl() },
@@ -275,21 +279,21 @@
 
 @if (isAccountAndLoggedInUserIsOwner)
 {
-    <div id="footer-activity" class="activity-footer text-center hide">
-        <span class="span-upgrade-modal-close" onclick="return hideActivityRibbon()">X</span>
-        @if (activity.IsPublished)
-        {
-            <button class="btn btn-default btn-activity-footer">Share</button>
-            <a href="@Url.Action("editsetup", "activity", new { id = Model.Uid, area = "org" })" class="btn btn-default btn-activity-footer">Edit Activity</a>
-        }
-        else
-        {
-            <button class="btn btn-default btn-activity-footer" disabled>Share</button>
-            <a href="@Url.Action("editsetup", "activity", new { id = Model.Uid, area = "org" })" class="btn btn-default btn-activity-footer">Return to Edit</a>
-            <a href="@Url.Action("publish", "activity", new { id = Model.Uid, isFromActivityHome = true, area = "org" })" class="btn btn-default btn-activity-footer">Publish</a>
-        }
+<div id="footer-activity" class="activity-footer text-center hide">
+    <span class="span-upgrade-modal-close" onclick="return hideActivityRibbon()">X</span>
+    @if (Model.IsPublished)
+    {
+        <button class="btn btn-default btn-activity-footer">Share</button>
+        <a href="@Url.Action("editsetup", "activity", new { id = Model.Uid, area = "org" })" class="btn btn-default btn-activity-footer">Edit Activity</a>
+    }
+    else
+    {
+        <button class="btn btn-default btn-activity-footer" disabled>Share</button>
+        <a href="@Url.Action("editsetup", "activity", new { id = Model.Uid, area = "org" })" class="btn btn-default btn-activity-footer">Return to Edit</a>
+        <a href="@Url.Action("publish", "activity", new { id = Model.Uid, isFromActivityHome = true, area = "org" })" class="btn btn-default btn-activity-footer">Publish</a>
+    }
 
-    </div>
+</div>
 
     Html.RenderPartial("~/Views/Shared/_GettingStartedModal.cshtml", Model.OwnerAccount, new ViewDataDictionary() { { "ActivityUid", Model.Uid } });
 }

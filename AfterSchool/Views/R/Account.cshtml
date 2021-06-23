@@ -30,7 +30,9 @@
     var specialNeedsOffered = accountProperties.Where(item => item.AccountPropertyTypeId.In(specialNeedsTypes));
     var showPhotoGallery = photos.Any() || isInEditMode;
     var isOnboadingCompleted = AccountService.IsOnboardingCompleted(SessionVariables.CurrentAccount, msgs);
+    var currentLevel = AccountService.OnboardingCompletionStatus(Model);
     var isStripeIntegrated = TempData["IsStripeIntegrated"] != null;
+    var firstActivity = Model.GetActivities(msgs)?.FirstOrDefault();
     var isAccountAndLoggedInUserIsOwner = SessionVariables.CurrentAccount.IsNotEmpty() &&
         SessionVariables.CurrentUser.IsNotEmpty() &&
         (SessionVariables.CurrentAccount.ID == Model.ID) &&
@@ -547,17 +549,51 @@
     </div>
 
     <div id="modal-payment-confirmation-accountView" class="hide">
-        @{ Html.RenderPartial("~/Views/Shared/_ModalPaymentConfirmation.cshtml", Model, new ViewDataDictionary() { { "ActivityUid", Model.Uid } }); };
+        @{ Html.RenderPartial("~/Views/Shared/_ModalPaymentConfirmation.cshtml", Model, new ViewDataDictionary() { { "ActivityUid", firstActivity?.Uid } }); };
+    </div>
+
+    <div id="modal-acceptpayment-done" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content modal-min-width modal-box">
+                <div class="modal-body account-getting-started-padding">
+                    <div onclick="return $('#modal-acceptpayment-done').modal('hide');">
+                        <a class="close close-icon-position">
+                            <span aria-hidden="true">&times;</span>
+                        </a>
+                    </div>
+
+                    <div class="text-center">
+                        <img src="~/img/email-symbol.png" />
+                    </div>
+                    <div id="modal-email-confirmation-text" class="modal-box-body">
+                        Account setup complete!
+                    </div>
+                    <div id="modal-email-confirmation-btn" class="margin-v-30 text-center">
+                        <a href="#" class="btn btn-primary btn-free-profile" style="padding: 12px 20px;" onclick="return hideAcceptPaymentModal()">View Activity</a>
+                        <div class="clearfix"></div>
+                        <br />
+                        <a href="@Url.Action("editsetup", "activity", new { id = firstActivity?.Uid, area = "org" })" class="view-activity-text">Return to activity draft</a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 }
 
 <script type="text/javascript">
     PageEvent.add(PageEvent.AFTER_INIT, function () {
 
+        var currentLevel = @Json.Encode(currentLevel);
         var isOnboadingCompleted = @Json.Encode(isOnboadingCompleted);
+        var isProcessCompleted = @Json.Encode(GettingStartedOptions.ProcessCompleted);
         var isStripeIntegrated = @Json.Encode(isStripeIntegrated);
-
-        if (!isOnboadingCompleted || isStripeIntegrated) {
+        
+        if (currentLevel == isProcessCompleted && isStripeIntegrated) {
+            $('#modal-acceptpayment-done').modal({
+                backdrop: 'static'
+            });
+        }
+        else if (!isOnboadingCompleted) {
             //.. show getting started modal options if user misses any of that option
             $('#modal-getting-started').modal({
                 backdrop: 'static'

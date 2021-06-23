@@ -1,6 +1,7 @@
 ﻿<tr>
   <td style="padding: 10px;">@Model.AttendanceDate</td>
   <td style="padding: 10px; text-align:center;">@Model.NumberPresent</td>
+  <td style="padding: 10px; text-align:center;">@Model.NumberPrePaid</td>
   <td style="padding: 10px; text-align:center;">@Model.TotalCharge</td>
   <td style="padding: 10px; text-align:center;">@Model.CouponDiscount</td>
 </tr>

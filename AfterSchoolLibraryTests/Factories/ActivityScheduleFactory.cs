@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Services;
 
 namespace AfterSchoolLibraryTests.Factories
 {
@@ -81,6 +82,28 @@ namespace AfterSchoolLibraryTests.Factories
             msgs.AddRange(activitySchedule.Save(dc));
             return activitySchedule;
 
+        }
+
+        public static void Create(Account account, Activity activity, ActivitySchedule schedule, List<DateRange> startDates, List<DateTime> endDates, WebUser user, SystemMessages msgs, DatabaseConnection dc)
+        {
+            ActivityScheduleService.SetupSchedule(
+                activity.AccountId.Value,
+                schedule.ID.Value,
+                $"{activity.Name} - Schedule",
+                schedule.ScheduleDetails,
+                schedule.RepeatsWeekly.ToString(),
+                schedule.IsOngoing.ToString(),
+                schedule.StartDate.ToString(),
+                schedule.EndDate.ToString(),
+                schedule.DailyStartTime.ToString(),
+                schedule.DailyEndTime.ToString(),
+                startDates,
+                endDates,
+                account,
+                activity.ActivityGroupId,
+                user.ID.Value,
+                msgs,
+                dc);
         }
     }
 }

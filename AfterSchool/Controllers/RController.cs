@@ -46,6 +46,8 @@ namespace AfterSchool.Controllers
                 return RedirectUnsupportedBrowser();
 
             var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
 
             try
@@ -66,10 +68,10 @@ namespace AfterSchool.Controllers
 
                         // LOG: Someone Viewed Account AccountName from Directory DirectoryAccountName
                         // pass in the SessionVariables.WebSession object instead of trying to pass the ID
-                        WebSessionUtilities.LogActivity(
+                        SessionVariables.WebSession.LogActivity(
                             request: Request,
-                            webSession: SessionVariables.WebSession,
-                            actor: SessionVariables.CurrentUser,
+                            actor: currentUser,
+                            account: directoryAccount,
                             actionType: WebSessionActionType.Viewed,
                             objectType: ObjectType.DirectoryAccount,
                             objectId: account.ID,
@@ -111,10 +113,10 @@ namespace AfterSchool.Controllers
                     }
 
                     // LOG: Someone Viewed Directory Account DirectoryName
-                    WebSessionUtilities.LogActivity(
+                    SessionVariables.WebSession.LogActivity(
                         request: Request,
-                        webSession: SessionVariables.WebSession,
-                        actor: SessionVariables.CurrentUser,
+                        actor: currentUser,
+                        account: currentAccount,
                         actionType: WebSessionActionType.Viewed,
                         objectType: ObjectType.DirectoryAccount,
                         objectId: account.ID,
@@ -125,19 +127,16 @@ namespace AfterSchool.Controllers
                 }
 
                 if (dir.IsEmpty())
-                {
                     // LOG: Somone Viewed Account AccountName
-                    WebSessionUtilities.LogActivity(
-                       request: Request,
-                       webSession: SessionVariables.WebSession,
-                       actor: SessionVariables.CurrentUser,
+                    SessionVariables.WebSession.LogActivity(
+                       request: Request,                       
+                       actor: currentUser,
+                       account: currentAccount,
                        objectId: account.ID,
                        objectText: account.Name,
                        actionType: WebSessionActionType.Viewed,
                        objectType: ObjectType.Account
                     );
-
-                }
 
                 if (profile.IsEmpty())
                     return Redirect(account.BrowseUrl);
@@ -233,8 +232,8 @@ namespace AfterSchool.Controllers
                 regClosed = participationObjects.Where(po => po.NotIn(regWillOpen) && po.RegistrationPeriod.IsClosed(account, msgs)).ToList();
 
                 // LOG: Someone Browsed Account AccountName's Programs
-                WebSessionUtilities.LogActivity(
-                    webSessionId: SessionVariables.WebSession.ID.Value,
+                SessionVariables.WebSession.LogActivity(
+                    account: account,
                     actor: SessionVariables.CurrentUser,
                     actionType: WebSessionActionType.BrowsedAllActivities,
                     objectType: ObjectType.Account,
@@ -400,8 +399,8 @@ namespace AfterSchool.Controllers
             ViewBag.AccountProfile = accountProfile;
 
             // LOG: Someone Viewed ParticipationObjectType ParticipationObjectName by Account AccountName
-            WebSessionUtilities.LogActivity(
-                webSessionId: SessionVariables.WebSession.ID.Value,
+            SessionVariables.WebSession.LogActivity(
+                account: account,
                 actor: SessionVariables.CurrentUser,
                 actionType: WebSessionActionType.Viewed,
                 objectType: participationObject.GetWebSessionObjectType(),
@@ -451,9 +450,9 @@ namespace AfterSchool.Controllers
             ViewBag.AccountProfile = account.GetAccountProfile(msgs);
 
             // LOG: Somone Viewed Session SessionName by Account AccountName
-            WebSessionUtilities.LogActivity(
+            SessionVariables.WebSession.LogActivity(
+                account: account,
                 actor: SessionVariables.CurrentUser,
-                webSessionId: SessionVariables.WebSession.ID.Value,
                 actionType: WebSessionActionType.Viewed,
                 objectType: participationObject.GetWebSessionObjectType(),
                 objectId: participationObject.ObjectID.Value,
@@ -513,9 +512,9 @@ namespace AfterSchool.Controllers
             ViewBag.AccountProfile = account.GetAccountProfile(msgs);
 
             // LOG: Somone Viewed League LeagueName by Account AccountName
-            WebSessionUtilities.LogActivity(
+            SessionVariables.WebSession.LogActivity(
+                account: account,
                 actor: SessionVariables.CurrentUser,
-                webSessionId: SessionVariables.WebSession.ID.Value,
                 actionType: WebSessionActionType.Viewed,
                 objectType: participationObject.GetWebSessionObjectType(),
                 objectId: participationObject.ObjectID.Value,
@@ -720,9 +719,9 @@ namespace AfterSchool.Controllers
             if (masterRegistrant.IsParentOrGuardian)
             {
                 // LOG: Somone Began Registration for ParticipationObjectType ParticipationObjectName by Account AccountName
-                WebSessionUtilities.LogActivity(
+                SessionVariables.WebSession.LogActivity(
+                    account: account,
                     actor: SessionVariables.CurrentUser,
-                    webSessionId: SessionVariables.WebSession.ID.Value,
                     actionType: WebSessionActionType.BeganRegistration,
                     objectType: participationObject.GetWebSessionObjectType(),
                     objectId: participationObject.ObjectID.Value,

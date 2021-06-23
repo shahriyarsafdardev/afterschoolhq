@@ -17,6 +17,14 @@
     {
         canRegiserFor = ViewData["canRegisterFor"].ToString().ToBoolean();
     }
+
+    var IsPublished = false;
+    var activity = Model.GetActivity();
+
+    if (activity.IsNotEmpty())
+    {
+        IsPublished = activity.IsPublished;
+    }
 }
 
 @if (!Model.OwnerAccount.ID.HasValue)
@@ -158,7 +166,7 @@ else
                 <span><i class="s7-plus icon-medium"></i><i class="s7-cart icon-medium"></i></span>
             </button>
         }
-        else if (Model.Schedule.IsClosingInTwoDays(Model.OwnerAccount))
+        else if (Model.Schedule.IsNotEmpty() && !Model.Schedule.IsOngoing && Model.Schedule.IsEndingInTwoDays(Model.OwnerAccount))
         {
             <button type="button" class="btn btn-register btn-block">
                 Registration Closed
@@ -167,7 +175,7 @@ else
         else {
             var anotherChildString = anotherChild ? $"Again for New Child" : "";
 
-            <a href="@Model.GetRegistrationPageUrl()" class="btn btn-register btn-block">
+            <a href="@(IsPublished? Model.GetRegistrationPageUrl().ToString(): "javascript:void(0)")" class="@(IsPublished?"":"disabled") btn btn-register btn-block"  @IsPublished>
                 @Model.RegistrationMode.ToString() @anotherChildString Now &raquo;
             </a>
         }

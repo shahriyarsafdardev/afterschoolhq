@@ -66,6 +66,7 @@
         width: 100%;
         z-index: 1000000;
     }
+
 </style>
 
 <div class="visible-lg visible-md">
@@ -79,7 +80,7 @@
                     <a href=@(website.IsNotEmpty() ? website : "")>
                         <img src="@logoUrl" style="width: 200px;" />
                     </a>
-                    
+
                 </div>
 
                 <div class="col-lg-9 col-md-9">
@@ -103,7 +104,7 @@
         </div>
     </div>
     <div class="col-xs-2" style="padding: 0; text-align: center;">
-        <img id="img-mobile-filter" src="~/img/filter.png" class="filter" isOpen="0" onclick="return mobileFilter()" />
+        <img id="img-mobile-filter" src="~/img/filter.png" class="filter hide" isOpen="0"  onclick="return mobileFilter()" />
     </div>
 
     <div class="clearfix"></div>
@@ -119,7 +120,11 @@
     @{ Html.RenderPartial("~/Views/Shared/_DirectoryFilters.cshtml"); }
 </div>
 
-<div id="search-container" class="col-md-9" style="padding-bottom: 20px;">
+<div id="search-container" class="col-md-9 pt-20 pb-20" style="">
+
+    <div class="text-center">
+        <button class="btn contactUsBtn" type="button" data-toggle="modal" data-target="#ContactUsModal">Can't find what you are looking for? <span class="contactSpan">CONTACT US</span></button>
+    </div>
     <div id="search-result"> </div>
 
     <div class="clearfix"></div>
@@ -160,7 +165,48 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="ContactUsModal" tabindex="-1" role="dialog" aria-labelledby="ContactUsModal" aria-hidden="true">
+    <div class="modal-dialog contactUsModal Contactmodaldialog" role="document">
+        <div class="">
 
+            <div class="">
+                <div class="modalHeader">Can't find the program you're looking for?</div>
+                <div style="padding-bottom:10px" class="text-center">
+                    We want to help you find the perfect program for your student(s). Let us know what we're missing and we will do our best to connect you with a provider.
+                </div>
+
+                <form id="ContactUsForm" onsubmit="return false">
+
+                    <div class="col-md-12 onboarding-form-group floatNone">
+                        <label class="onboarding-lable">NAME *</label>
+                        <input type="text" name="name" id="name" required="required" autocomplete="off" class="form-control onboarding-input" value="" />
+                    </div>
+                    <div class="col-md-12 onboarding-form-group floatNone">
+                        <label class="onboarding-lable">EMAIL ADDRESS *</label>
+                        <input type="email" name="email" id="email" required="required" autocomplete="off" class="form-control onboarding-input" value="" />
+                    </div>
+
+                    <div class="col-md-12 onboarding-form-group floatNone">
+                        <label class="onboarding-lable">PHONE NUMBER</label>
+                        <input type="text" name="phone" id="phone" required="required" autocomplete="off" class="form-control onboarding-input" value="" />
+                    </div>
+                    <div class="col-md-12 onboarding-form-group floatNone">
+                        <label class="onboarding-lable">MESSAGE *</label>
+                        <textarea name="message" id="message" required="" autocomplete="off" placeholder="List the type of programs, age range or budget, etc. that you are looking for. If you have specific program in mind, please include the website if available." style="height:200px" class="form-control onboarding-input"></textarea>
+                    </div>
+                    <div class="g-recaptcha" data-sitekey="6Lfg2BEUAAAAADCXTFVlYUywSoqvMUgLd-tERDxO">
+                    </div>
+                    <br/>
+                    <div class="text-center">
+                        <div clas="formSubmitting"></div>
+                        <button type="submit" class="btn btn-primary btn-lg btnContactUsSubmit">Submit</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
 <script id="script-search-result-list" type="text/template">
 
     <% _.each(response, function(searchResult){ %>
@@ -170,7 +216,7 @@
             background-image: url("<%= searchResult.ProfileHeaderImageUrl %>");
         }
     </style>
-    
+
     <div id="<%= searchResult.AccountUid %>" name="<%= searchResult.AccountName %>" class="col-xl-12 col-sm-6 col-md-6 col-lg-6 col-xl-4 participation-object" style="height: 410px; margin-bottom: 10px;">
 
         <div class="panel" style="overflow: hidden; cursor: pointer;" onclick="WebPage.navigateIframe('<%= searchResult.HomePageUrl %>?dir=@accountUniqueName')">
@@ -285,6 +331,7 @@
 
 @section Scripts
 {
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <script type="text/javascript">
 
         var delayTimer;
@@ -301,6 +348,9 @@
                 @(CookieVariables.ShowISYPModal = "false")
             }
 
+            // we need to show the filter button, once js will get loaded, to avoid any js related error
+            $("#img-mobile-filter").removeClass("hide");
+
             $(window).scroll(function () {
                 if (isReachedScrollEnd == false &&
                     isMobileFilterWindowOpened == false &&
@@ -315,6 +365,87 @@
             if (!isMobile) {
                 $('#filters').show();
             }
+
+            $(".btnContactUsSubmit").on('click', function () {
+                if ($('#name').val() && $('#email').val() && $('#message').val()) {
+
+                    var subjectLine = 'New Search Page Form Submission From: ' + $('#name').val();
+                    if ($('#phone').val()) {
+                        subjectLine = subjectLine + ' - ' + $('#phone').val();
+                    }
+                    var params =
+                        'name=' + encodeURIComponent($('#name').val()) +
+                        '&pageName=search' +
+                        '&fromEmail=' + encodeURIComponent($('#email').val()) +
+                        '&message=' + encodeURIComponent($('#message').val()) +
+                        '&MainSubject=' + encodeURIComponent(subjectLine) +
+                        '&g_recaptcha_response=' + $('#g-recaptcha-response').val() +
+                        '&phone=' + $('#phone').val();
+
+                    $('.formSubmitting').html('Submitting...');
+                    $('.btnContactUsSubmit').prop('disabled', true);
+
+                    $.post(
+                        '/services/submitcontactform',
+                        params,
+                        function (data) {
+
+                            $('.formSubmitting').html('Submit');
+                            $('.btnContactUsSubmit').prop('disabled', false);
+                            grecaptcha.reset();
+
+                            if (data && data.status == 'ok') {
+
+                                $('#name').val('');
+                                $('#email').val('');
+                                $('#message').val('');
+                                $('#phone').val('');
+
+                                Notifications.showBar({
+                                    title: 'Success',
+                                    message: 'Your message has been sent.',
+                                    success: true
+                                });
+
+                            } else {
+
+
+                                var text = "";
+                                for (var message of data.messages) {
+
+                                    text = text + message.Text;
+                                }
+                                Notifications.showBar({
+                                    title: 'Failed',
+                                    message: text,
+                                    success: false
+                                });
+                            }
+                        }
+                    );
+
+                    return false;
+                }
+
+                return true;
+            })
+
+            var inputElement = document.getElementById('phone');
+            inputElement.addEventListener('keydown', enforceFormat);
+            inputElement.addEventListener('keyup', formatToPhone);
+
+            //format phone number when we load
+            if (inputElement && inputElement.value) {
+                var input = inputElement.value.replace(/\D/g, '').substring(0, 10); // First ten digits of input only
+                var zip = input.substring(0, 3);
+                var middle = input.substring(3, 6);
+                var last = input.substring(6, 10);
+
+                if (input.length > 6) { inputElement.value = `(${zip}) ${middle} ${last}`; } //(xxx) xxx xxxx
+                else if (input.length > 3) { inputElement.value = `(${zip}) ${middle}`; }
+                else if (input.length > 0) { inputElement.value = `(${zip}`; }
+            }
+
         })
 
         function showModalIsyp() {
@@ -638,10 +769,8 @@
             else {
                 $('#filters').hide();
                 $('#mobile-filter-footer').hide();
-
                 $('#search-result').show();
                 $('#footerShowHide').show();
-
                 $('#img-mobile-filter').attr('isOpen', "0");
                 isMobileFilterWindowOpened = false;
             }
@@ -698,7 +827,7 @@
             txtZip.val('');
             //..clear web link and hide clear filter link
             WebPage.addHash('');
-            $('#clear-filters').hide();            
+            $('#clear-filters').hide();
 
             //..refresh accounts
             if (isMobile) {
