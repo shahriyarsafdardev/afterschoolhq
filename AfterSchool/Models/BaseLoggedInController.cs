@@ -56,20 +56,18 @@ namespace AfterSchool.Models
             var account = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
 
-            if (account.IsEmpty() || account.IsDeleted)
-                return false;
-
-            if (AllowedAccountTypes.IsNotEmpty() &&
-                    AllowedAccountTypes.Any() &&
-                    account.AccountTypeId.NotIn(AllowedAccountTypes))
+            if (account.IsNotEmpty() && 
+                !account.IsDeleted && 
+                currentUser.HasAccessTo(account) && 
+                AllowedAccountTypes.IsNotEmpty() && 
+                AllowedAccountTypes.Any() && 
+                account.AccountTypeId.In(AllowedAccountTypes))
             {
-                if (!currentUser.HasAccessTo(account))
-                    return false;
-
                 LoadSessionInfo(currentUser, account);
-            }
+                return true;
+            } 
 
-            return true;
+            return false;
         }
 
         protected override void OnActionExecuting(ActionExecutingContext filterContext)
