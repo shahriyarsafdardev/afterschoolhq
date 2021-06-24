@@ -795,8 +795,8 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
-            if (currentAccount.IsEmpty() || id.IsEmpty() || copyfrom.IsEmpty())
-                return HttpNotFound();
+            //if (currentAccount.IsEmpty() || id.IsEmpty() || copyfrom.IsEmpty())
+            //    return HttpNotFound();
 
             var msgs = new SystemMessages();
             Form form = null;
@@ -878,7 +878,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                         question.Description = Request.Params[$"description-{question.ID}"];
                                         question.Options = Request.Params[$"options-text-{question.ID}"];
                                         question.Link = Request.Params[$"link-text-{question.ID}"];
-                                        question.DisplayOrder = Request.Params[$"sortId-{question.ID}"].ToInteger();
+                                        question.DisplayOrder = Request.Params[$"displayOrderId-{question.ID}"].ToInteger();
                                         question.QuestionTypeId = (QuestionType)Request.Params[$"questiontype-{question.ID}"].ToInteger();
                                     }
 
