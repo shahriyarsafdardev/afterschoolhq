@@ -1144,11 +1144,19 @@ namespace AfterSchoolLibraryTests.Tests
                 var activityGroup = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
 
                 // Act
-                var addactivity = ActivityFactory.Create(account, activityGroup, msgs, dc);                
+                for (int i = 1; i <= 5; i++)
+                {
+                    var addactivity = ActivityFactory.Create(account, activityGroup, msgs, dc);                    
+                    if (i%2 == 0)
+                    {
+                        addactivity.Publish(accountOwner, msgs, dc);
+                    }
+                }
+                                
                 var GetActivities = AccountService.GetAllActiveAndNonPublishedActivities(account, msgs, dc);
 
                 // Assert
-                Assert.True(GetActivities.Count() > 0);
+                Assert.True(GetActivities.Count() == 3);
             }
             catch (Exception ex)
             {

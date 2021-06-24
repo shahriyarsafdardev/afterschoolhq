@@ -337,13 +337,10 @@ namespace AfterSchoolLibrary.Services
 
             var accountOwner = account.GetAccountOwner(msgs);    
             if (account.HasPaidActivities())
-            {
-                return account.HasAccountProfile(msgs) && account.HasActiveActivities(msgs) && accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount && account.StripeUserId.IsNotEmpty();
-            }
-            else
-            {
-                return account.HasAccountProfile(msgs) && account.HasActiveActivities(msgs) && accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount;
-            }
+                return account.HasAccountProfile(msgs) && account.HasActiveActivities(msgs) && accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount && account.CanProcessPayments();
+            
+            return account.HasAccountProfile(msgs) && account.HasActiveActivities(msgs) && accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount;
+            
             
         }
         
