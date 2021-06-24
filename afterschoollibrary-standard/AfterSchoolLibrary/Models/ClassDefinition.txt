@@ -1948,7 +1948,7 @@ values: NotSet, Individual, Organization
 [begin]
 type: Enum
 name: FeatureType
-values: NotSet, Attendance, AcceptPayments, EmailMessaging, CustomUrl, TeamAccounts, WaitingList, ManageForms, ManageLocations, ManageActivityGroups, Activities, Participants, AllowApplications, Lottery, TrialDays, ManageContacts, ViewInsights, PaymentsPercentageFee, PaymentsPercentageFlatFee, ManageExternalLeagues, UseStripeConnectedAccount, AcceptACH, ManageLeagues, ManageFieldTrips, ManagePermissionSlips, ManageLearningPods,	TextMessaging, AllowInvites, AllowStudentRegistration, AllowPaymentPlans, AllowSubscriptionPlans, AllowPayLater, StudentCRM, ManageCoupons
+values: NotSet, Attendance, AcceptPayments, EmailMessaging, CustomUrl, TeamAccounts, WaitingList, ManageForms, ManageLocations, ManageActivityGroups, Activities, Participants, AllowApplications, Lottery, TrialDays, ManageContacts, ViewInsights, PaymentsPercentageFee, PaymentsPercentageFlatFee, ManageExternalLeagues, UseStripeConnectedAccount, AcceptACH, ManageLeagues, ManageFieldTrips, ManagePermissionSlips, ManageLearningPods,	TextMessaging, AllowInvites, AllowStudentRegistration, AllowPaymentPlans, AllowSubscriptionPlans, AllowPayLater, StudentCRM, ManageCoupons, Teacher1099
 [end]
 
 [begin]
@@ -2183,5 +2183,5 @@ values: NotSet, CreateProfile, CreateFirstActivity, PublishActivity, ValidateEma
 [begin]
 type: Enum
 name: SignUpType
-values: NotSet, NewAccountSignUp, TrialSignUp, ConvertingFromTrial, ChangePackage, ChangePackageDuringTrial, ChangeBillingPeriodType
+values: NotSet, NewAccountSignUp, TrialSignUp, ConvertingFromTrial, ChangePackage, ChangePackageDuringTrial, ChangeBillingPeriodType, Teacher1099
 [end]

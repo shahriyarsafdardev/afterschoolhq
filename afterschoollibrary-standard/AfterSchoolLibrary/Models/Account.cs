@@ -553,6 +553,14 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
+        public string HostAccountTeacherInviteUrl
+        {
+            get
+            {
+                return $"{Helpers.Utilities.BaseUrl()}/signup/welcome?invite={this.InviteCodeToShare}&signuptype={(int)SignUpType.Teacher1099}";
+            }
+        }
+
         public string UserInviteUrl
         {
             get
