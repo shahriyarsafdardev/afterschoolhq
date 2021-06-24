@@ -519,7 +519,7 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Done()
         {
-            var msgs =  new SystemMessages();
+            var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
 
