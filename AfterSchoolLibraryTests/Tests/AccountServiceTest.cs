@@ -1298,6 +1298,90 @@ namespace AfterSchoolLibraryTests.Tests
             }
         }
 
+        [Fact(DisplayName = "LoadByActivitiesbyActivityGroupByAccountId test")]
+        public void LoadByActivitiesbyActivityGroupByAccountIdTest()
+        {
+            try
+            {
+                // Arrange
+                var accountOwner = WebUserFactory.Create(msgs, dc);
+                var account = AccountFactory.Create(accountOwner, msgs, dc);
+                var activityGroup = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
+                var addactivity = ActivityFactory.Create(account, activityGroup, msgs, dc);
+                addactivity.Publish(accountOwner, msgs, dc);
+
+                // Act
+                var activityList = AccountService.LoadByActivitiesbyActivityGroupByAccountId(account, addactivity.ID.Value, msgs, dc);              
+
+                // Assert
+                Assert.True(activityList.Count() == 1);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+
+        [Fact(DisplayName = "GetRegistrationPeriod test")]
+        public void GetRegistrationPeriodTest()
+        {
+            try
+            {
+                // Arrange
+                var accountOwner = WebUserFactory.Create(msgs, dc);
+                var account = AccountFactory.Create(accountOwner, msgs, dc);
+                var ResgistrationPeriod = RegistrationPeriodFactory.Create(account, msgs, dc);
+              
+
+                // Act
+                var RegistrationPeriod = AccountService.GetRegistrationPeriod(account, ResgistrationPeriod.ID.Value, msgs, dc);
+
+
+                // Assert
+                Assert.NotNull(RegistrationPeriod);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Theory(DisplayName = "GetRegistrationPeriodsByGroupId Test")]
+        [InlineData(1)]
+        [InlineData(5)]
+        public void GetRegistrationPeriodsByGroupIdTest(int expectedNumberOfResistrationPeriod)
+        {
+            try
+            {
+                // Arrange
+                var accountOwner = WebUserFactory.Create(msgs, dc);
+                var account = AccountFactory.Create(accountOwner, msgs, dc);
+                var registrationPeriods = new List<RegistrationPeriod>();
+
+                for (int i = 0; i < expectedNumberOfResistrationPeriod; i++)
+                {
+                    var regPeriod = RegistrationPeriodFactory.Create(account, msgs, dc);
+                    registrationPeriods.Add(regPeriod);
+                }
+
+                // Act
+                var RegistrationPeriodLists = AccountService.GetRegistrationPeriods(account,null,null, msgs, dc);
+
+
+                // Assert
+                Assert.Equal(expected: registrationPeriods.Count, actual: RegistrationPeriodLists.Count);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+
         [Fact(DisplayName = "DoesContactExist test")]
         public void DoesContactExistTest()
         {

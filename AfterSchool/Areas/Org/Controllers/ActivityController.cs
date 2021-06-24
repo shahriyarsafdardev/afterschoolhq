@@ -2305,17 +2305,21 @@ namespace AfterSchool.Areas.Org.Controllers
                 return HttpNotFound();
             
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+            var isNewActivity = Request["isnew"] == "1";
 
-            activity.RequestToPublish(SessionVariables.CurrentUser, msgs);
+            activity.RequestToPublish(SessionVariables.CurrentUser, msgs);           
 
             if (msgs.HasNoErrors())
-                msgs.Add("Your request to publish has been submitted", MessageType.Success);
+                if (isNewActivity)
+                    msgs.Add("Your request to publish has been submitted", MessageType.Success);            
+                else
+                    msgs.Add("Activity saved successfully", MessageType.Success);
 
             ViewBag.Messages = msgs;
             ViewBag.MustRequestToPublish = MustRequestToPublish(activity);
             ViewBag.ShowCopyButton = ShowCopyButtonOnPublishDetail(activity);
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
-            ViewBag.IsFullScreen = Request["isnew"] == "1";
+            ViewBag.IsFullScreen = isNewActivity;
             return View("publishdetail", activity);
         }
 
