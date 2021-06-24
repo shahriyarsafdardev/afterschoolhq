@@ -205,7 +205,10 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var activityGroup = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
-            var aag = activityGroup.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);
+            var currentUser = SessionVariables.CurrentUser;
+            var currentAccount = SessionVariables.CurrentAccount;
+            var aag = activityGroup.GetAccountActivityGroup(currentAccount, msgs);
+            
             Activity activity = null;
             var otherActivities = Activity.LoadByActivityGroupId(activityGroup.ID.Value);
 
@@ -222,16 +225,17 @@ namespace AfterSchool.Areas.Org.Controllers
                     Name = teamname.MaxChars(50),
                     SeatsAvailable = seatsavailable.ToInteger(),
                     CreateDate = DateTime.UtcNow,
-                    CreatedBy = SessionVariables.CurrentUser.ID,
+                    CreatedBy = currentUser.ID,
                     LastModifiedDate = DateTime.UtcNow,
-                    LastModifiedBy = SessionVariables.CurrentUser.ID,
+                    LastModifiedBy = currentUser.ID,
                     AccountActivityGroupId = aag?.ID,
                     ActivityGroupId = activityGroup.ID,
-                    AccountId = SessionVariables.CurrentAccount.ID,
+                    AccountId = currentAccount.ID,
                     ActivityTypeId = ActivityType.Team,
                     ContactEmail = aag.ContactEmail,
                     ContactName = aag.ContactName,
-                    ContactPhone = aag.ContactPhone
+                    ContactPhone = aag.ContactPhone,
+                    UniqueName = ActivityService.GenerateUniqueName(teamname.MaxChars(50), null, currentAccount.ID, msgs)
                 };
                 msgs.AddRange(activity.Save());
             }

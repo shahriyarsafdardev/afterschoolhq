@@ -177,6 +177,14 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
+
+        public static List<Activity> LoadByActivitiesbyActivityGroupByAccountId(this Account account, int activityGroupId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (account.IsNotEmpty())
+                return Activity.LoadByActivityGroupIdByAccountId(activityGroupId, account.ID.Value, msgs, dc);
+
+            return null;
+        }
         public static List<ParticipationObject> GetPublishedParticipationObjects(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var participationObjects = new List<ParticipationObject>();
@@ -355,7 +363,7 @@ namespace AfterSchoolLibrary.Services
             var HasActivities = account.HasActiveActivities(msgs);
             var activitycount= account.GetActiveAndNonPublishedActivityCount(msgs);
             var VerifiedAccount = accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount;
-            var StripeUserId = account.StripeUserId.IsNotEmpty();
+            var HasPaymentConfigured = account.CanProcessPayments(msgs);
            
             if (!HasAccountProfile)
                 return GettingStartedOptions.CreateProfile;
@@ -369,10 +377,10 @@ namespace AfterSchoolLibrary.Services
             else if (activitycount >= 1 && !HasActivities)
                 return GettingStartedOptions.PublishActivity;           
 
-            else if (!StripeUserId)
+            else if (!HasPaymentConfigured)
                 return GettingStartedOptions.AcceptPayments;
 
-            else if (StripeUserId)
+            else if (HasPaymentConfigured)
                 return GettingStartedOptions.ProcessCompleted;
 
             else
@@ -397,7 +405,7 @@ namespace AfterSchoolLibrary.Services
             if (accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount)
                 startingOptions.Add(GettingStartedOptions.ValidateEmail);
 
-            if (account.StripeUserId.IsNotEmpty())
+            if (account.CanProcessPayments(msgs))
                 startingOptions.Add(GettingStartedOptions.AcceptPayments);
 
             return startingOptions;
@@ -584,6 +592,11 @@ namespace AfterSchoolLibrary.Services
             return RegistrationPeriod.LoadByAccountId(account.ID.Value, msgs, dc);
         }
 
+        public static RegistrationPeriod GetRegistrationPeriod(this Account account, int id, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RegistrationPeriod.LoadByIdByAccountId(id, account.ID.Value, msgs, dc);
+        }
+
         public static bool IsNowEnrolling(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return account.GetPublishedParticipationObjects(msgs, dc)
@@ -598,6 +611,14 @@ namespace AfterSchoolLibrary.Services
         public static int GetRegistrationPeriodCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return RegistrationPeriod.GetCount(new Hashtable() { { "AccountId", account.ID.Value } }, msgs, dc);
+        }
+
+        public static List<RegistrationPeriod> GetRegistrationPeriodsByGroupId(this Account account, int id, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (account.IsNotEmpty())
+                return RegistrationPeriod.LoadByActivityGroupIdByAccountId(id, account.ID.Value, msgs, dc);
+
+            return null;
         }
 
         public static List<RegistrationPeriod> GetUpcomingRegistrationPeriods(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -3300,6 +3321,7 @@ namespace AfterSchoolLibrary.Services
                 onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
+
         }
 
         public static void ProcessInterestRegistration(CheckoutObject checkoutObject, bool sendConfirmationEmail, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
