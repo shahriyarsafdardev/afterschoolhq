@@ -309,6 +309,7 @@
                     }
 
                     <input type="hidden" name="newquestioncount" id="newquestioncount" value="0" />
+                    <input type="hidden" name="optioncount" id="optioncount" value="0" />
 
                 </form>
             </div>
@@ -384,7 +385,7 @@
             </div>
         </form>
     </div>*@
-
+<!------- Options and Emoji Modal Pop-up------------->
 <div id="modal-options" class="md-modal colored-header custom-width md-effect-9">
         <form id="form-options" action="#" method="post">
             <div class="md-content">
@@ -397,7 +398,7 @@
                     <p>Update your options here. Your options are not saved until you hit the save button on the screen</p>
 
                     <div class="table-responsive">
-                        <table class="table table-striped options-table" id="options-table">
+                        <table class="table options-table emoji-option-table" id="options-table">
                             <thead>
                                 <tr>
                                     <th></th>
@@ -411,27 +412,11 @@
                                     <td>
                                         Option 1
                                     </td>
-                                    <td>
-                                        
-                                        <input type="text"
-                                               id="text-"
-                                               name="text-"
-                                               value=""
-                                               required
-                                               class="form-control col-sm-3"
-                                               onfocus="this.select()"
-                                               data-tooltip-id="Option Tooltip" />
+                                    <td>                                        
+                                        <input type="text" value="" id="option-1" required class="form-control col-sm-3 option" onfocus="this.select()" />
                                     </td>
-
                                     <td>
-                                        <input type="text"
-                                               id="text-"
-                                               name="text-"
-                                               value=""
-                                               required
-                                               class="form-control col-sm-3"
-                                               onfocus="this.select()"
-                                               data-tooltip-id="Option Tooltip" />
+                                        <input type="text" value="" id="optionDescription-1" class="form-control col-sm-3 optionDescription"  onfocus="this.select()" />
                                     </td>
                                     <td>
                                         <button class="btn btn-default btn-sm md-trigger" onclick="$(this).closest('tr').remove();"><span class="text-danger"><i class="s7-trash"></i></span></button>
@@ -458,79 +443,6 @@
             </div>
         </form>
     </div>
-
-<div id="modal-options" class="md-modal colored-header custom-width md-effect-9">
-    <form id="form-options" action="#" method="post">
-        <div class="md-content">
-            <div class="modal-header">
-                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
-                <h3 class="modal-title">Edit Options</h3>
-            </div>
-            <div class="modal-body form">
-
-                <p>Update your options here. Your options are not saved until you hit the save button on the screen</p>
-
-                <div class="form-group">
-                    <label><span id="question-options-label"></span> (options must be separated by commas)</label>
-                    <textarea class="form-control" id="question-options" name="question-options" rows="6" placeholder="ex: option 1, option 2, option 3"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label><span id="question-options-label"></span> (options must be separated by commas)</label>
-                    <textarea class="form-control" id="question-options" name="question-options" rows="6" placeholder="ex: option 1, option 2, option 3"></textarea>
-                </div>
-
-                <!--<div class="form-group">
-                    <label><span id="question-options-label"></span> Option 1</label>-->
-                @*<textarea class="form-control" id="question-options" name="question-options" rows="6" placeholder="ex: option 1, option 2, option 3"></textarea>*@
-                <!--<input class="form-control" id="option1" name="option1" required placeholder="Enter option value" />
-
-                    <label><span id="question-description-label"></span> Description</label>
-                    <input class="form-control" id="description" name="description" placeholder="Enter description" />
-
-                </div>-->
-
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            @Html.Label("Value")
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            @Html.Label("Description (optional)")
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            @*<label><span id="question-options-label"></span> Option 1</label>*@
-                            Option 1 <input class="form-control" id="option1" name="option1" required placeholder="Enter option value" />
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            @*<label><span id="question-description-label"></span> Description</label>*@
-                            Description<input class="form-control" id="description" name="description" placeholder="Enter description" />
-                        </div>
-                    </div>
-                </div>
-
-
-            </div>
-
-
-
-        </div>
-        <div class="modal-footer">
-            <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-            <button type="button" data-dismiss="modal" class="btn btn-primary md-close" onclick="updateOptions()">Done</button>
-        </div>
-</div>
-    </form>
-</div>
 
 <div id="modal-link" class="md-modal colored-header custom-width md-effect-9">
     <form id="form-link" action="#" method="post">
@@ -636,8 +548,6 @@
         return `<button class="btn btn-default btn-sm md-trigger" onclick="$(this).closest('tr').remove();"><span class="text-danger"><i class="s7-trash"></i></span></button>`;
     }
 
-
-
     function getShowCheckbox() {
         return `@{Html.RenderPartial(
             "~/Views/Shared/_SwitchButton.cshtml",
@@ -684,6 +594,20 @@
         return `<input type="hidden" id="questiontype-${getQuestionCount()}" name="new-questiontype-${getQuestionCount()}"" value="@((int)QuestionType.TextBlock)" />`
     }
 
+    function incrementOptionCount() {
+        $('#optioncount').val(getOptionCount() + 1);
+    }
+    function getOptionCount() {
+        return parseInt($('#optioncount').val() + 2);
+    }
+
+    var numberOfOptions = 1;
+    function getOptionsRowCount() {
+        var rowCount = $('#options-table tr').length;
+        ++numberOfOptions;
+        return rowCount - 1;
+    }
+
     function addQuestion() {
         $('#question-table')
             .find('tr')
@@ -700,12 +624,8 @@
         $('#options-table')
             .find('tr')
             .last()
-            .before(`<tr class="questionRow"><td>Option 1</td><td><input type="text" id="text-" name="text-" value="" required class="form-control col-sm-3" onfocus="this.select()" data-tooltip-id="Option Tooltip" /></td><td><input type="text" id="text-" name="text-" value="" required class="form-control col-sm-3" onfocus="this.select()" data-tooltip-id="Option Tooltip" /></td><td><button class="btn btn-default btn-sm md-trigger" onclick="$(this).closest('tr').remove();"><span class="text-danger"><i class="s7-trash"></i></span></button></td></tr>`);
-
-        //incrementQuestionCount();
-        //$('.md-trigger').modalEffects();
-        //var rowCount = $('#question-table tr').length;
-        //console.log("----------After adding Question, table rows :" + rowCount);
+            .before(`<tr class="questionRow"><td>Option ${getOptionsRowCount()}</td><td><input type="text" value="" id="option- ${getOptionsRowCount()}" required class="form-control col-sm-3 option" onfocus="this.select()" /></td><td><input type="text" value="" id="optionDescription- ${getOptionsRowCount()}" class="form-control col-sm-3 optionDescription" onfocus="this.select()" /></td><td><button class="btn btn-default btn-sm md-trigger" onclick="$(this).closest('tr').remove();"><span class="text-danger"><i class="s7-trash"></i></span></button></td></tr>`);
+        //incrementOptionCount();
     }
 
     function addTextBlock() {
@@ -748,13 +668,59 @@
 
     function setOptions(id) {
         selectedQuestion = id;
-        $('#question-options-label').html($('#text-' + id).val());
-        $('#question-options').val($('#options-text-' + id).val());
+        //$('#question-options-label').html($('#text-' + id).val());
+        //$('#question-options').val($('#options-text-' + id).val());
+
+        //1--Get option values from hidden field
+        var options = $('#options-text-' + selectedQuestion).val();
+        console.log("Id : " + id + " and options :" + options);
+        var rowCount = $("#options-table tr").length-1;
+        //---Here trying to remove rows in Modal table if any
+        $("#options-table tr").each(function (index) {
+            if (index != 0 && index != rowCount) {
+                $(this).remove();
+            }
+        });
+
+        //---2--If option has value then parse string, create rows and populate with values.
+        if (options != '') {
+            
+            //var numberofOptionRows = [];
+            numberofOptionRows = (options.split(",").length);
+            console.log("numberofOptionRows : " + numberofOptionRows);
+            indivdualOption = options.split(',');
+            console.log("indivdualOptionArray : " + indivdualOption);
+            //---Check if numberofOptionRows has value
+            for (var i = 0; i < indivdualOption.length; i++) {
+                var optionRow = indivdualOption[i];
+                var optionRowArray = optionRow.split('=');
+                optionValue = optionRowArray[0];
+                optionDescriptionValue = optionRowArray[1];
+                $('#options-table')
+                    .find('tr')
+                    .last()
+                    .before(`<tr class="questionRow"><td>Option ${i}</td><td><input type="text" value="${optionValue}" required class="form-control col-sm-3 option" onfocus="this.select()" /></td><td><input type="text" value="${optionDescriptionValue}" class="form-control col-sm-3 optionDescription" onfocus="this.select()" /></td><td><button class="btn btn-default btn-sm md-trigger" onclick="$(this).closest('tr').remove();"><span class="text-danger"><i class="s7-trash"></i></span></button></td></tr>`);
+            }
+            indivdualOption = null;
+        }
     }
 
     function updateOptions() {
         if (!isNaN(selectedQuestion)) {
-            $('#options-text-' + selectedQuestion).val($('#question-options').val());
+            var optionString = '';
+            var rowCount = $("#options-table tr").length - 1;
+            $("#options-table tr").each(function (index) {
+                if (index != 0 && index != rowCount) {
+                    var rowOption = $(this).find("input.option").val() + "=" + $(this).find("input.optionDescription").val() + ",";
+                    console.log(rowOption);
+                    optionString = optionString + rowOption;
+                }
+            });
+
+            var commaIndex = optionString.lastIndexOf(",");
+            var optionWithoutLastComma = optionString.substring(0, commaIndex);
+            console.log(optionWithoutLastComma + ":" + selectedQuestion);
+            $('#options-text-' + selectedQuestion).val(optionWithoutLastComma);
         }
     }
 

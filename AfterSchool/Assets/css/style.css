@@ -19364,3 +19364,6 @@ div.dataTables_wrapper div.dataTables_length label select {
     margin-bottom: 0px;
   }
 }
+.emoji-option-table tr th, .emoji-option-table tr td {
+    border: 0 !important;
+}
