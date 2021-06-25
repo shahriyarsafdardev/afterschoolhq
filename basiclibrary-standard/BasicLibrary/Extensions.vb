@@ -547,6 +547,14 @@ Public Module Extensions
             Return False
         End Try
     End Function
+    <Extension()>
+    Public Function IsNotGuid(ByVal aString As String) As Boolean
+        Try
+            Return Not IsGuid(aString)
+        Catch ex As Exception
+            Return False
+        End Try
+    End Function
 
     <Extension()>
     Public Function ToGuid(ByVal aObj As Object) As Guid
