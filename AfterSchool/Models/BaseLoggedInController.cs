@@ -124,6 +124,8 @@ namespace AfterSchool.Models
                 case OnboardingStepType.AccountType:
                     return RedirectToAction("programinfo", "onboarding");
                 case OnboardingStepType.ProgramInfo:
+                    return RedirectToAction("additionalinfo", "onboarding");
+                case OnboardingStepType.AdditionalInfo:
                     return RedirectToAction("contactinfo", "onboarding");
                 case OnboardingStepType.ContactInfo:
                     return RedirectToAction("logo", "onboarding");
