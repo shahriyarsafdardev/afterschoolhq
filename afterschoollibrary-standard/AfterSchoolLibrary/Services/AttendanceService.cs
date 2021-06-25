@@ -59,7 +59,8 @@ namespace AfterSchoolLibrary.Services
                     attendance.LastModifiedDate = DateTime.UtcNow;
                     amsgs.AddRange(attendance.Save(adc));
 
-                    attendance.GetAttendanceRegistrants(amsgs, adc).ForEach(attendanceRegistrant => {
+                    attendance.GetAttendanceRegistrants(amsgs, adc).ForEach(attendanceRegistrant =>
+                    {
                         attendanceRegistrant.UpdateIsPresent(attendanceRegistrant.ID.Value.In(attendanceRegistrantIds), loggedInUser, amsgs, adc);
                     });
                 },
