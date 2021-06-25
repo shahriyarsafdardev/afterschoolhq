@@ -309,6 +309,16 @@ namespace AfterSchoolLibrary.Services
             }, msgs, dc);
         }
 
+        public static List<Activity> GetAllActiveAndNonPublishedActivities(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Activity.Load(new Hashtable() {
+                { "AccountId", account.ID.Value },
+                { "IsPublished", false },
+                { "IsDeleted", false },
+                { "isArchived", false }                
+            },null,null, msgs, dc);
+        }
+
         public static Activity GetUnpublishActivity(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Activity.LoadByAccountIdByIsPublished(account.ID.Value, false, msgs, dc).FirstOrDefault();
@@ -324,14 +334,24 @@ namespace AfterSchoolLibrary.Services
             return account.GetActiveAndPublishedActivityCount(msgs, dc) > 0;
         }
 
+        public static bool HasPaidActivities(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.GetAllActiveAndNonPublishedActivities(msgs, dc).Any(activity => !activity.IsFree);
+        }
         public static bool IsOnboardingCompleted(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (account.IsEmpty())
                 return false;
 
-            var accountOwner = account.GetAccountOwner(msgs);
-            return account.HasAccountProfile(msgs) && account.HasActiveActivities(msgs) && accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount && account.CanProcessPayments(msgs);
+            var accountOwner = account.GetAccountOwner(msgs);    
+            if (account.HasPaidActivities())
+                return account.HasAccountProfile(msgs) && account.HasActiveActivities(msgs) && accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount && account.CanProcessPayments();
+            
+            return account.HasAccountProfile(msgs) && account.HasActiveActivities(msgs) && accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount;
+            
+            
         }
+        
 
         public static GettingStartedOptions OnboardingCompletionStatus(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
