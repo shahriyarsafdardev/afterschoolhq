@@ -175,11 +175,12 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult PaymentsOptions()
+        public ActionResult PaymentsOptions(string showPaymentNotificationPopup)
         {
             var account = SessionVariables.CurrentAccount;
 
             ViewBag.Account = account;
+            ViewBag.ShowPaymentNotificationPopup = showPaymentNotificationPopup;
             ViewBag.IsFullScreen = GetIsFullScreen();
             ViewBag.SignupType = Request["signuptype"].IsNotEmpty() && Request["signuptype"].IsInteger() ? (SignUpType)Request["signuptype"].ToInteger() : SignUpType.NotSet;
             ViewBag.Messages = new SystemMessages();

@@ -100,7 +100,8 @@
                     <h4 class="modal-title">Payment method not found.</h4>
                 </div>
                 <div class="modal-body" style="overflow-y: auto;">
-                    Please setup payment method before you proceed futher.
+                    Please setup payment method before you proceed futher. <br /><br />
+                    For support or any query contact, please email us at <a href="mailto:support@afterschoolhq.com">support@afterschoolhq.com</a>
                 </div>
                 <div class="modal-footer">
                     <a class="btn btn-primary" data-dismiss="modal" onclick="return location.href = '@Url.Action("paymentsoptions", "account", new { area = "org"})'">Proceed</a>
@@ -109,9 +110,37 @@
             </div>
         </div>
     </div>
+
+    <div id="modal-payment-notification" class="modal colored-header" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                    <h4 class="modal-title">Payment method not found.</h4>
+                </div>
+                <div class="modal-body" style="overflow-y: auto;">
+                    You have been redirected to this payment setup page since you haven't added your default payment method yet.
+                    <br /><br />
+                    You can close this modal and start setting up your payment method.
+                    <br /><br />
+                    For support or any query contact, please email us at <a href="mailto:support@afterschoolhq.com">support@afterschoolhq.com</a>
+                </div>
+                <div class="modal-footer">                    
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script type="text/javascript">
         function loadPaymentRestrictionModal() {
             $('#modal-payment-restriction').modal('show');
+            return false;
+        }
+
+        function loadPaymentNotificationModal() {
+            $('#modal-payment-notification').modal('show');
+            return false;
         }
     </script>
 </body>

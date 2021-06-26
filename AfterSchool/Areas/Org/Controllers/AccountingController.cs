@@ -8,9 +8,11 @@ using AfterSchoolLibrary.Helpers;
 using AfterSchool.Models;
 using BasicLibrary;
 using System.Linq;
+using System.Net;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
+    [AccountingFilter]
     public class AccountingController : BaseLoggedInController
     {
         public AccountingController() : base(AccountService.ProviderAccountTypes.ToList())
@@ -87,8 +89,16 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Payouts(string pn, string rpp, string sdate, string edate)
         {
-            var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+
+            if (currentAccount.IsEmpty())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
+            //var isStripeEnabled = currentAccount.UseStripeConnectDuringCheckout(msgs);
+            //if (!isStripeEnabled)
+            //    return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             int pageNumber = 1;
             int recordsPerPage = 25;
 
@@ -166,6 +176,13 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var transactionIds = Request.Form["TransactionIds"];
             var msgs = new SystemMessages();
+
+            if (currentAccount.IsEmpty())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
+            //var isStripeEnabled = currentAccount.UseStripeConnectDuringCheckout(msgs);
+            //if (!isStripeEnabled)
+            //    return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
             if (!string.IsNullOrEmpty(transactionIds))
             {
