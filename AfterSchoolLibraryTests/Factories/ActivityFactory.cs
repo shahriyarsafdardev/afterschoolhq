@@ -78,7 +78,7 @@ namespace AfterSchoolLibraryTests.Factories
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
-        public static Activity Create(Account account, ActivitySchedule schedule, ActivityGroup activityGroup, Location location, SystemMessages msgs, DatabaseConnection dc)
+        public static Activity Create(Account account, ActivitySchedule schedule, ActivityGroup activityGroup, Location location, decimal? costPerRegistrant, SystemMessages msgs, DatabaseConnection dc)
         {
             var name = "Test Activity";
             var obj = new Activity()
@@ -89,6 +89,7 @@ namespace AfterSchoolLibraryTests.Factories
                 ActivityGroupId = activityGroup.ID,
                 LocationId = location.ID,
                 Name = name,
+                CostPerRegistrant = costPerRegistrant.HasValue ? costPerRegistrant : null,
                 UniqueName = ActivityService.GenerateUniqueName(name, null, account.ID, msgs, dc)
             };
             msgs.AddRange(obj.Save(dc: dc));

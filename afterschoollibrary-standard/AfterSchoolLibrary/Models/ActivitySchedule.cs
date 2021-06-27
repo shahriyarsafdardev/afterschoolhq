@@ -236,7 +236,9 @@ namespace AfterSchoolLibrary.Models
 			dq.Criterias.Add(ObjectMap["ActivityGroupId"], ActivityGroupId);
 			dq.Criterias.Add(ObjectMap["IsOngoing"], IsOngoing);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-		}		
+		}
+
+		
 
         #endregion
 
@@ -623,7 +625,7 @@ namespace AfterSchoolLibrary.Models
 
         public List<Activity> GetActivities(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Activity.LoadByActivityScheduleId(this.ID.Value, msgs, dc);
+            return Activity.LoadByActivityScheduleIdByAccountId(this.ID.Value, this.AccountId.Value, msgs, dc);
         }
 
         public Account GetAccount(SystemMessages msgs = null, DatabaseConnection dc = null)

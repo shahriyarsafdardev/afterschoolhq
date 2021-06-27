@@ -117,6 +117,7 @@ loadmethod: Uid
 loadmethod: Uid|AccountId
 -loadmethod: ParentActivityId, List<>
 loadmethod: ActivityGroupId, List<>
+loadmethod: ActivityGroupId|AccountId, List<>
 loadmethod: AccountActivityGroupId, List<>
 loadmethod: ActivityScheduleId, List<>
 loadmethod: ProviderAccountId, List<>
@@ -620,6 +621,7 @@ baseproperty: EndDateTime, required
 loadmethod: AccountId, List<>
 loadmethod: Uid
 loadmethod: ActivityGroupId, List<>
+loadmethod: ActivityGroupId|AccountId, List<>
 loadmethod: AccountActivityGroupId, List<>
 [end]
 
@@ -1175,6 +1177,7 @@ joinproperty: Registrant.RegistrantTypeId, RegistrantType, Int
 joinproperty: Registrant.AccountId, int?, Int
 joinproperty: Attendance.ActivityId, int?, Int
 joinproperty: Attendance.IsCompleted, bool, Bit
+joinproperty: Attendance.Date, DateTime?, DateTime
 loadmethod: RegistrantId, List<>
 loadmethod: AttendanceId, List<>
 loadmethod: AttendanceId|RegistrantId, List<>
@@ -1227,6 +1230,7 @@ loadmethod: PackageId, List<>
 loadmethod: AccountId, List<>
 loadmethod: AccountId|IsActive
 loadmethod: Uid
+loadmethod: Uid|AccountId
 [end]
 
 [begin]
@@ -1538,6 +1542,8 @@ property: CouponValue, decimal?, Decimal "10,2"
 loadmethod: BillerAccountId|IsDeleted, List<>
 loadmethod: PayerAccountId|IsDeleted, List<>
 loadmethod: Uid
+loadmethod: Uid|BillerAccountId
+loadmethod: Uid|PayerAccountId
 loadmethod: BillerAccountId|TransactionTypeId|IsDeleted, List<>
 loadmethod: PayerAccountId|TransactionTypeId|IsDeleted, List<>
 loadmethod: StripeChargeOrRefundId
@@ -1621,7 +1627,6 @@ type: Class
 name: Coupon
 description: Used to give discounts to parents during the purchase of a registration, product, etc
 inherits: BasicLookUpObject
-property: Description, string, NVarChar "400"
 property: Amount, decimal?, Money, required, Store the amount a percentage or flat amount. If percentage it should be stored as a decimal meaning 100% should be stored as 1.00
 property: AmountTypeId, CouponAmountType, Int, required, Either a percentage or a flat amount
 property: AccountId, int?, Int, required, the account that is the owner
@@ -1945,7 +1950,7 @@ values: NotSet, Individual, Organization
 [begin]
 type: Enum
 name: FeatureType
-values: NotSet, Attendance, AcceptPayments, EmailMessaging, CustomUrl, TeamAccounts, WaitingList, ManageForms, ManageLocations, ManageActivityGroups, Activities, Participants, AllowApplications, Lottery, TrialDays, ManageContacts, ViewInsights, PaymentsPercentageFee, PaymentsPercentageFlatFee, ManageExternalLeagues, UseStripeConnectedAccount, AcceptACH, ManageLeagues, ManageFieldTrips, ManagePermissionSlips, ManageLearningPods,	TextMessaging, AllowInvites, AllowStudentRegistration, AllowPaymentPlans, AllowSubscriptionPlans, AllowPayLater, StudentCRM, ManageCoupons
+values: NotSet, Attendance, AcceptPayments, EmailMessaging, CustomUrl, TeamAccounts, WaitingList, ManageForms, ManageLocations, ManageActivityGroups, Activities, Participants, AllowApplications, Lottery, TrialDays, ManageContacts, ViewInsights, PaymentsPercentageFee, PaymentsPercentageFlatFee, ManageExternalLeagues, UseStripeConnectedAccount, AcceptACH, ManageLeagues, ManageFieldTrips, ManagePermissionSlips, ManageLearningPods,	TextMessaging, AllowInvites, AllowStudentRegistration, AllowPaymentPlans, AllowSubscriptionPlans, AllowPayLater, StudentCRM, ManageCoupons, Teacher1099
 [end]
 
 [begin]
@@ -2175,4 +2180,10 @@ values: NotSet, PastDue, CurrentlyDue, EventuallyDue
 type: Enum
 name: GettingStartedOptions
 values: NotSet, CreateProfile, CreateFirstActivity, PublishActivity, ValidateEmail, AcceptPayments, ProcessCompleted
+[end]
+
+[begin]
+type: Enum
+name: SignUpType
+values: NotSet, NewAccountSignUp, TrialSignUp, ConvertingFromTrial, ChangePackage, ChangePackageDuringTrial, ChangeBillingPeriodType, Teacher1099
 [end]

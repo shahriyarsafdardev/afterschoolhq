@@ -205,7 +205,10 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var activityGroup = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
-            var aag = activityGroup.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);
+            var currentUser = SessionVariables.CurrentUser;
+            var currentAccount = SessionVariables.CurrentAccount;
+            var aag = activityGroup.GetAccountActivityGroup(currentAccount, msgs);
+            
             Activity activity = null;
             var otherActivities = Activity.LoadByActivityGroupId(activityGroup.ID.Value);
 
@@ -222,16 +225,17 @@ namespace AfterSchool.Areas.Org.Controllers
                     Name = teamname.MaxChars(50),
                     SeatsAvailable = seatsavailable.ToInteger(),
                     CreateDate = DateTime.UtcNow,
-                    CreatedBy = SessionVariables.CurrentUser.ID,
+                    CreatedBy = currentUser.ID,
                     LastModifiedDate = DateTime.UtcNow,
-                    LastModifiedBy = SessionVariables.CurrentUser.ID,
+                    LastModifiedBy = currentUser.ID,
                     AccountActivityGroupId = aag?.ID,
                     ActivityGroupId = activityGroup.ID,
-                    AccountId = SessionVariables.CurrentAccount.ID,
+                    AccountId = currentAccount.ID,
                     ActivityTypeId = ActivityType.Team,
                     ContactEmail = aag.ContactEmail,
                     ContactName = aag.ContactName,
-                    ContactPhone = aag.ContactPhone
+                    ContactPhone = aag.ContactPhone,
+                    UniqueName = ActivityService.GenerateUniqueName(teamname.MaxChars(50), null, currentAccount.ID, msgs)
                 };
                 msgs.AddRange(activity.Save());
             }
@@ -497,8 +501,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     msgs.Add($"{UILabel.ActivityGroupLabel(league.ActivityGroupTypeId)} Saved", MessageType.Success);
 
                     // LOG: CurrentUser Updated ActivityGroup ActivityGroupName for Account AccountName
-                    WebSessionUtilities.LogActivity(
-                        webSessionId: SessionVariables.WebSession.ID.Value,
+                    SessionVariables.WebSession.LogActivity(
+                        account: currentAccount,
                         actor: currentWebUser,
                         actionType: WebSessionActionType.Updated,
                         objectId: league.ID.Value,
@@ -636,8 +640,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add(string.Format("{0} has been published", activityGroup.Name), MessageType.Success);
 
                 // LOG: CurrentWebUser published ActivityGroup ActivityGroupName to Account AccountName's Profile
-                WebSessionUtilities.LogActivity(
-                    webSessionId: SessionVariables.WebSession.ID.Value,
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
                     actor: currentWebUser,
                     actionType: WebSessionActionType.Published,
                     objectId: activityGroup.ID.Value,
@@ -671,9 +675,10 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add(string.Format("{0} has been unpublished", activityGroup.Name), MessageType.Success);
+                
                 // LOG: CurrentWebUser unpublished ActivityGroup ActivityGroupName to Account AccountName's Profile
-                WebSessionUtilities.LogActivity(
-                    webSessionId: SessionVariables.WebSession.ID.Value,
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
                     actor: currentWebUser,
                     actionType: WebSessionActionType.Unpublished,
                     objectId: activityGroup.ID.Value,

@@ -295,6 +295,8 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult MoveSeat(string id, string ra, string to, string r)
         {
             var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
             var registration = Registration.LoadByUid(id.ToGuid());
             var selectedRegistration = Registration.LoadByUid(r.ToGuid());           
 
@@ -305,16 +307,16 @@ namespace AfterSchool.Areas.Org.Controllers
                 ratTo = (RegistrationAssignmentType)to.ToInteger();
 
             if(ratTo != RegistrationAssignmentType.NotSet)
-                registrantActivity.ChangeSeatAssignment(ratTo, SessionVariables.CurrentUser, msgs);
+                registrantActivity.ChangeSeatAssignment(ratTo, currentUser, msgs);
 
             if (msgs.HasNoErrors())
             {
                 selectedRegistration.WasUpdated(msgs);
 
                 // LOG: Someone Updated RegistrantActivity {registrant.Name} assignment type to {ratTo} for Activty ActivityName
-                WebSessionUtilities.LogActivity(
-                    webSessionId: SessionVariables.WebSession.ID.Value,
-                    actor: SessionVariables.CurrentUser,
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
+                    actor: currentUser,
                     actionType: WebSessionActionType.Updated,
                     objectId: registrantActivity.ID,
                     objectType: ObjectType.RegistrantActivity,
@@ -357,6 +359,8 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult AddActivity(string id, string activity, string activityassignment, string r)
         {
             var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
             var registration = Registration.LoadByUid(id.ToGuid(), msgs);
             var selectedRegistration = Registration.LoadByUid(r.ToGuid(), msgs);
             var act = Activity.LoadByUid(activity.ToGuid(), msgs);
@@ -376,8 +380,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 assignmentType, 
                 choiceNumber, 
                 registrationPeriodId, 
-                act.ActivityGroupId, 
-                SessionVariables.CurrentUser.ID.Value, 
+                act.ActivityGroupId,
+                currentUser.ID.Value, 
                 msgs);
 
             if (msgs.HasNoErrors())
@@ -391,7 +395,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     selectedRegistration.SendConfirmation(
                         new CheckoutObject()
                         {
-                            BillingAccount = SessionVariables.CurrentAccount,
+                            BillingAccount = currentAccount,
                             PayingAccount = masterRegistrant.GetAccount(msgs),
                             MasterRegistrant = masterRegistrant,
                             NumberOfSeats = 1,
@@ -399,14 +403,14 @@ namespace AfterSchool.Areas.Org.Controllers
                             Registration = selectedRegistration,
                         },
                         null,
-                        SessionVariables.CurrentUser,
+                        currentUser,
                         true,
                         msgs);
 
                 // LOG:  CurrentWebUser added Registrant RegistrantName to Activity ActivityName
-                WebSessionUtilities.LogActivity(
-                    webSessionId: SessionVariables.WebSession.ID.Value,
-                    actor: SessionVariables.CurrentUser,
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
+                    actor: currentUser,
                     actionType: WebSessionActionType.Added,
                     objectId: registrant.ID.Value,
                     objectType: ObjectType.Registrant,

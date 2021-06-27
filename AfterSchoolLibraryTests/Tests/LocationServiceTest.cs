@@ -6,6 +6,7 @@ using AfterSchoolLibraryTests.Factories;
 using System.Linq;
 using System.Collections.Generic;
 using System.Collections;
+using System;
 
 namespace AfterSchoolLibraryTests.Tests
 {
@@ -259,6 +260,94 @@ namespace AfterSchoolLibraryTests.Tests
                 );
 
             Assert.NotNull(locationLoad);
+        }
+
+        [Fact(DisplayName = "GetHostAccount Test")]
+        public void GetHostAccountTest()
+        {
+            try
+            {
+                // Arrange
+                var location = LocationService.CreateNew(
+                    locationName: "School 101",
+                    address1: "1234 N Whatever Street",
+                    address2: "Suite 1900",
+                    city: "Indianapolis",
+                    state: "IN",
+                    postalCode: "12345",
+                    country: "US",
+                    locationType: LocationType.School,
+                    hostAccountId: LocationOwnerAccount.ID,
+                    loggedInUser: LoggedInUser,
+                    msgs: msgs,
+                    dc: dc
+                );
+
+                // Act
+                var hostAccount = location.GetHostAccount(msgs, dc);
+
+                // Assert
+                Assert.NotNull(hostAccount);
+                Assert.Equal(hostAccount.ID, LocationOwnerAccount.ID);
+                Assert.Equal(hostAccount.Name, LocationOwnerAccount.Name);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "GetHostAccount Reverse Test")]
+        public void GetHostAccountWithEmptyHostTest()
+        {
+            try
+            {
+                // Arrange
+                var location = LocationService.CreateNew(
+                    locationName: "School 101",
+                    address1: "1234 N Whatever Street",
+                    address2: "Suite 1900",
+                    city: "Indianapolis",
+                    state: "IN",
+                    postalCode: "12345",
+                    country: "US",
+                    locationType: LocationType.School,
+                    hostAccountId: null,
+                    loggedInUser: LoggedInUser,
+                    msgs: msgs,
+                    dc: dc
+                );
+
+                // Act
+                var hostAccount = location.GetHostAccount(msgs, dc);
+
+                // Assert
+                Assert.Null(hostAccount);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "GetHostAccount Empty Location Test")]
+        public void GetHostAccountWithEmptyLocationTest()
+        {
+            try
+            {
+                // Arrange & Act
+                var hostAccount = LocationService.GetHostAccount(location: null, msgs, dc);
+
+                // Assert
+                Assert.Null(hostAccount);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
         }
     }
 }

@@ -7,6 +7,7 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using AfterSchoolLibraryTests.Factories;
+using BasicLibrary.DataAccess;
 
 namespace AfterSchoolLibraryTests.Tests
 {
@@ -169,7 +170,7 @@ namespace AfterSchoolLibraryTests.Tests
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             activity.ActivityScheduleId = 12;
             activity.Save(dc: dc);
-            Assert.Single(Activity.LoadByActivityScheduleId(activity.ActivityScheduleId.Value, dc: dc));
+            Assert.Single(Activity.LoadByActivityScheduleIdByAccountId(activity.ActivityScheduleId.Value, account.ID.Value, dc: dc));
         }
 
         [Fact]
@@ -466,7 +467,25 @@ namespace AfterSchoolLibraryTests.Tests
             attendance.IsCompleted = true;
             attendance.Save(dc: dc);
 
-            Assert.Single(activity.GetCompletedAttendance(dc: dc));
+            Assert.Single(activity.GetCompletedAttendance( dc: dc));
+        }
+
+        [Theory]
+        [InlineData("date","1",1,10)]
+        public void GetCompletedAttendanceWithPagingTest(string orderByParam,string direction,int pageNumber,int recordsPerPage)
+        {
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
+            var schedule = Factories.ActivityScheduleFactory.Create(account, msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var activityInstance = Factories.ActivityInstanceFactory.Create(activity, schedule, msgs, dc);
+            var form = Factories.FormFactory.Create(account, msgs, dc: dc);
+            var activityForm = Factories.ActivityFormWebUserFactory.Create(account, activity, form, msgs, dc: dc);
+            var attendance = new Attendance() { ActivityId = activity.ID.Value, ActivityInstanceId = activityInstance.ID.Value };
+            attendance.IsCompleted = true;
+            attendance.Save(dc: dc);
+
+            Assert.Single(activity.GetCompletedAttendanceWithPaging(orderByParam, (OrderByDirectionEnum)Enum.Parse(typeof(OrderByDirectionEnum), direction), pageNumber, recordsPerPage, msgs, dc: dc));
         }
         /// <summary>
         /// returns the numberof attendance objects asociated with the activity that have been marked as present
