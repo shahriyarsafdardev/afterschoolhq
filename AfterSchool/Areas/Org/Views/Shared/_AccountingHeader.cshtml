@@ -12,14 +12,7 @@
         </a>
         @if (!SessionVariables.CurrentAccount.UseStripeConnectDuringCheckout())
         {
-            if (SessionVariables.CurrentAccount.CanReceiveCheckPayouts())
-            {
-                <a class="btn btn-alt6@(actionName == "payouts" ? "-active" : "")" href="@Url.Action("payouts", "accounting")"> Payouts </a>
-            }
-            else
-            {
-                <a class="btn btn-alt6@(actionName == "payouts" ? "-active" : "")" href="#" onclick="return loadPaymentRestrictionModal();"> Payouts </a>
-            }
+            <a class="btn btn-alt6@(actionName == "payouts" ? "-active" : "")" href="@Url.Action("payouts", "accounting")"> Payouts </a>
         }
         <a class="btn btn-alt6@(actionName == "subscriptions" ? "-active" : "")" href="@Url.Action("subscriptions", "accounting")">
             Subscriptions &amp; Plans

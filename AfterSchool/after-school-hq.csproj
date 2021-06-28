@@ -563,6 +563,7 @@
     <Compile Include="Areas\District\Controllers\ServicesController.cs" />
     <Compile Include="Areas\District\Controllers\UserController.cs" />
     <Compile Include="Areas\District\DistrictAreaRegistration.cs" />
+    <Compile Include="Areas\Org\AccountingFilter.cs" />
     <Compile Include="Areas\Org\Controllers\AccountController.cs" />
     <Compile Include="Areas\Org\Controllers\AccountingController.cs" />
     <Compile Include="Areas\Org\Controllers\LeagueActivityController.cs" />

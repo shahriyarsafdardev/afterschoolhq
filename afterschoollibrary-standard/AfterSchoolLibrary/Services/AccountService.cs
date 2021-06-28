@@ -2691,7 +2691,11 @@ namespace AfterSchoolLibrary.Services
 
         public static bool UseStripeConnectDuringCheckout(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc) && account.StripeChargesEnabled && account.StripePayoutsEnabled;
+            // checking cheque payout is just for fail-safe, mostly account stripe will handle it.
+            if (account.CanReceiveCheckPayouts(msgs))
+                return false;
+            else
+                return account.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc) && account.StripeChargesEnabled && account.StripePayoutsEnabled;
         }
 
         public static Payout RequestNewPayout(this Account account, List<Transaction> transactions, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)

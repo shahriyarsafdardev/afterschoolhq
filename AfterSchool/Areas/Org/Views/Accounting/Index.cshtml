@@ -2,7 +2,7 @@
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
     var account = SessionVariables.CurrentAccount;
-    var isStripeEnabled = account.CanReceiveCheckPayouts(msgs) ? true : account.UseStripeConnectDuringCheckout(msgs);
+    var isStripeEnabled = account.UseStripeConnectDuringCheckout(msgs);
     var transactionCount = ((PagingModel)ViewBag.PagingModel).TotalCount;
     var totalTransactionAmount = (decimal)ViewBag.TotalAmountPaid;
     var totalAmountRefunded = (decimal)ViewBag.TotalAmountRefunded;
