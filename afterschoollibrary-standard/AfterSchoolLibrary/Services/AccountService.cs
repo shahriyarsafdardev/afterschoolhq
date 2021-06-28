@@ -177,7 +177,6 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-
         public static List<Activity> LoadByActivitiesbyActivityGroupByAccountId(this Account account, int activityGroupId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (account.IsNotEmpty())
@@ -185,6 +184,7 @@ namespace AfterSchoolLibrary.Services
 
             return null;
         }
+
         public static List<ParticipationObject> GetPublishedParticipationObjects(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var participationObjects = new List<ParticipationObject>();
@@ -538,6 +538,14 @@ namespace AfterSchoolLibrary.Services
         public static List<ActivityGroup> GetActivityGroups(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return ActivityGroup.LoadByAccountId(account.ID.Value, msgs, dc);
+        }
+
+        public static List<ActivityGroup> GetActivityGroups(this Account account, List<int> activityGroupIds, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (account.IsNotEmpty())
+                return ActivityGroup.LoadListByIdsByAccountId(activityGroupIds, account.ID.Value, msgs, dc);
+
+            return null;
         }
 
         public static List<ActivityGroup> GetSessions(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -1422,13 +1430,21 @@ namespace AfterSchoolLibrary.Services
 
         #endregion
 
-            #region Registrations
+        #region Registrations
 
-            public static List<Registration> GetRegistrations(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Registration> GetRegistrations(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Registration.LoadByAccountId(account.ID.Value, msgs, dc)
                 .Where(registration => Registration.ValidCompletionStatus.Contains(registration.CompletionStatusId))
                 .ToList();
+        }
+
+        public static Registration GetRegistration(this Account account, Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (account.IsNotEmpty())
+                return Registration.LoadByUidByAccountId(Uid, account.ID.Value, msgs, dc);
+
+            return null;
         }
 
         public static List<Registration> GetRegistrationsByDate(this Account account, DateTime startDate, DateTime endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
