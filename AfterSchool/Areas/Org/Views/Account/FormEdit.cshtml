@@ -669,10 +669,11 @@
     function setOptions(id) {
         selectedQuestion = id;
         var optionType = "Option";
+        var emojiType = @QuestionType.Emoji;
         $('#modal-options-id').text("Options");
 
         //---1---If options type is emoji, then set emoji option and labels
-        if ($('#questiontype-' + id).val() == 16) {
+        if ($('#questiontype-' + id).val() == emojiType) {
             $('#modal-options-id').text("Emojis");
             optionType = "Emoji";
         }
@@ -681,7 +682,7 @@
         var options = $('#options-text-' + selectedQuestion).val();
         var rowCount = $("#options-table tr").length - 1;
 
-        //---3---Remove rows in Modal table if any
+        //---3---Initialize Modal table, so that for other questions, old question data get removed. we will keep the header and footer rows
         $("#options-table tr").each(function (index) {
             if (index != 0 && index != rowCount) {
                 $(this).remove();
@@ -699,13 +700,14 @@
                 optionNo = i;
                 optionValue = optionRowArray[0];
                 optionDescriptionValue = optionRowArray[1];
-                addSavedOption(optionType, optionNo, optionValue, optionDescriptionValue)
+                //create new row for option modal
+                addOptionRow(optionType, optionNo, optionValue, optionDescriptionValue)
             }
             indivdualOption = null;
         }
     }
 
-    function addSavedOption(optionType, optionNo, optionValue, optionDescriptionValue) {
+    function addOptionRow(optionType, optionNo, optionValue, optionDescriptionValue) {
         $('#options-table')
             .find('tr')
             .last()
