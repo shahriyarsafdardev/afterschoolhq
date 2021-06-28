@@ -4,12 +4,13 @@ using BasicLibrary;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using AfterSchool.Models;
+using System.Collections.Generic;
 
 namespace AfterSchool.Areas.User.Controllers
 {
     public class ProfileController : BaseLoggedInController
     {
-        public ProfileController() : base(null)
+        public ProfileController() : base(new List<AccountType>() { AccountType.Registrant })
         {
 
         }

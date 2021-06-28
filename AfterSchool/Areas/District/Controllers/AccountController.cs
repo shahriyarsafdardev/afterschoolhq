@@ -9,8 +9,13 @@ using System.Web.Mvc;
 
 namespace AfterSchool.Areas.District.Controllers
 {
-    public class AccountController : Controller
+    public class AccountController : BaseLoggedInController
     {
+        public AccountController() : base(new List<AccountType> { AccountType.SchoolDistrict })
+        {
+
+        }
+
         // GET: District/Account
         [HttpGet]
         public ActionResult Team()

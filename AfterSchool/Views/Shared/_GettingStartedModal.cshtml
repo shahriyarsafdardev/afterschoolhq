@@ -8,6 +8,7 @@
     var activityUid = (Guid)ViewBag.ActivityUid;
     var currentLevel = AccountService.OnboardingCompletionStatus(Model);
     var isStripeIntegrated = TempData["IsStripeIntegrated"] != null;
+    var IsActivityFree = (bool)ViewBag.IsActivityFree;
 }
 
 <div id="modal-email-confirmation" class="modal fade" tabindex="-1" role="dialog">
@@ -26,7 +27,7 @@
                     Before we publish your activity lets confirm your email.
                 </div>
                 <div id="modal-email-confirmation-btn" class="margin-v-30 text-center">
-                    <a href="#" class="btn btn-primary btn-free-profile" onclick="return resendValidationEmail()">Re-Send Validation email.</a>
+                    <a href="#" class="btn btn-primary btn-free-profile" onclick="return resendValidationEmail()">Re-send verification email</a>
                 </div>
             </div>
         </div>
@@ -52,10 +53,10 @@
                     Account setup complete!
                 </div>
                 <div id="modal-email-confirmation-btn" class="margin-v-30 text-center">
-                    <a href="@Url.Action("editsetup", "activity", new { id = activityUid, area = "org" })" class="btn btn-primary btn-free-profile" style="padding: 12px 20px;"> Return to activity draft</a>
+                    <a href="#" class="btn btn-primary btn-free-profile" style="padding: 12px 20px;"  onclick="return hideAcceptPaymentModal()">View Activity</a>
                     <div class="clearfix"></div>
                     <br />
-                    <a href="#" class="view-activity-text" onclick="return hideAcceptPaymentModal()">View Activity</a>
+                    <a href="@Url.Action("editsetup", "activity", new { id = activityUid, area = "org" })" class="view-activity-text">Return to activity draft</a>
                 </div>
             </div>
         </div>
@@ -69,7 +70,7 @@
     var isPaymentSetupToBeDone = @Json.Encode(GettingStartedOptions.AcceptPayments);
     var isProcessCompleted = @Json.Encode(GettingStartedOptions.ProcessCompleted);
     var isStripeIntegrated = @Json.Encode(isStripeIntegrated);
-
+    var isfreeActivity = @Json.Encode(IsActivityFree);
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         if (currentLevel == isEmailToBeValidated) {
             $('#modal-email-confirmation').modal({
@@ -77,8 +78,10 @@
             });
         } else if (currentLevel == isActivityToBePublished) {
             $('#footer-activity').removeClass('hide');
-        } else if (currentLevel == isPaymentSetupToBeDone) {
-            $('#modal-payment-confirmation').modal({
+        }
+        // we do not need to show payment modal, if activity is Free
+        else if (currentLevel == isPaymentSetupToBeDone && !isfreeActivity) {
+                $('#modal-payment-confirmation').modal({
                 backdrop: 'static'
             });
         } else if (currentLevel == isProcessCompleted && isStripeIntegrated) {
@@ -107,6 +110,7 @@
     }
 
     function resendValidationEmail() {
+        AccountSetup.sendVerificationEmail();
         $('#modal-email-confirmation-text').html('An email has been sent to <span style="color: #00b492;">@accountOwner.Email</span> Please check your inbox for next steps.');
         $('#modal-email-confirmation-btn').hide();
         $('#footer-activity').removeClass('hide');

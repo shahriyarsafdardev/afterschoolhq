@@ -15,8 +15,13 @@ using AfterSchoolLibrary.Models;
 
 namespace AfterSchool.Areas.Admin.Controllers
 {
-    public class UploadController : Controller
+    public class UploadController : BaseLoggedInController
     {
+        public UploadController() : base(new List<AccountType> { AccountType.AfterSchool })
+        {
+
+        }
+
         // GET: Admin/Upload
         [HttpGet]
         public ActionResult Index()

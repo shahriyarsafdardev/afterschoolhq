@@ -22,6 +22,7 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Index(string pn, string rpp, string sdate, string edate, string poId, string poTypeId, string q)
         {
+            var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
             int pageNumber = 1;
             int recordsPerPage = 25;
@@ -36,10 +37,10 @@ namespace AfterSchool.Areas.Org.Controllers
             var length = recordsPerPage;
 
             var startDate = sdate.IsDateTime() ?
-                SessionVariables.CurrentAccount.ConvertFromAccountTimeZone(sdate.ToDateTime()) :
+                currentAccount.ConvertFromAccountTimeZone(sdate.ToDateTime()) :
                 new DateTime?();
             var endDate = edate.IsDateTime() ?
-                SessionVariables.CurrentAccount.ConvertFromAccountTimeZone(edate.ToDateTime().AddDays(1).AddMilliseconds(-1)) :
+                currentAccount.ConvertFromAccountTimeZone(edate.ToDateTime().AddDays(1).AddMilliseconds(-1)) :
                 new DateTime?();
 
             //PO filters
@@ -50,24 +51,24 @@ namespace AfterSchool.Areas.Org.Controllers
                 poFilter.Add((poId.ToInteger(), (ParticipationObjectType)poTypeId.ToInteger()));
             }
 
-            var totalTransactionCount = SessionVariables.CurrentAccount.GetTransactionCount(q, startDate, endDate, poFilter, false);
-            var allTransactions = SessionVariables.CurrentAccount.GetTransactions(q, startDate, endDate, poFilter, false, start, length);
+            var totalTransactionCount = currentAccount.GetTransactionCount(q, startDate, endDate, poFilter, false);
+            var allTransactions = currentAccount.GetTransactions(q, startDate, endDate, poFilter, false, start, length);
             var totalPages = Math.Ceiling(totalTransactionCount.ToDouble() / recordsPerPage).ToInteger();
 
             allTransactions.ForEach(transaction =>
-                transaction.CreateDate = SessionVariables.CurrentAccount.ConvertToAccountTimeZone(transaction.CreateDate.Value)
+                transaction.CreateDate = currentAccount.ConvertToAccountTimeZone(transaction.CreateDate.Value)
             );
 
-            var allPos = Transaction.GetParticipationObjectsByBillerAccountId(SessionVariables.CurrentAccount.ID.Value, null, null, false);
+            var allPos = currentAccount.GetParticipationObjectsByBillerAccountId(null, null, false);
             var allParticipationObjects = allPos.DistinctBy(po => (po.ID, po.ParticipationObjectTypeId, po.Name));
 
-            ViewBag.TotalAmountPaid = SessionVariables.CurrentAccount.GetTotalAmountBilledOut(q, null, null, startDate, endDate, msgs);
-            ViewBag.TotalAmountRefunded = SessionVariables.CurrentAccount.GetTotalAmountRefunded(q, startDate, endDate, msgs);
-            ViewBag.TotalAmountRefundedManual = SessionVariables.CurrentAccount.GetTotalAmountRefundedManually(q, startDate, endDate, msgs);
-            ViewBag.TotalAmountRefundedAHQ = SessionVariables.CurrentAccount.GetTotalAmountRefundedAHQ(q, true, startDate, endDate, msgs);
-            ViewBag.TotalFeesPaid = SessionVariables.CurrentAccount.GetTotalFeesPaidAsBiller(q, null, startDate, endDate, msgs);
-            ViewBag.TotalPaidOut = SessionVariables.CurrentAccount.GetTotalPayoutAmount(q, PayoutStatus.Completed, startDate, endDate, msgs);
-            ViewBag.TotalAvailableForPayout = SessionVariables.CurrentAccount.GetMaxAmountAvailableForPayout(q, startDate, endDate, msgs);
+            ViewBag.TotalAmountPaid = currentAccount.GetTotalAmountBilledOut(q, null, null, startDate, endDate, msgs);
+            ViewBag.TotalAmountRefunded = currentAccount.GetTotalAmountRefunded(q, startDate, endDate, msgs);
+            ViewBag.TotalAmountRefundedManual = currentAccount.GetTotalAmountRefundedManually(q, startDate, endDate, msgs);
+            ViewBag.TotalAmountRefundedAHQ = currentAccount.GetTotalAmountRefundedAHQ(q, true, startDate, endDate, msgs);
+            ViewBag.TotalFeesPaid = currentAccount.GetTotalFeesPaidAsBiller(q, null, startDate, endDate, msgs);
+            ViewBag.TotalPaidOut = currentAccount.GetTotalPayoutAmount(q, PayoutStatus.Completed, startDate, endDate, msgs);
+            ViewBag.TotalAvailableForPayout = currentAccount.GetMaxAmountAvailableForPayout(q, startDate, endDate, msgs);
             ViewBag.ParticipationObjects = allParticipationObjects;
             ViewBag.Messages = msgs;
             ViewBag.PagingModel = new PagingModel()
@@ -77,6 +78,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 RecordsPerPage = recordsPerPage,
                 TotalPages = totalPages
             };
+
             return View(allTransactions);
         }
 
@@ -85,6 +87,7 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Payouts(string pn, string rpp, string sdate, string edate)
         {
+            var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
             int pageNumber = 1;
             int recordsPerPage = 25;
@@ -99,30 +102,30 @@ namespace AfterSchool.Areas.Org.Controllers
             var length = recordsPerPage;
 
             var startDate = sdate.IsDateTime() ?
-                SessionVariables.CurrentAccount.ConvertFromAccountTimeZone(sdate.ToDateTime()) :
+                currentAccount.ConvertFromAccountTimeZone(sdate.ToDateTime()) :
                 new DateTime?();
             var endDate = edate.IsDateTime() ?
-                SessionVariables.CurrentAccount.ConvertFromAccountTimeZone(edate.ToDateTime().AddDays(1).AddMilliseconds(-1)) :
+                currentAccount.ConvertFromAccountTimeZone(edate.ToDateTime().AddDays(1).AddMilliseconds(-1)) :
                 new DateTime?();
 
-            var totalPayoutAmount = SessionVariables.CurrentAccount.GetTotalPayoutAmount(null, PayoutStatus.Completed, startDate, endDate, msgs);
-            var totalPayoutCount = SessionVariables.CurrentAccount.GetPayoutCount(null, startDate, endDate);
-            var payouts = SessionVariables.CurrentAccount.GetPayouts(null, startDate, endDate, start, length);
+            var totalPayoutAmount = currentAccount.GetTotalPayoutAmount(null, PayoutStatus.Completed, startDate, endDate, msgs);
+            var totalPayoutCount = currentAccount.GetPayoutCount(null, startDate, endDate);
+            var payouts = currentAccount.GetPayouts(null, startDate, endDate, start, length);
             var totalPages = Math.Ceiling(totalPayoutCount.ToDouble() / recordsPerPage).ToInteger();
 
             payouts.ForEach(payout =>
-                payout.DateRequested = SessionVariables.CurrentAccount.ConvertToAccountTimeZone(payout.DateRequested.Value)
+                payout.DateRequested = currentAccount.ConvertToAccountTimeZone(payout.DateRequested.Value)
             );
 
             // sort transactions
             payouts = payouts.OrderByDescending(x => x.ID).ToList();
 
-            ViewBag.CanReceiveACHDeposits = SessionVariables.CurrentAccount.CanReceiveACHDeposits(msgs);
-            ViewBag.CanReceiveDeposits = SessionVariables.CurrentAccount.CanReceivePaymentDeposits(msgs);
-            ViewBag.MaxRequestAmount = SessionVariables.CurrentAccount.GetMaxAmountAvailableForPayout(search: null, msgs: msgs);
-            ViewBag.LastPayout = SessionVariables.CurrentAccount.GetLastPayout(msgs);
+            ViewBag.CanReceiveACHDeposits = currentAccount.CanReceiveACHDeposits(msgs);
+            ViewBag.CanReceiveDeposits = currentAccount.CanReceivePaymentDeposits(msgs);
+            ViewBag.MaxRequestAmount = currentAccount.GetMaxAmountAvailableForPayout(search: null, msgs: msgs);
+            ViewBag.LastPayout = currentAccount.GetLastPayout(msgs);
             ViewBag.TotalPayoutAmount = totalPayoutAmount;
-            ViewBag.TotalPendingAmount = SessionVariables.CurrentAccount.GetTotalPayoutAmount(null, PayoutStatus.InProgress, msgs: msgs);
+            ViewBag.TotalPendingAmount = currentAccount.GetTotalPayoutAmount(null, PayoutStatus.InProgress, msgs: msgs);
             ViewBag.Messages = msgs;
             ViewBag.PagingModel = new PagingModel()
             {
@@ -131,13 +134,15 @@ namespace AfterSchool.Areas.Org.Controllers
                 RecordsPerPage = recordsPerPage,
                 TotalPages = totalPages
             };
+
             return View(payouts);
         }
 
         [HttpGet]
         public ActionResult PayoutTransactions(string id)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
+            var currentAccount = SessionVariables.CurrentAccount;
+            if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
             var transactions = new List<Transaction>();
@@ -145,39 +150,43 @@ namespace AfterSchool.Areas.Org.Controllers
             if (id.IsGuid())
             {
                 var msgs = new SystemMessages();
-                var payout = Payout.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+                var payout = currentAccount.GetPayout(id.ToGuid(), msgs);
 
                 transactions = payout.GetTransactions(msgs);
 
                 ViewBag.TotalPayout = transactions.Sum(p => p.GetBillerPayout()).ToCurrency();
             }
+
             return View(transactions);
         }
 
         [HttpPost]
         public ActionResult RequestPayout()
         {
+            var currentAccount = SessionVariables.CurrentAccount;
             var transactionIds = Request.Form["TransactionIds"];
             var msgs = new SystemMessages();
 
             if (!string.IsNullOrEmpty(transactionIds))
             {
                 var ids = transactionIds.Split(',').Select(p => Convert.ToInt32(p)).ToList();
-                var transactions = Transaction.LoadList(ids, msgs);
+                var transactions = currentAccount.GetBillerAccountTransactions(ids, msgs);
 
                 ViewBag.TranIds = transactionIds;
                 ViewBag.TotalPayoutAmount = transactions.Sum(transaction => transaction.GetBillerPayout(msgs));
-                ViewBag.MaxPayoutAvailable = SessionVariables.CurrentAccount.GetMaxAmountAvailableForPayout(search: null, msgs: msgs);
+                ViewBag.MaxPayoutAvailable = currentAccount.GetMaxAmountAvailableForPayout(search: null, msgs: msgs);
                 ViewBag.Messages = msgs;
 
                 return View(transactions);
             }
+
             return null;
         }
 
         [HttpPost]
         public ActionResult RequestPayoutDone()
         {
+            var currentAccount = SessionVariables.CurrentAccount;
             var transactionIds = Request.Form["TransactionIds"];
             var transactions = new List<Transaction>();
             var msgs = new SystemMessages();
@@ -186,12 +195,12 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 var ids = transactionIds.Split(',').Select(p => p.ToInteger()).ToList();
 
-                transactions = Transaction.LoadList(ids).ToList();
+                transactions = currentAccount.GetBillerAccountTransactions(ids, msgs);
                 ViewBag.TotalAmount = transactions.Sum(p => p.GetBillerPayout()).ToCurrency();
                 ViewBag.TranIds = transactionIds;
                 ViewBag.TotalPayoutAmount = ViewBag.TotalAmount;
 
-                SessionVariables.CurrentAccount.RequestNewPayout(transactions, SessionVariables.CurrentUser, msgs);
+                currentAccount.RequestNewPayout(transactions, SessionVariables.CurrentUser, msgs);
 
                 if (msgs.HasNoErrors())
                     return View();
@@ -206,11 +215,12 @@ namespace AfterSchool.Areas.Org.Controllers
 
         public ActionResult DownloadCSV(string sdate, string edate, string poId, string poTypeId, string q)
         {
+            var currentAccount = SessionVariables.CurrentAccount;
             var startDate = sdate.IsDateTime() ?
-                SessionVariables.CurrentAccount.ConvertFromAccountTimeZone(sdate.ToDateTime()) :
+                currentAccount.ConvertFromAccountTimeZone(sdate.ToDateTime()) :
                 new DateTime?();
             var endDate = edate.IsDateTime() ?
-                SessionVariables.CurrentAccount.ConvertFromAccountTimeZone(edate.ToDateTime().AddDays(1).AddMilliseconds(-1)) :
+                currentAccount.ConvertFromAccountTimeZone(edate.ToDateTime().AddDays(1).AddMilliseconds(-1)) :
                 new DateTime?();
 
             //PO filters
@@ -222,17 +232,19 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             // transaction data
-            var billedTransactions = SessionVariables.CurrentAccount.GetBilledTransactions(q, startDate, endDate, poFilter, false, null, null);
-            var paidTransactions = SessionVariables.CurrentAccount.GetPaidTransactions(q, startDate, endDate, poFilter, false, null, null);
+            var billedTransactions = currentAccount.GetBilledTransactions(q, startDate, endDate, poFilter, false, null, null);
+            var paidTransactions = currentAccount.GetPaidTransactions(q, startDate, endDate, poFilter, false, null, null);
             var allTransactions = billedTransactions.Concat(paidTransactions).ToList();
 
             allTransactions.ForEach(transaction =>
-                transaction.CreateDate = SessionVariables.CurrentAccount.ConvertToAccountTimeZone(transaction.CreateDate.Value)
+                transaction.CreateDate = currentAccount.ConvertToAccountTimeZone(transaction.CreateDate.Value)
             );
             // sort transactions
             allTransactions = allTransactions.OrderByDescending(x => x.ID).ToList();
+
             var table = new List<List<string>>();
             var row = new List<string>();
+
             row.Add("ID");
             row.Add("CreatedOn");
             row.Add("Payer");
@@ -244,7 +256,9 @@ namespace AfterSchool.Areas.Org.Controllers
             row.Add("Your Amount");
             row.Add("Status");
             row.Add("Type");
+
             table.Add(row);
+
             foreach (var t in allTransactions)
             {
                 var registrant = t.GetPurchase()?.GetRegistrant();
@@ -265,6 +279,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 row.Add(t.PaymentTypeId.ToString().SplitByUpperCase()); // Type
                 table.Add(row);
             }
+
             string csv = CsvFile.Create(table);
 
             Response.Clear();
@@ -275,6 +290,7 @@ namespace AfterSchool.Areas.Org.Controllers
             Response.AddHeader("Content-Length", filebytes.Length.ToString());
             Response.BinaryWrite(filebytes);
             Response.End();
+
             return null;
         }
 
@@ -283,8 +299,9 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Subscriptions()
         {
+            var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
-            var plans = SessionVariables.CurrentAccount.GetSubscriptionPlans(msgs);
+            var plans = currentAccount.GetSubscriptionPlans(msgs);
             var subscriptions = new List<RegistrantSubscriptionPlan>();
 
             plans.ForEach(plan =>
@@ -304,7 +321,8 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult WithdrawAndCancel(string id, string po, string type, string returnurl)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
+            var currentAccount = SessionVariables.CurrentAccount;
+            if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
             var msgs = new SystemMessages();
@@ -313,7 +331,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                var registrant = Registrant.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+                var registrant = currentAccount.GetRegistrant(id.ToGuid(), msgs);
 
                 if (registrant.IsNotEmpty())
                 {
@@ -321,7 +339,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         participationObjectId: po.ToInteger(),
                         participationObjectType: (ParticipationObjectType)type.ToInteger(),
                         loggedInUser: SessionVariables.CurrentUser,
-                        account: SessionVariables.CurrentAccount,
+                        account: currentAccount,
                         msgs: msgs);
                 }
             }
@@ -342,19 +360,21 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult RefundRequests()
         {
+            var currentAccount = SessionVariables.CurrentAccount;
             ViewBag.Messages = new SystemMessages();
-            ViewBag.AmountAvailableToRefund = SessionVariables.CurrentAccount.GetMaxAmountAvailableForPayout(search: null);
-            return View(SessionVariables.CurrentAccount.GetRefundRequests().OrderByDescending(request => request.CreateDate).ToList());
+            ViewBag.AmountAvailableToRefund = currentAccount.GetMaxAmountAvailableForPayout(search: null);
+            return View(currentAccount.GetRefundRequests().OrderByDescending(request => request.CreateDate).ToList());
         }
 
         [HttpGet]
         public ActionResult ProcessManualRefund(string uid, string amount, string reason)
         {
+            var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
 
             if (uid.IsGuid() && amount.IsNumber())
             {
-                var transaction = Transaction.LoadByUid(uid.ToGuid(), msgs);
+                var transaction = currentAccount.GetBillerTransaction(uid.ToGuid(), msgs);
 
                 if (transaction.IsNotEmpty())
                     transaction.ManualRefund(amount.ToDecimal(), SessionVariables.CurrentUser, msgs);
@@ -370,18 +390,18 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpPost]
         public ActionResult RequestRefund(string uid, string amount, string reason)
         {
+            var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
 
             if (uid.IsGuid() && amount.IsNumber())
             {
-                var transaction = Transaction.LoadByUid(uid.ToGuid(), msgs);
+                var transaction = currentAccount.GetBillerTransaction(uid.ToGuid(), msgs); 
 
                 if (transaction.IsNotEmpty())
                     transaction.RequestRefund(amount.ToDecimal(), RefundRequestStatus.RequestedByProvider, reason, SessionVariables.CurrentUser, msgs);
 
                 if (msgs.HasNoErrors())
                     return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
-
             }
 
             return new JsonResult { Data = new { status = "error", messages = msgs }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
@@ -390,21 +410,21 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult ApproveRefundRequest(string uid)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
+            var currentAccount = SessionVariables.CurrentAccount;
+            if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
             var msgs = new SystemMessages();
 
             if (uid.IsGuid())
             {
-                var request = RefundRequest.LoadByUidByAccountId(uid.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+                var request = currentAccount.GetRefundRequest(uid.ToGuid(), msgs);
 
                 if (request.IsNotEmpty())
                     request.ApproveRequestAsProvider(null, SessionVariables.CurrentUser, msgs);
 
                 if (msgs.HasNoErrors())
                     return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
-
             }
 
             return new JsonResult { Data = new { status = "error", messages = msgs }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
@@ -413,21 +433,21 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult ApproveManualRefundRequest(string uid)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
+            var currentAccount = SessionVariables.CurrentAccount;
+            if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
             var msgs = new SystemMessages();
 
             if (uid.IsGuid())
             {
-                var request = RefundRequest.LoadByUidByAccountId(uid.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+                var request = currentAccount.GetRefundRequest(uid.ToGuid(), msgs);
 
                 if (request.IsNotEmpty())
                     request.UpdateStatus(RefundRequestStatus.ApprovedManualRefund, SessionVariables.CurrentUser, msgs);
 
                 if (msgs.HasNoErrors())
                     return new JsonResult { Data = new { status = "ok" }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
-
             }
 
             return new JsonResult { Data = new { status = "error", messages = msgs }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
@@ -436,14 +456,15 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpPost]
         public ActionResult DenyRefundRequest(string uid, string reason)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
+            var currentAccount = SessionVariables.CurrentAccount;
+            if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
             var msgs = new SystemMessages();
 
             if (uid.IsGuid())
             {
-                var request = RefundRequest.LoadByUidByAccountId(uid.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+                var request = currentAccount.GetRefundRequest(uid.ToGuid(), msgs);
 
                 if (request.IsNotEmpty())
                     request.DenyRequestAsProvider(reason, SessionVariables.CurrentUser, msgs);
@@ -463,8 +484,9 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Coupon()
         {
+            var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
-            var coupons = AfterSchoolLibrary.Models.Coupon.LoadByAccountId(SessionVariables.CurrentAccount.ID.Value, msgs);
+            var coupons = currentAccount.GetCoupons(msgs);
 
             ViewBag.Messages = msgs;
 
@@ -474,7 +496,8 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult EditCoupon(string id)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
+            var currentAccount = SessionVariables.CurrentAccount;
+            if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
             var msgs = new SystemMessages();
@@ -482,11 +505,11 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (id.IsNotBlank() && id.IsGuid())
             {
-                coupon = AfterSchoolLibrary.Models.Coupon.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+                coupon = currentAccount.GetCoupon(id.ToGuid(), msgs);
                 ViewBag.Activities = GetActivityIdsForCoupon(coupon.ID.Value);
             }
             else {
-                coupon = CouponService.CreateBlank(SessionVariables.CurrentAccount, SessionVariables.CurrentUser);
+                coupon = CouponService.CreateBlank(currentAccount, SessionVariables.CurrentUser);
             }
 
             ViewBag.Messages = msgs;            
@@ -505,17 +528,17 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpPost]
         public virtual JsonResult GetActivities()
         {
+            var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
 
             try
             {
-                var activities = Activity.LoadByAccountId(SessionVariables.CurrentAccount.ID.Value, msgs)
-                .Where(activity => activity.IsOpenOrUpcoming(msgs) && !activity.IsFree && !activity.HasPostPayPlan() && !activity.HasSubscriptionPlan())
-                .Select(m => new ModalViewModel()
-                {
-                    ID = m.ID.Value.ToString(),
-                    Title = m.Name
-                }).ToList();
+                var activities = currentAccount.GetActivities(msgs)?
+                    .Where(activity => activity.IsOpenOrUpcoming(msgs) && !activity.IsFree && !activity.HasPostPayPlan() && !activity.HasSubscriptionPlan())
+                    .Select(m => new ModalViewModel() {
+                        ID = m.ID.Value.ToString(),
+                        Title = m.Name
+                    }).ToList();
 
                 if (msgs.HasNoErrors())
                     return Json(new { success = true, status = "ok", data = activities }, JsonRequestBehavior.AllowGet);
@@ -531,17 +554,18 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpPost]
         public ActionResult SaveCoupon(string id)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
+            var currentAccount = SessionVariables.CurrentAccount;
+            if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
             var msgs = new SystemMessages();
             Coupon coupon = null;
 
             if (id.IsNotBlank() && id.IsGuid())
-                coupon = AfterSchoolLibrary.Models.Coupon.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
-            
-            if(coupon.IsEmpty())
-                coupon = CouponService.CreateBlank(SessionVariables.CurrentAccount, SessionVariables.LoggedInUser);
+                coupon = currentAccount.GetCoupon(id.ToGuid(), msgs);
+
+            if (coupon.IsEmpty())
+                coupon = CouponService.CreateBlank(currentAccount, SessionVariables.LoggedInUser);
 
             var name = Request.Form["name"];
             var description = Request.Form["description"];
@@ -590,7 +614,6 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 var ids = new List<int>();
                 var loggedInUser = SessionVariables.CurrentUser;
-                var account = SessionVariables.CurrentAccount;
 
                 if (activityIds.IsNotBlank())
                     ids = activityIds.Split(',').Select(p => Convert.ToInt32(p)).ToList();
@@ -599,7 +622,7 @@ namespace AfterSchool.Areas.Org.Controllers
                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
                    {
                        // create new coupon
-                       coupon = account.CreateorUpdateCoupon(
+                       coupon = currentAccount.CreateorUpdateCoupon(
                             coupon: coupon,
                             amount: amount.ToDecimal(),
                             expirationDate: hasExpirationDate ? expirationDate.ToDateTime() : new DateTime?(),
@@ -642,7 +665,6 @@ namespace AfterSchool.Areas.Org.Controllers
             }
             else
             {
-
                 ViewBag.Messages = msgs;
                 ViewBag.Activities = activityIds;
 

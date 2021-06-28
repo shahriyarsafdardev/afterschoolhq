@@ -40,6 +40,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\afterschoollibrary-standard\AfterSchoolLibrary\AfterSchoolLibrary.csproj" />
+    <ProjectReference Include="..\AfterSchool\after-school-hq.csproj" />
     <ProjectReference Include="..\basiclibrary-standard\BasicLibrary\BasicLibrary.vbproj" />
   </ItemGroup>
 

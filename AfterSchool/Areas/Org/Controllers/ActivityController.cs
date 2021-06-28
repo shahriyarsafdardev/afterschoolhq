@@ -13,6 +13,7 @@ using Hangfire;
 using AfterSchoolLibrary.Billing;
 using AfterSchoolLibrary;
 using AfterSchoolLibrary.Helpers;
+using ServiceStack.Text;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -25,18 +26,20 @@ namespace AfterSchool.Areas.Org.Controllers
 
         public ActionResult Summary(string id)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
+            var currentAccount = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
+
+            if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
-            var msgs = new SystemMessages();
-            var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
             if (activity.IsEmpty())
                 return HttpNotFound();
 
             var actions = SessionAction.LoadByAccountIdByActivityId(
                 activity.ID.Value,
-                SessionVariables.CurrentAccount.ID.Value,
+                currentAccount.ID.Value,
                 new List<SessionActionType>() {
                     SessionActionType.ActivityRegistrationUpdated,
                     SessionActionType.ActivityRegistrationCompleted,
@@ -65,10 +68,12 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Index(string group, string pn, string rpp, string archive, string copyerror, string type)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
-                return HttpNotFound();
-
+            var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
+
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+            
             int pageNumber = 1;
             int recordsPerPage = 10;
             bool isArchived = false;
@@ -96,16 +101,16 @@ namespace AfterSchool.Areas.Org.Controllers
             ActivityGroup activityGroup = null;
             if (group.IsGuid())
             {
-                activityGroup = ActivityGroup.LoadByUidByAccountId(group.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+                activityGroup = currentAccount.GetActivityGroup(group.ToGuid(), msgs);
                 totalActivityCount = activityGroup.GetActivityCount(ActivityType.Activity, isArchived, false, null, msgs);
                 activities = activityGroup.GetActivities(ActivityType.Activity, isArchived, false, start, length, msgs: msgs);
                 hasArchivedActivities = activityGroup.GetActivityCount(ActivityType.Activity, true, false, null, msgs) > 0;
             }
             else
             {
-                var getUngroupActivitiesOnly = SessionVariables.CurrentAccount.AccountTypeId == AccountType.School;
+                var getUngroupActivitiesOnly = currentAccount.AccountTypeId == AccountType.School;
 
-                totalActivityCount = SessionVariables.CurrentAccount.GetActivityCount(
+                totalActivityCount = currentAccount.GetActivityCount(
                     SessionVariables.AccountUserType, 
                     SessionVariables.CurrentUser, 
                     activityType, 
@@ -114,7 +119,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     getUngroupActivitiesOnly, 
                     msgs);
 
-                activities = SessionVariables.CurrentAccount.GetActivities(
+                activities = currentAccount.GetActivities(
                     SessionVariables.AccountUserType, 
                     SessionVariables.CurrentUser, 
                     activityType, 
@@ -125,7 +130,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     length, 
                     msgs);
 
-                hasArchivedActivities = SessionVariables.CurrentAccount.GetActivityCount(
+                hasArchivedActivities = currentAccount.GetActivityCount(
                     SessionVariables.AccountUserType, 
                     SessionVariables.CurrentUser, 
                     activityType,
@@ -148,8 +153,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add("Error creating copy", MessageType.Error);
 
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.Messages = new SystemMessages();
-            ViewBag.Groups = SessionVariables.CurrentAccount.GetSessions();
+            ViewBag.Messages = msgs;
+            ViewBag.Groups = currentAccount.GetSessions();
             ViewBag.Group = activityGroup;
             ViewBag.NeedToUpgrade = totalActivityCount >= SessionVariables.AccountPackage.GetFeature(FeatureType.Activities).GetMaxValue();
             ViewBag.HasArchivedActivities = hasArchivedActivities;
@@ -170,7 +175,8 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult EditSetup(string id, string group, string type)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
+            var currentAccount = SessionVariables.CurrentAccount;
+            if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
             var msgs = new SystemMessages();
@@ -179,12 +185,12 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (id.IsGuid())
             {
-                activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
-                activityGroup = activity.GetActivityGroup(SessionVariables.CurrentAccount.ID.Value, msgs);
+                activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+                activityGroup = activity.GetActivityGroup(currentAccount.ID.Value, msgs);
             }
             else
             {
-                activity = SessionVariables.CurrentAccount.GetDefaultNewActivity();
+                activity = currentAccount.GetDefaultNewActivity();
                 activity.RegistrationModeId = RegistrationMode.Register;
 
                 if (type.IsNotEmpty() && type.IsNumber())
@@ -193,10 +199,10 @@ namespace AfterSchool.Areas.Org.Controllers
                 if (activity.ActivityTypeId == ActivityType.LearningPod)
                     activity.IsInviteOnly = true;
 
-                //this means a new activity is  being added to an existing enrollment group
+                //this means a new activity is being added to an existing enrollment group
                 if (group.IsGuid())
                 {
-                    activityGroup = ActivityGroup.LoadByUidByAccountId(group.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+                    activityGroup = currentAccount.GetActivityGroup(group.ToGuid(), msgs);
                     activity.RegistrationModeId = activityGroup.RegistrationModeId;
                 }
             }
@@ -210,12 +216,13 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpPost]
         public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd, string type, string inviteonly, string minseatsrequired, string isAdvanceSettingEnabled)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
-                return HttpNotFound();
-
-            var msgs = new SystemMessages();
-            var currentAccount = SessionVariables.CurrentAccount;
+            var currentAccount = SessionVariables.CurrentAccount;            
             var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();
+
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+            
             Activity activity;
             Activity defaultActivity;
             ActivityGroup activityGroup = null;
@@ -224,7 +231,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (id.IsEmpty() || !id.IsGuid())
                 return HttpNotFound();
 
-            activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+            activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             defaultActivity = currentAccount.GetDefaultNewActivity();
 
             if (name.IsEmpty())
@@ -235,15 +242,11 @@ namespace AfterSchool.Areas.Org.Controllers
             if (form.IsEmpty() && (isAdvanceSettingEnabled.IsEmpty() || !isAdvanceSettingEnabled.ToBoolean()))
             {
                 if (activity.IsNotEmpty())
-                {
                     //.. edit activity
                     activeForm = activity.GetActiveActivityForm(msgs);
-                }
                 else
-                {
                     //.. create activity
                     activeForm = currentAccount.GetDefaultActivityForm(msgs);
-                }
 
                 if (activeForm.IsEmpty())
                 {
@@ -298,8 +301,9 @@ namespace AfterSchool.Areas.Org.Controllers
                     if (msgs.HasNoErrors())
                     {
                         msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
-                        WebSessionUtilities.LogActivity(
-                            webSessionId: SessionVariables.WebSession.ID.Value,
+
+                        SessionVariables.WebSession.LogActivity(
+                            account: currentAccount,
                             actor: currentUser,
                             actionType: WebSessionActionType.Updated,
                             objectType: ObjectType.Activity,
@@ -322,13 +326,9 @@ namespace AfterSchool.Areas.Org.Controllers
                         if (msgs.HasNoErrors())
                         {
                             if (values.Any(m => m.Key == "form"))
-                            {
                                 values["form"] = newForm.ID.Value.ToString();
-                            }
                             else
-                            {
                                 values.Add("form", newForm.ID.Value.ToString());
-                            }
                         }
                     }
 
@@ -348,8 +348,9 @@ namespace AfterSchool.Areas.Org.Controllers
                     if (msgs.HasNoErrors())
                     {
                         msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
-                        WebSessionUtilities.LogActivity(
-                            webSessionId: SessionVariables.WebSession.ID.Value,
+
+                        SessionVariables.WebSession.LogActivity(
+                            account: currentAccount,
                             actor: currentUser,
                             actionType: WebSessionActionType.Created,
                             objectType: ObjectType.Activity,
@@ -363,10 +364,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
 
                 if (group.IsGuid())
-                    activityGroup = ActivityGroup.LoadByUidByAccountId(group.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);                
-
-                if (msgs.HasNoErrors())
-                    msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
+                    activityGroup = currentAccount.GetActivityGroup(group.ToGuid(), msgs);                
 
                 switch (cmd)
                 {
@@ -436,14 +434,15 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult EditRestrictions(string id)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
+            var currentAccount = SessionVariables.CurrentAccount;
+            if (currentAccount.IsEmpty())
                 return HttpNotFound();
             
             var msgs = new SystemMessages();
-            var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
-            ViewBag.Messages = new SystemMessages();
-            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.Messages = msgs;
+            ViewBag.Account = currentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.ActiveMenu = "EditRestrictions";
             ViewBag.IsFullScreen = GetIsFullScreen(activity);
@@ -462,7 +461,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
-            activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+            activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             if (activity.IsNotEmpty())
             {
                 if (!accountPackage.HasFeature(FeatureType.AllowStudentRegistration) && requiresparentalconsent.IsBlank())
@@ -507,8 +506,9 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
-                WebSessionUtilities.LogActivity(
-                    webSessionId: SessionVariables.WebSession.ID.Value,
+
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
                     actor: currentUser,
                     actionType: WebSessionActionType.Updated,
                     objectType: ObjectType.Activity,
@@ -521,7 +521,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             ViewBag.Messages = msgs;
-            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.Account = currentAccount;
             ViewBag.AccountPackage = accountPackage;
 
             if (msgs.HasNoErrors())
@@ -548,16 +548,17 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult EditContact(string id)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
+            var currentAccount = SessionVariables.CurrentAccount;
+            if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
             var msgs = new SystemMessages();
-            var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
             ViewBag.Messages = msgs;
-            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.Account = currentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.Instructors = SessionVariables.CurrentAccount.GetUsers(msgs: msgs);
+            ViewBag.Instructors = currentAccount.GetUsers(msgs: msgs);
             ViewBag.ActiveMenu = "EditContact";
             ViewBag.IsFullScreen = GetIsFullScreen(activity);
             return View(activity);
@@ -566,14 +567,15 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpPost]
         public ActionResult EditContact(string id, string leadertype, string contactname, string contactphone, string contactemail, string instructor, string instructorfirstname, string instructorlastname, string instructoremail, string instructorphone, string cmd, string provider, string providername, string providerfirstname, string providerlastname, string provideremail, string providerphone)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
-                return HttpNotFound();
-
             var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+            
             Activity activity = null;
             var beforeProviderAccountId = new int?();
-            var currentUser = SessionVariables.CurrentUser;
-            var currentAccount = SessionVariables.CurrentAccount;
 
             var values = new Dictionary<string, object>()
             {
@@ -594,7 +596,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 { "providerphone", providerphone }
             };
 
-            activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+            activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             beforeProviderAccountId = activity.ProviderAccountId;
 
             if (activity.IsNotEmpty())
@@ -610,8 +612,9 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
-                WebSessionUtilities.LogActivity(
-                    webSessionId: SessionVariables.WebSession.ID.Value,
+
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
                     actor: currentUser,
                     actionType: WebSessionActionType.Updated,
                     objectType: ObjectType.Activity,
@@ -624,15 +627,15 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             ViewBag.Messages = msgs;
-            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.Account = currentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.Instructors = SessionVariables.CurrentAccount.GetUsers(msgs: msgs);
+            ViewBag.Instructors = currentAccount.GetUsers(msgs: msgs);
             ViewBag.IsFullScreen = GetIsFullScreen(activity);
 
             if (msgs.HasNoErrors())
             {
                 if (beforeProviderAccountId != activity.ProviderAccountId)
-                    ActivityService.NotifyProviderOfNewActivity(activity, SessionVariables.CurrentUser, msgs);
+                    ActivityService.NotifyProviderOfNewActivity(activity, currentUser, msgs);
 
                 switch (cmd)
                 {
@@ -661,14 +664,15 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult EditDetails(string id)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
+            var currentAccount = SessionVariables.CurrentAccount;
+            if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
             var msgs = new SystemMessages();
-            var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
             ViewBag.Messages = new SystemMessages();
-            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.Account = currentAccount;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.ActiveMenu = "EditDetails";
@@ -680,18 +684,19 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpPost]
         public ActionResult EditDetails(string id, string description, string details, string cmd)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
-                return HttpNotFound();
-
-            var msgs = new SystemMessages();
-            var currentUser = SessionVariables.CurrentUser;
             var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();
+
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+            
             Activity activity = null;
 
             if (details.IsEmpty())
                 msgs.Add($"{UILabel.ActivityLabel()} Details is required", MessageType.UserError);
 
-            activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+            activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             if (activity.IsNotEmpty())
             {
                 var values = new Dictionary<string, object>()
@@ -714,8 +719,9 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
-                WebSessionUtilities.LogActivity(
-                    webSessionId: SessionVariables.WebSession.ID.Value,
+
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
                     actor: currentUser,
                     actionType: WebSessionActionType.Updated,
                     objectType: ObjectType.Activity,
@@ -723,8 +729,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     objectText: activity.Name,
                     indirectObjectType: ObjectType.Account,
                     indirectObjectId: currentAccount.ID.Value,
-                    indirectObjectText: currentAccount.Name
-                );
+                    indirectObjectText: currentAccount.Name,
+                    msgs: msgs);
             }
 
             ViewBag.Messages = msgs;
@@ -754,13 +760,15 @@ namespace AfterSchool.Areas.Org.Controllers
 
         private void LoadEditScheduleViewBag(Activity activity, string scheduleId)
         {
+            var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
-            ViewBag.Account = SessionVariables.CurrentAccount;
+
+            ViewBag.Account = currentAccount;
             ViewBag.ActivityId = activity.Uid.ToString();
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.ActiveMenu = "EditSchedule";
-            ViewBag.Schedules = SessionVariables.CurrentAccount.GetActivitySchedules(msgs);
+            ViewBag.Schedules = currentAccount.GetActivitySchedules(msgs);
             ViewBag.IsFullScreen = GetIsFullScreen(activity);
 
             ActivitySchedule schedule = null;
@@ -768,8 +776,8 @@ namespace AfterSchool.Areas.Org.Controllers
             // changing schedule
             if (scheduleId.IsNumber())
             {
-                schedule = ActivitySchedule.LoadByIdByAccountId(scheduleId, SessionVariables.CurrentAccount.ID.Value, msgs);
-                if (schedule.AccountId != SessionVariables.CurrentAccount.ID)
+                schedule = currentAccount.GetActivitySchedule(scheduleId.ToInteger(), msgs);
+                if (schedule.AccountId != currentAccount.ID)
                     schedule = null;
             }
 
@@ -787,11 +795,13 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult EditSchedule(string id, string schedule)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
+            var currentAccount = SessionVariables.CurrentAccount;
+
+            if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
             var msgs = new SystemMessages();
-            var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
             LoadEditScheduleViewBag(activity, schedule);
             return View(activity);
@@ -813,7 +823,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
-            activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+            activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             if (activity.IsNotEmpty() && hasschedule.IsBoolean() && hasschedule.ToBoolean())
             {
                 var filteredParams = Request.Params.Filter("schedulerepeat-");
@@ -866,8 +876,9 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
-                WebSessionUtilities.LogActivity(
-                    webSessionId: SessionVariables.WebSession.ID.Value,
+
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
                     actor: currentUser,
                     actionType: WebSessionActionType.Updated,
                     objectType: ObjectType.Activity,
@@ -926,10 +937,16 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult EditLocation(string id)
         {
-            var activity = Activity.LoadByUid(id.ToGuid());
+            var currentAccount = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
 
-            ViewBag.Messages = new SystemMessages();
-            ViewBag.Account = SessionVariables.CurrentAccount;
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+
+            ViewBag.Messages = msgs;
+            ViewBag.Account = currentAccount;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.ActiveMenu = "EditLocation";
@@ -943,13 +960,14 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult EditLocation(string id, string location, string locationname, string locationdetails,string address1, string streetnumber, string streetname, string address2, string neighborhood, string city, string county, string state, 
             string postalcode, string country, string placeid, decimal latitude, decimal longitude, string mylocation, string locationtype, string cmd, string activitylocationtype, string virtuallocation, string hidepreciselocation = "0")
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
+            var currentAccount = SessionVariables.CurrentAccount;           
+            var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();
+
+            if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
-            var msgs = new SystemMessages();
-            var currentUser = SessionVariables.CurrentUser;
-            var currentAccount = SessionVariables.CurrentAccount;
-            Activity activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
             if (location.IsEmpty())
                 msgs.Add("Location is required", MessageType.UserError);
@@ -995,8 +1013,9 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
-                WebSessionUtilities.LogActivity(
-                    webSessionId: SessionVariables.WebSession.ID.Value,
+
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
                     actor: currentUser,
                     actionType: WebSessionActionType.Updated,
                     objectType: ObjectType.Activity,
@@ -1041,13 +1060,14 @@ namespace AfterSchool.Areas.Org.Controllers
 
         private void LoadEditCostViewBag(Activity activity, SystemMessages msgs)
         {
-            var canProcessPayments = SessionVariables.CurrentAccount.CanProcessPayments(msgs);
+            var currentAccount = SessionVariables.CurrentAccount;
+            var canProcessPayments = currentAccount.CanProcessPayments(msgs);
 
             if (!canProcessPayments)
                 activity.AllowToPayLater = true;
 
             ViewBag.Messages = msgs;
-            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.Account = currentAccount;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.CanProcessPayments = canProcessPayments;
@@ -1062,11 +1082,12 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult EditCost(string id)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
+            var currentAccount = SessionVariables.CurrentAccount;
+            if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
             var msgs = new SystemMessages();
-            var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             LoadEditCostViewBag(activity, msgs);
             return View(activity);
         }
@@ -1075,15 +1096,16 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult EditCost(string id, string cost, string costdescription, string acceptpaypal, string acceptcreditcard, string allowtopaylater, string cmd, 
             string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string isongoingsubscription, string subscriptionPlanPeriodNumber, string subscriptionPaymentStartType, string subscriptionStartDate, string subscriptionEndDate,
             string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, string paymentplanpaymentstarttype, string splitcostevenly, string regfeedownpayment, 
-            string haspostpayplan, string postpaycost, string isparentpricepostpay, string isparentpricecost, string isparentpricepaymentplan, string isparentpricesubscription, string prepaidperiodspostpay)
+            string haspostpayplan, string postpaycost, string isparentpricepostpay, string isparentpricecost, string isparentpricepaymentplan, string isparentpricesubscription, string prepaidperiodspostpay, string postpayplanperiod)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
-                return HttpNotFound();
-
-            var msgs = new SystemMessages();
-            var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
-            var currentUser = SessionVariables.CurrentUser;
             var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();
+
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+            
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
             if (id.IsGuid())
             {
@@ -1125,6 +1147,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "isparentpricepaymentplan", isparentpricepaymentplan},
                     { "isparentpricesubscription", isparentpricesubscription },
                     { "prepaidperiodspostpay", prepaidperiodspostpay },
+                    { "postpayplanperiod", postpayplanperiod },
                 };
 
                 activity = ActivityService.EditExisting(
@@ -1141,8 +1164,9 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
-                WebSessionUtilities.LogActivity(
-                    webSessionId: SessionVariables.WebSession.ID.Value,
+
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
                     actor: currentUser,
                     actionType: WebSessionActionType.Updated,
                     objectType: ObjectType.Activity,
@@ -1183,14 +1207,15 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult EditConfirmation(string id)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
+            var currentAccount = SessionVariables.CurrentAccount;
+            if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
             var msgs = new SystemMessages();
-            var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
-            ViewBag.Messages = new SystemMessages();
-            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.Messages = msgs;
+            ViewBag.Account = currentAccount;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.ActiveMenu = "EditConfirmation";
@@ -1202,13 +1227,14 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpPost]
         public ActionResult EditConfirmation(string id, string registrationthankyouemail, string applicationthankyouemail, string interestthankyouemail, string cmd)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();
+
+            if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
-            var msgs = new SystemMessages();
-            var currentUser = SessionVariables.CurrentUser;
-            var currentAccount = SessionVariables.CurrentAccount;
-            Activity activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
             if (id.IsGuid())
             {
@@ -1233,8 +1259,9 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
-                WebSessionUtilities.LogActivity(
-                    webSessionId: SessionVariables.WebSession.ID.Value,
+
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
                     actor: currentUser,
                     actionType: WebSessionActionType.Updated,
                     objectType: ObjectType.Activity,
@@ -1284,21 +1311,20 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpPost]
         public ActionResult Copy(string id, string activitynamecopy, string usesameformcopy, string copywithregistrants, string type)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
-                return HttpNotFound();
-
-            var msgs = new SystemMessages();
-            var activityToCopy = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
-            var currentUser = SessionVariables.CurrentUser;
             var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();
+
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+            
+            var activityToCopy = currentAccount.GetActivity(id.ToGuid(), msgs);
 
             var activity = activityToCopy.Copy(
                             activitynamecopy,
                             true,
                             currentUser.ID.Value,
-                            msgs);
-
-            ViewBag.Messages = msgs;
+                            msgs);            
 
             // Show Success Message
             // LOG: Someone Updated Activity ActivityName for Account AccountName
@@ -1306,8 +1332,9 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Copied", MessageType.Success);
-                WebSessionUtilities.LogActivity(
-                    webSessionId: SessionVariables.WebSession.ID.Value,
+
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
                     actor: currentUser,
                     actionType: WebSessionActionType.Copied,
                     objectType: ObjectType.Activity,
@@ -1318,35 +1345,37 @@ namespace AfterSchool.Areas.Org.Controllers
                     indirectObjectText: currentAccount.Name
                 );
 
+                ViewBag.Messages = msgs;
                 return RedirectToAction("editsetup", new { id = activity.Uid, isnew = 1, source = Request["source"] });
             }
 
+            ViewBag.Messages = msgs;
             return RedirectToAction("index", "activity", new { copyerror = true, type });
         }
 
         [HttpGet]
         public ActionResult Delete(string id)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();
+
+            if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
-            var msgs = new SystemMessages();
-            var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
-            var currentUser = SessionVariables.CurrentUser;
-            var currentAccount = SessionVariables.CurrentAccount;
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
             if (activity.IsNotEmpty())
-                msgs.AddRange(activity.MarkAsDeleted(currentUser.ID.Value));
-
-            ViewBag.Messages = msgs;
+                msgs.AddRange(activity.MarkAsDeleted(currentUser.ID.Value));            
 
             // Show Success Message
             // LOG: Someone has Deleted Activity ActivityName for Account AccountName
             if (msgs.HasNoErrors())
             {
                 msgs.Add(string.Format("{0} has been deleted", activity.Name), MessageType.Success);
-                WebSessionUtilities.LogActivity(
-                   webSessionId: SessionVariables.WebSession.ID.Value,
+
+                SessionVariables.WebSession.LogActivity(
+                   account: currentAccount,
                    actor: currentUser,
                    actionType: WebSessionActionType.Deleted,
                    objectType: ObjectType.Activity,
@@ -1357,6 +1386,8 @@ namespace AfterSchool.Areas.Org.Controllers
                    indirectObjectText: currentAccount.Name
                );
             }
+            
+            ViewBag.Messages = msgs;
 
             if (Request.UrlReferrer.IsNotEmpty())
                 return Redirect(Request.UrlReferrer.ToString());
@@ -1367,36 +1398,38 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Archive(string id)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();
+
+            if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
-            var msgs = new SystemMessages();
-            var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
-            var currentUser = SessionVariables.CurrentUser;
-            var currentAccount = SessionVariables.CurrentAccount;
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
             if (activity.IsNotEmpty())
-                msgs.AddRange(activity.MoveToArchive(currentUser.ID.Value));
-
-            ViewBag.Messages = msgs;
+                msgs.AddRange(activity.MoveToArchive(currentUser.ID.Value));            
 
             // Show Success Message
             // LOG: Someone Archived Activity ActivityName for Account AccountName
             if (msgs.HasNoErrors())
             {           
                 msgs.Add(string.Format("{0} has been archived", activity.Name), MessageType.Success);
-                WebSessionUtilities.LogActivity(
-                   webSessionId: SessionVariables.WebSession.ID.Value,
-                   actor: currentUser,
-                   actionType: WebSessionActionType.Archived,
-                   objectType: ObjectType.Activity,
-                   objectId: activity.ID.Value,
-                   objectText: activity.Name,
-                   indirectObjectType: ObjectType.Account,
-                   indirectObjectId: currentAccount.ID.Value,
-                   indirectObjectText: currentAccount.Name
+
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
+                    actor: currentUser,
+                    actionType: WebSessionActionType.Archived,
+                    objectType: ObjectType.Activity,
+                    objectId: activity.ID.Value,
+                    objectText: activity.Name,
+                    indirectObjectType: ObjectType.Account,
+                    indirectObjectId: currentAccount.ID.Value,
+                    indirectObjectText: currentAccount.Name
                );
             }
+
+            ViewBag.Messages = msgs;
 
             if (Request.UrlReferrer.IsNotEmpty())
                 return Redirect(Request.UrlReferrer.ToString());
@@ -1407,36 +1440,38 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Restore(string id)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();
+
+            if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
-            var msgs = new SystemMessages();
-            var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
-            var currentUser = SessionVariables.CurrentUser;
-            var currentAccount = SessionVariables.CurrentAccount;
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
             if (activity.IsNotEmpty())
                 msgs.AddRange(activity.MoveFromArchive(currentUser.ID.Value));
-
-            ViewBag.Messages = msgs;
 
             // Show Success Message
             // LOG: Someone Restored Activity ActivityName for Account AccountName
             if (msgs.HasNoErrors())
             {
                 msgs.Add(string.Format("{0} has been restored", activity.Name), MessageType.Success);
-                WebSessionUtilities.LogActivity(
-                   webSessionId: SessionVariables.WebSession.ID.Value,
-                   actor: currentUser,
-                   actionType: WebSessionActionType.Restored,
-                   objectType: ObjectType.Activity,
-                   objectId: activity.ID.Value,
-                   objectText: activity.Name,
-                   indirectObjectType: ObjectType.Account,
-                   indirectObjectId: currentAccount.ID.Value,
-                   indirectObjectText: currentAccount.Name
+
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
+                    actor: currentUser,
+                    actionType: WebSessionActionType.Restored,
+                    objectType: ObjectType.Activity,
+                    objectId: activity.ID.Value,
+                    objectText: activity.Name,
+                    indirectObjectType: ObjectType.Account,
+                    indirectObjectId: currentAccount.ID.Value,
+                    indirectObjectText: currentAccount.Name
                );
             }
+
+            ViewBag.Messages = msgs;
 
             if (Request.UrlReferrer.IsNotEmpty())
                 return Redirect(Request.UrlReferrer.ToString());
@@ -1450,11 +1485,13 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Attendance(string id, string orderby, string direction, string pn, string rpp, string msg)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
+            var currentAccount = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
+
+            if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
-            var msgs = new SystemMessages();
-            var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             if (msg.IsNotEmpty())
                 msgs.Add(msg, msg.Contains("error") || msg.Contains("Error") ? MessageType.UserError : MessageType.Success);
 
@@ -1476,7 +1513,6 @@ namespace AfterSchool.Areas.Org.Controllers
             if (direction.IsNotBlank())
                 orderbyDirection = (OrderByDirectionEnum)Enum.Parse(typeof(OrderByDirectionEnum), direction);
 
-
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
 
@@ -1484,7 +1520,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (activity.IsNotEmpty())
             {
-                attendances = activity.GetAttendance(orderByParam, orderbyDirection, start, length, msgs);
+                attendances = activity.GetCompletedAttendanceWithPaging(orderByParam, orderbyDirection, start, length, msgs);
                 totalAttendanceCount = activity.GetTotalAttendanceCount(msgs);
 
                 if (totalAttendanceCount > 0)
@@ -1510,13 +1546,15 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult TrackAttendance(string id, string att, string actinst)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
+            var currentAccount = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
+
+            if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
-            var msgs = new SystemMessages();
             var attendanceId = att.IsNumber() ? att.ToInteger() : new int?();
             var activityInstanceId = actinst.IsNumber() ? actinst.ToInteger() : new int?();
-            var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             var attendance = activity.GetOrCreateNewAttendance(attendanceId, activityInstanceId, SessionVariables.CurrentUser, msgs);
 
             if (attendance.IsEmpty())
@@ -1532,12 +1570,14 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpPost]
         public ActionResult TrackAttendance(string id, string att)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
+            var currentAccount = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
+
+            if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
-            var msgs = new SystemMessages();
             var presentStudents = new List<int>();
-            var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             var attendance = AfterSchoolLibrary.Models.Attendance.Load(att.ToInteger(), msgs);
 
             attendance.GetAttendanceRegistrants(msgs).ForEach(attendanceRegistrant => {
@@ -1555,68 +1595,143 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(attendance);
         }
 
-        // This returns all uncompleted AttendanceRegistrants by Registrant
-        private Dictionary<RegistrantActivity,List<Attendance>> GetRegistrantActivityAttendances(List<RegistrantActivity> registrantActivities, List<Attendance> attendances, SystemMessages msgs)
+        // This returns all unbilled selected Attendances by Registrant
+        private Dictionary<RegistrantActivity, List<Attendance>> GetAttendancesToBillPerRegistrantActivity(Account currentAccount, List<RegistrantActivity> registrantActivities, List<Attendance> attendances, BillingPeriodType billingPeriodType, SystemMessages msgs)
         {
             Dictionary<RegistrantActivity, List<Attendance>> registrantActivityAttendanceCounts = new Dictionary<RegistrantActivity, List<Attendance>>();
-
+    
             registrantActivities.ForEach(registrantActivity =>
             {
-                var attendancesToCharge = attendances.FindAll(attendance =>
+                //.. special case: post pay plan with # of Pre-pay
+                var activity = registrantActivity.GetActivity(msgs);
+                var postPayPlan = activity.GetPostPayPlan(msgs);
+                var attendancesToCharge = new List<Attendance>();
+
+                switch (postPayPlan.BillingPeriodTypeId)
                 {
-                    var attendanceRegistrant = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(attendance.ID.Value, registrantActivity.RegistrantId.Value, msgs).FirstOrDefault();
-                    if (attendanceRegistrant.IsNotEmpty() && !attendanceRegistrant.IsAlreadyBilled)
-                        return attendanceRegistrant.NumberPresent > 0;        
+                    case BillingPeriodType.Day:
 
-                    return false;
-                }).ToList();
+                        attendancesToCharge = attendances.FindAll(attendance =>
+                        {
+                            var attendanceRegistrant = currentAccount.GetAttendanceRegistrant(activity, attendance.ID.Value, registrantActivity.RegistrantId.Value, msgs);
+                            if (attendanceRegistrant.IsNotEmpty() && !attendanceRegistrant.IsAlreadyBilled)
+                                return attendanceRegistrant.NumberPresent > 0;
 
-                registrantActivityAttendanceCounts.Add(registrantActivity, attendancesToCharge);
+                            return false;
 
+                        }).ToList();
+
+                        registrantActivityAttendanceCounts.Add(registrantActivity, attendancesToCharge);
+
+                        break;
+
+                    case BillingPeriodType.Week:
+                       
+                        attendances.ForEach(attendance =>
+                        {
+                            var currentWeekPresent = currentAccount.GetAttendanceRegistrantByDateRange(
+                                                        activity, 
+                                                        registrantActivity.RegistrantId.Value, 
+                                                        new DateRange(
+                                                            attendance.Date.Value.FirstDateOfWeek().Date,
+                                                            attendance.Date.Value.LastDateOfWeek().Date.AddDays(1).AddMilliseconds(-1)
+                                                        ) )
+                                                        .Where(item => item.NumberPresent > 0)
+                                                        .OrderBy(item => item.AttendanceDate.Value)
+                                                        .ToList();
+
+                            if (currentWeekPresent.Any() && !currentWeekPresent.Any(item => item.IsAlreadyBilled))
+                            {
+                                var firstAttendanceOfWeek = currentWeekPresent.First().GetAttendance(msgs);
+
+                                var currentUser = SessionVariables.CurrentUser;
+                                var attendanceRegistrant = currentAccount.GetAttendanceRegistrant(activity, attendance.ID.Value, registrantActivity.RegistrantId.Value, msgs);
+
+                                if (attendanceRegistrant.IsNotEmpty() && firstAttendanceOfWeek.IsNotEmpty() && !attendanceRegistrant.IncludeNextAvailablePrePayment(currentUser, msgs)  && !attendancesToCharge.Any(item => item.ID == firstAttendanceOfWeek.ID))
+                                    attendancesToCharge.Add(firstAttendanceOfWeek);
+                            }
+
+                        });
+
+                        registrantActivityAttendanceCounts.Add(registrantActivity, attendancesToCharge);
+
+                        break;
+                }                
+
+                
             });
 
             return registrantActivityAttendanceCounts;
         }
 
-        // This returns all completed AttendanceRegistrants by Attendance
-        private Dictionary<Attendance, int> GetAttendanceRegistrantActivityCounts(List<Attendance> attendances, List<RegistrantActivity> registrantActivities,  SystemMessages msgs)
+        // This returns billed Attendances and the count of Registrants Billed for billing period
+        private Dictionary<Attendance, List<int>> GetNumberOfRegistrantsBilledPerAttendance(List<Attendance> attendances, BillingPeriodType billingPeriodType, SystemMessages msgs = null)
         {
-            Dictionary<Attendance, int> attendanceRegistrantActivityCounts = new Dictionary<Attendance, int>();
+            var numberOfRegistrantsBilledPerAttendance = new Dictionary<Attendance, List<int>>();
 
             attendances.ForEach(attendance =>
             {
-                var numberOfRegistrants = registrantActivities.FindAll(registrantActivity =>
+                var registrantIdsBilled = AttendanceRegistrant.LoadByAttendanceId(attendance.ID.Value, msgs).Where(ar => ar.IsAlreadyBilled).Select(rb => rb.RegistrantId.Value).Distinct().ToList();
+
+                switch (billingPeriodType)
                 {
-                    var attendanceRegistrant = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(attendance.ID.Value, registrantActivity.RegistrantId.Value, msgs).First();
-                    if (attendanceRegistrant.IsNotEmpty() && attendanceRegistrant.TransactionId.HasValue)
-                        return attendanceRegistrant.NumberPresent > 0;
+                    case BillingPeriodType.Day:
+                        if (numberOfRegistrantsBilledPerAttendance.ContainsKey(attendance))
+                        {
+                            registrantIdsBilled.ForEach(rbId =>
+                            {
+                                if (!numberOfRegistrantsBilledPerAttendance[attendance].Contains(rbId))
+                                    numberOfRegistrantsBilledPerAttendance[attendance].Add(rbId);
+                            });
+                        }
+                        else
+                            numberOfRegistrantsBilledPerAttendance.Add(attendance, registrantIdsBilled);
+                        
+                        break;
 
-                    return false;
-                }).Count;
+                    case BillingPeriodType.Week:
+                        var attendanceIsInSameWeekAsExisitingAttendanceInList = numberOfRegistrantsBilledPerAttendance.FirstOrDefault(keyPair => keyPair.Key.Date.Value.DatesAreInSameWeek(attendance.Date.Value)).Key;
+                        if (attendanceIsInSameWeekAsExisitingAttendanceInList.IsNotEmpty())
+                        {
+                            registrantIdsBilled.ForEach(rbId =>
+                            {
+                                if (!numberOfRegistrantsBilledPerAttendance[attendanceIsInSameWeekAsExisitingAttendanceInList].Contains(rbId))
+                                    numberOfRegistrantsBilledPerAttendance[attendanceIsInSameWeekAsExisitingAttendanceInList].Add(rbId);
+                            });
+                        }
+                        else
+                            numberOfRegistrantsBilledPerAttendance.Add(attendance, registrantIdsBilled);
 
-                attendanceRegistrantActivityCounts.Add(attendance, numberOfRegistrants);
+                        break;
+
+                    default:
+                        break;
+                }
 
             });
 
-            return attendanceRegistrantActivityCounts;
+            return numberOfRegistrantsBilledPerAttendance;
         }
 
-        [HttpPost]
+            [HttpPost]
         public ActionResult ChargeAttendanceFee()
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
+            var currentAccount = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
+
+            if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
             // this should return the amount to be charged for each registrant 
             var attendanceIds = Request.Form["AttendanceIds"];
             var activityId = Request.Form["Uid"];
-            var msgs = new SystemMessages();
+            
             Activity activity = null;
 
             if (activityId.IsNotEmpty() && activityId.IsGuid())
-                activity = Activity.LoadByUidByAccountId(activityId.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+                activity = currentAccount.GetActivity(activityId.ToGuid(), msgs);
 
-            if (attendanceIds.IsNotEmpty() || attendanceIds.IsNotBlank())
+            if (activity.IsNotEmpty() && (attendanceIds.IsNotEmpty() || attendanceIds.IsNotBlank()))
             {
                 // get selected attendances
                 var attendanceIdsList = attendanceIds.Split(',').Select(p => p.ToInteger()).ToList();
@@ -1625,11 +1740,11 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 // sum up total cost of all attendances per registrant to display
                 var registrantActivities = RegistrantActivity.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs);
-
-                var registrantActivityAttendances = GetRegistrantActivityAttendances(registrantActivities, selectedAttendances, msgs);                
+                var billingPeriodType = activity.GetPostPayPlan(msgs).BillingPeriodTypeId;
 
                 ViewBag.AttdanceIds = attendanceIds;
-                ViewBag.RegistrantActivityAttendanceCounts = registrantActivityAttendances;
+                ViewBag.BillingPeriodType = billingPeriodType;
+                ViewBag.AttendancesToBillRegistrants = GetAttendancesToBillPerRegistrantActivity(currentAccount, registrantActivities, selectedAttendances, billingPeriodType, msgs);
                 ViewBag.Messages = msgs;
 
                 return View(activity);
@@ -1637,28 +1752,29 @@ namespace AfterSchool.Areas.Org.Controllers
             return RedirectToAction("Attendance");
         }
 
-
-
         [HttpPost]
         public ActionResult ChargeAttendanceFeeDone()
         {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();
+
             // this should make the transaction purchase and activity payment records
             //and send charges for each registrant to stripe
-            if (SessionVariables.CurrentAccount.IsEmpty())
+            if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
             var attendanceIds = Request.Form["AttendanceIds"];
             var activityId = Request.Form["Uid"];
-            var msgs = new SystemMessages();
+            
             Activity activity = null;
             var defaultMsg = "An error occurred while processing payments. Please contact support, do not attempt to charge attendance again";
-            var msg = defaultMsg;
-            var currentUser = SessionVariables.CurrentUser;
+            var msg = defaultMsg;            
 
             if (activityId.IsNotEmpty() && activityId.IsGuid())
-                activity = Activity.LoadByUidByAccountId(activityId.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+                activity = currentAccount.GetActivity(activityId.ToGuid(), msgs);
 
-            if (attendanceIds.IsNotEmpty() || attendanceIds.IsNotBlank())
+            if (activity.IsNotEmpty() && (attendanceIds.IsNotEmpty() || attendanceIds.IsNotBlank()))
             {
                 // get selected attendances
                 var attendanceIdsList = attendanceIds.Split(',').Select(p => p.ToInteger()).ToList();
@@ -1667,13 +1783,18 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 // sum up total cost of all attendances per registrant to display
                 var registrantActivities = RegistrantActivity.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs);
-
-                var registrantActivityAttendances = GetRegistrantActivityAttendances(registrantActivities, selectedAttendances, msgs);
+                var postPayPlan = activity.GetPostPayPlan(msgs);
+                var billingPeriodType = postPayPlan?.BillingPeriodTypeId;
+                var registrantActivityAttendances = GetAttendancesToBillPerRegistrantActivity(
+                                                        currentAccount,
+                                                        registrantActivities, 
+                                                        selectedAttendances, 
+                                                        billingPeriodType.HasValue ? billingPeriodType.Value : BillingPeriodType.NotSet, 
+                                                        msgs);                
 
                 foreach (var registrantActivityAttendance in registrantActivityAttendances)
                 {
                     // one person multiple attendance dates
-
                     var registrantActivity = registrantActivityAttendance.Key;
                     var registration = registrantActivity.GetRegistration(msgs);
                     var costPerAttendance = registration.CostPerClass.IsNotEmpty() ? registration.CostPerClass.Value : 0;
@@ -1701,7 +1822,6 @@ namespace AfterSchool.Areas.Org.Controllers
                             else
                                 creditCardPurchaseObject = new CreditCardPurchaseObject { StripeSourceId = registration.StripeSourceId };
 
-                            var postPayPlan = activity.GetPostPayPlan(msgs);
                             var overrideAmount = costPerAttendance * attendanceDaysToCharge;
 
                             if (postPayPlan.IsNotEmpty())
@@ -1751,17 +1871,22 @@ namespace AfterSchool.Areas.Org.Controllers
                                                                 msgs)
                                                             .FirstOrDefault();
 
-                                if (attendanceRegistrant.IsNotEmpty())
+                                // add next available pre payment if available, if not then continue to set the checkoutobject transaction id
+                                if (attendanceRegistrant.IsNotEmpty() 
+                                    && !attendanceRegistrant.IncludeNextAvailablePrePayment(currentUser, msgs) 
+                                    && (checkoutObject?.Transaction).IsNotEmpty() 
+                                    && !attendanceRegistrant.IsAlreadyBilled)
                                 {
-                                    // add next available pre payment if available, if not then continue to set the checkoutobject transaction id
-                                    if (!attendanceRegistrant.AddNextAvailablePrePayment(currentUser, msgs))
-                                    {
-                                        if ((checkoutObject?.Transaction).IsNotEmpty() && !attendanceRegistrant.IsAlreadyBilled)
-                                        {
-                                            attendanceRegistrant.TransactionId = checkoutObject.Transaction.ID.Value;
-                                            msgs.AddRange(attendanceRegistrant.Save());
-                                        }
-                                    }
+                                    attendanceRegistrant.TransactionId = checkoutObject.Transaction.ID.Value;
+
+                                    attendanceRegistrant
+                                        .GetAttendanceRegistrantsInSameBillingPeriod(postPayPlan.BillingPeriodTypeId, msgs)
+                                        .ForEach(ar => {
+                                           ar.TransactionId = checkoutObject.Transaction.ID.Value;
+                                           msgs.AddRange(ar.Save());
+                                        });
+
+                                    msgs.AddRange(attendanceRegistrant.Save());
                                 }
                             });
 
@@ -1785,13 +1910,16 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
 
                 // Send summary email of charged AttendanceRegistrants to Activity Provider if there were any successful charges
-                var attendanceRegistrantAcitivtyCounts = GetAttendanceRegistrantActivityCounts(selectedAttendances, registrantActivities, msgs);
+                var registrantsBilledPerAttendance = GetNumberOfRegistrantsBilledPerAttendance(
+                        selectedAttendances, 
+                        billingPeriodType.HasValue ? billingPeriodType.Value : BillingPeriodType.NotSet,
+                        msgs);
                 var objRegistration = registrantActivities.First().GetRegistration(msgs);
                 var costPerClass = objRegistration.CostPerClass.HasValue ? objRegistration.CostPerClass.Value : 0;
                 var couponValue = objRegistration.CouponValue.HasValue ? objRegistration.CouponValue.Value : 0;
 
-                if (attendanceRegistrantAcitivtyCounts.Count > 0)
-                    EmailHelper.SendAttendanceChargeConfirmation(attendanceRegistrantAcitivtyCounts, activity, costPerClass, couponValue, null, SessionVariables.CurrentUser, false, msgs);
+                if (registrantsBilledPerAttendance.Count > 0)
+                    EmailHelper.SendAttendanceChargeConfirmation(registrantsBilledPerAttendance, activity, costPerClass, couponValue, null, SessionVariables.CurrentUser, false, msgs);
                     
             }
 
@@ -1802,13 +1930,16 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult FinalizeRegistration(string id, string atype)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
-                return HttpNotFound();
-
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
-            var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
 
-            activity.FinalizeRegistrations(SessionVariables.CurrentUser, msgs);
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+            
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+
+            activity.FinalizeRegistrations(currentUser, msgs);
 
             var msg = msgs.HasErrors() ? "Error Finalizing Registration" : "Registration Finalized";
 
@@ -1847,11 +1978,13 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Registrants(string id, string atype, string msg)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
-                return HttpNotFound();
-
+            var currentAccount = SessionVariables.CurrentAccount;            
             var msgs = new SystemMessages();
-            var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+            
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             RegistrantsViewBag(activity, atype, msg);
             return View(activity);
         }
@@ -1859,11 +1992,14 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult MoveRegistrant(string id, string registrant, string assignmenttype)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
-                return HttpNotFound();
-
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
-            var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+            
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
                 activity.ID.Value, 
                 ParticipationObjectType.Activity, 
@@ -1879,8 +2015,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
                         ra.ChangeSeatAssignment(
-                            newAssignmentType, 
-                            SessionVariables.CurrentUser,
+                            newAssignmentType,
+                            currentUser,
                             amsgs,
                             adc);
                     },
@@ -1896,11 +2032,13 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult RegistrantSummary(string id)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
-                return HttpNotFound();
-
+            var currentAccount = SessionVariables.CurrentAccount;            
             var msgs = new SystemMessages();
-            var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+            
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
             BackgroundJob.Enqueue(() =>
                 ActivityService.SendRegistrationSummaryReport(activity.ID.Value, UILabel.ActivityLabel(activity.ActivityTypeId, false), null)
@@ -1918,11 +2056,13 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult RegistrantDownload(string id)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
-                return HttpNotFound();
-
+            var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
-            var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+            
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             var af = activity.GetActiveActivityForm();
             var questions = af.GetForm().GetAllQuestions();
 
@@ -1938,9 +2078,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 row.Add("Amount Paid");
 
             foreach (var question in questions)
-            {
                 row.Add(question.QuestionDataTypeId.ToString());
-            }
 
             table.Add(row);
 
@@ -1978,7 +2116,7 @@ namespace AfterSchool.Areas.Org.Controllers
             Response.BinaryWrite(filebytes);
             Response.End();
 
-            ViewBag.Messages = new SystemMessages();
+            ViewBag.Messages = msgs;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             return View("Registrants", activity);
         }
@@ -1986,14 +2124,16 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpPost]
         public JsonResult WithdrawRegistrant(string participationObjectId, string registrantUId, string type)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
-                return Json(new { success = false, status = "error" }, JsonRequestBehavior.AllowGet);
-
+            var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
-            if (participationObjectId.IsEmpty() || registrantUId.IsEmpty() || type.IsEmpty())
+
+            if (currentAccount.IsEmpty())
                 return Json(new { success = false, status = "error" }, JsonRequestBehavior.AllowGet);
             
-            var registrant = Registrant.LoadByUidByAccountId(registrantUId.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+            if (participationObjectId.IsEmpty() || registrantUId.IsEmpty() || type.IsEmpty())
+                return Json(new { success = false, status = "error" }, JsonRequestBehavior.AllowGet);
+
+            var registrant = currentAccount.GetRegistrant(registrantUId.ToGuid(), msgs);
 
             if (registrant.IsNotEmpty())
             {
@@ -2001,19 +2141,15 @@ namespace AfterSchool.Areas.Org.Controllers
                     participationObjectId: participationObjectId.ToInteger(),
                     participationObjectType: (ParticipationObjectType)Enum.Parse(typeof(ParticipationObjectType), type),
                     loggedInUser: SessionVariables.CurrentUser,
-                    account: SessionVariables.CurrentAccount,
+                    account: currentAccount,
                     msgs: msgs);
             }
 
             if (msgs.HasNoErrors())
-            {
                 return Json(new { success = true, status = "ok" }, JsonRequestBehavior.AllowGet);
-            }
-            else
-            {
-                //.. something went wrong, error occured
-                return Json(new { success = false, status = "error", data = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
-            }
+                
+            //.. something went wrong, error occured
+            return Json(new { success = false, status = "error", data = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
         }
 
         private List<AttachedCoupon> GetAttachedCoupons(RegistrantActivity registrantActivity)
@@ -2025,14 +2161,16 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult RegistrantDetail(string id)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
-                return HttpNotFound();
-
+            var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
-            var registrantActivity = RegistrantActivity.LoadByUid(id.ToGuid());
-            var activity = Activity.LoadByIdByAccountId(registrantActivity.ParticipationObjectId.Value.ToString(), SessionVariables.CurrentAccount.ID.Value, msgs);
 
-            ViewBag.Messages = new SystemMessages();
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+            
+            var registrantActivity = RegistrantActivityService.GetRegistrantActivity(id.ToGuid(), msgs);
+            var activity = currentAccount.GetActivity(registrantActivity.ParticipationObjectId.Value, msgs);
+
+            ViewBag.Messages = msgs;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.AttachedCoupons = GetAttachedCoupons(registrantActivity);
             return View(registrantActivity);
@@ -2041,8 +2179,9 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpPost]
         public ActionResult AddPayment(string id, string datepaid, string amountpaid, string paymenttype)
         {
+            var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
-            var registrantActivity = RegistrantActivity.LoadByUid(id.ToGuid());
+            var registrantActivity = RegistrantActivityService.GetRegistrantActivity(id.ToGuid(), msgs);
             var activity = registrantActivity.GetActivity();
 
             if (!datepaid.IsDateTime())
@@ -2069,7 +2208,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 AccountService.CreatePurchaseTransactionPayment(
                     checkoutObject: new CheckoutObject()
                     {
-                        BillingAccount = SessionVariables.CurrentAccount,
+                        BillingAccount = currentAccount,
                         PayingAccount = purchaserAccount,
                         NumberOfSeats = 1,
                         ParticipationObject = registrantActivity.GetParticipationObject(msgs),
@@ -2098,7 +2237,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult AttachCoupon(string id, decimal couponAmount, CouponAmountType discountType, DateTime? expirationDate, CouponApplyType couponApplyType, StripeCouponDuration duration, int durationInMonths)
         {
             var msgs = new SystemMessages();
-            var registrantActivity = RegistrantActivity.LoadByUid(id.ToGuid());
+            var registrantActivity = RegistrantActivityService.GetRegistrantActivity(id.ToGuid(), msgs);
             var activity = registrantActivity.GetActivity();
             
             // check coupon's minimum amount
@@ -2141,12 +2280,14 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult PublishDetail(string id)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
-                return HttpNotFound();
-
+            var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
-            var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
-            ViewBag.Account = SessionVariables.CurrentAccount;
+
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+            
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+            ViewBag.Account = currentAccount;
             ViewBag.MustRequestToPublish = MustRequestToPublish(activity);
             ViewBag.ShowCopyButton = ShowCopyButtonOnPublishDetail(activity);
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
@@ -2157,29 +2298,38 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult RequestToPublish(string id)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
-                return HttpNotFound();
+            var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
-            var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
 
-            activity.RequestToPublish(SessionVariables.CurrentUser, msgs);
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+            
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+            var isNewActivity = Request["isnew"] == "1";
+
+            activity.RequestToPublish(SessionVariables.CurrentUser, msgs);           
 
             if (msgs.HasNoErrors())
-                msgs.Add("Your request to publish has been submitted", MessageType.Success);
+                if (isNewActivity)
+                    msgs.Add("Your request to publish has been submitted", MessageType.Success);            
+                else
+                    msgs.Add("Activity saved successfully", MessageType.Success);
 
             ViewBag.Messages = msgs;
             ViewBag.MustRequestToPublish = MustRequestToPublish(activity);
             ViewBag.ShowCopyButton = ShowCopyButtonOnPublishDetail(activity);
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
-            ViewBag.IsFullScreen = Request["isnew"] == "1";
+            ViewBag.IsFullScreen = isNewActivity;
             return View("publishdetail", activity);
         }
 
         private void BeforePublish(Activity activity, SystemMessages msgs)
         {
+            var currentAccount = SessionVariables.CurrentAccount;            
+
             // check if provided by external provider
             var location = activity.GetLocation(msgs);
-            var isLoggedInAccountOwnerAccount = SessionVariables.CurrentAccount.ID == location?.HostAccountId;
+            var isLoggedInAccountOwnerAccount = currentAccount.ID == location?.HostAccountId;
             var activityIsHostedAtAnotherAccount = location?.HostAccountId != activity.AccountId;
 
             // activity is created in the activity provider's account
@@ -2187,12 +2337,12 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 var visitingAccount = activity.GetAccount(msgs);
 
-                if (!visitingAccount.IsApprovedAsVisitorTo(SessionVariables.CurrentAccount, msgs))
+                if (!visitingAccount.IsApprovedAsVisitorTo(currentAccount, msgs))
                 {
-                    SessionVariables.CurrentAccount.ApproveAccessToAccount(visitingAccount, SessionVariables.CurrentUser, msgs);
+                    currentAccount.ApproveAccessToAccount(visitingAccount, SessionVariables.CurrentUser, msgs);
 
                     if (msgs.HasNoErrors())
-                        SessionVariables.CurrentAccount.SendApprovalNotificationToVisitor(visitingAccount, msgs);
+                        currentAccount.SendApprovalNotificationToVisitor(visitingAccount, msgs);
                 }
             }
         }
@@ -2200,14 +2350,15 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Publish(string id, bool isFromActivityHome = false)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
-                return HttpNotFound();
-
-            var msgs = new SystemMessages();
-            var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
-            var mustRequestToPublish = MustRequestToPublish(activity);
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();
+
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+            var mustRequestToPublish = MustRequestToPublish(activity);
 
             if (mustRequestToPublish)
                 msgs.Add("You do not have permissions to publish", MessageType.UserError);
@@ -2249,16 +2400,17 @@ namespace AfterSchool.Areas.Org.Controllers
                 // Show Succes Message
                 // LOG: Someone Published Activity ActivityName for Account AccountName
                 msgs.Add(string.Format("{0} has been published", activity.Name), MessageType.Success);
-                WebSessionUtilities.LogActivity(
-                   webSessionId: SessionVariables.WebSession.ID.Value,
-                   actor: currentUser,
-                   actionType: WebSessionActionType.Published,
-                   objectType: ObjectType.Activity,
-                   objectId: activity.ID.Value,
-                   objectText: activity.Name,
-                   indirectObjectType: ObjectType.Account,
-                   indirectObjectId: currentAccount.ID.Value,
-                   indirectObjectText: currentAccount.Name
+
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
+                    actor: currentUser,
+                    actionType: WebSessionActionType.Published,
+                    objectType: ObjectType.Activity,
+                    objectId: activity.ID.Value,
+                    objectText: activity.Name,
+                    indirectObjectType: ObjectType.Account,
+                    indirectObjectId: currentAccount.ID.Value,
+                    indirectObjectText: currentAccount.Name
                );
             }
 
@@ -2270,9 +2422,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var user = currentAccount.GetAccountOwner(msgs);
             if (user.IsNotEmpty() && currentAccount.IsNotEmpty())
-            {
                 SendGridHelper.AddOrUpdateContact(currentAccount, user, msgs);
-            }
 
             if (isFromActivityHome)
                 return Redirect(activity.ShortHomePageUrl);
@@ -2283,15 +2433,16 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Unpublish(string id)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
-                return HttpNotFound();
-
-            var msgs = new SystemMessages();
-            var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
-            var mustRequestToPublish = MustRequestToPublish(activity);
-            var currentUser = SessionVariables.CurrentUser;
             var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();
 
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+            
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+            var mustRequestToPublish = MustRequestToPublish(activity);
+            
             if (mustRequestToPublish)
                 msgs.Add("You do not have permissions to unpublish", MessageType.UserError);
 
@@ -2303,8 +2454,9 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add(string.Format("{0} has been unpublished", activity.Name), MessageType.Success);
-                WebSessionUtilities.LogActivity(
-                    webSessionId: SessionVariables.WebSession.ID.Value,
+
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
                     actor: currentUser,
                     actionType: WebSessionActionType.Unpublished,
                     objectType: ObjectType.Activity,
@@ -2326,11 +2478,13 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Form(string id, string qg)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
+            var currentAccount = SessionVariables.CurrentAccount;
+
+            if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
             var msgs = new SystemMessages();
-            var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             var activityForm = activity.GetActiveActivityForm();
 
             var questionGroups = activityForm.GetForm().GetQuestionGroups();
@@ -2340,15 +2494,11 @@ namespace AfterSchool.Areas.Org.Controllers
             FormQuestionGroup questionGroup = null;
 
             if (qg.IsNumber())
-            {
                 questionGroup = FormQuestionGroup.Load(qg.ToInteger());
-            }
             else
-            {
                 questionGroup = questionGroups.First();
-            }
 
-            ViewBag.Messages = new SystemMessages();
+            ViewBag.Messages = msgs;
             ViewBag.QuestionGroups = questionGroups;
             ViewBag.IndividualGroups = individualGroups;
             ViewBag.OrganizationGroups = organizationGroups;
@@ -2360,21 +2510,18 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpPost]
         public ActionResult Form(string id, string qg, string name, string description, string cmd)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
-                return HttpNotFound();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
 
-            SystemMessages msgs = new SystemMessages();
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();            
 
             if (name.IsEmpty() && qg.IsBlank())
-            {
                 msgs.Add("Name is required", MessageType.UserError);
-            }
             if (description.IsEmpty() && qg.IsBlank())
-            {
                 msgs.Add("Description is required", MessageType.UserError);
-            }
 
-            var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             var activityForm = activity.GetActiveActivityForm();
             FormQuestionGroup questionGroup = null;
 
@@ -2412,15 +2559,11 @@ namespace AfterSchool.Areas.Org.Controllers
 
                                 question.IsActive = false;
                                 if (Request.Params[string.Format("active-{0}", question.ID)].IsBoolean())
-                                {
                                     question.IsActive = true;
-                                }
 
                                 question.IsRequired = false;
                                 if (Request.Params[string.Format("required-{0}", question.ID)].IsBoolean())
-                                {
                                     question.IsRequired = true;
-                                }
 
                                 amsgs.AddRange(question.Save(adc));
                             }
@@ -2466,11 +2609,13 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Messages(string id, string pn, string rpp)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
-                return HttpNotFound();
-
+            var currentAccount = SessionVariables.CurrentAccount;            
             var msgs = new SystemMessages();
-            var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+            
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
             int pageNumber = 1;
             int recordsPerPage = 10;
@@ -2507,26 +2652,32 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult MessageDetail(string id)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
+            var currentAccount = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
+
+            if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
-            var msgs = new SystemMessages();
-            var am = ActivityMessage.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
-            var activity = Activity.LoadByIdByAccountId(am.ActivityId.Value.ToString(), SessionVariables.CurrentAccount.ID.Value, msgs);
-            ViewBag.Messages = new SystemMessages();
+            var am = currentAccount.GetActivityMessage(id.ToGuid(), msgs);
+            var activity = currentAccount.GetActivity(am.ActivityId.Value, msgs);
+
+            ViewBag.Messages = msgs;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.Registrants = am.GetActivityMessageRegistrants();
+
             return View(am);
         }
 
         [HttpGet]
         public ActionResult MessageAdd(string id)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
-                return HttpNotFound();
-
+            var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
-            var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+            
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
             ViewBag.Messages = msgs;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
@@ -2536,8 +2687,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
             // If the user does have the messages feature, and the user tries to send a message, validate the user hasn't used up their quota of emails, and/or text messages, if they have exceeded their quota, show the upgrade.
             // If the user has hit or exceeded the email quota then show the upgrade modal
-            ViewBag.EmailCount = SessionVariables.CurrentAccount.GetEmailCountForCurrentMessagePeriod();
-            ViewBag.TextCount = SessionVariables.CurrentAccount.GetTextMessageCountForCurrentMessagePeriod();
+            ViewBag.EmailCount = currentAccount.GetEmailCountForCurrentMessagePeriod();
+            ViewBag.TextCount = currentAccount.GetTextMessageCountForCurrentMessagePeriod();
 
             return View(activity);
         }
@@ -2546,10 +2697,11 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpPost]
         public ActionResult MessageAdd(string id, string deliveryMethod, string subject, string body, string sendtostaff, string sendtextmessages)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
-                return HttpNotFound();
-
+            var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
+
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
 
             if (subject.IsEmpty())
                 msgs.Add("Message Reason is required", MessageType.UserError);
@@ -2557,7 +2709,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add("Message Body is required", MessageType.UserError);
 
             ActivityMessage am = null;
-            var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
             if (msgs.HasNoErrors())
             {
@@ -2575,7 +2727,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                     // get current quota
                     var amr = ActivityMessageRegistrant.LoadByCreatedBy(SessionVariables.CurrentUser.ID.Value.ToString()).Where(m => m.CreateDate > DateTime.Now.AddMonths(-1).Date);
-                    var usedEmailQuota = SessionVariables.CurrentAccount.GetEmailCountForCurrentMessagePeriod();
+                    var usedEmailQuota = currentAccount.GetEmailCountForCurrentMessagePeriod();
 
                     //add additional registransts
                     usedEmailQuota = usedEmailQuota + registrantIds.Count;
@@ -2616,13 +2768,15 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Team(string id)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
-                return HttpNotFound();
-
+            var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
-            var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
 
-            ViewBag.Users = SessionVariables.CurrentAccount.GetUsers(msgs: msgs);
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+            
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+
+            ViewBag.Users = currentAccount.GetUsers(msgs: msgs);
             ViewBag.Messages = msgs;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             return View(activity);
@@ -2631,10 +2785,13 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpPost]
         public ActionResult TeamSave(string id)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
-                return HttpNotFound();
-
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
+
+            if (currentAccount.IsEmpty())
+                return HttpNotFound();
+            
             Activity activity = null;
             Account account = null;
             List<WebUser> users = null;
@@ -2643,13 +2800,13 @@ namespace AfterSchool.Areas.Org.Controllers
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) => {
 
-                    activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs, adc);
+                    activity = currentAccount.GetActivity(id.ToGuid(), amsgs, adc);
                     account = activity.GetAccount(amsgs, adc);
                     users = account.GetUsers(msgs: amsgs, dc: adc);
 
                     users.ForEach(user =>
                     {
-                        var doNotSkip = !(activity.CreatedBy.Value == user.ID.Value || SessionVariables.CurrentUser.ID == user.ID);
+                        var doNotSkip = !(activity.CreatedBy.Value == user.ID.Value || currentUser.ID == user.ID);
 
                         if (doNotSkip)
                         {
@@ -2663,7 +2820,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                     awu.ActivityId = activity.ID;
                                     awu.WebUserId = user.ID;
                                     awu.CreateDate = DateTime.UtcNow;
-                                    awu.CreatedBy = SessionVariables.CurrentUser.ID;
+                                    awu.CreatedBy = currentUser.ID;
                                 }
 
                                 if (Request["isleader-" + user.ID.Value.ToString()].IsNotEmpty())
@@ -2672,7 +2829,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                     awu.IsLeader = false;
 
                                 awu.LastModifiedDate = DateTime.UtcNow;
-                                awu.LastModifiedBy = SessionVariables.CurrentUser.ID;
+                                awu.LastModifiedBy = currentUser.ID;
                                 amsgs.AddRange(awu.Save(adc));
 
                             }
@@ -2697,11 +2854,13 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult AddRegistration(string id)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
+            var currentAccount = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
+
+            if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
-            var msgs = new SystemMessages();
-            var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             var activeForm = activity.GetActiveForm(msgs);
             var questions = activeForm.GetActiveQuestions(msgs);
 
@@ -2729,11 +2888,13 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpPost]
         public ActionResult AddRegistration(string id, string parentsig)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
+            var currentAccount = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
+
+            if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
-            var msgs = new SystemMessages();
-            var activity = Activity.LoadByUidByAccountId(id.ToGuid(), SessionVariables.CurrentAccount.ID.Value, msgs);
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             var questions = activity.GetActiveForm(msgs).GetActiveQuestions(msgs);
 
             questions.ForEach(question => {
@@ -2772,7 +2933,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var qvms = questions.OrderBy(question => question.DisplayOrder).Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
 
             if (msgs.HasNoErrors())
-                SessionVariables.CurrentAccount.CreateNewRegistrantAndRegistration(
+                currentAccount.CreateNewRegistrantAndRegistration(
                     participationObject: activity.GetParticipationObject(msgs),
                     questionsAndAnswers: qvms.Select(qvm => (qvm.Question, qvm.Value)).ToList(),
                     period: activity.GetCurrentRegistrationPeriod(msgs),
@@ -2799,13 +2960,9 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             return false;
-
         }
 
-        private bool MustRequestToPublish(Activity activity)
-        {
-            return !SessionVariables.CurrentUser.CanPublishActivity(SessionVariables.CurrentAccount, activity);
-        }
+        private bool MustRequestToPublish(Activity activity) => !SessionVariables.CurrentUser.CanPublishActivity(SessionVariables.CurrentAccount, activity);
 
         private bool IsExternallyProvided(Activity activity)
         {
@@ -2818,20 +2975,22 @@ namespace AfterSchool.Areas.Org.Controllers
             return false;
         }
 
-        private bool ShowCopyButtonOnPublishDetail(Activity activity)
-        {
-            return activity.AccountId == SessionVariables.CurrentAccount.ID || !IsExternallyProvided(activity);
-        }
+        private bool ShowCopyButtonOnPublishDetail(Activity activity) => activity.AccountId == SessionVariables.CurrentAccount.ID || !IsExternallyProvided(activity);
 
         [HttpGet]
         public virtual JsonResult GetCalculatedStartingAndEndDateForSubscription(string activityId, string billingPeriodType, string dayOfWeek, string dayOfMonth)
         {
-            if (!IsRequestFromApp() || activityId.IsEmpty() || SessionVariables.CurrentAccount.IsEmpty())
-                return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
-
+            var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
-            var activity = Activity.LoadByIdByAccountId(activityId, SessionVariables.CurrentAccount.ID.Value, msgs);
-            var dates = ActivityService.FinalizeStartAndEndDateForSubscription(activity, (BillingPeriodType)billingPeriodType.ToInteger(), dayOfWeek.IsNotEmpty() ? dayOfWeek.ToEnum<DayOfWeek>() : DayOfWeek.Sunday, dayOfMonth.IsNotEmpty() ? dayOfMonth.ToDateTime() : DateTime.Now.AddDays(1));
+
+            if (!IsRequestFromApp() || activityId.IsEmpty() || currentAccount.IsEmpty())
+                return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+            
+            var activity = currentAccount.GetActivity(activityId.ToInteger(), msgs);
+            var dates = ActivityService.FinalizeStartAndEndDateForSubscription(activity, 
+                (BillingPeriodType)billingPeriodType.ToInteger(), 
+                dayOfWeek.IsNotEmpty() ? dayOfWeek.ToEnum<DayOfWeek>() : DayOfWeek.Sunday, 
+                dayOfMonth.IsNotEmpty() ? dayOfMonth.ToDateTime() : DateTime.Now.AddDays(1));
 
             if (dates.paymentStart.IsNotEmpty() && dates.paymentStart.HasValue && dates.paymentEnd.IsNotEmpty() && dates.paymentEnd.HasValue)
                 return Json(new { 

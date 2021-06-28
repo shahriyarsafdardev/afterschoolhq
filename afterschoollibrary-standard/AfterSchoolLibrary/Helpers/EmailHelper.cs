@@ -950,7 +950,7 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
-        public static void SendAttendanceChargeConfirmation(Dictionary<Attendance, int> attendanceRegistrantActivityCounts, Activity activity, decimal costPerClass, decimal couponDiscount, string customMessage, WebUser loggedInUser, bool sendBcc, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void SendAttendanceChargeConfirmation(Dictionary<Attendance, List<int>> attendanceRegistrantActivityCounts, Activity activity, decimal costPerClass, decimal couponDiscount, string customMessage, WebUser loggedInUser, bool sendBcc, SystemMessages msgs, DatabaseConnection dc = null)
         {
             msgs = msgs ?? new SystemMessages();
 
@@ -965,16 +965,18 @@ namespace AfterSchoolLibrary.Helpers
             attendanceRegistrantActivityCounts.ToList().ForEach(attendanceRegistrantActivityCount =>
             {
                 var attendance = attendanceRegistrantActivityCount.Key;
-                var attendanceCount = attendanceRegistrantActivityCount.Value;
-                var totalCharge = attendanceCount * costPerClass;
+                var attendanceCount = attendanceRegistrantActivityCount.Value.Count();
+                var prePaidAttendanceRegistrantCount = attendance.GetAttendanceRegistrants(msgs, dc).Count(ar => ar.HasPrePayment(msgs, dc));
+                var totalCharge = (attendanceCount - prePaidAttendanceRegistrantCount) * costPerClass;
                 var totalDiscount = attendanceCount * couponDiscount;
-
+                
                 //.. todo: get coupon discount and prepare calculation
 
                 var attendanceModel = new NameValueCollection() 
                 {
                     { "AttendanceDate", attendance.Date.ToShortDateTimeString() },
                     { "NumberPresent",  attendanceCount.ToString() },
+                    { "NumberPrePaid", prePaidAttendanceRegistrantCount.ToString() },
                     { "TotalCharge", totalCharge.ToCurrency() },
                     { "CouponDiscount", totalDiscount.ToCurrency() }
                 };
@@ -982,7 +984,7 @@ namespace AfterSchoolLibrary.Helpers
                 receiptRows += ProcessTemplate(
                         EmailTemplates.Attendance_Charge_Confirmation_Rows,
                         attendanceModel,
-                        "Attendance_Charge_Confirmation_Rows-1.1",
+                        "Attendance_Charge_Confirmation_Rows-1.2",
                         msgs);
 
                 totalAttendanceCharge += (totalCharge - totalDiscount);
@@ -999,7 +1001,7 @@ namespace AfterSchoolLibrary.Helpers
             var attendanceChargeTable = ProcessTemplate(
                 EmailTemplates.Attendance_Charge_Confirmation_Table,
                 attendanceChargeTableModel,
-                "Attendance_Charge_Confirmation_Table-1.1",
+                "Attendance_Charge_Confirmation_Table-1.2",
                 msgs);
 
             var model = new NameValueCollection()

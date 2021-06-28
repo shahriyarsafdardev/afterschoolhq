@@ -24,18 +24,47 @@ namespace AfterSchoolLibraryTests.Tests
             ActivityOwnerAccount = AccountFactory.Create(AccountOwner, msgs, dc);
         }
 
-        [Fact(DisplayName = "IsClosingInTwoDaysTest")]
-        public void IsClosingInTwoDays()
+        [Fact(DisplayName = "IsEndingInTwoDays")]
+        public void IsEndingInTwoDaysTest()
         {
-            
-            var schedule = ActivityScheduleFactory.CreateIsClosing(ActivityOwnerAccount, msgs, dc);
+            try
+            {
+                // Arrange     
+                var schedule = ActivityScheduleFactory.CreateIsClosing(ActivityOwnerAccount, msgs, dc);
 
-            var IsClosingInTwoDays = ActivityScheduleService.IsClosingInTwoDays(schedule, ActivityOwnerAccount);
+                // Act
+                var isEndingInTwoDays = ActivityScheduleService.IsEndingInTwoDays(schedule, ActivityOwnerAccount);
 
-            Assert.True(IsClosingInTwoDays);
+                // Assert
+                Assert.True(isEndingInTwoDays);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
         }
 
+        [Fact]
+        public void LoadByIdByAccountIdTest()
+        {
+            try
+            {
+                // Arrange
+                var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, msgs, dc);
 
+                // Act
+                var expected = ActivitySchedule.LoadByIdByAccountId(Id: schedule.ID.Value, AccountId: ActivityOwnerAccount.ID.Value, msgs: msgs, dc: dc);
 
+                // Assert
+                Assert.Equal(expected: expected.ID, actual: schedule.ID);                
+                Assert.Equal(expected: expected.Name, actual: schedule.Name);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
     }
 }

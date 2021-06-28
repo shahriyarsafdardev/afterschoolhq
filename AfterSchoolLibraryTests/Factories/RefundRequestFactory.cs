@@ -14,7 +14,10 @@ namespace AfterSchoolLibraryTests.Factories
                 TransactionId = transaction.ID.Value,
                 AccountId = billingAccount.ID.Value,
                 RequestReason = reason,
-                CreatedBy = creator.ID.Value
+                CreatedBy = creator.ID.Value,
+                RefundRequestStatusId = RefundRequestStatus.RequestedByProvider,
+                RequestedRefundTypeId = RefundType.Credit,
+                ApprovedRefundTypeId = RefundType.Credit
             };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;

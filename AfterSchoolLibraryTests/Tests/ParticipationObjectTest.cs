@@ -22,18 +22,18 @@ namespace AfterSchoolLibraryTests.Tests
         private List<ActivityInstance> Instances { get; }
         private Location Location { get; }
         private Package Package { get; }
-        private AccountPackage AccountPackage { get; }
+        private AccountPackage AccountPackage { get; }        
 
         public PartcipationObjectTest(ITestOutputHelper output) : base(output)
-        {
+        {            
             LoggedInUser = WebUserFactory.Create(msgs, dc);
             AccountOwner = WebUserFactory.Create(msgs, dc);
             ActivityOwnerAccount = AccountFactory.Create(AccountOwner, msgs, dc);
             PlanOwner = AccountFactory.CreateAccount(AccountOwner, msgs, dc);
-            ActivityGroup = ActivityGroupFactory.Create(ActivityOwnerAccount, ActivityGroupType.Session, msgs, dc);
+            ActivityGroup = ActivityGroupFactory.Create(ActivityOwnerAccount,ActivityGroupType.Session,20, msgs, dc);
             Schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, ActivityGroup, DateTime.UtcNow.FirstDateOfMonth(), msgs, dc);
             Location = LocationFactory.Create(ActivityOwnerAccount, msgs, dc);
-            Activity = ActivityFactory.Create(ActivityOwnerAccount, Schedule, ActivityGroup, Location, msgs, dc);
+            Activity = ActivityFactory.Create(ActivityOwnerAccount, Schedule, ActivityGroup, Location,20, msgs, dc);
             Instances = new List<ActivityInstance>();
             Package = PackageFactory.Create(100, 1200, msgs, dc);
             AccountPackage = AccountPackageFactory.Create(ActivityOwnerAccount, Package, msgs, dc);
@@ -70,7 +70,32 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(classes.Equals(remainingDays));
 
         }
-        
+
+        [Theory]
+        [InlineData(20,0.5)]
+        public void GetCheckoutCostWithConvenienceFeeUsingActivity(decimal costPerRegistrant, decimal convenienceFee)
+        {
+            ParticipationObject participationObject = new ParticipationObject(Activity, msgs, dc);
+            
+            var calculatedFee = participationObject.GetCheckoutCostWithConvenienceFee();
+            var requiredFee = costPerRegistrant + convenienceFee;
+            
+            Assert.True(calculatedFee == requiredFee);
+            
+        }
+
+        [Theory]
+        [InlineData(20, 0.5)]
+        public void GetCheckoutCostWithConvenienceFeebyUsingActivityGroup(decimal costPerRegistrant, decimal convenienceFee)
+        {
+            ParticipationObject participationObject = new ParticipationObject(ActivityGroup, msgs, dc);
+
+            var calculatedFee = participationObject.GetCheckoutCostWithConvenienceFee();
+            var requiredFee = costPerRegistrant + convenienceFee;
+
+            Assert.True(calculatedFee == requiredFee);
+        }
+
         [Fact]
         public void GetNumberOfRemainingClassesInNextCycleTest()
         {
