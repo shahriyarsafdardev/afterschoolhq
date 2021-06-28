@@ -110,5 +110,12 @@
             else if (input.length > 0) { inputElement.value = `(${zip}`; }
         }
 
+       
+        $(document).ready(function () {
+             //adding HTML5 required attribute to 'Location' here, so we can use Location Component partial view in any other Form also
+            //where we might need not need it 'required'
+            $("#location").attr("required", "required");
+        })
+
     </script>
 }

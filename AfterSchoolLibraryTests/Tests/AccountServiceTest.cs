@@ -1133,6 +1133,38 @@ namespace AfterSchoolLibraryTests.Tests
             }
         }
 
+        [Fact(DisplayName = "GetAllActiveAndNonPublishedActivities test")]
+        public void GetAllActiveAndNonPublishedActivitiesTest()
+        {
+            try
+            {
+                // Arrange
+                var accountOwner = WebUserFactory.Create(msgs, dc);
+                var account = AccountFactory.Create(accountOwner, msgs, dc);
+                var activityGroup = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
+
+                // Act
+                for (int i = 1; i <= 5; i++)
+                {
+                    var addactivity = ActivityFactory.Create(account, activityGroup, msgs, dc);                    
+                    if (i%2 == 0)
+                    {
+                        addactivity.Publish(accountOwner, msgs, dc);
+                    }
+                }
+                                
+                var GetActivities = AccountService.GetAllActiveAndNonPublishedActivities(account, msgs, dc);
+
+                // Assert
+                Assert.True(GetActivities.Count() == 3);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
         [Fact(DisplayName = "GetActiveAndNonPublishedActivityCount test")]
         public void GetActiveAndNonPublishedActivityCountTest()
         {

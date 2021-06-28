@@ -1520,7 +1520,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (activity.IsNotEmpty())
             {
-                attendances = activity.GetAttendance(orderByParam, orderbyDirection, start, length, msgs);
+                attendances = activity.GetCompletedAttendanceWithPaging(orderByParam, orderbyDirection, start, length, msgs);
                 totalAttendanceCount = activity.GetTotalAttendanceCount(msgs);
 
                 if (totalAttendanceCount > 0)
