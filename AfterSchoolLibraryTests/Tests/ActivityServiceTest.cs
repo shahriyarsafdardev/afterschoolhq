@@ -165,6 +165,28 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(activity.IsValidActivityInstance(activityInstance, msgs, dc));
         }
 
+        /// <summary>
+        /// Tests that an activity instance does not have schedule id or not 
+        /// </summary>
+        [Fact]
+        public void IsNotValidActivityInstance()
+        {
+            // Arrange
+            var user = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(user, msgs, dc);
+            var schedule = Factories.ActivityScheduleFactory.Create(account, msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, schedule, msgs, dc);
+            var wrongSchedule = Factories.ActivityScheduleFactory.Create(account, msgs, dc);
+            var activityInstance = Factories.ActivityInstanceFactory.Create(activity, schedule, msgs, dc);
+
+            // Act
+            activityInstance.ActivityScheduleId = wrongSchedule.ID.Value;
+            msgs.AddRange(activityInstance.Save(dc));
+
+            // Assert
+            Assert.False(activity.IsValidActivityInstance(activityInstance, msgs, dc));
+        }
+
         [Theory(DisplayName = "GenerateUniqueName")]
         [InlineData("My Sample Account", "MySampleAccount")]
         [InlineData("My Sample Account Rocks Bud Boy", "MySampleAccountRocksBud")]
