@@ -10,7 +10,7 @@
         <a class="btn btn-alt6@(actionName == "index" ? "-active" : "")" href="@Url.Action("index", "accounting")">
             Transactions
         </a>
-        @if (SessionVariables.CurrentAccount.UseStripeConnectDuringCheckout())
+        @if (SessionVariables.CurrentAccount.CanProcessPayments())
         {
             <a class="btn btn-alt6@(actionName == "payouts" ? "-active" : "")" href="@Url.Action("payouts", "accounting")"> Payouts </a>
         }
