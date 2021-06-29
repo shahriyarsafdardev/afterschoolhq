@@ -34,10 +34,10 @@ namespace AfterSchool.Areas.Org.Controllers
                 return RedirectToAction("getstartedpayments", "account");
 
             if (account.IsNewProviderForOtherAccounts())
-                    return RedirectToAction("getstartedpayments", "account");
+                return RedirectToAction("getstartedpayments", "account");
 
-                if (account.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.CurrentUser, null, null, null, null) == 0)
-                    return RedirectToAction("getstarted");
+            if (account.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.CurrentUser, null, null, null, null) == 0)
+                return RedirectToAction("getstarted");
             
           
 
