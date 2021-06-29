@@ -642,7 +642,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (activity.IsNotEmpty())
             {
                 activityIds = activity.Split(',').Select(x => x.ToInteger()).ToList();
-                selectedActivities = Activity.LoadList(activityIds, msgs);
+                selectedActivities = currentAccount.GetActivities(activityIds, msgs);
             }
 
             if (group.IsNotEmpty())

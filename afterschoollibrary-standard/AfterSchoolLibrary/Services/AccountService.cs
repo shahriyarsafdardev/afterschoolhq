@@ -177,6 +177,14 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
+        public static List<Activity> GetActivities(this Account account, List<int> ActivityIds, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (account.IsNotEmpty())
+                return Activity.LoadListByIdsByAccountId(ActivityIds, account.ID.Value, msgs, dc);
+
+            return null;
+        }
+
         public static List<Activity> LoadByActivitiesbyActivityGroupByAccountId(this Account account, int activityGroupId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (account.IsNotEmpty())

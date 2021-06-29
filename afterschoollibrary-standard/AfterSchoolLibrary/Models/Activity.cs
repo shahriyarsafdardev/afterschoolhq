@@ -651,7 +651,16 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static List<Activity> LoadList(List<int> ids, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+		public static List<Activity> LoadListByIdsByAccountId(List<int> ids, int AccountId, SystemMessages msgs = null, DatabaseConnection dc = null)
+		{
+			DatabaseQuery dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["ID"], ids.ToArray(), DatabaseCriteriaOperatorEnum.In);
+			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<Activity> LoadList(List<int> ids, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
