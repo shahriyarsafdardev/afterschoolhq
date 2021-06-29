@@ -24,21 +24,24 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentUser = SessionVariables.CurrentUser;
 
             // only redirect if onboarding steps haven't been acknowledged
-            if(CookieVariables.OnboardingStepsAcknowledged.IsEmpty() || !CookieVariables.OnboardingStepsAcknowledged.ToBoolean())
+            if (CookieVariables.OnboardingStepsAcknowledged.IsEmpty() || !CookieVariables.OnboardingStepsAcknowledged.ToBoolean())
             {
-                CookieVariables.OnboardingStepsAcknowledged = true.ToString();
+
                 if (account.OnboardingStepDone != OnboardingStepType.All)
                     return HandleOnboardingRedirect();
 
                 if (!account.CanReceivePaymentDeposits() && SessionVariables.AccountUserType == UserType.Treasurer)
                     return RedirectToAction("getstartedpayments", "account");
 
+                CookieVariables.OnboardingStepsAcknowledged = true.ToString();
+            }
+
                 if (account.IsNewProviderForOtherAccounts())
                     return RedirectToAction("getstartedpayments", "account");
 
                 if (account.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.CurrentUser, null, null, null, null) == 0)
                     return RedirectToAction("getstarted");
-            }
+            
           
 
             var msgs = new SystemMessages();
