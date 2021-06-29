@@ -28,6 +28,13 @@ namespace AfterSchoolLibraryTests.Factories
             return obj;
         }
 
+        public static Account CreateAccount(WebUser user, AccountType accountType, bool stripeChargesEnabled, bool stripePayoutsEnabled, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var obj = new Account() { OwnerId = user.ID, Name = "Test Account", Email = "test@test.com", AccountTypeId = accountType, StripeChargesEnabled = stripeChargesEnabled, StripePayoutsEnabled = stripePayoutsEnabled };
+            msgs.AddRange(obj.Save(dc: dc));
+            return obj;
+        }
+
         public static Account CreateWithFreePackage(WebUser user, AccountType accountType, SystemMessages msgs, DatabaseConnection dc)
         {
             var obj = new Account() { OwnerId = user.ID, Name = "Test Account", Email = "test@test.com", AccountTypeId = accountType };

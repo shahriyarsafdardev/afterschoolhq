@@ -95,10 +95,6 @@ namespace AfterSchool.Areas.Org.Controllers
             if (currentAccount.IsEmpty())
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
-            //var isStripeEnabled = currentAccount.UseStripeConnectDuringCheckout(msgs);
-            //if (!isStripeEnabled)
-            //    return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-
             int pageNumber = 1;
             int recordsPerPage = 25;
 
@@ -179,10 +175,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (currentAccount.IsEmpty())
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-
-            //var isStripeEnabled = currentAccount.UseStripeConnectDuringCheckout(msgs);
-            //if (!isStripeEnabled)
-            //    return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
             if (!string.IsNullOrEmpty(transactionIds))
             {
