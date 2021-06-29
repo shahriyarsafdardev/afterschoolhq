@@ -26,6 +26,7 @@ namespace AfterSchool.Areas.Org.Controllers
             // only redirect if onboarding steps haven't been acknowledged
             if(CookieVariables.OnboardingStepsAcknowledged.IsEmpty() || !CookieVariables.OnboardingStepsAcknowledged.ToBoolean())
             {
+                CookieVariables.OnboardingStepsAcknowledged = true.ToString();
                 if (account.OnboardingStepDone != OnboardingStepType.All)
                     return HandleOnboardingRedirect();
 
