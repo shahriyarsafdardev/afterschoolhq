@@ -25,18 +25,15 @@ namespace AfterSchool.Areas.Org.Controllers
 
             // only redirect if onboarding steps haven't been acknowledged
             if (CookieVariables.OnboardingStepsAcknowledged.IsEmpty() || !CookieVariables.OnboardingStepsAcknowledged.ToBoolean())
-            {
-
-                if (account.OnboardingStepDone != OnboardingStepType.All)
-                    return HandleOnboardingRedirect();
-
-                if (!account.CanReceivePaymentDeposits() && SessionVariables.AccountUserType == UserType.Treasurer)
-                    return RedirectToAction("getstartedpayments", "account");
-
                 CookieVariables.OnboardingStepsAcknowledged = true.ToString();
-            }
 
-                if (account.IsNewProviderForOtherAccounts())
+            if (account.OnboardingStepDone != OnboardingStepType.All)
+                return HandleOnboardingRedirect();
+
+            if (!account.CanReceivePaymentDeposits() && SessionVariables.AccountUserType == UserType.Treasurer)
+                return RedirectToAction("getstartedpayments", "account");
+
+            if (account.IsNewProviderForOtherAccounts())
                     return RedirectToAction("getstartedpayments", "account");
 
                 if (account.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.CurrentUser, null, null, null, null) == 0)
