@@ -13,19 +13,13 @@ namespace AfterSchool.Areas.Org
             var account = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
 
-            if (account.CanReceiveCheckPayouts(msgs))
-                return;
-
-            var isStripeEnabled = account.UseStripeConnectDuringCheckout(msgs);
-            if (!isStripeEnabled)
-            {
+            if (account.CanProcessPayments(msgs))                
                 filterContext.Result = new RedirectToRouteResult(new RouteValueDictionary {
                     { "controller", "account" },
                     { "action", "paymentsoptions" },
                     { "area", "org" },
                     { "showPaymentNotificationPopup", "1" },
                 });
-            }
         }
 
         public override void OnResultExecuting(ResultExecutingContext filterContext)
@@ -33,29 +27,13 @@ namespace AfterSchool.Areas.Org
             var account = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
 
-            if (account.CanReceiveCheckPayouts(msgs))
-                return;
-
-            var isStripeEnabled = account.UseStripeConnectDuringCheckout(msgs);
-            if (!isStripeEnabled)
-            {
+            if (account.CanProcessPayments(msgs))
                 filterContext.Result = new RedirectToRouteResult(new RouteValueDictionary {
                     { "controller", "account" },
                     { "action", "paymentsoptions" },
                     { "area", "org" },
                     { "showPaymentNotificationPopup", "1" },
                 });
-            }
         }
-
-        //public override void OnResultExecuted(ResultExecutedContext filterContext)
-        //{
-        //    Log("OnResultExecuted", filterContext.RouteData, filterContext.Result);
-        //}
-
-        //public override void OnActionExecuted(ActionExecutedContext filterContext)
-        //{
-        //    Log("OnActionExecuted", filterContext.RouteData, filterContext.Result);
-        //}
     }
 }
