@@ -27,6 +27,10 @@ namespace AfterSchoolLibrary.Models
 		/// </summary>
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
 		public bool IsActive { get { return (bool)MDV["IsActive"].Value; } set { MDV["IsActive"].Value = value; } }
+		/// <summary>
+		/// Required.
+		/// </summary>
+		public int? FormType { get { return (int?)MDV["FormType"].Value; } set { MDV["FormType"].Value = value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
 		
 
@@ -49,6 +53,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
 				_dp.Add(className, "IsActive", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "FormType", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
 				
                 return _dp;
@@ -106,6 +111,8 @@ namespace AfterSchoolLibrary.Models
 				msgs.Add("AccountId is required on Form object", MessageType.Error);
 			if (this.Uid.IsEmpty())
 				msgs.Add("Uid is required on Form object", MessageType.Error);
+			if (this.FormType.IsEmpty())
+				msgs.Add("FormType is required on Form object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(Form).Name));
@@ -138,6 +145,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["IsActive"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["FormType"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

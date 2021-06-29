@@ -946,6 +946,7 @@ inherits: BasicLookUpObject
 property: AccountId, int?, Int, required
 property: Uid, Guid, UniqueIdentifier, required
 property: IsActive, bool, Bit
+property: FormType, int?, Int, required
 join: Account.ID, AccountId, InnerJoin
 joinproperty: Account.Name, string, NVarChar
 loadmethod: AccountId, List<>

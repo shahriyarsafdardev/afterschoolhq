@@ -123,6 +123,7 @@
                                                 <th></th>
                                                 <th>Ask? (<a href="javascript:checkAllActive()">All</a> / <a href="javascript:uncheckAllActive()">None</a>)</th>
                                                 <th>Required? (<a href="javascript:checkAllRequired()">All</a> / <a href="javascript:uncheckAllRequired()">None</a>)</th>
+                                                <th>AnswerDescription? (<a href="javascript:checkAllRequired()">All</a> / <a href="javascript:uncheckAllRequired()">None</a>)</th>
                                                 <th>Action</th>
                                             </tr>
                                         </thead>
@@ -263,6 +264,18 @@
                                                         }
                                                     </td>
                                                     <td>
+                                                        @{Html.RenderPartial(
+                                                                            "~/Views/Shared/_SwitchButton.cshtml",
+                                                                            question.IsActive,
+                                                                            new ViewDataDictionary()
+                                                                            {
+                                                                            { "checkboxname", "active-" + question.ID },
+                                                                            { "checkboxid", "active-" + question.ID },
+                                                                            { "disabled", question.IsLocked },
+                                                                            { "classname", "question-isactive" }
+});}
+                                                    </td>
+                                                    <td>
                                                         <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteQuestion('@question.Text', '@Url.Action("delete","Account", new { id = @question.ID.ToString()})')"><span class="text-danger"><i class="s7-trash"></i></span></button>
                                                     </td>
                                                 </tr>
@@ -361,37 +374,13 @@
 
 </div>
 
-
-@*<div id="modal-options" class="md-modal colored-header custom-width md-effect-9">
-        <form id="form-options" action="#" method="post">
-            <div class="md-content">
-                <div class="modal-header">
-                    <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
-                    <h3 class="modal-title">Edit Options</h3>
-                </div>
-                <div class="modal-body form">
-
-                    <p>Update your options here. Your options are not saved until you hit the save button on the screen</p>
-
-                    <div class="form-group">
-                        <label><span id="question-options-label"></span> (options must be separated by commas)</label>
-                        <textarea class="form-control" id="question-options" name="question-options" rows="6" placeholder="ex: option 1, option 2, option 3"></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-                    <button type="button" data-dismiss="modal" class="btn btn-primary md-close" onclick="updateOptions()">Done</button>
-                </div>
-            </div>
-        </form>
-    </div>*@
 <!------- Options and Emoji Modal Pop-up------------->
 <div id="modal-options" class="md-modal colored-header custom-width md-effect-9">
         <form id="form-options" action="#" method="post">
             <div class="md-content">
                 <div class="modal-header">
                     <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
-                    <h3 class="modal-title">Edit <span id="modal-options-id">Options</span></h3>
+                    <h3 class="modal-title">Edit <span id="modal-options-title">Options</span></h3>
                 </div>
                 <div class="modal-body form">
 
@@ -594,17 +583,12 @@
         return `<input type="hidden" id="questiontype-${getQuestionCount()}" name="new-questiontype-${getQuestionCount()}"" value="@((int)QuestionType.TextBlock)" />`
     }
 
-    function incrementOptionCount() {
-        $('#optioncount').val(getOptionCount() + 1);
-    }
-    function getOptionCount() {
-        return parseInt($('#optioncount').val() + 2);
-    }
+    
+    
 
-    var numberOfOptions = 1;
+    
     function getOptionsRowCount() {
-        var rowCount = $('#options-table tr').length;
-        ++numberOfOptions;
+        var rowCount = $('#options-table tr').length;        
         return rowCount - 1;
     }
 
@@ -612,7 +596,7 @@
         $('#question-table')
             .find('tr')
             .last()
-            .before(`<tr><td>${getSortOrder()}</td><td>${getLabelTextbox()}</td><td>${getQuestionTypeList()}</td><td>${getOptionsLinks()}</td><td>${getShowCheckbox()}</td><td>${getRequiredCheckbox()}</td><td>${getDeleteIcon()}</td></tr>`);
+            .before(`<tr><td>${getSortOrder()}</td><td>${getLabelTextbox()}</td><td>${getQuestionTypeList()}</td><td>${getOptionsLinks()}</td><td>${getShowCheckbox()}</td><td>${getRequiredCheckbox()}</td><td>${getShowCheckbox()}*</td><td>${getDeleteIcon()}</td></tr>`);
 
         incrementQuestionCount();
         $('.md-trigger').modalEffects();
@@ -621,11 +605,34 @@
     }
 
     function addOption() {
+        var optionType = "Option";
+        if ($('#modal-options-title').text() == 'Emojis') {
+            optionType = "Emoji";
+        }
         $('#options-table')
             .find('tr')
             .last()
-            .before(`<tr class="questionRow"><td>Option ${getOptionsRowCount()}</td><td><input type="text" value="" id="option- ${getOptionsRowCount()}" required class="form-control col-sm-3 option" onfocus="this.select()" /></td><td><input type="text" value="" id="optionDescription- ${getOptionsRowCount()}" class="form-control col-sm-3 optionDescription" onfocus="this.select()" /></td><td><button class="btn btn-default btn-sm md-trigger" onclick="$(this).closest('tr').remove();"><span class="text-danger"><i class="s7-trash"></i></span></button></td></tr>`);
-        //incrementOptionCount();
+            .before(`<tr class="questionRow" id="${optionType}-${getOptionsRowCount()}"><td>${optionType} ${getOptionsRowCount()}</td><td><input type="text" value="" id="option- ${getOptionsRowCount()}" required class="form-control col-sm-3 option" onfocus="this.select()" /></td><td><input type="text" value="" id="optionDescription- ${getOptionsRowCount()}" class="form-control col-sm-3 optionDescription" onfocus="this.select()" /></td><td><button class="btn btn-default btn-sm md-trigger" onclick="$(this).closest('tr').remove();updateOptions()"><span class="text-danger"><i class="s7-trash"></i></span></button></td></tr>`);
+        //incrementOptionCount();onChange="deleteOptionAndUpdate(${optionType}-${getOptionsRowCount()})"--onclick="$(this).closest('tr').remove();updateOptions()"
+    }
+
+    function updateOptions() {
+        event.preventDefault();
+        console.log(rowId);
+        var optionType = "Option";
+        if ($('#modal-options-title').text() == 'Emojis') {
+            optionType = "Emoji";
+        }
+        $('#options-table tr').each(function (index) {
+            if (index > $('#options-table tr').length) {
+                $('td:first-child', this).text(optionType + " " + index);
+            }
+        });
+        //$("#options-table tr").each(function (index) {
+        //    if (index != 0 && index != rowCount) {
+        //        $(this).remove();
+        //    }
+        //});
     }
 
     function addTextBlock() {
@@ -669,12 +676,11 @@
     function setOptions(id) {
         selectedQuestion = id;
         var optionType = "Option";
-        var emojiType = @QuestionType.Emoji;
-        $('#modal-options-id').text("Options");
+        $('#modal-options-title').text("Options");
 
         //---1---If options type is emoji, then set emoji option and labels
-        if ($('#questiontype-' + id).val() == emojiType) {
-            $('#modal-options-id').text("Emojis");
+        if ($('#questiontype-' + id).val() == 16) {
+            $('#modal-options-title').text("Emojis");
             optionType = "Emoji";
         }
 
@@ -711,7 +717,7 @@
         $('#options-table')
             .find('tr')
             .last()
-            .before(`<tr class="questionRow"><td>${optionType} ${++optionNo}</td><td><input type="text" value="${optionValue}" required class="form-control col-sm-3 option" onfocus="this.select()" /></td><td><input type="text" value="${optionDescriptionValue}" class="form-control col-sm-3 optionDescription" onfocus="this.select()" /></td><td><button class="btn btn-default btn-sm md-trigger" onclick="$(this).closest('tr').remove();"><span class="text-danger"><i class="s7-trash"></i></span></button></td></tr>`);
+            .before(`<tr class="questionRow" id="questionRow${optionNo}"><td>${optionType} ${++optionNo}</td><td><input type="text" value="${optionValue}" required class="form-control col-sm-3 option" onfocus="this.select()" /></td><td><input type="text" value="${optionDescriptionValue}" class="form-control col-sm-3 optionDescription" onfocus="this.select()" /></td><td><button class="btn btn-default btn-sm md-trigger" onclick="$(this).closest('tr').remove();"><span class="text-danger"><i class="s7-trash"></i></span></button></td></tr>`);
     }
 
     function updateOptions() {
