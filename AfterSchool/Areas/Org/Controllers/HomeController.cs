@@ -23,19 +23,24 @@ namespace AfterSchool.Areas.Org.Controllers
             var account = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
 
-            if (account.OnboardingStepDone != OnboardingStepType.All)
-                return HandleOnboardingRedirect();
-            else if(account.OnboardingStepDone == OnboardingStepType.All)
-                return RedirectToAction("Account", "R", new {area = "", accountname = account.UniqueName });
+            // only redirect if onboarding steps haven't been acknowledged
+            if(CookieVariables.OnboardingStepsAcknowledged.IsEmpty() || !CookieVariables.OnboardingStepsAcknowledged.ToBoolean())
+            {
+                if (account.OnboardingStepDone != OnboardingStepType.All)
+                    return HandleOnboardingRedirect();
+                else if (account.OnboardingStepDone == OnboardingStepType.All)
+                    return RedirectToAction("Account", "R", new { area = "", accountname = account.UniqueName });
 
-            if (!account.CanReceivePaymentDeposits() && SessionVariables.AccountUserType == UserType.Treasurer)
-                return RedirectToAction("getstartedpayments", "account");
+                if (!account.CanReceivePaymentDeposits() && SessionVariables.AccountUserType == UserType.Treasurer)
+                    return RedirectToAction("getstartedpayments", "account");
 
-            if (account.IsNewProviderForOtherAccounts())
-                return RedirectToAction("getstartedpayments", "account");
+                if (account.IsNewProviderForOtherAccounts())
+                    return RedirectToAction("getstartedpayments", "account");
 
-            if (account.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.CurrentUser, null, null, null, null) == 0)
-                return RedirectToAction("getstarted");
+                if (account.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.CurrentUser, null, null, null, null) == 0)
+                    return RedirectToAction("getstarted");
+            }
+          
 
             var msgs = new SystemMessages();
             var actions = SessionAction.LoadByAccountId(

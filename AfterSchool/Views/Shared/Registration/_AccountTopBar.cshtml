@@ -28,19 +28,19 @@
         isDuringProfileSetup = ViewData["IsDuringProfileSetup"].ToString().ToBoolean();
     }
 
-    var currentLevel = AccountService.OnboardingCompletionStatus(SessionVariables.CurrentAccount);
-    var currentProgress = AccountService.GetCurrentOnboardingProcess(SessionVariables.CurrentAccount);    
+    var currentLevel = AccountService.OnboardingCompletionStatus(currentAccount);
+    var currentProgress = AccountService.GetCurrentOnboardingProcess(currentAccount);    
     var totalNumberOfOnboardingSteps = 4;
-    var hasAnyPaidActivity = SessionVariables.CurrentAccount.HasPaidActivities();
+    var hasAnyPaidActivity = currentAccount.IsNotEmpty() && currentAccount.HasPaidActivities();
     //If there is no paid activity configured then we should not display Payment Modal and Progressbar to user
     var totalStepsLeft = hasAnyPaidActivity ? totalNumberOfOnboardingSteps : totalNumberOfOnboardingSteps - 1;
     var progressPercentage = ((Decimal)currentProgress.Count / totalStepsLeft) * 100;
     
 
-    var isAccountAndLoggedInUserIsOwner = SessionVariables.CurrentAccount.IsNotEmpty() &&
-        SessionVariables.CurrentUser.IsNotEmpty() &&
-        (SessionVariables.CurrentAccount.ID == Model.ID) &&
-        (SessionVariables.CurrentUser.HasAccessTo(Model));
+    var isAccountAndLoggedInUserIsOwner = currentAccount.IsNotEmpty() &&
+        currentUser.IsNotEmpty() &&
+        (currentAccount.ID == Model.ID) &&
+        (currentUser.HasAccessTo(Model));
 
     Activity unpublishActivity = null;
     var url = "";
@@ -316,6 +316,7 @@
             $("#popover-container").removeClass("popover-setup popover-active full-z-index");
             $('.blur-bg').hide()
             $('body').removeClass('hidden-overflow');
+            setOnboardingStepsAcknowledge();
         }
         else {
             $("#popover-container").addClass("popover-setup popover-active full-z-index");
@@ -345,5 +346,13 @@
             hideLoader();
             LoadPaymentModal();
         }
+    }
+
+    function setOnboardingStepsAcknowledge() {
+        var url = '@Url.Action("SetOnboardingStepsAcknowledged", "Services", new { Area = "" })';
+        $.ajax({
+            type: "POST",
+            url: url
+        });
     }
 </script>

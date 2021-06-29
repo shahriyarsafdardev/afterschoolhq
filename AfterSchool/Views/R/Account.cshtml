@@ -37,6 +37,8 @@
         SessionVariables.CurrentUser.IsNotEmpty() &&
         (SessionVariables.CurrentAccount.ID == Model.ID) &&
         (SessionVariables.CurrentUser.HasAccessTo(Model));
+    var onboardingStepsAcknowledged = (bool)CookieVariables.OnboardingStepsAcknowledged.IsNotEmpty() ? CookieVariables.OnboardingStepsAcknowledged.ToBoolean() : false;
+
 }
 
 <style>
@@ -519,7 +521,8 @@
         welcome user
     </button>*@
 
-<div>
+@* dont think this is needed anymore.. *@
+@*<div> 
     @{
         Html.RenderPartial("~/Views/Shared/_Modal.cshtml", new ModalViewModel()
         {
@@ -528,9 +531,9 @@
             HtmlBody = $"<p>This is your organizations profile. you can review your dashboard and create activities from there.</p>",
         });
     }
-</div>
+</div>*@
 
-@if (isAccountAndLoggedInUserIsOwner)
+@if (isAccountAndLoggedInUserIsOwner && !onboardingStepsAcknowledged)
 {
     <div id="footer-account" class="activity-footer text-center hide">
         <span class="span-upgrade-modal-close" onclick="return hideActivityRibbon()">X</span>
