@@ -24,7 +24,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentUser = SessionVariables.CurrentUser;
 
             // only redirect if onboarding steps haven't been acknowledged
-            if (CookieVariables.OnboardingStepsAcknowledged.IsEmpty() || !CookieVariables.OnboardingStepsAcknowledged.ToBoolean())
+            if (account.CanReceivePaymentDeposits() && (CookieVariables.OnboardingStepsAcknowledged.IsEmpty() || !CookieVariables.OnboardingStepsAcknowledged.ToBoolean()))
                 CookieVariables.OnboardingStepsAcknowledged = true.ToString();
 
             if (account.OnboardingStepDone != OnboardingStepType.All)
