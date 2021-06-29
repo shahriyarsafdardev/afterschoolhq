@@ -13,7 +13,7 @@ namespace AfterSchool.Areas.Org
             var account = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
 
-            if (account.CanProcessPayments(msgs))                
+            if (!account.CanProcessPayments(msgs))                
                 filterContext.Result = new RedirectToRouteResult(new RouteValueDictionary {
                     { "controller", "account" },
                     { "action", "paymentsoptions" },
@@ -27,7 +27,7 @@ namespace AfterSchool.Areas.Org
             var account = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
 
-            if (account.CanProcessPayments(msgs))
+            if (!account.CanProcessPayments(msgs))
                 filterContext.Result = new RedirectToRouteResult(new RouteValueDictionary {
                     { "controller", "account" },
                     { "action", "paymentsoptions" },
