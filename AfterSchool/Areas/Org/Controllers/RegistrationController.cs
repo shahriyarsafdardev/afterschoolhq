@@ -32,7 +32,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (rpp.IsNumber() && rpp.ToInteger() > 0)
                 recordsPerPage = rpp.ToInteger();
 
-            var (registrations, totalCount) = LoadSearch(activity, group, pageNumber, recordsPerPage, q, emailed, question, regstatus, at, false);
+            var (registrations, totalCount) = LoadSearch(activity, group, pageNumber, recordsPerPage, q, emailed, question, regstatus, at, false, msgs);
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
 
             if (emailed.IsBoolean() && emailed.ToBoolean())
@@ -799,7 +799,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add("Message Body is required", MessageType.UserError);
 
             ActivityMessage am = null;
-            var (registrations, totalCount) = LoadSearch(activity, group, null, null, q, emailed, question, regstatus, at, true);
+            var (registrations, totalCount) = LoadSearch(activity, group, null, null, q, emailed, question, regstatus, at, true, msgs);
 
             if (msgs.HasNoErrors())
             {
