@@ -670,7 +670,7 @@ namespace AfterSchoolLibrary.Services
         public static AccountPackage GetActiveAccountPackage(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (account.IsNotEmpty())
-                return AccountPackage.LoadByAccountId(account.ID.Value, true, "CreateDate", OrderByDirectionEnum.Descending, msgs, dc);
+                return AccountPackage.LoadFirstFromListByAccountIdByIsActiveByOrderProperty(account.ID.Value, true, "CreateDate", OrderByDirectionEnum.Descending, msgs, dc);
 
             return null;
         }
