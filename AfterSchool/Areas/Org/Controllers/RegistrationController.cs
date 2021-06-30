@@ -120,6 +120,9 @@ namespace AfterSchool.Areas.Org.Controllers
             var registration = currentAccount.GetRegistration(id.ToGuid(), msgs);
             LoadRegistrationViewBag(registration, r, msgs);
 
+            if (registration.IsEmpty())
+                return new HttpStatusCodeResult(System.Net.HttpStatusCode.NotFound);
+
             return View(registration);
         }
 
@@ -366,6 +369,10 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             LoadRegistrationViewBag(registration, r, msgs);
+
+            if (registration.IsEmpty())
+                return new HttpStatusCodeResult(System.Net.HttpStatusCode.NotFound);
+
             return View("edit", registration);
         }
 
@@ -389,6 +396,10 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add($"Removed {UILabel.ActivityLabel(activity.ActivityTypeId)}: {activity.Name}", MessageType.Success);
 
             LoadRegistrationViewBag(registration, r, msgs);
+
+            if (registration.IsEmpty())
+                return new HttpStatusCodeResult(System.Net.HttpStatusCode.NotFound);
+
             return View("edit", registration);
         }
 
@@ -464,6 +475,10 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             LoadRegistrationViewBag(registration, r, msgs);
+
+            if (registration.IsEmpty())
+                return new HttpStatusCodeResult(System.Net.HttpStatusCode.NotFound);
+
             return View("edit", registration);
         }
 
@@ -501,6 +516,10 @@ namespace AfterSchool.Areas.Org.Controllers
             // msgs.Add(string.Format("{0} will be notified shortly", selectedRegistration.ToRegistrant().Name), MessageType.Success);
 
             LoadRegistrationViewBag(registration, r, msgs);
+            
+            if (registration.IsEmpty())
+                return new HttpStatusCodeResult(System.Net.HttpStatusCode.NotFound);
+
             return View("Edit", registration);
         }
 
@@ -539,6 +558,10 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             LoadRegistrationViewBag(registration, r, msgs);
+
+            if (registration.IsEmpty())
+                return new HttpStatusCodeResult(System.Net.HttpStatusCode.NotFound);
+
             return View("Edit", registration);
         }
 
@@ -569,6 +592,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 registration = allRegistrations.First(x => x.Uid == selectedRegistration.ToGuid());
             else
                 registration = allRegistrations.First();
+
+            if (registration.IsEmpty())
+                return;
 
             var ras = registration.GetRegistrantActivities(msgs);
             var rasActivityTypes = ras.Where(y => y.ParticipationObjectTypeId == ParticipationObjectType.Activity);            
