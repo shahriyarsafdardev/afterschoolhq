@@ -1084,7 +1084,7 @@ namespace AfterSchoolLibraryTests.Tests
             }
         }
 
-        [Fact(DisplayName = "HasFeature test 2")]
+        [Fact(DisplayName = "HasFeature False Case Test")]
         public void HasFeatureEmptyAccountTest()
         {
             try
