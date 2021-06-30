@@ -12,7 +12,6 @@ using System.Net;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
-    [AccountingFilter]
     public class AccountingController : BaseLoggedInController
     {
         public AccountingController() : base(AccountService.ProviderAccountTypes.ToList())
