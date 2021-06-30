@@ -266,13 +266,13 @@
                                                     <td>
                                                         @{Html.RenderPartial(
                                                                             "~/Views/Shared/_SwitchButton.cshtml",
-                                                                            question.IsActive,
+                                                                            question.IsAnswerDescriptionEnabled,
                                                                             new ViewDataDictionary()
                                                                             {
-                                                                            { "checkboxname", "active-" + question.ID },
-                                                                            { "checkboxid", "active-" + question.ID },
+                                                                            { "checkboxname", "answerDescription-" + question.ID },
+                                                                            { "checkboxid", "answerDescription-" + question.ID },
                                                                             { "disabled", question.IsLocked },
-                                                                            { "classname", "question-isactive" }
+                                                                            { "classname", "question-IsAnswerDescriptionEnabled" }
 });}
                                                     </td>
                                                     <td>
@@ -408,7 +408,7 @@
                                         <input type="text" value="" id="optionDescription-1" class="form-control col-sm-3 optionDescription"  onfocus="this.select()" />
                                     </td>
                                     <td>
-                                        <button class="btn btn-default btn-sm md-trigger" onclick="$(this).closest('tr').remove();"><span class="text-danger"><i class="s7-trash"></i></span></button>
+                                        <button type="button" class="btn btn-default btn-sm md-trigger" onclick="$(this).closest('tr').remove();"><span class="text-danger"><i class="s7-trash"></i></span></button>
                                     </td>
                                 </tr>
 
@@ -528,7 +528,7 @@
     function getSortOrder() {
 
         var rowCount = $('#question-table tr').length;
-        return `<label id="displayOrderlabel-${getQuestionCount()}">${rowCount}</label>
+        return `<label id="displayOrderlabel-${getQuestionCount()}">${--rowCount}</label>
                  <input type="hidden" id="questionid-${getQuestionCount()}" name="questionid-${getQuestionCount()}" class="questionId" value="${getQuestionCount()}" />
                 <input type="hidden" id="sortorder-${getQuestionCount()}" name="new-sort-${getQuestionCount()}" class="displayOrderId" value="${rowCount} " />`;
     }
@@ -561,6 +561,18 @@
             });}`.replace(/::number::/g, getQuestionCount());
     }
 
+    function getDescriptionCheckbox() {
+        return `@{Html.RenderPartial(
+            "~/Views/Shared/_SwitchButton.cshtml",
+            false,
+            new ViewDataDictionary()
+            {
+                { "checkboxname", "new-description-enabled-::number::" },
+                { "checkboxid", "description-::number::" },
+                { "disabled", false }
+            });}`.replace(/::number::/g, getQuestionCount());
+    }
+
     function getQuestionTypeList() {
         var rtn = `<select class="form-control" onChange="showEditButton(${getQuestionCount()})" id="questiontype-${getQuestionCount()}" name="new-questiontype-${getQuestionCount()}">`;
         @foreach (var type in Enum.GetValues(typeof(QuestionType)).Cast<QuestionType>().Where(questionType => !typesUserCannotAdd.Contains(questionType)))
@@ -588,7 +600,7 @@
 
     
     function getOptionsRowCount() {
-        var rowCount = $('#options-table tr').length;        
+        var rowCount = $('#options-table tr').length;
         return rowCount - 1;
     }
 
@@ -596,7 +608,7 @@
         $('#question-table')
             .find('tr')
             .last()
-            .before(`<tr><td>${getSortOrder()}</td><td>${getLabelTextbox()}</td><td>${getQuestionTypeList()}</td><td>${getOptionsLinks()}</td><td>${getShowCheckbox()}</td><td>${getRequiredCheckbox()}</td><td>${getShowCheckbox()}*</td><td>${getDeleteIcon()}</td></tr>`);
+            .before(`<tr><td>${getSortOrder()}</td><td>${getLabelTextbox()}</td><td>${getQuestionTypeList()}</td><td>${getOptionsLinks()}</td><td>${getShowCheckbox()}</td><td>${getRequiredCheckbox()}</td><td>${getDescriptionCheckbox()}</td><td>${getDeleteIcon()}</td></tr>`);
 
         incrementQuestionCount();
         $('.md-trigger').modalEffects();
@@ -612,27 +624,19 @@
         $('#options-table')
             .find('tr')
             .last()
-            .before(`<tr class="questionRow" id="${optionType}-${getOptionsRowCount()}"><td>${optionType} ${getOptionsRowCount()}</td><td><input type="text" value="" id="option- ${getOptionsRowCount()}" required class="form-control col-sm-3 option" onfocus="this.select()" /></td><td><input type="text" value="" id="optionDescription- ${getOptionsRowCount()}" class="form-control col-sm-3 optionDescription" onfocus="this.select()" /></td><td><button class="btn btn-default btn-sm md-trigger" onclick="$(this).closest('tr').remove();updateOptions()"><span class="text-danger"><i class="s7-trash"></i></span></button></td></tr>`);
-        //incrementOptionCount();onChange="deleteOptionAndUpdate(${optionType}-${getOptionsRowCount()})"--onclick="$(this).closest('tr').remove();updateOptions()"
+            .before(`<tr class="questionRow" id="${optionType}-${getOptionsRowCount()}"><td>${optionType} ${getOptionsRowCount()}</td><td><input type="text" value="" id="option- ${getOptionsRowCount()}" required class="form-control col-sm-3 option" onfocus="this.select()" /></td><td><input type="text" value="" id="optionDescription- ${getOptionsRowCount()}" class="form-control col-sm-3 optionDescription" onfocus="this.select()" /></td><td><button type="button" class="btn btn-default btn-sm md-trigger" onclick="removeOption($(this).closest('tr').attr('id'))"><span class="text-danger"><i class="s7-trash"></i></span></button></td></tr>`);
     }
 
-    function updateOptions() {
+    function removeOption(id) {
         event.preventDefault();
-        console.log(rowId);
-        var optionType = "Option";
-        if ($('#modal-options-title').text() == 'Emojis') {
-            optionType = "Emoji";
+        var index = id.split("-")[1];
+        var optionType = id.split("-")[0];
+        $("#"+id).remove();
+        for (var i = parseInt(index); i <= $('#options-table tr').length - 2; i++) {
+            var newid =i + 1;
+            $("#" + optionType + "-" + newid).find($('td:first-child')).text(optionType + " " + i);
+            $("#" + optionType + "-" + newid).attr("id", optionType + "-" + i);
         }
-        $('#options-table tr').each(function (index) {
-            if (index > $('#options-table tr').length) {
-                $('td:first-child', this).text(optionType + " " + index);
-            }
-        });
-        //$("#options-table tr").each(function (index) {
-        //    if (index != 0 && index != rowCount) {
-        //        $(this).remove();
-        //    }
-        //});
     }
 
     function addTextBlock() {

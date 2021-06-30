@@ -791,7 +791,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult FormEdit(string id, string copyfrom, string qg, string name, string description, string cmd)
+        public ActionResult FormEdit(string id, string copyfrom, string qg, string name, string description,  string cmd, string formtype)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
@@ -809,10 +809,12 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 if (copyfrom.IsNumber())
                     form = currentAccount.GetForm(id.ToInteger(), msgs)?
-                        .Copy(currentUser.ID.Value, currentAccount.ID.Value, null, msgs);
+                        .Copy(currentUser.ID.Value, currentAccount.ID.Value, formtype.ToInteger(), null, msgs);
+                //.Copy(currentUser.ID.Value, currentAccount.ID.Value, formtype, null, msgs);
                 else
                     form = currentAccount.GetDefaultForm(msgs)
-                        .Copy(currentUser.ID.Value, currentAccount.ID.Value, null, msgs);
+                        .Copy(currentUser.ID.Value, currentAccount.ID.Value, formtype.ToInteger(), null, msgs);
+                //.Copy(currentUser.ID.Value, currentAccount.ID.Value, formtype, null, msgs);
             }
             else
                 form = currentAccount.GetForm(id.ToInteger(), msgs);
@@ -870,6 +872,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                 {
                                     question.IsActive = Request.Params[$"active-{question.ID}"].IsBoolean();
                                     question.IsRequired = Request.Params[$"required-{question.ID}"].IsBoolean();
+                                    question.IsAnswerDescriptionEnabled = Request.Params[$"answerDescription-{question.ID}"].IsBoolean();
 
                                     if (question.QuestionDataTypeId == QuestionDataType.NotSet)
                                     {
@@ -912,7 +915,8 @@ namespace AfterSchool.Areas.Org.Controllers
                                         Link = Request.Params[string.Format("new-link-text-{0}", i)],
                                         Description = Request.Params[string.Format("new-description-{0}", i)],
                                         IsActive = Request.Params[string.Format("new-active-{0}", i)].IsBoolean(),
-                                        IsRequired = Request.Params[string.Format("new-required-{0}", i)].IsBoolean()
+                                        IsRequired = Request.Params[string.Format("new-required-{0}", i)].IsBoolean(),
+                                        IsAnswerDescriptionEnabled = Request.Params[string.Format("new-description-enabled-{0}", i)].IsBoolean()
                                     };
                                     amsgs.AddRange(question.Save(adc));
                                 }

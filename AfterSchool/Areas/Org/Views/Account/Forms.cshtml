@@ -133,12 +133,13 @@
 
                 <div class="form-group">
                     <label>Form Type</label>
-                    @*@Html.DropDownListFor(m => m.Formtype,
-                      new SelectList(Enum.GetValues(typeof(Formtype))),
-                      "Select Form Type")*@
-                    <select class="form-control" id="FormType" name="FormType">
-                        <option>RegistrationType</option>
-                        <option>SurveyType</option>
+                    <select class="form-control formtype-select" id="formtype" name="formtype">
+                        @foreach (var type in Enum.GetValues(typeof(FormType)).Cast<FormType>())
+                        {
+                            <option value="@((int)type)" @(type == FormType.RegistrationType ? "selected=\"selected\"" : "")>
+                                @type.ToString().SplitByUpperCase()
+                            </option>
+                        }
                     </select>
                 </div>
             </div>

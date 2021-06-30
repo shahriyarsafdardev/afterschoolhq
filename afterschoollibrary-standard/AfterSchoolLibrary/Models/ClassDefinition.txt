@@ -968,6 +968,7 @@ property: QuestionDataTypeId, QuestionDataType, Int
 property: IsActive, bool, Bit
 property: IsRequired, bool, Bit
 property: IsLocked, bool, Bit
+property: IsAnswerDescriptionEnabled, bool, Bit
 property: Options, string, NVarChar "1000"
 property: Link, string, NVarChar "1000"
 property: DependsOnQuestionId, int?, Int
@@ -1010,6 +1011,7 @@ property: RegistrantId, int?, Int
 property: ActivityId, int?, Int
 property: RegistrationId, int?, Int
 property: Text, string, NVarChar "400"
+property: Description, string, NVarChar "4000"
 property: QuestionDataTypeId, QuestionDataType, Int
 property: QuestionText, string, NVarChar "400", , Used to keep the question text just in case the question text changes on the original
 join: FormQuestion.ID, FormQuestionId, LeftOuterJoin
