@@ -17,7 +17,7 @@ namespace AfterSchoolLibrary.Services
         public static bool HasFeature(this Account account, FeatureType featureType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (account.IsNotEmpty())
-                return account.GetActiveAccountPackage(msgs, dc).HasFeature(featureType, msgs, dc);
+                return (bool)account.GetActiveAccountPackage(msgs, dc)?.HasFeature(featureType, msgs, dc);
 
             return false;
         }

@@ -1089,11 +1089,16 @@ namespace AfterSchoolLibraryTests.Tests
         {
             try
             {
-                // Arrange & Act
-                var AccountWithFeature = AccountService.HasFeature(account: null, FeatureType.AcceptACH, msgs, dc);
-
+                // Arrange
+                var accountWithNoPackage = AccountFactory.Create(user, msgs, dc);
+                
+                // Act
+                var accountWithFeature = AccountService.HasFeature(account: null, FeatureType.AcceptACH, msgs, dc);
+                var accountWithNoPackageFeature = AccountService.HasFeature(account: accountWithNoPackage, FeatureType.AcceptACH, msgs, dc);
+                
                 // Assert
-                Assert.False(AccountWithFeature);
+                Assert.False(accountWithFeature);
+                Assert.False(accountWithNoPackageFeature);
             }
             catch (Exception ex)
             {
