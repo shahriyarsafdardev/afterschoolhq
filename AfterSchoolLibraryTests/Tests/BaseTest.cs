@@ -29,9 +29,10 @@ namespace AfterSchoolLibraryTests
             if (UseDatabase)
             {
                 AfterSchoolLibrary.Helpers.Utilities.InitializeApp();
-                if (AfterSchoolLibrary.Helpers.Utilities.IsLocalHost)
-                    dc = new DatabaseConnection(Database.LocalTestCredentials.ConnectionString);
-                else
+
+                //if (AfterSchoolLibrary.Helpers.Utilities.IsLocalHost)
+                //    dc = new DatabaseConnection(Database.LocalTestCredentials.ConnectionString);
+                //else
                     dc = new DatabaseConnection(Database.TestCredentials.ConnectionString);
 
                 msgs = new SystemMessages();
