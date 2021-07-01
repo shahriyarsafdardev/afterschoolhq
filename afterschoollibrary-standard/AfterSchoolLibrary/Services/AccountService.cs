@@ -16,7 +16,10 @@ namespace AfterSchoolLibrary.Services
     {
         public static bool HasFeature(this Account account, FeatureType featureType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.GetActiveAccountPackage(msgs, dc).HasFeature(featureType, msgs, dc);
+            if (account.IsNotEmpty())
+                return (bool)account.GetActiveAccountPackage(msgs, dc)?.HasFeature(featureType, msgs, dc);
+
+            return false;
         }
 
         public static WebUser GetAccountOwner(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -686,7 +689,10 @@ namespace AfterSchoolLibrary.Services
 
         public static AccountPackage GetActiveAccountPackage(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountPackage.LoadByAccountId(account.ID.Value, true, "CreateDate", OrderByDirectionEnum.Descending, msgs, dc);
+            if (account.IsNotEmpty())
+                return AccountPackage.LoadFirstFromListByAccountIdByIsActiveByOrderProperty(account.ID.Value, true, "CreateDate", OrderByDirectionEnum.Descending, msgs, dc);
+
+            return null;
         }
 
         public static List<AccountPackage> GetAccountPackages(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -2711,7 +2717,10 @@ namespace AfterSchoolLibrary.Services
 
         public static bool UseStripeConnectDuringCheckout(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc) && account.StripeChargesEnabled;
+            if (account.IsNotEmpty())
+                return account.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc) && account.StripeChargesEnabled;
+
+            return false;
         }
 
         public static Payout RequestNewPayout(this Account account, List<Transaction> transactions, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
@@ -3599,7 +3608,10 @@ namespace AfterSchoolLibrary.Services
 
         public static CheckPaymentAccount GetCheckPaymentAccount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return CheckPaymentAccount.LoadByAccountId(account.ID.Value, msgs, dc);
+            if (account.IsNotEmpty())
+                return CheckPaymentAccount.LoadByAccountId(account.ID.Value, msgs, dc);
+
+            return null;
         }
 
         public static BankPaymentAccount CreateOrUpdateBankPaymentAccount(this Account account, string bankName, BankAccountType bankAccountType, string routingNumber, string accountNumber, string accountHoldersName, string bankCountry, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
