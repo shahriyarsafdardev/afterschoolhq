@@ -123,7 +123,7 @@
                                                 <th></th>
                                                 <th>Ask? (<a href="javascript:checkAllActive()">All</a> / <a href="javascript:uncheckAllActive()">None</a>)</th>
                                                 <th>Required? (<a href="javascript:checkAllRequired()">All</a> / <a href="javascript:uncheckAllRequired()">None</a>)</th>
-                                                <th>AnswerDescription? (<a href="javascript:checkAllRequired()">All</a> / <a href="javascript:uncheckAllRequired()">None</a>)</th>
+                                                <th>Answer Description? (<a href="javascript:checkAllRequired()">All</a> / <a href="javascript:uncheckAllRequired()">None</a>)</th>
                                                 <th>Action</th>
                                             </tr>
                                         </thead>
@@ -132,7 +132,8 @@
                                             {
                                                 <tr class="questionRow">
                                                     <td>
-                                                        <label id="displayOrderlabel-@question.ID">@question.DisplayOrder</label>
+                                                        <label class="lbl-display-order" id="displayOrderlabel-@question.ID">@question.DisplayOrder
+                                                        </label>
                                                         <input type="hidden"
                                                                id="sortorder-@question.ID"
                                                                name="displayOrderId-@question.ID" class="displayOrderId"
@@ -322,7 +323,6 @@
                     }
 
                     <input type="hidden" name="newquestioncount" id="newquestioncount" value="0" />
-                    <input type="hidden" name="optioncount" id="optioncount" value="0" />
 
                 </form>
             </div>
@@ -528,7 +528,7 @@
     function getSortOrder() {
 
         var rowCount = $('#question-table tr').length;
-        return `<label id="displayOrderlabel-${getQuestionCount()}">${--rowCount}</label>
+        return `<label class="lbl-display-order" id="displayOrderlabel-${getQuestionCount()}">${--rowCount}</label>
                  <input type="hidden" id="questionid-${getQuestionCount()}" name="questionid-${getQuestionCount()}" class="questionId" value="${getQuestionCount()}" />
                 <input type="hidden" id="sortorder-${getQuestionCount()}" name="new-sort-${getQuestionCount()}" class="displayOrderId" value="${rowCount} " />`;
     }
@@ -584,7 +584,7 @@
     }
 
     function getOptionsLinks() {
-        return `<button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-options" onclick="setOptions(${getQuestionCount()})" id="btn-setoptions-${getQuestionCount()}">Edit Options</button><input type="hidden" id="options-text-${getQuestionCount()}" name="new-options-text-${getQuestionCount()}" value="" /><button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-link" onclick="setLink(${getQuestionCount()})" id="btn-setlink-${getQuestionCount()}">Add/Edit Link</button><input type="hidden" id="link-text-${getQuestionCount()}" name="new-link-text-${getQuestionCount()}" value="" /><button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-rating" onclick="setRating(${getQuestionCount()})" id="btn-setratings-${getQuestionCount()}">Set Rating</button><input type="hidden" id="displayOrderId-${getQuestionCount()}" name="displayOrderId-${getQuestionCount()}" value="" />`;
+        return `<button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-options" onclick="setOptions(${getQuestionCount()})" id="btn-setoptions-${getQuestionCount()}">Edit Options</button><input type="hidden" id="options-text-${getQuestionCount()}" name="new-options-text-${getQuestionCount()}" value="" /><button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-link" onclick="setLink(${getQuestionCount()})" id="btn-setlink-${getQuestionCount()}">Add/Edit Link</button><input type="hidden" id="link-text-${getQuestionCount()}" name="new-link-text-${getQuestionCount()}" value="" /><button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-rating" onclick="setRating(${getQuestionCount()})" id="btn-setratings-${getQuestionCount()}">Set Rating</button><input type="hidden" id="displayOrderId-${getQuestionCount()}" name="displayOrderId-${getQuestionCount()}" class="displayOrderId" value="" />`;
     }
 
     function getDescription() {
@@ -615,7 +615,12 @@
         var rowCount = $('#question-table tr').length;
         console.log("----------After adding Question, table rows :" + rowCount);
     }
-
+    function addOptionRow(optionType, optionNo, optionValue, optionDescriptionValue) {
+        $('#options-table')
+            .find('tr')
+            .last()
+            .before(`<tr class="questionRow" id="${optionType}-${optionNo+1}"><td>${optionType} ${optionNo+1}</td><td><input type="text" value="${optionValue}" required class="form-control col-sm-3 option" onfocus="this.select()" /></td><td><input type="text" value="${optionDescriptionValue}" class="form-control col-sm-3 optionDescription" onfocus="this.select()" /></td><td><button class="btn btn-default btn-sm md-trigger" onclick="removeOption($(this).closest('tr').attr('id'))"><span class="text-danger"><i class="s7-trash"></i></span></button></td></tr>`);
+    }
     function addOption() {
         var optionType = "Option";
         if ($('#modal-options-title').text() == 'Emojis') {
@@ -631,12 +636,15 @@
         event.preventDefault();
         var index = id.split("-")[1];
         var optionType = id.split("-")[0];
-        $("#"+id).remove();
-        for (var i = parseInt(index); i <= $('#options-table tr').length - 2; i++) {
-            var newid =i + 1;
-            $("#" + optionType + "-" + newid).find($('td:first-child')).text(optionType + " " + i);
-            $("#" + optionType + "-" + newid).attr("id", optionType + "-" + i);
-        }
+        $("#" + id).remove();
+        var totalRows = $('#options-table tr').length - 2;
+        $("#options-table tbody tr").each(function (i) {          
+            var newid = i + 1;           
+            if (i < totalRows) {
+                $(this).find($('td:first-child')).text(optionType + " " + newid);
+                $(this).attr("id", optionType + "-" + newid);
+            }
+        });
     }
 
     function addTextBlock() {
@@ -717,12 +725,7 @@
         }
     }
 
-    function addOptionRow(optionType, optionNo, optionValue, optionDescriptionValue) {
-        $('#options-table')
-            .find('tr')
-            .last()
-            .before(`<tr class="questionRow" id="questionRow${optionNo}"><td>${optionType} ${++optionNo}</td><td><input type="text" value="${optionValue}" required class="form-control col-sm-3 option" onfocus="this.select()" /></td><td><input type="text" value="${optionDescriptionValue}" class="form-control col-sm-3 optionDescription" onfocus="this.select()" /></td><td><button class="btn btn-default btn-sm md-trigger" onclick="$(this).closest('tr').remove();"><span class="text-danger"><i class="s7-trash"></i></span></button></td></tr>`);
-    }
+   
 
     function updateOptions() {
         if (!isNaN(selectedQuestion)) {
@@ -834,7 +837,7 @@
     $(function () {
         var selectQuestionId, oldPosition, newPosition;
         $("#question-table").sortable({
-            items: 'tr:not(tr:first-child)',
+            items: 'tr',
             cursor: 'pointer',
             axis: 'y',
             dropOnEmpty: false,
@@ -851,36 +854,14 @@
                 var nbElems = inputs.length;
                 $('input.currentposition').each(function (idx) {
                     $(this).val(nbElems - idx);
-                });
+                });              
+                var totalRows = $('#question-table tr').length - 2;
+                $("#question-table tbody tr").each(function (i) {
 
-                var questionId = $(ui.item).find(".questionId").val();
-                newPosition = ui.item.index();
-
-
-                currentSortingPosition = parseInt($("#displayOrderlabel-" + questionId).text());
-                // update current position with respect to sort order plus position changed
-                currentSortingPosition = currentSortingPosition + (newPosition - oldPosition);
-
-                //update hidden field with updated sort position
-                $(ui.item).find(".displayOrderId").val(currentSortingPosition);
-                // update label with updated sort position
-                $("#displayOrderlabel-" + questionId).text(currentSortingPosition);
-
-                // iterate over next rows and increase their sorting value with 1 increment
-                $("tr.questionRow").each(function (i, tr) {
-                    $this = $(this);
-                    if (i > ui.item.index()) {
-
-                        var updatedQuestionId = $this.find(".questionId").val();
-
-                        var displayOrder = $this.find(".displayOrderId").val();
-                        var increment = ++displayOrder;
-
-                        $(this).find(".displayOrderId").val(increment);
-
-                        $("#displayOrderlabel-" + updatedQuestionId).text(increment);
-
-                    }
+                    if (i < totalRows) {
+                        $(this).find(".lbl-display-order").text(i + 1);
+                        $(this).find(".displayOrderId").val(i + 1);                       
+                    }                    
                 });
             }
         });
