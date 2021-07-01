@@ -1,6 +1,12 @@
 ﻿User-agent: MJ12bot
 Disallow: /
 
+User-agent: PetalBot
+Disallow: /
+
+User-agent: BLEXBot 1.0
+Disallow: /
+
 User-agent: Twitterbot
 Disallow: 
 
