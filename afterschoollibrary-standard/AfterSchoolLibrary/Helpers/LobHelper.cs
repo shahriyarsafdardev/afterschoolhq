@@ -111,7 +111,7 @@ namespace AfterSchoolLibrary.Helpers
             }
             catch(Exception ex)
             {
-                msgs.Add("Error creating check", MessageType.Error);
+                msgs.Add("Error creating check.", MessageType.Error, ex);
             }
 
             return check;

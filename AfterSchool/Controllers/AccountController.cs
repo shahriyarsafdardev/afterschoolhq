@@ -449,7 +449,7 @@ namespace AfterSchool.Controllers
             var currentUser = SessionVariables.CurrentUser;
             var currentAccount = SessionVariables.CurrentAccount;
 
-            if (currentUser.IsNotEmpty())
+            if (currentUser.IsNotEmpty() && currentAccount.IsNotEmpty())
             {
                 var registrantAccount = currentAccount;
 

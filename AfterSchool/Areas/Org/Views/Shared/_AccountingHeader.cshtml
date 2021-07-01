@@ -4,21 +4,25 @@
     var couponPackage = PackageService.GetPackageWithAnyFeaturesLowestPrice(new List<FeatureType>() { FeatureType.ManageCoupons });
 }
 
-
 <div class="btn-toolbar">
     <div class="btn-group hidden-xs">
         <a class="btn btn-alt6@(actionName == "index" ? "-active" : "")" href="@Url.Action("index", "accounting")">
             Transactions
         </a>
-        @if (!SessionVariables.CurrentAccount.UseStripeConnectDuringCheckout())
-        { 
-            <a class="btn btn-alt6@(actionName == "payouts" ? "-active" : "")" href="@Url.Action("payouts", "accounting")">
-                Payouts
-            </a>
+
+        @if (SessionVariables.CurrentAccount.CanProcessPayments())
+        {
+            <a class="btn btn-alt6@(actionName == "payouts" ? "-active" : "")" href="@Url.Action("payouts", "accounting")"> Payouts </a>
+        } 
+        else
+        {
+            <a class="btn btn-alt6@(actionName == "payouts" ? "-active" : "")" href="#" onclick="return loadPaymentRestrictionModal();"> Payouts </a>
         }
+
         <a class="btn btn-alt6@(actionName == "subscriptions" ? "-active" : "")" href="@Url.Action("subscriptions", "accounting")">
             Subscriptions &amp; Plans
         </a>
+
         <a class="btn btn-alt6@(actionName == "refundrequests" ? "-active" : "")" href="@Url.Action("refundrequests", "accounting")">
             Refund Requests
         </a>
@@ -37,6 +41,7 @@
             </a>
         }
     </div>
+
     <div class="hidden-lg hidden-sm hidden-md">
         <select class="form-control" onchange="this.value == '#' ? showUpgradeMyPlan(this.packagename,this.packageid) : handleNav(this.value)">
             <optgroup label="Navigation">
