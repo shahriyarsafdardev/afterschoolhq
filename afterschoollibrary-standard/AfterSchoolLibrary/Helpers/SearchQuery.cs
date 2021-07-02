@@ -217,40 +217,55 @@ namespace AfterSchoolLibrary.Helpers
 			SELECT *
 			INTO #temp_accounts_2
 			FROM (
-				--accounts with current activities or now enrolling
+			     --accounts with current activities or now enrolling and has headerimage and has headline
 				SELECT DISTINCT 
 					AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
 					IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 1 as Priority
 				FROM #temp_accounts_1 
 				WHERE 
-					IsAccountNowEnrolling = 1
-				
+					IsAccountNowEnrolling = 1 AND HeaderImage is not null AND (Headline is not null AND Headline != '')					
 				UNION ALL
 
-				-- accounts with header image or logo next
+				-- accounts with now enrolling and has headerimage but not headline
 				SELECT DISTINCT 
 					AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
 					IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 2 as Priority
 				FROM #temp_accounts_1 
 				WHERE 
-					AccountId NOT IN (
-						SELECT DISTINCT AccountId FROM #temp_accounts_1 
-						WHERE IsAccountNowEnrolling = 1
-					) AND (HeaderImage is not null or Logo is not null)
+				    IsAccountNowEnrolling = 1 AND HeaderImage is not null AND (Headline is null or Headline = '')
+				UNION ALL
+
+				-- accounts  with now enrolling and has no headerimage but headline
+				SELECT DISTINCT 
+					AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+					IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 3 as Priority
+				FROM #temp_accounts_1 
+				WHERE 
+					IsAccountNowEnrolling = 1 AND HeaderImage is null AND (Headline is not null AND Headline != '')
 
 				UNION ALL
+
+				-- accounts  with now enrolling but without headerimage and headline
+				SELECT DISTINCT 
+					AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, IsAccountNowEnrolling, IsELearningCenter, 
+					IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 4 as Priority
+				FROM #temp_accounts_1 
+				WHERE 
+					IsAccountNowEnrolling = 1 AND HeaderImage is null AND (Headline is null or Headline = '')
+
+				UNION ALL
+
 
 				-- all other accounts
 				SELECT DISTINCT 
 					AccountId, AccountUid, AccountName, AccountUniqueName, IsOpenDuringCovid, 0 as IsAccountNowEnrolling, IsELearningCenter, 
-					IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 3 as Priority
+					IsVirtualProgram, Headline, HeaderImage, Logo, LocationId, AgeStart, AgeEnd, GradeLevelStart, GradeLevelEnd, 5 as Priority
 				FROM #temp_accounts_1
 				WHERE
 					AccountId NOT IN (
 						SELECT DISTINCT AccountId FROM #temp_accounts_1 
 						WHERE IsAccountNowEnrolling = 1		
-					)
-					AND HeaderImage is null and Logo is null --because we already filtered this in second query, so no need of those accounts now
+					)--because we already filtered this in second query, so no need of those accounts now
 			) as filteredData							
 
 			SELECT DISTINCT
