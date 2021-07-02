@@ -376,62 +376,62 @@
 
 <!------- Options and Emoji Modal Pop-up------------->
 <div id="modal-options" class="md-modal colored-header custom-width md-effect-9">
-        <form id="form-options" action="#" method="post">
-            <div class="md-content">
-                <div class="modal-header">
-                    <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
-                    <h3 class="modal-title">Edit <span id="modal-options-title">Options</span></h3>
-                </div>
-                <div class="modal-body form">
-
-                    <p>Update your options here. Your options are not saved until you hit the save button on the screen</p>
-
-                    <div class="table-responsive">
-                        <table class="table options-table emoji-option-table" id="options-table">
-                            <thead>
-                                <tr>
-                                    <th></th>
-                                    <th>Value <span style="color:red">*</span></th>
-                                    <th>Description (optional)</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr class="questionRow">
-                                    <td>
-                                        Option 1
-                                    </td>
-                                    <td>                                        
-                                        <input type="text" value="" id="option-1" required class="form-control col-sm-3 option" onfocus="this.select()" />
-                                    </td>
-                                    <td>
-                                        <input type="text" value="" id="optionDescription-1" class="form-control col-sm-3 optionDescription"  onfocus="this.select()" />
-                                    </td>
-                                    <td>
-                                        <button type="button" class="btn btn-default btn-sm md-trigger" onclick="$(this).closest('tr').remove();"><span class="text-danger"><i class="s7-trash"></i></span></button>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td colspan="4">
-                                        <button type="button" class="btn btn-default" onclick="addOption()">
-                                            <i class="s7-plus"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-
-                </div>
-                <div class="modal-footer">
-                    <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-                    <button type="button" data-dismiss="modal" class="btn btn-primary md-close" onclick="updateOptions()">Done</button>
-                </div>
+    <form id="form-options" name="form-options" action="#" method="post">
+        <div class="md-content">
+            <div class="modal-header">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+                <h3 class="modal-title">Edit <span id="modal-options-title">Options</span></h3>
             </div>
-        </form>
-    </div>
+            <div class="modal-body form">
+
+                <p>Update your options here. Your options are not saved until you hit the save button on the screen</p>
+
+                <div class="table-responsive">
+                    <table class="table options-table emoji-option-table" id="options-table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Value <span style="color:red">*</span></th>
+                                <th>Description (optional)</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="questionRow">
+                                <td>
+                                    Option 1
+                                </td>
+                                <td>
+                                    <input type="text" value="" id="option-1" required class="form-control col-sm-3 option" onfocus="this.select()" />
+                                </td>
+                                <td>
+                                    <input type="text" value="" id="optionDescription-1" class="form-control col-sm-3 optionDescription" onfocus="this.select()" />
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-default btn-sm md-trigger" onclick="removeOption($(this).closest('tr').attr('id'))"><span class="text-danger"><i class="s7-trash"></i></span></button>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="4">
+                                    <button type="button" class="btn btn-default" onclick="addOption()">
+                                        <i class="s7-plus"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+                <button type="button" data-dismiss="modal" class="btn btn-primary" onclick="updateOptions()">Done</button>
+            </div>
+        </div>
+    </form>
+</div>
 
 <div id="modal-link" class="md-modal colored-header custom-width md-effect-9">
     <form id="form-link" action="#" method="post">
@@ -731,16 +731,27 @@
         if (!isNaN(selectedQuestion)) {
             var optionString = '';
             var rowCount = $("#options-table tr").length - 1;
+            var validation = true;
             $("#options-table tr").each(function (index) {
                 if (index != 0 && index != rowCount) {
+                    if ($(this).find("input.option").val() == "") {
+                        $(this).find("input.option").addClass("danger");
+                        validation = false;
+                    }
+                    else {
+                        $(this).find("input.option").removeClass("danger");
+                    }
                     var rowOption = $(this).find("input.option").val() + "=" + $(this).find("input.optionDescription").val() + ",";
                     optionString = optionString + rowOption;
                 }
             });
-
-            var commaIndex = optionString.lastIndexOf(",");
-            var optionWithoutLastComma = optionString.substring(0, commaIndex);
-            $('#options-text-' + selectedQuestion).val(optionWithoutLastComma);
+            if (validation == true) {
+                var commaIndex = optionString.lastIndexOf(",");
+                var optionWithoutLastComma = optionString.substring(0, commaIndex);
+                $('#options-text-' + selectedQuestion).val(optionWithoutLastComma);
+                $("#modal-options").removeClass("md-show");
+            }
+            else return false;           
         }
     }
 
