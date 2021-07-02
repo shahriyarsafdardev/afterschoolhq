@@ -232,6 +232,12 @@ namespace AfterSchoolLibrary.Services
                                     },
                                     msgs: msgs);
 
+                    //logic: (costperclass + ccfee + connenincefee)  * (100 - (platformFee * 100))/100
+                    var amountPaid = ((subscription?.Plan?.Amount / 100) * subscription?.TransferData?.AmountPercent) / 100;
+
+                    //update checkoutobject so pro-rated amount gets reflected
+                    checkoutObject.OverrideAmount = amountPaid;
+
                     if (msgs.HasErrors())
                         return;
 
@@ -265,6 +271,9 @@ namespace AfterSchoolLibrary.Services
                                                                     loggedInUser,
                                                                     msgs,
                                                                     dc);
+
+                    if (msgs.HasNoErrors())
+                        AccountService.CreatePurchaseTransactionPayment(checkoutObject, loggedInUser, msgs, dc);
                 }                
             }
             else

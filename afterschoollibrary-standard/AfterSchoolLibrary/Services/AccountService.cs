@@ -3228,6 +3228,8 @@ namespace AfterSchoolLibrary.Services
 
                 // -- should be fixed now
                 // why is this being passed with no fees?
+                // Bharat: (hypothetically)becuase in provider's student panel you wanted to show amount paid by parent without fees, and not the amount that we charged. 
+                // should I refactor this code?
                 var amountPaid = checkoutObject.GetTotalCostToPurchaseTodayNoFees(msgs, dc);
 
                 if (checkoutObject.PostPayPlan.IsNotEmpty())
