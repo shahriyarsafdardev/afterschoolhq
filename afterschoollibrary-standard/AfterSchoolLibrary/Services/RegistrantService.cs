@@ -229,14 +229,17 @@ namespace AfterSchoolLibrary.Services
                                         { "PayingAccountName", purchasingAccount.Name.ToString() },
                                         { "ParticipationObjectType", checkoutObject.ParticipationObject.ObjectType.ToString() },
                                         { "ParticipationObjectName", checkoutObject.ParticipationObject.Name },
+                                        { "SourceId", sourceId },
+                                        { "ApprovedBy", loggedInUser.Uid.ToString() },
+                                        { "DateRequested", DateTime.Now.ToShortDateTimeString() }
                                     },
                                     msgs: msgs);
 
                     //logic: (costperclass + ccfee + connenincefee)  * (100 - (platformFee * 100))/100
-                    var amountPaid = ((subscription?.Plan?.Amount / 100) * subscription?.TransferData?.AmountPercent) / 100;
+                    //var amountPaid = ((subscription?.Plan?.Amount / 100) * subscription?.TransferData?.AmountPercent) / 100;
 
                     //update checkoutobject so pro-rated amount gets reflected
-                    checkoutObject.OverrideAmount = amountPaid;
+                    //checkoutObject.OverrideAmount = amountPaid;                    
 
                     if (msgs.HasErrors())
                         return;
@@ -272,8 +275,9 @@ namespace AfterSchoolLibrary.Services
                                                                     msgs,
                                                                     dc);
 
-                    if (msgs.HasNoErrors())
-                        AccountService.CreatePurchaseTransactionPayment(checkoutObject, loggedInUser, msgs, dc);
+                    //Bharat: this will be handled through web hook, see stripecontroller
+                    //if (msgs.HasNoErrors())
+                    //    AccountService.CreatePurchaseTransactionPayment(checkoutObject, loggedInUser, msgs, dc);
                 }                
             }
             else

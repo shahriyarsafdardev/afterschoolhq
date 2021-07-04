@@ -3238,16 +3238,34 @@ namespace AfterSchoolLibrary.Services
                 if (checkoutObject.OverrideAmount.HasValue)
                     amountPaid = checkoutObject.OverrideAmount.Value;
 
-                // need to track a payment for each activity/activitygroup
-                checkoutObject.ParticipationObject.AddPayment(
-                    amount: amountPaid,
-                    registrant: registrant,
-                    transaction: transaction,
-                    registrantSubscriptionPlan: checkoutObject.RegistrantSubscriptionPlan,
-                    createDate: checkoutObject.Date,
-                    loggedInUser: loggedInUser,
-                    msgs: msgs,
-                    dc: dc);
+                if (checkoutObject.AmountPaidByParent.HasValue && checkoutObject.AmountReceivedByProvider.HasValue)
+                {
+                    // need to track a payment for each activity/activitygroup
+                    checkoutObject.ParticipationObject.AddPayment(
+                        amountReceivedByProvider: checkoutObject.AmountReceivedByProvider.Value,
+                        amountPaidByParent: checkoutObject.AmountPaidByParent.Value,
+                        isAmountProRated: checkoutObject.IsAmountProRated,
+                        registrant: registrant,
+                        transaction: transaction,
+                        registrantSubscriptionPlan: checkoutObject.RegistrantSubscriptionPlan,
+                        createDate: checkoutObject.Date,
+                        loggedInUser: loggedInUser,
+                        msgs: msgs,
+                        dc: dc);
+                }
+                else
+                {
+                    // need to track a payment for each activity/activitygroup
+                    checkoutObject.ParticipationObject.AddPayment(
+                        amount: amountPaid,
+                        registrant: registrant,
+                        transaction: transaction,
+                        registrantSubscriptionPlan: checkoutObject.RegistrantSubscriptionPlan,
+                        createDate: checkoutObject.Date,
+                        loggedInUser: loggedInUser,
+                        msgs: msgs,
+                        dc: dc);
+                }
 
                 // if successful payment and reserved pending payment then it should be reserved
                 // TODO: Needs review!!

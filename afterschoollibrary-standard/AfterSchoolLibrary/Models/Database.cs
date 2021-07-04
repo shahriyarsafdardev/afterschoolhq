@@ -286,6 +286,7 @@ namespace AfterSchoolLibrary.Models
 			Registrant.Update(new Hashtable(){{"ProfileStatusId",0}}, new Hashtable(){{"ProfileStatusId", DBNull.Value}}, Registrant.ObjectMap, dc);
 			Registrant.Update(new Hashtable(){{"IsDeleted",false}}, new Hashtable(){{"IsDeleted", DBNull.Value}}, Registrant.ObjectMap, dc);
 			RegistrantWebUser.Update(new Hashtable(){{"IsDeleted",false}}, new Hashtable(){{"IsDeleted", DBNull.Value}}, RegistrantWebUser.ObjectMap, dc);
+			ActivityPayment.Update(new Hashtable(){{"IsProRated",false}}, new Hashtable(){{"IsProRated", DBNull.Value}}, ActivityPayment.ObjectMap, dc);
 			ActivityPayment.Update(new Hashtable(){{"ParticipationObjectTypeId",0}}, new Hashtable(){{"ParticipationObjectTypeId", DBNull.Value}}, ActivityPayment.ObjectMap, dc);
 			ActivityPayment.Update(new Hashtable(){{"IsDeleted",false}}, new Hashtable(){{"IsDeleted", DBNull.Value}}, ActivityPayment.ObjectMap, dc);
 			RegistrantActivity.Update(new Hashtable(){{"ParticipationObjectTypeId",0}}, new Hashtable(){{"ParticipationObjectTypeId", DBNull.Value}}, RegistrantActivity.ObjectMap, dc);
@@ -472,7 +473,6 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AccountWebUser_AccountId_UserTypeId ON [AccountWebUser] (AccountId,UserTypeId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrationPeriod_AccountId ON [RegistrationPeriod] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrationPeriod_Uid ON [RegistrationPeriod] (Uid)"));
-			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrationPeriod_AccountId_Id ON [RegistrationPeriod] (Id,AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrationPeriod_ActivityGroupId ON [RegistrationPeriod] (ActivityGroupId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrationPeriod_AccountId_ActivityGroupId ON [RegistrationPeriod] (ActivityGroupId,AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrationPeriod_AccountActivityGroupId ON [RegistrationPeriod] (AccountActivityGroupId)"));

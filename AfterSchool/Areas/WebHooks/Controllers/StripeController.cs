@@ -171,12 +171,15 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             else
                 transactionFeePayer = billingAccount;
 
+            //we will need this logic to ensure we are adding pro-rated amount in ActivityPayment and RegistrantSubscriptionPlan
+            var overrideAmount = (decimal)stripeInvoice.AmountPaid / 100;
+
             // save transaction info and track payment to the activity as well.
             var checkoutObject = new CheckoutObject()
             {
                 PayingAccount = purchasingAccount,
                 BillingAccount = billingAccount,
-                OverrideAmount = rsp.TotalPaidWithFees,
+                OverrideAmount = overrideAmount > 0 ? overrideAmount : rsp.TotalPaidWithFees,
                 ConvenienceFeeOverrideAmount = rsp.ConvenienceFee,
                 PaymentTypeFeeOverrideAmount = rsp.PaymentTypeFee,
                 ParticipationObject = participationObject,
