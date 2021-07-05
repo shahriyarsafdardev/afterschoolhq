@@ -181,10 +181,14 @@ namespace AfterSchoolLibrary.Services
                 DateTime? billingCycleAnchor = null;
                 if (participationObject.Schedule.IsEmpty())
                 {
-                    if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
-                        billingCycleAnchor = startDateTime.LastDateOfMonth().AddDays(1); 
-                    else if (plan.BillingPeriodTypeId == BillingPeriodType.Week)
-                        billingCycleAnchor = startDateTime.LastDateOfWeek().AddDays(1);
+                    //if first day of month, don't set anchor so no pro rate
+                    if (DateTime.UtcNow.Date != DateTime.Now.FirstDateOfMonth().Date)
+                    {
+                        if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
+                            billingCycleAnchor = startDateTime.LastDateOfMonth().AddDays(1);
+                        else if (plan.BillingPeriodTypeId == BillingPeriodType.Week)
+                            billingCycleAnchor = startDateTime.LastDateOfWeek().AddDays(1);
+                    }
                 }
 
                 //.. charge parent if they tries to join mid-period
@@ -348,6 +352,9 @@ namespace AfterSchoolLibrary.Services
                 checkoutObject: new CheckoutObject()
                 {
                     OverrideAmount = amount,
+                    AmountPaidByParent = amount,
+                    AmountReceivedByProvider = calcObj.GetAmountToProvider(),
+                    IsAmountProRated = true,
                     ConvenienceFeeOverrideAmount = convenienceFee,
                     PaymentTypeFeeOverrideAmount = ccFee,
                     PayingAccount = checkoutObject.PayingAccount,

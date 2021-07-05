@@ -279,6 +279,7 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
             else
                 transactionFeePayer = billingAccount;
 
+            //we will need this logic to ensure we are adding pro-rated amount in ActivityPayment and RegistrantSubscriptionPlan
             decimal amountPaidByParent = stripeInvoice.AmountPaid > 0 ? (decimal)stripeInvoice.AmountPaid / 100 : 0m;
             decimal amountReceivedByProvider = stripeInvoice.TransferData.Amount > 0 ? (decimal)stripeInvoice.TransferData.Amount / 100 : 0m;
             bool isAmountProRated = amountReceivedByProvider < plan.CostPerPeriod;
@@ -288,7 +289,7 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
             {
                 PayingAccount = purchasingAccount,
                 BillingAccount = billingAccount,
-                OverrideAmount = rsp.TotalPaidWithFees,
+                OverrideAmount = amountPaidByParent,
                 AmountPaidByParent = amountPaidByParent,
                 AmountReceivedByProvider = amountReceivedByProvider,
                 IsAmountProRated = isAmountProRated,
