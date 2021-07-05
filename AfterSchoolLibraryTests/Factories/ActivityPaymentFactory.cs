@@ -13,7 +13,7 @@ namespace AfterSchoolLibraryTests.Factories
                 AccountId = account.ID,
                 ParticipationObjectId = activity.ID,
                 ParticipationObjectTypeId = ParticipationObjectType.Activity,
-                AmountReceivedByProvider = 100,
+                Amount = 100,
                 RegistrantId = registrant.ID,
                 TransactionId = transaction.ID
             };
@@ -28,7 +28,7 @@ namespace AfterSchoolLibraryTests.Factories
                 AccountId = account.ID,
                 ParticipationObjectId = activity.ID,
                 ParticipationObjectTypeId = ParticipationObjectType.Activity,
-                AmountReceivedByProvider = 100,
+                Amount = 100,
                 RegistrantSubscriptionPlanId = registrantSubscriptionPlan.ID,
                 RegistrantId = registrantSubscriptionPlan.RegistrantId,
                 TransactionId = transaction.ID
