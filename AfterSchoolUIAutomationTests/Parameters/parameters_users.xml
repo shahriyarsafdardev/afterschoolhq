@@ -7,8 +7,7 @@
       <Password>123456789</Password>
   </Login>
   <!--Individual Account Signup Info-->
-  <AccountSigUp>
-    <SignUpUrl>https://qa.afterschoolhq.com/signup/Welcome</SignUpUrl>
+  <AccountSigUp>    
     <ProgramName>Rock Climbing</ProgramName>
     <FirstName>Alex</FirstName>
     <LasttName>Stuart</LasttName>
@@ -20,4 +19,14 @@
     <AutoComplete>New York, New York, USA</AutoComplete>
     <ProgramCategories>Karate, Sports, Leadership</ProgramCategories>
   </AccountSigUp>
+  <!--Account Update-->
+  <EditAccountProfile>
+    <EditAccountProfileUrl>https://qa.afterschoolhq.com/Org/user/edit</EditAccountProfileUrl>
+    <UserFirstName>Jim2</UserFirstName>
+    <UserLastName>Carrey2</UserLastName>
+    <UserEmail>musicschool@yopmail.com</UserEmail>
+    <UserPassword>123456</UserPassword>
+    <UserConfirmPassword>123456</UserConfirmPassword>
+  </EditAccountProfile>
+
 </PARAMETERS>
