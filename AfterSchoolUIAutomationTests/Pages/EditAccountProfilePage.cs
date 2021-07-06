@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using AfterSchoolUIAutomationTests.Helpers.Extensions;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
@@ -22,7 +23,7 @@ namespace AfterSchoolUIAutomationTests.Pages
         private IWebElement UserPassword1Element => webDriver.FindElement(By.Id("password1"));
         private IWebElement UserPassword2Element => webDriver.FindElement(By.Id("password2"));
         private IWebElement SubmitElement => webDriver.FindElement(By.XPath("//div[@class='col-sm-6']//button[text()='Update']"));
-        private IWebElement ToastElement => webDriver.FindElement(By.XPath("(//div[@class='gritter-content gritter-without-image']//span[@class='gritter-title']/text()"));
+        private IWebElement ToastElement => webDriver.FindElement(By.XPath("//div[@class='gritter-content gritter-without-image']//span[@class='gritter-title']/text()"));
 
         //------------Edit Account Profile Helper Methods-----------
         public void Navigate(string url)
@@ -77,8 +78,14 @@ namespace AfterSchoolUIAutomationTests.Pages
             return this;
         }
 
-        public string toastText()
+        public string ToastMessage()
         {
+            //webDriver.WaitInSeconds(2);
+            Thread.Sleep(2000);
+            //WebDriverWait wait = new WebDriverWait(webDriver, new TimeSpan(0, 0, 5));
+            //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.XPath("//div[@class='gritter-content gritter-without-image']//span[@class='gritter-title']/text()")));
+            //return this;
+
             string message = ToastElement.Text;
             webDriver.WaitInSeconds(2);
             return message;

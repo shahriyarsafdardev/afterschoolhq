@@ -3,11 +3,12 @@
   <!--User Login Info-->
   <Login>
     <LoginUrl>https://qa.afterschoolhq.com/login</LoginUrl>
-      <UserName>musicschool@yopmail.com</UserName>
-      <Password>123456789</Password>
+      <UserName>jimcarey2@yopmail.com</UserName>
+      <Password>123456</Password>
   </Login>
   <!--Individual Account Signup Info-->
-  <AccountSigUp>    
+  <AccountSigUp>
+    <SignUpUrl>http://localhost:54849/signup/Welcome</SignUpUrl>
     <ProgramName>Rock Climbing</ProgramName>
     <FirstName>Alex</FirstName>
     <LasttName>Stuart</LasttName>
@@ -21,12 +22,15 @@
   </AccountSigUp>
   <!--Account Update-->
   <EditAccountProfile>
-    <EditAccountProfileUrl>https://qa.afterschoolhq.com/Org/user/edit</EditAccountProfileUrl>
+    <EditAccountProfileUrl>http://localhost:54849/Org/user/edit</EditAccountProfileUrl>
     <UserFirstName>Jim2</UserFirstName>
     <UserLastName>Carrey2</UserLastName>
-    <UserEmail>musicschool@yopmail.com</UserEmail>
+    <UserEmail>jimcarey2@yopmail.com</UserEmail>
     <UserPassword>123456</UserPassword>
     <UserConfirmPassword>123456</UserConfirmPassword>
   </EditAccountProfile>
+  <CreateNewActivity>
+    <AddActivityUrl>http://localhost:54849/Org/activity/editsetup?isnew=1&amp;type=1</AddActivityUrl>
+  </CreateNewActivity>
 
 </PARAMETERS>

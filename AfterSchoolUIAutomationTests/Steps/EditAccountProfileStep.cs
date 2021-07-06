@@ -79,14 +79,15 @@ namespace AfterSchoolUIAutomationTests.Steps
         [When(@"Click on Update")]
         public void ClickUpdate()
         {
-            editAccountProfilePage.PopulateFirstName(Parameter.Get("EditAccountProfile", "UserFirstName"));
+            editAccountProfilePage.ClickUpdate();
         }
 
         [Then(@"Verify Success Message")]
         public void VerifyNavigatedURL()
         {
-            String successMessage = editAccountProfilePage.toastText();
+            String successMessage = editAccountProfilePage.ToastMessage();
             successMessage.Equals(" Success");
+            loginPage = null;
             webDriver.Quit();
             webDriver.Dispose();
         }
