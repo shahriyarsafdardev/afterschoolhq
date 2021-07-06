@@ -1808,5 +1808,115 @@ namespace AfterSchoolLibraryTests.Tests
                 Assert.False(false, ex.Message);
             }
         }
+
+        [Fact(DisplayName = "CreatePurchaseTransactionPayment test")]
+        public void CreatePurchaseTransactionPaymentTest()
+        {
+            try
+            {
+                // Arrange
+                var billingAccountOwner = WebUserFactory.Create("Don", "John", "DonJohn@test.com", true, msgs, dc);
+                var purchasingAccountOwner = WebUserFactory.Create("Cristine", "Trump", "CristineTrump@test.com", true, msgs, dc);
+                var billingAccount = AccountFactory.CreateWithFreePackage("Billing account", "BillingAccount@test.com", billingAccountOwner, AccountType.School, msgs, dc);
+                var purchasingAccount = AccountFactory.CreateWithFreePackage("Purchasing account", "PurchasingAccount@test.com", purchasingAccountOwner, AccountType.School, msgs, dc);
+                var masterRegistrant = RegistrantFactory.Create(purchasingAccount, msgs, dc);
+
+                var activity = ActivityFactory.Create(billingAccount, msgs, dc: dc);
+                var activityGroup = ActivityGroupFactory.Create(billingAccount, ActivityGroupType.Session, msgs, dc);
+                var registrant = RegistrantFactory.Create(billingAccount, msgs, dc: dc);
+                var registration = RegistrationFactory.Create(billingAccount, registrant, msgs, dc);
+                var registrantActivity = RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
+
+                decimal amount = 100m, 
+                    convenienceFee = 6m, 
+                    paymentTypeFee = 4m,
+                    amountPaidByParent = 110m, // with convenience fee + cc fee
+                    amountReceivedByProvider = 100m; //assume user joins mid-period and so as we have to keep pro-rated amount, its 94.3m(otherwise it would 100m)
+                bool isAmountProRated = false;
+
+                var subscriptionPlan = SubscriptionPlanFactory.CreatePaymentPlan(billingAccount, activity, amountPaidByParent, 3, msgs, dc);
+                purchasingAccount.CreateStripeCustomer(msgs, dc);
+
+                //var subscriptionPlan = SubscriptionPlanFactory.Create(account, activity, SubscriptionPlanType.Subscription, msgs, dc);
+                //var transaction = TransactionFactory.Create(account, account, PaymentType.CreditCard, msgs, dc);
+                //var masterRegistrant = registrant.GetMasterRegistrant(msgs, dc);
+                //var purchasingAccount = masterRegistrant.GetAccount(msgs, dc);
+                //var billingAccount = subscriptionPlan.GetAccount(msgs, dc);
+
+                var purchase = PurchaseFactory.Create(account, amountPaidByParent, msgs, dc);                
+                var registrantSubscriptionPlan = RegistrantSubscriptionPlanFactory.Create(registrant, subscriptionPlan, purchase, amount: amount, convenienceFee: convenienceFee, paymentTypeFee: paymentTypeFee, msgs, dc);
+                var participationObject = subscriptionPlan.GetParticipationObject(msgs, dc);
+
+                Account convenienceFeePayer;
+                Account transactionFeePayer;
+
+                if (registrantSubscriptionPlan.ConvenienceFeesPaidBy == FeesPaidByType.Parent)
+                    convenienceFeePayer = purchasingAccount;
+                else
+                    convenienceFeePayer = billingAccount;
+
+                if (registrantSubscriptionPlan.PaymentTypeFeesPaidBy == FeesPaidByType.Parent)
+                    transactionFeePayer = purchasingAccount;
+                else
+                    transactionFeePayer = billingAccount;
+
+                // save transaction info and track payment to the activity as well.
+                var checkoutObject = new CheckoutObject()
+                {
+                    PayingAccount = purchasingAccount,
+                    BillingAccount = billingAccount,
+                    OverrideAmount = amount,
+                    AmountPaidByParent = amountPaidByParent,
+                    AmountReceivedByProvider = amountReceivedByProvider,
+                    IsAmountProRated = isAmountProRated,
+                    ConvenienceFeeOverrideAmount = registrantSubscriptionPlan.ConvenienceFee,
+                    PaymentTypeFeeOverrideAmount = registrantSubscriptionPlan.PaymentTypeFee,
+                    ParticipationObject = participationObject,
+                    PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
+                    PaymentType = registrantSubscriptionPlan.PaymentTypeId,
+                    SubscriptionPlan = subscriptionPlan.PlanTypeId == SubscriptionPlanType.Subscription ? subscriptionPlan : null,
+                    PaymentPlan = subscriptionPlan.PlanTypeId == SubscriptionPlanType.PaymentPlan ? subscriptionPlan : null,
+                    MasterRegistrant = masterRegistrant,
+                    NumberOfSeats = 1,
+                    Registration = registration,
+                    RegistrantSubscriptionPlan = registrantSubscriptionPlan,
+                    ConvenienceFeePayer = convenienceFeePayer,
+                    CreditCardFeePayer = transactionFeePayer,
+                };
+
+                // Act
+                AccountService.CreatePurchaseTransactionPayment(checkoutObject, user, msgs, dc);
+
+                // Assert
+                var activityPayment = ActivityPayment.LoadByParticipationObjectByRegistrant(participationObject.ObjectID.Value, participationObject.ObjectType, registrant.ID.Value, false, msgs, dc).FirstOrDefault();
+
+                Assert.NotNull(activityPayment);
+                Assert.Equal(activityPayment?.Amount, amountReceivedByProvider);
+                Assert.Equal(activityPayment?.AmountPaidByParent, amountPaidByParent);
+                Assert.Equal(activityPayment?.ParticipationObjectId, participationObject.ObjectID.Value);
+                Assert.Equal(activityPayment?.IsProRated, isAmountProRated);
+                Assert.Equal(activityPayment?.RegistrantId, registrant.ID.Value);
+
+                Assert.NotNull(registrantSubscriptionPlan);
+                Assert.Equal(registrantSubscriptionPlan?.Amount, amount);
+                Assert.Equal(registrantSubscriptionPlan?.SubscriptionPlanId, subscriptionPlan.ID.Value);
+                Assert.Equal(registrantSubscriptionPlan?.RegistrantId, registrant.ID.Value);
+                Assert.Equal(registrantSubscriptionPlan?.ConvenienceFee, convenienceFee);
+                Assert.Equal(registrantSubscriptionPlan?.PaymentTypeFee, paymentTypeFee);
+
+                //transaction
+                //purchase
+                //subscription plan
+                //registrant
+                //account
+                //activity
+                //registration
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
     }
 }
