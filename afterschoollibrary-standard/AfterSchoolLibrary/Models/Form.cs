@@ -27,9 +27,6 @@ namespace AfterSchoolLibrary.Models
 		/// </summary>
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
 		public bool IsActive { get { return (bool)MDV["IsActive"].Value; } set { MDV["IsActive"].Value = value; } }
-		/// <summary>
-		/// Required.
-		/// </summary>
 		public int? FormType { get { return (int?)MDV["FormType"].Value; } set { MDV["FormType"].Value = value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
 		
@@ -111,8 +108,6 @@ namespace AfterSchoolLibrary.Models
 				msgs.Add("AccountId is required on Form object", MessageType.Error);
 			if (this.Uid.IsEmpty())
 				msgs.Add("Uid is required on Form object", MessageType.Error);
-			if (this.FormType.IsEmpty())
-				msgs.Add("FormType is required on Form object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(Form).Name));
