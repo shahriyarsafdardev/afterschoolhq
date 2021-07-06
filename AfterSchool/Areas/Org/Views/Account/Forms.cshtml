@@ -136,7 +136,7 @@
                     <select class="form-control formtype-select" id="formtype" name="formtype">
                         @foreach (var type in Enum.GetValues(typeof(FormType)).Cast<FormType>())
                         {
-                            <option value="@((int)type)" @(type == FormType.RegistrationType ? "selected=\"selected\"" : "")>
+                            <option value="@((int)type)" @(type == FormType.Registration ? "selected=\"selected\"" : "")>
                                 @type.ToString().SplitByUpperCase()
                             </option>
                         }

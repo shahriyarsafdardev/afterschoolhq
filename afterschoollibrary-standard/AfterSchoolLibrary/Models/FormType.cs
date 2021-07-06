@@ -1,5 +1,5 @@
-﻿public enum FormType
+public enum FormType
 {
-	RegistrationType = 0,
-	SurveyType
+	Registration = 0,
+	Survey
 }

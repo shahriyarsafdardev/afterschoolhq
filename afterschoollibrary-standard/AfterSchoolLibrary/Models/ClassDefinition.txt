@@ -946,7 +946,7 @@ inherits: BasicLookUpObject
 property: AccountId, int?, Int, required
 property: Uid, Guid, UniqueIdentifier, required
 property: IsActive, bool, Bit
-property: FormType, int?, Int
+property: FormTypeId, FormType, Int, required
 join: Account.ID, AccountId, InnerJoin
 joinproperty: Account.Name, string, NVarChar
 loadmethod: AccountId, List<>
@@ -1868,6 +1868,12 @@ values: NotSet, Account, AccountActivityGroup, AccountPackage, AccountPackageFea
 type: Enum
 name: AHQObjectType
 values: NotSet, Account, Activity, ActivityGroup, AccountActivityGroup
+[end]
+
+[begin]
+type: Enum
+name: FormType
+values: Registration, Survey
 [end]
 
 [begin]
