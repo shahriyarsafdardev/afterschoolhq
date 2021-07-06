@@ -2689,6 +2689,7 @@ namespace AfterSchool.Areas.Org.Controllers
             // If the user has hit or exceeded the email quota then show the upgrade modal
             ViewBag.EmailCount = currentAccount.GetEmailCountForCurrentMessagePeriod();
             ViewBag.TextCount = currentAccount.GetTextMessageCountForCurrentMessagePeriod();
+            ViewBag.Body = "";
 
             return View(activity);
         }
@@ -2719,7 +2720,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                         .ToList();
 
                 //.. email messaging
-                if (sendtostaff.IsNotEmpty())
+                if (msgs.HasNoErrors())
                 {
                     // get current limit
                     var accountPackage = SessionVariables.AccountPackage;
@@ -2742,7 +2743,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             subject,
                             body,
                             registrantIds,
-                            sendtostaff.IsBoolean(),
+                            sendtostaff.IsBoolean() ? sendtostaff.ToBoolean() : false,
                             SessionVariables.CurrentUser.ID.Value,
                             msgs);
 
@@ -2762,6 +2763,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);            
             ViewBag.Registrants = activity.GetRegistrants();
+            ViewBag.Body = body;
             return View(activity);
         }
 
