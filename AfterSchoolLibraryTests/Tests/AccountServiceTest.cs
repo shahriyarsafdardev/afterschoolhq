@@ -1809,8 +1809,12 @@ namespace AfterSchoolLibraryTests.Tests
             }
         }
 
-        [Fact(DisplayName = "CreatePurchaseTransactionPayment test")]
-        public void CreatePurchaseTransactionPaymentTest()
+        [Theory(DisplayName = "CreatePurchaseTransactionPayment test")]
+        [InlineData(100, 6, 4, 110, 100, false)] //no pro-rate
+        [InlineData(100, 6, 4, 90, 83.33, true)] //assume user joins mid-period and so as we have to keep pro-rated amount, its 94.3m(otherwise it would 100m)
+        [InlineData(10, 2, 0, 12, 10, false)] //no pro-rate
+        [InlineData(10, 2, 0, 9.7, 9.1, true)]
+        public void CreatePurchaseTransactionPaymentTest(decimal amount, decimal convenienceFee, decimal paymentTypeFee, decimal amountPaidByParent, decimal amountReceivedByProvider, bool isAmountProRated = false)
         {
             try
             {
@@ -1827,21 +1831,8 @@ namespace AfterSchoolLibraryTests.Tests
                 var registration = RegistrationFactory.Create(billingAccount, registrant, msgs, dc);
                 var registrantActivity = RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
 
-                decimal amount = 100m, 
-                    convenienceFee = 6m, 
-                    paymentTypeFee = 4m,
-                    amountPaidByParent = 110m, // with convenience fee + cc fee
-                    amountReceivedByProvider = 100m; //assume user joins mid-period and so as we have to keep pro-rated amount, its 94.3m(otherwise it would 100m)
-                bool isAmountProRated = false;
-
                 var subscriptionPlan = SubscriptionPlanFactory.Create(billingAccount, activity, SubscriptionPlanType.Subscription, amountPaidByParent, msgs, dc);
                 purchasingAccount.CreateStripeCustomer(msgs, dc);
-
-                //var subscriptionPlan = SubscriptionPlanFactory.Create(account, activity, SubscriptionPlanType.Subscription, msgs, dc);
-                //var transaction = TransactionFactory.Create(account, account, PaymentType.CreditCard, msgs, dc);
-                //var masterRegistrant = registrant.GetMasterRegistrant(msgs, dc);
-                //var purchasingAccount = masterRegistrant.GetAccount(msgs, dc);
-                //var billingAccount = subscriptionPlan.GetAccount(msgs, dc);
 
                 var purchase = PurchaseFactory.Create(purchasingAccount, amount, registrantId: registrant.ID.Value, registrationId: registration.ID.Value, msgs, dc); // check: we are inserting row amount here
                 var registrantSubscriptionPlan = RegistrantSubscriptionPlanFactory.Create(registrant, subscriptionPlan, purchase, amount: amount, convenienceFee: convenienceFee, paymentTypeFee: paymentTypeFee, msgs, dc);

@@ -33,5 +33,48 @@ namespace AfterSchoolLibraryTests.Tests
             // Assert
             Assert.Equal(expected: expectedRegistrantActivity.ID, actual: actualRegistrantActivity.ID);
         }
+
+        [Theory(DisplayName = "test cases for GetAmountPaidTest, GetAmountPaidByParent, GetIsProRatedFlagByParent")]
+        [InlineData(100, 6, 4, 110, false)] //no pro-rate
+        [InlineData(100, 6, 4, 90, true)] //assume user joins mid-period and so as we have to keep pro-rated amount, its 94.3m(otherwise it would 100m)
+        public void ActivtyPayemntRelatedTest(decimal amount, decimal convenienceFee, decimal paymentTypeFee, decimal amountPaidByParent, bool isAmountProRated = false)
+        {
+            try
+            {
+                // Arrange
+                var billingAccountOwner = WebUserFactory.Create("Don", "John", "DonJohn@test.com", true, msgs, dc);
+                var billingAccount = AccountFactory.CreateWithFreePackage("Billing account", "BillingAccount@test.com", billingAccountOwner, AccountType.School, msgs, dc);
+                var purchasingAccountOwner = WebUserFactory.Create("Cristine", "Trump", "CristineTrump@test.com", true, msgs, dc);
+                var purchasingAccount = AccountFactory.CreateWithFreePackage("Purchasing account", "PurchasingAccount@test.com", purchasingAccountOwner, AccountType.School, msgs, dc);
+                var activity = ActivityFactory.Create(billingAccount, msgs, dc: dc);
+
+                var registrant = RegistrantFactory.Create(billingAccount, msgs, dc: dc);
+                var registration = RegistrationFactory.Create(billingAccount, registrant, msgs, dc);
+                var registrantActivity = RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
+
+                var subscriptionPlan = SubscriptionPlanFactory.Create(billingAccount, activity, SubscriptionPlanType.Subscription, amountPaidByParent, msgs, dc);
+                var purchase = PurchaseFactory.Create(purchasingAccount, amount, registrantId: registrant.ID.Value, registrationId: registration.ID.Value, msgs, dc); // check: we are inserting row amount here
+                var registrantSubscriptionPlan = RegistrantSubscriptionPlanFactory.Create(registrant, subscriptionPlan, purchase, amount: amount, convenienceFee: convenienceFee, paymentTypeFee: paymentTypeFee, msgs, dc);
+
+                // Act    
+                var activityPayment = ActivityPaymentFactory.Create(billingAccount, activity, registrant, registrantSubscriptionPlan, amount, amountPaidByParent, isAmountProRated, msgs, dc);
+
+                var activityPaymentAmount = RegistrantActivityService.GetAmountPaid(registrantActivity, msgs, dc);
+                var activityPaymentAmountPaidByParent = RegistrantActivityService.GetAmountPaidByParent(registrantActivity, msgs, dc);
+                var activityPaymentIsProRated = RegistrantActivityService.GetIsProRatedFlagByParent(registrantActivity, msgs, dc);
+
+                // Assert
+                Assert.Equal(expected: activityPaymentAmount, actual: activityPayment.Amount);
+                Assert.Equal(expected: activityPaymentAmountPaidByParent, actual: activityPayment.AmountPaidByParent);
+                Assert.Equal(expected: activityPaymentIsProRated, actual: activityPayment.IsProRated);
+
+                Assert.True(msgs.HasNoErrors());
+            }
+            catch (Exception ex)
+            {
+                Assert.False(false, ex.Message);
+            }
+            
+        }
     }
 }
