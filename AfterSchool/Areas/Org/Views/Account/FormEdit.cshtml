@@ -132,7 +132,8 @@
                                             {
                                                 <tr class="questionRow">
                                                     <td>
-                                                        <label class="lbl-display-order" id="displayOrderlabel-@question.ID">@question.DisplayOrder
+                                                        <label class="lbl-display-order" id="displayOrderlabel-@question.ID">
+                                                            @question.DisplayOrder
                                                         </label>
                                                         <input type="hidden"
                                                                id="sortorder-@question.ID"
@@ -337,12 +338,12 @@
                         </li>
 
                         @{ Html.RenderPartial("_FormEditMenu",
-                                  Model,
-                                  new ViewDataDictionary() {
+                                         Model,
+                                         new ViewDataDictionary() {
                                         { "RegistrantType", RegistrantType.Individual },
                                         { "QuestionGroups", individualGroups },
                                         { "QuestionGroupId", qgId }
-  });
+});
                         }
 
                         <li class="dd-item">
@@ -355,12 +356,12 @@
                         </li>
 
                         @{ Html.RenderPartial("_FormEditMenu",
-                                  Model,
-                                  new ViewDataDictionary() {
+                                         Model,
+                                         new ViewDataDictionary() {
                                         { "RegistrantType", RegistrantType.Organization },
                                         { "QuestionGroups", organizationGroups },
                                         { "QuestionGroupId", qgId }
-  });
+});
                         }
 
                     </ol>
@@ -432,7 +433,8 @@
         </div>
     </form>
 </div>
-
+<!------- Enf of Options and Emoji Modal Pop-up------------->
+<!------- Link Modal Pop-up------------->
 <div id="modal-link" class="md-modal colored-header custom-width md-effect-9">
     <form id="form-link" action="#" method="post">
         <div class="md-content">
@@ -456,7 +458,8 @@
         </div>
     </form>
 </div>
-
+<!------- End of Link Modal Pop-up------------->
+<!------- Rating Modal Pop-up------------->
 <div id="modal-rating" class="md-modal colored-header custom-width md-effect-9">
     <form id="form-rating" action="#" method="post">
         <div class="md-content">
@@ -492,7 +495,8 @@
         </div>
     </form>
 </div>
-
+<!-------End of Rating Modal Pop-up------------->
+<!------- Delete Modal Pop-up------------->
 <div id="modal-delete" class="md-modal colored-header custom-width md-effect-9">
     <div class="md-content">
         <div class="modal-header">
@@ -510,6 +514,7 @@
         </div>
     </div>
 </div>
+<!-------End of Delete Modal Pop-up------------->
 
 <script>
     var selectedQuestion = null;
@@ -595,10 +600,6 @@
         return `<input type="hidden" id="questiontype-${getQuestionCount()}" name="new-questiontype-${getQuestionCount()}"" value="@((int)QuestionType.TextBlock)" />`
     }
 
-    
-    
-
-    
     function getOptionsRowCount() {
         var rowCount = $('#options-table tr').length;
         return rowCount - 1;
@@ -613,14 +614,15 @@
         incrementQuestionCount();
         $('.md-trigger').modalEffects();
         var rowCount = $('#question-table tr').length;
-        console.log("----------After adding Question, table rows :" + rowCount);
     }
+
     function addOptionRow(optionType, optionNo, optionValue, optionDescriptionValue) {
         $('#options-table')
             .find('tr')
             .last()
             .before(`<tr class="questionRow" id="${optionType}-${optionNo+1}"><td>${optionType} ${optionNo+1}</td><td><input type="text" value="${optionValue}" required class="form-control col-sm-3 option" onfocus="this.select()" /></td><td><input type="text" value="${optionDescriptionValue}" class="form-control col-sm-3 optionDescription" onfocus="this.select()" /></td><td><button class="btn btn-default btn-sm md-trigger" onclick="removeOption($(this).closest('tr').attr('id'))"><span class="text-danger"><i class="s7-trash"></i></span></button></td></tr>`);
     }
+
     function addOption() {
         var optionType = "Option";
         if ($('#modal-options-title').text() == 'Emojis') {
@@ -638,8 +640,8 @@
         var optionType = id.split("-")[0];
         $("#" + id).remove();
         var totalRows = $('#options-table tr').length - 2;
-        $("#options-table tbody tr").each(function (i) {          
-            var newid = i + 1;           
+        $("#options-table tbody tr").each(function (i) {
+            var newid = i + 1;
             if (i < totalRows) {
                 $(this).find($('td:first-child')).text(optionType + " " + newid);
                 $(this).attr("id", optionType + "-" + newid);
@@ -652,11 +654,8 @@
             .find('tr')
             .last()
             .before(`<tr><td colspan="3">${getDescription()}${getTextBlockQuestionType()}</td><td>${getShowCheckbox()}</td><td></td></tr>`);
-
         incrementQuestionCount();
     }
-
-
 
     function showEditButton(id) {
         var arr = [@Html.Raw(typesWithOptions.Select(x=> "'" + ((int)x) + "'").ToStringList())];
@@ -685,6 +684,7 @@
         }
     }
 
+    //--Set options type based on emoji/option question type and their labels
     function setOptions(id) {
         selectedQuestion = id;
         var optionType = "Option";
@@ -725,8 +725,6 @@
         }
     }
 
-   
-
     function updateOptions() {
         if (!isNaN(selectedQuestion)) {
             var optionString = '';
@@ -751,7 +749,7 @@
                 $('#options-text-' + selectedQuestion).val(optionWithoutLastComma);
                 $("#modal-options").removeClass("md-show");
             }
-            else return false;           
+            else return false;
         }
     }
 
@@ -856,23 +854,20 @@
                 ui.item.addClass("selected");
                 var questionId = $(ui.item).find(".questionId").val();
                 oldPosition = ui.item.index();
-                console.log("Start Selected Question ID", questionId, oldPosition);
                 var rowCount = $('#question-table tr').length;
-                console.log("----------Before adding Question, table rows :" + rowCount);
             },
             stop: function (e, ui) {
                 var inputs = $('input.currentposition');
                 var nbElems = inputs.length;
                 $('input.currentposition').each(function (idx) {
                     $(this).val(nbElems - idx);
-                });              
+                });
                 var totalRows = $('#question-table tr').length - 2;
                 $("#question-table tbody tr").each(function (i) {
-
                     if (i < totalRows) {
                         $(this).find(".lbl-display-order").text(i + 1);
-                        $(this).find(".displayOrderId").val(i + 1);                       
-                    }                    
+                        $(this).find(".displayOrderId").val(i + 1);
+                    }
                 });
             }
         });

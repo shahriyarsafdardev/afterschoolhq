@@ -817,12 +817,10 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 if (copyfrom.IsNumber())
                     form = currentAccount.GetForm(id.ToInteger(), msgs)?
-                        .Copy(currentUser.ID.Value, currentAccount.ID.Value, formtype.ToInteger(), null, msgs);
-                //.Copy(currentUser.ID.Value, currentAccount.ID.Value, formtype, null, msgs);
+                        .Copy(currentUser.ID.Value, currentAccount.ID.Value, null, msgs, null, formtype);
                 else
                     form = currentAccount.GetDefaultForm(msgs)
-                        .Copy(currentUser.ID.Value, currentAccount.ID.Value, formtype.ToInteger(), null, msgs);
-                //.Copy(currentUser.ID.Value, currentAccount.ID.Value, formtype, null, msgs);
+                        .Copy(currentUser.ID.Value, currentAccount.ID.Value, null, msgs, null, formtype);
             }
             else
                 form = currentAccount.GetForm(id.ToInteger(), msgs);

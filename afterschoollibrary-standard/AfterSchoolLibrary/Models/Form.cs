@@ -226,7 +226,7 @@ namespace AfterSchoolLibrary.Models
             return FormQuestionGroup.GetCount(new Hashtable() { { "FormId", this.ID.Value } }, msgs, dc);
         }
 
-        public Form Copy(int loggedInUserId, int newAccountId, string formName = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public Form Copy(int loggedInUserId, int newAccountId, string formName = null, SystemMessages msgs = null, DatabaseConnection dc = null, string formType = null )
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -236,60 +236,7 @@ namespace AfterSchoolLibrary.Models
                 Description = this.Description,
                 LastModifiedDate = DateTime.UtcNow,
                 CreateDate = DateTime.UtcNow,
-                //FormType = formType,
-                LastModifiedBy = loggedInUserId,
-                CreatedBy = loggedInUserId,
-                AccountId = newAccountId,
-                IsActive = true,
-                Uid = Guid.NewGuid()
-            };
-            msgs.AddRange(form.Save(dc: dc));
-
-            var groups = FormQuestionGroup.LoadByFormId(this.ID.Value, dc: dc);
-            foreach (var group in groups)
-            {
-                var questions = FormQuestion.LoadByFormQuestionGroupId(group.ID.Value, dc: dc);
-
-                var newGroup = group.Copy();
-                newGroup.LastModifiedDate = DateTime.UtcNow;
-                newGroup.CreateDate = DateTime.UtcNow;
-                newGroup.LastModifiedBy = newGroup.CreatedBy = loggedInUserId;
-                newGroup.FormId = form.ID;
-                msgs.AddRange(newGroup.Save(dc: dc));
-
-                questions.ForEach(question => {
-                    var newQuestion = question.Copy();
-                    newQuestion.LastModifiedDate = newQuestion.CreateDate = DateTime.UtcNow;
-                    newQuestion.LastModifiedBy = newQuestion.CreatedBy = loggedInUserId;
-                    newQuestion.FormQuestionGroupId = newGroup.ID;
-                    newQuestion.FormId = form.ID;
-                    newQuestion.IsTemplate = false;
-                    msgs.AddRange(newQuestion.Save(dc: dc));
-                });
-            }
-
-            //check for default form existence
-            var account = Account.Load(newAccountId, dc: dc);
-            if (account.IsNotEmpty() && !account.DefaultFormId.HasValue)
-            {
-                account.DefaultFormId = form.ID;
-                msgs.AddRange(account.Save(dc: dc));
-            }
-
-            return form;
-        }
-
-        public Form Copy(int loggedInUserId, int newAccountId, int formType, string formName = null, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-            var form = new Form
-            {
-                Name = formName.IfEmpty(this.Name),
-                Description = this.Description,
-                LastModifiedDate = DateTime.UtcNow,
-                CreateDate = DateTime.UtcNow,
-                FormTypeId = (FormType)formType,
+                FormTypeId = (FormType)formType.ToInteger(),
                 LastModifiedBy = loggedInUserId,
                 CreatedBy = loggedInUserId,
                 AccountId = newAccountId,
