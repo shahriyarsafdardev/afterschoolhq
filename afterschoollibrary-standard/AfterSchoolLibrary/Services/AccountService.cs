@@ -3025,7 +3025,7 @@ namespace AfterSchoolLibrary.Services
         /// <param name="stripeToken"></param>
         /// <param name="msgs"></param>
         /// <returns></returns>
-        public static string CreateStripeSourceFromToken(this Account fromAccount, string stripeToken, Stripe.Customer customer, SystemMessages msgs)
+        public static string CreateStripeSourceFromToken(this Account fromAccount, string stripeToken, Stripe.Customer customer, SystemMessages msgs, DatabaseConnection dc = null)
         {
             // stripe stuff
             // create payment source if not already existent on the user
@@ -3043,7 +3043,7 @@ namespace AfterSchoolLibrary.Services
                     if (fromAccount.StripeDefaultCardId.IsEmpty())
                     {
                         fromAccount.StripeDefaultCardId = source.Id;
-                        fromAccount.Save();
+                        fromAccount.Save(dc);
                     }
 
                     return source.Id;
