@@ -226,17 +226,16 @@ namespace AfterSchoolLibrary.Models
             return FormQuestionGroup.GetCount(new Hashtable() { { "FormId", this.ID.Value } }, msgs, dc);
         }
 
-        public Form Copy(int loggedInUserId, int newAccountId, string formName = null, SystemMessages msgs = null, DatabaseConnection dc = null, string formType = null )
+        public Form Copy(int loggedInUserId, int newAccountId,   FormType formType, string formName = null, SystemMessages msgs = null, DatabaseConnection dc = null  )
         {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
+            if (msgs.IsEmpty()) msgs = new SystemMessages();           
             var form = new Form
             {
                 Name = formName.IfEmpty(this.Name),
                 Description = this.Description,
                 LastModifiedDate = DateTime.UtcNow,
                 CreateDate = DateTime.UtcNow,
-                FormTypeId = (FormType)formType.ToInteger(),
+                FormTypeId = formType,
                 LastModifiedBy = loggedInUserId,
                 CreatedBy = loggedInUserId,
                 AccountId = newAccountId,

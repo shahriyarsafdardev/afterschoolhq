@@ -1875,7 +1875,7 @@ values: NotSet, Account, Activity, ActivityGroup, AccountActivityGroup
 [begin]
 type: Enum
 name: FormType
-values: Registration, Survey
+values: NotSet, Registration, Survey
 [end]
 
 [begin]

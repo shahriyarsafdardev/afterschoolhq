@@ -543,7 +543,7 @@ namespace AfterSchoolLibrary.Services
                         else
                             formToCopy = account.GetDefaultForm(amsgs, adc);
 
-                        var newForm = formToCopy.Copy(loggedInUserId, copy.AccountId.Value, null, amsgs, dc: adc);
+                        var newForm = formToCopy.Copy(loggedInUserId, copy.AccountId.Value, FormType.NotSet, null, amsgs, dc: adc);
                         copy.AddFormAndActivitate(newForm, loggedInUserId, false, amsgs, dc: adc);
                     }
 
@@ -699,7 +699,7 @@ namespace AfterSchoolLibrary.Services
             {
                 var account = activity.GetAccount(dc: dc);
                 var formToCopy = account.GetDefaultForm(dc: dc);
-                var newForm = formToCopy.Copy(loggedInUserId, activity.AccountId.Value, null, msgs, dc: dc);
+                var newForm = formToCopy.Copy(loggedInUserId, activity.AccountId.Value, FormType.Registration, null, msgs, dc: dc);
                 var af = activity.AddFormAndActivitate(newForm, loggedInUserId, false, msgs, dc: dc);
 
                 account.DefaultFormId = af.FormId;
@@ -1812,7 +1812,7 @@ namespace AfterSchoolLibrary.Services
                 {
                     //if creating a new form, copy from the default form
                     var defaultForm = account.GetDefaultForm(dc: dc);
-                    newForm = defaultForm.Copy(loggedInUserId, account.ID.Value, null, msgs, dc: dc);
+                    newForm = defaultForm.Copy(loggedInUserId, account.ID.Value, FormType.Registration, null, msgs, dc: dc);
                     newForm.Name = (activity.Name + " Form").MaxChars(100, "...");
                     msgs.AddRange(newForm.Save(dc: dc));
                 }

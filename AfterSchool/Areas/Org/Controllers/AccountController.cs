@@ -803,8 +803,10 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
-            //if (currentAccount.IsEmpty() || id.IsEmpty() || copyfrom.IsEmpty())
-            //    return HttpNotFound();
+            if (currentAccount.IsEmpty() || id.IsEmpty() || copyfrom.IsEmpty())
+                return HttpNotFound();
+
+
 
             var msgs = new SystemMessages();
             Form form = null;
@@ -815,12 +817,17 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (id.ToInteger() == 0)
             {
+                FormType formTypeEnum = FormType.NotSet;
+                if (!string.IsNullOrEmpty(formtype))
+                {
+                    formTypeEnum = (FormType)formtype.ToInteger();
+                }
                 if (copyfrom.IsNumber())
                     form = currentAccount.GetForm(id.ToInteger(), msgs)?
-                        .Copy(currentUser.ID.Value, currentAccount.ID.Value, null, msgs, null, formtype);
+                        .Copy(currentUser.ID.Value, currentAccount.ID.Value, formTypeEnum, null, msgs, null);
                 else
                     form = currentAccount.GetDefaultForm(msgs)
-                        .Copy(currentUser.ID.Value, currentAccount.ID.Value, null, msgs, null, formtype);
+                        .Copy(currentUser.ID.Value, currentAccount.ID.Value, formTypeEnum, null, msgs, null);
             }
             else
                 form = currentAccount.GetForm(id.ToInteger(), msgs);

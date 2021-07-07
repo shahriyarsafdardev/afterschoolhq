@@ -1,5 +1,6 @@
 public enum FormType
 {
-	Registration = 0,
+	NotSet = 0,
+	Registration,
 	Survey
 }

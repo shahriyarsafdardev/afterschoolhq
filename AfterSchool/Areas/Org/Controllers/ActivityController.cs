@@ -322,7 +322,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     if (msgs.HasNoErrors() && !SessionVariables.AccountPackage.HasFeature(FeatureType.ManageForms))
                     {
                         var defaultForm = currentAccount.GetDefaultForm();
-                        var newForm = defaultForm.Copy(currentUser.ID.Value, currentAccount.ID.Value, (name + " form").MaxChars(100, "..."), msgs);
+                        var newForm = defaultForm.Copy(currentUser.ID.Value, currentAccount.ID.Value, FormType.NotSet, (name + " form").MaxChars(100, "..."),  msgs);
                         if (msgs.HasNoErrors())
                         {
                             if (values.Any(m => m.Key == "form"))
