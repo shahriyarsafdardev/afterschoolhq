@@ -62,7 +62,7 @@
                     </div>
                 }
 
-                <form method="post" action="@Url.Action("checksetup", "account", new { isnew = Request["isnew"] })" class="form-horizontal">
+                <form method="post" action="@Url.Action("checksetup", "account", new { isnew = Request["isnew"], isaccountredirect = Request["isaccountredirect"] })" class="form-horizontal">
                     <div class="form-group">
                         <label class="col-sm-4 control-label"></label>
                         <div class="col-sm-8">

@@ -1072,10 +1072,115 @@ namespace AfterSchoolLibraryTests.Tests
                 var account = AccountFactory.CreateWithFreePackage(accountOwner, AccountType.Church, msgs, dc);
 
                 // Act
-                var AccountWithFeature = AccountService.HasFeature(account, FeatureType.AcceptACH, msgs, dc);
+                var AccountWithFeature = account.HasFeature(FeatureType.AcceptACH, msgs, dc);
 
                 // Assert
                 Assert.True(AccountWithFeature);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "HasFeature False Case Test")]
+        public void HasFeatureEmptyAccountTest()
+        {
+            try
+            {
+                // Arrange
+                var accountWithNoPackage = AccountFactory.Create(user, msgs, dc);
+                
+                // Act
+                var accountWithFeature = AccountService.HasFeature(account: null, FeatureType.AcceptACH, msgs, dc);
+                var accountWithNoPackageFeature = AccountService.HasFeature(account: accountWithNoPackage, FeatureType.AcceptACH, msgs, dc);
+                
+                // Assert
+                Assert.False(accountWithFeature);
+                Assert.False(accountWithNoPackageFeature);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "GetActiveAccountPackage test")]
+        public void GetActiveAccountPackageTest()
+        {
+            try
+            {
+                // Arrange
+                var package = PackageFactory.Create(msgs, dc);
+                var accountPackage = AccountPackageFactory.Create(account, package, msgs, dc);
+
+                // Act
+                var expected = account.GetActiveAccountPackage(msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.NotNull(expected);
+                Assert.Equal(accountPackage.PackageName, expected.PackageName);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "GetActiveAccountPackage test 2")]
+        public void GetActiveAccountPackageEmptyAccountTest()
+        {
+            try
+            {
+                // Arrange & Act
+                var expected = AccountService.GetActiveAccountPackage(account: null, msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.Null(expected);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "GetCheckPaymentAccount test")]
+        public void GetCheckPaymentAccountTest()
+        {
+            try
+            {
+                // Arrange
+                var checkPaymentAccount = CheckPaymentAccountFactory.Create(account, msgs, dc);
+
+                // Act
+                var expected = account.GetCheckPaymentAccount(msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.NotNull(expected);
+                Assert.Equal(checkPaymentAccount.Name, expected.Name);
+                Assert.Equal(checkPaymentAccount.LegalEntityTypeId, expected.LegalEntityTypeId);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "GetCheckPaymentAccount test 2")]
+        public void GetCheckPaymentAccountEmptyAccountTest()
+        {
+            try
+            {
+                // Arrange & Act
+                var expected = AccountService.GetCheckPaymentAccount(account: null, msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.Null(expected);
             }
             catch (Exception ex)
             {
@@ -1125,6 +1230,38 @@ namespace AfterSchoolLibraryTests.Tests
 
                 // Assert
                 Assert.True(GetActivityCount > 0);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "GetAllActiveAndNonPublishedActivities test")]
+        public void GetAllActiveAndNonPublishedActivitiesTest()
+        {
+            try
+            {
+                // Arrange
+                var accountOwner = WebUserFactory.Create(msgs, dc);
+                var account = AccountFactory.Create(accountOwner, msgs, dc);
+                var activityGroup = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
+
+                // Act
+                for (int i = 1; i <= 5; i++)
+                {
+                    var addactivity = ActivityFactory.Create(account, activityGroup, msgs, dc);                    
+                    if (i%2 == 0)
+                    {
+                        addactivity.Publish(accountOwner, msgs, dc);
+                    }
+                }
+                                
+                var GetActivities = AccountService.GetAllActiveAndNonPublishedActivities(account, msgs, dc);
+
+                // Assert
+                Assert.True(GetActivities.Count() == 3);
             }
             catch (Exception ex)
             {
@@ -1298,6 +1435,90 @@ namespace AfterSchoolLibraryTests.Tests
             }
         }
 
+        [Fact(DisplayName = "LoadByActivitiesbyActivityGroupByAccountId test")]
+        public void LoadByActivitiesbyActivityGroupByAccountIdTest()
+        {
+            try
+            {
+                // Arrange
+                var accountOwner = WebUserFactory.Create(msgs, dc);
+                var account = AccountFactory.Create(accountOwner, msgs, dc);
+                var activityGroup = ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
+                var addactivity = ActivityFactory.Create(account, activityGroup, msgs, dc);
+                addactivity.Publish(accountOwner, msgs, dc);
+
+                // Act
+                var activityList = AccountService.LoadByActivitiesbyActivityGroupByAccountId(account, addactivity.ID.Value, msgs, dc);              
+
+                // Assert
+                Assert.True(activityList.Count() == 1);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+
+        [Fact(DisplayName = "GetRegistrationPeriod test")]
+        public void GetRegistrationPeriodTest()
+        {
+            try
+            {
+                // Arrange
+                var accountOwner = WebUserFactory.Create(msgs, dc);
+                var account = AccountFactory.Create(accountOwner, msgs, dc);
+                var ResgistrationPeriod = RegistrationPeriodFactory.Create(account, msgs, dc);
+              
+
+                // Act
+                var RegistrationPeriod = AccountService.GetRegistrationPeriod(account, ResgistrationPeriod.ID.Value, msgs, dc);
+
+
+                // Assert
+                Assert.NotNull(RegistrationPeriod);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Theory(DisplayName = "GetRegistrationPeriodsByGroupId Test")]
+        [InlineData(1)]
+        [InlineData(5)]
+        public void GetRegistrationPeriodsByGroupIdTest(int expectedNumberOfResistrationPeriod)
+        {
+            try
+            {
+                // Arrange
+                var accountOwner = WebUserFactory.Create(msgs, dc);
+                var account = AccountFactory.Create(accountOwner, msgs, dc);
+                var registrationPeriods = new List<RegistrationPeriod>();
+
+                for (int i = 0; i < expectedNumberOfResistrationPeriod; i++)
+                {
+                    var regPeriod = RegistrationPeriodFactory.Create(account, msgs, dc);
+                    registrationPeriods.Add(regPeriod);
+                }
+
+                // Act
+                var RegistrationPeriodLists = AccountService.GetRegistrationPeriods(account,null,null, msgs, dc);
+
+
+                // Assert
+                Assert.Equal(expected: registrationPeriods.Count, actual: RegistrationPeriodLists.Count);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+
         [Fact(DisplayName = "DoesContactExist test")]
         public void DoesContactExistTest()
         {
@@ -1422,6 +1643,170 @@ namespace AfterSchoolLibraryTests.Tests
             // Assert
             Assert.Null(expectedError);
             Assert.True(msgs.HasErrors());
+        }
+
+        [Fact(DisplayName = "UseStripeConnectDuringCheckout stripe is activated test")]
+        public void UseStripeConnectDuringCheckoutWithStripeTest()
+        {
+            try
+            {
+                // Arrange
+                var accountOwner = WebUserFactory.Create(msgs, dc);
+                var account = AccountFactory.CreateAccount(accountOwner, AccountType.School, stripeChargesEnabled: true, stripePayoutsEnabled: true, msgs, dc);
+                
+                //UseStripeConnectedAccount is true for this package, so this test case will pass since it meets all criteria
+                var package = PackageFactory.CreateFreePackageWithUseStripeConnectedAccount(msgs, dc);
+                var accountPackage = AccountPackageFactory.Create(account, package, msgs, dc);
+
+                // Act
+                var expected = account.UseStripeConnectDuringCheckout(msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.True(expected);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "UseStripeConnectDuringCheckout test")]
+        public void UseStripeConnectDuringCheckoutTest()
+        {
+            try
+            {
+                // Arrange
+                var accountOwner = WebUserFactory.Create(msgs, dc);
+                var account = AccountFactory.CreateAccount(accountOwner, AccountType.School, stripeChargesEnabled: true, stripePayoutsEnabled: true, msgs, dc);
+                var package = PackageFactory.CreateFreePackage(msgs, dc); //UseStripeConnectedAccount is false for this package, so this test case will fail
+                var accountPackage = AccountPackageFactory.Create(account, package, msgs, dc);
+
+                // Act
+                var expected = account.UseStripeConnectDuringCheckout(msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.False(expected);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "UseStripeConnectDuringCheckout stripeChargesEnabled test")]
+        public void UseStripeConnectDuringCheckoutWithStripeChargesEnabledTest()
+        {
+            try
+            {
+                // Arrange
+                var accountOwner = WebUserFactory.Create(msgs, dc);
+                var account = AccountFactory.CreateAccount(accountOwner, AccountType.School, stripeChargesEnabled: true, stripePayoutsEnabled: true, msgs, dc);                
+                var package = PackageFactory.CreateFreePackageWithUseStripeConnectedAccount(msgs, dc);
+                var accountPackage = AccountPackageFactory.Create(account, package, msgs, dc);
+
+                // Act
+                var expected = account.UseStripeConnectDuringCheckout(msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.True(expected);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "UseStripeConnectDuringCheckout stripeCharges is disabled test")]
+        public void UseStripeConnectDuringCheckoutWithStripeChargesDisabledTest()
+        {
+            try
+            {
+                // Arrange
+                var accountOwner = WebUserFactory.Create(msgs, dc);
+                var account = AccountFactory.CreateAccount(accountOwner, AccountType.School, stripeChargesEnabled: false, stripePayoutsEnabled: true, msgs, dc);
+                var package = PackageFactory.CreateFreePackageWithUseStripeConnectedAccount(msgs, dc);
+                var accountPackage = AccountPackageFactory.Create(account, package, msgs, dc);
+
+                // Act
+                var expected = account.UseStripeConnectDuringCheckout(msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.False(expected);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "UseStripeConnectDuringCheckout StripePayouts Enabled test")]
+        public void UseStripeConnectDuringCheckoutWithStripePayoutsEnabledTest()
+        {
+            try
+            {
+                // Arrange
+                var accountOwner = WebUserFactory.Create(msgs, dc);
+                var account = AccountFactory.CreateAccount(accountOwner, AccountType.School, stripeChargesEnabled: true, stripePayoutsEnabled: true, msgs, dc);
+                var package = PackageFactory.CreateFreePackageWithUseStripeConnectedAccount(msgs, dc);
+                var accountPackage = AccountPackageFactory.Create(account, package, msgs, dc);
+
+                // Act
+                var expected = account.UseStripeConnectDuringCheckout(msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.True(expected);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "UseStripeConnectDuringCheckout StripePayouts is Disabled test")]
+        public void UseStripeConnectDuringCheckoutWithStripePayoutsDisabledTest()
+        {
+            try
+            {
+                // Arrange
+                var accountOwner = WebUserFactory.Create(msgs, dc);
+                var account = AccountFactory.CreateAccount(accountOwner, AccountType.School, stripeChargesEnabled: true, stripePayoutsEnabled: false, msgs, dc);
+                var package = PackageFactory.CreateFreePackageWithUseStripeConnectedAccount(msgs, dc);
+                var accountPackage = AccountPackageFactory.Create(account, package, msgs, dc);
+
+                // Act
+                var expected = account.UseStripeConnectDuringCheckout(msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.False(expected);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
+        }
+
+        [Fact(DisplayName = "UseStripeConnectDuringCheckout Empty account test")]
+        public void UseStripeConnectDuringCheckoutEmptyAccountTest()
+        {
+            try
+            {
+                // Arrange && Act
+                var expected = AccountService.UseStripeConnectDuringCheckout(account: null, msgs: msgs, dc: dc);
+
+                // Assert
+                Assert.False(expected);
+            }
+            catch (Exception ex)
+            {
+                //Assert
+                Assert.False(false, ex.Message);
+            }
         }
     }
 }

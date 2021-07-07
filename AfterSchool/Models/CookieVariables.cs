@@ -92,6 +92,18 @@ namespace AfterSchool.Models
             }
         }
 
+        public static string OnboardingStepsAcknowledged
+        {
+            get
+            {
+                return GetCookie("OnboardingStepsAcknowledged");
+            }
+            set
+            {
+                SetCookie("OnboardingStepsAcknowledged", value);
+            }
+        }
+
         private static string GetCookie(string key)
         {
             if (HttpContext.Current.Request.Cookies[key].IsNotEmpty())

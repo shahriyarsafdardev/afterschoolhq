@@ -6,5 +6,6 @@ public enum SignUpType
 	ConvertingFromTrial,
 	ChangePackage,
 	ChangePackageDuringTrial,
-	ChangeBillingPeriodType
+	ChangeBillingPeriodType,
+	Teacher1099,
 }

@@ -1520,7 +1520,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (activity.IsNotEmpty())
             {
-                attendances = activity.GetAttendance(orderByParam, orderbyDirection, start, length, msgs);
+                attendances = activity.GetCompletedAttendanceWithPaging(orderByParam, orderbyDirection, start, length, msgs);
                 totalAttendanceCount = activity.GetTotalAttendanceCount(msgs);
 
                 if (totalAttendanceCount > 0)
@@ -2305,17 +2305,21 @@ namespace AfterSchool.Areas.Org.Controllers
                 return HttpNotFound();
             
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+            var isNewActivity = Request["isnew"] == "1";
 
-            activity.RequestToPublish(SessionVariables.CurrentUser, msgs);
+            activity.RequestToPublish(SessionVariables.CurrentUser, msgs);           
 
             if (msgs.HasNoErrors())
-                msgs.Add("Your request to publish has been submitted", MessageType.Success);
+                if (isNewActivity)
+                    msgs.Add("Your request to publish has been submitted", MessageType.Success);            
+                else
+                    msgs.Add("Activity saved successfully", MessageType.Success);
 
             ViewBag.Messages = msgs;
             ViewBag.MustRequestToPublish = MustRequestToPublish(activity);
             ViewBag.ShowCopyButton = ShowCopyButtonOnPublishDetail(activity);
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
-            ViewBag.IsFullScreen = Request["isnew"] == "1";
+            ViewBag.IsFullScreen = isNewActivity;
             return View("publishdetail", activity);
         }
 
@@ -2685,6 +2689,7 @@ namespace AfterSchool.Areas.Org.Controllers
             // If the user has hit or exceeded the email quota then show the upgrade modal
             ViewBag.EmailCount = currentAccount.GetEmailCountForCurrentMessagePeriod();
             ViewBag.TextCount = currentAccount.GetTextMessageCountForCurrentMessagePeriod();
+            ViewBag.Body = "";
 
             return View(activity);
         }
@@ -2715,7 +2720,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                         .ToList();
 
                 //.. email messaging
-                if (sendtostaff.IsNotEmpty())
+                if (msgs.HasNoErrors())
                 {
                     // get current limit
                     var accountPackage = SessionVariables.AccountPackage;
@@ -2738,7 +2743,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             subject,
                             body,
                             registrantIds,
-                            sendtostaff.IsBoolean(),
+                            sendtostaff.IsBoolean() ? sendtostaff.ToBoolean() : false,
                             SessionVariables.CurrentUser.ID.Value,
                             msgs);
 
@@ -2758,6 +2763,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);            
             ViewBag.Registrants = activity.GetRegistrants();
+            ViewBag.Body = body;
             return View(activity);
         }
 

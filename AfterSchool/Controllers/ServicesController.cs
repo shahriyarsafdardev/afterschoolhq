@@ -581,6 +581,16 @@ namespace AfterSchool.Controllers
 
         #endregion
 
+        #region OnboardingStepsAcknowledged
+        public ActionResult SetOnboardingStepsAcknowledged()
+        {
+            CookieVariables.OnboardingStepsAcknowledged = true.ToString();
+
+            return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
+        }
+
+        #endregion
+
         public ActionResult LeadForm(string org, string name, string email, string phone, string comments)
         {
             if (!IsRequestFromApp())

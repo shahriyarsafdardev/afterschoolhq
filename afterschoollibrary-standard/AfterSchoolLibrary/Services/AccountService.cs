@@ -16,7 +16,10 @@ namespace AfterSchoolLibrary.Services
     {
         public static bool HasFeature(this Account account, FeatureType featureType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.GetActiveAccountPackage(msgs, dc).HasFeature(featureType, msgs, dc);
+            if (account.IsNotEmpty())
+                return (bool)account.GetActiveAccountPackage(msgs, dc)?.HasFeature(featureType, msgs, dc);
+
+            return false;
         }
 
         public static WebUser GetAccountOwner(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -177,6 +180,14 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
+
+        public static List<Activity> LoadByActivitiesbyActivityGroupByAccountId(this Account account, int activityGroupId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (account.IsNotEmpty())
+                return Activity.LoadByActivityGroupIdByAccountId(activityGroupId, account.ID.Value, msgs, dc);
+
+            return null;
+        }
         public static List<ParticipationObject> GetPublishedParticipationObjects(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var participationObjects = new List<ParticipationObject>();
@@ -301,6 +312,16 @@ namespace AfterSchoolLibrary.Services
             }, msgs, dc);
         }
 
+        public static List<Activity> GetAllActiveAndNonPublishedActivities(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Activity.Load(new Hashtable() {
+                { "AccountId", account.ID.Value },
+                { "IsPublished", false },
+                { "IsDeleted", false },
+                { "isArchived", false }                
+            },null,null, msgs, dc);
+        }
+
         public static Activity GetUnpublishActivity(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Activity.LoadByAccountIdByIsPublished(account.ID.Value, false, msgs, dc).FirstOrDefault();
@@ -316,14 +337,24 @@ namespace AfterSchoolLibrary.Services
             return account.GetActiveAndPublishedActivityCount(msgs, dc) > 0;
         }
 
+        public static bool HasPaidActivities(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.GetAllActiveAndNonPublishedActivities(msgs, dc).Any(activity => !activity.IsFree);
+        }
         public static bool IsOnboardingCompleted(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (account.IsEmpty())
                 return false;
 
-            var accountOwner = account.GetAccountOwner(msgs);
-            return account.HasAccountProfile(msgs) && account.HasActiveActivities(msgs) && accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount && account.StripeUserId.IsNotEmpty();
+            var accountOwner = account.GetAccountOwner(msgs);    
+            if (account.HasPaidActivities())
+                return account.HasAccountProfile(msgs) && account.HasActiveActivities(msgs) && accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount && account.CanProcessPayments();
+            
+            return account.HasAccountProfile(msgs) && account.HasActiveActivities(msgs) && accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount;
+            
+            
         }
+        
 
         public static GettingStartedOptions OnboardingCompletionStatus(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -335,7 +366,7 @@ namespace AfterSchoolLibrary.Services
             var HasActivities = account.HasActiveActivities(msgs);
             var activitycount= account.GetActiveAndNonPublishedActivityCount(msgs);
             var VerifiedAccount = accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount;
-            var StripeUserId = account.StripeUserId.IsNotEmpty();
+            var HasPaymentConfigured = account.CanProcessPayments(msgs);
            
             if (!HasAccountProfile)
                 return GettingStartedOptions.CreateProfile;
@@ -349,10 +380,10 @@ namespace AfterSchoolLibrary.Services
             else if (activitycount >= 1 && !HasActivities)
                 return GettingStartedOptions.PublishActivity;           
 
-            else if (!StripeUserId)
+            else if (!HasPaymentConfigured)
                 return GettingStartedOptions.AcceptPayments;
 
-            else if (StripeUserId)
+            else if (HasPaymentConfigured)
                 return GettingStartedOptions.ProcessCompleted;
 
             else
@@ -377,7 +408,7 @@ namespace AfterSchoolLibrary.Services
             if (accountOwner.IsNotEmpty() && accountOwner.VerifiedAccount)
                 startingOptions.Add(GettingStartedOptions.ValidateEmail);
 
-            if (account.StripeUserId.IsNotEmpty())
+            if (account.CanProcessPayments(msgs))
                 startingOptions.Add(GettingStartedOptions.AcceptPayments);
 
             return startingOptions;
@@ -564,6 +595,11 @@ namespace AfterSchoolLibrary.Services
             return RegistrationPeriod.LoadByAccountId(account.ID.Value, msgs, dc);
         }
 
+        public static RegistrationPeriod GetRegistrationPeriod(this Account account, int id, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RegistrationPeriod.LoadByIdByAccountId(id, account.ID.Value, msgs, dc);
+        }
+
         public static bool IsNowEnrolling(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return account.GetPublishedParticipationObjects(msgs, dc)
@@ -578,6 +614,14 @@ namespace AfterSchoolLibrary.Services
         public static int GetRegistrationPeriodCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return RegistrationPeriod.GetCount(new Hashtable() { { "AccountId", account.ID.Value } }, msgs, dc);
+        }
+
+        public static List<RegistrationPeriod> GetRegistrationPeriodsByGroupId(this Account account, int id, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (account.IsNotEmpty())
+                return RegistrationPeriod.LoadByActivityGroupIdByAccountId(id, account.ID.Value, msgs, dc);
+
+            return null;
         }
 
         public static List<RegistrationPeriod> GetUpcomingRegistrationPeriods(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -645,7 +689,10 @@ namespace AfterSchoolLibrary.Services
 
         public static AccountPackage GetActiveAccountPackage(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountPackage.LoadByAccountId(account.ID.Value, true, "CreateDate", OrderByDirectionEnum.Descending, msgs, dc);
+            if (account.IsNotEmpty())
+                return AccountPackage.LoadFirstFromListByAccountIdByIsActiveByOrderProperty(account.ID.Value, true, "CreateDate", OrderByDirectionEnum.Descending, msgs, dc);
+
+            return null;
         }
 
         public static List<AccountPackage> GetAccountPackages(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -2670,7 +2717,10 @@ namespace AfterSchoolLibrary.Services
 
         public static bool UseStripeConnectDuringCheckout(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc) && account.StripeChargesEnabled;
+            if (account.IsNotEmpty())
+                return account.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc) && account.StripeChargesEnabled;
+
+            return false;
         }
 
         public static Payout RequestNewPayout(this Account account, List<Transaction> transactions, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
@@ -3558,7 +3608,10 @@ namespace AfterSchoolLibrary.Services
 
         public static CheckPaymentAccount GetCheckPaymentAccount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return CheckPaymentAccount.LoadByAccountId(account.ID.Value, msgs, dc);
+            if (account.IsNotEmpty())
+                return CheckPaymentAccount.LoadByAccountId(account.ID.Value, msgs, dc);
+
+            return null;
         }
 
         public static BankPaymentAccount CreateOrUpdateBankPaymentAccount(this Account account, string bankName, BankAccountType bankAccountType, string routingNumber, string accountNumber, string accountHoldersName, string bankCountry, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)

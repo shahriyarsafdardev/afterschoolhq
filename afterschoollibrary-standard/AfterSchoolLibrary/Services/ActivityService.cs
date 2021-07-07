@@ -100,12 +100,12 @@ namespace AfterSchoolLibrary.Services
 
         public static string BuildHomePageUrl(string accountUniqueName, ActivityType activityType, string activityUniqueName)
         {
-            return $"{Helpers.Utilities.BaseUrl()}/{accountUniqueName}/{activityType.ToString().ToLower()}/{activityUniqueName.ToLower()}";
+            return $"{Helpers.Utilities.BaseUrl()}/{accountUniqueName}/{activityType.ToString().ToLower()}/{activityUniqueName?.ToLower()}";
         }
 
         public static string BuildShortHomePageUrl(string accountUniqueName, ActivityType activityType, string activityUniqueName)
         {
-            return $"{Helpers.Utilities.ShortBaseUrl()}/{accountUniqueName}/{activityType.ToString().ToLower()}/{activityUniqueName.ToLower()}";
+            return $"{Helpers.Utilities.ShortBaseUrl()}/{accountUniqueName}/{activityType.ToString().ToLower()}/{activityUniqueName?.ToLower()}";
         }
 
         public static bool IsFull(this Activity activity, DatabaseConnection dc = null)
@@ -1891,6 +1891,15 @@ namespace AfterSchoolLibrary.Services
             return Models.Match.LoadByTeamId(activity.ID.Value, msgs, dc).IsNotEmpty();
         }
 
+        public static bool IsValidActivityInstance(this Activity activity, ActivityInstance activityInstance , SystemMessages msgs = null, DatabaseConnection dc = null)
+        {   
+            if (activityInstance?.ActivityScheduleId == activity.ActivityScheduleId)
+                return true;
+
+            msgs.Add("Invalid record error", MessageType.Error);
+            return false;
+        }
+
         public static bool HasNoTeamMatches(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Models.Match.LoadByTeamId(activity.ID.Value, msgs, dc).IsEmpty();
@@ -1902,11 +1911,8 @@ namespace AfterSchoolLibrary.Services
             if (activityInstanceId.HasValue)
             {
                 var activityInstance = ActivityInstance.Load(activityInstanceId.Value, msgs, dc);
-                if (activityInstance?.ActivityScheduleId != activity.ActivityScheduleId)
-                {
-                    msgs.Add("Invalid record error", MessageType.UserError);
+                if (!activity.IsValidActivityInstance(activityInstance, msgs, dc))                    
                     return null;
-                }
 
                 var attendance = activityInstance.GetAttendance(msgs, dc);
                 if (attendance.IsNotEmpty())
@@ -1929,12 +1935,14 @@ namespace AfterSchoolLibrary.Services
                 //.. if student registers in between class, it should be listed in attendance
                 //.. for that we need entry of that user in AttendanceRegistrant table
                 if (registrantActivities.Count() > attendanceRegistrants.Count)
-                    return activity.CreateNewAttendance(activityInstanceId.IsEmpty() ? closestActivityInstance.ID.Value : activityInstanceId, loggedInUser, msgs, dc);
-
-                if (!activityInstanceId.HasValue)
                 {
-                    return closestActivityInstanceAttendance;
+                    // if a new student has registered then we do not need to create new Attendance. Instead we just need to add AttendanceRegistrant 
+                    // to existing Attendance only   
+                    activity.CreateNewAttendanceRegistrantByRegistrantActivities(closestActivityInstanceAttendance, attendanceRegistrants, registrantActivities, loggedInUser, msgs, dc);
                 }
+                  
+                if (!activityInstanceId.HasValue)
+                    return closestActivityInstanceAttendance;                
             }
 
             // otherwise create a new attendance if there is no attendance id
@@ -1943,6 +1951,20 @@ namespace AfterSchoolLibrary.Services
 
             // otherwise return the attendance with given id
             return Attendance.Load(attendanceId.Value, msgs, dc);
+        }
+
+        public static List<AttendanceRegistrant> CreateNewAttendanceRegistrantByRegistrantActivities(this Activity activity,Attendance attendance, List<AttendanceRegistrant> attendanceRegistrants, List<RegistrantActivity> registrantActivities, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            List<AttendanceRegistrant> newAttendanceRegistrants = new List<AttendanceRegistrant>();
+            var newStudents = registrantActivities.Where(registrant => !attendanceRegistrants.Any(attendanceRegistrant =>
+                    attendanceRegistrant.RegistrantId == registrant.RegistrantId)).ToList();
+
+            newStudents
+                .ForEach(registrantActivity => {
+                    newAttendanceRegistrants.Add(AttendanceRegistrantService.CreateNew(attendance.ID.Value, registrantActivity.RegistrantId.Value,
+                        loggedInUser, msgs, dc));
+                });
+            return newAttendanceRegistrants;
         }
 
         public static ActivityInstance GetClosestPastActivityInstanceToDate(this Activity activity, DateTime date, SystemMessages msgs, DatabaseConnection dc)
@@ -2207,9 +2229,14 @@ namespace AfterSchoolLibrary.Services
             return Attendance.LoadByActivityId(activity.ID.Value, orderByParam, direction, start, length, msgs, dc);
         }
 
-        public static List<Attendance> GetCompletedAttendance(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Attendance> GetCompletedAttendance(this Activity activity,SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Attendance.LoadByActivityIdByIsCompleted(activity.ID.Value, true, msgs: msgs, dc: dc);
+            return Attendance.LoadByActivityIdByIsCompleted(activity.ID.Value,true, msgs: msgs, dc: dc);
+        }
+
+        public static List<Attendance> GetCompletedAttendanceWithPaging(this Activity activity, string orderByParam, OrderByDirectionEnum direction, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Attendance.LoadByActivityIdByIsCompletedWithPaging(activity.ID.Value, true, orderByParam, direction, start, length, msgs: msgs, dc: dc);
         }
 
         public static int GetAttendancePresentCount(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -2498,7 +2525,7 @@ namespace AfterSchoolLibrary.Services
 
         public static ActivityGroup GetActivityGroup(this Activity activity, int AccountId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (activity.ActivityGroupId.HasValue)
+            if (activity.IsNotEmpty() && activity.ActivityGroupId.HasValue)
                 return ActivityGroup.LoadByIdByAccountId(activity.ActivityGroupId.Value, AccountId, msgs, dc: dc);
 
             return null;
