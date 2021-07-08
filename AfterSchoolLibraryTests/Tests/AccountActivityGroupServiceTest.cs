@@ -20,7 +20,7 @@ namespace AfterSchoolLibraryTests.Tests
         {
             AccountOwner = WebUserFactory.Create(msgs, dc);
             LoggedInUser = WebUserFactory.Create(msgs, dc);
-            ActivityGroupOwner = AccountFactory.Create(AccountOwner, msgs, dc);
+            ActivityGroupOwner = AccountFactory.CreateWithFreePackage(AccountOwner, AccountType.SchoolDistrict, msgs, dc);
             ActivityGroup = ActivityGroupFactory.Create(ActivityGroupOwner, ActivityGroupType.Session, msgs, dc);
         }
 
