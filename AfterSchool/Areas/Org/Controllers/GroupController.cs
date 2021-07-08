@@ -90,22 +90,28 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Edit(string id)
+        public ActionResult Edit(string id, string isnew)
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
-            var group = new ActivityGroup()
-            {
-                ID = new int?(),
-                RegistrationModeId = RegistrationMode.Register,
-                ActivityGroupTypeId = ActivityGroupType.Session
-            };
+            ActivityGroup group = null;
 
-            if (id.IsNotGuid())
+            if (id.IsNotGuid() && isnew.IsEmpty())
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
-            group = currentAccount.GetActivityGroup(id.ToGuid(), msgs);
-                        
+            if (isnew.IsEmpty() && !isnew.ToBoolean())
+                group = currentAccount.GetActivityGroup(id.ToGuid(), msgs);
+
+            if (isnew.IsNotEmpty() && isnew.ToBoolean())
+            {
+                group = new ActivityGroup()
+                {
+                    ID = new int?(),
+                    RegistrationModeId = RegistrationMode.Register,
+                    ActivityGroupTypeId = ActivityGroupType.Session
+                };
+            }
+
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Forms = currentAccount.GetForms(msgs);
             ViewBag.Messages = msgs;
