@@ -3,12 +3,12 @@
   <!--User Login Info-->
   <Login>
     <LoginUrl>https://qa.afterschoolhq.com/login</LoginUrl>
-      <UserName>jimcarey2@yopmail.com</UserName>
-      <Password>123456</Password>
+    <UserName>musicschool@yopmail.com</UserName>
+    <Password>123456789</Password>
   </Login>
-  <!--Individual Account Signup Info-->
+  <!-- Individual Account Signup Info -->
   <AccountSigUp>
-    <SignUpUrl>http://localhost:54849/signup/Welcome</SignUpUrl>
+    <SignUpUrl>https://qa.afterschoolhq.com/signup/Welcome</SignUpUrl>
     <ProgramName>Rock Climbing</ProgramName>
     <FirstName>Alex</FirstName>
     <LasttName>Stuart</LasttName>
@@ -20,17 +20,23 @@
     <AutoComplete>New York, New York, USA</AutoComplete>
     <ProgramCategories>Karate, Sports, Leadership</ProgramCategories>
   </AccountSigUp>
-  <!--Account Update-->
+  <!-- Account Update -->
   <EditAccountProfile>
-    <EditAccountProfileUrl>http://localhost:54849/Org/user/edit</EditAccountProfileUrl>
+    <EditAccountProfileUrl>https://qa.afterschoolhq.com/Org/user/edit</EditAccountProfileUrl>
     <UserFirstName>Jim2</UserFirstName>
     <UserLastName>Carrey2</UserLastName>
     <UserEmail>jimcarey2@yopmail.com</UserEmail>
     <UserPassword>123456</UserPassword>
     <UserConfirmPassword>123456</UserConfirmPassword>
   </EditAccountProfile>
+  <!-- Create New Activity -->
   <CreateNewActivity>
-    <AddActivityUrl>http://localhost:54849/Org/activity/editsetup?isnew=1&amp;type=1</AddActivityUrl>
+    <AddActivityUrl>https://qa.afterschoolhq.com/Org/activity/editsetup?isnew=1&amp;type=1</AddActivityUrl>
+    <ActivityName>Rock Climbing</ActivityName>
+    <TotalAvailableSeats>25</TotalAvailableSeats>
+    <InviteOnly>Yes</InviteOnly>
+    <SignUpPeriodOpen></SignUpPeriodOpen>
+    <ActivityName></ActivityName>
   </CreateNewActivity>
 
 </PARAMETERS>

@@ -4,6 +4,7 @@
 @CreateActivity
 Scenario: Login And Create New Activity
 	Given  Login to Create Activity
+	Given  Click on account button
 	Given  Navigate to the new activity page
 	Given  Populate settings section and save
 	Given  Populate restrictions section and save

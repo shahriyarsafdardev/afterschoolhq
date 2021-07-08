@@ -31,7 +31,7 @@ namespace AfterSchoolUIAutomationTests.Steps
         public void NavigateToSignup()
         {
             webDriver.Navigate().GoToUrl(Parameter.Get("AccountSigUp", "SignUpUrl"));
-            webDriver.WaitInSeconds(3);
+            webDriver.WaitInSeconds(2);
         }
 
         [Given(@"Manage the browser window size for Signup and click Get started")]
